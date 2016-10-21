@@ -48,8 +48,6 @@ import org.springframework.util.MimeTypeUtils;
  */
 public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Object> {
 
-	private static final MediaType TEXT_EVENT_STREAM = new MediaType("text", "event-stream");
-
 	private final List<Encoder<?>> dataEncoders;
 
 
@@ -65,20 +63,20 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 
 	@Override
 	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
-		return mediaType == null || TEXT_EVENT_STREAM.isCompatibleWith(mediaType) ||
+		return mediaType == null || MediaType.TEXT_EVENT_STREAM.isCompatibleWith(mediaType) ||
 				ServerSentEvent.class.isAssignableFrom(elementType.getRawClass());
 	}
 
 	@Override
 	public List<MediaType> getWritableMediaTypes() {
-		return Collections.singletonList(TEXT_EVENT_STREAM);
+		return Collections.singletonList(MediaType.TEXT_EVENT_STREAM);
 	}
 
 	@Override
 	public Mono<Void> write(Publisher<?> inputStream, ResolvableType elementType, MediaType mediaType,
 			ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
 
-		outputMessage.getHeaders().setContentType(TEXT_EVENT_STREAM);
+		outputMessage.getHeaders().setContentType(MediaType.TEXT_EVENT_STREAM);
 
 		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
 		Flux<Publisher<DataBuffer>> body = encode(inputStream, bufferFactory, elementType, hints);
