@@ -151,7 +151,7 @@ public class DelegatingWebReactiveConfigurationTests {
 		verify(webReactiveConfigurer).addArgumentResolvers(any());
 
 		assertSame(formatterRegistry.getValue(), initializerConversionService);
-		assertEquals(5, readers.getValue().size());
+		assertEquals(6, readers.getValue().size());
 	}
 
 	@Test

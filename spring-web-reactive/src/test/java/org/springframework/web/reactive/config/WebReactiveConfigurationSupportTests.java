@@ -145,8 +145,9 @@ public class WebReactiveConfigurationSupportTests {
 		assertNotNull(adapter);
 
 		List<HttpMessageReader<?>> readers = adapter.getMessageReaders();
-		assertEquals(5, readers.size());
+		assertEquals(6, readers.size());
 
+		assertHasMessageReader(readers, byte[].class, APPLICATION_OCTET_STREAM);
 		assertHasMessageReader(readers, ByteBuffer.class, APPLICATION_OCTET_STREAM);
 		assertHasMessageReader(readers, String.class, TEXT_PLAIN);
 		assertHasMessageReader(readers, Resource.class, IMAGE_PNG);
@@ -194,8 +195,9 @@ public class WebReactiveConfigurationSupportTests {
 		assertEquals(0, handler.getOrder());
 
 		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertEquals(6, writers.size());
+		assertEquals(7, writers.size());
 
+		assertHasMessageWriter(writers, byte[].class, APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, ByteBuffer.class, APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, String.class, TEXT_PLAIN);
 		assertHasMessageWriter(writers, Resource.class, IMAGE_PNG);
@@ -219,8 +221,9 @@ public class WebReactiveConfigurationSupportTests {
 		assertEquals(100, handler.getOrder());
 
 		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertEquals(6, writers.size());
+		assertEquals(7, writers.size());
 
+		assertHasMessageWriter(writers, byte[].class, APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, ByteBuffer.class, APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, String.class, TEXT_PLAIN);
 		assertHasMessageWriter(writers, Resource.class, IMAGE_PNG);

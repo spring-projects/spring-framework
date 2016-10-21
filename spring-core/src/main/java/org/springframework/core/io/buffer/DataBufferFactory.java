@@ -52,4 +52,11 @@ public interface DataBufferFactory {
 	 */
 	DataBuffer wrap(ByteBuffer byteBuffer);
 
+	/**
+	 * Wrap the given {@code byte} array in a {@code DataBuffer}.
+	 * @param bytes the byte array to wrap
+	 * @return the wrapped buffer
+	 */
+	DataBuffer wrap(byte[] bytes);
+
 }

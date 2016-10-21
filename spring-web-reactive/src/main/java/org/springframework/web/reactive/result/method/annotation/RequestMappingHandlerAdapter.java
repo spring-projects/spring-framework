@@ -32,6 +32,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
@@ -75,6 +76,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 
 
 	public RequestMappingHandlerAdapter() {
+		this.messageReaders.add(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		this.messageReaders.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
 		this.messageReaders.add(new DecoderHttpMessageReader<>(new StringDecoder()));
 	}

@@ -23,6 +23,8 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.codec.ByteArrayDecoder;
+import org.springframework.core.codec.ByteArrayEncoder;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
@@ -65,8 +67,10 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 	private final List<ViewResolver> viewResolvers = new ArrayList<>();
 
 	public void defaultConfiguration() {
+		messageReader(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		messageReader(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
 		messageReader(new DecoderHttpMessageReader<>(new StringDecoder()));
+		messageWriter(new EncoderHttpMessageWriter<>(new ByteArrayEncoder()));
 		messageWriter(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
 		messageWriter(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 		if (jaxb2Present) {

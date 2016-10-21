@@ -28,6 +28,8 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.codec.ByteArrayDecoder;
+import org.springframework.core.codec.ByteArrayEncoder;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
@@ -307,6 +309,7 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 	 * {@link #configureMessageReaders(List)}.
 	 */
 	protected final void addDefaultHttpMessageReaders(List<HttpMessageReader<?>> readers) {
+		readers.add(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		readers.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
 		readers.add(new DecoderHttpMessageReader<>(new StringDecoder()));
 		readers.add(new DecoderHttpMessageReader<>(new ResourceDecoder()));
@@ -444,6 +447,7 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 	 */
 	protected final void addDefaultHttpMessageWriters(List<HttpMessageWriter<?>> writers) {
 		List<Encoder<?>> sseDataEncoders = new ArrayList<>();
+		writers.add(new EncoderHttpMessageWriter<>(new ByteArrayEncoder()));
 		writers.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
 		writers.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 		writers.add(new ResourceHttpMessageWriter());
