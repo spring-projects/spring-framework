@@ -61,11 +61,16 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 			DataBufferFactory dataBufferFactory, int bufferSize) throws IOException {
 
 		super(dataBufferFactory);
+
 		Assert.notNull(response, "HttpServletResponse must not be null");
 		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
 		Assert.isTrue(bufferSize > 0, "Buffer size must be higher than 0");
+
 		this.response = response;
 		this.bufferSize = bufferSize;
+
+		// Tomcat expects WriteListener registration on initial thread
+		registerListener();
 	}
 
 
@@ -119,14 +124,13 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 	@Override
 	protected Processor<Publisher<DataBuffer>, Void> createBodyFlushProcessor() {
 		ResponseBodyFlushProcessor processor = new ResponseBodyFlushProcessor();
-		registerListener();
-		bodyFlushProcessor = processor;
+		this.bodyFlushProcessor = processor;
 		return processor;
 	}
 
 	private void registerListener() {
 		try {
-			outputStream().setWriteListener(writeListener);
+			outputStream().setWriteListener(this.writeListener);
 		}
 		catch (IOException ex) {
 			throw new UncheckedIOException(ex);

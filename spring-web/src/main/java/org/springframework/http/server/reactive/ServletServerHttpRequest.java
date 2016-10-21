@@ -69,6 +69,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		Assert.isTrue(bufferSize > 0, "'bufferSize' must be higher than 0");
+
 		this.request = request;
 		this.dataBufferFactory = bufferFactory;
 		this.bufferSize = bufferSize;
