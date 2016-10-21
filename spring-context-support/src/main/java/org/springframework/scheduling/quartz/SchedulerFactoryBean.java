@@ -652,6 +652,8 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 				logger.info("Will start Quartz Scheduler [" + scheduler.getSchedulerName() +
 						"] in " + startupDelay + " seconds");
 			}
+			// Not using the Quartz startDelayed method since we explicitly want a daemon
+			// thread here, not keeping the JVM alive in case of all other threads ending.
 			Thread schedulerThread = new Thread() {
 				@Override
 				public void run() {

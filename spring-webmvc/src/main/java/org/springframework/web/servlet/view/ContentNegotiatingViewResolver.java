@@ -303,7 +303,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 			for (MediaType requestedMediaType : requestedMediaTypes) {
 				List<String> extensions = this.contentNegotiationManager.resolveFileExtensions(requestedMediaType);
 				for (String extension : extensions) {
-					String viewNameWithExtension = viewName + "." + extension;
+					String viewNameWithExtension = viewName + '.' + extension;
 					view = viewResolver.resolveViewName(viewNameWithExtension, locale);
 					if (view != null) {
 						candidateViews.add(view);

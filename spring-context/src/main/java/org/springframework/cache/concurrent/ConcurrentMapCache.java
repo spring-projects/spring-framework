@@ -149,7 +149,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 				try {
 					value = valueLoader.call();
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					throw new ValueRetrievalException(key, valueLoader, ex);
 				}
 				put(key, value);

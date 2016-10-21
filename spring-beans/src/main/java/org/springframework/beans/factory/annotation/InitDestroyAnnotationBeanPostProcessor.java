@@ -40,6 +40,7 @@ import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcess
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -349,7 +350,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 			}
 			this.method = method;
 			this.identifier = (Modifier.isPrivate(method.getModifiers()) ?
-					method.getDeclaringClass() + "." + method.getName() : method.getName());
+					ClassUtils.getQualifiedMethodName(method) : method.getName());
 		}
 
 		public Method getMethod() {

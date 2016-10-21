@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,7 +142,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 				group.add(entry.getKey(), bean);
 			}
 		}
-		if (phases.size() > 0) {
+		if (!phases.isEmpty()) {
 			List<Integer> keys = new ArrayList<Integer>(phases.keySet());
 			Collections.sort(keys);
 			for (Integer key : keys) {
@@ -195,7 +195,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 			group.add(entry.getKey(), bean);
 		}
-		if (phases.size() > 0) {
+		if (!phases.isEmpty()) {
 			List<Integer> keys = new ArrayList<Integer>(phases.keySet());
 			Collections.sort(keys, Collections.reverseOrder());
 			for (Integer key : keys) {

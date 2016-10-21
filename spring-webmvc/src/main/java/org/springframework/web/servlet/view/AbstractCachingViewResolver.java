@@ -179,7 +179,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 * lead to a different view resource.
 	 */
 	protected Object getCacheKey(String viewName, Locale locale) {
-		return viewName + "_" + locale;
+		return viewName + '_' + locale;
 	}
 
 	/**

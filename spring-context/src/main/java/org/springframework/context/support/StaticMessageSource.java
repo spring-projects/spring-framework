@@ -43,12 +43,12 @@ public class StaticMessageSource extends AbstractMessageSource {
 
 	@Override
 	protected String resolveCodeWithoutArguments(String code, Locale locale) {
-		return this.messages.get(code + "_" + locale.toString());
+		return this.messages.get(code + '_' + locale.toString());
 	}
 
 	@Override
 	protected MessageFormat resolveCode(String code, Locale locale) {
-		String key = code + "_" + locale.toString();
+		String key = code + '_' + locale.toString();
 		String msg = this.messages.get(key);
 		if (msg == null) {
 			return null;
@@ -73,7 +73,7 @@ public class StaticMessageSource extends AbstractMessageSource {
 		Assert.notNull(code, "Code must not be null");
 		Assert.notNull(locale, "Locale must not be null");
 		Assert.notNull(msg, "Message must not be null");
-		this.messages.put(code + "_" + locale.toString(), msg);
+		this.messages.put(code + '_' + locale.toString(), msg);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Added message [" + msg + "] for code [" + code + "] and Locale [" + locale + "]");
 		}

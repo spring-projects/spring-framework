@@ -210,7 +210,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		}
 		trySetStompHeaderForSubscriptionId();
 		if (getMessageId() == null) {
-			String messageId = getSessionId() + "-" + messageIdCounter.getAndIncrement();
+			String messageId = getSessionId() + '-' + messageIdCounter.getAndIncrement();
 			setNativeHeader(STOMP_MESSAGE_ID_HEADER, messageId);
 		}
 	}
