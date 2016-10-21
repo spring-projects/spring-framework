@@ -82,7 +82,7 @@ configure(allprojects) { project ->
 	ext.reactorNettyVersion    = '0.5.2.RELEASE'
 	ext.romeVersion            = "1.7.0"
 	ext.rxjavaVersion          = '1.2.1'
-	ext.rxjava2Version         = '2.0.0-RC3'
+	ext.rxjava2Version         = '2.0.0-RC5'
 	ext.rxjavaAdapterVersion   = '1.2.0'
 	ext.rxnettyVersion         = '0.5.2-rc.4'
 	ext.servletVersion         = "3.1.0"
