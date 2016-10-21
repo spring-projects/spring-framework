@@ -90,12 +90,14 @@ public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport
 	@Override
 	public void service(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException {
 
+		// Start async before Read/WriteListener registration
+		AsyncContext asyncContext = servletRequest.startAsync();
+
 		ServletServerHttpRequest request = new ServletServerHttpRequest(
 				((HttpServletRequest) servletRequest), getDataBufferFactory(), getBufferSize());
 		ServletServerHttpResponse response = new ServletServerHttpResponse(
 				((HttpServletResponse) servletResponse), getDataBufferFactory(), getBufferSize());
 
-		AsyncContext asyncContext = servletRequest.startAsync();
 		asyncContext.addListener(new EventHandlingAsyncListener(request, response));
 
 		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(asyncContext);
