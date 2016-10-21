@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.core.DecoratingProxy;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionFailedException;
@@ -96,9 +97,14 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	@Override
 	public void addConverter(Converter<?, ?> converter) {
-		ResolvableType[] typeInfo = getRequiredTypeInfo(converter, Converter.class);
-		Assert.notNull(typeInfo, "Unable to the determine sourceType <S> and targetType " +
-				"<T> which your Converter<S, T> converts between; declare these generic types.");
+		ResolvableType[] typeInfo = getRequiredTypeInfo(converter.getClass(), Converter.class);
+		if (typeInfo == null && converter instanceof DecoratingProxy) {
+			typeInfo = getRequiredTypeInfo(((DecoratingProxy) converter).getDecoratedClass(), Converter.class);
+		}
+		if (typeInfo == null) {
+			throw new IllegalArgumentException("Unable to determine source type <S> and target type <T> for your " +
+					"Converter [" + converter.getClass().getName() + "]; does the class parameterize those types?");
+		}
 		addConverter(new ConverterAdapter(converter, typeInfo[0], typeInfo[1]));
 	}
 
@@ -115,11 +121,16 @@ public class GenericConversionService implements ConfigurableConversionService {
 	}
 
 	@Override
-	public void addConverterFactory(ConverterFactory<?, ?> converterFactory) {
-		ResolvableType[] typeInfo = getRequiredTypeInfo(converterFactory, ConverterFactory.class);
-		Assert.notNull(typeInfo, "Unable to the determine source type <S> and target range type R which your " +
-				"ConverterFactory<S, R> converts between; declare these generic types.");
-		addConverter(new ConverterFactoryAdapter(converterFactory,
+	public void addConverterFactory(ConverterFactory<?, ?> factory) {
+		ResolvableType[] typeInfo = getRequiredTypeInfo(factory.getClass(), ConverterFactory.class);
+		if (typeInfo == null && factory instanceof DecoratingProxy) {
+			typeInfo = getRequiredTypeInfo(((DecoratingProxy) factory).getDecoratedClass(), ConverterFactory.class);
+		}
+		if (typeInfo == null) {
+			throw new IllegalArgumentException("Unable to determine source type <S> and target type <T> for your " +
+					"ConverterFactory [" + factory.getClass().getName() + "]; does the class parameterize those types?");
+		}
+		addConverter(new ConverterFactoryAdapter(factory,
 				new ConvertiblePair(typeInfo[0].resolve(), typeInfo[1].resolve())));
 	}
 
@@ -284,8 +295,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	// Internal helpers
 
-	private ResolvableType[] getRequiredTypeInfo(Object converter, Class<?> genericIfc) {
-		ResolvableType resolvableType = ResolvableType.forClass(converter.getClass()).as(genericIfc);
+	private ResolvableType[] getRequiredTypeInfo(Class<?> converterClass, Class<?> genericIfc) {
+		ResolvableType resolvableType = ResolvableType.forClass(converterClass).as(genericIfc);
 		ResolvableType[] generics = resolvableType.getGenerics();
 		if (generics.length < 2) {
 			return null;
