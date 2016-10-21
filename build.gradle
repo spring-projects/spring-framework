@@ -11,7 +11,7 @@ buildscript {
 }
 
 plugins {
-	id "org.sonarqube" version "2.2"
+	id "org.sonarqube" version "2.1"
 }
 
 ext {
