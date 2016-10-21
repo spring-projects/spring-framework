@@ -61,6 +61,7 @@ import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -74,6 +75,8 @@ import org.springframework.web.reactive.result.method.annotation.ResponseEntityR
 import org.springframework.web.reactive.result.view.ViewResolutionResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebExceptionHandler;
+import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
 
 /**
  * The main class for Spring Web Reactive configuration.
@@ -115,6 +118,16 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 		return this.applicationContext;
 	}
 
+
+	@Bean
+	public DispatcherHandler webHandler() {
+		return new DispatcherHandler();
+	}
+
+	@Bean
+	public WebExceptionHandler responseStatusExceptionHandler() {
+		return new ResponseStatusExceptionHandler();
+	}
 
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping() {
