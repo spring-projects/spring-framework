@@ -37,6 +37,7 @@ import org.springframework.util.MultiValueMap;
  * Adapt {@link ServerHttpRequest} to the Reactor Net {@link HttpChannel}.
  *
  * @author Stephane Maldini
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
@@ -46,11 +47,38 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	private final NettyDataBufferFactory bufferFactory;
 
 
-	public ReactorServerHttpRequest(HttpChannel request, NettyDataBufferFactory bufferFactory) {
-		Assert.notNull("'request' must not be null");
+	public ReactorServerHttpRequest(HttpChannel channel, NettyDataBufferFactory bufferFactory) {
+		super(initUri(channel), initHeaders(channel));
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
-		this.channel = request;
+		this.channel = channel;
 		this.bufferFactory = bufferFactory;
+	}
+
+	private static URI initUri(HttpChannel channel) {
+		Assert.notNull("'channel' must not be null");
+		try {
+			URI uri = new URI(channel.uri());
+			InetSocketAddress remoteAddress = channel.remoteAddress();
+			return new URI(
+					uri.getScheme(),
+					uri.getUserInfo(),
+					(remoteAddress != null ? remoteAddress.getHostString() : null),
+					(remoteAddress != null ? remoteAddress.getPort() : -1),
+					uri.getPath(),
+					uri.getQuery(),
+					uri.getFragment());
+		}
+		catch (URISyntaxException ex) {
+			throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
+		}
+	}
+
+	private static HttpHeaders initHeaders(HttpChannel channel) {
+		HttpHeaders headers = new HttpHeaders();
+		for (String name : channel.headers().names()) {
+			headers.put(name, channel.headers().getAll(name));
+		}
+		return headers;
 	}
 
 
@@ -61,29 +89,6 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	public HttpMethod getMethod() {
 		return HttpMethod.valueOf(this.channel.method().name());
-	}
-
-	@Override
-	protected URI initUri() throws URISyntaxException {
-		URI uri = new URI(this.channel.uri());
-		InetSocketAddress remoteAddress = this.channel.remoteAddress();
-		return new URI(
-				uri.getScheme(),
-				uri.getUserInfo(),
-				(remoteAddress != null ? remoteAddress.getHostString() : null),
-				(remoteAddress != null ? remoteAddress.getPort() : -1),
-				uri.getPath(),
-				uri.getQuery(),
-				uri.getFragment());
-	}
-
-	@Override
-	protected HttpHeaders initHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		for (String name : this.channel.headers().names()) {
-			headers.put(name, this.channel.headers().getAll(name));
-		}
-		return headers;
 	}
 
 	@Override

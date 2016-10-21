@@ -53,10 +53,31 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 	public UndertowServerHttpRequest(HttpServerExchange exchange,
 			DataBufferFactory dataBufferFactory) {
-		Assert.notNull(exchange, "'exchange' is required.");
+
+		super(initUri(exchange), initHeaders(exchange));
 		this.exchange = exchange;
 		this.body = new RequestBodyPublisher(exchange, dataBufferFactory);
 		this.body.registerListener();
+	}
+
+	private static URI initUri(HttpServerExchange exchange) {
+		Assert.notNull(exchange, "'exchange' is required.");
+		try {
+			return new URI(exchange.getRequestScheme(), null,
+					exchange.getHostName(), exchange.getHostPort(),
+					exchange.getRequestURI(), exchange.getQueryString(), null);
+		}
+		catch (URISyntaxException ex) {
+			throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
+		}
+	}
+
+	private static HttpHeaders initHeaders(HttpServerExchange exchange) {
+		HttpHeaders headers = new HttpHeaders();
+		for (HeaderValues values : exchange.getRequestHeaders()) {
+			headers.put(values.getHeaderName().toString(), values);
+		}
+		return headers;
 	}
 
 
@@ -67,22 +88,6 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	public HttpMethod getMethod() {
 		return HttpMethod.valueOf(this.getUndertowExchange().getRequestMethod().toString());
-	}
-
-	@Override
-	protected URI initUri() throws URISyntaxException {
-		return new URI(this.exchange.getRequestScheme(), null,
-				this.exchange.getHostName(), this.exchange.getHostPort(),
-				this.exchange.getRequestURI(), this.exchange.getQueryString(), null);
-	}
-
-	@Override
-	protected HttpHeaders initHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		for (HeaderValues values : this.getUndertowExchange().getRequestHeaders()) {
-			headers.put(values.getHeaderName().toString(), values);
-		}
-		return headers;
 	}
 
 	@Override

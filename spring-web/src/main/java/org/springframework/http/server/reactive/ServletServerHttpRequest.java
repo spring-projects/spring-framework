@@ -59,16 +59,73 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	private volatile RequestBodyPublisher bodyPublisher;
 
+	private final Object cookieLock = new Object();
+
 
 	public ServletServerHttpRequest(HttpServletRequest request,
-			DataBufferFactory dataBufferFactory, int bufferSize) {
+			DataBufferFactory bufferFactory, int bufferSize) {
 
-		Assert.notNull(request, "HttpServletRequest must not be null");
-		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
-		Assert.isTrue(bufferSize > 0, "Buffer size must be higher than 0");
+		super(initUri(request), initHeaders(request));
+
+		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
+		Assert.isTrue(bufferSize > 0, "'bufferSize' must be higher than 0");
 		this.request = request;
-		this.dataBufferFactory = dataBufferFactory;
+		this.dataBufferFactory = bufferFactory;
 		this.bufferSize = bufferSize;
+	}
+
+	private static URI initUri(HttpServletRequest request) {
+		Assert.notNull(request, "'request' must not be null");
+		try {
+			StringBuffer url = request.getRequestURL();
+			String query = request.getQueryString();
+			if (StringUtils.hasText(query)) {
+				url.append('?').append(query);
+			}
+			return new URI(url.toString());
+		}
+		catch (URISyntaxException ex) {
+			throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
+		}
+	}
+
+	private static HttpHeaders initHeaders(HttpServletRequest request) {
+		HttpHeaders headers = new HttpHeaders();
+		for (Enumeration<?> names = request.getHeaderNames();
+			 names.hasMoreElements(); ) {
+			String name = (String) names.nextElement();
+			for (Enumeration<?> values = request.getHeaders(name);
+				 values.hasMoreElements(); ) {
+				headers.add(name, (String) values.nextElement());
+			}
+		}
+		MediaType contentType = headers.getContentType();
+		if (contentType == null) {
+			String requestContentType = request.getContentType();
+			if (StringUtils.hasLength(requestContentType)) {
+				contentType = MediaType.parseMediaType(requestContentType);
+				headers.setContentType(contentType);
+			}
+		}
+		if (contentType != null && contentType.getCharset() == null) {
+			String encoding = request.getCharacterEncoding();
+			if (StringUtils.hasLength(encoding)) {
+				Charset charset = Charset.forName(encoding);
+				Map<String, String> params = new LinkedCaseInsensitiveMap<>();
+				params.putAll(contentType.getParameters());
+				params.put("charset", charset.toString());
+				headers.setContentType(
+						new MediaType(contentType.getType(), contentType.getSubtype(),
+								params));
+			}
+		}
+		if (headers.getContentLength() == -1) {
+			int contentLength = request.getContentLength();
+			if (contentLength != -1) {
+				headers.setContentLength(contentLength);
+			}
+		}
+		return headers;
 	}
 
 
@@ -87,59 +144,12 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	protected URI initUri() throws URISyntaxException {
-		StringBuffer url = this.request.getRequestURL();
-		String query = this.request.getQueryString();
-		if (StringUtils.hasText(query)) {
-			url.append('?').append(query);
-		}
-		return new URI(url.toString());
-	}
-
-	@Override
-	protected HttpHeaders initHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		for (Enumeration<?> names = getServletRequest().getHeaderNames();
-		     names.hasMoreElements(); ) {
-			String name = (String) names.nextElement();
-			for (Enumeration<?> values = getServletRequest().getHeaders(name);
-			     values.hasMoreElements(); ) {
-				headers.add(name, (String) values.nextElement());
-			}
-		}
-		MediaType contentType = headers.getContentType();
-		if (contentType == null) {
-			String requestContentType = getServletRequest().getContentType();
-			if (StringUtils.hasLength(requestContentType)) {
-				contentType = MediaType.parseMediaType(requestContentType);
-				headers.setContentType(contentType);
-			}
-		}
-		if (contentType != null && contentType.getCharset() == null) {
-			String encoding = getServletRequest().getCharacterEncoding();
-			if (StringUtils.hasLength(encoding)) {
-				Charset charset = Charset.forName(encoding);
-				Map<String, String> params = new LinkedCaseInsensitiveMap<>();
-				params.putAll(contentType.getParameters());
-				params.put("charset", charset.toString());
-				headers.setContentType(
-						new MediaType(contentType.getType(), contentType.getSubtype(),
-								params));
-			}
-		}
-		if (headers.getContentLength() == -1) {
-			int contentLength = getServletRequest().getContentLength();
-			if (contentLength != -1) {
-				headers.setContentLength(contentLength);
-			}
-		}
-		return headers;
-	}
-
-	@Override
 	protected MultiValueMap<String, HttpCookie> initCookies() {
 		MultiValueMap<String, HttpCookie> httpCookies = new LinkedMultiValueMap<>();
-		Cookie[] cookies = this.request.getCookies();
+		Cookie[] cookies;
+		synchronized (this.cookieLock) {
+			cookies = this.request.getCookies();
+		}
 		if (cookies != null) {
 			for (Cookie cookie : cookies) {
 				String name = cookie.getName();
