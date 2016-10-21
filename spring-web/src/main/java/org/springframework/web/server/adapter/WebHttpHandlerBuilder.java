@@ -17,8 +17,13 @@ package org.springframework.web.server.adapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
+import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -28,6 +33,7 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
 import org.springframework.web.server.handler.FilteringWebHandler;
+import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 /**
@@ -52,6 +58,13 @@ import org.springframework.web.server.session.WebSessionManager;
  */
 public class WebHttpHandlerBuilder {
 
+	/** Well-known name for the target WebHandler in the bean factory. */
+	public static final String WEB_HANDLER_BEAN_NAME = "webHandler";
+
+	/** Well-known name for the WebSessionManager in the bean factory. */
+	public static final String WEB_SESSION_MANAGER_BEAN_NAME = "webSessionManager";
+
+
 	private final WebHandler targetHandler;
 
 	private final List<WebFilter> filters = new ArrayList<>();
@@ -74,9 +87,64 @@ public class WebHttpHandlerBuilder {
 	/**
 	 * Factory method to create a new builder instance.
 	 * @param webHandler the target handler for the request
+	 * @return the prepared builder
 	 */
 	public static WebHttpHandlerBuilder webHandler(WebHandler webHandler) {
 		return new WebHttpHandlerBuilder(webHandler);
+	}
+
+	/**
+	 * Factory method to create a new builder instance by detecting beans in an
+	 * {@link ApplicationContext}. The following are detected:
+	 * <ul>
+	 *	<li>{@link WebHandler} [1] -- looked up by the name
+	 *	{@link #WEB_HANDLER_BEAN_NAME}.
+	 *	<li>{@link WebFilter} [0..N] -- detected by type and ordered,
+	 *	see {@link AnnotationAwareOrderComparator}.
+	 *	<li>{@link WebExceptionHandler} [0..N] -- detected by type and
+	 *	ordered.
+	 *	<li>{@link WebSessionManager} [0..1] -- looked up by the name
+	 *	{@link #WEB_SESSION_MANAGER_BEAN_NAME}.
+	 * </ul>
+	 * @param context the application context to use for the lookup
+	 * @return the prepared builder
+	 */
+	public static WebHttpHandlerBuilder applicationContext(ApplicationContext context) {
+
+		// Target WebHandler
+
+		WebHttpHandlerBuilder builder = new WebHttpHandlerBuilder(
+				context.getBean(WEB_HANDLER_BEAN_NAME, WebHandler.class));
+
+		// WebFilter...
+
+		Collection<WebFilter> filters = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+				context, WebFilter.class, true, false).values();
+
+		WebFilter[] sortedFilters = filters.toArray(new WebFilter[filters.size()]);
+		AnnotationAwareOrderComparator.sort(sortedFilters);
+		builder.filters(sortedFilters);
+
+		// WebExceptionHandler...
+
+		Collection<WebExceptionHandler> handlers = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+				context, WebExceptionHandler.class, true, false).values();
+
+		WebExceptionHandler[] sortedHandlers = handlers.toArray(new WebExceptionHandler[handlers.size()]);
+		AnnotationAwareOrderComparator.sort(sortedHandlers);
+		builder.exceptionHandlers(sortedHandlers);
+
+		// WebSessionManager
+
+		try {
+			builder.sessionManager(
+					context.getBean(WEB_SESSION_MANAGER_BEAN_NAME, WebSessionManager.class));
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// Fall back on default
+		}
+
+		return builder;
 	}
 
 
@@ -104,8 +172,8 @@ public class WebHttpHandlerBuilder {
 
 	/**
 	 * Configure the {@link WebSessionManager} to set on the
-	 * {@link ServerWebExchange WebServerExchange}
-	 * created for each HTTP request.
+	 * {@link ServerWebExchange WebServerExchange}.
+	 * <p>By default {@link DefaultWebSessionManager} is used.
 	 * @param sessionManager the session manager
 	 * @see HttpWebHandlerAdapter#setSessionManager(WebSessionManager)
 	 */

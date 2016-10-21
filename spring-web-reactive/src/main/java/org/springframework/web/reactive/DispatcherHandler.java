@@ -36,6 +36,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
  * Central dispatcher for HTTP request handlers/controllers. Dispatches to registered
@@ -170,7 +171,14 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	 * Expose a dispatcher-based {@link HttpHandler} for the given application context,
 	 * typically for direct registration with an engine adapter such as
 	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter}.
-	 * @param applicationContext the application context to find the handler beans in
+	 *
+	 * <p>Delegates to {@link WebHttpHandlerBuilder#applicationContext} that
+	 * detects the target {@link DispatcherHandler} along with
+	 * {@link org.springframework.web.server.WebFilter}s, and
+	 * {@link org.springframework.web.server.WebExceptionHandler}s in the given
+	 * ApplicationContext.
+	 *
+	 * @param context the application context to find the handler beans in
 	 * @see #DispatcherHandler(ApplicationContext)
 	 * @see HttpWebHandlerAdapter
 	 * @see org.springframework.http.server.reactive.ServletHttpHandlerAdapter
@@ -178,8 +186,8 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	 * @see org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter
 	 * @see org.springframework.http.server.reactive.UndertowHttpHandlerAdapter
 	 */
-	public static HttpHandler toHttpHandler(ApplicationContext applicationContext) {
-		return new HttpWebHandlerAdapter(new DispatcherHandler(applicationContext));
+	public static HttpHandler toHttpHandler(ApplicationContext context) {
+		return WebHttpHandlerBuilder.applicationContext(context).build();
 	}
 
 }
