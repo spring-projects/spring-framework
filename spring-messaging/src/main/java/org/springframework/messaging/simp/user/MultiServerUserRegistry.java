@@ -77,7 +77,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		catch (UnknownHostException ex) {
 			host = "unknown";
 		}
-		return host + "-" + UUID.randomUUID();
+		return host + '-' + UUID.randomUUID();
 	}
 
 

@@ -86,7 +86,7 @@ class ResourceRegionHttpMessageWriter extends EncoderHttpMessageWriter<ResourceR
 			long start = region.getPosition();
 			long end = start + region.getCount() - 1;
 			end = Math.min(end, length - 1);
-			outputMessage.getHeaders().add("Content-Range", "bytes " + start + "-" + end + "/" + length);
+			outputMessage.getHeaders().add("Content-Range", "bytes " + start + '-' + end + '/' + length);
 			outputMessage.getHeaders().setContentLength(end - start + 1);
 		});
 		outputMessage.getHeaders().setContentType(contentType);

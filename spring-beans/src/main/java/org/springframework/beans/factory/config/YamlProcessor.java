@@ -280,7 +280,7 @@ public abstract class YamlProcessor {
 					key = path + key;
 				}
 				else {
-					key = path + "." + key;
+					key = path + '.' + key;
 				}
 			}
 			Object value = entry.getValue();

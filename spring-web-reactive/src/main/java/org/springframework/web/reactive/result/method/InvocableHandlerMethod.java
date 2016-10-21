@@ -32,12 +32,12 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
-
 
 /**
  * Extension of HandlerMethod that can invoke the target method after resolving
@@ -160,22 +160,22 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private String getDetailedErrorMessage(String message, MethodParameter param) {
 		StringBuilder sb = new StringBuilder(message);
-		sb.append("argument [" + param.getParameterIndex() + "] ");
-		sb.append("of type [" + param.getParameterType().getName() + "] ");
-		sb.append("on method [" + getBridgedMethod().toGenericString() + "]");
+		sb.append("argument [").append(param.getParameterIndex()).append("] ");
+		sb.append("of type [").append(param.getParameterType().getName()).append("] ");
+		sb.append("on method [").append(getBridgedMethod().toGenericString()).append("]");
 		return sb.toString();
 	}
 
 	private Object doInvoke(Object[] args) throws Exception {
 		if (logger.isTraceEnabled()) {
-			String target = getBeanType().getSimpleName() + "." + getMethod().getName();
-			logger.trace("Invoking [" + target + "] method with arguments " + Arrays.toString(args));
+			logger.trace("Invoking '" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) +
+					"' with arguments " + Arrays.toString(args));
 		}
 		ReflectionUtils.makeAccessible(getBridgedMethod());
 		Object returnValue = getBridgedMethod().invoke(getBean(), args);
 		if (logger.isTraceEnabled()) {
-			String target = getBeanType().getSimpleName() + "." + getMethod().getName();
-			logger.trace("Method [" + target + "] returned [" + returnValue + "]");
+			logger.trace("Method [" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) +
+					"] returned [" + returnValue + "]");
 		}
 		return returnValue;
 	}

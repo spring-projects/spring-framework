@@ -241,7 +241,7 @@ public abstract class Conventions {
 	public static String getQualifiedAttributeName(Class<?> enclosingClass, String attributeName) {
 		Assert.notNull(enclosingClass, "'enclosingClass' must not be null");
 		Assert.notNull(attributeName, "'attributeName' must not be null");
-		return enclosingClass.getName() + "." + attributeName;
+		return enclosingClass.getName() + '.' + attributeName;
 	}
 
 

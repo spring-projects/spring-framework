@@ -105,7 +105,7 @@ public class StandardTypeLocator implements TypeLocator {
 		}
 		for (String prefix : this.knownPackagePrefixes) {
 			try {
-				nameToLookup = prefix + "." + typeName;
+				nameToLookup = prefix + '.' + typeName;
 				return ClassUtils.forName(nameToLookup, this.classLoader);
 			}
 			catch (ClassNotFoundException ex) {

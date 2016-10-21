@@ -37,7 +37,6 @@ import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.util.ResourceUtils;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -73,6 +72,7 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Flux<DataBuffer> encode(Publisher<? extends ResourceRegion> inputStream,
 			DataBufferFactory bufferFactory, ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
 
@@ -138,10 +138,10 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 		long end = start + region.getCount() - 1;
 		OptionalLong contentLength = contentLength(region.getResource());
 		if (contentLength.isPresent()) {
-			return getAsciiBytes("Content-Range: bytes " + start + "-" + end + "/" + contentLength.getAsLong() + "\r\n\r\n");
+			return getAsciiBytes("Content-Range: bytes " + start + '-' + end + '/' + contentLength.getAsLong() + "\r\n\r\n");
 		}
 		else {
-			return getAsciiBytes("Content-Range: bytes " + start + "-" + end + "\r\n\r\n");
+			return getAsciiBytes("Content-Range: bytes " + start + '-' + end + "\r\n\r\n");
 		}
 	}
 

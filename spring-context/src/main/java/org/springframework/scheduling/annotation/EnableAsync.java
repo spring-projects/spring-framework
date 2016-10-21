@@ -32,7 +32,9 @@ import org.springframework.core.Ordered;
  * Enables Spring's asynchronous method execution capability, similar to functionality
  * found in Spring's {@code <task:*>} XML namespace.
  *
- * <p>To be used together with @{@link Configuration Configuration} classes as follows:
+ * <p>To be used together with @{@link Configuration Configuration} classes as follows,
+ * enabling annotation-driven async processing for an entire Spring application context:
+ *
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableAsync
@@ -45,6 +47,7 @@ import org.springframework.core.Ordered;
  * annotation, or any custom annotation specified via the {@link #annotation} attribute.
  * The aspect is added transparently for any registered bean, for instance via this
  * configuration:
+ *
  * <pre class="code">
  * &#064;Configuration
  * public class AnotherAppConfig {
