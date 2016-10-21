@@ -38,7 +38,7 @@ configure(allprojects) { project ->
 	ext.cacheApiVersion        = "1.0.0"
 	ext.caffeineVersion        = "2.3.3"
 	ext.eclipselinkVersion     = "2.6.4"
-	ext.ehcacheVersion         = "2.10.2"
+	ext.ehcacheVersion         = "2.10.3"
 	ext.ehcachejcacheVersion   = "1.0.1"
 	ext.ehcache3Version        = "3.1.3"
 	ext.ejbApiVersion          = "3.2"
@@ -54,7 +54,7 @@ configure(allprojects) { project ->
 	ext.httpasyncVersion       = "4.1.2"
 	ext.httpclientVersion      = "4.5.2"
 	ext.interceptorApiVersion  = "1.2"
-	ext.jackson2Version        = "2.8.3"
+	ext.jackson2Version        = "2.8.4"
 	ext.javamailVersion        = "1.5.6"
 	ext.jaxbVersion            = "2.2.11"
 	ext.jaxwsVersion           = "2.2.11"
@@ -70,7 +70,7 @@ configure(allprojects) { project ->
 	ext.junitJupiterVersion    = '5.0.0-M2'
 	ext.junitPlatformVersion   = '1.0.0-M2'
 	ext.log4jVersion           = '2.7'
-	ext.nettyVersion           = "4.1.5.Final"
+	ext.nettyVersion           = "4.1.6.Final"
 	ext.okhttpVersion          = "2.7.5"
 	ext.okhttp3Version         = "3.4.1"
 	ext.poiVersion             = "3.15"
