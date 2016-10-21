@@ -31,12 +31,12 @@ public class MapTransactionAttributeSource extends AbstractFallbackTransactionAt
 	private final Map<Object, TransactionAttribute> attributeMap = new HashMap<Object, TransactionAttribute>();
 
 
-	public void register(Method method, TransactionAttribute txAtt) {
-		this.attributeMap.put(method, txAtt);
+	public void register(Method method, TransactionAttribute txAttr) {
+		this.attributeMap.put(method, txAttr);
 	}
 
-	public void register(Class<?> clazz, TransactionAttribute txAtt) {
-		this.attributeMap.put(clazz, txAtt);
+	public void register(Class<?> clazz, TransactionAttribute txAttr) {
+		this.attributeMap.put(clazz, txAttr);
 	}
 
 

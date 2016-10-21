@@ -511,8 +511,21 @@ public abstract class ClassUtils {
 	 * @return the qualified name of the method
 	 */
 	public static String getQualifiedMethodName(Method method) {
+		return getQualifiedMethodName(method, null);
+	}
+
+	/**
+	 * Return the qualified name of the given method, consisting of
+	 * fully qualified interface/class name + "." + method name.
+	 * @param method the method
+	 * @param clazz the clazz that the method is being invoked on
+	 * (may be {@code null} to indicate the method's declaring class)
+	 * @return the qualified name of the method
+	 * @since 4.3.4
+	 */
+	public static String getQualifiedMethodName(Method method, Class<?> clazz) {
 		Assert.notNull(method, "Method must not be null");
-		return method.getDeclaringClass().getName() + "." + method.getName();
+		return (clazz != null ? clazz : method.getDeclaringClass()).getName() + '.' + method.getName();
 	}
 
 	/**
@@ -640,10 +653,10 @@ public abstract class ClassUtils {
 				return candidates.iterator().next();
 			}
 			else if (candidates.isEmpty()) {
-				throw new IllegalStateException("Expected method not found: " + clazz + "." + methodName);
+				throw new IllegalStateException("Expected method not found: " + clazz.getName() + '.' + methodName);
 			}
 			else {
-				throw new IllegalStateException("No unique method found: " + clazz + "." + methodName);
+				throw new IllegalStateException("No unique method found: " + clazz.getName() + '.' + methodName);
 			}
 		}
 	}
@@ -980,7 +993,7 @@ public abstract class ClassUtils {
 	public static String addResourcePathToPackagePath(Class<?> clazz, String resourceName) {
 		Assert.notNull(resourceName, "Resource name must not be null");
 		if (!resourceName.startsWith("/")) {
-			return classPackageAsResourcePath(clazz) + "/" + resourceName;
+			return classPackageAsResourcePath(clazz) + '/' + resourceName;
 		}
 		return classPackageAsResourcePath(clazz) + resourceName;
 	}

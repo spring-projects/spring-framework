@@ -34,6 +34,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.CallbackPreferringPlatformTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
 
@@ -269,7 +270,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		// If the transaction attribute is null, the method is non-transactional.
 		final TransactionAttribute txAttr = getTransactionAttributeSource().getTransactionAttribute(method, targetClass);
 		final PlatformTransactionManager tm = determineTransactionManager(txAttr);
-		final String joinpointIdentification = methodIdentification(method, targetClass);
+		final String joinpointIdentification = methodIdentification(method, targetClass, txAttr);
 
 		if (txAttr == null || !(tm instanceof CallbackPreferringPlatformTransactionManager)) {
 			// Standard transaction demarcation with getTransaction and commit/rollback calls.
@@ -385,17 +386,33 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		return txManager;
 	}
 
+	private String methodIdentification(Method method, Class<?> targetClass, TransactionAttribute txAttr) {
+		String methodIdentification = methodIdentification(method, targetClass);
+		if (methodIdentification == null) {
+			if (txAttr instanceof DefaultTransactionAttribute) {
+				methodIdentification = ((DefaultTransactionAttribute) txAttr).getDescriptor();
+			}
+			if (methodIdentification == null) {
+				methodIdentification = ClassUtils.getQualifiedMethodName(method, targetClass);
+			}
+		}
+		return methodIdentification;
+	}
+
 	/**
 	 * Convenience method to return a String representation of this Method
 	 * for use in logging. Can be overridden in subclasses to provide a
 	 * different identifier for the given method.
+	 * <p>The default implementation returns {@code null}, indicating the
+	 * use of {@link DefaultTransactionAttribute#getDescriptor()} instead,
+	 * ending up as {@link ClassUtils#getQualifiedMethodName(Method, Class)}.
 	 * @param method the method we're interested in
 	 * @param targetClass the class that the method is being invoked on
 	 * @return a String representation identifying this method
 	 * @see org.springframework.util.ClassUtils#getQualifiedMethodName
 	 */
 	protected String methodIdentification(Method method, Class<?> targetClass) {
-		return (targetClass != null ? targetClass : method.getDeclaringClass()).getName() + "." + method.getName();
+		return null;
 	}
 
 	/**
