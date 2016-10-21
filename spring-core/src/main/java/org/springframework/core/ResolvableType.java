@@ -837,7 +837,7 @@ public class ResolvableType implements Serializable {
 		}
 		if (this.typeProvider != otherType.typeProvider &&
 				(this.typeProvider == null || otherType.typeProvider == null ||
-				!ObjectUtils.nullSafeEquals(this.typeProvider.getSource(), otherType.typeProvider.getSource()))) {
+				!ObjectUtils.nullSafeEquals(this.typeProvider.getType(), otherType.typeProvider.getType()))) {
 			return false;
 		}
 		if (this.variableResolver != otherType.variableResolver &&
@@ -859,7 +859,7 @@ public class ResolvableType implements Serializable {
 	private int calculateHashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(this.type);
 		if (this.typeProvider != null) {
-			hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.typeProvider.getSource());
+			hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.typeProvider.getType());
 		}
 		if (this.variableResolver != null) {
 			hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.variableResolver.getSource());
