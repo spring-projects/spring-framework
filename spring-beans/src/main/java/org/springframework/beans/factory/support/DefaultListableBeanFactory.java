@@ -1081,7 +1081,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
 			if (matchingBeans.isEmpty()) {
 				if (descriptor.isRequired()) {
-					raiseNoMatchingBeanFound(type, descriptor.getResolvableType().toString(), descriptor);
+					raiseNoMatchingBeanFound(type, descriptor.getResolvableType(), descriptor);
 				}
 				return null;
 			}
@@ -1444,11 +1444,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * for an unresolvable dependency.
 	 */
 	private void raiseNoMatchingBeanFound(
-			Class<?> type, String dependencyDescription, DependencyDescriptor descriptor) throws BeansException {
+			Class<?> type, ResolvableType resolvableType, DependencyDescriptor descriptor) throws BeansException {
 
 		checkBeanNotOfRequiredType(type, descriptor);
 
-		throw new NoSuchBeanDefinitionException(type, dependencyDescription,
+		throw new NoSuchBeanDefinitionException(resolvableType,
 				"expected at least 1 bean which qualifies as autowire candidate. " +
 				"Dependency annotations: " + ObjectUtils.nullSafeToString(descriptor.getAnnotations()));
 	}
