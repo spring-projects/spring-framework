@@ -30,8 +30,6 @@ import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
-import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
-import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 
 /**
  * Defines callback methods to customize the configuration for Web Reactive
@@ -149,26 +147,6 @@ public interface WebReactiveConfigurer {
 	 * @see ViewResolverRegistry
 	 */
 	default void configureViewResolvers(ViewResolverRegistry registry) {
-	}
-
-	/**
-	 * Factory method for the {@link RequestMappingHandlerMapping} bean creating
-	 * an instance or a custom extension of it. Note that only one configurer
-	 * is allowed to implement this method.
-	 * The default implementation returns {@code Optional.empty()}.
-	 */
-	default Optional<RequestMappingHandlerMapping> createRequestMappingHandlerMapping() {
-		return Optional.empty();
-	}
-
-	/**
-	 * Factory method for the {@link RequestMappingHandlerAdapter} bean creating
-	 * an instance or a custom extension of it. Note that only one configurer
-	 * is allowed to implement this method.
-	 * The default implementation returns {@code Optional.empty()}.
-	 */
-	default Optional<RequestMappingHandlerAdapter> createRequestMappingHandlerAdapter() {
-		return Optional.empty();
 	}
 
 }

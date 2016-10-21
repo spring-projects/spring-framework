@@ -16,15 +16,12 @@
 
 package org.springframework.web.reactive.config;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -39,17 +36,12 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
-import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.given;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Test fixture for {@link DelegatingWebReactiveConfiguration} tests.
@@ -72,17 +64,12 @@ public class DelegatingWebReactiveConfigurationTests {
 	@Captor
 	private ArgumentCaptor<FormatterRegistry> formatterRegistry;
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		delegatingConfig = new DelegatingWebReactiveConfiguration();
 		delegatingConfig.setApplicationContext(new StaticApplicationContext());
-		given(webReactiveConfigurer.createRequestMappingHandlerMapping()).willReturn(Optional.empty());
-		given(webReactiveConfigurer.createRequestMappingHandlerAdapter()).willReturn(Optional.empty());
 		given(webReactiveConfigurer.getValidator()).willReturn(Optional.empty());
 		given(webReactiveConfigurer.getMessageCodesResolver()).willReturn(Optional.empty());
 	}
@@ -93,44 +80,9 @@ public class DelegatingWebReactiveConfigurationTests {
 		delegatingConfig.setConfigurers(Collections.singletonList(webReactiveConfigurer));
 		delegatingConfig.requestMappingHandlerMapping();
 
-		verify(webReactiveConfigurer).createRequestMappingHandlerMapping();
 		verify(webReactiveConfigurer).configureRequestedContentTypeResolver(any(RequestedContentTypeResolverBuilder.class));
 		verify(webReactiveConfigurer).addCorsMappings(any(CorsRegistry.class));
 		verify(webReactiveConfigurer).configurePathMatching(any(PathMatchConfigurer.class));
-	}
-
-	@Test
-	public void requestMappingHandlerMappingFactoryMethod() throws Exception {
-		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
-
-		WebReactiveConfigurer configurer1 = mock(WebReactiveConfigurer.class);
-		WebReactiveConfigurer configurer2 = mock(WebReactiveConfigurer.class);
-
-		when(configurer1.createRequestMappingHandlerMapping()).thenReturn(Optional.of(mapping));
-		when(configurer2.createRequestMappingHandlerMapping()).thenReturn(Optional.empty());
-
-		delegatingConfig.setConfigurers(Arrays.asList(configurer1, configurer2));
-		Object actual = delegatingConfig.createRequestMappingHandlerMapping();
-
-		assertSame(mapping, actual);
-	}
-
-	@Test
-	public void multipleRequestMappingHandlerMappingFactoryMethods() throws Exception {
-		RequestMappingHandlerMapping mapping1 = new RequestMappingHandlerMapping();
-		RequestMappingHandlerMapping mapping2 = new RequestMappingHandlerMapping();
-
-		WebReactiveConfigurer configurer1 = mock(WebReactiveConfigurer.class);
-		WebReactiveConfigurer configurer2 = mock(WebReactiveConfigurer.class);
-
-		when(configurer1.createRequestMappingHandlerMapping()).thenReturn(Optional.of(mapping1));
-		when(configurer2.createRequestMappingHandlerMapping()).thenReturn(Optional.of(mapping2));
-
-		this.thrown.expectMessage("More than one WebReactiveConfigurer implements " +
-				"RequestMappingHandlerMapping factory method.");
-
-		delegatingConfig.setConfigurers(Arrays.asList(configurer1, configurer2));
-		delegatingConfig.createRequestMappingHandlerMapping();
 	}
 
 	@Test
@@ -142,7 +94,6 @@ public class DelegatingWebReactiveConfigurationTests {
 		ConversionService initializerConversionService = initializer.getConversionService();
 		assertTrue(initializer.getValidator() instanceof LocalValidatorFactoryBean);
 
-		verify(webReactiveConfigurer).createRequestMappingHandlerAdapter();
 		verify(webReactiveConfigurer).configureMessageReaders(readers.capture());
 		verify(webReactiveConfigurer).extendMessageReaders(readers.capture());
 		verify(webReactiveConfigurer).getValidator();

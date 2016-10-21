@@ -30,8 +30,6 @@ import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
-import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
-import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 
 /**
  * A {@link WebReactiveConfigurer} that delegates to one or more others.
@@ -115,18 +113,6 @@ public class WebReactiveConfigurerComposite implements WebReactiveConfigurer {
 	@Override
 	public void configureViewResolvers(ViewResolverRegistry registry) {
 		this.delegates.stream().forEach(delegate -> delegate.configureViewResolvers(registry));
-	}
-
-	@Override
-	public Optional<RequestMappingHandlerMapping> createRequestMappingHandlerMapping() {
-		return createSingleBean(WebReactiveConfigurer::createRequestMappingHandlerMapping,
-				RequestMappingHandlerMapping.class);
-	}
-
-	@Override
-	public Optional<RequestMappingHandlerAdapter> createRequestMappingHandlerAdapter() {
-		return createSingleBean(WebReactiveConfigurer::createRequestMappingHandlerAdapter,
-				RequestMappingHandlerAdapter.class);
 	}
 
 	private <T> Optional<T> createSingleBean(Function<WebReactiveConfigurer, Optional<T>> factory,

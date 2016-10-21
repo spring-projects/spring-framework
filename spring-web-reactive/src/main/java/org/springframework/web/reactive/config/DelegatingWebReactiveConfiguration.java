@@ -28,8 +28,6 @@ import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
-import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
-import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 
 /**
  * A subclass of {@code WebReactiveConfigurationSupport} that detects and delegates
@@ -53,12 +51,6 @@ public class DelegatingWebReactiveConfiguration extends WebReactiveConfiguration
 	}
 
 	@Override
-	protected RequestMappingHandlerMapping createRequestMappingHandlerMapping() {
-		return this.configurers.createRequestMappingHandlerMapping()
-				.orElse(super.createRequestMappingHandlerMapping());
-	}
-
-	@Override
 	protected void configureRequestedContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
 		this.configurers.configureRequestedContentTypeResolver(builder);
 	}
@@ -76,12 +68,6 @@ public class DelegatingWebReactiveConfiguration extends WebReactiveConfiguration
 	@Override
 	protected void addResourceHandlers(ResourceHandlerRegistry registry) {
 		this.configurers.addResourceHandlers(registry);
-	}
-
-	@Override
-	protected RequestMappingHandlerAdapter createRequestMappingHandlerAdapter() {
-		return this.configurers.createRequestMappingHandlerAdapter()
-				.orElse(super.createRequestMappingHandlerAdapter());
 	}
 
 	@Override
