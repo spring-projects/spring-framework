@@ -53,6 +53,7 @@ import static org.junit.Assert.*;
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Kazuki Shimizu
  */
 public class JodaTimeFormattingTests {
 
@@ -496,6 +497,16 @@ public class JodaTimeFormattingTests {
 	}
 
 	@Test
+	public void testBindYearMonthAnnotatedPattern() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("yearMonthAnnotatedPattern", "12/2007");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertTrue(binder.getBindingResult().getFieldValue("yearMonthAnnotatedPattern").toString().equals("12/2007"));
+		assertEquals(YearMonth.parse("2007-12"), binder.getBindingResult().getRawFieldValue("yearMonthAnnotatedPattern"));
+	}
+
+	@Test
 	public void testBindMonthDay() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("monthDay", "--12-03");
@@ -504,6 +515,15 @@ public class JodaTimeFormattingTests {
 		assertTrue(binder.getBindingResult().getFieldValue("monthDay").toString().equals("--12-03"));
 	}
 
+	@Test
+	public void testBindMonthDayAnnotatedPattern() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("monthDayAnnotatedPattern", "1/3");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertTrue(binder.getBindingResult().getFieldValue("monthDayAnnotatedPattern").toString().equals("1/3"));
+		assertEquals(MonthDay.parse("--01-03"), binder.getBindingResult().getRawFieldValue("monthDayAnnotatedPattern"));
+	}
 
 	@SuppressWarnings("unused")
 	private static class JodaTimeBean {
@@ -568,7 +588,13 @@ public class JodaTimeFormattingTests {
 
 		private YearMonth yearMonth;
 
+		@DateTimeFormat(pattern = "MM/yyyy")
+		private YearMonth yearMonthAnnotatedPattern;
+
 		private MonthDay monthDay;
+
+		@DateTimeFormat(pattern = "M/d")
+		private MonthDay monthDayAnnotatedPattern;
 
 		private final List<JodaTimeBean> children = new ArrayList<>();
 
@@ -757,12 +783,28 @@ public class JodaTimeFormattingTests {
 			this.yearMonth = yearMonth;
 		}
 
+		public YearMonth getYearMonthAnnotatedPattern() {
+			return yearMonthAnnotatedPattern;
+		}
+
+		public void setYearMonthAnnotatedPattern(YearMonth yearMonthAnnotatedPattern) {
+			this.yearMonthAnnotatedPattern = yearMonthAnnotatedPattern;
+		}
+
 		public MonthDay getMonthDay() {
 			return monthDay;
 		}
 
 		public void setMonthDay(MonthDay monthDay) {
 			this.monthDay = monthDay;
+		}
+
+		public MonthDay getMonthDayAnnotatedPattern() {
+			return monthDayAnnotatedPattern;
+		}
+
+		public void setMonthDayAnnotatedPattern(MonthDay monthDayAnnotatedPattern) {
+			this.monthDayAnnotatedPattern = monthDayAnnotatedPattern;
 		}
 
 		public List<JodaTimeBean> getChildren() {

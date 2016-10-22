@@ -25,8 +25,10 @@ import java.util.Set;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.MonthDay;
 import org.joda.time.ReadableInstant;
 import org.joda.time.ReadablePartial;
+import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormatter;
 
 import org.springframework.context.support.EmbeddedValueResolutionSupport;
@@ -42,6 +44,7 @@ import org.springframework.format.annotation.DateTimeFormat;
  *
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Kazuki Shimizu
  * @since 3.0
  * @see DateTimeFormat
  */
@@ -65,6 +68,8 @@ public class JodaDateTimeFormatAnnotationFormatterFactory extends EmbeddedValueR
 		fieldTypes.add(Date.class);
 		fieldTypes.add(Calendar.class);
 		fieldTypes.add(Long.class);
+		fieldTypes.add(YearMonth.class);
+		fieldTypes.add(MonthDay.class);
 		FIELD_TYPES = Collections.unmodifiableSet(fieldTypes);
 	}
 
@@ -100,6 +105,12 @@ public class JodaDateTimeFormatAnnotationFormatterFactory extends EmbeddedValueR
 		}
 		else if (LocalDateTime.class == fieldType) {
 			return new LocalDateTimeParser(getFormatter(annotation, fieldType));
+		}
+		else if (YearMonth.class == fieldType) {
+			return new YearMonthParser(getFormatter(annotation, fieldType));
+		}
+		else if (MonthDay.class == fieldType) {
+			return new MonthDayParser(getFormatter(annotation, fieldType));
 		}
 		else {
 			return new DateTimeParser(getFormatter(annotation, fieldType));
