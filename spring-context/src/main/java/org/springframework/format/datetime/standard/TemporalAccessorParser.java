@@ -20,8 +20,10 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.MonthDay;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.YearMonth;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -38,6 +40,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Kazuki Shimizu
  * @since 4.0
  * @see DateTimeContextHolder#getFormatter
  * @see java.time.LocalDate#parse(CharSequence, java.time.format.DateTimeFormatter)
@@ -46,6 +49,8 @@ import org.springframework.util.ObjectUtils;
  * @see java.time.ZonedDateTime#parse(CharSequence, java.time.format.DateTimeFormatter)
  * @see java.time.OffsetDateTime#parse(CharSequence, java.time.format.DateTimeFormatter)
  * @see java.time.OffsetTime#parse(CharSequence, java.time.format.DateTimeFormatter)
+ * @see java.time.YearMonth#parse(CharSequence, java.time.format.DateTimeFormatter)
+ * @see java.time.MonthDay#parse(CharSequence, java.time.format.DateTimeFormatter)
  */
 public final class TemporalAccessorParser implements Parser<TemporalAccessor> {
 
@@ -127,6 +132,12 @@ public final class TemporalAccessorParser implements Parser<TemporalAccessor> {
 		}
 		else if (OffsetTime.class == this.temporalAccessorType) {
 			return OffsetTime.parse(text, formatterToUse);
+		}
+		else if (YearMonth.class == this.temporalAccessorType) {
+			return YearMonth.parse(text, formatterToUse);
+		}
+		else if (MonthDay.class == this.temporalAccessorType) {
+			return MonthDay.parse(text, formatterToUse);
 		}
 		else {
 			throw new IllegalStateException("Unsupported TemporalAccessor type: " + this.temporalAccessorType);
