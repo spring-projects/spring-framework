@@ -42,6 +42,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
@@ -50,6 +51,7 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
@@ -128,18 +130,22 @@ public class ViewResolutionResultHandlerTests {
 		returnType = ResolvableType.forClass(View.class);
 		returnValue = new TestView("account");
 		testHandle("/path", returnType, returnValue, "account: {id=123}");
+		assertEquals(HttpStatus.NO_CONTENT, this.exchange.getResponse().getStatusCode());
 
 		returnType = ResolvableType.forClassWithGenerics(Mono.class, View.class);
 		returnValue = Mono.just(new TestView("account"));
 		testHandle("/path", returnType, returnValue, "account: {id=123}");
+		assertEquals(HttpStatus.SEE_OTHER, this.exchange.getResponse().getStatusCode());
 
 		returnType = ResolvableType.forClass(String.class);
 		returnValue = "account";
 		testHandle("/path", returnType, returnValue, "account: {id=123}", resolver);
+		assertEquals(HttpStatus.CREATED, this.exchange.getResponse().getStatusCode());
 
 		returnType = ResolvableType.forClassWithGenerics(Mono.class, String.class);
 		returnValue = Mono.just("account");
 		testHandle("/path", returnType, returnValue, "account: {id=123}", resolver);
+		assertEquals(HttpStatus.PARTIAL_CONTENT, this.exchange.getResponse().getStatusCode());
 
 		returnType = ResolvableType.forClass(Model.class);
 		returnValue = new ExtendedModelMap().addAttribute("name", "Joe");
@@ -392,12 +398,16 @@ public class ViewResolutionResultHandlerTests {
 	@SuppressWarnings("unused")
 	private static class TestController {
 
+		@ResponseStatus(code = HttpStatus.CREATED)
 		String string() { return null; }
 
+		@ResponseStatus(HttpStatus.NO_CONTENT)
 		View view() { return null; }
 
+		@ResponseStatus(HttpStatus.PARTIAL_CONTENT)
 		Mono<String> monoString() { return null; }
 
+		@ResponseStatus(code = HttpStatus.SEE_OTHER)
 		Mono<View> monoView() { return null; }
 
 		Mono<Void> monoVoid() { return null; }

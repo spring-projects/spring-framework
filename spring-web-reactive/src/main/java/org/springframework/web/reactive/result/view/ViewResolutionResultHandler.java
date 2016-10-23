@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
-import org.springframework.web.reactive.result.ContentNegotiatingResultHandlerSupport;
+import org.springframework.web.reactive.result.AbstractHandlerResultHandler;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.HttpRequestPathHelper;
@@ -74,7 +74,7 @@ import org.springframework.web.util.HttpRequestPathHelper;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ViewResolutionResultHandler extends ContentNegotiatingResultHandlerSupport
+public class ViewResolutionResultHandler extends AbstractHandlerResultHandler
 		implements HandlerResultHandler, Ordered {
 
 	private final List<ViewResolver> viewResolvers = new ArrayList<>(4);
@@ -208,6 +208,7 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 		}
 		Map<String, ?> model = result.getModel();
 		return viewMono.then(view -> {
+			updateResponseStatus(result.getReturnTypeSource(), exchange);
 			if (view instanceof View) {
 				return ((View) view).render(model, null, exchange);
 			}

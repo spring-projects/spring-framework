@@ -46,10 +46,10 @@ import static org.springframework.http.MediaType.TEXT_PLAIN;
 import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 
 /**
- * Unit tests for {@link ContentNegotiatingResultHandlerSupport}.
+ * Unit tests for {@link AbstractHandlerResultHandler}.
  * @author Rossen Stoyanchev
  */
-public class ContentNegotiatingResultHandlerSupportTests {
+public class HandlerResultHandlerTests {
 
 	private TestResultHandler resultHandler;
 
@@ -117,7 +117,7 @@ public class ContentNegotiatingResultHandlerSupportTests {
 
 
 	@SuppressWarnings("WeakerAccess")
-	private static class TestResultHandler extends ContentNegotiatingResultHandlerSupport {
+	private static class TestResultHandler extends AbstractHandlerResultHandler {
 
 		protected TestResultHandler() {
 			this(new HeaderContentTypeResolver());

@@ -23,10 +23,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.ServerWebExchange;
@@ -38,7 +41,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public abstract class ContentNegotiatingResultHandlerSupport implements Ordered {
+public abstract class AbstractHandlerResultHandler implements Ordered {
 
 	private static final MediaType MEDIA_TYPE_APPLICATION_ALL = new MediaType("application");
 
@@ -50,11 +53,11 @@ public abstract class ContentNegotiatingResultHandlerSupport implements Ordered 
 	private int order = LOWEST_PRECEDENCE;
 
 
-	protected ContentNegotiatingResultHandlerSupport(RequestedContentTypeResolver contentTypeResolver) {
+	protected AbstractHandlerResultHandler(RequestedContentTypeResolver contentTypeResolver) {
 		this(contentTypeResolver, new ReactiveAdapterRegistry());
 	}
 
-	protected ContentNegotiatingResultHandlerSupport(RequestedContentTypeResolver contentTypeResolver,
+	protected AbstractHandlerResultHandler(RequestedContentTypeResolver contentTypeResolver,
 			ReactiveAdapterRegistry adapterRegistry) {
 
 		Assert.notNull(contentTypeResolver, "'contentTypeResolver' is required.");
@@ -149,6 +152,19 @@ public abstract class ContentNegotiatingResultHandlerSupport implements Ordered 
 		producible = producible.copyQualityValue(acceptable);
 		Comparator<MediaType> comparator = MediaType.SPECIFICITY_COMPARATOR;
 		return (comparator.compare(acceptable, producible) <= 0 ? acceptable : producible);
+	}
+
+	/**
+	 * Optionally set the response status using the information provided by {@code @ResponseStatus}.
+	 * @param methodParameter the controller method return parameter
+	 * @param exchange the server exchange being handled
+	 */
+	protected void updateResponseStatus(MethodParameter methodParameter, ServerWebExchange exchange) {
+		ResponseStatus annotation = methodParameter.getMethodAnnotation(ResponseStatus.class);
+		if (annotation != null) {
+			annotation = AnnotationUtils.synthesizeAnnotation(annotation, methodParameter.getMethod());
+			exchange.getResponse().setStatusCode(annotation.code());
+		}
 	}
 
 }

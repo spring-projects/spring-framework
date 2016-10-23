@@ -33,7 +33,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
-import org.springframework.web.reactive.result.ContentNegotiatingResultHandlerSupport;
+import org.springframework.web.reactive.result.AbstractHandlerResultHandler;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -44,7 +44,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public abstract class AbstractMessageWriterResultHandler extends ContentNegotiatingResultHandlerSupport {
+public abstract class AbstractMessageWriterResultHandler extends AbstractHandlerResultHandler {
 
 	private final List<HttpMessageWriter<?>> messageWriters;
 
@@ -110,7 +110,8 @@ public abstract class AbstractMessageWriterResultHandler extends ContentNegotiat
 		}
 
 		if (void.class == elementType.getRawClass() || Void.class == elementType.getRawClass()) {
-			return Mono.from((Publisher<Void>) publisher);
+			return Mono.from((Publisher<Void>) publisher)
+					.doOnSubscribe(sub -> updateResponseStatus(bodyParameter, exchange));
 		}
 
 		List<MediaType> producibleTypes = getProducibleMediaTypes(elementType);
@@ -125,11 +126,12 @@ public abstract class AbstractMessageWriterResultHandler extends ContentNegotiat
 		if (bestMediaType != null) {
 			for (HttpMessageWriter<?> messageWriter : getMessageWriters()) {
 				if (messageWriter.canWrite(elementType, bestMediaType)) {
-					return (messageWriter instanceof ServerHttpMessageWriter ?
-							((ServerHttpMessageWriter<?>)messageWriter).write((Publisher) publisher,
+					Mono<Void> bodyWriter = (messageWriter instanceof ServerHttpMessageWriter ?
+							((ServerHttpMessageWriter<?>) messageWriter).write((Publisher) publisher,
 									bodyType, elementType, bestMediaType, request, response, Collections.emptyMap()) :
 							messageWriter.write((Publisher) publisher, elementType,
 									bestMediaType, response, Collections.emptyMap()));
+					return bodyWriter.doOnSubscribe(sub -> updateResponseStatus(bodyParameter, exchange));
 				}
 			}
 		}
