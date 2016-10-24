@@ -27,20 +27,26 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 
 /**
- * Wraps another {@link ServerWebExchange} and delegates all methods to it.
- * Sub-classes can override specific methods, e.g. {@link #getPrincipal()} to
- * return the authenticated user for the request.
+ * A convenient base class for classes that need to wrap another
+ * {@link ServerWebExchange}. Pre-implements all methods by delegating to the
+ * wrapped instance.
+ *
+ * <p>Note that if the purpose for wrapping is simply to override specific
+ * properties, e.g. {@link #getPrincipal()}, consider using
+ * {@link ServerWebExchange#mutate()} instead.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ *
+ * @see ServerWebExchange#mutate()
  */
 public class ServerWebExchangeDecorator implements ServerWebExchange {
 
 	private final ServerWebExchange delegate;
 
 
-	public ServerWebExchangeDecorator(ServerWebExchange delegate) {
-		Assert.notNull(delegate, "'delegate' is required.");
+	protected ServerWebExchangeDecorator(ServerWebExchange delegate) {
+		Assert.notNull(delegate, "ServerWebExchange 'delegate' is required.");
 		this.delegate = delegate;
 	}
 
