@@ -127,7 +127,8 @@ public class ModelAndView {
 	 * @param model Map of model names (Strings) to model objects
 	 * (Objects). Model entries may not be {@code null}, but the
 	 * model Map may be {@code null} if there is no model data.
-	 * @param status an alternative status code to use for the response.
+	 * @param status an alternative status code to use for the response;
+	 * The response status is set just prior to View rendering.
 	 * @since 4.3
 	 */
 	public ModelAndView(String viewName, Map<String, ?> model, HttpStatus status) {
@@ -240,6 +241,7 @@ public class ModelAndView {
 
 	/**
 	 * Set the HTTP status to use for the response.
+	 * <p>The response status is set just prior to View rendering.
 	 * @since 4.3
 	 */
 	public void setStatus(HttpStatus status) {
