@@ -136,7 +136,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	 * Return the required type of the missing bean, if it was a lookup <em>by type</em> that failed.
 	 */
 	public Class<?> getBeanType() {
-		return this.beanResolvableType.getRawClass();
+		return (this.beanResolvableType != null ? this.beanResolvableType.getRawClass() : null);
 	}
 
 	/**
