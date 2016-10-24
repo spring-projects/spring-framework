@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.web.bind.MissingServletRequestHeaderException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -77,9 +78,8 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 	}
 
 	@Override
-	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
-		throw new ServletRequestBindingException("Missing request header '" + name +
-				"' for method parameter of type " + parameter.getNestedParameterType().getSimpleName());
+	protected void handleMissingValue(String name, MethodParameter parameter) throws MissingServletRequestHeaderException{
+		throw new MissingServletRequestHeaderException(name, parameter.getNestedParameterType().getTypeName());
 	}
 
 
