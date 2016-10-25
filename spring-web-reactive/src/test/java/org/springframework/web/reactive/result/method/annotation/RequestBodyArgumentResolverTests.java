@@ -22,12 +22,12 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
+import io.reactivex.Maybe;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.subscriber.ScriptedSubscriber;
-import rx.Completable;
 import rx.Observable;
 import rx.RxReactiveStreams;
 import rx.Single;
@@ -163,6 +163,21 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 	@Test
+	public void emptyBodyWithMaybe() throws Exception {
+		ResolvableType type = forClassWithGenerics(Maybe.class, String.class);
+
+		Maybe<String> maybe = resolveValueWithEmptyBody(type, true);
+		ScriptedSubscriber.<String>create().expectNextCount(0)
+				.expectError(ServerWebInputException.class)
+				.verify(maybe.toFlowable());
+
+		maybe = resolveValueWithEmptyBody(type, false);
+		ScriptedSubscriber.<String>create().expectNextCount(0)
+				.expectComplete()
+				.verify(maybe.toFlowable());
+	}
+
+	@Test
 	public void emptyBodyWithObservable() throws Exception {
 		ResolvableType type = forClassWithGenerics(Observable.class, String.class);
 
@@ -239,6 +254,7 @@ public class RequestBodyArgumentResolverTests {
 			@RequestBody Flux<String> flux,
 			@RequestBody Single<String> single,
 			@RequestBody io.reactivex.Single<String> rxJava2Single,
+			@RequestBody Maybe<String> rxJava2Maybe,
 			@RequestBody Observable<String> obs,
 			@RequestBody io.reactivex.Observable<String> rxjava2Obs,
 			@RequestBody CompletableFuture<String> future,
@@ -247,6 +263,7 @@ public class RequestBodyArgumentResolverTests {
 			@RequestBody(required = false) Flux<String> fluxNotRequired,
 			@RequestBody(required = false) Single<String> singleNotRequired,
 			@RequestBody(required = false) io.reactivex.Single<String> rxJava2SingleNotRequired,
+			@RequestBody(required = false) Maybe<String> rxJava2MaybeNotRequired,
 			@RequestBody(required = false) Observable<String> obsNotRequired,
 			@RequestBody(required = false) io.reactivex.Observable<String> rxjava2ObsNotRequired,
 			@RequestBody(required = false) CompletableFuture<String> futureNotRequired,

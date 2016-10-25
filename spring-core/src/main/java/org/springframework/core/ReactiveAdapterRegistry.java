@@ -25,6 +25,7 @@ import java.util.function.Predicate;
 
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -43,6 +44,7 @@ import org.springframework.util.ClassUtils;
  * registered via {@link #registerFluxAdapter} and {@link #registerMonoAdapter}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public class ReactiveAdapterRegistry {
@@ -295,6 +297,11 @@ public class ReactiveAdapterRegistry {
 					source -> Mono.from(((io.reactivex.Single<?>) source).toFlowable()),
 					source -> Flowable.fromPublisher(source).toObservable().singleElement().toSingle(),
 					new ReactiveAdapter.Descriptor(false, false, false)
+			);
+			registry.registerMonoAdapter(Maybe.class,
+					source -> Mono.from(((Maybe<?>) source).toFlowable()),
+					source -> Flowable.fromPublisher(source).toObservable().singleElement(),
+					new ReactiveAdapter.Descriptor(false, true, false)
 			);
 			registry.registerMonoAdapter(io.reactivex.Completable.class,
 					source -> Mono.from(((io.reactivex.Completable) source).toFlowable()),

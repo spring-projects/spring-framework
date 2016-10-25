@@ -24,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
 
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -98,6 +99,7 @@ public class HttpEntityArgumentResolverTests {
 		testSupports(httpEntityType(forClassWithGenerics(Mono.class, String.class)));
 		testSupports(httpEntityType(forClassWithGenerics(Single.class, String.class)));
 		testSupports(httpEntityType(forClassWithGenerics(io.reactivex.Single.class, String.class)));
+		testSupports(httpEntityType(forClassWithGenerics(Maybe.class, String.class)));
 		testSupports(httpEntityType(forClassWithGenerics(CompletableFuture.class, String.class)));
 		testSupports(httpEntityType(forClassWithGenerics(Flux.class, String.class)));
 		testSupports(httpEntityType(forClassWithGenerics(Observable.class, String.class)));
@@ -158,6 +160,17 @@ public class HttpEntityArgumentResolverTests {
 		ScriptedSubscriber
 				.create().expectNextCount(0)
 				.expectError(ServerWebInputException.class)
+				.verify(entity.getBody().toFlowable());
+	}
+
+	@Test
+	public void emptyBodyWithRxJava2Maybe() throws Exception {
+		ResolvableType type = httpEntityType(forClassWithGenerics(Maybe.class, String.class));
+		HttpEntity<Maybe<String>> entity = resolveValueWithEmptyBody(type);
+
+		ScriptedSubscriber
+				.create().expectNextCount(0)
+				.expectComplete()
 				.verify(entity.getBody().toFlowable());
 	}
 
@@ -239,6 +252,16 @@ public class HttpEntityArgumentResolverTests {
 		String body = "line1";
 		ResolvableType type = httpEntityType(forClassWithGenerics(io.reactivex.Single.class, String.class));
 		HttpEntity<io.reactivex.Single<String>> httpEntity = resolveValue(type, body);
+
+		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
+		assertEquals("line1", httpEntity.getBody().blockingGet());
+	}
+
+	@Test
+	public void httpEntityWithRxJava2MaybeBody() throws Exception {
+		String body = "line1";
+		ResolvableType type = httpEntityType(forClassWithGenerics(Maybe.class, String.class));
+		HttpEntity<Maybe<String>> httpEntity = resolveValue(type, body);
 
 		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
 		assertEquals("line1", httpEntity.getBody().blockingGet());
@@ -337,7 +360,8 @@ public class HttpEntityArgumentResolverTests {
 			HttpEntity<Mono<String>> monoBody,
 			HttpEntity<Flux<String>> fluxBody,
 			HttpEntity<Single<String>> singleBody,
-			HttpEntity<io.reactivex.Single<String>> xJava2SingleBody,
+			HttpEntity<io.reactivex.Single<String>> rxJava2SingleBody,
+			HttpEntity<Maybe<String>> rxJava2MaybeBody,
 			HttpEntity<Observable<String>> observableBody,
 			HttpEntity<io.reactivex.Observable<String>> rxJava2ObservableBody,
 			HttpEntity<Flowable<String>> flowableBody,

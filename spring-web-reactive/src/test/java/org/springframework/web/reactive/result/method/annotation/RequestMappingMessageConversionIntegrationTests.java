@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -215,6 +216,13 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	public void personTransformWithRxJava2Single() throws Exception {
 		assertEquals(new Person("ROBERT"),
 				performPost("/person-transform/rxjava2-single", JSON, new Person("Robert"),
+						JSON, Person.class).getBody());
+	}
+
+	@Test
+	public void personTransformWithRxJava2Maybe() throws Exception {
+		assertEquals(new Person("ROBERT"),
+				performPost("/person-transform/rxjava2-maybe", JSON, new Person("Robert"),
 						JSON, Person.class).getBody());
 	}
 
@@ -506,6 +514,11 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 
 		@PostMapping("/rxjava2-single")
 		public io.reactivex.Single<Person> transformRxJava2Single(@RequestBody io.reactivex.Single<Person> personFuture) {
+			return personFuture.map(person -> new Person(person.getName().toUpperCase()));
+		}
+
+		@PostMapping("/rxjava2-maybe")
+		public Maybe<Person> transformRxJava2Maybe(@RequestBody Maybe<Person> personFuture) {
 			return personFuture.map(person -> new Person(person.getName().toUpperCase()));
 		}
 

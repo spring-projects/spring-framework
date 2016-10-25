@@ -29,6 +29,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -157,6 +158,16 @@ public class MessageReaderArgumentResolverTests {
 		io.reactivex.Single<TestBean> single = resolveValue(param, body);
 
 		assertEquals(new TestBean("f1", "b1"), single.blockingGet());
+	}
+
+	@Test
+	public void rxJava2MaybeTestBean() throws Exception {
+		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
+		ResolvableType type = forClassWithGenerics(Maybe.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		Maybe<TestBean> maybe = resolveValue(param, body);
+
+		assertEquals(new TestBean("f1", "b1"), maybe.blockingGet());
 	}
 
 	@Test
@@ -316,6 +327,7 @@ public class MessageReaderArgumentResolverTests {
 			@Validated Flux<TestBean> fluxTestBean,
 			Single<TestBean> singleTestBean,
 			io.reactivex.Single<TestBean> rxJava2SingleTestBean,
+			Maybe<TestBean> rxJava2MaybeTestBean,
 			Observable<TestBean> observableTestBean,
 			io.reactivex.Observable<TestBean> rxJava2ObservableTestBean,
 			Flowable<TestBean> flowableTestBean,
