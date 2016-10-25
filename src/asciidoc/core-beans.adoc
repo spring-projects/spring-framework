@@ -8281,8 +8281,8 @@ event is equal to `foo`:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@EventListener(condition = "#event.test == 'foo'")
-	public void processBlackListEvent(BlackListEvent event) {
+	@EventListener(condition = "#blEvent.test == 'foo'")
+	public void processBlackListEvent(BlackListEvent blEvent) {
 		// notify appropriate parties via notificationAddress...
 	}
 ----
@@ -8295,22 +8295,22 @@ available to the context so one can use them for conditional event processing:
 |===
 | Name| Location| Description| Example
 
-| event
+| Event
 | root object
 | The actual `ApplicationEvent`
 | `#root.event`
 
-| args
+| Arguments array
 | root object
 | The arguments (as array) used for invoking the target
 | `#root.args[0]`
 
-| __argument name__
+| __Argument name__
 | evaluation context
 | Name of any of the method arguments. If for some reason the names are not available
   (e.g. no debug information), the argument names are also available under the `#a<#arg>`
   where __#arg__ stands for the argument index (starting from 0).
-| `#iban` or `#a0` (one can also use `#p0` or `#p<#arg>` notation as an alias).
+| `#blEvent` or `#a0` (one can also use `#p0` or `#p<#arg>` notation as an alias).
 |===
 
 Note that `#root.event` allows you to access to the underlying event, even if your method
