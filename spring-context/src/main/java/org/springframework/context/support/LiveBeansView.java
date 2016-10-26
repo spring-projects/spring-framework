@@ -44,6 +44,7 @@ import org.springframework.util.StringUtils;
  * Spring Tool Suite 3.1 and higher.
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.2
  * @see #getSnapshotAsJson()
  * @see org.springframework.web.context.support.LiveBeansViewServlet
@@ -57,6 +58,7 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 	private static final Set<ConfigurableApplicationContext> applicationContexts =
 			new LinkedHashSet<>();
 
+	private static String applicationName;
 
 	static void registerApplicationContext(ConfigurableApplicationContext applicationContext) {
 		String mbeanDomain = applicationContext.getEnvironment().getProperty(MBEAN_DOMAIN_PROPERTY_NAME);
@@ -65,8 +67,9 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 				if (applicationContexts.isEmpty()) {
 					try {
 						MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+						applicationName = applicationContext.getApplicationName();
 						server.registerMBean(new LiveBeansView(),
-								new ObjectName(mbeanDomain, MBEAN_APPLICATION_KEY, applicationContext.getApplicationName()));
+								new ObjectName(mbeanDomain, MBEAN_APPLICATION_KEY, applicationName));
 					}
 					catch (Exception ex) {
 						throw new ApplicationContextException("Failed to register LiveBeansView MBean", ex);
@@ -83,10 +86,12 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 				try {
 					MBeanServer server = ManagementFactory.getPlatformMBeanServer();
 					String mbeanDomain = applicationContext.getEnvironment().getProperty(MBEAN_DOMAIN_PROPERTY_NAME);
-					server.unregisterMBean(new ObjectName(mbeanDomain, MBEAN_APPLICATION_KEY, applicationContext.getApplicationName()));
+					server.unregisterMBean(new ObjectName(mbeanDomain, MBEAN_APPLICATION_KEY, applicationName));
 				}
 				catch (Exception ex) {
 					throw new ApplicationContextException("Failed to unregister LiveBeansView MBean", ex);
+				} finally {
+					applicationName = null;
 				}
 			}
 		}
