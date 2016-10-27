@@ -424,9 +424,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	}
 
 	private Object wrapCacheValue(Method method, Object cacheValue) {
-		if (method.getReturnType() == Optional.class &&
-				(cacheValue == null || cacheValue.getClass() != Optional.class)) {
-			return Optional.ofNullable(cacheValue);
+		if (method.getReturnType() == javaUtilOptionalClass &&
+				(cacheValue == null || cacheValue.getClass() != javaUtilOptionalClass)) {
+			return OptionalUnwrapper.wrap(cacheValue);
 		}
 		return cacheValue;
 	}
