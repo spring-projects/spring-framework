@@ -4503,8 +4503,8 @@ limit is 1000.
 
 In addition to the primitive values in the value list, you can create a `java.util.List`
 of object arrays. This list would support multiple expressions defined for the `in`
-clause such as `select * from T_ACTOR where (id, last_name) in ((1, 'Johnson'), (2,
-'Harrop'))`. This of course requires that your database supports this syntax.
+clause such as `select * from T_ACTOR where (id, last_name) in \((1, 'Johnson'), (2,
+'Harrop'\))`. This of course requires that your database supports this syntax.
 
 
 
