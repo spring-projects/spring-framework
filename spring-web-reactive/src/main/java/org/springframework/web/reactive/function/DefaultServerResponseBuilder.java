@@ -21,7 +21,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -60,9 +59,11 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	private final HttpHeaders headers = new HttpHeaders();
 
+
 	public DefaultServerResponseBuilder(int statusCode) {
 		this.statusCode = statusCode;
 	}
+
 
 	@Override
 	public ServerResponse.BodyBuilder header(String headerName, String... headerValues) {
@@ -152,7 +153,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	public <T extends Publisher<Void>> ServerResponse<T> build(T voidPublisher) {
 		Assert.notNull(voidPublisher, "'voidPublisher' must not be null");
 		return body(BodyInserter.of(
-				(response, context) -> Flux.from(voidPublisher).then(response.setComplete()),
+				(response, context) -> Flux.from(voidPublisher).thenEmpty(response.setComplete()),
 				() -> null));
 	}
 
@@ -173,21 +174,6 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		return render(name, toModelMap(modelAttributes));
 	}
 
-	private static Map<String, Object> toModelMap(Object[] modelAttributes) {
-		if (!ObjectUtils.isEmpty(modelAttributes)) {
-			return Arrays.stream(modelAttributes)
-					.filter(o -> !isEmptyCollection(o))
-					.collect(Collectors.toMap(Conventions::getVariableName, o -> o));
-		}
-		else {
-			return null;
-		}
-	}
-
-	private static boolean isEmptyCollection(Object o) {
-		return o instanceof Collection && ((Collection<?>) o).isEmpty();
-	}
-
 	@Override
 	public ServerResponse<Rendering> render(String name, Map<String, ?> model) {
 		Assert.hasLength(name, "'name' must not be empty");
@@ -198,13 +184,21 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		return new RenderingServerResponse(this.statusCode, this.headers, name, modelMap);
 	}
 
+	private Map<String, Object> toModelMap(Object[] modelAttributes) {
+		if (ObjectUtils.isEmpty(modelAttributes)) {
+			return null;
+		}
+		return Arrays.stream(modelAttributes)
+				.filter(val -> !ObjectUtils.isEmpty(val))
+				.collect(Collectors.toMap(Conventions::getVariableName, val -> val));
+	}
+
 
 	private static abstract class AbstractServerResponse<T> implements ServerResponse<T> {
 
 		private final int statusCode;
 
 		private final HttpHeaders headers;
-
 
 		protected AbstractServerResponse(int statusCode, HttpHeaders headers) {
 			this.statusCode = statusCode;
@@ -234,10 +228,10 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 	}
 
+
 	private static final class BodyInserterServerResponse<T> extends AbstractServerResponse<T> {
 
 		private final BodyInserter<T, ? super ServerHttpResponse> inserter;
-
 
 		public BodyInserterServerResponse(int statusCode, HttpHeaders headers,
 				BodyInserter<T, ? super ServerHttpResponse> inserter) {
@@ -262,7 +256,6 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				}
 			});
 		}
-
 	}
 
 
@@ -274,8 +267,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		private final Rendering rendering;
 
-		public RenderingServerResponse(int statusCode, HttpHeaders headers, String name,
-				Map<String, Object> model) {
+		public RenderingServerResponse(int statusCode, HttpHeaders headers, String name, Map<String, Object> model) {
 			super(statusCode, headers);
 			this.name = name;
 			this.model = model;
@@ -314,9 +306,6 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				return model;
 			}
 		}
-
-
 	}
-
 
 }
