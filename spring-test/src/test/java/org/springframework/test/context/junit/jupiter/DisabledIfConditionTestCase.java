@@ -76,11 +76,26 @@ class DisabledIfConditionTestCase {
 
 	@Test
 	void invalidExpressionEvaluationType() {
+		String methodName = "nonBooleanOrStringExpression";
 		IllegalStateException exception = expectThrows(IllegalStateException.class,
-			() -> condition.evaluate(buildExtensionContext("nonBooleanOrStringExpression")));
+			() -> condition.evaluate(buildExtensionContext(methodName)));
+
+		Method method = ReflectionUtils.findMethod(getClass(), methodName);
 
 		assertThat(exception.getMessage(),
-			is(equalTo("@DisabledIf(\"#{6 * 7}\") must evaluate to a String or a Boolean, not java.lang.Integer")));
+			is(equalTo("@DisabledIf(\"#{6 * 7}\") on " + method + " must evaluate to a String or a Boolean, not java.lang.Integer")));
+	}
+
+	@Test
+	void unsupportedStringEvaluationValue() {
+		String methodName = "stringExpressionThatIsNeitherTrueNorFalse";
+		IllegalStateException exception = expectThrows(IllegalStateException.class,
+			() -> condition.evaluate(buildExtensionContext(methodName)));
+
+		Method method = ReflectionUtils.findMethod(getClass(), methodName);
+
+		assertThat(exception.getMessage(),
+			is(equalTo("@DisabledIf(\"#{'enigma'}\") on " + method + " must evaluate to \"true\" or \"false\", not \"enigma\"")));
 	}
 
 	@Test
@@ -149,6 +164,10 @@ class DisabledIfConditionTestCase {
 
 	@DisabledIf("#{6 * 7}")
 	private void nonBooleanOrStringExpression() {
+	}
+
+	@DisabledIf("#{'enigma'}")
+	private void stringExpressionThatIsNeitherTrueNorFalse() {
 	}
 
 	@DisabledIf(expression = "#{6 * 7 == 42}", reason = "Because... 42!")

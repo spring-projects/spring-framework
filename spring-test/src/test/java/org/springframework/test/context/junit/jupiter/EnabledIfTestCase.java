@@ -18,6 +18,7 @@ package org.springframework.test.context.junit.jupiter;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestPropertySource;
@@ -64,13 +65,19 @@ class EnabledIfTestCase {
 		}
 
 		@Test
-		@EnabledIf("${foo}")
+		@EnabledIf("${__EnigmaPropertyShouldNotExist__:false}")
+		void enabledIfWithPropertyPlaceholderForNonexistentPropertyWithDefaultValue() {
+			fail("This test must be disabled");
+		}
+
+		@Test
+		@EnabledIf(expression = "${foo}", loadContext = true)
 		void enabledIfWithPropertyPlaceholder() {
 			fail("This test must be disabled");
 		}
 
 		@Test
-		@EnabledIf("\t${foo}   ")
+		@EnabledIf(expression = "\t${foo}   ", loadContext = true)
 		void enabledIfWithPropertyPlaceholderWithSurroundingWhitespace() {
 			fail("This test must be disabled");
 		}
@@ -108,13 +115,13 @@ class EnabledIfTestCase {
 		}
 
 		@Test
-		@EnabledIf("#{@booleanFalseBean}")
+		@EnabledIf(expression = "#{@booleanFalseBean}", loadContext = true)
 		void enabledIfWithSpelBooleanFalseBean() {
 			fail("This test must be disabled");
 		}
 
 		@Test
-		@EnabledIf("#{@stringFalseBean}")
+		@EnabledIf(expression = "#{@stringFalseBean}", loadContext = true)
 		void enabledIfWithSpelStringFalseBean() {
 			fail("This test must be disabled");
 		}

@@ -34,6 +34,7 @@ import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -75,6 +76,8 @@ abstract class AbstractExpressionEvaluatingCondition implements ContainerExecuti
 	 * the annotation
 	 * @param reasonExtractor a function that extracts the reason from the
 	 * annotation
+	 * @param loadContextExtractor a function that extracts the {@code loadContext}
+	 * flag from the annotation
 	 * @param enabledOnTrue indicates whether the returned {@code ConditionEvaluationResult}
 	 * should be {@link ConditionEvaluationResult#enabled enabled} if the expression
 	 * evaluates to {@code true}
@@ -83,8 +86,8 @@ abstract class AbstractExpressionEvaluatingCondition implements ContainerExecuti
 	 * or test should be enabled; otherwise {@link ConditionEvaluationResult#disabled disabled}
 	 */
 	protected <A extends Annotation> ConditionEvaluationResult evaluateAnnotation(Class<A> annotationType,
-			Function<A, String> expressionExtractor, Function<A, String> reasonExtractor, boolean enabledOnTrue,
-			ExtensionContext context) {
+			Function<A, String> expressionExtractor, Function<A, String> reasonExtractor,
+			Function<A, Boolean> loadContextExtractor, boolean enabledOnTrue, ExtensionContext context) {
 
 		AnnotatedElement element = context.getElement().get();
 		Optional<A> annotation = findMergedAnnotation(element, annotationType);
@@ -104,7 +107,8 @@ abstract class AbstractExpressionEvaluatingCondition implements ContainerExecuti
 						"The expression in @%s on [%s] must not be blank", annotationType.getSimpleName(), element)));
 		// @formatter:on
 
-		boolean evaluatedToTrue = evaluateExpression(expression, annotationType, context);
+		boolean loadContext = annotation.map(loadContextExtractor).get();
+		boolean evaluatedToTrue = evaluateExpression(expression, loadContext, annotationType, context);
 
 		if (evaluatedToTrue) {
 			String adjective = (enabledOnTrue ? "enabled" : "disabled");
@@ -129,17 +133,27 @@ abstract class AbstractExpressionEvaluatingCondition implements ContainerExecuti
 		}
 	}
 
-	private <A extends Annotation> boolean evaluateExpression(String expression, Class<A> annotationType,
-			ExtensionContext extensionContext) {
+	private <A extends Annotation> boolean evaluateExpression(String expression, boolean loadContext,
+			Class<A> annotationType, ExtensionContext extensionContext) {
 
-		ApplicationContext applicationContext = SpringExtension.getApplicationContext(extensionContext);
+		AnnotatedElement element = extensionContext.getElement().get();
+		GenericApplicationContext gac = null;
+		ApplicationContext applicationContext;
+
+		if (loadContext) {
+			applicationContext = SpringExtension.getApplicationContext(extensionContext);
+		} else {
+			gac = new GenericApplicationContext();
+			gac.refresh();
+			applicationContext = gac;
+		}
 
 		if (!(applicationContext instanceof ConfigurableApplicationContext)) {
 			if (logger.isWarnEnabled()) {
 				String contextType = (applicationContext != null ? applicationContext.getClass().getName() : "null");
 				logger.warn(String.format("@%s(\"%s\") could not be evaluated on [%s] since the test " +
 						"ApplicationContext [%s] is not a ConfigurableApplicationContext",
-						annotationType.getSimpleName(), expression, extensionContext.getElement(), contextType));
+						annotationType.getSimpleName(), expression, element, contextType));
 			}
 			return false;
 		}
@@ -151,12 +165,29 @@ abstract class AbstractExpressionEvaluatingCondition implements ContainerExecuti
 		Object result = expressionResolver.evaluate(configurableBeanFactory.resolveEmbeddedValue(expression),
 			beanExpressionContext);
 
-		Assert.state((result instanceof Boolean || result instanceof String),
-			() -> String.format("@%s(\"%s\") must evaluate to a String or a Boolean, not %s",
-				annotationType.getSimpleName(), expression, (result != null ? result.getClass().getName() : "null")));
+		if (gac != null) {
+			gac.close();
+		}
 
-		return (result instanceof Boolean && ((Boolean) result).booleanValue())
-				|| (result instanceof String && Boolean.parseBoolean((String) result));
+		if (result instanceof Boolean) {
+			return ((Boolean) result).booleanValue();
+		}
+		else if (result instanceof String) {
+			String str = ((String) result).trim().toLowerCase();
+			if ("true".equals(str)) {
+				return true;
+			}
+			Assert.state("false".equals(str),
+				() -> String.format("@%s(\"%s\") on %s must evaluate to \"true\" or \"false\", not \"%s\"",
+					annotationType.getSimpleName(), expression, element, result));
+			return false;
+		}
+		else {
+			String message = String.format("@%s(\"%s\") on %s must evaluate to a String or a Boolean, not %s",
+					annotationType.getSimpleName(), expression, element,
+					(result != null ? result.getClass().getName() : "null"));
+			throw new IllegalStateException(message);
+		}
 	}
 
 	private static <A extends Annotation> Optional<A> findMergedAnnotation(AnnotatedElement element,

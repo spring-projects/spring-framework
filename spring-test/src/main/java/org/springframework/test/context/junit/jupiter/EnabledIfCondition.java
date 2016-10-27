@@ -60,7 +60,8 @@ public class EnabledIfCondition extends AbstractExpressionEvaluatingCondition {
 	}
 
 	private ConditionEvaluationResult evaluateEnabledIf(ExtensionContext context) {
-		return evaluateAnnotation(EnabledIf.class, EnabledIf::expression, EnabledIf::reason, true, context);
+		return evaluateAnnotation(EnabledIf.class, EnabledIf::expression, EnabledIf::reason,
+			EnabledIf::loadContext, true, context);
 	}
 
 }

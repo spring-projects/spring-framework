@@ -23,7 +23,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Integration tests which verify support for {@link DisabledIf @DisabledIf}
@@ -63,13 +64,19 @@ class DisabledIfTestCase {
 		}
 
 		@Test
-		@DisabledIf("${foo}")
+		@DisabledIf("${__EnigmaPropertyShouldNotExist__:true}")
+		void disabledIfWithPropertyPlaceholderForNonexistentPropertyWithDefaultValue() {
+			fail("This test must be disabled");
+		}
+
+		@Test
+		@DisabledIf(expression = "${foo}", loadContext = true)
 		void disabledIfWithPropertyPlaceholder() {
 			fail("This test must be disabled");
 		}
 
 		@Test
-		@DisabledIf("\t${foo}   ")
+		@DisabledIf(expression = "\t${foo}   ", loadContext = true)
 		void disabledIfWithPropertyPlaceholderWithSurroundingWhitespace() {
 			fail("This test must be disabled");
 		}
@@ -105,13 +112,13 @@ class DisabledIfTestCase {
 		}
 
 		@Test
-		@DisabledIf("#{@booleanTrueBean}")
+		@DisabledIf(expression = "#{@booleanTrueBean}", loadContext = true)
 		void disabledIfWithSpelBooleanTrueBean() {
 			fail("This test must be disabled");
 		}
 
 		@Test
-		@DisabledIf("#{@stringTrueBean}")
+		@DisabledIf(expression = "#{@stringTrueBean}", loadContext = true)
 		void disabledIfWithSpelStringTrueBean() {
 			fail("This test must be disabled");
 		}

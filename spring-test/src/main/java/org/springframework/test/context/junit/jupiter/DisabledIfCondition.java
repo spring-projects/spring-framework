@@ -61,7 +61,8 @@ public class DisabledIfCondition extends AbstractExpressionEvaluatingCondition {
 	}
 
 	private ConditionEvaluationResult evaluateDisabledIf(ExtensionContext context) {
-		return evaluateAnnotation(DisabledIf.class, DisabledIf::expression, DisabledIf::reason, false, context);
+		return evaluateAnnotation(DisabledIf.class, DisabledIf::expression, DisabledIf::reason,
+			DisabledIf::loadContext, false, context);
 	}
 
 }
