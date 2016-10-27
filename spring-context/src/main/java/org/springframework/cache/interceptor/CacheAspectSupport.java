@@ -40,7 +40,6 @@ import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.util.Assert;
@@ -340,12 +339,12 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				Object key = generateKey(context, CacheOperationExpressionEvaluator.NO_RESULT);
 				Cache cache = context.getCaches().iterator().next();
 				try {
-					return cache.get(key, new Callable<Object>() {
+					return wrapCacheValue(method, cache.get(key, new Callable<Object>() {
 						@Override
 						public Object call() throws Exception {
-							return invokeOperation(invoker);
+							return unwrapReturnValue(invokeOperation(invoker));
 						}
-					});
+					}));
 				}
 				catch (Cache.ValueRetrievalException ex) {
 					// The invoker wraps any Throwable in a ThrowableWrapper instance so we
@@ -380,18 +379,12 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		if (cacheHit != null && cachePutRequests.isEmpty() && !hasCachePut(contexts)) {
 			// If there are no put requests, just use the cache hit
 			cacheValue = cacheHit.get();
-			if (method.getReturnType() == Optional.class &&
-					(cacheValue == null || cacheValue.getClass() != Optional.class)) {
-				returnValue = Optional.ofNullable(cacheValue);
-			}
-			else {
-				returnValue = cacheValue;
-			}
+			returnValue = wrapCacheValue(method, cacheValue);
 		}
 		else {
 			// Invoke the method if we don't have a cache hit
 			returnValue = invokeOperation(invoker);
-			cacheValue = ObjectUtils.unwrapOptional(returnValue);
+			cacheValue = unwrapReturnValue(returnValue);
 		}
 
 		// Collect any explicit @CachePuts
@@ -406,6 +399,18 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		processCacheEvicts(contexts.get(CacheEvictOperation.class), false, cacheValue);
 
 		return returnValue;
+	}
+
+	private Object wrapCacheValue(Method method, Object cacheValue) {
+		if (method.getReturnType() == Optional.class &&
+				(cacheValue == null || cacheValue.getClass() != Optional.class)) {
+			return Optional.ofNullable(cacheValue);
+		}
+		return cacheValue;
+	}
+
+	private Object unwrapReturnValue(Object returnValue) {
+		return ObjectUtils.unwrapOptional(returnValue);
 	}
 
 	private boolean hasCachePut(CacheOperationContexts contexts) {
