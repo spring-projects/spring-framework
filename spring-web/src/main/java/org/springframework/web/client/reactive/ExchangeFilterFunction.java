@@ -16,6 +16,8 @@
 
 package org.springframework.web.client.reactive;
 
+import java.util.function.Function;
+
 import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
@@ -64,6 +66,32 @@ public interface ExchangeFilterFunction {
 	default ExchangeFunction apply(ExchangeFunction exchange) {
 		Assert.notNull(exchange, "'exchange' must not be null");
 		return request -> this.filter(request, exchange);
+	}
+
+	/**
+	 * Adapt the given request processor function to a filter function that only operates on the
+	 * {@code ClientRequest}.
+	 * @param requestProcessor the request processor
+	 * @return the filter adaptation of the request processor
+	 */
+	static ExchangeFilterFunction ofRequestProcessor(Function<ClientRequest<?>,
+			Mono<ClientRequest<?>>> requestProcessor) {
+
+		Assert.notNull(requestProcessor, "'requestProcessor' must not be null");
+		return (request, next) -> requestProcessor.apply(request).then(next::exchange);
+	}
+
+	/**
+	 * Adapt the given response processor function to a filter function that only operates on the
+	 * {@code ClientResponse}.
+	 * @param responseProcessor the response processor
+	 * @return the filter adaptation of the request processor
+	 */
+	static ExchangeFilterFunction ofResponseProcessor(Function<ClientResponse,
+			Mono<ClientResponse>> responseProcessor) {
+
+		Assert.notNull(responseProcessor, "'responseProcessor' must not be null");
+		return (request, next) -> next.exchange(request).then(responseProcessor);
 	}
 
 }
