@@ -485,7 +485,8 @@ public abstract class AnnotationUtils {
 	 * @since 4.2
 	 */
 	@SuppressWarnings("unchecked")
-	private static <A extends Annotation> A findAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType, Set<Annotation> visited) {
+	private static <A extends Annotation> A findAnnotation(
+			AnnotatedElement annotatedElement, Class<A> annotationType, Set<Annotation> visited) {
 		try {
 			Annotation[] anns = annotatedElement.getDeclaredAnnotations();
 			for (Annotation ann : anns) {

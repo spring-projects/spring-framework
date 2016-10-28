@@ -71,7 +71,7 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 						server.registerMBean(new LiveBeansView(),
 								new ObjectName(mbeanDomain, MBEAN_APPLICATION_KEY, applicationName));
 					}
-					catch (Exception ex) {
+					catch (Throwable ex) {
 						throw new ApplicationContextException("Failed to register LiveBeansView MBean", ex);
 					}
 				}
@@ -88,7 +88,7 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 					String mbeanDomain = applicationContext.getEnvironment().getProperty(MBEAN_DOMAIN_PROPERTY_NAME);
 					server.unregisterMBean(new ObjectName(mbeanDomain, MBEAN_APPLICATION_KEY, applicationName));
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					throw new ApplicationContextException("Failed to unregister LiveBeansView MBean", ex);
 				} finally {
 					applicationName = null;
