@@ -60,6 +60,7 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 	@Test
 	public void decodeSingleChunkToArray() throws InterruptedException {
 		JsonObjectDecoder decoder = new JsonObjectDecoder();
+
 		Flux<DataBuffer> source = Flux.just(stringBuffer(
 				"[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
 		Flux<String> output =
@@ -69,11 +70,20 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 				.expectNext("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}")
 				.expectComplete()
 				.verify(output);
+
+		source = Flux.just(stringBuffer("[{\"foo\": \"bar\"},{\"foo\": \"baz\"}]"));
+		output = decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
+		ScriptedSubscriber.<String>create()
+				.expectNext("{\"foo\": \"bar\"}")
+				.expectNext("{\"foo\": \"baz\"}")
+				.expectComplete()
+				.verify(output);
 	}
 
 	@Test
 	public void decodeMultipleChunksToArray() throws InterruptedException {
 		JsonObjectDecoder decoder = new JsonObjectDecoder();
+
 		Flux<DataBuffer> source =
 				Flux.just(stringBuffer("[{\"foo\": \"foofoo\", \"bar\""), stringBuffer(
 						": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
@@ -82,6 +92,18 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 		ScriptedSubscriber.<String>create()
 				.expectNext("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}")
 				.expectNext("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}")
+				.expectComplete()
+				.verify(output);
+
+		source = Flux.just(
+				stringBuffer("[{\"foo\": \""),
+				stringBuffer("bar\"},{\"fo"),
+				stringBuffer("o\": \"baz\"}"),
+				stringBuffer("]"));
+		output = decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
+		ScriptedSubscriber.<String>create()
+				.expectNext("{\"foo\": \"bar\"}")
+				.expectNext("{\"foo\": \"baz\"}")
 				.expectComplete()
 				.verify(output);
 	}

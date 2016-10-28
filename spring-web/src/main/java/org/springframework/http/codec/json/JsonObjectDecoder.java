@@ -118,6 +118,7 @@ class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 					this.writerIndex = this.input.writerIndex();
 				}
 				else {
+					this.index = this.index - this.input.readerIndex();
 					this.input = Unpooled.copiedBuffer(this.input,
 							Unpooled.copiedBuffer(buffer.asByteBuffer()));
 					DataBufferUtils.release(buffer);
