@@ -91,6 +91,8 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	protected final Object responseLock = new Object();
+
 	private final String id;
 
 	private final SockJsServiceConfig config;
@@ -108,8 +110,6 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	private ScheduledFuture<?> heartbeatFuture;
 
 	private HeartbeatTask heartbeatTask;
-
-	private final Object heartbeatLock = new Object();
 
 	private volatile boolean heartbeatDisabled;
 
@@ -250,7 +250,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	}
 
 	protected void sendHeartbeat() throws SockJsTransportFailureException {
-		synchronized (this.heartbeatLock) {
+		synchronized (this.responseLock) {
 			if (isActive() && !this.heartbeatDisabled) {
 				writeFrame(SockJsFrame.heartbeatFrame());
 				scheduleHeartbeat();
@@ -262,7 +262,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		if (this.heartbeatDisabled) {
 			return;
 		}
-		synchronized (this.heartbeatLock) {
+		synchronized (this.responseLock) {
 			cancelHeartbeat();
 			if (!isActive()) {
 				return;
@@ -277,7 +277,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	}
 
 	protected void cancelHeartbeat() {
-		synchronized (this.heartbeatLock) {
+		synchronized (this.responseLock) {
 			if (this.heartbeatFuture != null) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Cancelling heartbeat in session " + getId());
@@ -445,7 +445,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 		@Override
 		public void run() {
-			synchronized (heartbeatLock) {
+			synchronized (responseLock) {
 				if (!this.expired) {
 					try {
 						sendHeartbeat();
