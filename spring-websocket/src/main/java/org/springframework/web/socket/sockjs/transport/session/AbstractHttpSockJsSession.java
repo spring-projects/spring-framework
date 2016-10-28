@@ -51,6 +51,7 @@ import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
  */
 public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
+	private final Queue<String> messageCache;
 
 	private volatile URI uri;
 
@@ -64,20 +65,13 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 	private volatile String acceptedProtocol;
 
-
 	private volatile ServerHttpResponse response;
 
 	private volatile SockJsFrameFormat frameFormat;
 
-
 	private volatile ServerHttpAsyncRequestControl asyncRequestControl;
 
-	private final Object responseLock = new Object();
-
-	private volatile boolean readyToSend;
-
-
-	private final Queue<String> messageCache;
+	private boolean readyToSend;
 
 
 	public AbstractHttpSockJsSession(String id, SockJsServiceConfig config,
@@ -215,14 +209,10 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 				this.frameFormat = frameFormat;
 				this.asyncRequestControl = request.getAsyncRequestControl(response);
 				this.asyncRequestControl.start(-1);
-
 				disableShallowEtagHeaderFilter(request);
-
 				// Let "our" handler know before sending the open frame to the remote handler
 				delegateConnectionEstablished();
-
 				handleRequestInternal(request, response, true);
-
 				// Request might have been reset (e.g. polling sessions do after writing)
 				this.readyToSend = isActive();
 			}
@@ -258,9 +248,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 				this.frameFormat = frameFormat;
 				this.asyncRequestControl = request.getAsyncRequestControl(response);
 				this.asyncRequestControl.start(-1);
-
 				disableShallowEtagHeaderFilter(request);
-
 				handleRequestInternal(request, response, false);
 				this.readyToSend = isActive();
 			}
@@ -332,14 +320,11 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 	protected void resetRequest() {
 		synchronized (this.responseLock) {
-
 			ServerHttpAsyncRequestControl control = this.asyncRequestControl;
 			this.asyncRequestControl = null;
 			this.readyToSend = false;
 			this.response = null;
-
 			updateLastActiveTime();
-
 			if (control != null && !control.isCompleted()) {
 				if (control.isStarted()) {
 					try {
