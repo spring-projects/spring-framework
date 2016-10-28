@@ -37,17 +37,27 @@ public class FormHttpMessageWriterTests {
 
 	private final FormHttpMessageWriter writer = new FormHttpMessageWriter();
 
+
 	@Test
 	public void canWrite() {
-		assertTrue(this.writer.canWrite(ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
+		assertTrue(this.writer.canWrite(
+				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
 				MediaType.APPLICATION_FORM_URLENCODED));
-		assertFalse(this.writer.canWrite(ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
+
+		assertFalse(this.writer.canWrite(
+				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
 				MediaType.APPLICATION_FORM_URLENCODED));
-		assertFalse(this.writer.canWrite(ResolvableType.forClassWithGenerics(MultiValueMap.class, Object.class, String.class),
+
+		assertFalse(this.writer.canWrite(
+				ResolvableType.forClassWithGenerics(MultiValueMap.class, Object.class, String.class),
 				MediaType.APPLICATION_FORM_URLENCODED));
-		assertFalse(this.writer.canWrite(ResolvableType.forClassWithGenerics(Map.class, String.class, String.class),
+
+		assertFalse(this.writer.canWrite(
+				ResolvableType.forClassWithGenerics(Map.class, String.class, String.class),
 				MediaType.APPLICATION_FORM_URLENCODED));
-		assertFalse(this.writer.canWrite(ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
+
+		assertFalse(this.writer.canWrite(
+				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
 				MediaType.MULTIPART_FORM_DATA));
 	}
 
@@ -62,12 +72,9 @@ public class FormHttpMessageWriterTests {
 		this.writer.write(Mono.just(body), null, MediaType.APPLICATION_FORM_URLENCODED, response, null).block();
 
 		String responseBody = response.getBodyAsString().block();
-		assertEquals("Invalid result", "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3",
-				responseBody);
-		assertEquals("Invalid content-type", MediaType.APPLICATION_FORM_URLENCODED,
-				response.getHeaders().getContentType());
-		assertEquals("Invalid content-length", responseBody.getBytes().length,
-				response.getHeaders().getContentLength());
+		assertEquals("name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3", responseBody);
+		assertEquals(MediaType.APPLICATION_FORM_URLENCODED, response.getHeaders().getContentType());
+		assertEquals(responseBody.getBytes().length, response.getHeaders().getContentLength());
 	}
 
 }

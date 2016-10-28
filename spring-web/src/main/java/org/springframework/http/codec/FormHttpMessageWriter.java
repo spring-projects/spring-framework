@@ -38,26 +38,46 @@ import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Implementation of {@link HttpMessageWriter} to write 'normal' HTML
- * forms with {@code "application/x-www-form-urlencoded"} media type.
+ * Implementation of an {@link HttpMessageWriter} to write HTML form data, i.e.
+ * response body with media type {@code "application/x-www-form-urlencoded"}.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 5.0
- * @see MultiValueMap
  */
 public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<String, String>> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	private static final ResolvableType formType = ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
+	private static final ResolvableType MULTIVALUE_TYPE =
+			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
-	private Charset charset = DEFAULT_CHARSET;
+
+	private Charset defaultCharset = DEFAULT_CHARSET;
+
+
+	/**
+	 * Set the default character set to use for writing form data when the response
+	 * Content-Type header does not explicitly specify it.
+	 * <p>By default this is set to "UTF-8".
+	 */
+	public void setDefaultCharset(Charset charset) {
+		Assert.notNull(charset, "'charset' must not be null");
+		this.defaultCharset = charset;
+	}
+
+	/**
+	 * Return the configured default charset.
+	 */
+	public Charset getDefaultCharset() {
+		return this.defaultCharset;
+	}
 
 
 	@Override
 	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
-		return (mediaType == null || MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType)) &&
-				formType.isAssignableFrom(elementType);
+		return MULTIVALUE_TYPE.isAssignableFrom(elementType) &&
+				(mediaType == null || MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType));
 	}
 
 	@Override
@@ -66,19 +86,17 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 			Map<String, Object> hints) {
 
 		MediaType contentType = outputMessage.getHeaders().getContentType();
-		Charset charset;
-		if (contentType != null) {
+		if (contentType == null) {
+			contentType = MediaType.APPLICATION_FORM_URLENCODED;
 			outputMessage.getHeaders().setContentType(contentType);
-			charset = (contentType != null && contentType.getCharset() != null ? contentType.getCharset() : this.charset);
 		}
-		else {
-			outputMessage.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-			charset = this.charset;
-		}
+
+		Charset charset = getMediaTypeCharset(contentType);
+
 		return Flux
 				.from(inputStream)
 				.single()
-				.map(form -> generateForm(form))
+				.map(form -> generateForm(form, charset))
 				.then(value -> {
 					ByteBuffer byteBuffer = charset.encode(value);
 					DataBuffer buffer = outputMessage.bufferFactory().wrap(byteBuffer);
@@ -88,23 +106,32 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 
 	}
 
-	private String generateForm(MultiValueMap<String, String> form) {
+	private Charset getMediaTypeCharset(MediaType mediaType) {
+		if (mediaType != null && mediaType.getCharset() != null) {
+			return mediaType.getCharset();
+		}
+		else {
+			return getDefaultCharset();
+		}
+	}
+
+	private String generateForm(MultiValueMap<String, String> form, Charset charset) {
 		StringBuilder builder = new StringBuilder();
 		try {
-			for (Iterator<String> nameIterator = form.keySet().iterator(); nameIterator.hasNext();) {
-				String name = nameIterator.next();
-				for (Iterator<String> valueIterator = form.get(name).iterator(); valueIterator.hasNext();) {
-					String value = valueIterator.next();
+			for (Iterator<String> names = form.keySet().iterator(); names.hasNext();) {
+				String name = names.next();
+				for (Iterator<String> values = form.get(name).iterator(); values.hasNext();) {
+					String value = values.next();
 					builder.append(URLEncoder.encode(name, charset.name()));
 					if (value != null) {
 						builder.append('=');
 						builder.append(URLEncoder.encode(value, charset.name()));
-						if (valueIterator.hasNext()) {
+						if (values.hasNext()) {
 							builder.append('&');
 						}
 					}
 				}
-				if (nameIterator.hasNext()) {
+				if (names.hasNext()) {
 					builder.append('&');
 				}
 			}
@@ -118,16 +145,6 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 	@Override
 	public List<MediaType> getWritableMediaTypes() {
 		return Collections.singletonList(MediaType.APPLICATION_FORM_URLENCODED);
-	}
-
-	/**
-	 * Set the default character set to use for writing form data when the response
-	 * Content-Type header does not explicitly specify it.
-	 * <p>By default this is set to "UTF-8".
-	 */
-	public void setCharset(Charset charset) {
-		Assert.notNull(charset, "'charset' must not be null");
-		this.charset = charset;
 	}
 
 }

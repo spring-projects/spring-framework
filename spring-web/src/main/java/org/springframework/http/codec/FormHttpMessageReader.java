@@ -39,29 +39,52 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
- * Implementation of {@link HttpMessageReader} to read 'normal' HTML
- * forms with {@code "application/x-www-form-urlencoded"} media type.
+ * Implementation of an {@link HttpMessageReader} to read HTML form data, i.e.
+ * request body with media type {@code "application/x-www-form-urlencoded"}.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class FormHttpMessageReader implements HttpMessageReader<MultiValueMap<String, String>> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	private static final ResolvableType formType = ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
+	private static final ResolvableType MULTIVALUE_TYPE =
+			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
-	private Charset charset = DEFAULT_CHARSET;
+
+	private Charset defaultCharset = DEFAULT_CHARSET;
+
+
+	/**
+	 * Set the default character set to use for reading form data when the
+	 * request Content-Type header does not explicitly specify it.
+	 * <p>By default this is set to "UTF-8".
+	 */
+	public void setDefaultCharset(Charset charset) {
+		Assert.notNull(charset, "'charset' must not be null");
+		this.defaultCharset = charset;
+	}
+
+	/**
+	 * Return the configured default charset.
+	 */
+	public Charset getDefaultCharset() {
+		return this.defaultCharset;
+	}
 
 
 	@Override
 	public boolean canRead(ResolvableType elementType, MediaType mediaType) {
-		return (mediaType == null || MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType)) &&
-				formType.isAssignableFrom(elementType);
+		return MULTIVALUE_TYPE.isAssignableFrom(elementType) &&
+				(mediaType == null || MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType));
 	}
 
 	@Override
 	public Flux<MultiValueMap<String, String>> read(ResolvableType elementType,
 			ReactiveHttpInputMessage inputMessage, Map<String, Object> hints) {
+
 		return Flux.from(readMono(elementType, inputMessage, hints));
 	}
 
@@ -70,50 +93,52 @@ public class FormHttpMessageReader implements HttpMessageReader<MultiValueMap<St
 			ReactiveHttpInputMessage inputMessage, Map<String, Object> hints) {
 
 		MediaType contentType = inputMessage.getHeaders().getContentType();
-		Charset charset = (contentType.getCharset() != null ? contentType.getCharset() : this.charset);
+		Charset charset = getMediaTypeCharset(contentType);
 
 		return inputMessage.getBody()
 				.reduce(DataBuffer::write)
 				.map(buffer -> {
 					CharBuffer charBuffer = charset.decode(buffer.asByteBuffer());
-					DataBufferUtils.release(buffer);
 					String body = charBuffer.toString();
-					String[] pairs = StringUtils.tokenizeToStringArray(body, "&");
-					MultiValueMap<String, String> result = new LinkedMultiValueMap<>(pairs.length);
-					try {
-						for (String pair : pairs) {
-							int idx = pair.indexOf('=');
-							if (idx == -1) {
-								result.add(URLDecoder.decode(pair, charset.name()), null);
-							}
-							else {
-								String name = URLDecoder.decode(pair.substring(0, idx), charset.name());
-								String value = URLDecoder.decode(pair.substring(idx + 1), charset.name());
-								result.add(name, value);
-							}
-						}
-					}
-					catch (UnsupportedEncodingException ex) {
-						throw new IllegalStateException(ex);
-					}
-
-					return result;
+					DataBufferUtils.release(buffer);
+					return parseFormData(charset, body);
 				});
+	}
+
+	private Charset getMediaTypeCharset(MediaType mediaType) {
+		if (mediaType != null && mediaType.getCharset() != null) {
+			return mediaType.getCharset();
+		}
+		else {
+			return getDefaultCharset();
+		}
+	}
+
+	private MultiValueMap<String, String> parseFormData(Charset charset, String body) {
+		String[] pairs = StringUtils.tokenizeToStringArray(body, "&");
+		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(pairs.length);
+		try {
+			for (String pair : pairs) {
+				int idx = pair.indexOf('=');
+				if (idx == -1) {
+					result.add(URLDecoder.decode(pair, charset.name()), null);
+				}
+				else {
+					String name = URLDecoder.decode(pair.substring(0, idx),  charset.name());
+					String value = URLDecoder.decode(pair.substring(idx + 1), charset.name());
+					result.add(name, value);
+				}
+			}
+		}
+		catch (UnsupportedEncodingException ex) {
+			throw new IllegalStateException(ex);
+		}
+		return result;
 	}
 
 	@Override
 	public List<MediaType> getReadableMediaTypes() {
 		return Collections.singletonList(MediaType.APPLICATION_FORM_URLENCODED);
-	}
-
-	/**
-	 * Set the default character set to use for reading form data when the request
-	 * Content-Type header does not explicitly specify it.
-	 * <p>By default this is set to "UTF-8".
-	 */
-	public void setCharset(Charset charset) {
-		Assert.notNull(charset, "'charset' must not be null");
-		this.charset = charset;
 	}
 
 }
