@@ -48,9 +48,15 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 	@Override
 	public Object getAspectInstance() {
 		if (this.materialized == null) {
-			synchronized (this.maaif.getAspectCreationMutex()) {
-				if (this.materialized == null) {
-					this.materialized = this.maaif.getAspectInstance();
+			Object mutex = this.maaif.getAspectCreationMutex();
+			if (mutex == null) {
+				this.materialized = this.maaif.getAspectInstance();
+			}
+			else {
+				synchronized (mutex) {
+					if (this.materialized == null) {
+						this.materialized = this.maaif.getAspectInstance();
+					}
 				}
 			}
 		}
