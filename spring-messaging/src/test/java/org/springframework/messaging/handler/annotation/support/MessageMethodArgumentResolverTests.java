@@ -124,7 +124,7 @@ public class MessageMethodArgumentResolverTests {
 
 		assertTrue(this.resolver.supportsParameter(parameter));
 		thrown.expect(MessageConversionException.class);
-		thrown.expectMessage("the payload is empty");
+		thrown.expectMessage("payload is empty");
 		thrown.expectMessage(Integer.class.getName());
 		thrown.expectMessage(String.class.getName());
 		this.resolver.resolveArgument(parameter, message);
@@ -216,7 +216,7 @@ public class MessageMethodArgumentResolverTests {
 
 		assertTrue(this.resolver.supportsParameter(parameter));
 		thrown.expect(MessageConversionException.class);
-		thrown.expectMessage("the payload is empty");
+		thrown.expectMessage("payload is empty");
 		thrown.expectMessage(Integer.class.getName());
 		thrown.expectMessage(String.class.getName());
 		this.resolver.resolveArgument(parameter, message);

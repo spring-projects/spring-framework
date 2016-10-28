@@ -82,7 +82,7 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 			public Object getTarget() {
 				Object target = beanFactory.doResolveDependency(descriptor, beanName, null, null);
 				if (target == null) {
-					throw new NoSuchBeanDefinitionException(descriptor.getDependencyType(),
+					throw new NoSuchBeanDefinitionException(descriptor.getResolvableType(),
 							"Optional dependency not present for lazy injection point");
 				}
 				return target;
