@@ -370,8 +370,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 			catch (TypeMismatchException ex) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Failed to convert bean '" + name + "' to required type [" +
-							ClassUtils.getQualifiedName(requiredType) + "]", ex);
+					logger.debug("Failed to convert bean '" + name + "' to required type '" +
+							ClassUtils.getQualifiedName(requiredType) + "'", ex);
 				}
 				throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
 			}
@@ -803,12 +803,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	@Override
 	public String resolveEmbeddedValue(String value) {
+		if (value == null) {
+			return null;
+		}
 		String result = value;
 		for (StringValueResolver resolver : this.embeddedValueResolvers) {
+			result = resolver.resolveStringValue(result);
 			if (result == null) {
 				return null;
 			}
-			result = resolver.resolveStringValue(result);
 		}
 		return result;
 	}
