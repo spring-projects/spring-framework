@@ -118,4 +118,47 @@ public interface ServerWebExchange {
 	 */
 	boolean checkNotModified(String etag, Instant lastModified);
 
+
+	/**
+	 * Return a builder to mutate properties of this exchange. The resulting
+	 * new exchange instance is an immutable wrapper of this exchange returning
+	 * mutated values, if provided, or original values otherwise.
+	 */
+	default MutativeBuilder mutate() {
+		return new DefaultServerWebExchangeMutativeBuilder(this);
+	}
+
+
+	/**
+	 * Builder for mutating properties of a {@link ServerWebExchange}.
+	 */
+	interface MutativeBuilder {
+
+		/**
+		 * Set the request to use.
+		 */
+		MutativeBuilder setRequest(ServerHttpRequest request);
+
+		/**
+		 * Set the response to use.
+		 */
+		MutativeBuilder setResponse(ServerHttpResponse response);
+
+		/**
+		 * Set the principal to use.
+		 */
+		MutativeBuilder setPrincipal(Principal user);
+
+		/**
+		 * Set the session to use.
+		 */
+		MutativeBuilder setSession(Mono<WebSession> session);
+
+		/**
+		 * Build an immutable wrapper that returning the mutated properties.
+		 */
+		ServerWebExchange build();
+
+	}
+
 }
