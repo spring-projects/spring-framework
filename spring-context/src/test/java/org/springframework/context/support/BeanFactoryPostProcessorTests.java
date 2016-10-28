@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,12 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.Assert;
 
 import static org.junit.Assert.*;
 
@@ -119,6 +123,24 @@ public class BeanFactoryPostProcessorTests {
 		assertTrue(ac.getBean(TestBeanFactoryPostProcessor.class).wasCalled);
 	}
 
+	@Test
+	public void testBeanFactoryPostProcessorAsApplicationListener() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		ac.registerBeanDefinition("bfpp", new RootBeanDefinition(ListeningBeanFactoryPostProcessor.class));
+		ac.refresh();
+		assertTrue(ac.getBean(ListeningBeanFactoryPostProcessor.class).received instanceof ContextRefreshedEvent);
+	}
+
+	@Test
+	public void testBeanFactoryPostProcessorWithInnerBeanAsApplicationListener() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		RootBeanDefinition rbd = new RootBeanDefinition(NestingBeanFactoryPostProcessor.class);
+		rbd.getPropertyValues().add("listeningBean", new RootBeanDefinition(ListeningBean.class));
+		ac.registerBeanDefinition("bfpp", rbd);
+		ac.refresh();
+		assertTrue(ac.getBean(NestingBeanFactoryPostProcessor.class).getListeningBean().received instanceof ContextRefreshedEvent);
+	}
+
 
 	public static class TestBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 
@@ -167,6 +189,52 @@ public class BeanFactoryPostProcessorTests {
 		@Override
 		public int getOrder() {
 			return HIGHEST_PRECEDENCE;
+		}
+	}
+
+
+	public static class ListeningBeanFactoryPostProcessor implements BeanFactoryPostProcessor, ApplicationListener {
+
+		public ApplicationEvent received;
+
+		@Override
+		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+		}
+
+		@Override
+		public void onApplicationEvent(ApplicationEvent event) {
+			Assert.state(this.received == null, "Just one ContextRefreshedEvent expected");
+			this.received = event;
+		}
+	}
+
+
+	public static class ListeningBean implements ApplicationListener {
+
+		public ApplicationEvent received;
+
+		@Override
+		public void onApplicationEvent(ApplicationEvent event) {
+			Assert.state(this.received == null, "Just one ContextRefreshedEvent expected");
+			this.received = event;
+		}
+	}
+
+
+	public static class NestingBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
+
+		private ListeningBean listeningBean;
+
+		public void setListeningBean(ListeningBean listeningBean) {
+			this.listeningBean = listeningBean;
+		}
+
+		public ListeningBean getListeningBean() {
+			return listeningBean;
+		}
+
+		@Override
+		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		}
 	}
 
