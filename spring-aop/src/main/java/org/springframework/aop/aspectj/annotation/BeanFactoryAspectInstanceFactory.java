@@ -92,8 +92,19 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	}
 
 	public Object getAspectCreationMutex() {
-		return (this.beanFactory instanceof AbstractBeanFactory ?
-				((AbstractBeanFactory) this.beanFactory).getSingletonMutex() : this);
+		if (this.beanFactory != null) {
+			if (this.beanFactory.isSingleton(this.name)) {
+				// Rely on singleton semantics provided by the factory -> no local lock.
+				return null;
+			}
+			else if (this.beanFactory instanceof AbstractBeanFactory) {
+				// No singleton guarantees from the factory -> let's lock locally but
+				// reuse the factory's singleton lock, just in case a lazy dependency
+				// of our advice bean happens to trigger the singleton lock implicitly...
+				return ((AbstractBeanFactory) this.beanFactory).getSingletonMutex();
+			}
+		}
+		return this;
 	}
 
 	/**
