@@ -28,6 +28,7 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionSynchronizationUtils;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager}
@@ -86,6 +87,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * in combination with a locally defined JDBC DataSource (e.g. an Apache Commons
  * DBCP connection pool). Switching between this local strategy and a JTA
  * environment is just a matter of configuration!
+ *
+ * <p>As of 4.3.4, this transaction manager triggers flush callbacks on registered
+ * transaction synchronizations (if synchronization is generally active), assuming
+ * resources operating on the underlying JDBC {@code Connection}. This allows for
+ * setup analogous to {@code JtaTransactionManager}, in particular with respect to
+ * lazily registered ORM resources (e.g. a Hibernate {@code Session}).
  *
  * @author Juergen Hoeller
  * @since 02.05.2003
@@ -367,6 +374,13 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		@Override
 		public boolean isRollbackOnly() {
 			return getConnectionHolder().isRollbackOnly();
+		}
+
+		@Override
+		public void flush() {
+			if (TransactionSynchronizationManager.isSynchronizationActive()) {
+				TransactionSynchronizationUtils.triggerFlush();
+			}
 		}
 	}
 
