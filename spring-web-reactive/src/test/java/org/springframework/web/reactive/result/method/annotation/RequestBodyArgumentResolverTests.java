@@ -122,6 +122,7 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void emptyBodyWithMono() throws Exception {
 		ResolvableType type = forClassWithGenerics(Mono.class, String.class);
 
@@ -135,6 +136,7 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void emptyBodyWithFlux() throws Exception {
 		ResolvableType type = forClassWithGenerics(Flux.class, String.class);
 
@@ -247,7 +249,6 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 
-	@SuppressWarnings("unused")
 	void handle(
 			@RequestBody String string,
 			@RequestBody Mono<String> mono,
