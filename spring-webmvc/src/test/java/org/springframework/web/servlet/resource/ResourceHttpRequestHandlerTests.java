@@ -81,7 +81,6 @@ public class ResourceHttpRequestHandlerTests {
 		this.handler.setCacheSeconds(3600);
 		this.handler.setServletContext(new TestServletContext());
 		this.handler.afterPropertiesSet();
-		this.handler.afterSingletonsInstantiated();
 
 		this.request = new MockHttpServletRequest("GET", "");
 		this.response = new MockHttpServletResponse();
@@ -148,7 +147,6 @@ public class ResourceHttpRequestHandlerTests {
 				.addFixedVersionStrategy("versionString", "/**");
 		this.handler.setResourceResolvers(Arrays.asList(versionResolver, new PathResourceResolver()));
 		this.handler.afterPropertiesSet();
-		this.handler.afterSingletonsInstantiated();
 
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "versionString/foo.css");
 		this.handler.handleRequest(this.request, this.response);
@@ -255,7 +253,6 @@ public class ResourceHttpRequestHandlerTests {
 		handler.setLocations(paths);
 		handler.setContentNegotiationManager(manager);
 		handler.afterPropertiesSet();
-		handler.afterSingletonsInstantiated();
 
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
 		handler.handleRequest(this.request, this.response);
@@ -277,7 +274,6 @@ public class ResourceHttpRequestHandlerTests {
 		handler.setLocations(paths);
 		handler.setContentNegotiationManager(manager);
 		handler.afterPropertiesSet();
-		handler.afterSingletonsInstantiated();
 
 		this.request.addHeader("Accept", "application/json,text/plain,*/*");
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.html");
@@ -306,7 +302,6 @@ public class ResourceHttpRequestHandlerTests {
 		handler.setServletContext(servletContext);
 		handler.setLocations(paths);
 		handler.afterPropertiesSet();
-		handler.afterSingletonsInstantiated();
 
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
 		handler.handleRequest(this.request, this.response);
@@ -421,7 +416,6 @@ public class ResourceHttpRequestHandlerTests {
 		handler.setServletContext(new MockServletContext());
 		handler.setLocations(Arrays.asList(location1, location2));
 		handler.afterPropertiesSet();
-		handler.afterSingletonsInstantiated();
 
 		Resource[] locations = pathResolver.getAllowedLocations();
 		assertEquals(1, locations.length);
