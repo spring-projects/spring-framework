@@ -418,8 +418,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 									!requiresEagerInitForType(mbd.getFactoryBeanName()))) {
 						// In case of FactoryBean, match object created by FactoryBean.
 						boolean isFactoryBean = isFactoryBean(beanName, mbd);
-						boolean matchFound = (allowEagerInit || !isFactoryBean || containsSingleton(beanName)) &&
-								(includeNonSingletons || isSingleton(beanName)) && isTypeMatch(beanName, type);
+						boolean matchFound = (allowEagerInit || !isFactoryBean ||
+								(mbd.getDecoratedDefinition() != null && !mbd.isLazyInit()) ||
+								containsSingleton(beanName)) &&
+								(includeNonSingletons || isSingleton(beanName)) &&
+								isTypeMatch(beanName, type);
 						if (!matchFound && isFactoryBean) {
 							// In case of FactoryBean, try to match FactoryBean instance itself next.
 							beanName = FACTORY_BEAN_PREFIX + beanName;
@@ -1091,7 +1094,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
 			if (matchingBeans.isEmpty()) {
 				if (descriptor.isRequired()) {
-					raiseNoMatchingBeanFound(type, descriptor.getResolvableType().toString(), descriptor);
+					raiseNoMatchingBeanFound(type, descriptor.getResolvableType(), descriptor);
 				}
 				return null;
 			}
@@ -1454,11 +1457,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * for an unresolvable dependency.
 	 */
 	private void raiseNoMatchingBeanFound(
-			Class<?> type, String dependencyDescription, DependencyDescriptor descriptor) throws BeansException {
+			Class<?> type, ResolvableType resolvableType, DependencyDescriptor descriptor) throws BeansException {
 
 		checkBeanNotOfRequiredType(type, descriptor);
 
-		throw new NoSuchBeanDefinitionException(type, dependencyDescription,
+		throw new NoSuchBeanDefinitionException(resolvableType,
 				"expected at least 1 bean which qualifies as autowire candidate. " +
 				"Dependency annotations: " + ObjectUtils.nullSafeToString(descriptor.getAnnotations()));
 	}
