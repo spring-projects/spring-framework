@@ -16,14 +16,17 @@
 
 package org.springframework.web.client.reactive;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.util.Assert;
 
 /**
- * Reactive Web client supporting the HTTP/1.1 protocol. Main entry point is throught the
- * {@link #exchange(ClientRequest)} method.
+ * Reactive Web client supporting the HTTP/1.1 protocol. Main entry point is through the
+ * {@link #exchange(ClientRequest)} method, or through the
+ * {@link #retrieveMono(ClientRequest, Class)} and {@link #retrieveFlux(ClientRequest, Class)}
+ * convenience methods.
  *
  * <p>For example:
  * <pre class="code">
@@ -34,6 +37,11 @@ import org.springframework.util.Assert;
  *   .exchange(request)
  *   .then(response -> response.body(BodyExtractors.toMono(String.class)));
  * </pre>
+ * <p>or, by using {@link #retrieveMono(ClientRequest, Class)}:
+ * <pre class="code">
+ * Mono&lt;String&gt; result = client.retrieveMono(request, String.class);
+ * </pre>
+ *
  * @author Brian Clozel
  * @author Arjen Poutsma
  * @since 5.0
@@ -43,10 +51,37 @@ public interface WebClient {
 	/**
 	 * Exchange the given request for a response mono. Invoking this method performs the actual
 	 * HTTP request/response exchange.
+	 * <p>Note that this method will <strong>not</strong> publish an exception if the response
+	 * has a 4xx or 5xx status code; as opposed to {@link #retrieveMono(ClientRequest, Class)} and
+	 * {@link #retrieveFlux(ClientRequest, Class)}.
 	 * @param request the request to exchange
 	 * @return the response, wrapped in a {@code Mono}
 	 */
 	Mono<ClientResponse> exchange(ClientRequest<?> request);
+
+	/**
+	 * Retrieve the body of the response as a {@code Mono}. A 4xx or 5xx status
+	 * code in the response will result in a {@link WebClientException} published in the returned
+	 * {@code Mono}.
+	 * @param request the request to exchange
+	 * @param elementClass the class of element in the {@code Mono}
+	 * @param <T> the element type
+	 * @return the response body as a mono
+	 * @see ExchangeFilterFunctions#clientOrServerError()
+	 */
+	<T> Mono<T> retrieveMono(ClientRequest<?> request, Class<? extends T> elementClass);
+
+	/**
+	 * Retrieve the body of the response as a {@code Flux}. A 4xx or 5xx status
+	 * code in the response will result in a {@link WebClientException} published in the returned
+	 * {@code Flux}.
+	 * @param request the request to exchange
+	 * @param elementClass the class of element in the {@code Flux}
+	 * @param <T> the element type
+	 * @return the response body as a flux
+	 * @see ExchangeFilterFunctions#clientOrServerError()
+	 */
+	<T> Flux<T> retrieveFlux(ClientRequest<?> request, Class<? extends T> elementClass);
 
 
 	/**
