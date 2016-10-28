@@ -92,7 +92,7 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
 
-		final HttpResponseFutureCallback callback = new HttpResponseFutureCallback();
+		final HttpResponseFutureCallback callback = new HttpResponseFutureCallback(this.httpRequest);
 		final Future<HttpResponse> futureResponse =
 				this.httpClient.execute(this.httpRequest, this.httpContext, callback);
 		return new ClientHttpResponseFuture(futureResponse, callback);
@@ -103,6 +103,14 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 
 		private final ListenableFutureCallbackRegistry<ClientHttpResponse> callbacks =
 				new ListenableFutureCallbackRegistry<>();
+
+		private final HttpUriRequest httpRequest;
+
+
+		public HttpResponseFutureCallback(HttpUriRequest httpRequest) {
+			this.httpRequest = httpRequest;
+		}
+
 
 		public void addCallback(ListenableFutureCallback<? super ClientHttpResponse> callback) {
 			this.callbacks.addCallback(callback);
@@ -128,6 +136,7 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 
 		@Override
 		public void cancelled() {
+			this.httpRequest.abort();
 		}
 	}
 
