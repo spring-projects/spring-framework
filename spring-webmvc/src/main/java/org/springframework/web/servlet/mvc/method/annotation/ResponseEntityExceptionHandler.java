@@ -18,6 +18,8 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.List;
 import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,6 +45,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
@@ -462,14 +465,23 @@ public abstract class ResponseEntityExceptionHandler {
 	 * @param ex the exception
 	 * @param headers the headers to be written to the response
 	 * @param status the selected response status
-	 * @param request the current request
+	 * @param webRequest the current request
 	 * @return a {@code ResponseEntity} instance
 	 * @since 4.2.8
 	 */
 	protected ResponseEntity<Object> handleAsyncRequestTimeoutException(
-			AsyncRequestTimeoutException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+			AsyncRequestTimeoutException ex, HttpHeaders headers, HttpStatus status, WebRequest webRequest) {
 
-		return handleExceptionInternal(ex, null, headers, status, request);
+		if (webRequest instanceof ServletWebRequest) {
+			ServletWebRequest servletRequest = (ServletWebRequest) webRequest;
+			HttpServletRequest request = servletRequest.getNativeRequest(HttpServletRequest.class);
+			HttpServletResponse response = servletRequest.getNativeResponse(HttpServletResponse.class);
+			if (response.isCommitted()) {
+				logger.error("Async timeout for " + request.getMethod() + " [" +  request.getRequestURI() + "]");
+				return null;
+			}
+		}
+		return handleExceptionInternal(ex, null, headers, status, webRequest);
 	}
 
 }

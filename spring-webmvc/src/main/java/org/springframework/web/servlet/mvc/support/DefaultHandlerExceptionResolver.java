@@ -496,7 +496,12 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleAsyncRequestTimeoutException(AsyncRequestTimeoutException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
-		response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+		if (!response.isCommitted()) {
+			response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+		}
+		else if (logger.isErrorEnabled()) {
+			logger.error("Async timeout for " + request.getMethod() + " [" + request.getRequestURI() + "]");
+		}
 		return new ModelAndView();
 	}
 
@@ -507,6 +512,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 */
 	protected void sendServerError(Exception ex, HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
+
 
 		request.setAttribute("javax.servlet.error.exception", ex);
 		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
