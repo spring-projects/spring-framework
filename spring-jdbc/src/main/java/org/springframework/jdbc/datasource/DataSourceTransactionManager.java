@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionSynchronizationUtils;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager}
@@ -47,14 +48,14 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * <p>Application code is required to retrieve the JDBC Connection via
  * {@link DataSourceUtils#getConnection(DataSource)} instead of a standard
- * J2EE-style {@link DataSource#getConnection()} call. Spring classes such as
+ * Java EE-style {@link DataSource#getConnection()} call. Spring classes such as
  * {@link org.springframework.jdbc.core.JdbcTemplate} use this strategy implicitly.
  * If not used in combination with this transaction manager, the
  * {@link DataSourceUtils} lookup strategy behaves exactly like the native
  * DataSource lookup; it can thus be used in a portable fashion.
  *
  * <p>Alternatively, you can allow application code to work with the standard
- * J2EE-style lookup pattern {@link DataSource#getConnection()}, for example for
+ * Java EE-style lookup pattern {@link DataSource#getConnection()}, for example for
  * legacy code that is not aware of Spring at all. In that case, define a
  * {@link TransactionAwareDataSourceProxy} for your target DataSource, and pass
  * that proxy DataSource to your DAOs, which will automatically participate in
@@ -86,6 +87,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * in combination with a locally defined JDBC DataSource (e.g. an Apache Commons
  * DBCP connection pool). Switching between this local strategy and a JTA
  * environment is just a matter of configuration!
+ *
+ * <p>As of 4.3.4, this transaction manager triggers flush callbacks on registered
+ * transaction synchronizations (if synchronization is generally active), assuming
+ * resources operating on the underlying JDBC {@code Connection}. This allows for
+ * setup analogous to {@code JtaTransactionManager}, in particular with respect to
+ * lazily registered ORM resources (e.g. a Hibernate {@code Session}).
  *
  * @author Juergen Hoeller
  * @since 02.05.2003
@@ -367,6 +374,13 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		@Override
 		public boolean isRollbackOnly() {
 			return getConnectionHolder().isRollbackOnly();
+		}
+
+		@Override
+		public void flush() {
+			if (TransactionSynchronizationManager.isSynchronizationActive()) {
+				TransactionSynchronizationUtils.triggerFlush();
+			}
 		}
 	}
 
