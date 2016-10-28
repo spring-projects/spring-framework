@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +31,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
@@ -92,7 +90,7 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  * @since 3.0.4
  */
 public class ResourceHttpRequestHandler extends WebContentGenerator
-		implements HttpRequestHandler, InitializingBean, SmartInitializingSingleton, CorsConfigurationSource {
+		implements HttpRequestHandler, InitializingBean, CorsConfigurationSource {
 
 	// Servlet 3.1 setContentLengthLong(long) available?
 	private static final boolean contentLengthLongAvailable =
@@ -113,9 +111,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	private ContentNegotiationManager contentNegotiationManager;
 
-	private PathExtensionContentNegotiationStrategy pathExtensionStrategy;
-
-	private ServletContext servletContext;
+	private PathExtensionContentNegotiationStrategy contentNegotiationStrategy;
 
 	private CorsConfiguration corsConfiguration;
 
@@ -190,7 +186,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	/**
-	 * Return the list of configured resource converters.
+	 * Return the configured resource converter.
 	 * @since 4.3
 	 */
 	public ResourceHttpMessageConverter getResourceHttpMessageConverter() {
@@ -207,7 +203,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	/**
-	 * Return the list of configured resource region converters.
+	 * Return the configured resource region converter.
 	 * @since 4.3
 	 */
 	public ResourceRegionHttpMessageConverter getResourceRegionHttpMessageConverter() {
@@ -249,11 +245,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		return this.corsConfiguration;
 	}
 
-	@Override
-	protected void initServletContext(ServletContext servletContext) {
-		this.servletContext = servletContext;
-	}
-
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -261,16 +252,20 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			logger.warn("Locations list is empty. No resources will be served unless a " +
 					"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
 		}
+
 		if (this.resourceResolvers.isEmpty()) {
 			this.resourceResolvers.add(new PathResourceResolver());
 		}
 		initAllowedLocations();
+
 		if (this.resourceHttpMessageConverter == null) {
 			this.resourceHttpMessageConverter = new ResourceHttpMessageConverter();
 		}
 		if (this.resourceRegionHttpMessageConverter == null) {
 			this.resourceRegionHttpMessageConverter = new ResourceRegionHttpMessageConverter();
 		}
+
+		this.contentNegotiationStrategy = initContentNegotiationStrategy();
 	}
 
 	/**
@@ -293,12 +288,13 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 	}
 
-	@Override
-	public void afterSingletonsInstantiated() {
-		this.pathExtensionStrategy = initPathExtensionStrategy();
-	}
-
-	protected PathExtensionContentNegotiationStrategy initPathExtensionStrategy() {
+	/**
+	 * Initialize the content negotiation strategy depending on the {@code ContentNegotiationManager}
+	 * setup and the availability of a {@code ServletContext}.
+	 * @see ServletPathExtensionContentNegotiationStrategy
+	 * @see PathExtensionContentNegotiationStrategy
+	 */
+	protected PathExtensionContentNegotiationStrategy initContentNegotiationStrategy() {
 		Map<String, MediaType> mediaTypes = null;
 		if (getContentNegotiationManager() != null) {
 			PathExtensionContentNegotiationStrategy strategy =
@@ -307,9 +303,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				mediaTypes = new HashMap<String, MediaType>(strategy.getMediaTypes());
 			}
 		}
-		return (getServletContext() != null) ?
+		return (getServletContext() != null ?
 				new ServletPathExtensionContentNegotiationStrategy(getServletContext(), mediaTypes) :
-				new PathExtensionContentNegotiationStrategy(mediaTypes);
+				new PathExtensionContentNegotiationStrategy(mediaTypes));
 	}
 
 
@@ -528,7 +524,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		if (mediaType != null) {
 			return mediaType;
 		}
-		return this.pathExtensionStrategy.getMediaTypeForResource(resource);
+		return this.contentNegotiationStrategy.getMediaTypeForResource(resource);
 	}
 
 	/**
