@@ -22,6 +22,7 @@ import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 
 import org.springframework.mock.web.MockServletConfig;
+import org.springframework.test.web.servlet.DispatcherServletCustomizer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MockMvcBuilderSupport;
 import org.springframework.test.web.servlet.RequestBuilder;
@@ -42,6 +43,7 @@ import org.springframework.web.context.WebApplicationContext;
  * pass to the DispatcherServlet.
  *
  * @author Rossen Stoyanchev
+ * @author Stephane Nicoll
  * @since 4.0
  */
 public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>>
@@ -55,7 +57,7 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 
 	private final List<ResultHandler> globalResultHandlers = new ArrayList<>();
 
-	private Boolean dispatchOptions = Boolean.TRUE;
+	private final List<DispatcherServletCustomizer> dispatcherServletCustomizers = new ArrayList<>();
 
 	private final List<MockMvcConfigurer> configurers = new ArrayList<>(4);
 
@@ -104,9 +106,14 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 	}
 
 	@SuppressWarnings("unchecked")
-	public final <T extends B> T dispatchOptions(boolean dispatchOptions) {
-		this.dispatchOptions = dispatchOptions;
+	public final <T extends B> T addDispatcherServletCustomizer(DispatcherServletCustomizer customizer) {
+		this.dispatcherServletCustomizers.add(customizer);
 		return (T) this;
+	}
+
+	public final <T extends B> T dispatchOptions(boolean dispatchOptions) {
+		return addDispatcherServletCustomizer(
+				dispatcherServlet -> dispatcherServlet.setDispatchOptionsRequest(dispatchOptions));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -144,7 +151,7 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 		Filter[] filterArray = this.filters.toArray(new Filter[this.filters.size()]);
 
 		return super.createMockMvc(filterArray, mockServletConfig, wac, this.defaultRequestBuilder,
-				this.globalResultMatchers, this.globalResultHandlers, this.dispatchOptions);
+				this.globalResultMatchers, this.globalResultHandlers, this.dispatcherServletCustomizers);
 	}
 
 	/**
