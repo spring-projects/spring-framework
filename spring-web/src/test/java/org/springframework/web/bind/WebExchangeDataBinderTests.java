@@ -16,16 +16,15 @@
 package org.springframework.web.bind;
 
 import java.beans.PropertyEditorSupport;
-import java.util.Collections;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Iterator;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import reactor.core.publisher.Mono;
 
-import org.springframework.core.ResolvableType;
-import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.tests.sample.beans.ITestBean;
@@ -35,14 +34,11 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 
 /**
  * Unit tests for {@link WebExchangeDataBinder}.
@@ -51,49 +47,31 @@ import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
  */
 public class WebExchangeDataBinderTests {
 
-	private static final ResolvableType ELEMENT_TYPE = ResolvableType.forClass(MultiValueMap.class);
-
-
 	private WebExchangeDataBinder binder;
 
 	private TestBean testBean;
 
-	private ServerWebExchange exchange;
-
-	@Mock
-	private HttpMessageReader<MultiValueMap<String, String>> formReader;
-
-	private MultiValueMap<String, String> formData;
+	private MockServerHttpRequest request;
 
 
 	@Before
 	public void setUp() throws Exception {
-		MockitoAnnotations.initMocks(this);
-
 		this.testBean = new TestBean();
 		this.binder = new WebExchangeDataBinder(this.testBean, "person");
 		this.binder.registerCustomEditor(ITestBean.class, new TestBeanPropertyEditor());
-		this.binder.setFormReader(this.formReader);
 
-		MockServerHttpRequest request = new MockServerHttpRequest();
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		WebSessionManager sessionManager = new DefaultWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(request, response, sessionManager);
-
-		request.getHeaders().setContentType(APPLICATION_FORM_URLENCODED);
-
-		this.formData = new LinkedMultiValueMap<>();
-		when(this.formReader.canRead(ELEMENT_TYPE, APPLICATION_FORM_URLENCODED)).thenReturn(true);
-		when(this.formReader.readMono(ELEMENT_TYPE, request, Collections.emptyMap()))
-				.thenReturn(Mono.just(formData));
+		this.request = new MockServerHttpRequest();
+		this.request.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 	}
 
 
 	@Test
 	public void testBindingWithNestedObjectCreation() throws Exception {
-		this.formData.add("spouse", "someValue");
-		this.formData.add("spouse.name", "test");
-		this.binder.bind(this.exchange).blockMillis(5000);
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+		formData.add("spouse", "someValue");
+		formData.add("spouse.name", "test");
+		this.request.setBody(generateForm(formData));
+		this.binder.bind(createExchange()).blockMillis(5000);
 
 		assertNotNull(this.testBean.getSpouse());
 		assertEquals("test", testBean.getSpouse().getName());
@@ -101,13 +79,16 @@ public class WebExchangeDataBinderTests {
 
 	@Test
 	public void testFieldPrefixCausesFieldReset() throws Exception {
-		this.formData.add("_postProcessed", "visible");
-		this.formData.add("postProcessed", "on");
-		this.binder.bind(this.exchange).blockMillis(5000);
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+		formData.add("_postProcessed", "visible");
+		formData.add("postProcessed", "on");
+		this.request.setBody(generateForm(formData));
+		this.binder.bind(createExchange()).blockMillis(5000);
 		assertTrue(this.testBean.isPostProcessed());
 
-		this.formData.remove("postProcessed");
-		this.binder.bind(this.exchange).blockMillis(5000);
+		formData.remove("postProcessed");
+		this.request.setBody(generateForm(formData));
+		this.binder.bind(createExchange()).blockMillis(5000);
 		assertFalse(this.testBean.isPostProcessed());
 	}
 
@@ -115,76 +96,94 @@ public class WebExchangeDataBinderTests {
 	public void testFieldPrefixCausesFieldResetWithIgnoreUnknownFields() throws Exception {
 		this.binder.setIgnoreUnknownFields(false);
 
-		this.formData.add("_postProcessed", "visible");
-		this.formData.add("postProcessed", "on");
-		this.binder.bind(this.exchange).blockMillis(5000);
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+		formData.add("_postProcessed", "visible");
+		formData.add("postProcessed", "on");
+		this.request.setBody(generateForm(formData));
+		this.binder.bind(createExchange()).blockMillis(5000);
 		assertTrue(this.testBean.isPostProcessed());
 
-		this.formData.remove("postProcessed");
-		this.binder.bind(this.exchange).blockMillis(5000);
+		formData.remove("postProcessed");
+		this.request.setBody(generateForm(formData));
+		this.binder.bind(createExchange()).blockMillis(5000);
 		assertFalse(this.testBean.isPostProcessed());
 	}
 
 	@Test
 	public void testFieldDefault() throws Exception {
-		this.formData.add("!postProcessed", "off");
-		this.formData.add("postProcessed", "on");
-		this.binder.bind(this.exchange).blockMillis(5000);
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+		formData.add("!postProcessed", "off");
+		formData.add("postProcessed", "on");
+		this.request.setBody(generateForm(formData));
+		this.binder.bind(createExchange()).blockMillis(5000);
 		assertTrue(this.testBean.isPostProcessed());
 
-		this.formData.remove("postProcessed");
-		this.binder.bind(this.exchange).blockMillis(5000);
+		formData.remove("postProcessed");
+		this.request.setBody(generateForm(formData));
+		this.binder.bind(createExchange()).blockMillis(5000);
 		assertFalse(this.testBean.isPostProcessed());
 	}
 
 	@Test
 	public void testFieldDefaultPreemptsFieldMarker() throws Exception {
-		this.formData.add("!postProcessed", "on");
-		this.formData.add("_postProcessed", "visible");
-		this.formData.add("postProcessed", "on");
-		this.binder.bind(this.exchange).blockMillis(5000);
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+		formData.add("!postProcessed", "on");
+		formData.add("_postProcessed", "visible");
+		formData.add("postProcessed", "on");
+		this.request.setBody(generateForm(formData));
+		this.binder.bind(createExchange()).blockMillis(5000);
 		assertTrue(this.testBean.isPostProcessed());
 
-		this.formData.remove("postProcessed");
-		this.binder.bind(this.exchange).blockMillis(5000);
+		formData.remove("postProcessed");
+		this.request.setBody(generateForm(formData));
+		this.binder.bind(createExchange()).blockMillis(5000);
 		assertTrue(this.testBean.isPostProcessed());
 
-		this.formData.remove("!postProcessed");
-		this.binder.bind(this.exchange).blockMillis(5000);
+		formData.remove("!postProcessed");
+		this.request.setBody(generateForm(formData));
+		this.binder.bind(createExchange()).blockMillis(5000);
 		assertFalse(this.testBean.isPostProcessed());
 	}
 
 	@Test
 	public void testFieldDefaultNonBoolean() throws Exception {
-		this.formData.add("!name", "anonymous");
-		this.formData.add("name", "Scott");
-		this.binder.bind(this.exchange).blockMillis(5000);
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+		formData.add("!name", "anonymous");
+		formData.add("name", "Scott");
+		this.request.setBody(generateForm(formData));
+		this.binder.bind(createExchange()).blockMillis(5000);
 		assertEquals("Scott", this.testBean.getName());
 
-		this.formData.remove("name");
-		this.binder.bind(this.exchange).blockMillis(5000);
+		formData.remove("name");
+		this.request.setBody(generateForm(formData));
+		this.binder.bind(createExchange()).blockMillis(5000);
 		assertEquals("anonymous", this.testBean.getName());
 	}
 
 	@Test
 	public void testWithCommaSeparatedStringArray() throws Exception {
-		this.formData.add("stringArray", "bar");
-		this.formData.add("stringArray", "abc");
-		this.formData.add("stringArray", "123,def");
-		this.binder.bind(this.exchange).blockMillis(5000);
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+		formData.add("stringArray", "bar");
+		formData.add("stringArray", "abc");
+		formData.add("stringArray", "123,def");
+		this.request.setBody(generateForm(formData));
+		this.binder.bind(createExchange()).blockMillis(5000);
 		assertEquals("Expected all three items to be bound", 3, this.testBean.getStringArray().length);
 
-		this.formData.remove("stringArray");
-		this.formData.add("stringArray", "123,def");
-		this.binder.bind(this.exchange).blockMillis(5000);
+		formData.remove("stringArray");
+		formData.add("stringArray", "123,def");
+		this.request.setBody(generateForm(formData));
+		this.binder.bind(createExchange()).blockMillis(5000);
 		assertEquals("Expected only 1 item to be bound", 1, this.testBean.getStringArray().length);
 	}
 
 	@Test
 	public void testBindingWithNestedObjectCreationAndWrongOrder() throws Exception {
-		this.formData.add("spouse.name", "test");
-		this.formData.add("spouse", "someValue");
-		this.binder.bind(this.exchange).blockMillis(5000);
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+		formData.add("spouse.name", "test");
+		formData.add("spouse", "someValue");
+		this.request.setBody(generateForm(formData));
+		this.binder.bind(createExchange()).blockMillis(5000);
 
 		assertNotNull(this.testBean.getSpouse());
 		assertEquals("test", this.testBean.getSpouse().getName());
@@ -192,15 +191,47 @@ public class WebExchangeDataBinderTests {
 
 	@Test
 	public void testBindingWithQueryParams() throws Exception {
-		MultiValueMap<String, String> queryParams = this.exchange.getRequest().getQueryParams();
+		MultiValueMap<String, String> queryParams = createExchange().getRequest().getQueryParams();
 		queryParams.add("spouse", "someValue");
 		queryParams.add("spouse.name", "test");
-		this.binder.bind(this.exchange).blockMillis(5000);
+		this.binder.bind(createExchange()).blockMillis(5000);
 
 		assertNotNull(this.testBean.getSpouse());
 		assertEquals("test", this.testBean.getSpouse().getName());
 	}
 
+	private String generateForm(MultiValueMap<String, String> form) {
+		StringBuilder builder = new StringBuilder();
+		try {
+			for (Iterator<String> names = form.keySet().iterator(); names.hasNext();) {
+				String name = names.next();
+				for (Iterator<String> values = form.get(name).iterator(); values.hasNext();) {
+					String value = values.next();
+					builder.append(URLEncoder.encode(name, "UTF-8"));
+					if (value != null) {
+						builder.append('=');
+						builder.append(URLEncoder.encode(value, "UTF-8"));
+						if (values.hasNext()) {
+							builder.append('&');
+						}
+					}
+				}
+				if (names.hasNext()) {
+					builder.append('&');
+				}
+			}
+		}
+		catch (UnsupportedEncodingException ex) {
+			throw new IllegalStateException(ex);
+		}
+		return builder.toString();
+	}
+
+	@NotNull
+	private ServerWebExchange createExchange() {
+		return new DefaultServerWebExchange(
+				this.request, new MockServerHttpResponse(), new DefaultWebSessionManager());
+	}
 
 
 	private static class TestBeanPropertyEditor extends PropertyEditorSupport {

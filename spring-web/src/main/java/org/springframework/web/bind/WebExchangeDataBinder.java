@@ -24,9 +24,6 @@ import java.util.TreeMap;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.core.ResolvableType;
-import org.springframework.http.MediaType;
-import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -41,11 +38,6 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  */
 public class WebExchangeDataBinder extends WebDataBinder {
-
-	private static final ResolvableType MULTIVALUE_MAP_TYPE = ResolvableType.forClass(MultiValueMap.class);
-
-
-	private HttpMessageReader<MultiValueMap<String, String>> formReader = null;
 
 
 	/**
@@ -69,15 +61,6 @@ public class WebExchangeDataBinder extends WebDataBinder {
 	}
 
 
-	public void setFormReader(HttpMessageReader<MultiValueMap<String, String>> formReader) {
-		this.formReader = formReader;
-	}
-
-	public HttpMessageReader<MultiValueMap<String, String>> getFormReader() {
-		return this.formReader;
-	}
-
-
 	/**
 	 * Bind the URL query parameters or form data of the body of the given request
 	 * to this binder's target. The request body is parsed if the content-type
@@ -90,7 +73,8 @@ public class WebExchangeDataBinder extends WebDataBinder {
 
 		ServerHttpRequest request = exchange.getRequest();
 		Mono<MultiValueMap<String, String>> queryParams = Mono.just(request.getQueryParams());
-		Mono<MultiValueMap<String, String>> formParams = getFormParams(exchange);
+		Mono<MultiValueMap<String, String>> formParams =
+				exchange.getFormData().defaultIfEmpty(new LinkedMultiValueMap<>());
 
 		return Mono.zip(this::mergeParams, queryParams, formParams)
 				.map(this::getParamsToBind)
@@ -100,17 +84,6 @@ public class WebExchangeDataBinder extends WebDataBinder {
 					doBind(new MutablePropertyValues(values));
 					return Mono.empty();
 				});
-	}
-
-	private Mono<MultiValueMap<String, String>> getFormParams(ServerWebExchange exchange) {
-		ServerHttpRequest request = exchange.getRequest();
-		MediaType contentType = request.getHeaders().getContentType();
-		if (this.formReader.canRead(MULTIVALUE_MAP_TYPE, contentType)) {
-			return this.formReader.readMono(MULTIVALUE_MAP_TYPE, request, Collections.emptyMap());
-		}
-		else {
-			return Mono.just(new LinkedMultiValueMap<>());
-		}
 	}
 
 	@SuppressWarnings("unchecked")

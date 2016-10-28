@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Default implementation of
@@ -42,6 +43,8 @@ class DefaultServerWebExchangeMutativeBuilder implements ServerWebExchange.Mutat
 	private Principal user;
 
 	private Mono<WebSession> session;
+
+	private Mono<MultiValueMap<String, String>> formData;
 
 
 	public DefaultServerWebExchangeMutativeBuilder(ServerWebExchange delegate) {
@@ -75,9 +78,15 @@ class DefaultServerWebExchangeMutativeBuilder implements ServerWebExchange.Mutat
 	}
 
 	@Override
+	public ServerWebExchange.MutativeBuilder setFormData(Mono<MultiValueMap<String, String>> formData) {
+		this.formData = formData;
+		return this;
+	}
+
+	@Override
 	public ServerWebExchange build() {
-		return new MutativeDecorator(this.delegate,
-				this.request, this.response, this.user, this.session);
+		return new MutativeDecorator(this.delegate, this.request, this.response,
+				this.user, this.session, this.formData);
 	}
 
 
@@ -95,16 +104,19 @@ class DefaultServerWebExchangeMutativeBuilder implements ServerWebExchange.Mutat
 
 		private final Mono<WebSession> session;
 
+		private final Mono<MultiValueMap<String, String>> formData;
+
 
 		public MutativeDecorator(ServerWebExchange delegate,
 				ServerHttpRequest request, ServerHttpResponse response, Principal user,
-				Mono<WebSession> session) {
+				Mono<WebSession> session, Mono<MultiValueMap<String, String>> formData) {
 
 			super(delegate);
 			this.request = request;
 			this.response = response;
 			this.user = user;
 			this.session = session;
+			this.formData = formData;
 		}
 
 
@@ -127,6 +139,11 @@ class DefaultServerWebExchangeMutativeBuilder implements ServerWebExchange.Mutat
 		@Override
 		public <T extends Principal> Optional<T> getPrincipal() {
 			return (this.user != null ? Optional.of((T) this.user) : getDelegate().getPrincipal());
+		}
+
+		@Override
+		public Mono<MultiValueMap<String, String>> getFormData() {
+			return (this.formData != null ? this.formData : getDelegate().getFormData());
 		}
 	}
 

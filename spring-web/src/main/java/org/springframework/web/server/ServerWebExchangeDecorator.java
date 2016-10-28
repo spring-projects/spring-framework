@@ -25,6 +25,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 
 /**
  * A convenient base class for classes that need to wrap another
@@ -59,52 +60,57 @@ public class ServerWebExchangeDecorator implements ServerWebExchange {
 
 	@Override
 	public ServerHttpRequest getRequest() {
-		return this.getDelegate().getRequest();
+		return getDelegate().getRequest();
 	}
 
 	@Override
 	public ServerHttpResponse getResponse() {
-		return this.getDelegate().getResponse();
+		return getDelegate().getResponse();
 	}
 
 	@Override
 	public Map<String, Object> getAttributes() {
-		return this.getDelegate().getAttributes();
+		return getDelegate().getAttributes();
 	}
 
 	@Override
 	public <T> Optional<T> getAttribute(String name) {
-		return this.getDelegate().getAttribute(name);
+		return getDelegate().getAttribute(name);
 	}
 
 	@Override
 	public Mono<WebSession> getSession() {
-		return this.getDelegate().getSession();
+		return getDelegate().getSession();
 	}
 
 	@Override
 	public <T extends Principal> Optional<T> getPrincipal() {
-		return this.getDelegate().getPrincipal();
+		return getDelegate().getPrincipal();
+	}
+
+	@Override
+	public Mono<MultiValueMap<String, String>> getFormData() {
+		return getDelegate().getFormData();
 	}
 
 	@Override
 	public boolean isNotModified() {
-		return this.getDelegate().isNotModified();
+		return getDelegate().isNotModified();
 	}
 
 	@Override
 	public boolean checkNotModified(Instant lastModified) {
-		return this.getDelegate().checkNotModified(lastModified);
+		return getDelegate().checkNotModified(lastModified);
 	}
 
 	@Override
 	public boolean checkNotModified(String etag) {
-		return this.getDelegate().checkNotModified(etag);
+		return getDelegate().checkNotModified(etag);
 	}
 
 	@Override
 	public boolean checkNotModified(String etag, Instant lastModified) {
-		return this.getDelegate().checkNotModified(etag, lastModified);
+		return getDelegate().checkNotModified(etag, lastModified);
 	}
 
 

@@ -20,6 +20,7 @@ import java.security.Principal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,12 +28,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.InvalidMediaTypeException;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.FormHttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
@@ -48,6 +54,11 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private static final List<HttpMethod> SAFE_METHODS = Arrays.asList(HttpMethod.GET, HttpMethod.HEAD);
 
+	private static final FormHttpMessageReader FORM_READER = new FormHttpMessageReader();
+
+	private static final ResolvableType MULTIVALUE_TYPE =
+			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
+
 
 	private final ServerHttpRequest request;
 
@@ -56,6 +67,8 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
 	private final Mono<WebSession> sessionMono;
+
+	private final Mono<MultiValueMap<String, String>> formDataMono;
 
 	private volatile boolean notModified;
 
@@ -66,9 +79,25 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		Assert.notNull(request, "'request' is required");
 		Assert.notNull(response, "'response' is required");
 		Assert.notNull(response, "'sessionManager' is required");
+		Assert.notNull(response, "'formReader' is required");
 		this.request = request;
 		this.response = response;
 		this.sessionMono = sessionManager.getSession(this).cache();
+		this.formDataMono = initFormData(request);
+	}
+
+	private static Mono<MultiValueMap<String, String>> initFormData(ServerHttpRequest request) {
+		MediaType contentType;
+		try {
+			contentType = request.getHeaders().getContentType();
+			if (MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType)) {
+				return FORM_READER.readMono(MULTIVALUE_TYPE, request, Collections.emptyMap()).cache();
+			}
+		}
+		catch (InvalidMediaTypeException ex) {
+			// Ignore
+		}
+		return Mono.empty();
 	}
 
 
@@ -108,6 +137,11 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	@Override
 	public <T extends Principal> Optional<T> getPrincipal() {
 		return Optional.empty();
+	}
+
+	@Override
+	public Mono<MultiValueMap<String, String>> getFormData() {
+		return this.formDataMono;
 	}
 
 	@Override
