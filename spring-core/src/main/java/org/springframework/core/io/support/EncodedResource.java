@@ -37,6 +37,7 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 1.2.6
+ * @see Resource#getInputStream()
  * @see java.io.Reader
  * @see java.nio.charset.Charset
  */
@@ -142,8 +143,8 @@ public class EncodedResource implements InputStreamSource {
 	}
 
 	/**
-	 * Open a {@code java.io.InputStream} for the specified resource, ignoring any
-	 * specified {@link #getCharset() Charset} or {@linkplain #getEncoding() encoding}.
+	 * Open an {@code InputStream} for the specified resource, ignoring any specified
+	 * {@link #getCharset() Charset} or {@linkplain #getEncoding() encoding}.
 	 * @throws IOException if opening the InputStream failed
 	 * @see #requiresReader()
 	 * @see #getReader()

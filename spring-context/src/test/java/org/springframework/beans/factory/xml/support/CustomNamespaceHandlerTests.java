@@ -82,6 +82,7 @@ public class CustomNamespaceHandlerTests {
 
 	private GenericApplicationContext beanFactory;
 
+
 	@Before
 	public void setUp() throws Exception {
 		NamespaceHandlerResolver resolver = new DefaultNamespaceHandlerResolver(CLASS.getClassLoader(), NS_PROPS);
@@ -148,30 +149,21 @@ public class CustomNamespaceHandlerTests {
 		assertEquals("foo", beanDefinition.getAttribute("objectName"));
 	}
 
-	/**
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2728
-	 */
-	@Test
+	@Test  // SPR-2728
 	public void testCustomElementNestedWithinUtilList() throws Exception {
 		List<?> things = (List<?>) this.beanFactory.getBean("list.of.things");
 		assertNotNull(things);
 		assertEquals(2, things.size());
 	}
 
-	/**
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2728
-	 */
-	@Test
+	@Test  // SPR-2728
 	public void testCustomElementNestedWithinUtilSet() throws Exception {
 		Set<?> things = (Set<?>) this.beanFactory.getBean("set.of.things");
 		assertNotNull(things);
 		assertEquals(2, things.size());
 	}
 
-	/**
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2728
-	 */
-	@Test
+	@Test  // SPR-2728
 	public void testCustomElementNestedWithinUtilMap() throws Exception {
 		Map<?, ?> things = (Map<?, ?>) this.beanFactory.getBean("map.of.things");
 		assertNotNull(things);
@@ -229,6 +221,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 		registerBeanDefinitionDecoratorForAttribute("object-name", new ObjectNameBeanDefinitionDecorator());
 	}
 
+
 	private static class TestBeanDefinitionParser implements BeanDefinitionParser {
 
 		@Override
@@ -247,6 +240,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 		}
 	}
 
+
 	private static final class PersonDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 		@Override
@@ -260,6 +254,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 			builder.addPropertyValue("age", element.getAttribute("age"));
 		}
 	}
+
 
 	private static class PropertyModifyingBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
@@ -277,6 +272,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 		}
 	}
 
+
 	private static class DebugBeanDefinitionDecorator extends AbstractInterceptorDrivenBeanDefinitionDecorator {
 
 		@Override
@@ -285,6 +281,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 		}
 	}
 
+
 	private static class NopInterceptorBeanDefinitionDecorator extends AbstractInterceptorDrivenBeanDefinitionDecorator {
 
 		@Override
@@ -292,6 +289,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 			return new RootBeanDefinition(NopInterceptor.class);
 		}
 	}
+
 
 	private static class ObjectNameBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
@@ -302,5 +300,5 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 			return definition;
 		}
 	}
-}
 
+}
