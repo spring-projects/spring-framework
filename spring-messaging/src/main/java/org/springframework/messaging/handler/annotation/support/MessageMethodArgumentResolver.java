@@ -73,10 +73,9 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 		Class<?> targetPayloadType = getPayloadType(parameter);
 
 		if (!targetMessageType.isAssignableFrom(message.getClass())) {
-			String actual = ClassUtils.getQualifiedName(message.getClass());
-			String expected = ClassUtils.getQualifiedName(targetMessageType);
-			throw new MethodArgumentTypeMismatchException(message, parameter, "The actual message type " +
-					"[" + actual + "] does not match the expected type [" + expected + "]");
+			throw new MethodArgumentTypeMismatchException(message, parameter, "Actual message type '" +
+					ClassUtils.getDescriptiveType(message) + "' does not match expected type '" +
+					ClassUtils.getQualifiedName(targetMessageType) + "'");
 		}
 
 		Object payload = message.getPayload();
@@ -85,11 +84,9 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 		}
 
 		if (isEmptyPayload(payload)) {
-			String actual = ClassUtils.getQualifiedName(payload.getClass());
-			String expected = ClassUtils.getQualifiedName(targetPayloadType);
-			throw new MessageConversionException(message, "Cannot convert from the " +
-					"expected payload type [" + expected + "] to the " +
-					"actual payload type [" + actual + "] when the payload is empty.");
+			throw new MessageConversionException(message, "Cannot convert from actual payload type '" +
+					ClassUtils.getDescriptiveType(payload) + "' to expected payload type '" +
+					ClassUtils.getQualifiedName(targetPayloadType) + "' when payload is empty");
 		}
 
 		payload = convertPayload(message, parameter, targetPayloadType);
@@ -132,10 +129,9 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 		}
 
 		if (result == null) {
-			String actual = ClassUtils.getQualifiedName(targetPayloadType);
-			String expected = ClassUtils.getQualifiedName(message.getPayload().getClass());
-			throw new MessageConversionException(message, "No converter found to convert payload type [" +
-					actual + "] to expected payload type [" + expected + "]");
+			throw new MessageConversionException(message, "No converter found from actual payload type '" +
+					ClassUtils.getDescriptiveType(message.getPayload()) + "' to expected payload type '" +
+					ClassUtils.getQualifiedName(targetPayloadType) + "'");
 		}
 		return result;
 	}

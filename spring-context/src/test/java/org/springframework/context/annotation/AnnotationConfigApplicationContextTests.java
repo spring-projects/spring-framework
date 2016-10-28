@@ -128,7 +128,7 @@ public class AnnotationConfigApplicationContextTests {
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			assertThat(ex.getMessage(), containsString(
-					format("No qualifying bean of type [%s] is defined", targetType.getName())));
+					format("No qualifying bean of type '%s'", targetType.getName())));
 		}
 	}
 
@@ -142,7 +142,7 @@ public class AnnotationConfigApplicationContextTests {
 		catch (NoSuchBeanDefinitionException ex) {
 			assertThat(ex.getMessage(),
 					allOf(
-						containsString("No qualifying bean of type [" + TestBean.class.getName() + "] is defined"),
+						containsString("No qualifying bean of type '" + TestBean.class.getName() + "'"),
 						containsString("tb1"),
 						containsString("tb2")
 					)

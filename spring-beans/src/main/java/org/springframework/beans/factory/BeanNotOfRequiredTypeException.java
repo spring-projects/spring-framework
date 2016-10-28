@@ -17,6 +17,7 @@
 package org.springframework.beans.factory;
 
 import org.springframework.beans.BeansException;
+import org.springframework.util.ClassUtils;
 
 /**
  * Thrown when a bean doesn't match the expected type.
@@ -45,8 +46,8 @@ public class BeanNotOfRequiredTypeException extends BeansException {
 	 * the expected type
 	 */
 	public BeanNotOfRequiredTypeException(String beanName, Class<?> requiredType, Class<?> actualType) {
-		super("Bean named '" + beanName + "' is expected to be of type [" + requiredType.getName() +
-				"] but was actually of type [" + actualType.getName() + "]");
+		super("Bean named '" + beanName + "' is expected to be of type '" + ClassUtils.getQualifiedName(requiredType) +
+				"' but was actually of type '" + ClassUtils.getQualifiedName(actualType) + "'");
 		this.beanName = beanName;
 		this.requiredType = requiredType;
 		this.actualType = actualType;
