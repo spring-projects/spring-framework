@@ -62,7 +62,6 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 	private final List<MockMvcConfigurer> configurers = new ArrayList<>(4);
 
 
-	@SuppressWarnings("unchecked")
 	public final <T extends B> T addFilters(Filter... filters) {
 		Assert.notNull(filters, "filters cannot be null");
 
@@ -70,10 +69,9 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 			Assert.notNull(f, "filters cannot contain null values");
 			this.filters.add(f);
 		}
-		return (T) this;
+		return self();
 	}
 
-	@SuppressWarnings("unchecked")
 	public final <T extends B> T addFilter(Filter filter, String... urlPatterns) {
 
 		Assert.notNull(filter, "filter cannot be null");
@@ -84,31 +82,27 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 		}
 
 		this.filters.add(filter);
-		return (T) this;
+		return self();
 	}
 
-	@SuppressWarnings("unchecked")
 	public final <T extends B> T defaultRequest(RequestBuilder requestBuilder) {
 		this.defaultRequestBuilder = requestBuilder;
-		return (T) this;
+		return self();
 	}
 
-	@SuppressWarnings("unchecked")
 	public final <T extends B> T alwaysExpect(ResultMatcher resultMatcher) {
 		this.globalResultMatchers.add(resultMatcher);
-		return (T) this;
+		return self();
 	}
 
-	@SuppressWarnings("unchecked")
 	public final <T extends B> T alwaysDo(ResultHandler resultHandler) {
 		this.globalResultHandlers.add(resultHandler);
-		return (T) this;
+		return self();
 	}
 
-	@SuppressWarnings("unchecked")
 	public final <T extends B> T addDispatcherServletCustomizer(DispatcherServletCustomizer customizer) {
 		this.dispatcherServletCustomizers.add(customizer);
-		return (T) this;
+		return self();
 	}
 
 	public final <T extends B> T dispatchOptions(boolean dispatchOptions) {
@@ -116,10 +110,14 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 				dispatcherServlet -> dispatcherServlet.setDispatchOptionsRequest(dispatchOptions));
 	}
 
-	@SuppressWarnings("unchecked")
 	public final <T extends B> T apply(MockMvcConfigurer configurer) {
 		configurer.afterConfigurerAdded(this);
 		this.configurers.add(configurer);
+		return self();
+	}
+
+	@SuppressWarnings("unchecked")
+	protected <T extends B> T self() {
 		return (T) this;
 	}
 
