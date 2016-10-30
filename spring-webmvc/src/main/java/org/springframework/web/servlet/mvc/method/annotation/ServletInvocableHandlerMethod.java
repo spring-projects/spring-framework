@@ -51,6 +51,7 @@ import org.springframework.web.util.NestedServletException;
  * a method argument that provides access to the response stream.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
@@ -81,6 +82,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		initResponseStatus();
 	}
 
+
 	private void initResponseStatus() {
 		ResponseStatus annotation = getMethodAnnotation(ResponseStatus.class);
 		if (annotation == null) {
@@ -92,7 +94,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		}
 	}
 
-
 	/**
 	 * Register {@link HandlerMethodReturnValueHandler} instances to use to
 	 * handle return values.
@@ -101,8 +102,9 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		this.returnValueHandlers = returnValueHandlers;
 	}
 
+
 	/**
-	 * Invokes the method and handles the return value through one of the
+	 * Invoke the method and handle the return value through one of the
 	 * configured {@link HandlerMethodReturnValueHandler}s.
 	 * @param webRequest the current request
 	 * @param mavContainer the ModelAndViewContainer for this request
@@ -151,7 +153,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		else {
 			webRequest.getResponse().setStatus(this.responseStatus.value());
 		}
-		// to be picked up by the RedirectView
+		// To be picked up by RedirectView
 		webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, this.responseStatus);
 	}
 
@@ -214,6 +216,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 					return result;
 				}
 			}, CALLABLE_METHOD);
+
 			setHandlerMethodReturnValueHandlers(ServletInvocableHandlerMethod.this.returnValueHandlers);
 			this.returnType = returnType;
 		}

@@ -472,7 +472,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 			return extractViewClass((JsonView) conversionHint, conversionHint);
 		}
 		else if (conversionHint instanceof Class) {
-			return (Class) conversionHint;
+			return (Class<?>) conversionHint;
 		}
 		else {
 			return null;

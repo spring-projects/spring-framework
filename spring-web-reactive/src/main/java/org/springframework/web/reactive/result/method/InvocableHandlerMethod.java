@@ -50,7 +50,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private static final Mono<Object[]> NO_ARGS = Mono.just(new Object[0]);
 
-	private final static Object NO_VALUE = new Object();
+	private static final Object NO_VALUE = new Object();
 
 
 	private List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
@@ -101,8 +101,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				return Mono.error(ex.getTargetException());
 			}
 			catch (Throwable ex) {
-				String s = getInvocationErrorMessage(args);
-				return Mono.error(new IllegalStateException(s));
+				String msg = getInvocationErrorMessage(args);
+				return Mono.error(new IllegalStateException(msg));
 			}
 		});
 	}

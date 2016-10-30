@@ -171,7 +171,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		}
 
 		Class<?> contextClass = (param != null ? param.getContainingClass() : null);
-		Class<T> targetClass = (targetType instanceof Class<?> ? (Class<T>) targetType : null);
+		Class<T> targetClass = (targetType instanceof Class ? (Class<T>) targetType : null);
 		if (targetClass == null) {
 			ResolvableType resolvableType = (param != null ?
 					ResolvableType.forMethodParameter(param) : ResolvableType.forType(targetType));
