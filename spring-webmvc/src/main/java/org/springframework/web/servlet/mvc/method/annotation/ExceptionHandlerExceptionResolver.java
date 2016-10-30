@@ -381,9 +381,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 				exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, handlerMethod);
 			}
 		}
-		catch (Exception invocationEx) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Failed to invoke @ExceptionHandler method: " + exceptionHandlerMethod, invocationEx);
+		catch (Throwable invocationEx) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Failed to invoke @ExceptionHandler method: " + exceptionHandlerMethod, invocationEx);
 			}
 			return null;
 		}
