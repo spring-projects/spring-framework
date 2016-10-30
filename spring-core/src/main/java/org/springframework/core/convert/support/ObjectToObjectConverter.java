@@ -102,6 +102,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 			}
 			else if (member instanceof Constructor) {
 				Constructor<?> ctor = (Constructor<?>) member;
+				ReflectionUtils.makeAccessible(ctor);
 				return ctor.newInstance(source);
 			}
 		}

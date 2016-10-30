@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.convert.support;
+package org.springframework.core.convert.converter;
 
 import java.awt.Color;
 import java.lang.reflect.Method;
@@ -49,8 +49,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.core.convert.converter.ConverterRegistry;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.util.ClassUtils;
@@ -60,16 +59,16 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for the {@link DefaultConversionService}.
+ * Unit tests for {@link DefaultConversionService}.
  *
- * <p>For tests involving the {@link GenericConversionService}, see
- * {@link GenericConversionServiceTests}.
+ * <p>In this package for enforcing accessibility checks to non-public classes outside
+ * of the {@code org.springframework.core.convert.support} implementation package.
+ * Only in such a scenario, {@code setAccessible(true)} is actually necessary.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @author Sam Brannen
- * @see GenericConversionServiceTests
  */
 public class DefaultConversionServiceTests {
 
@@ -243,22 +242,22 @@ public class DefaultConversionServiceTests {
 	public void testEnumToString() {
 		assertEquals("BAR", conversionService.convert(Foo.BAR, String.class));
 	}
-	
+
 	@Test
 	public void testIntegerToEnum() throws Exception {
 		assertEquals(Foo.BAR, conversionService.convert(0, Foo.class));
 	}
-	
+
 	@Test
 	public void testIntegerToEnumWithSubclass() throws Exception {
 		assertEquals(SubFoo.BAZ, conversionService.convert(1, SubFoo.BAR.getClass()));
 	}
-	
+
 	@Test
 	public void testIntegerToEnumNull() {
 		assertEquals(null, conversionService.convert(null, Foo.class));
 	}
-	
+
 	@Test
 	public void testEnumToInteger() {
 		assertEquals(Integer.valueOf(0), conversionService.convert(Foo.BAR, Integer.class));
