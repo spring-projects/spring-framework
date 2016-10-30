@@ -92,7 +92,6 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 		try {
 			if (member instanceof Method) {
 				Method method = (Method) member;
-				ReflectionUtils.makeAccessible(method);
 				if (!Modifier.isStatic(method.getModifiers())) {
 					return method.invoke(source);
 				}
