@@ -26,7 +26,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.transform.Source;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -381,9 +380,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 				exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, handlerMethod);
 			}
 		}
-		catch (Exception invocationEx) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Failed to invoke @ExceptionHandler method: " + exceptionHandlerMethod, invocationEx);
+		catch (Throwable invocationEx) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Failed to invoke @ExceptionHandler method: " + exceptionHandlerMethod, invocationEx);
 			}
 			return null;
 		}

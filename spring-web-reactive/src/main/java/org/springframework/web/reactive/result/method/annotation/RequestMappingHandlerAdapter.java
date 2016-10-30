@@ -57,7 +57,6 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 
 	private static final Log logger = LogFactory.getLog(RequestMappingHandlerAdapter.class);
 
-
 	private final List<HttpMessageReader<?>> messageReaders = new ArrayList<>(10);
 
 	private WebBindingInitializer webBindingInitializer;
@@ -72,7 +71,6 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<>(64);
-
 
 
 	public RequestMappingHandlerAdapter() {
@@ -226,28 +224,27 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	private Mono<HandlerResult> handleException(Throwable ex, HandlerMethod handlerMethod,
 			BindingContext bindingContext, ServerWebExchange exchange) {
 
-		if (ex instanceof Exception) {
-			InvocableHandlerMethod invocable = findExceptionHandler(handlerMethod, (Exception) ex);
-			if (invocable != null) {
-				try {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Invoking @ExceptionHandler method: " + invocable);
-					}
-					invocable.setHandlerMethodArgumentResolvers(getArgumentResolvers());
-					bindingContext.getModel().clear();
-					return invocable.invokeForRequest(exchange, bindingContext, ex);
+		InvocableHandlerMethod invocable = findExceptionHandler(handlerMethod, ex);
+		if (invocable != null) {
+			try {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Invoking @ExceptionHandler method: " + invocable.getMethod());
 				}
-				catch (Exception invocationEx) {
-					if (logger.isErrorEnabled()) {
-						logger.error("Failed to invoke @ExceptionHandler method: " + invocable, invocationEx);
-					}
+				invocable.setHandlerMethodArgumentResolvers(getArgumentResolvers());
+				bindingContext.getModel().clear();
+				return invocable.invokeForRequest(exchange, bindingContext, ex);
+			}
+			catch (Throwable invocationEx) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Failed to invoke @ExceptionHandler method: " + invocable.getMethod(),
+							invocationEx);
 				}
 			}
 		}
 		return Mono.error(ex);
 	}
 
-	protected InvocableHandlerMethod findExceptionHandler(HandlerMethod handlerMethod, Exception exception) {
+	protected InvocableHandlerMethod findExceptionHandler(HandlerMethod handlerMethod, Throwable exception) {
 		if (handlerMethod == null) {
 			return null;
 		}
@@ -257,7 +254,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 			resolver = new ExceptionHandlerMethodResolver(handlerType);
 			this.exceptionHandlerCache.put(handlerType, resolver);
 		}
-		Method method = resolver.resolveMethod(exception);
+		Method method = resolver.resolveMethodByExceptionType(exception.getClass());
 		return (method != null ? new InvocableHandlerMethod(handlerMethod.getBean(), method) : null);
 	}
 
