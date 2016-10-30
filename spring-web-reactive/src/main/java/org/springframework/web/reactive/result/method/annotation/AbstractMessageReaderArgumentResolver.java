@@ -19,7 +19,6 @@ import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import reactor.core.publisher.Flux;
@@ -39,6 +38,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.WebExchangeDataBinder;
 import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
@@ -143,7 +143,8 @@ public abstract class AbstractMessageReaderArgumentResolver {
 					}
 					Object[] hints = extractValidationHints(bodyParameter);
 					if (hints != null) {
-						flux = flux.concatMap(getValidator(hints, bodyParameter, bindingContext, exchange));
+						flux = flux.doOnNext(target ->
+								validate(target, hints, bodyParameter, bindingContext, exchange));
 					}
 					return Mono.just(adapter.fromPublisher(flux));
 				}
@@ -162,7 +163,8 @@ public abstract class AbstractMessageReaderArgumentResolver {
 					}
 					Object[] hints = extractValidationHints(bodyParameter);
 					if (hints != null) {
-						mono = mono.then(getValidator(hints, bodyParameter, bindingContext, exchange));
+						mono = mono.doOnNext(target ->
+								validate(target, hints, bodyParameter, bindingContext, exchange));
 					}
 					if (adapter != null) {
 						return Mono.just(adapter.fromPublisher(mono));
@@ -207,19 +209,15 @@ public abstract class AbstractMessageReaderArgumentResolver {
 		return null;
 	}
 
-	protected <T> Function<T, Mono<T>> getValidator(Object[] validationHints,
+	protected void validate(Object target, Object[] validationHints,
 			MethodParameter param, BindingContext binding, ServerWebExchange exchange) {
 
 		String name = Conventions.getVariableNameForParameter(param);
-
-		return target -> binding.createBinder(exchange, target, name)
-				.map(binder -> {
-					binder.validate(validationHints);
-					if (binder.getBindingResult().hasErrors()) {
-						throw new ServerWebInputException("Validation failed", param);
-					}
-					return target;
-				});
+		WebExchangeDataBinder binder = binding.createBinder(exchange, target, name);
+		binder.validate(validationHints);
+		if (binder.getBindingResult().hasErrors()) {
+			throw new ServerWebInputException("Validation failed", param);
+		}
 	}
 
 }

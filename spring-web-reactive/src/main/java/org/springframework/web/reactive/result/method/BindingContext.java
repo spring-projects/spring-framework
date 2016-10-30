@@ -17,8 +17,6 @@ package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Field;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
@@ -42,7 +40,7 @@ public class BindingContext implements TypeConverter {
 
 	private final WebBindingInitializer initializer;
 
-	private final WebDataBinder simpleValueDataBinder;
+	private final TypeConverter simpleValueTypeConverter;
 
 
 	public BindingContext() {
@@ -51,10 +49,15 @@ public class BindingContext implements TypeConverter {
 
 	public BindingContext(WebBindingInitializer initializer) {
 		this.initializer = initializer;
-		this.simpleValueDataBinder = new WebExchangeDataBinder(null);
+		this.simpleValueTypeConverter = initTypeConverter(initializer);
+	}
+
+	private static WebExchangeDataBinder initTypeConverter(WebBindingInitializer initializer) {
+		WebExchangeDataBinder binder = new WebExchangeDataBinder(null);
 		if (initializer != null) {
-			initializer.initBinder(this.simpleValueDataBinder);
+			initializer.initBinder(binder);
 		}
+		return binder;
 	}
 
 
@@ -73,7 +76,7 @@ public class BindingContext implements TypeConverter {
 	 * @param objectName the name of the target object
 	 * @return a Mono for the created {@link WebDataBinder} instance
 	 */
-	public Mono<WebExchangeDataBinder> createBinder(ServerWebExchange exchange, Object target,
+	public WebExchangeDataBinder createBinder(ServerWebExchange exchange, Object target,
 			String objectName) {
 
 		WebExchangeDataBinder dataBinder = createBinderInstance(target, objectName);
@@ -87,24 +90,24 @@ public class BindingContext implements TypeConverter {
 		return new WebExchangeDataBinder(target, objectName);
 	}
 
-	protected Mono<WebExchangeDataBinder> initBinder(WebExchangeDataBinder binder, ServerWebExchange exchange) {
-		return Mono.just(binder);
+	protected WebExchangeDataBinder initBinder(WebExchangeDataBinder binder, ServerWebExchange exchange) {
+		return binder;
 	}
 
 	public <T> T convertIfNecessary(Object value, Class<T> requiredType) throws TypeMismatchException {
-		return this.simpleValueDataBinder.convertIfNecessary(value, requiredType);
+		return this.simpleValueTypeConverter.convertIfNecessary(value, requiredType);
 	}
 
 	public <T> T convertIfNecessary(Object value, Class<T> requiredType, MethodParameter methodParam)
 			throws TypeMismatchException {
 
-		return this.simpleValueDataBinder.convertIfNecessary(value, requiredType, methodParam);
+		return this.simpleValueTypeConverter.convertIfNecessary(value, requiredType, methodParam);
 	}
 
 	public <T> T convertIfNecessary(Object value, Class<T> requiredType, Field field)
 			throws TypeMismatchException {
 
-		return this.simpleValueDataBinder.convertIfNecessary(value, requiredType, field);
+		return this.simpleValueTypeConverter.convertIfNecessary(value, requiredType, field);
 	}
 
 }
