@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.convert.support;
+package org.springframework.core.convert.converter;
 
 import java.awt.Color;
 import java.lang.reflect.Method;
@@ -50,8 +50,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.core.convert.converter.ConverterRegistry;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.util.ClassUtils;
@@ -61,16 +60,16 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for the {@link DefaultConversionService}.
+ * Unit tests for {@link DefaultConversionService}.
  *
- * <p>For tests involving the {@link GenericConversionService}, see
- * {@link GenericConversionServiceTests}.
+ * <p>In this package for enforcing accessibility checks to non-public classes outside
+ * of the {@code org.springframework.core.convert.support} implementation package.
+ * Only in such a scenario, {@code setAccessible(true)} is actually necessary.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @author Sam Brannen
- * @see GenericConversionServiceTests
  */
 public class DefaultConversionServiceTests {
 

@@ -54,17 +54,15 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for the {@link GenericConversionService}.
+ * Unit tests for {@link GenericConversionService}.
  *
- * <p>For tests involving the {@link DefaultConversionService}, see
- * {@link DefaultConversionServiceTests}.
+ * <p>In this package for access to package-local converter implementations.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Phillip Webb
  * @author David Haraburda
  * @author Sam Brannen
- * @see DefaultConversionServiceTests
  */
 public class GenericConversionServiceTests {
 
