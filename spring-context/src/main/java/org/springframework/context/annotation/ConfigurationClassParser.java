@@ -37,15 +37,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.Aware;
-import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
@@ -53,8 +48,6 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.core.NestedIOException;
 import org.springframework.core.annotation.AnnotationAttributes;
@@ -724,7 +717,7 @@ class ConfigurationClassParser {
 
 		public SourceClass(Object source) {
 			this.source = source;
-			if (source instanceof Class<?>) {
+			if (source instanceof Class) {
 				this.metadata = new StandardAnnotationMetadata((Class<?>) source, true);
 			}
 			else {
@@ -737,7 +730,7 @@ class ConfigurationClassParser {
 		}
 
 		public Class<?> loadClass() throws ClassNotFoundException {
-			if (this.source instanceof Class<?>) {
+			if (this.source instanceof Class) {
 				return (Class<?>) this.source;
 			}
 			String className = ((MetadataReader) this.source).getClassMetadata().getClassName();
@@ -752,7 +745,7 @@ class ConfigurationClassParser {
 		}
 
 		public ConfigurationClass asConfigClass(ConfigurationClass importedBy) throws IOException {
-			if (this.source instanceof Class<?>) {
+			if (this.source instanceof Class) {
 				return new ConfigurationClass((Class<?>) this.source, importedBy);
 			}
 			return new ConfigurationClass((MetadataReader) this.source, importedBy);
@@ -760,7 +753,7 @@ class ConfigurationClassParser {
 
 		public Collection<SourceClass> getMemberClasses() throws IOException {
 			Object sourceToProcess = this.source;
-			if (sourceToProcess instanceof Class<?>) {
+			if (sourceToProcess instanceof Class) {
 				Class<?> sourceClass = (Class<?>) sourceToProcess;
 				try {
 					Class<?>[] declaredClasses = sourceClass.getDeclaredClasses();
@@ -797,7 +790,7 @@ class ConfigurationClassParser {
 		}
 
 		public SourceClass getSuperClass() throws IOException {
-			if (this.source instanceof Class<?>) {
+			if (this.source instanceof Class) {
 				return asSourceClass(((Class<?>) this.source).getSuperclass());
 			}
 			return asSourceClass(((MetadataReader) this.source).getClassMetadata().getSuperClassName());
@@ -805,7 +798,7 @@ class ConfigurationClassParser {
 
 		public Set<SourceClass> getInterfaces() throws IOException {
 			Set<SourceClass> result = new LinkedHashSet<SourceClass>();
-			if (this.source instanceof Class<?>) {
+			if (this.source instanceof Class) {
 				Class<?> sourceClass = (Class<?>) this.source;
 				for (Class<?> ifcClass : sourceClass.getInterfaces()) {
 					result.add(asSourceClass(ifcClass));
@@ -847,7 +840,7 @@ class ConfigurationClassParser {
 		}
 
 		private SourceClass getRelated(String className) throws IOException {
-			if (this.source instanceof Class<?>) {
+			if (this.source instanceof Class) {
 				try {
 					Class<?> clazz = ((Class<?>) this.source).getClassLoader().loadClass(className);
 					return asSourceClass(clazz);

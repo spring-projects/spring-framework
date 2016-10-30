@@ -516,7 +516,8 @@ public abstract class AnnotationUtils {
 	 * @since 4.2
 	 */
 	@SuppressWarnings("unchecked")
-	private static <A extends Annotation> A findAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType, Set<Annotation> visited) {
+	private static <A extends Annotation> A findAnnotation(
+			AnnotatedElement annotatedElement, Class<A> annotationType, Set<Annotation> visited) {
 		try {
 			Annotation[] anns = annotatedElement.getDeclaredAnnotations();
 			for (Annotation ann : anns) {
@@ -1108,10 +1109,10 @@ public abstract class AnnotationUtils {
 			boolean nestedAnnotationsAsMap) {
 
 		if (classValuesAsString) {
-			if (value instanceof Class<?>) {
+			if (value instanceof Class) {
 				return ((Class<?>) value).getName();
 			}
-			else if (value instanceof Class<?>[]) {
+			else if (value instanceof Class[]) {
 				Class<?>[] clazzArray = (Class<?>[]) value;
 				String[] classNames = new String[clazzArray.length];
 				for (int i = 0; i < clazzArray.length; i++) {

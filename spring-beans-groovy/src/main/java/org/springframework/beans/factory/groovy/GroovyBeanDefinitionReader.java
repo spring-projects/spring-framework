@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -458,7 +458,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	private GroovyBeanDefinitionWrapper invokeBeanDefiningMethod(String beanName, Object[] args) {
 		boolean hasClosureArgument = args[args.length - 1] instanceof Closure;
 		if (args[0] instanceof Class) {
-			Class<?> beanClass = (args[0] instanceof Class ? (Class) args[0] : args[0].getClass());
+			Class<?> beanClass = (args[0] instanceof Class ? (Class<?>) args[0] : args[0].getClass());
 			if (args.length >= 1) {
 				if (hasClosureArgument) {
 					if (args.length-1 != 1) {
