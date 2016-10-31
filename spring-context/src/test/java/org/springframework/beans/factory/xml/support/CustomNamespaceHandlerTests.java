@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ public class CustomNamespaceHandlerTests {
 		assertTrue(AopUtils.isAopProxy(bean));
 		Advisor[] advisors = ((Advised) bean).getAdvisors();
 		assertEquals("Incorrect number of advisors", 1, advisors.length);
-		assertEquals("Incorrect advice class.", DebugInterceptor.class, advisors[0].getAdvice().getClass());
+		assertEquals("Incorrect advice class", DebugInterceptor.class, advisors[0].getAdvice().getClass());
 	}
 
 	@Test
@@ -139,8 +139,8 @@ public class CustomNamespaceHandlerTests {
 		assertTrue(AopUtils.isAopProxy(bean));
 		Advisor[] advisors = ((Advised) bean).getAdvisors();
 		assertEquals("Incorrect number of advisors", 2, advisors.length);
-		assertEquals("Incorrect advice class.", DebugInterceptor.class, advisors[0].getAdvice().getClass());
-		assertEquals("Incorrect advice class.", NopInterceptor.class, advisors[1].getAdvice().getClass());
+		assertEquals("Incorrect advice class", DebugInterceptor.class, advisors[0].getAdvice().getClass());
+		assertEquals("Incorrect advice class", NopInterceptor.class, advisors[1].getAdvice().getClass());
 	}
 
 	@Test
@@ -235,7 +235,6 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 			definition.setPropertyValues(mpvs);
 
 			parserContext.getRegistry().registerBeanDefinition(element.getAttribute("id"), definition);
-
 			return null;
 		}
 	}
