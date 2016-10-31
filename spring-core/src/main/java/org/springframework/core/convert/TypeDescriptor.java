@@ -83,9 +83,8 @@ public class TypeDescriptor implements Serializable {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
 		this.resolvableType = ResolvableType.forMethodParameter(methodParameter);
 		this.type = this.resolvableType.resolve(methodParameter.getParameterType());
-		this.annotations = (methodParameter.getParameterIndex() == -1 ?
-				nullSafeAnnotations(methodParameter.getMethodAnnotations()) :
-				nullSafeAnnotations(methodParameter.getParameterAnnotations()));
+		this.annotations = nullSafeAnnotations(methodParameter.getParameterIndex() == -1 ?
+				methodParameter.getMethodAnnotations() :methodParameter.getParameterAnnotations());
 	}
 
 	/**
@@ -384,7 +383,7 @@ public class TypeDescriptor implements Serializable {
 	 * @throws IllegalStateException if this type is not a {@code java.util.Map}
 	 */
 	public TypeDescriptor getMapKeyTypeDescriptor() {
-		Assert.state(isMap(), "Not a java.util.Map");
+		Assert.state(isMap(), "Not a [java.util.Map]");
 		return getRelatedIfResolvable(this, this.resolvableType.asMap().getGeneric(0));
 	}
 
@@ -419,7 +418,7 @@ public class TypeDescriptor implements Serializable {
 	 * @throws IllegalStateException if this type is not a {@code java.util.Map}
 	 */
 	public TypeDescriptor getMapValueTypeDescriptor() {
-		Assert.state(isMap(), "Not a java.util.Map");
+		Assert.state(isMap(), "Not a [java.util.Map]");
 		return getRelatedIfResolvable(this, this.resolvableType.asMap().getGeneric(1));
 	}
 
@@ -529,9 +528,9 @@ public class TypeDescriptor implements Serializable {
 	 * @return the collection type descriptor
 	 */
 	public static TypeDescriptor collection(Class<?> collectionType, TypeDescriptor elementTypeDescriptor) {
-		Assert.notNull(collectionType, "collectionType must not be null");
+		Assert.notNull(collectionType, "Collection type must not be null");
 		if (!Collection.class.isAssignableFrom(collectionType)) {
-			throw new IllegalArgumentException("collectionType must be a java.util.Collection");
+			throw new IllegalArgumentException("Collection type must be a [java.util.Collection]");
 		}
 		ResolvableType element = (elementTypeDescriptor != null ? elementTypeDescriptor.resolvableType : null);
 		return new TypeDescriptor(ResolvableType.forClassWithGenerics(collectionType, element), null, null);

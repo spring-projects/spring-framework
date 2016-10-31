@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,9 +113,9 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * Add a new BeanFactoryPostProcessor that will get applied to the internal
 	 * bean factory of this application context on refresh, before any of the
 	 * bean definitions get evaluated. To be invoked during context configuration.
-	 * @param beanFactoryPostProcessor the factory processor to register
+	 * @param postProcessor the factory processor to register
 	 */
-	void addBeanFactoryPostProcessor(BeanFactoryPostProcessor beanFactoryPostProcessor);
+	void addBeanFactoryPostProcessor(BeanFactoryPostProcessor postProcessor);
 
 	/**
 	 * Add a new ApplicationListener that will be notified on context events
