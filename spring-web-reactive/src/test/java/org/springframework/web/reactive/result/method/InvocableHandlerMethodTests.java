@@ -154,7 +154,7 @@ public class InvocableHandlerMethodTests {
 		HandlerMethodArgumentResolver resolver = mock(HandlerMethodArgumentResolver.class);
 		when(resolver.supportsParameter(any())).thenReturn(true);
 		when(resolver.resolveArgument(any(), any(), any())).thenReturn(resolvedValue);
-		handlerMethod.setHandlerMethodArgumentResolvers(Collections.singletonList(resolver));
+		handlerMethod.setArgumentResolvers(Collections.singletonList(resolver));
 	}
 
 	private void assertHandlerResultValue(Mono<HandlerResult> mono, String expected) {

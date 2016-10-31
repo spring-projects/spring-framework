@@ -67,9 +67,22 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 
-	public void setHandlerMethodArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+	/**
+	 * Set {@link HandlerMethodArgumentResolver}s to use to use for resolving
+	 * method argument values.
+	 */
+	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
 		this.resolvers.clear();
 		this.resolvers.addAll(resolvers);
+	}
+
+	/**
+	 * Set the ParameterNameDiscoverer for resolving parameter names when needed
+	 * (e.g. default request attribute name).
+	 * <p>Default is a {@link DefaultParameterNameDiscoverer}.
+	 */
+	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
+		this.parameterNameDiscoverer = parameterNameDiscoverer;
 	}
 
 	@Override

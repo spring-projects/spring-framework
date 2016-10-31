@@ -16,6 +16,7 @@
 package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.util.Assert;
@@ -48,11 +49,11 @@ public class SyncInvocableHandlerMethod extends InvocableHandlerMethod {
 	 * all resolvers are {@link SyncHandlerMethodArgumentResolver}.
 	 */
 	@Override
-	public void setHandlerMethodArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
 		resolvers.forEach(resolver ->
 				Assert.isInstanceOf(SyncHandlerMethodArgumentResolver.class, resolver,
 						"Expected sync argument resolver: " + resolver.getClass().getName()));
-		super.setHandlerMethodArgumentResolvers(resolvers);
+		super.setArgumentResolvers(resolvers);
 	}
 
 	/**

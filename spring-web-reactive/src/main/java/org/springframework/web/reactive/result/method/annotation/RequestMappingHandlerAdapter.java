@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
@@ -31,12 +32,16 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
@@ -45,6 +50,8 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
+import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
+import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -57,6 +64,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 
 	private static final Log logger = LogFactory.getLog(RequestMappingHandlerAdapter.class);
 
+
 	private final List<HttpMessageReader<?>> messageReaders = new ArrayList<>(10);
 
 	private WebBindingInitializer webBindingInitializer;
@@ -67,7 +75,14 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 
 	private List<HandlerMethodArgumentResolver> argumentResolvers;
 
+	private List<SyncHandlerMethodArgumentResolver> customInitBinderArgumentResolvers;
+
+	private List<SyncHandlerMethodArgumentResolver> initBinderArgumentResolvers;
+
 	private ConfigurableBeanFactory beanFactory;
+
+
+	private final Map<Class<?>, Set<Method>> initBinderCache = new ConcurrentHashMap<>(64);
 
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<>(64);
@@ -119,10 +134,10 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	}
 
 	/**
-	 * Provide custom argument resolvers without overriding the built-in ones.
+	 * Configure custom argument resolvers without overriding the built-in ones.
 	 */
-	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-		this.customArgumentResolvers = argumentResolvers;
+	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+		this.customArgumentResolvers = resolvers;
 	}
 
 	/**
@@ -148,6 +163,39 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	}
 
 	/**
+	 * Configure custom argument resolvers for {@code @InitBinder} methods.
+	 */
+	public void setCustomInitBinderArgumentResolvers(List<SyncHandlerMethodArgumentResolver> resolvers) {
+		this.customInitBinderArgumentResolvers = resolvers;
+	}
+
+	/**
+	 * Return the custom {@code @InitBinder} argument resolvers.
+	 */
+	public List<SyncHandlerMethodArgumentResolver> getCustomInitBinderArgumentResolvers() {
+		return this.customInitBinderArgumentResolvers;
+	}
+
+	/**
+	 * Configure the supported argument types in {@code @InitBinder} methods.
+	 */
+	public void setInitBinderArgumentResolvers(List<SyncHandlerMethodArgumentResolver> resolvers) {
+		this.initBinderArgumentResolvers = null;
+		if (resolvers != null) {
+			this.initBinderArgumentResolvers = new ArrayList<>();
+			this.initBinderArgumentResolvers.addAll(resolvers);
+		}
+	}
+
+	/**
+	 * Return the configured argument resolvers for {@code @InitBinder} methods.
+	 */
+	public List<SyncHandlerMethodArgumentResolver> getInitBinderArgumentResolvers() {
+		return this.initBinderArgumentResolvers;
+	}
+
+
+	/**
 	 * A {@link ConfigurableBeanFactory} is expected for resolving expressions
 	 * in method argument default values.
 	 */
@@ -166,21 +214,22 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (this.argumentResolvers == null) {
-			this.argumentResolvers = initArgumentResolvers();
+			this.argumentResolvers = getDefaultArgumentResolvers();
+		}
+		if (this.initBinderArgumentResolvers == null) {
+			this.initBinderArgumentResolvers = getDefaultInitBinderArgumentResolvers();
 		}
 	}
 
-	protected List<HandlerMethodArgumentResolver> initArgumentResolvers() {
+	protected List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
-
-		ReactiveAdapterRegistry adapterRegistry = getReactiveAdapterRegistry();
 
 		// Annotation-based argument resolution
 		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), false));
 		resolvers.add(new RequestParamMapMethodArgumentResolver());
 		resolvers.add(new PathVariableMethodArgumentResolver(getBeanFactory()));
 		resolvers.add(new PathVariableMapMethodArgumentResolver());
-		resolvers.add(new RequestBodyArgumentResolver(getMessageReaders(), adapterRegistry));
+		resolvers.add(new RequestBodyArgumentResolver(getMessageReaders(), getReactiveAdapterRegistry()));
 		resolvers.add(new RequestHeaderMethodArgumentResolver(getBeanFactory()));
 		resolvers.add(new RequestHeaderMapMethodArgumentResolver());
 		resolvers.add(new CookieValueMethodArgumentResolver(getBeanFactory()));
@@ -189,7 +238,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 		resolvers.add(new RequestAttributeMethodArgumentResolver(getBeanFactory()));
 
 		// Type-based argument resolution
-		resolvers.add(new HttpEntityArgumentResolver(getMessageReaders(), adapterRegistry));
+		resolvers.add(new HttpEntityArgumentResolver(getMessageReaders(), getReactiveAdapterRegistry()));
 		resolvers.add(new ModelArgumentResolver());
 		resolvers.add(new ServerWebExchangeArgumentResolver());
 		resolvers.add(new WebSessionArgumentResolver());
@@ -204,6 +253,35 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 		return resolvers;
 	}
 
+	protected List<SyncHandlerMethodArgumentResolver> getDefaultInitBinderArgumentResolvers() {
+		List<SyncHandlerMethodArgumentResolver> resolvers = new ArrayList<>();
+
+		// Annotation-based argument resolution
+		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), false));
+		resolvers.add(new RequestParamMapMethodArgumentResolver());
+		resolvers.add(new PathVariableMethodArgumentResolver(getBeanFactory()));
+		resolvers.add(new PathVariableMapMethodArgumentResolver());
+		resolvers.add(new RequestHeaderMethodArgumentResolver(getBeanFactory()));
+		resolvers.add(new RequestHeaderMapMethodArgumentResolver());
+		resolvers.add(new CookieValueMethodArgumentResolver(getBeanFactory()));
+		resolvers.add(new ExpressionValueMethodArgumentResolver(getBeanFactory()));
+		resolvers.add(new RequestAttributeMethodArgumentResolver(getBeanFactory()));
+
+		// Type-based argument resolution
+		resolvers.add(new ModelArgumentResolver());
+		resolvers.add(new ServerWebExchangeArgumentResolver());
+
+		// Custom resolvers
+		if (getCustomArgumentResolvers() != null) {
+			resolvers.addAll(getCustomInitBinderArgumentResolvers());
+		}
+
+		// Catch-all
+		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), true));
+		return resolvers;
+	}
+
+
 	@Override
 	public boolean supports(Object handler) {
 		return HandlerMethod.class.equals(handler.getClass());
@@ -213,14 +291,32 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	public Mono<HandlerResult> handle(ServerWebExchange exchange, Object handler) {
 		HandlerMethod handlerMethod = (HandlerMethod) handler;
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
-		invocable.setHandlerMethodArgumentResolvers(getArgumentResolvers());
-		BindingContext bindingContext = new BindingContext(getWebBindingInitializer());
+		invocable.setArgumentResolvers(getArgumentResolvers());
+		BindingContext bindingContext = getBindingContext(handlerMethod);
 		return invocable.invoke(exchange, bindingContext)
 				.map(result -> result.setExceptionHandler(
 						ex -> handleException(ex, handlerMethod, bindingContext, exchange)))
 				.otherwise(ex -> handleException(
 						ex, handlerMethod, bindingContext, exchange));
 	}
+
+	private BindingContext getBindingContext(HandlerMethod handlerMethod) {
+		Class<?> handlerType = handlerMethod.getBeanType();
+		Set<Method> methods = this.initBinderCache.get(handlerType);
+		if (methods == null) {
+			methods = MethodIntrospector.selectMethods(handlerType, INIT_BINDER_METHODS);
+			this.initBinderCache.put(handlerType, methods);
+		}
+		List<SyncInvocableHandlerMethod> initBinderMethods = new ArrayList<>();
+		for (Method method : methods) {
+			Object bean = handlerMethod.getBean();
+			SyncInvocableHandlerMethod initBinderMethod = new SyncInvocableHandlerMethod(bean, method);
+			initBinderMethod.setArgumentResolvers(new ArrayList<>(this.initBinderArgumentResolvers));
+			initBinderMethods.add(initBinderMethod);
+		}
+		return new InitBinderBindingContext(getWebBindingInitializer(), initBinderMethods);
+	}
+
 
 	private Mono<HandlerResult> handleException(Throwable ex, HandlerMethod handlerMethod,
 			BindingContext bindingContext, ServerWebExchange exchange) {
@@ -231,7 +327,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 				if (logger.isDebugEnabled()) {
 					logger.debug("Invoking @ExceptionHandler method: " + invocable.getMethod());
 				}
-				invocable.setHandlerMethodArgumentResolvers(getArgumentResolvers());
+				invocable.setArgumentResolvers(getArgumentResolvers());
 				bindingContext.getModel().clear();
 				return invocable.invoke(exchange, bindingContext, ex);
 			}
@@ -258,5 +354,12 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 		Method method = resolver.resolveMethodByExceptionType(exception.getClass());
 		return (method != null ? new InvocableHandlerMethod(handlerMethod.getBean(), method) : null);
 	}
+
+
+	/**
+	 * MethodFilter that matches {@link InitBinder @InitBinder} methods.
+	 */
+	public static final ReflectionUtils.MethodFilter INIT_BINDER_METHODS =
+			method -> AnnotationUtils.findAnnotation(method, InitBinder.class) != null;
 
 }

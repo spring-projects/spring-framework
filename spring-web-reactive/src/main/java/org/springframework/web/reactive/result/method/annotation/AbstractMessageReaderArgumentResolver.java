@@ -213,7 +213,7 @@ public abstract class AbstractMessageReaderArgumentResolver {
 			MethodParameter param, BindingContext binding, ServerWebExchange exchange) {
 
 		String name = Conventions.getVariableNameForParameter(param);
-		WebExchangeDataBinder binder = binding.createBinder(exchange, target, name);
+		WebExchangeDataBinder binder = binding.createDataBinder(exchange, target, name);
 		binder.validate(validationHints);
 		if (binder.getBindingResult().hasErrors()) {
 			throw new ServerWebInputException("Validation failed", param);
