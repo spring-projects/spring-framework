@@ -614,9 +614,9 @@ project("spring-jdbc") {
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 		optional("com.mchange:c3p0:0.9.5.2")
 		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
-		optional("com.h2database:h2:1.4.192")
-		optional("org.apache.derby:derby:10.12.1.1")
-		optional("org.apache.derby:derbyclient:10.12.1.1")
+		optional("com.h2database:h2:1.4.193")
+		optional("org.apache.derby:derby:10.13.1.1")
+		optional("org.apache.derby:derbyclient:10.13.1.1")
 	}
 }
 
