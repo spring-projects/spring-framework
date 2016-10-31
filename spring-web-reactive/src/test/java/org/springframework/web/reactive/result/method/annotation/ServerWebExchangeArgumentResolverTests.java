@@ -69,7 +69,6 @@ public class ServerWebExchangeArgumentResolverTests {
 		assertTrue(this.resolver.supportsParameter(parameter(ServerWebExchange.class)));
 		assertTrue(this.resolver.supportsParameter(parameter(ServerHttpRequest.class)));
 		assertTrue(this.resolver.supportsParameter(parameter(ServerHttpResponse.class)));
-		assertTrue(this.resolver.supportsParameter(parameter(WebSession.class)));
 		assertTrue(this.resolver.supportsParameter(parameter(HttpMethod.class)));
 		assertFalse(this.resolver.supportsParameter(parameter(String.class)));
 	}
@@ -79,7 +78,6 @@ public class ServerWebExchangeArgumentResolverTests {
 		testResolveArgument(parameter(ServerWebExchange.class), this.exchange);
 		testResolveArgument(parameter(ServerHttpRequest.class), this.exchange.getRequest());
 		testResolveArgument(parameter(ServerHttpResponse.class), this.exchange.getResponse());
-		testResolveArgument(parameter(WebSession.class), this.exchange.getSession().block());
 		testResolveArgument(parameter(HttpMethod.class), HttpMethod.GET);
 	}
 

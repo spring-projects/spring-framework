@@ -18,8 +18,7 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.List;
 import java.util.Map;
-
-import reactor.core.publisher.Mono;
+import java.util.Optional;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
@@ -44,8 +43,7 @@ import org.springframework.web.server.ServerWebInputException;
  * @since 5.0
  * @see RequestHeaderMapMethodArgumentResolver
  */
-public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
-
+public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueSyncArgumentResolver {
 
 	/**
 	 * @param beanFactory a bean factory to use for resolving  ${...}
@@ -70,13 +68,15 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 	}
 
 	@Override
-	protected Mono<Object> resolveName(String name, MethodParameter parameter, ServerWebExchange exchange) {
+	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter,
+			ServerWebExchange exchange) {
+
 		List<String> headerValues = exchange.getRequest().getHeaders().get(name);
 		Object result = null;
 		if (headerValues != null) {
 			result = (headerValues.size() == 1 ? headerValues.get(0) : headerValues);
 		}
-		return Mono.justOrEmpty(result);
+		return Optional.ofNullable(result);
 	}
 
 	@Override

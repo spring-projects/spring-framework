@@ -18,6 +18,7 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
@@ -50,7 +51,7 @@ import org.springframework.web.server.ServerWebInputException;
  * @since 5.0
  * @see RequestParamMapMethodArgumentResolver
  */
-public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
+public class RequestParamMethodArgumentResolver extends AbstractNamedValueSyncArgumentResolver {
 
 	private final boolean useDefaultResolution;
 
@@ -91,13 +92,15 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	@Override
-	protected Mono<Object> resolveName(String name, MethodParameter parameter, ServerWebExchange exchange) {
+	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter,
+			ServerWebExchange exchange) {
+
 		List<String> paramValues = exchange.getRequest().getQueryParams().get(name);
 		Object result = null;
 		if (paramValues != null) {
 			result = (paramValues.size() == 1 ? paramValues.get(0) : paramValues);
 		}
-		return Mono.justOrEmpty(result);
+		return Optional.ofNullable(result);
 	}
 
 	@Override

@@ -17,15 +17,14 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.Map;
-
-import reactor.core.publisher.Mono;
+import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.result.method.BindingContext;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -43,7 +42,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  * @see RequestParamMethodArgumentResolver
  */
-public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgumentResolver {
+public class RequestParamMapMethodArgumentResolver implements SyncHandlerMethodArgumentResolver {
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -57,16 +56,17 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 	}
 
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext,
+	public Optional<Object> resolveArgumentValue(MethodParameter parameter, BindingContext context,
 			ServerWebExchange exchange) {
 
-		Class<?> paramType = parameter.getParameterType();
 		MultiValueMap<String, String> queryParams = exchange.getRequest().getQueryParams();
-		if (MultiValueMap.class.isAssignableFrom(paramType)) {
-			return Mono.just(queryParams);
-		}
-		else {
-			return Mono.just(queryParams.toSingleValueMap());
-		}
+		Object value = (isMultiValueMap(parameter) ? queryParams : queryParams.toSingleValueMap());
+		return Optional.of(value);
 	}
+
+	private boolean isMultiValueMap(MethodParameter parameter) {
+		Class<?> paramType = parameter.getParameterType();
+		return MultiValueMap.class.isAssignableFrom(paramType);
+	}
+
 }

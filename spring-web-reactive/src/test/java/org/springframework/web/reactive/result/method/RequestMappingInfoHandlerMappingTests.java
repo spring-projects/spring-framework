@@ -380,7 +380,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 		BindingContext bindingContext = new BindingContext();
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
-		Mono<HandlerResult> mono = invocable.invokeForRequest(exchange, bindingContext);
+		Mono<HandlerResult> mono = invocable.invoke(exchange, bindingContext);
 
 		HandlerResult result = mono.block();
 		assertNotNull(result);

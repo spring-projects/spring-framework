@@ -53,7 +53,7 @@ import org.springframework.web.server.ServerWebInputException;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public abstract class AbstractNamedValueMethodArgumentResolver implements HandlerMethodArgumentResolver {
+public abstract class AbstractNamedValueArgumentResolver implements HandlerMethodArgumentResolver {
 
 	private final ConfigurableBeanFactory configurableBeanFactory;
 
@@ -67,7 +67,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * and #{...} SpEL expressions in default values, or {@code null} if default
 	 * values are not expected to contain expressions
 	 */
-	public AbstractNamedValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
+	public AbstractNamedValueArgumentResolver(ConfigurableBeanFactory beanFactory) {
 		this.configurableBeanFactory = beanFactory;
 		this.expressionContext = (beanFactory != null ? new BeanExpressionContext(beanFactory, null) : null);
 	}

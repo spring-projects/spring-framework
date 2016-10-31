@@ -192,6 +192,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 		resolvers.add(new HttpEntityArgumentResolver(getMessageReaders(), adapterRegistry));
 		resolvers.add(new ModelArgumentResolver());
 		resolvers.add(new ServerWebExchangeArgumentResolver());
+		resolvers.add(new WebSessionArgumentResolver());
 
 		// Custom resolvers
 		if (getCustomArgumentResolvers() != null) {
@@ -214,7 +215,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
 		invocable.setHandlerMethodArgumentResolvers(getArgumentResolvers());
 		BindingContext bindingContext = new BindingContext(getWebBindingInitializer());
-		return invocable.invokeForRequest(exchange, bindingContext)
+		return invocable.invoke(exchange, bindingContext)
 				.map(result -> result.setExceptionHandler(
 						ex -> handleException(ex, handlerMethod, bindingContext, exchange)))
 				.otherwise(ex -> handleException(
@@ -232,7 +233,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 				}
 				invocable.setHandlerMethodArgumentResolvers(getArgumentResolvers());
 				bindingContext.getModel().clear();
-				return invocable.invokeForRequest(exchange, bindingContext, ex);
+				return invocable.invoke(exchange, bindingContext, ex);
 			}
 			catch (Throwable invocationEx) {
 				if (logger.isWarnEnabled()) {

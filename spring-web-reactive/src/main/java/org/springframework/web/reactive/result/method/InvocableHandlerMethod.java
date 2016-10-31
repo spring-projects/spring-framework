@@ -87,7 +87,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @return Publisher that produces a single HandlerResult or an error signal;
 	 * never throws an exception
 	 */
-	public Mono<HandlerResult> invokeForRequest(ServerWebExchange exchange,
+	public Mono<HandlerResult> invoke(ServerWebExchange exchange,
 			BindingContext bindingContext, Object... providedArgs) {
 
 		return resolveArguments(exchange, bindingContext, providedArgs).then(args -> {

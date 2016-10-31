@@ -64,7 +64,7 @@ public class InvocableHandlerMethodTests {
 	@Test
 	public void invokeMethodWithNoArguments() throws Exception {
 		InvocableHandlerMethod hm = handlerMethod("noArgs");
-		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, new BindingContext());
+		Mono<HandlerResult> mono = hm.invoke(this.exchange, new BindingContext());
 
 		assertHandlerResultValue(mono, "success");
 	}
@@ -73,7 +73,7 @@ public class InvocableHandlerMethodTests {
 	public void invokeMethodWithNoValue() throws Exception {
 		InvocableHandlerMethod hm = handlerMethod("singleArg");
 		addResolver(hm, Mono.empty());
-		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, new BindingContext());
+		Mono<HandlerResult> mono = hm.invoke(this.exchange, new BindingContext());
 
 		assertHandlerResultValue(mono, "success:null");
 	}
@@ -82,7 +82,7 @@ public class InvocableHandlerMethodTests {
 	public void invokeMethodWithValue() throws Exception {
 		InvocableHandlerMethod hm = handlerMethod("singleArg");
 		addResolver(hm, Mono.just("value1"));
-		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, new BindingContext());
+		Mono<HandlerResult> mono = hm.invoke(this.exchange, new BindingContext());
 
 		assertHandlerResultValue(mono, "success:value1");
 	}
@@ -90,7 +90,7 @@ public class InvocableHandlerMethodTests {
 	@Test
 	public void noMatchingResolver() throws Exception {
 		InvocableHandlerMethod hm = handlerMethod("singleArg");
-		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, new BindingContext());
+		Mono<HandlerResult> mono = hm.invoke(this.exchange, new BindingContext());
 
 		ScriptedSubscriber.create().expectNextCount(0)
 				.consumeErrorWith(error -> {
@@ -105,7 +105,7 @@ public class InvocableHandlerMethodTests {
 	public void resolverThrowsException() throws Exception {
 		InvocableHandlerMethod hm = handlerMethod("singleArg");
 		addResolver(hm, Mono.error(new UnsupportedMediaTypeStatusException("boo")));
-		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, new BindingContext());
+		Mono<HandlerResult> mono = hm.invoke(this.exchange, new BindingContext());
 
 		ScriptedSubscriber.create().expectNextCount(0)
 				.consumeErrorWith(error -> {
@@ -119,7 +119,7 @@ public class InvocableHandlerMethodTests {
 	public void illegalArgumentExceptionIsWrappedWithInvocationDetails() throws Exception {
 		InvocableHandlerMethod hm = handlerMethod("singleArg");
 		addResolver(hm, Mono.just(1));
-		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, new BindingContext());
+		Mono<HandlerResult> mono = hm.invoke(this.exchange, new BindingContext());
 
 		ScriptedSubscriber.create().expectNextCount(0)
 				.consumeErrorWith(error -> {
@@ -134,7 +134,7 @@ public class InvocableHandlerMethodTests {
 	@Test
 	public void invocationTargetExceptionIsUnwrapped() throws Exception {
 		InvocableHandlerMethod hm = handlerMethod("exceptionMethod");
-		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, new BindingContext());
+		Mono<HandlerResult> mono = hm.invoke(this.exchange, new BindingContext());
 
 		ScriptedSubscriber.create().expectNextCount(0)
 				.consumeErrorWith(error -> {

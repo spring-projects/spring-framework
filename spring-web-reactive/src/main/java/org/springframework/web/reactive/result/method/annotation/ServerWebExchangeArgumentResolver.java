@@ -15,31 +15,32 @@
  */
 package org.springframework.web.reactive.result.method.annotation;
 
-import reactor.core.publisher.Mono;
+import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.reactive.result.method.BindingContext;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebSession;
 
 /**
  * Resolves ServerWebExchange-related method argument values of the following types:
  * <ul>
  * <li>{@link ServerWebExchange}
  * <li>{@link ServerHttpRequest}
- * <li>{@link WebSession}
  * <li>{@link HttpMethod}
  * <li>{@link ServerHttpResponse}
  * </ul>
  *
+ * <p>For the {@code WebSession} see {@link WebSessionArgumentResolver}.
+ *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see WebSessionArgumentResolver
  */
-public class ServerWebExchangeArgumentResolver implements HandlerMethodArgumentResolver {
+public class ServerWebExchangeArgumentResolver implements SyncHandlerMethodArgumentResolver {
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -47,35 +48,33 @@ public class ServerWebExchangeArgumentResolver implements HandlerMethodArgumentR
 		return (ServerWebExchange.class.isAssignableFrom(paramType) ||
 				ServerHttpRequest.class.isAssignableFrom(paramType) ||
 				ServerHttpResponse.class.isAssignableFrom(paramType) ||
-				WebSession.class.isAssignableFrom(paramType) ||
 				HttpMethod.class == paramType);
 	}
 
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext,
+	public Optional<Object> resolveArgumentValue(MethodParameter parameter, BindingContext context,
 			ServerWebExchange exchange) {
 
 		Class<?> paramType = parameter.getParameterType();
+		Object value;
 		if (ServerWebExchange.class.isAssignableFrom(paramType)) {
-			return Mono.just(exchange);
+			value = exchange;
 		}
 		else if (ServerHttpRequest.class.isAssignableFrom(paramType)) {
-			return Mono.just(exchange.getRequest());
+			value = exchange.getRequest();
 		}
 		else if (ServerHttpResponse.class.isAssignableFrom(paramType)) {
-			return Mono.just(exchange.getResponse());
-		}
-		else if (WebSession.class.isAssignableFrom(paramType)) {
-			return exchange.getSession().cast(Object.class);
+			value = exchange.getResponse();
 		}
 		else if (HttpMethod.class == paramType) {
-			return Mono.just(exchange.getRequest().getMethod());
+			value = exchange.getRequest().getMethod();
 		}
 		else {
 			// should never happen...
-			return Mono.error(new UnsupportedOperationException(
-					"Unknown parameter type: " + paramType + " in method: " + parameter.getMethod()));
+			throw new IllegalArgumentException(
+					"Unknown parameter type: " + paramType + " in method: " + parameter.getMethod());
 		}
+		return Optional.of(value);
 	}
 
 }

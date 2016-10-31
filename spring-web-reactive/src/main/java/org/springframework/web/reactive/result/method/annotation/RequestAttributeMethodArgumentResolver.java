@@ -15,7 +15,7 @@
  */
 package org.springframework.web.reactive.result.method.annotation;
 
-import reactor.core.publisher.Mono;
+import java.util.Optional;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
@@ -31,7 +31,7 @@ import org.springframework.web.server.ServerWebInputException;
  * @since 5.0
  * @see SessionAttributeMethodArgumentResolver
  */
-public class RequestAttributeMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
+public class RequestAttributeMethodArgumentResolver extends AbstractNamedValueSyncArgumentResolver {
 
 
 	public RequestAttributeMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
@@ -52,8 +52,10 @@ public class RequestAttributeMethodArgumentResolver extends AbstractNamedValueMe
 	}
 
 	@Override
-	protected Mono<Object> resolveName(String name, MethodParameter parameter, ServerWebExchange exchange){
-		return Mono.justOrEmpty(exchange.getAttribute(name));
+	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter,
+			ServerWebExchange exchange) {
+
+		return exchange.getAttribute(name);
 	}
 
 	@Override

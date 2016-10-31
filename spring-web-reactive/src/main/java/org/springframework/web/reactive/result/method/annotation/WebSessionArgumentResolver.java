@@ -13,51 +13,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.reactive.result.method.BindingContext;
+import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebSession;
 
 /**
- * Resolver for {@link Map} method arguments also annotated with
- * {@link PathVariable @PathVariable} where the annotation does not specify a
- * path variable name. The resulting {@link Map} argument is a coyp of all URI
- * template name-value pairs.
+ * Resolves method argument value of type {@link WebSession}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
- * @see PathVariableMethodArgumentResolver
+ * @see ServerWebExchangeArgumentResolver
  */
-public class PathVariableMapMethodArgumentResolver implements SyncHandlerMethodArgumentResolver {
-
+public class WebSessionArgumentResolver implements HandlerMethodArgumentResolver {
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		PathVariable ann = parameter.getParameterAnnotation(PathVariable.class);
-		return (ann != null && (Map.class.isAssignableFrom(parameter.getParameterType()))
-				&& !StringUtils.hasText(ann.value()));
+		return (WebSession.class.isAssignableFrom(parameter.getParameterType()));
 	}
 
-	/**
-	 * Return a Map with all URI template variables or an empty map.
-	 */
 	@Override
-	public Optional<Object> resolveArgumentValue(MethodParameter parameter, BindingContext bindingContext,
+	public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext context,
 			ServerWebExchange exchange) {
 
-		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		Object value = exchange.getAttribute(name).orElse(Collections.emptyMap());
-		return Optional.of(value);
+		Class<?> paramType = parameter.getParameterType();
+		if (WebSession.class.isAssignableFrom(paramType)) {
+			return exchange.getSession().cast(Object.class);
+		}
+		else {
+			// should never happen...
+			throw new IllegalArgumentException(
+					"Unknown parameter type: " + paramType + " in method: " + parameter.getMethod());
+		}
 	}
 
 }

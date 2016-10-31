@@ -33,7 +33,7 @@ import org.springframework.web.server.ServerWebInputException;
  * @since 5.0
  * @see RequestAttributeMethodArgumentResolver
  */
-public class SessionAttributeMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
+public class SessionAttributeMethodArgumentResolver extends AbstractNamedValueArgumentResolver {
 
 
 	public SessionAttributeMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
@@ -53,9 +53,13 @@ public class SessionAttributeMethodArgumentResolver extends AbstractNamedValueMe
 	}
 
 	@Override
-	protected Mono<Object> resolveName(String name, MethodParameter parameter, ServerWebExchange exchange){
-		return exchange.getSession().map(session ->  session.getAttribute(name))
-				.filter(Optional::isPresent).map(Optional::get);
+	protected Mono<Object> resolveName(String name, MethodParameter parameter,
+			ServerWebExchange exchange) {
+
+		return exchange.getSession()
+				.map(session -> session.getAttribute(name))
+				.filter(Optional::isPresent)
+				.map(Optional::get);
 	}
 
 	@Override
