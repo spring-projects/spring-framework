@@ -56,7 +56,7 @@ configure(allprojects) { project ->
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
 	ext.log4jVersion         = "1.2.17"
-	ext.nettyVersion         = "4.0.41.Final"
+	ext.nettyVersion         = "4.0.42.Final"
 	ext.okhttpVersion        = "2.7.5"
 	ext.openjpaVersion       = "2.4.1"
 	ext.poiVersion           = "3.13"
@@ -618,7 +618,7 @@ project("spring-jdbc") {
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 		optional("com.mchange:c3p0:0.9.5.2")
 		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
-		optional("com.h2database:h2:1.4.192")
+		optional("com.h2database:h2:1.4.193")
 		optional("org.apache.derby:derby:10.12.1.1")
 		optional("org.apache.derby:derbyclient:10.12.1.1")
 	}
