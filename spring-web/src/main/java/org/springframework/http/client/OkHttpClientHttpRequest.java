@@ -26,7 +26,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
 /**
- * {@link ClientHttpRequest} implementation that uses OkHttp 2.x to execute requests.
+ * {@link ClientHttpRequest} implementation based on OkHttp 2.x.
  *
  * <p>Created via the {@link OkHttpClientHttpRequestFactory}.
  *

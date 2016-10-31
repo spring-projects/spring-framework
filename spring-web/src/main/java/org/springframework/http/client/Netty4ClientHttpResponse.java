@@ -28,8 +28,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 
 /**
- * {@link org.springframework.http.client.ClientHttpResponse} implementation
- * that uses Netty 4 to parse responses.
+ * {@link ClientHttpResponse} implementation based on Netty 4.
  *
  * @author Arjen Poutsma
  * @since 4.1.2
