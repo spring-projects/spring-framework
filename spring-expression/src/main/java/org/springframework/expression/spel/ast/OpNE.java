@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,12 +36,13 @@ public class OpNE extends Operator {
 		this.exitTypeDescriptor = "Z";
 	}
 
+
 	@Override
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		Object left = getLeftOperand().getValueInternal(state).getValue();
 		Object right = getRightOperand().getValueInternal(state).getValue();
-		leftActualDescriptor = CodeFlow.toDescriptorFromObject(left);
-		rightActualDescriptor = CodeFlow.toDescriptorFromObject(right);
+		this.leftActualDescriptor = CodeFlow.toDescriptorFromObject(left);
+		this.rightActualDescriptor = CodeFlow.toDescriptorFromObject(right);
 		return BooleanTypedValue.forValue(!equalityCheck(state, left, right));
 	}
 
@@ -57,7 +58,8 @@ public class OpNE extends Operator {
 
 		String leftDesc = left.exitTypeDescriptor;
 		String rightDesc = right.exitTypeDescriptor;
-		DescriptorComparison dc =  DescriptorComparison.checkNumericCompatibility(leftDesc, rightDesc, leftActualDescriptor, rightActualDescriptor);
+		DescriptorComparison dc =  DescriptorComparison.checkNumericCompatibility(
+				leftDesc, rightDesc, this.leftActualDescriptor, this.rightActualDescriptor);
 		return (!dc.areNumbers || dc.areCompatible);
 	}
 	
@@ -70,16 +72,15 @@ public class OpNE extends Operator {
 		boolean leftPrim = CodeFlow.isPrimitive(leftDesc);
 		boolean rightPrim = CodeFlow.isPrimitive(rightDesc);
 
-		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(leftDesc, rightDesc, leftActualDescriptor, rightActualDescriptor);
+		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(
+				leftDesc, rightDesc, this.leftActualDescriptor, this.rightActualDescriptor);
 		
 		if (dc.areNumbers && dc.areCompatible) {
 			char targetType = dc.compatibleType;
-			
 			getLeftOperand().generateCode(mv, cf);
 			if (!leftPrim) {
 				CodeFlow.insertUnboxInsns(mv, targetType, leftDesc);
 			}
-		
 			cf.enterCompilationScope();
 			getRightOperand().generateCode(mv, cf);
 			cf.exitCompilationScope();
@@ -103,7 +104,7 @@ public class OpNE extends Operator {
 				mv.visitJumpInsn(IF_ICMPEQ, elseTarget);		
 			}
 			else {
-				throw new IllegalStateException("Unexpected descriptor "+leftDesc);
+				throw new IllegalStateException("Unexpected descriptor " + leftDesc);
 			}
 		}
 		else {

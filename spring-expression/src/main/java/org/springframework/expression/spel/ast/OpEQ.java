@@ -58,8 +58,8 @@ public class OpEQ extends Operator {
 
 		String leftDesc = left.exitTypeDescriptor;
 		String rightDesc = right.exitTypeDescriptor;
-		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(leftDesc, rightDesc,
-				this.leftActualDescriptor, this.rightActualDescriptor);
+		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(
+				leftDesc, rightDesc, this.leftActualDescriptor, this.rightActualDescriptor);
 		return (!dc.areNumbers || dc.areCompatible);
 	}
 	
@@ -73,17 +73,15 @@ public class OpEQ extends Operator {
 		boolean leftPrim = CodeFlow.isPrimitive(leftDesc);
 		boolean rightPrim = CodeFlow.isPrimitive(rightDesc);
 
-		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(leftDesc, rightDesc,
-				this.leftActualDescriptor, this.rightActualDescriptor);
+		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(
+				leftDesc, rightDesc, this.leftActualDescriptor, this.rightActualDescriptor);
 		
 		if (dc.areNumbers && dc.areCompatible) {
 			char targetType = dc.compatibleType;
-			
 			getLeftOperand().generateCode(mv, cf);
 			if (!leftPrim) {
 				CodeFlow.insertUnboxInsns(mv, targetType, leftDesc);
 			}
-		
 			cf.enterCompilationScope();
 			getRightOperand().generateCode(mv, cf);
 			cf.exitCompilationScope();
@@ -91,23 +89,23 @@ public class OpEQ extends Operator {
 				CodeFlow.insertUnboxInsns(mv, targetType, rightDesc);
 			}
 			// assert: SpelCompiler.boxingCompatible(leftDesc, rightDesc)
-			if (targetType=='D') {
+			if (targetType == 'D') {
 				mv.visitInsn(DCMPL);
 				mv.visitJumpInsn(IFNE, elseTarget);
 			}
-			else if (targetType=='F') {
+			else if (targetType == 'F') {
 				mv.visitInsn(FCMPL);		
 				mv.visitJumpInsn(IFNE, elseTarget);
 			}
-			else if (targetType=='J') {
+			else if (targetType == 'J') {
 				mv.visitInsn(LCMP);		
 				mv.visitJumpInsn(IFNE, elseTarget);
 			}
-			else if (targetType=='I' || targetType=='Z') {
+			else if (targetType == 'I' || targetType == 'Z') {
 				mv.visitJumpInsn(IF_ICMPNE, elseTarget);		
 			}
 			else {
-				throw new IllegalStateException("Unexpected descriptor "+leftDesc);
+				throw new IllegalStateException("Unexpected descriptor " + leftDesc);
 			}
 		}
 		else {
@@ -120,11 +118,11 @@ public class OpEQ extends Operator {
 				CodeFlow.insertBoxIfNecessary(mv, rightDesc.charAt(0));
 			}
 			Label leftNotNull = new Label();
-			mv.visitInsn(DUP_X1); // Dup right on the top of the stack
-			mv.visitJumpInsn(IFNONNULL,leftNotNull);
+			mv.visitInsn(DUP_X1);  // dup right on the top of the stack
+			mv.visitJumpInsn(IFNONNULL, leftNotNull);
 			// Right is null!
 			mv.visitInsn(SWAP);
-			mv.visitInsn(POP); // remove it
+			mv.visitInsn(POP);  // remove it
 			Label rightNotNull = new Label();
 			mv.visitJumpInsn(IFNONNULL, rightNotNull);
 			// Left is null too
@@ -132,7 +130,7 @@ public class OpEQ extends Operator {
 			mv.visitJumpInsn(GOTO, endOfIf);
 			mv.visitLabel(rightNotNull);
 			mv.visitInsn(ICONST_0);
-			mv.visitJumpInsn(GOTO,endOfIf);
+			mv.visitJumpInsn(GOTO, endOfIf);
 			mv.visitLabel(leftNotNull);
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "equals", "(Ljava/lang/Object;)Z", false);
 			mv.visitLabel(endOfIf);
@@ -140,7 +138,7 @@ public class OpEQ extends Operator {
 			return;
 		}
 		mv.visitInsn(ICONST_1);
-		mv.visitJumpInsn(GOTO,endOfIf);
+		mv.visitJumpInsn(GOTO, endOfIf);
 		mv.visitLabel(elseTarget);
 		mv.visitInsn(ICONST_0);
 		mv.visitLabel(endOfIf);
