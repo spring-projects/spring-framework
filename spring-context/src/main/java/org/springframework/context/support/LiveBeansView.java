@@ -60,6 +60,7 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 
 	private static String applicationName;
 
+
 	static void registerApplicationContext(ConfigurableApplicationContext applicationContext) {
 		String mbeanDomain = applicationContext.getEnvironment().getProperty(MBEAN_DOMAIN_PROPERTY_NAME);
 		if (mbeanDomain != null) {
@@ -90,7 +91,8 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 				}
 				catch (Throwable ex) {
 					throw new ApplicationContextException("Failed to unregister LiveBeansView MBean", ex);
-				} finally {
+				}
+				finally {
 					applicationName = null;
 				}
 			}
