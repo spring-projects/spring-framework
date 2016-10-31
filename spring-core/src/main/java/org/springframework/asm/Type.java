@@ -562,7 +562,7 @@ public class Type {
             }
             return sb.toString();
         case OBJECT:
-            return new String(buf, off, len).replace('/', '.');
+            return new String(buf, off, len).replace('/', '.').intern();
         default:
             return null;
         }
@@ -577,7 +577,7 @@ public class Type {
      * @return the internal name of the class corresponding to this object type.
      */
     public String getInternalName() {
-        return new String(buf, off, len);
+        return new String(buf, off, len).intern();
     }
 
     /**
