@@ -100,13 +100,13 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 
 	private static class HttpResponseFutureCallback implements FutureCallback<HttpResponse> {
 
-		private final HttpUriRequest httpRequest;
+		private final HttpUriRequest request;
 
 		private final ListenableFutureCallbackRegistry<ClientHttpResponse> callbacks =
 				new ListenableFutureCallbackRegistry<>();
 
-		public HttpResponseFutureCallback(HttpUriRequest httpRequest) {
-			this.httpRequest = httpRequest;
+		public HttpResponseFutureCallback(HttpUriRequest request) {
+			this.request = request;
 		}
 
 		public void addCallback(ListenableFutureCallback<? super ClientHttpResponse> callback) {
@@ -133,7 +133,7 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 
 		@Override
 		public void cancelled() {
-			this.httpRequest.abort();
+			this.request.abort();
 		}
 	}
 
@@ -143,8 +143,8 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 
 		private final HttpResponseFutureCallback callback;
 
-		public ClientHttpResponseFuture(Future<HttpResponse> futureResponse, HttpResponseFutureCallback callback) {
-			super(futureResponse);
+		public ClientHttpResponseFuture(Future<HttpResponse> response, HttpResponseFutureCallback callback) {
+			super(response);
 			this.callback = callback;
 		}
 
@@ -164,6 +164,5 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 			this.callback.addFailureCallback(failureCallback);
 		}
 	}
-
 
 }
