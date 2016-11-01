@@ -21,8 +21,8 @@ import java.math.BigInteger;
 
 import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
+import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.CodeFlow;
-import org.springframework.expression.spel.ExpressionState;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.ObjectUtils;
@@ -114,7 +114,9 @@ public abstract class Operator extends SpelNodeImpl {
 				leftDesc, rightDesc, this.leftActualDescriptor, this.rightActualDescriptor);
 		char targetType = dc.compatibleType;  // CodeFlow.toPrimitiveTargetDesc(leftDesc);
 		
+		cf.enterCompilationScope();
 		getLeftOperand().generateCode(mv, cf);
+		cf.exitCompilationScope();
 		if (unboxLeft) {
 			CodeFlow.insertUnboxInsns(mv, targetType, leftDesc);
 		}
@@ -157,7 +159,17 @@ public abstract class Operator extends SpelNodeImpl {
 		cf.pushDescriptor("Z");
 	}
 
-	protected boolean equalityCheck(ExpressionState state, Object left, Object right) {
+
+	/**
+	 * Perform an equality check for the given operand values.
+	 * <p>This method is not just used for reflective comparisons in subclasses
+	 * but also from compiled expression code, which is why it needs to be
+	 * declared as {@code public static} here.
+	 * @param context the current evaluation context
+	 * @param left the left-hand operand value
+	 * @param right the right-hand operand value
+	 */
+	public static boolean equalityCheck(EvaluationContext context, Object left, Object right) {
 		if (left instanceof Number && right instanceof Number) {
 			Number leftNumber = (Number) left;
 			Number rightNumber = (Number) right;
@@ -207,7 +219,7 @@ public abstract class Operator extends SpelNodeImpl {
 		if (left instanceof Comparable && right instanceof Comparable) {
 			Class<?> ancestor = ClassUtils.determineCommonAncestor(left.getClass(), right.getClass());
 			if (ancestor != null && Comparable.class.isAssignableFrom(ancestor)) {
-				return (state.getTypeComparator().compare(left, right) == 0);
+				return (context.getTypeComparator().compare(left, right) == 0);
 			}
 		}
 
