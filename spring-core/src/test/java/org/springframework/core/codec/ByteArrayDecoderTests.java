@@ -21,7 +21,7 @@ import java.util.Collections;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
@@ -57,12 +57,12 @@ public class ByteArrayDecoderTests extends AbstractDataBufferAllocatingTestCase 
 		Flux<byte[]> output = this.decoder.decode(source,
 				ResolvableType.forClassWithGenerics(Publisher.class, byte[].class),
 				null, Collections.emptyMap());
-		ScriptedSubscriber
-				.<byte[]>create()
+
+		Verifier.create(output)
 				.consumeNextWith(bytes -> assertArrayEquals("foo".getBytes(), bytes))
 				.consumeNextWith(bytes -> assertArrayEquals("bar".getBytes(), bytes))
 				.expectComplete()
-				.verify(output);
+				.verify();
 	}
 
 }

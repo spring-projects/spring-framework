@@ -21,7 +21,7 @@ import javax.xml.stream.events.XMLEvent;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 
@@ -47,8 +47,7 @@ public class XmlEventDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<XMLEvent> events =
 				this.decoder.decode(Flux.just(stringBuffer(XML)), null, null, Collections.emptyMap());
 
-		ScriptedSubscriber
-				.<XMLEvent>create()
+		Verifier.create(events)
 				.consumeNextWith(e -> assertTrue(e.isStartDocument()))
 				.consumeNextWith(e -> assertStartElement(e, "pojo"))
 				.consumeNextWith(e -> assertStartElement(e, "foo"))
@@ -59,7 +58,7 @@ public class XmlEventDecoderTests extends AbstractDataBufferAllocatingTestCase {
 				.consumeNextWith(e -> assertEndElement(e, "bar"))
 				.consumeNextWith(e -> assertEndElement(e, "pojo"))
 				.expectComplete()
-				.verify(events);
+				.verify();
 	}
 
 	@Test
@@ -69,8 +68,7 @@ public class XmlEventDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<XMLEvent> events =
 				this.decoder.decode(Flux.just(stringBuffer(XML)), null, null, Collections.emptyMap());
 
-		ScriptedSubscriber
-				.<XMLEvent>create()
+		Verifier.create(events)
 				.consumeNextWith(e -> assertTrue(e.isStartDocument()))
 				.consumeNextWith(e -> assertStartElement(e, "pojo"))
 				.consumeNextWith(e -> assertStartElement(e, "foo"))
@@ -82,7 +80,7 @@ public class XmlEventDecoderTests extends AbstractDataBufferAllocatingTestCase {
 				.consumeNextWith(e -> assertEndElement(e, "pojo"))
 				.consumeNextWith(e -> assertTrue(e.isEndDocument()))
 				.expectComplete()
-				.verify(events);
+				.verify();
 	}
 
 	private static void assertStartElement(XMLEvent event, String expectedLocalName) {

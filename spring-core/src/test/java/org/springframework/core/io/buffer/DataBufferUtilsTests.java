@@ -24,7 +24,7 @@ import java.nio.file.StandardOpenOption;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import static org.junit.Assert.assertFalse;
 
@@ -39,13 +39,13 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		FileChannel channel = FileChannel.open(Paths.get(uri), StandardOpenOption.READ);
 		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.bufferFactory, 3);
 
-		ScriptedSubscriber
-				.<DataBuffer>create()
+		Verifier.create(flux)
 				.consumeNextWith(stringConsumer("foo"))
 				.consumeNextWith(stringConsumer("bar"))
 				.consumeNextWith(stringConsumer("baz"))
 				.consumeNextWith(stringConsumer("qux"))
-				.expectComplete().verify(flux);
+				.expectComplete()
+				.verify();
 
 		assertFalse(channel.isOpen());
 	}
@@ -56,12 +56,12 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		FileChannel channel = FileChannel.open(Paths.get(uri), StandardOpenOption.READ);
 		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.bufferFactory, 5);
 
-		ScriptedSubscriber
-				.<DataBuffer>create()
+		Verifier.create(flux)
 				.consumeNextWith(stringConsumer("fooba"))
 				.consumeNextWith(stringConsumer("rbazq"))
 				.consumeNextWith(stringConsumer("ux"))
-				.expectComplete().verify(flux);
+				.expectComplete()
+				.verify();
 
 		assertFalse(channel.isOpen());
 	}
@@ -71,13 +71,13 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		InputStream is = DataBufferUtilsTests.class.getResourceAsStream("DataBufferUtilsTests.txt");
 		Flux<DataBuffer> flux = DataBufferUtils.read(is, this.bufferFactory, 3);
 
-		ScriptedSubscriber
-				.<DataBuffer>create()
+		Verifier.create(flux)
 				.consumeNextWith(stringConsumer("foo"))
 				.consumeNextWith(stringConsumer("bar"))
 				.consumeNextWith(stringConsumer("baz"))
 				.consumeNextWith(stringConsumer("qux"))
-				.expectComplete().verify(flux);
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
@@ -88,11 +88,10 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
 		Flux<DataBuffer> result = DataBufferUtils.takeUntilByteCount(flux, 5L);
 
-		ScriptedSubscriber
-				.<DataBuffer>create()
+		Verifier.create(result)
 				.consumeNextWith(stringConsumer("foo"))
 				.consumeNextWith(stringConsumer("ba"))
-				.expectComplete().verify(result);
+				.expectComplete().verify();
 
 		release(baz);
 	}
@@ -105,11 +104,11 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
 		Flux<DataBuffer> result = DataBufferUtils.skipUntilByteCount(flux, 5L);
 
-		ScriptedSubscriber
-				.<DataBuffer>create()
+		Verifier.create(result)
 				.consumeNextWith(stringConsumer("r"))
 				.consumeNextWith(stringConsumer("baz"))
-				.expectComplete().verify(result);
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
@@ -120,10 +119,10 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
 		Flux<DataBuffer> result = DataBufferUtils.skipUntilByteCount(flux, 9L);
 
-		ScriptedSubscriber
-				.<DataBuffer>create()
+		Verifier.create(result)
 				.expectNextCount(0)
-				.expectComplete().verify(result);
+				.expectComplete()
+				.verify();
 	}
 
 }

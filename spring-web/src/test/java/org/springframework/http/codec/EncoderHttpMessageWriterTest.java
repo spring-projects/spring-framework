@@ -21,7 +21,7 @@ import java.util.Collections;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
@@ -68,10 +68,10 @@ public class EncoderHttpMessageWriterTest {
 				MediaType.APPLICATION_OCTET_STREAM, this.response, Collections.emptyMap());
 
 		assertThat(this.response.getHeaders().getContentType(), is(MediaType.APPLICATION_OCTET_STREAM));
-		ScriptedSubscriber.<String>create()
+		Verifier.create(this.response.getBodyAsString())
 				.expectNext(payload)
 				.expectComplete()
-				.verify(this.response.getBodyAsString());
+				.verify();
 	}
 
 	@NotNull

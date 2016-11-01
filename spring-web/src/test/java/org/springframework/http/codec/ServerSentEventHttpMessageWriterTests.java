@@ -24,7 +24,7 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
@@ -73,12 +73,11 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
 
 		Publisher<Publisher<DataBuffer>> result = Flux.from(outputMessage.getBodyWithFlush());
-		ScriptedSubscriber
-				.<Publisher<DataBuffer>>create()
+		Verifier.create(result)
 				.consumeNextWith(sseConsumer("id:c42\n" + "event:foo\n" + "retry:123\n" +
 						":bla\n:bla bla\n:bla bla bla\n" + "data:bar\n"))
 				.expectComplete()
-				.verify(result);
+				.verify();
 	}
 
 	@Test
@@ -89,12 +88,11 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
 
 		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
-		ScriptedSubscriber
-				.<Publisher<DataBuffer>>create()
+		Verifier.create(result)
 				.consumeNextWith(sseConsumer("data:foo\n"))
 				.consumeNextWith(sseConsumer("data:bar\n"))
 				.expectComplete()
-				.verify(result);
+				.verify();
 	}
 
 	@Test
@@ -105,12 +103,11 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
 
 		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
-		ScriptedSubscriber
-				.<Publisher<DataBuffer>>create()
+		Verifier.create(result)
 				.consumeNextWith(sseConsumer("data:foo\ndata:bar\n"))
 				.consumeNextWith(sseConsumer("data:foo\ndata:baz\n"))
 				.expectComplete()
-				.verify(result);
+				.verify();
 	}
 
 	@Test
@@ -122,21 +119,20 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
 
 		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
-		ScriptedSubscriber
-				.<Publisher<DataBuffer>>create()
+		Verifier.create(result)
 				.consumeNextWith(sseConsumer("data:", "{\"foo\":\"foofoo\",\"bar\":\"barbar\"}", "\n"))
 				.consumeNextWith(sseConsumer("data:", "{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}", "\n"))
 				.expectComplete()
-				.verify(result);
+				.verify();
 	}
 
 	private Consumer<Publisher<DataBuffer>> sseConsumer(String... expected) {
 		return publisher -> {
-			ScriptedSubscriber.StepBuilder<DataBuffer> builder = ScriptedSubscriber.create();
+			Verifier.Step builder = Verifier.create(publisher);
 			for (String value : expected) {
 				builder = builder.consumeNextWith(stringConsumer(value));
 			}
-			builder.consumeNextWith(stringConsumer("\n")).expectComplete().verify(publisher);
+			builder.consumeNextWith(stringConsumer("\n")).expectComplete().verify();
 		};
 	}
 

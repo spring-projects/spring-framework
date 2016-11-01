@@ -22,7 +22,7 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
@@ -73,22 +73,20 @@ public class ResourceHttpMessageWriterTests {
 		Mono<Void> mono = this.writer.write(Mono.just(resource), null,
 				ResolvableType.forClass(Resource.class),
 				MediaType.TEXT_PLAIN, this.request, this.response, Collections.emptyMap());
-		ScriptedSubscriber
-				.<Void>create()
+		Verifier.create(mono)
 				.expectNextCount(0)
 				.expectComplete()
-				.verify(mono);
+				.verify();
 
 		assertThat(this.response.getHeaders().getContentType(), is(MediaType.TEXT_PLAIN));
 		assertThat(this.response.getHeaders().getContentLength(), is(39L));
 		assertThat(this.response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES), is("bytes"));
 
 		Mono<String> result = this.response.getBodyAsString();
-		ScriptedSubscriber
-				.<String>create()
+		Verifier.create(result)
 				.expectNext("Spring Framework test resource content.")
 				.expectComplete()
-				.verify(result);
+				.verify();
 	}
 
 	@Test
@@ -96,11 +94,10 @@ public class ResourceHttpMessageWriterTests {
 		this.request.getHeaders().setRange(Collections.singletonList(HttpRange.createByteRange(0, 5)));
 		Mono<Void> mono = this.writer.write(Mono.just(resource), null, ResolvableType.forClass(Resource.class),
 				MediaType.TEXT_PLAIN, this.request, this.response, Collections.emptyMap());
-		ScriptedSubscriber
-				.<Void>create()
+		Verifier.create(mono)
 				.expectNextCount(0)
 				.expectComplete()
-				.verify(mono);
+				.verify();
 
 		assertThat(this.response.getHeaders().getContentType(), is(MediaType.TEXT_PLAIN));
 		assertThat(this.response.getHeaders().getFirst(HttpHeaders.CONTENT_RANGE), is("bytes 0-5/39"));
@@ -108,11 +105,10 @@ public class ResourceHttpMessageWriterTests {
 		assertThat(this.response.getHeaders().getContentLength(), is(6L));
 
 		Mono<String> result = this.response.getBodyAsString();
-		ScriptedSubscriber
-				.<String>create()
+		Verifier.create(result)
 				.expectNext("Spring")
 				.expectComplete()
-				.verify(result);
+				.verify();
 	}
 
 	@Test
@@ -121,11 +117,10 @@ public class ResourceHttpMessageWriterTests {
 
 		Mono<Void> mono = this.writer.write(Mono.just(resource), null, ResolvableType.forClass(Resource.class),
 				MediaType.TEXT_PLAIN, this.request, this.response, Collections.emptyMap());
-		ScriptedSubscriber
-				.<Void>create()
+		Verifier.create(mono)
 				.expectNextCount(0)
 				.expectComplete()
-				.verify(mono);
+				.verify();
 
 		assertThat(this.response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES), is("bytes"));
 		assertThat(this.response.getStatusCode(), is(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE));

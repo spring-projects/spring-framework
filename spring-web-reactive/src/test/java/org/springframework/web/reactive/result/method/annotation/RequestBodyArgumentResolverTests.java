@@ -27,7 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 import rx.Observable;
 import rx.RxReactiveStreams;
 import rx.Single;
@@ -126,13 +126,15 @@ public class RequestBodyArgumentResolverTests {
 	public void emptyBodyWithMono() throws Exception {
 		ResolvableType type = forClassWithGenerics(Mono.class, String.class);
 
-		ScriptedSubscriber.<Void>create().expectNextCount(0)
+		Verifier.create((Mono<Void>) resolveValueWithEmptyBody(type, true))
+				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
-				.verify((Mono<Void>) resolveValueWithEmptyBody(type, true));
+				.verify();
 
-		ScriptedSubscriber.<Void>create().expectNextCount(0)
+		Verifier.create((Mono<Void>) resolveValueWithEmptyBody(type, false))
+				.expectNextCount(0)
 				.expectComplete()
-				.verify((Mono<Void>) resolveValueWithEmptyBody(type, false));
+				.verify();
 	}
 
 	@Test
@@ -140,13 +142,15 @@ public class RequestBodyArgumentResolverTests {
 	public void emptyBodyWithFlux() throws Exception {
 		ResolvableType type = forClassWithGenerics(Flux.class, String.class);
 
-		ScriptedSubscriber.<Void>create().expectNextCount(0)
+		Verifier.create((Flux<Void>) resolveValueWithEmptyBody(type, true))
+				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
-				.verify((Flux<Void>) resolveValueWithEmptyBody(type, true));
+				.verify();
 
-		ScriptedSubscriber.<Void>create().expectNextCount(0)
+		Verifier.create((Flux<Void>) resolveValueWithEmptyBody(type, false))
+				.expectNextCount(0)
 				.expectComplete()
-				.verify((Flux<Void>) resolveValueWithEmptyBody(type, false));
+				.verify();
 	}
 
 	@Test
@@ -154,14 +158,16 @@ public class RequestBodyArgumentResolverTests {
 		ResolvableType type = forClassWithGenerics(Single.class, String.class);
 
 		Single<String> single = resolveValueWithEmptyBody(type, true);
-		ScriptedSubscriber.<String>create().expectNextCount(0)
+		Verifier.create(RxReactiveStreams.toPublisher(single))
+				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
-				.verify(RxReactiveStreams.toPublisher(single));
+				.verify();
 
 		single = resolveValueWithEmptyBody(type, false);
-		ScriptedSubscriber.<String>create().expectNextCount(0)
+		Verifier.create(RxReactiveStreams.toPublisher(single))
+				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
-				.verify(RxReactiveStreams.toPublisher(single));
+				.verify();
 	}
 
 	@Test
@@ -169,14 +175,16 @@ public class RequestBodyArgumentResolverTests {
 		ResolvableType type = forClassWithGenerics(Maybe.class, String.class);
 
 		Maybe<String> maybe = resolveValueWithEmptyBody(type, true);
-		ScriptedSubscriber.<String>create().expectNextCount(0)
+		Verifier.create(maybe.toFlowable())
+				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
-				.verify(maybe.toFlowable());
+				.verify();
 
 		maybe = resolveValueWithEmptyBody(type, false);
-		ScriptedSubscriber.<String>create().expectNextCount(0)
+		Verifier.create(maybe.toFlowable())
+				.expectNextCount(0)
 				.expectComplete()
-				.verify(maybe.toFlowable());
+				.verify();
 	}
 
 	@Test
@@ -184,14 +192,16 @@ public class RequestBodyArgumentResolverTests {
 		ResolvableType type = forClassWithGenerics(Observable.class, String.class);
 
 		Observable<String> observable = resolveValueWithEmptyBody(type, true);
-		ScriptedSubscriber.<String>create().expectNextCount(0)
+		Verifier.create(RxReactiveStreams.toPublisher(observable))
+				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
-				.verify(RxReactiveStreams.toPublisher(observable));
+				.verify();
 
 		observable = resolveValueWithEmptyBody(type, false);
-		ScriptedSubscriber.<String>create().expectNextCount(0)
+		Verifier.create(RxReactiveStreams.toPublisher(observable))
+				.expectNextCount(0)
 				.expectComplete()
-				.verify(RxReactiveStreams.toPublisher(observable));
+				.verify();
 	}
 
 	@Test

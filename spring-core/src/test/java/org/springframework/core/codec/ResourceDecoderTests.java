@@ -21,7 +21,7 @@ import java.util.Collections;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
@@ -64,7 +64,7 @@ public class ResourceDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<Resource> result = this.decoder
 				.decode(source, ResolvableType.forClass(Resource.class), null, Collections.emptyMap());
 
-		ScriptedSubscriber.<Resource>create()
+		Verifier.create(result)
 				.consumeNextWith(resource -> {
 					try {
 						byte[] bytes = StreamUtils.copyToByteArray(resource.getInputStream());
@@ -75,7 +75,7 @@ public class ResourceDecoderTests extends AbstractDataBufferAllocatingTestCase {
 					}
 				})
 				.expectComplete()
-				.verify(result);
+				.verify();
 	}
 
 }

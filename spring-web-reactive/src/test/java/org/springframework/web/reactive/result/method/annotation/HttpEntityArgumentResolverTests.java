@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 import rx.Observable;
 import rx.RxReactiveStreams;
 import rx.Single;
@@ -130,7 +130,7 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(Mono.class, String.class));
 		HttpEntity<Mono<String>> entity = resolveValueWithEmptyBody(type);
 
-		ScriptedSubscriber.create().expectNextCount(0).expectComplete().verify(entity.getBody());
+		Verifier.create(entity.getBody()).expectNextCount(0).expectComplete().verify();
 	}
 
 	@Test
@@ -138,7 +138,7 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(Flux.class, String.class));
 		HttpEntity<Flux<String>> entity = resolveValueWithEmptyBody(type);
 
-		ScriptedSubscriber.create().expectNextCount(0).expectComplete().verify(entity.getBody());
+		Verifier.create(entity.getBody()).expectNextCount(0).expectComplete().verify();
 	}
 
 	@Test
@@ -146,10 +146,10 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(Single.class, String.class));
 		HttpEntity<Single<String>> entity = resolveValueWithEmptyBody(type);
 
-		ScriptedSubscriber
-				.create().expectNextCount(0)
+		Verifier.create(RxReactiveStreams.toPublisher(entity.getBody()))
+				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
-				.verify(RxReactiveStreams.toPublisher(entity.getBody()));
+				.verify();
 	}
 
 	@Test
@@ -157,10 +157,10 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(io.reactivex.Single.class, String.class));
 		HttpEntity<io.reactivex.Single<String>> entity = resolveValueWithEmptyBody(type);
 
-		ScriptedSubscriber
-				.create().expectNextCount(0)
+		Verifier.create(entity.getBody().toFlowable())
+				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
-				.verify(entity.getBody().toFlowable());
+				.verify();
 	}
 
 	@Test
@@ -168,10 +168,10 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(Maybe.class, String.class));
 		HttpEntity<Maybe<String>> entity = resolveValueWithEmptyBody(type);
 
-		ScriptedSubscriber
-				.create().expectNextCount(0)
+		Verifier.create(entity.getBody().toFlowable())
+				.expectNextCount(0)
 				.expectComplete()
-				.verify(entity.getBody().toFlowable());
+				.verify();
 	}
 
 	@Test
@@ -179,10 +179,10 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(Observable.class, String.class));
 		HttpEntity<Observable<String>> entity = resolveValueWithEmptyBody(type);
 
-		ScriptedSubscriber
-				.create().expectNextCount(0)
+		Verifier.create(RxReactiveStreams.toPublisher(entity.getBody()))
+				.expectNextCount(0)
 				.expectComplete()
-				.verify(RxReactiveStreams.toPublisher(entity.getBody()));
+				.verify();
 	}
 
 	@Test
@@ -190,10 +190,10 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(io.reactivex.Observable.class, String.class));
 		HttpEntity<io.reactivex.Observable<String>> entity = resolveValueWithEmptyBody(type);
 
-		ScriptedSubscriber
-				.create().expectNextCount(0)
+		Verifier.create(entity.getBody().toFlowable(BackpressureStrategy.BUFFER))
+				.expectNextCount(0)
 				.expectComplete()
-				.verify(entity.getBody().toFlowable(BackpressureStrategy.BUFFER));
+				.verify();
 	}
 
 	@Test
@@ -201,9 +201,10 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(Flowable.class, String.class));
 		HttpEntity<Flowable<String>> entity = resolveValueWithEmptyBody(type);
 
-		ScriptedSubscriber
-				.create().expectNextCount(0)
-				.expectComplete().verify(entity.getBody());
+		Verifier.create(entity.getBody())
+				.expectNextCount(0)
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
@@ -284,13 +285,12 @@ public class HttpEntityArgumentResolverTests {
 		HttpEntity<Flux<String>> httpEntity = resolveValue(type, body);
 
 		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
-		ScriptedSubscriber
-				.<String>create()
+		Verifier.create(httpEntity.getBody())
 				.expectNext("line1\n")
 				.expectNext("line2\n")
 				.expectNext("line3\n")
 				.expectComplete()
-				.verify(httpEntity.getBody());
+				.verify();
 	}
 
 	@Test

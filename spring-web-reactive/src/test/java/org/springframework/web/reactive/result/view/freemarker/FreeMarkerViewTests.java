@@ -25,7 +25,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.GenericApplicationContext;
@@ -123,12 +123,12 @@ public class FreeMarkerViewTests {
 		model.addAttribute("hello", "hi FreeMarker");
 		view.render(model, null, this.exchange);
 
-		ScriptedSubscriber.<DataBuffer>create()
+		Verifier.create(this.response.getBody())
 				.consumeNextWith(buf -> {
 					assertEquals("<html><body>hi FreeMarker</body></html>", asString(buf));
 				})
 				.expectComplete()
-				.verify(this.response.getBody());
+				.verify();
 	}
 
 

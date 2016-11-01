@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
@@ -67,7 +67,7 @@ public class ByteBufferEncoderTests extends AbstractDataBufferAllocatingTestCase
 		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory,
 				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
 				null, Collections.emptyMap());
-		ScriptedSubscriber.<DataBuffer>create()
+		Verifier.create(output)
 				.consumeNextWith(b -> {
 					byte[] buf = new byte[3];
 					b.read(buf);
@@ -79,7 +79,7 @@ public class ByteBufferEncoderTests extends AbstractDataBufferAllocatingTestCase
 					assertArrayEquals(barBytes, buf);
 				})
 				.expectComplete()
-				.verify(output);
+				.verify();
 	}
 
 }

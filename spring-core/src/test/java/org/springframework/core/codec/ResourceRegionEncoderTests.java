@@ -23,7 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
@@ -81,10 +81,10 @@ public class ResourceRegionEncoderTests extends AbstractDataBufferAllocatingTest
 				ResolvableType.forClass(ResourceRegion.class), MimeTypeUtils.APPLICATION_OCTET_STREAM
 				, Collections.emptyMap());
 
-		ScriptedSubscriber.<DataBuffer>create()
+		Verifier.create(result)
 				.consumeNextWith(stringConsumer("Spring"))
 				.expectComplete()
-				.verify(result);
+				.verify();
 	}
 
 	@Test
@@ -111,7 +111,7 @@ public class ResourceRegionEncoderTests extends AbstractDataBufferAllocatingTest
 					return previous;
 				});
 
-		ScriptedSubscriber.<DataBuffer>create()
+		Verifier.create(reduced)
 				.consumeNextWith(buf -> {
 					String content = DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8);
 					String[] ranges = StringUtils.tokenizeToStringArray(content, "\r\n",
@@ -138,7 +138,7 @@ public class ResourceRegionEncoderTests extends AbstractDataBufferAllocatingTest
 					assertArrayEquals(expected, ranges);
 				})
 				.expectComplete()
-				.verify(reduced);
+				.verify();
 	}
 
 }

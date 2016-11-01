@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
@@ -61,10 +61,10 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, null,
 				Collections.emptyMap());
 
-		ScriptedSubscriber.<Object>create()
+		Verifier.create(flux)
 				.expectNext(new Pojo("foofoo", "barbar"))
 				.expectComplete()
-				.verify(flux);
+				.verify();
 	}
 
 	@Test
@@ -76,10 +76,10 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 		Mono<Object> mono = new Jackson2JsonDecoder().decodeToMono(source, elementType,
 				null, Collections.emptyMap());
 
-		ScriptedSubscriber.<Object>create()
+		Verifier.create(mono)
 				.expectNext(Arrays.asList(new Pojo("f1", "b1"), new Pojo("f2", "b2")))
 				.expectComplete()
-				.verify(mono);
+				.verify();
 	}
 
 	@Test
@@ -91,11 +91,11 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, null,
 				Collections.emptyMap());
 
-		ScriptedSubscriber.<Object>create()
+		Verifier.create(flux)
 				.expectNext(new Pojo("f1", "b1"))
 				.expectNext(new Pojo("f2", "b2"))
 				.expectComplete()
-				.verify(flux);
+				.verify();
 	}
 
 	@Test
@@ -107,14 +107,14 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 		Flux<JacksonViewBean> flux = new Jackson2JsonDecoder()
 				.decode(source, elementType, null, hints).cast(JacksonViewBean.class);
 
-		ScriptedSubscriber.<JacksonViewBean>create()
+		Verifier.create(flux)
 				.consumeNextWith(b -> {
 					assertTrue(b.getWithView1().equals("with"));
 					assertNull(b.getWithView2());
 					assertNull(b.getWithoutView());
 				})
 				.expectComplete()
-				.verify(flux);
+				.verify();
 	}
 
 	@Test
@@ -124,10 +124,10 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 		Mono<Object> mono = new Jackson2JsonDecoder().decodeToMono(source, elementType,
 				null, Collections.emptyMap());
 
-		ScriptedSubscriber.
-				<Object>create().expectNextCount(0)
+		Verifier.create(mono)
+				.expectNextCount(0)
 				.expectComplete()
-				.verify(mono);
+				.verify();
 	}
 
 

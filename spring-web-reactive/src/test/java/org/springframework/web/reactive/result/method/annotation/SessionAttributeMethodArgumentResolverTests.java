@@ -21,7 +21,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -96,7 +96,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 	public void resolve() throws Exception {
 		MethodParameter param = initMethodParameter(0);
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
-		ScriptedSubscriber.create().expectError(ServerWebInputException.class).verify(mono);
+		Verifier.create(mono).expectError(ServerWebInputException.class).verify();
 
 		Foo foo = new Foo();
 		when(this.session.getAttribute("foo")).thenReturn(Optional.of(foo));

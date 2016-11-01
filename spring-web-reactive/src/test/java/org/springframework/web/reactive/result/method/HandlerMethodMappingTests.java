@@ -26,7 +26,7 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -100,7 +100,7 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping("/fo?", this.handler, this.method2);
 		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, "/foo"));
 
-		ScriptedSubscriber.create().expectError(IllegalStateException.class).verify(result);
+		Verifier.create(result).expectError(IllegalStateException.class).verify();
 	}
 
 	@Test

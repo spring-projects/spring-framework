@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.StringDecoder;
@@ -80,10 +80,10 @@ public class BodyExtractorsTests {
 
 		Mono<String> result = extractor.extract(request, this.context);
 
-		ScriptedSubscriber.<String>create()
+		Verifier.create(result)
 				.expectNext("foo")
 				.expectComplete()
-				.verify(result);
+				.verify();
 	}
 
 	@Test
@@ -100,10 +100,10 @@ public class BodyExtractorsTests {
 
 		Flux<String> result = extractor.extract(request, this.context);
 
-		ScriptedSubscriber.<String>create()
+		Verifier.create(result)
 				.expectNext("foo")
 				.expectComplete()
-				.verify(result);
+				.verify();
 	}
 
 	@Test
@@ -127,9 +127,9 @@ public class BodyExtractorsTests {
 		};
 
 		Flux<String> result = extractor.extract(request, emptyContext);
-		ScriptedSubscriber.create()
+		Verifier.create(result)
 				.expectError(UnsupportedMediaTypeException.class)
-				.verify(result);
+				.verify();
 	}
 
 }

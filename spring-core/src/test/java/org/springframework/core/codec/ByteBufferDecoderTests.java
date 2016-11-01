@@ -22,7 +22,7 @@ import java.util.Collections;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
@@ -58,9 +58,9 @@ public class ByteBufferDecoderTests extends AbstractDataBufferAllocatingTestCase
 				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
 				null, Collections.emptyMap());
 
-		ScriptedSubscriber.<ByteBuffer>create()
+		Verifier.create(output)
 				.expectNext(ByteBuffer.wrap("foo".getBytes()), ByteBuffer.wrap("bar".getBytes()))
 				.expectComplete()
-				.verify(output);
+				.verify();
 	}
 }

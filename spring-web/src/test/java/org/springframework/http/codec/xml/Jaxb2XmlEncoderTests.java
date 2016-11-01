@@ -21,7 +21,7 @@ import java.util.Collections;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
@@ -69,8 +69,7 @@ public class Jaxb2XmlEncoderTests extends AbstractDataBufferAllocatingTestCase {
 				ResolvableType.forClass(Pojo.class),
 				MediaType.APPLICATION_XML, Collections.emptyMap());
 
-		ScriptedSubscriber
-				.<DataBuffer>create()
+		Verifier.create(output)
 				.consumeNextWith(dataBuffer -> {
 					try {
 						String s = DataBufferTestUtils
@@ -83,7 +82,7 @@ public class Jaxb2XmlEncoderTests extends AbstractDataBufferAllocatingTestCase {
 					}
 				})
 				.expectComplete()
-				.verify(output);
+				.verify();
 	}
 
 }
