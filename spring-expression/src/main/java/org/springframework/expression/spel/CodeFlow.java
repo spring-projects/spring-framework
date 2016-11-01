@@ -100,6 +100,15 @@ public class CodeFlow implements Opcodes {
 	}
 
 	/**
+	 * Push the bytecode to load the EvaluationContext (the second parameter passed to
+	 * the compiled expression method).
+	 * @param mv the visitor into which the load instruction should be inserted
+	 */
+	public void loadEvaluationContext(MethodVisitor mv) {
+		mv.visitVarInsn(ALOAD, 2);
+	}
+
+	/**
 	 * Record the descriptor for the most recently evaluated expression element.
 	 * @param descriptor type descriptor for most recently evaluated element
 	 */

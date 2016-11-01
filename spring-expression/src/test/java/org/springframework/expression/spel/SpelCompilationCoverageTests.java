@@ -1335,8 +1335,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	public void opEq() throws Exception {
 		String tvar = "35";
 		expression = parse("#root == 35");
-		Boolean bb = (Boolean)expression.getValue(tvar);
-		System.out.println(bb);
 		assertFalse((Boolean)expression.getValue(tvar));
 		assertCanCompile(expression);
 		assertFalse((Boolean)expression.getValue(tvar));
@@ -1621,6 +1619,122 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertTrue((Boolean)expression.getValue());
 		assertCanCompile(expression);
 		assertTrue((Boolean)expression.getValue());
+	}
+
+	@Test
+	public void opNe_SPR14863() throws Exception {
+		// First part is from the test case specified in the bug report
+		Map<String, String> data = new HashMap<>();
+        data.put("my-key", new String("my-value"));
+        StandardEvaluationContext context = new StandardEvaluationContext(new MyContext(data));
+        SpelParserConfiguration configuration = new SpelParserConfiguration(SpelCompilerMode.MIXED,
+                                                                            ClassLoader.getSystemClassLoader());
+        SpelExpressionParser parser = new SpelExpressionParser(configuration);
+        Expression expression = parser.parseExpression("data['my-key'] != 'my-value'");
+        assertFalse(expression.getValue(context, Boolean.class));
+        assertCanCompile(expression);
+        ((SpelExpression) expression).compileExpression();
+        assertFalse(expression.getValue(context, Boolean.class));
+
+        List<String> ls = new ArrayList<String>();
+        ls.add(new String("foo"));
+        context = new StandardEvaluationContext(ls);
+        expression = parse("get(0) != 'foo'");
+        assertFalse(expression.getValue(context, Boolean.class));
+        assertCanCompile(expression);
+        assertFalse(expression.getValue(context, Boolean.class));
+        
+        ls.remove(0);
+        ls.add("goo");
+        assertTrue(expression.getValue(context, Boolean.class));
+	}
+	
+    @Test
+    public void opEq_SPR14863() throws Exception {
+        // Exercise the comparator invocation code that runs in
+        // equalityCheck() (called from interpreted and compiled code)
+        expression = parser.parseExpression("#aa==#bb");
+        StandardEvaluationContext sec = new StandardEvaluationContext();
+        Apple aa = new Apple(1);
+        Apple bb = new Apple(2);
+        sec.setVariable("aa",aa);
+        sec.setVariable("bb",bb);
+        boolean b = expression.getValue(sec,Boolean.class);
+        // Verify what the expression caused aa to be compared to
+        assertEquals(bb,aa.gotComparedTo);
+        assertFalse(b);
+        bb.setValue(1);
+        b = expression.getValue(sec,Boolean.class);
+        assertEquals(bb,aa.gotComparedTo);
+        assertTrue(b);
+        
+        assertCanCompile(expression);
+        
+        // Similar test with compiled expression
+        aa = new Apple(99);
+        bb = new Apple(100);
+        sec.setVariable("aa",aa);
+        sec.setVariable("bb",bb);
+        b = expression.getValue(sec,Boolean.class);
+        assertFalse(b);
+        assertEquals(bb,aa.gotComparedTo);
+        bb.setValue(99);
+        b = expression.getValue(sec,Boolean.class);
+        assertTrue(b);
+        assertEquals(bb,aa.gotComparedTo);
+        
+
+        List<String> ls = new ArrayList<String>();
+        ls.add(new String("foo"));
+        StandardEvaluationContext context = new StandardEvaluationContext(ls);
+        expression = parse("get(0) == 'foo'");
+        assertTrue(expression.getValue(context, Boolean.class));
+        assertCanCompile(expression);
+        assertTrue(expression.getValue(context, Boolean.class));
+        
+        ls.remove(0);
+        ls.add("goo");
+        assertFalse(expression.getValue(context, Boolean.class));
+    }
+	
+	public static class Apple implements Comparable<Apple> {
+		public Object gotComparedTo = null;
+		public int i;
+
+		public Apple(int i) {
+			this.i = i;
+		}
+		
+		public void setValue(int i) {
+			this.i = i;
+		}
+
+		@Override
+		public int compareTo(Apple that) {
+			this.gotComparedTo = that;
+			if (this.i<that.i) {
+				return -1;
+			} else if (this.i>that.i) {
+				return +1;
+			} else {
+				return 0;
+			}
+		}
+		
+	}
+	
+	// For opNe_SPR14863
+	public static class MyContext {
+
+        private final Map<String, String> data;
+
+        public MyContext(Map<String, String> data) {
+            this.data = data;
+        }
+
+        public Map<String, String> getData() {
+            return data;
+        }
 	}
 
 	@Test
@@ -3901,7 +4015,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		m.put("andy","778");
 
 		expression = parse("['andy']==null?1:2");
-		System.out.println(expression.getValue(m));
+		assertEquals(2,expression.getValue(m));
 		assertCanCompile(expression);
 		assertEquals(2,expression.getValue(m));
 		m.remove("andy");
