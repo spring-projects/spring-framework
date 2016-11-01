@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -527,10 +527,10 @@ public class ResourceWebHandlerTests {
 		this.request.addHeader("Range", "bytes= foo bar");
 		this.exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
 
-		ScriptedSubscriber.create()
+		Verifier.create(this.handler.handle(this.exchange))
 				.expectNextCount(0)
 				.expectComplete()
-				.verify(this.handler.handle(this.exchange));
+				.verify();
 
 		assertEquals(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE, this.response.getStatusCode());
 		assertEquals("bytes", this.response.getHeaders().getFirst("Accept-Ranges"));
@@ -555,7 +555,7 @@ public class ResourceWebHandlerTests {
 					return previous;
 				});
 
-		ScriptedSubscriber.<DataBuffer>create()
+		Verifier.create(reduced)
 				.consumeNextWith(buf -> {
 					String content = DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8);
 					String[] ranges = StringUtils.tokenizeToStringArray(content, "\r\n", false, true);
@@ -576,7 +576,7 @@ public class ResourceWebHandlerTests {
 					assertEquals("t.", ranges[11]);
 				})
 				.expectComplete()
-				.verify(reduced);
+				.verify();
 	}
 
 	@Test  // SPR-14005
@@ -598,11 +598,11 @@ public class ResourceWebHandlerTests {
 	}
 
 	private void assertResponseBody(String responseBody) {
-		ScriptedSubscriber.<DataBuffer>create()
+		Verifier.create(this.response.getBody())
 				.consumeNextWith(buf -> assertEquals(responseBody,
 						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)))
 				.expectComplete()
-				.verify(this.response.getBody());
+				.verify();
 	}
 
 }

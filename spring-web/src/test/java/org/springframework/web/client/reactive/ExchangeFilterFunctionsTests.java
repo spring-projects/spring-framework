@@ -20,7 +20,7 @@ import java.util.Optional;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -97,10 +97,10 @@ public class ExchangeFilterFunctionsTests {
 
 		Mono<ClientResponse> result = standardErrors.filter(request, exchange);
 
-		ScriptedSubscriber.<ClientResponse>create()
+		Verifier.create(result)
 				.expectNext(response)
 				.expectComplete()
-				.verify(result);
+				.verify();
 	}
 
 	@Test
@@ -114,9 +114,9 @@ public class ExchangeFilterFunctionsTests {
 
 		Mono<ClientResponse> result = standardErrors.filter(request, exchange);
 
-		ScriptedSubscriber.<ClientResponse>create()
+		Verifier.create(result)
 				.expectError(WebClientException.class)
-				.verify(result);
+				.verify();
 	}
 
 	@Test
@@ -131,9 +131,9 @@ public class ExchangeFilterFunctionsTests {
 
 		Mono<ClientResponse> result = errorPredicate.filter(request, exchange);
 
-		ScriptedSubscriber.<ClientResponse>create()
+		Verifier.create(result)
 				.expectError(WebClientException.class)
-				.verify(result);
+				.verify();
 	}
 
 
@@ -148,9 +148,9 @@ public class ExchangeFilterFunctionsTests {
 
 		Mono<ClientResponse> result = errorMapper.filter(request, exchange);
 
-		ScriptedSubscriber.<ClientResponse>create()
+		Verifier.create(result)
 				.expectError(IllegalStateException.class)
-				.verify(result);
+				.verify();
 	}
 
 

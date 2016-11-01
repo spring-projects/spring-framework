@@ -33,7 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 import rx.Completable;
 import rx.Observable;
 
@@ -137,7 +137,7 @@ public class MessageWriterResultHandlerTests {
 		HttpMessageWriter<?> writer = new EncoderHttpMessageWriter<>(new ByteBufferEncoder());
 		Mono<Void> mono = createResultHandler(writer).writeBody(body, returnType(type), this.exchange);
 
-		ScriptedSubscriber.create().expectError(IllegalStateException.class).verify(mono);
+		Verifier.create(mono).expectError(IllegalStateException.class).verify();
 	}
 
 	@Test  // SPR-12811
@@ -194,11 +194,11 @@ public class MessageWriterResultHandlerTests {
 	}
 
 	private void assertResponseBody(String responseBody) {
-		ScriptedSubscriber.<DataBuffer>create()
+		Verifier.create(this.response.getBody())
 				.consumeNextWith(buf -> assertEquals(responseBody,
 						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)))
 				.expectComplete()
-				.verify(this.response.getBody());
+				.verify();
 	}
 
 

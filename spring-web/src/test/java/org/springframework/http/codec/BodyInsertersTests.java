@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
@@ -85,14 +85,14 @@ public class BodyInsertersTests {
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
-		ScriptedSubscriber.create().expectComplete().verify(result);
+		Verifier.create(result).expectComplete().verify();
 
 		ByteBuffer byteBuffer = ByteBuffer.wrap(body.getBytes(UTF_8));
 		DataBuffer buffer = new DefaultDataBufferFactory().wrap(byteBuffer);
-		ScriptedSubscriber.<DataBuffer>create()
+		Verifier.create(response.getBody())
 				.expectNext(buffer)
 				.expectComplete()
-				.verify(response.getBody());
+				.verify();
 	}
 
 	@Test
@@ -104,14 +104,14 @@ public class BodyInsertersTests {
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
-		ScriptedSubscriber.create().expectComplete().verify(result);
+		Verifier.create(result).expectComplete().verify();
 
 		ByteBuffer byteBuffer = ByteBuffer.wrap("foo".getBytes(UTF_8));
 		DataBuffer buffer = new DefaultDataBufferFactory().wrap(byteBuffer);
-		ScriptedSubscriber.<DataBuffer>create()
+		Verifier.create(response.getBody())
 				.expectNext(buffer)
 				.expectComplete()
-				.verify(response.getBody());
+				.verify();
 	}
 
 	@Test
@@ -123,18 +123,18 @@ public class BodyInsertersTests {
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
-		ScriptedSubscriber.create().expectComplete().verify(result);
+		Verifier.create(result).expectComplete().verify();
 
 		byte[] expectedBytes = Files.readAllBytes(body.getFile().toPath());
 
-		ScriptedSubscriber.<DataBuffer>create()
+		Verifier.create(response.getBody())
 				.consumeNextWith(dataBuffer -> {
 					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
 					dataBuffer.read(resultBytes);
 					assertArrayEquals(expectedBytes, resultBytes);
 				})
 				.expectComplete()
-				.verify(response.getBody());
+				.verify();
 	}
 
 	@Test
@@ -148,7 +148,7 @@ public class BodyInsertersTests {
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
-		ScriptedSubscriber.create().expectNextCount(0).expectComplete().verify(result);
+		Verifier.create(result).expectNextCount(0).expectComplete().verify();
 	}
 
 	@Test
@@ -161,7 +161,7 @@ public class BodyInsertersTests {
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
-		ScriptedSubscriber.create().expectNextCount(0).expectComplete().verify(result);
+		Verifier.create(result).expectNextCount(0).expectComplete().verify();
 	}
 
 }

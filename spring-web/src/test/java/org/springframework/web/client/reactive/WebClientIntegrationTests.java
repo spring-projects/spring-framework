@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -70,14 +70,14 @@ public class WebClientIntegrationTests {
 				.exchange(request)
 				.map(response -> response.headers().asHttpHeaders());
 
-		ScriptedSubscriber.<HttpHeaders>create()
+		Verifier.create(result)
 				.consumeNextWith(
 						httpHeaders -> {
 							assertEquals(MediaType.TEXT_PLAIN, httpHeaders.getContentType());
 							assertEquals(13L, httpHeaders.getContentLength());
 						})
 				.expectComplete()
-				.verify(result);
+				.verify();
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -98,11 +98,10 @@ public class WebClientIntegrationTests {
 				.exchange(request)
 				.then(response -> response.body(toMono(String.class)));
 
-		ScriptedSubscriber
-				.<String>create()
+		Verifier.create(result)
 				.expectNext("Hello Spring!")
 				.expectComplete()
-				.verify(result);
+				.verify();
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -121,11 +120,10 @@ public class WebClientIntegrationTests {
 		Mono<String> result = this.webClient
 				.retrieveMono(request, String.class);
 
-		ScriptedSubscriber
-				.<String>create()
+		Verifier.create(result)
 				.expectNext("Hello Spring!")
 				.expectComplete()
-				.verify(result);
+				.verify();
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -143,11 +141,10 @@ public class WebClientIntegrationTests {
 		Flux<String> result = this.webClient
 				.retrieveFlux(request, String.class);
 
-		ScriptedSubscriber
-				.<String>create()
+		Verifier.create(result)
 				.expectNext("Hello Spring!")
 				.expectComplete()
-				.verify(result);
+				.verify();
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -170,11 +167,10 @@ public class WebClientIntegrationTests {
 				.exchange(request)
 				.then(response -> response.body(toMono(String.class)));
 
-		ScriptedSubscriber
-				.<String>create()
+		Verifier.create(result)
 				.expectNext(content)
 				.expectComplete()
-				.verify(result);
+				.verify();
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -196,11 +192,10 @@ public class WebClientIntegrationTests {
 				.exchange(request)
 				.then(response -> response.body(toMono(Pojo.class)));
 
-		ScriptedSubscriber
-				.<Pojo>create()
+		Verifier.create(result)
 				.consumeNextWith(p -> assertEquals("barbar", p.getBar()))
 				.expectComplete()
-				.verify(result);
+				.verify();
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -222,12 +217,11 @@ public class WebClientIntegrationTests {
 				.exchange(request)
 				.flatMap(response -> response.body(toFlux(Pojo.class)));
 
-		ScriptedSubscriber
-				.<Pojo>create()
+		Verifier.create(result)
 				.consumeNextWith(p -> assertThat(p.getBar(), Matchers.is("bar1")))
 				.consumeNextWith(p -> assertThat(p.getBar(), Matchers.is("bar2")))
 				.expectComplete()
-				.verify(result);
+				.verify();
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -252,11 +246,10 @@ public class WebClientIntegrationTests {
 				.exchange(request)
 				.then(response -> response.body(BodyExtractors.toMono(Pojo.class)));
 
-		ScriptedSubscriber
-				.<Pojo>create()
+		Verifier.create(result)
 				.consumeNextWith(p -> assertEquals("BARBAR", p.getBar()))
 				.expectComplete()
-				.verify(result);
+				.verify();
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -281,11 +274,10 @@ public class WebClientIntegrationTests {
 				.exchange(request)
 				.then(response -> response.body(toMono(String.class)));
 
-		ScriptedSubscriber
-				.<String>create()
+		Verifier.create(result)
 				.expectNext("test")
 				.expectComplete()
-				.verify(result);
+				.verify();
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -304,13 +296,12 @@ public class WebClientIntegrationTests {
 		Mono<ClientResponse> result = this.webClient
 				.exchange(request);
 
-		ScriptedSubscriber
-				.<ClientResponse>create()
+		Verifier.create(result)
 				.consumeNextWith(response -> {
 					assertEquals(HttpStatus.NOT_FOUND, response.statusCode());
 				})
 				.expectComplete()
-				.verify(result, Duration.ofSeconds(3));
+				.verify(Duration.ofSeconds(3));
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -329,10 +320,9 @@ public class WebClientIntegrationTests {
 		Mono<String> result = this.webClient
 				.retrieveMono(request, String.class);
 
-		ScriptedSubscriber
-				.<String>create()
+		Verifier.create(result)
 				.expectError(WebClientException.class)
-				.verify(result, Duration.ofSeconds(3));
+				.verify(Duration.ofSeconds(3));
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -351,10 +341,9 @@ public class WebClientIntegrationTests {
 		Mono<String> result = this.webClient
 				.retrieveMono(request, String.class);
 
-		ScriptedSubscriber
-				.<String>create()
+		Verifier.create(result)
 				.expectError(WebClientException.class)
-				.verify(result, Duration.ofSeconds(3));
+				.verify(Duration.ofSeconds(3));
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -380,11 +369,10 @@ public class WebClientIntegrationTests {
 		Mono<String> result = filteredClient.exchange(request)
 				.then(response -> response.body(toMono(String.class)));
 
-		ScriptedSubscriber
-				.<String>create()
+		Verifier.create(result)
 				.expectNext("Hello Spring!")
 				.expectComplete()
-				.verify(result);
+				.verify();
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());

@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -155,12 +155,12 @@ public class HttpMessageWriterViewTests {
 
 		this.view.render(this.model, MediaType.APPLICATION_JSON, exchange);
 
-		ScriptedSubscriber.<DataBuffer>create()
+		Verifier.create(response.getBody())
 				.consumeNextWith( buf -> assertEquals("{\"foo\":\"f\",\"bar\":\"b\"}",
 						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8))
 				)
 				.expectComplete()
-				.verify(response.getBody());
+				.verify();
 	}
 
 

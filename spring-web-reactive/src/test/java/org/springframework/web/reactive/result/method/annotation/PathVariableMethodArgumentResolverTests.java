@@ -24,7 +24,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
@@ -134,20 +134,21 @@ public class PathVariableMethodArgumentResolverTests {
 	public void handleMissingValue() throws Exception {
 		BindingContext bindingContext = new BindingContext();
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramNamedString, bindingContext, this.exchange);
-		ScriptedSubscriber
-				.create().expectNextCount(0)
+		Verifier.create(mono)
+				.expectNextCount(0)
 				.expectError(ServerErrorException.class)
-				.verify(mono);
+				.verify();
 	}
 
 	@Test
 	public void nullIfNotRequired() throws Exception {
 		BindingContext bindingContext = new BindingContext();
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramNotRequired, bindingContext, this.exchange);
-		ScriptedSubscriber
-				.create().expectNextCount(0)
+		Verifier
+				.create(mono)
+				.expectNextCount(0)
 				.expectComplete()
-				.verify(mono);
+				.verify();
 	}
 
 	@Test
@@ -155,13 +156,13 @@ public class PathVariableMethodArgumentResolverTests {
 		BindingContext bindingContext = new BindingContext();
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramOptional, bindingContext, this.exchange);
 
-		ScriptedSubscriber.create()
+		Verifier.create(mono)
 				.consumeNextWith(value -> {
 					assertTrue(value instanceof Optional);
 					assertFalse(((Optional) value).isPresent());
 				})
 				.expectComplete()
-				.verify(mono);
+				.verify();
 	}
 
 

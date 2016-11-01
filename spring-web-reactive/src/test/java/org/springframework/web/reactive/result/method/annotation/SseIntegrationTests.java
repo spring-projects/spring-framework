@@ -32,7 +32,7 @@ import org.springframework.http.codec.BodyExtractors;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.reactive.ClientRequest;
@@ -87,11 +87,11 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.map(s -> (s.replace("\n", "")))
 				.take(2);
 
-		ScriptedSubscriber.<String>create()
+		Verifier.create(result)
 				.expectNext("data:foo 0")
 				.expectNext("data:foo 1")
 				.expectComplete()
-				.verify(result, Duration.ofSeconds(5L));
+				.verify(Duration.ofSeconds(5L));
 	}
 	@Test
 	public void sseAsPerson() throws Exception {
@@ -109,10 +109,10 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.takeUntil(s -> s.endsWith("foo 1\"}"))
 				.reduce((s1, s2) -> s1 + s2);
 
-		ScriptedSubscriber.<String>create()
+		Verifier.create(result)
 				.expectNext("data:{\"name\":\"foo 0\"}data:{\"name\":\"foo 1\"}")
 				.expectComplete()
-				.verify(result, Duration.ofSeconds(5L));
+				.verify(Duration.ofSeconds(5L));
 	}
 
 	@Test
@@ -129,11 +129,11 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.map(s -> s.replace("\n", ""))
 				.take(2);
 
-		ScriptedSubscriber.<String>create()
+		Verifier.create(result)
 				.expectNext("id:0:bardata:foo")
 				.expectNext("id:1:bardata:foo")
 				.expectComplete()
-				.verify(result, Duration.ofSeconds(5L));
+				.verify(Duration.ofSeconds(5L));
 	}
 
 	@Test
@@ -151,11 +151,11 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.map(s -> s.replace("\n", ""))
 				.take(2);
 
-		ScriptedSubscriber.<String>create()
+		Verifier.create(result)
 				.expectNext("id:0:bardata:foo")
 				.expectNext("id:1:bardata:foo")
 				.expectComplete()
-				.verify(result, Duration.ofSeconds(5L));
+				.verify(Duration.ofSeconds(5L));
 	}
 
 	@RestController

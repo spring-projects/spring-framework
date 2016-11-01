@@ -21,7 +21,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -89,9 +89,10 @@ public class RequestAttributeMethodArgumentResolverTests {
 	public void resolve() throws Exception {
 		MethodParameter param = initMethodParameter(0);
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
-		ScriptedSubscriber.create().expectNextCount(0)
+		Verifier.create(mono)
+				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
-				.verify(mono);
+				.verify();
 
 		Foo foo = new Foo();
 		this.exchange.getAttributes().put("foo", foo);

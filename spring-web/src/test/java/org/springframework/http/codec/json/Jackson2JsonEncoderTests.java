@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
@@ -65,8 +65,7 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 		ResolvableType type = ResolvableType.forClass(Pojo.class);
 		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null, Collections.emptyMap());
 
-		ScriptedSubscriber
-				.<DataBuffer>create()
+		Verifier.create(output)
 				.consumeNextWith(stringConsumer("["))
 				.consumeNextWith(stringConsumer("{\"foo\":\"foo\",\"bar\":\"bar\"}"))
 				.consumeNextWith(stringConsumer(","))
@@ -75,7 +74,7 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 				.consumeNextWith(stringConsumer("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"))
 				.consumeNextWith(stringConsumer("]"))
 				.expectComplete()
-				.verify(output);
+				.verify();
 	}
 
 	@Test
@@ -84,15 +83,14 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 		ResolvableType type = ResolvableType.forClass(ParentClass.class);
 		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null, Collections.emptyMap());
 
-		ScriptedSubscriber
-				.<DataBuffer>create()
+		Verifier.create(output)
 				.consumeNextWith(stringConsumer("["))
 				.consumeNextWith(stringConsumer("{\"type\":\"foo\"}"))
 				.consumeNextWith(stringConsumer(","))
 				.consumeNextWith(stringConsumer("{\"type\":\"bar\"}"))
 				.consumeNextWith(stringConsumer("]"))
 				.expectComplete()
-				.verify(output);
+				.verify();
 	}
 
 	@Test
@@ -106,11 +104,10 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 		Map<String, Object> hints = Collections.singletonMap(Jackson2JsonEncoder.JSON_VIEW_HINT, MyJacksonView1.class);
 		Flux<DataBuffer> output = this.encoder.encode(Mono.just(bean), this.bufferFactory, type, null, hints);
 
-		ScriptedSubscriber
-				.<DataBuffer>create()
+		Verifier.create(output)
 				.consumeNextWith(stringConsumer("{\"withView1\":\"with\"}"))
 				.expectComplete()
-				.verify(output);
+				.verify();
 	}
 
 

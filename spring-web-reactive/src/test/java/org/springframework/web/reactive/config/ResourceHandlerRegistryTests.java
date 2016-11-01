@@ -24,7 +24,7 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.context.support.GenericApplicationContext;
@@ -100,11 +100,11 @@ public class ResourceHandlerRegistryTests {
 		ResourceWebHandler handler = getHandler("/resources/**");
 		handler.handle(this.exchange).blockMillis(5000);
 
-		ScriptedSubscriber.<DataBuffer>create()
+		Verifier.create(this.response.getBody())
 				.consumeNextWith(buf -> assertEquals("test stylesheet content",
 						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)))
 				.expectComplete()
-				.verify(this.response.getBody());
+				.verify();
 	}
 
 	@Test

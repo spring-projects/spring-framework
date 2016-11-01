@@ -31,7 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 import rx.Completable;
 import rx.Single;
 
@@ -204,9 +204,10 @@ public class ViewResolutionResultHandlerTests {
 		this.request.setUri("/path");
 		Mono<Void> mono = createResultHandler().handleResult(this.exchange, handlerResult);
 
-		ScriptedSubscriber.create().expectNextCount(0)
+		Verifier.create(mono)
+				.expectNextCount(0)
 				.expectErrorWith(err -> err.getMessage().equals("Could not resolve view with name 'account'."))
-				.verify(mono);
+				.verify();
 	}
 
 	@Test
@@ -239,9 +240,10 @@ public class ViewResolutionResultHandlerTests {
 
 		ViewResolutionResultHandler resultHandler = createResultHandler(new TestViewResolver("account"));
 		Mono<Void> mono = resultHandler.handleResult(this.exchange, handlerResult);
-		ScriptedSubscriber.create().expectNextCount(0)
+		Verifier.create(mono)
+				.expectNextCount(0)
 				.expectError(NotAcceptableStatusException.class)
-				.verify(mono);
+				.verify();
 	}
 
 
@@ -291,11 +293,11 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	private void assertResponseBody(String responseBody) {
-		ScriptedSubscriber.<DataBuffer>create()
+		Verifier.create(this.response.getBody())
 				.consumeNextWith(buf -> assertEquals(responseBody,
 						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)))
 				.expectComplete()
-				.verify(this.response.getBody());
+				.verify();
 	}
 
 

@@ -23,7 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.ScriptedSubscriber;
+import reactor.test.subscriber.Verifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -99,13 +99,13 @@ public class DispatcherHandlerErrorTests {
 		this.request.setUri("/does-not-exist");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
-		ScriptedSubscriber.<Void>create()
+		Verifier.create(publisher)
 				.consumeErrorWith(error -> {
 					assertThat(error, instanceOf(ResponseStatusException.class));
 					assertThat(error.getMessage(),
 							is("Request failure [status: 404, reason: \"No matching handler\"]"));
 				})
-				.verify(publisher);
+				.verify();
 	}
 
 	@Test
@@ -113,12 +113,12 @@ public class DispatcherHandlerErrorTests {
 		this.request.setUri("/unknown-argument-type");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
-		ScriptedSubscriber.<Void>create()
+		Verifier.create(publisher)
 				.consumeErrorWith(error -> {
 					assertThat(error, instanceOf(IllegalStateException.class));
 					assertThat(error.getMessage(), startsWith("No resolver for argument [0]"));
 				})
-				.verify(publisher);
+				.verify();
 	}
 
 	@Test
@@ -126,11 +126,11 @@ public class DispatcherHandlerErrorTests {
 		this.request.setUri("/error-signal");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
-		ScriptedSubscriber.<Void>create()
+		Verifier.create(publisher)
 				.consumeErrorWith(error -> {
 					assertSame(EXCEPTION, error);
 				})
-				.verify(publisher);
+				.verify();
 	}
 
 	@Test
@@ -138,11 +138,11 @@ public class DispatcherHandlerErrorTests {
 		this.request.setUri("/raise-exception");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
-		ScriptedSubscriber.<Void>create()
+		Verifier.<Void>create(publisher)
 				.consumeErrorWith(error -> {
 					assertSame(EXCEPTION, error);
 				})
-				.verify(publisher);
+				.verify();
 	}
 
 	@Test
@@ -150,12 +150,12 @@ public class DispatcherHandlerErrorTests {
 		this.request.setUri("/unknown-return-type");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
-		ScriptedSubscriber.<Void>create()
+		Verifier.create(publisher)
 				.consumeErrorWith(error -> {
 					assertThat(error, instanceOf(IllegalStateException.class));
 					assertThat(error.getMessage(), startsWith("No HandlerResultHandler"));
 				})
-				.verify(publisher);
+				.verify();
 	}
 
 	@Test
@@ -163,11 +163,11 @@ public class DispatcherHandlerErrorTests {
 		this.request.setUri("/request-body").setHeader("Accept", "application/json").setBody("body");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
-		ScriptedSubscriber.<Void>create()
+		Verifier.create(publisher)
 				.consumeErrorWith(error -> {
 					assertThat(error, instanceOf(NotAcceptableStatusException.class));
 				})
-				.verify(publisher);
+				.verify();
 	}
 
 	@Test
@@ -175,12 +175,12 @@ public class DispatcherHandlerErrorTests {
 		this.request.setUri("/request-body").setBody(Mono.error(EXCEPTION));
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
-		ScriptedSubscriber.<Void>create()
+		Verifier.create(publisher)
 				.consumeErrorWith(error -> {
 					assertThat(error, instanceOf(ServerWebInputException.class));
 					assertSame(EXCEPTION, error.getCause());
 				})
-				.verify(publisher);
+				.verify();
 	}
 
 	@Test
