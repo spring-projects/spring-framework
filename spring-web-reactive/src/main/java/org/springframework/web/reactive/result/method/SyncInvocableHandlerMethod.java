@@ -16,7 +16,7 @@
 package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.util.Assert;
@@ -25,9 +25,10 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * An extension of {@code InvocableHandlerMethod} for use with
- * {@link SyncHandlerMethodArgumentResolver}s which in turn enables synchronous
- * handler method invocation via {@link #invokeForHandlerResult}.
+ * An extension of {@code InvocableHandlerMethod} for synchronous, non-blocking
+ * method invocation via {@link #invokeForHandlerResult}. By allowing only
+ * {@link SyncHandlerMethodArgumentResolver}s to be configured, the invocation
+ * is guaranteed to be non-blocking.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -45,8 +46,9 @@ public class SyncInvocableHandlerMethod extends InvocableHandlerMethod {
 
 
 	/**
-	 * Overloaded variant of the same setter from the base class that ensures
-	 * all resolvers are {@link SyncHandlerMethodArgumentResolver}.
+	 * {@inheritDoc}
+	 * <p>Resolvers must be of type {@link SyncHandlerMethodArgumentResolver}.
+	 * @see #setSyncArgumentResolvers(List)
 	 */
 	@Override
 	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
@@ -55,6 +57,15 @@ public class SyncInvocableHandlerMethod extends InvocableHandlerMethod {
 						"Expected sync argument resolver: " + resolver.getClass().getName()));
 		super.setArgumentResolvers(resolvers);
 	}
+
+	/**
+	 * Convenient alternative to {@link #setArgumentResolvers(List)} to configure
+	 * synchronous argument resolvers.
+	 */
+	public void setSyncArgumentResolvers(List<SyncHandlerMethodArgumentResolver> resolvers) {
+		setArgumentResolvers(new ArrayList<>(resolvers));
+	}
+
 
 	/**
 	 * Delegate to the base class {@link #invoke} and also wait for the result.

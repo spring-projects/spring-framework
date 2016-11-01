@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -40,17 +41,17 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Extension of HandlerMethod that can invoke the target method after resolving
- * its method arguments.
+ * A sub-class of {@link HandlerMethod} that can resolve method arguments from
+ * a {@link ServerWebExchange} and use that to invoke the underlying method.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class InvocableHandlerMethod extends HandlerMethod {
 
-	private static final Mono<Object[]> NO_ARGS = Mono.just(new Object[0]);
+	private static final Mono<Object[]> EMPTY_ARGS = Mono.just(new Object[0]);
 
-	private static final Object NO_VALUE = new Object();
+	private static final Object NO_ARG_VALUE = new Object();
 
 
 	private List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
@@ -68,8 +69,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 
 	/**
-	 * Set {@link HandlerMethodArgumentResolver}s to use to use for resolving
-	 * method argument values.
+	 * Configure the argument resolvers to use to use for resolving method
+	 * argument values against a {@code ServerWebExchange}.
 	 */
 	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
 		this.resolvers.clear();
@@ -81,24 +82,18 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * (e.g. default request attribute name).
 	 * <p>Default is a {@link DefaultParameterNameDiscoverer}.
 	 */
-	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
-		this.parameterNameDiscoverer = parameterNameDiscoverer;
-	}
-
-	@Override
-	protected Method getBridgedMethod() {
-		return super.getBridgedMethod();
+	public void setParameterNameDiscoverer(ParameterNameDiscoverer nameDiscoverer) {
+		this.parameterNameDiscoverer = nameDiscoverer;
 	}
 
 
 	/**
-	 * Invoke the method and return a Publisher for the return value.
+	 * Invoke the method for the given exchange.
+	 *
 	 * @param exchange the current exchange
 	 * @param bindingContext the binding context to use
-	 * @param providedArgs optional list of argument values to check by type
-	 * (via {@code instanceof}) for resolving method arguments.
-	 * @return Publisher that produces a single HandlerResult or an error signal;
-	 * never throws an exception
+	 * @param providedArgs optional list of argument values to match by type
+	 * @return Mono with a {@link HandlerResult}.
 	 */
 	public Mono<HandlerResult> invoke(ServerWebExchange exchange,
 			BindingContext bindingContext, Object... providedArgs) {
@@ -124,59 +119,73 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			BindingContext bindingContext, Object... providedArgs) {
 
 		if (ObjectUtils.isEmpty(getMethodParameters())) {
-			return NO_ARGS;
+			return EMPTY_ARGS;
 		}
 		try {
-			List<Mono<Object>> monos = Stream.of(getMethodParameters())
+			List<Mono<Object>> argMonos = Stream.of(getMethodParameters())
 					.map(param -> {
 						param.initParameterNameDiscovery(this.parameterNameDiscoverer);
 						GenericTypeResolver.resolveParameterType(param, getBean().getClass());
-						if (!ObjectUtils.isEmpty(providedArgs)) {
-							for (Object providedArg : providedArgs) {
-								if (param.getParameterType().isInstance(providedArg)) {
-									return Mono.just(providedArg).log("reactor.resolved");
-								}
-							}
-						}
-						HandlerMethodArgumentResolver resolver = this.resolvers.stream()
-								.filter(r -> r.supportsParameter(param))
-								.findFirst()
-								.orElseThrow(() -> getArgError("No resolver for ", param, null));
-						try {
-							return resolver.resolveArgument(param, bindingContext, exchange)
-									.defaultIfEmpty(NO_VALUE)
-									.doOnError(cause -> {
-										if(logger.isDebugEnabled()) {
-											logger.debug(getDetailedErrorMessage("Error resolving ", param), cause);
-										}
-									})
-									.log("reactor.unresolved");
-						}
-						catch (Exception ex) {
-							throw getArgError("Error resolving ", param, ex);
-						}
+						return findProvidedArg(param, providedArgs)
+								.map(Mono::just)
+								.orElseGet(() -> {
+									HandlerMethodArgumentResolver resolver = findResolver(param);
+									return resolveArg(resolver, param, bindingContext, exchange);
+								});
+
 					})
 					.collect(Collectors.toList());
 
 			// Create Mono with array of resolved values...
-			return Mono.when(monos,
-					args -> Stream.of(args).map(o -> o != NO_VALUE ? o : null).toArray());
+			return Mono.when(argMonos, argValues ->
+					Stream.of(argValues).map(o -> o != NO_ARG_VALUE ? o : null).toArray());
 		}
 		catch (Throwable ex) {
 			return Mono.error(ex);
 		}
 	}
 
-	private IllegalStateException getArgError(String message, MethodParameter param, Throwable cause) {
-		return new IllegalStateException(getDetailedErrorMessage(message, param), cause);
+	private Optional<Object> findProvidedArg(MethodParameter param, Object... providedArgs) {
+		if (ObjectUtils.isEmpty(providedArgs)) {
+			return Optional.empty();
+		}
+		return Arrays.stream(providedArgs)
+				.filter(arg -> param.getParameterType().isInstance(arg))
+				.findFirst();
+	}
+
+	private HandlerMethodArgumentResolver findResolver(MethodParameter param) {
+		return this.resolvers.stream()
+				.filter(r -> r.supportsParameter(param))
+				.findFirst()
+				.orElseThrow(() -> getArgumentError("No resolver for ", param, null));
+	}
+
+	private Mono<Object> resolveArg(HandlerMethodArgumentResolver resolver, MethodParameter param,
+			BindingContext bindingContext, ServerWebExchange exchange) {
+
+		try {
+			return resolver.resolveArgument(param, bindingContext, exchange)
+					.defaultIfEmpty(NO_ARG_VALUE)
+					.doOnError(cause -> {
+						if(logger.isDebugEnabled()) {
+							logger.debug(getDetailedErrorMessage("Error resolving ", param), cause);
+						}
+					});
+		}
+		catch (Exception ex) {
+			throw getArgumentError("Error resolving ", param, ex);
+		}
+	}
+
+	private IllegalStateException getArgumentError(String message, MethodParameter param, Throwable ex) {
+		return new IllegalStateException(getDetailedErrorMessage(message, param), ex);
 	}
 
 	private String getDetailedErrorMessage(String message, MethodParameter param) {
-		StringBuilder sb = new StringBuilder(message);
-		sb.append("argument [").append(param.getParameterIndex()).append("] ");
-		sb.append("of type [").append(param.getParameterType().getName()).append("] ");
-		sb.append("on method [").append(getBridgedMethod().toGenericString()).append("]");
-		return sb.toString();
+		return message + "argument [" + param.getParameterIndex() + "] " +
+				"of type [" + param.getParameterType().getName() + "] " +
+				"on method [" + getBridgedMethod().toGenericString() + "]";
 	}
 
 	private Object doInvoke(Object[] args) throws Exception {

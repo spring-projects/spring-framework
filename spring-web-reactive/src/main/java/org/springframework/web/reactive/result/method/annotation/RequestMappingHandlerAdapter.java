@@ -311,7 +311,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 		for (Method method : methods) {
 			Object bean = handlerMethod.getBean();
 			SyncInvocableHandlerMethod initBinderMethod = new SyncInvocableHandlerMethod(bean, method);
-			initBinderMethod.setArgumentResolvers(new ArrayList<>(this.initBinderArgumentResolvers));
+			initBinderMethod.setSyncArgumentResolvers(getInitBinderArgumentResolvers());
 			initBinderMethods.add(initBinderMethod);
 		}
 		return new InitBinderBindingContext(getWebBindingInitializer(), initBinderMethods);
