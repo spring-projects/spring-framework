@@ -16,7 +16,6 @@
 package org.springframework.web.server;
 
 import java.security.Principal;
-import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
@@ -40,7 +39,7 @@ class DefaultServerWebExchangeMutativeBuilder implements ServerWebExchange.Mutat
 
 	private ServerHttpResponse response;
 
-	private Principal user;
+	private Mono<Principal> user;
 
 	private Mono<WebSession> session;
 
@@ -66,7 +65,7 @@ class DefaultServerWebExchangeMutativeBuilder implements ServerWebExchange.Mutat
 	}
 
 	@Override
-	public ServerWebExchange.MutativeBuilder setPrincipal(Principal user) {
+	public ServerWebExchange.MutativeBuilder setPrincipal(Mono<Principal> user) {
 		this.user = user;
 		return this;
 	}
@@ -100,7 +99,7 @@ class DefaultServerWebExchangeMutativeBuilder implements ServerWebExchange.Mutat
 
 		private final ServerHttpResponse response;
 
-		private final Principal user;
+		private final Mono<Principal> userMono;
 
 		private final Mono<WebSession> session;
 
@@ -108,13 +107,13 @@ class DefaultServerWebExchangeMutativeBuilder implements ServerWebExchange.Mutat
 
 
 		public MutativeDecorator(ServerWebExchange delegate,
-				ServerHttpRequest request, ServerHttpResponse response, Principal user,
+				ServerHttpRequest request, ServerHttpResponse response, Mono<Principal> user,
 				Mono<WebSession> session, Mono<MultiValueMap<String, String>> formData) {
 
 			super(delegate);
 			this.request = request;
 			this.response = response;
-			this.user = user;
+			this.userMono = user;
 			this.session = session;
 			this.formData = formData;
 		}
@@ -137,8 +136,8 @@ class DefaultServerWebExchangeMutativeBuilder implements ServerWebExchange.Mutat
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public <T extends Principal> Optional<T> getPrincipal() {
-			return (this.user != null ? Optional.of((T) this.user) : getDelegate().getPrincipal());
+		public <T extends Principal> Mono<T> getPrincipal() {
+			return (this.userMono != null ? (Mono<T>) this.userMono : getDelegate().getPrincipal());
 		}
 
 		@Override

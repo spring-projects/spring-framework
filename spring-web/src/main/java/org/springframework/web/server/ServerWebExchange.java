@@ -73,7 +73,7 @@ public interface ServerWebExchange {
 	/**
 	 * Return the authenticated user for the request, if any.
 	 */
-	<T extends Principal> Optional<T> getPrincipal();
+	<T extends Principal> Mono<T> getPrincipal();
 
 	/**
 	 * Return the form data from the body of the request or an empty {@code Mono}
@@ -155,7 +155,7 @@ public interface ServerWebExchange {
 		/**
 		 * Set the principal to use.
 		 */
-		MutativeBuilder setPrincipal(Principal user);
+		MutativeBuilder setPrincipal(Mono<Principal> user);
 
 		/**
 		 * Set the session to use.

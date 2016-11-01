@@ -30,15 +30,17 @@ import org.springframework.web.server.ServerWebExchange;
  * <ul>
  * <li>{@link ServerWebExchange}
  * <li>{@link ServerHttpRequest}
- * <li>{@link HttpMethod}
  * <li>{@link ServerHttpResponse}
+ * <li>{@link HttpMethod}
  * </ul>
  *
- * <p>For the {@code WebSession} see {@link WebSessionArgumentResolver}.
+ * <p>For the {@code WebSession} see {@link WebSessionArgumentResolver}
+ * and for the {@code Principal} see {@link PrincipalArgumentResolver}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  * @see WebSessionArgumentResolver
+ * @see PrincipalArgumentResolver
  */
 public class ServerWebExchangeArgumentResolver implements SyncHandlerMethodArgumentResolver {
 
@@ -56,25 +58,23 @@ public class ServerWebExchangeArgumentResolver implements SyncHandlerMethodArgum
 			ServerWebExchange exchange) {
 
 		Class<?> paramType = parameter.getParameterType();
-		Object value;
 		if (ServerWebExchange.class.isAssignableFrom(paramType)) {
-			value = exchange;
+			return Optional.of(exchange);
 		}
 		else if (ServerHttpRequest.class.isAssignableFrom(paramType)) {
-			value = exchange.getRequest();
+			return Optional.of(exchange.getRequest());
 		}
 		else if (ServerHttpResponse.class.isAssignableFrom(paramType)) {
-			value = exchange.getResponse();
+			return Optional.of(exchange.getResponse());
 		}
 		else if (HttpMethod.class == paramType) {
-			value = exchange.getRequest().getMethod();
+			return Optional.of(exchange.getRequest().getMethod());
 		}
 		else {
 			// should never happen...
 			throw new IllegalArgumentException(
 					"Unknown parameter type: " + paramType + " in method: " + parameter.getMethod());
 		}
-		return Optional.of(value);
 	}
 
 }

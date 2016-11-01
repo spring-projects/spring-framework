@@ -84,7 +84,7 @@ public class ServerWebExchangeDecorator implements ServerWebExchange {
 	}
 
 	@Override
-	public <T extends Principal> Optional<T> getPrincipal() {
+	public <T extends Principal> Mono<T> getPrincipal() {
 		return getDelegate().getPrincipal();
 	}
 

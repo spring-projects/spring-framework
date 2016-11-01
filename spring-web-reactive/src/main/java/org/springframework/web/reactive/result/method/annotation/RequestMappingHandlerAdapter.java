@@ -241,6 +241,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 		resolvers.add(new HttpEntityArgumentResolver(getMessageReaders(), getReactiveAdapterRegistry()));
 		resolvers.add(new ModelArgumentResolver());
 		resolvers.add(new ServerWebExchangeArgumentResolver());
+		resolvers.add(new PrincipalArgumentResolver());
 		resolvers.add(new WebSessionArgumentResolver());
 
 		// Custom resolvers

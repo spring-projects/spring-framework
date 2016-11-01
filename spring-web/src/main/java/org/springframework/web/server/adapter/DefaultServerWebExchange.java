@@ -135,8 +135,8 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	}
 
 	@Override
-	public <T extends Principal> Optional<T> getPrincipal() {
-		return Optional.empty();
+	public <T extends Principal> Mono<T> getPrincipal() {
+		return Mono.empty();
 	}
 
 	@Override
