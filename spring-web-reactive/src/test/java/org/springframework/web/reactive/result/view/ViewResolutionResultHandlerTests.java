@@ -49,7 +49,6 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.reactive.HandlerResult;
@@ -80,7 +79,7 @@ public class ViewResolutionResultHandlerTests {
 
 	private ServerWebExchange exchange;
 
-	private ModelMap model = new ExtendedModelMap();
+	private Model model = new ExtendedModelMap();
 
 
 	@Before
@@ -184,7 +183,7 @@ public class ViewResolutionResultHandlerTests {
 	private void testDefaultViewName(Object returnValue, ResolvableType type)
 			throws URISyntaxException {
 
-		ModelMap model = new ExtendedModelMap().addAttribute("id", "123");
+		Model model = new ExtendedModelMap().addAttribute("id", "123");
 		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType(type), model);
 		ViewResolutionResultHandler handler = createResultHandler(new TestViewResolver("account"));
 
@@ -290,7 +289,7 @@ public class ViewResolutionResultHandlerTests {
 	private void testHandle(String path, ResolvableMethod resolvableMethod, Object returnValue,
 			String responseBody, ViewResolver... resolvers) throws URISyntaxException {
 
-		ModelMap model = new ExtendedModelMap().addAttribute("id", "123");
+		Model model = new ExtendedModelMap().addAttribute("id", "123");
 		MethodParameter returnType = resolvableMethod.resolveReturnType();
 		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, model);
 		this.request.setUri(path);

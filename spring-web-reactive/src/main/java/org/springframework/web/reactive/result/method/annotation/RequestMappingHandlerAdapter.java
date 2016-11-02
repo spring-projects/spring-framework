@@ -329,7 +329,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 					logger.debug("Invoking @ExceptionHandler method: " + invocable.getMethod());
 				}
 				invocable.setArgumentResolvers(getArgumentResolvers());
-				bindingContext.getModel().clear();
+				bindingContext.getModel().asMap().clear();
 				return invocable.invoke(exchange, bindingContext, ex);
 			}
 			catch (Throwable invocationEx) {

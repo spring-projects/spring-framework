@@ -206,7 +206,7 @@ public class ViewResolutionResultHandler extends AbstractHandlerResultHandler
 					.defaultIfEmpty(result.getModel())
 					.then(model -> getDefaultViewNameMono(exchange, result));
 		}
-		Map<String, ?> model = result.getModel();
+		Map<String, ?> model = result.getModel().asMap();
 		return viewMono.then(view -> {
 			updateResponseStatus(result.getReturnTypeSource(), exchange);
 			if (view instanceof View) {
