@@ -24,7 +24,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
@@ -134,7 +134,7 @@ public class PathVariableMethodArgumentResolverTests {
 	public void handleMissingValue() throws Exception {
 		BindingContext bindingContext = new BindingContext();
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramNamedString, bindingContext, this.exchange);
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.expectNextCount(0)
 				.expectError(ServerErrorException.class)
 				.verify();
@@ -144,8 +144,7 @@ public class PathVariableMethodArgumentResolverTests {
 	public void nullIfNotRequired() throws Exception {
 		BindingContext bindingContext = new BindingContext();
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramNotRequired, bindingContext, this.exchange);
-		Verifier
-				.create(mono)
+		StepVerifier.create(mono)
 				.expectNextCount(0)
 				.expectComplete()
 				.verify();
@@ -156,7 +155,7 @@ public class PathVariableMethodArgumentResolverTests {
 		BindingContext bindingContext = new BindingContext();
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramOptional, bindingContext, this.exchange);
 
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.consumeNextWith(value -> {
 					assertTrue(value instanceof Optional);
 					assertFalse(((Optional) value).isPresent());

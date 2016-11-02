@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
@@ -61,7 +61,7 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, null,
 				Collections.emptyMap());
 
-		Verifier.create(flux)
+		StepVerifier.create(flux)
 				.expectNext(new Pojo("foofoo", "barbar"))
 				.expectComplete()
 				.verify();
@@ -76,7 +76,7 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 		Mono<Object> mono = new Jackson2JsonDecoder().decodeToMono(source, elementType,
 				null, Collections.emptyMap());
 
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.expectNext(Arrays.asList(new Pojo("f1", "b1"), new Pojo("f2", "b2")))
 				.expectComplete()
 				.verify();
@@ -91,7 +91,7 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, null,
 				Collections.emptyMap());
 
-		Verifier.create(flux)
+		StepVerifier.create(flux)
 				.expectNext(new Pojo("f1", "b1"))
 				.expectNext(new Pojo("f2", "b2"))
 				.expectComplete()
@@ -107,7 +107,7 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 		Flux<JacksonViewBean> flux = new Jackson2JsonDecoder()
 				.decode(source, elementType, null, hints).cast(JacksonViewBean.class);
 
-		Verifier.create(flux)
+		StepVerifier.create(flux)
 				.consumeNextWith(b -> {
 					assertTrue(b.getWithView1().equals("with"));
 					assertNull(b.getWithView2());
@@ -124,7 +124,7 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 		Mono<Object> mono = new Jackson2JsonDecoder().decodeToMono(source, elementType,
 				null, Collections.emptyMap());
 
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.expectNextCount(0)
 				.expectComplete()
 				.verify();

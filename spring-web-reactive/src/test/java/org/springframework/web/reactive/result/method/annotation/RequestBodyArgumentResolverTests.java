@@ -27,7 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 import rx.Observable;
 import rx.RxReactiveStreams;
 import rx.Single;
@@ -126,12 +126,12 @@ public class RequestBodyArgumentResolverTests {
 	public void emptyBodyWithMono() throws Exception {
 		ResolvableType type = forClassWithGenerics(Mono.class, String.class);
 
-		Verifier.create((Mono<Void>) resolveValueWithEmptyBody(type, true))
+		StepVerifier.create((Mono<Void>) resolveValueWithEmptyBody(type, true))
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
 				.verify();
 
-		Verifier.create((Mono<Void>) resolveValueWithEmptyBody(type, false))
+		StepVerifier.create((Mono<Void>) resolveValueWithEmptyBody(type, false))
 				.expectNextCount(0)
 				.expectComplete()
 				.verify();
@@ -142,12 +142,12 @@ public class RequestBodyArgumentResolverTests {
 	public void emptyBodyWithFlux() throws Exception {
 		ResolvableType type = forClassWithGenerics(Flux.class, String.class);
 
-		Verifier.create((Flux<Void>) resolveValueWithEmptyBody(type, true))
+		StepVerifier.create((Flux<Void>) resolveValueWithEmptyBody(type, true))
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
 				.verify();
 
-		Verifier.create((Flux<Void>) resolveValueWithEmptyBody(type, false))
+		StepVerifier.create((Flux<Void>) resolveValueWithEmptyBody(type, false))
 				.expectNextCount(0)
 				.expectComplete()
 				.verify();
@@ -158,13 +158,13 @@ public class RequestBodyArgumentResolverTests {
 		ResolvableType type = forClassWithGenerics(Single.class, String.class);
 
 		Single<String> single = resolveValueWithEmptyBody(type, true);
-		Verifier.create(RxReactiveStreams.toPublisher(single))
+		StepVerifier.create(RxReactiveStreams.toPublisher(single))
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
 				.verify();
 
 		single = resolveValueWithEmptyBody(type, false);
-		Verifier.create(RxReactiveStreams.toPublisher(single))
+		StepVerifier.create(RxReactiveStreams.toPublisher(single))
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
 				.verify();
@@ -175,13 +175,13 @@ public class RequestBodyArgumentResolverTests {
 		ResolvableType type = forClassWithGenerics(Maybe.class, String.class);
 
 		Maybe<String> maybe = resolveValueWithEmptyBody(type, true);
-		Verifier.create(maybe.toFlowable())
+		StepVerifier.create(maybe.toFlowable())
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
 				.verify();
 
 		maybe = resolveValueWithEmptyBody(type, false);
-		Verifier.create(maybe.toFlowable())
+		StepVerifier.create(maybe.toFlowable())
 				.expectNextCount(0)
 				.expectComplete()
 				.verify();
@@ -192,13 +192,13 @@ public class RequestBodyArgumentResolverTests {
 		ResolvableType type = forClassWithGenerics(Observable.class, String.class);
 
 		Observable<String> observable = resolveValueWithEmptyBody(type, true);
-		Verifier.create(RxReactiveStreams.toPublisher(observable))
+		StepVerifier.create(RxReactiveStreams.toPublisher(observable))
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
 				.verify();
 
 		observable = resolveValueWithEmptyBody(type, false);
-		Verifier.create(RxReactiveStreams.toPublisher(observable))
+		StepVerifier.create(RxReactiveStreams.toPublisher(observable))
 				.expectNextCount(0)
 				.expectComplete()
 				.verify();

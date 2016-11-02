@@ -24,7 +24,7 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.context.support.GenericApplicationContext;
@@ -100,7 +100,7 @@ public class ResourceHandlerRegistryTests {
 		ResourceWebHandler handler = getHandler("/resources/**");
 		handler.handle(this.exchange).blockMillis(5000);
 
-		Verifier.create(this.response.getBody())
+		StepVerifier.create(this.response.getBody())
 				.consumeNextWith(buf -> assertEquals("test stylesheet content",
 						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)))
 				.expectComplete()

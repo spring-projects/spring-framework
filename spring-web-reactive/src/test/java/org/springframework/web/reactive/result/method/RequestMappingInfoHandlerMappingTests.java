@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -164,7 +164,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		this.handlerMapping.registerHandler(new UserController());
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.expectError(NotAcceptableStatusException.class)
 				.verify();
 	}
@@ -353,7 +353,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	@SuppressWarnings("unchecked")
 	private <T> void assertError(Mono<Object> mono, final Class<T> exceptionClass, final Consumer<T> consumer)  {
 
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.consumeErrorWith(error -> {
 					assertEquals(exceptionClass, error.getClass());
 					consumer.accept((T) error);

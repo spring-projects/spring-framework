@@ -23,7 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -99,7 +99,7 @@ public class DispatcherHandlerErrorTests {
 		this.request.setUri("/does-not-exist");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
-		Verifier.create(publisher)
+		StepVerifier.create(publisher)
 				.consumeErrorWith(error -> {
 					assertThat(error, instanceOf(ResponseStatusException.class));
 					assertThat(error.getMessage(),
@@ -113,7 +113,7 @@ public class DispatcherHandlerErrorTests {
 		this.request.setUri("/unknown-argument-type");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
-		Verifier.create(publisher)
+		StepVerifier.create(publisher)
 				.consumeErrorWith(error -> {
 					assertThat(error, instanceOf(IllegalStateException.class));
 					assertThat(error.getMessage(), startsWith("No resolver for argument [0]"));
@@ -126,7 +126,7 @@ public class DispatcherHandlerErrorTests {
 		this.request.setUri("/error-signal");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
-		Verifier.create(publisher)
+		StepVerifier.create(publisher)
 				.consumeErrorWith(error -> {
 					assertSame(EXCEPTION, error);
 				})
@@ -138,7 +138,7 @@ public class DispatcherHandlerErrorTests {
 		this.request.setUri("/raise-exception");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
-		Verifier.<Void>create(publisher)
+		StepVerifier.<Void>create(publisher)
 				.consumeErrorWith(error -> {
 					assertSame(EXCEPTION, error);
 				})
@@ -150,7 +150,7 @@ public class DispatcherHandlerErrorTests {
 		this.request.setUri("/unknown-return-type");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
-		Verifier.create(publisher)
+		StepVerifier.create(publisher)
 				.consumeErrorWith(error -> {
 					assertThat(error, instanceOf(IllegalStateException.class));
 					assertThat(error.getMessage(), startsWith("No HandlerResultHandler"));
@@ -163,7 +163,7 @@ public class DispatcherHandlerErrorTests {
 		this.request.setUri("/request-body").setHeader("Accept", "application/json").setBody("body");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
-		Verifier.create(publisher)
+		StepVerifier.create(publisher)
 				.consumeErrorWith(error -> {
 					assertThat(error, instanceOf(NotAcceptableStatusException.class));
 				})
@@ -175,7 +175,7 @@ public class DispatcherHandlerErrorTests {
 		this.request.setUri("/request-body").setBody(Mono.error(EXCEPTION));
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
-		Verifier.create(publisher)
+		StepVerifier.create(publisher)
 				.consumeErrorWith(error -> {
 					assertThat(error, instanceOf(ServerWebInputException.class));
 					assertSame(EXCEPTION, error.getCause());

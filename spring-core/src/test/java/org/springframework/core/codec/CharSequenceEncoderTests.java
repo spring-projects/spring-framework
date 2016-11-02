@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import reactor.core.publisher.Flux;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
@@ -65,7 +65,7 @@ public class CharSequenceEncoderTests extends AbstractDataBufferAllocatingTestCa
 		Flux<String> stringFlux = Flux.just("foo");
 		Flux<DataBuffer> output = Flux.from(
 				this.encoder.encode(stringFlux, this.bufferFactory, null, null, Collections.emptyMap()));
-		Verifier.create(output)
+		StepVerifier.create(output)
 				.consumeNextWith(stringConsumer("foo"))
 				.expectComplete()
 				.verify();
@@ -76,7 +76,7 @@ public class CharSequenceEncoderTests extends AbstractDataBufferAllocatingTestCa
 		Flux<StringBuilder> stringBuilderFlux = Flux.just(new StringBuilder("foo"));
 		Flux<DataBuffer> output = Flux.from(
 				this.encoder.encode(stringBuilderFlux, this.bufferFactory, null, null, Collections.emptyMap()));
-		Verifier.create(output)
+		StepVerifier.create(output)
 				.consumeNextWith(stringConsumer("foo"))
 				.expectComplete()
 				.verify();

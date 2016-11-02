@@ -24,7 +24,7 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
@@ -73,7 +73,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
 
 		Publisher<Publisher<DataBuffer>> result = Flux.from(outputMessage.getBodyWithFlush());
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.consumeNextWith(sseConsumer("id:c42\n" + "event:foo\n" + "retry:123\n" +
 						":bla\n:bla bla\n:bla bla bla\n" + "data:bar\n"))
 				.expectComplete()
@@ -88,7 +88,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
 
 		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.consumeNextWith(sseConsumer("data:foo\n"))
 				.consumeNextWith(sseConsumer("data:bar\n"))
 				.expectComplete()
@@ -103,7 +103,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
 
 		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.consumeNextWith(sseConsumer("data:foo\ndata:bar\n"))
 				.consumeNextWith(sseConsumer("data:foo\ndata:baz\n"))
 				.expectComplete()
@@ -119,7 +119,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
 
 		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.consumeNextWith(sseConsumer("data:", "{\"foo\":\"foofoo\",\"bar\":\"barbar\"}", "\n"))
 				.consumeNextWith(sseConsumer("data:", "{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}", "\n"))
 				.expectComplete()
@@ -128,7 +128,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 
 	private Consumer<Publisher<DataBuffer>> sseConsumer(String... expected) {
 		return publisher -> {
-			Verifier.Step builder = Verifier.create(publisher);
+			StepVerifier.Step builder = StepVerifier.create(publisher);
 			for (String value : expected) {
 				builder = builder.consumeNextWith(stringConsumer(value));
 			}

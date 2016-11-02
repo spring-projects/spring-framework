@@ -22,7 +22,7 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
@@ -73,7 +73,7 @@ public class ResourceHttpMessageWriterTests {
 		Mono<Void> mono = this.writer.write(Mono.just(resource), null,
 				ResolvableType.forClass(Resource.class),
 				MediaType.TEXT_PLAIN, this.request, this.response, Collections.emptyMap());
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.expectNextCount(0)
 				.expectComplete()
 				.verify();
@@ -83,7 +83,7 @@ public class ResourceHttpMessageWriterTests {
 		assertThat(this.response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES), is("bytes"));
 
 		Mono<String> result = this.response.getBodyAsString();
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.expectNext("Spring Framework test resource content.")
 				.expectComplete()
 				.verify();
@@ -94,7 +94,7 @@ public class ResourceHttpMessageWriterTests {
 		this.request.getHeaders().setRange(Collections.singletonList(HttpRange.createByteRange(0, 5)));
 		Mono<Void> mono = this.writer.write(Mono.just(resource), null, ResolvableType.forClass(Resource.class),
 				MediaType.TEXT_PLAIN, this.request, this.response, Collections.emptyMap());
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.expectNextCount(0)
 				.expectComplete()
 				.verify();
@@ -105,7 +105,7 @@ public class ResourceHttpMessageWriterTests {
 		assertThat(this.response.getHeaders().getContentLength(), is(6L));
 
 		Mono<String> result = this.response.getBodyAsString();
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.expectNext("Spring")
 				.expectComplete()
 				.verify();
@@ -117,7 +117,7 @@ public class ResourceHttpMessageWriterTests {
 
 		Mono<Void> mono = this.writer.write(Mono.just(resource), null, ResolvableType.forClass(Resource.class),
 				MediaType.TEXT_PLAIN, this.request, this.response, Collections.emptyMap());
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.expectNextCount(0)
 				.expectComplete()
 				.verify();

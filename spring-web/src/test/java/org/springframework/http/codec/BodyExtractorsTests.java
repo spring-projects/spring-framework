@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.StringDecoder;
@@ -80,7 +80,7 @@ public class BodyExtractorsTests {
 
 		Mono<String> result = extractor.extract(request, this.context);
 
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.expectNext("foo")
 				.expectComplete()
 				.verify();
@@ -100,7 +100,7 @@ public class BodyExtractorsTests {
 
 		Flux<String> result = extractor.extract(request, this.context);
 
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.expectNext("foo")
 				.expectComplete()
 				.verify();
@@ -127,7 +127,7 @@ public class BodyExtractorsTests {
 		};
 
 		Flux<String> result = extractor.extract(request, emptyContext);
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.expectError(UnsupportedMediaTypeException.class)
 				.verify();
 	}

@@ -24,7 +24,7 @@ import java.nio.file.StandardOpenOption;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import static org.junit.Assert.assertFalse;
 
@@ -39,7 +39,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		FileChannel channel = FileChannel.open(Paths.get(uri), StandardOpenOption.READ);
 		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.bufferFactory, 3);
 
-		Verifier.create(flux)
+		StepVerifier.create(flux)
 				.consumeNextWith(stringConsumer("foo"))
 				.consumeNextWith(stringConsumer("bar"))
 				.consumeNextWith(stringConsumer("baz"))
@@ -56,7 +56,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		FileChannel channel = FileChannel.open(Paths.get(uri), StandardOpenOption.READ);
 		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.bufferFactory, 5);
 
-		Verifier.create(flux)
+		StepVerifier.create(flux)
 				.consumeNextWith(stringConsumer("fooba"))
 				.consumeNextWith(stringConsumer("rbazq"))
 				.consumeNextWith(stringConsumer("ux"))
@@ -71,7 +71,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		InputStream is = DataBufferUtilsTests.class.getResourceAsStream("DataBufferUtilsTests.txt");
 		Flux<DataBuffer> flux = DataBufferUtils.read(is, this.bufferFactory, 3);
 
-		Verifier.create(flux)
+		StepVerifier.create(flux)
 				.consumeNextWith(stringConsumer("foo"))
 				.consumeNextWith(stringConsumer("bar"))
 				.consumeNextWith(stringConsumer("baz"))
@@ -88,7 +88,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
 		Flux<DataBuffer> result = DataBufferUtils.takeUntilByteCount(flux, 5L);
 
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.consumeNextWith(stringConsumer("foo"))
 				.consumeNextWith(stringConsumer("ba"))
 				.expectComplete().verify();
@@ -104,7 +104,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
 		Flux<DataBuffer> result = DataBufferUtils.skipUntilByteCount(flux, 5L);
 
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.consumeNextWith(stringConsumer("r"))
 				.consumeNextWith(stringConsumer("baz"))
 				.expectComplete()
@@ -119,7 +119,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
 		Flux<DataBuffer> result = DataBufferUtils.skipUntilByteCount(flux, 9L);
 
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.expectNextCount(0)
 				.expectComplete()
 				.verify();

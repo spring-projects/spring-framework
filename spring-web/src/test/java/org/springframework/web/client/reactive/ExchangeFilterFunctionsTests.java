@@ -20,7 +20,7 @@ import java.util.Optional;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -97,7 +97,7 @@ public class ExchangeFilterFunctionsTests {
 
 		Mono<ClientResponse> result = standardErrors.filter(request, exchange);
 
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.expectNext(response)
 				.expectComplete()
 				.verify();
@@ -114,7 +114,7 @@ public class ExchangeFilterFunctionsTests {
 
 		Mono<ClientResponse> result = standardErrors.filter(request, exchange);
 
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.expectError(WebClientException.class)
 				.verify();
 	}
@@ -131,7 +131,7 @@ public class ExchangeFilterFunctionsTests {
 
 		Mono<ClientResponse> result = errorPredicate.filter(request, exchange);
 
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.expectError(WebClientException.class)
 				.verify();
 	}
@@ -148,7 +148,7 @@ public class ExchangeFilterFunctionsTests {
 
 		Mono<ClientResponse> result = errorMapper.filter(request, exchange);
 
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.expectError(IllegalStateException.class)
 				.verify();
 	}

@@ -21,7 +21,7 @@ import java.util.Collections;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
@@ -68,7 +68,7 @@ public class EncoderHttpMessageWriterTest {
 				MediaType.APPLICATION_OCTET_STREAM, this.response, Collections.emptyMap());
 
 		assertThat(this.response.getHeaders().getContentType(), is(MediaType.APPLICATION_OCTET_STREAM));
-		Verifier.create(this.response.getBodyAsString())
+		StepVerifier.create(this.response.getBodyAsString())
 				.expectNext(payload)
 				.expectComplete()
 				.verify();

@@ -21,7 +21,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
@@ -92,7 +92,7 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = handlerMethod("singleArg");
 		Mono<HandlerResult> mono = hm.invoke(this.exchange, new BindingContext());
 
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.expectNextCount(0)
 				.consumeErrorWith(error -> {
 					assertThat(error, instanceOf(IllegalStateException.class));
@@ -108,7 +108,7 @@ public class InvocableHandlerMethodTests {
 		addResolver(hm, Mono.error(new UnsupportedMediaTypeStatusException("boo")));
 		Mono<HandlerResult> mono = hm.invoke(this.exchange, new BindingContext());
 
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.expectNextCount(0)
 				.consumeErrorWith(error -> {
 					assertThat(error, instanceOf(UnsupportedMediaTypeStatusException.class));
@@ -123,7 +123,7 @@ public class InvocableHandlerMethodTests {
 		addResolver(hm, Mono.just(1));
 		Mono<HandlerResult> mono = hm.invoke(this.exchange, new BindingContext());
 
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.expectNextCount(0)
 				.consumeErrorWith(error -> {
 					assertThat(error, instanceOf(IllegalStateException.class));
@@ -139,7 +139,7 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = handlerMethod("exceptionMethod");
 		Mono<HandlerResult> mono = hm.invoke(this.exchange, new BindingContext());
 
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.expectNextCount(0)
 				.consumeErrorWith(error -> {
 					assertThat(error, instanceOf(IllegalStateException.class));
@@ -162,7 +162,7 @@ public class InvocableHandlerMethodTests {
 	}
 
 	private void assertHandlerResultValue(Mono<HandlerResult> mono, String expected) {
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.consumeNextWith(result -> {
 					Optional<?> optional = result.getReturnValue();
 					assertTrue(optional.isPresent());

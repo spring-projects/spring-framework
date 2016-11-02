@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.MethodParameter;
@@ -119,7 +119,7 @@ public class CookieValueMethodArgumentResolverTests {
 	@Test
 	public void notFound() {
 		Mono<Object> mono = resolver.resolveArgument(this.cookieParameter, this.bindingContext, this.exchange);
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
 				.verify();

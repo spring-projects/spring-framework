@@ -23,7 +23,7 @@ import javax.xml.stream.events.XMLEvent;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
@@ -91,7 +91,7 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 				.decode(Flux.just(stringBuffer(POJO_ROOT)), null, null, Collections.emptyMap());
 		Flux<List<XMLEvent>> result = this.decoder.split(xmlEvents, new QName("pojo"));
 
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.consumeNextWith(events -> {
 					assertEquals(8, events.size());
 					assertStartElement(events.get(0), "pojo");
@@ -114,7 +114,7 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<List<XMLEvent>> result = this.decoder.split(xmlEvents, new QName("pojo"));
 
 
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.consumeNextWith(events -> {
 					assertEquals(8, events.size());
 					assertStartElement(events.get(0), "pojo");
@@ -162,7 +162,7 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<Object> output = this.decoder.decode(source, ResolvableType.forClass(Pojo.class),
 				null, Collections.emptyMap());
 
-		Verifier.create(output)
+		StepVerifier.create(output)
 				.expectNext(new Pojo("foofoo", "barbar"))
 				.expectComplete()
 				.verify();
@@ -174,7 +174,7 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<Object> output = this.decoder.decode(source, ResolvableType.forClass(TypePojo.class),
 				null, Collections.emptyMap());
 
-		Verifier.create(output)
+		StepVerifier.create(output)
 				.expectNext(new TypePojo("foofoo", "barbar"))
 				.expectComplete()
 				.verify();
@@ -186,7 +186,7 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<Object> output = this.decoder.decode(source, ResolvableType.forClass(Pojo.class),
 				null, Collections.emptyMap());
 
-		Verifier.create(output)
+		StepVerifier.create(output)
 				.expectNext(new Pojo("foo", "bar"))
 				.expectNext(new Pojo("foofoo", "barbar"))
 				.expectComplete()
@@ -199,7 +199,7 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<Object> output = this.decoder.decode(source, ResolvableType.forClass(TypePojo.class),
 				null, Collections.emptyMap());
 
-		Verifier.create(output)
+		StepVerifier.create(output)
 				.expectNext(new TypePojo("foo", "bar"))
 				.expectNext(new TypePojo("foofoo", "barbar"))
 				.expectComplete()

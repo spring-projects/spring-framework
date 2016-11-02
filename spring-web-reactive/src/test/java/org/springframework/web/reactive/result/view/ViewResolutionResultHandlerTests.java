@@ -31,7 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 import rx.Completable;
 import rx.Single;
 
@@ -204,7 +204,7 @@ public class ViewResolutionResultHandlerTests {
 		this.request.setUri("/path");
 		Mono<Void> mono = createResultHandler().handleResult(this.exchange, handlerResult);
 
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.expectNextCount(0)
 				.expectErrorWith(err -> err.getMessage().equals("Could not resolve view with name 'account'."))
 				.verify();
@@ -240,7 +240,7 @@ public class ViewResolutionResultHandlerTests {
 
 		ViewResolutionResultHandler resultHandler = createResultHandler(new TestViewResolver("account"));
 		Mono<Void> mono = resultHandler.handleResult(this.exchange, handlerResult);
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.expectNextCount(0)
 				.expectError(NotAcceptableStatusException.class)
 				.verify();
@@ -293,7 +293,7 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	private void assertResponseBody(String responseBody) {
-		Verifier.create(this.response.getBody())
+		StepVerifier.create(this.response.getBody())
 				.consumeNextWith(buf -> assertEquals(responseBody,
 						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)))
 				.expectComplete()

@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -527,7 +527,7 @@ public class ResourceWebHandlerTests {
 		this.request.addHeader("Range", "bytes= foo bar");
 		this.exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
 
-		Verifier.create(this.handler.handle(this.exchange))
+		StepVerifier.create(this.handler.handle(this.exchange))
 				.expectNextCount(0)
 				.expectComplete()
 				.verify();
@@ -555,7 +555,7 @@ public class ResourceWebHandlerTests {
 					return previous;
 				});
 
-		Verifier.create(reduced)
+		StepVerifier.create(reduced)
 				.consumeNextWith(buf -> {
 					String content = DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8);
 					String[] ranges = StringUtils.tokenizeToStringArray(content, "\r\n", false, true);
@@ -598,7 +598,7 @@ public class ResourceWebHandlerTests {
 	}
 
 	private void assertResponseBody(String responseBody) {
-		Verifier.create(this.response.getBody())
+		StepVerifier.create(this.response.getBody())
 				.consumeNextWith(buf -> assertEquals(responseBody,
 						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)))
 				.expectComplete()

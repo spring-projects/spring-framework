@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 import rx.Observable;
 import rx.RxReactiveStreams;
 import rx.Single;
@@ -130,7 +130,7 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(Mono.class, String.class));
 		HttpEntity<Mono<String>> entity = resolveValueWithEmptyBody(type);
 
-		Verifier.create(entity.getBody()).expectNextCount(0).expectComplete().verify();
+		StepVerifier.create(entity.getBody()).expectNextCount(0).expectComplete().verify();
 	}
 
 	@Test
@@ -138,7 +138,7 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(Flux.class, String.class));
 		HttpEntity<Flux<String>> entity = resolveValueWithEmptyBody(type);
 
-		Verifier.create(entity.getBody()).expectNextCount(0).expectComplete().verify();
+		StepVerifier.create(entity.getBody()).expectNextCount(0).expectComplete().verify();
 	}
 
 	@Test
@@ -146,7 +146,7 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(Single.class, String.class));
 		HttpEntity<Single<String>> entity = resolveValueWithEmptyBody(type);
 
-		Verifier.create(RxReactiveStreams.toPublisher(entity.getBody()))
+		StepVerifier.create(RxReactiveStreams.toPublisher(entity.getBody()))
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
 				.verify();
@@ -157,7 +157,7 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(io.reactivex.Single.class, String.class));
 		HttpEntity<io.reactivex.Single<String>> entity = resolveValueWithEmptyBody(type);
 
-		Verifier.create(entity.getBody().toFlowable())
+		StepVerifier.create(entity.getBody().toFlowable())
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
 				.verify();
@@ -168,7 +168,7 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(Maybe.class, String.class));
 		HttpEntity<Maybe<String>> entity = resolveValueWithEmptyBody(type);
 
-		Verifier.create(entity.getBody().toFlowable())
+		StepVerifier.create(entity.getBody().toFlowable())
 				.expectNextCount(0)
 				.expectComplete()
 				.verify();
@@ -179,7 +179,7 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(Observable.class, String.class));
 		HttpEntity<Observable<String>> entity = resolveValueWithEmptyBody(type);
 
-		Verifier.create(RxReactiveStreams.toPublisher(entity.getBody()))
+		StepVerifier.create(RxReactiveStreams.toPublisher(entity.getBody()))
 				.expectNextCount(0)
 				.expectComplete()
 				.verify();
@@ -190,7 +190,7 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(io.reactivex.Observable.class, String.class));
 		HttpEntity<io.reactivex.Observable<String>> entity = resolveValueWithEmptyBody(type);
 
-		Verifier.create(entity.getBody().toFlowable(BackpressureStrategy.BUFFER))
+		StepVerifier.create(entity.getBody().toFlowable(BackpressureStrategy.BUFFER))
 				.expectNextCount(0)
 				.expectComplete()
 				.verify();
@@ -201,7 +201,7 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(Flowable.class, String.class));
 		HttpEntity<Flowable<String>> entity = resolveValueWithEmptyBody(type);
 
-		Verifier.create(entity.getBody())
+		StepVerifier.create(entity.getBody())
 				.expectNextCount(0)
 				.expectComplete()
 				.verify();
@@ -285,7 +285,7 @@ public class HttpEntityArgumentResolverTests {
 		HttpEntity<Flux<String>> httpEntity = resolveValue(type, body);
 
 		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
-		Verifier.create(httpEntity.getBody())
+		StepVerifier.create(httpEntity.getBody())
 				.expectNext("line1\n")
 				.expectNext("line2\n")
 				.expectNext("line3\n")

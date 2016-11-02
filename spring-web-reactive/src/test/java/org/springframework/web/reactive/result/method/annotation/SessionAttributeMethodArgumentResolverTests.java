@@ -21,7 +21,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -96,7 +96,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 	public void resolve() throws Exception {
 		MethodParameter param = initMethodParameter(0);
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
-		Verifier.create(mono).expectError(ServerWebInputException.class).verify();
+		StepVerifier.create(mono).expectError(ServerWebInputException.class).verify();
 
 		Foo foo = new Foo();
 		when(this.session.getAttribute("foo")).thenReturn(Optional.of(foo));

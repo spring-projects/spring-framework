@@ -29,7 +29,7 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 import rx.Completable;
 import rx.Single;
 
@@ -291,7 +291,7 @@ public class ResponseEntityResultHandlerTests {
 	}
 
 	private void assertResponseBody(String responseBody) {
-		Verifier.create(this.response.getBody())
+		StepVerifier.create(this.response.getBody())
 				.consumeNextWith(buf -> assertEquals(responseBody,
 						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)))
 				.expectComplete()

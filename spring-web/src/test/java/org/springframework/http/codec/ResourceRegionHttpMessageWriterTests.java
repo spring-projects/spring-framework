@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
@@ -85,14 +85,14 @@ public class ResourceRegionHttpMessageWriterTests {
 
 		Mono<Void> mono = this.writer.write(Mono.just(region), ResolvableType.forClass(ResourceRegion.class),
 				MediaType.TEXT_PLAIN, this.response, Collections.emptyMap());
-		Verifier.create(mono).expectComplete().verify();
+		StepVerifier.create(mono).expectComplete().verify();
 
 		assertThat(this.response.getHeaders().getContentType(), is(MediaType.TEXT_PLAIN));
 		assertThat(this.response.getHeaders().getFirst(HttpHeaders.CONTENT_RANGE), is("bytes 0-5/39"));
 		assertThat(this.response.getHeaders().getContentLength(), is(6L));
 
 		Mono<String> result = response.getBodyAsString();
-		Verifier.create(result).expectNext("Spring").expectComplete().verify();
+		StepVerifier.create(result).expectNext("Spring").expectComplete().verify();
 	}
 
 	@Test
@@ -109,14 +109,14 @@ public class ResourceRegionHttpMessageWriterTests {
 
 		Mono<Void> mono = this.writer.write(regions, ResolvableType.forClass(ResourceRegion.class),
 				MediaType.TEXT_PLAIN, this.response, hints);
-		Verifier.create(mono).expectComplete().verify();
+		StepVerifier.create(mono).expectComplete().verify();
 
 		HttpHeaders headers = this.response.getHeaders();
 		assertThat(headers.getContentType().toString(), startsWith("multipart/byteranges;boundary=" + boundary));
 
 		Mono<String> result = response.getBodyAsString();
 
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.consumeNextWith(content -> {
 					String[] ranges = StringUtils
 							.tokenizeToStringArray(content, "\r\n", false, true);

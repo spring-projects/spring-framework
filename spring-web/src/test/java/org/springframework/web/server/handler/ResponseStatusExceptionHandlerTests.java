@@ -21,7 +21,7 @@ import java.time.Duration;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -72,7 +72,7 @@ public class ResponseStatusExceptionHandlerTests {
 		Throwable expected = new IllegalStateException();
 		Mono<Void> mono = this.handler.handle(this.exchange, expected);
 
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.consumeErrorWith(actual -> assertSame(expected, actual))
 				.verify();
 	}

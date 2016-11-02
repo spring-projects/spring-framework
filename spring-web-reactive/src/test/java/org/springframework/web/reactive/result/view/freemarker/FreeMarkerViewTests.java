@@ -25,7 +25,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.GenericApplicationContext;
@@ -123,7 +123,7 @@ public class FreeMarkerViewTests {
 		model.addAttribute("hello", "hi FreeMarker");
 		view.render(model, null, this.exchange);
 
-		Verifier.create(this.response.getBody())
+		StepVerifier.create(this.response.getBody())
 				.consumeNextWith(buf -> {
 					assertEquals("<html><body>hi FreeMarker</body></html>", asString(buf));
 				})

@@ -21,7 +21,7 @@ import java.util.Collections;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -38,7 +38,7 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 				Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
 		Flux<String> output =
 				decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
-		Verifier.create(output)
+		StepVerifier.create(output)
 				.expectNext("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}")
 				.expectComplete()
 				.verify();
@@ -51,7 +51,7 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 				stringBuffer(", \"bar\": \"barbar\"}"));
 		Flux<String> output =
 				decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
-		Verifier.create(output)
+		StepVerifier.create(output)
 				.expectNext("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}")
 				.expectComplete()
 				.verify();
@@ -65,7 +65,7 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 				"[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
 		Flux<String> output =
 				decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
-		Verifier.create(output)
+		StepVerifier.create(output)
 				.expectNext("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}")
 				.expectNext("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}")
 				.expectComplete()
@@ -73,7 +73,7 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 
 		source = Flux.just(stringBuffer("[{\"foo\": \"bar\"},{\"foo\": \"baz\"}]"));
 		output = decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
-		Verifier.create(output)
+		StepVerifier.create(output)
 				.expectNext("{\"foo\": \"bar\"}")
 				.expectNext("{\"foo\": \"baz\"}")
 				.expectComplete()
@@ -89,7 +89,7 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 						": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
 		Flux<String> output =
 				decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
-		Verifier.create(output)
+		StepVerifier.create(output)
 				.expectNext("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}")
 				.expectNext("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}")
 				.expectComplete()
@@ -101,7 +101,7 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 				stringBuffer("o\": \"baz\"}"),
 				stringBuffer("]"));
 		output = decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
-		Verifier.create(output)
+		StepVerifier.create(output)
 				.expectNext("{\"foo\": \"bar\"}")
 				.expectNext("{\"foo\": \"baz\"}")
 				.expectComplete()

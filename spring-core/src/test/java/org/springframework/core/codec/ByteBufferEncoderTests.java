@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
@@ -67,7 +67,7 @@ public class ByteBufferEncoderTests extends AbstractDataBufferAllocatingTestCase
 		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory,
 				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
 				null, Collections.emptyMap());
-		Verifier.create(output)
+		StepVerifier.create(output)
 				.consumeNextWith(b -> {
 					byte[] buf = new byte[3];
 					b.read(buf);

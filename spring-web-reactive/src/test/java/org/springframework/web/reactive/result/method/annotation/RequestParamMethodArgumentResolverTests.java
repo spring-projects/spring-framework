@@ -24,7 +24,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
@@ -159,7 +159,7 @@ public class RequestParamMethodArgumentResolverTests {
 		Mono<Object> mono = this.resolver.resolveArgument(
 				this.paramNamedStringArray, this.bindingContext, this.exchange);
 
-		Verifier.create(mono)
+		StepVerifier.create(mono)
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
 				.verify();

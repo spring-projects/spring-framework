@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -74,7 +74,7 @@ public class SseHandlerFunctionIntegrationTests
 				.map(s -> (s.replace("\n", "")))
 				.take(2);
 
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.expectNext("data:foo 0")
 				.expectNext("data:foo 1")
 				.expectComplete()
@@ -97,7 +97,7 @@ public class SseHandlerFunctionIntegrationTests
 				.takeUntil(s -> s.endsWith("foo 1\"}"))
 				.reduce((s1, s2) -> s1 + s2);
 
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.expectNext("data:{\"name\":\"foo 0\"}data:{\"name\":\"foo 1\"}")
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
@@ -118,7 +118,7 @@ public class SseHandlerFunctionIntegrationTests
 				.map(s -> s.replace("\n", ""))
 				.take(2);
 
-		Verifier.create(result)
+		StepVerifier.create(result)
 				.expectNext("id:0:bardata:foo")
 				.expectNext("id:1:bardata:foo")
 				.expectComplete()

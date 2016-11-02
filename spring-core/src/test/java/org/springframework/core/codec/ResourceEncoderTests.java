@@ -22,7 +22,7 @@ import java.util.Collections;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
@@ -64,7 +64,7 @@ public class ResourceEncoderTests extends AbstractDataBufferAllocatingTestCase {
 				ResolvableType.forClass(Resource.class),
 				null, Collections.emptyMap());
 
-		Verifier.create(output)
+		StepVerifier.create(output)
 				.consumeNextWith(stringConsumer(s))
 				.expectComplete()
 				.verify();

@@ -34,7 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 import rx.Observable;
 import rx.Single;
 
@@ -103,7 +103,7 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.resolveParam(type);
 		Mono<Object> result = this.resolver.readBody(param, true, this.bindingContext, this.exchange);
 
-		Verifier.create(result).expectError(UnsupportedMediaTypeStatusException.class).verify();
+		StepVerifier.create(result).expectError(UnsupportedMediaTypeStatusException.class).verify();
 	}
 
 	// More extensive "empty body" tests in RequestBody- and HttpEntityArgumentResolverTests
@@ -116,7 +116,7 @@ public class MessageReaderArgumentResolverTests {
 		Mono<TestBean> result = (Mono<TestBean>) this.resolver.readBody(
 				param, true, this.bindingContext, this.exchange).block();
 
-		Verifier.create(result).expectError(ServerWebInputException.class).verify();
+		StepVerifier.create(result).expectError(ServerWebInputException.class).verify();
 	}
 
 	@Test
@@ -273,7 +273,7 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.resolveParam(type);
 		Mono<TestBean> mono = resolveValue(param, body);
 
-		Verifier.create(mono).expectNextCount(0).expectError(ServerWebInputException.class).verify();
+		StepVerifier.create(mono).expectNextCount(0).expectError(ServerWebInputException.class).verify();
 	}
 
 	@Test @SuppressWarnings("unchecked")
@@ -283,7 +283,7 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.resolveParam(type);
 		Flux<TestBean> flux = resolveValue(param, body);
 
-		Verifier.create(flux)
+		StepVerifier.create(flux)
 				.expectNext(new TestBean("f1", "b1"))
 				.expectError(ServerWebInputException.class)
 				.verify();

@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.subscriber.Verifier;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
@@ -85,11 +85,11 @@ public class BodyInsertersTests {
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
-		Verifier.create(result).expectComplete().verify();
+		StepVerifier.create(result).expectComplete().verify();
 
 		ByteBuffer byteBuffer = ByteBuffer.wrap(body.getBytes(UTF_8));
 		DataBuffer buffer = new DefaultDataBufferFactory().wrap(byteBuffer);
-		Verifier.create(response.getBody())
+		StepVerifier.create(response.getBody())
 				.expectNext(buffer)
 				.expectComplete()
 				.verify();
@@ -104,11 +104,11 @@ public class BodyInsertersTests {
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
-		Verifier.create(result).expectComplete().verify();
+		StepVerifier.create(result).expectComplete().verify();
 
 		ByteBuffer byteBuffer = ByteBuffer.wrap("foo".getBytes(UTF_8));
 		DataBuffer buffer = new DefaultDataBufferFactory().wrap(byteBuffer);
-		Verifier.create(response.getBody())
+		StepVerifier.create(response.getBody())
 				.expectNext(buffer)
 				.expectComplete()
 				.verify();
@@ -123,11 +123,11 @@ public class BodyInsertersTests {
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
-		Verifier.create(result).expectComplete().verify();
+		StepVerifier.create(result).expectComplete().verify();
 
 		byte[] expectedBytes = Files.readAllBytes(body.getFile().toPath());
 
-		Verifier.create(response.getBody())
+		StepVerifier.create(response.getBody())
 				.consumeNextWith(dataBuffer -> {
 					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
 					dataBuffer.read(resultBytes);
@@ -148,7 +148,7 @@ public class BodyInsertersTests {
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
-		Verifier.create(result).expectNextCount(0).expectComplete().verify();
+		StepVerifier.create(result).expectNextCount(0).expectComplete().verify();
 	}
 
 	@Test
@@ -161,7 +161,7 @@ public class BodyInsertersTests {
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
-		Verifier.create(result).expectNextCount(0).expectComplete().verify();
+		StepVerifier.create(result).expectNextCount(0).expectComplete().verify();
 	}
 
 }
