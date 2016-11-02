@@ -23,6 +23,9 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.util.StringUtils;
 
+import static org.springframework.util.StringUtils.commaDelimitedListToStringArray;
+import static org.springframework.util.SystemPropertyUtils.resolvePlaceholders;
+
 /**
  * Abstract parser for &lt;context:property-.../&gt; elements.
  *
@@ -42,7 +45,7 @@ abstract class AbstractPropertyLoadingBeanDefinitionParser extends AbstractSingl
 	protected void doParse(Element element, BeanDefinitionBuilder builder) {
 		String location = element.getAttribute("location");
 		if (StringUtils.hasLength(location)) {
-			String[] locations = StringUtils.commaDelimitedListToStringArray(location);
+			String[] locations = commaDelimitedListToStringArray(resolvePlaceholders(location));
 			builder.addPropertyValue("locations", locations);
 		}
 
