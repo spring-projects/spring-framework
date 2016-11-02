@@ -1001,10 +1001,10 @@ project("spring-test") {
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.hamcrest:hamcrest-core:${hamcrestVersion}")
 		optional("xmlunit:xmlunit:${xmlunitVersion}")
-		optional("net.sourceforge.htmlunit:htmlunit:2.22")
-		optional("org.seleniumhq.selenium:htmlunit-driver:2.21")
+		optional("net.sourceforge.htmlunit:htmlunit:2.23")
+		optional("org.seleniumhq.selenium:htmlunit-driver:2.23.2")
 		optional("org.seleniumhq.selenium:selenium-java:2.53.1")
-		optional("org.skyscreamer:jsonassert:1.3.0")
+		optional("org.skyscreamer:jsonassert:1.4.0")
 		optional("com.jayway.jsonpath:json-path:2.2.0")
 		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
@@ -1029,7 +1029,7 @@ project("spring-test") {
 		testCompile("javax.cache:cache-api:1.0.0")
 		testRuntime("log4j:log4j:${log4jVersion}")
 		testRuntime("org.ehcache:ehcache:${ehcache3Version}")
-		testRuntime("org.terracotta:management-model:2.0.0")
+		testRuntime("org.terracotta:management-model:2.3.0")
 	}
 
 	task testNG(type: Test) {
