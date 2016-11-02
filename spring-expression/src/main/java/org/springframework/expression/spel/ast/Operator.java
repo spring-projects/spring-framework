@@ -159,6 +159,16 @@ public abstract class Operator extends SpelNodeImpl {
 		cf.pushDescriptor("Z");
 	}
 
+
+	/**
+	 * Perform an equality check for the given operand values.
+	 * <p>This method is not just used for reflective comparisons in subclasses
+	 * but also from compiled expression code, which is why it needs to be
+	 * declared as {@code public static} here.
+	 * @param context the current evaluation context
+	 * @param left the left-hand operand value
+	 * @param right the right-hand operand value
+	 */
 	public static boolean equalityCheck(EvaluationContext context, Object left, Object right) {
 		if (left instanceof Number && right instanceof Number) {
 			Number leftNumber = (Number) left;

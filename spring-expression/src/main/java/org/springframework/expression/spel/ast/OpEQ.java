@@ -36,9 +36,9 @@ public class OpEQ extends Operator {
 		this.exitTypeDescriptor = "Z";
 	}
 
+
 	@Override
-	public BooleanTypedValue getValueInternal(ExpressionState state)
-			throws EvaluationException {
+	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		Object left = getLeftOperand().getValueInternal(state).getValue();
 		Object right = getRightOperand().getValueInternal(state).getValue();
 		this.leftActualDescriptor = CodeFlow.toDescriptorFromObject(left);
@@ -86,11 +86,9 @@ public class OpEQ extends Operator {
 		}
 
 		String operatorClassName = Operator.class.getName().replace('.', '/');
-		String evaluationContextClassName = EvaluationContext.class.getName().replace('.',
-				'/');
-		mv.visitMethodInsn(INVOKESTATIC, operatorClassName, "equalityCheck", "(L"
-				+ evaluationContextClassName + ";Ljava/lang/Object;Ljava/lang/Object;)Z",
-				false);
+		String evaluationContextClassName = EvaluationContext.class.getName().replace('.', '/');
+		mv.visitMethodInsn(INVOKESTATIC, operatorClassName, "equalityCheck",
+				"(L" + evaluationContextClassName + ";Ljava/lang/Object;Ljava/lang/Object;)Z", false);
 		cf.pushDescriptor("Z");
 	}
 
