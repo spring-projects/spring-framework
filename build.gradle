@@ -36,7 +36,7 @@ configure(allprojects) { project ->
 	ext.aspectjVersion         = "1.9.0.BETA-5"
 	ext.beanvalVersion         = "1.1.0.Final"
 	ext.cacheApiVersion        = "1.0.0"
-	ext.caffeineVersion        = "2.3.3"
+	ext.caffeineVersion        = "2.3.4"
 	ext.eclipselinkVersion     = "2.6.4"
 	ext.ehcacheVersion         = "2.10.3"
 	ext.ehcachejcacheVersion   = "1.0.1"
@@ -82,8 +82,8 @@ configure(allprojects) { project ->
 	ext.reactorNettyVersion    = '0.5.2.RELEASE'
 	ext.romeVersion            = "1.7.0"
 	ext.rxjavaVersion          = '1.2.1'
-	ext.rxjava2Version         = '2.0.0'
 	ext.rxjavaAdapterVersion   = '1.2.0'
+	ext.rxjava2Version         = '2.0.0'
 	ext.rxnettyVersion         = '0.5.2-rc.4'
 	ext.servletVersion         = "3.1.0"
 	ext.slf4jVersion           = "1.7.21"
@@ -97,7 +97,7 @@ configure(allprojects) { project ->
 	ext.websocketVersion       = "1.1"
 	ext.woodstoxVersion        = "5.0.3"
 	ext.xmlunitVersion         = "2.2.1"
-	ext.xnioVersion            = "3.4.0.Final"
+	ext.xnioVersion            = "3.4.1.Final"
 	ext.xstreamVersion         = "1.4.9"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
