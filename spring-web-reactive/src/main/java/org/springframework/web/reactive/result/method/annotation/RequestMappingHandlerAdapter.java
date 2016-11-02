@@ -273,7 +273,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 		resolvers.add(new ServerWebExchangeArgumentResolver());
 
 		// Custom resolvers
-		if (getCustomArgumentResolvers() != null) {
+		if (getCustomInitBinderArgumentResolvers() != null) {
 			resolvers.addAll(getCustomInitBinderArgumentResolvers());
 		}
 
