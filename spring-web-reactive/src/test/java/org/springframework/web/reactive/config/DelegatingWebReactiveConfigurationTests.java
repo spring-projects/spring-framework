@@ -80,7 +80,7 @@ public class DelegatingWebReactiveConfigurationTests {
 		delegatingConfig.setConfigurers(Collections.singletonList(webReactiveConfigurer));
 		delegatingConfig.requestMappingHandlerMapping();
 
-		verify(webReactiveConfigurer).configureRequestedContentTypeResolver(any(RequestedContentTypeResolverBuilder.class));
+		verify(webReactiveConfigurer).configureContentTypeResolver(any(RequestedContentTypeResolverBuilder.class));
 		verify(webReactiveConfigurer).addCorsMappings(any(CorsRegistry.class));
 		verify(webReactiveConfigurer).configurePathMatching(any(PathMatchConfigurer.class));
 	}
@@ -126,7 +126,7 @@ public class DelegatingWebReactiveConfigurationTests {
 
 		verify(webReactiveConfigurer).configureMessageWriters(writers.capture());
 		verify(webReactiveConfigurer).extendMessageWriters(writers.capture());
-		verify(webReactiveConfigurer).configureRequestedContentTypeResolver(any(RequestedContentTypeResolverBuilder.class));
+		verify(webReactiveConfigurer).configureContentTypeResolver(any(RequestedContentTypeResolverBuilder.class));
 	}
 
 	@Test

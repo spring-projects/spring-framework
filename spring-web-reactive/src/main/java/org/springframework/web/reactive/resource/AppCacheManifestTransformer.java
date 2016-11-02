@@ -61,7 +61,7 @@ import org.springframework.web.server.ServerWebExchange;
  * <p>In order to serve manifest files with the proper {@code "text/manifest"} content type,
  * it is required to configure it with
  * {@code requestedContentTypeResolverBuilder.mediaType("appcache", MediaType.valueOf("text/manifest")}
- * in {@code WebReactiveConfiguration.configureRequestedContentTypeResolver()}.
+ * in {@code WebReactiveConfiguration.configureContentTypeResolver()}.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel

@@ -51,8 +51,8 @@ public class DelegatingWebReactiveConfiguration extends WebReactiveConfiguration
 	}
 
 	@Override
-	protected void configureRequestedContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
-		this.configurers.configureRequestedContentTypeResolver(builder);
+	protected void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
+		this.configurers.configureContentTypeResolver(builder);
 	}
 
 	@Override

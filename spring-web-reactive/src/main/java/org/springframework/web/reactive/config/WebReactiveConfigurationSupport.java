@@ -167,7 +167,7 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 	public CompositeContentTypeResolver webReactiveContentTypeResolver() {
 		RequestedContentTypeResolverBuilder builder = new RequestedContentTypeResolverBuilder();
 		builder.mediaTypes(getDefaultMediaTypeMappings());
-		configureRequestedContentTypeResolver(builder);
+		configureContentTypeResolver(builder);
 		return builder.build();
 	}
 
@@ -186,7 +186,7 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 	/**
 	 * Override to configure how the requested content type is resolved.
 	 */
-	protected void configureRequestedContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
+	protected void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
 	}
 
 	/**
@@ -319,7 +319,9 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 
 	/**
 	 * Adds default converters that sub-classes can call from
-	 * {@link #configureMessageReaders(List)}.
+	 * {@link #configureMessageReaders(List)} for {@code byte[]},
+	 * {@code ByteBuffer}, {@code String}, {@code Resource}, JAXB2, and Jackson
+	 * (if present on the classpath).
 	 */
 	protected final void addDefaultHttpMessageReaders(List<HttpMessageReader<?>> readers) {
 		readers.add(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));

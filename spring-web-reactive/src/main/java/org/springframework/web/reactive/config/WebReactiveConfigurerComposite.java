@@ -51,8 +51,8 @@ public class WebReactiveConfigurerComposite implements WebReactiveConfigurer {
 
 
 	@Override
-	public void configureRequestedContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
-		this.delegates.stream().forEach(delegate -> delegate.configureRequestedContentTypeResolver(builder));
+	public void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
+		this.delegates.stream().forEach(delegate -> delegate.configureContentTypeResolver(builder));
 	}
 
 	@Override

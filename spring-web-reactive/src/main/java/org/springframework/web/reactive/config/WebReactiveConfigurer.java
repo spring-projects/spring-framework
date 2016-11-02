@@ -41,18 +41,20 @@ import org.springframework.web.reactive.result.method.HandlerMethodArgumentResol
  * overriding the relevant methods for your needs.
  *
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public interface WebReactiveConfigurer {
 
 	/**
-	 * Configure how the requested content type is resolved.
+	 * Configure how the content type requested for the response is resolved.
 	 * <p>The given builder will create a composite of multiple
-	 * {@link RequestedContentTypeResolver}s, each defining a way to resolve the
-	 * the requested content type (accept HTTP header, path extension, parameter, etc).
-	 * @param builder factory that creates a {@link CompositeContentTypeResolver} instance
+	 * {@link RequestedContentTypeResolver}s, each defining a way to resolve
+	 * the the requested content type (accept HTTP header, path extension,
+	 * parameter, etc).
+	 * @param builder factory that creates a {@link CompositeContentTypeResolver}
 	 */
-	default void configureRequestedContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
+	default void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
 	}
 
 	/**
@@ -79,71 +81,84 @@ public interface WebReactiveConfigurer {
 	}
 
 	/**
-	 * Provide custom argument resolvers without overriding the built-in ones.
-	 * @param resolvers a list of resolvers to add to the built-in ones
+	 * Provide custom controller method argument resolvers. Such resolvers do
+	 * not override and will be invoked after the built-in ones.
+	 * @param resolvers a list of resolvers to add
 	 */
 	default void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
 	}
 
 	/**
-	 * Configure the message readers to use for decoding controller method arguments.
-	 * <p>If no message readers are specified, default readers will be added via
+	 * Configure the message readers to use for decoding the request body where
+	 * {@code @RequestBody} and {@code HttpEntity} controller method arguments
+	 * are used. If none are specified, default ones are added based on
 	 * {@link WebReactiveConfigurationSupport#addDefaultHttpMessageReaders}.
-	 * @param readers a list to add message readers to, initially an empty list
+	 * <p>See {@link #extendMessageReaders(List)} for adding readers
+	 * in addition to the default ones.
+	 * @param readers an empty list to add message readers to
 	 */
 	default void configureMessageReaders(List<HttpMessageReader<?>> readers) {
 	}
 
 	/**
-	 * Modify the list of message readers to use for decoding controller method arguments,
-	 * for example to add some in addition to the ones already configured.
+	 * An alternative to {@link #configureMessageReaders(List)} that allows
+	 * modifying the message readers to use after default ones have been added.
 	 */
 	default void extendMessageReaders(List<HttpMessageReader<?>> readers) {
 	}
 
 	/**
-	 * Add custom {@link Converter}s and {@link Formatter}s.
+	 * Add custom {@link Converter}s and {@link Formatter}s for performing type
+	 * conversion and formatting of controller method arguments.
 	 */
 	default void addFormatters(FormatterRegistry registry) {
 	}
 
 	/**
-	 * Provide a custom {@link Validator}, instead of the instance configured by default.
-	 * <p>Only a single instance is allowed, an error will be thrown if multiple
-	 * {@code Validator}s are returned by {@code WebReactiveConfigurer}s.
-	 * The default implementation returns {@code Optional.empty()}.
+	 * Provide a custom {@link Validator}.
+	 * <p>By default a validator for standard bean validation is created if
+	 * bean validation api is present on the classpath.
 	 */
 	default Optional<Validator> getValidator() {
 		return Optional.empty();
 	}
 
 	/**
-	 * Provide a custom {@link MessageCodesResolver}, instead of using the one
-	 * provided by {@link org.springframework.validation.DataBinder} instances.
-	 * The default implementation returns {@code Optional.empty()}.
+	 * Provide a custom {@link MessageCodesResolver} to use for data binding
+	 * instead of the one created by default in
+	 * {@link org.springframework.validation.DataBinder}.
 	 */
 	default Optional<MessageCodesResolver> getMessageCodesResolver() {
 		return Optional.empty();
 	}
 
 	/**
-	 * Configure the message writers to use for encoding return values.
-	 * <p>If no message writers are specified, default writers will be added via
+	 * Configure the message writers to use to encode the response body based on
+	 * the return values of {@code @ResponseBody}, and {@code ResponseEntity}
+	 * controller methods. If none are specified, default ones are added based on
 	 * {@link WebReactiveConfigurationSupport#addDefaultHttpMessageWriters(List)}.
-	 * @param writers a list to add message writers to, initially an empty list
+	 * <p>See {@link #extendMessageWriters(List)} for adding writers
+	 * in addition to the default ones.
+	 * @param writers a empty list to add message writers to
 	 */
 	default void configureMessageWriters(List<HttpMessageWriter<?>> writers) {
 	}
 
 	/**
-	 * Modify the list of message writers to use for encoding return values,
-	 * for example to add some in addition to the ones already configured.
+	 * An alternative to {@link #configureMessageWriters(List)} that allows
+	 * modifying the message writers to use after default ones have been added.
 	 */
 	default void extendMessageWriters(List<HttpMessageWriter<?>> writers) {
 	}
 
 	/**
-	 * Configure view resolution for supporting template engines.
+	 * Configure view resolution for processing the return values of controller
+	 * methods that rely on resolving a
+	 * {@link org.springframework.web.reactive.result.view.View} to render
+	 * the response with. By default all controller methods rely on view
+	 * resolution unless annotated with {@code @ResponseBody} or explicitly
+	 * return {@code ResponseEntity}. A view may be specified explicitly with
+	 * a String return value or implicitly, e.g. {@code void} return value.
 	 * @see ViewResolverRegistry
 	 */
 	default void configureViewResolvers(ViewResolverRegistry registry) {

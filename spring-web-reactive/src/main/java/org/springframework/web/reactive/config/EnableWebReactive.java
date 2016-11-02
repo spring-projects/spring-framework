@@ -31,19 +31,19 @@ import org.springframework.context.annotation.Import;
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableWebReactive
- * &#064;ComponentScan(basePackageClasses = { MyConfiguration.class })
- * public class MyWebConfiguration {
+ * &#064;ComponentScan(basePackageClasses = MyConfiguration.class)
+ * public class MyConfiguration {
  *
  * }
  * </pre>
  *
- * <p>To customize the imported configuration, implement the interface
- * {@link WebReactiveConfigurer} and override individual methods, e.g.:
+ * <p>To customize the imported configuration implement
+ * {@link WebReactiveConfigurer} and override individual methods as shown below:
  *
  * <pre class="code">
  * &#064;Configuration
- * &#064;EnableWebMvc
- * &#064;ComponentScan(basePackageClasses = { MyConfiguration.class })
+ * &#064;EnableWebReactive
+ * &#064;ComponentScan(basePackageClasses = MyConfiguration.class)
  * public class MyConfiguration implements WebReactiveConfigurer {
  *
  * 	   &#064;Override
@@ -56,17 +56,23 @@ import org.springframework.context.annotation.Import;
  *         messageWriters.add(new MyHttpMessageWriter());
  * 	   }
  *
- *     // More overridden methods ...
  * }
  * </pre>
  *
- * <p>If {@link WebReactiveConfigurer} does not expose some advanced setting that
- * needs to be configured, consider removing the {@code @EnableWebReactive}
+ * <p><strong>Note:</strong> only one {@code @Configuration} class may have the
+ * {@code @EnableWebReactive} annotation to import the Spring Web Reactive
+ * configuration. There can however be multiple {@code @Configuration} classes
+ * implementing {@code WebReactiveConfigurer} in order to customize the provided
+ * configuration.
+ *
+ * <p>If {@link WebReactiveConfigurer} does not expose some more advanced setting
+ * that needs to be configured consider removing the {@code @EnableWebReactive}
  * annotation and extending directly from {@link WebReactiveConfigurationSupport}
  * or {@link DelegatingWebReactiveConfiguration} if you still want to allow
  * {@link WebReactiveConfigurer} instances to customize the configuration.
  *
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  * @since 5.0
  * @see WebReactiveConfigurer
  * @see WebReactiveConfigurationSupport
