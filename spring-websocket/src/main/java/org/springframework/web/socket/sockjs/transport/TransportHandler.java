@@ -44,10 +44,12 @@ public interface TransportHandler {
 	TransportType getTransportType();
 
 	/**
-	 * Whether the type of the given session matches the transport type of this
-	 * {@code TransportHandler} where session id and the transport type are
-	 * extracted from the SockJS URL.
-	 * @since 4.3.3
+	 * Check whether the type of the given session matches the transport type
+	 * of this {@code TransportHandler} where session id and the transport type
+	 * are extracted from the SockJS URL.
+	 * @return {@code true} if the session matches (and would therefore get
+	 * accepted by {@link #handleRequest}), or {@code false} otherwise
+	 * @since 4.3.4
 	 */
 	boolean checkSessionType(SockJsSession session);
 
