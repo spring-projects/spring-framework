@@ -48,11 +48,8 @@ import org.springframework.util.concurrent.SettableListenableFuture;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.notNull;
-import static org.mockito.Mockito.same;
 
 /**
  * Unit tests for {@link DefaultStompSession}.

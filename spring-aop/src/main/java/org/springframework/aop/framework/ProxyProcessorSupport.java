@@ -140,7 +140,8 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 	 */
 	protected boolean isInternalLanguageInterface(Class<?> ifc) {
 		return (ifc.getName().equals("groovy.lang.GroovyObject") ||
-				ifc.getName().endsWith(".cglib.proxy.Factory"));
+				ifc.getName().endsWith(".cglib.proxy.Factory") ||
+				ifc.getName().endsWith(".bytebuddy.MockAccess"));
 	}
 
 }

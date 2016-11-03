@@ -39,9 +39,6 @@ import org.springframework.web.reactive.result.method.annotation.RequestMappingH
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.verify;
 
 /**
  * Test fixture for {@link DelegatingWebReactiveConfiguration} tests.
@@ -109,7 +106,7 @@ public class DelegatingWebReactiveConfigurationTests {
 	public void resourceHandlerMapping() throws Exception {
 		delegatingConfig.setConfigurers(Collections.singletonList(webReactiveConfigurer));
 		doAnswer(invocation -> {
-			ResourceHandlerRegistry registry = invocation.getArgumentAt(0, ResourceHandlerRegistry.class);
+			ResourceHandlerRegistry registry = invocation.getArgument(0);
 			registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static");
 			return null;
 		}).when(webReactiveConfigurer).addResourceHandlers(any(ResourceHandlerRegistry.class));

@@ -60,16 +60,10 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.verify;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for
@@ -246,7 +240,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	public void listenableFutureSuccess() {
 		Message emptyMessage = (Message) MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
-		given(this.converter.toMessage(anyObject(), any(MessageHeaders.class))).willReturn(emptyMessage);
+		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
 
 		ListenableFutureController controller = new ListenableFutureController();
 		this.messageHandler.registerHandler(controller);
@@ -266,7 +260,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	public void listenableFutureFailure() {
 		Message emptyMessage = (Message) MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
-		given(this.converter.toMessage(anyObject(), any(MessageHeaders.class))).willReturn(emptyMessage);
+		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
 
 		ListenableFutureController controller = new ListenableFutureController();
 		this.messageHandler.registerHandler(controller);
@@ -284,7 +278,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	public void completableFutureSuccess() {
 		Message emptyMessage = (Message) MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
-		given(this.converter.toMessage(anyObject(), any(MessageHeaders.class))).willReturn(emptyMessage);
+		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
 
 		CompletableFutureController controller = new CompletableFutureController();
 		this.messageHandler.registerHandler(controller);
@@ -304,7 +298,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	public void completableFutureFailure() {
 		Message emptyMessage = (Message) MessageBuilder.withPayload(new byte[0]).build();
 		given(this.channel.send(any(Message.class))).willReturn(true);
-		given(this.converter.toMessage(anyObject(), any(MessageHeaders.class))).willReturn(emptyMessage);
+		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
 
 		CompletableFutureController controller = new CompletableFutureController();
 		this.messageHandler.registerHandler(controller);

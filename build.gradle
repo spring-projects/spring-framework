@@ -179,7 +179,7 @@ configure(allprojects) { project ->
 		testCompile("junit:junit:${junitVersion}") {
 			exclude group:'org.hamcrest', module:'hamcrest-core'
 		}
-		testCompile("org.mockito:mockito-core:1.10.19") {
+		testCompile("org.mockito:mockito-core:2.2.10") {
 			exclude group:'org.hamcrest', module:'hamcrest-core'
 		}
 		testCompile("org.hamcrest:hamcrest-all:${hamcrestVersion}")
