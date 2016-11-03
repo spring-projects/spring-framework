@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,10 @@ import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJ
  */
 public abstract class AbstractHttpReceivingTransportHandler extends AbstractTransportHandler {
 
+	@Override
+	public boolean checkSessionType(SockJsSession session) {
+		return (session instanceof AbstractHttpSockJsSession);
+	}
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
@@ -94,13 +98,9 @@ public abstract class AbstractHttpReceivingTransportHandler extends AbstractTran
 		}
 	}
 
+
 	protected abstract String[] readMessages(ServerHttpRequest request) throws IOException;
 
 	protected abstract HttpStatus getResponseStatus();
-
-	@Override
-	public boolean checkSessionType(SockJsSession session) {
-		return session instanceof AbstractHttpSockJsSession;
-	}
 
 }
