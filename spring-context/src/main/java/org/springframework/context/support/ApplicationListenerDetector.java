@@ -27,6 +27,7 @@ import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcess
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ApplicationEventMulticaster;
+import org.springframework.util.ObjectUtils;
 
 /**
  * {@code BeanPostProcessor} that detects beans which implement the {@code ApplicationListener}
@@ -57,8 +58,8 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-		if (this.applicationContext != null && beanDefinition.isSingleton()) {
-			this.singletonNames.put(beanName, Boolean.TRUE);
+		if (this.applicationContext != null) {
+			this.singletonNames.put(beanName, beanDefinition.isSingleton());
 		}
 	}
 
@@ -76,7 +77,7 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 				// singleton bean (top-level or inner): register on the fly
 				this.applicationContext.addApplicationListener((ApplicationListener<?>) bean);
 			}
-			else if (flag == null) {
+			else if (Boolean.FALSE.equals(flag)) {
 				if (logger.isWarnEnabled() && !this.applicationContext.containsBean(beanName)) {
 					// inner bean with other scope - can't reliably process events
 					logger.warn("Inner bean '" + beanName + "' implements ApplicationListener interface " +
@@ -84,7 +85,7 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 							"because it does not have singleton scope. Only top-level listener beans are allowed " +
 							"to be of non-singleton scope.");
 				}
-				this.singletonNames.put(beanName, Boolean.FALSE);
+				this.singletonNames.remove(beanName);
 			}
 		}
 		return bean;
@@ -92,7 +93,7 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 
 	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) {
-		if (bean instanceof ApplicationListener) {
+		if (this.applicationContext != null && bean instanceof ApplicationListener) {
 			ApplicationEventMulticaster multicaster = this.applicationContext.getApplicationEventMulticaster();
 			multicaster.removeApplicationListener((ApplicationListener<?>) bean);
 			multicaster.removeApplicationListenerBean(beanName);
@@ -113,7 +114,7 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 
 	@Override
 	public int hashCode() {
-		return this.applicationContext.hashCode();
+		return ObjectUtils.nullSafeHashCode(this.applicationContext);
 	}
 
 }
