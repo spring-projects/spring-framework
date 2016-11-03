@@ -31,9 +31,11 @@ import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
 import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
+import org.springframework.web.socket.sockjs.transport.SockJsSession;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
+import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
 import org.springframework.web.util.JavaScriptUtils;
 
@@ -85,6 +87,11 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 	@Override
 	protected MediaType getContentType() {
 		return new MediaType("text", "html", UTF8_CHARSET);
+	}
+
+	@Override
+	public boolean checkSessionType(SockJsSession session) {
+		return session instanceof HtmlFileStreamingSockJsSession;
 	}
 
 	@Override
