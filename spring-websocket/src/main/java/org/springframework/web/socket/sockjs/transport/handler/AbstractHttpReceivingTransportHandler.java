@@ -99,4 +99,9 @@ public abstract class AbstractHttpReceivingTransportHandler extends AbstractTran
 
 	protected abstract HttpStatus getResponseStatus();
 
+	@Override
+	public boolean checkSessionType(SockJsSession session) {
+		return session instanceof AbstractHttpSockJsSession;
+	}
+
 }

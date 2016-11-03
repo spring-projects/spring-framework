@@ -30,6 +30,7 @@ import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
+import org.springframework.web.socket.sockjs.transport.SockJsSession;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSession;
@@ -51,6 +52,11 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 	@Override
 	protected MediaType getContentType() {
 		return new MediaType("application", "javascript", StandardCharsets.UTF_8);
+	}
+
+	@Override
+	public boolean checkSessionType(SockJsSession session) {
+		return session instanceof PollingSockJsSession;
 	}
 
 	@Override
