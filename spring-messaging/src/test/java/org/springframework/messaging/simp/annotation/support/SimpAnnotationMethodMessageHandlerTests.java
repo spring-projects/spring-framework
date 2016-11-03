@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,16 +60,10 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.verify;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for
@@ -367,7 +361,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 		private String method;
 
-		private Map<String, Object> arguments = new LinkedHashMap<String, Object>();
+		private Map<String, Object> arguments = new LinkedHashMap<>();
 
 		@MessageMapping("/headers")
 		public void headers(@Header String foo, @Headers Map<String, Object> headers) {
@@ -462,13 +456,13 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 		@MessageMapping("success")
 		public ListenableFutureTask<String> handleListenableFuture() {
-			this.future = new ListenableFutureTask<String>(() -> "foo");
+			this.future = new ListenableFutureTask<>(() -> "foo");
 			return this.future;
 		}
 
 		@MessageMapping("failure")
 		public ListenableFutureTask<String> handleListenableFutureException() {
-			this.future = new ListenableFutureTask<String>(() -> {
+			this.future = new ListenableFutureTask<>(() -> {
 				throw new IllegalStateException();
 			});
 			return this.future;

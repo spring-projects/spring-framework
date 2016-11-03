@@ -17,9 +17,8 @@
 package org.springframework.web.socket.sockjs.transport.session;
 
 import java.io.IOException;
-import java.sql.Date;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 
 import org.junit.Test;
@@ -42,15 +41,14 @@ import static org.mockito.BDDMockito.*;
  */
 public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSession> {
 
-
 	@Override
 	protected TestSockJsSession initSockJsSession() {
 		return new TestSockJsSession("1", this.sockJsConfig, this.webSocketHandler, Collections.<String, Object>emptyMap());
 	}
 
+
 	@Test
 	public void getTimeSinceLastActive() throws Exception {
-
 		Thread.sleep(1);
 
 		long time1 = this.session.getTimeSinceLastActive();
@@ -91,7 +89,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	public void delegateMessages() throws Exception {
 		String msg1 = "message 1";
 		String msg2 = "message 2";
-		this.session.delegateMessages(new String[] { msg1, msg2 });
+		this.session.delegateMessages(msg1, msg2);
 
 		verify(this.webSocketHandler).handleMessage(this.session, new TextMessage(msg1));
 		verify(this.webSocketHandler).handleMessage(this.session, new TextMessage(msg2));
@@ -100,10 +98,9 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 
 	@Test
 	public void delegateMessagesWithErrorAndConnectionClosing() throws Exception {
-
 		WebSocketHandler wsHandler = new ExceptionWebSocketHandlerDecorator(this.webSocketHandler);
-		TestSockJsSession sockJsSession = new TestSockJsSession("1", this.sockJsConfig,
-				wsHandler, Collections.<String, Object>emptyMap());
+		TestSockJsSession sockJsSession = new TestSockJsSession(
+				"1", this.sockJsConfig, wsHandler, Collections.<String, Object>emptyMap());
 
 		String msg1 = "message 1";
 		String msg2 = "message 2";
@@ -113,11 +110,11 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 
 		sockJsSession.delegateConnectionEstablished();
 		try {
-			sockJsSession.delegateMessages(new String[] { msg1, msg2, msg3 });
+			sockJsSession.delegateMessages(msg1, msg2, msg3);
 			fail("expected exception");
 		}
 		catch (SockJsMessageDeliveryException ex) {
-			assertEquals(Arrays.asList(msg3), ex.getUndeliveredMessages());
+			assertEquals(Collections.singletonList(msg3), ex.getUndeliveredMessages());
 			verify(this.webSocketHandler).afterConnectionEstablished(sockJsSession);
 			verify(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg1));
 			verify(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg2));
@@ -139,7 +136,6 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 
 	@Test
 	public void closeWhenNotOpen() throws Exception {
-
 		assertNew();
 
 		this.session.close();
@@ -158,7 +154,6 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 
 	@Test
 	public void closeWhenNotActive() throws Exception {
-
 		this.session.delegateConnectionEstablished();
 		assertOpen();
 
@@ -170,7 +165,6 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 
 	@Test
 	public void close() throws Exception {
-
 		this.session.delegateConnectionEstablished();
 		assertOpen();
 
@@ -190,7 +184,6 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 
 	@Test
 	public void closeWithWriteFrameExceptions() throws Exception {
-
 		this.session.setExceptionOnWrite(new IOException());
 
 		this.session.delegateConnectionEstablished();
@@ -203,7 +196,6 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 
 	@Test
 	public void closeWithWebSocketHandlerExceptions() throws Exception {
-
 		willThrow(new Exception()).given(this.webSocketHandler).afterConnectionClosed(this.session, CloseStatus.NORMAL);
 
 		this.session.delegateConnectionEstablished();
@@ -216,7 +208,6 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 
 	@Test
 	public void tryCloseWithWebSocketHandlerExceptions() throws Exception {
-
 		this.session.delegateConnectionEstablished();
 		this.session.setActive(true);
 		this.session.tryCloseWithSockJsTransportError(new Exception(), CloseStatus.BAD_DATA);
@@ -237,6 +228,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	public void writeFrameIoException() throws Exception {
 		this.session.setExceptionOnWrite(new IOException());
 		this.session.delegateConnectionEstablished();
+
 		try {
 			this.session.writeFrame(SockJsFrame.openFrame());
 			fail("expected exception");
@@ -278,7 +270,6 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 
 	@Test
 	public void scheduleAndCancelHeartbeat() throws Exception {
-
 		ScheduledFuture<?> task = mock(ScheduledFuture.class);
 		willReturn(task).given(this.taskScheduler).schedule(any(Runnable.class), any(Date.class));
 

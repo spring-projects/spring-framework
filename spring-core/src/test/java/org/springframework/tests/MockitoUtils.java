@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,10 @@ import static org.junit.Assert.*;
  *
  * @author Phillip Webb
  */
-public class MockitoUtils {
+public abstract class MockitoUtils {
 
-	private static MockUtil mockUtil = new MockUtil();
+	private static final MockUtil mockUtil = new MockUtil();
+
 
 	/**
 	 * Verify the same invocations have been applied to two mocks. This is generally not
@@ -48,16 +49,18 @@ public class MockitoUtils {
 		verifySameInvocations(expectedInvocations, actualInvocations, argumentAdapters);
 	}
 
-	private static void verifySameInvocations(List<Invocation> expectedInvocations, List<Invocation> actualInvocations, InvocationArgumentsAdapter... argumentAdapters) {
+	private static void verifySameInvocations(List<Invocation> expectedInvocations, List<Invocation> actualInvocations,
+			InvocationArgumentsAdapter... argumentAdapters) {
+
 		assertThat(expectedInvocations.size(), is(equalTo(actualInvocations.size())));
 		for (int i = 0; i < expectedInvocations.size(); i++) {
 			verifySameInvocation(expectedInvocations.get(i), actualInvocations.get(i), argumentAdapters);
 		}
 	}
 
-	private static void verifySameInvocation(Invocation expectedInvocation, Invocation actualInvocation, InvocationArgumentsAdapter... argumentAdapters) {
-		System.out.println(expectedInvocation);
-		System.out.println(actualInvocation);
+	private static void verifySameInvocation(Invocation expectedInvocation, Invocation actualInvocation,
+			InvocationArgumentsAdapter... argumentAdapters) {
+
 		assertThat(expectedInvocation.getMethod(), is(equalTo(actualInvocation.getMethod())));
 		Object[] expectedArguments = getInvocationArguments(expectedInvocation, argumentAdapters);
 		Object[] actualArguments = getInvocationArguments(actualInvocation, argumentAdapters);
@@ -72,16 +75,18 @@ public class MockitoUtils {
 		return arguments;
 	}
 
+
 	/**
 	 * Adapter strategy that can be used to change invocation arguments.
 	 */
-	public static interface InvocationArgumentsAdapter {
+	public interface InvocationArgumentsAdapter {
 
 		/**
-		 * Change the arguments if required
+		 * Change the arguments if required.
 		 * @param arguments the source arguments
 		 * @return updated or original arguments (never {@code null})
 		 */
 		Object[] adaptArguments(Object[] arguments);
 	}
+
 }
