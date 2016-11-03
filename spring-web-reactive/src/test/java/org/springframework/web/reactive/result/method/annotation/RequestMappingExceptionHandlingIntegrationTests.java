@@ -25,6 +25,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,13 +53,13 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 
 	@Test
 	public void controllerThrowingException() throws Exception {
-		String expected = "Recovered from error: Boo";
+		String expected = "Recovered from error: State";
 		assertEquals(expected, performGet("/thrown-exception", new HttpHeaders(), String.class).getBody());
 	}
 
 	@Test
 	public void controllerReturnsMonoError() throws Exception {
-		String expected = "Recovered from error: Boo";
+		String expected = "Recovered from error: Argument";
 		assertEquals(expected, performGet("/mono-error", new HttpHeaders(), String.class).getBody());
 	}
 
@@ -78,17 +79,22 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 
 		@GetMapping("/thrown-exception")
 		public Publisher<String> handleAndThrowException() {
-			throw new IllegalStateException("Boo");
+			throw new IllegalStateException("State");
 		}
 
 		@GetMapping("/mono-error")
 		public Publisher<String> handleWithError() {
-			return Mono.error(new IllegalStateException("Boo"));
+			return Mono.error(new IllegalArgumentException("Argument"));
 		}
 
 		@ExceptionHandler
-		public Publisher<String> handleException(IllegalStateException ex) {
+		public Publisher<String> handleArgumentException(IllegalArgumentException ex) {
 			return Mono.just("Recovered from error: " + ex.getMessage());
+		}
+
+		@ExceptionHandler
+		public ResponseEntity<Publisher<String>> handleStateException(IllegalStateException ex) {
+			return ResponseEntity.ok(Mono.just("Recovered from error: " + ex.getMessage()));
 		}
 
 	}
