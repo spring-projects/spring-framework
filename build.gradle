@@ -72,7 +72,7 @@ configure(allprojects) { project ->
 	ext.log4jVersion           = '2.7'
 	ext.nettyVersion           = "4.1.6.Final"
 	ext.okhttpVersion          = "2.7.5"
-	ext.okhttp3Version         = "3.4.1"
+	ext.okhttp3Version         = "3.4.2"
 	ext.poiVersion             = "3.15"
 	ext.protobufVersion        = "3.1.0"
 	ext.quartzVersion          = "2.2.3"
@@ -81,7 +81,7 @@ configure(allprojects) { project ->
 	ext.reactorCoreVersion     = '3.0.3.RELEASE'
 	ext.reactorNettyVersion    = '0.5.2.RELEASE'
 	ext.romeVersion            = "1.7.0"
-	ext.rxjavaVersion          = '1.2.1'
+	ext.rxjavaVersion          = '1.2.2'
 	ext.rxjavaAdapterVersion   = '1.2.0'
 	ext.rxjava2Version         = '2.0.0'
 	ext.rxnettyVersion         = '0.5.2-rc.4'
@@ -179,7 +179,7 @@ configure(allprojects) { project ->
 		testCompile("junit:junit:${junitVersion}") {
 			exclude group:'org.hamcrest', module:'hamcrest-core'
 		}
-		testCompile("org.mockito:mockito-core:2.2.10") {
+		testCompile("org.mockito:mockito-core:2.2.11") {
 			exclude group:'org.hamcrest', module:'hamcrest-core'
 		}
 		testCompile("org.hamcrest:hamcrest-all:${hamcrestVersion}")
