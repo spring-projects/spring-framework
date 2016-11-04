@@ -29,7 +29,7 @@ configure(allprojects) { project ->
 
 	ext.aspectjVersion       = "1.8.9"
 	ext.eclipselinkVersion   = "2.4.2"
-	ext.ehcacheVersion       = "2.10.2"
+	ext.ehcacheVersion       = "2.10.3"
 	ext.ehcachejcacheVersion = "1.0.1"
 	ext.ehcache3Version      = "3.0.3"
 	ext.ejbVersion           = "3.0"
@@ -51,7 +51,7 @@ configure(allprojects) { project ->
 	ext.jasperreportsVersion = "6.2.1"
 	ext.javamailVersion      = "1.5.5"
 	ext.jettyVersion         = "9.3.9.v20160517"
-	ext.jodaVersion          = "2.9.4"
+	ext.jodaVersion          = "2.9.5"
 	ext.jrubyVersion         = "1.7.26"  // JRuby 9000 only supported through JSR-223 (StandardScriptFactory)
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
