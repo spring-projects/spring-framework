@@ -54,10 +54,10 @@ public class BindingAwareConcurrentModel extends ConcurrentModel {
 
 	private void removeBindingResultIfNecessary(String key, Object value) {
 		if (!key.startsWith(BindingResult.MODEL_KEY_PREFIX)) {
-			String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + key;
-			BindingResult bindingResult = (BindingResult) get(bindingResultKey);
-			if (bindingResult != null && bindingResult.getTarget() != value) {
-				remove(bindingResultKey);
+			String resultKey = BindingResult.MODEL_KEY_PREFIX + key;
+			BindingResult result = (BindingResult) get(resultKey);
+			if (result != null && result.getTarget() != value) {
+				remove(resultKey);
 			}
 		}
 	}
