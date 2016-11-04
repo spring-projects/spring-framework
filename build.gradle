@@ -90,7 +90,7 @@ configure(allprojects) { project ->
 	ext.snakeyamlVersion       = "1.17"
 	ext.snifferVersion         = "1.15"
 	ext.testngVersion          = "6.9.12"
-	ext.tiles3Version          = "3.0.5"
+	ext.tiles3Version          = "3.0.7"
 	ext.tomcatVersion          = "8.5.6"
 	ext.tyrusVersion           = "1.13"
 	ext.undertowVersion        = "1.4.4.Final"
