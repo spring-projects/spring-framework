@@ -54,7 +54,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 		this.httpMethod = httpMethod;
 		this.uri = uri;
 		this.httpRequest = httpRequest;
-		this.bufferFactory = new NettyDataBufferFactory(httpRequest.delegate().alloc());
+		this.bufferFactory = new NettyDataBufferFactory(httpRequest.channel().alloc());
 	}
 
 
@@ -84,7 +84,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 		Publisher<Publisher<ByteBuf>> byteBufs = Flux.from(body).
 				map(ReactorClientHttpRequest::toByteBufs);
 		return applyBeforeCommit().then(this.httpRequest
-				.sendAndFlush(byteBufs));
+				.sendGroups(byteBufs));
 	}
 
 	private static Publisher<ByteBuf> toByteBufs(Publisher<DataBuffer> dataBuffers) {
@@ -100,7 +100,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	protected void writeHeaders() {
 		getHeaders().entrySet()
-				.forEach(e -> this.httpRequest.headers().set(e.getKey(), e.getValue()));
+				.forEach(e -> this.httpRequest.requestHeaders().set(e.getKey(), e.getValue()));
 	}
 
 	@Override

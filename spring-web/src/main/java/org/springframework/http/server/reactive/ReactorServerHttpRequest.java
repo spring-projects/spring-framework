@@ -22,7 +22,7 @@ import java.net.URISyntaxException;
 
 import io.netty.handler.codec.http.cookie.Cookie;
 import reactor.core.publisher.Flux;
-import reactor.ipc.netty.http.HttpChannel;
+import reactor.ipc.netty.http.HttpServerRequest;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
@@ -34,7 +34,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Adapt {@link ServerHttpRequest} to the Reactor Net {@link HttpChannel}.
+ * Adapt {@link ServerHttpRequest} to the Reactor {@link HttpServerRequest}.
  *
  * @author Stephane Maldini
  * @author Rossen Stoyanchev
@@ -42,19 +42,19 @@ import org.springframework.util.MultiValueMap;
  */
 public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
-	private final HttpChannel channel;
+	private final HttpServerRequest request;
 
 	private final NettyDataBufferFactory bufferFactory;
 
 
-	public ReactorServerHttpRequest(HttpChannel channel, NettyDataBufferFactory bufferFactory) {
-		super(initUri(channel), initHeaders(channel));
+	public ReactorServerHttpRequest(HttpServerRequest request, NettyDataBufferFactory bufferFactory) {
+		super(initUri(request), initHeaders(request));
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
-		this.channel = channel;
+		this.request = request;
 		this.bufferFactory = bufferFactory;
 	}
 
-	private static URI initUri(HttpChannel channel) {
+	private static URI initUri(HttpServerRequest channel) {
 		Assert.notNull("'channel' must not be null");
 		try {
 			URI uri = new URI(channel.uri());
@@ -73,7 +73,7 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 		}
 	}
 
-	private static HttpHeaders initHeaders(HttpChannel channel) {
+	private static HttpHeaders initHeaders(HttpServerRequest channel) {
 		HttpHeaders headers = new HttpHeaders();
 		for (String name : channel.headers().names()) {
 			headers.put(name, channel.headers().getAll(name));
@@ -82,20 +82,20 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 
-	public HttpChannel getReactorChannel() {
-		return this.channel;
+	public HttpServerRequest getReactorRequest() {
+		return this.request;
 	}
 
 	@Override
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.channel.method().name());
+		return HttpMethod.valueOf(this.request.method().name());
 	}
 
 	@Override
 	protected MultiValueMap<String, HttpCookie> initCookies() {
 		MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
-		for (CharSequence name : this.channel.cookies().keySet()) {
-			for (Cookie cookie : this.channel.cookies().get(name)) {
+		for (CharSequence name : this.request.cookies().keySet()) {
+			for (Cookie cookie : this.request.cookies().get(name)) {
 				HttpCookie httpCookie = new HttpCookie(name.toString(), cookie.value());
 				cookies.add(name.toString(), httpCookie);
 			}
@@ -105,7 +105,7 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return this.channel.receive().retain().map(this.bufferFactory::wrap);
+		return this.request.receive().retain().map(this.bufferFactory::wrap);
 	}
 
 }

@@ -17,11 +17,12 @@
 package org.springframework.http.server.reactive;
 
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.HttpChannel;
+import reactor.ipc.netty.http.HttpServerRequest;
+import reactor.ipc.netty.http.HttpServerResponse;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 
@@ -32,7 +33,7 @@ import org.springframework.core.io.buffer.NettyDataBufferFactory;
  * @since 5.0
  */
 public class ReactorHttpHandlerAdapter extends HttpHandlerAdapterSupport
-		implements Function<HttpChannel, Mono<Void>> {
+		implements BiFunction<HttpServerRequest, HttpServerResponse, Mono<Void>> {
 
 
 	public ReactorHttpHandlerAdapter(HttpHandler httpHandler) {
@@ -45,16 +46,18 @@ public class ReactorHttpHandlerAdapter extends HttpHandlerAdapterSupport
 
 
 	@Override
-	public Mono<Void> apply(HttpChannel channel) {
+	public Mono<Void> apply(HttpServerRequest request, HttpServerResponse response) {
 
-		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(channel.delegate().alloc());
-		ReactorServerHttpRequest request = new ReactorServerHttpRequest(channel, bufferFactory);
-		ReactorServerHttpResponse response = new ReactorServerHttpResponse(channel, bufferFactory);
+		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(request.channel()
+		                                                                   .alloc());
+		ReactorServerHttpRequest req = new ReactorServerHttpRequest(request, bufferFactory);
+		ReactorServerHttpResponse resp = new ReactorServerHttpResponse(response,
+				bufferFactory);
 
-		return getHttpHandler().handle(request, response)
+		return getHttpHandler().handle(req, resp)
 				.otherwise(ex -> {
 					logger.error("Could not complete request", ex);
-					channel.status(HttpResponseStatus.INTERNAL_SERVER_ERROR);
+					response.status(HttpResponseStatus.INTERNAL_SERVER_ERROR);
 					return Mono.empty();
 				})
 				.doOnSuccess(aVoid -> logger.debug("Successfully completed request"));

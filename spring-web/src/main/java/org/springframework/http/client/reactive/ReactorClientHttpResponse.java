@@ -19,7 +19,7 @@ package org.springframework.http.client.reactive;
 import java.util.Collection;
 
 import reactor.core.publisher.Flux;
-import reactor.ipc.netty.http.HttpInbound;
+import reactor.ipc.netty.http.HttpClientResponse;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
@@ -41,12 +41,12 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	private final NettyDataBufferFactory dataBufferFactory;
 
-	private final HttpInbound response;
+	private final HttpClientResponse response;
 
 
-	public ReactorClientHttpResponse(HttpInbound response) {
+	public ReactorClientHttpResponse(HttpClientResponse response) {
 		this.response = response;
-		this.dataBufferFactory = new NettyDataBufferFactory(response.delegate().alloc());
+		this.dataBufferFactory = new NettyDataBufferFactory(response.channel().alloc());
 	}
 
 
@@ -62,7 +62,9 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public HttpHeaders getHeaders() {
 		HttpHeaders headers = new HttpHeaders();
-		this.response.responseHeaders().entries().stream().forEach(e -> headers.add(e.getKey(), e.getValue()));
+		this.response.headers()
+		             .entries()
+		             .forEach(e -> headers.add(e.getKey(), e.getValue()));
 		return headers;
 	}
 

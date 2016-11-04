@@ -22,8 +22,7 @@ import java.util.function.Function;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.config.ClientOptions;
 import reactor.ipc.netty.http.HttpClient;
-import reactor.ipc.netty.http.HttpException;
-import reactor.ipc.netty.http.HttpInbound;
+import reactor.ipc.netty.http.HttpClientException;
 
 import org.springframework.http.HttpMethod;
 
@@ -64,8 +63,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 						uri.toString(),
 						httpClientRequest -> requestCallback
 								.apply(new ReactorClientHttpRequest(method, uri, httpClientRequest)))
-				.cast(HttpInbound.class)
-				.otherwise(HttpException.class, exc -> Mono.just(exc.getChannel()))
+				.otherwise(HttpClientException.class, exc -> Mono.just(exc.getResponse()))
 				.map(ReactorClientHttpResponse::new);
 	}
 
