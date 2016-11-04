@@ -212,7 +212,7 @@ public class ViewResolutionResultHandlerTests {
 
 		StepVerifier.create(mono)
 				.expectNextCount(0)
-				.expectErrorWith(err -> err.getMessage().equals("Could not resolve view with name 'account'."))
+				.expectErrorMatch(err -> err.getMessage().equals("Could not resolve view with name 'account'."))
 				.verify();
 	}
 
