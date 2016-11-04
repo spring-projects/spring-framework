@@ -61,7 +61,7 @@ configure(allprojects) { project ->
 	ext.jcaVersion             = "1.7"
 	ext.jettyVersion           = "9.4.0.RC1"
 	ext.jmsVersion             = "2.0.1"
-	ext.jodaVersion            = "2.9.4"
+	ext.jodaVersion            = "2.9.5"
 	ext.jpaVersion             = "2.1.1"
 	ext.jsfVersion             = "2.2"
 	ext.jspVersion             = "2.3.2-b02"
