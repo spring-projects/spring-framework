@@ -289,6 +289,23 @@ public class ResponseEntityResultHandlerTests {
 		assertResponseBody("\"body\"");
 	}
 
+	@Test // SPR-14877
+	public void handleMonoWithWildcardBodyTypeAndNullBody() throws Exception {
+
+		this.exchange.getAttributes().put(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE,
+				Collections.singleton(MediaType.APPLICATION_JSON));
+
+		HandlerResult result = new HandlerResult(new TestController(), Mono.just(notFound().build()),
+				ResolvableMethod.onClass(TestController.class)
+						.name("monoResponseEntityWildcard")
+						.resolveReturnType());
+
+		this.resultHandler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
+
+		assertEquals(HttpStatus.NOT_FOUND, this.response.getStatusCode());
+		assertNull(this.response.getBody());
+	}
+
 
 	private void testHandle(Object returnValue, ResolvableType type) {
 		HandlerResult result = handlerResult(returnValue, type);
