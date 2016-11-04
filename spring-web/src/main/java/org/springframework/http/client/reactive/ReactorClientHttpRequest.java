@@ -24,7 +24,7 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.HttpClientRequest;
+import reactor.ipc.netty.http.client.HttpClientRequest;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -36,7 +36,7 @@ import org.springframework.http.HttpMethod;
  *
  * @author Brian Clozel
  * @since 5.0
- * @see reactor.ipc.netty.http.HttpClient
+ * @see reactor.ipc.netty.http.client.HttpClient
  */
 public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 
@@ -54,7 +54,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 		this.httpMethod = httpMethod;
 		this.uri = uri;
 		this.httpRequest = httpRequest;
-		this.bufferFactory = new NettyDataBufferFactory(httpRequest.delegate().alloc());
+		this.bufferFactory = new NettyDataBufferFactory(httpRequest.channel().alloc());
 	}
 
 
@@ -84,7 +84,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 		Publisher<Publisher<ByteBuf>> byteBufs = Flux.from(body).
 				map(ReactorClientHttpRequest::toByteBufs);
 		return applyBeforeCommit().then(this.httpRequest
-				.sendAndFlush(byteBufs));
+				.sendGroups(byteBufs));
 	}
 
 	private static Publisher<ByteBuf> toByteBufs(Publisher<DataBuffer> dataBuffers) {
@@ -100,7 +100,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	protected void writeHeaders() {
 		getHeaders().entrySet()
-				.forEach(e -> this.httpRequest.headers().set(e.getKey(), e.getValue()));
+				.forEach(e -> this.httpRequest.requestHeaders().set(e.getKey(), e.getValue()));
 	}
 
 	@Override
