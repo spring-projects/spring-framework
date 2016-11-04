@@ -71,10 +71,10 @@ public class ImportSelectorTests {
 		context.refresh();
 		context.getBean(Config.class);
 		InOrder ordered = inOrder(beanFactory);
-		ordered.verify(beanFactory).registerBeanDefinition(eq("a"), (BeanDefinition) anyObject());
-		ordered.verify(beanFactory).registerBeanDefinition(eq("b"), (BeanDefinition) anyObject());
-		ordered.verify(beanFactory).registerBeanDefinition(eq("d"), (BeanDefinition) anyObject());
-		ordered.verify(beanFactory).registerBeanDefinition(eq("c"), (BeanDefinition) anyObject());
+		ordered.verify(beanFactory).registerBeanDefinition(eq("a"), any());
+		ordered.verify(beanFactory).registerBeanDefinition(eq("b"), any());
+		ordered.verify(beanFactory).registerBeanDefinition(eq("d"), any());
+		ordered.verify(beanFactory).registerBeanDefinition(eq("c"), any());
 	}
 
 	@Test

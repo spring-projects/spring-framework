@@ -148,10 +148,10 @@ public class ModelAttributeMethodProcessorTests {
 	public void resovleArgumentViaDefaultConstructor() throws Exception {
 		WebDataBinder dataBinder = new WebRequestDataBinder(null);
 		WebDataBinderFactory factory = mock(WebDataBinderFactory.class);
-		given(factory.createBinder(anyObject(), notNull(), eq("attrName"))).willReturn(dataBinder);
+		given(factory.createBinder(any(), notNull(), eq("attrName"))).willReturn(dataBinder);
 
 		this.processor.resolveArgument(this.paramNamedValidModelAttr, this.container, this.request, factory);
-		verify(factory).createBinder(anyObject(), notNull(), eq("attrName"));
+		verify(factory).createBinder(any(), notNull(), eq("attrName"));
 	}
 
 	@Test
