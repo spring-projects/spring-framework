@@ -54,11 +54,12 @@ public class AbstractJettyServerTestCase {
 
 	protected static final String helloWorld = "H\u00e9llo W\u00f6rld";
 
-	protected static final MediaType textContentType = new MediaType("text", "plain",
-			Collections.singletonMap("charset", "UTF-8"));
+	protected static final MediaType textContentType =
+			new MediaType("text", "plain", Collections.singletonMap("charset", "UTF-8"));
 
-	protected static final MediaType jsonContentType = new MediaType("application",
-			"json", Collections.singletonMap("charset", "utf-8"));
+	protected static final MediaType jsonContentType =
+			new MediaType("application", "json", Collections.singletonMap("charset", "UTF-8"));
+
 
 	private static Server jettyServer;
 
@@ -69,7 +70,6 @@ public class AbstractJettyServerTestCase {
 
 	@BeforeClass
 	public static void startJettyServer() throws Exception {
-
 		// Let server pick its own random, available port.
 		jettyServer = new Server(0);
 
@@ -119,13 +119,12 @@ public class AbstractJettyServerTestCase {
 
 		private final int sc;
 
-		private StatusCodeServlet(int sc) {
+		public StatusCodeServlet(int sc) {
 			this.sc = sc;
 		}
 
 		@Override
-		public void service(ServletRequest request, ServletResponse response) throws
-				ServletException, IOException {
+		public void service(ServletRequest request, ServletResponse response) throws IOException {
 			((HttpServletResponse) response).setStatus(sc);
 		}
 	}
@@ -137,12 +136,12 @@ public class AbstractJettyServerTestCase {
 
 		private final int sc;
 
-		private ErrorServlet(int sc) {
+		public ErrorServlet(int sc) {
 			this.sc = sc;
 		}
 
 		@Override
-		public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException {
+		public void service(ServletRequest request, ServletResponse response) throws IOException {
 			((HttpServletResponse) response).sendError(sc);
 		}
 	}
@@ -155,14 +154,13 @@ public class AbstractJettyServerTestCase {
 
 		private final MediaType contentType;
 
-		private GetServlet(byte[] buf, MediaType contentType) {
+		public GetServlet(byte[] buf, MediaType contentType) {
 			this.buf = buf;
 			this.contentType = contentType;
 		}
 
 		@Override
-		protected void doGet(HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
+		protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 			if (contentType != null) {
 				response.setContentType(contentType.toString());
 			}
@@ -175,7 +173,7 @@ public class AbstractJettyServerTestCase {
 	@SuppressWarnings("serial")
 	private static class PostServlet extends HttpServlet {
 
-		private final String s;
+		private final String content;
 
 		private final String location;
 
@@ -183,20 +181,19 @@ public class AbstractJettyServerTestCase {
 
 		private final MediaType contentType;
 
-		private PostServlet(String s, String location, byte[] buf, MediaType contentType) {
-			this.s = s;
+		public PostServlet(String content, String location, byte[] buf, MediaType contentType) {
+			this.content = content;
 			this.location = location;
 			this.buf = buf;
 			this.contentType = contentType;
 		}
 
 		@Override
-		protected void doPost(HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
+		protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 			assertTrue("Invalid request content-length", request.getContentLength() > 0);
 			assertNotNull("No content-type", request.getContentType());
 			String body = FileCopyUtils.copyToString(request.getReader());
-			assertEquals("Invalid request body", s, body);
+			assertEquals("Invalid request body", content, body);
 			response.setStatus(HttpServletResponse.SC_CREATED);
 			response.setHeader("Location", baseUrl + location);
 			response.setContentLength(buf.length);
@@ -213,14 +210,13 @@ public class AbstractJettyServerTestCase {
 
 		private final MediaType contentType;
 
-		private JsonPostServlet(String location, MediaType contentType) {
+		public JsonPostServlet(String location, MediaType contentType) {
 			this.location = location;
 			this.contentType = contentType;
 		}
 
 		@Override
-		protected void doPost(HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
+		protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 			assertTrue("Invalid request content-length", request.getContentLength() > 0);
 			assertNotNull("No content-type", request.getContentType());
 			String body = FileCopyUtils.copyToString(request.getReader());
@@ -239,13 +235,12 @@ public class AbstractJettyServerTestCase {
 
 		private final String s;
 
-		private PutServlet(String s, byte[] buf, MediaType contentType) {
+		public PutServlet(String s, byte[] buf, MediaType contentType) {
 			this.s = s;
 		}
 
 		@Override
-		protected void doPut(HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
+		protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
 			assertTrue("Invalid request content-length", request.getContentLength() > 0);
 			assertNotNull("No content-type", request.getContentType());
 			String body = FileCopyUtils.copyToString(request.getReader());
@@ -259,7 +254,7 @@ public class AbstractJettyServerTestCase {
 	private static class UriServlet extends HttpServlet {
 
 		@Override
-		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 			resp.setContentType("text/plain");
 			resp.setCharacterEncoding("utf-8");
 			resp.getWriter().write(req.getRequestURI());
@@ -311,9 +306,8 @@ public class AbstractJettyServerTestCase {
 	private static class FormServlet extends HttpServlet {
 
 		@Override
-		protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-			assertEquals(MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-					req.getContentType());
+		protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+			assertEquals(MediaType.APPLICATION_FORM_URLENCODED_VALUE, req.getContentType());
 
 			Map<String, String[]> parameters = req.getParameterMap();
 			assertEquals(2, parameters.size());
@@ -334,7 +328,7 @@ public class AbstractJettyServerTestCase {
 	private static class DeleteServlet extends HttpServlet {
 
 		@Override
-		protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 			resp.setStatus(200);
 		}
 	}
