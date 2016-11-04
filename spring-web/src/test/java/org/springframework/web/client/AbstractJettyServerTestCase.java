@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,11 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -114,6 +112,7 @@ public class AbstractJettyServerTestCase {
 		}
 	}
 
+
 	/** Servlet that sets the given status code. */
 	@SuppressWarnings("serial")
 	private static class StatusCodeServlet extends GenericServlet {
@@ -131,6 +130,7 @@ public class AbstractJettyServerTestCase {
 		}
 	}
 
+
 	/** Servlet that returns an error message for a given status code. */
 	@SuppressWarnings("serial")
 	private static class ErrorServlet extends GenericServlet {
@@ -146,6 +146,7 @@ public class AbstractJettyServerTestCase {
 			((HttpServletResponse) response).sendError(sc);
 		}
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class GetServlet extends HttpServlet {
@@ -169,6 +170,7 @@ public class AbstractJettyServerTestCase {
 			FileCopyUtils.copy(buf, response.getOutputStream());
 		}
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class PostServlet extends HttpServlet {
@@ -203,6 +205,7 @@ public class AbstractJettyServerTestCase {
 		}
 	}
 
+
 	@SuppressWarnings("serial")
 	private static class JsonPostServlet extends HttpServlet {
 
@@ -230,6 +233,7 @@ public class AbstractJettyServerTestCase {
 		}
 	}
 
+
 	@SuppressWarnings("serial")
 	private static class PutServlet extends HttpServlet {
 
@@ -250,6 +254,7 @@ public class AbstractJettyServerTestCase {
 		}
 	}
 
+
 	@SuppressWarnings("serial")
 	private static class UriServlet extends HttpServlet {
 
@@ -260,6 +265,7 @@ public class AbstractJettyServerTestCase {
 			resp.getWriter().write(req.getRequestURI());
 		}
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class MultipartServlet extends HttpServlet {
@@ -300,6 +306,7 @@ public class AbstractJettyServerTestCase {
 		}
 	}
 
+
 	@SuppressWarnings("serial")
 	private static class FormServlet extends HttpServlet {
 
@@ -322,15 +329,14 @@ public class AbstractJettyServerTestCase {
 		}
 	}
 
+
 	@SuppressWarnings("serial")
 	private static class DeleteServlet extends HttpServlet {
 
 		@Override
-		protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+		protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			resp.setStatus(200);
 		}
-
 	}
 
 }
