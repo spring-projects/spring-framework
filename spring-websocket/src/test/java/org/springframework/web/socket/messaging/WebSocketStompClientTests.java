@@ -59,20 +59,21 @@ public class WebSocketStompClientTests {
 	private static final Charset UTF_8 = Charset.forName("UTF-8");
 
 
-	private TestWebSocketStompClient stompClient;
-
 	@Mock
 	private TaskScheduler taskScheduler;
 
 	@Mock
 	private ConnectionHandlingStompSession stompSession;
 
+	@Mock
+	private WebSocketSession webSocketSession;
+
+
+	private TestWebSocketStompClient stompClient;
+
 	private ArgumentCaptor<WebSocketHandler> webSocketHandlerCaptor;
 
 	private SettableListenableFuture<WebSocketSession> handshakeFuture;
-
-	@Mock
-	private WebSocketSession webSocketSession;
 
 
 	@Before
@@ -123,7 +124,7 @@ public class WebSocketStompClientTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public void handleWebSocketMessage() throws Exception {
 		String text = "SEND\na:alpha\n\nMessage payload\0";
 		connect().handleMessage(this.webSocketSession, new TextMessage(text));
@@ -141,7 +142,7 @@ public class WebSocketStompClientTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public void handleWebSocketMessageSplitAcrossTwoMessage() throws Exception {
 		WebSocketHandler webSocketHandler = connect();
 
@@ -166,7 +167,7 @@ public class WebSocketStompClientTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public void handleWebSocketMessageBinary() throws Exception {
 		String text = "SEND\na:alpha\n\nMessage payload\0";
 		connect().handleMessage(this.webSocketSession, new BinaryMessage(text.getBytes(UTF_8)));
@@ -249,7 +250,7 @@ public class WebSocketStompClientTests {
 			fail("Expected IllegalStateException");
 		}
 		catch (IllegalStateException ex) {
-			// Ignore
+			// ignore
 		}
 	}
 
@@ -290,7 +291,7 @@ public class WebSocketStompClientTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void cancelInactivityTasks() throws Exception {
 		TcpConnection<byte[]> tcpConnection = getTcpConnection();
 
