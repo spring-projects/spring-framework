@@ -43,7 +43,6 @@ import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
@@ -51,9 +50,9 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -211,7 +210,7 @@ public class MessageWriterResultHandlerTests {
 		public ParentClass() {
 		}
 
-		public ParentClass(String parentProperty) {
+		ParentClass(String parentProperty) {
 			this.parentProperty = parentProperty;
 		}
 
@@ -235,7 +234,7 @@ public class MessageWriterResultHandlerTests {
 	@JsonTypeName("bar")
 	private static class Bar extends ParentClass {
 
-		public Bar(String parentProperty) {
+		Bar(String parentProperty) {
 			super(parentProperty);
 		}
 	}
@@ -253,7 +252,7 @@ public class MessageWriterResultHandlerTests {
 
 		private String name;
 
-		public SimpleBean(Long id, String name) {
+		SimpleBean(Long id, String name) {
 			this.id = id;
 			this.name = name;
 		}

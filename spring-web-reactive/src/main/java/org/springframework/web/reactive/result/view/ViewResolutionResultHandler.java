@@ -319,7 +319,7 @@ public class ViewResolutionResultHandler extends AbstractHandlerResultHandler
 					views.addAll(getDefaultViews());
 
 					List<MediaType> producibleTypes = getProducibleMediaTypes(views);
-					MediaType bestMediaType = selectMediaType(exchange, producibleTypes);
+					MediaType bestMediaType = selectMediaType(exchange, () -> producibleTypes);
 
 					if (bestMediaType != null) {
 						for (View view : views) {

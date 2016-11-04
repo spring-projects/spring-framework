@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -37,11 +38,11 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -51,6 +52,7 @@ import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -270,6 +272,23 @@ public class ResponseEntityResultHandlerTests {
 		assertConditionalResponse(HttpStatus.OK, "body", newEtag, oneMinAgo);
 	}
 
+	@Test // SPR-14877
+	public void handleMonoWithWildcardBodyType() throws Exception {
+
+		this.exchange.getAttributes().put(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE,
+				Collections.singleton(MediaType.APPLICATION_JSON));
+
+		HandlerResult result = new HandlerResult(new TestController(), Mono.just(ok().body("body")),
+				ResolvableMethod.onClass(TestController.class)
+						.name("monoResponseEntityWildcard")
+						.resolveReturnType());
+
+		this.resultHandler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
+
+		assertEquals(HttpStatus.OK, this.response.getStatusCode());
+		assertResponseBody("\"body\"");
+	}
+
 
 	private void testHandle(Object returnValue, ResolvableType type) {
 		HandlerResult result = handlerResult(returnValue, type);
@@ -333,6 +352,9 @@ public class ResponseEntityResultHandlerTests {
 		String string() { return null; }
 
 		Completable completable() { return null; }
+
+		Mono<ResponseEntity<?>> monoResponseEntityWildcard() { return null; }
+
 	}
 
 }

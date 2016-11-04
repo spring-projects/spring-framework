@@ -93,8 +93,9 @@ public abstract class AbstractMessageWriterResultHandler extends AbstractHandler
 	@SuppressWarnings("unchecked")
 	protected Mono<Void> writeBody(Object body, MethodParameter bodyParameter, ServerWebExchange exchange) {
 
-		ResolvableType bodyType = ResolvableType.forMethodParameter(bodyParameter);
-		ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(bodyType.resolve(), body);
+		ResolvableType valueType = ResolvableType.forMethodParameter(bodyParameter);
+		Class<?> valueClass = valueType.resolve();
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(valueClass, body);
 
 		Publisher<?> publisher;
 		ResolvableType elementType;
@@ -102,11 +103,11 @@ public abstract class AbstractMessageWriterResultHandler extends AbstractHandler
 			publisher = adapter.toPublisher(body);
 			elementType = adapter.getDescriptor().isNoValue() ?
 					ResolvableType.forClass(Void.class) :
-					bodyType.getGeneric(0);
+					valueType.getGeneric(0);
 		}
 		else {
 			publisher = Mono.justOrEmpty(body);
-			elementType = bodyType;
+			elementType = (valueClass == null && body != null ? ResolvableType.forInstance(body) : valueType);
 		}
 
 		if (void.class == elementType.getRawClass() || Void.class == elementType.getRawClass()) {
@@ -114,29 +115,29 @@ public abstract class AbstractMessageWriterResultHandler extends AbstractHandler
 					.doOnSubscribe(sub -> updateResponseStatus(bodyParameter, exchange));
 		}
 
-		List<MediaType> producibleTypes = getProducibleMediaTypes(elementType);
-		if (producibleTypes.isEmpty()) {
-			return Mono.error(new IllegalStateException(
-					"No converter for return value type: " + elementType));
-		}
-
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
-		MediaType bestMediaType = selectMediaType(exchange, producibleTypes);
+		MediaType bestMediaType = selectMediaType(exchange, () -> getProducibleMediaTypes(elementType));
 		if (bestMediaType != null) {
 			for (HttpMessageWriter<?> messageWriter : getMessageWriters()) {
 				if (messageWriter.canWrite(elementType, bestMediaType)) {
 					Mono<Void> bodyWriter = (messageWriter instanceof ServerHttpMessageWriter ?
 							((ServerHttpMessageWriter<?>) messageWriter).write((Publisher) publisher,
-									bodyType, elementType, bestMediaType, request, response, Collections.emptyMap()) :
+									valueType, elementType, bestMediaType, request, response, Collections.emptyMap()) :
 							messageWriter.write((Publisher) publisher, elementType,
 									bestMediaType, response, Collections.emptyMap()));
 					return bodyWriter.doOnSubscribe(sub -> updateResponseStatus(bodyParameter, exchange));
 				}
 			}
 		}
+		else {
+			if (getProducibleMediaTypes(elementType).isEmpty()) {
+				return Mono.error(new IllegalStateException(
+						"No converter for return value type: " + elementType));
+			}
+		}
 
-		return Mono.error(new NotAcceptableStatusException(producibleTypes));
+		return Mono.error(new NotAcceptableStatusException(getProducibleMediaTypes(elementType)));
 	}
 
 	private List<MediaType> getProducibleMediaTypes(ResolvableType elementType) {

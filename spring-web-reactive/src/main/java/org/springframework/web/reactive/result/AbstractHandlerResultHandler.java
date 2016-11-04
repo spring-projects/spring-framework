@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
@@ -101,13 +102,14 @@ public abstract class AbstractHandlerResultHandler implements Ordered {
 	 * Select the best media type for the current request through a content
 	 * negotiation algorithm.
 	 * @param exchange the current request
-	 * @param producibleTypes the media types that can be produced for the current request
+	 * @param producibleTypesSupplier the media types that can be produced for the current request
 	 * @return the selected media type or {@code null}
 	 */
-	protected MediaType selectMediaType(ServerWebExchange exchange, List<MediaType> producibleTypes) {
+	protected MediaType selectMediaType(ServerWebExchange exchange,
+			Supplier<List<MediaType>> producibleTypesSupplier) {
 
 		List<MediaType> acceptableTypes = getAcceptableTypes(exchange);
-		producibleTypes = getProducibleTypes(exchange, producibleTypes);
+		List<MediaType> producibleTypes = getProducibleTypes(exchange, producibleTypesSupplier);
 
 		Set<MediaType> compatibleMediaTypes = new LinkedHashSet<>();
 		for (MediaType acceptable : acceptableTypes) {
@@ -139,13 +141,15 @@ public abstract class AbstractHandlerResultHandler implements Ordered {
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<MediaType> getProducibleTypes(ServerWebExchange exchange, List<MediaType> mediaTypes) {
+	private List<MediaType> getProducibleTypes(ServerWebExchange exchange,
+			Supplier<List<MediaType>> producibleTypesSupplier) {
+
 		Optional<Object> optional = exchange.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		if (optional.isPresent()) {
 			Set<MediaType> set = (Set<MediaType>) optional.get();
 			return new ArrayList<>(set);
 		}
-		return mediaTypes;
+		return producibleTypesSupplier.get();
 	}
 
 	private MediaType selectMoreSpecificMediaType(MediaType acceptable, MediaType producible) {

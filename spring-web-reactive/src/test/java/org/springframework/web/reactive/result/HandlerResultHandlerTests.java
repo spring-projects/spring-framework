@@ -71,7 +71,7 @@ public class HandlerResultHandlerTests {
 	public void usesContentTypeResolver() throws Exception {
 		TestResultHandler resultHandler = new TestResultHandler(new FixedContentTypeResolver(IMAGE_GIF));
 		List<MediaType> mediaTypes = Arrays.asList(IMAGE_JPEG, IMAGE_GIF, IMAGE_PNG);
-		MediaType actual = resultHandler.selectMediaType(this.exchange, mediaTypes);
+		MediaType actual = resultHandler.selectMediaType(this.exchange, () -> mediaTypes);
 
 		assertEquals(IMAGE_GIF, actual);
 	}
@@ -82,7 +82,7 @@ public class HandlerResultHandlerTests {
 		this.exchange.getAttributes().put(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, producible);
 
 		List<MediaType> mediaTypes = Arrays.asList(IMAGE_JPEG, IMAGE_GIF, IMAGE_PNG);
-		MediaType actual = resultHandler.selectMediaType(this.exchange, mediaTypes);
+		MediaType actual = resultHandler.selectMediaType(this.exchange, () -> mediaTypes);
 
 		assertEquals(IMAGE_GIF, actual);
 	}
@@ -92,7 +92,7 @@ public class HandlerResultHandlerTests {
 		this.request.setHeader("Accept", "text/plain; q=0.5, application/json");
 
 		List<MediaType> mediaTypes = Arrays.asList(TEXT_PLAIN, APPLICATION_JSON_UTF8);
-		MediaType actual = this.resultHandler.selectMediaType(this.exchange, mediaTypes);
+		MediaType actual = this.resultHandler.selectMediaType(this.exchange, () -> mediaTypes);
 
 		assertEquals(APPLICATION_JSON_UTF8, actual);
 	}
@@ -102,7 +102,8 @@ public class HandlerResultHandlerTests {
 		MediaType text8859 = MediaType.parseMediaType("text/plain;charset=ISO-8859-1");
 		MediaType textUtf8 = MediaType.parseMediaType("text/plain;charset=UTF-8");
 		this.request.getHeaders().setAccept(Collections.singletonList(text8859));
-		MediaType actual = this.resultHandler.selectMediaType(this.exchange, Collections.singletonList(textUtf8));
+		MediaType actual = this.resultHandler.selectMediaType(this.exchange,
+				() -> Collections.singletonList(textUtf8));
 
 		assertEquals(text8859, actual);
 	}
@@ -110,7 +111,7 @@ public class HandlerResultHandlerTests {
 	@Test // SPR-12894
 	public void noConcreteMediaType() throws Exception {
 		List<MediaType> producible = Collections.singletonList(ALL);
-		MediaType actual = this.resultHandler.selectMediaType(this.exchange, producible);
+		MediaType actual = this.resultHandler.selectMediaType(this.exchange, () -> producible);
 
 		assertEquals(APPLICATION_OCTET_STREAM, actual);
 	}
