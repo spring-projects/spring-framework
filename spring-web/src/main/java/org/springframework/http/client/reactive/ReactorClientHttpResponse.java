@@ -62,7 +62,7 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public HttpHeaders getHeaders() {
 		HttpHeaders headers = new HttpHeaders();
-		this.response.headers()
+		this.response.responseHeaders()
 		             .entries()
 		             .forEach(e -> headers.add(e.getKey(), e.getValue()));
 		return headers;
