@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.view;
 
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,7 +39,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -61,21 +59,24 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
+import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.springframework.core.io.buffer.support.DataBufferTestUtils.dumpString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 /**
  * Unit tests for {@link ViewResolutionResultHandler}.
- *
  * @author Rossen Stoyanchev
  */
 public class ViewResolutionResultHandlerTests {
 
-	private MockServerHttpRequest request;
+	private final MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/path");
 
-	private MockServerHttpResponse response = new MockServerHttpResponse();
+	private final MockServerHttpResponse response = new MockServerHttpResponse();
 
 	private ServerWebExchange exchange;
 
@@ -84,7 +85,6 @@ public class ViewResolutionResultHandlerTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.request = new MockServerHttpRequest(HttpMethod.GET, "/path");
 		WebSessionManager manager = new DefaultWebSessionManager();
 		this.exchange = new DefaultServerWebExchange(this.request, this.response, manager);
 	}
@@ -92,21 +92,30 @@ public class ViewResolutionResultHandlerTests {
 
 	@Test
 	public void supports() throws Exception {
+		testSupports(forClass(String.class), true);
+		testSupports(forClass(View.class), true);
+		testSupports(forClassWithGenerics(Mono.class, String.class), true);
+		testSupports(forClassWithGenerics(Mono.class, View.class), true);
+		testSupports(forClassWithGenerics(Single.class, String.class), true);
+		testSupports(forClassWithGenerics(Single.class, View.class), true);
+		testSupports(forClassWithGenerics(Mono.class, Void.class), true);
+		testSupports(forClass(Completable.class), true);
+		testSupports(forClass(Model.class), true);
+		testSupports(forClass(Map.class), true);
+		testSupports(forClass(TestBean.class), true);
+		testSupports(forClass(Integer.class), false);
+		testSupports(resolvableMethod().annotated(ModelAttribute.class), true);
+	}
 
-		testSupports(ResolvableType.forClass(String.class), true);
-		testSupports(ResolvableType.forClass(View.class), true);
-		testSupports(ResolvableType.forClassWithGenerics(Mono.class, String.class), true);
-		testSupports(ResolvableType.forClassWithGenerics(Mono.class, View.class), true);
-		testSupports(ResolvableType.forClassWithGenerics(Single.class, String.class), true);
-		testSupports(ResolvableType.forClassWithGenerics(Single.class, View.class), true);
-		testSupports(ResolvableType.forClassWithGenerics(Mono.class, Void.class), true);
-		testSupports(ResolvableType.forClass(Completable.class), true);
-		testSupports(ResolvableType.forClass(Model.class), true);
-		testSupports(ResolvableType.forClass(Map.class), true);
-		testSupports(ResolvableType.forClass(TestBean.class), true);
-		testSupports(ResolvableType.forClass(Integer.class), false);
+	private void testSupports(ResolvableType type, boolean result) {
+		testSupports(resolvableMethod().returning(type), result);
+	}
 
-		testSupports(ResolvableMethod.onClass(TestController.class).annotated(ModelAttribute.class), true);
+	private void testSupports(ResolvableMethod resolvableMethod, boolean result) {
+		ViewResolutionResultHandler resultHandler = resultHandler(mock(ViewResolver.class));
+		MethodParameter returnType = resolvableMethod.resolveReturnType();
+		HandlerResult handlerResult = new HandlerResult(new Object(), null, returnType, this.model);
+		assertEquals(result, resultHandler.supports(handlerResult));
 	}
 
 	@Test
@@ -115,7 +124,7 @@ public class ViewResolutionResultHandlerTests {
 		TestViewResolver resolver2 = new TestViewResolver("profile");
 		resolver1.setOrder(2);
 		resolver2.setOrder(1);
-		List<ViewResolver> resolvers = createResultHandler(resolver1, resolver2).getViewResolvers();
+		List<ViewResolver> resolvers = resultHandler(resolver1, resolver2).getViewResolvers();
 
 		assertEquals(Arrays.asList(resolver2, resolver1), resolvers);
 	}
@@ -126,47 +135,47 @@ public class ViewResolutionResultHandlerTests {
 		ResolvableType returnType;
 		ViewResolver resolver = new TestViewResolver("account");
 
-		returnType = ResolvableType.forClass(View.class);
+		returnType = forClass(View.class);
 		returnValue = new TestView("account");
 		testHandle("/path", returnType, returnValue, "account: {id=123}");
 		assertEquals(HttpStatus.NO_CONTENT, this.exchange.getResponse().getStatusCode());
 
-		returnType = ResolvableType.forClassWithGenerics(Mono.class, View.class);
+		returnType = forClassWithGenerics(Mono.class, View.class);
 		returnValue = Mono.just(new TestView("account"));
 		testHandle("/path", returnType, returnValue, "account: {id=123}");
 		assertEquals(HttpStatus.SEE_OTHER, this.exchange.getResponse().getStatusCode());
 
-		returnType = ResolvableType.forClass(String.class);
+		returnType = forClass(String.class);
 		returnValue = "account";
 		testHandle("/path", returnType, returnValue, "account: {id=123}", resolver);
 		assertEquals(HttpStatus.CREATED, this.exchange.getResponse().getStatusCode());
 
-		returnType = ResolvableType.forClassWithGenerics(Mono.class, String.class);
+		returnType = forClassWithGenerics(Mono.class, String.class);
 		returnValue = Mono.just("account");
 		testHandle("/path", returnType, returnValue, "account: {id=123}", resolver);
 		assertEquals(HttpStatus.PARTIAL_CONTENT, this.exchange.getResponse().getStatusCode());
 
-		returnType = ResolvableType.forClass(Model.class);
+		returnType = forClass(Model.class);
 		returnValue = new ExtendedModelMap().addAttribute("name", "Joe");
 		testHandle("/account", returnType, returnValue, "account: {id=123, name=Joe}", resolver);
 
-		returnType = ResolvableType.forClass(Map.class);
+		returnType = forClass(Map.class);
 		returnValue = Collections.singletonMap("name", "Joe");
 		testHandle("/account", returnType, returnValue, "account: {id=123, name=Joe}", resolver);
 
-		returnType = ResolvableType.forClass(TestBean.class);
+		returnType = forClass(TestBean.class);
 		returnValue = new TestBean("Joe");
 		String responseBody = "account: {id=123, testBean=TestBean[name=Joe]}";
 		testHandle("/account", returnType, returnValue, responseBody, resolver);
 
-		testHandle("/account", ResolvableMethod.onClass(TestController.class).annotated(ModelAttribute.class),
+		testHandle("/account", resolvableMethod().annotated(ModelAttribute.class),
 				99L, "account: {id=123, num=99}", resolver);
 	}
 
 	@Test
 	public void handleWithMultipleResolvers() throws Exception {
 		Object returnValue = "profile";
-		ResolvableType returnType = ResolvableType.forClass(String.class);
+		ResolvableType returnType = forClass(String.class);
 		ViewResolver[] resolvers = {new TestViewResolver("account"), new TestViewResolver("profile")};
 
 		testHandle("/account", returnType, returnValue, "profile: {id=123}", resolvers);
@@ -174,51 +183,49 @@ public class ViewResolutionResultHandlerTests {
 
 	@Test
 	public void defaultViewName() throws Exception {
-		testDefaultViewName(null, ResolvableType.forClass(String.class));
-		testDefaultViewName(Mono.empty(), ResolvableType.forClassWithGenerics(Mono.class, String.class));
-		testDefaultViewName(Mono.empty(), ResolvableType.forClassWithGenerics(Mono.class, Void.class));
-		testDefaultViewName(Completable.complete(), ResolvableType.forClass(Completable.class));
+		testDefaultViewName(null, forClass(String.class));
+		testDefaultViewName(Mono.empty(), forClassWithGenerics(Mono.class, String.class));
+		testDefaultViewName(Mono.empty(), forClassWithGenerics(Mono.class, Void.class));
+		testDefaultViewName(Completable.complete(), forClass(Completable.class));
 	}
 
-	private void testDefaultViewName(Object returnValue, ResolvableType type)
-			throws URISyntaxException {
-
+	private void testDefaultViewName(Object returnValue, ResolvableType type) throws URISyntaxException {
 		Model model = new ExtendedModelMap().addAttribute("id", "123");
 		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType(type), model);
-		ViewResolutionResultHandler handler = createResultHandler(new TestViewResolver("account"));
+		ViewResolutionResultHandler handler = resultHandler(new TestViewResolver("account"));
 
 		this.request.setUri("/account");
-		handler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
+		handler.handleResult(this.exchange, result).blockMillis(5000);
 		assertResponseBody("account: {id=123}");
 
 		this.request.setUri("/account/");
-		handler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
+		handler.handleResult(this.exchange, result).blockMillis(5000);
 		assertResponseBody("account: {id=123}");
 
 		this.request.setUri("/account.123");
-		handler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
+		handler.handleResult(this.exchange, result).blockMillis(5000);
 		assertResponseBody("account: {id=123}");
 	}
 
 	@Test
 	public void unresolvedViewName() throws Exception {
 		String returnValue = "account";
-		ResolvableType type = ResolvableType.forClass(String.class);
-		HandlerResult handlerResult = new HandlerResult(new Object(), returnValue, returnType(type), this.model);
+		ResolvableType type = forClass(String.class);
+		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType(type), this.model);
 
 		this.request.setUri("/path");
-		Mono<Void> mono = createResultHandler().handleResult(this.exchange, handlerResult);
+		Mono<Void> mono = resultHandler().handleResult(this.exchange, result);
 
 		StepVerifier.create(mono)
 				.expectNextCount(0)
-				.expectErrorMatches(err -> err.getMessage().equals("Could not resolve view with name 'account'."))
+				.expectErrorMessage("Could not resolve view with name 'account'.")
 				.verify();
 	}
 
 	@Test
 	public void contentNegotiation() throws Exception {
 		TestBean value = new TestBean("Joe");
-		ResolvableType type = ResolvableType.forClass(TestBean.class);
+		ResolvableType type = forClass(TestBean.class);
 		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType(type), this.model);
 
 		this.request.setHeader("Accept", "application/json");
@@ -226,7 +233,7 @@ public class ViewResolutionResultHandlerTests {
 
 		TestView defaultView = new TestView("jsonView", APPLICATION_JSON);
 
-		createResultHandler(Collections.singletonList(defaultView), new TestViewResolver("account"))
+		resultHandler(Collections.singletonList(defaultView), new TestViewResolver("account"))
 				.handleResult(this.exchange, handlerResult)
 				.block(Duration.ofSeconds(5));
 
@@ -237,13 +244,13 @@ public class ViewResolutionResultHandlerTests {
 	@Test
 	public void contentNegotiationWith406() throws Exception {
 		TestBean value = new TestBean("Joe");
-		ResolvableType type = ResolvableType.forClass(TestBean.class);
+		ResolvableType type = forClass(TestBean.class);
 		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType(type), this.model);
 
 		this.request.setHeader("Accept", "application/json");
 		this.request.setUri("/account");
 
-		ViewResolutionResultHandler resultHandler = createResultHandler(new TestViewResolver("account"));
+		ViewResolutionResultHandler resultHandler = resultHandler(new TestViewResolver("account"));
 		Mono<Void> mono = resultHandler.handleResult(this.exchange, handlerResult);
 		StepVerifier.create(mono)
 				.expectNextCount(0)
@@ -251,16 +258,32 @@ public class ViewResolutionResultHandlerTests {
 				.verify();
 	}
 
+	@Test
+	public void modelWithAsyncAttributes() throws Exception {
+		Model model = new ExtendedModelMap();
+		model.addAttribute("bean1", Mono.just(new TestBean("Bean1")));
+		model.addAttribute("bean2", Single.just(new TestBean("Bean2")));
+		model.addAttribute("empty", Mono.empty());
+
+		ResolvableType type = forClass(void.class);
+		HandlerResult result = new HandlerResult(new Object(), null, returnType(type), model);
+		ViewResolutionResultHandler handler = resultHandler(new TestViewResolver("account"));
+
+		this.request.setUri("/account");
+		handler.handleResult(this.exchange, result).blockMillis(5000);
+		assertResponseBody("account: {bean1=TestBean[name=Bean1], bean2=TestBean[name=Bean2]}");
+	}
+
 
 	private MethodParameter returnType(ResolvableType type) {
-		return ResolvableMethod.onClass(TestController.class).returning(type).resolveReturnType();
+		return resolvableMethod().returning(type).resolveReturnType();
 	}
 
-	private ViewResolutionResultHandler createResultHandler(ViewResolver... resolvers) {
-		return createResultHandler(Collections.emptyList(), resolvers);
+	private ViewResolutionResultHandler resultHandler(ViewResolver... resolvers) {
+		return resultHandler(Collections.emptyList(), resolvers);
 	}
 
-	private ViewResolutionResultHandler createResultHandler(List<View> defaultViews, ViewResolver... resolvers) {
+	private ViewResolutionResultHandler resultHandler(List<View> defaultViews, ViewResolver... resolvers) {
 		List<ViewResolver> resolverList = Arrays.asList(resolvers);
 		RequestedContentTypeResolver contentTypeResolver = new HeaderContentTypeResolver();
 		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolverList, contentTypeResolver);
@@ -268,22 +291,14 @@ public class ViewResolutionResultHandlerTests {
 		return handler;
 	}
 
-	private void testSupports(ResolvableType type, boolean result) {
-		testSupports(ResolvableMethod.onClass(TestController.class).returning(type), result);
-	}
-
-	private void testSupports(ResolvableMethod resolvableMethod, boolean result) {
-		ViewResolutionResultHandler resultHandler = createResultHandler(mock(ViewResolver.class));
-		MethodParameter returnType = resolvableMethod.resolveReturnType();
-		HandlerResult handlerResult = new HandlerResult(new Object(), null, returnType, this.model);
-		assertEquals(result, resultHandler.supports(handlerResult));
+	private ResolvableMethod resolvableMethod() {
+		return ResolvableMethod.onClass(TestController.class);
 	}
 
 	private void testHandle(String path, ResolvableType returnType, Object returnValue,
 			String responseBody, ViewResolver... resolvers) throws URISyntaxException {
 
-		testHandle(path, ResolvableMethod.onClass(TestController.class).returning(returnType),
-				returnValue, responseBody, resolvers);
+		testHandle(path, resolvableMethod().returning(returnType), returnValue, responseBody, resolvers);
 	}
 
 	private void testHandle(String path, ResolvableMethod resolvableMethod, Object returnValue,
@@ -293,14 +308,13 @@ public class ViewResolutionResultHandlerTests {
 		MethodParameter returnType = resolvableMethod.resolveReturnType();
 		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, model);
 		this.request.setUri(path);
-		createResultHandler(resolvers).handleResult(this.exchange, result).block(Duration.ofSeconds(5));
+		resultHandler(resolvers).handleResult(this.exchange, result).block(Duration.ofSeconds(5));
 		assertResponseBody(responseBody);
 	}
 
 	private void assertResponseBody(String responseBody) {
 		StepVerifier.create(this.response.getBody())
-				.consumeNextWith(buf -> assertEquals(responseBody,
-						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)))
+				.consumeNextWith(buf -> assertEquals(responseBody, dumpString(buf, UTF_8)))
 				.expectComplete()
 				.verify();
 	}
@@ -360,15 +374,14 @@ public class ViewResolutionResultHandlerTests {
 		}
 
 		@Override
-		public Mono<Void> render(Map<String, ?> model, MediaType mediaType,
-				ServerWebExchange exchange) {
+		public Mono<Void> render(Map<String, ?> model, MediaType mediaType, ServerWebExchange exchange) {
 			String value = this.name + ": " + model.toString();
 			assertNotNull(value);
 			ServerHttpResponse response = exchange.getResponse();
 			if (mediaType != null) {
 				response.getHeaders().setContentType(mediaType);
 			}
-			ByteBuffer byteBuffer = ByteBuffer.wrap(value.getBytes(StandardCharsets.UTF_8));
+			ByteBuffer byteBuffer = ByteBuffer.wrap(value.getBytes(UTF_8));
 			DataBuffer dataBuffer = new DefaultDataBufferFactory().wrap(byteBuffer);
 			return response.writeWith(Flux.just(dataBuffer));
 		}
@@ -410,6 +423,8 @@ public class ViewResolutionResultHandlerTests {
 		Mono<View> monoView() { return null; }
 
 		Mono<Void> monoVoid() { return null; }
+
+		void voidMethod() {}
 
 		Single<String> singleString() { return null; }
 
