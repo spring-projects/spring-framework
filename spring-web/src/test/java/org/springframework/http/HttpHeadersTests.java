@@ -331,18 +331,13 @@ public class HttpHeadersTests {
 
 	@Test
 	public void contentDisposition() {
-		headers.setContentDispositionFormData("name", null);
-		assertEquals("Invalid Content-Disposition header", "form-data; name=\"name\"",
-				headers.getFirst("Content-Disposition"));
+		ContentDisposition disposition = headers.getContentDisposition();
+		assertNotNull(disposition);
+		assertEquals("Invalid Content-Disposition header", ContentDisposition.empty(), headers.getContentDisposition());
 
-		headers.setContentDispositionFormData("name", "filename");
-		assertEquals("Invalid Content-Disposition header", "form-data; name=\"name\"; filename=\"filename\"",
-				headers.getFirst("Content-Disposition"));
-
-		headers.setContentDispositionFormData("name", "中文.txt", StandardCharsets.UTF_8);
-		assertEquals("Invalid Content-Disposition header",
-				"form-data; name=\"name\"; filename*=UTF-8''%E4%B8%AD%E6%96%87.txt",
-				headers.getFirst("Content-Disposition"));
+		disposition = ContentDisposition.builder("attachment").name("foo").filename("foo.txt").size(123L).build();
+		headers.setContentDisposition(disposition);
+		assertEquals("Invalid Content-Disposition header", disposition, headers.getContentDisposition());
 	}
 
 	@Test  // SPR-11917
@@ -425,20 +420,6 @@ public class HttpHeadersTests {
 		assertNull(headers.getAccessControlRequestMethod());
 		headers.setAccessControlRequestMethod(HttpMethod.POST);
 		assertEquals(HttpMethod.POST, headers.getAccessControlRequestMethod());
-	}
-
-	@Test  // SPR-14547
-	public void encodeHeaderFieldParam() {
-		String result = HttpHeaders.encodeHeaderFieldParam("test.txt", StandardCharsets.US_ASCII);
-		assertEquals("test.txt", result);
-
-		result = HttpHeaders.encodeHeaderFieldParam("中文.txt", StandardCharsets.UTF_8);
-		assertEquals("UTF-8''%E4%B8%AD%E6%96%87.txt", result);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void encodeHeaderFieldParamInvalidCharset() {
-		HttpHeaders.encodeHeaderFieldParam("test", StandardCharsets.UTF_16);
 	}
 
 }
