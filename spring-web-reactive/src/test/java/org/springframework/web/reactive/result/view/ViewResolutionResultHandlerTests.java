@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +46,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.ui.ExtendedModelMap;
+import org.springframework.ui.ConcurrentModel;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -53,6 +54,7 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.ResolvableMethod;
+import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -61,7 +63,6 @@ import org.springframework.web.server.session.WebSessionManager;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
@@ -80,7 +81,7 @@ public class ViewResolutionResultHandlerTests {
 
 	private ServerWebExchange exchange;
 
-	private Model model = new ExtendedModelMap();
+	private final BindingContext bindingContext = new BindingContext();
 
 
 	@Before
@@ -114,7 +115,7 @@ public class ViewResolutionResultHandlerTests {
 	private void testSupports(ResolvableMethod resolvableMethod, boolean result) {
 		ViewResolutionResultHandler resultHandler = resultHandler(mock(ViewResolver.class));
 		MethodParameter returnType = resolvableMethod.resolveReturnType();
-		HandlerResult handlerResult = new HandlerResult(new Object(), null, returnType, this.model);
+		HandlerResult handlerResult = new HandlerResult(new Object(), null, returnType, this.bindingContext);
 		assertEquals(result, resultHandler.supports(handlerResult));
 	}
 
@@ -156,7 +157,7 @@ public class ViewResolutionResultHandlerTests {
 		assertEquals(HttpStatus.PARTIAL_CONTENT, this.exchange.getResponse().getStatusCode());
 
 		returnType = forClass(Model.class);
-		returnValue = new ExtendedModelMap().addAttribute("name", "Joe");
+		returnValue = new ConcurrentModel().addAttribute("name", "Joe");
 		testHandle("/account", returnType, returnValue, "account: {id=123, name=Joe}", resolver);
 
 		returnType = forClass(Map.class);
@@ -190,8 +191,8 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	private void testDefaultViewName(Object returnValue, ResolvableType type) throws URISyntaxException {
-		Model model = new ExtendedModelMap().addAttribute("id", "123");
-		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType(type), model);
+		this.bindingContext.getModel().addAttribute("id", "123");
+		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType(type), this.bindingContext);
 		ViewResolutionResultHandler handler = resultHandler(new TestViewResolver("account"));
 
 		this.request.setUri("/account");
@@ -210,8 +211,8 @@ public class ViewResolutionResultHandlerTests {
 	@Test
 	public void unresolvedViewName() throws Exception {
 		String returnValue = "account";
-		ResolvableType type = forClass(String.class);
-		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType(type), this.model);
+		MethodParameter returnType = returnType(forClass(String.class));
+		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, this.bindingContext);
 
 		this.request.setUri("/path");
 		Mono<Void> mono = resultHandler().handleResult(this.exchange, result);
@@ -225,8 +226,8 @@ public class ViewResolutionResultHandlerTests {
 	@Test
 	public void contentNegotiation() throws Exception {
 		TestBean value = new TestBean("Joe");
-		ResolvableType type = forClass(TestBean.class);
-		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType(type), this.model);
+		MethodParameter returnType = returnType(forClass(TestBean.class));
+		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType, this.bindingContext);
 
 		this.request.setHeader("Accept", "application/json");
 		this.request.setUri("/account");
@@ -244,8 +245,8 @@ public class ViewResolutionResultHandlerTests {
 	@Test
 	public void contentNegotiationWith406() throws Exception {
 		TestBean value = new TestBean("Joe");
-		ResolvableType type = forClass(TestBean.class);
-		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType(type), this.model);
+		MethodParameter returnType = returnType(forClass(TestBean.class));
+		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType, this.bindingContext);
 
 		this.request.setHeader("Accept", "application/json");
 		this.request.setUri("/account");
@@ -260,13 +261,13 @@ public class ViewResolutionResultHandlerTests {
 
 	@Test
 	public void modelWithAsyncAttributes() throws Exception {
-		Model model = new ExtendedModelMap();
-		model.addAttribute("bean1", Mono.just(new TestBean("Bean1")));
-		model.addAttribute("bean2", Single.just(new TestBean("Bean2")));
-		model.addAttribute("empty", Mono.empty());
+		this.bindingContext.getModel()
+				.addAttribute("bean1", Mono.just(new TestBean("Bean1")))
+				.addAttribute("bean2", Single.just(new TestBean("Bean2")))
+				.addAttribute("empty", Mono.empty());
 
 		ResolvableType type = forClass(void.class);
-		HandlerResult result = new HandlerResult(new Object(), null, returnType(type), model);
+		HandlerResult result = new HandlerResult(new Object(), null, returnType(type), this.bindingContext);
 		ViewResolutionResultHandler handler = resultHandler(new TestViewResolver("account"));
 
 		this.request.setUri("/account");
@@ -304,9 +305,11 @@ public class ViewResolutionResultHandlerTests {
 	private void testHandle(String path, ResolvableMethod resolvableMethod, Object returnValue,
 			String responseBody, ViewResolver... resolvers) throws URISyntaxException {
 
-		Model model = new ExtendedModelMap().addAttribute("id", "123");
+		Model model = this.bindingContext.getModel();
+		model.asMap().clear();
+		model.addAttribute("id", "123");
 		MethodParameter returnType = resolvableMethod.resolveReturnType();
-		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, model);
+		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, this.bindingContext);
 		this.request.setUri(path);
 		resultHandler(resolvers).handleResult(this.exchange, result).block(Duration.ofSeconds(5));
 		assertResponseBody(responseBody);
@@ -375,12 +378,12 @@ public class ViewResolutionResultHandlerTests {
 
 		@Override
 		public Mono<Void> render(Map<String, ?> model, MediaType mediaType, ServerWebExchange exchange) {
-			String value = this.name + ": " + model.toString();
-			assertNotNull(value);
 			ServerHttpResponse response = exchange.getResponse();
 			if (mediaType != null) {
 				response.getHeaders().setContentType(mediaType);
 			}
+			model = new TreeMap<>(model);
+			String value = this.name + ": " + model.toString();
 			ByteBuffer byteBuffer = ByteBuffer.wrap(value.getBytes(UTF_8));
 			DataBuffer dataBuffer = new DefaultDataBufferFactory().wrap(byteBuffer);
 			return response.writeWith(Flux.just(dataBuffer));
