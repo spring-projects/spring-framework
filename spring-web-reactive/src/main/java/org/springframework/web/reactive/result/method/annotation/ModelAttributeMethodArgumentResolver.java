@@ -152,10 +152,12 @@ public class ModelAttributeMethodArgumentResolver implements HandlerMethodArgume
 	}
 
 	private String getAttributeName(Class<?> valueType, MethodParameter parameter) {
-		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
-		String name = (ann != null ? ann.value() : null);
+		ModelAttribute annot = parameter.getParameterAnnotation(ModelAttribute.class);
+		if (annot != null && StringUtils.hasText(annot.value())) {
+			return annot.value();
+		}
 		// TODO: Conventions does not deal with async wrappers
-		return StringUtils.hasText(name) ? name : ClassUtils.getShortNameAsProperty(valueType);
+		return ClassUtils.getShortNameAsProperty(valueType);
 	}
 
 	private Mono<?> getAttributeMono(String attributeName, Class<?> attributeType,
