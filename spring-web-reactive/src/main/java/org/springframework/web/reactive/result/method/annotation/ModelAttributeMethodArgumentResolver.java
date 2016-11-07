@@ -60,20 +60,28 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class ModelAttributeMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
-	private final boolean useDefaultResolution;
-
 	private final ReactiveAdapterRegistry adapterRegistry;
+
+	private final boolean useDefaultResolution;
 
 
 	/**
 	 * Class constructor.
+	 * @param registry for adapting to other reactive types from and to Mono
+	 */
+	public ModelAttributeMethodArgumentResolver(ReactiveAdapterRegistry registry) {
+		this(registry, false);
+	}
+
+	/**
+	 * Class constructor with a default resolution mode flag.
+	 * @param registry for adapting to other reactive types from and to Mono
 	 * @param useDefaultResolution if "true", non-simple method arguments and
 	 * return values are considered model attributes with or without a
 	 * {@code @ModelAttribute} annotation present.
-	 * @param registry for adapting to other reactive types from and to Mono
 	 */
-	public ModelAttributeMethodArgumentResolver(boolean useDefaultResolution,
-			ReactiveAdapterRegistry registry) {
+	public ModelAttributeMethodArgumentResolver(ReactiveAdapterRegistry registry,
+			boolean useDefaultResolution) {
 
 		Assert.notNull(registry, "'ReactiveAdapterRegistry' is required.");
 		this.useDefaultResolution = useDefaultResolution;

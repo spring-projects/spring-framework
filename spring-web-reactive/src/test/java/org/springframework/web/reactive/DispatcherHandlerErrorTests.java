@@ -109,27 +109,12 @@ public class DispatcherHandlerErrorTests {
 	}
 
 	@Test
-	public void unknownMethodArgumentType() throws Exception {
-		this.request.setUri("/unknown-argument-type");
-		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
-
-		StepVerifier.create(publisher)
-				.consumeErrorWith(error -> {
-					assertThat(error, instanceOf(IllegalStateException.class));
-					assertThat(error.getMessage(), startsWith("No resolver for argument [0]"));
-				})
-				.verify();
-	}
-
-	@Test
 	public void controllerReturnsMonoError() throws Exception {
 		this.request.setUri("/error-signal");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
 		StepVerifier.create(publisher)
-				.consumeErrorWith(error -> {
-					assertSame(EXCEPTION, error);
-				})
+				.consumeErrorWith(error -> assertSame(EXCEPTION, error))
 				.verify();
 	}
 
@@ -138,10 +123,8 @@ public class DispatcherHandlerErrorTests {
 		this.request.setUri("/raise-exception");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
-		StepVerifier.<Void>create(publisher)
-				.consumeErrorWith(error -> {
-					assertSame(EXCEPTION, error);
-				})
+		StepVerifier.create(publisher)
+				.consumeErrorWith(error -> assertSame(EXCEPTION, error))
 				.verify();
 	}
 
@@ -164,9 +147,7 @@ public class DispatcherHandlerErrorTests {
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
 		StepVerifier.create(publisher)
-				.consumeErrorWith(error -> {
-					assertThat(error, instanceOf(NotAcceptableStatusException.class));
-				})
+				.consumeErrorWith(error -> assertThat(error, instanceOf(NotAcceptableStatusException.class)))
 				.verify();
 	}
 
@@ -225,10 +206,6 @@ public class DispatcherHandlerErrorTests {
 	@Controller
 	@SuppressWarnings("unused")
 	private static class TestController {
-
-		@RequestMapping("/unknown-argument-type")
-		public void unknownArgumentType(Foo arg) {
-		}
 
 		@RequestMapping("/error-signal")
 		@ResponseBody

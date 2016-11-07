@@ -191,15 +191,11 @@ public class ViewResolutionResultHandler extends AbstractHandlerResultHandler
 		ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(parameterType.getRawClass(), optional);
 
 		if (adapter != null) {
-			if (optional.isPresent()) {
-				Mono<?> converted = adapter.toMono(optional);
-				returnValueMono = converted.map(o -> o);
-			}
-			else {
-				returnValueMono = Mono.empty();
-			}
-			elementType = adapter.getDescriptor().isNoValue() ?
-					ResolvableType.forClass(Void.class) : parameterType.getGeneric(0);
+			returnValueMono = optional
+					.map(value -> adapter.toMono(value).cast(Object.class))
+					.orElse(Mono.empty());
+			elementType = !adapter.getDescriptor().isNoValue() ?
+					parameterType.getGeneric(0) : ResolvableType.forClass(Void.class);
 		}
 		else {
 			returnValueMono = Mono.justOrEmpty(result.getReturnValue());

@@ -91,7 +91,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 	public void supports() throws Exception {
 
 		ModelAttributeMethodArgumentResolver resolver =
-				new ModelAttributeMethodArgumentResolver(false, new ReactiveAdapterRegistry());
+				new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry(), false);
 
 		ResolvableType type = forClass(Foo.class);
 		assertTrue(resolver.supportsParameter(parameter(type)));
@@ -110,7 +110,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 	public void supportsWithDefaultResolution() throws Exception {
 
 		ModelAttributeMethodArgumentResolver resolver =
-				new ModelAttributeMethodArgumentResolver(true, new ReactiveAdapterRegistry());
+				new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry(), true);
 
 		ResolvableType type = forClass(Foo.class);
 		assertTrue(resolver.supportsParameter(parameterNotAnnotated(type)));
@@ -282,7 +282,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 
 	private ModelAttributeMethodArgumentResolver createResolver() {
-		return new ModelAttributeMethodArgumentResolver(false, new ReactiveAdapterRegistry());
+		return new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry());
 	}
 
 	private MethodParameter parameter(ResolvableType type) {
