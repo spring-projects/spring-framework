@@ -265,6 +265,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			catch (IllegalStateException ex) {
 				throw new BeanCreationException(beanName, "Lookup method resolution failed", ex);
 			}
+			catch (NoClassDefFoundError err) {
+				throw new BeanCreationException(beanName, "Failed to introspect bean class [" + beanClass.getName() +
+						"] for lookup method metadata: could not find class that it depends on", err);
+			}
 			this.lookupMethodsChecked.add(beanName);
 		}
 
