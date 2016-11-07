@@ -166,7 +166,12 @@ public class ViewResolutionResultHandlerTests {
 
 		returnType = forClass(TestBean.class);
 		returnValue = new TestBean("Joe");
-		String responseBody = "account: {id=123, testBean=TestBean[name=Joe]}";
+		String responseBody = "account: {" +
+				"id=123, " +
+				"org.springframework.validation.BindingResult.testBean=" +
+				"org.springframework.validation.BeanPropertyBindingResult: 0 errors, " +
+				"testBean=TestBean[name=Joe]" +
+				"}";
 		testHandle("/account", returnType, returnValue, responseBody, resolver);
 
 		testHandle("/account", resolvableMethod().annotated(ModelAttribute.class),
@@ -239,7 +244,11 @@ public class ViewResolutionResultHandlerTests {
 				.block(Duration.ofSeconds(5));
 
 		assertEquals(APPLICATION_JSON, this.response.getHeaders().getContentType());
-		assertResponseBody("jsonView: {testBean=TestBean[name=Joe]}");
+		assertResponseBody("jsonView: {" +
+				"org.springframework.validation.BindingResult.testBean=" +
+				"org.springframework.validation.BeanPropertyBindingResult: 0 errors, " +
+				"testBean=TestBean[name=Joe]" +
+				"}");
 	}
 
 	@Test
@@ -272,7 +281,14 @@ public class ViewResolutionResultHandlerTests {
 
 		this.request.setUri("/account");
 		handler.handleResult(this.exchange, result).blockMillis(5000);
-		assertResponseBody("account: {bean1=TestBean[name=Bean1], bean2=TestBean[name=Bean2]}");
+		assertResponseBody("account: {" +
+				"bean1=TestBean[name=Bean1], " +
+				"bean2=TestBean[name=Bean2], " +
+				"org.springframework.validation.BindingResult.bean1=" +
+				"org.springframework.validation.BeanPropertyBindingResult: 0 errors, " +
+				"org.springframework.validation.BindingResult.bean2=" +
+				"org.springframework.validation.BeanPropertyBindingResult: 0 errors" +
+				"}");
 	}
 
 

@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.view;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -38,11 +39,14 @@ import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebExchangeDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.AbstractHandlerResultHandler;
+import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.HttpRequestPathHelper;
@@ -241,6 +245,7 @@ public class ViewResolutionResultHandler extends AbstractHandlerResultHandler
 					}
 
 					return resolveAsyncAttributes(model.asMap())
+							.doOnSuccess(aVoid -> addBindingResult(result, exchange))
 							.then(viewsMono)
 							.then(views -> render(views, model.asMap(), exchange));
 				});
@@ -320,6 +325,24 @@ public class ViewResolutionResultHandler extends AbstractHandlerResultHandler
 					return NO_VALUE;
 				})
 				.then();
+	}
+
+	private void addBindingResult(HandlerResult result, ServerWebExchange exchange) {
+		BindingContext context = result.getBindingContext();
+		Map<String, Object> model = context.getModel().asMap();
+		model.keySet().stream()
+				.filter(name -> isBindingCandidate(name, model.get(name)))
+				.filter(name -> !model.containsKey(BindingResult.MODEL_KEY_PREFIX + name))
+				.forEach(name -> {
+					WebExchangeDataBinder binder = context.createDataBinder(exchange, model.get(name), name);
+					model.put(BindingResult.MODEL_KEY_PREFIX + name, binder.getBindingResult());
+				});
+	}
+
+	private boolean isBindingCandidate(String name, Object value) {
+		return !name.startsWith(BindingResult.MODEL_KEY_PREFIX) && value != null &&
+				!value.getClass().isArray() && !(value instanceof Collection) &&
+				!(value instanceof Map) && !BeanUtils.isSimpleValueType(value.getClass());
 	}
 
 	private Mono<? extends Void> render(List<View> views, Map<String, Object> model,
