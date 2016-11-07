@@ -32,7 +32,6 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -101,9 +100,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		return resolveArguments(exchange, bindingContext, providedArgs).then(args -> {
 			try {
 				Object value = doInvoke(args);
-				ModelMap model = bindingContext.getModel();
-				HandlerResult handlerResult = new HandlerResult(this, value, getReturnType(), model);
-				return Mono.just(handlerResult);
+				HandlerResult result = new HandlerResult(this, value, getReturnType(), bindingContext);
+				return Mono.just(result);
 			}
 			catch (InvocationTargetException ex) {
 				return Mono.error(ex.getTargetException());

@@ -15,9 +15,8 @@
  */
 package org.springframework.web.reactive.result.method;
 
-import org.springframework.beans.TypeConverter;
-import org.springframework.ui.ModelMap;
-import org.springframework.validation.support.BindingAwareModelMap;
+import org.springframework.ui.Model;
+import org.springframework.validation.support.BindingAwareConcurrentModel;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.WebExchangeDataBinder;
 import org.springframework.web.bind.support.WebBindingInitializer;
@@ -33,11 +32,9 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class BindingContext {
 
-	private final ModelMap model = new BindingAwareModelMap();
+	private final Model model = new BindingAwareConcurrentModel();
 
 	private final WebBindingInitializer initializer;
-
-	private final TypeConverter simpleValueTypeConverter;
 
 
 	public BindingContext() {
@@ -46,7 +43,6 @@ public class BindingContext {
 
 	public BindingContext(WebBindingInitializer initializer) {
 		this.initializer = initializer;
-		this.simpleValueTypeConverter = initTypeConverter(initializer);
 	}
 
 	private static WebExchangeDataBinder initTypeConverter(WebBindingInitializer initializer) {
@@ -61,7 +57,7 @@ public class BindingContext {
 	/**
 	 * Return the default model.
 	 */
-	public ModelMap getModel() {
+	public Model getModel() {
 		return this.model;
 	}
 

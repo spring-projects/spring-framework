@@ -43,6 +43,7 @@ import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
+import org.springframework.web.bind.WebExchangeBindException;
 
 /**
  * Abstract base class for argument resolvers that resolve method arguments
@@ -216,7 +217,7 @@ public abstract class AbstractMessageReaderArgumentResolver {
 		WebExchangeDataBinder binder = binding.createDataBinder(exchange, target, name);
 		binder.validate(validationHints);
 		if (binder.getBindingResult().hasErrors()) {
-			throw new ServerWebInputException("Validation failed", param);
+			throw new WebExchangeBindException(param, binder.getBindingResult());
 		}
 	}
 

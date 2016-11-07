@@ -22,7 +22,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ValueConstants;
@@ -93,7 +93,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueSyncAr
 	@Override
 	@SuppressWarnings("unchecked")
 	protected void handleResolvedValue(Object arg, String name, MethodParameter parameter,
-			ModelMap model, ServerWebExchange exchange) {
+			Model model, ServerWebExchange exchange) {
 
 		// TODO: View.PATH_VARIABLES ?
 	}

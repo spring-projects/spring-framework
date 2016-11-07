@@ -27,7 +27,7 @@ import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.reactive.result.method.BindingContext;
@@ -87,7 +87,7 @@ public abstract class AbstractNamedValueArgumentResolver implements HandlerMetho
 					"Specified name must not resolve to null: [" + namedValueInfo.name + "]"));
 		}
 
-		ModelMap model = bindingContext.getModel();
+		Model model = bindingContext.getModel();
 
 		return resolveName(resolvedName.toString(), nestedParameter, exchange)
 				.map(arg -> {
@@ -186,7 +186,7 @@ public abstract class AbstractNamedValueArgumentResolver implements HandlerMetho
 	}
 
 	private Mono<Object> getDefaultValue(NamedValueInfo namedValueInfo, MethodParameter parameter,
-			BindingContext bindingContext, ModelMap model, ServerWebExchange exchange) {
+			BindingContext bindingContext, Model model, ServerWebExchange exchange) {
 
 		Object value = null;
 		try {
@@ -263,7 +263,7 @@ public abstract class AbstractNamedValueArgumentResolver implements HandlerMetho
 	 */
 	@SuppressWarnings("UnusedParameters")
 	protected void handleResolvedValue(Object arg, String name, MethodParameter parameter,
-			ModelMap model, ServerWebExchange exchange) {
+			Model model, ServerWebExchange exchange) {
 	}
 
 

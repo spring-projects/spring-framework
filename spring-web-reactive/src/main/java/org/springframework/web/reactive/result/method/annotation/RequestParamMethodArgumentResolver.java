@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
@@ -57,6 +55,17 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueSyncAr
 
 
 	/**
+	 * Class constructor.
+	 * @param beanFactory a bean factory used for resolving  ${...} placeholder
+	 * and #{...} SpEL expressions in default values, or {@code null} if default
+	 * values are not expected to contain expressions
+	 */
+	public RequestParamMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
+		this(beanFactory, false);
+	}
+
+	/**
+	 * Class constructor with a default resolution mode flag.
 	 * @param beanFactory a bean factory used for resolving  ${...} placeholder
 	 * and #{...} SpEL expressions in default values, or {@code null} if default
 	 * values are not expected to contain expressions
@@ -65,7 +74,9 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueSyncAr
 	 * is treated as a request parameter even if it isn't annotated, the
 	 * request parameter name is derived from the method parameter name.
 	 */
-	public RequestParamMethodArgumentResolver(ConfigurableBeanFactory beanFactory, boolean useDefaultResolution) {
+	public RequestParamMethodArgumentResolver(ConfigurableBeanFactory beanFactory,
+			boolean useDefaultResolution) {
+
 		super(beanFactory);
 		this.useDefaultResolution = useDefaultResolution;
 	}
