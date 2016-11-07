@@ -607,6 +607,7 @@ public abstract class ReflectionUtils {
 	 * @see Class#getDeclaredMethods()
 	 */
 	private static Method[] getDeclaredMethods(Class<?> clazz) {
+		Assert.notNull(clazz, "Class must not be null");
 		Method[] result = declaredMethodsCache.get(clazz);
 		if (result == null) {
 			Method[] declaredMethods = clazz.getDeclaredMethods();
@@ -708,6 +709,7 @@ public abstract class ReflectionUtils {
 	 * @see Class#getDeclaredFields()
 	 */
 	private static Field[] getDeclaredFields(Class<?> clazz) {
+		Assert.notNull(clazz, "Class must not be null");
 		Field[] result = declaredFieldsCache.get(clazz);
 		if (result == null) {
 			result = clazz.getDeclaredFields();

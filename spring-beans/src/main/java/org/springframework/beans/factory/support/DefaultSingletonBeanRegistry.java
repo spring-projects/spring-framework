@@ -214,7 +214,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 			if (singletonObject == null) {
 				if (this.singletonsCurrentlyInDestruction) {
 					throw new BeanCreationNotAllowedException(beanName,
-							"Singleton bean creation not allowed while the singletons of this factory are in destruction " +
+							"Singleton bean creation not allowed while singletons of this factory are in destruction " +
 							"(Do not request a bean from a BeanFactory in a destroy method implementation!)");
 				}
 				if (logger.isDebugEnabled()) {
