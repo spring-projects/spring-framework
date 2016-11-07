@@ -80,6 +80,24 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 	}
 
 	@Override
+	public ClientHttpResponse execute() throws IOException {
+		try {
+			return executeAsync().get();
+		}
+		catch (InterruptedException ex) {
+			throw new IOException(ex.getMessage(), ex);
+		}
+		catch (ExecutionException ex) {
+			if (ex.getCause() instanceof IOException) {
+				throw (IOException) ex.getCause();
+			}
+			else {
+				throw new IOException(ex.getMessage(), ex.getCause());
+			}
+		}
+	}
+
+	@Override
 	protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
 		return this.body;
 	}
@@ -105,26 +123,24 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 		};
 
 		this.bootstrap.connect(this.uri.getHost(), getPort(this.uri)).addListener(connectionListener);
-
 		return responseFuture;
 	}
 
-	@Override
-	public ClientHttpResponse execute() throws IOException {
-		try {
-			return executeAsync().get();
+	private FullHttpRequest createFullHttpRequest(HttpHeaders headers) {
+		io.netty.handler.codec.http.HttpMethod nettyMethod =
+				io.netty.handler.codec.http.HttpMethod.valueOf(this.method.name());
+
+		FullHttpRequest nettyRequest = new DefaultFullHttpRequest(
+				HttpVersion.HTTP_1_1, nettyMethod, this.uri.toString(), this.body.buffer());
+
+		nettyRequest.headers().set(HttpHeaders.HOST, this.uri.getHost());
+		nettyRequest.headers().set(HttpHeaders.CONNECTION, "close");
+
+		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+			nettyRequest.headers().add(entry.getKey(), entry.getValue());
 		}
-		catch (InterruptedException ex) {
-			throw new IOException(ex.getMessage(), ex);
-		}
-		catch (ExecutionException ex) {
-			if (ex.getCause() instanceof IOException) {
-				throw (IOException) ex.getCause();
-			}
-			else {
-				throw new IOException(ex.getMessage(), ex);
-			}
-		}
+
+		return nettyRequest;
 	}
 
 	private static int getPort(URI uri) {
@@ -138,23 +154,6 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 			}
 		}
 		return port;
-	}
-
-	private FullHttpRequest createFullHttpRequest(HttpHeaders headers) {
-		io.netty.handler.codec.http.HttpMethod nettyMethod =
-				io.netty.handler.codec.http.HttpMethod.valueOf(this.method.name());
-
-		FullHttpRequest nettyRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1,
-				nettyMethod, this.uri.toString(), this.body.buffer());
-
-		nettyRequest.headers().set(HttpHeaders.HOST, this.uri.getHost());
-		nettyRequest.headers().set(HttpHeaders.CONNECTION, "close");
-
-		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-			nettyRequest.headers().add(entry.getKey(), entry.getValue());
-		}
-
-		return nettyRequest;
 	}
 
 
