@@ -243,23 +243,28 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		// Let's check for lookup methods here..
 		if (!this.lookupMethodsChecked.contains(beanName)) {
-			ReflectionUtils.doWithMethods(beanClass, new ReflectionUtils.MethodCallback() {
-				@Override
-				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-					Lookup lookup = method.getAnnotation(Lookup.class);
-					if (lookup != null) {
-						LookupOverride override = new LookupOverride(method, lookup.value());
-						try {
-							RootBeanDefinition mbd = (RootBeanDefinition) beanFactory.getMergedBeanDefinition(beanName);
-							mbd.getMethodOverrides().addOverride(override);
-						}
-						catch (NoSuchBeanDefinitionException ex) {
-							throw new BeanCreationException(beanName,
-									"Cannot apply @Lookup to beans without corresponding bean definition");
+			try {
+				ReflectionUtils.doWithMethods(beanClass, new ReflectionUtils.MethodCallback() {
+					@Override
+					public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+						Lookup lookup = method.getAnnotation(Lookup.class);
+						if (lookup != null) {
+							LookupOverride override = new LookupOverride(method, lookup.value());
+							try {
+								RootBeanDefinition mbd = (RootBeanDefinition) beanFactory.getMergedBeanDefinition(beanName);
+								mbd.getMethodOverrides().addOverride(override);
+							}
+							catch (NoSuchBeanDefinitionException ex) {
+								throw new BeanCreationException(beanName,
+										"Cannot apply @Lookup to beans without corresponding bean definition");
+							}
 						}
 					}
-				}
-			});
+				});
+			}
+			catch (IllegalStateException ex) {
+				throw new BeanCreationException(beanName, "Lookup method resolution failed", ex);
+			}
 			this.lookupMethodsChecked.add(beanName);
 		}
 

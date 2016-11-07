@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,7 @@ public interface Scope {
 	 * @param objectFactory the {@link ObjectFactory} to use to create the scoped
 	 * object if it is not present in the underlying storage mechanism
 	 * @return the desired object (never {@code null})
+	 * @throws IllegalStateException if the underlying scope is not currently active
 	 */
 	Object get(String name, ObjectFactory<?> objectFactory);
 
@@ -84,6 +85,7 @@ public interface Scope {
 	 * removing an object.
 	 * @param name the name of the object to remove
 	 * @return the removed object, or {@code null} if no object was present
+	 * @throws IllegalStateException if the underlying scope is not currently active
 	 * @see #registerDestructionCallback
 	 */
 	Object remove(String name);
@@ -112,6 +114,7 @@ public interface Scope {
 	 * so it can safely be executed without an enclosing try-catch block.
 	 * Furthermore, the Runnable will usually be serializable, provided
 	 * that its target object is serializable as well.
+	 * @throws IllegalStateException if the underlying scope is not currently active
 	 * @see org.springframework.beans.factory.DisposableBean
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#getDestroyMethodName()
 	 * @see DestructionAwareBeanPostProcessor
@@ -123,6 +126,7 @@ public interface Scope {
 	 * E.g. the HttpServletRequest object for key "request".
 	 * @param key the contextual key
 	 * @return the corresponding object, or {@code null} if none found
+	 * @throws IllegalStateException if the underlying scope is not currently active
 	 */
 	Object resolveContextualObject(String key);
 
@@ -139,6 +143,7 @@ public interface Scope {
 	 * underlying storage mechanism has no obvious candidate for such an ID.
 	 * @return the conversation ID, or {@code null} if there is no
 	 * conversation ID for the current scope
+	 * @throws IllegalStateException if the underlying scope is not currently active
 	 */
 	String getConversationId();
 
