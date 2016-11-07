@@ -60,14 +60,12 @@ public abstract class ReflectionUtils {
 	 * Cache for {@link Class#getDeclaredMethods()} plus equivalent default methods
 	 * from Java 8 based interfaces, allowing for fast iteration.
 	 */
-	private static final Map<Class<?>, Method[]> declaredMethodsCache =
-			new ConcurrentReferenceHashMap<>(256);
+	private static final Map<Class<?>, Method[]> declaredMethodsCache = new ConcurrentReferenceHashMap<>(256);
 
 	/**
 	 * Cache for {@link Class#getDeclaredFields()}, allowing for fast iteration.
 	 */
-	private static final Map<Class<?>, Field[]> declaredFieldsCache =
-			new ConcurrentReferenceHashMap<>(256);
+	private static final Map<Class<?>, Field[]> declaredFieldsCache = new ConcurrentReferenceHashMap<>(256);
 
 
 	/**

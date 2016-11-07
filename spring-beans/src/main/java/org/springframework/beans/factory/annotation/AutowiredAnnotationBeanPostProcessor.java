@@ -355,7 +355,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	@Override
 	public PropertyValues postProcessPropertyValues(
-			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
+			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeanCreationException {
 
 		InjectionMetadata metadata = findAutowiringMetadata(beanName, bean.getClass(), pvs);
 		try {
@@ -404,14 +404,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					if (metadata != null) {
 						metadata.clear(pvs);
 					}
-					try {
-						metadata = buildAutowiringMetadata(clazz);
-						this.injectionMetadataCache.put(cacheKey, metadata);
-					}
-					catch (NoClassDefFoundError err) {
-						throw new IllegalStateException("Failed to introspect bean class [" + clazz.getName() +
-								"] for autowiring metadata: could not find class that it depends on", err);
-					}
+					metadata = buildAutowiringMetadata(clazz);
+					this.injectionMetadataCache.put(cacheKey, metadata);
 				}
 			}
 		}

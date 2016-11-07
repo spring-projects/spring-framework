@@ -389,14 +389,8 @@ public class PersistenceAnnotationBeanPostProcessor
 					if (metadata != null) {
 						metadata.clear(pvs);
 					}
-					try {
-						metadata = buildPersistenceMetadata(clazz);
-						this.injectionMetadataCache.put(cacheKey, metadata);
-					}
-					catch (NoClassDefFoundError err) {
-						throw new IllegalStateException("Failed to introspect bean class [" + clazz.getName() +
-								"] for persistence metadata: could not find class that it depends on", err);
-					}
+					metadata = buildPersistenceMetadata(clazz);
+					this.injectionMetadataCache.put(cacheKey, metadata);
 				}
 			}
 		}
