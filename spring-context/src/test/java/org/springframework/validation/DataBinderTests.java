@@ -38,8 +38,8 @@ import java.util.TreeSet;
 
 import org.junit.Rule;
 import org.junit.Test;
-
 import org.junit.rules.ExpectedException;
+
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
@@ -77,6 +77,7 @@ public class DataBinderTests {
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
+
 
 	@Test
 	public void testBindingNoErrors() throws Exception {
@@ -1988,7 +1989,7 @@ public class DataBinderTests {
 		assertEquals("age", binder.getBindingResult().getFieldError("age").getField());
 	}
 
-	@Test // SPR-14888
+	@Test  // SPR-14888
 	public void testSetAutoGrowCollectionLimit() {
 		BeanWithIntegerList tb = new BeanWithIntegerList();
 		DataBinder binder = new DataBinder(tb);
@@ -2002,9 +2003,8 @@ public class DataBinderTests {
 		assertEquals(Integer.valueOf(1), binder.getBindingResult().getFieldValue("integerList[256]"));
 	}
 
-	@Test // SPR-14888
+	@Test  // SPR-14888
 	public void testSetAutoGrowCollectionLimitAfterInitialization() {
-
 		expectedException.expect(IllegalStateException.class);
 		expectedException.expectMessage("DataBinder is already initialized - call setAutoGrowCollectionLimit before other configuration methods");
 
@@ -2012,6 +2012,7 @@ public class DataBinderTests {
 		binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
 		binder.setAutoGrowCollectionLimit(257);
 	}
+
 
 	@SuppressWarnings("unused")
 	private static class BeanWithIntegerList {
