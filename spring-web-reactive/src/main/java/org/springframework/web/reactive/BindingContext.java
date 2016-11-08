@@ -18,9 +18,8 @@ package org.springframework.web.reactive;
 
 import org.springframework.ui.Model;
 import org.springframework.validation.support.BindingAwareConcurrentModel;
-import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.WebExchangeDataBinder;
 import org.springframework.web.bind.support.WebBindingInitializer;
+import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -60,7 +59,7 @@ public class BindingContext {
 	 * @param exchange the current exchange
 	 * @param target the object to create a data binder for
 	 * @param name the name of the target object
-	 * @return the {@link WebDataBinder} instance
+	 * @return the {@link WebExchangeDataBinder} instance
 	 */
 	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, Object target, String name) {
 		WebExchangeDataBinder dataBinder = createBinderInstance(target, name);
@@ -75,7 +74,7 @@ public class BindingContext {
 	 * for applying type conversion to simple types.
 	 * @param exchange the current exchange
 	 * @param name the name of the target object
-	 * @return a Mono for the created {@link WebDataBinder} instance
+	 * @return a Mono for the created {@link WebExchangeDataBinder} instance
 	 */
 	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, String name) {
 		return createDataBinder(exchange, null, name);

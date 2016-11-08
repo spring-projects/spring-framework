@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.bind;
+
+package org.springframework.web.bind.support;
 
 import java.beans.PropertyEditorSupport;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Iterator;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -227,7 +227,6 @@ public class WebExchangeDataBinderTests {
 		return builder.toString();
 	}
 
-	@NotNull
 	private ServerWebExchange createExchange() {
 		return new DefaultServerWebExchange(
 				this.request, new MockServerHttpResponse(), new DefaultWebSessionManager());

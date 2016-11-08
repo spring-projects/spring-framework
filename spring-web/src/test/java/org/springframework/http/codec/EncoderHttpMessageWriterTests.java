@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.codec;
 
 import java.nio.ByteBuffer;
 import java.util.Collections;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -40,7 +40,7 @@ import static org.junit.Assert.*;
  * @author Marcin Kamionowski
  * @author Rossen Stoyanchev
  */
-public class EncoderHttpMessageWriterTest {
+public class EncoderHttpMessageWriterTests {
 
 	private MockServerHttpResponse response = new MockServerHttpResponse();
 
@@ -74,7 +74,6 @@ public class EncoderHttpMessageWriterTest {
 				.verify();
 	}
 
-	@NotNull
 	private <T> EncoderHttpMessageWriter<T> createWriter(Encoder<T> encoder) {
 		return new EncoderHttpMessageWriter<>(encoder);
 	}

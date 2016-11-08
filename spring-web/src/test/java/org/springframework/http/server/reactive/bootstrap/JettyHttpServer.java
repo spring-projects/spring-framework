@@ -20,7 +20,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.jetbrains.annotations.NotNull;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
@@ -52,7 +51,6 @@ public class JettyHttpServer extends HttpServerSupport implements HttpServer, In
 		this.jettyServer.addConnector(connector);
 	}
 
-	@NotNull
 	private ServletHttpHandlerAdapter initServletHttpHandlerAdapter() {
 		if (getHttpHandlerMap() != null) {
 			return new ServletHttpHandlerAdapter(getHttpHandlerMap());
