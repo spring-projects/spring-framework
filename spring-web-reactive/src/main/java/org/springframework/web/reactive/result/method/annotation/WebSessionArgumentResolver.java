@@ -13,19 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Optional;
+package org.springframework.web.reactive.result.method.annotation;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.web.reactive.result.method.BindingContext;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
-import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 

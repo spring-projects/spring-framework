@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.Arrays;
@@ -24,8 +25,8 @@ import org.springframework.web.bind.WebExchangeDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
 

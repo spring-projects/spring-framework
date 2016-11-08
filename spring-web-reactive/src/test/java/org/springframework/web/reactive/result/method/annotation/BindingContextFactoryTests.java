@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.Collections;
@@ -36,17 +37,16 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.config.WebReactiveConfigurationSupport;
 import org.springframework.web.reactive.result.ResolvableMethod;
-import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link BindingContextFactory}.
@@ -77,7 +77,6 @@ public class BindingContextFactoryTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void basic() throws Exception {
-
 		Validator validator = mock(Validator.class);
 		TestController controller = new TestController(validator);
 
@@ -117,11 +116,9 @@ public class BindingContextFactoryTests {
 
 		private Validator[] validators;
 
-
 		public TestController(Validator... validators) {
 			this.validators = validators;
 		}
-
 
 		@InitBinder
 		public void initDataBinder(WebDataBinder dataBinder) {
@@ -160,6 +157,7 @@ public class BindingContextFactoryTests {
 		@RequestMapping
 		public void handle() {}
 	}
+
 
 	private static class TestBean {
 

@@ -25,7 +25,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
-import org.springframework.web.reactive.result.method.BindingContext;
 
 /**
  * Represent the result of the invocation of a handler or a handler method.

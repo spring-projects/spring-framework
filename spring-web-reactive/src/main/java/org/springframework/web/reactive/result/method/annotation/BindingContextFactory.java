@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
@@ -33,8 +34,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;

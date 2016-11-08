@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
-import org.springframework.web.reactive.result.method.BindingContext;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -37,7 +37,6 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public abstract class AbstractNamedValueSyncArgumentResolver extends AbstractNamedValueArgumentResolver
 		implements SyncHandlerMethodArgumentResolver {
-
 
 	public AbstractNamedValueSyncArgumentResolver(ConfigurableBeanFactory beanFactory) {
 		super(beanFactory);

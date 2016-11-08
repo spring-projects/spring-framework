@@ -25,7 +25,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.reactive.result.method.BindingContext;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
@@ -46,7 +46,6 @@ import org.springframework.web.server.ServerWebInputException;
  */
 public class RequestBodyArgumentResolver extends AbstractMessageReaderArgumentResolver
 		implements HandlerMethodArgumentResolver {
-
 
 	/**
 	 * Constructor with {@link HttpMessageReader}'s and a {@link Validator}.

@@ -50,24 +50,23 @@ import org.springframework.ui.ConcurrentModel;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.ResolvableMethod;
-import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.springframework.core.ResolvableType.forClass;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
-import static org.springframework.core.io.buffer.support.DataBufferTestUtils.dumpString;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static java.nio.charset.StandardCharsets.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.core.ResolvableType.*;
+import static org.springframework.core.io.buffer.support.DataBufferTestUtils.*;
+import static org.springframework.http.MediaType.*;
 
 /**
  * Unit tests for {@link ViewResolutionResultHandler}.

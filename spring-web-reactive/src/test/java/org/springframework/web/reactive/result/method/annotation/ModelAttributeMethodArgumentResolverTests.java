@@ -39,8 +39,8 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.WebExchangeBindException;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.ResolvableMethod;
-import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -51,9 +51,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.forClass;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
-import static org.springframework.util.Assert.isTrue;
+import static org.springframework.core.ResolvableType.*;
+import static org.springframework.util.Assert.*;
 
 
 /**
@@ -296,6 +295,18 @@ public class ModelAttributeMethodArgumentResolverTests {
 	}
 
 
+	@SuppressWarnings("unused")
+	void handle(
+			@ModelAttribute @Validated Foo foo,
+			@ModelAttribute @Validated Mono<Foo> mono,
+			@ModelAttribute @Validated Single<Foo> single,
+			Foo fooNotAnnotated,
+			String stringNotAnnotated,
+			Mono<Foo> monoNotAnnotated,
+			Mono<String> monoStringNotAnnotated) {
+	}
+
+
 	private static class Foo {
 
 		private String name;
@@ -325,15 +336,5 @@ public class ModelAttributeMethodArgumentResolverTests {
 			this.age = age;
 		}
 	}
-
-	@SuppressWarnings("unused")
-	void handle(
-			@ModelAttribute @Validated Foo foo,
-			@ModelAttribute @Validated Mono<Foo> mono,
-			@ModelAttribute @Validated Single<Foo> single,
-			Foo fooNotAnnotated,
-			String stringNotAnnotated,
-			Mono<Foo> monoNotAnnotated,
-			Mono<String> monoStringNotAnnotated) {}
 
 }

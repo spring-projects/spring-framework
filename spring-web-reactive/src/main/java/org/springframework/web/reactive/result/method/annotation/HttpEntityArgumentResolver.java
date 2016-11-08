@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.List;
@@ -28,7 +29,7 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.validation.Validator;
-import org.springframework.web.reactive.result.method.BindingContext;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -42,7 +43,6 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentResolver
 		implements HandlerMethodArgumentResolver {
-
 
 	/**
 	 * Constructor with {@link HttpMessageReader}'s and a {@link Validator}.

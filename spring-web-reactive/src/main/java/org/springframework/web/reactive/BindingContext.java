@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.reactive.result.method;
+
+package org.springframework.web.reactive;
 
 import org.springframework.ui.Model;
 import org.springframework.validation.support.BindingAwareConcurrentModel;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.WebExchangeDataBinder;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.server.ServerWebExchange;
-
 
 /**
  * A context for binding requests to method arguments that provides access to
@@ -45,14 +45,6 @@ public class BindingContext {
 		this.initializer = initializer;
 	}
 
-	private static WebExchangeDataBinder initTypeConverter(WebBindingInitializer initializer) {
-		WebExchangeDataBinder binder = new WebExchangeDataBinder(null);
-		if (initializer != null) {
-			initializer.initBinder(binder);
-		}
-		return binder;
-	}
-
 
 	/**
 	 * Return the default model.
@@ -65,7 +57,6 @@ public class BindingContext {
 	/**
 	 * Create a {@link WebExchangeDataBinder} for applying data binding, type
 	 * conversion, and validation on the given "target" object.
-	 *
 	 * @param exchange the current exchange
 	 * @param target the object to create a data binder for
 	 * @param name the name of the target object
@@ -82,7 +73,6 @@ public class BindingContext {
 	/**
 	 * Create a {@link WebExchangeDataBinder} without a "target" object, i.e.
 	 * for applying type conversion to simple types.
-	 *
 	 * @param exchange the current exchange
 	 * @param name the name of the target object
 	 * @return a Mono for the created {@link WebDataBinder} instance
@@ -101,9 +91,7 @@ public class BindingContext {
 	/**
 	 * Initialize the data binder instance for the given exchange.
 	 */
-	protected WebExchangeDataBinder initDataBinder(WebExchangeDataBinder binder,
-			ServerWebExchange exchange) {
-
+	protected WebExchangeDataBinder initDataBinder(WebExchangeDataBinder binder, ServerWebExchange exchange) {
 		return binder;
 	}
 

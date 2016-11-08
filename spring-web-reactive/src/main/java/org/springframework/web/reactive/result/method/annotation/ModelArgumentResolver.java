@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.ui.Model;
-import org.springframework.web.reactive.result.method.BindingContext;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -30,7 +31,6 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  */
 public class ModelArgumentResolver implements SyncHandlerMethodArgumentResolver {
-
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {

@@ -37,7 +37,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
-import org.springframework.web.reactive.result.method.BindingContext;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.WebSession;

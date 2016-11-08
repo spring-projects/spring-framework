@@ -23,8 +23,8 @@ import java.util.Optional;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -39,7 +39,6 @@ import org.springframework.web.server.ServerWebExchange;
  * @see PathVariableMethodArgumentResolver
  */
 public class PathVariableMapMethodArgumentResolver implements SyncHandlerMethodArgumentResolver {
-
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {

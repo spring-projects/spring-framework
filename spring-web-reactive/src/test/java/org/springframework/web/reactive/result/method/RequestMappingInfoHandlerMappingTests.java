@@ -47,10 +47,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.ResolvableMethod;
-import org.springframework.web.reactive.result.method.RequestMappingInfo.BuilderConfiguration;
+import org.springframework.web.reactive.result.method.RequestMappingInfo.*;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -61,16 +62,10 @@ import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 import org.springframework.web.util.HttpRequestPathHelper;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
-import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
-import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static org.springframework.web.reactive.result.method.RequestMappingInfo.*;
 
 /**
  * Unit tests for {@link RequestMappingInfoHandlerMapping}.

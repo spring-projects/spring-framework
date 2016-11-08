@@ -38,18 +38,14 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
-import org.springframework.web.reactive.result.method.BindingContext;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link RequestParamMethodArgumentResolver}.

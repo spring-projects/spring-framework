@@ -52,23 +52,20 @@ import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.ResolvableMethod;
-import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.forClass;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.junit.Assert.*;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * Unit tests for {@link AbstractMessageReaderArgumentResolver}.
+ *
  * @author Rossen Stoyanchev
  */
 public class MessageReaderArgumentResolverTests {
@@ -266,7 +263,8 @@ public class MessageReaderArgumentResolverTests {
 		assertArrayEquals(new TestBean[] {new TestBean("f1", "b1"), new TestBean("f2", "b2")}, value);
 	}
 
-	@Test @SuppressWarnings("unchecked")
+	@Test
+	@SuppressWarnings("unchecked")
 	public void validateMonoTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\"}";
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
@@ -276,7 +274,8 @@ public class MessageReaderArgumentResolverTests {
 		StepVerifier.create(mono).expectNextCount(0).expectError(ServerWebInputException.class).verify();
 	}
 
-	@Test @SuppressWarnings("unchecked")
+	@Test
+	@SuppressWarnings("unchecked")
 	public void validateFluxTestBean() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\"}]";
 		ResolvableType type = forClassWithGenerics(Flux.class, TestBean.class);
@@ -289,7 +288,7 @@ public class MessageReaderArgumentResolverTests {
 				.verify();
 	}
 
-	@Test // SPR-9964
+	@Test  // SPR-9964
 	public void parameterizedMethodArgument() throws Exception {
 		Method method = AbstractParameterizedController.class.getMethod("handleDto", Identifiable.class);
 		HandlerMethod handlerMethod = new HandlerMethod(new ConcreteParameterizedController(), method);
@@ -337,7 +336,8 @@ public class MessageReaderArgumentResolverTests {
 			List<TestBean> list,
 			Mono<List<TestBean>> monoList,
 			Set<TestBean> set,
-			TestBean[] array) {}
+			TestBean[] array) {
+	}
 
 
 	@XmlRootElement
@@ -395,6 +395,7 @@ public class MessageReaderArgumentResolverTests {
 		}
 	}
 
+
 	private static class TestBeanValidator implements Validator {
 
 		@Override
@@ -411,14 +412,17 @@ public class MessageReaderArgumentResolverTests {
 		}
 	}
 
+
 	private static abstract class AbstractParameterizedController<DTO extends Identifiable> {
 
 		@SuppressWarnings("unused")
 		public void handleDto(DTO dto) {}
 	}
 
+
 	private static class ConcreteParameterizedController extends AbstractParameterizedController<SimpleBean> {
 	}
+
 
 	private interface Identifiable extends Serializable {
 
@@ -426,6 +430,7 @@ public class MessageReaderArgumentResolverTests {
 
 		void setId(Long id);
 	}
+
 
 	@SuppressWarnings({"serial"})
 	private static class SimpleBean implements Identifiable {

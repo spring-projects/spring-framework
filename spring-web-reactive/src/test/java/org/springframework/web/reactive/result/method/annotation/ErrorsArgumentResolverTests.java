@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import org.junit.Before;
@@ -30,8 +31,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebExchangeDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.ResolvableMethod;
-import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
@@ -40,11 +41,11 @@ import org.springframework.web.server.session.WebSessionManager;
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.forClass;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * Unit tests for {@link ErrorsMethodArgumentResolver}.
+ *
  * @author Rossen Stoyanchev
  */
 public class ErrorsArgumentResolverTests {
