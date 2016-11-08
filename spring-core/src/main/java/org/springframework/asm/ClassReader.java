@@ -2464,7 +2464,8 @@ public class ClassReader {
         // computes the start index of the CONSTANT_Class item in b
         // and reads the CONSTANT_Utf8 item designated by
         // the first two bytes of this CONSTANT_Class item
-        return readUTF8(items[readUnsignedShort(index)], buf);
+        String name = readUTF8(items[readUnsignedShort(index)], buf);
+        return (name != null ? name.intern() : null);
     }
 
     /**
