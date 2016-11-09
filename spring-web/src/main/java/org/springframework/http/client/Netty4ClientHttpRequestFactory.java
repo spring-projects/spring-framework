@@ -51,6 +51,7 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Mark Paluch
  * @since 4.1.2
  */
 public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
@@ -174,8 +175,7 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	}
 
 	private Bootstrap getBootstrap(URI uri) {
-		boolean isSecure = (uri.getPort() == 443 ||
-				(uri.getPort() == -1 && "https".equalsIgnoreCase(uri.getScheme())));
+		boolean isSecure = (uri.getPort() == 443 || "https".equalsIgnoreCase(uri.getScheme()));
 		if (isSecure) {
 			if (this.sslBootstrap == null) {
 				this.sslBootstrap = buildBootstrap(true);
