@@ -88,14 +88,13 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
-
 	private StompSubProtocolErrorHandler errorHandler;
 
 	private int messageSizeLimit = 64 * 1024;
 
-	private final StompEncoder stompEncoder = new StompEncoder();
+	private StompEncoder stompEncoder;
 
-	private final StompDecoder stompDecoder = new StompDecoder();
+	private StompDecoder stompDecoder;
 
 	private final Map<String, BufferingStompDecoder> decoders = new ConcurrentHashMap<>();
 
@@ -107,6 +106,10 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	private final Stats stats = new Stats();
 
+	public StompSubProtocolHandler() {
+		setEncoder(new StompEncoder());
+		setDecoder(new StompDecoder());
+	}
 
 	/**
 	 * Configure a handler for error messages sent to clients which allows
@@ -124,6 +127,24 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 */
 	public StompSubProtocolErrorHandler getErrorHandler() {
 		return this.errorHandler;
+	}
+
+	/**
+	 * Configure a {@link StompEncoder} for encoding STOMP frames
+	 * @param encoder the encoder
+	 * @since 4.3.5
+	 */
+	public void setEncoder(StompEncoder encoder) {
+		this.stompEncoder = encoder;
+	}
+
+	/**
+	 * Configure a {@link StompDecoder} for decoding STOMP frames
+	 * @param decoder the decoder
+	 * @since 4.3.5
+	 */
+	public void setDecoder(StompDecoder decoder) {
+		this.stompDecoder = decoder;
 	}
 
 	/**
