@@ -34,7 +34,7 @@ public class EventSourceTransportTest {
 
 
 	@Before
-	public void setup() {
+	public void setUp() {
 		this.eventSourceTransport = new TestEventSourceTransport();
 		this.sockJsSession = mock(EventSourceClientSockJsSession.class);
 	}
@@ -152,6 +152,8 @@ public class EventSourceTransportTest {
 		protected void connectInternal(TransportRequest request, WebSocketHandler handler,
 				URI receiveUrl, HttpHeaders handshakeHeaders, EventSourceClientSockJsSession session,
 				SettableListenableFuture<WebSocketSession> connectFuture) {
+
+			// nothing to do here
 		}
 	}
 

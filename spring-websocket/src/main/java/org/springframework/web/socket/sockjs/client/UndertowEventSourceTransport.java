@@ -426,7 +426,8 @@ public class UndertowEventSourceTransport extends AbstractEventSourceTransport {
 
 			PooledByteBuffer pooled = bufferPool.allocate();
 			try {
-				int r, previousB = -1;
+				int r;
+				int previousB = -1;
 				do {
 					ByteBuffer buffer = pooled.getBuffer();
 					buffer.clear();

@@ -78,7 +78,7 @@ public class RestTemplateEventSourceTransportTests {
 
 
 	@Before
-	public void setup() throws Exception {
+	public void setUp() throws Exception {
 		this.webSocketHandler = mock(WebSocketHandler.class);
 	}
 
@@ -138,6 +138,7 @@ public class RestTemplateEventSourceTransportTests {
 				new ListenableFutureCallback<WebSocketSession>() {
 					@Override
 					public void onSuccess(WebSocketSession result) {
+						// nothing to do here
 					}
 					@Override
 					public void onFailure(Throwable ex) {
@@ -176,8 +177,7 @@ public class RestTemplateEventSourceTransportTests {
 		return connect(new TestRestTemplate(responses));
 	}
 
-	private ListenableFuture<WebSocketSession> connect(RestOperations restTemplate, ClientHttpResponse... responses)
-			throws Exception {
+	private ListenableFuture<WebSocketSession> connect(RestOperations restTemplate) throws Exception {
 
 		RestTemplateEventSourceTransport transport = new RestTemplateEventSourceTransport(restTemplate);
 		transport.setTaskExecutor(new SyncTaskExecutor());
