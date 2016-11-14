@@ -78,12 +78,13 @@ public interface RouterFunction<T> {
 	 * {@link RouterFunctions#route(RequestPredicate, HandlerFunction)}.
 	 * @param predicate the predicate to test
 	 * @param handlerFunction the handler function to route to
+	 * @param <S> the handler function type
 	 * @return a composed function that first routes with this function and then the function
 	 * created from {@code predicate} and {@code handlerFunction} if this
 	 * function has no result
 	 */
-	default RouterFunction<?> andRoute(RequestPredicate predicate,
-			HandlerFunction<?> handlerFunction) {
+	default <S> RouterFunction<?> andRoute(RequestPredicate predicate,
+			HandlerFunction<S> handlerFunction) {
 		return and(RouterFunctions.route(predicate, handlerFunction));
 	}
 

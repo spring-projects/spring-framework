@@ -62,6 +62,23 @@ public class RouterFunctionTests {
 	}
 
 	@Test
+	public void andRoute() throws Exception {
+		RouterFunction<Integer> routerFunction1 = request -> Optional.empty();
+		RequestPredicate requestPredicate = request -> true;
+
+		RouterFunction<?> result = routerFunction1.andRoute(requestPredicate, this::handlerMethod);
+		assertNotNull(result);
+
+		MockServerRequest request = MockServerRequest.builder().build();
+		Optional<? extends HandlerFunction<?>> resultHandlerFunction = result.route(request);
+		assertTrue(resultHandlerFunction.isPresent());
+	}
+
+	private ServerResponse<String> handlerMethod(ServerRequest request) {
+		return ServerResponse.ok().body(fromObject("42"));
+	}
+
+	@Test
 	public void filter() throws Exception {
 		HandlerFunction<String> handlerFunction = request -> ServerResponse.ok().body(fromObject("42"));
 		RouterFunction<String> routerFunction = request -> Optional.of(handlerFunction);
