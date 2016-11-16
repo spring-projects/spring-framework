@@ -802,6 +802,11 @@ project("spring-web-reactive") {
 		optional("org.freemarker:freemarker:${freemarkerVersion}")
 		optional "org.apache.httpcomponents:httpclient:${httpclientVersion}"
 		optional('org.webjars:webjars-locator:0.32')
+		optional("io.reactivex:rxnetty-http:${rxnettyVersion}") {
+			exclude group: 'io.reactivex', module: 'rxjava'
+		}
+		optional("io.reactivex:rxjava:${rxjavaVersion}")
+		optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
 		testCompile("io.projectreactor.addons:reactor-test:${reactorCoreVersion}")
 		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("org.hibernate:hibernate-validator:${hibval5Version}")
@@ -810,12 +815,7 @@ project("spring-web-reactive") {
 		testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
 		testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
 		testCompile("io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}")
-		testCompile("io.reactivex:rxnetty-http:${rxnettyVersion}") {
-			exclude group: 'io.reactivex', module: 'rxjava'
-		}
-		testCompile("io.reactivex:rxjava:${rxjavaVersion}")
 		testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
-		testCompile("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
 		testCompile("io.undertow:undertow-core:${undertowVersion}")
 		testCompile("org.jboss.xnio:xnio-api:${xnioVersion}")
 		testCompile("com.fasterxml:aalto-xml:1.0.0")
