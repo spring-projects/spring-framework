@@ -1209,7 +1209,7 @@ This will inject a system property `pop3.port` if it is defined or 25 if not.
 Selection is a powerful expression language feature that allows you to transform some
 source collection into another by selecting from its entries.
 
-Selection uses the syntax `?[selectionExpression]`. This will filter the collection and
+Selection uses the syntax `.?[selectionExpression]`. This will filter the collection and
 return a new collection containing a subset of the original elements. For example,
 selection would allow us to easily get a list of Serbian inventors:
 
