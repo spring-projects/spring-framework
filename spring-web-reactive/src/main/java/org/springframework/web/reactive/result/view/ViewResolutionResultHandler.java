@@ -294,13 +294,20 @@ public class ViewResolutionResultHandler extends AbstractHandlerResultHandler
 	private Mono<Void> resolveAsyncAttributes(Map<String, Object> model) {
 
 		List<String> names = new ArrayList<>();
-		List<Mono<Object>> valueMonos = new ArrayList<>();
+		List<Mono<?>> valueMonos = new ArrayList<>();
 
 		for (Map.Entry<String, ?> entry : model.entrySet()) {
 			ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(null, entry.getValue());
 			if (adapter != null) {
 				names.add(entry.getKey());
-				valueMonos.add(adapter.toMono(entry.getValue()).defaultIfEmpty(NO_VALUE));
+				if (adapter.getDescriptor().isMultiValue()) {
+					Flux<Object> value = adapter.toFlux(entry.getValue());
+					valueMonos.add(value.collectList().defaultIfEmpty(Collections.emptyList()));
+				}
+				else {
+					Mono<Object> value = adapter.toMono(entry.getValue());
+					valueMonos.add(value.defaultIfEmpty(NO_VALUE));
+				}
 			}
 		}
 
