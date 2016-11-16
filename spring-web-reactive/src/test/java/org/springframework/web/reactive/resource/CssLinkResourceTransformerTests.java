@@ -16,6 +16,11 @@
 
 package org.springframework.web.reactive.resource;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +28,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -80,9 +86,6 @@ public class CssLinkResourceTransformerTests {
 	public void transform() throws Exception {
 		initExchange(HttpMethod.GET, "/static/main.css");
 		Resource css = new ClassPathResource("test/main.css", getClass());
-		TransformedResource actual =
-				(TransformedResource) this.transformerChain.transform(this.exchange, css)
-						.blockMillis(5000);
 
 		String expected = "\n" +
 				"@import url(\"/static/bar-11e16cf79faee7ac698c805cf28248d2.css\");\n" +
@@ -92,17 +95,24 @@ public class CssLinkResourceTransformerTests {
 				"@import '/static/foo-e36d2e05253c6c7085a91522ce43a0b4.css';\n\n" +
 				"body { background: url(\"/static/images/image-f448cd1d5dba82b774f3202c878230b3.png\") }\n";
 
-		String result = new String(actual.getByteArray(), "UTF-8");
-		result = StringUtils.deleteAny(result, "\r");
-		assertEquals(expected, result);
+		StepVerifier.create(this.transformerChain.transform(this.exchange, css).cast(TransformedResource.class))
+				.consumeNextWith(resource -> {
+					String result = new String(resource.getByteArray(), StandardCharsets.UTF_8);
+					result = StringUtils.deleteAny(result, "\r");
+					assertEquals(expected, result);
+				})
+				.expectComplete().verify();
 	}
 
 	@Test
 	public void transformNoLinks() throws Exception {
 		initExchange(HttpMethod.GET, "/static/foo.css");
 		Resource expected = new ClassPathResource("test/foo.css", getClass());
-		Resource actual = this.transformerChain.transform(this.exchange, expected).blockMillis(5000);
-		assertSame(expected, actual);
+		StepVerifier.create(this.transformerChain.transform(this.exchange, expected))
+				.consumeNextWith(resource -> {
+					assertSame(expected, resource);
+				})
+				.expectComplete().verify();
 	}
 
 	@Test
@@ -113,15 +123,15 @@ public class CssLinkResourceTransformerTests {
 				Collections.singletonList(new CssLinkResourceTransformer()));
 
 		Resource externalCss = new ClassPathResource("test/external.css", getClass());
-		Resource resource = transformerChain.transform(this.exchange, externalCss).blockMillis(5000);
-		TransformedResource transformedResource = (TransformedResource) resource;
-
-		String expected = "@import url(\"http://example.org/fonts/css\");\n" +
-				"body { background: url(\"file:///home/spring/image.png\") }\n" +
-				"figure { background: url(\"//example.org/style.css\")}";
-		String result = new String(transformedResource.getByteArray(), "UTF-8");
-		result = StringUtils.deleteAny(result, "\r");
-		assertEquals(expected, result);
+		StepVerifier.create(transformerChain.transform(this.exchange, externalCss).cast(TransformedResource.class))
+				.consumeNextWith(resource -> {
+					String expected = "@import url(\"http://example.org/fonts/css\");\n" +
+							"body { background: url(\"file:///home/spring/image.png\") }\n" +
+							"figure { background: url(\"//example.org/style.css\")}";
+					String result = new String(resource.getByteArray(), StandardCharsets.UTF_8);
+					result = StringUtils.deleteAny(result, "\r");
+					assertEquals(expected, result);
+				}).expectComplete().verify();
 
 		Mockito.verify(resolverChain, Mockito.never())
 				.resolveUrlPath("http://example.org/fonts/css", Collections.singletonList(externalCss));
@@ -135,8 +145,29 @@ public class CssLinkResourceTransformerTests {
 	public void transformWithNonCssResource() throws Exception {
 		initExchange(HttpMethod.GET, "/static/images/image.png");
 		Resource expected = new ClassPathResource("test/images/image.png", getClass());
-		Resource actual = this.transformerChain.transform(this.exchange, expected).blockMillis(5000);
-		assertSame(expected, actual);
+		StepVerifier.create(this.transformerChain.transform(this.exchange, expected))
+				.expectNext(expected)
+				.expectComplete().verify();
+	}
+
+	@Test
+	public void transformWithGzippedResource() throws Exception {
+		initExchange(HttpMethod.GET, "/static/main.css");
+		Resource original = new ClassPathResource("test/main.css", getClass());
+		createTempCopy("main.css", "main.css.gz");
+		GzipResourceResolver.GzippedResource expected = new GzipResourceResolver.GzippedResource(original);
+		StepVerifier.create(this.transformerChain.transform(this.exchange, expected))
+				.expectNext(expected)
+				.expectComplete().verify();
+	}
+
+	private void createTempCopy(String filePath, String copyFilePath) throws IOException {
+		Resource location = new ClassPathResource("test/", CssLinkResourceTransformerTests.class);
+		Path original = Paths.get(location.getFile().getAbsolutePath(), filePath);
+		Path copy = Paths.get(location.getFile().getAbsolutePath(), copyFilePath);
+		Files.deleteIfExists(copy);
+		Files.copy(original, copy);
+		copy.toFile().deleteOnExit();
 	}
 
 	private void initExchange(HttpMethod method, String url) {

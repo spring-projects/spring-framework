@@ -73,7 +73,8 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		return transformerChain.transform(exchange, resource)
 				.then(newResource -> {
 					String filename = newResource.getFilename();
-					if (!"css".equals(StringUtils.getFilenameExtension(filename))) {
+					if (!"css".equals(StringUtils.getFilenameExtension(filename)) ||
+							resource instanceof GzipResourceResolver.GzippedResource) {
 						return Mono.just(newResource);
 					}
 

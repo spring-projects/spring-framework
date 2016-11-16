@@ -16,6 +16,11 @@
 
 package org.springframework.web.servlet.resource;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -87,7 +92,7 @@ public class CssLinkResourceTransformerTests {
 				"@import '/static/foo-e36d2e05253c6c7085a91522ce43a0b4.css';\n\n" +
 				"body { background: url(\"/static/images/image-f448cd1d5dba82b774f3202c878230b3.png\") }\n";
 
-		String result = new String(actual.getByteArray(), "UTF-8");
+		String result = new String(actual.getByteArray(), StandardCharsets.UTF_8);
 		result = StringUtils.deleteAny(result, "\r");
 		assertEquals(expected, result);
 	}
@@ -114,7 +119,7 @@ public class CssLinkResourceTransformerTests {
 		String expected = "@import url(\"http://example.org/fonts/css\");\n" +
 				"body { background: url(\"file:///home/spring/image.png\") }\n" +
 				"figure { background: url(\"//example.org/style.css\")}";
-		String result = new String(transformedResource.getByteArray(), "UTF-8");
+		String result = new String(transformedResource.getByteArray(), StandardCharsets.UTF_8);
 		result = StringUtils.deleteAny(result, "\r");
 		assertEquals(expected, result);
 
@@ -132,6 +137,25 @@ public class CssLinkResourceTransformerTests {
 		Resource expected = new ClassPathResource("test/images/image.png", getClass());
 		Resource actual = this.transformerChain.transform(this.request, expected);
 		assertSame(expected, actual);
+	}
+
+	@Test
+	public void transformWithGzippedResource() throws Exception {
+		this.request = new MockHttpServletRequest("GET", "/static/main.css");
+		Resource original = new ClassPathResource("test/main.css", getClass());
+		createTempCopy("main.css", "main.css.gz");
+		GzipResourceResolver.GzippedResource expected = new GzipResourceResolver.GzippedResource(original);
+		Resource actual = this.transformerChain.transform(this.request, expected);
+		assertSame(expected, actual);
+	}
+
+	private void createTempCopy(String filePath, String copyFilePath) throws IOException {
+		Resource location = new ClassPathResource("test/", CssLinkResourceTransformerTests.class);
+		Path original = Paths.get(location.getFile().getAbsolutePath(), filePath);
+		Path copy = Paths.get(location.getFile().getAbsolutePath(), copyFilePath);
+		Files.deleteIfExists(copy);
+		Files.copy(original, copy);
+		copy.toFile().deleteOnExit();
 	}
 
 }
