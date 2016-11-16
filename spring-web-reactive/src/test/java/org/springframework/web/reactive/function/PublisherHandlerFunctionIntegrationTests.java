@@ -53,7 +53,7 @@ public class PublisherHandlerFunctionIntegrationTests
 	}
 
 	@Override
-	protected RouterFunction<?> routerFunction() {
+	protected RouterFunction routerFunction() {
 		PersonHandler personHandler = new PersonHandler();
 		return route(GET("/mono"), personHandler::mono)
 				.and(route(POST("/mono"), personHandler::postMono))

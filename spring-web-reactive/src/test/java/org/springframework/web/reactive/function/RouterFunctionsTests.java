@@ -48,10 +48,10 @@ public class RouterFunctionsTests {
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(true);
 
-		RouterFunction<Void> result = RouterFunctions.route(requestPredicate, handlerFunction);
+		RouterFunction result = RouterFunctions.route(requestPredicate, handlerFunction);
 		assertNotNull(result);
 
-		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
+		Optional<HandlerFunction<?>> resultHandlerFunction = result.route(request);
 		assertTrue(resultHandlerFunction.isPresent());
 		assertEquals(handlerFunction, resultHandlerFunction.get());
 	}
@@ -64,26 +64,26 @@ public class RouterFunctionsTests {
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
 
-		RouterFunction<Void> result = RouterFunctions.route(requestPredicate, handlerFunction);
+		RouterFunction result = RouterFunctions.route(requestPredicate, handlerFunction);
 		assertNotNull(result);
 
-		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
+		Optional<HandlerFunction<?>> resultHandlerFunction = result.route(request);
 		assertFalse(resultHandlerFunction.isPresent());
 	}
 
 	@Test
 	public void subrouteMatch() throws Exception {
 		HandlerFunction<Void> handlerFunction = request -> ServerResponse.ok().build();
-		RouterFunction<Void> routerFunction = request -> Optional.of(handlerFunction);
+		RouterFunction routerFunction = request -> Optional.of(handlerFunction);
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(true);
 
-		RouterFunction<Void> result = RouterFunctions.subroute(requestPredicate, routerFunction);
+		RouterFunction result = RouterFunctions.subroute(requestPredicate, routerFunction);
 		assertNotNull(result);
 
-		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
+		Optional<HandlerFunction<?>> resultHandlerFunction = result.route(request);
 		assertTrue(resultHandlerFunction.isPresent());
 		assertEquals(handlerFunction, resultHandlerFunction.get());
 	}
@@ -91,16 +91,16 @@ public class RouterFunctionsTests {
 	@Test
 	public void subrouteNoMatch() throws Exception {
 		HandlerFunction<Void> handlerFunction = request -> ServerResponse.ok().build();
-		RouterFunction<Void> routerFunction = request -> Optional.of(handlerFunction);
+		RouterFunction routerFunction = request -> Optional.of(handlerFunction);
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
 
-		RouterFunction<Void> result = RouterFunctions.subroute(requestPredicate, routerFunction);
+		RouterFunction result = RouterFunctions.subroute(requestPredicate, routerFunction);
 		assertNotNull(result);
 
-		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
+		Optional<HandlerFunction<?>> resultHandlerFunction = result.route(request);
 		assertFalse(resultHandlerFunction.isPresent());
 	}
 
