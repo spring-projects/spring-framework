@@ -4,14 +4,13 @@ buildscript {
 	}
 	dependencies {
 		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
-		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.2")
+		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.3")
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
-		classpath("ws.antonov.gradle.plugins:gradle-plugin-protobuf:0.9.1")
 	}
 }
 
 plugins {
-	id "org.sonarqube" version "2.1"
+	id "org.sonarqube" version "2.2.1"
 }
 
 ext {
@@ -705,21 +704,6 @@ project("spring-context-indexer") {
 project("spring-web") {
 	description = "Spring Web"
 	apply plugin: "groovy"
-
-	// Re-generate Protobuf classes from *.proto files and move them in test sources
-	if (project.hasProperty('genProtobuf')) {
-		apply plugin: 'protobuf'
-
-		task updateGenProtobuf(type:Copy, dependsOn: ":spring-web:generateTestProto") {
-			from "${project.buildDir}/generated-sources/test/"
-			into "${projectDir}/src/test/java"
-			doLast {
-				project.delete "${project.buildDir}/generated-sources/test"
-			}
-		}
-
-		tasks.getByPath("compileTestJava").dependsOn "updateGenProtobuf"
-	}
 
 	dependencies {
 		compile(project(":spring-aop"))  // for JaxWsPortProxyFactoryBean
