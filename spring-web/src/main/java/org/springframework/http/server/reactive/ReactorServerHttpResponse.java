@@ -25,7 +25,7 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.HttpServerResponse;
+import reactor.ipc.netty.http.server.HttpServerResponse;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;

@@ -17,12 +17,14 @@
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.config.ClientOptions;
-import reactor.ipc.netty.http.HttpClient;
-import reactor.ipc.netty.http.HttpClientException;
+import reactor.ipc.netty.http.client.HttpClientOptions;
+import reactor.ipc.netty.options.ClientOptions;
+import reactor.ipc.netty.http.client.HttpClient;
+import reactor.ipc.netty.http.client.HttpClientException;
 
 import org.springframework.http.HttpMethod;
 
@@ -43,13 +45,13 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 	 * and SSL support enabled.
 	 */
 	public ReactorClientHttpConnector() {
-		this(ClientOptions.create().sslSupport());
+		this.httpClient = HttpClient.create();
 	}
 
 	/**
 	 * Create a Reactor Netty {@link ClientHttpConnector} with the given {@link ClientOptions}
 	 */
-	public ReactorClientHttpConnector(ClientOptions clientOptions) {
+	public ReactorClientHttpConnector(Consumer<? super HttpClientOptions> clientOptions) {
 		this.httpClient = HttpClient.create(clientOptions);
 	}
 

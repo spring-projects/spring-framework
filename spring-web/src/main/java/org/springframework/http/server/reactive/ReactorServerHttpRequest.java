@@ -22,7 +22,7 @@ import java.net.URISyntaxException;
 
 import io.netty.handler.codec.http.cookie.Cookie;
 import reactor.core.publisher.Flux;
-import reactor.ipc.netty.http.HttpServerRequest;
+import reactor.ipc.netty.http.server.HttpServerRequest;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;

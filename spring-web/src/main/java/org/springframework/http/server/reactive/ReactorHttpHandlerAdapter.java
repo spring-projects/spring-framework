@@ -21,8 +21,8 @@ import java.util.function.BiFunction;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.HttpServerRequest;
-import reactor.ipc.netty.http.HttpServerResponse;
+import reactor.ipc.netty.http.server.HttpServerRequest;
+import reactor.ipc.netty.http.server.HttpServerResponse;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 

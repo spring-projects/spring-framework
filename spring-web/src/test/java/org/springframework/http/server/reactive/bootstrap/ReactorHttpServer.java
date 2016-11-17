@@ -17,7 +17,7 @@
 package org.springframework.http.server.reactive.bootstrap;
 
 import reactor.core.Loopback;
-import reactor.ipc.netty.NettyState;
+import reactor.ipc.netty.NettyContext;
 
 import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
 import org.springframework.util.Assert;
@@ -29,9 +29,9 @@ public class ReactorHttpServer extends HttpServerSupport implements HttpServer, 
 
 	private ReactorHttpHandlerAdapter reactorHandler;
 
-	private reactor.ipc.netty.http.HttpServer reactorServer;
+	private reactor.ipc.netty.http.server.HttpServer reactorServer;
 
-	private NettyState running;
+	private NettyContext running;
 
 
 	@Override
@@ -43,13 +43,14 @@ public class ReactorHttpServer extends HttpServerSupport implements HttpServer, 
 			Assert.notNull(getHttpHandler());
 			this.reactorHandler = new ReactorHttpHandlerAdapter(getHttpHandler());
 		}
-		this.reactorServer = reactor.ipc.netty.http.HttpServer.create(getHost(), getPort());
+		this.reactorServer = reactor.ipc.netty.http.server.HttpServer.create(getHost(),
+				getPort());
 	}
 
 
 	@Override
 	public boolean isRunning() {
-		NettyState running = this.running;
+		NettyContext running = this.running;
 		return running != null && running.channel()
 		                                 .isActive();
 	}
@@ -75,7 +76,7 @@ public class ReactorHttpServer extends HttpServerSupport implements HttpServer, 
 
 	@Override
 	public void stop() {
-		NettyState running = this.running;
+		NettyContext running = this.running;
 		if (running != null) {
 			this.running = null;
 			running.dispose();
