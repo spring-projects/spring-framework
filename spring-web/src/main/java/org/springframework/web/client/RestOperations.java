@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -304,6 +304,56 @@ public interface RestOperations {
 	 * @see HttpEntity
 	 */
 	void put(URI url, Object request) throws RestClientException;
+
+
+	// PATCH
+
+	/**
+	 * Update a resource by PATCHing the given object to the URI template,
+	 * and returns the representation found in the response.
+	 * <p>URI Template variables are expanded using the given URI variables, if any.
+	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
+	 * add additional HTTP headers to the request.
+	 * @param url the URL
+	 * @param request the Object to be PATCHed, may be {@code null}
+	 * @param responseType the type of the return value
+	 * @param uriVariables the variables to expand the template
+	 * @return the converted object
+	 * @see HttpEntity
+	 * @since 5.0
+	 */
+	<T> T patchForObject(String url, Object request, Class<T> responseType, Object... uriVariables)
+			throws RestClientException;
+
+	/**
+	 * Update a resource by PATCHing the given object to the URI template,
+	 * and returns the representation found in the response.
+	 * <p>URI Template variables are expanded using the given map.
+	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
+	 * add additional HTTP headers to the request.
+	 * @param url the URL
+	 * @param request the Object to be PATCHed, may be {@code null}
+	 * @param responseType the type of the return value
+	 * @param uriVariables the variables to expand the template
+	 * @return the converted object
+	 * @see HttpEntity
+	 */
+	<T> T patchForObject(String url, Object request, Class<T> responseType, Map<String, ?> uriVariables)
+			throws RestClientException;
+
+	/**
+	 * Update a resource by PATCHing the given object to the URL,
+	 * and returns the representation found in the response.
+	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
+	 * add additional HTTP headers to the request.
+	 * @param url the URL
+	 * @param request the Object to be POSTed, may be {@code null}
+	 * @param responseType the type of the return value
+	 * @return the converted object
+	 * @see HttpEntity
+	 */
+	<T> T patchForObject(URI url, Object request, Class<T> responseType) throws RestClientException;
+
 
 
 	// DELETE

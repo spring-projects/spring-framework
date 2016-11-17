@@ -458,6 +458,37 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		execute(url, HttpMethod.PUT, requestCallback, null);
 	}
 
+	// PATCH
+
+	@Override
+	public <T> T patchForObject(String url, Object request, Class<T> responseType,
+			Object... uriVariables) throws RestClientException {
+
+		RequestCallback requestCallback = httpEntityCallback(request, responseType);
+		HttpMessageConverterExtractor<T> responseExtractor =
+				new HttpMessageConverterExtractor<>(responseType, getMessageConverters(), logger);
+		return execute(url, HttpMethod.PATCH, requestCallback, responseExtractor, uriVariables);
+	}
+
+	@Override
+	public <T> T patchForObject(String url, Object request, Class<T> responseType,
+			Map<String, ?> uriVariables) throws RestClientException {
+
+		RequestCallback requestCallback = httpEntityCallback(request, responseType);
+		HttpMessageConverterExtractor<T> responseExtractor =
+				new HttpMessageConverterExtractor<>(responseType, getMessageConverters(), logger);
+		return execute(url, HttpMethod.PATCH, requestCallback, responseExtractor, uriVariables);
+	}
+
+	@Override
+	public <T> T patchForObject(URI url, Object request, Class<T> responseType)
+			throws RestClientException {
+
+		RequestCallback requestCallback = httpEntityCallback(request, responseType);
+		HttpMessageConverterExtractor<T> responseExtractor =
+				new HttpMessageConverterExtractor<>(responseType, getMessageConverters());
+		return execute(url, HttpMethod.PATCH, requestCallback, responseExtractor);
+	}
 
 	// DELETE
 

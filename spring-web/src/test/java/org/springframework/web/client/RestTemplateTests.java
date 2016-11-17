@@ -44,8 +44,17 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.util.DefaultUriTemplateHandler;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.willThrow;
 
 /**
  * @author Arjen Poutsma
@@ -589,6 +598,69 @@ public class RestTemplateTests {
 
 		verify(response).close();
 	}
+
+	@Test
+	public void patchForObject() throws Exception {
+		MediaType textPlain = new MediaType("text", "plain");
+		given(converter.canRead(Integer.class, null)).willReturn(true);
+		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(textPlain));
+		given(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.PATCH)).willReturn(this.request);
+		HttpHeaders requestHeaders = new HttpHeaders();
+		given(this.request.getHeaders()).willReturn(requestHeaders);
+		String request = "Hello World";
+		given(converter.canWrite(String.class, null)).willReturn(true);
+		converter.write(request, null, this.request);
+		given(this.request.execute()).willReturn(response);
+		given(errorHandler.hasError(response)).willReturn(false);
+		Integer expected = 42;
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setContentType(textPlain);
+		responseHeaders.setContentLength(10);
+		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.toString().getBytes()));
+		given(converter.canRead(Integer.class, textPlain)).willReturn(true);
+		given(converter.read(eq(Integer.class), any(HttpInputMessage.class))).willReturn(expected);
+		HttpStatus status = HttpStatus.OK;
+		given(response.getStatusCode()).willReturn(status);
+		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+
+		Integer result = template.patchForObject("http://example.com", request, Integer.class);
+		assertEquals("Invalid POST result", expected, result);
+		assertEquals("Invalid Accept header", textPlain.toString(), requestHeaders.getFirst("Accept"));
+
+		verify(response).close();
+	}
+
+	@Test
+	public void patchForObjectNull() throws Exception {
+		MediaType textPlain = new MediaType("text", "plain");
+		given(converter.canRead(Integer.class, null)).willReturn(true);
+		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(textPlain));
+		given(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.PATCH)).willReturn(request);
+		HttpHeaders requestHeaders = new HttpHeaders();
+		given(request.getHeaders()).willReturn(requestHeaders);
+		given(request.execute()).willReturn(response);
+		given(errorHandler.hasError(response)).willReturn(false);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setContentType(textPlain);
+		responseHeaders.setContentLength(10);
+		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getHeaders()).willReturn(responseHeaders);
+		given(converter.canRead(Integer.class, textPlain)).willReturn(true);
+		given(converter.read(Integer.class, response)).willReturn(null);
+		HttpStatus status = HttpStatus.OK;
+		given(response.getStatusCode()).willReturn(status);
+		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+
+		Integer result = template.patchForObject("http://example.com", null, Integer.class);
+		assertNull("Invalid POST result", result);
+		assertEquals("Invalid content length", 0, requestHeaders.getContentLength());
+
+		verify(response).close();
+	}
+
+
 
 	@Test
 	public void delete() throws Exception {

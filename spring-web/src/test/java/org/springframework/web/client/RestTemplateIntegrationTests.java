@@ -45,7 +45,13 @@ import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Arjen Poutsma
@@ -120,6 +126,12 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 	@Test
 	public void postForObject() throws URISyntaxException {
 		String s = template.postForObject(baseUrl + "/{method}", helloWorld, String.class, "post");
+		assertEquals("Invalid content", helloWorld, s);
+	}
+
+	@Test
+	public void patchForObject() throws URISyntaxException {
+		String s = template.patchForObject(baseUrl + "/{method}", helloWorld, String.class, "patch");
 		assertEquals("Invalid content", helloWorld, s);
 	}
 

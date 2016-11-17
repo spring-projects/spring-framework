@@ -44,7 +44,10 @@ import org.junit.BeforeClass;
 import org.springframework.http.MediaType;
 import org.springframework.util.FileCopyUtils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma
@@ -92,6 +95,8 @@ public class AbstractJettyServerTestCase {
 		handler.addServlet(new ServletHolder(new MultipartServlet()), "/multipart");
 		handler.addServlet(new ServletHolder(new FormServlet()), "/form");
 		handler.addServlet(new ServletHolder(new DeleteServlet()), "/delete");
+		handler.addServlet(new ServletHolder(new PatchServlet(helloWorld, bytes, textContentType)),
+				"/patch");
 		handler.addServlet(
 				new ServletHolder(new PutServlet(helloWorld, bytes, textContentType)),
 				"/put");
@@ -330,6 +335,38 @@ public class AbstractJettyServerTestCase {
 		@Override
 		protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 			resp.setStatus(200);
+		}
+	}
+
+	@SuppressWarnings("serial")
+	private static class PatchServlet extends GenericServlet {
+
+		private final String content;
+
+		private final byte[] buf;
+
+		private final MediaType contentType;
+
+		public PatchServlet(String content, byte[] buf, MediaType contentType) {
+			this.content = content;
+			this.buf = buf;
+			this.contentType = contentType;
+		}
+
+		@Override
+		public void service(ServletRequest req, ServletResponse res)
+				throws ServletException, IOException {
+			HttpServletRequest request = (HttpServletRequest) req;
+			HttpServletResponse response = (HttpServletResponse) res;
+			assertEquals("PATCH", request.getMethod());
+			assertTrue("Invalid request content-length", request.getContentLength() > 0);
+			assertNotNull("No content-type", request.getContentType());
+			String body = FileCopyUtils.copyToString(request.getReader());
+			assertEquals("Invalid request body", content, body);
+			response.setStatus(HttpServletResponse.SC_CREATED);
+			response.setContentLength(buf.length);
+			response.setContentType(contentType.toString());
+			FileCopyUtils.copy(buf, response.getOutputStream());
 		}
 	}
 
