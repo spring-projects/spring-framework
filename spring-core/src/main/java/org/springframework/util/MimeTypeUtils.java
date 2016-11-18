@@ -216,6 +216,10 @@ public abstract class MimeTypeUtils {
 		if (!StringUtils.hasLength(mimeType)) {
 			throw new InvalidMimeTypeException(mimeType, "'mimeType' must not be empty");
 		}
+		if (mimeType.startsWith(";")) {
+			throw new InvalidMimeTypeException(mimeType, "does not contain any type");
+		}
+
 		String[] parts = StringUtils.tokenizeToStringArray(mimeType, ";");
 		if (parts.length == 0) {
 			throw new InvalidMimeTypeException(mimeType, "'mimeType' must not be empty");
