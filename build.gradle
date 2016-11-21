@@ -58,7 +58,7 @@ configure(allprojects) { project ->
 	ext.jaxbVersion            = "2.2.11"
 	ext.jaxwsVersion           = "2.2.11"
 	ext.jcaVersion             = "1.7"
-	ext.jettyVersion           = "9.4.0.RC2"
+	ext.jettyVersion           = "9.4.0.RC1"  // RC2 has broken HEAD handling
 	ext.jmsVersion             = "2.0.1"
 	ext.jodaVersion            = "2.9.6"
 	ext.jpaVersion             = "2.1.1"
