@@ -56,6 +56,7 @@ import org.springframework.beans.propertyeditors.CustomBooleanEditor;
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
 import org.springframework.beans.propertyeditors.CustomMapEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.beans.propertyeditors.DurationEditor;
 import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.beans.propertyeditors.InputSourceEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
@@ -90,14 +91,17 @@ import org.springframework.util.ClassUtils;
 public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 	private static Class<?> zoneIdClass;
+	private static Class<?> durationClass;
 
 	static {
 		try {
 			zoneIdClass = ClassUtils.forName("java.time.ZoneId", PropertyEditorRegistrySupport.class.getClassLoader());
+			durationClass = ClassUtils.forName("java.time.Duration", PropertyEditorRegistrySupport.class.getClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
-			// Java 8 ZoneId class not available
+			// Java 8's time classes not available. (All or none should be present).
 			zoneIdClass = null;
+			durationClass = null;
 		}
 	}
 
@@ -224,6 +228,9 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(UUID.class, new UUIDEditor());
 		if (zoneIdClass != null) {
 			this.defaultEditors.put(zoneIdClass, new ZoneIdEditor());
+		}
+		if (durationClass != null) {
+			this.defaultEditors.put(durationClass, new DurationEditor());
 		}
 
 		// Default instances of collection editors.
