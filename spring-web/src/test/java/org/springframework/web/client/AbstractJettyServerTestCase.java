@@ -17,6 +17,7 @@
 package org.springframework.web.client;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +78,7 @@ public class AbstractJettyServerTestCase {
 		jettyServer = new Server(0);
 
 		ServletContextHandler handler = new ServletContextHandler();
-		byte[] bytes = helloWorld.getBytes("utf-8");
+		byte[] bytes = helloWorld.getBytes(StandardCharsets.UTF_8);
 		handler.addServlet(new ServletHolder(new GetServlet(bytes, textContentType)), "/get");
 		handler.addServlet(new ServletHolder(new GetServlet(new byte[0], textContentType)), "/get/nothing");
 		handler.addServlet(new ServletHolder(new GetServlet(bytes, null)), "/get/nocontenttype");

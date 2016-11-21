@@ -173,7 +173,6 @@ public class UriTemplate implements Serializable {
 
 		private final Pattern pattern;
 
-
 		private TemplateInfo(List<String> vars, Pattern pattern) {
 			this.variableNames = vars;
 			this.pattern = pattern;
@@ -187,7 +186,7 @@ public class UriTemplate implements Serializable {
 			return this.pattern;
 		}
 
-		private static TemplateInfo parse(String uriTemplate) {
+		public static TemplateInfo parse(String uriTemplate) {
 			int level = 0;
 			List<String> variableNames = new ArrayList<>();
 			StringBuilder pattern = new StringBuilder();
@@ -216,8 +215,7 @@ public class UriTemplate implements Serializable {
 						else {
 							if (idx + 1 == variable.length()) {
 								throw new IllegalArgumentException(
-										"No custom regular expression specified after ':' " +
-												"in \"" + variable + "\"");
+										"No custom regular expression specified after ':' in \"" + variable + "\"");
 							}
 							String regex = variable.substring(idx + 1, variable.length());
 							pattern.append('(');
@@ -238,7 +236,7 @@ public class UriTemplate implements Serializable {
 		}
 
 		private static String quote(StringBuilder builder) {
-			return builder.length() != 0 ? Pattern.quote(builder.toString()) : "";
+			return (builder.length() > 0 ? Pattern.quote(builder.toString()) : "");
 		}
 	}
 
