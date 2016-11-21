@@ -60,6 +60,11 @@ public class UserSessionRegistryAdapter implements SimpUserRegistry {
 	}
 
 	@Override
+	public int getUserCount() {
+		throw new UnsupportedOperationException("UserSessionRegistry does not expose a user count");
+	}
+
+	@Override
 	public Set<SimpSubscription> findSubscriptions(SimpSubscriptionMatcher matcher) {
 		throw new UnsupportedOperationException("UserSessionRegistry does not support operations across users");
 	}
