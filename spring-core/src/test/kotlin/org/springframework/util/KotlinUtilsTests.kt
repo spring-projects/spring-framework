@@ -11,20 +11,22 @@ import org.springframework.core.MethodParameter
 import org.springframework.util.KotlinUtils.*
 
 /**
- * Unit tests for [KotlinUtils].
-
+ * Test fixture for [KotlinUtils].
+ *
  * @author Raman Gupta
+ * @author Sebastien Deleuze
  */
 class KotlinUtilsTests {
 
-	private lateinit var methodNullable: Method
-	private lateinit var methodNonNullable: Method
+	lateinit var nullableMethod: Method
+
+	lateinit var nonNullableMethod: Method
 
 	@Before
 	@Throws(NoSuchMethodException::class)
-	fun setUp() {
-		methodNullable = javaClass.getMethod("methodNullable", String::class.java, java.lang.Long.TYPE)
-		methodNonNullable = javaClass.getMethod("methodNonNullable", String::class.java, java.lang.Long.TYPE)
+	fun setup() {
+		nullableMethod = javaClass.getMethod("nullable", String::class.java)
+		nonNullableMethod = javaClass.getMethod("nonNullable", String::class.java)
 	}
 
 	@Test
@@ -35,26 +37,26 @@ class KotlinUtilsTests {
 
 	@Test
 	fun `Are kotlin classes detected`() {
-		assertFalse(isKotlinClass(null))
 		assertFalse(isKotlinClass(MethodParameter::class.java))
 		assertTrue(isKotlinClass(javaClass))
 	}
 
 	@Test
 	fun `Obtains method return type nullability`() {
-		assertTrue(isNullable(-1, methodNullable, null))
-		assertFalse(isNullable(-1, methodNonNullable, null))
+		assertTrue(isNullable(MethodParameter(nullableMethod, -1)))
+		assertFalse(isNullable(MethodParameter(nonNullableMethod, -1)))
 	}
 
 	@Test
 	fun `Obtains method parameter nullability`() {
-		assertTrue(isNullable(0, methodNullable, null))
-		assertFalse(isNullable(1, methodNullable, null))
+		assertTrue(isNullable(MethodParameter(nullableMethod, 0)))
+		assertFalse(isNullable(MethodParameter(nonNullableMethod, 0)))
 	}
 
 	@Suppress("unused", "unused_parameter")
-	fun methodNullable(p1: String?, p2: Long): Int? = 42
+	fun nullable(p1: String?): Int? = 42
 
 	@Suppress("unused", "unused_parameter")
-	fun methodNonNullable(p1: String?, p2: Long): Int = 42
+	fun nonNullable(p1: String): Int = 42
+
 }

@@ -310,12 +310,12 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Return whether this method parameter is declared as optional
-	 * in the form of Java 8's {@link java.util.Optional}.
+	 * Return whether this method indicates a parameter which is not required
+	 * (either in the form of Java 8's {@link java.util.Optional} or Kotlin nullable type).
 	 * @since 4.3
 	 */
 	public boolean isOptional() {
-		return (getParameterType() == Optional.class);
+		return (getParameterType() == Optional.class || KotlinUtils.isNullable(this));
 	}
 
 	/**
@@ -327,18 +327,7 @@ public class MethodParameter {
 	 * @see #nested()
 	 */
 	public MethodParameter nestedIfOptional() {
-		return (isOptional() ? nested() : this);
-	}
-
-	/**
-	 * Return whether this method parameter is declared as a "nullable" value, if supported by
-	 * the underlying language. Currently the only supported language is Kotlin.
-	 * @since 5.0
-	 */
-	public boolean isNullable() {
-		return KotlinUtils.isKotlinPresent() &&
-				KotlinUtils.isKotlinClass(getContainingClass()) &&
-				KotlinUtils.isNullable(this.parameterIndex, this.method, this.constructor);
+		return (getParameterType() == Optional.class ? nested() : this);
 	}
 
 	/**

@@ -22,7 +22,6 @@ import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.springframework.core.MethodParameter;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,44 +30,55 @@ import java.util.stream.Collectors;
  * Miscellaneous Kotlin utility methods.
  *
  * @author Raman Gupta
+ * @author Sebastien Deleuze
  * @since 5.0
  */
-public class KotlinUtils {
+public abstract class KotlinUtils {
 
-	private static final boolean kotlinPresent;
+	private static final boolean kotlinPresent = ClassUtils.isPresent("kotlin.Unit", KotlinUtils.class.getClassLoader());
 
-	static {
-		kotlinPresent = ClassUtils.isPresent("kotlin.Unit", MethodParameter.class.getClassLoader());
-	}
-
+	/**
+	 * Return whether Kotlin is available on the classpath or not.
+	 */
 	public static boolean isKotlinPresent() {
 		return kotlinPresent;
 	}
 
+	/**
+	 * Return whether the specified type is a Kotlin class or not.
+	 */
 	public static boolean isKotlinClass(Class<?> type) {
-		return type != null && type.getDeclaredAnnotation(Metadata.class) != null;
+		Assert.notNull(type, "Type must not be null");
+		return isKotlinPresent() && type.getDeclaredAnnotation(Metadata.class) != null;
 	}
 
-	public static boolean isNullable(int parameterIndex, Method method, Constructor<?> constructor) {
-		if(parameterIndex < 0) {
-			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-			return function != null && function.getReturnType().isMarkedNullable();
-		} else {
-			KFunction<?> function = method != null ?
-				ReflectJvmMapping.getKotlinFunction(method) :
-				ReflectJvmMapping.getKotlinFunction(constructor);
-			if(function != null) {
-				@SuppressWarnings("unchecked")
-				List<KParameter> parameters = function.getParameters();
-				return parameters
-						.stream()
-						.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()))
-						.collect(Collectors.toList())
-						.get(parameterIndex)
-						.getType()
-						.isMarkedNullable();
+	/**
+	 * Check whether the specified {@link MethodParameter} represents a nullable Kotlin type or not.
+	 */
+	public static boolean isNullable(MethodParameter methodParameter) {
+		Method method = methodParameter.getMethod();
+		int parameterIndex = methodParameter.getParameterIndex();
+		if (isKotlinClass(methodParameter.getContainingClass())) {
+			if (parameterIndex < 0) {
+				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+				return function != null && function.getReturnType().isMarkedNullable();
 			}
-			return false;
+			else {
+				KFunction<?> function = (method != null ? ReflectJvmMapping.getKotlinFunction(method) :
+					ReflectJvmMapping.getKotlinFunction(methodParameter.getConstructor()));
+				if (function != null) {
+					List<KParameter> parameters = function.getParameters();
+					return parameters
+							.stream()
+							.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()))
+							.collect(Collectors.toList())
+							.get(parameterIndex)
+							.getType()
+							.isMarkedNullable();
+				}
+			}
 		}
+		return false;
 	}
+
 }
