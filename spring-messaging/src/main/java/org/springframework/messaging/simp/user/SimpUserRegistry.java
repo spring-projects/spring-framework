@@ -41,6 +41,13 @@ public interface SimpUserRegistry {
 	Set<SimpUser> getUsers();
 
 	/**
+	 * Return the count of all connected users.
+	 * @return the connected user count.
+	 * @since 4.3.5
+	 */
+	int getUserCount();
+
+	/**
 	 * Find subscriptions with the given matcher.
 	 * @param matcher the matcher to use
 	 * @return a set of matching subscriptions or an empty set.
