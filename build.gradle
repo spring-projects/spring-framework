@@ -5,7 +5,7 @@ buildscript {
 	dependencies {
 		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
 		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.3")
-		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.4"
+		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.5-2"
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
 	}
 }
@@ -71,7 +71,7 @@ configure(allprojects) { project ->
 	ext.junitPlatformVersion   = '1.0.0-M2'
 	ext.log4jVersion           = '2.7'
 	ext.nettyVersion           = "4.1.6.Final"
-	ext.kotlinVersion          = "1.0.4"
+	ext.kotlinVersion          = "1.0.5-2"
 	ext.okhttpVersion          = "2.7.5"
 	ext.okhttp3Version         = "3.4.2"
 	ext.poiVersion             = "3.15"
@@ -569,6 +569,8 @@ project("spring-oxm") {
 project("spring-messaging") {
 	description = "Spring Messaging"
 
+	apply plugin: "kotlin"
+
 	dependencies {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
@@ -604,6 +606,8 @@ project("spring-messaging") {
 		testCompile("io.netty:netty-all:${nettyVersion}")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+		testCompile("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		testRuntime("javax.activation:activation:${activationApiVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
@@ -710,7 +714,9 @@ project("spring-context-indexer") {
 
 project("spring-web") {
 	description = "Spring Web"
+
 	apply plugin: "groovy"
+	apply plugin: "kotlin"
 
 	dependencies {
 		compile(project(":spring-aop"))  // for JaxWsPortProxyFactoryBean
@@ -781,6 +787,8 @@ project("spring-web") {
 		testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+		testCompile("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
@@ -796,6 +804,8 @@ project("spring-web") {
 
 project("spring-web-reactive") {
 	description = "Spring Web Reactive"
+
+	apply plugin: "kotlin"
 
 	dependencies {
 		compile(project(":spring-core"))
@@ -828,6 +838,8 @@ project("spring-web-reactive") {
 		testCompile("com.fasterxml:aalto-xml:1.0.0")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+		testCompile("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		testRuntime("javax.el:javax.el-api:${elApiVersion}")
 		testRuntime("org.glassfish:javax.el:3.0.1-b08")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")

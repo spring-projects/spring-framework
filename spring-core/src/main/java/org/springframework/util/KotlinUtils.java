@@ -31,15 +31,13 @@ import java.util.stream.Collectors;
  * Miscellaneous Kotlin utility methods.
  *
  * @author Raman Gupta
+ * @author Sebastien Deleuze
  * @since 5.0
  */
-public class KotlinUtils {
+public abstract class KotlinUtils {
 
-	private static final boolean kotlinPresent;
+	private static final boolean kotlinPresent = ClassUtils.isPresent("kotlin.Unit", MethodParameter.class.getClassLoader());;
 
-	static {
-		kotlinPresent = ClassUtils.isPresent("kotlin.Unit", MethodParameter.class.getClassLoader());
-	}
 
 	public static boolean isKotlinPresent() {
 		return kotlinPresent;
@@ -50,25 +48,27 @@ public class KotlinUtils {
 	}
 
 	public static boolean isNullable(int parameterIndex, Method method, Constructor<?> constructor) {
-		if(parameterIndex < 0) {
-			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-			return function != null && function.getReturnType().isMarkedNullable();
-		} else {
-			KFunction<?> function = method != null ?
-				ReflectJvmMapping.getKotlinFunction(method) :
-				ReflectJvmMapping.getKotlinFunction(constructor);
-			if(function != null) {
-				@SuppressWarnings("unchecked")
-				List<KParameter> parameters = function.getParameters();
-				return parameters
-						.stream()
-						.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()))
-						.collect(Collectors.toList())
-						.get(parameterIndex)
-						.getType()
-						.isMarkedNullable();
+		if (KotlinUtils.isKotlinPresent() && KotlinUtils.isKotlinClass(method.getDeclaringClass())) {
+			if (parameterIndex < 0) {
+				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+				return function != null && function.getReturnType().isMarkedNullable();
 			}
-			return false;
+			else {
+				KFunction<?> function = method != null ? ReflectJvmMapping.getKotlinFunction(method) :
+					ReflectJvmMapping.getKotlinFunction(constructor);
+				if (function != null) {
+					List<KParameter> parameters = function.getParameters();
+					return parameters
+							.stream()
+							.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()))
+							.collect(Collectors.toList())
+							.get(parameterIndex)
+							.getType()
+							.isMarkedNullable();
+				}
+			}
 		}
+		return false;
 	}
+
 }

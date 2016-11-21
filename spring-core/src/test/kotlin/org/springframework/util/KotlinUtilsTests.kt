@@ -11,20 +11,22 @@ import org.springframework.core.MethodParameter
 import org.springframework.util.KotlinUtils.*
 
 /**
- * Unit tests for [KotlinUtils].
-
+ * Test fixture for [KotlinUtils].
+ *
  * @author Raman Gupta
+ * @author Sebastien Deleuze
  */
 class KotlinUtilsTests {
 
-	private lateinit var methodNullable: Method
-	private lateinit var methodNonNullable: Method
+	lateinit var methodNullable: Method
+
+	lateinit var methodNonNullable: Method
 
 	@Before
 	@Throws(NoSuchMethodException::class)
 	fun setUp() {
-		methodNullable = javaClass.getMethod("methodNullable", String::class.java, java.lang.Long.TYPE)
-		methodNonNullable = javaClass.getMethod("methodNonNullable", String::class.java, java.lang.Long.TYPE)
+		methodNullable = javaClass.getMethod("methodNullable", String::class.java)
+		methodNonNullable = javaClass.getMethod("methodNonNullable", String::class.java)
 	}
 
 	@Test
@@ -49,12 +51,13 @@ class KotlinUtilsTests {
 	@Test
 	fun `Obtains method parameter nullability`() {
 		assertTrue(isNullable(0, methodNullable, null))
-		assertFalse(isNullable(1, methodNullable, null))
+		assertFalse(isNullable(0, methodNonNullable, null))
 	}
 
 	@Suppress("unused", "unused_parameter")
-	fun methodNullable(p1: String?, p2: Long): Int? = 42
+	fun methodNullable(p1: String?): Int? = 42
 
 	@Suppress("unused", "unused_parameter")
-	fun methodNonNullable(p1: String?, p2: Long): Int = 42
+	fun methodNonNullable(p1: String): Int = 42
+
 }
