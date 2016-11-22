@@ -125,8 +125,10 @@ public abstract class JdbcUtils {
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
 	 * @param requiredType the required value type (may be {@code null})
-	 * @return the value object
+	 * @return the value object (possibly not of the specified required type,
+	 * with further conversion steps necessary)
 	 * @throws SQLException if thrown by the JDBC API
+	 * @see #getResultSetValue(ResultSet, int)
 	 */
 	public static Object getResultSetValue(ResultSet rs, int index, Class<?> requiredType) throws SQLException {
 		if (requiredType == null) {
@@ -182,6 +184,7 @@ public abstract class JdbcUtils {
 		else if (Clob.class == requiredType) {
 			return rs.getClob(index);
 		}
+
 		else {
 			// Some unknown type desired -> rely on getObject.
 			try {
@@ -196,7 +199,22 @@ public abstract class JdbcUtils {
 			catch (SQLException ex) {
 				logger.debug("JDBC driver has limited support for JDBC 4.1 'getObject(int, Class)' method", ex);
 			}
-			// Fall back to getObject without type specification...
+
+			// Corresponding SQL types for JSR-310 / Joda-Time types, left up
+			// to the caller to convert them (e.g. through a ConversionService).
+			String typeName = requiredType.getSimpleName();
+			if ("LocalDate".equals(typeName)) {
+				return rs.getDate(index);
+			}
+			else if ("LocalTime".equals(typeName)) {
+				return rs.getTime(index);
+			}
+			else if ("LocalDateTime".equals(typeName)) {
+				return rs.getTimestamp(index);
+			}
+
+			// Fall back to getObject without type specification, again
+			// left up to the caller to convert the value if necessary.
 			return getResultSetValue(rs, index);
 		}
 
@@ -248,7 +266,7 @@ public abstract class JdbcUtils {
 				obj = rs.getDate(index);
 			}
 		}
-		else if (obj != null && obj instanceof java.sql.Date) {
+		else if (obj instanceof java.sql.Date) {
 			if ("java.sql.Timestamp".equals(rs.getMetaData().getColumnClassName(index))) {
 				obj = rs.getTimestamp(index);
 			}
