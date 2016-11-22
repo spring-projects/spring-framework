@@ -23,7 +23,6 @@ import java.util.UUID;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.ConverterRegistry;
-import org.springframework.util.ClassUtils;
 
 /**
  * A specialization of {@link GenericConversionService} configured by default with
@@ -39,11 +38,6 @@ import org.springframework.util.ClassUtils;
  * @since 3.1
  */
 public class DefaultConversionService extends GenericConversionService {
-
-	/** Java 8's java.time package available? */
-	private static final boolean jsr310Available =
-			ClassUtils.isPresent("java.time.ZoneId", DefaultConversionService.class.getClassLoader());
-
 
 	/**
 	 * Create a new {@code DefaultConversionService} with the set of
@@ -67,9 +61,9 @@ public class DefaultConversionService extends GenericConversionService {
 		addCollectionConverters(converterRegistry);
 
 		converterRegistry.addConverter(new ByteBufferConverter((ConversionService) converterRegistry));
-		if (jsr310Available) {
-			Jsr310ConverterRegistrar.registerJsr310Converters(converterRegistry);
-		}
+		converterRegistry.addConverter(new StringToTimeZoneConverter());
+		converterRegistry.addConverter(new ZoneIdToTimeZoneConverter());
+		converterRegistry.addConverter(new ZonedDateTimeToCalendarConverter());
 
 		converterRegistry.addConverter(new ObjectToObjectConverter());
 		converterRegistry.addConverter(new IdToEntityConverter((ConversionService) converterRegistry));
@@ -147,19 +141,6 @@ public class DefaultConversionService extends GenericConversionService {
 
 		converterRegistry.addConverter(new StringToUUIDConverter());
 		converterRegistry.addConverter(UUID.class, String.class, new ObjectToStringConverter());
-	}
-
-
-	/**
-	 * Inner class to avoid a hard-coded dependency on Java 8's {@code java.time} package.
-	 */
-	private static final class Jsr310ConverterRegistrar {
-
-		public static void registerJsr310Converters(ConverterRegistry converterRegistry) {
-			converterRegistry.addConverter(new StringToTimeZoneConverter());
-			converterRegistry.addConverter(new ZoneIdToTimeZoneConverter());
-			converterRegistry.addConverter(new ZonedDateTimeToCalendarConverter());
-		}
 	}
 
 }
