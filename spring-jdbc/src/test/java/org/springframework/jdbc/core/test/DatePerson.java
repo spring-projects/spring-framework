@@ -17,18 +17,18 @@
 package org.springframework.jdbc.core.test;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /**
- * @author Thomas Risberg
+ * @author Juergen Hoeller
  */
-public class SpacePerson {
+public class DatePerson {
 
 	private String lastName;
 
 	private long age;
 
-	private LocalDateTime birthDate;
+	private LocalDate birthDate;
 
 	private BigDecimal balance;
 
@@ -48,11 +48,11 @@ public class SpacePerson {
 		this.age = age;
 	}
 
-	public LocalDateTime getBirthDate() {
+	public LocalDate getBirthDate() {
 		return birthDate;
 	}
 
-	public void setBirthDate(LocalDateTime birthDate) {
+	public void setBirthDate(LocalDate birthDate) {
 		this.birthDate = birthDate;
 	}
 
