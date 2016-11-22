@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,20 +29,20 @@ public interface SimpUserRegistry {
 	/**
 	 * Get the user for the given name.
 	 * @param userName the name of the user to look up
-	 * @return the user or {@code null} if not connected
+	 * @return the user, or {@code null} if not connected
 	 */
 	SimpUser getUser(String userName);
 
 	/**
-	 * Return a snapshot of all connected users. The returned set is a copy and
-	 * will never be modified.
-	 * @return the connected users or an empty set.
+	 * Return a snapshot of all connected users.
+	 * <p>The returned set is a copy and will not reflect further changes.
+	 * @return the connected users, or an empty set if none
 	 */
 	Set<SimpUser> getUsers();
 
 	/**
 	 * Return the count of all connected users.
-	 * @return the connected user count.
+	 * @return the number of connected users
 	 * @since 4.3.5
 	 */
 	int getUserCount();
@@ -50,7 +50,7 @@ public interface SimpUserRegistry {
 	/**
 	 * Find subscriptions with the given matcher.
 	 * @param matcher the matcher to use
-	 * @return a set of matching subscriptions or an empty set.
+	 * @return a set of matching subscriptions, or an empty set if none
 	 */
 	Set<SimpSubscription> findSubscriptions(SimpSubscriptionMatcher matcher);
 

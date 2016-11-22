@@ -44,13 +44,13 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class UriTemplate implements Serializable {
 
+	private final String uriTemplate;
+
 	private final UriComponents uriComponents;
 
 	private final List<String> variableNames;
 
 	private final Pattern matchPattern;
-
-	private final String uriTemplate;
 
 
 	/**

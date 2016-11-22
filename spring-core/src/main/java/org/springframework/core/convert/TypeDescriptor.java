@@ -438,7 +438,7 @@ public class TypeDescriptor implements Serializable {
 			return false;
 		}
 		TypeDescriptor other = (TypeDescriptor) obj;
-		if (!ObjectUtils.nullSafeEquals(this.type, other.type)) {
+		if (!ObjectUtils.nullSafeEquals(getType(), other.getType())) {
 			return false;
 		}
 		if (getAnnotations().length != other.getAnnotations().length) {
