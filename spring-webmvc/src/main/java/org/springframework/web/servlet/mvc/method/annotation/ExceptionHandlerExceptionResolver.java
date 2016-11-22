@@ -381,9 +381,12 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			}
 		}
 		catch (Throwable invocationEx) {
-			if (logger.isWarnEnabled()) {
+			// Any other than the original exception is unintended here,
+			// probably an accident (e.g. failed assertion or the like).
+			if (invocationEx != exception && logger.isWarnEnabled()) {
 				logger.warn("Failed to invoke @ExceptionHandler method: " + exceptionHandlerMethod, invocationEx);
 			}
+			// Continue with default processing of the original exception...
 			return null;
 		}
 
