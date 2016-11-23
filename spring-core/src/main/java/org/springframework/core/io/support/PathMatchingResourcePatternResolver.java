@@ -365,19 +365,17 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (classLoader instanceof URLClassLoader) {
 			try {
 				for (URL url : ((URLClassLoader) classLoader).getURLs()) {
-					if (ResourceUtils.isJarFileURL(url)) {
-						try {
-							UrlResource jarResource = new UrlResource(
-									ResourceUtils.JAR_URL_PREFIX + url.toString() + ResourceUtils.JAR_URL_SEPARATOR);
-							if (jarResource.exists()) {
-								result.add(jarResource);
-							}
+					try {
+						UrlResource jarResource = new UrlResource(
+								ResourceUtils.JAR_URL_PREFIX + url.toString() + ResourceUtils.JAR_URL_SEPARATOR);
+						if (jarResource.exists()) {
+							result.add(jarResource);
 						}
-						catch (MalformedURLException ex) {
-							if (logger.isDebugEnabled()) {
-								logger.debug("Cannot search for matching files underneath [" + url +
-										"] because it cannot be converted to a valid 'jar:' URL: " + ex.getMessage());
-							}
+					}
+					catch (MalformedURLException ex) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Cannot search for matching files underneath [" + url +
+									"] because it cannot be converted to a valid 'jar:' URL: " + ex.getMessage());
 						}
 					}
 				}
@@ -421,14 +419,12 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			for (String path : StringUtils.delimitedListToStringArray(
 					javaClassPathProperty, System.getProperty("path.separator"))) {
 				try {
-					if (path.endsWith(ResourceUtils.JAR_FILE_EXTENSION)) {
-						File file = new File(path);
-						UrlResource jarResource = new UrlResource(ResourceUtils.JAR_URL_PREFIX +
-								ResourceUtils.FILE_URL_PREFIX + file.getAbsolutePath() +
-								ResourceUtils.JAR_URL_SEPARATOR);
-						if (jarResource.exists()) {
-							result.add(jarResource);
-						}
+					File file = new File(path);
+					UrlResource jarResource = new UrlResource(ResourceUtils.JAR_URL_PREFIX +
+							ResourceUtils.FILE_URL_PREFIX + file.getAbsolutePath() +
+							ResourceUtils.JAR_URL_SEPARATOR);
+					if (jarResource.exists()) {
+						result.add(jarResource);
 					}
 				}
 				catch (MalformedURLException ex) {
