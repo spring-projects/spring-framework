@@ -90,6 +90,7 @@ public abstract class AbstractRowMapperTests {
 			this(MockType.ONE);
 		}
 
+		@SuppressWarnings("unchecked")
 		public Mock(MockType type) throws Exception {
 			connection = mock(Connection.class);
 			statement = mock(Statement.class);
@@ -107,7 +108,7 @@ public abstract class AbstractRowMapperTests {
 			given(resultSet.getObject(anyInt(), any(Class.class))).willThrow(new SQLFeatureNotSupportedException());
 			given(resultSet.getDate(3)).willReturn(new java.sql.Date(1221222L));
 			given(resultSet.getBigDecimal(4)).willReturn(new BigDecimal("1234.56"));
-			given(resultSet.wasNull()).willReturn(type == MockType.TWO ? true : false);
+			given(resultSet.wasNull()).willReturn(type == MockType.TWO);
 
 			given(resultSetMetaData.getColumnCount()).willReturn(4);
 			given(resultSetMetaData.getColumnLabel(1)).willReturn(

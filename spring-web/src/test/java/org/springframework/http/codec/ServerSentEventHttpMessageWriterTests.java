@@ -33,8 +33,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze
@@ -64,9 +63,10 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 
 	@Test
 	public void encodeServerSentEvent() {
-		ServerSentEvent<String>
-				event = ServerSentEvent.<String>builder().data("bar").id("c42").event("foo").comment("bla\nbla bla\nbla bla bla")
+		ServerSentEvent<String> event = ServerSentEvent.<String>builder().
+				data("bar").id("c42").event("foo").comment("bla\nbla bla\nbla bla bla")
 				.retry(Duration.ofMillis(123L)).build();
+
 		Mono<ServerSentEvent<String>> source = Mono.just(event);
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		messageWriter.write(source, ResolvableType.forClass(ServerSentEvent.class),
@@ -126,9 +126,10 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				.verify();
 	}
 
+
 	private Consumer<Publisher<DataBuffer>> sseConsumer(String... expected) {
 		return publisher -> {
-			StepVerifier.Step builder = StepVerifier.create(publisher);
+			StepVerifier.Step<DataBuffer> builder = StepVerifier.create(publisher);
 			for (String value : expected) {
 				builder = builder.consumeNextWith(stringConsumer(value));
 			}
