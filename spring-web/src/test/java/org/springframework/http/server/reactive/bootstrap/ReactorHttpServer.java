@@ -67,10 +67,9 @@ public class ReactorHttpServer extends HttpServerSupport implements HttpServer, 
 
 	@Override
 	public void start() {
-		//Should be made thread-safe (compareAndSet..)
+		// TODO: should be made thread-safe (compareAndSet..)
 		if (this.running == null) {
-			this.running = this.reactorServer.newHandler(reactorHandler)
-			                                 .block();
+			this.running = this.reactorServer.newHandler(reactorHandler).block();
 		}
 	}
 
