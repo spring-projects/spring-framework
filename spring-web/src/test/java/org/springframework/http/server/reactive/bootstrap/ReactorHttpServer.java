@@ -16,6 +16,8 @@
 
 package org.springframework.http.server.reactive.bootstrap;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import reactor.core.Loopback;
 import reactor.ipc.netty.NettyContext;
 
@@ -31,7 +33,7 @@ public class ReactorHttpServer extends HttpServerSupport implements HttpServer, 
 
 	private reactor.ipc.netty.http.server.HttpServer reactorServer;
 
-	private NettyContext running;
+	private AtomicReference<NettyContext> nettyContext = new AtomicReference<>();
 
 
 	@Override
@@ -43,42 +45,39 @@ public class ReactorHttpServer extends HttpServerSupport implements HttpServer, 
 			Assert.notNull(getHttpHandler());
 			this.reactorHandler = new ReactorHttpHandlerAdapter(getHttpHandler());
 		}
-		this.reactorServer = reactor.ipc.netty.http.server.HttpServer.create(getHost(),
-				getPort());
+		this.reactorServer = reactor.ipc.netty.http.server.HttpServer
+				.create(getHost(), getPort());
 	}
 
 
 	@Override
 	public boolean isRunning() {
-		NettyContext running = this.running;
-		return running != null && running.channel()
-		                                 .isActive();
+		NettyContext context = this.nettyContext.get();
+		return (context != null && context.channel().isActive());
 	}
 
 	@Override
 	public Object connectedInput() {
-		return reactorServer;
+		return this.reactorServer;
 	}
 
 	@Override
 	public Object connectedOutput() {
-		return reactorServer;
+		return this.reactorServer;
 	}
 
 	@Override
 	public void start() {
-		// TODO: should be made thread-safe (compareAndSet..)
-		if (this.running == null) {
-			this.running = this.reactorServer.newHandler(reactorHandler).block();
+		if (this.nettyContext.get() == null) {
+			this.nettyContext.set(this.reactorServer.newHandler(reactorHandler).block());
 		}
 	}
 
 	@Override
 	public void stop() {
-		NettyContext running = this.running;
-		if (running != null) {
-			this.running = null;
-			running.dispose();
+		NettyContext context = this.nettyContext.getAndSet(null);
+		if (context != null) {
+			context.dispose();
 		}
 	}
 }
