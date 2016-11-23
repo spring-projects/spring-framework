@@ -441,13 +441,8 @@ public class TypeDescriptor implements Serializable {
 		if (!ObjectUtils.nullSafeEquals(getType(), other.getType())) {
 			return false;
 		}
-		if (getAnnotations().length != other.getAnnotations().length) {
+		if (!Arrays.equals(getAnnotations(), other.getAnnotations())) {
 			return false;
-		}
-		for (Annotation ann : getAnnotations()) {
-			if (!ann.equals(other.getAnnotation(ann.annotationType()))) {
-				return false;
-			}
 		}
 		if (isCollection() || isArray()) {
 			return ObjectUtils.nullSafeEquals(getElementTypeDescriptor(), other.getElementTypeDescriptor());
