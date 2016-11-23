@@ -221,9 +221,11 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 				if (dataBuffer.readableByteCount() == 0) {
 					processor.subscription.request(1);
 				}
-				else if (processor.changeState(this, RECEIVED)) {
+				else {
 					processor.receiveBuffer(dataBuffer);
-					processor.writeIfPossible();
+					if (processor.changeState(this, RECEIVED)) {
+						processor.writeIfPossible();
+					}
 				}
 			}
 
