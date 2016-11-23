@@ -78,7 +78,7 @@ configure(allprojects) { project ->
 	ext.reactivestreamsVersion = "1.0.0"
 	ext.reactorVersion         = "2.0.8.RELEASE"
 	ext.reactorCoreVersion     = '3.0.3.RELEASE'
-	ext.reactorNettyVersion    = '0.5.2.RELEASE'
+	ext.reactorNettyVersion    = '0.6.0.BUILD-SNAPSHOT'
 	ext.romeVersion            = "1.7.0"
 	ext.rxjavaVersion          = '1.2.2'
 	ext.rxjavaAdapterVersion   = '1.2.1'
@@ -169,8 +169,10 @@ configure(allprojects) { project ->
 	}
 
 	repositories {
+	    mavenLocal()
 		maven { url "https://repo.spring.io/libs-release" }
 		maven { url "https://repo.spring.io/milestone" }
+		maven { url "https://repo.spring.io/snapshot" }
 	}
 
 	dependencies {
@@ -820,7 +822,8 @@ project("spring-web-reactive") {
 		testCompile("org.jboss.xnio:xnio-api:${xnioVersion}")
 		testCompile("com.fasterxml:aalto-xml:1.0.0")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+	  	testRuntime("org.slf4j:slf4j-api:${slf4jVersion}")
+	  	testRuntime("org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}")
 		testRuntime("javax.el:javax.el-api:${elApiVersion}")
 		testRuntime("org.glassfish:javax.el:3.0.1-b08")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
