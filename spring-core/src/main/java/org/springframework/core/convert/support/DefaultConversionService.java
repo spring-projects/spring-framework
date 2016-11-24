@@ -52,6 +52,30 @@ public class DefaultConversionService extends GenericConversionService {
 	private static final boolean streamAvailable = ClassUtils.isPresent(
 			"java.util.stream.Stream", DefaultConversionService.class.getClassLoader());
 
+	private static volatile DefaultConversionService sharedInstance;
+
+
+	/**
+	 * Return a shared default {@code ConversionService} instance,
+	 * lazily building it once needed.
+	 * <p><b>NOTE:</b> We highly recommend constructing individual
+	 * {@code ConversionService} instances for customization purposes.
+	 * This accessor is only meant as a fallback for code paths which
+	 * need simple type coercion but cannot access a longer-lived
+	 * {@code ConversionService} instance any other way.
+	 * @return the shared {@code ConversionService} instance (never {@code null})
+	 * @since 4.3.5
+	 */
+	public static ConversionService getSharedInstance() {
+		if (sharedInstance == null) {
+			synchronized (DefaultConversionService.class) {
+				if (sharedInstance == null) {
+					sharedInstance = new DefaultConversionService();
+				}
+			}
+		}
+		return sharedInstance;
+	}
 
 
 	/**

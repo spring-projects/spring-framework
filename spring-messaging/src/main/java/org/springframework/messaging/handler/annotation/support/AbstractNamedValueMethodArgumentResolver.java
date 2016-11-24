@@ -76,7 +76,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * values are not expected to contain expressions
 	 */
 	protected AbstractNamedValueMethodArgumentResolver(ConversionService cs, ConfigurableBeanFactory beanFactory) {
-		this.conversionService = (cs != null ? cs : new DefaultConversionService());
+		this.conversionService = (cs != null ? cs : DefaultConversionService.getSharedInstance());
 		this.configurableBeanFactory = beanFactory;
 		this.expressionContext = (beanFactory != null ? new BeanExpressionContext(beanFactory, null) : null);
 	}
@@ -108,8 +108,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		}
 
 		if (!ClassUtils.isAssignableValue(parameter.getParameterType(), arg)) {
-			arg = this.conversionService.convert(
-					arg, TypeDescriptor.valueOf(arg.getClass()), new TypeDescriptor(parameter));
+			arg = this.conversionService.convert(arg, TypeDescriptor.forObject(arg), new TypeDescriptor(parameter));
 		}
 
 		handleResolvedValue(arg, namedValueInfo.name, parameter, message);
