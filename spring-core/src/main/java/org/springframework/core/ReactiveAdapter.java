@@ -16,55 +16,81 @@
 
 package org.springframework.core;
 
+import java.util.Optional;
+import java.util.function.Function;
+
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+
+import org.springframework.util.Assert;
 
 /**
- * Contract for adapting to and from {@link Flux} and {@link Mono}.
+ * Adapt a Reactive Streams {@link Publisher} to and from an async/reactive type
+ * such as {@code CompletableFuture}, an RxJava {@code Observable}, etc.
  *
- * <p>An adapter supports a specific adaptee type whose stream semantics
- * can be checked via {@link #getDescriptor()}.
- *
- * <p>Use the {@link ReactiveAdapterRegistry} to obtain an adapter for a
- * supported adaptee type or to register additional adapters.
+ * <p>Use the {@link ReactiveAdapterRegistry} to register reactive types and
+ * obtain adapters from.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public interface ReactiveAdapter {
+public class ReactiveAdapter {
+
+	private final ReactiveTypeDescriptor descriptor;
+
+	private final Function<Object, Publisher<?>> toPublisherFunction;
+
+	private final Function<Publisher<?>, Object> fromPublisherFunction;
+
 
 	/**
-	 * Return a descriptor with further information about the adaptee.
+	 * Constructor for an adapter with functions to convert the target reactive
+	 * or async type to and from a Reactive Streams Publisher.
+	 * @param descriptor the reactive type descriptor
+	 * @param toPublisherFunction adapter to a Publisher
+	 * @param fromPublisherFunction adapter from a Publisher
 	 */
-	ReactiveTypeDescriptor getDescriptor();
+	public ReactiveAdapter(ReactiveTypeDescriptor descriptor,
+			Function<Object, Publisher<?>> toPublisherFunction,
+			Function<Publisher<?>, Object> fromPublisherFunction) {
+
+		Assert.notNull(descriptor, "'descriptor' is required");
+		Assert.notNull(toPublisherFunction, "'toPublisherFunction' is required");
+		Assert.notNull(fromPublisherFunction, "'fromPublisherFunction' is required");
+
+		this.descriptor = descriptor;
+		this.toPublisherFunction = toPublisherFunction;
+		this.fromPublisherFunction = fromPublisherFunction;
+	}
+
 
 	/**
-	 * Adapt the given Object to a {@link Mono}
-	 * @param source the source object to adapt
-	 * @return the resulting {@link Mono} possibly empty
+	 * Return the descriptor of the reactive type for the adapter.
 	 */
-	<T> Mono<T> toMono(Object source);
+	public ReactiveTypeDescriptor getDescriptor() {
+		return this.descriptor;
+	}
 
 	/**
-	 * Adapt the given Object to a {@link Flux}.
-	 * @param source the source object to adapt
-	 * @return the resulting {@link Flux} possibly empty
+	 * Adapt the given instance to a Reactive Streams Publisher.
+	 * @param source the source object to adapt from
+	 * @return the Publisher repesenting the adaptation
 	 */
-	<T> Flux<T> toFlux(Object source);
+	@SuppressWarnings("unchecked")
+	public <T> Publisher<T> toPublisher(Object source) {
+		source = (source instanceof Optional ? ((Optional<?>) source).orElse(null) : source);
+		if (source == null) {
+			source = getDescriptor().getEmptyValue();
+		}
+		return (Publisher<T>) this.toPublisherFunction.apply(source);
+	}
 
 	/**
-	 * Adapt the given Object to a Publisher.
-	 * @param source the source object to adapt
-	 * @return the resulting {@link Mono} or {@link Flux} possibly empty
+	 * Adapt from the given Reactive Streams Publisher.
+	 * @param publisher the publisher to adapt from
+	 * @return the reactive type instance representing the adapted publisher
 	 */
-	<T> Publisher<T> toPublisher(Object source);
-
-	/**
-	 * Adapt the given Publisher to the target adaptee.
-	 * @param publisher the publisher to adapt
-	 * @return the resulting adaptee
-	 */
-	Object fromPublisher(Publisher<?> publisher);
+	public Object fromPublisher(Publisher<?> publisher) {
+		return (publisher != null ? this.fromPublisherFunction.apply(publisher) : null);
+	}
 
 }
