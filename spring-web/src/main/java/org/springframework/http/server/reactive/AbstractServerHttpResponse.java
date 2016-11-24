@@ -131,7 +131,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public final Mono<Void> writeAndFlushWith(Publisher<Publisher<DataBuffer>> body) {
+	public final Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<DataBuffer>> body) {
 		return new ChannelSendOperator<>(body,
 				writePublisher -> doCommit(() -> writeAndFlushWithInternal(writePublisher)));
 	}
@@ -193,7 +193,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 * each {@code Publisher<DataBuffer>}.
 	 * @param body the publisher to write and flush with
 	 */
-	protected abstract Mono<Void> writeAndFlushWithInternal(Publisher<Publisher<DataBuffer>> body);
+	protected abstract Mono<Void> writeAndFlushWithInternal(Publisher<? extends Publisher<DataBuffer>> body);
 
 	/**
 	 * Implement this method to write the status code to the underlying response.

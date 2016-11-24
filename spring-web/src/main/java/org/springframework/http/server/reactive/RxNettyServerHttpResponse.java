@@ -80,7 +80,7 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	protected Mono<Void> writeAndFlushWithInternal(
-			Publisher<Publisher<DataBuffer>> body) {
+			Publisher<? extends Publisher<DataBuffer>> body) {
 		Flux<ByteBuf> bodyWithFlushSignals = Flux.from(body).
 				flatMap(publisher -> Flux.from(publisher).
 						map(NettyDataBufferFactory::toByteBuf).
