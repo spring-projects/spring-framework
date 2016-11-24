@@ -80,7 +80,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 	}
 
 	@Override
-	public Mono<Void> writeAndFlushWith(Publisher<Publisher<DataBuffer>> body) {
+	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<DataBuffer>> body) {
 		Publisher<Publisher<ByteBuf>> byteBufs = Flux.from(body).
 				map(ReactorClientHttpRequest::toByteBufs);
 		return applyBeforeCommit().then(this.httpRequest

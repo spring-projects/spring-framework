@@ -72,7 +72,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		messageWriter.write(source, ResolvableType.forClass(ServerSentEvent.class),
 				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
 
-		Publisher<Publisher<DataBuffer>> result = Flux.from(outputMessage.getBodyWithFlush());
+		Publisher<? extends Publisher<DataBuffer>> result = Flux.from(outputMessage.getBodyWithFlush());
 		StepVerifier.create(result)
 				.consumeNextWith(sseConsumer("id:c42\n" + "event:foo\n" + "retry:123\n" +
 						":bla\n:bla bla\n:bla bla bla\n" + "data:bar\n"))
@@ -87,7 +87,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		messageWriter.write(source, ResolvableType.forClass(String.class),
 				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
 
-		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
+		Publisher<? extends Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
 		StepVerifier.create(result)
 				.consumeNextWith(sseConsumer("data:foo\n"))
 				.consumeNextWith(sseConsumer("data:bar\n"))
@@ -102,7 +102,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		messageWriter.write(source, ResolvableType.forClass(String.class),
 				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
 
-		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
+		Publisher<? extends Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
 		StepVerifier.create(result)
 				.consumeNextWith(sseConsumer("data:foo\ndata:bar\n"))
 				.consumeNextWith(sseConsumer("data:foo\ndata:baz\n"))
@@ -118,7 +118,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		messageWriter.write(source, ResolvableType.forClass(Pojo.class),
 				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
 
-		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
+		Publisher<? extends Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
 		StepVerifier.create(result)
 				.consumeNextWith(sseConsumer("data:", "{\"foo\":\"foofoo\",\"bar\":\"barbar\"}", "\n"))
 				.consumeNextWith(sseConsumer("data:", "{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}", "\n"))
