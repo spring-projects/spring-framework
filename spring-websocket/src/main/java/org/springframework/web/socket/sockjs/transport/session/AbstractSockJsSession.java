@@ -396,7 +396,12 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		if (!isClosed()) {
 			try {
 				updateLastActiveTime();
-				cancelHeartbeat();
+				// Avoid cancelHeartbeat() and responseLock within server "close" callback
+				ScheduledFuture<?> future = this.heartbeatFuture;
+				if (future != null) {
+					this.heartbeatFuture = null;
+					future.cancel(false);
+				}
 			}
 			finally {
 				this.state = State.CLOSED;
@@ -446,7 +451,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		@Override
 		public void run() {
 			synchronized (responseLock) {
-				if (!this.expired) {
+				if (!this.expired && !isClosed()) {
 					try {
 						sendHeartbeat();
 					}
