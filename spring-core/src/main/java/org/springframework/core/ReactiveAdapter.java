@@ -37,7 +37,7 @@ public interface ReactiveAdapter {
 	/**
 	 * Return a descriptor with further information about the adaptee.
 	 */
-	Descriptor getDescriptor();
+	ReactiveTypeDescriptor getDescriptor();
 
 	/**
 	 * Adapt the given Object to a {@link Mono}
@@ -66,49 +66,5 @@ public interface ReactiveAdapter {
 	 * @return the resulting adaptee
 	 */
 	Object fromPublisher(Publisher<?> publisher);
-
-
-	/**
-	 * A descriptor with information about the adaptee stream semantics.
-	 */
-	class Descriptor {
-
-		private final boolean isMultiValue;
-
-		private final boolean supportsEmpty;
-
-		private final boolean isNoValue;
-
-		public Descriptor(boolean isMultiValue, boolean canBeEmpty, boolean isNoValue) {
-			this.isMultiValue = isMultiValue;
-			this.supportsEmpty = canBeEmpty;
-			this.isNoValue = isNoValue;
-		}
-
-		/**
-		 * Return {@code true} if the adaptee implies 0..N values can be produced
-		 * and is therefore a good fit to adapt to {@link Flux}. A {@code false}
-		 * return value implies the adaptee will produce 1 value at most and is
-		 * therefore a good fit for {@link Mono}.
-		 */
-		public boolean isMultiValue() {
-			return this.isMultiValue;
-		}
-
-		/**
-		 * Return {@code true} if the adaptee can complete without values.
-		 */
-		public boolean supportsEmpty() {
-			return this.supportsEmpty;
-		}
-
-		/**
-		 * Return {@code true} if the adaptee implies no values will be produced,
-		 * i.e. providing only completion or error signal.
-		 */
-		public boolean isNoValue() {
-			return this.isNoValue;
-		}
-	}
 
 }

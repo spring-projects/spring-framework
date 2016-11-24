@@ -25,7 +25,7 @@ import reactor.core.publisher.MonoProcessor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
-import org.springframework.core.ReactiveAdapter.Descriptor;
+import org.springframework.core.ReactiveTypeDescriptor;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -107,7 +107,7 @@ public class ModelAttributeMethodArgumentResolver implements HandlerMethodArgume
 			Class<?> clazz = parameter.getParameterType();
 			ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(clazz);
 			if (adapter != null) {
-				Descriptor descriptor = adapter.getDescriptor();
+				ReactiveTypeDescriptor descriptor = adapter.getDescriptor();
 				if (descriptor.isNoValue() || descriptor.isMultiValue()) {
 					return false;
 				}

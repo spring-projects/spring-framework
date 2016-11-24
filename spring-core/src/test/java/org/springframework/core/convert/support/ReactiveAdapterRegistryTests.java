@@ -43,10 +43,12 @@ public class ReactiveAdapterRegistryTests {
 
 	private ReactiveAdapterRegistry adapterRegistry;
 
+
 	@Before
 	public void setUp() throws Exception {
 		this.adapterRegistry = new ReactiveAdapterRegistry();
 	}
+
 
 	@Test
 	public void getDefaultAdapters() throws Exception {
