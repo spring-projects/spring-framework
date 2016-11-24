@@ -86,8 +86,10 @@ import org.springframework.web.context.support.ServletContextResource;
  * @see #setDefaultUrl
  * @see #setAllowedResources
  * @see #setApplyLastModified
+ * @deprecated in favor of the ResourceHttpRequestHandler
  */
 @SuppressWarnings("serial")
+@Deprecated
 public class ResourceServlet extends HttpServletBean {
 
 	/**
