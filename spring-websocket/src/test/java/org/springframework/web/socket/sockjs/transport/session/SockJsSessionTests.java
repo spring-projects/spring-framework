@@ -144,7 +144,6 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 
 		assertClosed();
 		assertEquals(1, this.session.getNumberOfLastActiveTimeUpdates());
-		assertTrue(this.session.didCancelHeartbeat());
 		verify(this.webSocketHandler).afterConnectionClosed(this.session, CloseStatus.GOING_AWAY);
 	}
 
