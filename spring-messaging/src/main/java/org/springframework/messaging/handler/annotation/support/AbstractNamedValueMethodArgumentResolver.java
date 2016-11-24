@@ -76,7 +76,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * values are not expected to contain expressions
 	 */
 	protected AbstractNamedValueMethodArgumentResolver(ConversionService cs, ConfigurableBeanFactory beanFactory) {
-		this.conversionService = (cs != null ? cs : new DefaultConversionService());
+		this.conversionService = (cs != null ? cs : DefaultConversionService.getSharedInstance());
 		this.configurableBeanFactory = beanFactory;
 		this.expressionContext = (beanFactory != null ? new BeanExpressionContext(beanFactory, null) : null);
 	}

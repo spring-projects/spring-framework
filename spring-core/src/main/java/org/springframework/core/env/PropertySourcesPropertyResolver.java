@@ -80,7 +80,7 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 						value = resolveNestedPlaceholders((String) value);
 					}
 					logKeyFound(key, propertySource, value);
-					return this.conversionService.convert(value, targetValueType);
+					return convertValueIfNecessary(value, targetValueType);
 				}
 			}
 		}
