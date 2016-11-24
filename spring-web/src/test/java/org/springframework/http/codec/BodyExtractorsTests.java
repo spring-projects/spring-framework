@@ -19,7 +19,6 @@ package org.springframework.http.codec;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -40,7 +39,6 @@ import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 /**
  * @author Arjen Poutsma
@@ -122,13 +120,33 @@ public class BodyExtractorsTests {
 		BodyExtractor.Context emptyContext = new BodyExtractor.Context() {
 			@Override
 			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-				return () -> Collections.<HttpMessageReader<?>>emptySet().stream();
+				return Stream::empty;
 			}
 		};
 
 		Flux<String> result = extractor.extract(request, emptyContext);
 		StepVerifier.create(result)
 				.expectError(UnsupportedMediaTypeException.class)
+				.verify();
+	}
+
+	@Test
+	public void toDataBuffers() throws Exception {
+		BodyExtractor<Flux<DataBuffer>, ReactiveHttpInputMessage> extractor = BodyExtractors.toDataBuffers();
+
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer =
+				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+
+		MockServerHttpRequest request = new MockServerHttpRequest();
+		request.setBody(body);
+
+		Flux<DataBuffer> result = extractor.extract(request, this.context);
+
+		StepVerifier.create(result)
+				.expectNext(dataBuffer)
+				.expectComplete()
 				.verify();
 	}
 

@@ -28,6 +28,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -182,13 +183,30 @@ public abstract class BodyInserters {
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
 		Assert.notNull(eventType, "'eventType' must not be null");
 		return BodyInserter.of(
-				(response, context) -> {
+				(outputMessage, context) -> {
 					HttpMessageWriter<T> messageWriter = sseMessageWriter(context);
 					return messageWriter.write(eventsPublisher, eventType,
-							MediaType.TEXT_EVENT_STREAM, response, Collections.emptyMap());
+							MediaType.TEXT_EVENT_STREAM, outputMessage, Collections.emptyMap());
 
 				},
 				() -> eventsPublisher
+		);
+	}
+
+	/**
+	 * Return a {@code BodyInserter} that writes the given {@code Publisher<DataBuffer>} to the
+	 * body.
+	 * @param publisher the data buffer publisher to write
+	 * @param <T> the type of the publisher
+	 * @return a {@code BodyInserter} that writes directly to the body
+	 * @see ReactiveHttpOutputMessage#writeWith(Publisher)
+	 */
+	public static <T extends Publisher<DataBuffer>> BodyInserter<T, ReactiveHttpOutputMessage> fromDataBuffers(T publisher) {
+		Assert.notNull(publisher, "'publisher' must not be null");
+
+		return BodyInserter.of(
+				(outputMessage, context) -> outputMessage.writeWith(publisher),
+				() -> publisher
 		);
 	}
 

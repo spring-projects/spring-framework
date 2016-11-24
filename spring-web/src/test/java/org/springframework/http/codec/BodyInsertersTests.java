@@ -17,6 +17,7 @@
 package org.springframework.http.codec;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,6 +36,7 @@ import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
@@ -163,5 +165,27 @@ public class BodyInsertersTests {
 		Mono<Void> result = inserter.insert(response, this.context);
 		StepVerifier.create(result).expectNextCount(0).expectComplete().verify();
 	}
+
+	@Test
+	public void ofDataBuffers() throws Exception {
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer =
+				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+
+		BodyInserter<Flux<DataBuffer>, ReactiveHttpOutputMessage> inserter = BodyInserters.fromDataBuffers(body);
+
+		assertEquals(body, inserter.t());
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Mono<Void> result = inserter.insert(response, this.context);
+		StepVerifier.create(result).expectComplete().verify();
+
+		StepVerifier.create(response.getBody())
+				.expectNext(dataBuffer)
+				.expectComplete()
+				.verify();
+	}
+
 
 }

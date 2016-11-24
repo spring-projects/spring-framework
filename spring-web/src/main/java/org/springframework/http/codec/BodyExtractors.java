@@ -28,6 +28,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
@@ -85,10 +86,22 @@ public abstract class BodyExtractors {
 	 */
 	public static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(ResolvableType elementType) {
 		Assert.notNull(elementType, "'elementType' must not be null");
-		return (request, context) -> readWithMessageReaders(request, context,
+		return (inputMessage, context) -> readWithMessageReaders(inputMessage, context,
 				elementType,
-				reader -> reader.read(elementType, request, Collections.emptyMap()),
+				reader -> reader.read(elementType, inputMessage, Collections.emptyMap()),
 				Flux::error);
+	}
+
+	/**
+	 * Return a {@code BodyExtractor} that returns the body of the message as a {@link Flux} of
+	 * {@link DataBuffer}s.
+	 * <p><strong>Note</strong> that the returned buffers should be released after usage by calling
+	 * {@link org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer)}
+	 * @return a {@code BodyExtractor} that returns the body
+	 * @see ReactiveHttpInputMessage#getBody()
+	 */
+	public static BodyExtractor<Flux<DataBuffer>, ReactiveHttpInputMessage> toDataBuffers() {
+		return (inputMessage, context) -> inputMessage.getBody();
 	}
 
 	private static <T, S extends Publisher<T>> S readWithMessageReaders(
