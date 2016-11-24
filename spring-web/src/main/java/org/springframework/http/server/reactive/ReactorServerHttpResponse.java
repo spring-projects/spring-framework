@@ -76,7 +76,7 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 	}
 
 	@Override
-	protected Mono<Void> writeAndFlushWithInternal(Publisher<Publisher<DataBuffer>> publisher) {
+	protected Mono<Void> writeAndFlushWithInternal(Publisher<? extends Publisher<DataBuffer>> publisher) {
 		Publisher<Publisher<ByteBuf>> body = Flux.from(publisher)
 				.map(ReactorServerHttpResponse::toByteBufs);
 		return this.response.sendGroups(body);

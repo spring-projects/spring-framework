@@ -48,7 +48,7 @@ public abstract class AbstractListenerServerHttpResponse extends AbstractServerH
 	}
 
 	@Override
-	protected final Mono<Void> writeAndFlushWithInternal(Publisher<Publisher<DataBuffer>> body) {
+	protected final Mono<Void> writeAndFlushWithInternal(Publisher<? extends Publisher<DataBuffer>> body) {
 		if (this.writeCalled.compareAndSet(false, true)) {
 			Processor<Publisher<DataBuffer>, Void> bodyProcessor = createBodyFlushProcessor();
 			return Mono.from(subscriber -> {

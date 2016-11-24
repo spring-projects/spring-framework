@@ -166,7 +166,7 @@ public class ServerHttpResponseTests {
 
 		@Override
 		protected Mono<Void> writeAndFlushWithInternal(
-				Publisher<Publisher<DataBuffer>> body) {
+				Publisher<? extends Publisher<DataBuffer>> body) {
 			return Mono.error(new UnsupportedOperationException());
 		}
 	}
