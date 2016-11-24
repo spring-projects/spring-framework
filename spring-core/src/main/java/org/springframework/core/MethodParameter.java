@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.util.Assert;
+import org.springframework.util.KotlinUtils;
 
 /**
  * Helper class that encapsulates the specification of a method parameter, i.e. a {@link Method}
@@ -309,12 +310,13 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Return whether this method parameter is declared as optional
-	 * in the form of Java 8's {@link java.util.Optional}.
+	 * Return whether this method indicates a parameter which is not required
+	 * (either in the form of Java 8's {@link java.util.Optional} or Kotlin nullable type).
 	 * @since 4.3
 	 */
 	public boolean isOptional() {
-		return (getParameterType() == Optional.class);
+		return (getParameterType() == Optional.class ||
+				KotlinUtils.isNullable(this.parameterIndex, this.method, this.constructor));
 	}
 
 	/**
@@ -326,9 +328,8 @@ public class MethodParameter {
 	 * @see #nested()
 	 */
 	public MethodParameter nestedIfOptional() {
-		return (isOptional() ? nested() : this);
+		return (getParameterType() == Optional.class ? nested() : this);
 	}
-
 
 	/**
 	 * Set a containing class to resolve the parameter type against.

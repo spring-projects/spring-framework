@@ -156,7 +156,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 				throw new MissingServletRequestPartException(name);
 			}
 		}
-		if (parameter.isOptional()) {
+		if (parameter.getParameterType() == Optional.class) {
 			if (arg == null || (arg instanceof Collection && ((Collection) arg).isEmpty()) ||
 					(arg instanceof Object[] && ((Object[]) arg).length == 0)) {
 				arg = Optional.empty();
