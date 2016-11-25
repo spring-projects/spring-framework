@@ -48,7 +48,7 @@ configure(allprojects) { project ->
 	ext.groovyVersion          = "2.4.7"
 	ext.gsonVersion            = "2.8.0"
 	ext.hamcrestVersion        = "1.3"
-	ext.hibernate5Version      = "5.2.4.Final"
+	ext.hibernate5Version      = "5.2.5.Final"
 	ext.hibval5Version         = "5.3.3.Final"
 	ext.hsqldbVersion          = "2.3.4"
 	ext.httpasyncVersion       = "4.1.2"
@@ -69,9 +69,9 @@ configure(allprojects) { project ->
 	ext.junitVersion           = "4.12"
 	ext.junitJupiterVersion    = '5.0.0-M2'
 	ext.junitPlatformVersion   = '1.0.0-M2'
+	ext.kotlinVersion          = "1.0.5-2"
 	ext.log4jVersion           = '2.7'
 	ext.nettyVersion           = "4.1.6.Final"
-	ext.kotlinVersion          = "1.0.5-2"
 	ext.okhttpVersion          = "2.7.5"
 	ext.okhttp3Version         = "3.4.2"
 	ext.poiVersion             = "3.15"
@@ -288,16 +288,16 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 		options.links(project.ext.javadocLinks)
 		options.addStringOption('Xdoclint:none', '-quiet')
 
-		// suppress warnings due to cross-module @see and @link references;
-		// note that global 'api' task does display all warnings.
+		// Suppress warnings due to cross-module @see and @link references.
+		// Note that global 'api' task does display all warnings.
 		logging.captureStandardError LogLevel.INFO
-		logging.captureStandardOutput LogLevel.INFO // suppress "## warnings" message
+		logging.captureStandardOutput LogLevel.INFO  // suppress "## warnings" message
 	}
 
 	task sourcesJar(type: Jar, dependsOn: classes) {
 		classifier = 'sources'
 		from sourceSets.main.allSource
-		// don't include or exclude anything explicitly by default. See SPR-12085.
+		// Don't include or exclude anything explicitly by default. See SPR-12085.
 	}
 
 	task javadocJar(type: Jar) {
@@ -392,8 +392,8 @@ project("spring-core") {
 		compile(files(cglibRepackJar))
 		compile(files(objenesisRepackJar))
 		compile("commons-logging:commons-logging:1.2")
+		optional("net.sf.jopt-simple:jopt-simple:5.0.3")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
-		optional("net.sf.jopt-simple:jopt-simple:5.0.2")
 		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		optional("org.reactivestreams:reactive-streams:${reactivestreamsVersion}")
@@ -954,7 +954,7 @@ project("spring-webmvc") {
 		testCompile("joda-time:joda-time:${jodaVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.mozilla:rhino:1.7.7.1")
-		testRuntime("org.jruby:jruby:9.1.5.0")
+		testRuntime("org.jruby:jruby:9.1.6.0")
 		testRuntime("org.python:jython-standalone:2.5.3")
 		testRuntime("org.webjars:underscorejs:1.8.3")
 		testRuntime("org.glassfish:javax.el:3.0.1-b08")
