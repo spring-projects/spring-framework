@@ -70,13 +70,13 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 	}
 
 	@Override
-	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
+	protected Mono<Void> writeWithInternal(Publisher<? extends DataBuffer> publisher) {
 		Publisher<ByteBuf> body = toByteBufs(publisher);
 		return this.response.send(body);
 	}
 
 	@Override
-	protected Mono<Void> writeAndFlushWithInternal(Publisher<? extends Publisher<DataBuffer>> publisher) {
+	protected Mono<Void> writeAndFlushWithInternal(Publisher<? extends Publisher<? extends DataBuffer>> publisher) {
 		Publisher<Publisher<ByteBuf>> body = Flux.from(publisher)
 				.map(ReactorServerHttpResponse::toByteBufs);
 		return this.response.sendGroups(body);
@@ -117,7 +117,7 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 		return doCommit(() -> this.response.sendFile(file, position, count));
 	}
 
-	private static Publisher<ByteBuf> toByteBufs(Publisher<DataBuffer> dataBuffers) {
+	private static Publisher<ByteBuf> toByteBufs(Publisher<? extends DataBuffer> dataBuffers) {
 		return Flux.from(dataBuffers).map(NettyDataBufferFactory::toByteBuf);
 	}
 

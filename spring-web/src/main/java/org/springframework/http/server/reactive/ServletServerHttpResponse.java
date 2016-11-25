@@ -122,7 +122,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 	}
 
 	@Override
-	protected Processor<Publisher<DataBuffer>, Void> createBodyFlushProcessor() {
+	protected Processor<? super Publisher<? extends DataBuffer>, Void> createBodyFlushProcessor() {
 		ResponseBodyFlushProcessor processor = new ResponseBodyFlushProcessor();
 		this.bodyFlushProcessor = processor;
 		return processor;
@@ -261,7 +261,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 	private class ResponseBodyFlushProcessor extends AbstractResponseBodyFlushProcessor {
 
 		@Override
-		protected Processor<DataBuffer, Void> createBodyProcessor() {
+		protected Processor<? super DataBuffer, Void> createBodyProcessor() {
 			try {
 				bodyProcessor = new ResponseBodyProcessor(outputStream(), bufferSize);
 				return bodyProcessor;

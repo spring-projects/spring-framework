@@ -27,6 +27,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.ResponseCookie;
 
@@ -54,6 +55,20 @@ public class ServerHttpResponseTests {
 		assertEquals("a", new String(response.body.get(0).asByteBuffer().array(), StandardCharsets.UTF_8));
 		assertEquals("b", new String(response.body.get(1).asByteBuffer().array(), StandardCharsets.UTF_8));
 		assertEquals("c", new String(response.body.get(2).asByteBuffer().array(), StandardCharsets.UTF_8));
+	}
+
+	@Test  // SPR-14952
+	public void writeAndFlushWithFluxOfDefaultDataBuffer() throws Exception {
+		TestServerHttpResponse response = new TestServerHttpResponse();
+		Flux<Flux<DefaultDataBuffer>> flux = Flux.just(Flux.just(wrap("foo")));
+		response.writeAndFlushWith(flux).block();
+
+		assertTrue(response.statusCodeWritten);
+		assertTrue(response.headersWritten);
+		assertTrue(response.cookiesWritten);
+
+		assertEquals(1, response.body.size());
+		assertEquals("foo", new String(response.body.get(0).asByteBuffer().array(), StandardCharsets.UTF_8));
 	}
 
 	@Test
@@ -119,7 +134,7 @@ public class ServerHttpResponseTests {
 
 
 
-	private DataBuffer wrap(String a) {
+	private DefaultDataBuffer wrap(String a) {
 		return new DefaultDataBufferFactory().wrap(ByteBuffer.wrap(a.getBytes(StandardCharsets.UTF_8)));
 	}
 
@@ -157,7 +172,7 @@ public class ServerHttpResponseTests {
 		}
 
 		@Override
-		protected Mono<Void> writeWithInternal(Publisher<DataBuffer> body) {
+		protected Mono<Void> writeWithInternal(Publisher<? extends DataBuffer> body) {
 			return Flux.from(body).map(b -> {
 				this.body.add(b);
 				return b;
@@ -166,8 +181,13 @@ public class ServerHttpResponseTests {
 
 		@Override
 		protected Mono<Void> writeAndFlushWithInternal(
-				Publisher<? extends Publisher<DataBuffer>> body) {
-			return Mono.error(new UnsupportedOperationException());
+				Publisher<? extends Publisher<? extends DataBuffer>> bodyWithFlush) {
+			return Flux.from(bodyWithFlush).flatMap(body ->
+				Flux.from(body).map(b -> {
+					this.body.add(b);
+					return b;
+				})
+			).then();
 		}
 	}
 

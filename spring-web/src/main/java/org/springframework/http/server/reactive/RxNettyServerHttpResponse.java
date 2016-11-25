@@ -71,7 +71,7 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	@Override
-	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> body) {
+	protected Mono<Void> writeWithInternal(Publisher<? extends DataBuffer> body) {
 		Observable<ByteBuf> content = RxReactiveStreams.toObservable(body)
 				.map(NettyDataBufferFactory::toByteBuf);
 		return Flux.from(RxReactiveStreams.toPublisher(this.response.write(content)))
@@ -80,7 +80,7 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	protected Mono<Void> writeAndFlushWithInternal(
-			Publisher<? extends Publisher<DataBuffer>> body) {
+			Publisher<? extends Publisher<? extends DataBuffer>> body) {
 		Flux<ByteBuf> bodyWithFlushSignals = Flux.from(body).
 				flatMap(publisher -> Flux.from(publisher).
 						map(NettyDataBufferFactory::toByteBuf).

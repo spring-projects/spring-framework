@@ -41,7 +41,7 @@ import org.springframework.core.io.buffer.DataBuffer;
  * @see UndertowHttpHandlerAdapter
  * @see ServerHttpResponse#writeAndFlushWith(Publisher)
  */
-abstract class AbstractResponseBodyFlushProcessor implements Processor<Publisher<DataBuffer>, Void> {
+abstract class AbstractResponseBodyFlushProcessor implements Processor<Publisher<? extends DataBuffer>, Void> {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -65,7 +65,7 @@ abstract class AbstractResponseBodyFlushProcessor implements Processor<Publisher
 	}
 
 	@Override
-	public final void onNext(Publisher<DataBuffer> publisher) {
+	public final void onNext(Publisher<? extends DataBuffer> publisher) {
 		if (logger.isTraceEnabled()) {
 			logger.trace(this.state + " onNext: " + publisher);
 		}
@@ -100,7 +100,7 @@ abstract class AbstractResponseBodyFlushProcessor implements Processor<Publisher
 	/**
 	 * Creates a new processor for subscribing to a body chunk.
 	 */
-	protected abstract Processor<DataBuffer, Void> createBodyProcessor();
+	protected abstract Processor<? super DataBuffer, Void> createBodyProcessor();
 
 	/**
 	 * Flushes the output.
@@ -144,9 +144,9 @@ abstract class AbstractResponseBodyFlushProcessor implements Processor<Publisher
 		REQUESTED {
 
 			@Override
-			public void onNext(AbstractResponseBodyFlushProcessor processor, Publisher<DataBuffer> chunk) {
+			public void onNext(AbstractResponseBodyFlushProcessor processor, Publisher<? extends DataBuffer> chunk) {
 				if (processor.changeState(this, RECEIVED)) {
-					Processor<DataBuffer, Void> chunkProcessor = processor.createBodyProcessor();
+					Processor<? super DataBuffer, Void> chunkProcessor = processor.createBodyProcessor();
 					chunk.subscribe(chunkProcessor);
 					chunkProcessor.subscribe(new WriteSubscriber(processor));
 				}
@@ -192,7 +192,7 @@ abstract class AbstractResponseBodyFlushProcessor implements Processor<Publisher
 
 			@Override
 			public void onNext(AbstractResponseBodyFlushProcessor processor,
-					Publisher<DataBuffer> publisher) {
+					Publisher<? extends DataBuffer> publisher) {
 				// ignore
 
 			}
@@ -212,7 +212,7 @@ abstract class AbstractResponseBodyFlushProcessor implements Processor<Publisher
 			subscription.cancel();
 		}
 
-		public void onNext(AbstractResponseBodyFlushProcessor processor, Publisher<DataBuffer> publisher) {
+		public void onNext(AbstractResponseBodyFlushProcessor processor, Publisher<? extends DataBuffer> publisher) {
 			throw new IllegalStateException(toString());
 		}
 

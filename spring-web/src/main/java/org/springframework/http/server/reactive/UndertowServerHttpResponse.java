@@ -29,6 +29,7 @@ import io.undertow.server.handlers.Cookie;
 import io.undertow.server.handlers.CookieImpl;
 import io.undertow.util.HttpString;
 import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
 import org.xnio.ChannelListener;
 import org.xnio.channels.StreamSinkChannel;
 import reactor.core.publisher.Mono;
@@ -123,7 +124,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 	}
 
 	@Override
-	protected AbstractResponseBodyFlushProcessor createBodyFlushProcessor() {
+	protected Processor<? super Publisher<? extends DataBuffer>, Void> createBodyFlushProcessor() {
 		return new ResponseBodyFlushProcessor();
 	}
 
@@ -209,7 +210,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 	private class ResponseBodyFlushProcessor extends AbstractResponseBodyFlushProcessor {
 
 		@Override
-		protected Processor<DataBuffer, Void> createBodyProcessor() {
+		protected Processor<? super DataBuffer, Void> createBodyProcessor() {
 			return UndertowServerHttpResponse.this.createBodyProcessor();
 		}
 

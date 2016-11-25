@@ -55,7 +55,7 @@ public interface ReactiveHttpOutputMessage extends HttpMessage {
 	 * @param body the body content publisher
 	 * @return a {@link Mono} that indicates completion or error
 	 */
-	Mono<Void> writeWith(Publisher<DataBuffer> body);
+	Mono<Void> writeWith(Publisher<? extends DataBuffer> body);
 
 	/**
 	 * Use the given {@link Publisher} of {@code Publishers} to write the body of the
@@ -64,7 +64,7 @@ public interface ReactiveHttpOutputMessage extends HttpMessage {
 	 * @param body the body content publisher
 	 * @return a {@link Mono} that indicates completion or error
 	 */
-	Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<DataBuffer>> body);
+	Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body);
 
 	/**
 	 * Indicate that message handling is complete, allowing for any cleanup or
