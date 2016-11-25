@@ -50,9 +50,9 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 
 	private final MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
 
-	private Publisher<? extends DataBuffer> body;
+	private Flux<DataBuffer> body;
 
-	private Publisher<? extends Publisher<? extends DataBuffer>> bodyWithFlushes;
+	private Flux<Publisher<DataBuffer>> bodyWithFlushes;
 
 	private DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
@@ -77,24 +77,24 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 		return this.cookies;
 	}
 
-	public Publisher<? extends DataBuffer> getBody() {
+	public Publisher<DataBuffer> getBody() {
 		return this.body;
 	}
 
-	public Publisher<? extends Publisher<? extends DataBuffer>> getBodyWithFlush() {
+	public Publisher<Publisher<DataBuffer>> getBodyWithFlush() {
 		return this.bodyWithFlushes;
 	}
 
 	@Override
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-		this.body = body;
-		return Flux.from(this.body).then();
+		this.body = Flux.from(body);
+		return this.body.then();
 	}
 
 	@Override
 	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		this.bodyWithFlushes = body;
-		return Flux.from(this.bodyWithFlushes).then();
+		this.bodyWithFlushes = Flux.from(body).map(p -> Flux.from(p));
+		return this.bodyWithFlushes.then();
 	}
 
 	@Override

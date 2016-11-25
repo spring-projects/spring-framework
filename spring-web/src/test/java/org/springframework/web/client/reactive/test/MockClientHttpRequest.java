@@ -41,9 +41,9 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest {
 
 	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
-	private Publisher<? extends DataBuffer> body;
+	private Flux<DataBuffer> body;
 
-	private Publisher<? extends Publisher<? extends DataBuffer>> bodyWithFlushes;
+	private Flux<Publisher<DataBuffer>> bodyWithFlushes;
 
 
 	public MockClientHttpRequest() {
@@ -91,21 +91,21 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-		this.body = body;
-		return applyBeforeCommit().then(Flux.from(this.body).then());
+		this.body = Flux.from(body);
+		return applyBeforeCommit().then(this.body.then());
 	}
 
 	@Override
 	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		this.bodyWithFlushes = body;
-		return applyBeforeCommit().then(Flux.from(this.bodyWithFlushes).then());
+		this.bodyWithFlushes = Flux.from(body).map(p -> Flux.from(p));
+		return applyBeforeCommit().then(this.bodyWithFlushes.then());
 	}
 
-	public Publisher<? extends DataBuffer> getBody() {
+	public Publisher<DataBuffer> getBody() {
 		return body;
 	}
 
-	public Publisher<? extends Publisher<? extends DataBuffer>> getBodyWithFlush() {
+	public Publisher<Publisher<DataBuffer>> getBodyWithFlush() {
 		return bodyWithFlushes;
 	}
 
