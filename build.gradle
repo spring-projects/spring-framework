@@ -326,7 +326,8 @@ project("spring-build-src") {
 project("spring-core") {
 	description = "Spring Core"
 
-	apply plugin: "kotlin"
+	// Disabled since Kotlin compiler does not support JDK 9 yet
+	//apply plugin: "kotlin"
 
 	// As of Spring 4.0.3, spring-core includes asm 5.x and repackages cglib 3.2, inlining
 	// both into the spring-core jar. cglib 3.2 itself depends on asm 5.x and is therefore
@@ -569,7 +570,8 @@ project("spring-oxm") {
 project("spring-messaging") {
 	description = "Spring Messaging"
 
-	apply plugin: "kotlin"
+	// Disabled since Kotlin compiler does not support JDK 9 yet
+	//apply plugin: "kotlin"
 
 	dependencies {
 		compile(project(":spring-beans"))
@@ -716,7 +718,8 @@ project("spring-web") {
 	description = "Spring Web"
 
 	apply plugin: "groovy"
-	apply plugin: "kotlin"
+	// Disabled since Kotlin compiler does not support JDK 9 yet
+	//apply plugin: "kotlin"
 
 	dependencies {
 		compile(project(":spring-aop"))  // for JaxWsPortProxyFactoryBean
@@ -805,7 +808,8 @@ project("spring-web") {
 project("spring-web-reactive") {
 	description = "Spring Web Reactive"
 
-	apply plugin: "kotlin"
+	// Disabled since Kotlin compiler does not support JDK 9 yet
+	//apply plugin: "kotlin"
 
 	dependencies {
 		compile(project(":spring-core"))
