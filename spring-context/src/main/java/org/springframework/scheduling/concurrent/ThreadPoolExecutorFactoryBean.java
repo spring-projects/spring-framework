@@ -62,11 +62,13 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 
 	private int keepAliveSeconds = 60;
 
-	private boolean allowCoreThreadTimeOut = false;
-
 	private int queueCapacity = Integer.MAX_VALUE;
 
+	private boolean allowCoreThreadTimeOut = false;
+
 	private boolean exposeUnconfigurableExecutor = false;
+
+	private boolean prestartAllCoreThreads = false;
 
 	private ExecutorService exposedExecutor;
 
@@ -119,6 +121,17 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 	}
 
 	/**
+	 * Specify whether this FactoryBean should prestart all threads
+	 * for the created executor.
+	 * <p>Default is "false".
+	 * Switch this flag to "true" to prestart the threads allocated for the current executor
+	 * @see java.util.concurrent.ThreadPoolExecutor#prestartAllCoreThreads
+	 */
+	public void setPrestartAllCoreThreads(boolean prestartAllCoreThreads) {
+		this.prestartAllCoreThreads = prestartAllCoreThreads;
+	}
+
+	/**
 	 * Specify whether this FactoryBean should expose an unconfigurable
 	 * decorator for the created executor.
 	 * <p>Default is "false", exposing the raw executor as bean reference.
@@ -140,6 +153,10 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 				this.keepAliveSeconds, queue, threadFactory, rejectedExecutionHandler);
 		if (this.allowCoreThreadTimeOut) {
 			executor.allowCoreThreadTimeOut(true);
+		}
+
+		if (this.prestartAllCoreThreads) {
+			executor.prestartAllCoreThreads();
 		}
 
 		// Wrap executor with an unconfigurable decorator.

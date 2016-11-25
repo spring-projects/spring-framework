@@ -16,18 +16,24 @@
 
 package org.springframework.scheduling.concurrent;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.FutureTask;
-
 import org.junit.Test;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.junit.Assert.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Juergen Hoeller
@@ -49,6 +55,21 @@ public class ThreadPoolExecutorFactoryBeanTests {
 		assertEquals("foo", task.get());
 	}
 
+	@Test
+	public void executorWithPreStartedThreads() throws Exception {
+		ApplicationContext context = new AnnotationConfigApplicationContext(ExecutorConfigWithPreStartedThreads.class);
+		ThreadPoolExecutor executor = context.getBean("childExecutor", ThreadPoolExecutor.class);
+
+		verify(executor).prestartAllCoreThreads();
+	}
+
+	@Test
+	public void executorWithNoPreStartedThreads() throws Exception {
+		ApplicationContext context = new AnnotationConfigApplicationContext(ExecutorConfigWithNoPreStartedThreads.class);
+		ThreadPoolExecutor executor = context.getBean("childExecutor", ThreadPoolExecutor.class);
+
+		verify(executor, never()).prestartAllCoreThreads();
+	}
 
 	@Configuration
 	public static class ExecutorConfig {
@@ -61,6 +82,47 @@ public class ThreadPoolExecutorFactoryBeanTests {
 		@Bean
 		public ExecutorService executor() {
 			return executorFactory().getObject();
+		}
+
+	}
+
+	@Configuration
+	public static class ExecutorConfigWithPreStartedThreads {
+
+		@Bean
+		public ThreadPoolExecutorFactoryBean executorChildFactory() {
+			ThreadPoolExecutorFactoryBeanMockingChild threadPoolExecutorFactoryBeanMockingChild = new ThreadPoolExecutorFactoryBeanMockingChild();
+			threadPoolExecutorFactoryBeanMockingChild.setPrestartAllCoreThreads(true);
+			return threadPoolExecutorFactoryBeanMockingChild;
+		}
+
+		@Bean
+		public ExecutorService childExecutor() {
+			return executorChildFactory().getObject();
+		}
+	}
+
+	@Configuration
+	public static class ExecutorConfigWithNoPreStartedThreads {
+
+		@Bean
+		public ThreadPoolExecutorFactoryBean executorChildFactory() {
+			return new ThreadPoolExecutorFactoryBeanMockingChild();
+		}
+
+		@Bean
+		public ExecutorService childExecutor() {
+			return executorChildFactory().getObject();
+		}
+	}
+
+	private static class ThreadPoolExecutorFactoryBeanMockingChild extends ThreadPoolExecutorFactoryBean {
+		@Override
+		protected ThreadPoolExecutor createExecutor(
+				int corePoolSize, int maxPoolSize, int keepAliveSeconds, BlockingQueue<Runnable> queue,
+				ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
+
+			return mock(ThreadPoolExecutor.class);
 		}
 	}
 
