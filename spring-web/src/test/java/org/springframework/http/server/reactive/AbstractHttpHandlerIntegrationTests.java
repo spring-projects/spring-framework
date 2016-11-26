@@ -29,6 +29,7 @@ import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
 import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
 import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
+import org.springframework.http.server.reactive.bootstrap.VertxHttpServer;
 import org.springframework.util.SocketUtils;
 
 
@@ -49,7 +50,8 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 				{new RxNettyHttpServer()},
 				{new ReactorHttpServer()},
 				{new TomcatHttpServer(base.getAbsolutePath())},
-				{new UndertowHttpServer()}
+				{new UndertowHttpServer()},
+				{new VertxHttpServer()}
 		};
 	}
 
@@ -61,6 +63,7 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 		this.server.setHandler(createHttpHandler());
 		this.server.afterPropertiesSet();
 		this.server.start();
+		waitForServerCondition(true);
 	}
 
 	protected abstract HttpHandler createHttpHandler();
@@ -68,6 +71,14 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 	@After
 	public void tearDown() throws Exception {
 		this.server.stop();
+		waitForServerCondition(false);
+	}
+
+	// Vertx server deploys asynchronously
+	private void waitForServerCondition(Boolean isRunning) throws InterruptedException {
+		while (!isRunning.equals(server.isRunning())) {
+			Thread.sleep(50);
+		}
 	}
 
 }

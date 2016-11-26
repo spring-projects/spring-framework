@@ -100,6 +100,7 @@ configure(allprojects) { project ->
 	ext.xmlunitVersion         = "2.2.1"
 	ext.xnioVersion            = "3.4.1.Final"
 	ext.xstreamVersion         = "1.4.9"
+	ext.vertxVersion		   = "3.3.3"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
@@ -745,6 +746,8 @@ project("spring-web") {
 		optional("io.reactivex:rxjava:${rxjavaVersion}")
 		optional "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 		optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
+		provided("io.vertx:vertx-codegen:${vertxVersion}")
+		optional("io.vertx:vertx-core:${vertxVersion}")
 		optional("io.undertow:undertow-core:${undertowVersion}")
 		optional("org.jboss.xnio:xnio-api:${xnioVersion}")
 		optional("io.netty:netty-buffer:${nettyVersion}")  // temporarily for JsonObjectDecoder
@@ -828,6 +831,8 @@ project("spring-web-reactive") {
 		}
 		optional("io.reactivex:rxjava:${rxjavaVersion}")
 		optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
+		provided("io.vertx:vertx-codegen:${vertxVersion}")
+		optional("io.vertx:vertx-core:${vertxVersion}")
 		testCompile("io.projectreactor.addons:reactor-test:${reactorCoreVersion}")
 		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("org.hibernate:hibernate-validator:${hibval5Version}")
