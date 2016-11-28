@@ -28,6 +28,7 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteArrayEncoder;
 import org.springframework.core.codec.ByteBufferDecoder;
@@ -266,6 +267,7 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 		RequestMappingHandlerAdapter adapter = createRequestMappingHandlerAdapter();
 		adapter.setMessageReaders(getMessageReaders());
 		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
+		adapter.setReactiveAdapterRegistry(getReactiveAdapterRegistry());
 
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 		addArgumentResolvers(resolvers);
@@ -370,6 +372,13 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 	}
 
 	/**
+	 * Override to plug in a custom {@link ReactiveAdapterRegistry}.
+	 */
+	protected ReactiveAdapterRegistry getReactiveAdapterRegistry() {
+		return new ReactiveAdapterRegistry();
+	}
+
+	/**
 	 * Return a global {@link Validator} instance for example for validating
 	 * {@code @RequestBody} method arguments.
 	 * <p>Delegates to {@link #getValidator()} first. If that returns {@code null}
@@ -423,12 +432,14 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 
 	@Bean
 	public ResponseEntityResultHandler responseEntityResultHandler() {
-		return new ResponseEntityResultHandler(getMessageWriters(), webReactiveContentTypeResolver());
+		return new ResponseEntityResultHandler(
+				getMessageWriters(), webReactiveContentTypeResolver(), getReactiveAdapterRegistry());
 	}
 
 	@Bean
 	public ResponseBodyResultHandler responseBodyResultHandler() {
-		return new ResponseBodyResultHandler(getMessageWriters(), webReactiveContentTypeResolver());
+		return new ResponseBodyResultHandler(
+				getMessageWriters(), webReactiveContentTypeResolver(), getReactiveAdapterRegistry());
 	}
 
 	/**
@@ -493,7 +504,8 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 		ViewResolverRegistry registry = new ViewResolverRegistry(getApplicationContext());
 		configureViewResolvers(registry);
 		List<ViewResolver> resolvers = registry.getViewResolvers();
-		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, webReactiveContentTypeResolver());
+		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(
+				resolvers, webReactiveContentTypeResolver(), getReactiveAdapterRegistry());
 		handler.setDefaultViews(registry.getDefaultViews());
 		handler.setOrder(registry.getOrder());
 		return handler;
