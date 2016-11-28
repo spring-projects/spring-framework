@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import com.gargoylesoftware.htmlunit.CookieManager;
+import com.gargoylesoftware.htmlunit.FormEncodingType;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
@@ -234,6 +235,12 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 
 	private void contentType(MockHttpServletRequest request) {
 		String contentType = header("Content-Type");
+		if (contentType == null) {
+			FormEncodingType encodingType = this.webRequest.getEncodingType();
+			if (encodingType != null) {
+				contentType = encodingType.getName();
+			}
+		}
 		request.setContentType(contentType != null ? contentType : MediaType.ALL_VALUE);
 	}
 
