@@ -33,10 +33,12 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.ReactiveTypeDescriptor;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
@@ -191,8 +193,10 @@ public class ViewResolutionResultHandler extends AbstractHandlerResultHandler
 		ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(parameterType.getRawClass(), optional);
 
 		if (adapter != null) {
+			ReactiveTypeDescriptor descriptor = adapter.getDescriptor();
+			Assert.isTrue(!descriptor.isMultiValue(), "Only single-value async return type supported.");
 			returnValueMono = optional
-					.map(value -> adapter.toMono(value).cast(Object.class))
+					.map(value -> Mono.from(adapter.toPublisher(value)))
 					.orElse(Mono.empty());
 			elementType = !adapter.getDescriptor().isNoValue() ?
 					parameterType.getGeneric(0) : ResolvableType.forClass(Void.class);
@@ -301,11 +305,11 @@ public class ViewResolutionResultHandler extends AbstractHandlerResultHandler
 			if (adapter != null) {
 				names.add(entry.getKey());
 				if (adapter.getDescriptor().isMultiValue()) {
-					Flux<Object> value = adapter.toFlux(entry.getValue());
+					Flux<Object> value = Flux.from(adapter.toPublisher(entry.getValue()));
 					valueMonos.add(value.collectList().defaultIfEmpty(Collections.emptyList()));
 				}
 				else {
-					Mono<Object> value = adapter.toMono(entry.getValue());
+					Mono<Object> value = Mono.from(adapter.toPublisher(entry.getValue()));
 					valueMonos.add(value.defaultIfEmpty(NO_VALUE));
 				}
 			}

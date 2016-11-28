@@ -25,8 +25,8 @@ import reactor.core.publisher.MonoProcessor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
-import org.springframework.core.ReactiveAdapter.Descriptor;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.ReactiveTypeDescriptor;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
@@ -107,7 +107,7 @@ public class ModelAttributeMethodArgumentResolver implements HandlerMethodArgume
 			Class<?> clazz = parameter.getParameterType();
 			ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(clazz);
 			if (adapter != null) {
-				Descriptor descriptor = adapter.getDescriptor();
+				ReactiveTypeDescriptor descriptor = adapter.getDescriptor();
 				if (descriptor.isNoValue() || descriptor.isMultiValue()) {
 					return false;
 				}
@@ -179,11 +179,14 @@ public class ModelAttributeMethodArgumentResolver implements HandlerMethodArgume
 		if (attribute != null) {
 			ReactiveAdapter adapterFrom = getAdapterRegistry().getAdapterFrom(null, attribute);
 			if (adapterFrom != null) {
-				return adapterFrom.toMono(attribute);
+				ReactiveTypeDescriptor descriptor = adapterFrom.getDescriptor();
+				Assert.isTrue(!descriptor.isMultiValue(), "Data binding supports single-value async types.");
+				return Mono.from(adapterFrom.toPublisher(attribute));
 			}
 		}
 		return Mono.justOrEmpty(attribute);
 	}
+
 
 	protected Object createAttribute(String attributeName, Class<?> attributeType,
 			MethodParameter parameter, BindingContext context, ServerWebExchange exchange) {
