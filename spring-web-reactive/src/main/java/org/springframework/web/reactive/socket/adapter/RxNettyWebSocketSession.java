@@ -127,7 +127,7 @@ public class RxNettyWebSocketSession extends WebSocketSessionSupport<WebSocketCo
 		else if (WebSocketMessage.Type.PING.equals(message.getType())) {
 			return new PingWebSocketFrame(byteBuf);
 		}
-		else if (WebSocketMessage.Type.BINARY.equals(message.getType())) {
+		else if (WebSocketMessage.Type.PONG.equals(message.getType())) {
 			return new PongWebSocketFrame(byteBuf);
 		}
 		else {
