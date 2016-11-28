@@ -112,7 +112,7 @@ public abstract class AbstractMessageReaderArgumentResolver {
 			BindingContext bindingContext, ServerWebExchange exchange) {
 
 		ResolvableType bodyType = ResolvableType.forMethodParameter(bodyParameter);
-		ReactiveAdapter adapter = getAdapterRegistry().getAdapterTo(bodyType.resolve());
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(bodyType.resolve());
 
 		ResolvableType elementType = ResolvableType.forMethodParameter(bodyParameter);
 		if (adapter != null) {
@@ -130,7 +130,7 @@ public abstract class AbstractMessageReaderArgumentResolver {
 
 			if (reader.canRead(elementType, mediaType)) {
 				Map<String, Object> readHints = Collections.emptyMap();
-				if (adapter != null && adapter.getDescriptor().isMultiValue()) {
+				if (adapter != null && adapter.isMultiValue()) {
 					Flux<?> flux;
 					if (reader instanceof ServerHttpMessageReader) {
 						ServerHttpMessageReader<?> serverReader = ((ServerHttpMessageReader<?>) reader);
@@ -186,7 +186,7 @@ public abstract class AbstractMessageReaderArgumentResolver {
 	}
 
 	protected boolean checkRequired(ReactiveAdapter adapter, boolean isBodyRequired) {
-		return adapter != null && !adapter.getDescriptor().supportsEmpty() || isBodyRequired;
+		return adapter != null && !adapter.supportsEmpty() || isBodyRequired;
 	}
 
 	protected ServerWebInputException getRequiredBodyError(MethodParameter parameter) {

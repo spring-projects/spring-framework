@@ -33,7 +33,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.ReactiveTypeDescriptor;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.MediaType;
@@ -154,9 +153,9 @@ public class ViewResolutionResultHandler extends AbstractHandlerResultHandler
 			return true;
 		}
 		Optional<Object> optional = result.getReturnValue();
-		ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(clazz, optional);
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(clazz, optional);
 		if (adapter != null) {
-			if (adapter.getDescriptor().isNoValue()) {
+			if (adapter.isNoValue()) {
 				return true;
 			}
 			else {
@@ -190,15 +189,14 @@ public class ViewResolutionResultHandler extends AbstractHandlerResultHandler
 		ResolvableType parameterType = result.getReturnType();
 
 		Optional<Object> optional = result.getReturnValue();
-		ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(parameterType.getRawClass(), optional);
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(parameterType.getRawClass(), optional);
 
 		if (adapter != null) {
-			ReactiveTypeDescriptor descriptor = adapter.getDescriptor();
-			Assert.isTrue(!descriptor.isMultiValue(), "Only single-value async return type supported.");
+			Assert.isTrue(!adapter.isMultiValue(), "Only single-value async return type supported.");
 			returnValueMono = optional
 					.map(value -> Mono.from(adapter.toPublisher(value)))
 					.orElse(Mono.empty());
-			elementType = !adapter.getDescriptor().isNoValue() ?
+			elementType = !adapter.isNoValue() ?
 					parameterType.getGeneric(0) : ResolvableType.forClass(Void.class);
 		}
 		else {
@@ -301,10 +299,10 @@ public class ViewResolutionResultHandler extends AbstractHandlerResultHandler
 		List<Mono<?>> valueMonos = new ArrayList<>();
 
 		for (Map.Entry<String, ?> entry : model.entrySet()) {
-			ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(null, entry.getValue());
+			ReactiveAdapter adapter = getAdapterRegistry().getAdapter(null, entry.getValue());
 			if (adapter != null) {
 				names.add(entry.getKey());
-				if (adapter.getDescriptor().isMultiValue()) {
+				if (adapter.isMultiValue()) {
 					Flux<Object> value = Flux.from(adapter.toPublisher(entry.getValue()));
 					valueMonos.add(value.collectList().defaultIfEmpty(Collections.emptyList()));
 				}

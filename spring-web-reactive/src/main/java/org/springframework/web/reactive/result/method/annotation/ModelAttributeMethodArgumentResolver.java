@@ -105,10 +105,9 @@ public class ModelAttributeMethodArgumentResolver implements HandlerMethodArgume
 		}
 		if (this.useDefaultResolution) {
 			Class<?> clazz = parameter.getParameterType();
-			ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(clazz);
+			ReactiveAdapter adapter = getAdapterRegistry().getAdapter(clazz);
 			if (adapter != null) {
-				ReactiveTypeDescriptor descriptor = adapter.getDescriptor();
-				if (descriptor.isNoValue() || descriptor.isMultiValue()) {
+				if (adapter.isNoValue() || adapter.isMultiValue()) {
 					return false;
 				}
 				clazz = ResolvableType.forMethodParameter(parameter).getGeneric(0).getRawClass();
@@ -123,8 +122,8 @@ public class ModelAttributeMethodArgumentResolver implements HandlerMethodArgume
 			ServerWebExchange exchange) {
 
 		ResolvableType type = ResolvableType.forMethodParameter(parameter);
-		ReactiveAdapter adapterTo = getAdapterRegistry().getAdapterTo(type.resolve());
-		Class<?> valueType = (adapterTo != null ? type.resolveGeneric(0) : parameter.getParameterType());
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(type.resolve());
+		Class<?> valueType = (adapter != null ? type.resolveGeneric(0) : parameter.getParameterType());
 		String name = getAttributeName(valueType, parameter);
 		Mono<?> valueMono = getAttributeMono(name, valueType, parameter, context, exchange);
 
@@ -145,8 +144,8 @@ public class ModelAttributeMethodArgumentResolver implements HandlerMethodArgume
 					})
 					.then(Mono.fromCallable(() -> {
 						BindingResult errors = binder.getBindingResult();
-						if (adapterTo != null) {
-							return adapterTo.fromPublisher(errors.hasErrors() ?
+						if (adapter != null) {
+							return adapter.fromPublisher(errors.hasErrors() ?
 									Mono.error(new WebExchangeBindException(parameter, errors)) :
 									Mono.just(value));
 						}
@@ -177,10 +176,9 @@ public class ModelAttributeMethodArgumentResolver implements HandlerMethodArgume
 			attribute = createAttribute(attributeName, attributeType, param, context, exchange);
 		}
 		if (attribute != null) {
-			ReactiveAdapter adapterFrom = getAdapterRegistry().getAdapterFrom(null, attribute);
+			ReactiveAdapter adapterFrom = getAdapterRegistry().getAdapter(null, attribute);
 			if (adapterFrom != null) {
-				ReactiveTypeDescriptor descriptor = adapterFrom.getDescriptor();
-				Assert.isTrue(!descriptor.isMultiValue(), "Data binding supports single-value async types.");
+				Assert.isTrue(!adapterFrom.isMultiValue(), "Data binding supports single-value async types.");
 				return Mono.from(adapterFrom.toPublisher(attribute));
 			}
 		}

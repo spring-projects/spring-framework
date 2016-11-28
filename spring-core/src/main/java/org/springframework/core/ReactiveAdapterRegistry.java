@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Completable;
@@ -101,34 +100,31 @@ public class ReactiveAdapterRegistry {
 	}
 
 	/**
-	 * Get the adapter to use to adapt from the given reactive type.
+	 * Get the adapter for the given reactive type.
 	 */
-	public ReactiveAdapter getAdapterFrom(Class<?> reactiveType) {
-		return getAdapterFrom(reactiveType, null);
+	public ReactiveAdapter getAdapter(Class<?> reactiveType) {
+		return getAdapter(reactiveType, null);
 	}
 
 	/**
-	 * Get the adapter to use to adapt from the given reactive type. Or if the
-	 * "source" object is not {@code null} its actual type is used instead.
+	 * Get the adapter for the given reactive type. Or if a "source" object is
+	 * provided, its actual type is used instead.
+	 * @param reactiveType the reactive type
+	 * @param source an instance of the reactive type (i.e. to adapt from)
 	 */
-	public ReactiveAdapter getAdapterFrom(Class<?> reactiveType, Object source) {
+	public ReactiveAdapter getAdapter(Class<?> reactiveType, Object source) {
+
 		source = (source instanceof Optional ? ((Optional<?>) source).orElse(null) : source);
 		Class<?> clazz = (source != null ? source.getClass() : reactiveType);
-		return getAdapter(type -> type.isAssignableFrom(clazz));
-	}
 
-	/**
-	 * Get the adapter for the given reactive type to adapt to.
-	 */
-	public ReactiveAdapter getAdapterTo(Class<?> reactiveType) {
-		return getAdapter(reactiveType::equals);
-	}
-
-	private ReactiveAdapter getAdapter(Predicate<Class<?>> predicate) {
 		return this.adapters.stream()
-				.filter(adapter -> predicate.test(adapter.getDescriptor().getReactiveType()))
+				.filter(adapter -> adapter.getReactiveType().equals(clazz))
 				.findFirst()
-				.orElse(null);
+				.orElseGet(() ->
+						this.adapters.stream()
+								.filter(adapter -> adapter.getReactiveType().isAssignableFrom(clazz))
+								.findFirst()
+								.orElse(null));
 	}
 
 
@@ -233,7 +229,7 @@ public class ReactiveAdapterRegistry {
 		@Override
 		public <T> Publisher<T> toPublisher(Object source) {
 			Publisher<T> publisher = super.toPublisher(source);
-			return (getDescriptor().isMultiValue() ? Flux.from(publisher) : Mono.from(publisher));
+			return (isMultiValue() ? Flux.from(publisher) : Mono.from(publisher));
 		}
 	}
 

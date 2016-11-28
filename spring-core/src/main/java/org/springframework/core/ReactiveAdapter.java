@@ -71,6 +71,35 @@ public class ReactiveAdapter {
 	}
 
 	/**
+	 * A shortcut for {@code getDescriptor().getReactiveType()}.
+	 */
+	public Class<?> getReactiveType() {
+		return getDescriptor().getReactiveType();
+	}
+
+	/**
+	 * A shortcut for {@code getDescriptor().isMultiValue()}.
+	 */
+	public boolean isMultiValue() {
+		return getDescriptor().isMultiValue();
+	}
+
+	/**
+	 * A shortcut for {@code getDescriptor().supportsEmpty()}.
+	 */
+	public boolean supportsEmpty() {
+		return getDescriptor().supportsEmpty();
+	}
+
+	/**
+	 * A shortcut for {@code getDescriptor().isNoValue()}.
+	 */
+	public boolean isNoValue() {
+		return getDescriptor().isNoValue();
+	}
+
+
+	/**
 	 * Adapt the given instance to a Reactive Streams Publisher.
 	 * @param source the source object to adapt from
 	 * @return the Publisher repesenting the adaptation

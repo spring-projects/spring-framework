@@ -95,19 +95,19 @@ public abstract class AbstractMessageWriterResultHandler extends AbstractHandler
 
 		ResolvableType valueType = ResolvableType.forMethodParameter(bodyParameter);
 		Class<?> valueClass = valueType.resolve();
-		ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(valueClass, body);
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(valueClass, body);
 
 		Publisher<?> publisher;
 		ResolvableType elementType;
 		if (adapter != null) {
 			publisher = adapter.toPublisher(body);
-			elementType = adapter.getDescriptor().isNoValue() ?
-					ResolvableType.forClass(Void.class) :
-					valueType.getGeneric(0);
+			elementType = adapter.isNoValue() ?
+					ResolvableType.forClass(Void.class) : valueType.getGeneric(0);
 		}
 		else {
 			publisher = Mono.justOrEmpty(body);
-			elementType = (valueClass == null && body != null ? ResolvableType.forInstance(body) : valueType);
+			elementType = (valueClass == null && body != null ?
+					ResolvableType.forInstance(body) : valueType);
 		}
 
 		if (void.class == elementType.getRawClass() || Void.class == elementType.getRawClass()) {

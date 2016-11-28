@@ -102,9 +102,9 @@ public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolv
 		Class<?> attributeType = attributeParam.getParameterType();
 
 		ResolvableType type = ResolvableType.forMethodParameter(attributeParam);
-		ReactiveAdapter adapterTo = getAdapterRegistry().getAdapterTo(type.resolve());
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(type.resolve());
 
-		Assert.isNull(adapterTo, "Errors/BindingResult cannot be used with an async model attribute. " +
+		Assert.isNull(adapter, "Errors/BindingResult cannot be used with an async model attribute. " +
 				"Either declare the model attribute without the async wrapper type " +
 				"or handle WebExchangeBindException through the async type.");
 
