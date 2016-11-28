@@ -25,6 +25,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.ReactiveTypeDescriptor;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -120,7 +121,9 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 		ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(rawClass, optionalValue);
 
 		if (adapter != null) {
-			returnValueMono = adapter.toMono(optionalValue);
+			ReactiveTypeDescriptor descriptor = adapter.getDescriptor();
+			Assert.isTrue(!descriptor.isMultiValue(), "Only a single ResponseEntity supported.");
+			returnValueMono = Mono.from(adapter.toPublisher(optionalValue));
 			bodyType = new MethodParameter(result.getReturnTypeSource());
 			bodyType.increaseNestingLevel();
 			bodyType.increaseNestingLevel();
