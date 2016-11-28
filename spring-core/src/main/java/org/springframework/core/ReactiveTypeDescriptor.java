@@ -17,9 +17,6 @@ package org.springframework.core;
 
 import java.util.function.Supplier;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.util.Assert;
 
 /**
@@ -76,9 +73,9 @@ public class ReactiveTypeDescriptor {
 
 	/**
 	 * Return {@code true} if the reactive type can produce more than 1 value
-	 * can be produced and is therefore a good fit to adapt to {@link Flux}.
+	 * can be produced and is therefore a good fit to adapt to {@code Flux}.
 	 * A {@code false} return value implies the reactive type can produce 1
-	 * value at most and is therefore a good fit to adapt to {@link Mono}.
+	 * value at most and is therefore a good fit to adapt to {@code Mono}.
 	 */
 	public boolean isMultiValue() {
 		return this.multiValue;
