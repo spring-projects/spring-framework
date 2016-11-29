@@ -114,7 +114,7 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 
 	@Override
 	public Mono<Void> writeWith(File file, long position, long count) {
-		return doCommit(() -> this.response.sendFile(file, position, count));
+		return doCommit(() -> this.response.sendFile(file.toPath(), position, count));
 	}
 
 	private static Publisher<ByteBuf> toByteBufs(Publisher<? extends DataBuffer> dataBuffers) {
