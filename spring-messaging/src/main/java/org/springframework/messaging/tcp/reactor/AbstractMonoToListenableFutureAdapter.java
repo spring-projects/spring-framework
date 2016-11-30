@@ -16,12 +16,14 @@
 
 package org.springframework.messaging.tcp.reactor;
 
+import java.time.Duration;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import reactor.fn.Consumer;
-import reactor.rx.Promise;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.FailureCallback;
@@ -31,28 +33,24 @@ import org.springframework.util.concurrent.ListenableFutureCallbackRegistry;
 import org.springframework.util.concurrent.SuccessCallback;
 
 /**
- * Adapts a reactor {@link Promise} to {@link ListenableFuture} optionally converting
+ * Adapts a reactor {@link Mono} to {@link ListenableFuture} optionally converting
  * the result Object type {@code <S>} to the expected target type {@code <T>}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
- * @param <S> the type of object expected from the {@link Promise}
+ * @param <S> the type of object expected from the {@link Mono}
  * @param <T> the type of object expected from the {@link ListenableFuture}
  */
-abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements ListenableFuture<T> {
+abstract class AbstractMonoToListenableFutureAdapter<S, T>
+		implements ListenableFuture<T> {
 
-	private final Promise<S> promise;
+	private final MonoProcessor<S> promise;
 
 	private final ListenableFutureCallbackRegistry<T> registry = new ListenableFutureCallbackRegistry<>();
 
-
-	protected AbstractPromiseToListenableFutureAdapter(Promise<S> promise) {
-		Assert.notNull(promise, "Promise must not be null");
-		this.promise = promise;
-
-		this.promise.onSuccess(new Consumer<S>() {
-			@Override
-			public void accept(S result) {
+	protected AbstractMonoToListenableFutureAdapter(Mono<S> promise) {
+		Assert.notNull(promise, "Mono must not be null");
+		this.promise = promise.doOnSuccess(result -> {
 				T adapted;
 				try {
 					adapted = adapt(result);
@@ -62,46 +60,44 @@ abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements Listena
 					return;
 				}
 				registry.success(adapted);
-			}
-		});
-
-		this.promise.onError(new Consumer<Throwable>() {
-			@Override
-			public void accept(Throwable ex) {
-				registry.failure(ex);
-			}
-		});
+		})
+		                      .doOnError(registry::failure)
+		                      .subscribe();
 	}
 
 
 	@Override
 	public T get() throws InterruptedException {
-		S result = this.promise.await();
+		S result = this.promise.block();
 		return adapt(result);
 	}
 
 	@Override
 	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-		S result = this.promise.await(timeout, unit);
-		if (!this.promise.isComplete()) {
-			throw new TimeoutException();
-		}
+		Objects.requireNonNull(unit, "unit");
+		S result = this.promise.block(Duration.ofMillis(TimeUnit.MILLISECONDS.convert(
+				timeout,
+				unit)));
 		return adapt(result);
 	}
 
 	@Override
 	public boolean cancel(boolean mayInterruptIfRunning) {
-		return false;
+		if (isCancelled()) {
+			return false;
+		}
+		this.promise.cancel();
+		return true;
 	}
 
 	@Override
 	public boolean isCancelled() {
-		return false;
+		return this.promise.isCancelled();
 	}
 
 	@Override
 	public boolean isDone() {
-		return this.promise.isComplete();
+		return this.promise.isTerminated();
 	}
 
 	@Override
