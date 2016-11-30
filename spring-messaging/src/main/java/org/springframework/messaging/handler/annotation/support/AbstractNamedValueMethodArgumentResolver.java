@@ -108,8 +108,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		}
 
 		if (!ClassUtils.isAssignableValue(parameter.getParameterType(), arg)) {
-			arg = this.conversionService.convert(
-					arg, TypeDescriptor.valueOf(arg.getClass()), new TypeDescriptor(parameter));
+			arg = this.conversionService.convert(arg, TypeDescriptor.forObject(arg), new TypeDescriptor(parameter));
 		}
 
 		handleResolvedValue(arg, namedValueInfo.name, parameter, message);
