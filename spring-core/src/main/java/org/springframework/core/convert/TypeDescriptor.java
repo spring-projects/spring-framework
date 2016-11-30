@@ -68,7 +68,7 @@ public class TypeDescriptor implements Serializable {
 
 	private final ResolvableType resolvableType;
 
-	private final AnnotatedElement annotatedElement;
+	private final AnnotatedElementAdapter annotatedElement;
 
 
 	/**
@@ -78,7 +78,6 @@ public class TypeDescriptor implements Serializable {
 	 * @param methodParameter the method parameter
 	 */
 	public TypeDescriptor(MethodParameter methodParameter) {
-		Assert.notNull(methodParameter, "MethodParameter must not be null");
 		this.resolvableType = ResolvableType.forMethodParameter(methodParameter);
 		this.type = this.resolvableType.resolve(methodParameter.getParameterType());
 		this.annotatedElement = new AnnotatedElementAdapter(methodParameter.getParameterIndex() == -1 ?
@@ -91,7 +90,6 @@ public class TypeDescriptor implements Serializable {
 	 * @param field the field
 	 */
 	public TypeDescriptor(Field field) {
-		Assert.notNull(field, "Field must not be null");
 		this.resolvableType = ResolvableType.forField(field);
 		this.type = this.resolvableType.resolve(field.getType());
 		this.annotatedElement = new AnnotatedElementAdapter(field.getAnnotations());
@@ -117,6 +115,7 @@ public class TypeDescriptor implements Serializable {
 	 * @param resolvableType the resolvable type
 	 * @param type the backing type (or {@code null} if it should get resolved)
 	 * @param annotations the type annotations
+	 * @since 4.0
 	 */
 	protected TypeDescriptor(ResolvableType resolvableType, Class<?> type, Annotation[] annotations) {
 		this.resolvableType = resolvableType;
@@ -207,7 +206,7 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * Returns the name of this type: the fully qualified class name.
+	 * Return the name of this type: the fully qualified class name.
 	 */
 	public String getName() {
 		return ClassUtils.getQualifiedName(getType());
@@ -221,7 +220,7 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * The annotations associated with this type descriptor, if any.
+	 * Return the annotations associated with this type descriptor, if any.
 	 * @return the annotations, or an empty array if none
 	 */
 	public Annotation[] getAnnotations() {
@@ -236,6 +235,11 @@ public class TypeDescriptor implements Serializable {
 	 * @return <tt>true</tt> if the annotation is present
 	 */
 	public boolean hasAnnotation(Class<? extends Annotation> annotationType) {
+		if (this.annotatedElement.isEmpty()) {
+			// Shortcut: AnnotatedElementUtils would have to expect AnnotatedElement.getAnnotations()
+			// to return a copy of the array, whereas we can do it more efficiently here.
+			return false;
+		}
 		return AnnotatedElementUtils.isAnnotated(this.annotatedElement, annotationType);
 	}
 
@@ -247,6 +251,11 @@ public class TypeDescriptor implements Serializable {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
+		if (this.annotatedElement.isEmpty()) {
+			// Shortcut: AnnotatedElementUtils would have to expect AnnotatedElement.getAnnotations()
+			// to return a copy of the array, whereas we can do it more efficiently here.
+			return null;
+		}
 		return AnnotatedElementUtils.getMergedAnnotation(this.annotatedElement, annotationType);
 	}
 
@@ -430,30 +439,49 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (!(obj instanceof TypeDescriptor)) {
+		if (!(other instanceof TypeDescriptor)) {
 			return false;
 		}
-		TypeDescriptor other = (TypeDescriptor) obj;
-		if (!ObjectUtils.nullSafeEquals(getType(), other.getType())) {
+		TypeDescriptor otherDesc = (TypeDescriptor) other;
+		if (getType() != otherDesc.getType()) {
 			return false;
 		}
-		if (!Arrays.equals(getAnnotations(), other.getAnnotations())) {
+		if (!annotationsMatch(otherDesc)) {
 			return false;
 		}
 		if (isCollection() || isArray()) {
-			return ObjectUtils.nullSafeEquals(getElementTypeDescriptor(), other.getElementTypeDescriptor());
+			return ObjectUtils.nullSafeEquals(getElementTypeDescriptor(), otherDesc.getElementTypeDescriptor());
 		}
 		else if (isMap()) {
-			return ObjectUtils.nullSafeEquals(getMapKeyTypeDescriptor(), other.getMapKeyTypeDescriptor()) &&
-					ObjectUtils.nullSafeEquals(getMapValueTypeDescriptor(), other.getMapValueTypeDescriptor());
+			return (ObjectUtils.nullSafeEquals(getMapKeyTypeDescriptor(), otherDesc.getMapKeyTypeDescriptor()) &&
+					ObjectUtils.nullSafeEquals(getMapValueTypeDescriptor(), otherDesc.getMapValueTypeDescriptor()));
 		}
 		else {
 			return true;
 		}
+	}
+
+	private boolean annotationsMatch(TypeDescriptor otherDesc) {
+		Annotation[] anns = getAnnotations();
+		Annotation[] otherAnns = otherDesc.getAnnotations();
+		if (anns == otherAnns) {
+			return true;
+		}
+		if (anns.length != otherAnns.length) {
+			return false;
+		}
+		if (anns.length > 0) {
+			for (int i = 0; i < anns.length; i++) {
+				if (anns[i] != otherAnns[i]) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	@Override
@@ -469,6 +497,20 @@ public class TypeDescriptor implements Serializable {
 		}
 		builder.append(getResolvableType().toString());
 		return builder.toString();
+	}
+
+
+	/**
+	 * Create a new type descriptor for an object.
+	 * <p>Use this factory method to introspect a source object before asking the
+	 * conversion system to convert it to some another type.
+	 * <p>If the provided object is {@code null}, returns {@code null}, else calls
+	 * {@link #valueOf(Class)} to build a TypeDescriptor from the object's class.
+	 * @param source the source object
+	 * @return the type descriptor
+	 */
+	public static TypeDescriptor forObject(Object source) {
+		return (source != null ? valueOf(source.getClass()) : null);
 	}
 
 	/**
@@ -631,19 +673,6 @@ public class TypeDescriptor implements Serializable {
 		return nested(new TypeDescriptor(property), nestingLevel);
 	}
 
-	/**
-	 * Create a new type descriptor for an object.
-	 * <p>Use this factory method to introspect a source object before asking the
-	 * conversion system to convert it to some another type.
-	 * <p>If the provided object is {@code null}, returns {@code null}, else calls
-	 * {@link #valueOf(Class)} to build a TypeDescriptor from the object's class.
-	 * @param source the source object
-	 * @return the type descriptor
-	 */
-	public static TypeDescriptor forObject(Object source) {
-		return (source != null ? valueOf(source.getClass()) : null);
-	}
-
 	private static TypeDescriptor nested(TypeDescriptor typeDescriptor, int nestingLevel) {
 		ResolvableType nested = typeDescriptor.resolvableType;
 		for (int i = 0; i < nestingLevel; i++) {
@@ -712,6 +741,10 @@ public class TypeDescriptor implements Serializable {
 		@Override
 		public Annotation[] getDeclaredAnnotations() {
 			return getAnnotations();
+		}
+
+		public boolean isEmpty() {
+			return ObjectUtils.isEmpty(this.annotations);
 		}
 
 		@Override
