@@ -19,6 +19,7 @@ package org.springframework.http.codec;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,6 +48,16 @@ import org.springframework.util.MimeTypeUtils;
  * @since 5.0
  */
 public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Object> {
+
+	/**
+	 * Server-Sent Events hint expecting a {@link Boolean} value which when set to true
+	 * will adapt the content in order to comply with Server-Sent Events recommendation.
+	 * For example, it will append "data:" after each line break with data encoders
+	 * supporting it.
+	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
+	 */
+	public static final String SSE_CONTENT_HINT = ServerSentEventHttpMessageWriter.class.getName() + ".sseContent";
+
 
 	private final List<Encoder<?>> dataEncoders;
 
@@ -87,6 +98,8 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	private Flux<Publisher<DataBuffer>> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory,
 			ResolvableType type, Map<String, Object> hints) {
 
+		Map<String, Object> hintsWithSse = new HashMap<>(hints);
+		hintsWithSse.put(SSE_CONTENT_HINT, true);
 		return Flux.from(inputStream)
 				.map(o -> toSseEvent(o, type))
 				.map(sse -> {
@@ -107,7 +120,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 									return Flux.empty();
 								}
 								else {
-									return applyEncoder(data, bufferFactory, hints);
+									return applyEncoder(data, bufferFactory, hintsWithSse);
 								}
 							}).orElse(Flux.empty());
 

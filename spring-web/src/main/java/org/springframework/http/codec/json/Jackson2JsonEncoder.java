@@ -22,9 +22,14 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.PrettyPrinter;
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationConfig;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -35,6 +40,7 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
@@ -57,12 +63,18 @@ public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Encode
 	private static final ByteBuffer END_ARRAY_BUFFER = ByteBuffer.wrap(new byte[]{']'});
 
 
+	private final PrettyPrinter ssePrettyPrinter;
+
+
 	public Jackson2JsonEncoder() {
-		super(Jackson2ObjectMapperBuilder.json().build());
+		this(Jackson2ObjectMapperBuilder.json().build());
 	}
 
 	public Jackson2JsonEncoder(ObjectMapper mapper) {
 		super(mapper);
+		DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
+		prettyPrinter.indentObjectsWith(new DefaultIndenter("  ", "\ndata:"));
+		this.ssePrettyPrinter = prettyPrinter;
 	}
 
 
@@ -121,6 +133,12 @@ public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Encode
 
 		if (javaType != null && javaType.isContainerType()) {
 			writer = writer.forType(javaType);
+		}
+
+		Boolean sse = (Boolean)hints.get(ServerSentEventHttpMessageWriter.SSE_CONTENT_HINT);
+		SerializationConfig config = writer.getConfig();
+		if (Boolean.TRUE.equals(sse) && config.isEnabled(SerializationFeature.INDENT_OUTPUT)) {
+			writer = writer.with(this.ssePrettyPrinter);
 		}
 
 		DataBuffer buffer = bufferFactory.allocateBuffer();
