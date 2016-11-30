@@ -131,15 +131,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private ConversionService conversionService;
 
 	/** Custom PropertyEditorRegistrars to apply to the beans of this factory */
-	private final Set<PropertyEditorRegistrar> propertyEditorRegistrars =
-			new LinkedHashSet<>(4);
+	private final Set<PropertyEditorRegistrar> propertyEditorRegistrars = new LinkedHashSet<>(4);
+
+	/** Custom PropertyEditors to apply to the beans of this factory */
+	private final Map<Class<?>, Class<? extends PropertyEditor>> customEditors = new HashMap<>(4);
 
 	/** A custom TypeConverter to use, overriding the default PropertyEditor mechanism */
 	private TypeConverter typeConverter;
-
-	/** Custom PropertyEditors to apply to the beans of this factory */
-	private final Map<Class<?>, Class<? extends PropertyEditor>> customEditors =
-			new HashMap<>(4);
 
 	/** String resolvers to apply e.g. to annotation attribute values */
 	private final List<StringValueResolver> embeddedValueResolvers = new LinkedList<>();
@@ -919,10 +917,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		setBeanClassLoader(otherFactory.getBeanClassLoader());
 		setCacheBeanMetadata(otherFactory.isCacheBeanMetadata());
 		setBeanExpressionResolver(otherFactory.getBeanExpressionResolver());
+		setConversionService(otherFactory.getConversionService());
 		if (otherFactory instanceof AbstractBeanFactory) {
 			AbstractBeanFactory otherAbstractFactory = (AbstractBeanFactory) otherFactory;
-			this.customEditors.putAll(otherAbstractFactory.customEditors);
 			this.propertyEditorRegistrars.addAll(otherAbstractFactory.propertyEditorRegistrars);
+			this.customEditors.putAll(otherAbstractFactory.customEditors);
+			this.typeConverter = otherAbstractFactory.typeConverter;
 			this.beanPostProcessors.addAll(otherAbstractFactory.beanPostProcessors);
 			this.hasInstantiationAwareBeanPostProcessors = this.hasInstantiationAwareBeanPostProcessors ||
 					otherAbstractFactory.hasInstantiationAwareBeanPostProcessors;
@@ -933,6 +933,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 		else {
 			setTypeConverter(otherFactory.getTypeConverter());
+			String[] otherScopeNames = otherFactory.getRegisteredScopeNames();
+			for (String scopeName : otherScopeNames) {
+				this.scopes.put(scopeName, otherFactory.getRegisteredScope(scopeName));
+			}
 		}
 	}
 

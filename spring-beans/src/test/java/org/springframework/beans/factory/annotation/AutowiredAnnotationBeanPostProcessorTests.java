@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -978,11 +979,59 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		RootBeanDefinition bd = new RootBeanDefinition(SelfInjectionBean.class);
-		bf.registerBeanDefinition("annotatedBean", bd);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SelfInjectionBean.class));
 
 		SelfInjectionBean bean = (SelfInjectionBean) bf.getBean("annotatedBean");
-		assertSame(bean, bean.selfReference);
+		assertSame(bean, bean.reference);
+		assertNull(bean.referenceCollection);
+	}
+
+	@Test
+	public void testSelfReferenceWithOther() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SelfInjectionBean.class));
+		bf.registerBeanDefinition("annotatedBean2", new RootBeanDefinition(SelfInjectionBean.class));
+
+		SelfInjectionBean bean = (SelfInjectionBean) bf.getBean("annotatedBean");
+		SelfInjectionBean bean2 = (SelfInjectionBean) bf.getBean("annotatedBean2");
+		assertSame(bean2, bean.reference);
+		assertEquals(1, bean.referenceCollection.size());
+		assertSame(bean2, bean.referenceCollection.get(0));
+	}
+
+	@Test
+	public void testSelfReferenceCollection() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SelfInjectionCollectionBean.class));
+
+		SelfInjectionCollectionBean bean = (SelfInjectionCollectionBean) bf.getBean("annotatedBean");
+		assertSame(bean, bean.reference);
+		assertNull(bean.referenceCollection);
+	}
+
+	@Test
+	public void testSelfReferenceCollectionWithOther() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SelfInjectionCollectionBean.class));
+		bf.registerBeanDefinition("annotatedBean2", new RootBeanDefinition(SelfInjectionCollectionBean.class));
+
+		SelfInjectionCollectionBean bean = (SelfInjectionCollectionBean) bf.getBean("annotatedBean");
+		SelfInjectionCollectionBean bean2 = (SelfInjectionCollectionBean) bf.getBean("annotatedBean2");
+		assertSame(bean2, bean.reference);
+		assertSame(1, bean2.referenceCollection.size());
+		assertSame(bean2, bean.referenceCollection.get(0));
 	}
 
 	@Test
@@ -2582,7 +2631,21 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	public static class SelfInjectionBean {
 
 		@Autowired
-		public SelfInjectionBean selfReference;
+		public SelfInjectionBean reference;
+
+		@Autowired(required = false)
+		public List<SelfInjectionBean> referenceCollection;
+	}
+
+
+	@SuppressWarnings("serial")
+	public static class SelfInjectionCollectionBean extends LinkedList<SelfInjectionCollectionBean> {
+
+		@Autowired
+		public SelfInjectionCollectionBean reference;
+
+		@Autowired(required = false)
+		public List<SelfInjectionCollectionBean> referenceCollection;
 	}
 
 
