@@ -609,6 +609,12 @@ public class ConfigurationClassPostProcessorTests {
 		ctx.getBean("aFoo");
 	}
 
+	@Test
+	public void testInjectionPointMatchForNarrowTargetReturnType() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(FooBarConfiguration.class);
+		assertSame(ctx.getBean(BarImpl.class), ctx.getBean(FooImpl.class).bar);
+	}
+
 
 	// -------------------------------------------------------------------------
 
@@ -1115,7 +1121,7 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	public static class A {
 
-		@Autowired(required=true)
+		@Autowired(required = true)
 		Z z;
 
 		@Bean
@@ -1219,6 +1225,32 @@ public class ConfigurationClassPostProcessorTests {
 	static abstract class FooFactory {
 
 		abstract DependingFoo createFoo(BarArgument bar);
+	}
+
+	interface BarInterface {
+	}
+
+	static class BarImpl implements BarInterface {
+	}
+
+	static class FooImpl {
+
+		@Autowired
+		public BarImpl bar;
+	}
+
+	@Configuration
+	static class FooBarConfiguration {
+
+		@Bean @DependsOn("bar")
+		public FooImpl foo() {
+			return new FooImpl();
+		}
+
+		@Bean
+		public BarInterface bar() {
+			return new BarImpl();
+		}
 	}
 
 }
