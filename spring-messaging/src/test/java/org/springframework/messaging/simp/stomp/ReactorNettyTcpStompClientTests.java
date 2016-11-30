@@ -43,20 +43,20 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Integration tests for {@link Reactor2TcpStompClient}.
+ * Integration tests for {@link ReactorNettyTcpStompClient}.
  *
  * @author Rossen Stoyanchev
  */
-public class Reactor2TcpStompClientTests {
+public class ReactorNettyTcpStompClientTests {
 
-	private static final Log logger = LogFactory.getLog(Reactor2TcpStompClientTests.class);
+	private static final Log logger = LogFactory.getLog(ReactorNettyTcpStompClientTests.class);
 
 	@Rule
 	public final TestName testName = new TestName();
 
 	private BrokerService activeMQBroker;
 
-	private Reactor2TcpStompClient client;
+	private ReactorNettyTcpStompClient client;
 
 
 	@Before
@@ -78,7 +78,7 @@ public class Reactor2TcpStompClientTests {
 		ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 		taskScheduler.afterPropertiesSet();
 
-		this.client = new Reactor2TcpStompClient("127.0.0.1", port);
+		this.client = new ReactorNettyTcpStompClient("127.0.0.1", port);
 		this.client.setMessageConverter(new StringMessageConverter());
 		this.client.setTaskScheduler(taskScheduler);
 	}

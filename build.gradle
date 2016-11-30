@@ -78,7 +78,6 @@ configure(allprojects) { project ->
 	ext.protobufVersion        = "3.1.0"
 	ext.quartzVersion          = "2.2.3"
 	ext.reactivestreamsVersion = "1.0.0"
-	ext.reactorVersion         = "2.0.8.RELEASE"
 	ext.reactorCoreVersion     = '3.0.3.RELEASE'
 	ext.reactorNettyVersion    = '0.6.0.BUILD-SNAPSHOT'
 	ext.romeVersion            = "1.7.0"
@@ -578,12 +577,8 @@ project("spring-messaging") {
 		compile(project(":spring-core"))
 		compile(project(":spring-context"))
 		optional(project(":spring-oxm"))
-		optional("io.projectreactor:reactor-core:${reactorVersion}") {
-			force = true  // enforce 2.0.x
-		}
-		optional("io.projectreactor:reactor-net:${reactorVersion}") {
-			exclude group: "io.netty", module: "netty-all"
-		}
+		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
+		optional("io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}")
 		optional("io.netty:netty-all:${nettyVersion}")
 		optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
@@ -1003,10 +998,8 @@ project("spring-websocket") {
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
-		testCompile("io.projectreactor:reactor-core:${reactorVersion}") {
-			force = true  // enforce 2.0.x
-		}
-		testCompile("io.projectreactor:reactor-net:${reactorVersion}")
+		testCompile("io.projectreactor:reactor-core:${reactorCoreVersion}")
+		testCompile("io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}")
 		testCompile("io.netty:netty-all:${nettyVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testRuntime("org.jboss.xnio:xnio-nio:${xnioVersion}")

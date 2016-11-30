@@ -16,62 +16,53 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
-import reactor.Environment;
-import reactor.core.config.ConfigurationReader;
-import reactor.core.config.DispatcherConfiguration;
-import reactor.core.config.DispatcherType;
-import reactor.core.config.ReactorConfiguration;
-import reactor.io.net.NetStreams;
-import reactor.io.net.Spec.TcpClientSpec;
+import io.netty.buffer.ByteBuf;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.tcp.TcpOperations;
-import org.springframework.messaging.tcp.reactor.Reactor2TcpClient;
+import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * A STOMP over TCP client that uses
- * {@link Reactor2TcpClient}.
+ * {@link ReactorNettyTcpClient}.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
  */
-public class Reactor2TcpStompClient extends StompClientSupport {
+public class ReactorNettyTcpStompClient extends StompClientSupport {
 
 	private final TcpOperations<byte[]> tcpClient;
-
 
 	/**
 	 * Create an instance with host "127.0.0.1" and port 61613.
 	 */
-	public Reactor2TcpStompClient() {
+	public ReactorNettyTcpStompClient() {
 		this("127.0.0.1", 61613);
 	}
+
 
 	/**
 	 * Create an instance with the given host and port.
 	 * @param host the host
 	 * @param port the port
 	 */
-	public Reactor2TcpStompClient(final String host, final int port) {
-		ConfigurationReader reader = new StompClientDispatcherConfigReader();
-		Environment environment = new Environment(reader).assignErrorJournal();
-		StompTcpClientSpecFactory factory = new StompTcpClientSpecFactory(environment, host, port);
-		this.tcpClient = new Reactor2TcpClient<>(factory);
+	public ReactorNettyTcpStompClient(final String host, final int port) {
+		this.tcpClient = create(host, port, new StompDecoder());
 	}
 
 	/**
 	 * Create an instance with a pre-configured TCP client.
 	 * @param tcpClient the client to use
 	 */
-	public Reactor2TcpStompClient(TcpOperations<byte[]> tcpClient) {
+	public ReactorNettyTcpStompClient(TcpOperations<byte[]> tcpClient) {
 		this.tcpClient = tcpClient;
 	}
-
 
 	/**
 	 * Connect and notify the given {@link StompSessionHandler} when connected
@@ -82,6 +73,7 @@ public class Reactor2TcpStompClient extends StompClientSupport {
 	public ListenableFuture<StompSession> connect(StompSessionHandler handler) {
 		return connect(null, handler);
 	}
+
 
 	/**
 	 * An overloaded version of {@link #connect(StompSessionHandler)} that
@@ -103,48 +95,54 @@ public class Reactor2TcpStompClient extends StompClientSupport {
 		this.tcpClient.shutdown();
 	}
 
-
 	/**
-	 * A ConfigurationReader with a thread pool-based dispatcher.
+	 * Create a new {@link ReactorNettyTcpClient} with Stomp specific configuration for
+	 * encoding, decoding and hand-off.
+	 *
+	 * @param relayHost target host
+	 * @param relayPort target port
+	 * @param decoder {@link StompDecoder} to use
+	 * @return a new {@link TcpOperations}
 	 */
-	private static class StompClientDispatcherConfigReader implements ConfigurationReader {
-
-		@Override
-		public ReactorConfiguration read() {
-			String dispatcherName = "StompClient";
-			DispatcherType dispatcherType = DispatcherType.DISPATCHER_GROUP;
-			DispatcherConfiguration config = new DispatcherConfiguration(dispatcherName, dispatcherType, 128, 0);
-			List<DispatcherConfiguration> configList = Collections.<DispatcherConfiguration>singletonList(config);
-			return new ReactorConfiguration(configList, dispatcherName, new Properties());
-		}
+	protected static TcpOperations<byte[]> create(String relayHost,
+			int relayPort,
+			StompDecoder decoder) {
+		return new ReactorNettyTcpClient<>(relayHost,
+				relayPort,
+				new ReactorNettyTcpClient.MessageHandlerConfiguration<>(new DecodingFunction(
+						decoder),
+						new EncodingConsumer(new StompEncoder()),
+						128,
+						Schedulers.newParallel("StompClient")));
 	}
 
+	private static final class EncodingConsumer
+			implements BiConsumer<ByteBuf, Message<byte[]>> {
 
-	private static class StompTcpClientSpecFactory
-			implements NetStreams.TcpClientFactory<Message<byte[]>, Message<byte[]>> {
+		private final StompEncoder encoder;
 
-		private final Environment environment;
-
-		private final String host;
-
-		private final int port;
-
-		public StompTcpClientSpecFactory(Environment environment, String host, int port) {
-			this.environment = environment;
-			this.host = host;
-			this.port = port;
+		public EncodingConsumer(StompEncoder encoder) {
+			this.encoder = encoder;
 		}
 
 		@Override
-		public TcpClientSpec<Message<byte[]>, Message<byte[]>> apply(
-				TcpClientSpec<Message<byte[]>, Message<byte[]>> tcpClientSpec) {
-
-			return tcpClientSpec
-					.codec(new Reactor2StompCodec(new StompEncoder(), new StompDecoder()))
-					.env(this.environment)
-					.dispatcher(this.environment.getCachedDispatchers("StompClient").get())
-					.connect(this.host, this.port);
+		public void accept(ByteBuf byteBuf, Message<byte[]> message) {
+			byteBuf.writeBytes(encoder.encode(message));
 		}
 	}
 
+	private static final class DecodingFunction
+			implements Function<ByteBuf, List<Message<byte[]>>> {
+
+		private final StompDecoder decoder;
+
+		public DecodingFunction(StompDecoder decoder) {
+			this.decoder = decoder;
+		}
+
+		@Override
+		public List<Message<byte[]>> apply(ByteBuf buffer) {
+			return this.decoder.decode(buffer.nioBuffer());
+		}
+	}
 }
