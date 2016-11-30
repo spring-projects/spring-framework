@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.config;
 
 import org.springframework.util.PathMatcher;
-import org.springframework.web.util.HttpRequestPathHelper;
+import org.springframework.web.server.support.HttpRequestPathHelper;
 
 /**
  * Assist with configuring {@code HandlerMapping}'s with path matching options.

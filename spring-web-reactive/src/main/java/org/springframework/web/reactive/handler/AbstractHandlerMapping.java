@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.handler;
 
 import java.util.Map;
@@ -33,7 +34,7 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.util.HttpRequestPathHelper;
+import org.springframework.web.server.support.HttpRequestPathHelper;
 
 /**
  * Abstract base class for {@link org.springframework.web.reactive.HandlerMapping}

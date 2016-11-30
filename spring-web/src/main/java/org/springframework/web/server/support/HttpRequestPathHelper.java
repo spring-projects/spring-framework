@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.util;
+
+package org.springframework.web.server.support;
 
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedHashMap;
@@ -24,6 +25,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.UriUtils;
 
 /**
  * A helper class to obtain the lookup path for path matching purposes.
@@ -57,7 +59,7 @@ public class HttpRequestPathHelper {
 
 	public String getLookupPathForRequest(ServerWebExchange exchange) {
 		String path = getPathWithinApplication(exchange.getRequest());
-		return (this.shouldUrlDecode() ? decode(exchange, path) : path);
+		return (shouldUrlDecode() ? decode(exchange, path) : path);
 	}
 
 	private String getPathWithinApplication(ServerHttpRequest request) {

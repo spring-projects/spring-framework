@@ -31,7 +31,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.util.HttpRequestPathHelper;
+import org.springframework.web.server.support.HttpRequestPathHelper;
 
 /**
  * A logical disjunction (' || ') request condition that matches a request
