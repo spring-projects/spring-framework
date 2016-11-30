@@ -16,10 +16,13 @@
 
 package org.springframework.messaging.tcp.reactor;
 
-import reactor.io.net.ChannelStream;
-import reactor.rx.Promise;
-import reactor.rx.Promises;
-import reactor.rx.Streams;
+import java.util.function.BiConsumer;
+
+import io.netty.buffer.ByteBuf;
+import reactor.core.publisher.DirectProcessor;
+import reactor.core.publisher.Mono;
+import reactor.ipc.netty.NettyInbound;
+import reactor.ipc.netty.NettyOutbound;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.tcp.TcpConnection;
@@ -29,45 +32,50 @@ import org.springframework.util.concurrent.ListenableFuture;
  * An implementation of {@link org.springframework.messaging.tcp.TcpConnection
  * TcpConnection} based on the TCP client support of the Reactor project.
  *
+ * @param <P> the payload type of messages read or written to the TCP stream.
+ *
  * @author Rossen Stoyanchev
  * @since 4.2
- * @param <P> the payload type of messages read or written to the TCP stream.
  */
-public class Reactor2TcpConnection<P> implements TcpConnection<P> {
+public class ReactorNettyTcpConnection<P> implements TcpConnection<P> {
 
-	private final ChannelStream<Message<P>, Message<P>> channelStream;
+	private final NettyInbound                                    in;
+	private final NettyOutbound                                   out;
+	private final DirectProcessor<Void>                           close;
+	private final BiConsumer<? super ByteBuf, ? super Message<P>> encoder;
 
-	private final Promise<Void> closePromise;
-
-
-	public Reactor2TcpConnection(ChannelStream<Message<P>, Message<P>> channelStream, Promise<Void> closePromise) {
-		this.channelStream = channelStream;
-		this.closePromise = closePromise;
+	public ReactorNettyTcpConnection(NettyInbound in,
+			NettyOutbound out,
+			BiConsumer<? super ByteBuf, ? super Message<P>> encoder,
+			DirectProcessor<Void> close) {
+		this.out = out;
+		this.in = in;
+		this.encoder = encoder;
+		this.close = close;
 	}
-
 
 	@Override
 	public ListenableFuture<Void> send(Message<P> message) {
-		Promise<Void> afterWrite = Promises.prepare();
-		this.channelStream.writeWith(Streams.just(message)).subscribe(afterWrite);
-		return new PassThroughPromiseToListenableFutureAdapter<>(afterWrite);
+		ByteBuf byteBuf = in.channel().alloc().buffer();
+		encoder.accept(byteBuf, message);
+		return new MonoToListenableFutureAdapter<>(out.send(Mono.just(byteBuf)));
 	}
 
 	@Override
 	@SuppressWarnings("deprecation")
 	public void onReadInactivity(Runnable runnable, long inactivityDuration) {
-		this.channelStream.on().readIdle(inactivityDuration, reactor.fn.Functions.<Void>consumer(runnable));
+		in.onReadIdle(inactivityDuration, runnable);
 	}
 
 	@Override
 	@SuppressWarnings("deprecation")
 	public void onWriteInactivity(Runnable runnable, long inactivityDuration) {
-		this.channelStream.on().writeIdle(inactivityDuration, reactor.fn.Functions.<Void>consumer(runnable));
+		out.onWriteIdle(inactivityDuration, runnable);
 	}
 
 	@Override
 	public void close() {
-		this.closePromise.onComplete();
+		close.onComplete();
 	}
 
 }
