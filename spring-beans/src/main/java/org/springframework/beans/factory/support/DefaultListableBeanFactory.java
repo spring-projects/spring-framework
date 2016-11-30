@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Provider;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanCreationException;
@@ -266,6 +267,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/**
 	 * Set a {@link java.util.Comparator} for dependency Lists and arrays.
+	 * @since 4.0
 	 * @see org.springframework.core.OrderComparator
 	 * @see org.springframework.core.annotation.AnnotationAwareOrderComparator
 	 */
@@ -275,6 +277,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/**
 	 * Return the dependency comparator for this BeanFactory (may be {@code null}.
+	 * @since 4.0
 	 */
 	public Comparator<Object> getDependencyComparator() {
 		return this.dependencyComparator;
@@ -289,11 +292,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		Assert.notNull(autowireCandidateResolver, "AutowireCandidateResolver must not be null");
 		if (autowireCandidateResolver instanceof BeanFactoryAware) {
 			if (System.getSecurityManager() != null) {
-				final BeanFactory target = this;
 				AccessController.doPrivileged(new PrivilegedAction<Object>() {
 					@Override
 					public Object run() {
-						((BeanFactoryAware) autowireCandidateResolver).setBeanFactory(target);
+						((BeanFactoryAware) autowireCandidateResolver).setBeanFactory(DefaultListableBeanFactory.this);
 						return null;
 					}
 				}, getAccessControlContext());
@@ -320,7 +322,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			DefaultListableBeanFactory otherListableFactory = (DefaultListableBeanFactory) otherFactory;
 			this.allowBeanDefinitionOverriding = otherListableFactory.allowBeanDefinitionOverriding;
 			this.allowEagerClassLoading = otherListableFactory.allowEagerClassLoading;
-			this.autowireCandidateResolver = otherListableFactory.autowireCandidateResolver;
+			this.dependencyComparator = otherListableFactory.dependencyComparator;
+			// A clone of the AutowireCandidateResolver since it is potentially BeanFactoryAware...
+			setAutowireCandidateResolver(BeanUtils.instantiateClass(getAutowireCandidateResolver().getClass()));
+			// Make resolvable dependencies (e.g. ResourceLoader) available here as well...
 			this.resolvableDependencies.putAll(otherListableFactory.resolvableDependencies);
 		}
 	}
@@ -367,7 +372,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Override
 	public String[] getBeanDefinitionNames() {
 		if (this.frozenBeanDefinitionNames != null) {
-			return this.frozenBeanDefinitionNames;
+			return this.frozenBeanDefinitionNames.clone();
 		}
 		else {
 			return StringUtils.toStringArray(this.beanDefinitionNames);
@@ -1266,8 +1271,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					addCandidateEntry(result, candidateName, descriptor, requiredType);
 				}
 			}
-			if (result.isEmpty()) {
-				// Consider self references before as a final pass
+			if (result.isEmpty() && !(descriptor instanceof MultiElementDependencyDescriptor)) {
+				// Consider self references as a final pass...
+				// but not as collection elements, just for direct dependency declarations.
 				for (String candidateName : candidateNames) {
 					if (isSelfReference(beanName, candidateName) && isAutowireCandidate(candidateName, fallbackDescriptor)) {
 						addCandidateEntry(result, candidateName, descriptor, requiredType);
@@ -1476,10 +1482,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Class<?> targetType = mbd.getTargetType();
 			if (targetType != null && type.isAssignableFrom(targetType) &&
 					isAutowireCandidate(beanName, mbd, descriptor, getAutowireCandidateResolver())) {
-				// Probably a poxy interfering with target type match -> throw meaningful exception.
+				// Probably a proxy interfering with target type match -> throw meaningful exception.
 				Object beanInstance = getSingleton(beanName, false);
 				Class<?> beanType = (beanInstance != null ? beanInstance.getClass() : predictBeanType(beanName, mbd));
-				if (type != beanType) {
+				if (!type.isAssignableFrom((beanType))) {
 					throw new BeanNotOfRequiredTypeException(beanName, type, beanType);
 				}
 			}

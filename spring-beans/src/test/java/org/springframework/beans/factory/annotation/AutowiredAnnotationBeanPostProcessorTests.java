@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -920,7 +921,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		RootBeanDefinition tbm = new RootBeanDefinition(CollectionFactoryMethods.class);
 		tbm.setUniqueFactoryMethodName("testBeanMap");
 		bf.registerBeanDefinition("myTestBeanMap", tbm);
-		bf.registerSingleton("otherMap", new HashMap<Object, Object>());
+		bf.registerSingleton("otherMap", new HashMap<>());
 
 		MapConstructorInjectionBean bean = (MapConstructorInjectionBean) bf.getBean("annotatedBean");
 		assertSame(bf.getBean("myTestBeanMap"), bean.getTestBeanMap());
@@ -942,7 +943,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		tbs.add(new TestBean("tb1"));
 		tbs.add(new TestBean("tb2"));
 		bf.registerSingleton("testBeans", tbs);
-		bf.registerSingleton("otherSet", new HashSet<Object>());
+		bf.registerSingleton("otherSet", new HashSet<>());
 
 		SetConstructorInjectionBean bean = (SetConstructorInjectionBean) bf.getBean("annotatedBean");
 		assertSame(tbs, bean.getTestBeanSet());
@@ -963,7 +964,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		RootBeanDefinition tbs = new RootBeanDefinition(CollectionFactoryMethods.class);
 		tbs.setUniqueFactoryMethodName("testBeanSet");
 		bf.registerBeanDefinition("myTestBeanSet", tbs);
-		bf.registerSingleton("otherSet", new HashSet<Object>());
+		bf.registerSingleton("otherSet", new HashSet<>());
 
 		SetConstructorInjectionBean bean = (SetConstructorInjectionBean) bf.getBean("annotatedBean");
 		assertSame(bf.getBean("myTestBeanSet"), bean.getTestBeanSet());
@@ -978,11 +979,59 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		RootBeanDefinition bd = new RootBeanDefinition(SelfInjectionBean.class);
-		bf.registerBeanDefinition("annotatedBean", bd);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SelfInjectionBean.class));
 
 		SelfInjectionBean bean = (SelfInjectionBean) bf.getBean("annotatedBean");
-		assertSame(bean, bean.selfReference);
+		assertSame(bean, bean.reference);
+		assertNull(bean.referenceCollection);
+	}
+
+	@Test
+	public void testSelfReferenceWithOther() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SelfInjectionBean.class));
+		bf.registerBeanDefinition("annotatedBean2", new RootBeanDefinition(SelfInjectionBean.class));
+
+		SelfInjectionBean bean = (SelfInjectionBean) bf.getBean("annotatedBean");
+		SelfInjectionBean bean2 = (SelfInjectionBean) bf.getBean("annotatedBean2");
+		assertSame(bean2, bean.reference);
+		assertEquals(1, bean.referenceCollection.size());
+		assertSame(bean2, bean.referenceCollection.get(0));
+	}
+
+	@Test
+	public void testSelfReferenceCollection() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SelfInjectionCollectionBean.class));
+
+		SelfInjectionCollectionBean bean = (SelfInjectionCollectionBean) bf.getBean("annotatedBean");
+		assertSame(bean, bean.reference);
+		assertNull(bean.referenceCollection);
+	}
+
+	@Test
+	public void testSelfReferenceCollectionWithOther() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SelfInjectionCollectionBean.class));
+		bf.registerBeanDefinition("annotatedBean2", new RootBeanDefinition(SelfInjectionCollectionBean.class));
+
+		SelfInjectionCollectionBean bean = (SelfInjectionCollectionBean) bf.getBean("annotatedBean");
+		SelfInjectionCollectionBean bean2 = (SelfInjectionCollectionBean) bf.getBean("annotatedBean2");
+		assertSame(bean2, bean.reference);
+		assertSame(1, bean2.referenceCollection.size());
+		assertSame(bean2, bean.referenceCollection.get(0));
 	}
 
 	@Test
@@ -2582,7 +2631,21 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	public static class SelfInjectionBean {
 
 		@Autowired
-		public SelfInjectionBean selfReference;
+		public SelfInjectionBean reference;
+
+		@Autowired(required = false)
+		public List<SelfInjectionBean> referenceCollection;
+	}
+
+
+	@SuppressWarnings("serial")
+	public static class SelfInjectionCollectionBean extends LinkedList<SelfInjectionCollectionBean> {
+
+		@Autowired
+		public SelfInjectionCollectionBean reference;
+
+		@Autowired(required = false)
+		public List<SelfInjectionCollectionBean> referenceCollection;
 	}
 
 
@@ -3149,7 +3212,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		}
 
 		public static GenericInterface1<String> createErased() {
-			return new GenericInterface1Impl<String>();
+			return new GenericInterface1Impl<>();
 		}
 
 		@SuppressWarnings("rawtypes")
@@ -3336,14 +3399,14 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	public static class CollectionFactoryMethods {
 
 		public static Map<String, TestBean> testBeanMap() {
-			Map<String, TestBean> tbm = new LinkedHashMap<String, TestBean>();
+			Map<String, TestBean> tbm = new LinkedHashMap<>();
 			tbm.put("testBean1", new TestBean("tb1"));
 			tbm.put("testBean2", new TestBean("tb2"));
 			return tbm;
 		}
 
 		public static Set<TestBean> testBeanSet() {
-			Set<TestBean> tbs = new LinkedHashSet<TestBean>();
+			Set<TestBean> tbs = new LinkedHashSet<>();
 			tbs.add(new TestBean("tb1"));
 			tbs.add(new TestBean("tb2"));
 			return tbs;
