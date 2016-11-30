@@ -17,7 +17,6 @@
 package org.springframework.messaging.tcp.reactor;
 
 import java.time.Duration;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -33,51 +32,53 @@ import org.springframework.util.concurrent.ListenableFutureCallbackRegistry;
 import org.springframework.util.concurrent.SuccessCallback;
 
 /**
- * Adapts a reactor {@link Mono} to {@link ListenableFuture} optionally converting
- * the result Object type {@code <S>} to the expected target type {@code <T>}.
+ * Adapts {@link Mono} to {@link ListenableFuture} optionally converting the
+ * result Object type {@code <S>} to the expected target type {@code <T>}.
  *
  * @author Rossen Stoyanchev
- * @since 4.0
+ * @since 5.0
  * @param <S> the type of object expected from the {@link Mono}
  * @param <T> the type of object expected from the {@link ListenableFuture}
  */
-abstract class AbstractMonoToListenableFutureAdapter<S, T>
-		implements ListenableFuture<T> {
+abstract class AbstractMonoToListenableFutureAdapter<S, T> implements ListenableFuture<T> {
 
-	private final MonoProcessor<S> promise;
+	private final MonoProcessor<S> monoProcessor;
 
 	private final ListenableFutureCallbackRegistry<T> registry = new ListenableFutureCallbackRegistry<>();
 
-	protected AbstractMonoToListenableFutureAdapter(Mono<S> promise) {
-		Assert.notNull(promise, "Mono must not be null");
-		this.promise = promise.doOnSuccess(result -> {
-				T adapted;
-				try {
-					adapted = adapt(result);
-				}
-				catch (Throwable ex) {
-					registry.failure(ex);
-					return;
-				}
-				registry.success(adapted);
-		})
-		                      .doOnError(registry::failure)
-		                      .subscribe();
+
+	protected AbstractMonoToListenableFutureAdapter(Mono<S> mono) {
+		Assert.notNull(mono, "'mono' must not be null");
+		this.monoProcessor = mono
+				.doOnSuccess(result -> {
+					T adapted;
+					try {
+						adapted = adapt(result);
+					}
+					catch (Throwable ex) {
+						registry.failure(ex);
+						return;
+					}
+					registry.success(adapted);
+				})
+				.doOnError(this.registry::failure)
+				.subscribe();
 	}
 
 
 	@Override
 	public T get() throws InterruptedException {
-		S result = this.promise.block();
+		S result = this.monoProcessor.block();
 		return adapt(result);
 	}
 
 	@Override
-	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-		Objects.requireNonNull(unit, "unit");
-		S result = this.promise.block(Duration.ofMillis(TimeUnit.MILLISECONDS.convert(
-				timeout,
-				unit)));
+	public T get(long timeout, TimeUnit unit)
+			throws InterruptedException, ExecutionException, TimeoutException {
+
+		Assert.notNull(unit);
+		Duration duration = Duration.ofMillis(TimeUnit.MILLISECONDS.convert(timeout, unit));
+		S result = this.monoProcessor.block(duration);
 		return adapt(result);
 	}
 
@@ -86,18 +87,18 @@ abstract class AbstractMonoToListenableFutureAdapter<S, T>
 		if (isCancelled()) {
 			return false;
 		}
-		this.promise.cancel();
+		this.monoProcessor.cancel();
 		return true;
 	}
 
 	@Override
 	public boolean isCancelled() {
-		return this.promise.isCancelled();
+		return this.monoProcessor.isCancelled();
 	}
 
 	@Override
 	public boolean isDone() {
-		return this.promise.isTerminated();
+		return this.monoProcessor.isTerminated();
 	}
 
 	@Override
@@ -110,7 +111,6 @@ abstract class AbstractMonoToListenableFutureAdapter<S, T>
 		this.registry.addSuccessCallback(successCallback);
 		this.registry.addFailureCallback(failureCallback);
 	}
-
 
 	protected abstract T adapt(S result);
 

@@ -24,10 +24,10 @@ import org.junit.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.InvalidMimeTypeException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Test fixture for {@link StompDecoder}.
@@ -38,6 +38,7 @@ import static org.junit.Assert.*;
 public class StompDecoderTests {
 
 	private final StompDecoder decoder = new StompDecoder();
+
 
 	@Test
 	public void decodeFrameWithCrLfEols() {

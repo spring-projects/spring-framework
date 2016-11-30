@@ -35,47 +35,52 @@ import org.springframework.util.concurrent.ListenableFuture;
  * @param <P> the payload type of messages read or written to the TCP stream.
  *
  * @author Rossen Stoyanchev
- * @since 4.2
+ * @since 5.0
  */
 public class ReactorNettyTcpConnection<P> implements TcpConnection<P> {
 
-	private final NettyInbound                                    in;
-	private final NettyOutbound                                   out;
-	private final DirectProcessor<Void>                           close;
+	private final NettyInbound inbound;
+
+	private final NettyOutbound outbound;
+
+	private final DirectProcessor<Void> closeProcessor;
+
 	private final BiConsumer<? super ByteBuf, ? super Message<P>> encoder;
 
-	public ReactorNettyTcpConnection(NettyInbound in,
-			NettyOutbound out,
+
+	public ReactorNettyTcpConnection(NettyInbound inbound, NettyOutbound outbound,
 			BiConsumer<? super ByteBuf, ? super Message<P>> encoder,
-			DirectProcessor<Void> close) {
-		this.out = out;
-		this.in = in;
+			DirectProcessor<Void> closeProcessor) {
+
+		this.inbound = inbound;
+		this.outbound = outbound;
 		this.encoder = encoder;
-		this.close = close;
+		this.closeProcessor = closeProcessor;
 	}
+
 
 	@Override
 	public ListenableFuture<Void> send(Message<P> message) {
-		ByteBuf byteBuf = in.channel().alloc().buffer();
-		encoder.accept(byteBuf, message);
-		return new MonoToListenableFutureAdapter<>(out.send(Mono.just(byteBuf)));
+		ByteBuf byteBuf = this.inbound.channel().alloc().buffer();
+		this.encoder.accept(byteBuf, message);
+		return new MonoToListenableFutureAdapter<>(this.outbound.send(Mono.just(byteBuf)));
 	}
 
 	@Override
 	@SuppressWarnings("deprecation")
 	public void onReadInactivity(Runnable runnable, long inactivityDuration) {
-		in.onReadIdle(inactivityDuration, runnable);
+		this.inbound.onReadIdle(inactivityDuration, runnable);
 	}
 
 	@Override
 	@SuppressWarnings("deprecation")
 	public void onWriteInactivity(Runnable runnable, long inactivityDuration) {
-		out.onWriteIdle(inactivityDuration, runnable);
+		this.outbound.onWriteIdle(inactivityDuration, runnable);
 	}
 
 	@Override
 	public void close() {
-		close.onComplete();
+		this.closeProcessor.onComplete();
 	}
 
 }

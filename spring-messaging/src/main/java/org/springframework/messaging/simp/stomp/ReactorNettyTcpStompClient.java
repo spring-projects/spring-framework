@@ -29,11 +29,10 @@ import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
- * A STOMP over TCP client that uses
- * {@link ReactorNettyTcpClient}.
+ * A STOMP over TCP client that uses {@link ReactorNettyTcpClient}.
  *
  * @author Rossen Stoyanchev
- * @since 4.2
+ * @since 5.0
  */
 public class ReactorNettyTcpStompClient extends StompClientSupport {
 
@@ -99,25 +98,21 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 	 * Create a new {@link ReactorNettyTcpClient} with Stomp specific configuration for
 	 * encoding, decoding and hand-off.
 	 *
-	 * @param relayHost target host
-	 * @param relayPort target port
+	 * @param host target host
+	 * @param port target port
 	 * @param decoder {@link StompDecoder} to use
 	 * @return a new {@link TcpOperations}
 	 */
-	protected static TcpOperations<byte[]> create(String relayHost,
-			int relayPort,
-			StompDecoder decoder) {
-		return new ReactorNettyTcpClient<>(relayHost,
-				relayPort,
-				new ReactorNettyTcpClient.MessageHandlerConfiguration<>(new DecodingFunction(
-						decoder),
+	protected static TcpOperations<byte[]> create(String host, int port, StompDecoder decoder) {
+		return new ReactorNettyTcpClient<>(host, port,
+				new ReactorNettyTcpClient.MessageHandlerConfiguration<>(
+						new DecodingFunction(decoder),
 						new EncodingConsumer(new StompEncoder()),
 						128,
 						Schedulers.newParallel("StompClient")));
 	}
 
-	private static final class EncodingConsumer
-			implements BiConsumer<ByteBuf, Message<byte[]>> {
+	private static final class EncodingConsumer implements BiConsumer<ByteBuf, Message<byte[]>> {
 
 		private final StompEncoder encoder;
 
@@ -127,12 +122,11 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 
 		@Override
 		public void accept(ByteBuf byteBuf, Message<byte[]> message) {
-			byteBuf.writeBytes(encoder.encode(message));
+			byteBuf.writeBytes(this.encoder.encode(message));
 		}
 	}
 
-	private static final class DecodingFunction
-			implements Function<ByteBuf, List<Message<byte[]>>> {
+	private static final class DecodingFunction implements Function<ByteBuf, List<Message<byte[]>>> {
 
 		private final StompDecoder decoder;
 
