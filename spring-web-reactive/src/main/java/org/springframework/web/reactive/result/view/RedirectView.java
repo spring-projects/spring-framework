@@ -45,8 +45,9 @@ import org.springframework.web.util.UriUtils;
  * available in the model.
  *
  * <p>A URL for this view is supposed to be a HTTP redirect which does the redirect via
- * sending an {@link HttpStatus#SEE_OTHER} code. If HTTP 1.0 compatibility is needed,
- * {@link HttpStatus#FOUND} code can be set via {@link #setStatusCode(HttpStatus)}.
+ * sending a {@literal 3xx} status code. By default {@link HttpStatus#SEE_OTHER} is used.
+ * If HTTP 1.0 compatibility is needed, {@link HttpStatus#FOUND} code can be set via
+ * {@link #setStatusCode(HttpStatus)}.
  *
  * <p>Note that the default value for the "contextRelative" flag is true.
  * With the flag on, URLs starting with "/" are considered relative to the web application
@@ -54,7 +55,6 @@ import org.springframework.web.util.UriUtils;
  * root.
  *
  * @author Sebastien Deleuze
- * @see #setContextRelative
  * @since 5.0
  */
 public class RedirectView extends AbstractUrlBasedView {
@@ -66,49 +66,70 @@ public class RedirectView extends AbstractUrlBasedView {
 
 	private HttpStatus statusCode = HttpStatus.SEE_OTHER;
 
-	private boolean propagateQueryParams = false;
+	private boolean propagateQuery = false;
 
 	private String[] hosts;
 
 
 	/**
-	 * Create a new {@code RedirectView} with the given redirect URL.
-	 *
-	 * @see #builder(String)
+	 * Constructor for use as a bean.
+	 */
+	public RedirectView() {
+	}
+
+	/**
+	 * Create a new {@code RedirectView} with the given URL and the {@link HttpStatus#SEE_OTHER}
+	 * status code which is the correct code for HTTP 1.1 clients.
 	 */
 	public RedirectView(String redirectUrl) {
 		super(redirectUrl);
 	}
 
-
 	/**
-	 * Return a builder for a {@code RedirectView}.
+	 * Create a new {@code RedirectView} with the given redirect URL ans status code. Most
+	 * frequently used ones are:
+	 * <ul>
+	 *     <li>{@link HttpStatus#SEE_OTHER} : temporary redirect for HTTP 1.1 compatible clients</li>
+	 *     <li>{@link HttpStatus#FOUND} : temporary redirect for HTTP 1.0 compatible clients</li>
+	 *     <li>{@link HttpStatus#MOVED_PERMANENTLY} : permanent redirect</li>
+	 * </ul>
 	 */
-	public static Builder builder(String redirectUrl) {
-		return new BuilderImpl(redirectUrl);
+	public RedirectView(String redirectUrl, HttpStatus statusCode) {
+		super(redirectUrl);
+		setStatusCode(statusCode);
 	}
 
 
 	/**
 	 * Set whether to interpret a given URL that starts with a slash ("/")
-	 * as relative to the current context path.
-	 * <p>Default is "true": the context path will be
-	 * prepended to the URL in such a case. If "false", an URL that starts
-	 * with a slash will be interpreted as absolute, i.e. taken as-is.
+	 * as relative to the current context path ({@code true}, the default) or to
+	 * the web server root ({@code false}).
 	 */
 	public void setContextRelative(boolean contextRelative) {
 		this.contextRelative = contextRelative;
 	}
 
 	/**
-	 * Set a customized redirect status code to be used for a redirect. Default is
-	 * {@link HttpStatus#SEE_OTHER} which is the correct code for HTTP 1.1
-	 * clients. This setter can be used to configure {@link HttpStatus#FOUND}
-	 * if HTTP 1.0 clients need to be supported, or any other {@literal 3xx}
-	 * status code.
+	 * Return whether to interpret a given URL that starts with a slash ("/")
+	 * as relative to the current context path ("true") or to the web server
+	 * root ("false").
+	 * @return
+	 */
+	public boolean isContextRelative() {
+		return contextRelative;
+	}
+
+	/**
+	 * Set the redirect status code. Most frequently used ones are:
+	 * <ul>
+	 *     <li>{@link HttpStatus#SEE_OTHER} : temporary redirect for HTTP 1.1 compatible clients</li>
+	 *     <li>{@link HttpStatus#FOUND} : temporary redirect for HTTP 1.0 compatible clients</li>
+	 *     <li>{@link HttpStatus#MOVED_PERMANENTLY} : permanent redirect</li>
+	 * </ul>
 	 */
 	public void setStatusCode(HttpStatus statusCode) {
-		Assert.notNull(statusCode);
+		Assert.notNull(statusCode, "HttpStatus must not be null");
+		Assert.isTrue(statusCode.is3xxRedirection(), "HttpStatus must be a redirection (3xx status code)");
 		this.statusCode = statusCode;
 	}
 
@@ -120,12 +141,19 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * When set to {@code true} the query string of the current URL is appended
-	 * and thus propagated through to the redirected URL.
-	 * <p>Defaults to {@code false}.
+	 * Set whether to append the query string of the current URL to the redirected URL
+	 * ({@code true}) or not ({@code false}, the default).
 	 */
-	public void setPropagateQueryParams(boolean propagateQueryParams) {
-		this.propagateQueryParams = propagateQueryParams;
+	public void setPropagateQuery(boolean propagateQuery) {
+		this.propagateQuery = propagateQuery;
+	}
+
+	/**
+	 * Return whether the query string of the current URL is appended to the redirected URL
+	 * ({@code true}) or not ({@code false}).
+	 */
+	public boolean isPropagateQuery() {
+		return propagateQuery;
 	}
 
 	/**
@@ -139,6 +167,13 @@ public class RedirectView extends AbstractUrlBasedView {
 	 */
 	public void setHosts(String... hosts) {
 		this.hosts = hosts;
+	}
+
+	/**
+	 * Return the configured application hosts.
+	 */
+	public String[] getHosts() {
+		return this.hosts;
 	}
 
 	/**
@@ -173,7 +208,7 @@ public class RedirectView extends AbstractUrlBasedView {
 			Map<String, String> variables = getCurrentRequestUriVariables(exchange);
 			targetUrl = replaceUriTemplateVariables(targetUrl.toString(), model, variables, charset);
 		}
-		if (this.propagateQueryParams) {
+		if (this.propagateQuery) {
 		 	appendCurrentQueryParams(targetUrl, request);
 		}
 
@@ -292,74 +327,12 @@ public class RedirectView extends AbstractUrlBasedView {
 		return true;
 	}
 
-	public interface Builder {
-
-		/**
-		 * @see RedirectView#setContextRelative(boolean)
-		 */
-		Builder contextRelative(boolean contextRelative);
-
-		/**
-		 * @see RedirectView#setStatusCode(HttpStatus)
-		 */
-		Builder statusCode(HttpStatus statusCode);
-
-		/**
-		 * @see RedirectView#setPropagateQueryParams(boolean)
-		 */
-		Builder propagateQueryParams(boolean propagateQueryParams);
-
-		/**
-		 * @see RedirectView#setHosts(String...)
-		 */
-		Builder hosts(String... hosts);
-
-		/**
-		 * Build the redirect view.
-		 */
-		RedirectView build();
-
-	}
-
-	private static class BuilderImpl implements Builder {
-
-		private final RedirectView view;
-
-
-		public BuilderImpl(String redirectUrl) {
-			this.view = new RedirectView(redirectUrl);
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		super.afterPropertiesSet();
+		if (getStatusCode() == null) {
+			throw new IllegalArgumentException("Property 'statusCode' is required");
 		}
-
-
-		@Override
-		public Builder contextRelative(boolean contextRelative) {
-			this.view.setContextRelative(contextRelative);
-			return this;
-		}
-
-		@Override
-		public Builder statusCode(HttpStatus statusCode) {
-			this.view.setStatusCode(statusCode);
-			return this;
-		}
-
-		@Override
-		public Builder propagateQueryParams(boolean propagateQueryParams) {
-			this.view.setPropagateQueryParams(propagateQueryParams);
-			return this;
-		}
-
-		@Override
-		public Builder hosts(String... hosts) {
-			this.view.setHosts(hosts);
-			return this;
-		}
-
-		@Override
-		public RedirectView build() {
-			return this.view;
-		}
-
 	}
 
 }

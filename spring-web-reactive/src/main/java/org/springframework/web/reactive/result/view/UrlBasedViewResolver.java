@@ -53,6 +53,7 @@ import org.springframework.util.PatternMatchUtils;
  * <p>Note: This class does not support localized resolution, i.e. resolving
  * a symbolic view name to different resources depending on the current locale.
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public class UrlBasedViewResolver extends ViewResolverSupport implements ViewResolver, InitializingBean {

@@ -76,13 +76,11 @@ public class RedirectViewTests {
 
 	@Test
 	public void customStatusCode() {
-		RedirectView view = RedirectView
-				.builder("http://url.somewhere.com")
-				.statusCode(HttpStatus.FOUND)
-				.build();
+		String url = "http://url.somewhere.com";
+		RedirectView view = new RedirectView(url, HttpStatus.FOUND);
 		view.render(new HashMap<>(), MediaType.TEXT_HTML, exchange);
 		assertEquals(HttpStatus.FOUND, response.getStatusCode());
-		assertEquals(URI.create("http://url.somewhere.com"), response.getHeaders().getLocation());
+		assertEquals(URI.create(url), response.getHeaders().getLocation());
 	}
 
 	@Test
@@ -137,10 +135,8 @@ public class RedirectViewTests {
 
 	@Test
 	public void propagateQueryParams() throws Exception {
-		RedirectView view = RedirectView
-				.builder("http://url.somewhere.com?foo=bar#bazz")
-				.propagateQueryParams(true)
-				.build();
+		RedirectView view = new RedirectView("http://url.somewhere.com?foo=bar#bazz");
+		view.setPropagateQuery(true);
 		request.setUri(URI.create("http://url.somewhere.com?a=b&c=d"));
 		view.render(new HashMap<>(), MediaType.TEXT_HTML, exchange);
 		assertEquals(HttpStatus.SEE_OTHER, response.getStatusCode());
