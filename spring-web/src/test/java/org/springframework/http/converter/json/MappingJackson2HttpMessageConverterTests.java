@@ -226,6 +226,20 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
+	public void prettyPrintWithSse() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		outputMessage.getHeaders().setContentType(new MediaType("text", "event-stream"));
+		PrettyPrintBean bean = new PrettyPrintBean();
+		bean.setName("Jason");
+
+		this.converter.setPrettyPrint(true);
+		this.converter.writeInternal(bean, null, outputMessage);
+		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
+
+		assertEquals("{\ndata:  \"name\" : \"Jason\"\ndata:}", result);
+	}
+
+	@Test
 	public void prefixJson() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.setPrefixJson(true);
