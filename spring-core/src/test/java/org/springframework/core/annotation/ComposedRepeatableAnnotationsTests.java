@@ -186,7 +186,7 @@ public class ComposedRepeatableAnnotationsTests {
 
 	private void expectNonRepeatableAnnotation() {
 		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("annotationType must be a repeatable annotation"));
+		exception.expectMessage(startsWith("Annotation type must be a repeatable annotation"));
 		exception.expectMessage(containsString("failed to resolve container type for"));
 		exception.expectMessage(containsString(NonRepeatable.class.getName()));
 	}
