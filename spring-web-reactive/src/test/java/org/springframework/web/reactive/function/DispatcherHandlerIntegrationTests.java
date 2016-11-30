@@ -118,7 +118,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		}
 
 		@Bean
-		public HandlerMapping handlerMapping(RouterFunction<?> routerFunction,
+		public HandlerMapping handlerMapping(RouterFunction routerFunction,
 				ApplicationContext applicationContext) {
 			return RouterFunctions.toHandlerMapping(routerFunction,
 					new HandlerStrategies() {
@@ -140,7 +140,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		}
 
 		@Bean
-		public RouterFunction<?> routerFunction() {
+		public RouterFunction routerFunction() {
 			PersonHandler personHandler = personHandler();
 			return route(RequestPredicates.GET("/mono"), personHandler::mono)
 					.and(route(RequestPredicates.GET("/flux"), personHandler::flux));

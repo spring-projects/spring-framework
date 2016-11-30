@@ -22,14 +22,14 @@ import org.springframework.web.reactive.function.support.ServerRequestWrapper;
 /**
  * Represents a function that filters a {@linkplain HandlerFunction handler function}.
  *
- * @param <T> the type of the {@linkplain HandlerFunction handler function} to filter
- * @param <R> the type of the response of the function
+ * @param <T> the type of the response of the function
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 5.0
  * @see RouterFunction#filter(HandlerFilterFunction)
  */
 @FunctionalInterface
-public interface HandlerFilterFunction<T, R> {
+public interface HandlerFilterFunction<T> {
 
 	/**
 	 * Apply this filter to the given handler function. The given
@@ -42,7 +42,7 @@ public interface HandlerFilterFunction<T, R> {
 	 * @return the filtered response
 	 * @see ServerRequestWrapper
 	 */
-	ServerResponse<R> filter(ServerRequest request, HandlerFunction<T> next);
+	ServerResponse<T> filter(ServerRequest request, HandlerFunction<?> next);
 
 	/**
 	 * Return a composed filter function that first applies this filter, and then applies the
@@ -51,7 +51,7 @@ public interface HandlerFilterFunction<T, R> {
 	 * @return a composed filter that first applies this function and then applies the
 	 * {@code after} function
 	 */
-	default HandlerFilterFunction<T, R> andThen(HandlerFilterFunction<T, T> after) {
+	default HandlerFilterFunction<T> andThen(HandlerFilterFunction<T> after) {
 		Assert.notNull(after, "'after' must not be null");
 		return (request, next) -> {
 			HandlerFunction<T> nextHandler =
@@ -65,7 +65,7 @@ public interface HandlerFilterFunction<T, R> {
 	 * @param handler the handler function to filter
 	 * @return the filtered handler function
 	 */
-	default HandlerFunction<R> apply(HandlerFunction<T> handler) {
+	default HandlerFunction<T> apply(HandlerFunction<?> handler) {
 		Assert.notNull(handler, "'handler' must not be null");
 		return request -> this.filter(request, handler);
 	}

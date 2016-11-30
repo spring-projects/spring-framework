@@ -43,6 +43,7 @@ import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
  * {@code DispatcherHandler}.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public abstract class RouterFunctions {
@@ -66,12 +67,11 @@ public abstract class RouterFunctions {
 	 * Route to the given handler function if the given request predicate applies.
 	 * @param predicate the predicate to test
 	 * @param handlerFunction the handler function to route to
-	 * @param <T> the type of the handler function
 	 * @return a routing function that routes to {@code handlerFunction} if
 	 * {@code predicate} evaluates to {@code true}
 	 * @see RequestPredicates
 	 */
-	public static <T> RouterFunction<T> route(RequestPredicate predicate, HandlerFunction<T> handlerFunction) {
+	public static <T> RouterFunction route(RequestPredicate predicate, HandlerFunction<T> handlerFunction) {
 		Assert.notNull(predicate, "'predicate' must not be null");
 		Assert.notNull(handlerFunction, "'handlerFunction' must not be null");
 
@@ -81,20 +81,19 @@ public abstract class RouterFunctions {
 	/**
 	 * Route to the given routing function if the given request predicate applies.
 	 * @param predicate the predicate to test
-	 * @param routerFunction the routing function to route to
-	 * @param <T> the type of the handler function
+	 * @param router the routing function to route to
 	 * @return a routing function that routes to {@code routerFunction} if
 	 * {@code predicate} evaluates to {@code true}
 	 * @see RequestPredicates
 	 */
-	public static <T> RouterFunction<T> subroute(RequestPredicate predicate, RouterFunction<T> routerFunction) {
+	public static RouterFunction subroute(RequestPredicate predicate, RouterFunction router) {
 		Assert.notNull(predicate, "'predicate' must not be null");
-		Assert.notNull(routerFunction, "'routerFunction' must not be null");
+		Assert.notNull(router, "'routerFunction' must not be null");
 
 		return request -> {
 			if (predicate.test(request)) {
 				ServerRequest subRequest = predicate.subRequest(request);
-				return routerFunction.route(subRequest);
+				return router.route(subRequest);
 			}
 			else {
 				return Optional.empty();
@@ -119,7 +118,7 @@ public abstract class RouterFunctions {
 	 * @param routerFunction the routing function to convert
 	 * @return an http handler that handles HTTP request using the given routing function
 	 */
-	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction) {
+	public static HttpHandler toHttpHandler(RouterFunction routerFunction) {
 		return toHttpHandler(routerFunction, HandlerStrategies.withDefaults());
 	}
 
@@ -141,7 +140,7 @@ public abstract class RouterFunctions {
 	 * @param strategies the strategies to use
 	 * @return an http handler that handles HTTP request using the given routing function
 	 */
-	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction, HandlerStrategies strategies) {
+	public static HttpHandler toHttpHandler(RouterFunction routerFunction, HandlerStrategies strategies) {
 		Assert.notNull(routerFunction, "RouterFunction must not be null");
 		Assert.notNull(strategies, "HandlerStrategies must not be null");
 
@@ -164,7 +163,7 @@ public abstract class RouterFunctions {
 	 * @see org.springframework.web.reactive.function.support.HandlerFunctionAdapter
 	 * @see org.springframework.web.reactive.function.support.ServerResponseResultHandler
 	 */
-	public static HandlerMapping toHandlerMapping(RouterFunction<?> routerFunction) {
+	public static HandlerMapping toHandlerMapping(RouterFunction routerFunction) {
 		return toHandlerMapping(routerFunction, HandlerStrategies.withDefaults());
 	}
 
@@ -179,7 +178,7 @@ public abstract class RouterFunctions {
 	 * @see org.springframework.web.reactive.function.support.HandlerFunctionAdapter
 	 * @see org.springframework.web.reactive.function.support.ServerResponseResultHandler
 	 */
-	public static HandlerMapping toHandlerMapping(RouterFunction<?> routerFunction, HandlerStrategies strategies) {
+	public static HandlerMapping toHandlerMapping(RouterFunction routerFunction, HandlerStrategies strategies) {
 		Assert.notNull(routerFunction, "RouterFunction must not be null");
 		Assert.notNull(strategies, "HandlerStrategies must not be null");
 
@@ -200,11 +199,6 @@ public abstract class RouterFunctions {
 	@SuppressWarnings("unchecked")
 	private static <T> HandlerFunction<T> notFound() {
 		return (HandlerFunction<T>) NOT_FOUND_HANDLER;
-	}
-
-	@SuppressWarnings("unchecked")
-	static <T> HandlerFunction<T> cast(HandlerFunction<?> handlerFunction) {
-		return (HandlerFunction<T>) handlerFunction;
 	}
 
 }

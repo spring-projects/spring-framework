@@ -21,13 +21,13 @@ import java.util.Optional;
 /**
  * Represents a function that routes to a {@linkplain HandlerFunction handler function}.
  *
- * @param <T> the type of the {@linkplain HandlerFunction handler function} to route to
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 5.0
  * @see RouterFunctions
  */
 @FunctionalInterface
-public interface RouterFunction<T> {
+public interface RouterFunction {
 
 	/**
 	 * Return the {@linkplain HandlerFunction handler function} that matches the given request.
@@ -35,23 +35,7 @@ public interface RouterFunction<T> {
 	 * @return an {@code Optional} describing the {@code HandlerFunction} that matches this request,
 	 * or an empty {@code Optional} if there is no match
 	 */
-	Optional<HandlerFunction<T>> route(ServerRequest request);
-
-	/**
-	 * Return a composed routing function that first invokes this function,
-	 * and then invokes the {@code other} function (of the same type {@code T}) if this route had
-	 * {@linkplain Optional#empty() no result}.
-	 *
-	 * @param other the function of type {@code T} to apply when this function has no result
-	 * @return a composed function that first routes with this function and then the {@code other} function if this
-	 * function has no result
-	 */
-	default RouterFunction<T> andSame(RouterFunction<T> other) {
-		return request -> {
-			Optional<HandlerFunction<T>> result = this.route(request);
-			return result.isPresent() ? result : other.route(request);
-		};
-	}
+	Optional<HandlerFunction<?>> route(ServerRequest request);
 
 	/**
 	 * Return a composed routing function that first invokes this function,
@@ -62,12 +46,10 @@ public interface RouterFunction<T> {
 	 * @return a composed function that first routes with this function and then the {@code other} function if this
 	 * function has no result
 	 */
-	default RouterFunction<?> and(RouterFunction<?> other) {
+	default RouterFunction and(RouterFunction other) {
 		return request -> {
-			Optional<HandlerFunction<Object>> result = this.route(request).
-					map(RouterFunctions::cast);
-			return result.isPresent() ? result : other.route(request)
-					.map(RouterFunctions::cast);
+			Optional<HandlerFunction<?>> result = this.route(request);
+			return result.isPresent() ? result : other.route(request);
 		};
 	}
 
@@ -83,7 +65,7 @@ public interface RouterFunction<T> {
 	 * created from {@code predicate} and {@code handlerFunction} if this
 	 * function has no result
 	 */
-	default <S> RouterFunction<?> andRoute(RequestPredicate predicate,
+	default <S> RouterFunction andRoute(RequestPredicate predicate,
 			HandlerFunction<S> handlerFunction) {
 		return and(RouterFunctions.route(predicate, handlerFunction));
 	}
@@ -93,10 +75,10 @@ public interface RouterFunction<T> {
 	 * {@linkplain HandlerFilterFunction filter function}.
 	 *
 	 * @param filterFunction the filter to apply
-	 * @param <S>            the filter return type
+	 * @param <T>            the filter return type
 	 * @return the filtered routing function
 	 */
-	default <S> RouterFunction<S> filter(HandlerFilterFunction<T, S> filterFunction) {
+	default <T> RouterFunction filter(HandlerFilterFunction<T> filterFunction) {
 		return request -> this.route(request).map(filterFunction::apply);
 	}
 

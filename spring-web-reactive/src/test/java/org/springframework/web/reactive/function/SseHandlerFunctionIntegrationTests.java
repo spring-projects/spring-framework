@@ -51,7 +51,7 @@ public class SseHandlerFunctionIntegrationTests
 	}
 
 	@Override
-	protected RouterFunction<?> routerFunction() {
+	protected RouterFunction routerFunction() {
 		SseHandler sseHandler = new SseHandler();
 		return route(RequestPredicates.GET("/string"), sseHandler::string)
 				.and(route(RequestPredicates.GET("/person"), sseHandler::person))

@@ -32,27 +32,12 @@ import static org.springframework.http.codec.BodyInserters.fromObject;
 public class RouterFunctionTests {
 
 	@Test
-	public void andSame() throws Exception {
-		HandlerFunction<Void> handlerFunction = request -> ServerResponse.ok().build();
-		RouterFunction<Void> routerFunction1 = request -> Optional.empty();
-		RouterFunction<Void> routerFunction2 = request -> Optional.of(handlerFunction);
-
-		RouterFunction<Void> result = routerFunction1.andSame(routerFunction2);
-		assertNotNull(result);
-
-		MockServerRequest request = MockServerRequest.builder().build();
-		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
-		assertTrue(resultHandlerFunction.isPresent());
-		assertEquals(handlerFunction, resultHandlerFunction.get());
-	}
-
-	@Test
 	public void and() throws Exception {
 		HandlerFunction<String> handlerFunction = request -> ServerResponse.ok().body(fromObject("42"));
-		RouterFunction<Void> routerFunction1 = request -> Optional.empty();
-		RouterFunction<String> routerFunction2 = request -> Optional.of(handlerFunction);
+		RouterFunction routerFunction1 = request -> Optional.empty();
+		RouterFunction routerFunction2 = request -> Optional.of(handlerFunction);
 
-		RouterFunction<?> result = routerFunction1.and(routerFunction2);
+		RouterFunction result = routerFunction1.and(routerFunction2);
 		assertNotNull(result);
 
 		MockServerRequest request = MockServerRequest.builder().build();
@@ -63,10 +48,10 @@ public class RouterFunctionTests {
 
 	@Test
 	public void andRoute() throws Exception {
-		RouterFunction<Integer> routerFunction1 = request -> Optional.empty();
+		RouterFunction routerFunction1 = request -> Optional.empty();
 		RequestPredicate requestPredicate = request -> true;
 
-		RouterFunction<?> result = routerFunction1.andRoute(requestPredicate, this::handlerMethod);
+		RouterFunction result = routerFunction1.andRoute(requestPredicate, this::handlerMethod);
 		assertNotNull(result);
 
 		MockServerRequest request = MockServerRequest.builder().build();
@@ -81,14 +66,14 @@ public class RouterFunctionTests {
 	@Test
 	public void filter() throws Exception {
 		HandlerFunction<String> handlerFunction = request -> ServerResponse.ok().body(fromObject("42"));
-		RouterFunction<String> routerFunction = request -> Optional.of(handlerFunction);
+		RouterFunction routerFunction = request -> Optional.of(handlerFunction);
 
-		HandlerFilterFunction<String, Integer> filterFunction = (request, next) -> {
-			ServerResponse<String> response = next.handle(request);
+		HandlerFilterFunction<Integer> filterFunction = (request, next) -> {
+			ServerResponse<String> response = (ServerResponse<String>)next.handle(request);
 			int i = Integer.parseInt(response.body());
 			return ServerResponse.ok().body(fromObject(i));
 		};
-		RouterFunction<Integer> result = routerFunction.filter(filterFunction);
+		RouterFunction result = routerFunction.filter(filterFunction);
 		assertNotNull(result);
 
 		MockServerRequest request = MockServerRequest.builder().build();
