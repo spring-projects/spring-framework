@@ -151,7 +151,7 @@ public class AnnotatedElementUtils {
 	 */
 	public static Set<String> getMetaAnnotationTypes(AnnotatedElement element, Class<? extends Annotation> annotationType) {
 		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.notNull(annotationType, "annotationType must not be null");
+		Assert.notNull(annotationType, "'annotationType' must not be null");
 
 		return getMetaAnnotationTypes(element, element.getAnnotation(annotationType));
 	}
@@ -213,7 +213,7 @@ public class AnnotatedElementUtils {
 	 */
 	public static boolean hasMetaAnnotationTypes(AnnotatedElement element, Class<? extends Annotation> annotationType) {
 		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.notNull(annotationType, "annotationType must not be null");
+		Assert.notNull(annotationType, "'annotationType' must not be null");
 
 		return hasMetaAnnotationTypes(element, annotationType, null);
 	}
@@ -266,7 +266,7 @@ public class AnnotatedElementUtils {
 	 */
 	public static boolean isAnnotated(AnnotatedElement element, Class<? extends Annotation> annotationType) {
 		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.notNull(annotationType, "annotationType must not be null");
+		Assert.notNull(annotationType, "'annotationType' must not be null");
 
 		// Shortcut: directly present on the element, with no processing needed?
 		if (element.isAnnotationPresent(annotationType)) {
@@ -333,7 +333,7 @@ public class AnnotatedElementUtils {
 	public static AnnotationAttributes getMergedAnnotationAttributes(
 			AnnotatedElement element, Class<? extends Annotation> annotationType) {
 
-		Assert.notNull(annotationType, "annotationType must not be null");
+		Assert.notNull(annotationType, "'annotationType' must not be null");
 		AnnotationAttributes attributes = searchWithGetSemantics(element, annotationType, null,
 				new MergedAnnotationAttributesProcessor());
 		AnnotationUtils.postProcessAnnotationAttributes(element, attributes, false, false);
@@ -417,7 +417,7 @@ public class AnnotatedElementUtils {
 	 * @see AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)
 	 */
 	public static <A extends Annotation> A getMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
-		Assert.notNull(annotationType, "annotationType must not be null");
+		Assert.notNull(annotationType, "'annotationType' must not be null");
 
 		// Shortcut: directly present on the element, with no merging needed?
 		if (!(element instanceof Class)) {
@@ -458,7 +458,7 @@ public class AnnotatedElementUtils {
 			Class<A> annotationType) {
 
 		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.notNull(annotationType, "annotationType must not be null");
+		Assert.notNull(annotationType, "'annotationType' must not be null");
 
 		MergedAnnotationAttributesProcessor processor = new MergedAnnotationAttributesProcessor(false, false, true);
 		searchWithGetSemantics(element, annotationType, null, processor);
@@ -525,7 +525,7 @@ public class AnnotatedElementUtils {
 			Class<A> annotationType, Class<? extends Annotation> containerType) {
 
 		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.notNull(annotationType, "annotationType must not be null");
+		Assert.notNull(annotationType, "'annotationType' must not be null");
 
 		if (containerType == null) {
 			containerType = resolveContainerType(annotationType);
@@ -611,7 +611,7 @@ public class AnnotatedElementUtils {
 	 */
 	public static boolean hasAnnotation(AnnotatedElement element, Class<? extends Annotation> annotationType) {
 		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.notNull(annotationType, "annotationType must not be null");
+		Assert.notNull(annotationType, "'annotationType' must not be null");
 
 		// Shortcut: directly present on the element, with no processing needed?
 		if (element.isAnnotationPresent(annotationType)) {
@@ -714,7 +714,7 @@ public class AnnotatedElementUtils {
 	 * @see #getMergedAnnotationAttributes(AnnotatedElement, Class)
 	 */
 	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
-		Assert.notNull(annotationType, "annotationType must not be null");
+		Assert.notNull(annotationType, "'annotationType' must not be null");
 
 		// Shortcut: directly present on the element, with no merging needed?
 		if (!(element instanceof Class)) {
@@ -783,7 +783,7 @@ public class AnnotatedElementUtils {
 			Class<A> annotationType) {
 
 		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.notNull(annotationType, "annotationType must not be null");
+		Assert.notNull(annotationType, "'annotationType' must not be null");
 
 		MergedAnnotationAttributesProcessor processor = new MergedAnnotationAttributesProcessor(false, false, true);
 		searchWithFindSemantics(element, annotationType, null, processor);
@@ -850,7 +850,7 @@ public class AnnotatedElementUtils {
 			Class<A> annotationType, Class<? extends Annotation> containerType) {
 
 		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.notNull(annotationType, "annotationType must not be null");
+		Assert.notNull(annotationType, "'annotationType' must not be null");
 
 		if (containerType == null) {
 			containerType = resolveContainerType(annotationType);
@@ -957,7 +957,7 @@ public class AnnotatedElementUtils {
 					}
 				}
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				AnnotationUtils.handleIntrospectionFailure(element, ex);
 			}
 		}
@@ -1246,7 +1246,7 @@ public class AnnotatedElementUtils {
 					}
 				}
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				AnnotationUtils.handleIntrospectionFailure(element, ex);
 			}
 		}
@@ -1288,7 +1288,7 @@ public class AnnotatedElementUtils {
 		try {
 			return (A[]) AnnotationUtils.getValue(container);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			AnnotationUtils.handleIntrospectionFailure(element, ex);
 		}
 		// Unable to read value from repeating annotation container -> ignore it.
@@ -1307,8 +1307,8 @@ public class AnnotatedElementUtils {
 		Class<? extends Annotation> containerType = AnnotationUtils.resolveContainerAnnotationType(annotationType);
 		if (containerType == null) {
 			throw new IllegalArgumentException(
-				"annotationType must be a repeatable annotation: failed to resolve container type for "
-						+ annotationType.getName());
+					"Annotation type must be a repeatable annotation: failed to resolve container type for " +
+					annotationType.getName());
 		}
 		return containerType;
 	}
@@ -1330,15 +1330,15 @@ public class AnnotatedElementUtils {
 			Class<?> returnType = method.getReturnType();
 			if (!returnType.isArray() || returnType.getComponentType() != annotationType) {
 				String msg = String.format(
-					"Container type [%s] must declare a 'value' attribute for an array of type [%s]",
-					containerType.getName(), annotationType.getName());
+						"Container type [%s] must declare a 'value' attribute for an array of type [%s]",
+						containerType.getName(), annotationType.getName());
 				throw new AnnotationConfigurationException(msg);
 			}
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			AnnotationUtils.rethrowAnnotationConfigurationException(ex);
 			String msg = String.format("Invalid declaration of container type [%s] for repeatable annotation [%s]",
-				containerType.getName(), annotationType.getName());
+					containerType.getName(), annotationType.getName());
 			throw new AnnotationConfigurationException(msg, ex);
 		}
 	}

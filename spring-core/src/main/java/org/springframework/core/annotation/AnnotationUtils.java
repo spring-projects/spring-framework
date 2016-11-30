@@ -159,7 +159,7 @@ public abstract class AnnotationUtils {
 		try {
 			return synthesizeAnnotation(annotatedElement.getAnnotation(annotationType), annotatedElement);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			handleIntrospectionFailure(annotatedElement, ex);
 		}
 		return null;
@@ -190,7 +190,7 @@ public abstract class AnnotationUtils {
 			}
 			return synthesizeAnnotation(annotation, annotatedElement);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			handleIntrospectionFailure(annotatedElement, ex);
 		}
 		return null;
@@ -230,7 +230,7 @@ public abstract class AnnotationUtils {
 		try {
 			return synthesizeAnnotationArray(annotatedElement.getAnnotations(), annotatedElement);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			handleIntrospectionFailure(annotatedElement, ex);
 		}
 		return null;
@@ -252,7 +252,7 @@ public abstract class AnnotationUtils {
 		try {
 			return synthesizeAnnotationArray(BridgeMethodResolver.findBridgedMethod(method).getAnnotations(), method);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			handleIntrospectionFailure(method, ex);
 		}
 		return null;
@@ -471,7 +471,7 @@ public abstract class AnnotationUtils {
 			}
 			return new AnnotationCollector<A>(annotationType, containerAnnotationType, declaredMode).getResult(annotatedElement);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			handleIntrospectionFailure(annotatedElement, ex);
 		}
 		return Collections.emptySet();
@@ -534,7 +534,7 @@ public abstract class AnnotationUtils {
 				}
 			}
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			handleIntrospectionFailure(annotatedElement, ex);
 		}
 		return null;
@@ -633,7 +633,7 @@ public abstract class AnnotationUtils {
 					break;
 				}
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				handleIntrospectionFailure(ifcMethod, ex);
 			}
 		}
@@ -723,7 +723,7 @@ public abstract class AnnotationUtils {
 				}
 			}
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			handleIntrospectionFailure(clazz, ex);
 			return null;
 		}
@@ -840,7 +840,7 @@ public abstract class AnnotationUtils {
 				}
 			}
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			handleIntrospectionFailure(clazz, ex);
 		}
 		return false;
@@ -903,12 +903,11 @@ public abstract class AnnotationUtils {
 	/**
 	 * Determine if the supplied {@link Annotation} is defined in the core JDK
 	 * {@code java.lang.annotation} package.
-	 * @param annotation the annotation to check (never {@code null})
+	 * @param annotation the annotation to check
 	 * @return {@code true} if the annotation is in the {@code java.lang.annotation} package
 	 */
 	public static boolean isInJavaLangAnnotationPackage(Annotation annotation) {
-		Assert.notNull(annotation, "Annotation must not be null");
-		return isInJavaLangAnnotationPackage(annotation.annotationType().getName());
+		return (annotation != null && isInJavaLangAnnotationPackage(annotation.annotationType().getName()));
 	}
 
 	/**
@@ -919,8 +918,7 @@ public abstract class AnnotationUtils {
 	 * @since 4.2
 	 */
 	public static boolean isInJavaLangAnnotationPackage(String annotationType) {
-		Assert.hasText(annotationType, "annotationType must not be null or empty");
-		return annotationType.startsWith("java.lang.annotation");
+		return (annotationType != null && annotationType.startsWith("java.lang.annotation"));
 	}
 
 	/**
@@ -1077,7 +1075,7 @@ public abstract class AnnotationUtils {
 				attributes.put(method.getName(),
 						adaptValue(annotatedElement, attributeValue, classValuesAsString, nestedAnnotationsAsMap));
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				if (ex instanceof InvocationTargetException) {
 					Throwable targetException = ((InvocationTargetException) ex).getTargetException();
 					rethrowAnnotationConfigurationException(targetException);
@@ -1492,7 +1490,7 @@ public abstract class AnnotationUtils {
 	public static <A extends Annotation> A synthesizeAnnotation(Map<String, Object> attributes,
 			Class<A> annotationType, AnnotatedElement annotatedElement) {
 
-		Assert.notNull(annotationType, "annotationType must not be null");
+		Assert.notNull(annotationType, "'annotationType' must not be null");
 		if (attributes == null) {
 			return null;
 		}
@@ -1572,7 +1570,7 @@ public abstract class AnnotationUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	static <A extends Annotation> A[] synthesizeAnnotationArray(Map<String, Object>[] maps, Class<A> annotationType) {
-		Assert.notNull(annotationType, "annotationType must not be null");
+		Assert.notNull(annotationType, "'annotationType' must not be null");
 		if (maps == null) {
 			return null;
 		}
@@ -1850,7 +1848,7 @@ public abstract class AnnotationUtils {
 	 * @param ex the exception that we encountered
 	 * @see #rethrowAnnotationConfigurationException
 	 */
-	static void handleIntrospectionFailure(AnnotatedElement element, Exception ex) {
+	static void handleIntrospectionFailure(AnnotatedElement element, Throwable ex) {
 		rethrowAnnotationConfigurationException(ex);
 
 		Log loggerToUse = logger;
@@ -1962,7 +1960,7 @@ public abstract class AnnotationUtils {
 						}
 					}
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					handleIntrospectionFailure(element, ex);
 				}
 			}
@@ -1977,7 +1975,7 @@ public abstract class AnnotationUtils {
 				}
 				return synthesizedAnnotations;
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				handleIntrospectionFailure(element, ex);
 			}
 			// Unable to read value from repeating annotation container -> ignore it.
