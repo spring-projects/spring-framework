@@ -77,6 +77,8 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 
 	private Function<String, RedirectView> redirectViewProvider = url -> new RedirectView(url);
 
+	private String requestContextAttribute;
+
 
 	/**
 	 * Set the view class to instantiate through {@link #createUrlBasedView(String)}.
@@ -162,12 +164,30 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 		this.redirectViewProvider = redirectViewProvider;
 	}
 
+	/**
+	 * Set the name of the RequestContext attribute for all views.
+	 * @param requestContextAttribute name of the RequestContext attribute
+	 * @see AbstractView#setRequestContextAttribute
+	 */
+	public void setRequestContextAttribute(String requestContextAttribute) {
+		this.requestContextAttribute = requestContextAttribute;
+	}
+
+	/**
+	 * Return the name of the RequestContext attribute for all views, if any.
+	 */
+	protected String getRequestContextAttribute() {
+		return this.requestContextAttribute;
+	}
+
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (getViewClass() == null) {
 			throw new IllegalArgumentException("Property 'viewClass' is required");
 		}
 	}
+
 
 	@Override
 	public Mono<View> resolveViewName(String viewName, Locale locale) {
@@ -221,6 +241,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 	protected AbstractUrlBasedView createUrlBasedView(String viewName) {
 		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(getViewClass());
 		view.setSupportedMediaTypes(getSupportedMediaTypes());
+		view.setRequestContextAttribute(getRequestContextAttribute());
 		view.setDefaultCharset(getDefaultCharset());
 		view.setUrl(getPrefix() + viewName + getSuffix());
 		return view;

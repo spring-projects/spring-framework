@@ -49,6 +49,8 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 
 	private Charset defaultCharset = StandardCharsets.UTF_8;
 
+	private String requestContextAttribute;
+
 	private ApplicationContext applicationContext;
 
 
@@ -95,6 +97,21 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 		return this.defaultCharset;
 	}
 
+	/**
+	 * Set the name of the RequestContext attribute for this view.
+	 * Default is none.
+	 */
+	public void setRequestContextAttribute(String requestContextAttribute) {
+		this.requestContextAttribute = requestContextAttribute;
+	}
+
+	/**
+	 * Return the name of the RequestContext attribute, if any.
+	 */
+	public String getRequestContextAttribute() {
+		return this.requestContextAttribute;
+	}
+
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
@@ -126,6 +143,12 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 		}
 
 		Map<String, Object> mergedModel = getModelAttributes(model, exchange);
+
+		// Expose RequestContext?
+		if (this.requestContextAttribute != null) {
+			mergedModel.put(this.requestContextAttribute, createRequestContext(exchange, mergedModel));
+		}
+
 		return renderInternal(mergedModel, contentType, exchange);
 	}
 
@@ -143,6 +166,20 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 		}
 
 		return attributes;
+	}
+
+	/**
+	 * Create a RequestContext to expose under the specified attribute name.
+	 * <p>The default implementation creates a standard RequestContext instance for the
+	 * given request and model. Can be overridden in subclasses for custom instances.
+	 * @param exchange current exchange
+	 * @param model combined output Map (never {@code null}),
+	 * with dynamic values taking precedence over static attributes
+	 * @return the RequestContext instance
+	 * @see #setRequestContextAttribute
+	 */
+	protected RequestContext createRequestContext(ServerWebExchange exchange, Map<String, Object> model) {
+		return new RequestContext(exchange, model, this.applicationContext);
 	}
 
 	/**
