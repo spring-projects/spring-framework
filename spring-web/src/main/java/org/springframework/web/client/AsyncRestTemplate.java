@@ -221,11 +221,11 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 
 	@Override
 	public <T> ListenableFuture<ResponseEntity<T>> getForEntity(String url, Class<T> responseType,
-			Map<String, ?> urlVariables) throws RestClientException {
+			Map<String, ?> uriVariables) throws RestClientException {
 
 		AsyncRequestCallback requestCallback = acceptHeaderRequestCallback(responseType);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
-		return execute(url, HttpMethod.GET, requestCallback, responseExtractor, urlVariables);
+		return execute(url, HttpMethod.GET, requestCallback, responseExtractor, uriVariables);
 	}
 
 	@Override
@@ -348,13 +348,13 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 	// DELETE
 
 	@Override
-	public ListenableFuture<?> delete(String url, Object... urlVariables) throws RestClientException {
-		return execute(url, HttpMethod.DELETE, null, null, urlVariables);
+	public ListenableFuture<?> delete(String url, Object... uriVariables) throws RestClientException {
+		return execute(url, HttpMethod.DELETE, null, null, uriVariables);
 	}
 
 	@Override
-	public ListenableFuture<?> delete(String url, Map<String, ?> urlVariables) throws RestClientException {
-		return execute(url, HttpMethod.DELETE, null, null, urlVariables);
+	public ListenableFuture<?> delete(String url, Map<String, ?> uriVariables) throws RestClientException {
+		return execute(url, HttpMethod.DELETE, null, null, uriVariables);
 	}
 
 	@Override
@@ -459,17 +459,17 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 
 	@Override
 	public <T> ListenableFuture<T> execute(String url, HttpMethod method, AsyncRequestCallback requestCallback,
-			ResponseExtractor<T> responseExtractor, Object... urlVariables) throws RestClientException {
+			ResponseExtractor<T> responseExtractor, Object... uriVariables) throws RestClientException {
 
-		URI expanded = getUriTemplateHandler().expand(url, urlVariables);
+		URI expanded = getUriTemplateHandler().expand(url, uriVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
 
 	@Override
 	public <T> ListenableFuture<T> execute(String url, HttpMethod method, AsyncRequestCallback requestCallback,
-			ResponseExtractor<T> responseExtractor, Map<String, ?> urlVariables) throws RestClientException {
+			ResponseExtractor<T> responseExtractor, Map<String, ?> uriVariables) throws RestClientException {
 
-		URI expanded = getUriTemplateHandler().expand(url, urlVariables);
+		URI expanded = getUriTemplateHandler().expand(url, uriVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
 

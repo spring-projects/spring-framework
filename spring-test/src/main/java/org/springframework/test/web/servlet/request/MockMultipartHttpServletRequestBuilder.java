@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,10 +46,10 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 	 * see {@link #with(RequestPostProcessor)} and the
 	 * {@link RequestPostProcessor} extension point.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
-	 * @param urlVariables zero or more URL variables
+	 * @param uriVariables zero or more URI variables
 	 */
-	MockMultipartHttpServletRequestBuilder(String urlTemplate, Object... urlVariables) {
-		super(HttpMethod.POST, urlTemplate, urlVariables);
+	MockMultipartHttpServletRequestBuilder(String urlTemplate, Object... uriVariables) {
+		super(HttpMethod.POST, urlTemplate, uriVariables);
 		super.contentType(MediaType.MULTIPART_FORM_DATA);
 	}
 
