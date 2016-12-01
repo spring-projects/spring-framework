@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * Abstract base class for resolving method arguments from a named value.
  * Request parameters, request headers, and path variables are examples of named
  * values. Each may have a name, a required flag, and a default value.
+ *
  * <p>Subclasses define how to do the following:
  * <ul>
  * <li>Obtain named value information for a method parameter
@@ -45,9 +46,11 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * <li>Handle missing argument values when argument values are required
  * <li>Optionally handle a resolved value
  * </ul>
+ *
  * <p>A default value string can contain ${...} placeholders and Spring Expression
  * Language #{...} expressions. For this to work a
  * {@link ConfigurableBeanFactory} must be supplied to the class constructor.
+ *
  * <p>A {@link WebDataBinder} is created to apply type conversion to the resolved
  * argument value if it doesn't match the method parameter type.
  *
@@ -61,7 +64,8 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 	private final BeanExpressionContext expressionContext;
 
-	private Map<MethodParameter, NamedValueInfo> namedValueInfoCache = new ConcurrentHashMap<MethodParameter, NamedValueInfo>(256);
+	private final Map<MethodParameter, NamedValueInfo> namedValueInfoCache =
+			new ConcurrentHashMap<MethodParameter, NamedValueInfo>(256);
 
 
 	public AbstractNamedValueMethodArgumentResolver() {
@@ -76,7 +80,8 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 */
 	public AbstractNamedValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
 		this.configurableBeanFactory = beanFactory;
-		this.expressionContext = (beanFactory != null ? new BeanExpressionContext(beanFactory, new RequestScope()) : null);
+		this.expressionContext =
+				(beanFactory != null ? new BeanExpressionContext(beanFactory, new RequestScope()) : null);
 	}
 
 
@@ -151,7 +156,8 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		if (info.name.length() == 0) {
 			name = parameter.getParameterName();
 			if (name == null) {
-				throw new IllegalArgumentException("Name for argument type [" + parameter.getParameterType().getName() +
+				throw new IllegalArgumentException(
+						"Name for argument type [" + parameter.getParameterType().getName() +
 						"] not available, and parameter name information not found in class file either.");
 			}
 		}
@@ -160,18 +166,19 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	}
 
 	/**
-	 * Resolves the given parameter type and value name into an argument value.
+	 * Resolve the given parameter type and value name into an argument value.
 	 * @param name the name of the value being resolved
 	 * @param parameter the method parameter to resolve to an argument value
 	 * @param request the current request
-	 * @return the resolved argument. May be {@code null}
+	 * @return the resolved argument (may be {@code null})
 	 * @throws Exception in case of errors
 	 */
 	protected abstract Object resolveName(String name, MethodParameter parameter, NativeWebRequest request)
 			throws Exception;
 
 	/**
-	 * Resolves the given default value into an argument value.
+	 * Resolve the given annotation-specified value,
+	 * potentially containing placeholders and expressions.
 	 */
 	private Object resolveDefaultValue(String defaultValue) {
 		if (this.configurableBeanFactory == null) {
@@ -215,7 +222,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * @param arg the resolved argument value
 	 * @param name the argument name
 	 * @param parameter the argument parameter type
-	 * @param mavContainer the {@link ModelAndViewContainer}, which may be {@code null}
+	 * @param mavContainer the {@link ModelAndViewContainer} (may be {@code null})
 	 * @param webRequest the current request
 	 */
 	protected void handleResolvedValue(Object arg, String name, MethodParameter parameter,
