@@ -66,9 +66,9 @@ import org.springframework.web.util.UriUtils;
  *
  * <p>Application tests will typically access this builder through the static factory
  * methods in {@link MockMvcRequestBuilders}.
- * <p>Although this class cannot be extended, additional ways to initialize
- * the {@code MockHttpServletRequest} can be plugged in via
- * {@link #with(RequestPostProcessor)}.
+ *
+ * <p>Although this class cannot be extended, additional ways to initialize the
+ * {@code MockHttpServletRequest} can be plugged in via {@link #with(RequestPostProcessor)}.
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
@@ -158,6 +158,7 @@ public class MockHttpServletRequestBuilder
 		this.method = httpMethod;
 		this.url = url;
 	}
+
 
 	/**
 	 * Add a request parameter to the {@link MockHttpServletRequest}.

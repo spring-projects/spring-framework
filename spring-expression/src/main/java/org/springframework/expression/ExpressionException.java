@@ -88,7 +88,7 @@ public class ExpressionException extends RuntimeException {
 	 * @param cause the underlying cause of this exception
 	 */
 	public ExpressionException(int position, String message, Throwable cause) {
-		super(message,cause);
+		super(message, cause);
 		this.position = position;
 	}
 
