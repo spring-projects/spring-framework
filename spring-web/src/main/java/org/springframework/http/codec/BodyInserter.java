@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
  *
  * @author Arjen Poutsma
  * @since 5.0
+ * @see BodyInserters
  */
 public interface BodyInserter<T, M extends ReactiveHttpOutputMessage> {
 

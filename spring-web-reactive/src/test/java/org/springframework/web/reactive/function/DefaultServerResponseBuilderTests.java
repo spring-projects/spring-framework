@@ -78,12 +78,6 @@ public class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
-	public void statusInt() throws Exception {
-		ServerResponse<Void> result = ServerResponse.status(201).build();
-		assertEquals(HttpStatus.CREATED, result.statusCode());
-	}
-
-	@Test
 	public void ok() throws Exception {
 		ServerResponse<Void> result = ServerResponse.ok().build();
 		assertEquals(HttpStatus.OK, result.statusCode());
@@ -186,7 +180,7 @@ public class DefaultServerResponseBuilderTests {
 
 	@Test
 	public void build() throws Exception {
-		ServerResponse<Void> result = ServerResponse.status(201).header("MyKey", "MyValue").build();
+		ServerResponse<Void> result = ServerResponse.status(HttpStatus.CREATED).header("MyKey", "MyValue").build();
 
 		ServerWebExchange exchange = mock(ServerWebExchange.class);
 		MockServerHttpResponse response = new MockServerHttpResponse();

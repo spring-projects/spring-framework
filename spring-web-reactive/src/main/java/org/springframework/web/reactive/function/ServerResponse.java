@@ -82,7 +82,7 @@ public interface ServerResponse<T> {
 	 */
 	static BodyBuilder from(ServerResponse<?> other) {
 		Assert.notNull(other, "'other' must not be null");
-		DefaultServerResponseBuilder builder = new DefaultServerResponseBuilder(other.statusCode().value());
+		DefaultServerResponseBuilder builder = new DefaultServerResponseBuilder(other.statusCode());
 		return builder.headers(other.headers());
 	}
 
@@ -94,16 +94,6 @@ public interface ServerResponse<T> {
 	 */
 	static BodyBuilder status(HttpStatus status) {
 		Assert.notNull(status, "HttpStatus must not be null");
-		return new DefaultServerResponseBuilder(status.value());
-	}
-
-	/**
-	 * Create a builder with the given status.
-	 *
-	 * @param status the response status
-	 * @return the created builder
-	 */
-	static BodyBuilder status(int status) {
 		return new DefaultServerResponseBuilder(status);
 	}
 
@@ -210,6 +200,16 @@ public interface ServerResponse<T> {
 		 * @see HttpHeaders#setAllow(Set)
 		 */
 		B allow(HttpMethod... allowedMethods);
+
+		/**
+		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified
+		 * by the {@code Allow} header.
+		 *
+		 * @param allowedMethods the allowed methods
+		 * @return this builder
+		 * @see HttpHeaders#setAllow(Set)
+		 */
+		B allow(Set<HttpMethod> allowedMethods);
 
 		/**
 		 * Set the entity tag of the body, as specified by the {@code ETag} header.

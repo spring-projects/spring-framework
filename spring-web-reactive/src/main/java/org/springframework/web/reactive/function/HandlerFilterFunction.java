@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.function;
 
+import java.util.function.Function;
+
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.support.ServerRequestWrapper;
 
@@ -69,5 +71,32 @@ public interface HandlerFilterFunction<T, R> {
 		Assert.notNull(handler, "'handler' must not be null");
 		return request -> this.filter(request, handler);
 	}
+
+	/**
+	 * Adapt the given request processor function to a filter function that only operates on the
+	 * {@code ClientRequest}.
+	 * @param requestProcessor the request processor
+	 * @return the filter adaptation of the request processor
+	 */
+	static HandlerFilterFunction<?, ?> ofRequestProcessor(Function<ServerRequest,
+				ServerRequest> requestProcessor) {
+
+		Assert.notNull(requestProcessor, "'requestProcessor' must not be null");
+		return (request, next) -> next.handle(requestProcessor.apply(request));
+	}
+
+	/**
+	 * Adapt the given response processor function to a filter function that only operates on the
+	 * {@code ClientResponse}.
+	 * @param responseProcessor the response processor
+	 * @return the filter adaptation of the request processor
+	 */
+	static <T, R> HandlerFilterFunction<T, R> ofResponseProcessor(Function<ServerResponse<T>,
+			ServerResponse<R>> responseProcessor) {
+
+		Assert.notNull(responseProcessor, "'responseProcessor' must not be null");
+		return (request, next) -> responseProcessor.apply(next.handle(request));
+	}
+
 
 }

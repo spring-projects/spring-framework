@@ -18,9 +18,11 @@ package org.springframework.web.reactive.function;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.Resource;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerMapping;
@@ -67,7 +69,7 @@ public abstract class RouterFunctions {
 	 * @param predicate the predicate to test
 	 * @param handlerFunction the handler function to route to
 	 * @param <T> the type of the handler function
-	 * @return a routing function that routes to {@code handlerFunction} if
+	 * @return a router function that routes to {@code handlerFunction} if
 	 * {@code predicate} evaluates to {@code true}
 	 * @see RequestPredicates
 	 */
@@ -79,11 +81,11 @@ public abstract class RouterFunctions {
 	}
 
 	/**
-	 * Route to the given routing function if the given request predicate applies.
+	 * Route to the given router function if the given request predicate applies.
 	 * @param predicate the predicate to test
-	 * @param routerFunction the routing function to route to
+	 * @param routerFunction the router function to route to
 	 * @param <T> the type of the handler function
-	 * @return a routing function that routes to {@code routerFunction} if
+	 * @return a router function that routes to {@code routerFunction} if
 	 * {@code predicate} evaluates to {@code true}
 	 * @see RequestPredicates
 	 */
@@ -103,7 +105,40 @@ public abstract class RouterFunctions {
 	}
 
 	/**
-	 * Convert the given {@linkplain RouterFunction routing function} into a {@link HttpHandler}.
+	 * Route requests that match the given pattern to resources relative to the given root location.
+	 * For instance
+	 * <pre class="code">
+	 * Resource location = new FileSystemResource("public-resources/");
+	 * RoutingFunction&lt;Resource&gt; resources = RouterFunctions.resources("/resources/**", location);
+     * </pre>
+	 * @param pattern the pattern to match
+	 * @param location the location directory relative to which resources should be resolved
+	 * @return a router function that routes to resources
+	 */
+	public static RouterFunction<Resource> resources(String pattern, Resource location) {
+		Assert.hasLength(pattern, "'pattern' must not be empty");
+		Assert.notNull(location, "'location' must not be null");
+
+		return resources(new PathResourceLookupFunction(pattern, location));
+	}
+
+	/**
+	 * Route to resources using the provided lookup function. If the lookup function provides a
+	 * {@link Resource} for the given request, it will be it will be exposed using a
+	 * {@link HandlerFunction} that handles GET, HEAD, and OPTIONS requests.
+	 * @param lookupFunction the function to provide a {@link Resource} given the {@link ServerRequest}
+	 * @return a router function that routes to resources
+	 */
+	public static RouterFunction<Resource> resources(Function<ServerRequest, Optional<Resource>> lookupFunction) {
+		Assert.notNull(lookupFunction, "'lookupFunction' must not be null");
+
+		// TODO: make lookupFunction return Mono<Resource> once SPR-14870 is resolved
+		return request -> lookupFunction.apply(request).map(ResourceHandlerFunction::new);
+
+	}
+
+	/**
+	 * Convert the given {@linkplain RouterFunction router function} into a {@link HttpHandler}.
 	 * This conversion uses {@linkplain HandlerStrategies#builder() default strategies}.
 	 * <p>The returned {@code HttpHandler} can be adapted to run in
 	 * <ul>
@@ -116,15 +151,15 @@ public abstract class RouterFunctions {
 	 * <li>Undertow using the
 	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}.</li>
 	 * </ul>
-	 * @param routerFunction the routing function to convert
-	 * @return an http handler that handles HTTP request using the given routing function
+	 * @param routerFunction the router function to convert
+	 * @return an http handler that handles HTTP request using the given router function
 	 */
 	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction) {
 		return toHttpHandler(routerFunction, HandlerStrategies.withDefaults());
 	}
 
 	/**
-	 * Convert the given {@linkplain RouterFunction routing function} into a {@link HttpHandler},
+	 * Convert the given {@linkplain RouterFunction router function} into a {@link HttpHandler},
 	 * using the given strategies.
 	 * <p>The returned {@code HttpHandler} can be adapted to run in
 	 * <ul>
@@ -137,9 +172,9 @@ public abstract class RouterFunctions {
 	 * <li>Undertow using the
 	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}.</li>
 	 * </ul>
-	 * @param routerFunction the routing function to convert
+	 * @param routerFunction the router function to convert
 	 * @param strategies the strategies to use
-	 * @return an http handler that handles HTTP request using the given routing function
+	 * @return an http handler that handles HTTP request using the given router function
 	 */
 	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction, HandlerStrategies strategies) {
 		Assert.notNull(routerFunction, "RouterFunction must not be null");
@@ -159,8 +194,8 @@ public abstract class RouterFunctions {
 	 * This conversion uses {@linkplain HandlerStrategies#builder() default strategies}.
 	 * <p>The returned {@code HandlerMapping} can be run in a
 	 * {@link org.springframework.web.reactive.DispatcherHandler}.
-	 * @param routerFunction the routing function to convert
-	 * @return an handler mapping that maps HTTP request to a handler using the given routing function
+	 * @param routerFunction the router function to convert
+	 * @return an handler mapping that maps HTTP request to a handler using the given router function
 	 * @see org.springframework.web.reactive.function.support.HandlerFunctionAdapter
 	 * @see org.springframework.web.reactive.function.support.ServerResponseResultHandler
 	 */
@@ -169,13 +204,13 @@ public abstract class RouterFunctions {
 	}
 
 	/**
-	 * Convert the given {@linkplain RouterFunction routing function} into a {@link HandlerMapping},
+	 * Convert the given {@linkplain RouterFunction router function} into a {@link HandlerMapping},
 	 * using the given strategies.
 	 * <p>The returned {@code HandlerMapping} can be run in a
 	 * {@link org.springframework.web.reactive.DispatcherHandler}.
-	 * @param routerFunction the routing function to convert
+	 * @param routerFunction the router function to convert
 	 * @param strategies the strategies to use
-	 * @return an handler mapping that maps HTTP request to a handler using the given routing function
+	 * @return an handler mapping that maps HTTP request to a handler using the given router function
 	 * @see org.springframework.web.reactive.function.support.HandlerFunctionAdapter
 	 * @see org.springframework.web.reactive.function.support.ServerResponseResultHandler
 	 */

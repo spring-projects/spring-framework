@@ -49,6 +49,16 @@ public abstract class BodyInserters {
 			ResolvableType.forClass(ServerSentEvent.class);
 
 	/**
+	 * Return an empty {@code BodyInserter} that writes nothing.
+	 * @return an empty {@code BodyInserter}
+	 */
+	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> empty() {
+		return BodyInserter.of(
+				(response, context) -> response.setComplete(),
+				() -> null);
+	}
+
+	/**
 	 * Return a {@code BodyInserter} that writes the given single object.
 	 * @param body the body of the response
 	 * @return a {@code BodyInserter} that writes a single object

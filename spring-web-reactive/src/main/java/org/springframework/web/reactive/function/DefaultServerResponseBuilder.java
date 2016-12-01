@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -55,12 +56,12 @@ import org.springframework.web.server.ServerWebExchange;
  */
 class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
-	private final int statusCode;
+	private final HttpStatus statusCode;
 
 	private final HttpHeaders headers = new HttpHeaders();
 
 
-	public DefaultServerResponseBuilder(int statusCode) {
+	public DefaultServerResponseBuilder(HttpStatus statusCode) {
 		this.statusCode = statusCode;
 	}
 
@@ -84,6 +85,12 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	@Override
 	public ServerResponse.BodyBuilder allow(HttpMethod... allowedMethods) {
 		this.headers.setAllow(new LinkedHashSet<>(Arrays.asList(allowedMethods)));
+		return this;
+	}
+
+	@Override
+	public ServerResponse.BodyBuilder allow(Set<HttpMethod> allowedMethods) {
+		this.headers.setAllow(allowedMethods);
 		return this;
 	}
 
@@ -144,9 +151,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	@Override
 	public ServerResponse<Void> build() {
-		return body(BodyInserter.of(
-				(response, context) -> response.setComplete(),
-				() -> null));
+		return body(BodyInserters.empty());
 	}
 
 	@Override
@@ -194,20 +199,20 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 
-	private static abstract class AbstractServerResponse<T> implements ServerResponse<T> {
+	static abstract class AbstractServerResponse<T> implements ServerResponse<T> {
 
-		private final int statusCode;
+		private final HttpStatus statusCode;
 
 		private final HttpHeaders headers;
 
-		protected AbstractServerResponse(int statusCode, HttpHeaders headers) {
+		protected AbstractServerResponse(HttpStatus statusCode, HttpHeaders headers) {
 			this.statusCode = statusCode;
 			this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
 		}
 
 		@Override
 		public final HttpStatus statusCode() {
-			return HttpStatus.valueOf(this.statusCode);
+			return this.statusCode;
 		}
 
 		@Override
@@ -216,7 +221,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 
 		protected void writeStatusAndHeaders(ServerHttpResponse response) {
-			response.setStatusCode(HttpStatus.valueOf(this.statusCode));
+			response.setStatusCode(this.statusCode);
 			HttpHeaders responseHeaders = response.getHeaders();
 
 			if (!this.headers.isEmpty()) {
@@ -233,7 +238,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		private final BodyInserter<T, ? super ServerHttpResponse> inserter;
 
-		public BodyInserterServerResponse(int statusCode, HttpHeaders headers,
+		public BodyInserterServerResponse(HttpStatus statusCode, HttpHeaders headers,
 				BodyInserter<T, ? super ServerHttpResponse> inserter) {
 
 			super(statusCode, headers);
@@ -267,7 +272,9 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		private final Rendering rendering;
 
-		public RenderingServerResponse(int statusCode, HttpHeaders headers, String name, Map<String, Object> model) {
+		public RenderingServerResponse(HttpStatus statusCode, HttpHeaders headers, String name,
+				Map<String, Object> model) {
+
 			super(statusCode, headers);
 			this.name = name;
 			this.model = model;
