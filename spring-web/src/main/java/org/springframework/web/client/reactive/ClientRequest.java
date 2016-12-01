@@ -115,83 +115,83 @@ public interface ClientRequest<T> {
 	 * Create a builder with the given method and url template.
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param urlTemplate the URL template
-	 * @param urlVariables optional variable to expand the template
+	 * @param uriVariables optional variables to expand the template
 	 * @return the created builder
 	 */
-	static BodyBuilder method(HttpMethod method, String urlTemplate, Object... urlVariables) {
+	static BodyBuilder method(HttpMethod method, String urlTemplate, Object... uriVariables) {
 		UriTemplateHandler templateHandler = new DefaultUriTemplateHandler();
-		URI url = templateHandler.expand(urlTemplate, urlVariables);
+		URI url = templateHandler.expand(urlTemplate, uriVariables);
 		return new DefaultClientRequestBuilder(method, url);
 	}
 
 	/**
 	 * Create an HTTP GET builder with the given url template.
 	 * @param urlTemplate the URL template
-	 * @param urlVariables optional variable to expand the template
+	 * @param uriVariables optional variables to expand the template
 	 * @return the created builder
 	 */
-	static HeadersBuilder<?> GET(String urlTemplate, Object... urlVariables) {
-		return method(HttpMethod.GET, urlTemplate, urlVariables);
+	static HeadersBuilder<?> GET(String urlTemplate, Object... uriVariables) {
+		return method(HttpMethod.GET, urlTemplate, uriVariables);
 	}
 
 	/**
 	 * Create an HTTP HEAD builder with the given url template.
 	 * @param urlTemplate the URL template
-	 * @param urlVariables optional variable to expand the template
+	 * @param uriVariables optional variables to expand the template
 	 * @return the created builder
 	 */
-	static HeadersBuilder<?> HEAD(String urlTemplate, Object... urlVariables) {
-		return method(HttpMethod.HEAD, urlTemplate, urlVariables);
+	static HeadersBuilder<?> HEAD(String urlTemplate, Object... uriVariables) {
+		return method(HttpMethod.HEAD, urlTemplate, uriVariables);
 	}
 
 	/**
 	 * Create an HTTP POST builder with the given url template.
 	 * @param urlTemplate the URL template
-	 * @param urlVariables optional variable to expand the template
+	 * @param uriVariables optional variables to expand the template
 	 * @return the created builder
 	 */
-	static BodyBuilder POST(String urlTemplate, Object... urlVariables) {
-		return method(HttpMethod.POST, urlTemplate, urlVariables);
+	static BodyBuilder POST(String urlTemplate, Object... uriVariables) {
+		return method(HttpMethod.POST, urlTemplate, uriVariables);
 	}
 
 	/**
 	 * Create an HTTP PUT builder with the given url template.
 	 * @param urlTemplate the URL template
-	 * @param urlVariables optional variable to expand the template
+	 * @param uriVariables optional variables to expand the template
 	 * @return the created builder
 	 */
-	static BodyBuilder PUT(String urlTemplate, Object... urlVariables) {
-		return method(HttpMethod.PUT, urlTemplate, urlVariables);
+	static BodyBuilder PUT(String urlTemplate, Object... uriVariables) {
+		return method(HttpMethod.PUT, urlTemplate, uriVariables);
 	}
 
 	/**
 	 * Create an HTTP PATCH builder with the given url template.
 	 * @param urlTemplate the URL template
-	 * @param urlVariables optional variable to expand the template
+	 * @param uriVariables optional variables to expand the template
 	 * @return the created builder
 	 */
-	static BodyBuilder PATCH(String urlTemplate, Object... urlVariables) {
-		return method(HttpMethod.PATCH, urlTemplate, urlVariables);
+	static BodyBuilder PATCH(String urlTemplate, Object... uriVariables) {
+		return method(HttpMethod.PATCH, urlTemplate, uriVariables);
 	}
 
 	/**
 	 * Create an HTTP DELETE builder with the given url template.
 	 * @param urlTemplate the URL template
-	 * @param urlVariables optional variable to expand the template
+	 * @param uriVariables optional variables to expand the template
 	 * @return the created builder
 	 */
-	static HeadersBuilder<?> DELETE(String urlTemplate, Object... urlVariables) {
-		return method(HttpMethod.DELETE, urlTemplate, urlVariables);
+	static HeadersBuilder<?> DELETE(String urlTemplate, Object... uriVariables) {
+		return method(HttpMethod.DELETE, urlTemplate, uriVariables);
 	}
 
 	/**
 	 * Creates an HTTP OPTIONS builder with the given url template.
 	 * @param urlTemplate the URL template
-	 * @param urlVariables optional variable to expand the template
+	 * @param uriVariables optional variables to expand the template
 	 * @return the created builder
 	 */
-	static HeadersBuilder<?> OPTIONS(String urlTemplate, Object... urlVariables) {
-		return method(HttpMethod.OPTIONS, urlTemplate, urlVariables);
+	static HeadersBuilder<?> OPTIONS(String urlTemplate, Object... uriVariables) {
+		return method(HttpMethod.OPTIONS, urlTemplate, uriVariables);
 	}
 
 
