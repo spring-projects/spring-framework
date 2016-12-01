@@ -33,6 +33,7 @@ import org.springframework.format.AnnotationFormatterFactory;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.lang.UsesJava8;
 
 /**
  * Formats fields annotated with the {@link DateTimeFormat} annotation using the
@@ -42,6 +43,7 @@ import org.springframework.format.annotation.DateTimeFormat;
  * @since 4.0
  * @see org.springframework.format.annotation.DateTimeFormat
  */
+@UsesJava8
 public class Jsr310DateTimeFormatAnnotationFormatterFactory extends EmbeddedValueResolutionSupport
 		implements AnnotationFormatterFactory<DateTimeFormat> {
 
