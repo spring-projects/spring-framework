@@ -17,12 +17,10 @@
 package org.springframework.messaging.tcp.reactor;
 
 import java.util.Collection;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.ImmediateEventExecutor;
@@ -32,6 +30,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 import reactor.ipc.netty.ChannelFutureMono;
 import reactor.ipc.netty.NettyContext;
 import reactor.ipc.netty.NettyInbound;
@@ -63,7 +62,9 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 
 	private final TcpClient tcpClient;
 
-	private final MessageHandlerConfiguration<P> configuration;
+	private final ReactorNettyCodec<P> codec;
+
+	private final Scheduler scheduler = Schedulers.newParallel("ReactorNettyTcpClient");
 
 	private final ChannelGroup group;
 
@@ -76,14 +77,14 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	 * the {@code reactor.tcp.ioThreadCount} System property. The network I/O
 	 * threads will be shared amongst the active clients.
 	 * <p>Also see the constructor accepting a {@link Consumer} of
-	 * {@link ClientOptions} for advanced tuning.
+	 * {@link ClientOptions} for additional options.
 	 *
 	 * @param host the host to connect to
 	 * @param port the port to connect to
-	 * @param configuration the client configuration
+	 * @param codec for encoding and decoding messages
 	 */
-	public ReactorNettyTcpClient(String host, int port, MessageHandlerConfiguration<P> configuration) {
-		this(opts -> opts.connect(host, port), configuration);
+	public ReactorNettyTcpClient(String host, int port, ReactorNettyCodec<P> codec) {
+		this(opts -> opts.connect(host, port), codec);
 	}
 
 	/**
@@ -93,15 +94,15 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	 * configuration.
 	 *
 	 * @param tcpOptions callback for configuring shared {@link ClientOptions}
-	 * @param configuration the client configuration
+	 * @param codec for encoding and decoding messages
 	 */
 	public ReactorNettyTcpClient(Consumer<? super ClientOptions> tcpOptions,
-			MessageHandlerConfiguration<P> configuration) {
+			ReactorNettyCodec<P> codec) {
 
-		Assert.notNull(configuration, "'configuration' is required");
+		Assert.notNull(codec, "'codec' is required");
 		this.group = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
 		this.tcpClient = TcpClient.create(opts -> tcpOptions.accept(opts.channelGroup(group)));
-		this.configuration = configuration;
+		this.codec = codec;
 	}
 
 
@@ -116,7 +117,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 		}
 
 		Mono<Void> connectMono = this.tcpClient
-				.newHandler(new MessageHandler<>(handler, this.configuration))
+				.newHandler(new MessageHandler<>(handler, this.codec, this.scheduler))
 				.doOnError(handler::afterConnectFailure)
 				.then();
 
@@ -136,7 +137,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 
 		MonoProcessor<Void> connectMono = MonoProcessor.create();
 
-		this.tcpClient.newHandler(new MessageHandler<>(handler, this.configuration))
+		this.tcpClient.newHandler(new MessageHandler<>(handler, this.codec, this.scheduler))
 				.doOnNext(item -> {
 					if (!connectMono.isTerminated()) {
 						connectMono.onComplete();
@@ -163,75 +164,48 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 
 		this.stopping = true;
 
-		Mono<Void> completion = ChannelFutureMono.from(this.group.close());
-
-		if (this.configuration.scheduler != null) {
-			completion = completion.doAfterTerminate((x, e) -> configuration.scheduler.shutdown());
-		}
+		Mono<Void> completion = ChannelFutureMono.from(this.group.close())
+				.doAfterTerminate((x, e) -> this.scheduler.shutdown());
 
 		return new MonoToListenableFutureAdapter<>(completion);
 	}
 
-
-	/**
-	 * A configuration holder
-	 */
-	public static final class MessageHandlerConfiguration<P> {
-
-		private final Function<? super ByteBuf, ? extends Collection<Message<P>>> decoder;
-
-		private final BiConsumer<? super ByteBuf, ? super Message<P>> encoder;
-
-		private final int backlog;
-
-		private final Scheduler scheduler;
-
-
-		public MessageHandlerConfiguration(
-				Function<? super ByteBuf, ? extends Collection<Message<P>>> decoder,
-				BiConsumer<? super ByteBuf, ? super Message<P>> encoder,
-				int backlog, Scheduler scheduler) {
-
-			this.decoder = decoder;
-			this.encoder = encoder;
-			this.backlog = backlog > 0 ? backlog : QueueSupplier.SMALL_BUFFER_SIZE;
-			this.scheduler = scheduler;
-		}
-	}
 
 	private static final class MessageHandler<P>
 			implements BiFunction<NettyInbound, NettyOutbound, Publisher<Void>> {
 
 		private final TcpConnectionHandler<P> connectionHandler;
 
-		private final MessageHandlerConfiguration<P> configuration;
+		private final ReactorNettyCodec<P> codec;
+
+		private final Scheduler scheduler;
 
 
-		MessageHandler(TcpConnectionHandler<P> handler, MessageHandlerConfiguration<P> config) {
+		MessageHandler(TcpConnectionHandler<P> handler, ReactorNettyCodec<P> codec,
+				Scheduler scheduler) {
+
 			this.connectionHandler = handler;
-			this.configuration = config;
+			this.codec = codec;
+			this.scheduler = scheduler;
 		}
 
 		@Override
 		public Publisher<Void> apply(NettyInbound in, NettyOutbound out) {
-			Flux<Collection<Message<P>>> inbound = in.receive().map(configuration.decoder);
+			Flux<Collection<Message<P>>> inbound = in.receive().map(this.codec.getDecoder());
 
 			DirectProcessor<Void> closeProcessor = DirectProcessor.create();
-			TcpConnection<P> tcpConnection =
-					new ReactorNettyTcpConnection<>(in, out, configuration.encoder, closeProcessor);
 
-			if (configuration.scheduler != null) {
-				configuration.scheduler.schedule(() -> connectionHandler.afterConnected(tcpConnection));
-				inbound = inbound.publishOn(configuration.scheduler, configuration.backlog);
-			}
-			else {
-				connectionHandler.afterConnected(tcpConnection);
-			}
+			TcpConnection<P> tcpConnection =
+					new ReactorNettyTcpConnection<>(in, out, this.codec.getEncoder(), closeProcessor);
+
+			this.scheduler.schedule(() -> connectionHandler.afterConnected(tcpConnection));
+			inbound = inbound.publishOn(this.scheduler, QueueSupplier.SMALL_BUFFER_SIZE);
 
 			inbound.flatMapIterable(Function.identity())
-			       .subscribe(connectionHandler::handleMessage,
-					       connectionHandler::handleFailure,
-					       connectionHandler::afterConnectionClosed);
+					.subscribe(
+							connectionHandler::handleMessage,
+							connectionHandler::handleFailure,
+							connectionHandler::afterConnectionClosed);
 
 			return closeProcessor;
 		}

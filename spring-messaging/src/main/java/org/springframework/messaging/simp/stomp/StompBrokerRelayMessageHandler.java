@@ -40,6 +40,7 @@ import org.springframework.messaging.tcp.FixedIntervalReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.messaging.tcp.TcpConnectionHandler;
 import org.springframework.messaging.tcp.TcpOperations;
+import org.springframework.messaging.tcp.reactor.ReactorNettyCodec;
 import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -387,8 +388,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		if (this.tcpClient == null) {
 			StompDecoder decoder = new StompDecoder();
 			decoder.setHeaderInitializer(getHeaderInitializer());
-
-			this.tcpClient = ReactorNettyTcpStompClient.create(this.relayHost, this.relayPort, decoder);
+			ReactorNettyCodec<byte[]> codec = new StompReactorNettyCodec(decoder);
+			this.tcpClient = new ReactorNettyTcpClient<>(this.relayHost, this.relayPort, codec);
 		}
 
 		if (logger.isInfoEnabled()) {

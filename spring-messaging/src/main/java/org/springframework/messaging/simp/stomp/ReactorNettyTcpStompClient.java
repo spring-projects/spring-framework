@@ -16,16 +16,9 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-
-import io.netty.buffer.ByteBuf;
-import reactor.core.scheduler.Schedulers;
-
-import org.springframework.messaging.Message;
 import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
+import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
@@ -38,6 +31,7 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 
 	private final TcpOperations<byte[]> tcpClient;
 
+
 	/**
 	 * Create an instance with host "127.0.0.1" and port 61613.
 	 */
@@ -45,14 +39,13 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 		this("127.0.0.1", 61613);
 	}
 
-
 	/**
 	 * Create an instance with the given host and port.
 	 * @param host the host
 	 * @param port the port
 	 */
-	public ReactorNettyTcpStompClient(final String host, final int port) {
-		this.tcpClient = create(host, port, new StompDecoder());
+	public ReactorNettyTcpStompClient(String host, int port) {
+		this.tcpClient = new ReactorNettyTcpClient<byte[]>(host, port, new StompReactorNettyCodec());
 	}
 
 	/**
@@ -60,6 +53,7 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 	 * @param tcpClient the client to use
 	 */
 	public ReactorNettyTcpStompClient(TcpOperations<byte[]> tcpClient) {
+		Assert.notNull(tcpClient, "'tcpClient' is required");
 		this.tcpClient = tcpClient;
 	}
 
@@ -94,49 +88,4 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 		this.tcpClient.shutdown();
 	}
 
-	/**
-	 * Create a new {@link ReactorNettyTcpClient} with Stomp specific configuration for
-	 * encoding, decoding and hand-off.
-	 *
-	 * @param host target host
-	 * @param port target port
-	 * @param decoder {@link StompDecoder} to use
-	 * @return a new {@link TcpOperations}
-	 */
-	protected static TcpOperations<byte[]> create(String host, int port, StompDecoder decoder) {
-		return new ReactorNettyTcpClient<>(host, port,
-				new ReactorNettyTcpClient.MessageHandlerConfiguration<>(
-						new DecodingFunction(decoder),
-						new EncodingConsumer(new StompEncoder()),
-						128,
-						Schedulers.newParallel("StompClient")));
-	}
-
-	private static final class EncodingConsumer implements BiConsumer<ByteBuf, Message<byte[]>> {
-
-		private final StompEncoder encoder;
-
-		public EncodingConsumer(StompEncoder encoder) {
-			this.encoder = encoder;
-		}
-
-		@Override
-		public void accept(ByteBuf byteBuf, Message<byte[]> message) {
-			byteBuf.writeBytes(this.encoder.encode(message));
-		}
-	}
-
-	private static final class DecodingFunction implements Function<ByteBuf, List<Message<byte[]>>> {
-
-		private final StompDecoder decoder;
-
-		public DecodingFunction(StompDecoder decoder) {
-			this.decoder = decoder;
-		}
-
-		@Override
-		public List<Message<byte[]>> apply(ByteBuf buffer) {
-			return this.decoder.decode(buffer.nioBuffer());
-		}
-	}
 }
