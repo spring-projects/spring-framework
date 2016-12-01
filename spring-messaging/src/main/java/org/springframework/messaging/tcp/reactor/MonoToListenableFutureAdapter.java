@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,21 @@
 
 package org.springframework.messaging.tcp.reactor;
 
-import reactor.rx.Promise;
+import reactor.core.publisher.Mono;
 
 /**
- * A Promise-to-ListenableFutureAdapter where the source and the target from
+ * A Mono-to-ListenableFuture adapter where the source and the target from
  * the Promise and the ListenableFuture respectively are of the same type.
  *
  * @author Rossen Stoyanchev
- * @since 4.0
+ * @author Stephane Maldini
+ * @since 5.0
  */
-class PassThroughPromiseToListenableFutureAdapter<T> extends AbstractPromiseToListenableFutureAdapter<T, T> {
+class MonoToListenableFutureAdapter<T> extends AbstractMonoToListenableFutureAdapter<T, T> {
 
 
-	public PassThroughPromiseToListenableFutureAdapter(Promise<T> promise) {
-		super(promise);
+	public MonoToListenableFutureAdapter(Mono<T> mono) {
+		super(mono);
 	}
 
 
