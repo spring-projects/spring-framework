@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,8 +206,8 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ConfigurableBeanFactory)) {
-			throw new IllegalStateException("ScriptFactoryPostProcessor doesn't work with a BeanFactory "
-					+ "which does not implement ConfigurableBeanFactory: " + beanFactory.getClass());
+			throw new IllegalStateException("ScriptFactoryPostProcessor doesn't work with " +
+					"non-ConfigurableBeanFactory: " + beanFactory.getClass());
 		}
 		this.beanFactory = (ConfigurableBeanFactory) beanFactory;
 

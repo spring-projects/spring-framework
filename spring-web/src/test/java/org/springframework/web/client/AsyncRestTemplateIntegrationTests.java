@@ -119,14 +119,12 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 		assertNull("Invalid content", entity.getBody());
 	}
 
-
 	@Test
 	public void getNoContentTypeHeader() throws Exception {
 		Future<ResponseEntity<byte[]>> futureEntity = template.getForEntity(baseUrl + "/get/nocontenttype", byte[].class);
 		ResponseEntity<byte[]> responseEntity = futureEntity.get();
 		assertArrayEquals("Invalid content", helloWorld.getBytes("UTF-8"), responseEntity.getBody());
 	}
-
 
 	@Test
 	public void getNoContent() throws Exception {
