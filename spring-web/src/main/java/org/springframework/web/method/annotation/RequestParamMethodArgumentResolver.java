@@ -181,7 +181,9 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	@Override
-	protected void handleMissingValue(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
+	protected void handleMissingValue(String name, MethodParameter parameter, NativeWebRequest request)
+			throws Exception {
+
 		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
 		if (MultipartResolutionDelegate.isMultipartArgument(parameter)) {
 			if (!MultipartResolutionDelegate.isMultipartRequest(servletRequest)) {
@@ -192,7 +194,8 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			}
 		}
 		else {
-			throw new MissingServletRequestParameterException(name, parameter.getNestedParameterType().getSimpleName());
+			throw new MissingServletRequestParameterException(name,
+					parameter.getNestedParameterType().getSimpleName());
 		}
 	}
 

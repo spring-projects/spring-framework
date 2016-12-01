@@ -39,6 +39,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * Abstract base class for resolving method arguments from a named value.
  * Request parameters, request headers, and path variables are examples of named
  * values. Each may have a name, a required flag, and a default value.
+ *
  * <p>Subclasses define how to do the following:
  * <ul>
  * <li>Obtain named value information for a method parameter
@@ -46,9 +47,11 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * <li>Handle missing argument values when argument values are required
  * <li>Optionally handle a resolved value
  * </ul>
+ *
  * <p>A default value string can contain ${...} placeholders and Spring Expression
  * Language #{...} expressions. For this to work a
  * {@link ConfigurableBeanFactory} must be supplied to the class constructor.
+ *
  * <p>A {@link WebDataBinder} is created to apply type conversion to the resolved
  * argument value if it doesn't match the method parameter type.
  *
@@ -63,7 +66,8 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 	private final BeanExpressionContext expressionContext;
 
-	private final Map<MethodParameter, NamedValueInfo> namedValueInfoCache = new ConcurrentHashMap<MethodParameter, NamedValueInfo>(256);
+	private final Map<MethodParameter, NamedValueInfo> namedValueInfoCache =
+			new ConcurrentHashMap<MethodParameter, NamedValueInfo>(256);
 
 
 	public AbstractNamedValueMethodArgumentResolver() {
@@ -78,7 +82,8 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 */
 	public AbstractNamedValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
 		this.configurableBeanFactory = beanFactory;
-		this.expressionContext = (beanFactory != null ? new BeanExpressionContext(beanFactory, new RequestScope()) : null);
+		this.expressionContext =
+				(beanFactory != null ? new BeanExpressionContext(beanFactory, new RequestScope()) : null);
 	}
 
 
@@ -204,7 +209,9 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * @param request the current request
 	 * @since 4.3
 	 */
-	protected void handleMissingValue(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
+	protected void handleMissingValue(String name, MethodParameter parameter, NativeWebRequest request)
+			throws Exception {
+
 		handleMissingValue(name, parameter);
 	}
 
@@ -241,7 +248,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * @param arg the resolved argument value
 	 * @param name the argument name
 	 * @param parameter the argument parameter type
-	 * @param mavContainer the {@link ModelAndViewContainer}, which may be {@code null}
+	 * @param mavContainer the {@link ModelAndViewContainer} (may be {@code null})
 	 * @param webRequest the current request
 	 */
 	protected void handleResolvedValue(Object arg, String name, MethodParameter parameter,
