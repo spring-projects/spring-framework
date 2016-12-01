@@ -226,6 +226,7 @@ public class FormattingConversionService extends GenericConversionService
 
 		public AnnotationPrinterConverter(Class<? extends Annotation> annotationType,
 				AnnotationFormatterFactory<?> annotationFormatterFactory, Class<?> fieldType) {
+
 			this.annotationType = annotationType;
 			this.annotationFormatterFactory = annotationFormatterFactory;
 			this.fieldType = fieldType;
@@ -279,6 +280,7 @@ public class FormattingConversionService extends GenericConversionService
 
 		public AnnotationParserConverter(Class<? extends Annotation> annotationType,
 				AnnotationFormatterFactory<?> annotationFormatterFactory, Class<?> fieldType) {
+
 			this.annotationType = annotationType;
 			this.annotationFormatterFactory = annotationFormatterFactory;
 			this.fieldType = fieldType;
@@ -345,16 +347,13 @@ public class FormattingConversionService extends GenericConversionService
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof AnnotationConverterKey)) {
-				return false;
-			}
 			AnnotationConverterKey otherKey = (AnnotationConverterKey) other;
-			return (this.annotation.equals(otherKey.annotation) && this.fieldType.equals(otherKey.fieldType));
+			return (this.fieldType == otherKey.fieldType && this.annotation.equals(otherKey.annotation));
 		}
 
 		@Override
 		public int hashCode() {
-			return (this.annotation.hashCode() + 29 * this.fieldType.hashCode());
+			return (this.fieldType.hashCode() * 29 + this.annotation.hashCode());
 		}
 	}
 

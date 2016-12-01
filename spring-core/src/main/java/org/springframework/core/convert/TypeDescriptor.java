@@ -80,7 +80,6 @@ public class TypeDescriptor implements Serializable {
 	 * @param methodParameter the method parameter
 	 */
 	public TypeDescriptor(MethodParameter methodParameter) {
-		Assert.notNull(methodParameter, "MethodParameter must not be null");
 		this.resolvableType = ResolvableType.forMethodParameter(methodParameter);
 		this.type = this.resolvableType.resolve(methodParameter.getParameterType());
 		this.annotations = nullSafeAnnotations(methodParameter.getParameterIndex() == -1 ?
@@ -93,7 +92,6 @@ public class TypeDescriptor implements Serializable {
 	 * @param field the field
 	 */
 	public TypeDescriptor(Field field) {
-		Assert.notNull(field, "Field must not be null");
 		this.resolvableType = ResolvableType.forField(field);
 		this.type = this.resolvableType.resolve(field.getType());
 		this.annotations = nullSafeAnnotations(field.getAnnotations());
@@ -451,31 +449,31 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (!(obj instanceof TypeDescriptor)) {
+		if (!(other instanceof TypeDescriptor)) {
 			return false;
 		}
-		TypeDescriptor other = (TypeDescriptor) obj;
-		if (!ObjectUtils.nullSafeEquals(this.type, other.type)) {
+		TypeDescriptor otherDesc = (TypeDescriptor) other;
+		if (getType() != otherDesc.getType()) {
 			return false;
 		}
-		if (getAnnotations().length != other.getAnnotations().length) {
+		if (getAnnotations().length != otherDesc.getAnnotations().length) {
 			return false;
 		}
 		for (Annotation ann : getAnnotations()) {
-			if (!other.hasAnnotation(ann.annotationType())) {
+			if (!otherDesc.hasAnnotation(ann.annotationType())) {
 				return false;
 			}
 		}
 		if (isCollection() || isArray()) {
-			return ObjectUtils.nullSafeEquals(getElementTypeDescriptor(), other.getElementTypeDescriptor());
+			return ObjectUtils.nullSafeEquals(getElementTypeDescriptor(), otherDesc.getElementTypeDescriptor());
 		}
 		else if (isMap()) {
-			return ObjectUtils.nullSafeEquals(getMapKeyTypeDescriptor(), other.getMapKeyTypeDescriptor()) &&
-					ObjectUtils.nullSafeEquals(getMapValueTypeDescriptor(), other.getMapValueTypeDescriptor());
+			return (ObjectUtils.nullSafeEquals(getMapKeyTypeDescriptor(), otherDesc.getMapKeyTypeDescriptor()) &&
+					ObjectUtils.nullSafeEquals(getMapValueTypeDescriptor(), otherDesc.getMapValueTypeDescriptor()));
 		}
 		else {
 			return true;
