@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,12 @@ import java.text.MessageFormat;
  * expect particular code numbers rather than particular text, enabling the message text
  * to more easily be modified and the tests to run successfully in different locales.
  *
- * <p>When a message is formatted, it will have this kind of form
+ * <p>When a message is formatted, it will have this kind of form, capturing the prefix
+ * and the error kind, including the position if it is known:
  *
  * <pre class="code">
- * EL1004E: (pos 34): Type cannot be found 'String'
+ * EL1004E:(pos 34): Type cannot be found 'String'
  * </pre>
- *
- * The prefix captures the code and the error kind, whilst the position is included
- * if it is known.
  *
  * @author Andy Clement
  * @since 3.0
@@ -175,7 +173,7 @@ public enum SpelMessage {
 			"Cannot find terminating \" for string"),
 
 	NON_TERMINATING_QUOTED_STRING(Kind.ERROR, 1046,
-			"Cannot find terminating ' for string"),
+			"Cannot find terminating '' for string"),
 
 	MISSING_LEADING_ZERO_FOR_NUMBER(Kind.ERROR, 1047,
 			"A real number must be prefixed by zero, it cannot start with just ''.''"),
@@ -190,7 +188,7 @@ public enum SpelMessage {
 			"The arguments '(...)' for the constructor call are missing"),
 
 	RUN_OUT_OF_ARGUMENTS(Kind.ERROR, 1051,
-			"Unexpected ran out of arguments"),
+			"Unexpectedly ran out of arguments"),
 
 	UNABLE_TO_GROW_COLLECTION(Kind.ERROR, 1052,
 			"Unable to grow collection"),
@@ -262,7 +260,7 @@ public enum SpelMessage {
 	private final String message;
 
 
-	private SpelMessage(Kind kind, int code, String message) {
+	SpelMessage(Kind kind, int code, String message) {
 		this.kind = kind;
 		this.code = code;
 		this.message = message;
@@ -293,6 +291,6 @@ public enum SpelMessage {
 	}
 
 
-	public static enum Kind { INFO, WARNING, ERROR }
+	public enum Kind { INFO, WARNING, ERROR }
 
 }

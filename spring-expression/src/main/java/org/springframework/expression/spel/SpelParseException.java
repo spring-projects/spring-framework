@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel;
 
 import org.springframework.expression.ParseException;
@@ -34,21 +35,21 @@ public class SpelParseException extends ParseException {
 
 
 	public SpelParseException(String expressionString, int position, SpelMessage message, Object... inserts) {
-		super(expressionString, position, message.formatMessage(position,inserts));
+		super(expressionString, position, message.formatMessage(position, inserts));
 		this.position = position;
 		this.message = message;
 		this.inserts = inserts;
 	}
 
 	public SpelParseException(int position, SpelMessage message, Object... inserts) {
-		super(position, message.formatMessage(position,inserts));
+		super(position, message.formatMessage(position, inserts));
 		this.position = position;
 		this.message = message;
 		this.inserts = inserts;
 	}
 
 	public SpelParseException(int position, Throwable cause, SpelMessage message, Object... inserts) {
-		super(position, message.formatMessage(position,inserts), cause);
+		super(position, message.formatMessage(position, inserts), cause);
 		this.position = position;
 		this.message = message;
 		this.inserts = inserts;
@@ -56,26 +57,22 @@ public class SpelParseException extends ParseException {
 
 
 	/**
-	 * @return a formatted message with inserts applied
-	 */
-	@Override
-	public String getMessage() {
-		return (this.message != null ? this.message.formatMessage(this.position, this.inserts)
-				: super.getMessage());
-	}
-
-	/**
-	 * @return the message code
+	 * Return the message code.
 	 */
 	public SpelMessage getMessageCode() {
 		return this.message;
 	}
 
 	/**
-	 * @return the message inserts
+	 * Return the message inserts.
 	 */
 	public Object[] getInserts() {
 		return this.inserts;
+	}
+
+	@Override
+	public String getMessage() {
+		return getSimpleMessage();
 	}
 
 }

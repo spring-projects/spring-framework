@@ -80,10 +80,10 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	private static final Set<String> disconnectedClientExceptions;
 
 	static {
-		Set<String> set = new HashSet<String>(2);
-		set.add("ClientAbortException"); // Tomcat
-		set.add("EOFException"); // Tomcat
-		set.add("EofException"); // Jetty
+		Set<String> set = new HashSet<String>(4);
+		set.add("ClientAbortException");  // Tomcat
+		set.add("EOFException");  // Tomcat
+		set.add("EofException");  // Jetty
 		// java.io.IOException "Broken pipe" on WildFly, Glassfish (already covered)
 		disconnectedClientExceptions = Collections.unmodifiableSet(set);
 	}
@@ -208,7 +208,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 						writeFrameInternal(SockJsFrame.closeFrame(status.getCode(), status.getReason()));
 					}
 					catch (Throwable ex) {
-						logger.debug("Failure while send SockJS close frame", ex);
+						logger.debug("Failure while sending SockJS close frame", ex);
 					}
 				}
 				updateLastActiveTime();

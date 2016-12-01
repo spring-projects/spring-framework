@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package org.springframework.expression;
  * Super class for exceptions that can occur whilst processing expressions.
  *
  * @author Andy Clement
+ * @author Phil Webb
  * @since 3.0
  */
 @SuppressWarnings("serial")
@@ -27,8 +28,25 @@ public class ExpressionException extends RuntimeException {
 
 	protected String expressionString;
 
-	protected int position;  // -1 if not known - but should be known in all reasonable cases
+	protected int position;  // -1 if not known; should be known in all reasonable cases
 
+
+	/**
+	 * Construct a new expression exception.
+	 * @param message a descriptive message
+	 */
+	public ExpressionException(String message) {
+		super(message);
+	}
+
+	/**
+	 * Construct a new expression exception.
+	 * @param message a descriptive message
+	 * @param cause the underlying cause of this exception
+	 */
+	public ExpressionException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
 	/**
 	 * Construct a new expression exception.
@@ -37,8 +55,8 @@ public class ExpressionException extends RuntimeException {
 	 */
 	public ExpressionException(String expressionString, String message) {
 		super(message);
-		this.position = -1;
 		this.expressionString = expressionString;
+		this.position = -1;
 	}
 
 	/**
@@ -49,8 +67,8 @@ public class ExpressionException extends RuntimeException {
 	 */
 	public ExpressionException(String expressionString, int position, String message) {
 		super(message);
-		this.position = position;
 		this.expressionString = expressionString;
+		this.position = position;
 	}
 
 	/**
@@ -70,25 +88,8 @@ public class ExpressionException extends RuntimeException {
 	 * @param cause the underlying cause of this exception
 	 */
 	public ExpressionException(int position, String message, Throwable cause) {
-		super(message,cause);
+		super(message, cause);
 		this.position = position;
-	}
-
-	/**
-	 * Construct a new expression exception.
-	 * @param message a descriptive message
-	 */
-	public ExpressionException(String message) {
-		super(message);
-	}
-
-	/**
-	 * Construct a new expression exception.
-	 * @param message a descriptive message
-	 * @param cause the underlying cause of this exception
-	 */
-	public ExpressionException(String message, Throwable cause) {
-		super(message,cause);
 	}
 
 
@@ -107,8 +108,9 @@ public class ExpressionException extends RuntimeException {
 	}
 
 	/**
-	 * Return the exception message. Since Spring 4.0 this method returns the
-	 * same result as {@link #toDetailedString()}.
+	 * Return the exception message.
+	 * As of Spring 4.0, this method returns the same result as {@link #toDetailedString()}.
+	 * @see #getSimpleMessage()
 	 * @see java.lang.Throwable#getMessage()
 	 */
 	@Override
@@ -142,6 +144,7 @@ public class ExpressionException extends RuntimeException {
 	/**
 	 * Return the exception simple message without including the expression
 	 * that caused the failure.
+	 * @since 4.0
 	 */
 	public String getSimpleMessage() {
 		return super.getMessage();

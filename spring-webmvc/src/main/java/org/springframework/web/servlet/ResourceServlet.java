@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,8 +175,8 @@ public class ResourceServlet extends HttpServletBean {
 	}
 
 	/**
-	 * Return a PathMatcher to use for matching the "allowedResources" URL pattern.
-	 * Default is AntPathMatcher.
+	 * Return a {@link PathMatcher} to use for matching the "allowedResources" URL pattern.
+	 * <p>The default is {@link AntPathMatcher}.
 	 * @see #setAllowedResources
 	 * @see org.springframework.util.AntPathMatcher
 	 */
@@ -191,9 +191,9 @@ public class ResourceServlet extends HttpServletBean {
 	 */
 	@Override
 	protected final void doGet(HttpServletRequest request, HttpServletResponse response)
-		throws ServletException, IOException {
+			throws ServletException, IOException {
 
-		// determine URL of resource to include
+		// Determine URL of resource to include...
 		String resourceUrl = determineResourceUrl(request);
 
 		if (resourceUrl != null) {
@@ -220,7 +220,7 @@ public class ResourceServlet extends HttpServletBean {
 			}
 		}
 
-		// no resource URL specified -> try to include default URL.
+		// No resource URL specified -> try to include default URL.
 		else if (!includeDefaultUrl(request, response)) {
 			throw new ServletException("No target resource URL found for request");
 		}
@@ -265,23 +265,23 @@ public class ResourceServlet extends HttpServletBean {
 	 * @throws IOException if thrown by the RequestDispatcher
 	 */
 	private void doInclude(HttpServletRequest request, HttpServletResponse response, String resourceUrl)
-		throws ServletException, IOException {
+			throws ServletException, IOException {
 
 		if (this.contentType != null) {
 			response.setContentType(this.contentType);
 		}
-		String[] resourceUrls =
-			StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS);
-		for (int i = 0; i < resourceUrls.length; i++) {
-			// check whether URL matches allowed resources
-			if (this.allowedResources != null && !this.pathMatcher.match(this.allowedResources, resourceUrls[i])) {
-				throw new ServletException("Resource [" + resourceUrls[i] +
+
+		String[] resourceUrls = StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS);
+		for (String url : resourceUrls) {
+			// Check whether URL matches allowed resources
+			if (this.allowedResources != null && !this.pathMatcher.match(this.allowedResources, url)) {
+				throw new ServletException("Resource [" + url +
 						"] does not match allowed pattern [" + this.allowedResources + "]");
 			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("Including resource [" + resourceUrls[i] + "]");
+				logger.debug("Including resource [" + url + "]");
 			}
-			RequestDispatcher rd = request.getRequestDispatcher(resourceUrls[i]);
+			RequestDispatcher rd = request.getRequestDispatcher(url);
 			rd.include(request, response);
 		}
 	}
@@ -309,8 +309,8 @@ public class ResourceServlet extends HttpServletBean {
 			if (resourceUrl != null) {
 				String[] resourceUrls = StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS);
 				long latestTimestamp = -1;
-				for (int i = 0; i < resourceUrls.length; i++) {
-					long timestamp = getFileTimestamp(resourceUrls[i]);
+				for (String url : resourceUrls) {
+					long timestamp = getFileTimestamp(url);
 					if (timestamp > latestTimestamp) {
 						latestTimestamp = timestamp;
 					}
@@ -336,8 +336,10 @@ public class ResourceServlet extends HttpServletBean {
 			return lastModifiedTime;
 		}
 		catch (IOException ex) {
-			logger.warn("Couldn't retrieve last-modified timestamp of [" + resource +
-					"] - using ResourceServlet startup time");
+			if (logger.isWarnEnabled()) {
+				logger.warn("Couldn't retrieve last-modified timestamp of " + resource +
+						" - using ResourceServlet startup time");
+			}
 			return -1;
 		}
 	}
