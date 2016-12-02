@@ -27,7 +27,7 @@ import org.springframework.http.server.ServerHttpResponse;
  * or a {@code ResponseEntity} controller method but before the body is written
  * with an {@code HttpMessageConverter}.
  *
- * <p>Implementations may be may be registered directly with
+ * <p>Implementations may be registered directly with
  * {@code RequestMappingHandlerAdapter} and {@code ExceptionHandlerExceptionResolver}
  * or more likely annotated with {@code @ControllerAdvice} in which case they
  * will be auto-detected by both.
