@@ -267,7 +267,7 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 		RequestMappingHandlerAdapter adapter = createRequestMappingHandlerAdapter();
 		adapter.setMessageReaders(getMessageReaders());
 		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
-		adapter.setReactiveAdapterRegistry(getReactiveAdapterRegistry());
+		adapter.setReactiveAdapterRegistry(webReactiveAdapterRegistry());
 
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 		addArgumentResolvers(resolvers);
@@ -372,9 +372,10 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 	}
 
 	/**
-	 * Override to plug in a custom {@link ReactiveAdapterRegistry}.
+	 * Return a {@link ReactiveAdapterRegistry} to adapting reactive types.
 	 */
-	protected ReactiveAdapterRegistry getReactiveAdapterRegistry() {
+	@Bean
+	public ReactiveAdapterRegistry webReactiveAdapterRegistry() {
 		return new ReactiveAdapterRegistry();
 	}
 
@@ -433,13 +434,13 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 	@Bean
 	public ResponseEntityResultHandler responseEntityResultHandler() {
 		return new ResponseEntityResultHandler(
-				getMessageWriters(), webReactiveContentTypeResolver(), getReactiveAdapterRegistry());
+				getMessageWriters(), webReactiveContentTypeResolver(), webReactiveAdapterRegistry());
 	}
 
 	@Bean
 	public ResponseBodyResultHandler responseBodyResultHandler() {
 		return new ResponseBodyResultHandler(
-				getMessageWriters(), webReactiveContentTypeResolver(), getReactiveAdapterRegistry());
+				getMessageWriters(), webReactiveContentTypeResolver(), webReactiveAdapterRegistry());
 	}
 
 	/**
@@ -505,7 +506,7 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 		configureViewResolvers(registry);
 		List<ViewResolver> resolvers = registry.getViewResolvers();
 		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(
-				resolvers, webReactiveContentTypeResolver(), getReactiveAdapterRegistry());
+				resolvers, webReactiveContentTypeResolver(), webReactiveAdapterRegistry());
 		handler.setDefaultViews(registry.getDefaultViews());
 		handler.setOrder(registry.getOrder());
 		return handler;
