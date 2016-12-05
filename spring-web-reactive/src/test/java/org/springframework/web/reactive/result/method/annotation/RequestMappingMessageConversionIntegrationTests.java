@@ -52,6 +52,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.server.reactive.ZeroCopyIntegrationTests;
+import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -62,6 +63,7 @@ import org.springframework.web.reactive.config.EnableWebReactive;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 import static org.springframework.http.MediaType.APPLICATION_XML;
 
 /**
@@ -175,6 +177,10 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 
 	@Test
 	public void resource() throws Exception {
+
+		// SPR-14975
+		assumeFalse(server instanceof ReactorHttpServer);
+
 		ResponseEntity<byte[]> response = performGet("/resource", new HttpHeaders(), byte[].class);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());

@@ -19,6 +19,7 @@ package org.springframework.http.server.reactive;
 import java.io.File;
 import java.net.URI;
 
+import org.junit.Assume;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
@@ -34,6 +35,7 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -50,9 +52,12 @@ public class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTest
 
 	@Test
 	public void zeroCopy() throws Exception {
+
+		// SPR-14975
+		assumeFalse(server instanceof ReactorHttpServer);
+
 		// Zero-copy only does not support servlet
-		assumeTrue(server instanceof ReactorHttpServer ||
-				server instanceof UndertowHttpServer);
+		assumeTrue(server instanceof ReactorHttpServer || server instanceof UndertowHttpServer);
 
 		RestTemplate restTemplate = new RestTemplate();
 
