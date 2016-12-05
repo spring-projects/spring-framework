@@ -31,7 +31,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
-import reactor.ipc.netty.ChannelFutureMono;
+import reactor.ipc.netty.FutureMono;
 import reactor.ipc.netty.NettyContext;
 import reactor.ipc.netty.NettyInbound;
 import reactor.ipc.netty.NettyOutbound;
@@ -164,7 +164,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 
 		this.stopping = true;
 
-		Mono<Void> completion = ChannelFutureMono.from(this.group.close())
+		Mono<Void> completion = FutureMono.from(this.group.close())
 				.doAfterTerminate((x, e) -> this.scheduler.shutdown());
 
 		return new MonoToListenableFutureAdapter<>(completion);
