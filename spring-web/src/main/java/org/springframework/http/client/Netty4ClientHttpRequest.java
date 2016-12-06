@@ -48,6 +48,7 @@ import org.springframework.util.concurrent.SettableListenableFuture;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 4.1.2
  */
 class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements ClientHttpRequest {
@@ -130,10 +131,15 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 		io.netty.handler.codec.http.HttpMethod nettyMethod =
 				io.netty.handler.codec.http.HttpMethod.valueOf(this.method.name());
 
+		String authority = this.uri.getRawAuthority();
+		String path = this.uri.toString().substring(this.uri.toString().indexOf(authority) + authority.length());
 		FullHttpRequest nettyRequest = new DefaultFullHttpRequest(
-				HttpVersion.HTTP_1_1, nettyMethod, this.uri.toString(), this.body.buffer());
+				HttpVersion.HTTP_1_1, nettyMethod, path, this.body.buffer());
 
 		nettyRequest.headers().set(HttpHeaders.HOST, this.uri.getHost());
+		if (this.body.buffer().readableBytes() > 0) {
+			nettyRequest.headers().set(HttpHeaders.CONTENT_LENGTH, this.body.buffer().readableBytes());
+		}
 		nettyRequest.headers().set(HttpHeaders.CONNECTION, "close");
 
 		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {

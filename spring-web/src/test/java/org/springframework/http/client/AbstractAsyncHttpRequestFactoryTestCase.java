@@ -39,7 +39,7 @@ import org.springframework.util.StreamUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
-public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJettyServerTestCase {
+public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractMockWebServerTestCase {
 
 	protected AsyncClientHttpRequestFactory factory;
 
