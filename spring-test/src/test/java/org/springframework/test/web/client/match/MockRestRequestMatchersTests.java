@@ -23,6 +23,9 @@ import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.client.MockClientHttpRequest;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.hamcrest.Matchers.*;
 
@@ -127,6 +130,70 @@ public class MockRestRequestMatchersTests {
 		this.request.getHeaders().put("foo", Arrays.asList("bar"));
 
 		MockRestRequestMatchers.header("foo", "bar", "baz").match(this.request);
+	}
+
+	@Test
+	public void queryParameter() throws Exception {
+		this.request.setURI(createUriWithQueryParameters("foo", "bar", "baz"));
+
+		MockRestRequestMatchers.queryParameter("foo", "bar", "baz").match(this.request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void queryParameterMissing() throws Exception {
+		this.request.setURI(UriComponentsBuilder
+				.fromUriString("http://foo.com")
+				.path("/bar")
+				.build().encode()
+				.toUri());
+
+		MockRestRequestMatchers.queryParameter("foo", "bar").match(this.request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void queryParameterMissingValue() throws Exception {
+		this.request.setURI(createUriWithQueryParameters("foo", "bar", "baz"));
+
+		MockRestRequestMatchers.queryParameter("foo", "bad").match(this.request);
+	}
+
+	@Test
+	public void queryParameterContains() throws Exception {
+		this.request.setURI(createUriWithQueryParameters("foo", "bar", "baz"));
+
+		MockRestRequestMatchers.queryParameter("foo", containsString("ba")).match(this.request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void queryParameterContainsWithMissingValue() throws Exception {
+		this.request.setURI(createUriWithQueryParameters("foo", "bar", "baz"));
+
+		MockRestRequestMatchers.queryParameter("foo", containsString("bx")).match(this.request);
+	}
+
+	@Test
+	public void queryParameters() throws Exception {
+		this.request.setURI(createUriWithQueryParameters("foo", "bar", "baz"));
+
+		MockRestRequestMatchers.queryParameter("foo", "bar", "baz").match(this.request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void queryParametersWithMissingValue() throws Exception {
+		this.request.setURI(createUriWithQueryParameters("foo", "bar"));
+
+		MockRestRequestMatchers.queryParameter("foo", "bar", "baz").match(this.request);
+	}
+
+
+	private URI createUriWithQueryParameters(String key, String ... values) {
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+		params.put(key, Arrays.asList(values));
+		return UriComponentsBuilder
+				.fromUriString("http://foo.com")
+				.path("/bar")
+				.queryParams(params)
+				.build().encode().toUri();
 	}
 
 }

@@ -17,6 +17,7 @@
 package org.springframework.test.web.client.match;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,9 @@ import org.springframework.test.util.AssertionErrors;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.RequestMatcher;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
@@ -153,9 +157,63 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	private static void assertHeaderValueCount(final String name, HttpHeaders headers, int expectedCount) {
-		List<String> actualValues = headers.get(name);
-		AssertionErrors.assertTrue("Expected header <" + name + ">", actualValues != null);
-		AssertionErrors.assertTrue("Expected header <" + name + "> to have at least <" + expectedCount +
+		assertMultiValueMapCount("header", name, headers, expectedCount);
+	}
+
+
+	/**
+	 * Assert request query parameter values with the given Hamcrest matcher.
+	 */
+	@SafeVarargs
+	public static RequestMatcher queryParameter(final String name, final Matcher<? super String>... matchers) {
+		return new RequestMatcher() {
+			@Override
+			public void match(ClientHttpRequest request) {
+				MultiValueMap<String, String> queryParameters = getQueryParameters(request.getURI().toString());
+				assertQueryParameterValueCount(name, queryParameters, matchers.length);
+				for (int i = 0 ; i < matchers.length; i++) {
+					assertThat("Request query parameter", queryParameters.get(name).get(i), matchers[i]);
+				}
+			}
+		};
+	}
+
+	/**
+	 * Assert request query parameter values.
+	 */
+	public static RequestMatcher queryParameter(final String name, final String... expectedValues) {
+		return new RequestMatcher() {
+			@Override
+			public void match(ClientHttpRequest request) {
+				MultiValueMap<String, String> queryParameters = getQueryParameters(request.getURI().toString());
+				assertQueryParameterValueCount(name, queryParameters, expectedValues.length);
+				for (int i = 0 ; i < expectedValues.length; i++) {
+					assertEquals("Request query parameter + [" + name + "]",
+							expectedValues[i], queryParameters.get(name).get(i));
+				}
+			}
+		};
+	}
+
+	private static MultiValueMap<String, String> getQueryParameters(String uri) {
+		try {
+			String decodeUri = UriUtils.decode(uri, "UTF-8");
+			MultiValueMap<String, String> queryParameters = UriComponentsBuilder.fromUriString(decodeUri)
+					.build().getQueryParams();
+			return queryParameters;
+		} catch (UnsupportedEncodingException e) {
+			throw new AssertionError("Failed to decode URI: " + uri, e);
+		}
+	}
+
+	private static void assertQueryParameterValueCount(final String name, MultiValueMap<String, String> queryParameters, int expectedCount) {
+		assertMultiValueMapCount("query parameter", name, queryParameters, expectedCount);
+	}
+
+	private static void assertMultiValueMapCount(String type, final String name, MultiValueMap<String, String> multiValueMap, int expectedCount) {
+		List<String> actualValues = multiValueMap.get(name);
+		AssertionErrors.assertTrue("Expected " + type + " <" + name + ">", actualValues != null);
+		AssertionErrors.assertTrue("Expected " + type + " <" + name + "> to have at least <" + expectedCount +
 				"> values but found " + actualValues, expectedCount <= actualValues.size());
 	}
 
