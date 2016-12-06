@@ -20,9 +20,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -77,12 +79,28 @@ class DefaultClientResponse implements ClientResponse {
 
 	@Override
 	public <T> Mono<T> bodyToMono(Class<? extends T> elementClass) {
-		return body(BodyExtractors.toMono(elementClass));
+		return bodyToPublisher(BodyExtractors.toMono(elementClass), Mono::error);
 	}
 
 	@Override
 	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
-		return body(BodyExtractors.toFlux(elementClass));
+		return bodyToPublisher(BodyExtractors.toFlux(elementClass), Flux::error);
+	}
+
+	private <T extends Publisher<?>> T bodyToPublisher(
+			BodyExtractor<T, ? super ClientHttpResponse> extractor,
+			Function<WebClientException, T> errorFunction) {
+
+		HttpStatus status = statusCode();
+		if (status.is4xxClientError() || status.is5xxServerError()) {
+			WebClientException ex = new WebClientException(
+					"ClientResponse has erroneous status code: " + status.value() +
+							" " + status.getReasonPhrase());
+			return errorFunction.apply(ex);
+		}
+		else {
+			return body(extractor);
+		}
 	}
 
 	private class DefaultHeaders implements Headers {

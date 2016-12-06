@@ -18,13 +18,9 @@ package org.springframework.web.client.reactive;
 
 import java.util.logging.Level;
 
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.client.reactive.ClientHttpConnector;
-import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.http.codec.BodyExtractor;
-import org.springframework.http.codec.BodyExtractors;
 import org.springframework.util.Assert;
 
 /**
@@ -80,33 +76,6 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 			this.clientHttpConnector = clientHttpConnector;
 			this.strategies = strategies;
 			this.filter = filter;
-		}
-
-		@Override
-		public <T> Mono<T> retrieveMono(ClientRequest<?> request, Class<? extends T> elementClass) {
-			Assert.notNull(request, "'request' must not be null");
-			Assert.notNull(elementClass, "'elementClass' must not be null");
-
-			return retrieve(request, BodyExtractors.toMono(elementClass))
-					.then(m -> m);
-		}
-
-		@Override
-		public <T> Flux<T> retrieveFlux(ClientRequest<?> request, Class<? extends T> elementClass) {
-			Assert.notNull(request, "'request' must not be null");
-			Assert.notNull(elementClass, "'elementClass' must not be null");
-
-			return retrieve(request, BodyExtractors.toFlux(elementClass))
-					.flatMap(flux -> flux);
-		}
-
-		private <T> Mono<T> retrieve(ClientRequest<?> request,
-				BodyExtractor<T, ? super ClientHttpResponse> extractor) {
-
-			ExchangeFilterFunction errorFilter = ExchangeFilterFunctions.clientOrServerError();
-
-			return errorFilter.filter(request, this::exchange)
-					.map(clientResponse -> clientResponse.body(extractor));
 		}
 
 		@Override

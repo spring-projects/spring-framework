@@ -32,7 +32,8 @@ import org.springframework.http.codec.BodyExtractor;
 /**
  * Represents an HTTP response, as returned by the {@link WebClient}.
  * Access to headers and body is offered by {@link Headers} and
- * {@link #body(BodyExtractor)} respectively.
+ * {@link #body(BodyExtractor)}, {@link #bodyToMono(Class)}, {@link #bodyToFlux(Class)}
+ * respectively.
  *
  * @author Brian Clozel
  * @author Arjen Poutsma
@@ -51,7 +52,9 @@ public interface ClientResponse {
 	Headers headers();
 
 	/**
-	 * Extract the body with the given {@code BodyExtractor}.
+	 * Extract the body with the given {@code BodyExtractor}. Unlike {@link #bodyToMono(Class)} and
+	 * {@link #bodyToFlux(Class)}; this method does not check for a 4xx or 5xx  status code before
+	 * extracting the body.
 	 * @param extractor the {@code BodyExtractor} that reads from the response
 	 * @param <T> the type of the body returned
 	 * @return the extracted body
@@ -59,18 +62,22 @@ public interface ClientResponse {
 	<T> T body(BodyExtractor<T, ? super ClientHttpResponse> extractor);
 
 	/**
-	 * Extract the body to a {@code Mono}.
+	 * Extract the body to a {@code Mono}. If the response has status code 4xx or 5xx, the
+	 * {@code Mono} will contain a {@link WebClientException}.
 	 * @param elementClass the class of element in the {@code Mono}
 	 * @param <T> the element type
-	 * @return the body as a mono
+	 * @return a mono containing the body, or a {@link WebClientException} if the status code is
+	 * 4xx or 5xx
 	 */
 	<T> Mono<T> bodyToMono(Class<? extends T> elementClass);
 
 	/**
-	 * Extract the body to a {@code Flux}.
+	 * Extract the body to a {@code Flux}. If the response has status code 4xx or 5xx, the
+	 * {@code Flux} will contain a {@link WebClientException}.
 	 * @param elementClass the class of element in the {@code Flux}
 	 * @param <T> the element type
-	 * @return the body as a flux
+	 * @return a flux containing the body, or a {@link WebClientException} if the status code is
+	 * 4xx or 5xx
 	 */
 	<T> Flux<T> bodyToFlux(Class<? extends T> elementClass);
 

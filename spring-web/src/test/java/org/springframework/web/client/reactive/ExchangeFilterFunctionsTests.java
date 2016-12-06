@@ -16,20 +16,15 @@
 
 package org.springframework.web.client.reactive;
 
-import java.util.Optional;
-
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Arjen Poutsma
@@ -84,75 +79,6 @@ public class ExchangeFilterFunctionsTests {
 		assertEquals(response, result);
 		assertTrue(filterInvoked[0]);
 	}
-
-
-	@Test
-	public void clientNoError() throws Exception {
-		ClientRequest<Void> request = ClientRequest.GET("http://example.com").build();
-		ClientResponse response = mock(ClientResponse.class);
-		when(response.statusCode()).thenReturn(HttpStatus.OK);
-		ExchangeFunction exchange = r -> Mono.just(response);
-
-		ExchangeFilterFunction standardErrors = ExchangeFilterFunctions.clientError();
-
-		Mono<ClientResponse> result = standardErrors.filter(request, exchange);
-
-		StepVerifier.create(result)
-				.expectNext(response)
-				.expectComplete()
-				.verify();
-	}
-
-	@Test
-	public void serverError() throws Exception {
-		ClientRequest<Void> request = ClientRequest.GET("http://example.com").build();
-		ClientResponse response = mock(ClientResponse.class);
-		when(response.statusCode()).thenReturn(HttpStatus.INTERNAL_SERVER_ERROR);
-		ExchangeFunction exchange = r -> Mono.just(response);
-
-		ExchangeFilterFunction standardErrors = ExchangeFilterFunctions.serverError();
-
-		Mono<ClientResponse> result = standardErrors.filter(request, exchange);
-
-		StepVerifier.create(result)
-				.expectError(WebClientException.class)
-				.verify();
-	}
-
-	@Test
-	public void errorPredicate() throws Exception {
-		ClientRequest<Void> request = ClientRequest.GET("http://example.com").build();
-		ClientResponse response = mock(ClientResponse.class);
-		when(response.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
-		ExchangeFunction exchange = r -> Mono.just(response);
-
-		ExchangeFilterFunction errorPredicate = ExchangeFilterFunctions
-				.errorPredicate(clientResponse -> clientResponse.statusCode().is4xxClientError());
-
-		Mono<ClientResponse> result = errorPredicate.filter(request, exchange);
-
-		StepVerifier.create(result)
-				.expectError(WebClientException.class)
-				.verify();
-	}
-
-
-	@Test
-	public void errorMapperFunction() throws Exception {
-		ClientRequest<Void> request = ClientRequest.GET("http://example.com").build();
-		ClientResponse response = mock(ClientResponse.class);
-		ExchangeFunction exchange = r -> Mono.just(response);
-
-		ExchangeFilterFunction errorMapper = ExchangeFilterFunctions
-				.errorMapper(clientResponse -> Optional.of(new IllegalStateException()));
-
-		Mono<ClientResponse> result = errorMapper.filter(request, exchange);
-
-		StepVerifier.create(result)
-				.expectError(IllegalStateException.class)
-				.verify();
-	}
-
 
 	@Test
 	public void basicAuthentication() throws Exception {

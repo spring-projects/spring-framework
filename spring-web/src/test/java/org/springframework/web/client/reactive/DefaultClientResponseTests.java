@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -125,6 +126,7 @@ public class DefaultClientResponseTests {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		when(mockResponse.getHeaders()).thenReturn(httpHeaders);
+		when(mockResponse.getStatusCode()).thenReturn(HttpStatus.OK);
 		when(mockResponse.getBody()).thenReturn(body);
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
@@ -133,6 +135,24 @@ public class DefaultClientResponseTests {
 
 		Mono<String> resultMono = defaultClientResponse.bodyToMono(String.class);
 		assertEquals("foo", resultMono.block());
+	}
+
+	@Test
+	public void bodyToMonoError() throws Exception {
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
+		when(mockResponse.getHeaders()).thenReturn(httpHeaders);
+		when(mockResponse.getStatusCode()).thenReturn(HttpStatus.NOT_FOUND);
+
+		Set<HttpMessageReader<?>> messageReaders = Collections
+				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
+		when(mockWebClientStrategies.messageReaders()).thenReturn(messageReaders::stream);
+
+		Mono<String> resultMono = defaultClientResponse.bodyToMono(String.class);
+
+		StepVerifier.create(resultMono)
+				.expectError(WebClientException.class)
+				.verify();
 	}
 
 	@Test
@@ -145,6 +165,7 @@ public class DefaultClientResponseTests {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		when(mockResponse.getHeaders()).thenReturn(httpHeaders);
+		when(mockResponse.getStatusCode()).thenReturn(HttpStatus.OK);
 		when(mockResponse.getBody()).thenReturn(body);
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
@@ -154,6 +175,23 @@ public class DefaultClientResponseTests {
 		Flux<String> resultFlux = defaultClientResponse.bodyToFlux(String.class);
 		Mono<List<String>> result = resultFlux.collectList();
 		assertEquals(Collections.singletonList("foo"), result.block());
+	}
+
+	@Test
+	public void bodyToFluxError() throws Exception {
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
+		when(mockResponse.getHeaders()).thenReturn(httpHeaders);
+		when(mockResponse.getStatusCode()).thenReturn(HttpStatus.INTERNAL_SERVER_ERROR);
+
+		Set<HttpMessageReader<?>> messageReaders = Collections
+				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
+		when(mockWebClientStrategies.messageReaders()).thenReturn(messageReaders::stream);
+
+		Flux<String> resultFlux = defaultClientResponse.bodyToFlux(String.class);
+		StepVerifier.create(resultFlux)
+				.expectError(WebClientException.class)
+				.verify();
 	}
 
 
