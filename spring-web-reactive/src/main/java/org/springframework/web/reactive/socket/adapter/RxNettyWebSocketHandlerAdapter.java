@@ -15,8 +15,6 @@
  */
 package org.springframework.web.reactive.socket.adapter;
 
-import java.net.URI;
-
 import io.reactivex.netty.protocol.http.ws.WebSocketConnection;
 import reactor.core.publisher.Mono;
 import rx.Observable;
@@ -35,37 +33,30 @@ import org.springframework.web.reactive.socket.WebSocketHandler;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class RxNettyWebSocketHandlerAdapter
+public class RxNettyWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupport
 		implements io.reactivex.netty.protocol.http.ws.server.WebSocketHandler {
 
-	private final URI uri;
-
 	private final NettyDataBufferFactory bufferFactory;
-
-	private final WebSocketHandler handler;
 
 
 	public RxNettyWebSocketHandlerAdapter(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler handler) {
 
-		Assert.notNull("'request' is required");
+		super(request, handler);
 		Assert.notNull("'response' is required");
-		Assert.notNull("'handler' handler is required");
-
-		this.uri = request.getURI();
 		this.bufferFactory = (NettyDataBufferFactory) response.bufferFactory();
-		this.handler = handler;
 	}
 
+
+	public NettyDataBufferFactory getBufferFactory() {
+		return this.bufferFactory;
+	}
 
 	@Override
-	public Observable<Void> handle(WebSocketConnection connection) {
-		Mono<Void> result = this.handler.handle(createSession(connection));
+	public Observable<Void> handle(WebSocketConnection conn) {
+		RxNettyWebSocketSession session = new RxNettyWebSocketSession(conn, getUri(), getBufferFactory());
+		Mono<Void> result = getDelegate().handle(session);
 		return RxReactiveStreams.toObservable(result);
-	}
-
-	private RxNettyWebSocketSession createSession(WebSocketConnection conn) {
-		return new RxNettyWebSocketSession(conn, this.uri, this.bufferFactory);
 	}
 
 }
