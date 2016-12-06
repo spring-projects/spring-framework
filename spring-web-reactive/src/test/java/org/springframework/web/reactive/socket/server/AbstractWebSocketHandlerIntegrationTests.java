@@ -27,11 +27,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.bootstrap.HttpServer;
+import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.socket.server.support.HandshakeWebSocketService;
 import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter;
+import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.RxNettyRequestUpgradeStrategy;
 
 /**
@@ -58,6 +60,7 @@ public abstract class AbstractWebSocketHandlerIntegrationTests {
 	@Parameters
 	public static Object[][] arguments() {
 		return new Object[][] {
+				{new ReactorHttpServer(), ReactorNettyConfig.class},
 				{new RxNettyHttpServer(), RxNettyConfig.class}
 		};
 	}
@@ -108,6 +111,15 @@ public abstract class AbstractWebSocketHandlerIntegrationTests {
 
 		protected abstract RequestUpgradeStrategy createUpgradeStrategy();
 
+	}
+
+	@Configuration
+	static class ReactorNettyConfig extends AbstractHandlerAdapterConfig {
+
+		@Override
+		protected RequestUpgradeStrategy createUpgradeStrategy() {
+			return new ReactorNettyRequestUpgradeStrategy();
+		}
 	}
 
 	@Configuration

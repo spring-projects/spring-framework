@@ -21,8 +21,6 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.io.buffer.DataBuffer;
-
 /**
  * Representation for a WebSocket session.
  *
@@ -43,10 +41,6 @@ public interface WebSocketSession {
 
 	/**
 	 * Get the flux of incoming messages.
-	 * <p><strong>Note:</strong> the caller of this method is responsible for
-	 * releasing the DataBuffer payload of each message after consuming it
-	 * on runtimes where a {@code PooledByteBuffer} is used such as Netty.
-	 * @see org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer)
 	 */
 	Flux<WebSocketMessage> receive();
 

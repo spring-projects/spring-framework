@@ -39,7 +39,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Basic WebSocket integration
+ * Basic WebSocket integration tests.
  * @author Rossen Stoyanchev
  */
 @SuppressWarnings({"unused", "WeakerAccess"})

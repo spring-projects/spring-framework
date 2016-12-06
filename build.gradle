@@ -818,6 +818,7 @@ project("spring-web-reactive") {
 		optional("org.freemarker:freemarker:${freemarkerVersion}")
 		optional "org.apache.httpcomponents:httpclient:${httpclientVersion}"
 		optional('org.webjars:webjars-locator:0.32')
+		optional("io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}")
 		optional("io.reactivex:rxnetty-http:${rxnettyVersion}") {
 			exclude group: 'io.reactivex', module: 'rxjava'
 		}
@@ -830,7 +831,6 @@ project("spring-web-reactive") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
 		testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
-		testCompile("io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}")
 		testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 		testCompile("io.undertow:undertow-core:${undertowVersion}")
 		testCompile("org.jboss.xnio:xnio-api:${xnioVersion}")
