@@ -55,7 +55,7 @@ public class RxNettyWebSocketSession extends NettyWebSocketSessionSupport<WebSoc
 	@Override
 	public Mono<Void> send(Publisher<WebSocketMessage> messages) {
 		Observable<WebSocketFrame> frames = RxReactiveStreams.toObservable(messages).map(this::toFrame);
-		Observable<Void> completion = getDelegate().write(frames);
+		Observable<Void> completion = getDelegate().writeAndFlushOnEach(frames);
 		return Mono.from(RxReactiveStreams.toPublisher(completion));
 	}
 

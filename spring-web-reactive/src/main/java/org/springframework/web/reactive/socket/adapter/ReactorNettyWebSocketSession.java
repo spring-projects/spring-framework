@@ -56,8 +56,9 @@ public class ReactorNettyWebSocketSession
 
 	@Override
 	public Mono<Void> send(Publisher<WebSocketMessage> messages) {
-		HttpOutbound outbound = getDelegate().getHttpOutbound();
 		Flux<WebSocketFrame> frameFlux = Flux.from(messages).map(this::toFrame);
+		HttpOutbound outbound = getDelegate().getHttpOutbound();
+		outbound.flushEach();
 		return outbound.sendObject(frameFlux);
 	}
 
