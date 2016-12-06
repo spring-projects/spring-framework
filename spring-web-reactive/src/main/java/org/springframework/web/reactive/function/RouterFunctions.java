@@ -27,7 +27,9 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
  * <strong>Central entry point to Spring's functional web framework.</strong>
@@ -140,7 +142,7 @@ public abstract class RouterFunctions {
 	/**
 	 * Convert the given {@linkplain RouterFunction router function} into a {@link HttpHandler}.
 	 * This conversion uses {@linkplain HandlerStrategies#builder() default strategies}.
-	 * <p>The returned {@code HttpHandler} can be adapted to run in
+	 * <p>The returned handler can be adapted to run in
 	 * <ul>
 	 * <li>Servlet 3.1+ using the
 	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter},</li>
@@ -151,10 +153,13 @@ public abstract class RouterFunctions {
 	 * <li>Undertow using the
 	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}.</li>
 	 * </ul>
+	 * <p>Note that {@code HttpWebHandlerAdapter} also implements {@link WebHandler}, allowing
+	 * for additional filter and exception handler registration through
+	 * {@link WebHttpHandlerBuilder}.
 	 * @param routerFunction the router function to convert
 	 * @return an http handler that handles HTTP request using the given router function
 	 */
-	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction) {
+	public static HttpWebHandlerAdapter toHttpHandler(RouterFunction<?> routerFunction) {
 		return toHttpHandler(routerFunction, HandlerStrategies.withDefaults());
 	}
 
@@ -172,11 +177,13 @@ public abstract class RouterFunctions {
 	 * <li>Undertow using the
 	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}.</li>
 	 * </ul>
+	 * <p>Note that {@code HttpWebHandlerAdapter} also implements {@link WebHandler}, allowing
+	 * for additional filter and exception handler registration through
 	 * @param routerFunction the router function to convert
 	 * @param strategies the strategies to use
 	 * @return an http handler that handles HTTP request using the given router function
 	 */
-	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction, HandlerStrategies strategies) {
+	public static HttpWebHandlerAdapter toHttpHandler(RouterFunction<?> routerFunction, HandlerStrategies strategies) {
 		Assert.notNull(routerFunction, "RouterFunction must not be null");
 		Assert.notNull(strategies, "HandlerStrategies must not be null");
 
