@@ -39,7 +39,7 @@ import static org.junit.Assert.*;
 /**
  * @author Arjen Poutsma
  */
-public abstract class AbstractHttpRequestFactoryTestCase extends AbstractJettyServerTestCase {
+public abstract class AbstractHttpRequestFactoryTestCase extends AbstractMockWebServerTestCase {
 
 	protected ClientHttpRequestFactory factory;
 
@@ -127,6 +127,8 @@ public abstract class AbstractHttpRequestFactoryTestCase extends AbstractJettySe
 				@Override
 				public void writeTo(OutputStream outputStream) throws IOException {
 					StreamUtils.copy(body, outputStream);
+					outputStream.flush();
+					outputStream.close();
 				}
 			});
 		}
@@ -135,12 +137,7 @@ public abstract class AbstractHttpRequestFactoryTestCase extends AbstractJettySe
 		}
 
 		ClientHttpResponse response = request.execute();
-		try {
-			FileCopyUtils.copy(body, request.getBody());
-		}
-		finally {
-			response.close();
-		}
+		FileCopyUtils.copy(body, request.getBody());
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
