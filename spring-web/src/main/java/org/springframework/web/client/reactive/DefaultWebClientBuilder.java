@@ -95,6 +95,14 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 							this.strategies));
 		}
 
+		@Override
+		public WebClient filter(ExchangeFilterFunction filter) {
+			Assert.notNull(filter, "'filter' must not be null");
+
+			ExchangeFilterFunction composedFilter = filter.andThen(this.filter);
+
+			return new DefaultWebClient(this.clientHttpConnector, this.strategies, composedFilter);
+		}
 	}
 
 	private class NoOpFilter implements ExchangeFilterFunction {

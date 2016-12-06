@@ -50,6 +50,15 @@ public interface WebClient extends ExchangeFunction {
 	@Override
 	Mono<ClientResponse> exchange(ClientRequest<?> request);
 
+	/**
+	 * Filters this client with the given {@code ExchangeFilterFunction}, resulting in a filtered
+	 * {@code WebClient}.
+	 * @param filterFunction the filter to apply to this client
+	 * @return the filtered client
+	 * @see ExchangeFilterFunction#apply(ExchangeFunction)
+	 */
+	WebClient filter(ExchangeFilterFunction filterFunction);
+
 
 	/**
 	 * Create a new instance of {@code WebClient} with the given connector. This method uses
