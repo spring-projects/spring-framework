@@ -5,3 +5,7 @@ function render(template, model) {
 function renderWithUrl(template, model, url) {
     return template.replace("{{title}}", "Check url parameter").replace("{{body}}", url);
 }
+
+function renderWithMessages(template, model, url, messages) {
+    return template.replace("{{title}}", messages.title).replace("{{body}}", messages.body);
+}
