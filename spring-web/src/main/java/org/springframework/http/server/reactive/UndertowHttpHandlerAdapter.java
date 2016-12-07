@@ -58,7 +58,7 @@ public class UndertowHttpHandlerAdapter extends HttpHandlerAdapterSupport
 	@Override
 	public void handleRequest(HttpServerExchange exchange) throws Exception {
 
-		ServerHttpRequest request = new UndertowServerHttpRequest(exchange, this.dataBufferFactory);
+		UndertowServerHttpRequest request = new UndertowServerHttpRequest(exchange, this.dataBufferFactory);
 		ServerHttpResponse response = new UndertowServerHttpResponse(exchange, this.dataBufferFactory);
 
 		getHttpHandler().handle(request, response).subscribe(new Subscriber<Void>() {
@@ -76,11 +76,13 @@ public class UndertowHttpHandlerAdapter extends HttpHandlerAdapterSupport
 				if (!exchange.isResponseStarted() && exchange.getStatusCode() <= 500) {
 					exchange.setStatusCode(500);
 				}
+				request.close();
 				exchange.endExchange();
 			}
 			@Override
 			public void onComplete() {
 				logger.debug("Successfully completed request");
+				request.close();
 				exchange.endExchange();
 			}
 		});
