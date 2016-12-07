@@ -78,7 +78,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	 * @see ReadListener#onAllDataRead()
 	 * @see org.xnio.ChannelListener#handleEvent(Channel)
 	 */
-	public final void onAllDataRead() {
+	public void onAllDataRead() {
 		if (this.logger.isTraceEnabled()) {
 			this.logger.trace(this.state + " onAllDataRead");
 		}
