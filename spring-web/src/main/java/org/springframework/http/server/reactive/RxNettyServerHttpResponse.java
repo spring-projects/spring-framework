@@ -28,6 +28,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import rx.Observable;
 import rx.RxReactiveStreams;
+import rx.functions.Func1;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
@@ -40,6 +41,7 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
@@ -47,6 +49,9 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 	private final HttpServerResponse<ByteBuf> response;
 
 	private static final ByteBuf FLUSH_SIGNAL = Unpooled.buffer(0, 0);
+
+	// 8 Kb flush threshold to avoid blocking RxNetty when the send buffer has reached the high watermark
+	private static final long FLUSH_THRESHOLD = 8192;
 
 	public RxNettyServerHttpResponse(HttpServerResponse<ByteBuf> response,
 			NettyDataBufferFactory dataBufferFactory) {
@@ -74,7 +79,7 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 	protected Mono<Void> writeWithInternal(Publisher<? extends DataBuffer> body) {
 		Observable<ByteBuf> content = RxReactiveStreams.toObservable(body)
 				.map(NettyDataBufferFactory::toByteBuf);
-		return Flux.from(RxReactiveStreams.toPublisher(this.response.write(content)))
+		return Flux.from(RxReactiveStreams.toPublisher(this.response.write(content, new FlushSelector(FLUSH_THRESHOLD))))
 				.then();
 	}
 
@@ -113,6 +118,26 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
 				this.response.addCookie(cookie);
 			}
+		}
+	}
+
+	private class FlushSelector implements Func1<ByteBuf, Boolean> {
+
+		private final long flushEvery;
+		private long count;
+
+		public FlushSelector(long flushEvery) {
+			this.flushEvery = flushEvery;
+		}
+
+		@Override
+		public Boolean call(ByteBuf byteBuf) {
+			this.count += byteBuf.readableBytes();
+			if (this.count >= this.flushEvery) {
+				this.count = 0;
+				return true;
+			}
+			return false;
 		}
 	}
 
