@@ -45,7 +45,7 @@ import org.springframework.util.MultiValueMap;
 /**
  * @author Arjen Poutsma
  */
-public class MockServerRequest<T> implements ServerRequest {
+public class MockServerRequest implements ServerRequest {
 
 	private final HttpMethod method;
 
@@ -53,7 +53,7 @@ public class MockServerRequest<T> implements ServerRequest {
 
 	private final MockHeaders headers;
 
-	private final T body;
+	private final Object body;
 
 	private final Map<String, Object> attributes;
 
@@ -62,7 +62,7 @@ public class MockServerRequest<T> implements ServerRequest {
 	private final Map<String, String> pathVariables;
 
 	private MockServerRequest(HttpMethod method, URI uri,
-			MockHeaders headers, T body, Map<String, Object> attributes,
+			MockHeaders headers, Object body, Map<String, Object> attributes,
 			MultiValueMap<String, String> queryParams,
 			Map<String, String> pathVariables) {
 		this.method = method;
@@ -74,8 +74,8 @@ public class MockServerRequest<T> implements ServerRequest {
 		this.pathVariables = pathVariables;
 	}
 
-	public static <T> Builder<T> builder() {
-		return new BuilderImpl<T>();
+	public static Builder builder() {
+		return new BuilderImpl();
 	}
 
 	@Override
@@ -127,35 +127,35 @@ public class MockServerRequest<T> implements ServerRequest {
 		return Collections.unmodifiableMap(this.pathVariables);
 	}
 
-	public interface Builder<T> {
+	public interface Builder {
 
-		Builder<T> method(HttpMethod method);
+		Builder method(HttpMethod method);
 
-		Builder<T> uri(URI uri);
+		Builder uri(URI uri);
 
-		Builder<T> header(String key, String value);
+		Builder header(String key, String value);
 
-		Builder<T> headers(HttpHeaders headers);
+		Builder headers(HttpHeaders headers);
 
-		Builder<T> attribute(String name, Object value);
+		Builder attribute(String name, Object value);
 
-		Builder<T> attributes(Map<String, Object> attributes);
+		Builder attributes(Map<String, Object> attributes);
 
-		Builder<T> queryParam(String key, String value);
+		Builder queryParam(String key, String value);
 
-		Builder<T> queryParams(MultiValueMap<String, String> queryParams);
+		Builder queryParams(MultiValueMap<String, String> queryParams);
 
-		Builder<T> pathVariable(String key, String value);
+		Builder pathVariable(String key, String value);
 
-		Builder<T> pathVariables(Map<String, String> pathVariables);
+		Builder pathVariables(Map<String, String> pathVariables);
 
-		MockServerRequest<T> body(T body);
+		MockServerRequest body(Object body);
 
-		MockServerRequest<Void> build();
+		MockServerRequest build();
 
 	}
 
-	private static class BuilderImpl<T> implements Builder<T> {
+	private static class BuilderImpl implements Builder {
 
 		private HttpMethod method = HttpMethod.GET;
 
@@ -163,7 +163,7 @@ public class MockServerRequest<T> implements ServerRequest {
 
 		private MockHeaders headers = new MockHeaders(new HttpHeaders());
 
-		private T body;
+		private Object body;
 
 		private Map<String, Object> attributes = new LinkedHashMap<>();
 
@@ -172,21 +172,21 @@ public class MockServerRequest<T> implements ServerRequest {
 		private Map<String, String> pathVariables = new LinkedHashMap<>();
 
 		@Override
-		public Builder<T> method(HttpMethod method) {
+		public Builder method(HttpMethod method) {
 			Assert.notNull(method, "'method' must not be null");
 			this.method = method;
 			return this;
 		}
 
 		@Override
-		public Builder<T> uri(URI uri) {
+		public Builder uri(URI uri) {
 			Assert.notNull(uri, "'uri' must not be null");
 			this.uri = uri;
 			return this;
 		}
 
 		@Override
-		public Builder<T> header(String key, String value) {
+		public Builder header(String key, String value) {
 			Assert.notNull(key, "'key' must not be null");
 			Assert.notNull(value, "'value' must not be null");
 			this.headers.header(key, value);
@@ -194,14 +194,14 @@ public class MockServerRequest<T> implements ServerRequest {
 		}
 
 		@Override
-		public Builder<T> headers(HttpHeaders headers) {
+		public Builder headers(HttpHeaders headers) {
 			Assert.notNull(headers, "'headers' must not be null");
 			this.headers = new MockHeaders(headers);
 			return this;
 		}
 
 		@Override
-		public Builder<T> attribute(String name, Object value) {
+		public Builder attribute(String name, Object value) {
 			Assert.notNull(name, "'name' must not be null");
 			Assert.notNull(value, "'value' must not be null");
 			this.attributes.put(name, value);
@@ -209,14 +209,14 @@ public class MockServerRequest<T> implements ServerRequest {
 		}
 
 		@Override
-		public Builder<T> attributes(Map<String, Object> attributes) {
+		public Builder attributes(Map<String, Object> attributes) {
 			Assert.notNull(attributes, "'attributes' must not be null");
 			this.attributes = attributes;
 			return this;
 		}
 
 		@Override
-		public Builder<T> queryParam(String key, String value) {
+		public Builder queryParam(String key, String value) {
 			Assert.notNull(key, "'key' must not be null");
 			Assert.notNull(value, "'value' must not be null");
 			this.queryParams.add(key, value);
@@ -224,14 +224,14 @@ public class MockServerRequest<T> implements ServerRequest {
 		}
 
 		@Override
-		public Builder<T> queryParams(MultiValueMap<String, String> queryParams) {
+		public Builder queryParams(MultiValueMap<String, String> queryParams) {
 			Assert.notNull(queryParams, "'queryParams' must not be null");
 			this.queryParams = queryParams;
 			return this;
 		}
 
 		@Override
-		public Builder<T> pathVariable(String key, String value) {
+		public Builder pathVariable(String key, String value) {
 			Assert.notNull(key, "'key' must not be null");
 			Assert.notNull(value, "'value' must not be null");
 			this.pathVariables.put(key, value);
@@ -239,22 +239,22 @@ public class MockServerRequest<T> implements ServerRequest {
 		}
 
 		@Override
-		public Builder<T> pathVariables(Map<String, String> pathVariables) {
+		public Builder pathVariables(Map<String, String> pathVariables) {
 			Assert.notNull(pathVariables, "'pathVariables' must not be null");
 			this.pathVariables = pathVariables;
 			return this;
 		}
 
 		@Override
-		public MockServerRequest<T> body(T body) {
+		public MockServerRequest body(Object body) {
 			this.body = body;
-			return new MockServerRequest<T>(this.method, this.uri, this.headers, this.body,
+			return new MockServerRequest(this.method, this.uri, this.headers, this.body,
 					this.attributes, this.queryParams, this.pathVariables);
 		}
 
 		@Override
-		public MockServerRequest<Void> build() {
-			return new MockServerRequest<Void>(this.method, this.uri, this.headers, null,
+		public MockServerRequest build() {
+			return new MockServerRequest(this.method, this.uri, this.headers, null,
 					this.attributes, this.queryParams, this.pathVariables);
 		}
 

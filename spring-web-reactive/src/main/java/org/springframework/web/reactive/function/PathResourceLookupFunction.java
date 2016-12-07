@@ -19,8 +19,9 @@ package org.springframework.web.reactive.function;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.util.function.Function;
+
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -37,7 +38,7 @@ import org.springframework.web.util.UriUtils;
  * @author Arjen Poutsma
  * @since 5.0
  */
-class PathResourceLookupFunction implements Function<ServerRequest, Optional<Resource>> {
+class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resource>> {
 
 	private static final PathMatcher PATH_MATCHER = new AntPathMatcher();
 
@@ -51,16 +52,16 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 	}
 
 	@Override
-	public Optional<Resource> apply(ServerRequest request) {
+	public Mono<Resource> apply(ServerRequest request) {
 		String path = processPath(request.path());
 		if (path.contains("%")) {
 			path = UriUtils.decode(path, StandardCharsets.UTF_8);
 		}
 		if (!StringUtils.hasLength(path) || isInvalidPath(path)) {
-			return Optional.empty();
+			return Mono.empty();
 		}
 		if (!PATH_MATCHER.match(this.pattern, path)) {
-			return Optional.empty();
+			return Mono.empty();
 		}
 		else {
 			path = PATH_MATCHER.extractPathWithinPattern(this.pattern, path);
@@ -68,10 +69,10 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 		try {
 			Resource resource = this.location.createRelative(path);
 			if (resource.exists() && resource.isReadable() && isResourceUnderLocation(resource)) {
-				return Optional.of(resource);
+				return Mono.just(resource);
 			}
 			else {
-				return Optional.empty();
+				return Mono.empty();
 			}
 		}
 		catch (IOException ex) {

@@ -25,6 +25,8 @@ import java.net.URL;
 import java.util.EnumSet;
 import java.util.Set;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -34,7 +36,7 @@ import org.springframework.http.codec.BodyInserters;
  * @author Arjen Poutsma
  * @since 5.0
  */
-class ResourceHandlerFunction implements HandlerFunction<Resource> {
+class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 
 
 	private static final Set<HttpMethod> SUPPORTED_METHODS =
@@ -48,7 +50,7 @@ class ResourceHandlerFunction implements HandlerFunction<Resource> {
 	}
 
 	@Override
-	public ServerResponse<Resource> handle(ServerRequest request) {
+	public Mono<ServerResponse> handle(ServerRequest request) {
 		switch (request.method()) {
 			case GET:
 				return ServerResponse.ok()

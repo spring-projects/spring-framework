@@ -18,6 +18,8 @@ package org.springframework.web.reactive.function;
 
 import java.util.function.Function;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.support.ServerRequestWrapper;
 
@@ -31,7 +33,7 @@ import org.springframework.web.reactive.function.support.ServerRequestWrapper;
  * @see RouterFunction#filter(HandlerFilterFunction)
  */
 @FunctionalInterface
-public interface HandlerFilterFunction<T, R> {
+public interface HandlerFilterFunction<T extends ServerResponse, R extends ServerResponse> {
 
 	/**
 	 * Apply this filter to the given handler function. The given
@@ -44,7 +46,7 @@ public interface HandlerFilterFunction<T, R> {
 	 * @return the filtered response
 	 * @see ServerRequestWrapper
 	 */
-	ServerResponse<R> filter(ServerRequest request, HandlerFunction<T> next);
+	Mono<R> filter(ServerRequest request, HandlerFunction<T> next);
 
 	/**
 	 * Return a composed filter function that first applies this filter, and then applies the
@@ -79,10 +81,10 @@ public interface HandlerFilterFunction<T, R> {
 	 * @return the filter adaptation of the request processor
 	 */
 	static HandlerFilterFunction<?, ?> ofRequestProcessor(Function<ServerRequest,
-				ServerRequest> requestProcessor) {
+				Mono<ServerRequest>> requestProcessor) {
 
 		Assert.notNull(requestProcessor, "'requestProcessor' must not be null");
-		return (request, next) -> next.handle(requestProcessor.apply(request));
+		return (request, next) -> requestProcessor.apply(request).then(next::handle);
 	}
 
 	/**
@@ -91,11 +93,11 @@ public interface HandlerFilterFunction<T, R> {
 	 * @param responseProcessor the response processor
 	 * @return the filter adaptation of the request processor
 	 */
-	static <T, R> HandlerFilterFunction<T, R> ofResponseProcessor(Function<ServerResponse<T>,
-			ServerResponse<R>> responseProcessor) {
+	static <T extends ServerResponse, R extends ServerResponse> HandlerFilterFunction<T, R> ofResponseProcessor(Function<T,
+			R> responseProcessor) {
 
 		Assert.notNull(responseProcessor, "'responseProcessor' must not be null");
-		return (request, next) -> responseProcessor.apply(next.handle(request));
+		return (request, next) -> next.handle(request).map(responseProcessor);
 	}
 
 

@@ -20,7 +20,6 @@ import java.time.Duration;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -127,18 +126,18 @@ public class SseHandlerFunctionIntegrationTests
 
 	private static class SseHandler {
 
-		public ServerResponse<Publisher<String>> string(ServerRequest request) {
+		public Mono<ServerResponse> string(ServerRequest request) {
 			Flux<String> flux = Flux.interval(Duration.ofMillis(100)).map(l -> "foo " + l).take(2);
 			return ServerResponse.ok().body(fromServerSentEvents(flux, String.class));
 		}
 
-		public ServerResponse<Publisher<Person>> person(ServerRequest request) {
+		public Mono<ServerResponse> person(ServerRequest request) {
 			Flux<Person> flux = Flux.interval(Duration.ofMillis(100))
 					.map(l -> new Person("foo " + l)).take(2);
 			return ServerResponse.ok().body(fromServerSentEvents(flux, Person.class));
 		}
 
-		public ServerResponse<Publisher<ServerSentEvent<String>>> sse(ServerRequest request) {
+		public Mono<ServerResponse> sse(ServerRequest request) {
 			Flux<ServerSentEvent<String>> flux = Flux.interval(Duration.ofMillis(100))
 					.map(l -> ServerSentEvent.<String>builder().data("foo")
 							.id(Long.toString(l))

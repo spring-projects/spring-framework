@@ -24,8 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -186,8 +184,7 @@ public class DefaultClientRequestBuilderTests {
 	@Test
 	public void bodyInserter() throws Exception {
 		String body = "foo";
-		Supplier<String> supplier = () -> body;
-		BiFunction<ClientHttpRequest, BodyInserter.Context, Mono<Void>> writer =
+		BodyInserter<String, ClientHttpRequest> inserter =
 				(response, strategies) -> {
 					byte[] bodyBytes = body.getBytes(UTF_8);
 					ByteBuffer byteBuffer = ByteBuffer.wrap(bodyBytes);
@@ -197,8 +194,7 @@ public class DefaultClientRequestBuilderTests {
 				};
 
 		ClientRequest<String> result = ClientRequest.POST("http://example.com")
-				.body(BodyInserter.of(writer, supplier));
-		assertEquals(body, result.body());
+				.body(inserter);
 
 		MockClientHttpRequest request = new MockClientHttpRequest();
 

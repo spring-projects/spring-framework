@@ -21,8 +21,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
-import org.springframework.web.reactive.function.ServerResponse;
 import org.springframework.web.reactive.function.HandlerStrategies;
+import org.springframework.web.reactive.function.ServerResponse;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -59,7 +59,7 @@ public class ServerResponseResultHandler implements HandlerResultHandler {
 
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
-		ServerResponse<?> response = (ServerResponse<?>) result.getReturnValue().orElseThrow(
+		ServerResponse response = (ServerResponse) result.getReturnValue().orElseThrow(
 				IllegalStateException::new);
 		return response.writeTo(exchange, this.strategies);
 	}

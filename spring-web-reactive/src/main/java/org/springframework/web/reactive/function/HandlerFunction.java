@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.function;
 
+import reactor.core.publisher.Mono;
+
 /**
  * Represents a function that handles a {@linkplain ServerRequest request}.
  *
@@ -24,13 +26,13 @@ package org.springframework.web.reactive.function;
  * @since 5.0
  */
 @FunctionalInterface
-public interface HandlerFunction<T> {
+public interface HandlerFunction<T extends ServerResponse> {
 
 	/**
 	 * Handle the given request.
 	 * @param request the request to handle
 	 * @return the response
 	 */
-	ServerResponse<T> handle(ServerRequest request);
+	Mono<T> handle(ServerRequest request);
 
 }

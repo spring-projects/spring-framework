@@ -46,7 +46,6 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Arjen Poutsma
@@ -83,8 +82,6 @@ public class BodyInsertersTests {
 		String body = "foo";
 		BodyInserter<String, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body);
 
-		assertEquals(body, inserter.t());
-
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
 		StepVerifier.create(result).expectComplete().verify();
@@ -102,8 +99,6 @@ public class BodyInsertersTests {
 		Flux<String> body = Flux.just("foo");
 		BodyInserter<Flux<String>, ReactiveHttpOutputMessage> inserter = BodyInserters.fromPublisher(body, String.class);
 
-		assertEquals(body, inserter.t());
-
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
 		StepVerifier.create(result).expectComplete().verify();
@@ -120,8 +115,6 @@ public class BodyInsertersTests {
 	public void ofResource() throws Exception {
 		Resource body = new ClassPathResource("response.txt", getClass());
 		BodyInserter<Resource, ReactiveHttpOutputMessage> inserter = BodyInserters.fromResource(body);
-
-		assertEquals(body, inserter.t());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
@@ -146,8 +139,6 @@ public class BodyInsertersTests {
 		BodyInserter<Flux<ServerSentEvent<String>>, ServerHttpResponse> inserter =
 				BodyInserters.fromServerSentEvents(body);
 
-		assertEquals(body, inserter.t());
-
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
 		StepVerifier.create(result).expectNextCount(0).expectComplete().verify();
@@ -158,8 +149,6 @@ public class BodyInsertersTests {
 		Flux<String> body = Flux.just("foo");
 		BodyInserter<Flux<String>, ServerHttpResponse> inserter =
 				BodyInserters.fromServerSentEvents(body, String.class);
-
-		assertEquals(body, inserter.t());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
@@ -174,8 +163,6 @@ public class BodyInsertersTests {
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		BodyInserter<Flux<DataBuffer>, ReactiveHttpOutputMessage> inserter = BodyInserters.fromDataBuffers(body);
-
-		assertEquals(body, inserter.t());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);

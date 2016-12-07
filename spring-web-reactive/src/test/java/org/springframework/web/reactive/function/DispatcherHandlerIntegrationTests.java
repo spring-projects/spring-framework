@@ -16,14 +16,12 @@
 
 package org.springframework.web.reactive.function;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -50,6 +48,7 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.assertEquals;
+import static org.springframework.http.codec.BodyInserters.fromObject;
 import static org.springframework.http.codec.BodyInserters.fromPublisher;
 import static org.springframework.web.reactive.function.RouterFunctions.route;
 
@@ -84,7 +83,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 	@Test
 	public void mono() throws Exception {
 		ResponseEntity<Person> result =
-				restTemplate.getForEntity("http://localhost:" + port + "/mono", Person.class);
+				this.restTemplate.getForEntity("http://localhost:" + this.port + "/mono", Person.class);
 
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		assertEquals("John", result.getBody().getName());
@@ -94,7 +93,8 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 	public void flux() throws Exception {
 		ParameterizedTypeReference<List<Person>> reference = new ParameterizedTypeReference<List<Person>>() {};
 		ResponseEntity<List<Person>> result =
-				restTemplate.exchange("http://localhost:" + port + "/flux", HttpMethod.GET, null, reference);
+				this.restTemplate
+						.exchange("http://localhost:" + this.port + "/flux", HttpMethod.GET, null, reference);
 
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		List<Person> body = result.getBody();
@@ -134,7 +134,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 
 						@Override
 						public Supplier<Stream<ViewResolver>> viewResolvers() {
-							return () -> Collections.<ViewResolver>emptySet().stream();
+							return Stream::empty;
 						}
 					});
 		}
@@ -154,16 +154,20 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 	
 	private static class PersonHandler {
 
-		public ServerResponse<Publisher<Person>> mono(ServerRequest request) {
+		public Mono<ServerResponse> mono(ServerRequest request) {
 			Person person = new Person("John");
-			return ServerResponse.ok().body(fromPublisher(Mono.just(person), Person.class));
+			return ServerResponse.ok().body(fromObject(person));
 		}
 
-		public ServerResponse<Publisher<Person>> flux(ServerRequest request) {
+		public Mono<ServerResponse> flux(ServerRequest request) {
 			Person person1 = new Person("John");
 			Person person2 = new Person("Jane");
 			return ServerResponse.ok().body(
 					fromPublisher(Flux.just(person1, person2), Person.class));
+		}
+
+		public Mono<ServerResponse> view() {
+			return ServerResponse.ok().render("foo", "bar");
 		}
 
 	}
@@ -181,7 +185,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		}
 
 		public String getName() {
-			return name;
+			return this.name;
 		}
 
 		public void setName(String name) {
@@ -209,7 +213,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		@Override
 		public String toString() {
 			return "Person{" +
-					"name='" + name + '\'' +
+					"name='" + this.name + '\'' +
 					'}';
 		}
 	}

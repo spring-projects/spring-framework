@@ -26,7 +26,6 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.function.HandlerFunction;
 import org.springframework.web.reactive.function.RouterFunctions;
 import org.springframework.web.reactive.function.ServerRequest;
-import org.springframework.web.reactive.function.ServerResponse;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -62,9 +61,7 @@ public class HandlerFunctionAdapter implements HandlerAdapter {
 						.orElseThrow(() -> new IllegalStateException(
 								"Could not find ServerRequest in exchange attributes"));
 
-		ServerResponse<?> response = handlerFunction.handle(request);
-		HandlerResult handlerResult =
-				new HandlerResult(handlerFunction, response, HANDLER_FUNCTION_RETURN_TYPE);
-		return Mono.just(handlerResult);
+		return handlerFunction.handle(request)
+				.map(response -> new HandlerResult(handlerFunction, response, HANDLER_FUNCTION_RETURN_TYPE));
 	}
 }

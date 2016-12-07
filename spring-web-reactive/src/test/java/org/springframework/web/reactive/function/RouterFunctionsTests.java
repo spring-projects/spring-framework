@@ -16,11 +16,11 @@
 
 package org.springframework.web.reactive.function;
 
-import java.util.Collections;
-import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.codec.HttpMessageReader;
@@ -31,8 +31,11 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Arjen Poutsma
@@ -42,87 +45,97 @@ public class RouterFunctionsTests {
 
 	@Test
 	public void routeMatch() throws Exception {
-		HandlerFunction<Void> handlerFunction = request -> ServerResponse.ok().build();
+		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(true);
 
-		RouterFunction<Void> result = RouterFunctions.route(requestPredicate, handlerFunction);
+		RouterFunction<ServerResponse> result = RouterFunctions.route(requestPredicate, handlerFunction);
 		assertNotNull(result);
 
-		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
-		assertTrue(resultHandlerFunction.isPresent());
-		assertEquals(handlerFunction, resultHandlerFunction.get());
+		Mono<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
+
+		StepVerifier.create(resultHandlerFunction)
+				.expectNext(handlerFunction)
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
 	public void routeNoMatch() throws Exception {
-		HandlerFunction<Void> handlerFunction = request -> ServerResponse.ok().build();
+		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
 
-		RouterFunction<Void> result = RouterFunctions.route(requestPredicate, handlerFunction);
+		RouterFunction<ServerResponse> result = RouterFunctions.route(requestPredicate, handlerFunction);
 		assertNotNull(result);
 
-		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
-		assertFalse(resultHandlerFunction.isPresent());
+		Mono<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
+		StepVerifier.create(resultHandlerFunction)
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
 	public void subrouteMatch() throws Exception {
-		HandlerFunction<Void> handlerFunction = request -> ServerResponse.ok().build();
-		RouterFunction<Void> routerFunction = request -> Optional.of(handlerFunction);
+		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
+		RouterFunction<ServerResponse> routerFunction = request -> Mono.just(handlerFunction);
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(true);
 
-		RouterFunction<Void> result = RouterFunctions.subroute(requestPredicate, routerFunction);
+		RouterFunction<ServerResponse> result = RouterFunctions.subroute(requestPredicate, routerFunction);
 		assertNotNull(result);
 
-		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
-		assertTrue(resultHandlerFunction.isPresent());
-		assertEquals(handlerFunction, resultHandlerFunction.get());
+		Mono<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
+		StepVerifier.create(resultHandlerFunction)
+				.expectNext(handlerFunction)
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
 	public void subrouteNoMatch() throws Exception {
-		HandlerFunction<Void> handlerFunction = request -> ServerResponse.ok().build();
-		RouterFunction<Void> routerFunction = request -> Optional.of(handlerFunction);
+		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
+		RouterFunction<ServerResponse> routerFunction = request -> Mono.just(handlerFunction);
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
 
-		RouterFunction<Void> result = RouterFunctions.subroute(requestPredicate, routerFunction);
+		RouterFunction<ServerResponse> result = RouterFunctions.subroute(requestPredicate, routerFunction);
 		assertNotNull(result);
 
-		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
-		assertFalse(resultHandlerFunction.isPresent());
+		Mono<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
+		StepVerifier.create(resultHandlerFunction)
+				.expectComplete()
+				.verify();
+
 	}
 
 	@Test
 	public void toHttpHandler() throws Exception {
 		HandlerStrategies strategies = mock(HandlerStrategies.class);
 		when(strategies.messageReaders()).thenReturn(
-				() -> Collections.<HttpMessageReader<?>>emptyList().stream());
+				Stream::<HttpMessageReader<?>>empty);
 		when(strategies.messageWriters()).thenReturn(
-				() -> Collections.<HttpMessageWriter<?>>emptyList().stream());
+				Stream::<HttpMessageWriter<?>>empty);
 		when(strategies.viewResolvers()).thenReturn(
-				() -> Collections.<ViewResolver>emptyList().stream());
+				Stream::<ViewResolver>empty);
 
 		ServerRequest request = mock(ServerRequest.class);
 		ServerResponse response = mock(ServerResponse.class);
 		when(response.writeTo(any(ServerWebExchange.class), eq(strategies))).thenReturn(Mono.empty());
 
-		HandlerFunction handlerFunction = mock(HandlerFunction.class);
-		when(handlerFunction.handle(any(ServerRequest.class))).thenReturn(response);
+		HandlerFunction<ServerResponse> handlerFunction = mock(HandlerFunction.class);
+		when(handlerFunction.handle(any(ServerRequest.class))).thenReturn(Mono.just(response));
 
-		RouterFunction routerFunction = mock(RouterFunction.class);
-		when(routerFunction.route(any(ServerRequest.class))).thenReturn(Optional.of(handlerFunction));
+		RouterFunction<ServerResponse> routerFunction = mock(RouterFunction.class);
+		when(routerFunction.route(any(ServerRequest.class))).thenReturn(Mono.just(handlerFunction));
 
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
