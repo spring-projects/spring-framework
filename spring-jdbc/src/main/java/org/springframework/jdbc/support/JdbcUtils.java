@@ -131,7 +131,7 @@ public abstract class JdbcUtils {
 	 * @see #getResultSetValue(ResultSet, int)
 	 */
 	public static Object getResultSetValue(ResultSet rs, int index, Class<?> requiredType) throws SQLException {
-		if (requiredType == null) {
+		if (requiredType == null || requiredType.isEnum()) {
 			return getResultSetValue(rs, index);
 		}
 
