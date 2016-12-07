@@ -19,6 +19,8 @@ package org.springframework.test.web.client.match;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import javax.xml.xpath.XPathExpressionException;
@@ -36,6 +38,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
 
@@ -166,10 +169,19 @@ public abstract class MockRestRequestMatchers {
 	 */
 	@SafeVarargs
 	public static RequestMatcher queryParameter(final String name, final Matcher<? super String>... matchers) {
+		return queryParameter(name, UTF_8, matchers);
+	}
+
+	/**
+	 * Assert request query parameter values with the given Hamcrest matcher.
+	 */
+	@SafeVarargs
+	public static RequestMatcher queryParameter(final String name, final Charset charset,
+												final Matcher<? super String>... matchers) {
 		return new RequestMatcher() {
 			@Override
 			public void match(ClientHttpRequest request) {
-				MultiValueMap<String, String> queryParameters = getQueryParameters(request.getURI().toString());
+				MultiValueMap<String, String> queryParameters = getQueryParameters(request.getURI().toString(), charset);
 				assertQueryParameterValueCount(name, queryParameters, matchers.length);
 				for (int i = 0 ; i < matchers.length; i++) {
 					assertThat("Request query parameter", queryParameters.get(name).get(i), matchers[i]);
@@ -182,10 +194,17 @@ public abstract class MockRestRequestMatchers {
 	 * Assert request query parameter values.
 	 */
 	public static RequestMatcher queryParameter(final String name, final String... expectedValues) {
+		return queryParameter(name, UTF_8, expectedValues);
+	}
+
+	/**
+	 * Assert request query parameter values.
+	 */
+	public static RequestMatcher queryParameter(final String name, final Charset charset, final String... expectedValues) {
 		return new RequestMatcher() {
 			@Override
 			public void match(ClientHttpRequest request) {
-				MultiValueMap<String, String> queryParameters = getQueryParameters(request.getURI().toString());
+				MultiValueMap<String, String> queryParameters = getQueryParameters(request.getURI().toString(), charset);
 				assertQueryParameterValueCount(name, queryParameters, expectedValues.length);
 				for (int i = 0 ; i < expectedValues.length; i++) {
 					assertEquals("Request query parameter + [" + name + "]",
@@ -196,14 +215,14 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	private static MultiValueMap<String, String> getQueryParameters(String uri) {
-		try {
-			String decodeUri = UriUtils.decode(uri, "UTF-8");
-			MultiValueMap<String, String> queryParameters = UriComponentsBuilder.fromUriString(decodeUri)
-					.build().getQueryParams();
-			return queryParameters;
-		} catch (UnsupportedEncodingException e) {
-			throw new AssertionError("Failed to decode URI: " + uri, e);
-		}
+		return getQueryParameters(uri, UTF_8);
+	}
+
+	private static MultiValueMap<String, String> getQueryParameters(String uri, Charset charset) {
+		String decodeUri = UriUtils.decode(uri, charset);
+		MultiValueMap<String, String> queryParameters = UriComponentsBuilder.fromUriString(decodeUri)
+				.build().getQueryParams();
+		return queryParameters;
 	}
 
 	private static void assertQueryParameterValueCount(final String name, MultiValueMap<String, String> queryParameters, int expectedCount) {
@@ -212,8 +231,8 @@ public abstract class MockRestRequestMatchers {
 
 	private static void assertMultiValueMapCount(String type, final String name, MultiValueMap<String, String> multiValueMap, int expectedCount) {
 		List<String> actualValues = multiValueMap.get(name);
-		AssertionErrors.assertTrue("Expected " + type + " <" + name + ">", actualValues != null);
-		AssertionErrors.assertTrue("Expected " + type + " <" + name + "> to have at least <" + expectedCount +
+		assertTrue("Expected " + type + " <" + name + ">", actualValues != null);
+		assertTrue("Expected " + type + " <" + name + "> to have at least <" + expectedCount +
 				"> values but found " + actualValues, expectedCount <= actualValues.size());
 	}
 

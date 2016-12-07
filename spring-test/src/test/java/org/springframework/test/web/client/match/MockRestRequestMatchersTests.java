@@ -16,18 +16,20 @@
 
 package org.springframework.test.web.client.match;
 
-import java.net.URI;
-import java.util.Arrays;
-
 import org.junit.Test;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.client.MockClientHttpRequest;
+import org.springframework.test.web.client.RequestMatcher;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.hamcrest.Matchers.*;
+import java.net.URI;
+import java.util.Arrays;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 /**
  * Unit tests for {@link MockRestRequestMatchers}.
@@ -136,7 +138,9 @@ public class MockRestRequestMatchersTests {
 	public void queryParameter() throws Exception {
 		this.request.setURI(createUriWithQueryParameters("foo", "bar", "baz"));
 
-		MockRestRequestMatchers.queryParameter("foo", "bar", "baz").match(this.request);
+		RequestMatcher requestMatcher = MockRestRequestMatchers.queryParameter("foo", "bar", "baz");
+		assertThat("Factory method did not create any request matcher", requestMatcher, notNullValue());
+		requestMatcher.match(this.request);
 	}
 
 	@Test(expected = AssertionError.class)
@@ -161,7 +165,9 @@ public class MockRestRequestMatchersTests {
 	public void queryParameterContains() throws Exception {
 		this.request.setURI(createUriWithQueryParameters("foo", "bar", "baz"));
 
-		MockRestRequestMatchers.queryParameter("foo", containsString("ba")).match(this.request);
+        RequestMatcher requestMatcher = MockRestRequestMatchers.queryParameter("foo", containsString("ba"));
+        assertThat("Factory method did not create any request matcher", requestMatcher, notNullValue());
+        requestMatcher.match(this.request);
 	}
 
 	@Test(expected = AssertionError.class)
@@ -175,7 +181,9 @@ public class MockRestRequestMatchersTests {
 	public void queryParameters() throws Exception {
 		this.request.setURI(createUriWithQueryParameters("foo", "bar", "baz"));
 
-		MockRestRequestMatchers.queryParameter("foo", "bar", "baz").match(this.request);
+        RequestMatcher requestMatcher = MockRestRequestMatchers.queryParameter("foo", "bar", "baz");
+        assertThat("Factory method did not create any request matcher", requestMatcher, notNullValue());
+        requestMatcher.match(this.request);
 	}
 
 	@Test(expected = AssertionError.class)
