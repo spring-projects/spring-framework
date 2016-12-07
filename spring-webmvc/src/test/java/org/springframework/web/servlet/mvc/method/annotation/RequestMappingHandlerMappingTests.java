@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -145,6 +146,14 @@ public class RequestMappingHandlerMappingTests {
 			info.getProducesCondition().getProducibleMediaTypes().iterator().next().toString());
 	}
 
+	@Test // SPR-14988
+	public void getMappingOverridesConsumesFromTypeLevelAnnotation() throws Exception {
+		RequestMappingInfo requestMappingInfo = assertComposedAnnotationMapping(RequestMethod.GET);
+
+		assertArrayEquals(new MediaType[]{MediaType.ALL}, new ArrayList<>(
+				requestMappingInfo.getConsumesCondition().getConsumableMediaTypes()).toArray());
+	}
+
 	@Test
 	public void getMapping() throws Exception {
 		assertComposedAnnotationMapping(RequestMethod.GET);
@@ -199,6 +208,7 @@ public class RequestMappingHandlerMappingTests {
 
 
 	@Controller
+	@RequestMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
 	static class ComposedAnnotationController {
 
 		@RequestMapping
@@ -209,7 +219,7 @@ public class RequestMappingHandlerMappingTests {
 		public void postJson() {
 		}
 
-		@GetMapping("/get")
+		@GetMapping(value = "/get", consumes = MediaType.ALL_VALUE)
 		public void get() {
 		}
 
