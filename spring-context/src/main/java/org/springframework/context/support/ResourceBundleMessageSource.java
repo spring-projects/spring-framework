@@ -26,6 +26,8 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -298,6 +300,45 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Given a resource bundle basename and Locale, produces a Map containing all
+	 * messages if the resource bundle exists.
+	 *
+	 * @param basename the ResourceBundle basename to lookup.
+	 * @param locale the Locale to use.
+	 * @return a Map of messages if found.
+	 */
+	public Map<String, Object> getMessageMap(String basename, Locale locale) {
+		ResourceBundle resourceBundle = getResourceBundle(basename, locale);
+		if(resourceBundle == null) return Collections.emptyMap();
+
+		Map<String, Object> messages = new HashMap<>();
+		Enumeration<String> keys = resourceBundle.getKeys();
+
+		while(keys.hasMoreElements()) {
+			String key = keys.nextElement();
+			Object value = resourceBundle.getObject(key);
+			messages.put(key, value);
+		}
+
+		return messages;
+	}
+
+	/**
+	 * Given a Locale, produces a Map containing all messages for the first basename
+	 * in the basename set.
+	 *
+	 * @param locale the Locale to use.
+	 * @return a Map of messages if found.
+	 */
+	public Map<String, Object> getMessageMap(Locale locale) {
+		Set<String> basenames = getBasenameSet();
+		for (String basename : basenames) {
+			return getMessageMap(basename, locale);
+		}
+		return Collections.emptyMap();
 	}
 
 	/**
