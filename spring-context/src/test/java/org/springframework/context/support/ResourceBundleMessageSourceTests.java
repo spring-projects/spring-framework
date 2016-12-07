@@ -18,6 +18,7 @@ package org.springframework.context.support;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
@@ -407,6 +408,18 @@ public class ResourceBundleMessageSourceTests {
 		MessageSourceResourceBundle rbg = new MessageSourceResourceBundle(ms, Locale.GERMAN);
 		assertEquals("nachricht2", rbg.getString("code2"));
 		assertTrue(rbg.containsKey("code2"));
+	}
+
+	@Test
+	public void testMessageSourceResourceBundleMap() {
+		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
+		ms.setBasename("org/springframework/context/support/messages");
+		Map<String, Object> englishMesages = ms.getMessageMap(Locale.ENGLISH);
+		assertTrue(englishMesages.containsKey("code1"));
+		assertEquals("message1", englishMesages.get("code1"));
+		Map<String, Object> germanMessages = ms.getMessageMap(Locale.GERMAN);
+		assertTrue(germanMessages.containsKey("code2"));
+		assertEquals("nachricht2", germanMessages.get("code2"));
 	}
 
 
