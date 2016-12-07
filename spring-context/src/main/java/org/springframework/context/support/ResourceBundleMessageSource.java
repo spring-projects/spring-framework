@@ -336,7 +336,8 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	public Map<String, Object> getMessageMap(Locale locale) {
 		Set<String> basenames = getBasenameSet();
 		for (String basename : basenames) {
-			return getMessageMap(basename, locale);
+		    Map<String, Object> messages = getMessageMap(basename, locale);
+			if (!messages.isEmpty()) return messages;
 		}
 		return Collections.emptyMap();
 	}
