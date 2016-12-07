@@ -121,9 +121,7 @@ class DefaultClientRequestBuilder implements ClientRequest.BodyBuilder {
 
 	@Override
 	public ClientRequest<Void> build() {
-		return body(BodyInserter.of(
-				(response, configuration) -> response.setComplete(),
-				() -> null));
+		return body(BodyInserters.empty());
 	}
 
 	@Override
@@ -190,11 +188,6 @@ class DefaultClientRequestBuilder implements ClientRequest.BodyBuilder {
 		@Override
 		public MultiValueMap<String, String> cookies() {
 			return this.cookies;
-		}
-
-		@Override
-		public T body() {
-			return this.inserter.t();
 		}
 
 		@Override

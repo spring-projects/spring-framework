@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -97,17 +96,17 @@ public class PublisherHandlerFunctionIntegrationTests
 
 	private static class PersonHandler {
 
-		public ServerResponse<Publisher<Person>> mono(ServerRequest request) {
+		public Mono<ServerResponse> mono(ServerRequest request) {
 			Person person = new Person("John");
 			return ServerResponse.ok().body(fromPublisher(Mono.just(person), Person.class));
 		}
 
-		public ServerResponse<Publisher<Person>> postMono(ServerRequest request) {
+		public Mono<ServerResponse> postMono(ServerRequest request) {
 			Mono<Person> personMono = request.body(toMono(Person.class));
 			return ServerResponse.ok().body(fromPublisher(personMono, Person.class));
 		}
 
-		public ServerResponse<Publisher<Person>> flux(ServerRequest request) {
+		public Mono<ServerResponse> flux(ServerRequest request) {
 			Person person1 = new Person("John");
 			Person person2 = new Person("Jane");
 			return ServerResponse.ok().body(

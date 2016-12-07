@@ -17,44 +17,26 @@
 package org.springframework.web.reactive.function;
 
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
+import java.util.Set;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
-import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.BodyInserter;
-import org.springframework.http.codec.EncoderHttpMessageWriter;
-import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.web.reactive.result.view.View;
-import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -65,130 +47,203 @@ public class DefaultServerResponseBuilderTests {
 
 	@Test
 	public void from() throws Exception {
-		ServerResponse<Void> other = ServerResponse.ok().header("foo", "bar").build();
-		ServerResponse<Void> result = ServerResponse.from(other).build();
-		assertEquals(HttpStatus.OK, result.statusCode());
-		assertEquals("bar", result.headers().getFirst("foo"));
+		ServerResponse other = ServerResponse.ok().header("foo", "bar").build().block();
+		Mono<ServerResponse> result = ServerResponse.from(other).build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> HttpStatus.OK.equals(response.statusCode()) &&
+						"bar".equals(response.headers().getFirst("foo")))
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
 	public void status() throws Exception {
-		ServerResponse<Void> result = ServerResponse.status(HttpStatus.CREATED).build();
-		assertEquals(HttpStatus.CREATED, result.statusCode());
+		Mono<ServerResponse> result = ServerResponse.status(HttpStatus.CREATED).build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> HttpStatus.CREATED.equals(response.statusCode()))
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
 	public void ok() throws Exception {
-		ServerResponse<Void> result = ServerResponse.ok().build();
-		assertEquals(HttpStatus.OK, result.statusCode());
+		Mono<ServerResponse> result = ServerResponse.ok().build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> HttpStatus.OK.equals(response.statusCode()))
+				.expectComplete()
+				.verify();
+
 	}
 
 	@Test
 	public void created() throws Exception {
 		URI location = URI.create("http://example.com");
-		ServerResponse<Void> result = ServerResponse.created(location).build();
-		assertEquals(HttpStatus.CREATED, result.statusCode());
-		assertEquals(location, result.headers().getLocation());
+		Mono<ServerResponse> result = ServerResponse.created(location).build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> HttpStatus.CREATED.equals(response.statusCode()) &&
+						location.equals(response.headers().getLocation()))
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
 	public void accepted() throws Exception {
-		ServerResponse<Void> result = ServerResponse.accepted().build();
-		assertEquals(HttpStatus.ACCEPTED, result.statusCode());
+		Mono<ServerResponse> result = ServerResponse.accepted().build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> HttpStatus.ACCEPTED.equals(response.statusCode()))
+				.expectComplete()
+				.verify();
+
 	}
 
 	@Test
 	public void noContent() throws Exception {
-		ServerResponse<Void> result = ServerResponse.noContent().build();
-		assertEquals(HttpStatus.NO_CONTENT, result.statusCode());
+		Mono<ServerResponse> result = ServerResponse.noContent().build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> HttpStatus.NO_CONTENT.equals(response.statusCode()))
+				.expectComplete()
+				.verify();
+
 	}
 
 	@Test
 	public void badRequest() throws Exception {
-		ServerResponse<Void> result = ServerResponse.badRequest().build();
-		assertEquals(HttpStatus.BAD_REQUEST, result.statusCode());
+		Mono<ServerResponse> result = ServerResponse.badRequest().build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> HttpStatus.BAD_REQUEST.equals(response.statusCode()))
+				.expectComplete()
+				.verify();
+
 	}
 
 	@Test
 	public void notFound() throws Exception {
-		ServerResponse<Void> result = ServerResponse.notFound().build();
-		assertEquals(HttpStatus.NOT_FOUND, result.statusCode());
+		Mono<ServerResponse> result = ServerResponse.notFound().build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> HttpStatus.NOT_FOUND.equals(response.statusCode()))
+				.expectComplete()
+				.verify();
+
 	}
 
 	@Test
 	public void unprocessableEntity() throws Exception {
-		ServerResponse<Void> result = ServerResponse.unprocessableEntity().build();
-		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, result.statusCode());
+		Mono<ServerResponse> result = ServerResponse.unprocessableEntity().build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> HttpStatus.UNPROCESSABLE_ENTITY.equals(response.statusCode()))
+				.expectComplete()
+				.verify();
+
 	}
 
 	@Test
 	public void allow() throws Exception {
-		ServerResponse<Void> result = ServerResponse.ok().allow(HttpMethod.GET).build();
-		assertEquals(Collections.singleton(HttpMethod.GET), result.headers().getAllow());
+		Mono<ServerResponse> result = ServerResponse.ok().allow(HttpMethod.GET).build();
+		Set<HttpMethod> expected = EnumSet.of(HttpMethod.GET);
+		StepVerifier.create(result)
+				.expectNextMatches(response -> expected.equals(response.headers().getAllow()))
+				.expectComplete()
+				.verify();
+
 	}
 
 	@Test
 	public void contentLength() throws Exception {
-		ServerResponse<Void> result = ServerResponse.ok().contentLength(42).build();
-		assertEquals(42, result.headers().getContentLength());
+		Mono<ServerResponse> result = ServerResponse.ok().contentLength(42).build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> Long.valueOf(42).equals(response.headers().getContentLength()))
+				.expectComplete()
+				.verify();
+
 	}
 
 	@Test
 	public void contentType() throws Exception {
-		ServerResponse<Void> result = ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).build();
-		assertEquals(MediaType.APPLICATION_JSON, result.headers().getContentType());
+		Mono<ServerResponse>
+				result = ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> MediaType.APPLICATION_JSON.equals(response.headers().getContentType()))
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
 	public void eTag() throws Exception {
-		ServerResponse<Void> result = ServerResponse.ok().eTag("foo").build();
-		assertEquals("\"foo\"", result.headers().getETag());
+		Mono<ServerResponse> result = ServerResponse.ok().eTag("foo").build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> "\"foo\"".equals(response.headers().getETag()))
+				.expectComplete()
+				.verify();
+
 	}
 
 	@Test
 	public void lastModified() throws Exception {
 		ZonedDateTime now = ZonedDateTime.now();
-		ServerResponse<Void> result = ServerResponse.ok().lastModified(now).build();
-		assertEquals(now.toInstant().toEpochMilli()/1000, result.headers().getLastModified()/1000);
+		Mono<ServerResponse> result = ServerResponse.ok().lastModified(now).build();
+		Long expected = now.toInstant().toEpochMilli() / 1000;
+		StepVerifier.create(result)
+				.expectNextMatches(response -> expected.equals(response.headers().getLastModified() / 1000))
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
 	public void cacheControlTag() throws Exception {
-		ServerResponse<Void> result = ServerResponse.ok().cacheControl(CacheControl.noCache()).build();
-		assertEquals("no-cache", result.headers().getCacheControl());
+		Mono<ServerResponse>
+				result = ServerResponse.ok().cacheControl(CacheControl.noCache()).build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> "no-cache".equals(response.headers().getCacheControl()))
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
 	public void varyBy() throws Exception {
-		ServerResponse<Void> result = ServerResponse.ok().varyBy("foo").build();
-		assertEquals(Collections.singletonList("foo"), result.headers().getVary());
+		Mono<ServerResponse> result = ServerResponse.ok().varyBy("foo").build();
+		List<String> expected = Collections.singletonList("foo");
+		StepVerifier.create(result)
+				.expectNextMatches(response -> expected.equals(response.headers().getVary()))
+				.expectComplete()
+				.verify();
+
 	}
 
 	@Test
 	public void statusCode() throws Exception {
 		HttpStatus statusCode = HttpStatus.ACCEPTED;
-		ServerResponse<Void> result = ServerResponse.status(statusCode).build();
-		assertSame(statusCode, result.statusCode());
+		Mono<ServerResponse> result = ServerResponse.status(statusCode).build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> statusCode.equals(response.statusCode()))
+				.expectComplete()
+				.verify();
+
 	}
 
 	@Test
 	public void headers() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
-		ServerResponse<Void> result = ServerResponse.ok().headers(headers).build();
-		assertEquals(headers, result.headers());
+		Mono<ServerResponse> result = ServerResponse.ok().headers(headers).build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> headers.equals(response.headers()))
+				.expectComplete()
+				.verify();
+
 	}
 
 	@Test
 	public void build() throws Exception {
-		ServerResponse<Void> result = ServerResponse.status(HttpStatus.CREATED).header("MyKey", "MyValue").build();
+		Mono<ServerResponse>
+				result = ServerResponse.status(HttpStatus.CREATED).header("MyKey", "MyValue").build();
 
 		ServerWebExchange exchange = mock(ServerWebExchange.class);
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		when(exchange.getResponse()).thenReturn(response);
 		HandlerStrategies strategies = mock(HandlerStrategies.class);
 
-		result.writeTo(exchange, strategies).block();
-		assertEquals(201, response.getStatusCode().value());
+		result.then(res -> res.writeTo(exchange, strategies)).block();
+
+		assertEquals(HttpStatus.CREATED, response.getStatusCode());
 		assertEquals("MyValue", response.getHeaders().getFirst("MyKey"));
 		assertNull(response.getBody());
 
@@ -197,21 +252,25 @@ public class DefaultServerResponseBuilderTests {
 	@Test
 	public void buildVoidPublisher() throws Exception {
 		Mono<Void> mono = Mono.empty();
-		ServerResponse<Mono<Void>> result = ServerResponse.ok().build(mono);
+		Mono<ServerResponse> result = ServerResponse.ok().build(mono);
 
 		ServerWebExchange exchange = mock(ServerWebExchange.class);
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		when(exchange.getResponse()).thenReturn(response);
 		HandlerStrategies strategies = mock(HandlerStrategies.class);
 
-		result.writeTo(exchange, strategies).block();
+		result.then(res -> res.writeTo(exchange, strategies)).block();
+
 		assertNull(response.getBody());
 	}
+
+/*
+TODO: enable when ServerEntityResponse is reintroduced
 
 	@Test
 	public void bodyInserter() throws Exception {
 		String body = "foo";
-		Supplier<String> supplier = () -> body;
+		Publisher<String> publisher = Mono.just(body);
 		BiFunction<ServerHttpResponse, BodyInserter.Context, Mono<Void>> writer =
 				(response, strategies) -> {
 					byte[] bodyBytes = body.getBytes(UTF_8);
@@ -221,14 +280,13 @@ public class DefaultServerResponseBuilderTests {
 					return response.writeWith(Mono.just(buffer));
 				};
 
-		ServerResponse<String> result = ServerResponse.ok().body(BodyInserter.of(writer, supplier));
-		assertEquals(body, result.body());
+		Mono<ServerResponse> result = ServerResponse.ok().body(BodyInserter.of(writer, publisher));
 
 		MockServerHttpRequest request =
 				new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
-		MockServerHttpResponse response = new MockServerHttpResponse();
+		MockServerHttpResponse mockResponse = new MockServerHttpResponse();
 		ServerWebExchange exchange =
-				new DefaultServerWebExchange(request, response, new MockWebSessionManager());
+				new DefaultServerWebExchange(request, mockResponse, new MockWebSessionManager());
 
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 		messageWriters.add(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder()));
@@ -236,21 +294,32 @@ public class DefaultServerResponseBuilderTests {
 		HandlerStrategies strategies = mock(HandlerStrategies.class);
 		when(strategies.messageWriters()).thenReturn(messageWriters::stream);
 
-		result.writeTo(exchange, strategies).block();
-		assertNotNull(response.getBody());
-	}
+		StepVerifier.create(result)
+				.consumeNextWith(response -> {
+					StepVerifier.create(response.body())
+							.expectNext(body)
+							.expectComplete()
+							.verify();
+					response.writeTo(exchange, strategies);
+				})
+				.expectComplete()
+				.verify();
 
+		assertNotNull(mockResponse.getBody());
+	}
+*/
+
+/*
+TODO: enable when ServerEntityResponse is reintroduced
 	@Test
 	public void render() throws Exception {
 		Map<String, Object> model = Collections.singletonMap("foo", "bar");
-		ServerResponse<Rendering> result = ServerResponse.ok().render("view", model);
+		Mono<ServerResponse> result = ServerResponse.ok().render("view", model);
 
-		assertEquals("view", result.body().name());
-		assertEquals(model, result.body().model());
 
 		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, URI.create("http://localhost"));
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		ServerWebExchange exchange = new DefaultServerWebExchange(request, response, new MockWebSessionManager());
+		MockServerHttpResponse mockResponse = new MockServerHttpResponse();
+		ServerWebExchange exchange = new DefaultServerWebExchange(request, mockResponse, new MockWebSessionManager());
 		ViewResolver viewResolver = mock(ViewResolver.class);
 		View view = mock(View.class);
 		when(viewResolver.resolveViewName("view", Locale.ENGLISH)).thenReturn(Mono.just(view));
@@ -262,17 +331,37 @@ public class DefaultServerResponseBuilderTests {
 		HandlerStrategies mockConfig = mock(HandlerStrategies.class);
 		when(mockConfig.viewResolvers()).thenReturn(viewResolvers::stream);
 
-		result.writeTo(exchange, mockConfig).block();
+		StepVerifier.create(result)
+				.consumeNextWith(response -> {
+					StepVerifier.create(response.body())
+							.expectNextMatches(rendering -> "view".equals(rendering.name())
+									&& model.equals(rendering.model()))
+							.expectComplete()
+							.verify();
+				})
+				.expectComplete()
+				.verify();
 	}
+*/
+
+/*
+TODO: enable when ServerEntityResponse is reintroduced
 
 	@Test
 	public void renderObjectArray() throws Exception {
-		ServerResponse<Rendering> result =
+		Mono<ServerResponse> result =
 				ServerResponse.ok().render("name", this, Collections.emptyList(), "foo");
-		Map<String, Object> model = result.body().model();
-		assertEquals(2, model.size());
-		assertEquals(this, model.get("defaultServerResponseBuilderTests"));
-		assertEquals("foo", model.get("string"));
+		Flux<Rendering> map = result.flatMap(ServerResponse::body);
+
+		Map<String, Object> expected = new HashMap<>(2);
+		expected.put("defaultServerResponseBuilderTests", this);
+		expected.put("string", "foo");
+
+		StepVerifier.create(map)
+				.expectNextMatches(rendering -> expected.equals(rendering.model()))
+				.expectComplete()
+				.verify();
 	}
+*/
 
 }

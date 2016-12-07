@@ -16,17 +16,16 @@
 
 package org.springframework.web.reactive.function;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
-import java.util.Optional;
 
 import org.junit.Test;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma
@@ -38,14 +37,23 @@ public class PathResourceLookupFunctionTests {
 		ClassPathResource location = new ClassPathResource("org/springframework/web/reactive/function/");
 
 		PathResourceLookupFunction function = new PathResourceLookupFunction("/resources/**", location);
-		MockServerRequest<Void> request = MockServerRequest.builder()
+		MockServerRequest request = MockServerRequest.builder()
 				.uri(new URI("http://localhost/resources/response.txt"))
 				.build();
-		Optional<Resource> result = function.apply(request);
-		assertTrue(result.isPresent());
+		Mono<Resource> result = function.apply(request);
 
-		ClassPathResource expected = new ClassPathResource("response.txt", getClass());
-		assertEquals(expected.getFile(), result.get().getFile());
+		File expected = new ClassPathResource("response.txt", getClass()).getFile();
+		StepVerifier.create(result)
+				.expectNextMatches(resource -> {
+					try {
+						return expected.equals(resource.getFile());
+					}
+					catch (IOException ex) {
+						return false;
+					}
+				})
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
@@ -53,14 +61,22 @@ public class PathResourceLookupFunctionTests {
 		ClassPathResource location = new ClassPathResource("org/springframework/web/reactive/function/");
 
 		PathResourceLookupFunction function = new PathResourceLookupFunction("/resources/**", location);
-		MockServerRequest<Void> request = MockServerRequest.builder()
+		MockServerRequest request = MockServerRequest.builder()
 				.uri(new URI("http://localhost/resources/child/response.txt"))
 				.build();
-		Optional<Resource> result = function.apply(request);
-		assertTrue(result.isPresent());
-
-		ClassPathResource expected = new ClassPathResource("org/springframework/web/reactive/function/child/response.txt");
-		assertEquals(expected.getFile(), result.get().getFile());
+		Mono<Resource> result = function.apply(request);
+		File expected = new ClassPathResource("org/springframework/web/reactive/function/child/response.txt").getFile();
+		StepVerifier.create(result)
+				.expectNextMatches(resource -> {
+					try {
+						return expected.equals(resource.getFile());
+					}
+					catch (IOException ex) {
+						return false;
+					}
+				})
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
@@ -68,11 +84,13 @@ public class PathResourceLookupFunctionTests {
 		ClassPathResource location = new ClassPathResource("org/springframework/web/reactive/function/");
 
 		PathResourceLookupFunction function = new PathResourceLookupFunction("/resources/**", location);
-		MockServerRequest<Void> request = MockServerRequest.builder()
+		MockServerRequest request = MockServerRequest.builder()
 				.uri(new URI("http://localhost/resources/foo"))
 				.build();
-		Optional<Resource> result = function.apply(request);
-		assertFalse(result.isPresent());
+		Mono<Resource> result = function.apply(request);
+		StepVerifier.create(result)
+				.expectComplete()
+				.verify();
 	}
 
 }

@@ -57,17 +57,23 @@ public class ResourceHandlerFunctionTests {
 
 		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults());
 
-		ServerResponse<Resource> response = this.handlerFunction.handle(request);
-		assertEquals(HttpStatus.OK, response.statusCode());
-		assertEquals(this.resource, response.body());
+		Mono<ServerResponse> responseMono = this.handlerFunction.handle(request);
 
-		Mono<Void> result = response.writeTo(exchange, HandlerStrategies.withDefaults());
+		Mono<Void> result = responseMono.then(response -> {
+					assertEquals(HttpStatus.OK, response.statusCode());
+/*
+TODO: enable when ServerEntityResponse is reintroduced
+					StepVerifier.create(response.body())
+							.expectNext(this.resource)
+							.expectComplete()
+							.verify();
+*/
+					return response.writeTo(exchange, HandlerStrategies.withDefaults());
+				});
 
 		StepVerifier.create(result)
 				.expectComplete()
 				.verify();
-
-		StepVerifier.create(result).expectComplete().verify();
 
 		byte[] expectedBytes = Files.readAllBytes(this.resource.getFile().toPath());
 
@@ -93,10 +99,12 @@ public class ResourceHandlerFunctionTests {
 
 		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults());
 
-		ServerResponse<Resource> response = this.handlerFunction.handle(request);
-		assertEquals(HttpStatus.OK, response.statusCode());
+		Mono<ServerResponse> response = this.handlerFunction.handle(request);
 
-		Mono<Void> result = response.writeTo(exchange, HandlerStrategies.withDefaults());
+		Mono<Void> result = response.then(res -> {
+			assertEquals(HttpStatus.OK, res.statusCode());
+			return res.writeTo(exchange, HandlerStrategies.withDefaults());
+		});
 
 		StepVerifier.create(result)
 				.expectComplete()
@@ -121,14 +129,20 @@ public class ResourceHandlerFunctionTests {
 
 		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults());
 
-		ServerResponse<Resource> response = this.handlerFunction.handle(request);
+		Mono<ServerResponse> responseMono = this.handlerFunction.handle(request);
+		Mono<Void> result = responseMono.then(response -> {
+			assertEquals(HttpStatus.OK, response.statusCode());
+			assertEquals(EnumSet.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS),
+					response.headers().getAllow());
+/*
+TODO: enable when ServerEntityResponse is reintroduced
+			StepVerifier.create(response.body())
+					.expectComplete()
+					.verify();
+*/
+			return response.writeTo(exchange, HandlerStrategies.withDefaults());
+		});
 
-		assertEquals(HttpStatus.OK, response.statusCode());
-		assertEquals(EnumSet.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS),
-				response.headers().getAllow());
-		assertNull(response.body());
-
-		Mono<Void> result = response.writeTo(exchange, HandlerStrategies.withDefaults());
 
 		StepVerifier.create(result)
 				.expectComplete()

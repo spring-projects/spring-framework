@@ -33,7 +33,7 @@ import org.springframework.http.ReactiveHttpInputMessage;
 public interface BodyExtractor<T, M extends ReactiveHttpInputMessage> {
 
 	/**
-	 * Extract from the given request.
+	 * Extract from the given input message.
 	 * @param inputMessage request to extract from
 	 * @param context the configuration to use
 	 * @return the extracted data

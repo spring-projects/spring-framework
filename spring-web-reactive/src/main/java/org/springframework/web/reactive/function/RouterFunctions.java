@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.function;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
@@ -63,7 +62,7 @@ public abstract class RouterFunctions {
 	public static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE =
 			RouterFunctions.class.getName() + ".uriTemplateVariables";
 
-	private static final HandlerFunction<Void> NOT_FOUND_HANDLER = request -> ServerResponse.notFound().build();
+	private static final HandlerFunction<ServerResponse> NOT_FOUND_HANDLER = request -> ServerResponse.notFound().build();
 
 
 	/**
@@ -75,11 +74,13 @@ public abstract class RouterFunctions {
 	 * {@code predicate} evaluates to {@code true}
 	 * @see RequestPredicates
 	 */
-	public static <T> RouterFunction<T> route(RequestPredicate predicate, HandlerFunction<T> handlerFunction) {
+	public static <T extends ServerResponse> RouterFunction<T> route(RequestPredicate predicate,
+			HandlerFunction<T> handlerFunction) {
+
 		Assert.notNull(predicate, "'predicate' must not be null");
 		Assert.notNull(handlerFunction, "'handlerFunction' must not be null");
 
-		return request -> predicate.test(request) ? Optional.of(handlerFunction) : Optional.empty();
+		return request -> predicate.test(request) ? Mono.just(handlerFunction) : Mono.empty();
 	}
 
 	/**
@@ -91,7 +92,9 @@ public abstract class RouterFunctions {
 	 * {@code predicate} evaluates to {@code true}
 	 * @see RequestPredicates
 	 */
-	public static <T> RouterFunction<T> subroute(RequestPredicate predicate, RouterFunction<T> routerFunction) {
+	public static <T extends ServerResponse> RouterFunction<T> subroute(RequestPredicate predicate,
+			RouterFunction<T> routerFunction) {
+
 		Assert.notNull(predicate, "'predicate' must not be null");
 		Assert.notNull(routerFunction, "'routerFunction' must not be null");
 
@@ -101,7 +104,7 @@ public abstract class RouterFunctions {
 				return routerFunction.route(subRequest);
 			}
 			else {
-				return Optional.empty();
+				return Mono.empty();
 			}
 		};
 	}
@@ -117,7 +120,7 @@ public abstract class RouterFunctions {
 	 * @param location the location directory relative to which resources should be resolved
 	 * @return a router function that routes to resources
 	 */
-	public static RouterFunction<Resource> resources(String pattern, Resource location) {
+	public static RouterFunction<ServerResponse> resources(String pattern, Resource location) {
 		Assert.hasLength(pattern, "'pattern' must not be empty");
 		Assert.notNull(location, "'location' must not be null");
 
@@ -131,12 +134,10 @@ public abstract class RouterFunctions {
 	 * @param lookupFunction the function to provide a {@link Resource} given the {@link ServerRequest}
 	 * @return a router function that routes to resources
 	 */
-	public static RouterFunction<Resource> resources(Function<ServerRequest, Optional<Resource>> lookupFunction) {
+	public static RouterFunction<ServerResponse> resources(Function<ServerRequest, Mono<Resource>> lookupFunction) {
 		Assert.notNull(lookupFunction, "'lookupFunction' must not be null");
 
-		// TODO: make lookupFunction return Mono<Resource> once SPR-14870 is resolved
 		return request -> lookupFunction.apply(request).map(ResourceHandlerFunction::new);
-
 	}
 
 	/**
@@ -190,9 +191,10 @@ public abstract class RouterFunctions {
 		return new HttpWebHandlerAdapter(exchange -> {
 			ServerRequest request = new DefaultServerRequest(exchange, strategies);
 			addAttributes(exchange, request);
-			HandlerFunction<?> handlerFunction = routerFunction.route(request).orElse(notFound());
-			ServerResponse<?> response = handlerFunction.handle(request);
-			return response.writeTo(exchange, strategies);
+			return routerFunction.route(request)
+					.defaultIfEmpty(notFound())
+					.then(handlerFunction -> handlerFunction.handle(request))
+					.then(response -> response.writeTo(exchange, strategies));
 		});
 	}
 
@@ -225,11 +227,13 @@ public abstract class RouterFunctions {
 		Assert.notNull(routerFunction, "RouterFunction must not be null");
 		Assert.notNull(strategies, "HandlerStrategies must not be null");
 
-		return exchange -> {
-			ServerRequest request = new DefaultServerRequest(exchange, strategies);
-			addAttributes(exchange, request);
-			Optional<? extends HandlerFunction<?>> route = routerFunction.route(request);
-			return Mono.justOrEmpty(route);
+		return new HandlerMapping() {
+			@Override
+			public Mono<Object> getHandler(ServerWebExchange exchange) {
+				ServerRequest request = new DefaultServerRequest(exchange, strategies);
+				addAttributes(exchange, request);
+				return routerFunction.route(request).map(handlerFunction -> (Object)handlerFunction);
+			}
 		};
 	}
 
@@ -240,12 +244,12 @@ public abstract class RouterFunctions {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> HandlerFunction<T> notFound() {
+	private static <T extends ServerResponse> HandlerFunction<T> notFound() {
 		return (HandlerFunction<T>) NOT_FOUND_HANDLER;
 	}
 
 	@SuppressWarnings("unchecked")
-	static <T> HandlerFunction<T> cast(HandlerFunction<?> handlerFunction) {
+	static <T extends ServerResponse> HandlerFunction<T> cast(HandlerFunction<?> handlerFunction) {
 		return (HandlerFunction<T>) handlerFunction;
 	}
 

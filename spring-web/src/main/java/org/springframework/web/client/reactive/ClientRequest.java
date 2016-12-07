@@ -68,11 +68,6 @@ public interface ClientRequest<T> {
 	MultiValueMap<String, String> cookies();
 
 	/**
-	 * Return the body of this request.
-	 */
-	T body();
-
-	/**
 	 * Return the body inserter of this request.
 	 */
 	BodyInserter<T, ? super ClientHttpRequest> inserter();
