@@ -104,12 +104,15 @@ public abstract class AbstractWebSocketHandlerIntegrationTests {
 
 		@Bean
 		public WebSocketHandlerAdapter handlerAdapter() {
-			RequestUpgradeStrategy strategy = createUpgradeStrategy();
-			WebSocketService service = new HandshakeWebSocketService(strategy);
-			return new WebSocketHandlerAdapter(service);
+			return new WebSocketHandlerAdapter(webSocketService());
 		}
 
-		protected abstract RequestUpgradeStrategy createUpgradeStrategy();
+		@Bean
+		public WebSocketService webSocketService() {
+			return new HandshakeWebSocketService(getUpgradeStrategy());
+		}
+
+		protected abstract RequestUpgradeStrategy getUpgradeStrategy();
 
 	}
 
@@ -117,7 +120,7 @@ public abstract class AbstractWebSocketHandlerIntegrationTests {
 	static class ReactorNettyConfig extends AbstractHandlerAdapterConfig {
 
 		@Override
-		protected RequestUpgradeStrategy createUpgradeStrategy() {
+		protected RequestUpgradeStrategy getUpgradeStrategy() {
 			return new ReactorNettyRequestUpgradeStrategy();
 		}
 	}
@@ -126,7 +129,7 @@ public abstract class AbstractWebSocketHandlerIntegrationTests {
 	static class RxNettyConfig extends AbstractHandlerAdapterConfig {
 
 		@Override
-		protected RequestUpgradeStrategy createUpgradeStrategy() {
+		protected RequestUpgradeStrategy getUpgradeStrategy() {
 			return new RxNettyRequestUpgradeStrategy();
 		}
 	}

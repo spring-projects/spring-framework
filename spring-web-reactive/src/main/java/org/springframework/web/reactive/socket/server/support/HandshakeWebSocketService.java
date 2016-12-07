@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -43,7 +44,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class HandshakeWebSocketService implements WebSocketService {
+public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 	private static final String SEC_WEBSOCKET_KEY = "Sec-WebSocket-Key";
 
@@ -57,6 +58,8 @@ public class HandshakeWebSocketService implements WebSocketService {
 
 
 	private final RequestUpgradeStrategy upgradeStrategy;
+
+	private volatile boolean running = false;
 
 
 	/**
@@ -102,6 +105,39 @@ public class HandshakeWebSocketService implements WebSocketService {
 	 */
 	public RequestUpgradeStrategy getUpgradeStrategy() {
 		return this.upgradeStrategy;
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
+	}
+
+	@Override
+	public void start() {
+		if (!isRunning()) {
+			this.running = true;
+			doStart();
+		}
+	}
+
+	protected void doStart() {
+		if (getUpgradeStrategy() instanceof Lifecycle) {
+			((Lifecycle) getUpgradeStrategy()).start();
+		}
+	}
+
+	@Override
+	public void stop() {
+		if (isRunning()) {
+			this.running = false;
+			doStop();
+		}
+	}
+
+	protected void doStop() {
+		if (getUpgradeStrategy() instanceof Lifecycle) {
+			((Lifecycle) getUpgradeStrategy()).stop();
+		}
 	}
 
 
