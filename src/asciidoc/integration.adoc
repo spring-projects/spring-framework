@@ -1014,21 +1014,21 @@ RestTemplate has an asynchronous counter-part: see <<rest-async-resttemplate>>.
 
 | HEAD
 | {api-spring-framework}/web/client/RestTemplate.html#headForHeaders(String,%20Object...)[headForHeaders(String
-  url, String... urlVariables)]
+  url, String... uriVariables)]
 
 | OPTIONS
 | {api-spring-framework}/web/client/RestTemplate.html#optionsForAllow(String,%20Object...)[optionsForAllow(String
-  url, String... urlVariables)]
+  url, String... uriVariables)]
 
 | POST
 | {api-spring-framework}/web/client/RestTemplate.html#postForLocation(String,%20Object,%20Object...)[postForLocation(String
-  url, Object request, String... urlVariables)]
+  url, Object request, String... uriVariables)]
   {api-spring-framework}/web/client/RestTemplate.html#postForObject(java.lang.String,%20java.lang.Object,%20java.lang.Class,%20java.lang.String...)[postForObject(String
   url, Object request, Class<T> responseType, String... uriVariables)]
 
 | PUT
 | {api-spring-framework}/web/client/RestTemplate.html#put(String,%20Object,%20Object...)[put(String
-  url, Object request, String...urlVariables)]
+  url, Object request, String...uriVariables)]
 
 | PATCH and others
 | {api-spring-framework}/web/client/RestTemplate.html#exchange(java.lang.String,%20org.springframework.http.HttpMethod,%20org.springframework.http.HttpEntity,%20java.lang.Class,%20java.lang.Object...)[exchange]
@@ -1063,8 +1063,8 @@ template are `ByteArrayHttpMessageConverter`, `StringHttpMessageConverter`,
 defaults using the `messageConverters()` bean property as would be required if using the
 `MarshallingHttpMessageConverter` or `MappingJackson2HttpMessageConverter`.
 
-Each method takes URI template arguments in two forms, either as a `String` variable
-length argument or a `Map<String,String>`. For example,
+Each method takes URI template arguments in two forms, either as a `String`
+variable-length argument or a `Map<String,String>`. For example,
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1073,7 +1073,7 @@ length argument or a `Map<String,String>`. For example,
 			"http://example.com/hotels/{hotel}/bookings/{booking}", String.class,"42", "21");
 ----
 
-using variable length arguments and
+using variable-length arguments and
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1146,9 +1146,9 @@ method is invoked.
 [subs="verbatim,quotes"]
 ----
 	public <T> T execute(String url, HttpMethod method, RequestCallback requestCallback,
-			ResponseExtractor<T> responseExtractor, String... urlVariables)
+			ResponseExtractor<T> responseExtractor, String... uriVariables)
 
-	// also has an overload with urlVariables as a Map<String, String>.
+	// also has an overload with uriVariables as a Map<String, String>.
 ----
 
 The `RequestCallback` interface is defined as
@@ -1173,7 +1173,7 @@ other method arguments.
 For each of the main HTTP methods, the `RestTemplate` provides variants that either take
 a String URI or `java.net.URI` as the first argument.
 
-The String URI variants accept template arguments as a String variable length argument
+The String URI variants accept template arguments as a String variable-length argument
 or as a `Map<String,String>`. They also assume the URL String is not encoded and needs
 to be encoded. For example the following:
 
