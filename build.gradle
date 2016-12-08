@@ -55,7 +55,7 @@ configure(allprojects) { project ->
 	ext.jackson2Version      = "2.8.4"
 	ext.jasperreportsVersion = "6.2.1"  // our tests fail with JR-internal NPEs against 6.2.2 and higher
 	ext.javamailVersion      = "1.5.6"
-	ext.jettyVersion         = "9.3.13.v20161014"
+	ext.jettyVersion         = "9.4.0.RC3"
 	ext.jodaVersion          = "2.9.6"
 	ext.jrubyVersion         = "1.7.26"  // JRuby 9000 only supported through JSR-223 (StandardScriptFactory)
 	ext.jtaVersion           = "1.2"
