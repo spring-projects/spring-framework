@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
+import org.springframework.http.server.reactive.bootstrap.JettyHttpServer;
 import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
 import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
 import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
@@ -39,6 +40,7 @@ import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.socket.server.support.HandshakeWebSocketService;
 import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyRequestUpgradeStrategy;
+import org.springframework.web.reactive.socket.server.upgrade.JettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.RxNettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.TomcatRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpgradeStrategy;
@@ -71,7 +73,8 @@ public abstract class AbstractWebSocketHandlerIntegrationTests {
 				{new ReactorHttpServer(), ReactorNettyConfig.class},
 				{new RxNettyHttpServer(), RxNettyConfig.class},
 				{new TomcatHttpServer(base.getAbsolutePath(), WsContextListener.class), TomcatConfig.class},
-				{new UndertowHttpServer(), UndertowConfig.class}
+				{new UndertowHttpServer(), UndertowConfig.class},
+				{new JettyHttpServer(), JettyConfig.class}
 		};
 	}
 
@@ -159,6 +162,15 @@ public abstract class AbstractWebSocketHandlerIntegrationTests {
 		@Override
 		protected RequestUpgradeStrategy getUpgradeStrategy() {
 			return new UndertowRequestUpgradeStrategy();
+		}
+	}
+
+	@Configuration
+	static class JettyConfig extends AbstractHandlerAdapterConfig {
+
+		@Override
+		protected RequestUpgradeStrategy getUpgradeStrategy() {
+			return new JettyRequestUpgradeStrategy();
 		}
 	}
 
