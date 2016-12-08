@@ -88,13 +88,14 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
+
 	private StompSubProtocolErrorHandler errorHandler;
 
 	private int messageSizeLimit = 64 * 1024;
 
-	private StompEncoder stompEncoder;
+	private StompEncoder stompEncoder = new StompEncoder();
 
-	private StompDecoder stompDecoder;
+	private StompDecoder stompDecoder = new StompDecoder();
 
 	private final Map<String, BufferingStompDecoder> decoders = new ConcurrentHashMap<>();
 
@@ -106,10 +107,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	private final Stats stats = new Stats();
 
-	public StompSubProtocolHandler() {
-		setEncoder(new StompEncoder());
-		setDecoder(new StompDecoder());
-	}
 
 	/**
 	 * Configure a handler for error messages sent to clients which allows
@@ -130,24 +127,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	}
 
 	/**
-	 * Configure a {@link StompEncoder} for encoding STOMP frames
-	 * @param encoder the encoder
-	 * @since 4.3.5
-	 */
-	public void setEncoder(StompEncoder encoder) {
-		this.stompEncoder = encoder;
-	}
-
-	/**
-	 * Configure a {@link StompDecoder} for decoding STOMP frames
-	 * @param decoder the decoder
-	 * @since 4.3.5
-	 */
-	public void setDecoder(StompDecoder decoder) {
-		this.stompDecoder = decoder;
-	}
-
-	/**
 	 * Configure the maximum size allowed for an incoming STOMP message.
 	 * Since a STOMP message can be received in multiple WebSocket messages,
 	 * buffering may be required and therefore it is necessary to know the maximum
@@ -165,6 +144,24 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 */
 	public int getMessageSizeLimit() {
 		return this.messageSizeLimit;
+	}
+
+	/**
+	 * Configure a {@link StompEncoder} for encoding STOMP frames
+	 * @param encoder the encoder
+	 * @since 4.3.5
+	 */
+	public void setEncoder(StompEncoder encoder) {
+		this.stompEncoder = encoder;
+	}
+
+	/**
+	 * Configure a {@link StompDecoder} for decoding STOMP frames
+	 * @param decoder the decoder
+	 * @since 4.3.5
+	 */
+	public void setDecoder(StompDecoder decoder) {
+		this.stompDecoder = decoder;
 	}
 
 	/**

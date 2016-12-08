@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,14 +54,25 @@ public class StompEncoder  {
 
 	private static final int HEADER_KEY_CACHE_LIMIT = 32;
 
+
+	private final Map<String, byte[]> headerKeyAccessCache =
+			new ConcurrentHashMap<>(HEADER_KEY_CACHE_LIMIT);
+
 	@SuppressWarnings("serial")
-	private final Map<String, byte[]> headerKeyCache =
+	private final Map<String, byte[]> headerKeyUpdateCache =
 			new LinkedHashMap<String, byte[]>(HEADER_KEY_CACHE_LIMIT, 0.75f, true) {
 				@Override
 				protected boolean removeEldestEntry(Map.Entry<String, byte[]> eldest) {
-					return size() > HEADER_KEY_CACHE_LIMIT;
+					if (size() > HEADER_KEY_CACHE_LIMIT) {
+						headerKeyAccessCache.remove(eldest.getKey());
+						return true;
+					}
+					else {
+						return false;
+					}
 				}
 			};
+
 
 	/**
 	 * Encodes the given STOMP {@code message} into a {@code byte[]}
@@ -160,21 +172,23 @@ public class StompEncoder  {
 
 	private byte[] encodeHeaderKey(String input, boolean escape) {
 		String inputToUse = (escape ? escape(input) : input);
-		if (headerKeyCache.containsKey(inputToUse)) {
-			return headerKeyCache.get(inputToUse);
+		if (this.headerKeyAccessCache.containsKey(inputToUse)) {
+			return this.headerKeyAccessCache.get(inputToUse);
 		}
-		byte[] bytes = encodeHeaderString(inputToUse);
-		headerKeyCache.put(inputToUse, bytes);
-		return bytes;
+		synchronized (this.headerKeyUpdateCache) {
+			byte[] bytes = this.headerKeyUpdateCache.get(inputToUse);
+			if (bytes == null) {
+				bytes = inputToUse.getBytes(StandardCharsets.UTF_8);
+				this.headerKeyAccessCache.put(inputToUse, bytes);
+				this.headerKeyUpdateCache.put(inputToUse, bytes);
+			}
+			return bytes;
+		}
 	}
 
 	private byte[] encodeHeaderValue(String input, boolean escape) {
 		String inputToUse = (escape ? escape(input) : input);
-		return encodeHeaderString(inputToUse);
-	}
-
-	private byte[] encodeHeaderString(String input) {
-		return input.getBytes(StandardCharsets.UTF_8);
+		return inputToUse.getBytes(StandardCharsets.UTF_8);
 	}
 
 	/**
