@@ -93,9 +93,9 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	private int messageSizeLimit = 64 * 1024;
 
-	private final StompEncoder stompEncoder = new StompEncoder();
+	private StompEncoder stompEncoder = new StompEncoder();
 
-	private final StompDecoder stompDecoder = new StompDecoder();
+	private StompDecoder stompDecoder = new StompDecoder();
 
 	private final Map<String, BufferingStompDecoder> decoders = new ConcurrentHashMap<>();
 
@@ -144,6 +144,24 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	 */
 	public int getMessageSizeLimit() {
 		return this.messageSizeLimit;
+	}
+
+	/**
+	 * Configure a {@link StompEncoder} for encoding STOMP frames
+	 * @param encoder the encoder
+	 * @since 4.3.5
+	 */
+	public void setEncoder(StompEncoder encoder) {
+		this.stompEncoder = encoder;
+	}
+
+	/**
+	 * Configure a {@link StompDecoder} for decoding STOMP frames
+	 * @param decoder the decoder
+	 * @since 4.3.5
+	 */
+	public void setDecoder(StompDecoder decoder) {
+		this.stompDecoder = decoder;
 	}
 
 	/**
