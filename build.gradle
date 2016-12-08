@@ -829,6 +829,9 @@ project("spring-web-reactive") {
 			exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
 			exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
 		}
+		optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
+			exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
+		}
 		testCompile("io.projectreactor.addons:reactor-test:${reactorCoreVersion}")
 		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("org.hibernate:hibernate-validator:${hibval5Version}")

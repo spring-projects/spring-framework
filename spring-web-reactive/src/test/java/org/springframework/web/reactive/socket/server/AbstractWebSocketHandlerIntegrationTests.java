@@ -33,6 +33,7 @@ import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
 import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
+import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.socket.server.support.HandshakeWebSocketService;
@@ -40,6 +41,7 @@ import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAd
 import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.RxNettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.TomcatRequestUpgradeStrategy;
+import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpgradeStrategy;
 
 /**
  * Base class for WebSocket integration tests involving a server-side
@@ -68,7 +70,8 @@ public abstract class AbstractWebSocketHandlerIntegrationTests {
 		return new Object[][] {
 				{new ReactorHttpServer(), ReactorNettyConfig.class},
 				{new RxNettyHttpServer(), RxNettyConfig.class},
-				{new TomcatHttpServer(base.getAbsolutePath(), WsContextListener.class), TomcatConfig.class}
+				{new TomcatHttpServer(base.getAbsolutePath(), WsContextListener.class), TomcatConfig.class},
+				{new UndertowHttpServer(), UndertowConfig.class}
 		};
 	}
 
@@ -147,6 +150,15 @@ public abstract class AbstractWebSocketHandlerIntegrationTests {
 		@Override
 		protected RequestUpgradeStrategy getUpgradeStrategy() {
 			return new TomcatRequestUpgradeStrategy();
+		}
+	}
+
+	@Configuration
+	static class UndertowConfig extends AbstractHandlerAdapterConfig {
+
+		@Override
+		protected RequestUpgradeStrategy getUpgradeStrategy() {
+			return new UndertowRequestUpgradeStrategy();
 		}
 	}
 

@@ -110,7 +110,8 @@ public class TomcatWebSocketHandlerAdapter extends Endpoint {
 	@Override
 	public void onClose(Session session, CloseReason reason) {
 		if (this.wsSession != null) {
-			this.wsSession.handleClose(reason);
+			this.wsSession.handleClose(
+					new CloseStatus(reason.getCloseCode().getCode(), reason.getReasonPhrase()));
 		}
 	}
 
