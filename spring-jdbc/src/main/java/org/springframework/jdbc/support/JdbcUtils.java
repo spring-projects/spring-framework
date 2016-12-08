@@ -38,6 +38,7 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.lang.UsesJava7;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.NumberUtils;
 
 /**
  * Generic utility methods for working with JDBC. Mainly for internal use
@@ -191,6 +192,24 @@ public abstract class JdbcUtils {
 		}
 		else if (Clob.class == requiredType) {
 			return rs.getClob(index);
+		}
+		else if (requiredType.isEnum()) {
+			// Enums can either be represented through a String or an enum index value:
+			// leave enum type conversion up to the caller (e.g. a ConversionService)
+			// but make sure that we return nothing other than a String or an Integer.
+			Object obj = rs.getObject(index);
+			if (obj instanceof String) {
+				return obj;
+			}
+			else if (obj instanceof Number) {
+				// Defensively convert any Number to an Integer (as needed by our
+				// ConversionService's IntegerToEnumConverterFactory) for use as index
+				return NumberUtils.convertNumberToTargetClass((Number) obj, Integer.class);
+			}
+			else {
+				// e.g. on Postgres: getObject returns a PGObject but we need a String
+				return rs.getString(index);
+			}
 		}
 
 		else {
