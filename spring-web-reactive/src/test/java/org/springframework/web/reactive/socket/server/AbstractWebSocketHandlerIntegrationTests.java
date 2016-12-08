@@ -15,6 +15,9 @@
  */
 package org.springframework.web.reactive.socket.server;
 
+import java.io.File;
+
+import org.apache.tomcat.websocket.server.WsContextListener;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -29,12 +32,14 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
+import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.socket.server.support.HandshakeWebSocketService;
 import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.RxNettyRequestUpgradeStrategy;
+import org.springframework.web.reactive.socket.server.upgrade.TomcatRequestUpgradeStrategy;
 
 /**
  * Base class for WebSocket integration tests involving a server-side
@@ -59,9 +64,11 @@ public abstract class AbstractWebSocketHandlerIntegrationTests {
 
 	@Parameters
 	public static Object[][] arguments() {
+		File base = new File(System.getProperty("java.io.tmpdir"));
 		return new Object[][] {
 				{new ReactorHttpServer(), ReactorNettyConfig.class},
-				{new RxNettyHttpServer(), RxNettyConfig.class}
+				{new RxNettyHttpServer(), RxNettyConfig.class},
+				{new TomcatHttpServer(base.getAbsolutePath(), WsContextListener.class), TomcatConfig.class}
 		};
 	}
 
@@ -131,6 +138,15 @@ public abstract class AbstractWebSocketHandlerIntegrationTests {
 		@Override
 		protected RequestUpgradeStrategy getUpgradeStrategy() {
 			return new RxNettyRequestUpgradeStrategy();
+		}
+	}
+
+	@Configuration
+	static class TomcatConfig extends AbstractHandlerAdapterConfig {
+
+		@Override
+		protected RequestUpgradeStrategy getUpgradeStrategy() {
+			return new TomcatRequestUpgradeStrategy();
 		}
 	}
 

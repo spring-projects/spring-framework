@@ -824,6 +824,11 @@ project("spring-web-reactive") {
 		}
 		optional("io.reactivex:rxjava:${rxjavaVersion}")
 		optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
+		optional("javax.websocket:javax.websocket-api:${websocketVersion}")
+		optional("org.apache.tomcat:tomcat-websocket:${tomcatVersion}") {
+			exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
+			exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
+		}
 		testCompile("io.projectreactor.addons:reactor-test:${reactorCoreVersion}")
 		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("org.hibernate:hibernate-validator:${hibval5Version}")
