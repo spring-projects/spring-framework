@@ -203,7 +203,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 
-	private static class RequestBodyPublisher extends AbstractRequestBodyPublisher {
+	private static class RequestBodyPublisher extends AbstractRequestBodyPublisher<DataBuffer> {
 
 		private final RequestBodyPublisher.RequestBodyReadListener readListener =
 				new RequestBodyPublisher.RequestBodyReadListener();

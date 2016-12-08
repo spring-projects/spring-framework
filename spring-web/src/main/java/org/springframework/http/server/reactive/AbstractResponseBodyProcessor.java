@@ -29,8 +29,6 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -44,7 +42,7 @@ import org.springframework.util.Assert;
  * @see UndertowHttpHandlerAdapter
  * @see ServerHttpResponse#writeWith(Publisher)
  */
-abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Void> {
+public abstract class AbstractResponseBodyProcessor<T> implements Processor<T, Void> {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -52,7 +50,7 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
-	private volatile DataBuffer currentBuffer;
+	protected volatile T currentData;
 
 	private volatile boolean subscriberCompleted;
 
@@ -70,11 +68,11 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 	}
 
 	@Override
-	public final void onNext(DataBuffer dataBuffer) {
+	public final void onNext(T data) {
 		if (logger.isTraceEnabled()) {
-			logger.trace(this.state + " onNext: " + dataBuffer);
+			logger.trace(this.state + " onNext: " + data);
 		}
-		this.state.get().onNext(this, dataBuffer);
+		this.state.get().onNext(this, data);
 	}
 
 	@Override
@@ -109,34 +107,29 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 	 * @see WriteListener#onWritePossible()
 	 * @see org.xnio.ChannelListener#handleEvent(Channel)
 	 */
-	protected final void onWritePossible() {
+	public final void onWritePossible() {
 		this.state.get().onWritePossible(this);
 	}
 
 	/**
-	 * Called when a {@link DataBuffer} is received via {@link Subscriber#onNext(Object)}
-	 * @param dataBuffer the buffer that was received.
+	 * Called when a data is received via {@link Subscriber#onNext(Object)}
+	 * @param data the data that was received.
 	 */
-	protected void receiveBuffer(DataBuffer dataBuffer) {
-		Assert.state(this.currentBuffer == null);
-		this.currentBuffer = dataBuffer;
+	protected void receiveData(T data) {
+		Assert.state(this.currentData == null);
+		this.currentData = data;
 	}
 
 	/**
-	 * Called when the current buffer should be
-	 * {@linkplain DataBufferUtils#release(DataBuffer) released}.
+	 * Called when the current data should be released.
 	 */
-	protected void releaseBuffer() {
-		if (logger.isTraceEnabled()) {
-			logger.trace("releaseBuffer: " + this.currentBuffer);
-		}
-		DataBufferUtils.release(this.currentBuffer);
-		this.currentBuffer = null;
-	}
+	protected abstract void releaseData();
+
+	protected abstract boolean isDataEmpty(T data);
 
 	/**
-	 * Called when a {@link DataBuffer} is received via {@link Subscriber#onNext(Object)}
-	 * or when only partial data from the {@link DataBuffer} was written.
+	 * Called when a data is received via {@link Subscriber#onNext(Object)}
+	 * or when only partial data was written.
 	 */
 	private void writeIfPossible() {
 		if (isWritePossible()) {
@@ -152,15 +145,15 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 	}
 
 	/**
-	 * Writes the given data buffer to the output, indicating if the entire buffer was
+	 * Writes the given data to the output, indicating if the entire data was
 	 * written.
-	 * @param dataBuffer the data buffer to write
-	 * @return {@code true} if {@code dataBuffer} was fully written and a new buffer
+	 * @param data the data to write
+	 * @return {@code true} if the data was fully written and a new data
 	 * can be requested; {@code false} otherwise
 	 */
-	protected abstract boolean write(DataBuffer dataBuffer) throws IOException;
+	protected abstract boolean write(T data) throws IOException;
 
-	protected void cancel() {
+	public void cancel() {
 		this.subscription.cancel();
 	}
 
@@ -191,13 +184,13 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 
 		/**
 		 * The initial unsubscribed state. Will respond to {@code onSubscribe} by
-		 * requesting 1 buffer from the subscription, and change state to {@link
+		 * requesting 1 data from the subscription, and change state to {@link
 		 * #REQUESTED}.
 		 */
 		UNSUBSCRIBED {
 
 			@Override
-			public void onSubscribe(AbstractResponseBodyProcessor processor, Subscription subscription) {
+			public <T> void onSubscribe(AbstractResponseBodyProcessor<T> processor, Subscription subscription) {
 				Objects.requireNonNull(subscription, "Subscription cannot be null");
 				if (processor.changeState(this, REQUESTED)) {
 					processor.subscription = subscription;
@@ -209,7 +202,7 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 			}
 		},
 		/**
-		 * State that gets entered after a buffer has been
+		 * State that gets entered after a data has been
 		 * {@linkplain Subscription#request(long) requested}. Responds to {@code onNext}
 		 * by changing state to {@link #RECEIVED}, and responds to {@code onComplete} by
 		 * changing state to {@link #COMPLETED}.
@@ -217,12 +210,12 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 		REQUESTED {
 
 			@Override
-			public void onNext(AbstractResponseBodyProcessor processor, DataBuffer dataBuffer) {
-				if (dataBuffer.readableByteCount() == 0) {
+			public <T> void onNext(AbstractResponseBodyProcessor<T> processor, T data) {
+				if (processor.isDataEmpty(data)) {
 					processor.subscription.request(1);
 				}
 				else {
-					processor.receiveBuffer(dataBuffer);
+					processor.receiveData(data);
 					if (processor.changeState(this, RECEIVED)) {
 						processor.writeIfPossible();
 					}
@@ -230,16 +223,16 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 			}
 
 			@Override
-			public void onComplete(AbstractResponseBodyProcessor processor) {
+			public <T> void onComplete(AbstractResponseBodyProcessor<T> processor) {
 				if (processor.changeState(this, COMPLETED)) {
 					processor.resultPublisher.publishComplete();
 				}
 			}
 		},
 		/**
-		 * State that gets entered after a buffer has been
+		 * State that gets entered after a data has been
 		 * {@linkplain Subscriber#onNext(Object) received}. Responds to
-		 * {@code onWritePossible} by writing the current buffer and changes
+		 * {@code onWritePossible} by writing the current data and changes
 		 * the state to {@link #WRITING}. If it can be written completely,
 		 * changes the state to either {@link #REQUESTED} if the subscription
 		 * has not been completed; or {@link #COMPLETED} if it has. If it cannot
@@ -248,13 +241,13 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 		RECEIVED {
 
 			@Override
-			public void onWritePossible(AbstractResponseBodyProcessor processor) {
+			public <T> void onWritePossible(AbstractResponseBodyProcessor<T> processor) {
 				if (processor.changeState(this, WRITING)) {
-					DataBuffer dataBuffer = processor.currentBuffer;
+					T data = processor.currentData;
 					try {
-						boolean writeCompleted = processor.write(dataBuffer);
+						boolean writeCompleted = processor.write(data);
 						if (writeCompleted) {
-							processor.releaseBuffer();
+							processor.releaseData();
 							if (!processor.subscriberCompleted) {
 								processor.changeState(WRITING, REQUESTED);
 								processor.subscription.request(1);
@@ -277,18 +270,18 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 			}
 
 			@Override
-			public void onComplete(AbstractResponseBodyProcessor processor) {
+			public <T> void onComplete(AbstractResponseBodyProcessor<T> processor) {
 				processor.subscriberCompleted = true;
 			}
 		},
 		/**
-		 * State that gets entered after a writing of the current buffer has been
+		 * State that gets entered after a writing of the current data has been
 		 * {@code onWritePossible started}.
 		 */
 		WRITING {
 
 			@Override
-			public void onComplete(AbstractResponseBodyProcessor processor) {
+			public <T> void onComplete(AbstractResponseBodyProcessor<T> processor) {
 				processor.subscriberCompleted = true;
 			}
 		},
@@ -298,40 +291,40 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 		COMPLETED {
 
 			@Override
-			public void onNext(AbstractResponseBodyProcessor processor, DataBuffer dataBuffer) {
+			public <T> void onNext(AbstractResponseBodyProcessor<T> processor, T data) {
 				// ignore
 			}
 
 			@Override
-			public void onError(AbstractResponseBodyProcessor processor, Throwable ex) {
+			public <T> void onError(AbstractResponseBodyProcessor<T> processor, Throwable ex) {
 				// ignore
 			}
 
 			@Override
-			public void onComplete(AbstractResponseBodyProcessor processor) {
+			public <T> void onComplete(AbstractResponseBodyProcessor<T> processor) {
 				// ignore
 			}
 		};
 
-		public void onSubscribe(AbstractResponseBodyProcessor processor, Subscription subscription) {
+		public <T> void onSubscribe(AbstractResponseBodyProcessor<T> processor, Subscription subscription) {
 			subscription.cancel();
 		}
 
-		public void onNext(AbstractResponseBodyProcessor processor, DataBuffer dataBuffer) {
+		public <T> void onNext(AbstractResponseBodyProcessor<T> processor, T data) {
 			throw new IllegalStateException(toString());
 		}
 
-		public void onError(AbstractResponseBodyProcessor processor, Throwable ex) {
+		public <T> void onError(AbstractResponseBodyProcessor<T> processor, Throwable ex) {
 			if (processor.changeState(this, COMPLETED)) {
 				processor.resultPublisher.publishError(ex);
 			}
 		}
 
-		public void onComplete(AbstractResponseBodyProcessor processor) {
+		public <T> void onComplete(AbstractResponseBodyProcessor<T> processor) {
 			throw new IllegalStateException(toString());
 		}
 
-		public void onWritePossible(AbstractResponseBodyProcessor processor) {
+		public <T> void onWritePossible(AbstractResponseBodyProcessor<T> processor) {
 			// ignore
 		}
 	}

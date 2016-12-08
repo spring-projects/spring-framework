@@ -36,6 +36,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
@@ -138,7 +139,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 	}
 
 
-	private static class ResponseBodyProcessor extends AbstractResponseBodyProcessor {
+	private static class ResponseBodyProcessor extends AbstractResponseBodyProcessor<DataBuffer> {
 
 		private final ChannelListener<StreamSinkChannel> listener = new WriteListener();
 
@@ -187,15 +188,25 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 		}
 
 		@Override
-		protected void receiveBuffer(DataBuffer dataBuffer) {
-			super.receiveBuffer(dataBuffer);
+		protected void receiveData(DataBuffer dataBuffer) {
+			super.receiveData(dataBuffer);
 			this.byteBuffer = dataBuffer.asByteBuffer();
 		}
 
 		@Override
-		protected void releaseBuffer() {
-			super.releaseBuffer();
+		protected void releaseData() {
+			if (logger.isTraceEnabled()) {
+				logger.trace("releaseBuffer: " + this.currentData);
+			}
+			DataBufferUtils.release(this.currentData);
+			this.currentData = null;
+
 			this.byteBuffer = null;
+		}
+
+		@Override
+		protected boolean isDataEmpty(DataBuffer dataBuffer) {
+			return dataBuffer.readableByteCount() == 0;
 		}
 
 		private class WriteListener implements ChannelListener<StreamSinkChannel> {
