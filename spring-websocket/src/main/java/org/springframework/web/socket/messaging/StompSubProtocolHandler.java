@@ -97,9 +97,9 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	@SuppressWarnings("deprecation")
 	private org.springframework.messaging.simp.user.UserSessionRegistry userSessionRegistry;
 
-	private final StompEncoder stompEncoder = new StompEncoder();
+	private StompEncoder stompEncoder = new StompEncoder();
 
-	private final StompDecoder stompDecoder = new StompDecoder();
+	private StompDecoder stompDecoder = new StompDecoder();
 
 	private final Map<String, BufferingStompDecoder> decoders = new ConcurrentHashMap<String, BufferingStompDecoder>();
 
@@ -169,6 +169,24 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	@Deprecated
 	public org.springframework.messaging.simp.user.UserSessionRegistry getUserSessionRegistry() {
 		return this.userSessionRegistry;
+	}
+
+	/**
+	 * Configure a {@link StompEncoder} for encoding STOMP frames
+	 * @param encoder the encoder
+	 * @since 4.3.5
+	 */
+	public void setEncoder(StompEncoder encoder) {
+		this.stompEncoder = encoder;
+	}
+
+	/**
+	 * Configure a {@link StompDecoder} for decoding STOMP frames
+	 * @param decoder the decoder
+	 * @since 4.3.5
+	 */
+	public void setDecoder(StompDecoder decoder) {
+		this.stompDecoder = decoder;
 	}
 
 	/**
