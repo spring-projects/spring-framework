@@ -220,6 +220,7 @@ example for Spring bean or Spring Web Flow definitions. In this case, the parser
 evaluation context, root object and any predefined variables are all set up implicitly,
 requiring the user to specify nothing other than the expressions.
 ====
+
 As a final introductory example, the use of a boolean operator is shown using the
 Inventor object in the previous example.
 
@@ -583,12 +584,13 @@ Autowired methods and constructors can also use the `@Value` annotation.
 
 [[expressions-ref-literal]]
 === Literal expressions
-The types of literal expressions supported are strings, dates, numeric values (int,
-real, and hex), boolean and null. Strings are delimited by single quotes. To put a
-single quote itself in a string use two single quote characters. The following listing
-shows simple usage of literals. Typically they would not be used in isolation like this,
-but as part of a more complex expression, for example using a literal on one side of a
-logical comparison operator.
+The types of literal expressions supported are strings, numeric values (int, real, hex),
+boolean and null. Strings are delimited by single quotes. To put a single quote itself
+in a string, use two single quote characters.
+
+The following listing shows simple usage of literals. Typically they would not be used
+in isolation like this but rather as part of a more complex expression, for example
+using a literal on one side of a logical comparison operator.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -776,6 +778,17 @@ and greater than or equal are supported using standard operator notation.
 	// evaluates to true
 	boolean trueValue = parser.parseExpression("'black' < 'block'").getValue(Boolean.class);
 ----
+
+[NOTE]
+====
+Greater/less-than comparisons against `null` follow a simple rule: `null` is treated as
+nothing here (i.e. NOT as zero). As a consequence, any other value is always greater
+than `null` (`X > null` is always `true`) and no other value is ever less than nothing
+(`X < null` is always `false`).
+
+If you prefer numeric comparisons instead, please avoid number-based `null` comparisons
+in favor of comparisons against zero (e.g. `X > 0` or `X < 0`).
+====
 
 In addition to standard relational operators SpEL supports the `instanceof` and regular
 expression based `matches` operator.
