@@ -1137,7 +1137,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (type.isArray()) {
 			Class<?> componentType = type.getComponentType();
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, componentType,
-					new MultiElementDependencyDescriptor(descriptor));
+					new MultiElementDescriptor(descriptor));
 			if (matchingBeans.isEmpty()) {
 				return null;
 			}
@@ -1157,7 +1157,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return null;
 			}
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, elementType,
-					new MultiElementDependencyDescriptor(descriptor));
+					new MultiElementDescriptor(descriptor));
 			if (matchingBeans.isEmpty()) {
 				return null;
 			}
@@ -1181,7 +1181,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return null;
 			}
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, valueType,
-					new MultiElementDependencyDescriptor(descriptor));
+					new MultiElementDescriptor(descriptor));
 			if (matchingBeans.isEmpty()) {
 				return null;
 			}
@@ -1248,25 +1248,27 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 		}
-		for (String candidateName : candidateNames) {
-			if (!isSelfReference(beanName, candidateName) && isAutowireCandidate(candidateName, descriptor)) {
-				addCandidateEntry(result, candidateName, descriptor, requiredType);
+		for (String candidate : candidateNames) {
+			if (!isSelfReference(beanName, candidate) && isAutowireCandidate(candidate, descriptor)) {
+				addCandidateEntry(result, candidate, descriptor, requiredType);
 			}
 		}
 		if (result.isEmpty() && !indicatesMultipleBeans(requiredType)) {
 			// Consider fallback matches if the first pass failed to find anything...
 			DependencyDescriptor fallbackDescriptor = descriptor.forFallbackMatch();
-			for (String candidateName : candidateNames) {
-				if (!isSelfReference(beanName, candidateName) && isAutowireCandidate(candidateName, fallbackDescriptor)) {
-					addCandidateEntry(result, candidateName, descriptor, requiredType);
+			for (String candidate : candidateNames) {
+				if (!isSelfReference(beanName, candidate) && isAutowireCandidate(candidate, fallbackDescriptor)) {
+					addCandidateEntry(result, candidate, descriptor, requiredType);
 				}
 			}
-			if (result.isEmpty() && !(descriptor instanceof MultiElementDependencyDescriptor)) {
+			if (result.isEmpty()) {
 				// Consider self references as a final pass...
-				// but not as collection elements, just for direct dependency declarations.
-				for (String candidateName : candidateNames) {
-					if (isSelfReference(beanName, candidateName) && isAutowireCandidate(candidateName, fallbackDescriptor)) {
-						addCandidateEntry(result, candidateName, descriptor, requiredType);
+				// but in the case of a dependency collection, not the very same bean itself.
+				for (String candidate : candidateNames) {
+					if (isSelfReference(beanName, candidate) &&
+							(!(descriptor instanceof MultiElementDescriptor) || !beanName.equals(candidate)) &&
+							isAutowireCandidate(candidate, fallbackDescriptor)) {
+						addCandidateEntry(result, candidate, descriptor, requiredType);
 					}
 				}
 			}
@@ -1281,7 +1283,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private void addCandidateEntry(Map<String, Object> candidates, String candidateName,
 			DependencyDescriptor descriptor, Class<?> requiredType) {
 
-		if (descriptor instanceof MultiElementDependencyDescriptor || containsSingleton(candidateName)) {
+		if (descriptor instanceof MultiElementDescriptor || containsSingleton(candidateName)) {
 			candidates.put(candidateName, descriptor.resolveCandidate(candidateName, requiredType, this));
 		}
 		else {
@@ -1730,9 +1732,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 
-	private static class MultiElementDependencyDescriptor extends NestedDependencyDescriptor {
+	private static class MultiElementDescriptor extends NestedDependencyDescriptor {
 
-		public MultiElementDependencyDescriptor(DependencyDescriptor original) {
+		public MultiElementDescriptor(DependencyDescriptor original) {
 			super(original);
 		}
 	}
