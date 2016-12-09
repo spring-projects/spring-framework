@@ -38,7 +38,7 @@ import reactor.core.publisher.Mono;
  * @author Violeta Georgieva
  * @since 5.0
  */
-public class TomcatWebSocketSession extends AbstractListenerWebSocketSessionSupport<Session> {
+public class TomcatWebSocketSession extends AbstractListenerWebSocketSession<Session> {
 
 	public TomcatWebSocketSession(Session session) {
 		super(session, session.getId(), session.getRequestURI());
@@ -56,20 +56,16 @@ public class TomcatWebSocketSession extends AbstractListenerWebSocketSessionSupp
 		return Mono.empty();
 	}
 
-	boolean canWebSocketMessagePublisherAccept() {
-		return this.webSocketMessagePublisher.canAccept();
-	}
-
 	@Override
-	protected boolean writeInternal(WebSocketMessage message) throws IOException {
+	protected boolean sendMessage(WebSocketMessage message) throws IOException {
 		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
-			this.webSocketMessageProcessor.setReady(false);
+			getSendProcessor().setReady(false);
 			getDelegate().getAsyncRemote().sendText(
 					new String(message.getPayload().asByteBuffer().array(), StandardCharsets.UTF_8),
 					new WebSocketMessageSendHandler());
 		}
 		else if (WebSocketMessage.Type.BINARY.equals(message.getType())) {
-			this.webSocketMessageProcessor.setReady(false);
+			getSendProcessor().setReady(false);
 			getDelegate().getAsyncRemote().sendBinary(message.getPayload().asByteBuffer(),
 					new WebSocketMessageSendHandler());
 		}
@@ -90,12 +86,12 @@ public class TomcatWebSocketSession extends AbstractListenerWebSocketSessionSupp
 		@Override
 		public void onResult(SendResult result) {
 			if (result.isOK()) {
-				webSocketMessageProcessor.setReady(true);
-				webSocketMessageProcessor.onWritePossible();
+				getSendProcessor().setReady(true);
+				getSendProcessor().onWritePossible();
 			}
 			else {
-				webSocketMessageProcessor.cancel();
-				webSocketMessageProcessor.onError(result.getException());
+				getSendProcessor().cancel();
+				getSendProcessor().onError(result.getException());
 			}
 		}
 

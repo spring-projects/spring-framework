@@ -35,7 +35,7 @@ import reactor.core.publisher.Mono;
  * @author Violeta Georgieva
  * @since 5.0
  */
-public class JettyWebSocketSession extends AbstractListenerWebSocketSessionSupport<Session> {
+public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Session> {
 
 	public JettyWebSocketSession(Session session) {
 		super(session, ObjectUtils.getIdentityHexString(session),
@@ -49,15 +49,15 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSessionSuppo
 	}
 
 	@Override
-	protected boolean writeInternal(WebSocketMessage message) throws IOException {
+	protected boolean sendMessage(WebSocketMessage message) throws IOException {
 		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
-			this.webSocketMessageProcessor.setReady(false);
+			getSendProcessor().setReady(false);
 			getDelegate().getRemote().sendString(
 					new String(message.getPayload().asByteBuffer().array(), StandardCharsets.UTF_8),
 					new WebSocketMessageWriteCallback());
 		}
 		else if (WebSocketMessage.Type.BINARY.equals(message.getType())) {
-			this.webSocketMessageProcessor.setReady(false);
+			getSendProcessor().setReady(false);
 			getDelegate().getRemote().sendBytes(message.getPayload().asByteBuffer(),
 					new WebSocketMessageWriteCallback());
 		}
@@ -77,14 +77,14 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSessionSuppo
 
 		@Override
 		public void writeFailed(Throwable x) {
-			webSocketMessageProcessor.cancel();
-			webSocketMessageProcessor.onError(x);
+			getSendProcessor().cancel();
+			getSendProcessor().onError(x);
 		}
 
 		@Override
 		public void writeSuccess() {
-			webSocketMessageProcessor.setReady(true);
-			webSocketMessageProcessor.onWritePossible();
+			getSendProcessor().setReady(true);
+			getSendProcessor().onWritePossible();
 		}
 
 	}

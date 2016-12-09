@@ -39,7 +39,7 @@ import reactor.core.publisher.Mono;
  * @author Violeta Georgieva
  * @since 5.0
  */
-public class UndertowWebSocketSession extends AbstractListenerWebSocketSessionSupport<WebSocketChannel> {
+public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<WebSocketChannel> {
 
 	public UndertowWebSocketSession(WebSocketChannel channel) throws URISyntaxException {
 		super(channel, ObjectUtils.getIdentityHexString(channel), new URI(channel.getUrl()));
@@ -63,25 +63,25 @@ public class UndertowWebSocketSession extends AbstractListenerWebSocketSessionSu
 	}
 
 	@Override
-	protected boolean writeInternal(WebSocketMessage message) throws IOException {
+	protected boolean sendMessage(WebSocketMessage message) throws IOException {
 		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
-			this.webSocketMessageProcessor.setReady(false);
+			getSendProcessor().setReady(false);
 			WebSockets.sendText(
 					new String(message.getPayload().asByteBuffer().array(), StandardCharsets.UTF_8),
 					getDelegate(), new WebSocketMessageSendHandler());
 		}
 		else if (WebSocketMessage.Type.BINARY.equals(message.getType())) {
-			this.webSocketMessageProcessor.setReady(false);
+			getSendProcessor().setReady(false);
 			WebSockets.sendBinary(message.getPayload().asByteBuffer(),
 					getDelegate(), new WebSocketMessageSendHandler());
 		}
 		else if (WebSocketMessage.Type.PING.equals(message.getType())) {
-			this.webSocketMessageProcessor.setReady(false);
+			getSendProcessor().setReady(false);
 			WebSockets.sendPing(message.getPayload().asByteBuffer(),
 					getDelegate(), new WebSocketMessageSendHandler());
 		}
 		else if (WebSocketMessage.Type.PONG.equals(message.getType())) {
-			this.webSocketMessageProcessor.setReady(false);
+			getSendProcessor().setReady(false);
 			WebSockets.sendPong(message.getPayload().asByteBuffer(),
 					getDelegate(), new WebSocketMessageSendHandler());
 		}
@@ -95,15 +95,15 @@ public class UndertowWebSocketSession extends AbstractListenerWebSocketSessionSu
 
 		@Override
 		public void complete(WebSocketChannel channel, Void context) {
-			webSocketMessageProcessor.setReady(true);
-			webSocketMessageProcessor.onWritePossible();
+			getSendProcessor().setReady(true);
+			getSendProcessor().onWritePossible();
 		}
 
 		@Override
 		public void onError(WebSocketChannel channel, Void context,
 				Throwable throwable) {
-			webSocketMessageProcessor.cancel();
-			webSocketMessageProcessor.onError(throwable);
+			getSendProcessor().cancel();
+			getSendProcessor().onError(throwable);
 		}
 
 	}

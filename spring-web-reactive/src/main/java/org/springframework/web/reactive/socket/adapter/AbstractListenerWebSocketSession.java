@@ -18,20 +18,19 @@ package org.springframework.web.reactive.socket.adapter;
 
 import java.io.IOException;
 import java.net.URI;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.http.server.reactive.AbstractListenerReadPublisher;
 import org.springframework.http.server.reactive.AbstractListenerWriteProcessor;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketMessage;
-import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.WebSocketMessage.Type;
-
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
  * Base class for Listener-based {@link WebSocketSession} adapters.
@@ -39,7 +38,7 @@ import reactor.core.publisher.Mono;
  * @author Violeta Georgieva
  * @since 5.0
  */
-public abstract class AbstractListenerWebSocketSessionSupport<T> extends WebSocketSessionSupport<T> {
+public abstract class AbstractListenerWebSocketSession<T> extends WebSocketSessionSupport<T> {
 
 	private final AtomicBoolean sendCalled = new AtomicBoolean();
 
@@ -47,18 +46,19 @@ public abstract class AbstractListenerWebSocketSessionSupport<T> extends WebSock
 
 	private final URI uri;
 
-	protected final WebSocketMessagePublisher webSocketMessagePublisher =
-			new WebSocketMessagePublisher();
+	private final WebSocketReceivePublisher receivePublisher = new WebSocketReceivePublisher();
 
-	protected volatile WebSocketMessageProcessor webSocketMessageProcessor;
+	private volatile WebSocketSendProcessor sendProcessor;
 
-	public AbstractListenerWebSocketSessionSupport(T delegate, String id, URI uri) {
+
+	public AbstractListenerWebSocketSession(T delegate, String id, URI uri) {
 		super(delegate);
 		Assert.notNull(id, "'id' is required.");
 		Assert.notNull(uri, "'uri' is required.");
 		this.id = id;
 		this.uri = uri;
 	}
+
 
 	@Override
 	public String getId() {
@@ -70,18 +70,22 @@ public abstract class AbstractListenerWebSocketSessionSupport<T> extends WebSock
 		return this.uri;
 	}
 
+	protected WebSocketSendProcessor getSendProcessor() {
+		return this.sendProcessor;
+	}
+
 	@Override
 	public Flux<WebSocketMessage> receive() {
-		return Flux.from(this.webSocketMessagePublisher);
+		return Flux.from(this.receivePublisher);
 	}
 
 	@Override
 	public Mono<Void> send(Publisher<WebSocketMessage> messages) {
 		if (this.sendCalled.compareAndSet(false, true)) {
-			this.webSocketMessageProcessor = new WebSocketMessageProcessor();
+			this.sendProcessor = new WebSocketSendProcessor();
 			return Mono.from(subscriber -> {
-					messages.subscribe(this.webSocketMessageProcessor);
-					this.webSocketMessageProcessor.subscribe(subscriber);
+					messages.subscribe(this.sendProcessor);
+					this.sendProcessor.subscribe(subscriber);
 			});
 		}
 		else {
@@ -97,32 +101,38 @@ public abstract class AbstractListenerWebSocketSessionSupport<T> extends WebSock
 		// no-op
 	}
 
-	protected abstract boolean writeInternal(WebSocketMessage message) throws IOException;
+	protected boolean isReadyToReceive() {
+		return this.receivePublisher.isReadyToReceive();
+	}
 
-	/** Handle a message callback from the Servlet container */
+	protected abstract boolean sendMessage(WebSocketMessage message) throws IOException;
+
+	/** Handle a message callback from the WebSocketHandler adapter */
 	void handleMessage(Type type, WebSocketMessage message) {
-		this.webSocketMessagePublisher.processWebSocketMessage(message);
+		this.receivePublisher.handleMessage(message);
 	}
 
-	/** Handle a error callback from the Servlet container */
+	/** Handle an error callback from the WebSocketHandler adapter */
 	void handleError(Throwable ex) {
-		this.webSocketMessagePublisher.onError(ex);
-		if (this.webSocketMessageProcessor != null) {
-			this.webSocketMessageProcessor.cancel();
-			this.webSocketMessageProcessor.onError(ex);
+		this.receivePublisher.onError(ex);
+		if (this.sendProcessor != null) {
+			this.sendProcessor.cancel();
+			this.sendProcessor.onError(ex);
 		}
 	}
 
-	/** Handle a complete callback from the Servlet container */
+	/** Handle a close callback from the WebSocketHandler adapter */
 	void handleClose(CloseStatus reason) {
-		this.webSocketMessagePublisher.onAllDataRead();
-		if (this.webSocketMessageProcessor != null) {
-			this.webSocketMessageProcessor.cancel();
-			this.webSocketMessageProcessor.onComplete();
+		this.receivePublisher.onAllDataRead();
+		if (this.sendProcessor != null) {
+			this.sendProcessor.cancel();
+			this.sendProcessor.onComplete();
 		}
 	}
 
-	final class WebSocketMessagePublisher extends AbstractListenerReadPublisher<WebSocketMessage> {
+
+	private final class WebSocketReceivePublisher extends AbstractListenerReadPublisher<WebSocketMessage> {
+
 		private volatile WebSocketMessage webSocketMessage;
 
 		@Override
@@ -144,52 +154,47 @@ public abstract class AbstractListenerWebSocketSessionSupport<T> extends WebSock
 			return null;
 		}
 
-		void processWebSocketMessage(WebSocketMessage webSocketMessage) {
+		void handleMessage(WebSocketMessage webSocketMessage) {
 			this.webSocketMessage = webSocketMessage;
 			suspendReceives();
 			onDataAvailable();
 		}
 
-		boolean canAccept() {
+		boolean isReadyToReceive() {
 			return this.webSocketMessage == null;
 		}
 	}
 
-	final class WebSocketMessageProcessor extends AbstractListenerWriteProcessor<WebSocketMessage> {
+	protected final class WebSocketSendProcessor extends AbstractListenerWriteProcessor<WebSocketMessage> {
+
 		private volatile boolean isReady = true;
 
 		@Override
 		protected boolean write(WebSocketMessage message) throws IOException {
-			return writeInternal(message);
+			return sendMessage(message);
 		}
 
 		@Override
 		protected void releaseData() {
 			if (logger.isTraceEnabled()) {
-				logger.trace("releaseBuffer: " + this.currentData);
+				logger.trace("releaseData: " + this.currentData);
 			}
 			this.currentData = null;
 		}
 
 		@Override
-		protected boolean isDataEmpty(WebSocketMessage data) {
-			return data.getPayload().readableByteCount() == 0;
+		protected boolean isDataEmpty(WebSocketMessage message) {
+			return message.getPayload().readableByteCount() == 0;
 		}
 
 		@Override
 		protected boolean isWritePossible() {
-			if (this.isReady && this.currentData != null) {
-				return true;
-			}
-			else {
-				return false;
-			}
+			return this.isReady && this.currentData != null;
 		}
 
-		void setReady(boolean ready) {
+		public void setReady(boolean ready) {
 			this.isReady = ready;
 		}
-
 	}
 
 }
