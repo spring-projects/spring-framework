@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static org.springframework.web.reactive.function.RequestPredicates.*;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
@@ -74,12 +75,52 @@ public abstract class RouterFunctions {
 	 * @return a router function that routes to {@code handlerFunction} if
 	 * {@code predicate} evaluates to {@code true}
 	 * @see RequestPredicates
+	 * @see #routeGet(String, HandlerFunction)
+	 * @see #routePost(String, HandlerFunction)
+	 * @see #routePut(String, HandlerFunction)
+	 * @see #routePatch(String, HandlerFunction)
+	 * @see #routeDelete(String, HandlerFunction)
 	 */
 	public static <T> RouterFunction<T> route(RequestPredicate predicate, HandlerFunction<T> handlerFunction) {
 		Assert.notNull(predicate, "'predicate' must not be null");
 		Assert.notNull(handlerFunction, "'handlerFunction' must not be null");
 
 		return request -> predicate.test(request) ? Optional.of(handlerFunction) : Optional.empty();
+	}
+
+	/**
+	 * Shortcut for {@link #route(RequestPredicate, HandlerFunction)} + {@link RequestPredicates#GET(String)}.
+	 */
+	public static <T> RouterFunction<T> routeGet(String pattern, HandlerFunction<T> handlerFunction) {
+		return route(GET(pattern), handlerFunction);
+	}
+
+	/**
+	 * Shortcut for {@link #route(RequestPredicate, HandlerFunction)} + {@link RequestPredicates#POST(String)}.
+	 */
+	public static <T> RouterFunction<T> routePost(String pattern, HandlerFunction<T> handlerFunction) {
+		return route(POST(pattern), handlerFunction);
+	}
+
+	/**
+	 * Shortcut for {@link #route(RequestPredicate, HandlerFunction)} + {@link RequestPredicates#PUT(String)}.
+	 */
+	public static <T> RouterFunction<T> routePut(String pattern, HandlerFunction<T> handlerFunction) {
+		return route(PUT(pattern), handlerFunction);
+	}
+
+	/**
+	 * Shortcut for {@link #route(RequestPredicate, HandlerFunction)} + {@link RequestPredicates#PATCH(String)}.
+	 */
+	public static <T> RouterFunction<T> routePatch(String pattern, HandlerFunction<T> handlerFunction) {
+		return route(PATCH(pattern), handlerFunction);
+	}
+
+	/**
+	 * Shortcut for {@link #route(RequestPredicate, HandlerFunction)} + {@link RequestPredicates#DELETE(String)}.
+	 */
+	public static <T> RouterFunction<T> routeDelete(String pattern, HandlerFunction<T> handlerFunction) {
+		return route(DELETE(pattern), handlerFunction);
 	}
 
 	/**

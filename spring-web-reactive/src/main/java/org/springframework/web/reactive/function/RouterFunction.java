@@ -18,6 +18,8 @@ package org.springframework.web.reactive.function;
 
 import java.util.Optional;
 
+import static org.springframework.web.reactive.function.RequestPredicates.*;
+
 /**
  * Represents a function that routes to a {@linkplain HandlerFunction handler function}.
  *
@@ -86,6 +88,41 @@ public interface RouterFunction<T> {
 	default <S> RouterFunction<?> andRoute(RequestPredicate predicate,
 			HandlerFunction<S> handlerFunction) {
 		return and(RouterFunctions.route(predicate, handlerFunction));
+	}
+
+	/**
+	 * Shortcut for {@link #andRoute(RequestPredicate, HandlerFunction)} + {@link RequestPredicates#GET(String)}.
+	 */
+	default <S> RouterFunction<?> andRouteGet(String pattern, HandlerFunction<S> handlerFunction) {
+		return andRoute(GET(pattern), handlerFunction);
+	}
+
+	/**
+	 * Shortcut for {@link #andRoute(RequestPredicate, HandlerFunction)} + {@link RequestPredicates#POST(String)}.
+	 */
+	default <S> RouterFunction<?> andRoutePost(String pattern, HandlerFunction<S> handlerFunction) {
+		return andRoute(POST(pattern), handlerFunction);
+	}
+
+	/**
+	 * Shortcut for {@link #andRoute(RequestPredicate, HandlerFunction)} + {@link RequestPredicates#PUT(String)}.
+	 */
+	default <S> RouterFunction<?> andRoutePut(String pattern, HandlerFunction<S> handlerFunction) {
+		return andRoute(PUT(pattern), handlerFunction);
+	}
+
+	/**
+	 * Shortcut for {@link #andRoute(RequestPredicate, HandlerFunction)} + {@link RequestPredicates#PATCH(String)}.
+	 */
+	default <S> RouterFunction<?> andRoutePatch(String pattern, HandlerFunction<S> handlerFunction) {
+		return andRoute(PATCH(pattern), handlerFunction);
+	}
+
+	/**
+	 * Shortcut for {@link #andRoute(RequestPredicate, HandlerFunction)} + {@link RequestPredicates#DELETE(String)}.
+	 */
+	default <S> RouterFunction<?> andRouteDelete(String pattern, HandlerFunction<S> handlerFunction) {
+		return andRoute(DELETE(pattern), handlerFunction);
 	}
 
 	/**
