@@ -56,6 +56,7 @@ configure(allprojects) { project ->
 	ext.jasperreportsVersion = "6.2.1"  // our tests fail with JR-internal NPEs against 6.2.2 and higher
 	ext.javamailVersion      = "1.5.6"
 	ext.jettyVersion         = "9.3.13.v20161014"
+	ext.jetty94Version       = "9.4.0.v20161208" // for spring-websocket support
 	ext.jodaVersion          = "2.9.6"
 	ext.jrubyVersion         = "1.7.26"  // JRuby 9000 only supported through JSR-223 (StandardScriptFactory)
 	ext.jtaVersion           = "1.2"
@@ -949,11 +950,11 @@ project("spring-websocket") {
 		optional("org.eclipse.jetty:jetty-webapp:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet"
 		}
-		optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
+		optional("org.eclipse.jetty.websocket:websocket-server:${jetty94Version}") {
 			exclude group: "javax.servlet", module: "javax.servlet"
 		}
-		optional("org.eclipse.jetty.websocket:websocket-client:${jettyVersion}")
-		optional("org.eclipse.jetty:jetty-client:${jettyVersion}")
+		optional("org.eclipse.jetty.websocket:websocket-client:${jetty94Version}")
+		optional("org.eclipse.jetty:jetty-client:${jetty94Version}")
 		optional("io.undertow:undertow-core:${undertowVersion}")
 		optional("io.undertow:undertow-servlet:${undertowVersion}") {
 			exclude group: "org.jboss.spec.javax.servlet", module: "jboss-servlet-api_3.1_spec"
