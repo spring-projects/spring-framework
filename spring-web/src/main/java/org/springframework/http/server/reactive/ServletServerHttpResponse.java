@@ -184,7 +184,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 	}
 
 
-	private class ResponseBodyProcessor extends AbstractResponseBodyProcessor<DataBuffer> {
+	private class ResponseBodyProcessor extends AbstractListenerWriteProcessor<DataBuffer> {
 
 		private final ServletOutputStream outputStream;
 

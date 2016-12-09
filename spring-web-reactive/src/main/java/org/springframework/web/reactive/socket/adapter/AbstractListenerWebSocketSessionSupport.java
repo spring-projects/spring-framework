@@ -22,8 +22,8 @@ import java.net.URI;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.reactivestreams.Publisher;
-import org.springframework.http.server.reactive.AbstractRequestBodyPublisher;
-import org.springframework.http.server.reactive.AbstractResponseBodyProcessor;
+import org.springframework.http.server.reactive.AbstractListenerReadPublisher;
+import org.springframework.http.server.reactive.AbstractListenerWriteProcessor;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -122,7 +122,7 @@ public abstract class AbstractListenerWebSocketSessionSupport<T> extends WebSock
 		}
 	}
 
-	final class WebSocketMessagePublisher extends AbstractRequestBodyPublisher<WebSocketMessage> {
+	final class WebSocketMessagePublisher extends AbstractListenerReadPublisher<WebSocketMessage> {
 		private volatile WebSocketMessage webSocketMessage;
 
 		@Override
@@ -155,7 +155,7 @@ public abstract class AbstractListenerWebSocketSessionSupport<T> extends WebSock
 		}
 	}
 
-	final class WebSocketMessageProcessor extends AbstractResponseBodyProcessor<WebSocketMessage> {
+	final class WebSocketMessageProcessor extends AbstractListenerWriteProcessor<WebSocketMessage> {
 		private volatile boolean isReady = true;
 
 		@Override

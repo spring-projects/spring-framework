@@ -32,15 +32,17 @@ import reactor.core.publisher.Operators;
 
 /**
  * Abstract base class for {@code Publisher} implementations that bridge between
- * event-listener APIs and Reactive Streams. Specifically, base class for the
- * Servlet 3.1 and Undertow support.
+ * event-listener read APIs and Reactive Streams. Specifically, a base class for
+ * reading from the HTTP request body with Servlet 3.1 and Undertow as well as
+ * handling incoming WebSocket messages with JSR-356, Jetty, and Undertow.
  *
  * @author Arjen Poutsma
+ * @author Violeta Georgieva
  * @since 5.0
  * @see ServletServerHttpRequest
  * @see UndertowHttpHandlerAdapter
  */
-public abstract class AbstractRequestBodyPublisher<T> implements Publisher<T> {
+public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -155,11 +157,11 @@ public abstract class AbstractRequestBodyPublisher<T> implements Publisher<T> {
 	}
 
 
-	private static final class RequestBodySubscription implements Subscription {
+	private static final class ReadSubscription implements Subscription {
 
-		private final AbstractRequestBodyPublisher<?> publisher;
+		private final AbstractListenerReadPublisher<?> publisher;
 
-		public RequestBodySubscription(AbstractRequestBodyPublisher<?> publisher) {
+		public ReadSubscription(AbstractListenerReadPublisher<?> publisher) {
 			this.publisher = publisher;
 		}
 
@@ -207,15 +209,15 @@ public abstract class AbstractRequestBodyPublisher<T> implements Publisher<T> {
 
 		/**
 		 * The initial unsubscribed state. Will respond to {@link
-		 * #subscribe(AbstractRequestBodyPublisher, Subscriber)} by
+		 * #subscribe(AbstractListenerReadPublisher, Subscriber)} by
 		 * changing state to {@link #NO_DEMAND}.
 		 */
 		UNSUBSCRIBED {
 			@Override
-			<T> void subscribe(AbstractRequestBodyPublisher<T> publisher, Subscriber<? super T> subscriber) {
+			<T> void subscribe(AbstractListenerReadPublisher<T> publisher, Subscriber<? super T> subscriber) {
 				Objects.requireNonNull(subscriber);
 				if (publisher.changeState(this, NO_DEMAND)) {
-					Subscription subscription = new RequestBodySubscription(publisher);
+					Subscription subscription = new ReadSubscription(publisher);
 					publisher.subscriber = subscriber;
 					subscriber.onSubscribe(subscription);
 				}
@@ -227,13 +229,13 @@ public abstract class AbstractRequestBodyPublisher<T> implements Publisher<T> {
 
 		/**
 		 * State that gets entered when there is no demand. Responds to {@link
-		 * #request(AbstractRequestBodyPublisher, long)} by increasing the demand,
+		 * #request(AbstractListenerReadPublisher, long)} by increasing the demand,
 		 * changing state to {@link #DEMAND} and will check whether there
 		 * is data available for reading.
 		 */
 		NO_DEMAND {
 			@Override
-			<T> void request(AbstractRequestBodyPublisher<T> publisher, long n) {
+			<T> void request(AbstractListenerReadPublisher<T> publisher, long n) {
 				if (Operators.checkRequest(n, publisher.subscriber)) {
 					Operators.addAndGet(publisher.demand, n);
 					if (publisher.changeState(this, DEMAND)) {
@@ -245,20 +247,20 @@ public abstract class AbstractRequestBodyPublisher<T> implements Publisher<T> {
 
 		/**
 		 * State that gets entered when there is demand. Responds to
-		 * {@link #onDataAvailable(AbstractRequestBodyPublisher)} by
+		 * {@link #onDataAvailable(AbstractListenerReadPublisher)} by
 		 * reading the available data. The state will be changed to
 		 * {@link #NO_DEMAND} if there is no demand.
 		 */
 		DEMAND {
 			@Override
-			<T> void request(AbstractRequestBodyPublisher<T> publisher, long n) {
+			<T> void request(AbstractListenerReadPublisher<T> publisher, long n) {
 				if (Operators.checkRequest(n, publisher.subscriber)) {
 					Operators.addAndGet(publisher.demand, n);
 				}
 			}
 
 			@Override
-			<T> void onDataAvailable(AbstractRequestBodyPublisher<T> publisher) {
+			<T> void onDataAvailable(AbstractListenerReadPublisher<T> publisher) {
 				if (publisher.changeState(this, READING)) {
 					try {
 						boolean demandAvailable = publisher.readAndPublish();
@@ -279,7 +281,7 @@ public abstract class AbstractRequestBodyPublisher<T> implements Publisher<T> {
 
 		READING {
 			@Override
-			<T> void request(AbstractRequestBodyPublisher<T> publisher, long n) {
+			<T> void request(AbstractListenerReadPublisher<T> publisher, long n) {
 				if (Operators.checkRequest(n, publisher.subscriber)) {
 					Operators.addAndGet(publisher.demand, n);
 				}
@@ -291,40 +293,40 @@ public abstract class AbstractRequestBodyPublisher<T> implements Publisher<T> {
 		 */
 		COMPLETED {
 			@Override
-			<T> void request(AbstractRequestBodyPublisher<T> publisher, long n) {
+			<T> void request(AbstractListenerReadPublisher<T> publisher, long n) {
 				// ignore
 			}
 			@Override
-			<T> void cancel(AbstractRequestBodyPublisher<T> publisher) {
+			<T> void cancel(AbstractListenerReadPublisher<T> publisher) {
 				// ignore
 			}
 			@Override
-			<T> void onAllDataRead(AbstractRequestBodyPublisher<T> publisher) {
+			<T> void onAllDataRead(AbstractListenerReadPublisher<T> publisher) {
 				// ignore
 			}
 			@Override
-			<T> void onError(AbstractRequestBodyPublisher<T> publisher, Throwable t) {
+			<T> void onError(AbstractListenerReadPublisher<T> publisher, Throwable t) {
 				// ignore
 			}
 		};
 
-		<T> void subscribe(AbstractRequestBodyPublisher<T> publisher, Subscriber<? super T> subscriber) {
+		<T> void subscribe(AbstractListenerReadPublisher<T> publisher, Subscriber<? super T> subscriber) {
 			throw new IllegalStateException(toString());
 		}
 
-		<T> void request(AbstractRequestBodyPublisher<T> publisher, long n) {
+		<T> void request(AbstractListenerReadPublisher<T> publisher, long n) {
 			throw new IllegalStateException(toString());
 		}
 
-		<T> void cancel(AbstractRequestBodyPublisher<T> publisher) {
+		<T> void cancel(AbstractListenerReadPublisher<T> publisher) {
 			publisher.changeState(this, COMPLETED);
 		}
 
-		<T> void onDataAvailable(AbstractRequestBodyPublisher<T> publisher) {
+		<T> void onDataAvailable(AbstractListenerReadPublisher<T> publisher) {
 			// ignore
 		}
 
-		<T> void onAllDataRead(AbstractRequestBodyPublisher<T> publisher) {
+		<T> void onAllDataRead(AbstractListenerReadPublisher<T> publisher) {
 			if (publisher.changeState(this, COMPLETED)) {
 				if (publisher.subscriber != null) {
 					publisher.subscriber.onComplete();
@@ -332,7 +334,7 @@ public abstract class AbstractRequestBodyPublisher<T> implements Publisher<T> {
 			}
 		}
 
-		<T> void onError(AbstractRequestBodyPublisher<T> publisher, Throwable t) {
+		<T> void onError(AbstractListenerReadPublisher<T> publisher, Throwable t) {
 			if (publisher.changeState(this, COMPLETED)) {
 				if (publisher.subscriber != null) {
 					publisher.subscriber.onError(t);

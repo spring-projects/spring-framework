@@ -33,16 +33,18 @@ import org.springframework.util.Assert;
 
 /**
  * Abstract base class for {@code Processor} implementations that bridge between
- * event-listener APIs and Reactive Streams. Specifically, base class for the
- * Servlet 3.1 and Undertow support.
+ * event-listener write APIs and Reactive Streams. Specifically, base class for
+ * writing to the HTTP response body with Servlet 3.1 and Undertow support as
+ * well for writing WebSocket messages with JSR-356, Jetty, and Undertow.
  *
  * @author Arjen Poutsma
+ * @author Violeta Georgieva
  * @since 5.0
  * @see ServletServerHttpRequest
  * @see UndertowHttpHandlerAdapter
  * @see ServerHttpResponse#writeWith(Publisher)
  */
-public abstract class AbstractResponseBodyProcessor<T> implements Processor<T, Void> {
+public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, Void> {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -190,7 +192,7 @@ public abstract class AbstractResponseBodyProcessor<T> implements Processor<T, V
 		UNSUBSCRIBED {
 
 			@Override
-			public <T> void onSubscribe(AbstractResponseBodyProcessor<T> processor, Subscription subscription) {
+			public <T> void onSubscribe(AbstractListenerWriteProcessor<T> processor, Subscription subscription) {
 				Objects.requireNonNull(subscription, "Subscription cannot be null");
 				if (processor.changeState(this, REQUESTED)) {
 					processor.subscription = subscription;
@@ -210,7 +212,7 @@ public abstract class AbstractResponseBodyProcessor<T> implements Processor<T, V
 		REQUESTED {
 
 			@Override
-			public <T> void onNext(AbstractResponseBodyProcessor<T> processor, T data) {
+			public <T> void onNext(AbstractListenerWriteProcessor<T> processor, T data) {
 				if (processor.isDataEmpty(data)) {
 					processor.subscription.request(1);
 				}
@@ -223,7 +225,7 @@ public abstract class AbstractResponseBodyProcessor<T> implements Processor<T, V
 			}
 
 			@Override
-			public <T> void onComplete(AbstractResponseBodyProcessor<T> processor) {
+			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				if (processor.changeState(this, COMPLETED)) {
 					processor.resultPublisher.publishComplete();
 				}
@@ -241,7 +243,7 @@ public abstract class AbstractResponseBodyProcessor<T> implements Processor<T, V
 		RECEIVED {
 
 			@Override
-			public <T> void onWritePossible(AbstractResponseBodyProcessor<T> processor) {
+			public <T> void onWritePossible(AbstractListenerWriteProcessor<T> processor) {
 				if (processor.changeState(this, WRITING)) {
 					T data = processor.currentData;
 					try {
@@ -270,7 +272,7 @@ public abstract class AbstractResponseBodyProcessor<T> implements Processor<T, V
 			}
 
 			@Override
-			public <T> void onComplete(AbstractResponseBodyProcessor<T> processor) {
+			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				processor.subscriberCompleted = true;
 			}
 		},
@@ -281,7 +283,7 @@ public abstract class AbstractResponseBodyProcessor<T> implements Processor<T, V
 		WRITING {
 
 			@Override
-			public <T> void onComplete(AbstractResponseBodyProcessor<T> processor) {
+			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				processor.subscriberCompleted = true;
 			}
 		},
@@ -291,40 +293,40 @@ public abstract class AbstractResponseBodyProcessor<T> implements Processor<T, V
 		COMPLETED {
 
 			@Override
-			public <T> void onNext(AbstractResponseBodyProcessor<T> processor, T data) {
+			public <T> void onNext(AbstractListenerWriteProcessor<T> processor, T data) {
 				// ignore
 			}
 
 			@Override
-			public <T> void onError(AbstractResponseBodyProcessor<T> processor, Throwable ex) {
+			public <T> void onError(AbstractListenerWriteProcessor<T> processor, Throwable ex) {
 				// ignore
 			}
 
 			@Override
-			public <T> void onComplete(AbstractResponseBodyProcessor<T> processor) {
+			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				// ignore
 			}
 		};
 
-		public <T> void onSubscribe(AbstractResponseBodyProcessor<T> processor, Subscription subscription) {
+		public <T> void onSubscribe(AbstractListenerWriteProcessor<T> processor, Subscription subscription) {
 			subscription.cancel();
 		}
 
-		public <T> void onNext(AbstractResponseBodyProcessor<T> processor, T data) {
+		public <T> void onNext(AbstractListenerWriteProcessor<T> processor, T data) {
 			throw new IllegalStateException(toString());
 		}
 
-		public <T> void onError(AbstractResponseBodyProcessor<T> processor, Throwable ex) {
+		public <T> void onError(AbstractListenerWriteProcessor<T> processor, Throwable ex) {
 			if (processor.changeState(this, COMPLETED)) {
 				processor.resultPublisher.publishError(ex);
 			}
 		}
 
-		public <T> void onComplete(AbstractResponseBodyProcessor<T> processor) {
+		public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 			throw new IllegalStateException(toString());
 		}
 
-		public <T> void onWritePossible(AbstractResponseBodyProcessor<T> processor) {
+		public <T> void onWritePossible(AbstractListenerWriteProcessor<T> processor) {
 			// ignore
 		}
 	}

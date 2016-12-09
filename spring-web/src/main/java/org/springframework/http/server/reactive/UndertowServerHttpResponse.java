@@ -139,7 +139,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 	}
 
 
-	private static class ResponseBodyProcessor extends AbstractResponseBodyProcessor<DataBuffer> {
+	private static class ResponseBodyProcessor extends AbstractListenerWriteProcessor<DataBuffer> {
 
 		private final ChannelListener<StreamSinkChannel> listener = new WriteListener();
 

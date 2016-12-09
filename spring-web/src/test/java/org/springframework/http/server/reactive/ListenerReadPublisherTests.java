@@ -32,12 +32,12 @@ import org.springframework.core.io.buffer.DataBuffer;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Unit tests for {@link AbstractRequestBodyPublisher}
+ * Unit tests for {@link AbstractListenerReadPublisher}
  * 
  * @author Violeta Georgieva
  * @since 5.0
  */
-public class AbstractRequestBodyPublisherTests {
+public class ListenerReadPublisherTests {
 
 	@Test
 	public void testReceiveTwoRequestCallsWhenOnSubscribe() {
@@ -45,14 +45,14 @@ public class AbstractRequestBodyPublisherTests {
 		Subscriber<DataBuffer> subscriber = mock(Subscriber.class);
 		doAnswer(new SubscriptionAnswer()).when(subscriber).onSubscribe(isA(Subscription.class));
 
-		TestRequestBodyPublisher publisher = new TestRequestBodyPublisher();
+		TestListenerReadPublisher publisher = new TestListenerReadPublisher();
 		publisher.subscribe(subscriber);
 		publisher.onDataAvailable();
 
 		assertTrue(publisher.getReadCalls() == 2);
 	}
 
-	private static final class TestRequestBodyPublisher extends AbstractRequestBodyPublisher {
+	private static final class TestListenerReadPublisher extends AbstractListenerReadPublisher {
 
 		private int readCalls = 0;
 
