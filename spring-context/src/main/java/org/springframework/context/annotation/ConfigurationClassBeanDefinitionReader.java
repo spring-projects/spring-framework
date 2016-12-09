@@ -129,7 +129,7 @@ class ConfigurationClassBeanDefinitionReader {
 			if (StringUtils.hasLength(beanName) && this.registry.containsBeanDefinition(beanName)) {
 				this.registry.removeBeanDefinition(beanName);
 			}
-			this.importRegistry.removeImportingClassFor(configClass.getMetadata().getClassName());
+			this.importRegistry.removeImportingClass(configClass.getMetadata().getClassName());
 			return;
 		}
 
