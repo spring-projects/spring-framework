@@ -644,20 +644,21 @@ class ConfigurationClassParser {
 		}
 
 		@Override
-		public void removeImportingClassFor(String importedClass) {
-			for (List<AnnotationMetadata> list : this.imports.values()) {
-				for (Iterator<AnnotationMetadata> iterator = list.iterator(); iterator.hasNext();) {
-					if (iterator.next().getClassName().equals(importedClass)) {
-						iterator.remove();
-					}
-				}
-			}
-		}
-
-		@Override
 		public AnnotationMetadata getImportingClassFor(String importedClass) {
 			List<AnnotationMetadata> list = this.imports.get(importedClass);
 			return (!CollectionUtils.isEmpty(list) ? list.get(list.size() - 1) : null);
+		}
+
+		@Override
+		public void removeImportingClass(String importingClass) {
+			for (List<AnnotationMetadata> list : this.imports.values()) {
+				for (Iterator<AnnotationMetadata> iterator = list.iterator(); iterator.hasNext();) {
+					if (iterator.next().getClassName().equals(importingClass)) {
+						iterator.remove();
+						break;
+					}
+				}
+			}
 		}
 
 		/**
