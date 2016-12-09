@@ -17,6 +17,7 @@
 package org.springframework.web.socket.messaging;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,6 +35,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.SimpAttributes;
 import org.springframework.messaging.simp.SimpAttributesContextHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -56,19 +59,29 @@ import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 import org.springframework.web.socket.sockjs.transport.SockJsSession;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * Test fixture for {@link StompSubProtocolHandler} tests.
- *
  * @author Rossen Stoyanchev
  */
 public class StompSubProtocolHandlerTests {
 
-	public static final byte[] EMPTY_PAYLOAD = new byte[0];
+	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 	private StompSubProtocolHandler protocolHandler;
 
@@ -210,22 +223,26 @@ public class StompSubProtocolHandlerTests {
 	public void handleMessageToClientWithHeartbeatSuppressingSockJsHeartbeat() throws IOException {
 
 		SockJsSession sockJsSession = Mockito.mock(SockJsSession.class);
+		when(sockJsSession.getId()).thenReturn("s1");
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECTED);
 		accessor.setHeartbeat(0, 10);
 		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(sockJsSession, message);
 
+		verify(sockJsSession).getId();
 		verify(sockJsSession).getPrincipal();
 		verify(sockJsSession).disableHeartbeat();
 		verify(sockJsSession).sendMessage(any(WebSocketMessage.class));
 		verifyNoMoreInteractions(sockJsSession);
 
 		sockJsSession = Mockito.mock(SockJsSession.class);
+		when(sockJsSession.getId()).thenReturn("s1");
 		accessor = StompHeaderAccessor.create(StompCommand.CONNECTED);
 		accessor.setHeartbeat(0, 0);
 		message = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(sockJsSession, message);
 
+		verify(sockJsSession).getId();
 		verify(sockJsSession).getPrincipal();
 		verify(sockJsSession).sendMessage(any(WebSocketMessage.class));
 		verifyNoMoreInteractions(sockJsSession);
@@ -350,6 +367,28 @@ public class StompSubProtocolHandlerTests {
 		handler.handleMessageFromClient(this.session, message, channel);
 		assertNotNull(mutable.get());
 		assertFalse(mutable.get());
+	}
+
+	@Test // SPR-14690
+	public void handleMessageFromClientWithTokenAuthentication() {
+		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
+		channel.addInterceptor(new AuthenticationInterceptor("__pete__@gmail.com"));
+		channel.addInterceptor(new ImmutableMessageChannelInterceptor());
+
+		TestMessageHandler messageHandler = new TestMessageHandler();
+		channel.subscribe(messageHandler);
+
+		StompSubProtocolHandler handler = new StompSubProtocolHandler();
+		handler.afterSessionStarted(this.session, channel);
+
+		TextMessage wsMessage = StompTextMessageBuilder.create(StompCommand.CONNECT).build();
+		handler.handleMessageFromClient(this.session, wsMessage, channel);
+
+		assertEquals(1, messageHandler.getMessages().size());
+		Message<?> message = messageHandler.getMessages().get(0);
+		Principal user = SimpMessageHeaderAccessor.getUser(message.getHeaders());
+		assertNotNull(user);
+		assertEquals("__pete__@gmail.com", user.getName());
 	}
 
 	@Test
@@ -504,4 +543,34 @@ public class StompSubProtocolHandlerTests {
 		}
 	}
 
+	private static class TestMessageHandler implements MessageHandler {
+
+		private final List<Message> messages = new ArrayList<>();
+
+		public List<Message> getMessages() {
+			return this.messages;
+		}
+
+		@Override
+		public void handleMessage(Message<?> message) throws MessagingException {
+			this.messages.add(message);
+		}
+	}
+
+	private static class AuthenticationInterceptor extends ChannelInterceptorAdapter {
+
+		private final String name;
+
+
+		public AuthenticationInterceptor(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public Message<?> preSend(Message<?> message, MessageChannel channel) {
+			TestPrincipal user = new TestPrincipal(name);
+			MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class).setUser(user);
+			return message;
+		}
+	}
 }

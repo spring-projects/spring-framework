@@ -101,6 +101,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	private MessageHeaderInitializer headerInitializer;
 
+	private final Map<String, Principal> stompAuthentications = new ConcurrentHashMap<String, Principal>();
+
 	private Boolean immutableMessageInterceptorPresent;
 
 	private ApplicationEventPublisher eventPublisher;
@@ -247,11 +249,10 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			try {
 				StompHeaderAccessor headerAccessor =
 						MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-				Principal user = session.getPrincipal();
 
 				headerAccessor.setSessionId(session.getId());
 				headerAccessor.setSessionAttributes(session.getAttributes());
-				headerAccessor.setUser(user);
+				headerAccessor.setUser(getUser(session));
 				headerAccessor.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, headerAccessor.getHeartbeat());
 				if (!detectImmutableMessageInterceptor(outputChannel)) {
 					headerAccessor.setImmutable();
@@ -261,7 +262,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 					logger.trace("From client: " + headerAccessor.getShortLogMessage(message.getPayload()));
 				}
 
-				if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
+				boolean isConnect = StompCommand.CONNECT.equals(headerAccessor.getCommand());
+				if (isConnect) {
 					this.stats.incrementConnectCount();
 				}
 				else if (StompCommand.DISCONNECT.equals(headerAccessor.getCommand())) {
@@ -272,15 +274,23 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 					SimpAttributesContextHolder.setAttributesFromMessage(message);
 					boolean sent = outputChannel.send(message);
 
-					if (sent && this.eventPublisher != null) {
-						if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
-							publishEvent(new SessionConnectEvent(this, message, user));
+					if (sent) {
+						if (isConnect) {
+							Principal user = headerAccessor.getUser();
+							if (user != null && user != session.getPrincipal()) {
+								this.stompAuthentications.put(session.getId(), user);
+							}
 						}
-						else if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
-							publishEvent(new SessionSubscribeEvent(this, message, user));
-						}
-						else if (StompCommand.UNSUBSCRIBE.equals(headerAccessor.getCommand())) {
-							publishEvent(new SessionUnsubscribeEvent(this, message, user));
+						if (this.eventPublisher != null) {
+							if (isConnect) {
+								publishEvent(new SessionConnectEvent(this, message, getUser(session)));
+							}
+							else if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
+								publishEvent(new SessionSubscribeEvent(this, message, getUser(session)));
+							}
+							else if (StompCommand.UNSUBSCRIBE.equals(headerAccessor.getCommand())) {
+								publishEvent(new SessionUnsubscribeEvent(this, message, getUser(session)));
+							}
 						}
 					}
 				}
@@ -296,6 +306,11 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				handleError(session, ex, message);
 			}
 		}
+	}
+
+	private Principal getUser(WebSocketSession session) {
+		Principal user = this.stompAuthentications.get(session.getId());
+		return user != null ? user : session.getPrincipal();
 	}
 
 	private void handleError(WebSocketSession session, Throwable ex, Message<byte[]> clientMessage) {
@@ -395,7 +410,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				try {
 					SimpAttributes simpAttributes = new SimpAttributes(session.getId(), session.getAttributes());
 					SimpAttributesContextHolder.setAttributes(simpAttributes);
-					Principal user = session.getPrincipal();
+					Principal user = getUser(session);
 					publishEvent(new SessionConnectedEvent(this, (Message<byte[]>) message, user));
 				}
 				finally {
@@ -535,7 +550,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	private StompHeaderAccessor afterStompSessionConnected(Message<?> message, StompHeaderAccessor accessor,
 			WebSocketSession session) {
 
-		Principal principal = session.getPrincipal();
+		Principal principal = getUser(session);
 		if (principal != null) {
 			accessor = toMutableAccessor(accessor, message);
 			accessor.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
@@ -574,12 +589,13 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		try {
 			SimpAttributesContextHolder.setAttributes(simpAttributes);
 			if (this.eventPublisher != null) {
-				Principal user = session.getPrincipal();
+				Principal user = getUser(session);
 				publishEvent(new SessionDisconnectEvent(this, message, session.getId(), closeStatus, user));
 			}
 			outputChannel.send(message);
 		}
 		finally {
+			this.stompAuthentications.remove(session.getId());
 			SimpAttributesContextHolder.resetAttributes();
 			simpAttributes.sessionCompleted();
 		}
@@ -592,7 +608,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		}
 		headerAccessor.setSessionId(session.getId());
 		headerAccessor.setSessionAttributes(session.getAttributes());
-		headerAccessor.setUser(session.getPrincipal());
+		headerAccessor.setUser(getUser(session));
 		return MessageBuilder.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
 	}
 
