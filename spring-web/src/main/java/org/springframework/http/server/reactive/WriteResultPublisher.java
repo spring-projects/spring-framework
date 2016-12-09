@@ -30,11 +30,12 @@ import reactor.core.publisher.Operators;
  * Publisher returned from {@link ServerHttpResponse#writeWith(Publisher)}.
  *
  * @author Arjen Poutsma
+ * @author Violeta Georgieva
  * @since 5.0
  */
-class ResponseBodyWriteResultPublisher implements Publisher<Void> {
+class WriteResultPublisher implements Publisher<Void> {
 
-	private static final Log logger = LogFactory.getLog(ResponseBodyWriteResultPublisher.class);
+	private static final Log logger = LogFactory.getLog(WriteResultPublisher.class);
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
@@ -80,9 +81,9 @@ class ResponseBodyWriteResultPublisher implements Publisher<Void> {
 
 	private static final class ResponseBodyWriteResultSubscription implements Subscription {
 
-		private final ResponseBodyWriteResultPublisher publisher;
+		private final WriteResultPublisher publisher;
 
-		public ResponseBodyWriteResultSubscription(ResponseBodyWriteResultPublisher publisher) {
+		public ResponseBodyWriteResultSubscription(WriteResultPublisher publisher) {
 			this.publisher = publisher;
 		}
 
@@ -112,7 +113,7 @@ class ResponseBodyWriteResultPublisher implements Publisher<Void> {
 
 		UNSUBSCRIBED {
 			@Override
-			void subscribe(ResponseBodyWriteResultPublisher publisher,
+			void subscribe(WriteResultPublisher publisher,
 					Subscriber<? super Void> subscriber) {
 				Objects.requireNonNull(subscriber);
 				if (publisher.changeState(this, SUBSCRIBED)) {
@@ -132,28 +133,28 @@ class ResponseBodyWriteResultPublisher implements Publisher<Void> {
 				}
 			}
 			@Override
-			void publishComplete(ResponseBodyWriteResultPublisher publisher) {
+			void publishComplete(WriteResultPublisher publisher) {
 				publisher.publisherCompleted = true;
 			}
 			@Override
-			void publishError(ResponseBodyWriteResultPublisher publisher, Throwable t) {
+			void publishError(WriteResultPublisher publisher, Throwable t) {
 				publisher.publisherError = t;
 			}
 		},
 
 		SUBSCRIBED {
 			@Override
-			void request(ResponseBodyWriteResultPublisher publisher, long n) {
+			void request(WriteResultPublisher publisher, long n) {
 				Operators.checkRequest(n, publisher.subscriber);
 			}
 			@Override
-			void publishComplete(ResponseBodyWriteResultPublisher publisher) {
+			void publishComplete(WriteResultPublisher publisher) {
 				if (publisher.changeState(this, COMPLETED)) {
 					publisher.subscriber.onComplete();
 				}
 			}
 			@Override
-			void publishError(ResponseBodyWriteResultPublisher publisher, Throwable t) {
+			void publishError(WriteResultPublisher publisher, Throwable t) {
 				if (publisher.changeState(this, COMPLETED)) {
 					publisher.subscriber.onError(t);
 				}
@@ -162,40 +163,40 @@ class ResponseBodyWriteResultPublisher implements Publisher<Void> {
 
 		COMPLETED {
 			@Override
-			void request(ResponseBodyWriteResultPublisher publisher, long n) {
+			void request(WriteResultPublisher publisher, long n) {
 				// ignore
 			}
 			@Override
-			void cancel(ResponseBodyWriteResultPublisher publisher) {
+			void cancel(WriteResultPublisher publisher) {
 				// ignore
 			}
 			@Override
-			void publishComplete(ResponseBodyWriteResultPublisher publisher) {
+			void publishComplete(WriteResultPublisher publisher) {
 				// ignore
 			}
 			@Override
-			void publishError(ResponseBodyWriteResultPublisher publisher, Throwable t) {
+			void publishError(WriteResultPublisher publisher, Throwable t) {
 				// ignore
 			}
 		};
 
-		void subscribe(ResponseBodyWriteResultPublisher publisher, Subscriber<? super Void> subscriber) {
+		void subscribe(WriteResultPublisher publisher, Subscriber<? super Void> subscriber) {
 			throw new IllegalStateException(toString());
 		}
 
-		void request(ResponseBodyWriteResultPublisher publisher, long n) {
+		void request(WriteResultPublisher publisher, long n) {
 			throw new IllegalStateException(toString());
 		}
 
-		void cancel(ResponseBodyWriteResultPublisher publisher) {
+		void cancel(WriteResultPublisher publisher) {
 			publisher.changeState(this, COMPLETED);
 		}
 
-		void publishComplete(ResponseBodyWriteResultPublisher publisher) {
+		void publishComplete(WriteResultPublisher publisher) {
 			throw new IllegalStateException(toString());
 		}
 
-		void publishError(ResponseBodyWriteResultPublisher publisher, Throwable t) {
+		void publishError(WriteResultPublisher publisher, Throwable t) {
 			throw new IllegalStateException(toString());
 		}
 	}

@@ -48,7 +48,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final ResponseBodyWriteResultPublisher resultPublisher = new ResponseBodyWriteResultPublisher();
+	private final WriteResultPublisher resultPublisher = new WriteResultPublisher();
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
