@@ -40,6 +40,8 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  */
 public abstract class AbstractListenerWebSocketSession<T> extends WebSocketSessionSupport<T> {
 
+	private static final int BUFFER_SIZE = 8192;
+
 	private final AtomicBoolean sendCalled = new AtomicBoolean();
 
 	private final String id;
@@ -49,6 +51,8 @@ public abstract class AbstractListenerWebSocketSession<T> extends WebSocketSessi
 	private final WebSocketReceivePublisher receivePublisher = new WebSocketReceivePublisher();
 
 	private volatile WebSocketSendProcessor sendProcessor;
+
+	private volatile boolean suspended = false;
 
 
 	public AbstractListenerWebSocketSession(T delegate, String id, URI uri) {
@@ -76,7 +80,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends WebSocketSessi
 
 	@Override
 	public Flux<WebSocketMessage> receive() {
-		return Flux.from(this.receivePublisher);
+		return Flux.from(this.receivePublisher).onBackpressureBuffer(BUFFER_SIZE);
 	}
 
 	@Override
@@ -94,15 +98,15 @@ public abstract class AbstractListenerWebSocketSession<T> extends WebSocketSessi
 	}
 
 	protected void resumeReceives() {
-		// no-op
+		this.suspended = false;
 	}
 
 	protected void suspendReceives() {
-		// no-op
+		this.suspended = true;
 	}
 
-	protected boolean isReadyToReceive() {
-		return this.receivePublisher.isReadyToReceive();
+	protected boolean isSuspended() {
+		return this.suspended;
 	}
 
 	protected abstract boolean sendMessage(WebSocketMessage message) throws IOException;
@@ -158,10 +162,6 @@ public abstract class AbstractListenerWebSocketSession<T> extends WebSocketSessi
 			this.webSocketMessage = webSocketMessage;
 			suspendReceives();
 			onDataAvailable();
-		}
-
-		boolean isReadyToReceive() {
-			return this.webSocketMessage == null;
 		}
 	}
 

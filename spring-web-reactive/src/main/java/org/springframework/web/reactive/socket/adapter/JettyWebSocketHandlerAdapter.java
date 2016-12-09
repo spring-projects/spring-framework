@@ -71,7 +71,7 @@ public class JettyWebSocketHandlerAdapter {
 
 	@OnWebSocketMessage
 	public void onWebSocketText(String message) {
-		if (this.wsSession != null) {
+		if (this.wsSession != null && !this.wsSession.isSuspended()) {
 			WebSocketMessage wsMessage = toMessage(Type.TEXT, message);
 			this.wsSession.handleMessage(wsMessage.getType(), wsMessage);
 		}
@@ -79,7 +79,7 @@ public class JettyWebSocketHandlerAdapter {
 
 	@OnWebSocketMessage
 	public void onWebSocketBinary(byte[] message, int offset, int length) {
-		if (this.wsSession != null) {
+		if (this.wsSession != null && !this.wsSession.isSuspended()) {
 			WebSocketMessage wsMessage = toMessage(Type.BINARY, ByteBuffer.wrap(message, offset, length));
 			wsSession.handleMessage(wsMessage.getType(), wsMessage);
 		}
@@ -87,7 +87,7 @@ public class JettyWebSocketHandlerAdapter {
 
 	@OnWebSocketFrame
 	public void onWebSocketFrame(Frame frame) {
-		if (this.wsSession != null) {
+		if (this.wsSession != null && !this.wsSession.isSuspended()) {
 			if (OpCode.PONG == frame.getOpCode()) {
 				ByteBuffer message = frame.getPayload() != null ? frame.getPayload() : EMPTY_PAYLOAD;
 				WebSocketMessage wsMessage = toMessage(Type.PONG, message);

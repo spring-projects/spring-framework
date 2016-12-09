@@ -55,10 +55,12 @@ public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<W
 	}
 
 	protected void resumeReceives() {
+		super.resumeReceives();
 		getDelegate().resumeReceives();
 	}
 
 	protected void suspendReceives() {
+		super.suspendReceives();
 		getDelegate().suspendReceives();
 	}
 

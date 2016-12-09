@@ -61,8 +61,7 @@ public class BasicWebSocketHandlerIntegrationTests extends AbstractWebSocketHand
 				.flatMap(WebSocketResponse::getWebSocketConnection)
 				.flatMap(conn -> conn.write(messages
 						.map(TextWebSocketFrame::new)
-						.cast(WebSocketFrame.class)
-						.concatWith(Observable.just(new CloseWebSocketFrame())))
+						.cast(WebSocketFrame.class))
 						.cast(WebSocketFrame.class)
 						.mergeWith(conn.getInput())
 				)

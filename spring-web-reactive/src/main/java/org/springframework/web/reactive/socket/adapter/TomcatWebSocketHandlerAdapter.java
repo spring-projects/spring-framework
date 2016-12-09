@@ -64,12 +64,9 @@ public class TomcatWebSocketHandlerAdapter extends Endpoint {
 
 			@Override
 			public void onMessage(String message) {
-				while (true) {
-					if (wsSession.isReadyToReceive()) {
-						WebSocketMessage wsMessage = toMessage(message);
-						wsSession.handleMessage(wsMessage.getType(), wsMessage);
-						break;
-					}
+				if (!wsSession.isSuspended()) {
+					WebSocketMessage wsMessage = toMessage(message);
+					wsSession.handleMessage(wsMessage.getType(), wsMessage);
 				}
 			}
 
@@ -78,12 +75,9 @@ public class TomcatWebSocketHandlerAdapter extends Endpoint {
 
 			@Override
 			public void onMessage(ByteBuffer message) {
-				while (true) {
-					if (wsSession.isReadyToReceive()) {
-						WebSocketMessage wsMessage = toMessage(message);
-						wsSession.handleMessage(wsMessage.getType(), wsMessage);
-						break;
-					}
+				if (!wsSession.isSuspended()) {
+					WebSocketMessage wsMessage = toMessage(message);
+					wsSession.handleMessage(wsMessage.getType(), wsMessage);
 				}
 			}
 
@@ -92,12 +86,9 @@ public class TomcatWebSocketHandlerAdapter extends Endpoint {
 
 			@Override
 			public void onMessage(PongMessage message) {
-				while (true) {
-					if (wsSession.isReadyToReceive()) {
-						WebSocketMessage wsMessage = toMessage(message);
-						wsSession.handleMessage(wsMessage.getType(), wsMessage);
-						break;
-					}
+				if (!wsSession.isSuspended()) {
+					WebSocketMessage wsMessage = toMessage(message);
+					wsSession.handleMessage(wsMessage.getType(), wsMessage);
 				}
 			}
 
