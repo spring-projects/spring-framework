@@ -68,6 +68,8 @@ public abstract class CommonsFileUploadSupport {
 
 	private boolean uploadTempDirSpecified = false;
 
+	private boolean preserveFilename = false;
+
 
 	/**
 	 * Instantiate a new CommonsFileUploadSupport with its
@@ -174,6 +176,20 @@ public abstract class CommonsFileUploadSupport {
 		return this.uploadTempDirSpecified;
 	}
 
+	/**
+	 * Set whether to preserve the filename as sent by the client, not stripping off
+	 * path information in {@link CommonsMultipartFile#getOriginalFilename()}.
+	 * <p>Default is "false", stripping off path information that may prefix the
+	 * actual filename e.g. from Opera. Switch this to "true" for preserving the
+	 * client-specified filename as-is, including potential path separators.
+	 * @since 4.3.5
+	 * @see MultipartFile#getOriginalFilename()
+	 * @see CommonsMultipartFile#setPreserveFilename(boolean)
+	 */
+	public void setPreserveFilename(boolean preserveFilename) {
+		this.preserveFilename = preserveFilename;
+	}
+
 
 	/**
 	 * Factory method for a Commons DiskFileItemFactory instance.
@@ -265,7 +281,7 @@ public abstract class CommonsFileUploadSupport {
 			}
 			else {
 				// multipart file field
-				CommonsMultipartFile file = new CommonsMultipartFile(fileItem);
+				CommonsMultipartFile file = createMultipartFile(fileItem);
 				multipartFiles.add(file.getName(), file);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Found multipart file [" + file.getName() + "] of size " + file.getSize() +
@@ -275,6 +291,20 @@ public abstract class CommonsFileUploadSupport {
 			}
 		}
 		return new MultipartParsingResult(multipartFiles, multipartParameters, multipartParameterContentTypes);
+	}
+
+	/**
+	 * Create a {@link CommonsMultipartFile} wrapper for the given Commons {@link FileItem}.
+	 * @param fileItem the Commons FileItem to wrap
+	 * @return the corresponding CommonsMultipartFile (potentially a custom subclass)
+	 * @since 4.3.5
+	 * @see #setPreserveFilename(boolean)
+	 * @see CommonsMultipartFile#setPreserveFilename(boolean)
+	 */
+	protected CommonsMultipartFile createMultipartFile(FileItem fileItem) {
+		CommonsMultipartFile multipartFile = new CommonsMultipartFile(fileItem);
+		multipartFile.setPreserveFilename(this.preserveFilename);
+		return multipartFile;
 	}
 
 	/**
@@ -323,6 +353,7 @@ public abstract class CommonsFileUploadSupport {
 
 		public MultipartParsingResult(MultiValueMap<String, MultipartFile> mpFiles,
 				Map<String, String[]> mpParams, Map<String, String> mpParamContentTypes) {
+
 			this.multipartFiles = mpFiles;
 			this.multipartParameters = mpParams;
 			this.multipartParameterContentTypes = mpParamContentTypes;
