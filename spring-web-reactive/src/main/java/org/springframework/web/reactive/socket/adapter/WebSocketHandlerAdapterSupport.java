@@ -17,12 +17,15 @@ package org.springframework.web.reactive.socket.adapter;
 
 import java.net.URI;
 
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 
 /**
- * Base class for {@link WebSocketHandler} implementations.
+ * Base class for {@link WebSocketHandler} adapters to underlying WebSocket
+ * handler APIs.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -33,21 +36,32 @@ public abstract class WebSocketHandlerAdapterSupport {
 
 	private final WebSocketHandler delegate;
 
+	private final DataBufferFactory bufferFactory;
 
-	protected WebSocketHandlerAdapterSupport(ServerHttpRequest request, WebSocketHandler handler) {
-		Assert.notNull("'request' is required");
-		Assert.notNull("'handler' handler is required");
+
+	protected WebSocketHandlerAdapterSupport(ServerHttpRequest request, ServerHttpResponse response,
+			WebSocketHandler handler) {
+
+		Assert.notNull("ServerHttpRequest is required");
+		Assert.notNull("ServerHttpResponse is required");
+		Assert.notNull("WebSocketHandler handler is required");
 		this.uri = request.getURI();
+		this.bufferFactory = response.bufferFactory();
 		this.delegate = handler;
 	}
 
 
-	public URI getUri() {
+	protected URI getUri() {
 		return this.uri;
 	}
 
-	public WebSocketHandler getDelegate() {
+	protected WebSocketHandler getDelegate() {
 		return this.delegate;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected <T extends DataBufferFactory> T getBufferFactory() {
+		return (T) this.bufferFactory;
 	}
 
 }

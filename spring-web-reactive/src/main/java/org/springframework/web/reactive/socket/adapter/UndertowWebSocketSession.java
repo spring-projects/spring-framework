@@ -18,7 +18,6 @@ package org.springframework.web.reactive.socket.adapter;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -43,8 +42,8 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<WebSocketChannel> {
 
 
-	public UndertowWebSocketSession(WebSocketChannel channel) throws URISyntaxException {
-		super(channel, ObjectUtils.getIdentityHexString(channel), new URI(channel.getUrl()));
+	public UndertowWebSocketSession(WebSocketChannel channel, URI url) {
+		super(channel, ObjectUtils.getIdentityHexString(channel), url);
 	}
 
 

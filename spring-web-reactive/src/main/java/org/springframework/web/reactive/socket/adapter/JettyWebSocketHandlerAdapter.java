@@ -32,9 +32,8 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.util.Assert;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -48,21 +47,17 @@ import org.springframework.web.reactive.socket.WebSocketMessage.Type;
  * @since 5.0
  */
 @WebSocket
-public class JettyWebSocketHandlerAdapter {
+public class JettyWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupport {
 
 	private static final ByteBuffer EMPTY_PAYLOAD = ByteBuffer.wrap(new byte[0]);
 
-
-	private final WebSocketHandler delegate;
-
 	private JettyWebSocketSession session;
 
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory(false);
 
+	public JettyWebSocketHandlerAdapter(ServerHttpRequest request, ServerHttpResponse response,
+			WebSocketHandler delegate) {
 
-	public JettyWebSocketHandlerAdapter(WebSocketHandler delegate) {
-		Assert.notNull("WebSocketHandler is required");
-		this.delegate = delegate;
+		super(request, response, delegate);
 	}
 
 
@@ -71,7 +66,7 @@ public class JettyWebSocketHandlerAdapter {
 		this.session = new JettyWebSocketSession(session);
 
 		HandlerResultSubscriber subscriber = new HandlerResultSubscriber();
-		this.delegate.handle(this.session).subscribe(subscriber);
+		getDelegate().handle(this.session).subscribe(subscriber);
 	}
 
 	@OnWebSocketMessage
@@ -105,15 +100,15 @@ public class JettyWebSocketHandlerAdapter {
 	private <T> WebSocketMessage toMessage(Type type, T message) {
 		if (Type.TEXT.equals(type)) {
 			byte[] bytes = ((String) message).getBytes(StandardCharsets.UTF_8);
-			DataBuffer buffer = this.bufferFactory.wrap(bytes);
+			DataBuffer buffer = getBufferFactory().wrap(bytes);
 			return WebSocketMessage.create(Type.TEXT, buffer);
 		}
 		else if (Type.BINARY.equals(type)) {
-			DataBuffer buffer = this.bufferFactory.wrap((ByteBuffer) message);
+			DataBuffer buffer = getBufferFactory().wrap((ByteBuffer) message);
 			return WebSocketMessage.create(Type.BINARY, buffer);
 		}
 		else if (Type.PONG.equals(type)) {
-			DataBuffer buffer = this.bufferFactory.wrap((ByteBuffer) message);
+			DataBuffer buffer = getBufferFactory().wrap((ByteBuffer) message);
 			return WebSocketMessage.create(Type.PONG, buffer);
 		}
 		else {

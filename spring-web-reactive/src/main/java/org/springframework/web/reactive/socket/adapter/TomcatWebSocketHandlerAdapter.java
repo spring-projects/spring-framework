@@ -28,9 +28,8 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.util.Assert;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -43,75 +42,83 @@ import org.springframework.web.reactive.socket.WebSocketMessage.Type;
  * @author Violeta Georgieva
  * @since 5.0
  */
-public class TomcatWebSocketHandlerAdapter extends Endpoint {
-
-	private final WebSocketHandler delegate;
+public class TomcatWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupport {
 
 	private TomcatWebSocketSession session;
 
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory(false);
 
+	public TomcatWebSocketHandlerAdapter(ServerHttpRequest request, ServerHttpResponse response,
+			WebSocketHandler delegate) {
 
-	public TomcatWebSocketHandlerAdapter(WebSocketHandler delegate) {
-		Assert.notNull("WebSocketHandler is required");
-		this.delegate = delegate;
+		super(request, response, delegate);
 	}
 
 
-	@Override
-	public void onOpen(Session session, EndpointConfig config) {
-		this.session = new TomcatWebSocketSession(session);
-
-		session.addMessageHandler(String.class, message -> {
-			WebSocketMessage webSocketMessage = toMessage(message);
-			this.session.handleMessage(webSocketMessage.getType(), webSocketMessage);
-		});
-		session.addMessageHandler(ByteBuffer.class, message -> {
-			WebSocketMessage webSocketMessage = toMessage(message);
-			this.session.handleMessage(webSocketMessage.getType(), webSocketMessage);
-		});
-		session.addMessageHandler(PongMessage.class, message -> {
-			WebSocketMessage webSocketMessage = toMessage(message);
-			this.session.handleMessage(webSocketMessage.getType(), webSocketMessage);
-		});
-
-		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber();
-		this.delegate.handle(this.session).subscribe(resultSubscriber);
+	public Endpoint getEndpoint() {
+		return new StandardEndpoint();
 	}
 
-	private <T> WebSocketMessage toMessage(T message) {
-		if (message instanceof String) {
-			byte[] bytes = ((String) message).getBytes(StandardCharsets.UTF_8);
-			return WebSocketMessage.create(Type.TEXT, this.bufferFactory.wrap(bytes));
-		}
-		else if (message instanceof ByteBuffer) {
-			DataBuffer buffer = this.bufferFactory.wrap((ByteBuffer) message);
-			return WebSocketMessage.create(Type.BINARY, buffer);
-		}
-		else if (message instanceof PongMessage) {
-			DataBuffer buffer = this.bufferFactory.wrap(((PongMessage) message).getApplicationData());
-			return WebSocketMessage.create(Type.PONG, buffer);
-		}
-		else {
-			throw new IllegalArgumentException("Unexpected message type: " + message);
-		}
+	private TomcatWebSocketSession getSession() {
+		return this.session;
 	}
 
-	@Override
-	public void onClose(Session session, CloseReason reason) {
-		if (this.session != null) {
-			int code = reason.getCloseCode().getCode();
-			this.session.handleClose(new CloseStatus(code, reason.getReasonPhrase()));
+
+	private class StandardEndpoint extends Endpoint {
+
+		@Override
+		public void onOpen(Session session, EndpointConfig config) {
+			TomcatWebSocketHandlerAdapter.this.session = new TomcatWebSocketSession(session);
+
+			session.addMessageHandler(String.class, message -> {
+				WebSocketMessage webSocketMessage = toMessage(message);
+				getSession().handleMessage(webSocketMessage.getType(), webSocketMessage);
+			});
+			session.addMessageHandler(ByteBuffer.class, message -> {
+				WebSocketMessage webSocketMessage = toMessage(message);
+				getSession().handleMessage(webSocketMessage.getType(), webSocketMessage);
+			});
+			session.addMessageHandler(PongMessage.class, message -> {
+				WebSocketMessage webSocketMessage = toMessage(message);
+				getSession().handleMessage(webSocketMessage.getType(), webSocketMessage);
+			});
+
+			HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber();
+			getDelegate().handle(TomcatWebSocketHandlerAdapter.this.session).subscribe(resultSubscriber);
+		}
+
+		private <T> WebSocketMessage toMessage(T message) {
+			if (message instanceof String) {
+				byte[] bytes = ((String) message).getBytes(StandardCharsets.UTF_8);
+				return WebSocketMessage.create(Type.TEXT, getBufferFactory().wrap(bytes));
+			}
+			else if (message instanceof ByteBuffer) {
+				DataBuffer buffer = getBufferFactory().wrap((ByteBuffer) message);
+				return WebSocketMessage.create(Type.BINARY, buffer);
+			}
+			else if (message instanceof PongMessage) {
+				DataBuffer buffer = getBufferFactory().wrap(((PongMessage) message).getApplicationData());
+				return WebSocketMessage.create(Type.PONG, buffer);
+			}
+			else {
+				throw new IllegalArgumentException("Unexpected message type: " + message);
+			}
+		}
+
+		@Override
+		public void onClose(Session session, CloseReason reason) {
+			if (getSession() != null) {
+				int code = reason.getCloseCode().getCode();
+				getSession().handleClose(new CloseStatus(code, reason.getReasonPhrase()));
+			}
+		}
+
+		@Override
+		public void onError(Session session, Throwable exception) {
+			if (getSession() != null) {
+				getSession().handleError(exception);
+			}
 		}
 	}
-
-	@Override
-	public void onError(Session session, Throwable exception) {
-		if (this.session != null) {
-			this.session.handleError(exception);
-		}
-	}
-
 
 	private final class HandlerResultSubscriber implements Subscriber<Void> {
 
@@ -127,15 +134,15 @@ public class TomcatWebSocketHandlerAdapter extends Endpoint {
 
 		@Override
 		public void onError(Throwable ex) {
-			if (session != null) {
-				session.close(new CloseStatus(CloseStatus.SERVER_ERROR.getCode(), ex.getMessage()));
+			if (getSession() != null) {
+				getSession().close(new CloseStatus(CloseStatus.SERVER_ERROR.getCode(), ex.getMessage()));
 			}
 		}
 
 		@Override
 		public void onComplete() {
-			if (session != null) {
-				session.close();
+			if (getSession() != null) {
+				getSession().close();
 			}
 		}
 	}

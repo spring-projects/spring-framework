@@ -24,6 +24,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.websocket.Endpoint;
+import javax.websocket.server.ServerEndpointConfig;
 
 import org.apache.tomcat.websocket.server.WsServerContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -50,45 +52,46 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler webSocketHandler){
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler){
 
-		TomcatWebSocketHandlerAdapter endpoint =
-				new TomcatWebSocketHandlerAdapter(webSocketHandler);
+		ServerHttpRequest request = exchange.getRequest();
+		ServerHttpResponse response = exchange.getResponse();
+		Endpoint endpoint = new TomcatWebSocketHandlerAdapter(request, response, handler).getEndpoint();
 
-		HttpServletRequest servletRequest = getHttpServletRequest(exchange.getRequest());
-		HttpServletResponse servletResponse = getHttpServletResponse(exchange.getResponse());
+		HttpServletRequest servletRequest = getHttpServletRequest(request);
+		HttpServletResponse servletResponse = getHttpServletResponse(response);
 
-		Map<String, String> pathParams = Collections.<String, String> emptyMap();
-
-		ServerEndpointRegistration sec =
-				new ServerEndpointRegistration(servletRequest.getRequestURI(), endpoint);
+		String requestURI = servletRequest.getRequestURI();
+		ServerEndpointConfig config = new ServerEndpointRegistration(requestURI, endpoint);
 		try {
-			getContainer(servletRequest).doUpgrade(servletRequest, servletResponse,
-					sec, pathParams);
+			WsServerContainer container = getContainer(servletRequest);
+			container.doUpgrade(servletRequest, servletResponse, config, Collections.emptyMap());
 		}
-		catch (ServletException | IOException e) {
-			return Mono.error(e);
+		catch (ServletException | IOException ex) {
+			return Mono.error(ex);
 		}
 
 		return Mono.empty();
 	}
 
-	private WsServerContainer getContainer(HttpServletRequest request) {
-		ServletContext servletContext = request.getServletContext();
-		Object container = servletContext.getAttribute(SERVER_CONTAINER_ATTR);
-		Assert.notNull(container, "No '" + SERVER_CONTAINER_ATTR + "' ServletContext attribute. " +
-				"Are you running in a Servlet container that supports JSR-356?");
-		Assert.isTrue(container instanceof WsServerContainer);
-		return (WsServerContainer) container;
-	}
-
-	private final HttpServletRequest getHttpServletRequest(ServerHttpRequest request) {
+	private HttpServletRequest getHttpServletRequest(ServerHttpRequest request) {
 		Assert.isTrue(request instanceof ServletServerHttpRequest);
 		return ((ServletServerHttpRequest) request).getServletRequest();
 	}
 
-	private final HttpServletResponse getHttpServletResponse(ServerHttpResponse response) {
+	private HttpServletResponse getHttpServletResponse(ServerHttpResponse response) {
 		Assert.isTrue(response instanceof ServletServerHttpResponse);
 		return ((ServletServerHttpResponse) response).getServletResponse();
 	}
+
+	private WsServerContainer getContainer(HttpServletRequest request) {
+		ServletContext servletContext = request.getServletContext();
+		Object container = servletContext.getAttribute(SERVER_CONTAINER_ATTR);
+		Assert.notNull(container,
+				"No 'javax.websocket.server.ServerContainer' ServletContext attribute. " +
+						"Are you running in a Servlet container that supports JSR-356?");
+		Assert.isTrue(container instanceof WsServerContainer);
+		return (WsServerContainer) container;
+	}
+
 }

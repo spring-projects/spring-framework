@@ -17,16 +17,14 @@
 package org.springframework.web.reactive.socket.server.upgrade;
 
 import java.io.IOException;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.util.DecoratedObjectFactory;
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
+import reactor.core.publisher.Mono;
+
 import org.springframework.context.Lifecycle;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -39,8 +37,6 @@ import org.springframework.web.reactive.socket.adapter.JettyWebSocketHandlerAdap
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
-import reactor.core.publisher.Mono;
-
 /**
  * A {@link RequestUpgradeStrategy} for use with Jetty.
  * 
@@ -52,43 +48,13 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	private static final ThreadLocal<JettyWebSocketHandlerAdapter> wsContainerHolder =
 			new NamedThreadLocal<>("Jetty WebSocketHandler Adapter");
 
+
 	private WebSocketServerFactory factory;
 
 	private ServletContext servletContext;
 
 	private volatile boolean running = false;
 
-	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler webSocketHandler) {
-
-		JettyWebSocketHandlerAdapter adapter =
-				new JettyWebSocketHandlerAdapter(webSocketHandler);
-
-		HttpServletRequest servletRequest = getHttpServletRequest(exchange.getRequest());
-		HttpServletResponse servletResponse = getHttpServletResponse(exchange.getResponse());
-
-		if (this.servletContext == null) {
-			this.servletContext = servletRequest.getServletContext();
-			servletContext.setAttribute(DecoratedObjectFactory.ATTR, new DecoratedObjectFactory());
-		}
-
-		try {
-			start();
-
-			Assert.isTrue(this.factory.isUpgradeRequest(servletRequest, servletResponse), "Not a WebSocket handshake");
-
-			wsContainerHolder.set(adapter);
-			this.factory.acceptWebSocket(servletRequest, servletResponse);
-		}
-		catch (IOException ex) {
-			return Mono.error(ex);
-		}
-		finally {
-			wsContainerHolder.remove();
-		}
-
-		return Mono.empty();
-	}
 
 	@Override
 	public void start() {
@@ -96,16 +62,10 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 			this.running = true;
 			try {
 				this.factory = new WebSocketServerFactory(this.servletContext);
-				this.factory.setCreator(new WebSocketCreator() {
-
-					@Override
-					public Object createWebSocket(ServletUpgradeRequest req,
-							ServletUpgradeResponse resp) {
-						JettyWebSocketHandlerAdapter adapter = wsContainerHolder.get();
-						Assert.state(adapter != null, "Expected JettyWebSocketHandlerAdapter");
-						return adapter;
-					}
-
+				this.factory.setCreator((request, response) -> {
+					JettyWebSocketHandlerAdapter adapter = wsContainerHolder.get();
+					Assert.state(adapter != null, "Expected JettyWebSocketHandlerAdapter");
+					return adapter;
 				});
 				this.factory.start();
 			}
@@ -133,12 +93,46 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		return this.running;
 	}
 
-	private final HttpServletRequest getHttpServletRequest(ServerHttpRequest request) {
+	@Override
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler) {
+
+		ServerHttpRequest request = exchange.getRequest();
+		ServerHttpResponse response = exchange.getResponse();
+		JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(request, response, handler);
+
+		HttpServletRequest servletRequest = getHttpServletRequest(request);
+		HttpServletResponse servletResponse = getHttpServletResponse(response);
+
+		if (this.servletContext == null) {
+			this.servletContext = servletRequest.getServletContext();
+			this.servletContext.setAttribute(DecoratedObjectFactory.ATTR, new DecoratedObjectFactory());
+		}
+
+		try {
+			start();
+
+			Assert.isTrue(this.factory.isUpgradeRequest(
+					servletRequest, servletResponse), "Not a WebSocket handshake");
+
+			wsContainerHolder.set(adapter);
+			this.factory.acceptWebSocket(servletRequest, servletResponse);
+		}
+		catch (IOException ex) {
+			return Mono.error(ex);
+		}
+		finally {
+			wsContainerHolder.remove();
+		}
+
+		return Mono.empty();
+	}
+
+	private HttpServletRequest getHttpServletRequest(ServerHttpRequest request) {
 		Assert.isTrue(request instanceof ServletServerHttpRequest);
 		return ((ServletServerHttpRequest) request).getServletRequest();
 	}
 
-	private final HttpServletResponse getHttpServletResponse(ServerHttpResponse response) {
+	private HttpServletResponse getHttpServletResponse(ServerHttpResponse response) {
 		Assert.isTrue(response instanceof ServletServerHttpResponse);
 		return ((ServletServerHttpResponse) response).getServletResponse();
 	}

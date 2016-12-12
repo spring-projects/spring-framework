@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.socket.server.upgrade;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.UndertowServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -25,6 +26,7 @@ import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
 import io.undertow.server.HttpServerExchange;
+import io.undertow.websockets.WebSocketConnectionCallback;
 import io.undertow.websockets.WebSocketProtocolHandshakeHandler;
 import reactor.core.publisher.Mono;
 
@@ -37,27 +39,23 @@ import reactor.core.publisher.Mono;
 public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange,
-			WebSocketHandler webSocketHandler) {
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler) {
 
-		UndertowWebSocketHandlerAdapter callback =
-				new UndertowWebSocketHandlerAdapter(webSocketHandler);
+		ServerHttpRequest request = exchange.getRequest();
+		ServerHttpResponse response = exchange.getResponse();
+		WebSocketConnectionCallback callback = new UndertowWebSocketHandlerAdapter(request, response, handler);
 
-		WebSocketProtocolHandshakeHandler handler =
-				new WebSocketProtocolHandshakeHandler(callback);
+		Assert.isTrue(request instanceof UndertowServerHttpRequest);
+		HttpServerExchange httpExchange = ((UndertowServerHttpRequest) request).getUndertowExchange();
+
 		try {
-			handler.handleRequest(getUndertowExchange(exchange.getRequest()));
+			new WebSocketProtocolHandshakeHandler(callback).handleRequest(httpExchange);
 		}
-		catch (Exception e) {
-			return Mono.error(e);
+		catch (Exception ex) {
+			return Mono.error(ex);
 		}
 
 		return Mono.empty();
-	}
-
-	private final HttpServerExchange getUndertowExchange(ServerHttpRequest request) {
-		Assert.isTrue(request instanceof UndertowServerHttpRequest);
-		return ((UndertowServerHttpRequest) request).getUndertowExchange();
 	}
 
 }
