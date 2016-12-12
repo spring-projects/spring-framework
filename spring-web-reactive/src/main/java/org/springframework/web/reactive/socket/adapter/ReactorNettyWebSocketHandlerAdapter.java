@@ -21,10 +21,8 @@ import org.reactivestreams.Publisher;
 import reactor.ipc.netty.http.HttpInbound;
 import reactor.ipc.netty.http.HttpOutbound;
 
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 
 /**
@@ -38,21 +36,12 @@ public class ReactorNettyWebSocketHandlerAdapter extends WebSocketHandlerAdapter
 		implements BiFunction<HttpInbound, HttpOutbound, Publisher<Void>> {
 
 
-	private final NettyDataBufferFactory bufferFactory;
-
-
 	public ReactorNettyWebSocketHandlerAdapter(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler handler) {
 
-		super(request, handler);
-		Assert.notNull("'response' is required");
-		this.bufferFactory = (NettyDataBufferFactory) response.bufferFactory();
+		super(request, response, handler);
 	}
 
-
-	public NettyDataBufferFactory getBufferFactory() {
-		return this.bufferFactory;
-	}
 
 	@Override
 	public Publisher<Void> apply(HttpInbound inbound, HttpOutbound outbound) {

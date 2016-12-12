@@ -20,10 +20,8 @@ import reactor.core.publisher.Mono;
 import rx.Observable;
 import rx.RxReactiveStreams;
 
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 
 /**
@@ -36,21 +34,13 @@ import org.springframework.web.reactive.socket.WebSocketHandler;
 public class RxNettyWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupport
 		implements io.reactivex.netty.protocol.http.ws.server.WebSocketHandler {
 
-	private final NettyDataBufferFactory bufferFactory;
-
 
 	public RxNettyWebSocketHandlerAdapter(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler handler) {
 
-		super(request, handler);
-		Assert.notNull("'response' is required");
-		this.bufferFactory = (NettyDataBufferFactory) response.bufferFactory();
+		super(request, response, handler);
 	}
 
-
-	public NettyDataBufferFactory getBufferFactory() {
-		return this.bufferFactory;
-	}
 
 	@Override
 	public Observable<Void> handle(WebSocketConnection conn) {

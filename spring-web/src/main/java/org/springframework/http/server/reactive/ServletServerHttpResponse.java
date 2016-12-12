@@ -32,6 +32,7 @@ import org.reactivestreams.Publisher;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
@@ -183,7 +184,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 	}
 
 
-	private class ResponseBodyProcessor extends AbstractResponseBodyProcessor {
+	private class ResponseBodyProcessor extends AbstractListenerWriteProcessor<DataBuffer> {
 
 		private final ServletOutputStream outputStream;
 
@@ -197,6 +198,20 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		@Override
 		protected boolean isWritePossible() {
 			return this.outputStream.isReady();
+		}
+
+		@Override
+		protected void releaseData() {
+			if (logger.isTraceEnabled()) {
+				logger.trace("releaseBuffer: " + this.currentData);
+			}
+			DataBufferUtils.release(this.currentData);
+			this.currentData = null;
+		}
+
+		@Override
+		protected boolean isDataEmpty(DataBuffer dataBuffer) {
+			return dataBuffer.readableByteCount() == 0;
 		}
 
 		@Override
@@ -258,7 +273,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 	}
 
 
-	private class ResponseBodyFlushProcessor extends AbstractResponseBodyFlushProcessor {
+	private class ResponseBodyFlushProcessor extends AbstractListenerFlushProcessor<DataBuffer> {
 
 		@Override
 		protected Processor<? super DataBuffer, Void> createBodyProcessor() {

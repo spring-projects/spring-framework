@@ -37,12 +37,19 @@ public class TomcatHttpServer extends HttpServerSupport implements HttpServer, I
 
 	private String baseDir;
 
+	private Class<?> wsListener;
+
 
 	public TomcatHttpServer() {
 	}
 
 	public TomcatHttpServer(String baseDir) {
 		this.baseDir = baseDir;
+	}
+
+	public TomcatHttpServer(String baseDir, Class<?> wsListener) {
+		this.baseDir = baseDir;
+		this.wsListener = wsListener;
 	}
 
 
@@ -61,6 +68,9 @@ public class TomcatHttpServer extends HttpServerSupport implements HttpServer, I
 		Context rootContext = tomcatServer.addContext("", base.getAbsolutePath());
 		Tomcat.addServlet(rootContext, "httpHandlerServlet", servlet);
 		rootContext.addServletMappingDecoded("/", "httpHandlerServlet");
+		if (wsListener != null) {
+			rootContext.addApplicationListener(wsListener.getName());
+		}
 	}
 
 	private ServletHttpHandlerAdapter initServletHttpHandlerAdapter() {

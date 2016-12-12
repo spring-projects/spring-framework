@@ -106,7 +106,7 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		return Flux.from(this.body);
 	}
 
-	private static class RequestBodyPublisher extends AbstractRequestBodyPublisher {
+	private static class RequestBodyPublisher extends AbstractListenerReadPublisher<DataBuffer> {
 
 		private final ChannelListener<StreamSourceChannel> readListener =
 				new ReadListener();
