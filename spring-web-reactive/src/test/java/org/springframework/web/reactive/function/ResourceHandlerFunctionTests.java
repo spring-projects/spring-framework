@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.EnumSet;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -36,24 +35,17 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
  */
 public class ResourceHandlerFunctionTests {
 
-	private Resource resource;
+	private final Resource resource = new ClassPathResource("response.txt", getClass());
 
-	private ResourceHandlerFunction handlerFunction;
+	private final ResourceHandlerFunction handlerFunction = new ResourceHandlerFunction(this.resource);
 
-	@Before
-	public void createResource() {
-		this.resource = new ClassPathResource("response.txt", getClass());
-		this.handlerFunction = new ResourceHandlerFunction(this.resource);
-	}
 
 	@Test
 	public void get() throws IOException {
@@ -88,7 +80,7 @@ public class ResourceHandlerFunctionTests {
 				.expectComplete()
 				.verify();
 		assertEquals(MediaType.TEXT_PLAIN, mockResponse.getHeaders().getContentType());
-		assertEquals(49, mockResponse.getHeaders().getContentLength());
+		assertEquals(this.resource.contentLength(), mockResponse.getHeaders().getContentLength());
 	}
 
 	@Test
@@ -116,7 +108,7 @@ public class ResourceHandlerFunctionTests {
 				.expectComplete()
 				.verify();
 		assertEquals(MediaType.TEXT_PLAIN, mockResponse.getHeaders().getContentType());
-		assertEquals(49, mockResponse.getHeaders().getContentLength());
+		assertEquals(this.resource.contentLength(), mockResponse.getHeaders().getContentLength());
 	}
 
 	@Test
