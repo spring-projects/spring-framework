@@ -191,7 +191,7 @@ public class TypeDescriptor implements Serializable {
 			return this;
 		}
 		ResolvableType narrowed = ResolvableType.forType(value.getClass(), this.resolvableType);
-		return new TypeDescriptor(narrowed, null, this.annotations);
+		return new TypeDescriptor(narrowed, value.getClass(), this.annotations);
 	}
 
 	/**
@@ -445,7 +445,10 @@ public class TypeDescriptor implements Serializable {
 		if (typeDescriptor != null) {
 			return typeDescriptor.narrow(value);
 		}
-		return (value != null ? new TypeDescriptor(this.resolvableType, value.getClass(), this.annotations) : null);
+		if (value != null) {
+			return narrow(value);
+		}
+		return null;
 	}
 
 	@Override
