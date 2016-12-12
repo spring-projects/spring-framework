@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -742,6 +742,15 @@ public class InjectAnnotationBeanPostProcessorTests {
 		bf.destroySingletons();
 	}
 
+	@Test
+	public void testAnnotatedDefaultConstructor() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(AnnotatedDefaultConstructorBean.class));
+
+		assertNotNull(bf.getBean("annotatedBean"));
+	}
+
 
 	public static class ResourceInjectionBean {
 
@@ -749,7 +758,6 @@ public class InjectAnnotationBeanPostProcessorTests {
 		private TestBean testBean;
 
 		private TestBean testBean2;
-
 
 		@Inject
 		public void setTestBean2(TestBean testBean2) {
@@ -819,7 +827,6 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 
 	public static class TypedExtendedResourceInjectionBean extends ExtendedResourceInjectionBean<NestedTestBean> {
-
 	}
 
 
@@ -1087,7 +1094,6 @@ public class InjectAnnotationBeanPostProcessorTests {
 		@Inject
 		private Map<String, TestBean> testBeanMap;
 
-
 		public Map<String, TestBean> getTestBeanMap() {
 			return this.testBeanMap;
 		}
@@ -1343,6 +1349,14 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 		public Optional<TestBean> getTestBean() {
 			return this.testBean.get();
+		}
+	}
+
+
+	public static class AnnotatedDefaultConstructorBean {
+
+		@Inject
+		public AnnotatedDefaultConstructorBean() {
 		}
 	}
 
