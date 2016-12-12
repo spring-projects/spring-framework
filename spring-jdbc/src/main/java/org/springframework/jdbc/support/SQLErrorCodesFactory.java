@@ -18,7 +18,6 @@ package org.springframework.jdbc.support;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.WeakHashMap;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -30,6 +29,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.PatternMatchUtils;
 
 /**
@@ -85,7 +85,7 @@ public class SQLErrorCodesFactory {
 	/**
 	 * Map to cache the SQLErrorCodes instance per DataSource.
 	 */
-	private final Map<DataSource, SQLErrorCodes> dataSourceCache = new WeakHashMap<>(16);
+	private final Map<DataSource, SQLErrorCodes> dataSourceCache = new ConcurrentReferenceHashMap<>(16);
 
 
 	/**
@@ -153,33 +153,33 @@ public class SQLErrorCodesFactory {
 	/**
 	 * Return the {@link SQLErrorCodes} instance for the given database.
 	 * <p>No need for a database metadata lookup.
-	 * @param dbName the database name (must not be {@code null})
+	 * @param databaseName the database name (must not be {@code null})
 	 * @return the {@code SQLErrorCodes} instance for the given database
 	 * @throws IllegalArgumentException if the supplied database name is {@code null}
 	 */
-	public SQLErrorCodes getErrorCodes(String dbName) {
-		Assert.notNull(dbName, "Database product name must not be null");
+	public SQLErrorCodes getErrorCodes(String databaseName) {
+		Assert.notNull(databaseName, "Database product name must not be null");
 
-		SQLErrorCodes sec = this.errorCodesMap.get(dbName);
+		SQLErrorCodes sec = this.errorCodesMap.get(databaseName);
 		if (sec == null) {
 			for (SQLErrorCodes candidate : this.errorCodesMap.values()) {
-				if (PatternMatchUtils.simpleMatch(candidate.getDatabaseProductNames(), dbName)) {
+				if (PatternMatchUtils.simpleMatch(candidate.getDatabaseProductNames(), databaseName)) {
 					sec = candidate;
 					break;
 				}
 			}
 		}
 		if (sec != null) {
-			checkCustomTranslatorRegistry(dbName, sec);
+			checkCustomTranslatorRegistry(databaseName, sec);
 			if (logger.isDebugEnabled()) {
-				logger.debug("SQL error codes for '" + dbName + "' found");
+				logger.debug("SQL error codes for '" + databaseName + "' found");
 			}
 			return sec;
 		}
 
 		// Could not find the database among the defined ones.
 		if (logger.isDebugEnabled()) {
-			logger.debug("SQL error codes for '" + dbName + "' not found");
+			logger.debug("SQL error codes for '" + databaseName + "' not found");
 		}
 		return new SQLErrorCodes();
 	}
@@ -196,75 +196,97 @@ public class SQLErrorCodesFactory {
 	public SQLErrorCodes getErrorCodes(DataSource dataSource) {
 		Assert.notNull(dataSource, "DataSource must not be null");
 		if (logger.isDebugEnabled()) {
-			logger.debug("Looking up default SQLErrorCodes for DataSource [" + dataSource + "]");
+			logger.debug("Looking up default SQLErrorCodes for DataSource [" + identify(dataSource) + "]");
 		}
 
-		synchronized (this.dataSourceCache) {
-			// Let's avoid looking up database product info if we can.
-			SQLErrorCodes sec = this.dataSourceCache.get(dataSource);
-			if (sec != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("SQLErrorCodes found in cache for DataSource [" +
-							dataSource.getClass().getName() + '@' + Integer.toHexString(dataSource.hashCode()) + "]");
-				}
-				return sec;
-			}
-			// We could not find it - got to look it up.
-			try {
-				String dbName = (String) JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
-				if (dbName != null) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Database product name cached for DataSource [" +
-								dataSource.getClass().getName() + '@' + Integer.toHexString(dataSource.hashCode()) +
-								"]: name is '" + dbName + "'");
+		// Try efficient lock-free access for existing cache entry
+		SQLErrorCodes sec = this.dataSourceCache.get(dataSource);
+		if (sec == null) {
+			synchronized (this.dataSourceCache) {
+				// Double-check within full dataSourceCache lock
+				sec = this.dataSourceCache.get(dataSource);
+				if (sec == null) {
+					// We could not find it - got to look it up.
+					try {
+						String name = (String) JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
+						if (name != null) {
+							return registerDatabase(dataSource, name);
+						}
 					}
-					sec = getErrorCodes(dbName);
-					this.dataSourceCache.put(dataSource, sec);
-					return sec;
+					catch (MetaDataAccessException ex) {
+						logger.warn("Error while extracting database name - falling back to empty error codes", ex);
+						// Fallback is to return an empty SQLErrorCodes instance.
+						return new SQLErrorCodes();
+					}
 				}
-			}
-			catch (MetaDataAccessException ex) {
-				logger.warn("Error while extracting database product name - falling back to empty error codes", ex);
 			}
 		}
 
-		// Fallback is to return an empty SQLErrorCodes instance.
-		return new SQLErrorCodes();
+		if (logger.isDebugEnabled()) {
+			logger.debug("SQLErrorCodes found in cache for DataSource [" + identify(dataSource) + "]");
+		}
+
+		return sec;
 	}
 
 	/**
 	 * Associate the specified database name with the given {@link DataSource}.
 	 * @param dataSource the {@code DataSource} identifying the database
-	 * @param dbName the corresponding database name as stated in the error codes
+	 * @param databaseName the corresponding database name as stated in the error codes
 	 * definition file (must not be {@code null})
-	 * @return the corresponding {@code SQLErrorCodes} object
+	 * @return the corresponding {@code SQLErrorCodes} object (never {@code null})
+	 * @see #unregisterDatabase(DataSource)
 	 */
-	public SQLErrorCodes registerDatabase(DataSource dataSource, String dbName) {
-		synchronized (this.dataSourceCache) {
-			SQLErrorCodes sec = getErrorCodes(dbName);
-			this.dataSourceCache.put(dataSource, sec);
-			return sec;
+	public SQLErrorCodes registerDatabase(DataSource dataSource, String databaseName) {
+		SQLErrorCodes sec = getErrorCodes(databaseName);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Caching SQL error codes for DataSource [" + identify(dataSource) +
+					"]: database product name is '" + databaseName + "'");
 		}
+		this.dataSourceCache.put(dataSource, sec);
+		return sec;
+	}
+
+	/**
+	 * Clear the cache for the specified {@link DataSource}, if registered.
+	 * @param dataSource the {@code DataSource} identifying the database
+	 * @return the corresponding {@code SQLErrorCodes} object,
+	 * or {@code null} if not registered
+	 * @since 4.3.5
+	 * @see #registerDatabase(DataSource, String)
+	 */
+	public SQLErrorCodes unregisterDatabase(DataSource dataSource) {
+		return this.dataSourceCache.remove(dataSource);
+	}
+
+	/**
+	 * Build an identification String for the given {@link DataSource},
+	 * primarily for logging purposes.
+	 * @param dataSource the {@code DataSource} to introspect
+	 * @return the identification String
+	 */
+	private String identify(DataSource dataSource) {
+		return dataSource.getClass().getName() + '@' + Integer.toHexString(dataSource.hashCode());
 	}
 
 	/**
 	 * Check the {@link CustomSQLExceptionTranslatorRegistry} for any entries.
 	 */
-	private void checkCustomTranslatorRegistry(String dbName, SQLErrorCodes dbCodes) {
+	private void checkCustomTranslatorRegistry(String databaseName, SQLErrorCodes errorCodes) {
 		SQLExceptionTranslator customTranslator =
-				CustomSQLExceptionTranslatorRegistry.getInstance().findTranslatorForDatabase(dbName);
+				CustomSQLExceptionTranslatorRegistry.getInstance().findTranslatorForDatabase(databaseName);
 		if (customTranslator != null) {
-			if (dbCodes.getCustomSqlExceptionTranslator() != null) {
+			if (errorCodes.getCustomSqlExceptionTranslator() != null && logger.isWarnEnabled()) {
 				logger.warn("Overriding already defined custom translator '" +
-						dbCodes.getCustomSqlExceptionTranslator().getClass().getSimpleName() +
+						errorCodes.getCustomSqlExceptionTranslator().getClass().getSimpleName() +
 						" with '" + customTranslator.getClass().getSimpleName() +
-						"' found in the CustomSQLExceptionTranslatorRegistry for database " + dbName);
+						"' found in the CustomSQLExceptionTranslatorRegistry for database '" + databaseName + "'");
 			}
-			else {
+			else if (logger.isInfoEnabled()) {
 				logger.info("Using custom translator '" + customTranslator.getClass().getSimpleName() +
-						"' found in the CustomSQLExceptionTranslatorRegistry for database " + dbName);
+						"' found in the CustomSQLExceptionTranslatorRegistry for database '" + databaseName + "'");
 			}
-			dbCodes.setCustomSqlExceptionTranslator(customTranslator);
+			errorCodes.setCustomSqlExceptionTranslator(customTranslator);
 		}
 	}
 
