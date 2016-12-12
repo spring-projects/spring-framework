@@ -21,16 +21,16 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.reactive.socket.CloseStatus;
-import org.springframework.web.reactive.socket.WebSocketMessage;
-import org.springframework.web.reactive.socket.WebSocketSession;
-
 import io.undertow.websockets.core.CloseMessage;
 import io.undertow.websockets.core.WebSocketCallback;
 import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.core.WebSockets;
 import reactor.core.publisher.Mono;
+
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.reactive.socket.CloseStatus;
+import org.springframework.web.reactive.socket.WebSocketMessage;
+import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
  * Spring {@link WebSocketSession} adapter for Undertow's
@@ -54,14 +54,17 @@ public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<W
 		return Mono.empty();
 	}
 
-	protected void resumeReceives() {
-		super.resumeReceives();
+	protected void resumeReceiving() {
 		getDelegate().resumeReceives();
 	}
 
-	protected void suspendReceives() {
-		super.suspendReceives();
+	protected void suspendReceiving() {
 		getDelegate().suspendReceives();
+	}
+
+	@Override
+	protected boolean canSuspendReceiving() {
+		return true;
 	}
 
 	@Override

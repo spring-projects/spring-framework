@@ -18,18 +18,17 @@ package org.springframework.web.reactive.socket.adapter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
 import javax.websocket.CloseReason;
+import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.SendHandler;
 import javax.websocket.SendResult;
 import javax.websocket.Session;
-import javax.websocket.CloseReason.CloseCodes;
+
+import reactor.core.publisher.Mono;
 
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
-
-import reactor.core.publisher.Mono;
 
 /**
  * Spring {@link WebSocketSession} adapter for Tomcat's
@@ -40,9 +39,11 @@ import reactor.core.publisher.Mono;
  */
 public class TomcatWebSocketSession extends AbstractListenerWebSocketSession<Session> {
 
+
 	public TomcatWebSocketSession(Session session) {
 		super(session, session.getId(), session.getRequestURI());
 	}
+
 
 	@Override
 	protected Mono<Void> closeInternal(CloseStatus status) {
@@ -80,6 +81,22 @@ public class TomcatWebSocketSession extends AbstractListenerWebSocketSession<Ses
 		}
 		return true;
 	}
+
+	@Override
+	protected void resumeReceiving() {
+		// No-op
+	}
+
+	@Override
+	protected void suspendReceiving() {
+		// No-op
+	}
+
+	@Override
+	protected boolean canSuspendReceiving() {
+		return false;
+	}
+
 
 	private final class WebSocketMessageSendHandler implements SendHandler {
 

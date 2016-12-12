@@ -21,12 +21,12 @@ import java.nio.charset.StandardCharsets;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WriteCallback;
+import reactor.core.publisher.Mono;
+
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
-
-import reactor.core.publisher.Mono;
 
 /**
  * Spring {@link WebSocketSession} adapter for Jetty's
@@ -37,10 +37,12 @@ import reactor.core.publisher.Mono;
  */
 public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Session> {
 
+
 	public JettyWebSocketSession(Session session) {
 		super(session, ObjectUtils.getIdentityHexString(session),
 				session.getUpgradeRequest().getRequestURI());
 	}
+
 
 	@Override
 	protected Mono<Void> closeInternal(CloseStatus status) {
@@ -72,6 +74,22 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 		}
 		return true;
 	}
+
+	@Override
+	protected void resumeReceiving() {
+		// No-op
+	}
+
+	@Override
+	protected void suspendReceiving() {
+		// No-op
+	}
+
+	@Override
+	protected boolean canSuspendReceiving() {
+		return false;
+	}
+
 
 	private final class WebSocketMessageWriteCallback implements WriteCallback {
 
