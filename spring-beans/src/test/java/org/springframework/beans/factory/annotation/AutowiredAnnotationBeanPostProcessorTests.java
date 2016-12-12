@@ -2184,6 +2184,15 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertNotNull(bf.getBean(ProvidedArgumentBean.class));
 	}
 
+	@Test
+	public void testAnnotatedDefaultConstructor() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(AnnotatedDefaultConstructorBean.class));
+
+		assertNotNull(bf.getBean("annotatedBean"));
+	}
+
 
 	public static class ResourceInjectionBean {
 
@@ -3411,7 +3420,14 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			tbs.add(new TestBean("tb2"));
 			return tbs;
 		}
+	}
 
+
+	public static class AnnotatedDefaultConstructorBean {
+
+		@Autowired
+		public AnnotatedDefaultConstructorBean() {
+		}
 	}
 
 }
