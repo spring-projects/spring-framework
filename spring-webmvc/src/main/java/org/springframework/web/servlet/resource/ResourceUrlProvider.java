@@ -173,7 +173,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 			logger.trace("Getting resource URL for request URL \"" + requestUrl + "\"");
 		}
 		int prefixIndex = getLookupPathIndex(request);
-		int suffixIndex = getQueryParamsIndex(requestUrl);
+		int suffixIndex = getEndPathIndex(requestUrl);
 		String prefix = requestUrl.substring(0, prefixIndex);
 		String suffix = requestUrl.substring(suffixIndex);
 		String lookupPath = requestUrl.substring(prefixIndex, suffixIndex);
@@ -188,9 +188,17 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		return requestUri.indexOf(lookupPath);
 	}
 
-	private int getQueryParamsIndex(String lookupPath) {
-		int index = lookupPath.indexOf("?");
-		return index > 0 ? index : lookupPath.length();
+	private int getEndPathIndex(String lookupPath) {
+		int suffixIndex = lookupPath.length();
+		int queryIndex = lookupPath.indexOf("?");
+		if(queryIndex > 0) {
+			suffixIndex = queryIndex;
+		}
+		int hashIndex = lookupPath.indexOf("#");
+		if(hashIndex > 0) {
+			suffixIndex = Math.min(suffixIndex, hashIndex);
+		}
+		return suffixIndex;
 	}
 
 	/**

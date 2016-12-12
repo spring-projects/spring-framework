@@ -79,7 +79,7 @@ public class ResourceUrlProviderTests {
 	}
 
 	@Test // SPR-13374
-	public void getStaticResourceUrlRequestWithRequestParams() {
+	public void getStaticResourceUrlRequestWithQueryOrHash() {
 		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		WebSessionManager manager = new DefaultWebSessionManager();
@@ -87,6 +87,10 @@ public class ResourceUrlProviderTests {
 
 		String url = "/resources/foo.css?foo=bar&url=http://example.org";
 		String resolvedUrl = this.urlProvider.getForRequestUrl(exchange, url).blockMillis(5000);
+		assertEquals(url, resolvedUrl);
+
+		url = "/resources/foo.css#hash";
+		resolvedUrl = this.urlProvider.getForRequestUrl(exchange, url).blockMillis(5000);
 		assertEquals(url, resolvedUrl);
 	}
 
