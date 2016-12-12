@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.socket.adapter;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import javax.websocket.CloseReason;
 import javax.websocket.CloseReason.CloseCodes;
@@ -59,22 +60,21 @@ public class TomcatWebSocketSession extends AbstractListenerWebSocketSession<Ses
 
 	@Override
 	protected boolean sendMessage(WebSocketMessage message) throws IOException {
+		ByteBuffer buffer = message.getPayload().asByteBuffer();
 		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
-			getSendProcessor().setReady(false);
-			getDelegate().getAsyncRemote().sendText(
-					new String(message.getPayload().asByteBuffer().array(), StandardCharsets.UTF_8),
-					new WebSocketMessageSendHandler());
+			getSendProcessor().setReadyToSend(false);
+			String text = new String(buffer.array(), StandardCharsets.UTF_8);
+			getDelegate().getAsyncRemote().sendText(text, new SendProcessorCallback());
 		}
 		else if (WebSocketMessage.Type.BINARY.equals(message.getType())) {
-			getSendProcessor().setReady(false);
-			getDelegate().getAsyncRemote().sendBinary(message.getPayload().asByteBuffer(),
-					new WebSocketMessageSendHandler());
+			getSendProcessor().setReadyToSend(false);
+			getDelegate().getAsyncRemote().sendBinary(buffer, new SendProcessorCallback());
 		}
 		else if (WebSocketMessage.Type.PING.equals(message.getType())) {
-			getDelegate().getAsyncRemote().sendPing(message.getPayload().asByteBuffer());
+			getDelegate().getAsyncRemote().sendPing(buffer);
 		}
 		else if (WebSocketMessage.Type.PONG.equals(message.getType())) {
-			getDelegate().getAsyncRemote().sendPong(message.getPayload().asByteBuffer());
+			getDelegate().getAsyncRemote().sendPong(buffer);
 		}
 		else {
 			throw new IllegalArgumentException("Unexpected message type: " + message.getType());
@@ -98,12 +98,12 @@ public class TomcatWebSocketSession extends AbstractListenerWebSocketSession<Ses
 	}
 
 
-	private final class WebSocketMessageSendHandler implements SendHandler {
+	private final class SendProcessorCallback implements SendHandler {
 
 		@Override
 		public void onResult(SendResult result) {
 			if (result.isOK()) {
-				getSendProcessor().setReady(true);
+				getSendProcessor().setReadyToSend(true);
 				getSendProcessor().onWritePossible();
 			}
 			else {

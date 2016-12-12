@@ -16,13 +16,14 @@
 
 package org.springframework.web.reactive.socket.adapter;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.util.Assert;
@@ -50,78 +51,78 @@ public class UndertowWebSocketHandlerAdapter implements WebSocketConnectionCallb
 
 	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory(false);
 
-	private final WebSocketHandler handler;
+	private final WebSocketHandler delegate;
 
-	private UndertowWebSocketSession wsSession;
+	private UndertowWebSocketSession session;
 
-	public UndertowWebSocketHandlerAdapter(WebSocketHandler handler) {
-		Assert.notNull("'handler' is required");
-		this.handler = handler;
+
+	public UndertowWebSocketHandlerAdapter(WebSocketHandler delegate) {
+		Assert.notNull("WebSocketHandler is required");
+		this.delegate = delegate;
 	}
+
 
 	@Override
 	public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel channel) {
 		try {
-			this.wsSession = new UndertowWebSocketSession(channel);
+			this.session = new UndertowWebSocketSession(channel);
 		}
 		catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		channel.getReceiveSetter().set(new ReceiveListener());
+		channel.getReceiveSetter().set(new UndertowReceiveListener());
 		channel.resumeReceives();
 
 		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber();
-		this.handler.handle(this.wsSession).subscribe(resultSubscriber);
+		this.delegate.handle(this.session).subscribe(resultSubscriber);
 	}
 
-	private final class ReceiveListener extends AbstractReceiveListener {
+
+	private final class UndertowReceiveListener extends AbstractReceiveListener {
 
 		@Override
 		protected void onFullTextMessage(WebSocketChannel channel, BufferedTextMessage message) {
-			wsSession.handleMessage(Type.TEXT, toMessage(Type.TEXT, message.getData()));
+			session.handleMessage(Type.TEXT, toMessage(Type.TEXT, message.getData()));
 		}
 
 		@Override
-		protected void onFullBinaryMessage(WebSocketChannel channel,
-				BufferedBinaryMessage message) throws IOException {
-			wsSession.handleMessage(Type.BINARY, toMessage(Type.BINARY, message.getData().getResource()));
+		protected void onFullBinaryMessage(WebSocketChannel channel, BufferedBinaryMessage message) {
+			session.handleMessage(Type.BINARY, toMessage(Type.BINARY, message.getData().getResource()));
 			message.getData().free();
 		}
 
 		@Override
-		protected void onFullPongMessage(WebSocketChannel channel,
-				BufferedBinaryMessage message) throws IOException {
-			wsSession.handleMessage(Type.PONG, toMessage(Type.PONG, message.getData().getResource()));
+		protected void onFullPongMessage(WebSocketChannel channel, BufferedBinaryMessage message) {
+			session.handleMessage(Type.PONG, toMessage(Type.PONG, message.getData().getResource()));
 			message.getData().free();
 		}
 
 		@Override
-		protected void onFullCloseMessage(WebSocketChannel channel,
-				BufferedBinaryMessage message) throws IOException {
+		protected void onFullCloseMessage(WebSocketChannel channel, BufferedBinaryMessage message) {
 			CloseMessage closeMessage = new CloseMessage(message.getData().getResource());
-			wsSession.handleClose(new CloseStatus(closeMessage.getCode(), closeMessage.getReason()));
+			session.handleClose(new CloseStatus(closeMessage.getCode(), closeMessage.getReason()));
 			message.getData().free();
 		}
 
 		@Override
 		protected void onError(WebSocketChannel channel, Throwable error) {
-			wsSession.handleError(error);
+			session.handleError(error);
 		}
 
 		private <T> WebSocketMessage toMessage(Type type, T message) {
 			if (Type.TEXT.equals(type)) {
-				return WebSocketMessage.create(Type.TEXT,
-						bufferFactory.wrap(((String) message).getBytes(StandardCharsets.UTF_8)));
+				byte[] bytes = ((String) message).getBytes(StandardCharsets.UTF_8);
+				return WebSocketMessage.create(Type.TEXT, bufferFactory.wrap(bytes));
 			}
 			else if (Type.BINARY.equals(type)) {
-				return WebSocketMessage.create(Type.BINARY,
-						bufferFactory.allocateBuffer().write((ByteBuffer[]) message));
+				DataBuffer buffer = bufferFactory.allocateBuffer().write((ByteBuffer[]) message);
+				return WebSocketMessage.create(Type.BINARY, buffer);
 			}
 			else if (Type.PONG.equals(type)) {
-				return WebSocketMessage.create(Type.PONG,
-						bufferFactory.allocateBuffer().write((ByteBuffer[]) message));
+				DataBuffer buffer = bufferFactory.allocateBuffer().write((ByteBuffer[]) message);
+				return WebSocketMessage.create(Type.PONG, buffer);
 			}
 			else {
 				throw new IllegalArgumentException("Unexpected message type: " + message);
@@ -144,12 +145,12 @@ public class UndertowWebSocketHandlerAdapter implements WebSocketConnectionCallb
 
 		@Override
 		public void onError(Throwable ex) {
-			wsSession.close(new CloseStatus(CloseStatus.SERVER_ERROR.getCode(), ex.getMessage()));
+			session.close(new CloseStatus(CloseStatus.SERVER_ERROR.getCode(), ex.getMessage()));
 		}
 
 		@Override
 		public void onComplete() {
-			wsSession.close();
+			session.close();
 		}
 	}
 

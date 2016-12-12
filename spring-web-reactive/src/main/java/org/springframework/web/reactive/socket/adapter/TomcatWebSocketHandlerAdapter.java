@@ -18,16 +18,16 @@ package org.springframework.web.reactive.socket.adapter;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
-import javax.websocket.MessageHandler;
 import javax.websocket.PongMessage;
 import javax.websocket.Session;
 
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.util.Assert;
@@ -47,83 +47,71 @@ public class TomcatWebSocketHandlerAdapter extends Endpoint {
 
 	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory(false);
 
-	private final WebSocketHandler handler;
+	private final WebSocketHandler delegate;
 
-	private TomcatWebSocketSession wsSession;
+	private TomcatWebSocketSession session;
 
-	public TomcatWebSocketHandlerAdapter(WebSocketHandler handler) {
-		Assert.notNull("'handler' is required");
-		this.handler = handler;
+
+	public TomcatWebSocketHandlerAdapter(WebSocketHandler delegate) {
+		Assert.notNull("WebSocketHandler is required");
+		this.delegate = delegate;
 	}
+
 
 	@Override
 	public void onOpen(Session session, EndpointConfig config) {
-		this.wsSession = new TomcatWebSocketSession(session);
+		this.session = new TomcatWebSocketSession(session);
 
-		session.addMessageHandler(new MessageHandler.Whole<String>() {
-
-			@Override
-			public void onMessage(String message) {
-				WebSocketMessage wsMessage = toMessage(message);
-				wsSession.handleMessage(wsMessage.getType(), wsMessage);
-			}
-
+		session.addMessageHandler(String.class, message -> {
+			WebSocketMessage webSocketMessage = toMessage(message);
+			this.session.handleMessage(webSocketMessage.getType(), webSocketMessage);
 		});
-		session.addMessageHandler(new MessageHandler.Whole<ByteBuffer>() {
-
-			@Override
-			public void onMessage(ByteBuffer message) {
-				WebSocketMessage wsMessage = toMessage(message);
-				wsSession.handleMessage(wsMessage.getType(), wsMessage);
-			}
-
+		session.addMessageHandler(ByteBuffer.class, message -> {
+			WebSocketMessage webSocketMessage = toMessage(message);
+			this.session.handleMessage(webSocketMessage.getType(), webSocketMessage);
 		});
-		session.addMessageHandler(new MessageHandler.Whole<PongMessage>() {
-
-			@Override
-			public void onMessage(PongMessage message) {
-				WebSocketMessage wsMessage = toMessage(message);
-				wsSession.handleMessage(wsMessage.getType(), wsMessage);
-			}
-
+		session.addMessageHandler(PongMessage.class, message -> {
+			WebSocketMessage webSocketMessage = toMessage(message);
+			this.session.handleMessage(webSocketMessage.getType(), webSocketMessage);
 		});
 
 		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber();
-		this.handler.handle(this.wsSession).subscribe(resultSubscriber);
+		this.delegate.handle(this.session).subscribe(resultSubscriber);
 	}
 
 	@Override
 	public void onClose(Session session, CloseReason reason) {
-		if (this.wsSession != null) {
-			this.wsSession.handleClose(
-					new CloseStatus(reason.getCloseCode().getCode(), reason.getReasonPhrase()));
+		if (this.session != null) {
+			int code = reason.getCloseCode().getCode();
+			this.session.handleClose(new CloseStatus(code, reason.getReasonPhrase()));
 		}
 	}
 
 	@Override
 	public void onError(Session session, Throwable exception) {
-		if (this.wsSession != null) {
-			this.wsSession.handleError(exception);
+		if (this.session != null) {
+			this.session.handleError(exception);
 		}
 	}
 
 	private <T> WebSocketMessage toMessage(T message) {
 		if (message instanceof String) {
-			return WebSocketMessage.create(Type.TEXT,
-					bufferFactory.wrap(((String) message).getBytes(StandardCharsets.UTF_8)));
+			byte[] bytes = ((String) message).getBytes(StandardCharsets.UTF_8);
+			return WebSocketMessage.create(Type.TEXT, this.bufferFactory.wrap(bytes));
 		}
 		else if (message instanceof ByteBuffer) {
-			return WebSocketMessage.create(Type.BINARY,
-					bufferFactory.wrap((ByteBuffer) message));
+			DataBuffer buffer = this.bufferFactory.wrap((ByteBuffer) message);
+			return WebSocketMessage.create(Type.BINARY, buffer);
 		}
 		else if (message instanceof PongMessage) {
-			return WebSocketMessage.create(Type.PONG,
-					bufferFactory.wrap(((PongMessage) message).getApplicationData()));
+			DataBuffer buffer = this.bufferFactory.wrap(((PongMessage) message).getApplicationData());
+			return WebSocketMessage.create(Type.PONG, buffer);
 		}
 		else {
 			throw new IllegalArgumentException("Unexpected message type: " + message);
 		}
 	}
+
 
 	private final class HandlerResultSubscriber implements Subscriber<Void> {
 
@@ -139,15 +127,15 @@ public class TomcatWebSocketHandlerAdapter extends Endpoint {
 
 		@Override
 		public void onError(Throwable ex) {
-			if (wsSession != null) {
-				wsSession.close(new CloseStatus(CloseStatus.SERVER_ERROR.getCode(), ex.getMessage()));
+			if (session != null) {
+				session.close(new CloseStatus(CloseStatus.SERVER_ERROR.getCode(), ex.getMessage()));
 			}
 		}
 
 		@Override
 		public void onComplete() {
-			if (wsSession != null) {
-				wsSession.close();
+			if (session != null) {
+				session.close();
 			}
 		}
 	}

@@ -19,6 +19,7 @@ package org.springframework.web.reactive.socket.adapter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import io.undertow.websockets.core.CloseMessage;
@@ -41,9 +42,11 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  */
 public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<WebSocketChannel> {
 
+
 	public UndertowWebSocketSession(WebSocketChannel channel) throws URISyntaxException {
 		super(channel, ObjectUtils.getIdentityHexString(channel), new URI(channel.getUrl()));
 	}
+
 
 	@Override
 	protected Mono<Void> closeInternal(CloseStatus status) {
@@ -69,26 +72,23 @@ public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<W
 
 	@Override
 	protected boolean sendMessage(WebSocketMessage message) throws IOException {
+		ByteBuffer buffer = message.getPayload().asByteBuffer();
 		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
-			getSendProcessor().setReady(false);
-			WebSockets.sendText(
-					new String(message.getPayload().asByteBuffer().array(), StandardCharsets.UTF_8),
-					getDelegate(), new WebSocketMessageSendHandler());
+			getSendProcessor().setReadyToSend(false);
+			String text = new String(buffer.array(), StandardCharsets.UTF_8);
+			WebSockets.sendText(text, getDelegate(), new SendProcessorCallback());
 		}
 		else if (WebSocketMessage.Type.BINARY.equals(message.getType())) {
-			getSendProcessor().setReady(false);
-			WebSockets.sendBinary(message.getPayload().asByteBuffer(),
-					getDelegate(), new WebSocketMessageSendHandler());
+			getSendProcessor().setReadyToSend(false);
+			WebSockets.sendBinary(buffer, getDelegate(), new SendProcessorCallback());
 		}
 		else if (WebSocketMessage.Type.PING.equals(message.getType())) {
-			getSendProcessor().setReady(false);
-			WebSockets.sendPing(message.getPayload().asByteBuffer(),
-					getDelegate(), new WebSocketMessageSendHandler());
+			getSendProcessor().setReadyToSend(false);
+			WebSockets.sendPing(buffer, getDelegate(), new SendProcessorCallback());
 		}
 		else if (WebSocketMessage.Type.PONG.equals(message.getType())) {
-			getSendProcessor().setReady(false);
-			WebSockets.sendPong(message.getPayload().asByteBuffer(),
-					getDelegate(), new WebSocketMessageSendHandler());
+			getSendProcessor().setReadyToSend(false);
+			WebSockets.sendPong(buffer, getDelegate(), new SendProcessorCallback());
 		}
 		else {
 			throw new IllegalArgumentException("Unexpected message type: " + message.getType());
@@ -96,21 +96,20 @@ public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<W
 		return true;
 	}
 
-	private final class WebSocketMessageSendHandler implements WebSocketCallback<Void> {
+
+	private final class SendProcessorCallback implements WebSocketCallback<Void> {
 
 		@Override
 		public void complete(WebSocketChannel channel, Void context) {
-			getSendProcessor().setReady(true);
+			getSendProcessor().setReadyToSend(true);
 			getSendProcessor().onWritePossible();
 		}
 
 		@Override
-		public void onError(WebSocketChannel channel, Void context,
-				Throwable throwable) {
+		public void onError(WebSocketChannel channel, Void context, Throwable throwable) {
 			getSendProcessor().cancel();
 			getSendProcessor().onError(throwable);
 		}
-
 	}
 
 }

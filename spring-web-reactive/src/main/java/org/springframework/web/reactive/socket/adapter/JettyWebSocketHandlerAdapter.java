@@ -30,6 +30,8 @@ import org.eclipse.jetty.websocket.api.extensions.Frame;
 import org.eclipse.jetty.websocket.common.OpCode;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.util.Assert;
@@ -50,83 +52,89 @@ public class JettyWebSocketHandlerAdapter {
 
 	private static final ByteBuffer EMPTY_PAYLOAD = ByteBuffer.wrap(new byte[0]);
 
+
 	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory(false);
 
-	private final WebSocketHandler handler;
+	private final WebSocketHandler delegate;
 
-	private JettyWebSocketSession wsSession;
+	private JettyWebSocketSession session;
 
-	public JettyWebSocketHandlerAdapter(WebSocketHandler handler) {
-		Assert.notNull("'handler' is required");
-		this.handler = handler;
+
+	public JettyWebSocketHandlerAdapter(WebSocketHandler delegate) {
+		Assert.notNull("WebSocketHandler is required");
+		this.delegate = delegate;
 	}
+
 
 	@OnWebSocketConnect
 	public void onWebSocketConnect(Session session) {
-		this.wsSession = new JettyWebSocketSession(session);
+		this.session = new JettyWebSocketSession(session);
 
-		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber();
-		this.handler.handle(this.wsSession).subscribe(resultSubscriber);
+		HandlerResultSubscriber subscriber = new HandlerResultSubscriber();
+		this.delegate.handle(this.session).subscribe(subscriber);
 	}
 
 	@OnWebSocketMessage
 	public void onWebSocketText(String message) {
-		if (this.wsSession != null) {
-			WebSocketMessage wsMessage = toMessage(Type.TEXT, message);
-			this.wsSession.handleMessage(wsMessage.getType(), wsMessage);
+		if (this.session != null) {
+			WebSocketMessage webSocketMessage = toMessage(Type.TEXT, message);
+			this.session.handleMessage(webSocketMessage.getType(), webSocketMessage);
 		}
 	}
 
 	@OnWebSocketMessage
 	public void onWebSocketBinary(byte[] message, int offset, int length) {
-		if (this.wsSession != null) {
-			WebSocketMessage wsMessage = toMessage(Type.BINARY, ByteBuffer.wrap(message, offset, length));
-			wsSession.handleMessage(wsMessage.getType(), wsMessage);
+		if (this.session != null) {
+			ByteBuffer buffer = ByteBuffer.wrap(message, offset, length);
+			WebSocketMessage webSocketMessage = toMessage(Type.BINARY, buffer);
+			session.handleMessage(webSocketMessage.getType(), webSocketMessage);
 		}
 	}
 
 	@OnWebSocketFrame
 	public void onWebSocketFrame(Frame frame) {
-		if (this.wsSession != null) {
+		if (this.session != null) {
 			if (OpCode.PONG == frame.getOpCode()) {
-				ByteBuffer message = frame.getPayload() != null ? frame.getPayload() : EMPTY_PAYLOAD;
-				WebSocketMessage wsMessage = toMessage(Type.PONG, message);
-				wsSession.handleMessage(wsMessage.getType(), wsMessage);
+				ByteBuffer buffer = (frame.getPayload() != null ? frame.getPayload() : EMPTY_PAYLOAD);
+				WebSocketMessage webSocketMessage = toMessage(Type.PONG, buffer);
+				session.handleMessage(webSocketMessage.getType(), webSocketMessage);
 			}
 		}
 	}
 
 	@OnWebSocketClose
 	public void onWebSocketClose(int statusCode, String reason) {
-		if (this.wsSession != null) {
-			this.wsSession.handleClose(new CloseStatus(statusCode, reason));
+		if (this.session != null) {
+			this.session.handleClose(new CloseStatus(statusCode, reason));
 		}
 	}
 
 	@OnWebSocketError
 	public void onWebSocketError(Throwable cause) {
-		if (this.wsSession != null) {
-			this.wsSession.handleError(cause);
+		if (this.session != null) {
+			this.session.handleError(cause);
 		}
 	}
 
 	private <T> WebSocketMessage toMessage(Type type, T message) {
 		if (Type.TEXT.equals(type)) {
-			return WebSocketMessage.create(Type.TEXT,
-					bufferFactory.wrap(((String) message).getBytes(StandardCharsets.UTF_8)));
+			byte[] bytes = ((String) message).getBytes(StandardCharsets.UTF_8);
+			DataBuffer buffer = this.bufferFactory.wrap(bytes);
+			return WebSocketMessage.create(Type.TEXT, buffer);
 		}
 		else if (Type.BINARY.equals(type)) {
-			return WebSocketMessage.create(Type.BINARY,
-					bufferFactory.wrap((ByteBuffer) message));
+			DataBuffer buffer = this.bufferFactory.wrap((ByteBuffer) message);
+			return WebSocketMessage.create(Type.BINARY, buffer);
 		}
 		else if (Type.PONG.equals(type)) {
-			return WebSocketMessage.create(Type.PONG,
-					bufferFactory.wrap((ByteBuffer) message));
+			DataBuffer buffer = this.bufferFactory.wrap((ByteBuffer) message);
+			return WebSocketMessage.create(Type.PONG, buffer);
 		}
 		else {
 			throw new IllegalArgumentException("Unexpected message type: " + message);
 		}
 	}
+
 
 	private final class HandlerResultSubscriber implements Subscriber<Void> {
 
@@ -142,15 +150,15 @@ public class JettyWebSocketHandlerAdapter {
 
 		@Override
 		public void onError(Throwable ex) {
-			if (wsSession != null) {
-				wsSession.close(new CloseStatus(CloseStatus.SERVER_ERROR.getCode(), ex.getMessage()));
+			if (session != null) {
+				session.close(new CloseStatus(CloseStatus.SERVER_ERROR.getCode(), ex.getMessage()));
 			}
 		}
 
 		@Override
 		public void onComplete() {
-			if (wsSession != null) {
-				wsSession.close();
+			if (session != null) {
+				session.close();
 			}
 		}
 	}

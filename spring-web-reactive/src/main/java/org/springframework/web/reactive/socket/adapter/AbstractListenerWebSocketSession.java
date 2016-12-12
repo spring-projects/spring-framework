@@ -213,7 +213,12 @@ public abstract class AbstractListenerWebSocketSession<T> extends WebSocketSessi
 			return this.isReady && this.currentData != null;
 		}
 
-		public void setReady(boolean ready) {
+		/**
+		 * Sub-classes can invoke this before sending a message (false) and
+		 * after receiving the async send callback (true) effective translating
+		 * async completion callback into simple flow control.
+		 */
+		public void setReadyToSend(boolean ready) {
 			this.isReady = ready;
 		}
 	}

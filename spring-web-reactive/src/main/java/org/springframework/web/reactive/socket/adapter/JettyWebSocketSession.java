@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.socket.adapter;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import org.eclipse.jetty.websocket.api.Session;
@@ -52,22 +53,21 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 
 	@Override
 	protected boolean sendMessage(WebSocketMessage message) throws IOException {
+		ByteBuffer buffer = message.getPayload().asByteBuffer();
 		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
-			getSendProcessor().setReady(false);
-			getDelegate().getRemote().sendString(
-					new String(message.getPayload().asByteBuffer().array(), StandardCharsets.UTF_8),
-					new WebSocketMessageWriteCallback());
+			getSendProcessor().setReadyToSend(false);
+			String text = new String(buffer.array(), StandardCharsets.UTF_8);
+			getDelegate().getRemote().sendString(text, new SendProcessorCallback());
 		}
 		else if (WebSocketMessage.Type.BINARY.equals(message.getType())) {
-			getSendProcessor().setReady(false);
-			getDelegate().getRemote().sendBytes(message.getPayload().asByteBuffer(),
-					new WebSocketMessageWriteCallback());
+			getSendProcessor().setReadyToSend(false);
+			getDelegate().getRemote().sendBytes(buffer, new SendProcessorCallback());
 		}
 		else if (WebSocketMessage.Type.PING.equals(message.getType())) {
-			getDelegate().getRemote().sendPing(message.getPayload().asByteBuffer());
+			getDelegate().getRemote().sendPing(buffer);
 		}
 		else if (WebSocketMessage.Type.PONG.equals(message.getType())) {
-			getDelegate().getRemote().sendPong(message.getPayload().asByteBuffer());
+			getDelegate().getRemote().sendPong(buffer);
 		}
 		else {
 			throw new IllegalArgumentException("Unexpected message type: " + message.getType());
@@ -91,7 +91,7 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 	}
 
 
-	private final class WebSocketMessageWriteCallback implements WriteCallback {
+	private final class SendProcessorCallback implements WriteCallback {
 
 		@Override
 		public void writeFailed(Throwable x) {
@@ -101,7 +101,7 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 
 		@Override
 		public void writeSuccess() {
-			getSendProcessor().setReady(true);
+			getSendProcessor().setReadyToSend(true);
 			getSendProcessor().onWritePossible();
 		}
 
