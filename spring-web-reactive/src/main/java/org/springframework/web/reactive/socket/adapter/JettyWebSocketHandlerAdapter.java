@@ -53,11 +53,11 @@ public class JettyWebSocketHandlerAdapter {
 	private static final ByteBuffer EMPTY_PAYLOAD = ByteBuffer.wrap(new byte[0]);
 
 
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory(false);
-
 	private final WebSocketHandler delegate;
 
 	private JettyWebSocketSession session;
+
+	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory(false);
 
 
 	public JettyWebSocketHandlerAdapter(WebSocketHandler delegate) {
@@ -102,20 +102,6 @@ public class JettyWebSocketHandlerAdapter {
 		}
 	}
 
-	@OnWebSocketClose
-	public void onWebSocketClose(int statusCode, String reason) {
-		if (this.session != null) {
-			this.session.handleClose(new CloseStatus(statusCode, reason));
-		}
-	}
-
-	@OnWebSocketError
-	public void onWebSocketError(Throwable cause) {
-		if (this.session != null) {
-			this.session.handleError(cause);
-		}
-	}
-
 	private <T> WebSocketMessage toMessage(Type type, T message) {
 		if (Type.TEXT.equals(type)) {
 			byte[] bytes = ((String) message).getBytes(StandardCharsets.UTF_8);
@@ -132,6 +118,20 @@ public class JettyWebSocketHandlerAdapter {
 		}
 		else {
 			throw new IllegalArgumentException("Unexpected message type: " + message);
+		}
+	}
+
+	@OnWebSocketClose
+	public void onWebSocketClose(int statusCode, String reason) {
+		if (this.session != null) {
+			this.session.handleClose(new CloseStatus(statusCode, reason));
+		}
+	}
+
+	@OnWebSocketError
+	public void onWebSocketError(Throwable cause) {
+		if (this.session != null) {
+			this.session.handleError(cause);
 		}
 	}
 

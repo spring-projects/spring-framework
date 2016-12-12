@@ -46,9 +46,18 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 
 
 	@Override
-	protected Mono<Void> closeInternal(CloseStatus status) {
-		getDelegate().close(status.getCode(), status.getReason());
-		return Mono.empty();
+	protected boolean canSuspendReceiving() {
+		return false;
+	}
+
+	@Override
+	protected void suspendReceiving() {
+		// No-op
+	}
+
+	@Override
+	protected void resumeReceiving() {
+		// No-op
 	}
 
 	@Override
@@ -76,18 +85,9 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 	}
 
 	@Override
-	protected void resumeReceiving() {
-		// No-op
-	}
-
-	@Override
-	protected void suspendReceiving() {
-		// No-op
-	}
-
-	@Override
-	protected boolean canSuspendReceiving() {
-		return false;
+	protected Mono<Void> closeInternal(CloseStatus status) {
+		getDelegate().close(status.getCode(), status.getReason());
+		return Mono.empty();
 	}
 
 

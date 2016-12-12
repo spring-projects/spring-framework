@@ -49,11 +49,11 @@ import io.undertow.websockets.spi.WebSocketHttpExchange;
  */
 public class UndertowWebSocketHandlerAdapter implements WebSocketConnectionCallback {
 
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory(false);
-
 	private final WebSocketHandler delegate;
 
 	private UndertowWebSocketSession session;
+
+	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory(false);
 
 
 	public UndertowWebSocketHandlerAdapter(WebSocketHandler delegate) {

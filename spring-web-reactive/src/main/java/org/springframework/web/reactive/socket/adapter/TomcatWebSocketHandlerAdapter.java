@@ -45,11 +45,11 @@ import org.springframework.web.reactive.socket.WebSocketMessage.Type;
  */
 public class TomcatWebSocketHandlerAdapter extends Endpoint {
 
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory(false);
-
 	private final WebSocketHandler delegate;
 
 	private TomcatWebSocketSession session;
+
+	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory(false);
 
 
 	public TomcatWebSocketHandlerAdapter(WebSocketHandler delegate) {
@@ -79,21 +79,6 @@ public class TomcatWebSocketHandlerAdapter extends Endpoint {
 		this.delegate.handle(this.session).subscribe(resultSubscriber);
 	}
 
-	@Override
-	public void onClose(Session session, CloseReason reason) {
-		if (this.session != null) {
-			int code = reason.getCloseCode().getCode();
-			this.session.handleClose(new CloseStatus(code, reason.getReasonPhrase()));
-		}
-	}
-
-	@Override
-	public void onError(Session session, Throwable exception) {
-		if (this.session != null) {
-			this.session.handleError(exception);
-		}
-	}
-
 	private <T> WebSocketMessage toMessage(T message) {
 		if (message instanceof String) {
 			byte[] bytes = ((String) message).getBytes(StandardCharsets.UTF_8);
@@ -109,6 +94,21 @@ public class TomcatWebSocketHandlerAdapter extends Endpoint {
 		}
 		else {
 			throw new IllegalArgumentException("Unexpected message type: " + message);
+		}
+	}
+
+	@Override
+	public void onClose(Session session, CloseReason reason) {
+		if (this.session != null) {
+			int code = reason.getCloseCode().getCode();
+			this.session.handleClose(new CloseStatus(code, reason.getReasonPhrase()));
+		}
+	}
+
+	@Override
+	public void onError(Session session, Throwable exception) {
+		if (this.session != null) {
+			this.session.handleError(exception);
 		}
 	}
 

@@ -49,25 +49,16 @@ public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<W
 
 
 	@Override
-	protected Mono<Void> closeInternal(CloseStatus status) {
-		CloseMessage cm = new CloseMessage(status.getCode(), status.getReason());
-		if (!getDelegate().isCloseFrameSent()) {
-			WebSockets.sendClose(cm, getDelegate(), null);
-		}
-		return Mono.empty();
-	}
-
-	protected void resumeReceiving() {
-		getDelegate().resumeReceives();
+	protected boolean canSuspendReceiving() {
+		return true;
 	}
 
 	protected void suspendReceiving() {
 		getDelegate().suspendReceives();
 	}
 
-	@Override
-	protected boolean canSuspendReceiving() {
-		return true;
+	protected void resumeReceiving() {
+		getDelegate().resumeReceives();
 	}
 
 	@Override
@@ -94,6 +85,15 @@ public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<W
 			throw new IllegalArgumentException("Unexpected message type: " + message.getType());
 		}
 		return true;
+	}
+
+	@Override
+	protected Mono<Void> closeInternal(CloseStatus status) {
+		CloseMessage cm = new CloseMessage(status.getCode(), status.getReason());
+		if (!getDelegate().isCloseFrameSent()) {
+			WebSockets.sendClose(cm, getDelegate(), null);
+		}
+		return Mono.empty();
 	}
 
 

@@ -47,15 +47,18 @@ public class TomcatWebSocketSession extends AbstractListenerWebSocketSession<Ses
 
 
 	@Override
-	protected Mono<Void> closeInternal(CloseStatus status) {
-		try {
-			getDelegate().close(
-					new CloseReason(CloseCodes.getCloseCode(status.getCode()), status.getReason()));
-		}
-		catch (IOException e) {
-			return Mono.error(e);
-		}
-		return Mono.empty();
+	protected boolean canSuspendReceiving() {
+		return false;
+	}
+
+	@Override
+	protected void suspendReceiving() {
+		// No-op
+	}
+
+	@Override
+	protected void resumeReceiving() {
+		// No-op
 	}
 
 	@Override
@@ -83,18 +86,15 @@ public class TomcatWebSocketSession extends AbstractListenerWebSocketSession<Ses
 	}
 
 	@Override
-	protected void resumeReceiving() {
-		// No-op
-	}
-
-	@Override
-	protected void suspendReceiving() {
-		// No-op
-	}
-
-	@Override
-	protected boolean canSuspendReceiving() {
-		return false;
+	protected Mono<Void> closeInternal(CloseStatus status) {
+		try {
+			CloseReason.CloseCode code = CloseCodes.getCloseCode(status.getCode());
+			getDelegate().close(new CloseReason(code, status.getReason()));
+		}
+		catch (IOException e) {
+			return Mono.error(e);
+		}
+		return Mono.empty();
 	}
 
 
