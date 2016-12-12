@@ -281,7 +281,7 @@ public abstract class Conventions {
 
 	/**
 	 * Retrieves the {@code Class} of an element in the {@code Collection}.
-	 * The exact element for which the {@code Class} is retreived will depend
+	 * The exact element for which the {@code Class} is retrieved will depend
 	 * on the concrete {@code Collection} implementation.
 	 */
 	private static <E> E peekAhead(Collection<E> collection) {

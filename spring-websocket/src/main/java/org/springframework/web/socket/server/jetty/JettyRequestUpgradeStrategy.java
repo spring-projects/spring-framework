@@ -19,6 +19,7 @@ package org.springframework.web.socket.server.jetty;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletContext;
@@ -176,8 +177,8 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 		Assert.isInstanceOf(ServletServerHttpResponse.class, response);
 		HttpServletResponse servletResponse = ((ServletServerHttpResponse) response).getServletResponse();
 
-		Assert.isTrue(this.factoryAdapter.getFactory()
-				.isUpgradeRequest(servletRequest, servletResponse), "Not a WebSocket handshake");
+		Assert.isTrue(this.factoryAdapter.getFactory().isUpgradeRequest(servletRequest, servletResponse),
+				"Not a WebSocket handshake");
 
 		JettyWebSocketSession session = new JettyWebSocketSession(attributes, user);
 		JettyWebSocketHandlerAdapter handlerAdapter = new JettyWebSocketHandlerAdapter(wsHandler, session);
@@ -213,12 +214,12 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 			this.handler = handler;
 			this.selectedProtocol = protocol;
 			if (CollectionUtils.isEmpty(extensions)) {
-				this.extensionConfigs = new ArrayList<>();
+				this.extensionConfigs = new LinkedList<>();
 			}
 			else {
 				this.extensionConfigs = new ArrayList<>();
-				for (WebSocketExtension e : extensions) {
-					this.extensionConfigs.add(new WebSocketToJettyExtensionConfigAdapter(e));
+				for (WebSocketExtension extension : extensions) {
+					this.extensionConfigs.add(new WebSocketToJettyExtensionConfigAdapter(extension));
 				}
 			}
 		}

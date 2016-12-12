@@ -129,8 +129,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	private int queryTimeout = -1;
 
 	/**
-	 * If this variable is set to true then all results checking will be bypassed for any
-	 * callable statement processing.  This can be used to avoid a bug in some older Oracle
+	 * If this variable is set to true, then all results checking will be bypassed for any
+	 * callable statement processing. This can be used to avoid a bug in some older Oracle
 	 * JDBC drivers like 10.1.0.2.
 	 */
 	private boolean skipResultsProcessing = false;

@@ -195,7 +195,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		String hostTo = encodeUriComponent(this.host, charset, getHostType());
 		PathComponent pathTo = this.path.encode(charset);
 		MultiValueMap<String, String> paramsTo = encodeQueryParams(charset);
-		String fragmentTo = encodeUriComponent(this.getFragment(), charset, Type.FRAGMENT);
+		String fragmentTo = encodeUriComponent(getFragment(), charset, Type.FRAGMENT);
 		return new HierarchicalUriComponents(schemeTo, userInfoTo, hostTo, this.port,
 				pathTo, paramsTo, fragmentTo, true, false);
 	}
@@ -339,7 +339,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		String portTo = expandUriComponent(this.port, uriVariables);
 		PathComponent pathTo = this.path.expand(uriVariables);
 		MultiValueMap<String, String> paramsTo = expandQueryParams(uriVariables);
-		String fragmentTo = expandUriComponent(this.getFragment(), uriVariables);
+		String fragmentTo = expandUriComponent(getFragment(), uriVariables);
 
 		return new HierarchicalUriComponents(schemeTo, userInfoTo, hostTo, portTo,
 				pathTo, paramsTo, fragmentTo, false, false);
