@@ -96,7 +96,8 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 * default strategy to use except when it cannot be, for example when using
 	 * JavaScript module loaders, use {@link #addFixedVersionStrategy} instead
 	 * for serving JavaScript files.
-	 * @param pathPatterns one or more resource URL path patterns
+	 * @param pathPatterns one or more resource URL path patterns,
+	 * relative to the pattern configured with the resource handler
 	 * @return the current instance for chained method invocation
 	 * @see ContentVersionStrategy
 	 */
@@ -118,7 +119,8 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 * will also cofigure automatically a {@code "/v1.0.0/js/**"} with {@code "v1.0.0"} the
 	 * {@code version} String given as an argument.
 	 * @param version a version string
-	 * @param pathPatterns one or more resource URL path patterns
+	 * @param pathPatterns one or more resource URL path patterns,
+	 * relative to the pattern configured with the resource handler
 	 * @return the current instance for chained method invocation
 	 * @see FixedVersionStrategy
 	 */
@@ -139,7 +141,8 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 * Register a custom VersionStrategy to apply to resource URLs that match the
 	 * given path patterns.
 	 * @param strategy the custom strategy
-	 * @param pathPatterns one or more resource URL path patterns
+	 * @param pathPatterns one or more resource URL path patterns,
+	 * relative to the pattern configured with the resource handler
 	 * @return the current instance for chained method invocation
 	 * @see VersionStrategy
 	 */
