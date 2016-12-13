@@ -150,6 +150,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	private ConversionService conversionService;
 
+	private MessageCodesResolver messageCodesResolver;
+
 
 	/**
 	 * Create a new DataBinder instance, with default object name.
@@ -253,6 +255,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		if (this.conversionService != null) {
 			result.initConversion(this.conversionService);
 		}
+		if (this.messageCodesResolver != null) {
+			result.setMessageCodesResolver(this.messageCodesResolver);
+		}
 		return result;
 	}
 
@@ -278,6 +283,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 				getObjectName(), isAutoGrowNestedPaths());
 		if (this.conversionService != null) {
 			result.initConversion(this.conversionService);
+		}
+		if (this.messageCodesResolver != null) {
+			result.setMessageCodesResolver(this.messageCodesResolver);
 		}
 		return result;
 	}
@@ -486,7 +494,11 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see DefaultMessageCodesResolver
 	 */
 	public void setMessageCodesResolver(MessageCodesResolver messageCodesResolver) {
-		getInternalBindingResult().setMessageCodesResolver(messageCodesResolver);
+		Assert.state(this.messageCodesResolver == null, "DataBinder is already initialized with MessageCodesResolver");
+		this.messageCodesResolver = messageCodesResolver;
+		if (this.bindingResult != null && messageCodesResolver != null) {
+			this.bindingResult.setMessageCodesResolver(messageCodesResolver);
+		}
 	}
 
 	/**
