@@ -75,7 +75,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-		return applyBeforeCommit().then(this.httpRequest
+		return doCommit(() -> this.httpRequest
 				.send(Flux.from(body).map(NettyDataBufferFactory::toByteBuf)).then());
 	}
 
@@ -83,8 +83,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
 		Publisher<Publisher<ByteBuf>> byteBufs = Flux.from(body).
 				map(ReactorClientHttpRequest::toByteBufs);
-		return applyBeforeCommit().then(this.httpRequest
-				.sendGroups(byteBufs).then());
+		return doCommit(() -> this.httpRequest.sendGroups(byteBufs).then());
 	}
 
 	private static Publisher<ByteBuf> toByteBufs(Publisher<? extends DataBuffer> dataBuffers) {
@@ -94,17 +93,17 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	public Mono<Void> setComplete() {
-		return applyBeforeCommit().then(httpRequest.sendHeaders().then());
+		return doCommit(() -> httpRequest.sendHeaders().then());
 	}
 
 	@Override
-	protected void writeHeaders() {
+	protected void applyHeaders() {
 		getHeaders().entrySet()
 				.forEach(e -> this.httpRequest.requestHeaders().set(e.getKey(), e.getValue()));
 	}
 
 	@Override
-	protected void writeCookies() {
+	protected void applyCookies() {
 		getCookies().values().stream().flatMap(Collection::stream)
 				.map(cookie -> new DefaultCookie(cookie.getName(), cookie.getValue()))
 				.forEach(this.httpRequest::addCookie);
