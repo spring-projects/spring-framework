@@ -19,13 +19,13 @@ package org.springframework.test.web.client.match;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.test.util.AssertionErrors;
@@ -38,6 +38,7 @@ import org.springframework.web.util.UriUtils;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.*;
+import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.util.AssertionErrors.*;
 
 /**
@@ -61,6 +62,21 @@ public abstract class MockRestRequestMatchers {
 		return new RequestMatcher() {
 			@Override
 			public void match(ClientHttpRequest request) throws AssertionError {
+			}
+		};
+	}
+
+	/**
+	 * Assert the {@link HttpMethod} of the request.
+	 * @param method the HTTP method
+	 * @return the request matcher
+	 */
+	public static RequestMatcher method(final HttpMethod method) {
+		Assert.notNull(method, "'method' must not be null");
+		return new RequestMatcher() {
+			@Override
+			public void match(ClientHttpRequest request) throws AssertionError {
+				AssertionErrors.assertEquals("Unexpected HttpMethod", method, request.getMethod());
 			}
 		};
 	}
@@ -96,21 +112,6 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	/**
-	 * Assert the {@link HttpMethod} of the request.
-	 * @param method the HTTP method
-	 * @return the request matcher
-	 */
-	public static RequestMatcher method(final HttpMethod method) {
-		Assert.notNull(method, "'method' must not be null");
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) throws AssertionError {
-				AssertionErrors.assertEquals("Unexpected HttpMethod", method, request.getMethod());
-			}
-		};
-	}
-
-	/**
 	 * Expect a request to the given URI.
 	 * @param uri the expected URI
 	 * @return the request matcher
@@ -126,6 +127,55 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	/**
+	 * Assert request query parameter values with the given Hamcrest matcher.
+	 */
+	@SafeVarargs
+	public static RequestMatcher queryParam(final String name, final Matcher<? super String>... matchers) {
+		return new RequestMatcher() {
+			@Override
+			public void match(ClientHttpRequest request) {
+				MultiValueMap<String, String> params = getQueryParams(request);
+				assertValueCount("query param", name, params, matchers.length);
+				for (int i = 0 ; i < matchers.length; i++) {
+					assertThat("Query param", params.get(name).get(i), matchers[i]);
+				}
+			}
+		};
+	}
+
+	/**
+	 * Assert request query parameter values.
+	 */
+	public static RequestMatcher queryParam(final String name, final String... expectedValues) {
+		return new RequestMatcher() {
+			@Override
+			public void match(ClientHttpRequest request) {
+				MultiValueMap<String, String> params = getQueryParams(request);
+				assertValueCount("query param", name, params, expectedValues.length);
+				for (int i = 0 ; i < expectedValues.length; i++) {
+					assertEquals("Query param + [" + name + "]", expectedValues[i], params.get(name).get(i));
+				}
+			}
+		};
+	}
+
+	private static MultiValueMap<String, String> getQueryParams(ClientHttpRequest request) {
+		return UriComponentsBuilder.fromUri(request.getURI()).build().getQueryParams();
+	}
+
+	private static void assertValueCount(String valueType, final String name,
+			MultiValueMap<String, String> map, int count) {
+
+		List<String> values = map.get(name);
+
+		String message = "Expected " + valueType + " <" + name + ">";
+		assertNotNull(message, values);
+
+		assertTrue(message + " to have at least <" + count + "> values but found " + values,
+				count <= values.size());
+	}
+
+	/**
 	 * Assert request header values with the given Hamcrest matcher.
 	 */
 	@SafeVarargs
@@ -133,7 +183,7 @@ public abstract class MockRestRequestMatchers {
 		return new RequestMatcher() {
 			@Override
 			public void match(ClientHttpRequest request) {
-				assertHeaderValueCount(name, request.getHeaders(), matchers.length);
+				assertValueCount("header", name, request.getHeaders(), matchers.length);
 				for (int i = 0 ; i < matchers.length; i++) {
 					assertThat("Request header", request.getHeaders().get(name).get(i), matchers[i]);
 				}
@@ -148,86 +198,13 @@ public abstract class MockRestRequestMatchers {
 		return new RequestMatcher() {
 			@Override
 			public void match(ClientHttpRequest request) {
-				assertHeaderValueCount(name, request.getHeaders(), expectedValues.length);
+				assertValueCount("header", name, request.getHeaders(), expectedValues.length);
 				for (int i = 0 ; i < expectedValues.length; i++) {
 					assertEquals("Request header + [" + name + "]",
 							expectedValues[i], request.getHeaders().get(name).get(i));
 				}
 			}
 		};
-	}
-
-	private static void assertHeaderValueCount(final String name, HttpHeaders headers, int expectedCount) {
-		assertMultiValueMapCount("header", name, headers, expectedCount);
-	}
-
-
-	/**
-	 * Assert request query parameter values with the given Hamcrest matcher.
-	 */
-	@SafeVarargs
-	public static RequestMatcher queryParameter(final String name, final Matcher<? super String>... matchers) {
-		return queryParameter(name, UTF_8, matchers);
-	}
-
-	/**
-	 * Assert request query parameter values with the given Hamcrest matcher.
-	 */
-	@SafeVarargs
-	public static RequestMatcher queryParameter(final String name, final Charset charset,
-												final Matcher<? super String>... matchers) {
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) {
-				MultiValueMap<String, String> queryParameters = getQueryParameters(request.getURI().toString(), charset);
-				assertQueryParameterValueCount(name, queryParameters, matchers.length);
-				for (int i = 0 ; i < matchers.length; i++) {
-					assertThat("Request query parameter", queryParameters.get(name).get(i), matchers[i]);
-				}
-			}
-		};
-	}
-
-	/**
-	 * Assert request query parameter values.
-	 */
-	public static RequestMatcher queryParameter(final String name, final String... expectedValues) {
-		return queryParameter(name, UTF_8, expectedValues);
-	}
-
-	/**
-	 * Assert request query parameter values.
-	 */
-	public static RequestMatcher queryParameter(final String name, final Charset charset, final String... expectedValues) {
-		return new RequestMatcher() {
-			@Override
-			public void match(ClientHttpRequest request) {
-				MultiValueMap<String, String> queryParameters = getQueryParameters(request.getURI().toString(), charset);
-				assertQueryParameterValueCount(name, queryParameters, expectedValues.length);
-				for (int i = 0 ; i < expectedValues.length; i++) {
-					assertEquals("Request query parameter + [" + name + "]",
-							expectedValues[i], queryParameters.get(name).get(i));
-				}
-			}
-		};
-	}
-
-	private static MultiValueMap<String, String> getQueryParameters(String uri, Charset charset) {
-		String decodeUri = UriUtils.decode(uri, charset);
-		MultiValueMap<String, String> queryParameters = UriComponentsBuilder.fromUriString(decodeUri)
-				.build().getQueryParams();
-		return queryParameters;
-	}
-
-	private static void assertQueryParameterValueCount(final String name, MultiValueMap<String, String> queryParameters, int expectedCount) {
-		assertMultiValueMapCount("query parameter", name, queryParameters, expectedCount);
-	}
-
-	private static void assertMultiValueMapCount(String type, final String name, MultiValueMap<String, String> multiValueMap, int expectedCount) {
-		List<String> actualValues = multiValueMap.get(name);
-		assertTrue("Expected " + type + " <" + name + ">", actualValues != null);
-		assertTrue("Expected " + type + " <" + name + "> to have at least <" + expectedCount +
-				"> values but found " + actualValues, expectedCount <= actualValues.size());
 	}
 
 	/**

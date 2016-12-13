@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,16 @@
 
 package org.springframework.test.web.client.match;
 
-import org.junit.Test;
-import org.springframework.http.HttpMethod;
-import org.springframework.mock.http.client.MockClientHttpRequest;
-import org.springframework.test.web.client.RequestMatcher;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.util.UriComponentsBuilder;
-
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
+
+import org.junit.Test;
+
+import org.springframework.http.HttpMethod;
+import org.springframework.mock.http.client.MockClientHttpRequest;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
 
 /**
  * Unit tests for {@link MockRestRequestMatchers}.
@@ -129,79 +125,39 @@ public class MockRestRequestMatchersTests {
 
 	@Test(expected = AssertionError.class)
 	public void headersWithMissingValue() throws Exception {
-		this.request.getHeaders().put("foo", Arrays.asList("bar"));
+		this.request.getHeaders().put("foo", Collections.singletonList("bar"));
 
 		MockRestRequestMatchers.header("foo", "bar", "baz").match(this.request);
 	}
 
 	@Test
-	public void queryParameter() throws Exception {
-		this.request.setURI(createUriWithQueryParameters("foo", "bar", "baz"));
-
-		RequestMatcher requestMatcher = MockRestRequestMatchers.queryParameter("foo", "bar", "baz");
-		assertThat("Factory method did not create any request matcher", requestMatcher, notNullValue());
-		requestMatcher.match(this.request);
+	public void queryParam() throws Exception {
+		this.request.setURI(new URI("http://foo.com/a?foo=bar&foo=baz"));
+		MockRestRequestMatchers.queryParam("foo", "bar", "baz").match(this.request);
 	}
 
 	@Test(expected = AssertionError.class)
-	public void queryParameterMissing() throws Exception {
-		this.request.setURI(UriComponentsBuilder
-				.fromUriString("http://foo.com")
-				.path("/bar")
-				.build().encode()
-				.toUri());
-
-		MockRestRequestMatchers.queryParameter("foo", "bar").match(this.request);
+	public void queryParamMissing() throws Exception {
+		this.request.setURI(new URI("http://foo.com/a"));
+		MockRestRequestMatchers.queryParam("foo", "bar").match(this.request);
 	}
 
 	@Test(expected = AssertionError.class)
-	public void queryParameterMissingValue() throws Exception {
-		this.request.setURI(createUriWithQueryParameters("foo", "bar", "baz"));
-
-		MockRestRequestMatchers.queryParameter("foo", "bad").match(this.request);
+	public void queryParamMissingValue() throws Exception {
+		this.request.setURI(new URI("http://foo.com/a?foo=bar&foo=baz"));
+		MockRestRequestMatchers.queryParam("foo", "bad").match(this.request);
 	}
 
 	@Test
-	public void queryParameterContains() throws Exception {
-		this.request.setURI(createUriWithQueryParameters("foo", "bar", "baz"));
-
-        RequestMatcher requestMatcher = MockRestRequestMatchers.queryParameter("foo", containsString("ba"));
-        assertThat("Factory method did not create any request matcher", requestMatcher, notNullValue());
-        requestMatcher.match(this.request);
+	public void queryParamContains() throws Exception {
+		this.request.setURI(new URI("http://foo.com/a?foo=bar&foo=baz"));
+		MockRestRequestMatchers.queryParam("foo", containsString("ba")).match(this.request);
 	}
 
 	@Test(expected = AssertionError.class)
-	public void queryParameterContainsWithMissingValue() throws Exception {
-		this.request.setURI(createUriWithQueryParameters("foo", "bar", "baz"));
-
-		MockRestRequestMatchers.queryParameter("foo", containsString("bx")).match(this.request);
-	}
-
-	@Test
-	public void queryParameters() throws Exception {
-		this.request.setURI(createUriWithQueryParameters("foo", "bar", "baz"));
-
-        RequestMatcher requestMatcher = MockRestRequestMatchers.queryParameter("foo", "bar", "baz");
-        assertThat("Factory method did not create any request matcher", requestMatcher, notNullValue());
-        requestMatcher.match(this.request);
-	}
-
-	@Test(expected = AssertionError.class)
-	public void queryParametersWithMissingValue() throws Exception {
-		this.request.setURI(createUriWithQueryParameters("foo", "bar"));
-
-		MockRestRequestMatchers.queryParameter("foo", "bar", "baz").match(this.request);
-	}
-
-
-	private URI createUriWithQueryParameters(String key, String ... values) {
-		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-		params.put(key, Arrays.asList(values));
-		return UriComponentsBuilder
-				.fromUriString("http://foo.com")
-				.path("/bar")
-				.queryParams(params)
-				.build().encode().toUri();
+	public void queryParamContainsWithMissingValue() throws Exception {
+		this.request.setURI(new URI("http://foo.com/a?foo=bar&foo=baz"));
+		MockRestRequestMatchers.queryParam("foo", containsString("bx")).match(this.request);
 	}
 
 }
