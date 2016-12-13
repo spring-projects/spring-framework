@@ -22,10 +22,12 @@ import java.io.PushbackInputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
@@ -45,6 +47,7 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
@@ -59,6 +62,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public abstract class AbstractMessageConverterMethodArgumentResolver implements HandlerMethodArgumentResolver {
@@ -128,17 +132,17 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * reading from the given request.
 	 * @param <T> the expected type of the argument value to be created
 	 * @param webRequest the current request
-	 * @param methodParam the method argument
+	 * @param parameter the method parameter descriptor (may be {@code null})
 	 * @param paramType the type of the argument value to be created
 	 * @return the created method argument value
 	 * @throws IOException if the reading from the request fails
 	 * @throws HttpMediaTypeNotSupportedException if no suitable message converter is found
 	 */
-	protected <T> Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter methodParam,
+	protected <T> Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter parameter,
 			Type paramType) throws IOException, HttpMediaTypeNotSupportedException, HttpMessageNotReadableException {
 
 		HttpInputMessage inputMessage = createInputMessage(webRequest);
-		return readWithMessageConverters(inputMessage, methodParam, paramType);
+		return readWithMessageConverters(inputMessage, parameter, paramType);
 	}
 
 	/**
@@ -146,7 +150,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * from the given HttpInputMessage.
 	 * @param <T> the expected type of the argument value to be created
 	 * @param inputMessage the HTTP input message representing the current request
-	 * @param param the method parameter descriptor (may be {@code null})
+	 * @param parameter the method parameter descriptor (may be {@code null})
 	 * @param targetType the target type, not necessarily the same as the method
 	 * parameter type, e.g. for {@code HttpEntity<String>}.
 	 * @return the created method argument value
@@ -154,7 +158,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * @throws HttpMediaTypeNotSupportedException if no suitable message converter is found
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage, MethodParameter param,
+	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage, MethodParameter parameter,
 			Type targetType) throws IOException, HttpMediaTypeNotSupportedException, HttpMessageNotReadableException {
 
 		MediaType contentType;
@@ -170,11 +174,11 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 			contentType = MediaType.APPLICATION_OCTET_STREAM;
 		}
 
-		Class<?> contextClass = (param != null ? param.getContainingClass() : null);
+		Class<?> contextClass = (parameter != null ? parameter.getContainingClass() : null);
 		Class<T> targetClass = (targetType instanceof Class ? (Class<T>) targetType : null);
 		if (targetClass == null) {
-			ResolvableType resolvableType = (param != null ?
-					ResolvableType.forMethodParameter(param) : ResolvableType.forType(targetType));
+			ResolvableType resolvableType = (parameter != null ?
+					ResolvableType.forMethodParameter(parameter) : ResolvableType.forType(targetType));
 			targetClass = (Class<T>) resolvableType.resolve();
 		}
 
@@ -193,13 +197,12 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 							logger.debug("Read [" + targetType + "] as \"" + contentType + "\" with [" + converter + "]");
 						}
 						if (inputMessage.getBody() != null) {
-							inputMessage = getAdvice().beforeBodyRead(inputMessage, param, targetType, converterType);
+							inputMessage = getAdvice().beforeBodyRead(inputMessage, parameter, targetType, converterType);
 							body = genericConverter.read(targetType, contextClass, inputMessage);
-							body = getAdvice().afterBodyRead(body, inputMessage, param, targetType, converterType);
+							body = getAdvice().afterBodyRead(body, inputMessage, parameter, targetType, converterType);
 						}
 						else {
-							body = null;
-							body = getAdvice().handleEmptyBody(body, inputMessage, param, targetType, converterType);
+							body = getAdvice().handleEmptyBody(null, inputMessage, parameter, targetType, converterType);
 						}
 						break;
 					}
@@ -210,13 +213,12 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 							logger.debug("Read [" + targetType + "] as \"" + contentType + "\" with [" + converter + "]");
 						}
 						if (inputMessage.getBody() != null) {
-							inputMessage = getAdvice().beforeBodyRead(inputMessage, param, targetType, converterType);
+							inputMessage = getAdvice().beforeBodyRead(inputMessage, parameter, targetType, converterType);
 							body = ((HttpMessageConverter<T>) converter).read(targetClass, inputMessage);
-							body = getAdvice().afterBodyRead(body, inputMessage, param, targetType, converterType);
+							body = getAdvice().afterBodyRead(body, inputMessage, parameter, targetType, converterType);
 						}
 						else {
-							body = null;
-							body = getAdvice().handleEmptyBody(body, inputMessage, param, targetType, converterType);
+							body = getAdvice().handleEmptyBody(null, inputMessage, parameter, targetType, converterType);
 						}
 						break;
 					}
@@ -254,12 +256,12 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * Spring's {@link org.springframework.validation.annotation.Validated},
 	 * and custom annotations whose name starts with "Valid".
 	 * @param binder the DataBinder to be used
-	 * @param methodParam the method parameter
-	 * @see #isBindExceptionRequired
+	 * @param parameter the method parameter descriptor
 	 * @since 4.1.5
+	 * @see #isBindExceptionRequired
 	 */
-	protected void validateIfApplicable(WebDataBinder binder, MethodParameter methodParam) {
-		Annotation[] annotations = methodParam.getParameterAnnotations();
+	protected void validateIfApplicable(WebDataBinder binder, MethodParameter parameter) {
+		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation ann : annotations) {
 			Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
 			if (validatedAnn != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
@@ -274,15 +276,26 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	/**
 	 * Whether to raise a fatal bind exception on validation errors.
 	 * @param binder the data binder used to perform data binding
-	 * @param methodParam the method argument
+	 * @param parameter the method parameter descriptor
 	 * @return {@code true} if the next method argument is not of type {@link Errors}
 	 * @since 4.1.5
 	 */
-	protected boolean isBindExceptionRequired(WebDataBinder binder, MethodParameter methodParam) {
-		int i = methodParam.getParameterIndex();
-		Class<?>[] paramTypes = methodParam.getMethod().getParameterTypes();
+	protected boolean isBindExceptionRequired(WebDataBinder binder, MethodParameter parameter) {
+		int i = parameter.getParameterIndex();
+		Class<?>[] paramTypes = parameter.getMethod().getParameterTypes();
 		boolean hasBindingResult = (paramTypes.length > (i + 1) && Errors.class.isAssignableFrom(paramTypes[i + 1]));
 		return !hasBindingResult;
+	}
+
+	/**
+	 * Adapt the given argument against the method parameter, if necessary.
+	 * @param arg the resolved argument
+	 * @param parameter the method parameter descriptor
+	 * @return the adapted argument, or the original resolved argument as-is
+	 * @since 4.3.5
+	 */
+	protected Object adaptArgumentIfNecessary(Object arg, MethodParameter parameter) {
+		return (parameter.isOptional() ? OptionalResolver.resolveValue(arg) : arg);
 	}
 
 
@@ -332,6 +345,22 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 
 		public HttpMethod getMethod() {
 			return this.method;
+		}
+	}
+
+
+	/**
+	 * Inner class to avoid hard-coded dependency on Java 8 Optional type...
+	 */
+	@UsesJava8
+	private static class OptionalResolver {
+
+		public static Object resolveValue(Object value) {
+			if (value == null || (value instanceof Collection && ((Collection) value).isEmpty()) ||
+					(value instanceof Object[] && ((Object[]) value).length == 0)) {
+				return Optional.empty();
+			}
+			return Optional.of(value);
 		}
 	}
 
