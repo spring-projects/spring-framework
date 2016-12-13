@@ -18,6 +18,7 @@ package org.springframework.mock.http.server.reactive.test;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
@@ -49,6 +50,8 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 
 	private final MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
 
+	private Function<String, String> urlEncoder = url -> url;
+
 	private Flux<DataBuffer> body;
 
 	private Flux<Publisher<DataBuffer>> bodyWithFlushes;
@@ -75,6 +78,16 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		return this.cookies;
+	}
+
+	@Override
+	public String encodeUrl(String url) {
+		return (this.urlEncoder != null ? this.urlEncoder.apply(url) : url);
+	}
+
+	@Override
+	public void registerUrlEncoder(Function<String, String> encoder) {
+		this.urlEncoder = (this.urlEncoder != null ? this.urlEncoder.andThen(encoder) : encoder);
 	}
 
 	public Publisher<DataBuffer> getBody() {

@@ -43,6 +43,27 @@ import static org.junit.Assert.assertSame;
 public class ServerHttpResponseTests {
 
 	@Test
+	public void encodeUrlDefault() throws Exception {
+		TestServerHttpResponse response = new TestServerHttpResponse();
+		assertEquals("/foo", response.encodeUrl("/foo"));
+	}
+
+	@Test
+	public void encodeUrlWithEncoder() throws Exception {
+		TestServerHttpResponse response = new TestServerHttpResponse();
+		response.registerUrlEncoder(s -> s + "?nonce=123");
+		assertEquals("/foo?nonce=123", response.encodeUrl("/foo"));
+	}
+
+	@Test
+	public void encodeUrlWithMultipleEncoders() throws Exception {
+		TestServerHttpResponse response = new TestServerHttpResponse();
+		response.registerUrlEncoder(s -> s + ";p=abc");
+		response.registerUrlEncoder(s -> s + "?q=123");
+		assertEquals("/foo;p=abc?q=123", response.encodeUrl("/foo"));
+	}
+
+	@Test
 	public void writeWith() throws Exception {
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		response.writeWith(Flux.just(wrap("a"), wrap("b"), wrap("c"))).block();
