@@ -21,8 +21,9 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.HttpInbound;
-import reactor.ipc.netty.http.HttpOutbound;
+import reactor.ipc.netty.NettyPipeline;
+import reactor.ipc.netty.http.websocket.WebsocketInbound;
+import reactor.ipc.netty.http.websocket.WebsocketOutbound;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.web.reactive.socket.CloseStatus;
@@ -40,8 +41,8 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public class ReactorNettyWebSocketSession
 		extends NettyWebSocketSessionSupport<ReactorNettyWebSocketSession.WebSocketConnection> {
 
-
-	protected ReactorNettyWebSocketSession(HttpInbound inbound, HttpOutbound outbound,
+	protected ReactorNettyWebSocketSession(WebsocketInbound inbound,
+			WebsocketOutbound outbound,
 			URI uri, NettyDataBufferFactory factory) {
 
 		super(new WebSocketConnection(inbound, outbound), uri, factory);
@@ -50,16 +51,17 @@ public class ReactorNettyWebSocketSession
 
 	@Override
 	public Flux<WebSocketMessage> receive() {
-		HttpInbound inbound = getDelegate().getHttpInbound();
+		WebsocketInbound inbound = getDelegate().getWebsocketInbound();
 		return toMessageFlux(inbound.receiveObject().cast(WebSocketFrame.class));
 	}
 
 	@Override
 	public Mono<Void> send(Publisher<WebSocketMessage> messages) {
 		Flux<WebSocketFrame> frameFlux = Flux.from(messages).map(this::toFrame);
-		HttpOutbound outbound = getDelegate().getHttpOutbound();
-		outbound.flushEach();
-		return outbound.sendObject(frameFlux);
+		WebsocketOutbound outbound = getDelegate().getWebsocketOutbound();
+		return outbound.options(NettyPipeline.SendOptions::flushOnEach)
+		               .sendObject(frameFlux)
+		               .then();
 	}
 
 	@Override
@@ -71,25 +73,24 @@ public class ReactorNettyWebSocketSession
 
 
 	/**
-	 * Simple container for {@link HttpInbound} and {@link HttpOutbound}.
+	 * Simple container for {@link WebsocketInbound} and {@link WebsocketOutbound}.
 	 */
 	public static class WebSocketConnection {
 
-		private final HttpInbound inbound;
+		private final WebsocketInbound inbound;
 
-		private final HttpOutbound outbound;
+		private final WebsocketOutbound outbound;
 
-
-		public WebSocketConnection(HttpInbound inbound, HttpOutbound outbound) {
+		public WebSocketConnection(WebsocketInbound inbound, WebsocketOutbound outbound) {
 			this.inbound = inbound;
 			this.outbound = outbound;
 		}
 
-		public HttpInbound getHttpInbound() {
+		public WebsocketInbound getWebsocketInbound() {
 			return this.inbound;
 		}
 
-		public HttpOutbound getHttpOutbound() {
+		public WebsocketOutbound getWebsocketOutbound() {
 			return this.outbound;
 		}
 	}

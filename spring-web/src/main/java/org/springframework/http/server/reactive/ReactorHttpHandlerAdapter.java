@@ -48,7 +48,7 @@ public class ReactorHttpHandlerAdapter extends HttpHandlerAdapterSupport
 	@Override
 	public Mono<Void> apply(HttpServerRequest request, HttpServerResponse response) {
 
-		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(request.channel().alloc());
+		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(response.alloc());
 		ReactorServerHttpRequest req = new ReactorServerHttpRequest(request, bufferFactory);
 		ReactorServerHttpResponse resp = new ReactorServerHttpResponse(response, bufferFactory);
 

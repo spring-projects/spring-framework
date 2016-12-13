@@ -54,7 +54,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 		this.httpMethod = httpMethod;
 		this.uri = uri;
 		this.httpRequest = httpRequest;
-		this.bufferFactory = new NettyDataBufferFactory(httpRequest.channel().alloc());
+		this.bufferFactory = new NettyDataBufferFactory(httpRequest.alloc());
 	}
 
 
@@ -76,7 +76,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 		return applyBeforeCommit().then(this.httpRequest
-				.send(Flux.from(body).map(NettyDataBufferFactory::toByteBuf)));
+				.send(Flux.from(body).map(NettyDataBufferFactory::toByteBuf)).then());
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 		Publisher<Publisher<ByteBuf>> byteBufs = Flux.from(body).
 				map(ReactorClientHttpRequest::toByteBufs);
 		return applyBeforeCommit().then(this.httpRequest
-				.sendGroups(byteBufs));
+				.sendGroups(byteBufs).then());
 	}
 
 	private static Publisher<ByteBuf> toByteBufs(Publisher<? extends DataBuffer> dataBuffers) {
@@ -94,7 +94,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	public Mono<Void> setComplete() {
-		return applyBeforeCommit().then(httpRequest.sendHeaders());
+		return applyBeforeCommit().then(httpRequest.sendHeaders().then());
 	}
 
 	@Override

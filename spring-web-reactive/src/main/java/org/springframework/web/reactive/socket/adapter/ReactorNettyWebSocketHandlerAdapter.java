@@ -18,8 +18,8 @@ package org.springframework.web.reactive.socket.adapter;
 import java.util.function.BiFunction;
 
 import org.reactivestreams.Publisher;
-import reactor.ipc.netty.http.HttpInbound;
-import reactor.ipc.netty.http.HttpOutbound;
+import reactor.ipc.netty.http.websocket.WebsocketInbound;
+import reactor.ipc.netty.http.websocket.WebsocketOutbound;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -33,7 +33,7 @@ import org.springframework.web.reactive.socket.WebSocketHandler;
  * @since 5.0
  */
 public class ReactorNettyWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupport
-		implements BiFunction<HttpInbound, HttpOutbound, Publisher<Void>> {
+		implements BiFunction<WebsocketInbound, WebsocketOutbound, Publisher<Void>> {
 
 
 	public ReactorNettyWebSocketHandlerAdapter(ServerHttpRequest request, ServerHttpResponse response,
@@ -44,7 +44,7 @@ public class ReactorNettyWebSocketHandlerAdapter extends WebSocketHandlerAdapter
 
 
 	@Override
-	public Publisher<Void> apply(HttpInbound inbound, HttpOutbound outbound) {
+	public Publisher<Void> apply(WebsocketInbound inbound, WebsocketOutbound outbound) {
 		ReactorNettyWebSocketSession session =
 				new ReactorNettyWebSocketSession(inbound, outbound, getUri(), getBufferFactory());
 		return getDelegate().handle(session);

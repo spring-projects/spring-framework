@@ -47,7 +47,7 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 		String protocols = StringUtils.arrayToCommaDelimitedString(getSubProtocols(webSocketHandler));
 		protocols = (StringUtils.hasText(protocols) ? protocols : null);
 
-		return response.getReactorResponse().upgradeToWebsocket(protocols, false, reactorHandler);
+		return response.getReactorResponse().sendWebsocket(protocols, reactorHandler);
 	}
 
 	private static String[] getSubProtocols(WebSocketHandler webSocketHandler) {

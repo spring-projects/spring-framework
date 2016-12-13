@@ -177,10 +177,6 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 
 	@Test
 	public void resource() throws Exception {
-
-		// SPR-14975
-		assumeFalse(server instanceof ReactorHttpServer);
-
 		ResponseEntity<byte[]> response = performGet("/resource", new HttpHeaders(), byte[].class);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
