@@ -73,7 +73,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 		StepVerifier.create(result)
 				.consumeNextWith(value -> Assert.isTrue(value.length() == 200000))
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(5L));
 	}
 
 	@Override

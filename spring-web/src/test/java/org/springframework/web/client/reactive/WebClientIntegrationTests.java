@@ -77,7 +77,7 @@ public class WebClientIntegrationTests {
 							assertEquals(13L, httpHeaders.getContentLength());
 						})
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(3));
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -101,7 +101,7 @@ public class WebClientIntegrationTests {
 		StepVerifier.create(result)
 				.expectNext("Hello Spring!")
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(3));
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -128,7 +128,7 @@ public class WebClientIntegrationTests {
 		StepVerifier.create(result)
 				.expectNext(content)
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(3));
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -153,7 +153,7 @@ public class WebClientIntegrationTests {
 		StepVerifier.create(result)
 				.consumeNextWith(p -> assertEquals("barbar", p.getBar()))
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(3));
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -179,7 +179,7 @@ public class WebClientIntegrationTests {
 				.consumeNextWith(p -> assertThat(p.getBar(), Matchers.is("bar1")))
 				.consumeNextWith(p -> assertThat(p.getBar(), Matchers.is("bar2")))
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(3));
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -207,7 +207,7 @@ public class WebClientIntegrationTests {
 		StepVerifier.create(result)
 				.consumeNextWith(p -> assertEquals("BARBAR", p.getBar()))
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(3));
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -235,7 +235,7 @@ public class WebClientIntegrationTests {
 		StepVerifier.create(result)
 				.expectNext("test")
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(3));
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -288,7 +288,7 @@ public class WebClientIntegrationTests {
 		StepVerifier.create(result)
 				.expectNext("Hello Spring!")
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(3));
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -317,7 +317,7 @@ public class WebClientIntegrationTests {
 		StepVerifier.create(result)
 				.expectNext("Hello Spring!")
 				.expectComplete()
-				.verify();
+				.verify(Duration.ofSeconds(3));
 
 		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
