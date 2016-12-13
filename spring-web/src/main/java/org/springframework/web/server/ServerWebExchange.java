@@ -129,43 +129,42 @@ public interface ServerWebExchange {
 	/**
 	 * Return a builder to mutate properties of this exchange. The resulting
 	 * new exchange is an immutable {@link ServerWebExchangeDecorator decorator}
-	 * around the current exchange instance that returns mutated values, where
-	 * provided, or delegating to the decorated instance otherwise.
+	 * around the current exchange instance returning mutated values.
 	 */
-	default MutativeBuilder mutate() {
-		return new DefaultServerWebExchangeMutativeBuilder(this);
+	default Builder mutate() {
+		return new DefaultServerWebExchangeBuilder(this);
 	}
 
 
 	/**
-	 * Builder for mutating properties of a {@link ServerWebExchange}.
+	 * Builder for mutating the properties of a {@link ServerWebExchange}.
 	 */
-	interface MutativeBuilder {
+	interface Builder {
 
 		/**
 		 * Set the request to use.
 		 */
-		MutativeBuilder setRequest(ServerHttpRequest request);
+		Builder request(ServerHttpRequest request);
 
 		/**
 		 * Set the response to use.
 		 */
-		MutativeBuilder setResponse(ServerHttpResponse response);
+		Builder response(ServerHttpResponse response);
 
 		/**
 		 * Set the principal to use.
 		 */
-		MutativeBuilder setPrincipal(Mono<Principal> user);
+		Builder principal(Mono<Principal> user);
 
 		/**
 		 * Set the session to use.
 		 */
-		MutativeBuilder setSession(Mono<WebSession> session);
+		Builder session(Mono<WebSession> session);
 
 		/**
 		 * Set the form data.
 		 */
-		MutativeBuilder setFormData(Mono<MultiValueMap<String, String>> formData);
+		Builder formData(Mono<MultiValueMap<String, String>> formData);
 
 		/**
 		 * Build an immutable wrapper that returning the mutated properties.

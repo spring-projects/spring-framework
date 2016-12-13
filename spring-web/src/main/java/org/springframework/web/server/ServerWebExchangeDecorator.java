@@ -32,8 +32,8 @@ import org.springframework.util.MultiValueMap;
  * {@link ServerWebExchange}. Pre-implements all methods by delegating to the
  * wrapped instance.
  *
- * <p>Note that if the purpose for wrapping is simply to override specific
- * properties, e.g. {@link #getPrincipal()}, consider using
+ * <p><strong>Note:</strong> if the purpose for using a decorator is to override
+ * properties like {@link #getPrincipal()}, consider using
  * {@link ServerWebExchange#mutate()} instead.
  *
  * @author Rossen Stoyanchev

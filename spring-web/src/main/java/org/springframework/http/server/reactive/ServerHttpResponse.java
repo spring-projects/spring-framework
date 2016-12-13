@@ -18,8 +18,6 @@ package org.springframework.http.server.reactive;
 
 import java.util.function.Function;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.ResponseCookie;
@@ -69,16 +67,5 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	 * @param encoder a URL encoding function to use
 	 */
 	void registerUrlEncoder(Function<String, String> encoder);
-
-	/**
-	 * Indicate that request handling is complete, allowing for any cleanup or
-	 * end-of-processing tasks to be performed such as applying header changes
-	 * made via {@link #getHeaders()} to the underlying server response (if not
-	 * applied already).
-	 * <p>This method should be automatically invoked at the end of request
-	 * processing so typically applications should not have to invoke it.
-	 * If invoked multiple times it should have no side effects.
-	 */
-	Mono<Void> setComplete();
 
 }

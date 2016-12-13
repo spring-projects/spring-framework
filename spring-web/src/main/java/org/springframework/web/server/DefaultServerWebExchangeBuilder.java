@@ -25,13 +25,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Default implementation of
- * {@link org.springframework.web.server.ServerWebExchange.MutativeBuilder}.
- *
+ * Package private implementation of {@link ServerWebExchange.Builder}.
+ * 
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-class DefaultServerWebExchangeMutativeBuilder implements ServerWebExchange.MutativeBuilder {
+class DefaultServerWebExchangeBuilder implements ServerWebExchange.Builder {
 
 	private final ServerWebExchange delegate;
 
@@ -46,38 +45,38 @@ class DefaultServerWebExchangeMutativeBuilder implements ServerWebExchange.Mutat
 	private Mono<MultiValueMap<String, String>> formData;
 
 
-	public DefaultServerWebExchangeMutativeBuilder(ServerWebExchange delegate) {
+	public DefaultServerWebExchangeBuilder(ServerWebExchange delegate) {
 		Assert.notNull(delegate, "'delegate' is required.");
 		this.delegate = delegate;
 	}
 
 
 	@Override
-	public ServerWebExchange.MutativeBuilder setRequest(ServerHttpRequest request) {
+	public ServerWebExchange.Builder request(ServerHttpRequest request) {
 		this.request = request;
 		return this;
 	}
 
 	@Override
-	public ServerWebExchange.MutativeBuilder setResponse(ServerHttpResponse response) {
+	public ServerWebExchange.Builder response(ServerHttpResponse response) {
 		this.response = response;
 		return this;
 	}
 
 	@Override
-	public ServerWebExchange.MutativeBuilder setPrincipal(Mono<Principal> user) {
+	public ServerWebExchange.Builder principal(Mono<Principal> user) {
 		this.user = user;
 		return this;
 	}
 
 	@Override
-	public ServerWebExchange.MutativeBuilder setSession(Mono<WebSession> session) {
+	public ServerWebExchange.Builder session(Mono<WebSession> session) {
 		this.session = session;
 		return this;
 	}
 
 	@Override
-	public ServerWebExchange.MutativeBuilder setFormData(Mono<MultiValueMap<String, String>> formData) {
+	public ServerWebExchange.Builder formData(Mono<MultiValueMap<String, String>> formData) {
 		this.formData = formData;
 		return this;
 	}

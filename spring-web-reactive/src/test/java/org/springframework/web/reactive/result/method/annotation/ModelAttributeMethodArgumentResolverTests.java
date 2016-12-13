@@ -76,7 +76,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 	public void setUp() throws Exception {
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(this.request, response, new MockWebSessionManager());
-		this.exchange = this.exchange.mutate().setFormData(Mono.just(this.formData)).build();
+		this.exchange = this.exchange.mutate().formData(Mono.just(this.formData)).build();
 
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 		validator.afterPropertiesSet();
