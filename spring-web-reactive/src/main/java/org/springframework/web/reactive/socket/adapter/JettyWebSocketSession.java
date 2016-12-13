@@ -38,7 +38,6 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  */
 public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Session> {
 
-
 	public JettyWebSocketSession(Session session) {
 		super(session, ObjectUtils.getIdentityHexString(session),
 				session.getUpgradeRequest().getRequestURI());
@@ -52,12 +51,12 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 
 	@Override
 	protected void suspendReceiving() {
-		// No-op
+		// no-op
 	}
 
 	@Override
 	protected void resumeReceiving() {
-		// No-op
+		// no-op
 	}
 
 	@Override

@@ -40,7 +40,6 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  */
 public class TomcatWebSocketSession extends AbstractListenerWebSocketSession<Session> {
 
-
 	public TomcatWebSocketSession(Session session) {
 		super(session, session.getId(), session.getRequestURI());
 	}
@@ -53,12 +52,12 @@ public class TomcatWebSocketSession extends AbstractListenerWebSocketSession<Ses
 
 	@Override
 	protected void suspendReceiving() {
-		// No-op
+		// no-op
 	}
 
 	@Override
 	protected void resumeReceiving() {
-		// No-op
+		// no-op
 	}
 
 	@Override

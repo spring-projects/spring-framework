@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.socket.adapter;
 
 import java.net.URI;
@@ -38,7 +39,6 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  * @since 5.0
  */
 public class RxNettyWebSocketSession extends NettyWebSocketSessionSupport<WebSocketConnection> {
-
 
 	public RxNettyWebSocketSession(WebSocketConnection conn, URI uri, NettyDataBufferFactory factory) {
 		super(conn, uri, factory);

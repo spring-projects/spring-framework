@@ -164,6 +164,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	@Override
 	protected Mono<Void> renderInternal(Map<String, Object> renderAttributes, MediaType contentType,
 			ServerWebExchange exchange) {
+
 		// Expose all standard FreeMarker hash models.
 		SimpleHash freeMarkerModel = getTemplateModel(renderAttributes, exchange);
 		if (logger.isDebugEnabled()) {
@@ -186,8 +187,8 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 		return exchange.getResponse().writeWith(Flux.just(dataBuffer));
 	}
 
-	private static Optional<Charset> getCharset(MediaType mediaType) {
-		return mediaType != null ? Optional.ofNullable(mediaType.getCharset()) : Optional.empty();
+	private Optional<Charset> getCharset(MediaType mediaType) {
+		return (mediaType != null ? Optional.ofNullable(mediaType.getCharset()) : Optional.empty());
 	}
 
 	/**

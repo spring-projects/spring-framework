@@ -41,7 +41,6 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  */
 public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<WebSocketChannel> {
 
-
 	public UndertowWebSocketSession(WebSocketChannel channel, URI url) {
 		super(channel, ObjectUtils.getIdentityHexString(channel), url);
 	}
