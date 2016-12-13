@@ -16,9 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.MethodParameter;
@@ -156,17 +154,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 				throw new MissingServletRequestPartException(name);
 			}
 		}
-		if (parameter.getParameterType() == Optional.class) {
-			if (arg == null || (arg instanceof Collection && ((Collection) arg).isEmpty()) ||
-					(arg instanceof Object[] && ((Object[]) arg).length == 0)) {
-				arg = Optional.empty();
-			}
-			else {
-				arg = Optional.of(arg);
-			}
-		}
-
-		return arg;
+		return adaptArgumentIfNecessary(arg, parameter);
 	}
 
 	private String getPartName(MethodParameter methodParam, RequestPart requestPart) {
