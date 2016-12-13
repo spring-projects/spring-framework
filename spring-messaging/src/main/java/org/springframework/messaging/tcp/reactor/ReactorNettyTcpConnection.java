@@ -61,11 +61,11 @@ public class ReactorNettyTcpConnection<P> implements TcpConnection<P> {
 
 	@Override
 	public ListenableFuture<Void> send(Message<P> message) {
-		ByteBuf byteBuf = this.inbound.alloc()
-		                              .buffer();
+		ByteBuf byteBuf = this.outbound.alloc()
+		                               .buffer();
 		this.encoder.accept(byteBuf, message);
-		return new MonoToListenableFutureAdapter<>(this.outbound.send(Mono.just(byteBuf)
-		                                                                  .then()));
+		return new MonoToListenableFutureAdapter<>(this.outbound.send(Mono.just(byteBuf))
+		                                                        .then());
 	}
 
 	@Override
