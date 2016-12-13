@@ -312,6 +312,7 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 
 project("spring-build-src") {
 	description = "Exposes gradle buildSrc for IDE support"
+
 	apply plugin: "groovy"
 
 	dependencies {
@@ -427,11 +428,16 @@ project("spring-core") {
 project("spring-beans") {
 	description = "Spring Beans"
 
+	// Disabled since Kotlin compiler does not support JDK 9 yet
+	//apply plugin: "kotlin"
+
 	dependencies {
 		compile(project(":spring-core"))
 		compile(files(project(":spring-core").cglibRepackJar))
 		optional("javax.inject:javax.inject:1")
 		optional("javax.el:javax.el-api:${elApiVersion}")
+		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		optional("org.yaml:snakeyaml:${snakeyamlVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	}
@@ -439,6 +445,7 @@ project("spring-beans") {
 
 project("spring-beans-groovy") {
 	description "Groovy Bean Definitions"
+
 	merge.into = project(":spring-beans")
 	apply plugin: "groovy"
 
@@ -501,6 +508,7 @@ project("spring-instrument") {
 
 project("spring-context") {
 	description = "Spring Context"
+
 	apply plugin: "groovy"
 
 	dependencies {

@@ -26,11 +26,18 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import kotlin.Metadata;
+import kotlin.reflect.KFunction;
+import kotlin.reflect.KParameter;
+import kotlin.reflect.jvm.ReflectJvmMapping;
 
 import org.springframework.util.Assert;
-import org.springframework.util.KotlinUtils;
+import org.springframework.util.ClassUtils;
 
 /**
  * Helper class that encapsulates the specification of a method parameter, i.e. a {@link Method}
@@ -45,11 +52,16 @@ import org.springframework.util.KotlinUtils;
  * @author Rob Harrop
  * @author Andy Clement
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  * @since 2.0
  * @see GenericCollectionTypeResolver
  * @see org.springframework.core.annotation.SynthesizingMethodParameter
  */
 public class MethodParameter {
+
+	private static final boolean kotlinPresent =
+			ClassUtils.isPresent("kotlin.Unit", MethodParameter.class.getClassLoader());
+
 
 	private final Method method;
 
@@ -311,11 +323,13 @@ public class MethodParameter {
 
 	/**
 	 * Return whether this method indicates a parameter which is not required
-	 * (either in the form of Java 8's {@link java.util.Optional} or Kotlin nullable type).
+	 * (either in the form of Java 8's {@link java.util.Optional} or Kotlin's
+	 * nullable type).
 	 * @since 4.3
 	 */
 	public boolean isOptional() {
-		return (getParameterType() == Optional.class || KotlinUtils.isNullable(this));
+		return (getParameterType() == Optional.class ||
+				(kotlinPresent && KotlinDelegate.isNullable(this)));
 	}
 
 	/**
@@ -670,6 +684,42 @@ public class MethodParameter {
 		int count = executable.getParameterCount();
 		Assert.isTrue(parameterIndex < count, () -> "Parameter index needs to be between -1 and " + (count - 1));
 		return parameterIndex;
+	}
+
+
+	/**
+	 * Inner class to avoid a hard dependency on Kotlin at runtime.
+	 */
+	private static class KotlinDelegate {
+
+		/**
+		 * Check whether the specified {@link MethodParameter} represents a nullable Kotlin type or not.
+		 */
+		public static boolean isNullable(MethodParameter param) {
+			if (param.getContainingClass().isAnnotationPresent(Metadata.class)) {
+				int parameterIndex = param.getParameterIndex();
+				if (parameterIndex == -1) {
+					KFunction<?> function = ReflectJvmMapping.getKotlinFunction(param.getMethod());
+					return (function != null && function.getReturnType().isMarkedNullable());
+				}
+				else {
+					KFunction<?> function = (param.getMethod() != null ?
+							ReflectJvmMapping.getKotlinFunction(param.getMethod()) :
+							ReflectJvmMapping.getKotlinFunction(param.getConstructor()));
+					if (function != null) {
+						List<KParameter> parameters = function.getParameters();
+						return parameters
+								.stream()
+								.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()))
+								.collect(Collectors.toList())
+								.get(parameterIndex)
+								.getType()
+								.isMarkedNullable();
+					}
+				}
+			}
+			return false;
+		}
 	}
 
 }
