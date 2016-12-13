@@ -16,6 +16,8 @@
 package org.springframework.http.server.reactive;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -48,7 +50,7 @@ public class HttpHandlerAdapterSupportTests {
 
 	private void testInvalidContextPath(String contextPath, String errorMessage) {
 		try {
-			new TestHttpHandlerAdapter(new TestHttpHandler(contextPath));
+			new TestHttpHandlerAdapter(Collections.singletonMap(contextPath, new TestHttpHandler()));
 			fail();
 		}
 		catch (IllegalArgumentException ex) {
@@ -58,35 +60,47 @@ public class HttpHandlerAdapterSupportTests {
 
 	@Test
 	public void match() throws Exception {
-		TestHttpHandler handler1 = new TestHttpHandler("/path");
-		TestHttpHandler handler2 = new TestHttpHandler("/another/path");
-		TestHttpHandler handler3 = new TestHttpHandler("/yet/another/path");
+		TestHttpHandler handler1 = new TestHttpHandler();
+		TestHttpHandler handler2 = new TestHttpHandler();
+		TestHttpHandler handler3 = new TestHttpHandler();
 
-		testPath("/another/path/and/more", handler1, handler2, handler3);
+		Map<String, HttpHandler> map = new HashMap<>();
+		map.put("/path", handler1);
+		map.put("/another/path", handler2);
+		map.put("/yet/another/path", handler3);
 
-		assertInvoked(handler2);
+		testPath("/another/path/and/more", map);
+
+		assertInvoked(handler2, "/another/path");
 		assertNotInvoked(handler1, handler3);
 	}
 
 	@Test
 	public void matchWithContextPathEqualToPath() throws Exception {
-		TestHttpHandler handler1 = new TestHttpHandler("/path");
-		TestHttpHandler handler2 = new TestHttpHandler("/another/path");
-		TestHttpHandler handler3 = new TestHttpHandler("/yet/another/path");
+		TestHttpHandler handler1 = new TestHttpHandler();
+		TestHttpHandler handler2 = new TestHttpHandler();
+		TestHttpHandler handler3 = new TestHttpHandler();
 
-		testPath("/path", handler1, handler2, handler3);
+		Map<String, HttpHandler> map = new HashMap<>();
+		map.put("/path", handler1);
+		map.put("/another/path", handler2);
+		map.put("/yet/another/path", handler3);
 
-		assertInvoked(handler1);
+		testPath("/path", map);
+
+		assertInvoked(handler1, "/path");
 		assertNotInvoked(handler2, handler3);
 	}
 
 	@Test
 	public void matchWithNativeContextPath() throws Exception {
 		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/yet/another/path");
-		request.setContextPath("/yet");
+		request.setContextPath("/yet"); // contextPath in underlying request
 
-		TestHttpHandler handler = new TestHttpHandler("/another/path");
-		new TestHttpHandlerAdapter(handler).handle(request);
+		TestHttpHandler handler = new TestHttpHandler();
+		Map<String, HttpHandler> map = Collections.singletonMap("/another/path", handler);
+
+		new TestHttpHandlerAdapter(map).handle(request);
 
 		assertTrue(handler.wasInvoked());
 		assertEquals("/yet/another/path", handler.getRequest().getContextPath());
@@ -94,24 +108,28 @@ public class HttpHandlerAdapterSupportTests {
 
 	@Test
 	public void notFound() throws Exception {
-		TestHttpHandler handler1 = new TestHttpHandler("/path");
-		TestHttpHandler handler2 = new TestHttpHandler("/another/path");
+		TestHttpHandler handler1 = new TestHttpHandler();
+		TestHttpHandler handler2 = new TestHttpHandler();
 
-		ServerHttpResponse response = testPath("/yet/another/path", handler1, handler2);
+		Map<String, HttpHandler> map = new HashMap<>();
+		map.put("/path", handler1);
+		map.put("/another/path", handler2);
+
+		ServerHttpResponse response = testPath("/yet/another/path", map);
 
 		assertNotInvoked(handler1, handler2);
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 	}
 
 
-	private ServerHttpResponse testPath(String path, TestHttpHandler... handlers) {
-		TestHttpHandlerAdapter adapter = new TestHttpHandlerAdapter(handlers);
+	private ServerHttpResponse testPath(String path, Map<String, HttpHandler> handlerMap) {
+		TestHttpHandlerAdapter adapter = new TestHttpHandlerAdapter(handlerMap);
 		return adapter.handle(path);
 	}
 
-	private void assertInvoked(TestHttpHandler handler) {
+	private void assertInvoked(TestHttpHandler handler, String contextPath) {
 		assertTrue(handler.wasInvoked());
-		assertEquals(handler.getContextPath(), handler.getRequest().getContextPath());
+		assertEquals(contextPath, handler.getRequest().getContextPath());
 	}
 
 	private void assertNotInvoked(TestHttpHandler... handlers) {
@@ -123,15 +141,8 @@ public class HttpHandlerAdapterSupportTests {
 	private static class TestHttpHandlerAdapter extends HttpHandlerAdapterSupport {
 
 
-		public TestHttpHandlerAdapter(TestHttpHandler... handlers) {
-			super(initHandlerMap(handlers));
-		}
-
-
-		private static Map<String, HttpHandler> initHandlerMap(TestHttpHandler... testHandlers) {
-			Map<String, HttpHandler> result = new LinkedHashMap<>();
-			Arrays.stream(testHandlers).forEachOrdered(h -> result.put(h.getContextPath(), h));
-			return result;
+		public TestHttpHandlerAdapter(Map<String, HttpHandler> handlerMap) {
+			super(handlerMap);
 		}
 
 		public ServerHttpResponse handle(String path) {
@@ -149,19 +160,8 @@ public class HttpHandlerAdapterSupportTests {
 	@SuppressWarnings("WeakerAccess")
 	private static class TestHttpHandler implements HttpHandler {
 
-		private final String contextPath;
-
 		private ServerHttpRequest request;
 
-
-		public TestHttpHandler(String contextPath) {
-			this.contextPath = contextPath;
-		}
-
-
-		public String getContextPath() {
-			return this.contextPath;
-		}
 
 		public boolean wasInvoked() {
 			return this.request != null;

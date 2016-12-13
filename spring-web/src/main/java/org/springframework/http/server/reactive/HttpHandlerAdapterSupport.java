@@ -111,9 +111,11 @@ public abstract class HttpHandlerAdapterSupport {
 					.filter(entry -> path.startsWith(entry.getKey()))
 					.findFirst()
 					.map(entry -> {
+						// Preserve "native" contextPath from underlying request..
+						String contextPath = request.getContextPath() + entry.getKey();
+						ServerHttpRequest mutatedRequest = request.mutate().contextPath(contextPath).build();
 						HttpHandler handler = entry.getValue();
-						ServerHttpRequest req = new ContextPathRequestDecorator(request, entry.getKey());
-						return handler.handle(req, response);
+						return handler.handle(mutatedRequest, response);
 					})
 					.orElseGet(() -> {
 						response.setStatusCode(HttpStatus.NOT_FOUND);
@@ -131,21 +133,6 @@ public abstract class HttpHandlerAdapterSupport {
 			}
 			int contextLength = contextPath.length();
 			return (path.length() > contextLength ? path.substring(contextLength) : "");
-		}
-	}
-
-	private static class ContextPathRequestDecorator extends ServerHttpRequestDecorator {
-
-		private final String contextPath;
-
-		public ContextPathRequestDecorator(ServerHttpRequest delegate, String contextPath) {
-			super(delegate);
-			this.contextPath = delegate.getContextPath() + contextPath;
-		}
-
-		@Override
-		public String getContextPath() {
-			return this.contextPath;
 		}
 	}
 

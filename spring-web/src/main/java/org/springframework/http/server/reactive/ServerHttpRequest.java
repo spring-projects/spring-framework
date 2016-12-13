@@ -16,7 +16,14 @@
 
 package org.springframework.http.server.reactive;
 
+import java.net.URI;
+
+import reactor.core.publisher.Flux;
+
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.util.MultiValueMap;
@@ -51,5 +58,64 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 	 * Return a read-only map of cookies sent by the client.
 	 */
 	MultiValueMap<String, HttpCookie> getCookies();
+
+
+	/**
+	 * Return a builder to mutate properties of this request. The resulting
+	 * new request is an immutable {@link ServerHttpRequestDecorator decorator}
+	 * around the current exchange instance returning mutated values.
+	 */
+	default ServerHttpRequest.Builder mutate() {
+		return new DefaultServerHttpRequestBuilder(this);
+	}
+
+
+	/**
+	 * Builder for mutating properties of a {@link ServerHttpRequest}.
+	 */
+	interface Builder {
+
+		/**
+		 * Set the HTTP method.
+		 */
+		Builder method(HttpMethod httpMethod);
+
+		/**
+		 * Set the request URI.
+		 */
+		Builder uri(URI uri);
+
+
+		/**
+		 * Set the contextPath for the request.
+		 */
+		Builder contextPath(String contextPath);
+
+		/**
+		 * Set the query params to return.
+		 */
+		Builder queryParams(MultiValueMap<String, String> queryParams);
+
+		/**
+		 * Set the headers to use.
+		 */
+		Builder headers(HttpHeaders headers);
+
+		/**
+		 * Set the cookies to use.
+		 */
+		Builder cookies(MultiValueMap<String, HttpCookie> cookies);
+
+		/**
+		 * Set the body to return.
+		 */
+		Builder body(Flux<DataBuffer> body);
+
+		/**
+		 * Build an immutable wrapper that returning the mutated properties.
+		 */
+		ServerHttpRequest build();
+
+	}
 
 }
