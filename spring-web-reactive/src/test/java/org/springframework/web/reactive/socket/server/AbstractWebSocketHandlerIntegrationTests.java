@@ -66,7 +66,7 @@ public abstract class AbstractWebSocketHandlerIntegrationTests {
 	public Class<?> handlerAdapterConfigClass;
 
 
-	@Parameters
+	@Parameters(name = "server [{0}]")
 	public static Object[][] arguments() {
 		File base = new File(System.getProperty("java.io.tmpdir"));
 		return new Object[][] {

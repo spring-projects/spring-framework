@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.reactivex.netty.protocol.http.client.HttpClient;
@@ -66,7 +65,11 @@ public class BasicWebSocketHandlerIntegrationTests extends AbstractWebSocketHand
 						.mergeWith(conn.getInput())
 				)
 				.take(10)
-				.map(frame -> frame.content().toString(StandardCharsets.UTF_8))
+				.map(frame -> {
+					String text = frame.content().toString(StandardCharsets.UTF_8);
+					frame.release();
+					return text;
+				})
 				.toList().toBlocking().first();
 		List<String> expected = messages.toList().toBlocking().first();
 		assertEquals(expected, actual);
