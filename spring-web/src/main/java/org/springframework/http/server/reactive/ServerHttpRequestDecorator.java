@@ -39,7 +39,7 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 
 
 	public ServerHttpRequestDecorator(ServerHttpRequest delegate) {
-		Assert.notNull(delegate, "'delegate' is required.");
+		Assert.notNull(delegate, "ServerHttpRequest delegate is required.");
 		this.delegate = delegate;
 	}
 
