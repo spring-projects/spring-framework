@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.test.web.client.match;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Test;
 
@@ -124,9 +125,39 @@ public class MockRestRequestMatchersTests {
 
 	@Test(expected = AssertionError.class)
 	public void headersWithMissingValue() throws Exception {
-		this.request.getHeaders().put("foo", Arrays.asList("bar"));
+		this.request.getHeaders().put("foo", Collections.singletonList("bar"));
 
 		MockRestRequestMatchers.header("foo", "bar", "baz").match(this.request);
+	}
+
+	@Test
+	public void queryParam() throws Exception {
+		this.request.setURI(new URI("http://foo.com/a?foo=bar&foo=baz"));
+		MockRestRequestMatchers.queryParam("foo", "bar", "baz").match(this.request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void queryParamMissing() throws Exception {
+		this.request.setURI(new URI("http://foo.com/a"));
+		MockRestRequestMatchers.queryParam("foo", "bar").match(this.request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void queryParamMissingValue() throws Exception {
+		this.request.setURI(new URI("http://foo.com/a?foo=bar&foo=baz"));
+		MockRestRequestMatchers.queryParam("foo", "bad").match(this.request);
+	}
+
+	@Test
+	public void queryParamContains() throws Exception {
+		this.request.setURI(new URI("http://foo.com/a?foo=bar&foo=baz"));
+		MockRestRequestMatchers.queryParam("foo", containsString("ba")).match(this.request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void queryParamContainsWithMissingValue() throws Exception {
+		this.request.setURI(new URI("http://foo.com/a?foo=bar&foo=baz"));
+		MockRestRequestMatchers.queryParam("foo", containsString("bx")).match(this.request);
 	}
 
 }
