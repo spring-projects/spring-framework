@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,13 @@
 
 package org.springframework.orm.jpa.hibernate;
 
+import javax.persistence.EntityManager;
+
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.ejb.HibernateEntityManagerFactory;
 
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 
@@ -46,6 +50,16 @@ public class HibernateEntityManagerFactoryIntegrationTests extends
 		assertTrue(sharedEntityManager instanceof HibernateEntityManager);
 		HibernateEntityManager hibernateEntityManager = (HibernateEntityManager) sharedEntityManager;
 		assertNotNull(hibernateEntityManager.getSession());
+	}
+
+	public void testCanUnwrapAopProxy() {
+		EntityManager em = entityManagerFactory.createEntityManager();
+		EntityManager proxy = ProxyFactory.getProxy(EntityManager.class, new SingletonTargetSource(em));
+		assertTrue(em instanceof HibernateEntityManager);
+		assertFalse(proxy instanceof HibernateEntityManager);
+		assertTrue(proxy.unwrap(HibernateEntityManager.class) instanceof HibernateEntityManager);
+		assertSame(em, proxy.unwrap(HibernateEntityManager.class));
+		assertSame(em.getDelegate(), proxy.getDelegate());
 	}
 
 }
