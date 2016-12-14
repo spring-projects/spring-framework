@@ -16,13 +16,11 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runners.Parameterized;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -32,10 +30,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.BodyExtractors;
-import org.springframework.http.server.reactive.bootstrap.JettyHttpServer;
-import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
-import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
-import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
 import org.springframework.util.Assert;
 import org.springframework.web.client.reactive.ClientRequest;
 import org.springframework.web.client.reactive.WebClient;
@@ -46,18 +40,6 @@ import org.springframework.web.client.reactive.WebClient;
 public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private WebClient webClient;
-
-	// TODO To be removed when Reactor Netty test will be green again
-	@Parameterized.Parameters(name = "server [{0}]")
-	public static Object[][] arguments() {
-		File base = new File(System.getProperty("java.io.tmpdir"));
-		return new Object[][] {
-				{new JettyHttpServer()},
-				{new RxNettyHttpServer()},
-				{new TomcatHttpServer(base.getAbsolutePath())},
-				{new UndertowHttpServer()}
-		};
-	}
 
 	@Before
 	public void setup() throws Exception {
