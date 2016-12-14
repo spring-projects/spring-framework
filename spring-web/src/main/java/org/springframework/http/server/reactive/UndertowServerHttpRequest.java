@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 
+import io.undertow.connector.ByteBufferPool;
 import io.undertow.connector.PooledByteBuffer;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
@@ -106,6 +107,10 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		return Flux.from(this.body);
 	}
 
+	void close() {
+		this.body.onAllDataRead();
+	}
+
 	private static class RequestBodyPublisher extends AbstractListenerReadPublisher<DataBuffer> {
 
 		private final ChannelListener<StreamSourceChannel> readListener =
@@ -118,13 +123,14 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 		private final DataBufferFactory dataBufferFactory;
 
-		private final PooledByteBuffer pooledByteBuffer;
+		private final ByteBufferPool byteBufferPool;
+
+		private PooledByteBuffer pooledByteBuffer;
 
 		public RequestBodyPublisher(HttpServerExchange exchange,
 				DataBufferFactory dataBufferFactory) {
 			this.requestChannel = exchange.getRequestChannel();
-			this.pooledByteBuffer =
-					exchange.getConnection().getByteBufferPool().allocate();
+			this.byteBufferPool = exchange.getConnection().getByteBufferPool();
 			this.dataBufferFactory = dataBufferFactory;
 		}
 
@@ -141,6 +147,9 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 		@Override
 		protected DataBuffer read() throws IOException {
+			if (this.pooledByteBuffer == null) {
+				this.pooledByteBuffer = this.byteBufferPool.allocate();
+			}
 			ByteBuffer byteBuffer = this.pooledByteBuffer.getBuffer();
 			int read = this.requestChannel.read(byteBuffer);
 			if (logger.isTraceEnabled()) {
@@ -155,6 +164,14 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 				onAllDataRead();
 			}
 			return null;
+		}
+
+		@Override
+		public void onAllDataRead() {
+			if (this.pooledByteBuffer != null && this.pooledByteBuffer.isOpen()) {
+				this.pooledByteBuffer.close();
+			}
+			super.onAllDataRead();
 		}
 
 		private class ReadListener implements ChannelListener<StreamSourceChannel> {
