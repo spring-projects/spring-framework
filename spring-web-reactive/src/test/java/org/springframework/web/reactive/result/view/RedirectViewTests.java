@@ -107,7 +107,7 @@ public class RedirectViewTests {
 		assertFalse(view.isRemoteHost("/path"));
 		assertFalse(view.isRemoteHost("http://url.somewhereelse.com"));
 
-		view.setHosts(new String[] {"url.somewhere.com"});
+		view.setHosts("url.somewhere.com");
 
 		assertFalse(view.isRemoteHost("http://url.somewhere.com"));
 		assertFalse(view.isRemoteHost("/path"));

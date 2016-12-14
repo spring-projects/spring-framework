@@ -18,7 +18,7 @@ package org.springframework.web.reactive.result.view;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
@@ -40,21 +40,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
 /**
- * View that redirects to an absolute or context relative URL. The URL may be a URI
- * template in which case the URI template variables will be replaced with values
- * available in the model.
+ * View that redirects to an absolute or context relative URL. The URL may be a
+ * URI template in which case the URI template variables will be replaced with
+ * values from the model or with URI variables from the current request.
  *
- * <p>A URL for this view is supposed to be a HTTP redirect which does the redirect via
- * sending a {@literal 3xx} status code. By default {@link HttpStatus#SEE_OTHER} is used.
- * If HTTP 1.0 compatibility is needed, {@link HttpStatus#FOUND} code can be set via
- * {@link #setStatusCode(HttpStatus)}.
- *
- * <p>Note that the default value for the "contextRelative" flag is true.
- * With the flag on, URLs starting with "/" are considered relative to the web application
- * context path, while with this flag off they are considered relative to the web server
- * root.
+ * <p>By default {@link HttpStatus#SEE_OTHER} is used but alternate status
+ * codes may be via constructor or setters arguments.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class RedirectView extends AbstractUrlBasedView {
@@ -78,21 +72,17 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Create a new {@code RedirectView} with the given URL and the {@link HttpStatus#SEE_OTHER}
-	 * status code which is the correct code for HTTP 1.1 clients.
+	 * Create a new {@code RedirectView} with the given redirect URL.
+	 * Status code {@link HttpStatus#SEE_OTHER} is used by default.
 	 */
 	public RedirectView(String redirectUrl) {
 		super(redirectUrl);
 	}
 
 	/**
-	 * Create a new {@code RedirectView} with the given redirect URL ans status code. Most
-	 * frequently used ones are:
-	 * <ul>
-	 *     <li>{@link HttpStatus#SEE_OTHER} : temporary redirect for HTTP 1.1 compatible clients</li>
-	 *     <li>{@link HttpStatus#FOUND} : temporary redirect for HTTP 1.0 compatible clients</li>
-	 *     <li>{@link HttpStatus#MOVED_PERMANENTLY} : permanent redirect</li>
-	 * </ul>
+	 * Create a new {@code RedirectView} with the given URL and an alternate
+	 * redirect status code such as {@link HttpStatus#TEMPORARY_REDIRECT} or
+	 * {@link HttpStatus#PERMANENT_REDIRECT}.
 	 */
 	public RedirectView(String redirectUrl, HttpStatus statusCode) {
 		super(redirectUrl);
@@ -101,7 +91,7 @@ public class RedirectView extends AbstractUrlBasedView {
 
 
 	/**
-	 * Set whether to interpret a given URL that starts with a slash ("/")
+	 * Whether to interpret a given redirect URLs that starts with a slash ("/")
 	 * as relative to the current context path ({@code true}, the default) or to
 	 * the web server root ({@code false}).
 	 */
@@ -110,38 +100,32 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Return whether to interpret a given URL that starts with a slash ("/")
-	 * as relative to the current context path ("true") or to the web server
-	 * root ("false").
-	 * @return
+	 * Whether to interpret URLs as relative to the current context path.
 	 */
 	public boolean isContextRelative() {
-		return contextRelative;
+		return this.contextRelative;
 	}
 
 	/**
-	 * Set the redirect status code. Most frequently used ones are:
-	 * <ul>
-	 *     <li>{@link HttpStatus#SEE_OTHER} : temporary redirect for HTTP 1.1 compatible clients</li>
-	 *     <li>{@link HttpStatus#FOUND} : temporary redirect for HTTP 1.0 compatible clients</li>
-	 *     <li>{@link HttpStatus#MOVED_PERMANENTLY} : permanent redirect</li>
-	 * </ul>
+	 * Set an alternate redirect status code such as
+	 * {@link HttpStatus#TEMPORARY_REDIRECT} or
+	 * {@link HttpStatus#PERMANENT_REDIRECT}.
 	 */
 	public void setStatusCode(HttpStatus statusCode) {
 		Assert.notNull(statusCode, "HttpStatus must not be null");
-		Assert.isTrue(statusCode.is3xxRedirection(), "HttpStatus must be a redirection (3xx status code)");
+		Assert.isTrue(statusCode.is3xxRedirection(), "Must be a redirection (3xx status code)");
 		this.statusCode = statusCode;
 	}
 
 	/**
-	 * Get the redirect status code.
+	 * Get the redirect status code to use.
 	 */
 	public HttpStatus getStatusCode() {
-		return statusCode;
+		return this.statusCode;
 	}
 
 	/**
-	 * Set whether to append the query string of the current URL to the redirected URL
+	 * Whether to append the query string of the current URL to the redirect URL
 	 * ({@code true}) or not ({@code false}, the default).
 	 */
 	public void setPropagateQuery(boolean propagateQuery) {
@@ -149,20 +133,19 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Return whether the query string of the current URL is appended to the redirected URL
-	 * ({@code true}) or not ({@code false}).
+	 * Whether the query string of the current URL is appended to the redirect URL.
 	 */
 	public boolean isPropagateQuery() {
-		return propagateQuery;
+		return this.propagateQuery;
 	}
 
 	/**
 	 * Configure one or more hosts associated with the application.
 	 * All other hosts will be considered external hosts.
-	 * <p>In effect, this property provides a way turn off encoding via
-	 * {@link javax.servlet.http.HttpServletResponse#encodeRedirectURL} for URLs that have a
-	 * host and that host is not listed as a known host when using a Servlet based engine.
-	 * <p>If not set (the default) all URLs are encoded through the response.
+	 * <p>In effect this provides a way turn off encoding via
+	 * {@link ServerHttpResponse#encodeUrl(String)} for URLs that have a
+	 * host and that host is not listed as a known host.
+	 * <p>If not set (the default) all redirect URLs are encoded.
 	 * @param hosts one or more application hosts
 	 */
 	public void setHosts(String... hosts) {
@@ -176,124 +159,134 @@ public class RedirectView extends AbstractUrlBasedView {
 		return this.hosts;
 	}
 
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		super.afterPropertiesSet();
+		if (getStatusCode() == null) {
+			throw new IllegalArgumentException("Property 'statusCode' is required");
+		}
+	}
+
+
+	@Override
+	public boolean checkResourceExists(Locale locale) throws Exception {
+		return true;
+	}
+
 	/**
 	 * Convert model to request parameters and redirect to the given URL.
-	 * @see #sendRedirect
 	 */
 	@Override
 	protected Mono<Void> renderInternal(Map<String, Object> model, MediaType contentType,
 			ServerWebExchange exchange) {
+
 		String targetUrl = createTargetUrl(model, exchange);
-		return sendRedirect(exchange, targetUrl);
+		return sendRedirect(targetUrl, exchange);
 	}
 
 	/**
-	 * Create the target URL by checking if the redirect string is a URI template first,
-	 * expanding it with the given model, and then optionally appending simple type model
-	 * attributes as query String parameters.
+	 * Create the target URL if necessary pre-pending the contextPath, expanding
+	 * URI template variables, and appending the current request query.
 	 */
 	protected final String createTargetUrl(Map<String, Object> model, ServerWebExchange exchange) {
 
-		ServerHttpRequest request = exchange.getRequest();
-		// Prepare target URL.
 		StringBuilder targetUrl = new StringBuilder();
-		if (this.contextRelative && getUrl().startsWith("/")) {
-			// Do not apply context path to relative URLs.
-			targetUrl.append(request.getContextPath());
+		if (isContextRelative() && getUrl().startsWith("/")) {
+			targetUrl.append(exchange.getRequest().getContextPath());
 		}
 		targetUrl.append(getUrl());
 
-		Charset charset = this.getDefaultCharset();
 		if (StringUtils.hasText(targetUrl)) {
-			Map<String, String> variables = getCurrentRequestUriVariables(exchange);
-			targetUrl = replaceUriTemplateVariables(targetUrl.toString(), model, variables, charset);
+			Map<String, String> uriVars = getCurrentUriVariables(exchange);
+			targetUrl = expandTargetUrlTemplate(targetUrl.toString(), model, uriVars);
 		}
-		if (this.propagateQuery) {
-		 	appendCurrentQueryParams(targetUrl, request);
+
+		if (isPropagateQuery()) {
+			targetUrl = appendCurrentRequestQuery(targetUrl.toString(), exchange.getRequest());
 		}
 
 		return targetUrl.toString();
 	}
 
-	/**
-	 * Replace URI template variables in the target URL with encoded model
-	 * attributes or URI variables from the current request. Model attributes
-	 * referenced in the URL are removed from the model.
-	 * @param targetUrl the redirect URL
-	 * @param model Map that contains model attributes
-	 * @param currentUriVariables current request URI variables to use
-	 * @param charset the charset to use
-	 */
-	protected StringBuilder replaceUriTemplateVariables(String targetUrl,
-			Map<String, Object> model, Map<String, String> currentUriVariables, Charset charset) {
-
-		StringBuilder result = new StringBuilder();
-		Matcher matcher = URI_TEMPLATE_VARIABLE_PATTERN.matcher(targetUrl);
-		int endLastMatch = 0;
-		while (matcher.find()) {
-			String name = matcher.group(1);
-			Object value = (model.containsKey(name) ? model.remove(name) : currentUriVariables.get(name));
-			if (value == null) {
-				throw new IllegalArgumentException("Model has no value for key '" + name + "'");
-			}
-			result.append(targetUrl.substring(endLastMatch, matcher.start()));
-			try {
-				result.append(UriUtils.encodePathSegment(value.toString(), charset.name()));
-			}
-			catch (UnsupportedEncodingException ex) {
-				throw new IllegalStateException(ex);
-			}
-			endLastMatch = matcher.end();
-		}
-		result.append(targetUrl.substring(endLastMatch, targetUrl.length()));
-		return result;
-	}
-
 	@SuppressWarnings("unchecked")
-	private Map<String, String> getCurrentRequestUriVariables(ServerWebExchange exchange) {
+	private Map<String, String> getCurrentUriVariables(ServerWebExchange exchange) {
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 		return (Map<String, String>) exchange.getAttribute(name).orElse(Collections.emptyMap());
 	}
 
 	/**
-	 * Append the query string of the current request to the target redirect URL.
-	 * @param targetUrl the StringBuilder to append the properties to
-	 * @param request the current request
+	 * Expand URI template variables in the target URL with either model
+	 * attribute values or as a fallback with URI variable values from the
+	 * current request. Values are encoded.
 	 */
-	protected void appendCurrentQueryParams(StringBuilder targetUrl, ServerHttpRequest request) {
-		String query = request.getURI().getQuery();
-		if (StringUtils.hasText(query)) {
-			// Extract anchor fragment, if any.
-			String fragment = null;
-			int anchorIndex = targetUrl.indexOf("#");
-			if (anchorIndex > -1) {
-				fragment = targetUrl.substring(anchorIndex);
-				targetUrl.delete(anchorIndex, targetUrl.length());
-			}
+	protected StringBuilder expandTargetUrlTemplate(String targetUrl,
+			Map<String, Object> model, Map<String, String> uriVariables) {
 
-			if (targetUrl.toString().indexOf('?') < 0) {
-				targetUrl.append('?').append(query);
-			}
-			else {
-				targetUrl.append('&').append(query);
-			}
-			// Append anchor fragment, if any, to end of URL.
-			if (fragment != null) {
-				targetUrl.append(fragment);
-			}
+		Matcher matcher = URI_TEMPLATE_VARIABLE_PATTERN.matcher(targetUrl);
+		boolean found = matcher.find();
+		if (!found) {
+			return new StringBuilder(targetUrl);
+		}
+		StringBuilder result = new StringBuilder();
+		int endLastMatch = 0;
+		while (found) {
+			String name = matcher.group(1);
+			Object value = (model.containsKey(name) ? model.get(name) : uriVariables.get(name));
+			Assert.notNull(value, "No value for URI variable '" + name + "'");
+			result.append(targetUrl.substring(endLastMatch, matcher.start()));
+			result.append(encodeUriVariable(value.toString()));
+			endLastMatch = matcher.end();
+			found = matcher.find();
+		}
+		result.append(targetUrl.substring(endLastMatch, targetUrl.length()));
+		return result;
+	}
+
+	private String encodeUriVariable(String text) {
+		try {
+			// Strict encoding of all reserved URI characters
+			return UriUtils.encode(text, StandardCharsets.UTF_8.name());
+		}
+		catch (UnsupportedEncodingException ex) {
+			// Should never happen...
+			throw new IllegalStateException(ex);
 		}
 	}
 
 	/**
-	 * Send a redirect back to the HTTP client
-	 * @param exchange current HTTP exchange
-	 * @param targetUrl the target URL to redirect to
+	 * Append the query of the current request to the target redirect URL.
 	 */
-	protected Mono<Void> sendRedirect(ServerWebExchange exchange, String targetUrl) {
+	protected StringBuilder appendCurrentRequestQuery(String targetUrl, ServerHttpRequest request) {
+		String query = request.getURI().getRawQuery();
+		if (!StringUtils.hasText(query)) {
+			return new StringBuilder(targetUrl);
+		}
+
+		int index = targetUrl.indexOf("#");
+		String fragment = (index > -1 ? targetUrl.substring(index) : null);
+
+		StringBuilder result = new StringBuilder();
+		result.append(index != -1 ? targetUrl.substring(0, index) : targetUrl);
+		result.append(targetUrl.indexOf('?') < 0 ? '?' : '&').append(query);
+
+		if (fragment != null) {
+			result.append(fragment);
+		}
+
+		return result;
+	}
+
+	/**
+	 * Send a redirect back to the HTTP client
+	 * @param targetUrl the target URL to redirect to
+	 * @param exchange current exchange
+	 */
+	protected Mono<Void> sendRedirect(String targetUrl, ServerWebExchange exchange) {
 		ServerHttpResponse response = exchange.getResponse();
-		// TODO Support encoding redirect URL as ServerHttpResponse level when SPR-14529 will be fixed
-		response.getHeaders().setLocation(URI.create(targetUrl));
-		response.setStatusCode(this.statusCode);
+		String encodedURL = (isRemoteHost(targetUrl) ? targetUrl : response.encodeUrl(targetUrl));
+		response.getHeaders().setLocation(URI.create(encodedURL));
+		response.setStatusCode(getStatusCode());
 		return Mono.empty();
 	}
 
@@ -320,19 +313,6 @@ public class RedirectView extends AbstractUrlBasedView {
 			}
 		}
 		return true;
-	}
-
-	@Override
-	public boolean checkResourceExists(Locale locale) throws Exception {
-		return true;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		super.afterPropertiesSet();
-		if (getStatusCode() == null) {
-			throw new IllegalArgumentException("Property 'statusCode' is required");
-		}
 	}
 
 }
