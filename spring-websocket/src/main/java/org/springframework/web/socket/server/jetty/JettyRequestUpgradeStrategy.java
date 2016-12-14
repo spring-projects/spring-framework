@@ -65,9 +65,12 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  */
 public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, ServletContextAware, Lifecycle {
 
-	private static final ThreadLocal<WebSocketHandlerContainer> wsContainerHolder =
-			new NamedThreadLocal<>("WebSocket Handler Container");
+	private static final ThreadLocal<WebSocketHandlerContainer> containerHolder =
+			new NamedThreadLocal<>("WebSocketHandlerContainer");
 
+
+	// Configurable factory adapter due to Jetty 9.3.15+ API differences:
+	// using WebSocketServerFactory(ServletContext) as a version indicator
 	private final WebSocketServerFactoryAdapter factoryAdapter =
 			(ClassUtils.hasConstructor(WebSocketServerFactory.class, ServletContext.class) ?
 					new ModernJettyWebSocketServerFactoryAdapter() : new LegacyJettyWebSocketServerFactoryAdapter());
@@ -129,8 +132,8 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 	@Override
 	public void stop() {
 		if (isRunning()) {
+			this.running = false;
 			try {
-				this.running = false;
 				this.factoryAdapter.stop();
 			}
 			catch (Throwable ex) {
@@ -187,7 +190,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 				new WebSocketHandlerContainer(handlerAdapter, selectedProtocol, selectedExtensions);
 
 		try {
-			wsContainerHolder.set(container);
+			containerHolder.set(container);
 			this.factoryAdapter.getFactory().acceptWebSocket(servletRequest, servletResponse);
 		}
 		catch (IOException ex) {
@@ -195,7 +198,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 					"Response update failed during upgrade to WebSocket: " + request.getURI(), ex);
 		}
 		finally {
-			wsContainerHolder.remove();
+			containerHolder.remove();
 		}
 	}
 
@@ -263,7 +266,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 			this.factory.setCreator(new WebSocketCreator() {
 				@Override
 				public Object createWebSocket(ServletUpgradeRequest request, ServletUpgradeResponse response) {
-					WebSocketHandlerContainer container = wsContainerHolder.get();
+					WebSocketHandlerContainer container = containerHolder.get();
 					Assert.state(container != null, "Expected WebSocketHandlerContainer");
 					response.setAcceptedSubProtocol(container.getSelectedProtocol());
 					response.setExtensions(container.getExtensionConfigs());

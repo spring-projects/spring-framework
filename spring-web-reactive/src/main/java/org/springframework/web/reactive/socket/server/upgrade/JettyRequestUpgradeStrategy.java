@@ -37,11 +37,11 @@ import org.springframework.web.reactive.socket.adapter.JettyWebSocketHandlerAdap
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
-
 /**
  * A {@link RequestUpgradeStrategy} for use with Jetty.
  * 
  * @author Violeta Georgieva
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Lifecycle {
@@ -54,7 +54,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 	private ServletContext servletContext;
 
-	private boolean running = false;
+	private volatile boolean running = false;
 
 	private final Object lifecycleMonitor = new Object();
 
@@ -69,7 +69,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 					this.factory.setCreator((request, response) -> adapterHolder.get());
 					this.factory.start();
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					throw new IllegalStateException("Unable to start WebSocketServerFactory", ex);
 				}
 			}
@@ -80,14 +80,12 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	public void stop() {
 		synchronized (this.lifecycleMonitor) {
 			if (isRunning()) {
+				this.running = false;
 				try {
 					this.factory.stop();
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					throw new IllegalStateException("Failed to stop WebSocketServerFactory", ex);
-				}
-				finally {
-					this.running = false;
 				}
 			}
 		}
@@ -95,14 +93,12 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 	@Override
 	public boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return this.running;
-		}
+		return this.running;
 	}
+
 
 	@Override
 	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler) {
-
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 		JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(request, response, handler);
@@ -146,7 +142,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		synchronized (this.lifecycleMonitor) {
 			if (this.servletContext == null) {
 				this.servletContext = request.getServletContext();
-				this.servletContext.setAttribute(DecoratedObjectFactory.ATTR,  new DecoratedObjectFactory());
+				this.servletContext.setAttribute(DecoratedObjectFactory.ATTR, new DecoratedObjectFactory());
 				start();
 			}
 		}
