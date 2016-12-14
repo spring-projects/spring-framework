@@ -50,6 +50,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.Netty4ClientHttpRequestFactory;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
+import org.springframework.http.client.OkHttpClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.LinkedMultiValueMap;
@@ -72,10 +73,11 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 	@Parameterized.Parameters
 	public static Iterable<? extends ClientHttpRequestFactory> data() {
 		return Arrays.asList(
+				new SimpleClientHttpRequestFactory(),
 				new HttpComponentsClientHttpRequestFactory(),
 				new Netty4ClientHttpRequestFactory(),
 				new OkHttp3ClientHttpRequestFactory(),
-				new SimpleClientHttpRequestFactory()
+				new OkHttpClientHttpRequestFactory()
 		);
 	}
 
@@ -141,7 +143,7 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 	public void postForLocationEntity() throws URISyntaxException {
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.setContentType(new MediaType("text", "plain", Charset.forName("ISO-8859-15")));
-		HttpEntity<String> entity = new HttpEntity<String>(helloWorld, entityHeaders);
+		HttpEntity<String> entity = new HttpEntity<>(helloWorld, entityHeaders);
 		URI location = template.postForLocation(baseUrl + "/{method}", entity, "post");
 		assertEquals("Invalid location", new URI(baseUrl + "/post/1"), location);
 	}
@@ -199,7 +201,7 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 
 	@Test
 	public void multipart() throws UnsupportedEncodingException {
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		parts.add("name 1", "value 1");
 		parts.add("name 2", "value 2+1");
 		parts.add("name 2", "value 2+2");
@@ -211,7 +213,7 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 
 	@Test
 	public void form() throws UnsupportedEncodingException {
-		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
 		form.add("name 1", "value 1");
 		form.add("name 2", "value 2+1");
 		form.add("name 2", "value 2+2");
@@ -223,7 +225,7 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 	public void exchangeGet() throws Exception {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.set("MyHeader", "MyValue");
-		HttpEntity<String> requestEntity = new HttpEntity<String>(requestHeaders);
+		HttpEntity<String> requestEntity = new HttpEntity<>(requestHeaders);
 		ResponseEntity<String> response =
 				template.exchange(baseUrl + "/{method}", HttpMethod.GET, requestEntity, String.class, "get");
 		assertEquals("Invalid content", helloWorld, response.getBody());
@@ -234,7 +236,7 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.set("MyHeader", "MyValue");
 		requestHeaders.setContentType(MediaType.TEXT_PLAIN);
-		HttpEntity<String> requestEntity = new HttpEntity<String>(helloWorld, requestHeaders);
+		HttpEntity<String> requestEntity = new HttpEntity<>(helloWorld, requestHeaders);
 		HttpEntity<Void> result = template.exchange(baseUrl + "/{method}", HttpMethod.POST, requestEntity, Void.class, "post");
 		assertEquals("Invalid location", new URI(baseUrl + "/post/1"), result.getHeaders().getLocation());
 		assertFalse(result.hasBody());
@@ -248,7 +250,7 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 		bean.setWith1("with");
 		bean.setWith2("with");
 		bean.setWithout("without");
-		HttpEntity<MySampleBean> entity = new HttpEntity<MySampleBean>(bean, entityHeaders);
+		HttpEntity<MySampleBean> entity = new HttpEntity<>(bean, entityHeaders);
 		String s = template.postForObject(baseUrl + "/jsonpost", entity, String.class);
 		assertTrue(s.contains("\"with1\":\"with\""));
 		assertTrue(s.contains("\"with2\":\"with\""));
@@ -262,7 +264,7 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 		MySampleBean bean = new MySampleBean("with", "with", "without");
 		MappingJacksonValue jacksonValue = new MappingJacksonValue(bean);
 		jacksonValue.setSerializationView(MyJacksonView1.class);
-		HttpEntity<MappingJacksonValue> entity = new HttpEntity<MappingJacksonValue>(jacksonValue, entityHeaders);
+		HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, entityHeaders);
 		String s = template.postForObject(baseUrl + "/jsonpost", entity, String.class);
 		assertTrue(s.contains("\"with1\":\"with\""));
 		assertFalse(s.contains("\"with2\":\"with\""));
@@ -290,10 +292,15 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 		assertTrue(content.contains("\"type\":\"bar\""));
 	}
 
+	@Test  // SPR-15015
+	public void postWithoutBody() throws Exception {
+		assertNull(template.postForObject(baseUrl + "/jsonpost", null, String.class));
+	}
 
-	public interface MyJacksonView1 {};
 
-	public interface MyJacksonView2 {};
+	public interface MyJacksonView1 {}
+
+	public interface MyJacksonView2 {}
 
 
 	public static class MySampleBean {
