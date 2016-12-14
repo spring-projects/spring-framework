@@ -76,13 +76,11 @@ public class UndertowHttpHandlerAdapter extends HttpHandlerAdapterSupport
 				if (!exchange.isResponseStarted() && exchange.getStatusCode() <= 500) {
 					exchange.setStatusCode(500);
 				}
-				request.close();
 				exchange.endExchange();
 			}
 			@Override
 			public void onComplete() {
 				logger.debug("Successfully completed request");
-				request.close();
 				exchange.endExchange();
 			}
 		});

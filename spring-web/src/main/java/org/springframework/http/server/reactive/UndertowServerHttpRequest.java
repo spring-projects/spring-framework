@@ -58,7 +58,7 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		super(initUri(exchange), initHeaders(exchange));
 		this.exchange = exchange;
 		this.body = new RequestBodyPublisher(exchange, dataBufferFactory);
-		this.body.registerListener();
+		this.body.registerListener(exchange);
 	}
 
 	private static URI initUri(HttpServerExchange exchange) {
@@ -107,9 +107,6 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		return Flux.from(this.body);
 	}
 
-	void close() {
-		this.body.onAllDataRead();
-	}
 
 	private static class RequestBodyPublisher extends AbstractListenerReadPublisher<DataBuffer> {
 
@@ -134,7 +131,11 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 			this.dataBufferFactory = dataBufferFactory;
 		}
 
-		private void registerListener() {
+		private void registerListener(HttpServerExchange exchange) {
+			exchange.addExchangeCompleteListener((ex, next) -> {
+				onAllDataRead();
+				next.proceed();
+			});
 			this.requestChannel.getReadSetter().set(this.readListener);
 			this.requestChannel.getCloseSetter().set(this.closeListener);
 			this.requestChannel.resumeReads();
