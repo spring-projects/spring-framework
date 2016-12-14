@@ -48,17 +48,15 @@ import org.springframework.util.Assert;
  */
 public class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
-	private final ResponseBodyWriteListener writeListener = new ResponseBodyWriteListener();
-
 	private final HttpServletResponse response;
 
 	private final int bufferSize;
 
-	private volatile boolean flushOnNext;
+	private volatile ResponseBodyFlushProcessor bodyFlushProcessor;
 
 	private volatile ResponseBodyProcessor bodyProcessor;
 
-	private volatile ResponseBodyFlushProcessor bodyFlushProcessor;
+	private volatile boolean flushOnNext;
 
 
 	public ServletServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,
@@ -76,7 +74,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		asyncContext.addListener(new ResponseAsyncListener());
 
 		// Tomcat expects WriteListener registration on initial thread
-		registerWriteListener();
+		response.getOutputStream().setWriteListener(new ResponseBodyWriteListener());
 	}
 
 
@@ -134,21 +132,8 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		return processor;
 	}
 
-	private void registerWriteListener() {
-		try {
-			outputStream().setWriteListener(this.writeListener);
-		}
-		catch (IOException ex) {
-			throw new UncheckedIOException(ex);
-		}
-	}
-
-	private ServletOutputStream outputStream() throws IOException {
-		return this.response.getOutputStream();
-	}
-
 	private void flush() throws IOException {
-		ServletOutputStream outputStream = outputStream();
+		ServletOutputStream outputStream = this.response.getOutputStream();
 		if (outputStream.isReady()) {
 			try {
 				outputStream.flush();
@@ -206,11 +191,53 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		}
 	}
 
+	private class ResponseBodyWriteListener implements WriteListener {
+
+		@Override
+		public void onWritePossible() throws IOException {
+			if (bodyProcessor != null) {
+				bodyProcessor.onWritePossible();
+			}
+		}
+
+		@Override
+		public void onError(Throwable ex) {
+			if (bodyProcessor != null) {
+				bodyProcessor.cancel();
+				bodyProcessor.onError(ex);
+			}
+		}
+	}
+
+	private class ResponseBodyFlushProcessor extends AbstractListenerWriteFlushProcessor<DataBuffer> {
+
+		@Override
+		protected Processor<? super DataBuffer, Void> createWriteProcessor() {
+			try {
+				ServletOutputStream outputStream = response.getOutputStream();
+				bodyProcessor = new ResponseBodyProcessor(outputStream, bufferSize);
+				return bodyProcessor;
+			}
+			catch (IOException ex) {
+				throw new UncheckedIOException(ex);
+			}
+		}
+
+		@Override
+		protected void flush() throws IOException {
+			if (logger.isTraceEnabled()) {
+				logger.trace("flush");
+			}
+			ServletServerHttpResponse.this.flush();
+		}
+	}
+
 	private class ResponseBodyProcessor extends AbstractListenerWriteProcessor<DataBuffer> {
 
 		private final ServletOutputStream outputStream;
 
 		private final int bufferSize;
+
 
 		public ResponseBodyProcessor(ServletOutputStream outputStream, int bufferSize) {
 			this.outputStream = outputStream;
@@ -272,47 +299,6 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 				bytesWritten += bytesRead;
 			}
 			return bytesWritten;
-		}
-	}
-
-
-	private class ResponseBodyWriteListener implements WriteListener {
-
-		@Override
-		public void onWritePossible() throws IOException {
-			if (bodyProcessor != null) {
-				bodyProcessor.onWritePossible();
-			}
-		}
-
-		@Override
-		public void onError(Throwable ex) {
-			if (bodyProcessor != null) {
-				bodyProcessor.cancel();
-				bodyProcessor.onError(ex);
-			}
-		}
-	}
-
-	private class ResponseBodyFlushProcessor extends AbstractListenerFlushProcessor<DataBuffer> {
-
-		@Override
-		protected Processor<? super DataBuffer, Void> createBodyProcessor() {
-			try {
-				bodyProcessor = new ResponseBodyProcessor(outputStream(), bufferSize);
-				return bodyProcessor;
-			}
-			catch (IOException ex) {
-				throw new UncheckedIOException(ex);
-			}
-		}
-
-		@Override
-		protected void flush() throws IOException {
-			if (logger.isTraceEnabled()) {
-				logger.trace("flush");
-			}
-			ServletServerHttpResponse.this.flush();
 		}
 	}
 

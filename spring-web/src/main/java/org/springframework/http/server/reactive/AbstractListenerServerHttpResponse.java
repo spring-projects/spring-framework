@@ -48,18 +48,18 @@ public abstract class AbstractListenerServerHttpResponse extends AbstractServerH
 	}
 
 	@Override
-	protected final Mono<Void> writeAndFlushWithInternal(Publisher<? extends Publisher<? extends DataBuffer>> body) {
+	protected final Mono<Void> writeAndFlushWithInternal(
+			Publisher<? extends Publisher<? extends DataBuffer>> body) {
+
 		if (this.writeCalled.compareAndSet(false, true)) {
-			Processor<? super Publisher<? extends DataBuffer>, Void> bodyProcessor = createBodyFlushProcessor();
+			Processor<? super Publisher<? extends DataBuffer>, Void> processor = createBodyFlushProcessor();
 			return Mono.from(subscriber -> {
-				body.subscribe(bodyProcessor);
-				bodyProcessor.subscribe(subscriber);
+				body.subscribe(processor);
+				processor.subscribe(subscriber);
 			});
 		}
-		else {
-			return Mono.error(new IllegalStateException(
-					"writeWith() or writeAndFlushWith() has already been called"));
-		}
+		return Mono.error(new IllegalStateException(
+				"writeWith() or writeAndFlushWith() has already been called"));
 	}
 
 	/**

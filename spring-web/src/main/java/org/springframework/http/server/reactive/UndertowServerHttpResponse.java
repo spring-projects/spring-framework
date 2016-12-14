@@ -158,6 +158,11 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 		}
 
 		@Override
+		protected boolean isWritePossible() {
+			return false;
+		}
+
+		@Override
 		protected boolean write(DataBuffer dataBuffer) throws IOException {
 			if (this.byteBuffer == null) {
 				return false;
@@ -208,10 +213,10 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 		}
 	}
 
-	private class ResponseBodyFlushProcessor extends AbstractListenerFlushProcessor<DataBuffer> {
+	private class ResponseBodyFlushProcessor extends AbstractListenerWriteFlushProcessor<DataBuffer> {
 
 		@Override
-		protected Processor<? super DataBuffer, Void> createBodyProcessor() {
+		protected Processor<? super DataBuffer, Void> createWriteProcessor() {
 			return UndertowServerHttpResponse.this.createBodyProcessor();
 		}
 

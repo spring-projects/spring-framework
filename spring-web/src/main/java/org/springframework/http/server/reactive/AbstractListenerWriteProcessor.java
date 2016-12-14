@@ -17,15 +17,12 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
-import java.nio.channels.Channel;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.servlet.WriteListener;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -33,16 +30,16 @@ import org.springframework.util.Assert;
 
 /**
  * Abstract base class for {@code Processor} implementations that bridge between
- * event-listener write APIs and Reactive Streams. Specifically, base class for
- * writing to the HTTP response body with Servlet 3.1 and Undertow support as
- * well for writing WebSocket messages with JSR-356, Jetty, and Undertow.
+ * event-listener write APIs and Reactive Streams.
+ *
+ * <p>Specifically a base class for writing to the HTTP response body with
+ * Servlet 3.1 non-blocking I/O and Undertow XNIO as well for writing WebSocket
+ * messages through the Java WebSocket API (JSR-356), Jetty, and Undertow.
  *
  * @author Arjen Poutsma
  * @author Violeta Georgieva
+ * @author Rossen Stoyanchev
  * @since 5.0
- * @see ServletServerHttpRequest
- * @see UndertowHttpHandlerAdapter
- * @see ServerHttpResponse#writeWith(Publisher)
  */
 public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, Void> {
 
@@ -59,7 +56,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	private Subscription subscription;
 
 
-	// Subscriber
+	// Subscriber implementation...
 
 	@Override
 	public final void onSubscribe(Subscription subscription) {
@@ -94,7 +91,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	}
 
 
-	// Publisher
+	// Publisher implementation...
 
 	@Override
 	public final void subscribe(Subscriber<? super Void> subscriber) {
@@ -102,20 +99,25 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	}
 
 
-	// listener methods
+	// Listener delegation methods...
 
 	/**
-	 * Called via a listener interface to indicate that writing is possible.
-	 * @see WriteListener#onWritePossible()
-	 * @see org.xnio.ChannelListener#handleEvent(Channel)
+	 * Listeners can call this to notify when writing is possible.
 	 */
 	public final void onWritePossible() {
 		this.state.get().onWritePossible(this);
 	}
 
 	/**
-	 * Called when a data is received via {@link Subscriber#onNext(Object)}
-	 * @param data the data that was received.
+	 * Listeners can call this method to cancel further writing.
+	 */
+	public void cancel() {
+		this.subscription.cancel();
+	}
+
+
+	/**
+	 * Called when a data item is received via {@link Subscriber#onNext(Object)}
 	 */
 	protected void receiveData(T data) {
 		Assert.state(this.currentData == null);
@@ -123,44 +125,37 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	}
 
 	/**
-	 * Called when the current data should be released.
+	 * Called when the current received data item can be released.
 	 */
 	protected abstract void releaseData();
 
+	/**
+	 * Whether the given data item contains any actual data to be processed.
+	 */
 	protected abstract boolean isDataEmpty(T data);
 
 	/**
-	 * Called when a data is received via {@link Subscriber#onNext(Object)}
-	 * or when only partial data was written.
+	 * Whether writing is possible.
 	 */
+	protected abstract boolean isWritePossible();
+
+	/**
+	 * Writes the given data to the output.
+	 * @param data the data to write
+	 * @return whether the data was fully written (true)and new data can be
+	 * requested or otherwise (false)
+	 */
+	protected abstract boolean write(T data) throws IOException;
+
+
+	private boolean changeState(State oldState, State newState) {
+		return this.state.compareAndSet(oldState, newState);
+	}
+
 	private void writeIfPossible() {
 		if (isWritePossible()) {
 			onWritePossible();
 		}
-	}
-
-	/**
-	 * Called via a listener interface to determine whether writing is possible.
-	 */
-	protected boolean isWritePossible() {
-		return false;
-	}
-
-	/**
-	 * Writes the given data to the output, indicating if the entire data was
-	 * written.
-	 * @param data the data to write
-	 * @return {@code true} if the data was fully written and a new data
-	 * can be requested; {@code false} otherwise
-	 */
-	protected abstract boolean write(T data) throws IOException;
-
-	public void cancel() {
-		this.subscription.cancel();
-	}
-
-	private boolean changeState(State oldState, State newState) {
-		return this.state.compareAndSet(oldState, newState);
 	}
 
 

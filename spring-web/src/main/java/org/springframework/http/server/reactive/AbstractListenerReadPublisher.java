@@ -17,11 +17,9 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
-import java.nio.channels.Channel;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.servlet.ReadListener;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,15 +30,17 @@ import reactor.core.publisher.Operators;
 
 /**
  * Abstract base class for {@code Publisher} implementations that bridge between
- * event-listener read APIs and Reactive Streams. Specifically, a base class for
- * reading from the HTTP request body with Servlet 3.1 and Undertow as well as
- * handling incoming WebSocket messages with JSR-356, Jetty, and Undertow.
+ * event-listener read APIs and Reactive Streams.
+ *
+ * <p>Specifically a base class for reading from the HTTP request body with
+ * Servlet 3.1 non-blocking I/O and Undertow XNIO as well as handling incoming
+ * WebSocket messages with standard Java WebSocket (JSR-356), Jetty, and
+ * Undertow.
  *
  * @author Arjen Poutsma
  * @author Violeta Georgieva
+ * @author Rossen Stoyanchev
  * @since 5.0
- * @see ServletServerHttpRequest
- * @see UndertowHttpHandlerAdapter
  */
 public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
@@ -53,6 +53,8 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	private Subscriber<? super T> subscriber;
 
 
+	// Publisher implementation...
+
 	@Override
 	public void subscribe(Subscriber<? super T> subscriber) {
 		if (this.logger.isTraceEnabled()) {
@@ -61,10 +63,11 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 		this.state.get().subscribe(this, subscriber);
 	}
 
+
+	// Listener delegation methods...
+
 	/**
-	 * Called via a listener interface to indicate that reading is possible.
-	 * @see ReadListener#onDataAvailable()
-	 * @see org.xnio.ChannelListener#handleEvent(Channel)
+	 * Listeners can call this to notify when reading is possible.
 	 */
 	public final void onDataAvailable() {
 		if (this.logger.isTraceEnabled()) {
@@ -74,9 +77,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	}
 
 	/**
-	 * Called via a listener interface to indicate that all data has been read.
-	 * @see ReadListener#onAllDataRead()
-	 * @see org.xnio.ChannelListener#handleEvent(Channel)
+	 * Listeners can call this to notify when all data has been read.
 	 */
 	public void onAllDataRead() {
 		if (this.logger.isTraceEnabled()) {
@@ -86,9 +87,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	}
 
 	/**
-	 * Called by a listener interface to indicate that as error has occurred.
-	 * @param t the error
-	 * @see ReadListener#onError(Throwable)
+	 * Listeners can call this to notify when a read error has occurred.
 	 */
 	public final void onError(Throwable t) {
 		if (this.logger.isErrorEnabled()) {
@@ -97,9 +96,19 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 		this.state.get().onError(this, t);
 	}
 
+
+	protected abstract void checkOnDataAvailable();
+
 	/**
-	 * Reads and publishes data from the input. Continues till either there is no
-	 * more demand, or till there is no more data to be read.
+	 * Reads a data from the input, if possible.
+	 * @return the data that was read; or {@code null}
+	 */
+	protected abstract T read() throws IOException;
+
+
+	/**
+	 * Read and publish data from the input. Continue till there is no more
+	 * demand or there is no more data to be read.
 	 * @return {@code true} if there is more demand; {@code false} otherwise
 	 */
 	private boolean readAndPublish() throws IOException {
@@ -117,11 +126,10 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	}
 
 	/**
-	 * Concurrent substraction bound to 0 and Long.MAX_VALUE.
+	 * Concurrent subscription bound to 0 and Long.MAX_VALUE.
 	 * Any concurrent write will "happen" before this operation.
-	 *
 	 * @param sequence current atomic to update
-	 * @param toSub    delta to sub
+	 * @param toSub delta to sub
 	 * @return value before subscription, 0 or Long.MAX_VALUE
 	 */
 	private static long getAndSub(AtomicLong sequence, long toSub) {
@@ -138,16 +146,6 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 		return r;
 	}
 
-
-	protected abstract void checkOnDataAvailable();
-
-	/**
-	 * Reads a data from the input, if possible. Returns {@code null} if a data
-	 * could not be read.
-	 * @return the data that was read; or {@code null}
-	 */
-	protected abstract T read() throws IOException;
-
 	private boolean hasDemand() {
 		return (this.demand.get() > 0);
 	}
@@ -160,6 +158,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	private static final class ReadSubscription implements Subscription {
 
 		private final AbstractListenerReadPublisher<?> publisher;
+
 
 		public ReadSubscription(AbstractListenerReadPublisher<?> publisher) {
 			this.publisher = publisher;

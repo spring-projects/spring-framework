@@ -28,18 +28,16 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 /**
- * Abstract base class for {@code Processor} implementations that bridge between
- * event-listener APIs and Reactive Streams. Specifically, base class for the
- * Servlet 3.1 and Undertow support.
+ * An alternative to {@link AbstractListenerWriteProcessor} but instead writing
+ * a {@code Publisher<Publisher<T>>} with flush boundaries enforces after
+ * the completion of each nested Publisher.
  *
  * @author Arjen Poutsma
  * @author Violeta Georgieva
+ * @author Rossen Stoyanchev
  * @since 5.0
- * @see ServletServerHttpRequest
- * @see UndertowHttpHandlerAdapter
- * @see ServerHttpResponse#writeAndFlushWith(Publisher)
  */
-public abstract class AbstractListenerFlushProcessor<T> implements Processor<Publisher<? extends T>, Void> {
+public abstract class AbstractListenerWriteFlushProcessor<T> implements Processor<Publisher<? extends T>, Void> {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -52,7 +50,7 @@ public abstract class AbstractListenerFlushProcessor<T> implements Processor<Pub
 	private Subscription subscription;
 
 
-	// Subscriber
+	// Subscriber implementation...
 
 	@Override
 	public final void onSubscribe(Subscription subscription) {
@@ -87,7 +85,7 @@ public abstract class AbstractListenerFlushProcessor<T> implements Processor<Pub
 	}
 
 
-	// Publisher
+	// Publisher implementation...
 
 	@Override
 	public final void subscribe(Subscriber<? super Void> subscriber) {
@@ -96,12 +94,20 @@ public abstract class AbstractListenerFlushProcessor<T> implements Processor<Pub
 
 
 	/**
-	 * Creates a new processor for subscribing to a body chunk.
+	 * Listeners can call this method to cancel further writing.
 	 */
-	protected abstract Processor<? super T, Void> createBodyProcessor();
+	protected void cancel() {
+		this.subscription.cancel();
+	}
+
 
 	/**
-	 * Flushes the output.
+	 * Create a new processor for subscribing to the next flush boundary.
+	 */
+	protected abstract Processor<? super T, Void> createWriteProcessor();
+
+	/**
+	 * Flush the output.
 	 */
 	protected abstract void flush() throws IOException;
 
@@ -115,11 +121,6 @@ public abstract class AbstractListenerFlushProcessor<T> implements Processor<Pub
 			logger.trace(this.state + " writeComplete");
 		}
 		this.state.get().writeComplete(this);
-
-	}
-
-	protected void cancel() {
-		this.subscription.cancel();
 	}
 
 
@@ -128,7 +129,7 @@ public abstract class AbstractListenerFlushProcessor<T> implements Processor<Pub
 		UNSUBSCRIBED {
 
 			@Override
-			public <T> void onSubscribe(AbstractListenerFlushProcessor<T> processor, Subscription subscription) {
+			public <T> void onSubscribe(AbstractListenerWriteFlushProcessor<T> processor, Subscription subscription) {
 				Objects.requireNonNull(subscription, "Subscription cannot be null");
 				if (processor.changeState(this, REQUESTED)) {
 					processor.subscription = subscription;
@@ -142,16 +143,16 @@ public abstract class AbstractListenerFlushProcessor<T> implements Processor<Pub
 		REQUESTED {
 
 			@Override
-			public <T> void onNext(AbstractListenerFlushProcessor<T> processor, Publisher<? extends T> chunk) {
+			public <T> void onNext(AbstractListenerWriteFlushProcessor<T> processor, Publisher<? extends T> chunk) {
 				if (processor.changeState(this, RECEIVED)) {
-					Processor<? super T, Void> chunkProcessor = processor.createBodyProcessor();
+					Processor<? super T, Void> chunkProcessor = processor.createWriteProcessor();
 					chunk.subscribe(chunkProcessor);
 					chunkProcessor.subscribe(new WriteSubscriber(processor));
 				}
 			}
 
 			@Override
-			public <T> void onComplete(AbstractListenerFlushProcessor<T> processor) {
+			public <T> void onComplete(AbstractListenerWriteFlushProcessor<T> processor) {
 				if (processor.changeState(this, COMPLETED)) {
 					processor.resultPublisher.publishComplete();
 				}
@@ -160,7 +161,7 @@ public abstract class AbstractListenerFlushProcessor<T> implements Processor<Pub
 		RECEIVED {
 
 			@Override
-			public <T> void writeComplete(AbstractListenerFlushProcessor<T> processor) {
+			public <T> void writeComplete(AbstractListenerWriteFlushProcessor<T> processor) {
 				try {
 					processor.flush();
 				}
@@ -182,58 +183,59 @@ public abstract class AbstractListenerFlushProcessor<T> implements Processor<Pub
 			}
 
 			@Override
-			public <T> void onComplete(AbstractListenerFlushProcessor<T> processor) {
+			public <T> void onComplete(AbstractListenerWriteFlushProcessor<T> processor) {
 				processor.subscriberCompleted = true;
 			}
 		},
 		COMPLETED {
 
 			@Override
-			public <T> void onNext(AbstractListenerFlushProcessor<T> processor,
+			public <T> void onNext(AbstractListenerWriteFlushProcessor<T> processor,
 					Publisher<? extends T> publisher) {
 				// ignore
 
 			}
 
 			@Override
-			public <T> void onError(AbstractListenerFlushProcessor<T> processor, Throwable t) {
+			public <T> void onError(AbstractListenerWriteFlushProcessor<T> processor, Throwable t) {
 				// ignore
 			}
 
 			@Override
-			public <T> void onComplete(AbstractListenerFlushProcessor<T> processor) {
+			public <T> void onComplete(AbstractListenerWriteFlushProcessor<T> processor) {
 				// ignore
 			}
 		};
 
-		public <T> void onSubscribe(AbstractListenerFlushProcessor<T> processor, Subscription subscription) {
+		public <T> void onSubscribe(AbstractListenerWriteFlushProcessor<T> processor, Subscription subscription) {
 			subscription.cancel();
 		}
 
-		public <T> void onNext(AbstractListenerFlushProcessor<T> processor, Publisher<? extends T> publisher) {
+		public <T> void onNext(AbstractListenerWriteFlushProcessor<T> processor, Publisher<? extends T> publisher) {
 			throw new IllegalStateException(toString());
 		}
 
-		public <T> void onError(AbstractListenerFlushProcessor<T> processor, Throwable ex) {
+		public <T> void onError(AbstractListenerWriteFlushProcessor<T> processor, Throwable ex) {
 			if (processor.changeState(this, COMPLETED)) {
 				processor.resultPublisher.publishError(ex);
 			}
 		}
 
-		public <T> void onComplete(AbstractListenerFlushProcessor<T> processor) {
+		public <T> void onComplete(AbstractListenerWriteFlushProcessor<T> processor) {
 			throw new IllegalStateException(toString());
 		}
 
-		public <T> void writeComplete(AbstractListenerFlushProcessor<T> processor) {
+		public <T> void writeComplete(AbstractListenerWriteFlushProcessor<T> processor) {
 			// ignore
 		}
 
 
 		private static class WriteSubscriber implements Subscriber<Void> {
 
-			private final AbstractListenerFlushProcessor<?> processor;
+			private final AbstractListenerWriteFlushProcessor<?> processor;
 
-			public WriteSubscriber(AbstractListenerFlushProcessor<?> processor) {
+
+			public WriteSubscriber(AbstractListenerWriteFlushProcessor<?> processor) {
 				this.processor = processor;
 			}
 
