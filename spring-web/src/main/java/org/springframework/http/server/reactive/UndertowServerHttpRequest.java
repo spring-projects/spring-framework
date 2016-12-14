@@ -52,17 +52,16 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final RequestBodyPublisher body;
 
-	public UndertowServerHttpRequest(HttpServerExchange exchange,
-			DataBufferFactory dataBufferFactory) {
 
+	public UndertowServerHttpRequest(HttpServerExchange exchange, DataBufferFactory bufferFactory) {
 		super(initUri(exchange), initHeaders(exchange));
 		this.exchange = exchange;
-		this.body = new RequestBodyPublisher(exchange, dataBufferFactory);
-		this.body.registerListener(exchange);
+		this.body = new RequestBodyPublisher(exchange, bufferFactory);
+		this.body.registerListeners(exchange);
 	}
 
 	private static URI initUri(HttpServerExchange exchange) {
-		Assert.notNull(exchange, "'exchange' is required.");
+		Assert.notNull(exchange, "HttpServerExchange is required.");
 		try {
 			return new URI(exchange.getRequestScheme(), null,
 					exchange.getHostName(), exchange.getHostPort(),
@@ -110,35 +109,29 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 	private static class RequestBodyPublisher extends AbstractListenerReadPublisher<DataBuffer> {
 
-		private final ChannelListener<StreamSourceChannel> readListener =
-				new ReadListener();
+		private final StreamSourceChannel channel;
 
-		private final ChannelListener<StreamSourceChannel> closeListener =
-				new CloseListener();
-
-		private final StreamSourceChannel requestChannel;
-
-		private final DataBufferFactory dataBufferFactory;
+		private final DataBufferFactory bufferFactory;
 
 		private final ByteBufferPool byteBufferPool;
 
 		private PooledByteBuffer pooledByteBuffer;
 
-		public RequestBodyPublisher(HttpServerExchange exchange,
-				DataBufferFactory dataBufferFactory) {
-			this.requestChannel = exchange.getRequestChannel();
+
+		public RequestBodyPublisher(HttpServerExchange exchange, DataBufferFactory bufferFactory) {
+			this.channel = exchange.getRequestChannel();
+			this.bufferFactory = bufferFactory;
 			this.byteBufferPool = exchange.getConnection().getByteBufferPool();
-			this.dataBufferFactory = dataBufferFactory;
 		}
 
-		private void registerListener(HttpServerExchange exchange) {
+		private void registerListeners(HttpServerExchange exchange) {
 			exchange.addExchangeCompleteListener((ex, next) -> {
 				onAllDataRead();
 				next.proceed();
 			});
-			this.requestChannel.getReadSetter().set(this.readListener);
-			this.requestChannel.getCloseSetter().set(this.closeListener);
-			this.requestChannel.resumeReads();
+			this.channel.getReadSetter().set((ChannelListener<StreamSourceChannel>) c -> onDataAvailable());
+			this.channel.getCloseSetter().set((ChannelListener<StreamSourceChannel>) c -> onAllDataRead());
+			this.channel.resumeReads();
 		}
 
 		@Override
@@ -152,14 +145,14 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 				this.pooledByteBuffer = this.byteBufferPool.allocate();
 			}
 			ByteBuffer byteBuffer = this.pooledByteBuffer.getBuffer();
-			int read = this.requestChannel.read(byteBuffer);
+			int read = this.channel.read(byteBuffer);
 			if (logger.isTraceEnabled()) {
 				logger.trace("read:" + read);
 			}
 
 			if (read > 0) {
 				byteBuffer.flip();
-				return this.dataBufferFactory.wrap(byteBuffer);
+				return this.bufferFactory.wrap(byteBuffer);
 			}
 			else if (read == -1) {
 				onAllDataRead();
@@ -173,22 +166,6 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 				this.pooledByteBuffer.close();
 			}
 			super.onAllDataRead();
-		}
-
-		private class ReadListener implements ChannelListener<StreamSourceChannel> {
-
-			@Override
-			public void handleEvent(StreamSourceChannel channel) {
-				onDataAvailable();
-			}
-		}
-
-		private class CloseListener implements ChannelListener<StreamSourceChannel> {
-
-			@Override
-			public void handleEvent(StreamSourceChannel channel) {
-				onAllDataRead();
-			}
 		}
 	}
 }

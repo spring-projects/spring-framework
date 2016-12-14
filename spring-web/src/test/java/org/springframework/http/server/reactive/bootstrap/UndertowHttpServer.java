@@ -17,7 +17,6 @@
 package org.springframework.http.server.reactive.bootstrap;
 
 import io.undertow.Undertow;
-import io.undertow.server.HttpHandler;
 
 import org.springframework.http.server.reactive.UndertowHttpHandlerAdapter;
 import org.springframework.util.Assert;
@@ -34,10 +33,19 @@ public class UndertowHttpServer extends HttpServerSupport implements HttpServer 
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(getHttpHandler());
-		HttpHandler handler = new UndertowHttpHandlerAdapter(getHttpHandler());
 		this.server = Undertow.builder().addHttpListener(getPort(), getHost())
-				.setHandler(handler).build();
+				.setHandler(initUndertowHttpHandlerAdapter())
+				.build();
+	}
+
+	private UndertowHttpHandlerAdapter initUndertowHttpHandlerAdapter() {
+		if (getHttpHandlerMap() != null) {
+			return new UndertowHttpHandlerAdapter(getHttpHandlerMap());
+		}
+		else {
+			Assert.notNull(getHttpHandler());
+			return new UndertowHttpHandlerAdapter(getHttpHandler());
+		}
 	}
 
 	@Override
