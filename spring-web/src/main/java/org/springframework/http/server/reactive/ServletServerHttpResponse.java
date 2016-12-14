@@ -22,6 +22,9 @@ import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
 import javax.servlet.http.Cookie;
@@ -58,20 +61,22 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 	private volatile ResponseBodyFlushProcessor bodyFlushProcessor;
 
 
-	public ServletServerHttpResponse(HttpServletResponse response,
-			DataBufferFactory dataBufferFactory, int bufferSize) throws IOException {
+	public ServletServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,
+			DataBufferFactory bufferFactory, int bufferSize) throws IOException {
 
-		super(dataBufferFactory);
+		super(bufferFactory);
 
 		Assert.notNull(response, "HttpServletResponse must not be null");
-		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
-		Assert.isTrue(bufferSize > 0, "Buffer size must be higher than 0");
+		Assert.notNull(bufferFactory, "DataBufferFactory must not be null");
+		Assert.isTrue(bufferSize > 0, "'bufferSize' must be greater than 0");
 
 		this.response = response;
 		this.bufferSize = bufferSize;
 
+		asyncContext.addListener(new ResponseAsyncListener());
+
 		// Tomcat expects WriteListener registration on initial thread
-		registerListener();
+		registerWriteListener();
 	}
 
 
@@ -129,7 +134,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		return processor;
 	}
 
-	private void registerListener() {
+	private void registerWriteListener() {
 		try {
 			outputStream().setWriteListener(this.writeListener);
 		}
@@ -159,30 +164,47 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		}
 	}
 
-	/** Handle a timeout/error callback from the Servlet container */
-	void handleAsyncListenerError(Throwable ex) {
-		if (this.bodyFlushProcessor != null) {
-			this.bodyFlushProcessor.cancel();
-			this.bodyFlushProcessor.onError(ex);
+
+	private final class ResponseAsyncListener implements AsyncListener {
+
+		@Override
+		public void onStartAsync(AsyncEvent event) {}
+
+		@Override
+		public void onTimeout(AsyncEvent event) {
+			Throwable ex = event.getThrowable();
+			ex = (ex != null ? ex : new IllegalStateException("Async operation timeout."));
+			handleError(ex);
 		}
-		if (this.bodyProcessor != null) {
-			this.bodyProcessor.cancel();
-			this.bodyProcessor.onError(ex);
+
+		@Override
+		public void onError(AsyncEvent event) {
+			handleError(event.getThrowable());
+		}
+
+		void handleError(Throwable ex) {
+			if (bodyFlushProcessor != null) {
+				bodyFlushProcessor.cancel();
+				bodyFlushProcessor.onError(ex);
+			}
+			if (bodyProcessor != null) {
+				bodyProcessor.cancel();
+				bodyProcessor.onError(ex);
+			}
+		}
+
+		@Override
+		public void onComplete(AsyncEvent event) {
+			if (bodyFlushProcessor != null) {
+				bodyFlushProcessor.cancel();
+				bodyFlushProcessor.onComplete();
+			}
+			if (bodyProcessor != null) {
+				bodyProcessor.cancel();
+				bodyProcessor.onComplete();
+			}
 		}
 	}
-
-	/** Handle a complete callback from the Servlet container */
-	void handleAsyncListenerComplete() {
-		if (this.bodyFlushProcessor != null) {
-			this.bodyFlushProcessor.cancel();
-			this.bodyFlushProcessor.onComplete();
-		}
-		if (this.bodyProcessor != null) {
-			this.bodyProcessor.cancel();
-			this.bodyProcessor.onComplete();
-		}
-	}
-
 
 	private class ResponseBodyProcessor extends AbstractListenerWriteProcessor<DataBuffer> {
 
@@ -271,7 +293,6 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 			}
 		}
 	}
-
 
 	private class ResponseBodyFlushProcessor extends AbstractListenerFlushProcessor<DataBuffer> {
 

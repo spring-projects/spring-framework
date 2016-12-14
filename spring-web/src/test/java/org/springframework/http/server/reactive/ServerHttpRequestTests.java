@@ -18,12 +18,15 @@ package org.springframework.http.server.reactive;
 
 import java.util.Arrays;
 import java.util.Collections;
+import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Test;
 
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.mock.web.test.MockAsyncContext;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.assertEquals;
@@ -72,9 +75,9 @@ public class ServerHttpRequestTests {
 	}
 
 	private ServerHttpRequest createHttpRequest(String path) throws Exception {
-		HttpServletRequest servletRequest = new MockHttpServletRequest("GET", path);
-		return new ServletServerHttpRequest(servletRequest,
-				new DefaultDataBufferFactory(), 1024);
+		HttpServletRequest request = new MockHttpServletRequest("GET", path);
+		AsyncContext asyncContext = new MockAsyncContext(request, new MockHttpServletResponse());
+		return new ServletServerHttpRequest(request, asyncContext, new DefaultDataBufferFactory(), 1024);
 	}
 
 }

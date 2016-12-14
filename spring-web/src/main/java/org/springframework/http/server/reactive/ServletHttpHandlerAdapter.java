@@ -19,8 +19,6 @@ package org.springframework.http.server.reactive;
 import java.io.IOException;
 import java.util.Map;
 import javax.servlet.AsyncContext;
-import javax.servlet.AsyncEvent;
-import javax.servlet.AsyncListener;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletRequest;
@@ -39,7 +37,7 @@ import org.springframework.util.Assert;
 
 /**
  * Adapt {@link HttpHandler} to an {@link HttpServlet} using Servlet Async
- * support and Servlet 3.1 Non-blocking I/O.
+ * support and Servlet 3.1 non-blocking I/O.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -47,8 +45,7 @@ import org.springframework.util.Assert;
  */
 @WebServlet(asyncSupported = true)
 @SuppressWarnings("serial")
-public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport
-		implements Servlet {
+public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport implements Servlet {
 
 	private static final int DEFAULT_BUFFER_SIZE = 8192;
 
@@ -78,30 +75,37 @@ public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport
 		return this.dataBufferFactory;
 	}
 
+	/**
+	 * Set the size of the input buffer used for reading in bytes.
+	 * <p>By default this is set to 8192.
+	 */
 	public void setBufferSize(int bufferSize) {
 		Assert.isTrue(bufferSize > 0);
 		this.bufferSize = bufferSize;
 	}
 
+	/**
+	 * Return the configured input buffer size.
+	 */
 	public int getBufferSize() {
 		return this.bufferSize;
 	}
 
+
 	@Override
-	public void service(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException {
+	public void service(ServletRequest request, ServletResponse response) throws IOException {
 
 		// Start async before Read/WriteListener registration
-		AsyncContext asyncContext = servletRequest.startAsync();
+		AsyncContext asyncContext = request.startAsync();
 
-		ServletServerHttpRequest request = new ServletServerHttpRequest(
-				((HttpServletRequest) servletRequest), getDataBufferFactory(), getBufferSize());
-		ServletServerHttpResponse response = new ServletServerHttpResponse(
-				((HttpServletResponse) servletResponse), getDataBufferFactory(), getBufferSize());
+		ServerHttpRequest httpRequest = new ServletServerHttpRequest(
+				((HttpServletRequest) request), asyncContext, getDataBufferFactory(), getBufferSize());
 
-		asyncContext.addListener(new EventHandlingAsyncListener(request, response));
+		ServerHttpResponse httpResponse = new ServletServerHttpResponse(
+				((HttpServletResponse) response), asyncContext, getDataBufferFactory(), getBufferSize());
 
-		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(asyncContext);
-		getHttpHandler().handle(request, response).subscribe(resultSubscriber);
+		HandlerResultSubscriber subscriber = new HandlerResultSubscriber(asyncContext);
+		getHttpHandler().handle(httpRequest, httpResponse).subscribe(subscriber);
 	}
 
 	// Other Servlet methods...
@@ -129,6 +133,7 @@ public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport
 
 		private final AsyncContext asyncContext;
 
+
 		public HandlerResultSubscriber(AsyncContext asyncContext) {
 			this.asyncContext = asyncContext;
 		}
@@ -155,50 +160,6 @@ public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport
 		public void onComplete() {
 			logger.debug("Successfully completed request");
 			this.asyncContext.complete();
-		}
-	}
-
-
-	private static final class EventHandlingAsyncListener implements AsyncListener {
-
-		private final ServletServerHttpRequest request;
-
-		private final ServletServerHttpResponse response;
-
-
-		public EventHandlingAsyncListener(ServletServerHttpRequest request,
-				ServletServerHttpResponse response) {
-
-			this.request = request;
-			this.response = response;
-		}
-
-
-		@Override
-		public void onTimeout(AsyncEvent event) {
-			Throwable ex = event.getThrowable();
-			if (ex == null) {
-				ex = new IllegalStateException("Async operation timeout.");
-			}
-			this.request.handleAsyncListenerError(ex);
-			this.response.handleAsyncListenerError(ex);
-		}
-
-		@Override
-		public void onError(AsyncEvent event) {
-			this.request.handleAsyncListenerError(event.getThrowable());
-			this.response.handleAsyncListenerError(event.getThrowable());
-		}
-
-		@Override
-		public void onStartAsync(AsyncEvent event) {
-			// no op
-		}
-
-		@Override
-		public void onComplete(AsyncEvent event) {
-			this.request.handleAsyncListenerComplete();
-			this.response.handleAsyncListenerComplete();
 		}
 	}
 
