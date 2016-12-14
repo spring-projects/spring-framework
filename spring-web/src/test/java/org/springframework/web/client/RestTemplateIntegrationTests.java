@@ -50,18 +50,13 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.Netty4ClientHttpRequestFactory;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
+import org.springframework.http.client.OkHttpClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -78,10 +73,11 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 	@Parameterized.Parameters
 	public static Iterable<? extends ClientHttpRequestFactory> data() {
 		return Arrays.asList(
+				new SimpleClientHttpRequestFactory(),
 				new HttpComponentsClientHttpRequestFactory(),
 				new Netty4ClientHttpRequestFactory(),
 				new OkHttp3ClientHttpRequestFactory(),
-				new SimpleClientHttpRequestFactory()
+				new OkHttpClientHttpRequestFactory()
 		);
 	}
 
@@ -305,10 +301,15 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 		assertTrue(content.contains("\"type\":\"bar\""));
 	}
 
+	@Test  // SPR-15015
+	public void postWithoutBody() throws Exception {
+		assertNull(template.postForObject(baseUrl + "/jsonpost", null, String.class));
+	}
 
-	public interface MyJacksonView1 {};
 
-	public interface MyJacksonView2 {};
+	public interface MyJacksonView1 {}
+
+	public interface MyJacksonView2 {}
 
 
 	public static class MySampleBean {
