@@ -18,6 +18,7 @@ package org.springframework.mock.http.server.reactive;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
@@ -55,6 +56,8 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	private Flux<Publisher<DataBuffer>> bodyWithFlushes;
 
 	private DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+
+	private Function<String, String> urlEncoder = url -> url;
 
 
 	@Override
@@ -109,6 +112,16 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	@Override
 	public DataBufferFactory bufferFactory() {
 		return this.bufferFactory;
+	}
+
+	@Override
+	public String encodeUrl(String url) {
+		return (this.urlEncoder != null ? this.urlEncoder.apply(url) : url);
+	}
+
+	@Override
+	public void registerUrlEncoder(Function<String, String> encoder) {
+		this.urlEncoder = (this.urlEncoder != null ? this.urlEncoder.andThen(encoder) : encoder);
 	}
 
 	/**
