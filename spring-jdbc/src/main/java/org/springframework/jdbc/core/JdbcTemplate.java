@@ -1177,7 +1177,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 					else {
 						if (!this.skipUndeclaredResults) {
 							String rsName = RETURN_RESULT_SET_PREFIX + (rsIndex + 1);
-							SqlReturnResultSet undeclaredRsParam = new SqlReturnResultSet(rsName, new ColumnMapRowMapper());
+							SqlReturnResultSet undeclaredRsParam = new SqlReturnResultSet(rsName, getColumnMapRowMapper());
 							if (logger.isDebugEnabled()) {
 								logger.debug("Added default SqlReturnResultSet parameter named '" + rsName + "'");
 							}
@@ -1242,7 +1242,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 						}
 						else {
 							String rsName = outParam.getName();
-							SqlReturnResultSet rsParam = new SqlReturnResultSet(rsName, new ColumnMapRowMapper());
+							SqlReturnResultSet rsParam = new SqlReturnResultSet(rsName, getColumnMapRowMapper());
 							returnedResults.putAll(processResultSet((ResultSet) out, rsParam));
 							if (logger.isDebugEnabled()) {
 								logger.debug("Added default SqlReturnResultSet parameter named '" + rsName + "'");
