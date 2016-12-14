@@ -144,13 +144,13 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	private String[] requiredFields;
 
-	private BindingErrorProcessor bindingErrorProcessor = new DefaultBindingErrorProcessor();
-
-	private final List<Validator> validators = new ArrayList<>();
-
 	private ConversionService conversionService;
 
 	private MessageCodesResolver messageCodesResolver;
+
+	private BindingErrorProcessor bindingErrorProcessor = new DefaultBindingErrorProcessor();
+
+	private final List<Validator> validators = new ArrayList<>();
 
 
 	/**
@@ -252,12 +252,14 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected AbstractPropertyBindingResult createBeanPropertyBindingResult() {
 		BeanPropertyBindingResult result = new BeanPropertyBindingResult(getTarget(),
 				getObjectName(), isAutoGrowNestedPaths(), getAutoGrowCollectionLimit());
+
 		if (this.conversionService != null) {
 			result.initConversion(this.conversionService);
 		}
 		if (this.messageCodesResolver != null) {
 			result.setMessageCodesResolver(this.messageCodesResolver);
 		}
+
 		return result;
 	}
 
@@ -474,16 +476,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	public String[] getRequiredFields() {
 		return this.requiredFields;
-	}
-
-	/**
-	 * Set whether to extract the old field value when applying a
-	 * property editor to a new value for a field.
-	 * <p>Default is "true", exposing previous field values to custom editors.
-	 * Turn this to "false" to avoid side effects caused by getters.
-	 */
-	public void setExtractOldValueForEditor(boolean extractOldValueForEditor) {
-		getPropertyAccessor().setExtractOldValueForEditor(extractOldValueForEditor);
 	}
 
 	/**
