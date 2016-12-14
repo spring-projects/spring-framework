@@ -54,19 +54,13 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpServletRequest request;
 
-	private final DataBufferFactory bufferFactory;
-
-	private final int bufferSize;
-
-	private final Object bodyPublisherLock = new Object();
-
-	private volatile RequestBodyPublisher bodyPublisher;
+	private final RequestBodyPublisher bodyPublisher;
 
 	private final Object cookieLock = new Object();
 
 
 	public ServletServerHttpRequest(HttpServletRequest request, AsyncContext asyncContext,
-			DataBufferFactory bufferFactory, int bufferSize) {
+			DataBufferFactory bufferFactory, int bufferSize) throws IOException {
 
 		super(initUri(request), initHeaders(request));
 
@@ -74,11 +68,15 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		Assert.isTrue(bufferSize > 0, "'bufferSize' must be higher than 0");
 
 		this.request = request;
-		this.bufferFactory = bufferFactory;
-		this.bufferSize = bufferSize;
 
 		asyncContext.addListener(new RequestAsyncListener());
+
+		// Tomcat expects ReadListener registration on initial thread
+		ServletInputStream inputStream = request.getInputStream();
+		this.bodyPublisher = new RequestBodyPublisher(inputStream, bufferFactory, bufferSize);
+		this.bodyPublisher.registerReadListener();
 	}
+
 
 	private static URI initUri(HttpServletRequest request) {
 		Assert.notNull(request, "'request' must not be null");
@@ -168,24 +166,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		try {
-			RequestBodyPublisher publisher = this.bodyPublisher;
-			if (publisher == null) {
-				synchronized (this.bodyPublisherLock) {
-					publisher = this.bodyPublisher;
-					if (publisher == null) {
-						ServletInputStream inputStream = this.request.getInputStream();
-						publisher = new RequestBodyPublisher(inputStream, this.bufferFactory, this.bufferSize);
-						publisher.registerReadListener();
-						this.bodyPublisher = publisher;
-					}
-				}
-			}
-			return Flux.from(publisher);
-		}
-		catch (IOException ex) {
-			return Flux.error(ex);
-		}
+		return Flux.from(this.bodyPublisher);
 	}
 
 
@@ -198,32 +179,21 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		public void onTimeout(AsyncEvent event) {
 			Throwable ex = event.getThrowable();
 			ex = ex != null ? ex : new IllegalStateException("Async operation timeout.");
-			handleError(ex);
+			bodyPublisher.onError(ex);
 		}
 
 		@Override
 		public void onError(AsyncEvent event) {
-			handleError(event.getThrowable());
-		}
-
-		private void handleError(Throwable ex) {
-			if (bodyPublisher != null) {
-				bodyPublisher.onError(ex);
-			}
+			bodyPublisher.onError(event.getThrowable());
 		}
 
 		@Override
 		public void onComplete(AsyncEvent event) {
-			if (bodyPublisher != null) {
-				bodyPublisher.onAllDataRead();
-			}
+			bodyPublisher.onAllDataRead();
 		}
 	}
 
 	private static class RequestBodyPublisher extends AbstractListenerReadPublisher<DataBuffer> {
-
-		private final RequestBodyPublisherReadListener readListener =
-				new RequestBodyPublisherReadListener();
 
 		private final ServletInputStream inputStream;
 
@@ -241,7 +211,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		public void registerReadListener() throws IOException {
-			this.inputStream.setReadListener(this.readListener);
+			this.inputStream.setReadListener(new RequestBodyPublisherReadListener());
 		}
 
 		@Override
@@ -267,7 +237,6 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			}
 			return null;
 		}
-
 
 		private class RequestBodyPublisherReadListener implements ReadListener {
 
