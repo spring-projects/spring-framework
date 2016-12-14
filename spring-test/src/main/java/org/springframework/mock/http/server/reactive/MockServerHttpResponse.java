@@ -51,13 +51,13 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 
 	private final MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
 
+	private Function<String, String> urlEncoder = url -> url;
+
 	private Flux<DataBuffer> body;
 
 	private Flux<Publisher<DataBuffer>> bodyWithFlushes;
 
 	private DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-
-	private Function<String, String> urlEncoder = url -> url;
 
 
 	@Override
@@ -66,6 +66,7 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 		return true;
 	}
 
+	@Override
 	public HttpStatus getStatusCode() {
 		return this.status;
 	}
@@ -78,6 +79,16 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		return this.cookies;
+	}
+
+	@Override
+	public String encodeUrl(String url) {
+		return (this.urlEncoder != null ? this.urlEncoder.apply(url) : url);
+	}
+
+	@Override
+	public void registerUrlEncoder(Function<String, String> encoder) {
+		this.urlEncoder = (this.urlEncoder != null ? this.urlEncoder.andThen(encoder) : encoder);
 	}
 
 	public Publisher<DataBuffer> getBody() {
@@ -96,7 +107,7 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		this.bodyWithFlushes = Flux.from(body).map(p -> Flux.from(p));
+		this.bodyWithFlushes = Flux.from(body).map(Flux::from);
 		return this.bodyWithFlushes.then();
 	}
 
@@ -114,16 +125,6 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 		return this.bufferFactory;
 	}
 
-	@Override
-	public String encodeUrl(String url) {
-		return (this.urlEncoder != null ? this.urlEncoder.apply(url) : url);
-	}
-
-	@Override
-	public void registerUrlEncoder(Function<String, String> encoder) {
-		this.urlEncoder = (this.urlEncoder != null ? this.urlEncoder.andThen(encoder) : encoder);
-	}
-
 	/**
 	 * Return the body of the response aggregated and converted to a String
 	 * using the charset of the Content-Type response or otherwise defaulting
@@ -131,35 +132,29 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	 */
 	public Mono<String> getBodyAsString() {
 		Charset charset = getCharset();
-		Charset charsetToUse = (charset != null ? charset : StandardCharsets.UTF_8);
-		return Flux.from(this.body)
-				.reduce(this.bufferFactory.allocateBuffer(), (previous, current) -> {
+		return Flux.from(getBody())
+				.reduce(bufferFactory().allocateBuffer(), (previous, current) -> {
 					previous.write(current);
 					DataBufferUtils.release(current);
 					return previous;
 				})
-				.map(buffer -> dumpString(buffer, charsetToUse));
+				.map(buffer -> dumpString(buffer, charset));
 	}
 
 	private static String dumpString(DataBuffer buffer, Charset charset) {
 		Assert.notNull(charset, "'charset' must not be null");
-		byte[] bytes = dumpBytes(buffer);
+		byte[] bytes = new byte[buffer.readableByteCount()];
+		buffer.read(bytes);
 		return new String(bytes, charset);
 	}
 
-	private static byte[] dumpBytes(DataBuffer buffer) {
-		Assert.notNull(buffer, "'buffer' must not be null");
-		byte[] bytes = new byte[buffer.readableByteCount()];
-		buffer.read(bytes);
-		return bytes;
-	}
-
 	private Charset getCharset() {
+		Charset charset = null;
 		MediaType contentType = getHeaders().getContentType();
 		if (contentType != null) {
-			return contentType.getCharset();
+			charset = contentType.getCharset();
 		}
-		return null;
+		return (charset != null ? charset : StandardCharsets.UTF_8);
 	}
 
 }

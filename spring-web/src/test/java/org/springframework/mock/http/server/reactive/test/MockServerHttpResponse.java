@@ -41,6 +41,7 @@ import org.springframework.util.MultiValueMap;
 /**
  * Mock implementation of {@link ServerHttpResponse}.
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class MockServerHttpResponse implements ServerHttpResponse {
 
@@ -106,7 +107,7 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		this.bodyWithFlushes = Flux.from(body).map(p -> Flux.from(p));
+		this.bodyWithFlushes = Flux.from(body).map(Flux::from);
 		return this.bodyWithFlushes.then();
 	}
 
@@ -131,22 +132,22 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	 */
 	public Mono<String> getBodyAsString() {
 		Charset charset = getCharset();
-		Charset charsetToUse = (charset != null ? charset : StandardCharsets.UTF_8);
-		return Flux.from(this.body)
-				.reduce(this.bufferFactory.allocateBuffer(), (previous, current) -> {
+		return Flux.from(getBody())
+				.reduce(bufferFactory().allocateBuffer(), (previous, current) -> {
 					previous.write(current);
 					DataBufferUtils.release(current);
 					return previous;
 				})
-				.map(buffer -> DataBufferTestUtils.dumpString(buffer, charsetToUse));
+				.map(buffer -> DataBufferTestUtils.dumpString(buffer, charset));
 	}
 
 	private Charset getCharset() {
+		Charset charset = null;
 		MediaType contentType = getHeaders().getContentType();
 		if (contentType != null) {
-			return contentType.getCharset();
+			charset = contentType.getCharset();
 		}
-		return null;
+		return (charset != null ? charset : StandardCharsets.UTF_8);
 	}
 
 }
