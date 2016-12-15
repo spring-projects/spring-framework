@@ -76,6 +76,19 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 				.verify(Duration.ofSeconds(5L));
 	}
 
+	@Test  // SPR-14992
+	public void writeAndAutoFlushBeforeComplete() {
+		ClientRequest<Void> request = ClientRequest.GET("http://localhost:" + port + "/write-and-never-complete").build();
+		Flux<String> result = this.webClient
+				.exchange(request)
+				.flatMap(response -> response.bodyToFlux(String.class));
+
+		StepVerifier.create(result)
+				.expectNextMatches(s -> s.startsWith("0123456789"))
+				.thenCancel()
+				.verify(Duration.ofSeconds(5L));
+	}
+
 	@Override
 	protected HttpHandler createHttpHandler() {
 		return new FlushingHandler();
@@ -95,11 +108,19 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 				responseBody = responseBody.concatWith(Flux.never());
 				return response.writeAndFlushWith(responseBody);
 			}
-			else if (path.endsWith("write-and-complete")){
+			else if (path.endsWith("write-and-complete")) {
 				Flux<DataBuffer> responseBody = Flux
 						.just("0123456789")
 						.repeat(20000)
 						.map(value -> toDataBuffer(value, response.bufferFactory()));
+				return response.writeWith(responseBody);
+			}
+			else if (path.endsWith("write-and-never-complete")) {
+				Flux<DataBuffer> responseBody = Flux
+						.just("0123456789")
+						.repeat(20000)
+						.map(value -> toDataBuffer(value, response.bufferFactory()))
+						.mergeWith(Flux.never());
 				return response.writeWith(responseBody);
 			}
 			return response.writeWith(Flux.empty());
