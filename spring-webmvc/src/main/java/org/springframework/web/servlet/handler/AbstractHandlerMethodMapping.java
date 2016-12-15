@@ -480,11 +480,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		private final MultiValueMap<String, T> urlLookup = new LinkedMultiValueMap<>();
 
-		private final Map<String, List<HandlerMethod>> nameLookup =
-				new ConcurrentHashMap<>();
+		private final Map<String, List<HandlerMethod>> nameLookup = new ConcurrentHashMap<>();
 
-		private final Map<HandlerMethod, CorsConfiguration> corsLookup =
-				new ConcurrentHashMap<>();
+		private final Map<HandlerMethod, CorsConfiguration> corsLookup = new ConcurrentHashMap<>();
 
 		private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
