@@ -422,4 +422,21 @@ public class HttpHeadersTests {
 		assertEquals(HttpMethod.POST, headers.getAccessControlRequestMethod());
 	}
 
+	@Test
+	public void acceptLanguage() {
+		assertTrue(headers.getAcceptLanguage().isEmpty());
+		String headerValue = "fr-ch, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5";
+		headers.setAcceptLanguage(Locale.LanguageRange.parse(headerValue));
+		assertEquals(headerValue, headers.getFirst(HttpHeaders.ACCEPT_LANGUAGE));
+		List<Locale.LanguageRange> languages = headers.getAcceptLanguage();
+		Locale.LanguageRange[] languageArray = new Locale.LanguageRange[]{
+				new Locale.LanguageRange("fr-ch"),
+				new Locale.LanguageRange("fr", 0.9),
+				new Locale.LanguageRange("en", 0.8),
+				new Locale.LanguageRange("de", 0.7),
+				new Locale.LanguageRange("*", 0.5)
+		};
+		assertArrayEquals(languageArray, languages.toArray());
+	}
+
 }

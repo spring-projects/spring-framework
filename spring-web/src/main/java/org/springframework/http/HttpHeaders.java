@@ -20,6 +20,8 @@ import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,6 +39,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -384,6 +387,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	private static final Pattern ETAG_HEADER_VALUE_PATTERN = Pattern.compile("\\*|\\s*((W\\/)?(\"[^\"]*\"))\\s*,?");
 
+	private static final DecimalFormatSymbols DECIMAL_FORMAT_SYMBOLS = new DecimalFormatSymbols(Locale.ENGLISH);
+
 	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 
@@ -432,6 +437,34 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public List<MediaType> getAccept() {
 		return MediaType.parseMediaTypes(get(ACCEPT));
+	}
+
+	/**
+	 * Set the acceptable language ranges,
+	 * as specified by the {@literal Accept-Language} header.
+	 * @see Locale.LanguageRange
+	 */
+	public void setAcceptLanguage(List<Locale.LanguageRange> languages) {
+		Assert.notNull(languages, "'languages' must not be null");
+		DecimalFormat df = new DecimalFormat("0.0", DECIMAL_FORMAT_SYMBOLS);
+		List<String> values = languages
+				.stream()
+				.map(r -> (r.getWeight() == Locale.LanguageRange.MAX_WEIGHT ? r.getRange() : r.getRange() + ";q=" + df.format(r.getWeight())))
+				.collect(Collectors.toList());
+		set(ACCEPT_LANGUAGE, toCommaDelimitedString(values));
+	}
+
+	/**
+	 * Return the acceptable language ranges,
+	 * as specified by the {@literal Accept-Language} header
+	 * @see Locale.LanguageRange
+	 */
+	public List<Locale.LanguageRange> getAcceptLanguage() {
+		String value = getFirst(ACCEPT_LANGUAGE);
+		if (value != null) {
+			return Locale.LanguageRange.parse(value);
+		}
+		return Collections.emptyList();
 	}
 
 	/**
