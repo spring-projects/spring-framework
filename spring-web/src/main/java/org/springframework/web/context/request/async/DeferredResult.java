@@ -43,6 +43,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * is added to a {@link PriorityQueue} it is handled in the correct order.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @author Rob Winch
  * @since 3.2
  */
@@ -65,7 +66,7 @@ public class DeferredResult<T> {
 
 	private volatile Object result = RESULT_NONE;
 
-	private volatile boolean expired;
+	private volatile boolean expired = false;
 
 
 	/**
@@ -164,24 +165,39 @@ public class DeferredResult<T> {
 	 */
 	public final void setResultHandler(DeferredResultHandler resultHandler) {
 		Assert.notNull(resultHandler, "DeferredResultHandler is required");
+		// Immediate expiration check outside of the result lock
+		if (this.expired) {
+			return;
+		}
+		Object resultToHandle;
 		synchronized (this) {
-			this.resultHandler = resultHandler;
-			if (this.result != RESULT_NONE && !this.expired) {
-				try {
-					this.resultHandler.handleResult(this.result);
-				}
-				catch (Throwable ex) {
-					logger.trace("DeferredResult not handled", ex);
-				}
+			// Got the lock in the meantime: double-check expiration status
+			if (this.expired) {
+				return;
 			}
+			resultToHandle = this.result;
+			if (resultToHandle == RESULT_NONE) {
+				// No result yet: store handler for processing once it comes in
+				this.resultHandler = resultHandler;
+				return;
+			}
+		}
+		// If we get here, we need to process an existing result object immediately.
+		// The decision is made within the result lock; just the handle call outside
+		// of it, avoiding any deadlock potential with Servlet container locks.
+		try {
+			resultHandler.handleResult(resultToHandle);
+		}
+		catch (Throwable ex) {
+			logger.debug("Failed to handle existing result", ex);
 		}
 	}
 
 	/**
 	 * Set the value for the DeferredResult and handle it.
 	 * @param result the value to set
-	 * @return "true" if the result was set and passed on for handling;
-	 * "false" if the result was already set or the async request expired
+	 * @return {@code true} if the result was set and passed on for handling;
+	 * {@code false} if the result was already set or the async request expired
 	 * @see #isSetOrExpired()
 	 */
 	public boolean setResult(T result) {
@@ -189,15 +205,32 @@ public class DeferredResult<T> {
 	}
 
 	private boolean setResultInternal(Object result) {
+		// Immediate expiration check outside of the result lock
+		if (isSetOrExpired()) {
+			return false;
+		}
+		DeferredResultHandler resultHandlerToUse;
 		synchronized (this) {
+			// Got the lock in the meantime: double-check expiration status
 			if (isSetOrExpired()) {
 				return false;
 			}
+			// At this point, we got a new result to process
 			this.result = result;
+			resultHandlerToUse = this.resultHandler;
+			if (resultHandlerToUse == null) {
+				// No result handler set yet -> let the setResultHandler implementation
+				// pick up the result object and invoke the result handler for it.
+				return true;
+			}
+			// Result handler available -> let's clear the stored reference since
+			// we don't need it anymore.
+			this.resultHandler = null;
 		}
-		if (this.resultHandler != null) {
-			this.resultHandler.handleResult(this.result);
-		}
+		// If we get here, we need to process an existing result object immediately.
+		// The decision is made within the result lock; just the handle call outside
+		// of it, avoiding any deadlock potential with Servlet container locks.
+		resultHandlerToUse.handleResult(result);
 		return true;
 	}
 
@@ -206,8 +239,9 @@ public class DeferredResult<T> {
 	 * The value may be an {@link Exception} or {@link Throwable} in which case
 	 * it will be processed as if a handler raised the exception.
 	 * @param result the error result value
-	 * @return "true" if the result was set to the error value and passed on for
-	 * handling; "false" if the result was already set or the async request expired
+	 * @return {@code true} if the result was set to the error value and passed on
+	 * for handling; {@code false} if the result was already set or the async
+	 * request expired
 	 * @see #isSetOrExpired()
 	 */
 	public boolean setErrorResult(Object result) {
@@ -222,16 +256,14 @@ public class DeferredResult<T> {
 				if (timeoutCallback != null) {
 					timeoutCallback.run();
 				}
-				if (DeferredResult.this.timeoutResult != RESULT_NONE) {
+				if (timeoutResult != RESULT_NONE) {
 					setResultInternal(timeoutResult);
 				}
 				return true;
 			}
 			@Override
 			public <S> void afterCompletion(NativeWebRequest request, DeferredResult<S> deferredResult) {
-				synchronized (DeferredResult.this) {
-					expired = true;
-				}
+				expired = true;
 				if (completionCallback != null) {
 					completionCallback.run();
 				}
