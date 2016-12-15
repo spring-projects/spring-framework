@@ -763,6 +763,32 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
+	 * Set the {@link Locale} of the content language,
+	 * as specified by the {@literal Content-Language} header.
+	 * <p>Use {@code set(CONTENT_LANGUAGE, ...)} if you need
+	 * to set multiple content languages.</p>
+	 */
+	public void setContentLanguage(Locale locale) {
+		Assert.notNull(locale, "'locale' must not be null");
+		set(CONTENT_LANGUAGE, locale.toLanguageTag());
+	}
+
+	/**
+	 * Return the first {@link Locale} of the content languages,
+	 * as specified by the {@literal Content-Language} header.
+	 * <p>Returns {@code null} when the content language is unknown.
+	 * <p>Use {@code getValuesAsList(CONTENT_LANGUAGE)} if you need
+	 * to get multiple content languages.</p>
+	 */
+	public Locale getContentLanguage() {
+		return getValuesAsList(CONTENT_LANGUAGE)
+				.stream()
+				.findFirst()
+				.map(Locale::forLanguageTag)
+				.orElse(null);
+	}
+
+	/**
 	 * Set the length of the body in bytes, as specified by the
 	 * {@code Content-Length} header.
 	 */

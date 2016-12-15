@@ -439,4 +439,15 @@ public class HttpHeadersTests {
 		assertArrayEquals(languageArray, languages.toArray());
 	}
 
+	@Test
+	public void contentLanguage() {
+		assertNull(headers.getContentLanguage());
+		headers.setContentLanguage(Locale.FRANCE);
+		assertEquals(Locale.FRANCE, headers.getContentLanguage());
+		assertEquals("fr-FR", headers.getFirst(HttpHeaders.CONTENT_LANGUAGE));
+		headers.clear();
+		headers.set(HttpHeaders.CONTENT_LANGUAGE, Locale.GERMAN.toLanguageTag() + ", " + Locale.CANADA);
+		assertEquals(Locale.GERMAN, headers.getContentLanguage());
+	}
+
 }
