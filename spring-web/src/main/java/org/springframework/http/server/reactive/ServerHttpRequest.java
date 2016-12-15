@@ -61,9 +61,9 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 
 
 	/**
-	 * Return a builder to mutate properties of this request. The resulting
-	 * new request is an immutable {@link ServerHttpRequestDecorator decorator}
-	 * around the current exchange instance returning mutated values.
+	 * Return a builder to mutate properties of this request by wrapping it
+	 * with {@link ServerHttpRequestDecorator} and returning either mutated
+	 * values or delegating back to this instance.
 	 */
 	default ServerHttpRequest.Builder mutate() {
 		return new DefaultServerHttpRequestBuilder(this);
@@ -71,51 +71,29 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 
 
 	/**
-	 * Builder for mutating properties of a {@link ServerHttpRequest}.
+	 * Builder for mutating an existing {@link ServerHttpRequest}.
 	 */
 	interface Builder {
 
 		/**
-		 * Set the HTTP method.
+		 * Set the HTTP method to return.
 		 */
 		Builder method(HttpMethod httpMethod);
 
 		/**
-		 * Set the request URI.
+		 * Set the request URI to return.
 		 */
-		Builder uri(URI uri);
-
+		Builder path(String path);
 
 		/**
-		 * Set the contextPath for the request.
+		 * Set the contextPath to return.
 		 */
 		Builder contextPath(String contextPath);
 
 		/**
-		 * Set the query params to return.
-		 */
-		Builder queryParams(MultiValueMap<String, String> queryParams);
-
-		/**
-		 * Set the headers to use.
-		 */
-		Builder headers(HttpHeaders headers);
-
-		/**
-		 * Set the cookies to use.
-		 */
-		Builder cookies(MultiValueMap<String, HttpCookie> cookies);
-
-		/**
-		 * Set the body to return.
-		 */
-		Builder body(Flux<DataBuffer> body);
-
-		/**
-		 * Build an immutable wrapper that returning the mutated properties.
+		 * Build a {@link ServerHttpRequest} decorator with the mutated properties.
 		 */
 		ServerHttpRequest build();
-
 	}
 
 }

@@ -16,13 +16,13 @@
 package org.springframework.web.server;
 
 import java.security.Principal;
+import java.util.function.Consumer;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
-import org.springframework.util.MultiValueMap;
 
 /**
  * Package private implementation of {@link ServerWebExchange.Builder}.
@@ -38,18 +38,21 @@ class DefaultServerWebExchangeBuilder implements ServerWebExchange.Builder {
 
 	private ServerHttpResponse response;
 
-	private Mono<Principal> user;
-
-	private Mono<WebSession> session;
-
-	private Mono<MultiValueMap<String, String>> formData;
+	private Mono<Principal> principalMono;
 
 
-	public DefaultServerWebExchangeBuilder(ServerWebExchange delegate) {
+	DefaultServerWebExchangeBuilder(ServerWebExchange delegate) {
 		Assert.notNull(delegate, "'delegate' is required.");
 		this.delegate = delegate;
 	}
 
+
+	@Override
+	public ServerWebExchange.Builder request(Consumer<ServerHttpRequest.Builder> consumer) {
+		ServerHttpRequest.Builder builder = this.delegate.getRequest().mutate();
+		consumer.accept(builder);
+		return request(builder.build());
+	}
 
 	@Override
 	public ServerWebExchange.Builder request(ServerHttpRequest request) {
@@ -64,27 +67,14 @@ class DefaultServerWebExchangeBuilder implements ServerWebExchange.Builder {
 	}
 
 	@Override
-	public ServerWebExchange.Builder principal(Mono<Principal> user) {
-		this.user = user;
-		return this;
-	}
-
-	@Override
-	public ServerWebExchange.Builder session(Mono<WebSession> session) {
-		this.session = session;
-		return this;
-	}
-
-	@Override
-	public ServerWebExchange.Builder formData(Mono<MultiValueMap<String, String>> formData) {
-		this.formData = formData;
+	public ServerWebExchange.Builder principal(Mono<Principal> principalMono) {
+		this.principalMono = principalMono;
 		return this;
 	}
 
 	@Override
 	public ServerWebExchange build() {
-		return new MutativeDecorator(this.delegate, this.request, this.response,
-				this.user, this.session, this.formData);
+		return new MutativeDecorator(this.delegate, this.request, this.response, this.principalMono);
 	}
 
 
@@ -98,23 +88,16 @@ class DefaultServerWebExchangeBuilder implements ServerWebExchange.Builder {
 
 		private final ServerHttpResponse response;
 
-		private final Mono<Principal> userMono;
-
-		private final Mono<WebSession> session;
-
-		private final Mono<MultiValueMap<String, String>> formData;
+		private final Mono<Principal> principalMono;
 
 
-		public MutativeDecorator(ServerWebExchange delegate,
-				ServerHttpRequest request, ServerHttpResponse response, Mono<Principal> user,
-				Mono<WebSession> session, Mono<MultiValueMap<String, String>> formData) {
+		public MutativeDecorator(ServerWebExchange delegate, ServerHttpRequest request,
+				ServerHttpResponse response, Mono<Principal> principalMono) {
 
 			super(delegate);
 			this.request = request;
 			this.response = response;
-			this.userMono = user;
-			this.session = session;
-			this.formData = formData;
+			this.principalMono = principalMono;
 		}
 
 
@@ -128,20 +111,11 @@ class DefaultServerWebExchangeBuilder implements ServerWebExchange.Builder {
 			return (this.response != null ? this.response : getDelegate().getResponse());
 		}
 
-		@Override
-		public Mono<WebSession> getSession() {
-			return (this.session != null ? this.session : getDelegate().getSession());
-		}
-
 		@SuppressWarnings("unchecked")
 		@Override
 		public <T extends Principal> Mono<T> getPrincipal() {
-			return (this.userMono != null ? (Mono<T>) this.userMono : getDelegate().getPrincipal());
-		}
-
-		@Override
-		public Mono<MultiValueMap<String, String>> getFormData() {
-			return (this.formData != null ? this.formData : getDelegate().getFormData());
+			return (this.principalMono != null ?
+					(Mono<T>) this.principalMono : getDelegate().getPrincipal());
 		}
 	}
 

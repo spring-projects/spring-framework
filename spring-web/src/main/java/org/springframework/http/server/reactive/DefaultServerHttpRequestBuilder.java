@@ -17,14 +17,9 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 
-import reactor.core.publisher.Flux;
-
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.HttpCookie;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
-import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Package private default implementation of {@link ServerHttpRequest.Builder}.
@@ -36,20 +31,11 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	private final ServerHttpRequest delegate;
 
-
 	private HttpMethod httpMethod;
 
-	private URI uri;
+	private String path;
 
 	private String contextPath;
-
-	private MultiValueMap<String, String> queryParams;
-
-	private HttpHeaders headers;
-
-	private MultiValueMap<String, HttpCookie> cookies;
-
-	private Flux<DataBuffer> body;
 
 
 	public DefaultServerHttpRequestBuilder(ServerHttpRequest delegate) {
@@ -65,8 +51,8 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	}
 
 	@Override
-	public ServerHttpRequest.Builder uri(URI uri) {
-		this.uri = uri;
+	public ServerHttpRequest.Builder path(String path) {
+		this.path = path;
 		return this;
 	}
 
@@ -77,33 +63,13 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	}
 
 	@Override
-	public ServerHttpRequest.Builder queryParams(MultiValueMap<String, String> queryParams) {
-		this.queryParams = queryParams;
-		return this;
-	}
-
-	@Override
-	public ServerHttpRequest.Builder headers(HttpHeaders headers) {
-		this.headers = headers;
-		return this;
-	}
-
-	@Override
-	public ServerHttpRequest.Builder cookies(MultiValueMap<String, HttpCookie> cookies) {
-		this.cookies = cookies;
-		return this;
-	}
-
-	@Override
-	public ServerHttpRequest.Builder body(Flux<DataBuffer> body) {
-		this.body = body;
-		return this;
-	}
-
-	@Override
 	public ServerHttpRequest build() {
-		return new MutativeDecorator(this.delegate, this.httpMethod, this.uri, this.contextPath,
-				this.queryParams, this.headers, this.cookies, this.body);
+		URI uri = null;
+		if (this.path != null) {
+			uri = this.delegate.getURI();
+			uri = UriComponentsBuilder.fromUri(uri).replacePath(this.path).build(true).toUri();
+		}
+		return new MutativeDecorator(this.delegate, this.httpMethod, uri, this.contextPath);
 	}
 
 
@@ -119,27 +85,14 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 		private final String contextPath;
 
-		private final MultiValueMap<String, String> queryParams;
 
-		private final HttpHeaders headers;
-
-		private final MultiValueMap<String, HttpCookie> cookies;
-
-		private final Flux<DataBuffer> body;
-
-
-		public MutativeDecorator(ServerHttpRequest delegate, HttpMethod httpMethod, URI uri,
-				String contextPath, MultiValueMap<String, String> queryParams, HttpHeaders headers,
-				MultiValueMap<String, HttpCookie> cookies, Flux<DataBuffer> body) {
+		public MutativeDecorator(ServerHttpRequest delegate, HttpMethod httpMethod,
+				URI uri, String contextPath) {
 
 			super(delegate);
 			this.httpMethod = httpMethod;
 			this.uri = uri;
 			this.contextPath = contextPath;
-			this.queryParams = queryParams;
-			this.headers = headers;
-			this.cookies = cookies;
-			this.body = body;
 		}
 
 		@Override
@@ -157,25 +110,6 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 			return (this.contextPath != null ? this.contextPath : super.getContextPath());
 		}
 
-		@Override
-		public MultiValueMap<String, String> getQueryParams() {
-			return (this.queryParams != null ? this.queryParams : super.getQueryParams());
-		}
-
-		@Override
-		public HttpHeaders getHeaders() {
-			return (this.headers != null ? this.headers : super.getHeaders());
-		}
-
-		@Override
-		public MultiValueMap<String, HttpCookie> getCookies() {
-			return (this.cookies != null ? this.cookies : super.getCookies());
-		}
-
-		@Override
-		public Flux<DataBuffer> getBody() {
-			return (this.body != null ? this.body : super.getBody());
-		}
 	}
 
 }

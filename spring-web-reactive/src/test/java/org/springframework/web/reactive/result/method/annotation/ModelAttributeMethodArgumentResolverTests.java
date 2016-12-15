@@ -15,6 +15,7 @@
  */
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -29,10 +30,9 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -41,18 +41,19 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.ResolvableMethod;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
+import org.springframework.web.server.session.WebSessionManager;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.*;
-import static org.springframework.util.Assert.*;
+import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.springframework.util.Assert.isTrue;
 
 
 /**
@@ -61,28 +62,18 @@ import static org.springframework.util.Assert.*;
  */
 public class ModelAttributeMethodArgumentResolverTests {
 
-	private ServerWebExchange exchange;
-
-	private final MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.POST, "/path");
-
-	private final MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-
-	private BindingContext bindingContext;
+	private BindingContext bindContext;
 
 	private ResolvableMethod testMethod = ResolvableMethod.onClass(this.getClass()).name("handle");
 
 
 	@Before
 	public void setUp() throws Exception {
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(this.request, response, new MockWebSessionManager());
-		this.exchange = this.exchange.mutate().formData(Mono.just(this.formData)).build();
-
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 		validator.afterPropertiesSet();
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setValidator(validator);
-		this.bindingContext = new BindingContext(initializer);
+		this.bindContext = new BindingContext(initializer);
 	}
 
 
@@ -156,49 +147,49 @@ public class ModelAttributeMethodArgumentResolverTests {
 	public void bindExisting() throws Exception {
 		Foo foo = new Foo();
 		foo.setName("Jim");
-		this.bindingContext.getModel().addAttribute(foo);
+		this.bindContext.getModel().addAttribute(foo);
 
 		testBindFoo(forClass(Foo.class), value -> {
 			assertEquals(Foo.class, value.getClass());
 			return (Foo) value;
 		});
 
-		assertSame(foo, this.bindingContext.getModel().asMap().get("foo"));
+		assertSame(foo, this.bindContext.getModel().asMap().get("foo"));
 	}
 
 	@Test
 	public void bindExistingMono() throws Exception {
 		Foo foo = new Foo();
 		foo.setName("Jim");
-		this.bindingContext.getModel().addAttribute("foo", Mono.just(foo));
+		this.bindContext.getModel().addAttribute("foo", Mono.just(foo));
 
 		testBindFoo(forClass(Foo.class), value -> {
 			assertEquals(Foo.class, value.getClass());
 			return (Foo) value;
 		});
 
-		assertSame(foo, this.bindingContext.getModel().asMap().get("foo"));
+		assertSame(foo, this.bindContext.getModel().asMap().get("foo"));
 	}
 
 	@Test
 	public void bindExistingSingle() throws Exception {
 		Foo foo = new Foo();
 		foo.setName("Jim");
-		this.bindingContext.getModel().addAttribute("foo", Single.just(foo));
+		this.bindContext.getModel().addAttribute("foo", Single.just(foo));
 
 		testBindFoo(forClass(Foo.class), value -> {
 			assertEquals(Foo.class, value.getClass());
 			return (Foo) value;
 		});
 
-		assertSame(foo, this.bindingContext.getModel().asMap().get("foo"));
+		assertSame(foo, this.bindContext.getModel().asMap().get("foo"));
 	}
 
 	@Test
 	public void bindExistingMonoToMono() throws Exception {
 		Foo foo = new Foo();
 		foo.setName("Jim");
-		this.bindingContext.getModel().addAttribute("foo", Mono.just(foo));
+		this.bindContext.getModel().addAttribute("foo", Mono.just(foo));
 
 		testBindFoo(forClassWithGenerics(Mono.class, Foo.class), mono -> {
 			assertTrue(mono.getClass().getName(), mono instanceof Mono);
@@ -238,14 +229,11 @@ public class ModelAttributeMethodArgumentResolverTests {
 	}
 
 
-	private void testBindFoo(ResolvableType type, Function<Object, Foo> valueExtractor) {
-
-		this.formData.add("name", "Robert");
-		this.formData.add("age", "25");
+	private void testBindFoo(ResolvableType type, Function<Object, Foo> valueExtractor) throws Exception {
 
 		Object value = createResolver()
-				.resolveArgument(parameter(type), this.bindingContext, this.exchange)
-				.blockMillis(5000);
+				.resolveArgument(parameter(type), this.bindContext, exchange("name=Robert&age=25"))
+				.blockMillis(0);
 
 		Foo foo = valueExtractor.apply(value);
 		assertEquals("Robert", foo.getName());
@@ -253,19 +241,18 @@ public class ModelAttributeMethodArgumentResolverTests {
 		String key = "foo";
 		String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + key;
 
-		Map<String, Object> map = bindingContext.getModel().asMap();
+		Map<String, Object> map = bindContext.getModel().asMap();
 		assertEquals(map.toString(), 2, map.size());
 		assertSame(foo, map.get(key));
 		assertNotNull(map.get(bindingResultKey));
 		assertTrue(map.get(bindingResultKey) instanceof BindingResult);
 	}
 
-	private void testValidationError(ResolvableType type, Function<Mono<?>, Mono<?>> valueMonoExtractor) {
+	private void testValidationError(ResolvableType type, Function<Mono<?>, Mono<?>> valueMonoExtractor)
+			throws URISyntaxException {
 
-		this.formData.add("age", "invalid");
-
-		HandlerMethodArgumentResolver resolver = createResolver();
-		Mono<?> mono = resolver.resolveArgument(parameter(type), this.bindingContext, this.exchange);
+		ServerWebExchange exchange = exchange("age=invalid");
+		Mono<?> mono = createResolver().resolveArgument(parameter(type), this.bindContext, exchange);
 
 		mono = valueMonoExtractor.apply(mono);
 
@@ -292,6 +279,15 @@ public class ModelAttributeMethodArgumentResolverTests {
 	private MethodParameter parameterNotAnnotated(ResolvableType type) {
 		return this.testMethod.resolveParam(type,
 				parameter -> !parameter.hasParameterAnnotations());
+	}
+
+	private ServerWebExchange exchange(String formData) throws URISyntaxException {
+		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
+		request.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		request.setBody(formData);
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		WebSessionManager manager = new MockWebSessionManager();
+		return new DefaultServerWebExchange(request, response, manager);
 	}
 
 

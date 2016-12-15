@@ -20,6 +20,7 @@ import java.security.Principal;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import reactor.core.publisher.Mono;
 
@@ -134,9 +135,9 @@ public interface ServerWebExchange {
 
 
 	/**
-	 * Return a builder to mutate properties of this exchange. The resulting
-	 * new exchange is an immutable {@link ServerWebExchangeDecorator decorator}
-	 * around the current exchange instance returning mutated values.
+	 * Return a builder to mutate properties of this exchange by wrapping it
+	 * with {@link ServerWebExchangeDecorator} and returning either mutated
+	 * values or delegating back to this instance.
 	 */
 	default Builder mutate() {
 		return new DefaultServerWebExchangeBuilder(this);
@@ -144,40 +145,52 @@ public interface ServerWebExchange {
 
 
 	/**
-	 * Builder for mutating the properties of a {@link ServerWebExchange}.
+	 * Builder for mutating an existing {@link ServerWebExchange}.
+	 * Removes the need
 	 */
 	interface Builder {
 
 		/**
-		 * Set the request to use.
+		 * Configure a consumer to modify the current request using a builder.
+		 * <p>Effectively this:
+		 * <pre>
+		 * exchange.mutate().request(builder-> builder.method(HttpMethod.PUT));
+		 *
+		 * // vs...
+		 *
+		 * ServerHttpRequest request = exchange.getRequest().mutate()
+		 *     .method(HttpMethod.PUT)
+		 *     .build();
+		 *
+		 * exchange.mutate().request(request);
+		 * </pre>
+		 * @see ServerHttpRequest#mutate()
+		 */
+		Builder request(Consumer<ServerHttpRequest.Builder> requestBuilderConsumer);
+
+		/**
+		 * Set the request to use especially when there is a need to override
+		 * {@link ServerHttpRequest} methods. To simply mutate request properties
+		 * see {@link #request(Consumer)} instead.
+		 * @see org.springframework.http.server.reactive.ServerHttpRequestDecorator
 		 */
 		Builder request(ServerHttpRequest request);
 
 		/**
 		 * Set the response to use.
+		 * @see org.springframework.http.server.reactive.ServerHttpResponseDecorator
 		 */
 		Builder response(ServerHttpResponse response);
 
 		/**
-		 * Set the principal to use.
+		 * Set the {@code Mono<Principal>} to return for this exchange.
 		 */
-		Builder principal(Mono<Principal> user);
+		Builder principal(Mono<Principal> principalMono);
 
 		/**
-		 * Set the session to use.
-		 */
-		Builder session(Mono<WebSession> session);
-
-		/**
-		 * Set the form data.
-		 */
-		Builder formData(Mono<MultiValueMap<String, String>> formData);
-
-		/**
-		 * Build an immutable wrapper that returning the mutated properties.
+		 * Build a {@link ServerWebExchange} decorator with the mutated properties.
 		 */
 		ServerWebExchange build();
-
 	}
 
 }
