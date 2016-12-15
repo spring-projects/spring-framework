@@ -43,7 +43,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Parameterized tests for ServletWebRequest
+ * "checkNotModified" unit tests for {@link DefaultServerWebExchange}.
+ *
  * @author Rossen Stoyanchev
  */
 @RunWith(Parameterized.class)

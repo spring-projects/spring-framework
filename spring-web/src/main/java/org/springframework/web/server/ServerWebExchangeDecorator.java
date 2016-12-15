@@ -94,6 +94,11 @@ public class ServerWebExchangeDecorator implements ServerWebExchange {
 	}
 
 	@Override
+	public Mono<MultiValueMap<String, String>> getRequestParams() {
+		return getDelegate().getRequestParams();
+	}
+
+	@Override
 	public boolean isNotModified() {
 		return getDelegate().isNotModified();
 	}

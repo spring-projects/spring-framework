@@ -17,21 +17,21 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ServerWebExchange;
@@ -42,17 +42,15 @@ import org.springframework.web.server.session.WebSessionManager;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.web.util.UriComponentsBuilder.fromPath;
 
 /**
  * Unit tests for {@link RequestParamMapMethodArgumentResolver}.
- *
  * @author Rossen Stoyanchev
  */
 public class RequestParamMapMethodArgumentResolverTests {
 
 	private RequestParamMapMethodArgumentResolver resolver;
-
-	private ServerWebExchange exchange;
 
 	private MethodParameter paramMap;
 	private MethodParameter paramMultiValueMap;
@@ -64,10 +62,6 @@ public class RequestParamMapMethodArgumentResolverTests {
 	@Before
 	public void setUp() throws Exception {
 		this.resolver = new RequestParamMapMethodArgumentResolver();
-
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
-		WebSessionManager sessionManager = new MockWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 
 		Method method = getClass().getMethod("params", Map.class, MultiValueMap.class, Map.class, Map.class);
 		this.paramMap = new SynthesizingMethodParameter(method, 0);
@@ -86,35 +80,51 @@ public class RequestParamMapMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveMapArgument() throws Exception {
-		String name = "foo";
-		String value = "bar";
-		this.exchange.getRequest().getQueryParams().set(name, value);
-		Map<String, String> expected = Collections.singletonMap(name, value);
-
-		Mono<Object> mono = resolver.resolveArgument(paramMap, null, exchange);
-		Object result = mono.block();
-
+	public void resolveMapArgumentWithQueryString() throws Exception {
+		Object result= resolve(this.paramMap, exchangeWithQuery("foo=bar"));
 		assertTrue(result instanceof Map);
-		assertEquals(expected, result);
+		assertEquals(Collections.singletonMap("foo", "bar"), result);
+	}
+
+	@Test
+	public void resolveMapArgumentWithFormData() throws Exception {
+		Object result= resolve(this.paramMap, exchangeWithFormData("foo=bar"));
+		assertTrue(result instanceof Map);
+		assertEquals(Collections.singletonMap("foo", "bar"), result);
 	}
 
 	@Test
 	public void resolveMultiValueMapArgument() throws Exception {
-		String name = "foo";
-		String value1 = "bar";
-		String value2 = "baz";
-		this.exchange.getRequest().getQueryParams().put(name, Arrays.asList(value1, value2));
-
-		MultiValueMap<String, String> expected = new LinkedMultiValueMap<>(1);
-		expected.add(name, value1);
-		expected.add(name, value2);
-
-		Mono<Object> mono = this.resolver.resolveArgument(this.paramMultiValueMap, null, this.exchange);
-		Object result = mono.block();
+		ServerWebExchange exchange = exchangeWithQuery("foo=bar&foo=baz");
+		Object result= resolve(this.paramMultiValueMap, exchange);
 
 		assertTrue(result instanceof MultiValueMap);
-		assertEquals(expected, result);
+		assertEquals(Collections.singletonMap("foo", Arrays.asList("bar", "baz")), result);
+	}
+
+
+	private ServerWebExchange exchangeWithQuery(String query) throws URISyntaxException {
+		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
+		MultiValueMap<String, String> params = fromPath("/").query(query).build().getQueryParams();
+		request.getQueryParams().putAll(params);
+		return exchange(request);
+	}
+
+	private ServerWebExchange exchangeWithFormData(String formData) throws URISyntaxException {
+		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
+		request.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		request.setBody(formData);
+		return exchange(request);
+	}
+
+	private ServerWebExchange exchange(ServerHttpRequest request) {
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		WebSessionManager manager = new MockWebSessionManager();
+		return new DefaultServerWebExchange(request, response, manager);
+	}
+
+	private Object resolve(MethodParameter parameter, ServerWebExchange exchange) {
+		return this.resolver.resolveArgument(parameter, null, exchange).blockMillis(0);
 	}
 
 

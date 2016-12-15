@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -59,9 +61,15 @@ public class RequestParamMapMethodArgumentResolver implements SyncHandlerMethodA
 	public Optional<Object> resolveArgumentValue(MethodParameter parameter, BindingContext context,
 			ServerWebExchange exchange) {
 
-		MultiValueMap<String, String> queryParams = exchange.getRequest().getQueryParams();
-		Object value = (isMultiValueMap(parameter) ? queryParams : queryParams.toSingleValueMap());
+		MultiValueMap<String, String> requestParams = getRequestParams(exchange);
+		Object value = (isMultiValueMap(parameter) ? requestParams : requestParams.toSingleValueMap());
 		return Optional.of(value);
+	}
+
+	private MultiValueMap<String, String> getRequestParams(ServerWebExchange exchange) {
+		MultiValueMap<String, String> params = exchange.getRequestParams().subscribe().peek();
+		Assert.notNull(params, "Expected form data (if any) to be parsed.");
+		return params;
 	}
 
 	private boolean isMultiValueMap(MethodParameter parameter) {

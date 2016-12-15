@@ -76,10 +76,17 @@ public interface ServerWebExchange {
 	<T extends Principal> Mono<T> getPrincipal();
 
 	/**
-	 * Return the form data from the body of the request or an empty {@code Mono}
-	 * if the Content-Type is not "application/x-www-form-urlencoded".
+	 * Return the form data from the body of the request if the Content-Type is
+	 * {@code "application/x-www-form-urlencoded"} or an empty map.
 	 */
 	Mono<MultiValueMap<String, String>> getFormData();
+
+	/**
+	 * Return a combined map that represents both
+	 * {@link ServerHttpRequest#getQueryParams()} and {@link #getFormData()}
+	 * or an empty map.
+	 */
+	Mono<MultiValueMap<String, String>> getRequestParams();
 
 	/**
 	 * Returns {@code true} if the one of the {@code checkNotModified} methods
