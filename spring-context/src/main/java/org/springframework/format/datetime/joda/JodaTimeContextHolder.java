@@ -29,11 +29,12 @@ import org.springframework.core.NamedThreadLocal;
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 3.0
+ * @see org.springframework.context.i18n.LocaleContextHolder
  */
 public final class JodaTimeContextHolder {
 
 	private static final ThreadLocal<JodaTimeContext> jodaTimeContextHolder =
-			new NamedThreadLocal<>("JodaTime Context");
+			new NamedThreadLocal<>("JodaTimeContext");
 
 
 	/**
