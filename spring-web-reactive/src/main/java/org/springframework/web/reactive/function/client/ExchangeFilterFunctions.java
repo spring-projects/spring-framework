@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.client.reactive;
+package org.springframework.web.reactive.function.client;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
