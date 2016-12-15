@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +34,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
@@ -230,9 +230,11 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	}
 
 	private static class ForwardedHeaderResponseWrapper extends HttpServletResponseWrapper {
+
 		private static final String FOLDER_SEPARATOR = "/";
 
 		private final HttpServletRequest request;
+
 
 		public ForwardedHeaderResponseWrapper(HttpServletResponse response, HttpServletRequest request) {
 			super(response);
@@ -241,46 +243,37 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		@Override
 		public void sendRedirect(String location) throws IOException {
-			String forwardedLocation = forwardedLocation(location);
 
-			super.sendRedirect(forwardedLocation);
-		}
+			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
 
-		private String forwardedLocation(String location) {
-			if(hasScheme(location)) {
-				return location;
+			// Absolute location
+			if (builder.build().getScheme() != null) {
+				super.sendRedirect(location);
+				return;
 			}
 
-			return createForwardedLocation(location);
-		}
-
-		private String createForwardedLocation(String location) {
-			boolean isNetworkPathReference = location.startsWith("//");
-			if(isNetworkPathReference) {
-				UriComponentsBuilder schemeForwardedLocation = UriComponentsBuilder.fromUriString(location).scheme(request.getScheme());
-				return schemeForwardedLocation.toUriString();
+			// Network-path reference
+			if(location.startsWith("//")) {
+				String scheme = this.request.getScheme();
+				super.sendRedirect(builder.scheme(scheme).toUriString());
+				return;
 			}
 
-			HttpRequest httpRequest = new ServletServerHttpRequest(request);
-			UriComponentsBuilder forwardedLocation = UriComponentsBuilder.fromHttpRequest(httpRequest);
-			boolean isRelativeToContextPath = location.startsWith(FOLDER_SEPARATOR);
-			if(isRelativeToContextPath) {
-				forwardedLocation.replacePath(request.getContextPath());
-			} else if(endsWithFileSpecificPart(forwardedLocation)) {
-				// remove a file specific part from existing request
-				forwardedLocation.path("/../");
+			// Relative to Servlet container root or to current request
+			String path;
+			if (location.startsWith(FOLDER_SEPARATOR)) {
+				path = this.request.getContextPath() + location;
 			}
-			forwardedLocation.path(location);
-			return forwardedLocation.build().normalize().toUriString();
-		}
+			else {
+				path = StringUtils.applyRelativePath(this.request.getRequestURI(), location);
+			}
 
-		private boolean endsWithFileSpecificPart(UriComponentsBuilder forwardedLocation) {
-			return !forwardedLocation.build().getPath().endsWith(FOLDER_SEPARATOR);
-		}
+			String result = UriComponentsBuilder
+					.fromHttpRequest(new ServletServerHttpRequest(this.request))
+					.replacePath(path)
+					.build().normalize().toUriString();
 
-		private boolean hasScheme(String location) {
-			String locationScheme = UriComponentsBuilder.fromUriString(location).build().getScheme();
-			return locationScheme != null;
+			super.sendRedirect(result);
 		}
 	}
 
