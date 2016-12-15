@@ -35,14 +35,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.http.codec.BodyExtractors;
-import org.springframework.http.codec.BodyInserters;
 import org.springframework.http.codec.Pojo;
+import org.springframework.web.reactive.function.BodyExtractors;
+import org.springframework.web.reactive.function.BodyInserters;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.springframework.http.codec.BodyExtractors.toFlux;
-import static org.springframework.http.codec.BodyExtractors.toMono;
+import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
+import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
 /**
  * {@link WebClient} integration tests with the {@code Flux} and {@code Mono} API.

@@ -30,11 +30,11 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.BodyExtractor;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
+import org.springframework.web.reactive.function.BodyExtractor;
 
 /**
  * Implementations of {@link RequestPredicate} that implement various useful request matching operations, such as

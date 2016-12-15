@@ -30,7 +30,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.codec.BodyInserters;
+import org.springframework.web.reactive.function.BodyInserters;
 
 /**
  * @author Arjen Poutsma

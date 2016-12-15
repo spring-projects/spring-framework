@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.codec;
+package org.springframework.web.reactive.function;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -36,6 +36,9 @@ import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.http.codec.DecoderHttpMessageReader;
+import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.UnsupportedMediaTypeException;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;

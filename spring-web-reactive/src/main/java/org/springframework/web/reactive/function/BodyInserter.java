@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.codec;
+package org.springframework.web.reactive.function;
 
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.ReactiveHttpOutputMessage;
+import org.springframework.http.codec.HttpMessageWriter;
 
 /**
  * A combination of functions that can populate a {@link ReactiveHttpOutputMessage} body.

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.http.codec;
+package org.springframework.web.reactive.function;
 
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.http.codec.HttpMessageReader;
 
 /**
  * A function that can extract data from a {@link ReactiveHttpInputMessage} body.

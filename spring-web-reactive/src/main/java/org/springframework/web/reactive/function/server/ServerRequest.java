@@ -31,8 +31,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.BodyExtractor;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.reactive.function.BodyExtractor;
 
 /**
  * Represents a server-side HTTP request, as handled by a {@code HandlerFunction}.

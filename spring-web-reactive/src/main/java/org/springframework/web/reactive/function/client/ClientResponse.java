@@ -27,7 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.http.codec.BodyExtractor;
+import org.springframework.web.reactive.function.BodyExtractor;
 
 /**
  * Represents an HTTP response, as returned by the {@link WebClient}.

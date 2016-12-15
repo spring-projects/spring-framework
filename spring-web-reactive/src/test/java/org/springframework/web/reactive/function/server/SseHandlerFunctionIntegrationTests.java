@@ -26,12 +26,12 @@ import reactor.test.StepVerifier;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.http.codec.BodyExtractors;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import static org.springframework.http.codec.BodyInserters.fromServerSentEvents;
+import static org.springframework.web.reactive.function.BodyInserters.fromServerSentEvents;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.codec;
+package org.springframework.web.reactive.function;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +32,8 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.UnsupportedMediaTypeException;
 import org.springframework.util.Assert;
 
 /**
