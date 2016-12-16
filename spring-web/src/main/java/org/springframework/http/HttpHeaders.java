@@ -440,8 +440,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Set the acceptable language ranges,
-	 * as specified by the {@literal Accept-Language} header.
+	 * Set the acceptable language ranges, as specified by the
+	 * {@literal Accept-Language} header.
 	 * @see Locale.LanguageRange
 	 * @since 5.0
 	 */
@@ -458,8 +458,12 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Return the acceptable language ranges,
-	 * as specified by the {@literal Accept-Language} header
+	 * Return the acceptable language ranges from the
+	 * {@literal Accept-Language} header
+	 * <p>If you only need the most preferred locale use
+	 * {@link #getAcceptLanguageAsLocale()} or if you need to filter based on
+	 * a list of supporeted locales you can pass the returned list to
+	 * {@link Locale#filter(List, Collection)}.
 	 * @see Locale.LanguageRange
 	 * @since 5.0
 	 */
@@ -473,18 +477,20 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * A variant of {@link #getAcceptLanguage()} that converts each
-	 * {@link java.util.Locale.LanguageRange} to a {@link Locale}.
+	 * {@link java.util.Locale.LanguageRange} to a {@link Locale} and returns
+	 * the first one on the list.
 	 * @since 5.0
 	 */
-	public List<Locale> getAcceptLanguageAsLocales() {
+	public Locale getAcceptLanguageAsLocale() {
 		List<Locale.LanguageRange> ranges = getAcceptLanguage();
 		if (ranges.isEmpty()) {
-			return Collections.emptyList();
+			return null;
 		}
 		return ranges.stream()
 				.map(range -> Locale.forLanguageTag(range.getRange()))
 				.filter(locale -> StringUtils.hasText(locale.getDisplayName()))
-				.collect(Collectors.toList());
+				.findFirst()
+				.orElse(null);
 	}
 
 	/**

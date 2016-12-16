@@ -437,13 +437,7 @@ public class HttpHeadersTests {
 		);
 		assertEquals(expectedRanges, headers.getAcceptLanguage());
 
-		List<Locale> expectedLocales = Arrays.asList(
-				Locale.forLanguageTag("fr-ch"),
-				Locale.forLanguageTag("fr"),
-				Locale.forLanguageTag("en"),
-				Locale.forLanguageTag("de")
-		);
-		assertEquals(expectedLocales, headers.getAcceptLanguageAsLocales());
+		assertEquals(Locale.forLanguageTag("fr-ch"), headers.getAcceptLanguageAsLocale());
 	}
 
 	@Test
