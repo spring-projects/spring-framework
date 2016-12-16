@@ -19,6 +19,9 @@ package org.springframework.web.reactive.function.server;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -52,6 +55,11 @@ import org.springframework.web.reactive.result.view.ViewResolver;
  */
 class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
+	static final Function<ServerRequest, Optional<Locale>> DEFAULT_LOCALE_RESOLVER =
+			request -> request.headers().acceptLanguage().stream()
+					.map(Locale.LanguageRange::getRange)
+					.map(Locale::forLanguageTag).findFirst();
+
 	private static final boolean jackson2Present =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
 					DefaultHandlerStrategiesBuilder.class.getClassLoader()) &&
@@ -68,6 +76,8 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 	private final List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 
 	private final List<ViewResolver> viewResolvers = new ArrayList<>();
+
+	private Function<ServerRequest, Optional<Locale>> localeResolver;
 
 	public void defaultConfiguration() {
 		messageReader(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
@@ -94,6 +104,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 		else {
 			messageWriter(new ServerSentEventHttpMessageWriter());
 		}
+		localeResolver(DEFAULT_LOCALE_RESOLVER);
 	}
 
 	public void applicationContext(ApplicationContext applicationContext) {
@@ -124,9 +135,16 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 	}
 
 	@Override
+	public HandlerStrategies.Builder localeResolver(Function<ServerRequest, Optional<Locale>> localeResolver) {
+		Assert.notNull(localeResolver, "'localeResolver' must not be null");
+		this.localeResolver = localeResolver;
+		return this;
+	}
+
+	@Override
 	public HandlerStrategies build() {
 		return new DefaultHandlerStrategies(this.messageReaders, this.messageWriters,
-				this.viewResolvers);
+				this.viewResolvers, localeResolver);
 	}
 
 	private static class DefaultHandlerStrategies implements HandlerStrategies {
@@ -137,13 +155,18 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 		private final List<ViewResolver> viewResolvers;
 
+		private final Function<ServerRequest, Optional<Locale>> localeResolver;
+
+
 		public DefaultHandlerStrategies(
 				List<HttpMessageReader<?>> messageReaders,
 				List<HttpMessageWriter<?>> messageWriters,
-				List<ViewResolver> viewResolvers) {
+				List<ViewResolver> viewResolvers,
+				Function<ServerRequest, Optional<Locale>> localeResolver) {
 			this.messageReaders = unmodifiableCopy(messageReaders);
 			this.messageWriters = unmodifiableCopy(messageWriters);
 			this.viewResolvers = unmodifiableCopy(viewResolvers);
+			this.localeResolver = localeResolver;
 		}
 
 		private static <T> List<T> unmodifiableCopy(List<? extends T> list) {
@@ -163,6 +186,11 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 		@Override
 		public Supplier<Stream<ViewResolver>> viewResolvers() {
 			return this.viewResolvers::stream;
+		}
+
+		@Override
+		public Function<ServerRequest, Optional<Locale>> localeResolver() {
+			return this.localeResolver;
 		}
 	}
 

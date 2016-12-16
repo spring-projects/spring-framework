@@ -20,6 +20,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -181,6 +182,12 @@ public interface ServerRequest {
 		 * as specified by the {@code Accept-Charset} header.
 		 */
 		List<Charset> acceptCharset();
+
+		/**
+		 * Return the list of acceptable {@linkplain Locale.LanguageRange languages},
+		 * as specified by the {@code Accept-Language} header.
+		 */
+		List<Locale.LanguageRange> acceptLanguage();
 
 		/**
 		 * Return the length of the body in bytes, as specified by the

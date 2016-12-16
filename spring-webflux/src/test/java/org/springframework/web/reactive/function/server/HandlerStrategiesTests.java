@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -57,15 +55,15 @@ public class HandlerStrategiesTests {
 		HttpMessageReader<?> messageReader = new DummyMessageReader();
 		HttpMessageWriter<?> messageWriter = new DummyMessageWriter();
 
-		HandlerStrategies strategies = HandlerStrategies.of(
-				() -> Stream.of(messageReader),
-				() -> Stream.of(messageWriter),
-				null);
+		HandlerStrategies strategies = HandlerStrategies.empty()
+				.messageReader(messageReader)
+				.messageWriter(messageWriter)
+				.build();
 
-		assertEquals(1L, strategies.messageReaders().get().collect(Collectors.counting()).longValue());
+		assertEquals(1L, ((Long) strategies.messageReaders().get().count()).longValue());
 		assertEquals(Optional.of(messageReader), strategies.messageReaders().get().findFirst());
 
-		assertEquals(1L, strategies.messageWriters().get().collect(Collectors.counting()).longValue());
+		assertEquals(1L, ((Long) strategies.messageWriters().get().count()).longValue());
 		assertEquals(Optional.of(messageWriter), strategies.messageWriters().get().findFirst());
 
 		assertEquals(Optional.empty(), strategies.viewResolvers().get().findFirst());

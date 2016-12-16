@@ -25,6 +25,7 @@ import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -310,6 +311,11 @@ public class MockServerRequest implements ServerRequest {
 		@Override
 		public List<Charset> acceptCharset() {
 			return delegate().getAcceptCharset();
+		}
+
+		@Override
+		public List<Locale.LanguageRange> acceptLanguage() {
+			return delegate().getAcceptLanguage();
 		}
 
 		@Override

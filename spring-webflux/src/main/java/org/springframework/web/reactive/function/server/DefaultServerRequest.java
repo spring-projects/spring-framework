@@ -21,6 +21,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -47,7 +48,9 @@ import org.springframework.web.server.WebSession;
 
 /**
  * {@code ServerRequest} implementation based on a {@link ServerWebExchange}.
+ *
  * @author Arjen Poutsma
+ * @since 5.0
  */
 class DefaultServerRequest implements ServerRequest {
 
@@ -164,6 +167,11 @@ class DefaultServerRequest implements ServerRequest {
 		@Override
 		public List<Charset> acceptCharset() {
 			return delegate().getAcceptCharset();
+		}
+
+		@Override
+		public List<Locale.LanguageRange> acceptLanguage() {
+			return delegate().getAcceptLanguage();
 		}
 
 		@Override

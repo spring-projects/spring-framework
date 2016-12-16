@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.web.reactive.function.server;
 
+import java.util.Locale;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -29,8 +32,7 @@ import org.springframework.web.reactive.result.view.ViewResolver;
  * Defines the strategies to be used for processing {@link HandlerFunction}s. An instance of
  * this class is immutable; instances are typically created through the mutable {@link Builder}:
  * either through {@link #builder()} to set up default strategies, or {@link #empty()} to start from
- * scratch. Alternatively, {@code HandlerStrategies} instances can be created through
- * {@link #of(Supplier, Supplier, Supplier)}.
+ * scratch.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -63,6 +65,12 @@ public interface HandlerStrategies {
 	 */
 	Supplier<Stream<ViewResolver>> viewResolvers();
 
+	/**
+	 * Supply a function that resolves the locale of a given {@link ServerRequest}.
+	 * @return the locale resolver
+	 */
+	Function<ServerRequest, Optional<Locale>> localeResolver();
+
 
 	// Static methods
 
@@ -87,39 +95,6 @@ public interface HandlerStrategies {
 	static HandlerStrategies of(ApplicationContext applicationContext) {
 		return builder(applicationContext).build();
 	}
-
-	/**
-	 * Return a new {@code HandlerStrategies} described by the given supplier functions.
-	 * All provided supplier function parameters can be {@code null} to indicate an empty
-	 * stream is to be returned.
-	 * @param messageReaders the supplier function for {@link HttpMessageReader} instances (can be {@code null})
-	 * @param messageWriters the supplier function for {@link HttpMessageWriter} instances (can be {@code null})
-	 * @param viewResolvers the supplier function for {@link ViewResolver} instances (can be {@code null})
-	 * @return the new {@code HandlerStrategies}
-	 */
-	static HandlerStrategies of(Supplier<Stream<HttpMessageReader<?>>> messageReaders,
-			Supplier<Stream<HttpMessageWriter<?>>> messageWriters,
-			Supplier<Stream<ViewResolver>> viewResolvers) {
-
-		return new HandlerStrategies() {
-			@Override
-			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-				return checkForNull(messageReaders);
-			}
-			@Override
-			public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
-				return checkForNull(messageWriters);
-			}
-			@Override
-			public Supplier<Stream<ViewResolver>> viewResolvers() {
-				return checkForNull(viewResolvers);
-			}
-			private <T> Supplier<Stream<T>> checkForNull(Supplier<Stream<T>> supplier) {
-				return supplier != null ? supplier : Stream::empty;
-			}
-		};
-	}
-
 
 	// Builder methods
 
@@ -183,6 +158,13 @@ public interface HandlerStrategies {
 		 * @return this builder
 		 */
 		Builder viewResolver(ViewResolver viewResolver);
+
+		/**
+		 * Set the given function as {@link Locale} resolver for this builder.
+		 * @param localeResolver the locale resolver to set
+		 * @return this builder
+		 */
+		Builder localeResolver(Function<ServerRequest, Optional<Locale>> localeResolver);
 
 		/**
 		 * Builds the {@link HandlerStrategies}.

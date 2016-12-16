@@ -20,6 +20,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -165,6 +166,11 @@ public class ServerRequestWrapper implements ServerRequest {
 		@Override
 		public List<Charset> acceptCharset() {
 			return this.headers.acceptCharset();
+		}
+
+		@Override
+		public List<Locale.LanguageRange> acceptLanguage() {
+			return this.headers.acceptLanguage();
 		}
 
 		@Override

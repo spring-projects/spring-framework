@@ -17,6 +17,9 @@
 package org.springframework.web.reactive.function.server;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -135,6 +138,11 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 						@Override
 						public Supplier<Stream<ViewResolver>> viewResolvers() {
 							return Stream::empty;
+						}
+
+						@Override
+						public Function<ServerRequest, Optional<Locale>> localeResolver() {
+							return DefaultHandlerStrategiesBuilder.DEFAULT_LOCALE_RESOLVER;
 						}
 					});
 		}

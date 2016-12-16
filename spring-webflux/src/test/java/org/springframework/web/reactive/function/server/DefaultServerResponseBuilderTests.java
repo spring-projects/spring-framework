@@ -309,59 +309,5 @@ TODO: enable when ServerEntityResponse is reintroduced
 	}
 */
 
-/*
-TODO: enable when ServerEntityResponse is reintroduced
-	@Test
-	public void render() throws Exception {
-		Map<String, Object> model = Collections.singletonMap("foo", "bar");
-		Mono<ServerResponse> result = ServerResponse.ok().render("view", model);
-
-
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, URI.create("http://localhost"));
-		MockServerHttpResponse mockResponse = new MockServerHttpResponse();
-		ServerWebExchange exchange = new DefaultServerWebExchange(request, mockResponse, new MockWebSessionManager());
-		ViewResolver viewResolver = mock(ViewResolver.class);
-		View view = mock(View.class);
-		when(viewResolver.resolveViewName("view", Locale.ENGLISH)).thenReturn(Mono.just(view));
-		when(view.render(model, null, exchange)).thenReturn(Mono.empty());
-
-		List<ViewResolver> viewResolvers = new ArrayList<>();
-		viewResolvers.add(viewResolver);
-
-		HandlerStrategies mockConfig = mock(HandlerStrategies.class);
-		when(mockConfig.viewResolvers()).thenReturn(viewResolvers::stream);
-
-		StepVerifier.create(result)
-				.consumeNextWith(response -> {
-					StepVerifier.create(response.body())
-							.expectNextMatches(rendering -> "view".equals(rendering.name())
-									&& model.equals(rendering.model()))
-							.expectComplete()
-							.verify();
-				})
-				.expectComplete()
-				.verify();
-	}
-*/
-
-/*
-TODO: enable when ServerEntityResponse is reintroduced
-
-	@Test
-	public void renderObjectArray() throws Exception {
-		Mono<ServerResponse> result =
-				ServerResponse.ok().render("name", this, Collections.emptyList(), "foo");
-		Flux<Rendering> map = result.flatMap(ServerResponse::body);
-
-		Map<String, Object> expected = new HashMap<>(2);
-		expected.put("defaultServerResponseBuilderTests", this);
-		expected.put("string", "foo");
-
-		StepVerifier.create(map)
-				.expectNextMatches(rendering -> expected.equals(rendering.model()))
-				.expectComplete()
-				.verify();
-	}
-*/
 
 }

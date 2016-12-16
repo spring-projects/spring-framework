@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,23 +21,17 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.Conventions;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -46,16 +40,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Default {@link ServerResponse.BodyBuilder} implementation.
  *
  * @author Arjen Poutsma
+ * @since 5.0
  */
 class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
@@ -197,31 +190,28 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	@Override
 	public Mono<ServerResponse> render(String name, Object... modelAttributes) {
 		Assert.hasLength(name, "'name' must not be empty");
-		return render(name, toModelMap(modelAttributes));
+
+		return new DefaultRenderingResponseBuilder(name)
+				.headers(this.headers)
+				.status(this.statusCode)
+				.modelAttributes(modelAttributes)
+				.build()
+				.map(renderingResponse -> renderingResponse);
 	}
 
 	@Override
 	public Mono<ServerResponse> render(String name, Map<String, ?> model) {
 		Assert.hasLength(name, "'name' must not be empty");
-		Map<String, Object> modelMap = new LinkedHashMap<>();
-		if (model != null) {
-			modelMap.putAll(model);
-		}
-		return Mono
-				.just(new RenderingServerResponse(this.statusCode, this.headers, name, modelMap));
+
+		return new DefaultRenderingResponseBuilder(name)
+				.headers(this.headers)
+				.status(this.statusCode)
+				.modelAttributes(model)
+				.build()
+				.map(renderingResponse -> renderingResponse);
 	}
 
-	private Map<String, Object> toModelMap(Object[] modelAttributes) {
-		if (ObjectUtils.isEmpty(modelAttributes)) {
-			return null;
-		}
-		return Arrays.stream(modelAttributes)
-				.filter(val -> !ObjectUtils.isEmpty(val))
-				.collect(Collectors.toMap(Conventions::getVariableName, val -> val));
-	}
-
-
-	private static abstract class AbstractServerResponse implements ServerResponse {
+	static abstract class AbstractServerResponse implements ServerResponse {
 
 		private final HttpStatus statusCode;
 
@@ -310,40 +300,6 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				}
 			});
 		}
-	}
-
-
-	private static final class RenderingServerResponse extends AbstractServerResponse {
-
-		private final String name;
-
-		private final Map<String, Object> model;
-
-
-		public RenderingServerResponse(HttpStatus statusCode, HttpHeaders headers, String name,
-				Map<String, Object> model) {
-
-			super(statusCode, headers);
-			this.name = name;
-			this.model = Collections.unmodifiableMap(model);
-		}
-
-		@Override
-		public Mono<Void> writeTo(ServerWebExchange exchange, HandlerStrategies strategies) {
-			ServerHttpResponse response = exchange.getResponse();
-			writeStatusAndHeaders(response);
-			MediaType contentType = exchange.getResponse().getHeaders().getContentType();
-			Locale acceptLocale = exchange.getRequest().getHeaders().getAcceptLanguageAsLocale();
-			Locale locale = (acceptLocale != null ? acceptLocale : Locale.getDefault());
-			Stream<ViewResolver> viewResolverStream = strategies.viewResolvers().get();
-			return Flux.fromStream(viewResolverStream)
-					.concatMap(viewResolver -> viewResolver.resolveViewName(this.name, locale))
-					.next()
-					.otherwiseIfEmpty(Mono.error(new IllegalArgumentException("Could not resolve view with name '" +
-							this.name +"'")))
-					.then(view -> view.render(this.model, contentType, exchange));
-		}
-
 	}
 
 }
