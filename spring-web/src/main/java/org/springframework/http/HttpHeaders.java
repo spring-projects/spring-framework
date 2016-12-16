@@ -443,13 +443,16 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Set the acceptable language ranges,
 	 * as specified by the {@literal Accept-Language} header.
 	 * @see Locale.LanguageRange
+	 * @since 5.0
 	 */
 	public void setAcceptLanguage(List<Locale.LanguageRange> languages) {
 		Assert.notNull(languages, "'languages' must not be null");
-		DecimalFormat df = new DecimalFormat("0.0", DECIMAL_FORMAT_SYMBOLS);
-		List<String> values = languages
-				.stream()
-				.map(r -> (r.getWeight() == Locale.LanguageRange.MAX_WEIGHT ? r.getRange() : r.getRange() + ";q=" + df.format(r.getWeight())))
+		DecimalFormat decimal = new DecimalFormat("0.0", DECIMAL_FORMAT_SYMBOLS);
+		List<String> values = languages.stream()
+				.map(range ->
+						range.getWeight() == Locale.LanguageRange.MAX_WEIGHT ?
+								range.getRange() :
+								range.getRange() + ";q=" + decimal.format(range.getWeight()))
 				.collect(Collectors.toList());
 		set(ACCEPT_LANGUAGE, toCommaDelimitedString(values));
 	}
@@ -458,6 +461,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return the acceptable language ranges,
 	 * as specified by the {@literal Accept-Language} header
 	 * @see Locale.LanguageRange
+	 * @since 5.0
 	 */
 	public List<Locale.LanguageRange> getAcceptLanguage() {
 		String value = getFirst(ACCEPT_LANGUAGE);
@@ -465,6 +469,22 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			return Locale.LanguageRange.parse(value);
 		}
 		return Collections.emptyList();
+	}
+
+	/**
+	 * A variant of {@link #getAcceptLanguage()} that converts each
+	 * {@link java.util.Locale.LanguageRange} to a {@link Locale}.
+	 * @since 5.0
+	 */
+	public List<Locale> getAcceptLanguageAsLocales() {
+		List<Locale.LanguageRange> ranges = getAcceptLanguage();
+		if (ranges.isEmpty()) {
+			return Collections.emptyList();
+		}
+		return ranges.stream()
+				.map(range -> Locale.forLanguageTag(range.getRange()))
+				.filter(locale -> StringUtils.hasText(locale.getDisplayName()))
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -767,6 +787,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * as specified by the {@literal Content-Language} header.
 	 * <p>Use {@code set(CONTENT_LANGUAGE, ...)} if you need
 	 * to set multiple content languages.</p>
+	 * @since 5.0
 	 */
 	public void setContentLanguage(Locale locale) {
 		Assert.notNull(locale, "'locale' must not be null");
@@ -779,6 +800,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * <p>Returns {@code null} when the content language is unknown.
 	 * <p>Use {@code getValuesAsList(CONTENT_LANGUAGE)} if you need
 	 * to get multiple content languages.</p>
+	 * @since 5.0
 	 */
 	public Locale getContentLanguage() {
 		return getValuesAsList(CONTENT_LANGUAGE)

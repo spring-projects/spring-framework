@@ -424,30 +424,39 @@ public class HttpHeadersTests {
 
 	@Test
 	public void acceptLanguage() {
-		assertTrue(headers.getAcceptLanguage().isEmpty());
-		String headerValue = "fr-ch, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5";
+		String headerValue = "fr-ch, fr;q=0.9, en-*;q=0.8, de;q=0.7, *;q=0.5";
 		headers.setAcceptLanguage(Locale.LanguageRange.parse(headerValue));
 		assertEquals(headerValue, headers.getFirst(HttpHeaders.ACCEPT_LANGUAGE));
-		List<Locale.LanguageRange> languages = headers.getAcceptLanguage();
-		Locale.LanguageRange[] languageArray = new Locale.LanguageRange[]{
+
+		List<Locale.LanguageRange> expectedRanges = Arrays.asList(
 				new Locale.LanguageRange("fr-ch"),
 				new Locale.LanguageRange("fr", 0.9),
-				new Locale.LanguageRange("en", 0.8),
+				new Locale.LanguageRange("en-*", 0.8),
 				new Locale.LanguageRange("de", 0.7),
 				new Locale.LanguageRange("*", 0.5)
-		};
-		assertArrayEquals(languageArray, languages.toArray());
+		);
+		assertEquals(expectedRanges, headers.getAcceptLanguage());
+
+		List<Locale> expectedLocales = Arrays.asList(
+				Locale.forLanguageTag("fr-ch"),
+				Locale.forLanguageTag("fr"),
+				Locale.forLanguageTag("en"),
+				Locale.forLanguageTag("de")
+		);
+		assertEquals(expectedLocales, headers.getAcceptLanguageAsLocales());
 	}
 
 	@Test
 	public void contentLanguage() {
-		assertNull(headers.getContentLanguage());
 		headers.setContentLanguage(Locale.FRANCE);
 		assertEquals(Locale.FRANCE, headers.getContentLanguage());
 		assertEquals("fr-FR", headers.getFirst(HttpHeaders.CONTENT_LANGUAGE));
-		headers.clear();
-		headers.set(HttpHeaders.CONTENT_LANGUAGE, Locale.GERMAN.toLanguageTag() + ", " + Locale.CANADA);
-		assertEquals(Locale.GERMAN, headers.getContentLanguage());
+	}
+
+	@Test
+	public void contentLanguageSerialized() {
+		headers.set(HttpHeaders.CONTENT_LANGUAGE,  "de, en_CA");
+		assertEquals("Expected one (first) locale", Locale.GERMAN, headers.getContentLanguage());
 	}
 
 }
