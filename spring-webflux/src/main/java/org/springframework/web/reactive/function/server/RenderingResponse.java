@@ -57,7 +57,7 @@ public interface RenderingResponse extends ServerResponse {
 	}
 
 	/**
-	 * Defines a builder that adds a body to the response.
+	 * Defines a builder for {@code RenderingResponse}.
 	 */
 	interface Builder {
 

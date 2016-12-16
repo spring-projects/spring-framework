@@ -127,7 +127,8 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 				this.model));
 	}
 
-	static class DefaultRenderingResponse extends DefaultServerResponseBuilder.AbstractServerResponse
+	private final static class DefaultRenderingResponse
+			extends DefaultServerResponseBuilder.AbstractServerResponse
 			implements RenderingResponse {
 
 		private final String name;

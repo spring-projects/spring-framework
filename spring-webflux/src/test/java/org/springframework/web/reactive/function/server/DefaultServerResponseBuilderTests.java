@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -261,51 +261,5 @@ public class DefaultServerResponseBuilderTests {
 
 		StepVerifier.create(response.getBody()).expectComplete().verify();
 	}
-
-/*
-TODO: enable when ServerEntityResponse is reintroduced
-
-	@Test
-	public void bodyInserter() throws Exception {
-		String body = "foo";
-		Publisher<String> publisher = Mono.just(body);
-		BiFunction<ServerHttpResponse, BodyInserter.Context, Mono<Void>> writer =
-				(response, strategies) -> {
-					byte[] bodyBytes = body.getBytes(UTF_8);
-					ByteBuffer byteBuffer = ByteBuffer.wrap(bodyBytes);
-					DataBuffer buffer = new DefaultDataBufferFactory().wrap(byteBuffer);
-
-					return response.writeWith(Mono.just(buffer));
-				};
-
-		Mono<ServerResponse> result = ServerResponse.ok().body(BodyInserter.of(writer, publisher));
-
-		MockServerHttpRequest request =
-				new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
-		MockServerHttpResponse mockResponse = new MockServerHttpResponse();
-		ServerWebExchange exchange =
-				new DefaultServerWebExchange(request, mockResponse, new MockWebSessionManager());
-
-		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
-		messageWriters.add(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder()));
-
-		HandlerStrategies strategies = mock(HandlerStrategies.class);
-		when(strategies.messageWriters()).thenReturn(messageWriters::stream);
-
-		StepVerifier.create(result)
-				.consumeNextWith(response -> {
-					StepVerifier.create(response.body())
-							.expectNext(body)
-							.expectComplete()
-							.verify();
-					response.writeTo(exchange, strategies);
-				})
-				.expectComplete()
-				.verify();
-
-		assertNotNull(mockResponse.getBody());
-	}
-*/
-
 
 }

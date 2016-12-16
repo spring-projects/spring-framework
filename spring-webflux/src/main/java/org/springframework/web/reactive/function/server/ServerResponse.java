@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -297,7 +297,6 @@ public interface ServerResponse {
 		/**
 		 * Set the length of the body in bytes, as specified by the
 		 * {@code Content-Length} header.
-		 *
 		 * @param contentLength the content length
 		 * @return this builder
 		 * @see HttpHeaders#setContentLength(long)
@@ -307,7 +306,6 @@ public interface ServerResponse {
 		/**
 		 * Set the {@linkplain MediaType media type} of the body, as specified by the
 		 * {@code Content-Type} header.
-		 *
 		 * @param contentType the content type
 		 * @return this builder
 		 * @see HttpHeaders#setContentType(MediaType)
@@ -317,6 +315,8 @@ public interface ServerResponse {
 		/**
 		 * Add a serialization hint like {@link AbstractJackson2Codec#JSON_VIEW_HINT} to
 		 * customize how the body will be serialized.
+		 * @param key the hint key
+		 * @param value the hint value
 		 */
 		BodyBuilder hint(String key, Object value);
 
