@@ -64,18 +64,13 @@ public class WebExchangeDataBinder extends WebDataBinder {
 
 	/**
 	 * Bind the URL query parameters or form data of the body of the given request
-	 * to this binder's target. The request body is parsed if the content-type
-	 * is "application/x-www-form-urlencoded".
+	 * to this binder's target. The request body is parsed if the Content-Type
+	 * is {@code "application/x-www-form-urlencoded"}.
 	 * @param exchange the current exchange.
-	 * @return a {@code Mono<Void>} to indicate the result
+	 * @return a {@code Mono<Void>} when binding is complete
 	 */
 	public Mono<Void> bind(ServerWebExchange exchange) {
-		ServerHttpRequest request = exchange.getRequest();
-		Mono<MultiValueMap<String, String>> queryParams = Mono.just(request.getQueryParams());
-		Mono<MultiValueMap<String, String>> formParams =
-				exchange.getFormData().defaultIfEmpty(new LinkedMultiValueMap<>());
-
-		return Mono.zip(this::mergeParams, queryParams, formParams)
+		return exchange.getRequestParams()
 				.map(this::getParamsToBind)
 				.doOnNext(values -> values.putAll(getMultipartFiles(exchange)))
 				.doOnNext(values -> values.putAll(getExtraValuesToBind(exchange)))
@@ -85,15 +80,8 @@ public class WebExchangeDataBinder extends WebDataBinder {
 				});
 	}
 
-	@SuppressWarnings("unchecked")
-	private MultiValueMap<String, String> mergeParams(Object[] paramMaps) {
-		MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
-		Arrays.stream(paramMaps).forEach(map -> result.putAll((MultiValueMap<String, String>) map));
-		return result;
-	}
-
 	private Map<String, Object> getParamsToBind(MultiValueMap<String, String> params) {
-		Map<String, Object> valuesToBind = new TreeMap<>();
+		Map<String, Object> result = new TreeMap<>();
 		for (Map.Entry<String, List<String>> entry : params.entrySet()) {
 			String name = entry.getKey();
 			List<String> values = entry.getValue();
@@ -102,14 +90,14 @@ public class WebExchangeDataBinder extends WebDataBinder {
 			}
 			else {
 				if (values.size() > 1) {
-					valuesToBind.put(name, values);
+					result.put(name, values);
 				}
 				else {
-					valuesToBind.put(name, values.get(0));
+					result.put(name, values.get(0));
 				}
 			}
 		}
-		return valuesToBind;
+		return result;
 	}
 
 	/**
