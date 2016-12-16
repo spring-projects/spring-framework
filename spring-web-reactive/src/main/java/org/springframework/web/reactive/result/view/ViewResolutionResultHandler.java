@@ -212,7 +212,9 @@ public class ViewResolutionResultHandler extends AbstractHandlerResultHandler
 
 					Mono<List<View>> viewsMono;
 					Model model = result.getModel();
-					Locale locale = Locale.getDefault(); // TODO
+
+					Locale acceptLocale = exchange.getRequest().getHeaders().getAcceptLanguageAsLocale();
+					Locale locale = acceptLocale != null ? acceptLocale : Locale.getDefault();
 
 					Class<?> clazz = elementType.getRawClass();
 					if (clazz == null) {

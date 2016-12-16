@@ -170,7 +170,10 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Rendering FreeMarker template [" + getUrl() + "].");
 		}
-		Locale locale = Locale.getDefault(); // TODO
+
+		Locale acceptLocale = exchange.getRequest().getHeaders().getAcceptLanguageAsLocale();
+		Locale locale = acceptLocale != null ? acceptLocale : Locale.getDefault();
+
 		DataBuffer dataBuffer = exchange.getResponse().bufferFactory().allocateBuffer();
 		try {
 			Charset charset = getCharset(contentType).orElse(getDefaultCharset());

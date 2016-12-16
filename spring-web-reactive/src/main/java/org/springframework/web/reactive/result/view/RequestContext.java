@@ -76,7 +76,9 @@ public class RequestContext {
 		this.model = model;
 		this.messageSource = messageSource;
 		this.defaultHtmlEscape = null; // TODO
-		this.locale = Locale.getDefault(); // TODO
+
+		Locale acceptLocale = exchange.getRequest().getHeaders().getAcceptLanguageAsLocale();
+		this.locale = acceptLocale != null ? acceptLocale : Locale.getDefault();
 		this.timeZone = TimeZone.getDefault(); // TODO
 	}
 
@@ -102,7 +104,6 @@ public class RequestContext {
 
 	/**
 	 * Return the current Locale.
-	 * TODO: currently this is Locale.getDefault()
 	 */
 	public final Locale getLocale() {
 		return this.locale;
@@ -118,7 +119,6 @@ public class RequestContext {
 
 	/**
 	 * Change the current locale to the specified one.
-	 * TODO: currently simply change the internal field
 	 */
 	public void changeLocale(Locale locale) {
 		this.locale = locale;
@@ -126,7 +126,6 @@ public class RequestContext {
 
 	/**
 	 * Change the current locale to the specified locale and time zone context.
-	 * TODO: currently simply change the internal fields
 	 */
 	public void changeLocale(Locale locale, TimeZone timeZone) {
 		this.locale = locale;
@@ -176,8 +175,7 @@ public class RequestContext {
 	 */
 	public String getContextUrl(String relativeUrl) {
 		String url = getContextPath() + relativeUrl;
-		// TODO: this.response.encodeURL(url)
-		return url;
+		return getExchange().getResponse().encodeUrl(url);
 	}
 
 	/**
@@ -194,8 +192,7 @@ public class RequestContext {
 		String url = getContextPath() + relativeUrl;
 		UriTemplate template = new UriTemplate(url);
 		url = template.expand(params).toASCIIString();
-		// TODO: this.response.encodeURL(url)
-		return url;
+		return getExchange().getResponse().encodeUrl(url);
 	}
 
 	/**

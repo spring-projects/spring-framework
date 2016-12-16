@@ -317,7 +317,8 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 			ServerHttpResponse response = exchange.getResponse();
 			writeStatusAndHeaders(response);
 			MediaType contentType = exchange.getResponse().getHeaders().getContentType();
-			Locale locale = Locale.ENGLISH; // TODO: resolve locale
+			Locale acceptLocale = exchange.getRequest().getHeaders().getAcceptLanguageAsLocale();
+			Locale locale = (acceptLocale != null ? acceptLocale : Locale.getDefault());
 			Stream<ViewResolver> viewResolverStream = strategies.viewResolvers().get();
 			return Flux.fromStream(viewResolverStream)
 					.concatMap(viewResolver -> viewResolver.resolveViewName(this.name, locale))
