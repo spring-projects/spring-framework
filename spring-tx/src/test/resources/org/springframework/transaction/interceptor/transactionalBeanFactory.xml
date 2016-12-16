@@ -58,9 +58,9 @@
 	</bean>
 
 	<!--
-		Same as proxyFactory2DynamicProxy but forces the use of CGLIB.
+		Same as proxyFactory2DynamicProxy but forces the use of class-based proxies.
 	-->
-	<bean id="proxyFactory2Cglib" parent="baseProxyFactory">
+	<bean id="proxyFactory2ClassBased" parent="baseProxyFactory">
 		<property name="proxyTargetClass"><value>true</value></property>
 		<property name="target"><ref bean="target"/></property>
 	</bean>
@@ -91,7 +91,7 @@
 		</property>
 	</bean>
 
-	<bean name="cglibNoInterfaces" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+	<bean name="classBasedNoInterfaces" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref bean="mockMan"/></property>
 		<property name="target">
 			<bean class="org.springframework.transaction.interceptor.ImplementsNoInterfaces">

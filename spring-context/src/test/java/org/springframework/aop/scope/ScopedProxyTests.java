@@ -127,7 +127,7 @@ public class ScopedProxyTests {
 		bf.registerScope("request", scope);
 
 		TestBean tb = (TestBean) bf.getBean("testBean");
-		assertThat(AopUtils.isCglibProxy(tb.getFriends())).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(tb.getFriends())).isTrue();
 		boolean condition1 = tb.getFriends() instanceof ScopedObject;
 		assertThat(condition1).isTrue();
 		ScopedObject scoped = (ScopedObject) tb.getFriends();
@@ -139,7 +139,7 @@ public class ScopedProxyTests {
 
 		ArrayList<?> deserialized = (ArrayList<?>) SerializationTestUtils.serializeAndDeserialize(tb.getFriends());
 		assertThat(deserialized).isNotNull();
-		assertThat(AopUtils.isCglibProxy(deserialized)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(deserialized)).isTrue();
 		assertThat(deserialized.contains("myFriend")).isTrue();
 		boolean condition = deserialized instanceof ScopedObject;
 		assertThat(condition).isTrue();

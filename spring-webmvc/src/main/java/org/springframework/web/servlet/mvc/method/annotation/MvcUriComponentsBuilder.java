@@ -29,14 +29,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.cglib.core.SpringNamingPolicy;
-import org.springframework.cglib.proxy.Callback;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.Factory;
-import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.MethodParameter;
@@ -44,13 +37,10 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.lang.Nullable;
-import org.springframework.objenesis.ObjenesisException;
-import org.springframework.objenesis.SpringObjenesis;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PathMatcher;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -102,8 +92,6 @@ public class MvcUriComponentsBuilder {
 
 
 	private static final Log logger = LogFactory.getLog(MvcUriComponentsBuilder.class);
-
-	private static final SpringObjenesis objenesis = new SpringObjenesis();
 
 	private static final PathMatcher pathMatcher = new AntPathMatcher();
 
@@ -380,7 +368,16 @@ public class MvcUriComponentsBuilder {
 	 */
 	public static <T> T controller(Class<T> controllerType) {
 		Assert.notNull(controllerType, "'controllerType' must not be null");
-		return ControllerMethodInvocationInterceptor.initProxy(controllerType, null);
+		String codegen = System.getProperty("org.springframework.codegen", "cglib");
+		if (codegen.equalsIgnoreCase("cglib")) {
+			return CglibControllerProxyFactory.initProxy(controllerType, null);
+		}
+		else if (codegen.equalsIgnoreCase("bytebuddy")) {
+			return ByteBuddyControllerProxyFactory.initProxy(controllerType, null);
+		}
+		else {
+			throw new IllegalStateException("Unknown code generation strategy: " + codegen + " - must be [cglib, bytebuddy]");
+		}
 	}
 
 	/**
@@ -699,122 +696,7 @@ public class MvcUriComponentsBuilder {
 	}
 
 
-	private static class ControllerMethodInvocationInterceptor
-			implements org.springframework.cglib.proxy.MethodInterceptor, MethodInterceptor, MethodInvocationInfo {
-
-		private final Class<?> controllerType;
-
-		@Nullable
-		private Method controllerMethod;
-
-		@Nullable
-		private Object[] argumentValues;
-
-		ControllerMethodInvocationInterceptor(Class<?> controllerType) {
-			this.controllerType = controllerType;
-		}
-
-		@Override
-		@Nullable
-		public Object intercept(Object obj, Method method, Object[] args, @Nullable MethodProxy proxy) {
-			switch (method.getName()) {
-				case "getControllerType": return this.controllerType;
-				case "getControllerMethod": return this.controllerMethod;
-				case "getArgumentValues": return this.argumentValues;
-			}
-			if (ReflectionUtils.isObjectMethod(method)) {
-				return ReflectionUtils.invokeMethod(method, obj, args);
-			}
-			else {
-				this.controllerMethod = method;
-				this.argumentValues = args;
-				Class<?> returnType = method.getReturnType();
-				try {
-					return (returnType == void.class ? null : returnType.cast(initProxy(returnType, this)));
-				}
-				catch (Throwable ex) {
-					throw new IllegalStateException(
-							"Failed to create proxy for controller method return type: " + method, ex);
-				}
-			}
-		}
-
-		@Override
-		@Nullable
-		public Object invoke(org.aopalliance.intercept.MethodInvocation inv) throws Throwable {
-			return intercept(inv.getThis(), inv.getMethod(), inv.getArguments(), null);
-		}
-
-		@Override
-		public Class<?> getControllerType() {
-			return this.controllerType;
-		}
-
-		@Override
-		public Method getControllerMethod() {
-			Assert.state(this.controllerMethod != null, "Not initialized yet");
-			return this.controllerMethod;
-		}
-
-		@Override
-		public Object[] getArgumentValues() {
-			Assert.state(this.argumentValues != null, "Not initialized yet");
-			return this.argumentValues;
-		}
-
-
-		@SuppressWarnings("unchecked")
-		private static <T> T initProxy(
-				Class<?> controllerType, @Nullable ControllerMethodInvocationInterceptor interceptor) {
-
-			interceptor = interceptor != null ?
-					interceptor : new ControllerMethodInvocationInterceptor(controllerType);
-
-			if (controllerType == Object.class) {
-				return (T) interceptor;
-			}
-
-			else if (controllerType.isInterface()) {
-				ProxyFactory factory = new ProxyFactory(EmptyTargetSource.INSTANCE);
-				factory.addInterface(controllerType);
-				factory.addInterface(MethodInvocationInfo.class);
-				factory.addAdvice(interceptor);
-				return (T) factory.getProxy();
-			}
-
-			else {
-				Enhancer enhancer = new Enhancer();
-				enhancer.setSuperclass(controllerType);
-				enhancer.setInterfaces(new Class<?>[] {MethodInvocationInfo.class});
-				enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-				enhancer.setCallbackType(org.springframework.cglib.proxy.MethodInterceptor.class);
-
-				Class<?> proxyClass = enhancer.createClass();
-				Object proxy = null;
-
-				if (objenesis.isWorthTrying()) {
-					try {
-						proxy = objenesis.newInstance(proxyClass, enhancer.getUseCache());
-					}
-					catch (ObjenesisException ex) {
-						logger.debug("Failed to create controller proxy, falling back on default constructor", ex);
-					}
-				}
-
-				if (proxy == null) {
-					try {
-						proxy = ReflectionUtils.accessibleConstructor(proxyClass).newInstance();
-					}
-					catch (Throwable ex) {
-						throw new IllegalStateException(
-								"Failed to create controller proxy or use default constructor", ex);
-					}
-				}
-
-				((Factory) proxy).setCallbacks(new Callback[] {interceptor});
-				return (T) proxy;
-			}
-		}
+	interface ControllerMethodInvocationInterceptor extends MethodInterceptor, MethodInvocationInfo {
 	}
 
 

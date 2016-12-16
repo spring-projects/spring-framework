@@ -187,8 +187,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (IN_NATIVE_IMAGE) {
 			this.instantiationStrategy = new SimpleInstantiationStrategy();
 		}
-		else {
+		String codegen = System.getProperty("org.springframework.codegen", "cglib");
+		if (codegen.equalsIgnoreCase("cglib")) {
 			this.instantiationStrategy = new CglibSubclassingInstantiationStrategy();
+		}
+		else if (codegen.equalsIgnoreCase("bytebuddy")) {
+			this.instantiationStrategy = new ByteBuddySubclassingInstantiationStrategy();
+		}
+		else {
+			throw new IllegalStateException("Unknown code generation strategy: " + codegen + " - must be [cglib, bytebuddy]");
 		}
 	}
 

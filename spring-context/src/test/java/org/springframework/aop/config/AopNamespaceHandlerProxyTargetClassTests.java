@@ -33,7 +33,7 @@ public class AopNamespaceHandlerProxyTargetClassTests extends AopNamespaceHandle
 	@Test
 	public void testIsClassProxy() {
 		ITestBean bean = getTestBean();
-		assertThat(AopUtils.isCglibProxy(bean)).as("Should be a CGLIB proxy").isTrue();
+		assertThat(AopUtils.isClassBasedProxy(bean)).as("Should be a class-based proxy").isTrue();
 		assertThat(((Advised) bean).isExposeProxy()).as("Should expose proxy").isTrue();
 	}
 

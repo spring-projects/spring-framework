@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class Spr7167Tests {
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void test() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
 
@@ -41,7 +42,7 @@ public class Spr7167Tests {
 				.isEqualTo("post processed by MyPostProcessor");
 
 		MyConfig config = ctx.getBean(MyConfig.class);
-		assertThat(ClassUtils.isCglibProxy(config)).as("Config class was not enhanced").isTrue();
+		assertThat(ClassUtils.isClassBasedProxy(config)).as("Config class was not a class-based proxy").isTrue();
 	}
 
 }

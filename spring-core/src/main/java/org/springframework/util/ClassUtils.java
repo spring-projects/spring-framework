@@ -80,6 +80,9 @@ public abstract class ClassUtils {
 	/** The CGLIB class separator: {@code "$$"}. */
 	public static final String CGLIB_CLASS_SEPARATOR = "$$";
 
+	/** The Byte Buddy class infix: {@code "SpringProxy"}. */
+	public static final String BYTE_BUDDY_CLASS_INFIX = "SpringProxy";
+
 	/** The ".class" file suffix. */
 	public static final String CLASS_FILE_SUFFIX = ".class";
 
@@ -876,6 +879,72 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Check whether the given object is a Byte Buddy proxy.
+	 * @param object the object to check
+	 * @see #isByteBuddyProxyClass(Class)
+	 * @see org.springframework.aop.support.AopUtils#isByteBuddyProxy(Object)
+	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
+	 */
+	@Deprecated
+	public static boolean isByteBuddyProxy(Object object) {
+		return isByteBuddyProxyClass(object.getClass());
+	}
+
+	/**
+	 * Check whether the specified class is a Byte Buddy-generated class.
+	 * @param clazz the class to check
+	 * @see #isByteBuddyProxyClassName(String)
+	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
+	 */
+	@Deprecated
+	public static boolean isByteBuddyProxyClass(@Nullable Class<?> clazz) {
+		return (clazz != null && isByteBuddyProxyClassName(clazz.getName()));
+	}
+
+	/**
+	 * Check whether the specified class name is a Byte Buddy-generated class.
+	 * @param className the class name to check
+	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
+	 */
+	@Deprecated
+	public static boolean isByteBuddyProxyClassName(@Nullable String className) {
+		return (className != null && className.contains(BYTE_BUDDY_CLASS_INFIX));
+	}
+
+	/**
+	 * Check whether the given object is a class-based proxy.
+	 * @param object the object to check
+	 * @see #isByteBuddyProxyClass(Class)
+	 * @see org.springframework.aop.support.AopUtils#isClassBasedProxy(Object)
+	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
+	 */
+	@Deprecated
+	public static boolean isClassBasedProxy(Object object) {
+		return isClassBasedProxyClass(object.getClass());
+	}
+
+	/**
+	 * Check whether the specified class is a class-based proxy class.
+	 * @param clazz the class to check
+	 * @see #isClassBasedProxyClassName(String)
+	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
+	 */
+	@Deprecated
+	public static boolean isClassBasedProxyClass(@Nullable Class<?> clazz) {
+		return (clazz != null && isClassBasedProxyClassName(clazz.getName()));
+	}
+
+	/**
+	 * Check whether the specified class name is a class-based proxy class.
+	 * @param className the class name to check
+	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
+	 */
+	@Deprecated
+	public static boolean isClassBasedProxyClassName(@Nullable String className) {
+		return (className != null && (className.contains(CGLIB_CLASS_SEPARATOR) || className.contains(BYTE_BUDDY_CLASS_INFIX)));
+	}
+
+	/**
 	 * Return the user-defined class for the given instance: usually simply
 	 * the class of the given instance, but the original class in case of a
 	 * CGLIB-generated subclass.
@@ -894,7 +963,7 @@ public abstract class ClassUtils {
 	 * @return the user-defined class
 	 */
 	public static Class<?> getUserClass(Class<?> clazz) {
-		if (clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
+		if (clazz.getName().contains(CGLIB_CLASS_SEPARATOR) || clazz.getName().contains(BYTE_BUDDY_CLASS_INFIX)) {
 			Class<?> superclass = clazz.getSuperclass();
 			if (superclass != null && superclass != Object.class) {
 				return superclass;
@@ -949,6 +1018,12 @@ public abstract class ClassUtils {
 		Assert.hasLength(className, "Class name must not be empty");
 		int lastDotIndex = className.lastIndexOf(PACKAGE_SEPARATOR);
 		int nameEndIndex = className.indexOf(CGLIB_CLASS_SEPARATOR);
+		if (nameEndIndex == -1) {
+			nameEndIndex = className.indexOf(BYTE_BUDDY_CLASS_INFIX);
+			if (nameEndIndex != -1) {
+				nameEndIndex -= 1;
+			}
+		}
 		if (nameEndIndex == -1) {
 			nameEndIndex = className.length();
 		}

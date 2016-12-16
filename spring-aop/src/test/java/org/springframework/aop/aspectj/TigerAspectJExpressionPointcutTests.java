@@ -156,7 +156,7 @@ public class TigerAspectJExpressionPointcutTests {
 	}
 
 	@Test
-	public void testAnnotationOnCglibProxyMethod() throws Exception {
+	public void testAnnotationOnClassBasedProxyMethod() throws Exception {
 		String expression = "@annotation(test.annotation.transaction.Tx)";
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 		ajexp.setExpression(expression);

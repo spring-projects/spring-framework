@@ -88,7 +88,7 @@ class EnableTransactionManagementIntegrationTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class, ProxyTargetClassTxConfig.class);
 
 		assertTxProxying(ctx);
-		assertThat(AopUtils.isCglibProxy(ctx.getBean(FooRepository.class))).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(ctx.getBean(FooRepository.class))).isTrue();
 	}
 
 	@Test

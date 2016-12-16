@@ -49,11 +49,11 @@ public class EnableAspectJAutoProxyTests {
 	}
 
 	@Test
-	public void withCglibProxy() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithCglibProxy.class);
+	public void withClassBasedProxy() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithClassBasedProxy.class);
 
 		aspectIsApplied(ctx);
-		assertThat(AopUtils.isCglibProxy(ctx.getBean(FooService.class))).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(ctx.getBean(FooService.class))).isTrue();
 	}
 
 	@Test
@@ -96,7 +96,7 @@ public class EnableAspectJAutoProxyTests {
 	@Test
 	public void withAnnotationOnArgumentAndCglibProxy() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(
-				ConfigWithCglibProxy.class, SampleService.class, LoggingAspect.class);
+				ConfigWithClassBasedProxy.class, SampleService.class, LoggingAspect.class);
 
 		SampleService sampleService = ctx.getBean(SampleService.class);
 		sampleService.execute(new SampleDto());
@@ -114,7 +114,7 @@ public class EnableAspectJAutoProxyTests {
 
 	@ComponentScan("example.scannable")
 	@EnableAspectJAutoProxy(proxyTargetClass = true)
-	static class ConfigWithCglibProxy {
+	static class ConfigWithClassBasedProxy {
 	}
 
 

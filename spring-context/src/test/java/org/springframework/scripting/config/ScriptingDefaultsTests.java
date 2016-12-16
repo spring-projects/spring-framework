@@ -89,7 +89,7 @@ public class ScriptingDefaultsTests {
 	public void defaultProxyTargetClass() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(PROXY_CONFIG);
 		Object testBean = context.getBean("testBean");
-		assertThat(AopUtils.isCglibProxy(testBean)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(testBean)).isTrue();
 	}
 
 }

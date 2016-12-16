@@ -55,6 +55,7 @@ public class ClassPathFactoryBeanDefinitionScannerTests {
 
 		FactoryMethodComponent fmc = context.getBean("factoryMethodComponent", FactoryMethodComponent.class);
 		assertThat(fmc.getClass().getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR)).isFalse();
+		assertThat(fmc.getClass().getName().contains(ClassUtils.BYTE_BUDDY_CLASS_INFIX)).isFalse();
 
 		TestBean tb = (TestBean) context.getBean("publicInstance"); //2
 		assertThat(tb.getName()).isEqualTo("publicInstance");
@@ -78,7 +79,7 @@ public class ClassPathFactoryBeanDefinitionScannerTests {
 		assertThat(tb).isNotSameAs(tb2);
 
 		Object bean = context.getBean("requestScopedInstance"); //5
-		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(bean)).isTrue();
 		boolean condition = bean instanceof ScopedObject;
 		assertThat(condition).isTrue();
 

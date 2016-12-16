@@ -125,11 +125,11 @@ class ReflectionTestUtilsTests {
 	}
 
 	@Test
-	void setFieldAndGetFieldViaCglibProxy() throws Exception {
+	void setFieldAndGetFieldViaClassBasedProxy() throws Exception {
 		ProxyFactory pf = new ProxyFactory(this.person);
 		pf.setProxyTargetClass(true);
 		Person proxy = (Person) pf.getProxy();
-		assertThat(AopUtils.isCglibProxy(proxy)).as("Proxy is a CGLIB proxy").isTrue();
+		assertThat(AopUtils.isClassBasedProxy(proxy)).as("Proxy is a class-based proxy").isTrue();
 		assertSetFieldAndGetFieldBehaviorForProxy(proxy, this.person);
 	}
 

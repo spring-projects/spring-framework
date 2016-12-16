@@ -66,7 +66,7 @@ public class AnnotationDrivenTests {
 		CallCountingTransactionManager tm1 = context.getBean("transactionManager1", CallCountingTransactionManager.class);
 		CallCountingTransactionManager tm2 = context.getBean("transactionManager2", CallCountingTransactionManager.class);
 		TransactionalService service = context.getBean("service", TransactionalService.class);
-		assertThat(AopUtils.isCglibProxy(service)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(service)).isTrue();
 		service.setSomething("someName");
 		assertThat(tm1.commits).isEqualTo(1);
 		assertThat(tm2.commits).isEqualTo(0);

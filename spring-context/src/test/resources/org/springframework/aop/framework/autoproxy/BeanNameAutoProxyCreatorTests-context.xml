@@ -20,10 +20,10 @@
 		<property name="interceptorNames" value="nopInterceptor" />
 	</bean>
 
-	<bean id="_cglibBeanNameProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
-		<property name="beanNames" value="cglib*" />
+	<bean id="_classBasedBeanNameProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+		<property name="beanNames" value="classBased*" />
 		<property name="proxyTargetClass">
-			<description>Use the inherited ProxyConfig property to force CGLIB proxying</description>
+			<description>Use the inherited ProxyConfig property to force class-based proxying</description>
 			<value>true</value>
 		</property>
 		<property name="interceptorNames">
@@ -88,8 +88,8 @@
 
 	<alias name="frozen" alias="frozenBean"/>
 
-	<bean id="cglib1" class="org.springframework.beans.testfixture.beans.TestBean">
-		<property name="name" value="cglib1" />
+	<bean id="classBased1" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name" value="classBased1" />
 	</bean>
 
 	<bean id="onlyJdk" class="org.springframework.beans.testfixture.beans.TestBean">

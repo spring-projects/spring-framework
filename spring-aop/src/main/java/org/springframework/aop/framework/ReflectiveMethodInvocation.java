@@ -105,7 +105,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * as far as was possibly statically. Passing an array might be about 10% faster,
 	 * but would complicate the code. And it would work only for static pointcuts.
 	 */
-	protected ReflectiveMethodInvocation(
+	public ReflectiveMethodInvocation(
 			Object proxy, @Nullable Object target, Method method, @Nullable Object[] arguments,
 			@Nullable Class<?> targetClass, List<Object> interceptorsAndDynamicMethodMatchers) {
 

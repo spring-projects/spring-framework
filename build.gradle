@@ -53,6 +53,7 @@ configure(allprojects) { project ->
 				entry 'aspectjtools'
 				entry 'aspectjweaver'
 			}
+			dependency "net.bytebuddy:byte-buddy:1.10.13"  // requires findbugs for warning-free compilation
 			dependencySet(group: 'org.codehaus.groovy', version: '3.0.7') {
 				entry 'groovy'
 				entry 'groovy-jsr223'

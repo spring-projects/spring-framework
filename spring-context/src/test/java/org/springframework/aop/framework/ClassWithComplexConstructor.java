@@ -42,8 +42,8 @@ public class ClassWithComplexConstructor {
 	}
 
 	public void method() {
-		Assert.state(this.selfReference != this && AopUtils.isCglibProxy(this.selfReference),
-				"Self reference must be a CGLIB proxy");
+		Assert.state(this.selfReference != this && AopUtils.isClassBasedProxy(this.selfReference),
+				"Self reference must be a class-based proxy");
 		this.dependency.method();
 	}
 

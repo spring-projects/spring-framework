@@ -1207,7 +1207,7 @@ class XmlBeanFactoryTests {
 	 */
 	@Test
 	@SuppressWarnings("deprecation")
-	void methodInjectedBeanMustBeOfSameEnhancedCglibSubclassTypeAcrossBeanFactories() {
+	void methodInjectedBeanMustBeOfSameEnhancedClassBasedSubclassTypeAcrossBeanFactories() {
 		Class<?> firstClass = null;
 
 		for (int i = 0; i < 10; i++) {
@@ -1215,7 +1215,7 @@ class XmlBeanFactoryTests {
 			new XmlBeanDefinitionReader(bf).loadBeanDefinitions(OVERRIDES_CONTEXT);
 
 			final Class<?> currentClass = bf.getBean("overrideOneMethod").getClass();
-			assertThat(ClassUtils.isCglibProxyClass(currentClass)).as("Method injected bean class [" + currentClass + "] must be a CGLIB enhanced subclass.").isTrue();
+			assertThat(ClassUtils.isClassBasedProxyClass(currentClass)).as("Method injected bean class [" + currentClass + "] must be a class-based enhanced subclass.").isTrue();
 
 			if (firstClass == null) {
 				firstClass = currentClass;
@@ -1238,7 +1238,7 @@ class XmlBeanFactoryTests {
 		lookupOverrideMethodsWithSetterInjection(xbf, "overrideInheritedMethod", true);
 
 		// Check cost of repeated construction of beans with method overrides
-		// Will pick up misuse of CGLIB
+		// Will pick up misuse of class-based proxies
 		int howMany = 100;
 		StopWatch sw = new StopWatch();
 		sw.start("Look up " + howMany + " prototype bean instances with method overrides");

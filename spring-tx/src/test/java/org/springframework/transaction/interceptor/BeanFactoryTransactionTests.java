@@ -87,9 +87,9 @@ public class BeanFactoryTransactionTests {
 	}
 
 	@Test
-	public void testGetsAreNotTransactionalWithProxyFactory2Cglib() {
-		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2Cglib");
-		assertThat(AopUtils.isCglibProxy(testBean)).as("testBean is CGLIB advised").isTrue();
+	public void testGetsAreNotTransactionalWithProxyFactory2ClassBased() {
+		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2ClassBased");
+		assertThat(AopUtils.isClassBasedProxy(testBean)).as("testBean is class-based advised").isTrue();
 		boolean condition = testBean instanceof TransactionalProxy;
 		assertThat(condition).isTrue();
 		doTestGetsAreNotTransactional(testBean);
@@ -104,9 +104,9 @@ public class BeanFactoryTransactionTests {
 	}
 
 	@Test
-	public void testCglibTransactionProxyImplementsNoInterfaces() {
-		ImplementsNoInterfaces ini = (ImplementsNoInterfaces) factory.getBean("cglibNoInterfaces");
-		assertThat(AopUtils.isCglibProxy(ini)).as("testBean is CGLIB advised").isTrue();
+	public void testClassBasedTransactionProxyImplementsNoInterfaces() {
+		ImplementsNoInterfaces ini = (ImplementsNoInterfaces) factory.getBean("classBasedNoInterfaces");
+		assertThat(AopUtils.isClassBasedProxy(ini)).as("testBean is class-based advised").isTrue();
 		boolean condition = ini instanceof TransactionalProxy;
 		assertThat(condition).isTrue();
 		String newName = "Gordon";

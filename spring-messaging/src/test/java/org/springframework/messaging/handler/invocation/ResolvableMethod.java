@@ -29,16 +29,9 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.aopalliance.intercept.MethodInterceptor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.EmptyTargetSource;
-import org.springframework.cglib.core.SpringNamingPolicy;
-import org.springframework.cglib.proxy.Callback;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.Factory;
-import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.MethodParameter;
@@ -48,8 +41,6 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.lang.Nullable;
-import org.springframework.objenesis.ObjenesisException;
-import org.springframework.objenesis.SpringObjenesis;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -126,10 +117,6 @@ import static java.util.stream.Collectors.joining;
  * @since 5.2
  */
 public class ResolvableMethod {
-
-	private static final Log logger = LogFactory.getLog(ResolvableMethod.class);
-
-	private static final SpringObjenesis objenesis = new SpringObjenesis();
 
 	private static final ParameterNameDiscoverer nameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
@@ -615,8 +602,7 @@ public class ResolvableMethod {
 	}
 
 
-	private static class MethodInvocationInterceptor
-			implements org.springframework.cglib.proxy.MethodInterceptor, MethodInterceptor {
+	private static class MethodInvocationInterceptor implements MethodInterceptor {
 
 		private Method invokedMethod;
 
@@ -627,25 +613,19 @@ public class ResolvableMethod {
 
 		@Override
 		@Nullable
-		public Object intercept(Object object, Method method, Object[] args, MethodProxy proxy) {
-			if (ReflectionUtils.isObjectMethod(method)) {
-				return ReflectionUtils.invokeMethod(method, object, args);
+		public Object invoke(org.aopalliance.intercept.MethodInvocation inv) throws Throwable {
+			if (ReflectionUtils.isObjectMethod(inv.getMethod())) {
+				return ReflectionUtils.invokeMethod(inv.getMethod(), inv.getThis(), inv.getArguments());
 			}
 			else {
-				this.invokedMethod = method;
+				this.invokedMethod = inv.getMethod();
 				return null;
 			}
-		}
-
-		@Override
-		@Nullable
-		public Object invoke(org.aopalliance.intercept.MethodInvocation inv) throws Throwable {
-			return intercept(inv.getThis(), inv.getMethod(), inv.getArguments(), null);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> T initProxy(Class<?> type, MethodInvocationInterceptor interceptor) {
+	private static <T> T initProxy(Class<?> type, MethodInterceptor interceptor) {
 		Assert.notNull(type, "'type' must not be null");
 		if (type.isInterface()) {
 			ProxyFactory factory = new ProxyFactory(EmptyTargetSource.INSTANCE);
@@ -654,38 +634,15 @@ public class ResolvableMethod {
 			factory.addAdvice(interceptor);
 			return (T) factory.getProxy();
 		}
-
+		String codegen = System.getProperty("org.springframework.codegen", "cglib");
+		if (codegen.equalsIgnoreCase("cglib")) {
+			return (T) new CglibMethodProxy().createProxy(type, interceptor);
+		}
+		else if (codegen.equalsIgnoreCase("bytebuddy")) {
+			return (T) new ByteBuddyMethodProxy().createProxy(type, interceptor);
+		}
 		else {
-			Enhancer enhancer = new Enhancer();
-			enhancer.setSuperclass(type);
-			enhancer.setInterfaces(new Class<?>[] {Supplier.class});
-			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-			enhancer.setCallbackType(org.springframework.cglib.proxy.MethodInterceptor.class);
-
-			Class<?> proxyClass = enhancer.createClass();
-			Object proxy = null;
-
-			if (objenesis.isWorthTrying()) {
-				try {
-					proxy = objenesis.newInstance(proxyClass, enhancer.getUseCache());
-				}
-				catch (ObjenesisException ex) {
-					logger.debug("Objenesis failed, falling back to default constructor", ex);
-				}
-			}
-
-			if (proxy == null) {
-				try {
-					proxy = ReflectionUtils.accessibleConstructor(proxyClass).newInstance();
-				}
-				catch (Throwable ex) {
-					throw new IllegalStateException("Unable to instantiate proxy " +
-							"via both Objenesis and default constructor fails as well", ex);
-				}
-			}
-
-			((Factory) proxy).setCallbacks(new Callback[] {interceptor});
-			return (T) proxy;
+			throw new IllegalStateException("Unknown code generation strategy: " + codegen + " - must be [cglib, bytebuddy]");
 		}
 	}
 

@@ -120,19 +120,19 @@ public class RequestContextHolderTests {
 
 	@Test
 	public void requestScopedController() throws Exception {
-		assertThat(AopUtils.isCglibProxy(this.requestScopedController)).as("request-scoped controller must be a CGLIB proxy").isTrue();
+		assertThat(AopUtils.isClassBasedProxy(this.requestScopedController)).as("request-scoped controller must be a CGLIB proxy").isTrue();
 		this.mockMvc.perform(get("/requestScopedController").requestAttr(FROM_MVC_TEST_MOCK, FROM_MVC_TEST_MOCK));
 	}
 
 	@Test
 	public void requestScopedService() throws Exception {
-		assertThat(AopUtils.isCglibProxy(this.requestScopedService)).as("request-scoped service must be a CGLIB proxy").isTrue();
+		assertThat(AopUtils.isClassBasedProxy(this.requestScopedService)).as("request-scoped service must be a CGLIB proxy").isTrue();
 		this.mockMvc.perform(get("/requestScopedService").requestAttr(FROM_MVC_TEST_MOCK, FROM_MVC_TEST_MOCK));
 	}
 
 	@Test
 	public void sessionScopedService() throws Exception {
-		assertThat(AopUtils.isCglibProxy(this.sessionScopedService)).as("session-scoped service must be a CGLIB proxy").isTrue();
+		assertThat(AopUtils.isClassBasedProxy(this.sessionScopedService)).as("session-scoped service must be a CGLIB proxy").isTrue();
 		this.mockMvc.perform(get("/sessionScopedService").requestAttr(FROM_MVC_TEST_MOCK, FROM_MVC_TEST_MOCK));
 	}
 

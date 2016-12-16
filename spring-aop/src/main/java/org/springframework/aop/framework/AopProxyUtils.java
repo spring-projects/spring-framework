@@ -83,7 +83,7 @@ public abstract class AopProxyUtils {
 			current = getSingletonTarget(current);
 		}
 		if (result == null) {
-			result = (AopUtils.isCglibProxy(candidate) ? candidate.getClass().getSuperclass() : candidate.getClass());
+			result = (AopUtils.isClassBasedProxy(candidate) ? candidate.getClass().getSuperclass() : candidate.getClass());
 		}
 		return result;
 	}

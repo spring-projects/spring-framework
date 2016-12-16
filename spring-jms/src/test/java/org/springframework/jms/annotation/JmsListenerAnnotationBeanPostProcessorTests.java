@@ -127,7 +127,7 @@ class JmsListenerAnnotationBeanPostProcessorTests {
 			JmsListenerEndpoint endpoint = factory.getListenerContainers().get(0).getEndpoint();
 			assertThat(endpoint.getClass()).as("Wrong endpoint type").isEqualTo(MethodJmsListenerEndpoint.class);
 			MethodJmsListenerEndpoint methodEndpoint = (MethodJmsListenerEndpoint) endpoint;
-			assertThat(AopUtils.isCglibProxy(methodEndpoint.getBean())).isTrue();
+			assertThat(AopUtils.isClassBasedProxy(methodEndpoint.getBean())).isTrue();
 			boolean condition = methodEndpoint.getBean() instanceof ClassProxyTestBean;
 			assertThat(condition).isTrue();
 			assertThat(methodEndpoint.getMethod()).isEqualTo(ClassProxyTestBean.class.getMethod("handleIt", String.class, String.class));

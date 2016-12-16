@@ -26,6 +26,8 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.reactivestreams:reactive-streams")
+	optional("net.bytebuddy:byte-buddy")
+	compileOnly("com.google.code.findbugs:findbugs")
 	testCompile(testFixtures(project(":spring-aop")))
 	testCompile(testFixtures(project(":spring-beans")))
 	testCompile(testFixtures(project(":spring-core")))

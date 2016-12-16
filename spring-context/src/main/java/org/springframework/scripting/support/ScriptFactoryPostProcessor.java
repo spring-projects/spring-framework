@@ -26,9 +26,6 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.asm.Type;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanCreationException;
@@ -44,8 +41,6 @@ import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostP
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.cglib.core.Signature;
-import org.springframework.cglib.proxy.InterfaceMaker;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.Conventions;
 import org.springframework.core.Ordered;
@@ -57,7 +52,6 @@ import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} that
@@ -497,28 +491,21 @@ public class ScriptFactoryPostProcessor implements SmartInstantiationAwareBeanPo
 	 * @param interfaces the interfaces to check against (might define
 	 * getters corresponding to the setters we're supposed to generate)
 	 * @return the config interface
-	 * @see org.springframework.cglib.proxy.InterfaceMaker
 	 * @see org.springframework.beans.BeanUtils#findPropertyType
 	 */
 	protected Class<?> createConfigInterface(BeanDefinition bd, @Nullable Class<?>[] interfaces) {
-		InterfaceMaker maker = new InterfaceMaker();
-		PropertyValue[] pvs = bd.getPropertyValues().getPropertyValues();
-		for (PropertyValue pv : pvs) {
-			String propertyName = pv.getName();
-			Class<?> propertyType = BeanUtils.findPropertyType(propertyName, interfaces);
-			String setterName = "set" + StringUtils.capitalize(propertyName);
-			Signature signature = new Signature(setterName, Type.VOID_TYPE, new Type[] {Type.getType(propertyType)});
-			maker.add(signature, new Type[0]);
+		InterfaceFactory interfaceFactory;
+		String codegen = System.getProperty("org.springframework.codegen", "cglib");
+		if (codegen.equalsIgnoreCase("cglib")) {
+			interfaceFactory = new CglibInterfaceFactory();
 		}
-		if (bd.getInitMethodName() != null) {
-			Signature signature = new Signature(bd.getInitMethodName(), Type.VOID_TYPE, new Type[0]);
-			maker.add(signature, new Type[0]);
+		else if (codegen.equalsIgnoreCase("bytebuddy")) {
+			interfaceFactory = new ByteBuddyInterfaceFactory();
 		}
-		if (StringUtils.hasText(bd.getDestroyMethodName())) {
-			Signature signature = new Signature(bd.getDestroyMethodName(), Type.VOID_TYPE, new Type[0]);
-			maker.add(signature, new Type[0]);
+		else {
+			throw new IllegalStateException("Unknown code generation strategy: " + codegen + " - must be [cglib, bytebuddy]");
 		}
-		return maker.create();
+		return interfaceFactory.createConfigInterface(bd, interfaces);
 	}
 
 	/**

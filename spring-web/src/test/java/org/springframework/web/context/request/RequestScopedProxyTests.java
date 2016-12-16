@@ -59,7 +59,7 @@ public class RequestScopedProxyTests {
 	public void testGetFromScope() {
 		String name = "requestScopedObject";
 		TestBean bean = (TestBean) this.beanFactory.getBean(name);
-		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(bean)).isTrue();
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		RequestAttributes requestAttributes = new ServletRequestAttributes(request);
@@ -109,7 +109,7 @@ public class RequestScopedProxyTests {
 	public void testDestructionAtRequestCompletion() {
 		String name = "requestScopedDisposableObject";
 		DerivedTestBean bean = (DerivedTestBean) this.beanFactory.getBean(name);
-		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(bean)).isTrue();
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
@@ -135,7 +135,7 @@ public class RequestScopedProxyTests {
 	public void testGetFromFactoryBeanInScope() {
 		String name = "requestScopedFactoryBean";
 		TestBean bean = (TestBean) this.beanFactory.getBean(name);
-		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(bean)).isTrue();
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		RequestAttributes requestAttributes = new ServletRequestAttributes(request);
@@ -157,7 +157,7 @@ public class RequestScopedProxyTests {
 	public void testGetInnerBeanFromScope() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("outerBean");
 		assertThat(AopUtils.isAopProxy(bean)).isFalse();
-		assertThat(AopUtils.isCglibProxy(bean.getSpouse())).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(bean.getSpouse())).isTrue();
 
 		String name = "scopedInnerBean";
 
@@ -181,7 +181,7 @@ public class RequestScopedProxyTests {
 	public void testGetAnonymousInnerBeanFromScope() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("outerBean");
 		assertThat(AopUtils.isAopProxy(bean)).isFalse();
-		assertThat(AopUtils.isCglibProxy(bean.getSpouse())).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(bean.getSpouse())).isTrue();
 
 		BeanDefinition beanDef = this.beanFactory.getBeanDefinition("outerBean");
 		BeanDefinitionHolder innerBeanDef =

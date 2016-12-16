@@ -67,7 +67,8 @@ public abstract class AopUtils {
 	 */
 	public static boolean isAopProxy(@Nullable Object object) {
 		return (object instanceof SpringProxy && (Proxy.isProxyClass(object.getClass()) ||
-				object.getClass().getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR)));
+				object.getClass().getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR) ||
+				object.getClass().getName().contains(ClassUtils.BYTE_BUDDY_CLASS_INFIX)));
 	}
 
 	/**
@@ -96,6 +97,23 @@ public abstract class AopUtils {
 	}
 
 	/**
+	 * Check whether the given object is a Byte Buddy proxy.
+	 */
+	public static boolean isByteBuddyProxy(@Nullable Object object) {
+		return (object instanceof SpringProxy &&
+				object.getClass().getName().contains(ClassUtils.BYTE_BUDDY_CLASS_INFIX));
+	}
+
+	/**
+	 * Check whether the given object is a class-based proxy.
+	 */
+	public static boolean isClassBasedProxy(@Nullable Object object) {
+		return (object instanceof SpringProxy &&
+				(object.getClass().getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR)
+				|| object.getClass().getName().contains(ClassUtils.BYTE_BUDDY_CLASS_INFIX)));
+	}
+
+	/**
 	 * Determine the target class of the given bean instance which might be an AOP proxy.
 	 * <p>Returns the target class for an AOP proxy or the plain class otherwise.
 	 * @param candidate the instance to check (might be an AOP proxy)
@@ -111,7 +129,9 @@ public abstract class AopUtils {
 			result = ((TargetClassAware) candidate).getTargetClass();
 		}
 		if (result == null) {
-			result = (isCglibProxy(candidate) ? candidate.getClass().getSuperclass() : candidate.getClass());
+			result = (isCglibProxy(candidate) || isByteBuddyProxy(candidate) ?
+					candidate.getClass().getSuperclass() :
+					candidate.getClass());
 		}
 		return result;
 	}

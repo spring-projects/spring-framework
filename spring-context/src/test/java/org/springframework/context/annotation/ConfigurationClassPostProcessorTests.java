@@ -543,8 +543,8 @@ class ConfigurationClassPostProcessorTests {
 		RepositoryInjectionBean bean = (RepositoryInjectionBean) beanFactory.getBean("annotatedBean");
 		assertThat(bean.stringRepository.toString()).isEqualTo("Repository<String>");
 		assertThat(bean.integerRepository.toString()).isEqualTo("Repository<Integer>");
-		assertThat(AopUtils.isCglibProxy(bean.stringRepository)).isTrue();
-		assertThat(AopUtils.isCglibProxy(bean.integerRepository)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(bean.stringRepository)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(bean.integerRepository)).isTrue();
 	}
 
 	@Test
@@ -563,8 +563,8 @@ class ConfigurationClassPostProcessorTests {
 		RepositoryInjectionBean bean = (RepositoryInjectionBean) beanFactory.getBean("annotatedBean");
 		assertThat(bean.stringRepository.toString()).isEqualTo("Repository<String>");
 		assertThat(bean.integerRepository.toString()).isEqualTo("Repository<Integer>");
-		assertThat(AopUtils.isCglibProxy(bean.stringRepository)).isTrue();
-		assertThat(AopUtils.isCglibProxy(bean.integerRepository)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(bean.stringRepository)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(bean.integerRepository)).isTrue();
 	}
 
 	@Test
@@ -741,7 +741,7 @@ class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	void genericsBasedInjectionWithEarlyGenericsMatchingOnCglibProxy() {
+	void genericsBasedInjectionWithEarlyGenericsMatchingOnClassBasedProxy() {
 		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
 		DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
@@ -761,11 +761,11 @@ class ConfigurationClassPostProcessorTests {
 		assertThat(beanNames.length).isEqualTo(1);
 		assertThat(beanNames[0]).isEqualTo("stringRepo");
 
-		assertThat(AopUtils.isCglibProxy(beanFactory.getBean("stringRepo"))).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(beanFactory.getBean("stringRepo"))).isTrue();
 	}
 
 	@Test
-	void genericsBasedInjectionWithLateGenericsMatchingOnCglibProxy() {
+	void genericsBasedInjectionWithLateGenericsMatchingOnClassBasedProxy() {
 		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
 		DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
@@ -786,11 +786,11 @@ class ConfigurationClassPostProcessorTests {
 		assertThat(beanNames.length).isEqualTo(1);
 		assertThat(beanNames[0]).isEqualTo("stringRepo");
 
-		assertThat(AopUtils.isCglibProxy(beanFactory.getBean("stringRepo"))).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(beanFactory.getBean("stringRepo"))).isTrue();
 	}
 
 	@Test
-	void genericsBasedInjectionWithLateGenericsMatchingOnCglibProxyAndRawFactoryMethod() {
+	void genericsBasedInjectionWithLateGenericsMatchingOnClassBasedProxyAndRawFactoryMethod() {
 		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RawFactoryMethodRepositoryConfiguration.class));
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
 		DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
@@ -811,11 +811,11 @@ class ConfigurationClassPostProcessorTests {
 		assertThat(beanNames.length).isEqualTo(1);
 		assertThat(beanNames[0]).isEqualTo("stringRepo");
 
-		assertThat(AopUtils.isCglibProxy(beanFactory.getBean("stringRepo"))).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(beanFactory.getBean("stringRepo"))).isTrue();
 	}
 
 	@Test
-	void genericsBasedInjectionWithLateGenericsMatchingOnCglibProxyAndRawInstance() {
+	void genericsBasedInjectionWithLateGenericsMatchingOnClassBasedProxyAndRawInstance() {
 		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RawInstanceRepositoryConfiguration.class));
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
 		DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
@@ -836,7 +836,7 @@ class ConfigurationClassPostProcessorTests {
 		assertThat(beanNames.length).isEqualTo(1);
 		assertThat(beanNames[0]).isEqualTo("stringRepo");
 
-		assertThat(AopUtils.isCglibProxy(beanFactory.getBean("stringRepo"))).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(beanFactory.getBean("stringRepo"))).isTrue();
 	}
 
 	@Test

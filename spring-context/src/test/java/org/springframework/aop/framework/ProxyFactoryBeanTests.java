@@ -269,9 +269,9 @@ public class ProxyFactoryBeanTests {
 	}
 
 	@Test
-	public void testCglibPrototypeInstance() {
+	public void testClassBasedPrototypeInstance() {
 		Object prototype = testPrototypeInstancesAreIndependent("cglibPrototype");
-		assertThat(AopUtils.isCglibProxy(prototype)).as("It's a cglib proxy").isTrue();
+		assertThat(AopUtils.isClassBasedProxy(prototype)).as("It's a class-based proxy").isTrue();
 		assertThat(AopUtils.isJdkDynamicProxy(prototype)).as("It's not a dynamic proxy").isFalse();
 	}
 

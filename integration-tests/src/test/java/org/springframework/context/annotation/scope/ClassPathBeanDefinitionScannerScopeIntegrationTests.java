@@ -187,7 +187,7 @@ class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 		IScopedTestBean bean = (IScopedTestBean) context.getBean("request");
 
 		// should be a class-based proxy
-		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(bean)).isTrue();
 		boolean condition = bean instanceof RequestScopedTestBean;
 		assertThat(condition).isTrue();
 
@@ -258,7 +258,7 @@ class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 		IScopedTestBean bean = (IScopedTestBean) context.getBean("session");
 
 		// should be a class-based proxy
-		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(bean)).isTrue();
 		boolean condition1 = bean instanceof ScopedTestBean;
 		assertThat(condition1).isTrue();
 		boolean condition = bean instanceof SessionScopedTestBean;

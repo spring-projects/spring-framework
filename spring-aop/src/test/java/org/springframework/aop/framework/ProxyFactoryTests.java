@@ -310,14 +310,14 @@ public class ProxyFactoryTests {
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTargetClass(TestBean.class);
 		Object proxy = pf.getProxy();
-		assertThat(AopUtils.isCglibProxy(proxy)).as("Proxy is a CGLIB proxy").isTrue();
+		assertThat(AopUtils.isClassBasedProxy(proxy)).as("Proxy is a class-based proxy").isTrue();
 		assertThat(proxy instanceof TestBean).isTrue();
 		assertThat(AopProxyUtils.ultimateTargetClass(proxy)).isEqualTo(TestBean.class);
 
 		ProxyFactory pf2 = new ProxyFactory(proxy);
 		pf2.setProxyTargetClass(true);
 		Object proxy2 = pf2.getProxy();
-		assertThat(AopUtils.isCglibProxy(proxy2)).as("Proxy is a CGLIB proxy").isTrue();
+		assertThat(AopUtils.isClassBasedProxy(proxy2)).as("Proxy is a class-based proxy").isTrue();
 		assertThat(proxy2 instanceof TestBean).isTrue();
 		assertThat(AopProxyUtils.ultimateTargetClass(proxy2)).isEqualTo(TestBean.class);
 	}

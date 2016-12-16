@@ -43,7 +43,7 @@ class ProxyAnnotationDiscoveryTests {
 		ctx.register(PTCTrue.class, AnnotatedServiceWithoutInterface.class);
 		ctx.refresh();
 		AnnotatedServiceWithoutInterface s = ctx.getBean(AnnotatedServiceWithoutInterface.class);
-		assertThat(AopUtils.isCglibProxy(s)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(s)).isTrue();
 		assertThat(s).isInstanceOf(AnnotatedServiceWithoutInterface.class);
 	}
 
@@ -53,7 +53,7 @@ class ProxyAnnotationDiscoveryTests {
 		ctx.register(PTCFalse.class, AnnotatedServiceWithoutInterface.class);
 		ctx.refresh();
 		AnnotatedServiceWithoutInterface s = ctx.getBean(AnnotatedServiceWithoutInterface.class);
-		assertThat(AopUtils.isCglibProxy(s)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(s)).isTrue();
 		assertThat(s).isInstanceOf(AnnotatedServiceWithoutInterface.class);
 	}
 
@@ -63,7 +63,7 @@ class ProxyAnnotationDiscoveryTests {
 		ctx.register(PTCTrue.class, AnnotatedServiceImpl.class);
 		ctx.refresh();
 		NonAnnotatedService s = ctx.getBean(NonAnnotatedService.class);
-		assertThat(AopUtils.isCglibProxy(s)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(s)).isTrue();
 		assertThat(s).isInstanceOf(AnnotatedServiceImpl.class);
 	}
 
@@ -83,7 +83,7 @@ class ProxyAnnotationDiscoveryTests {
 		ctx.register(PTCTrue.class, NonAnnotatedServiceImpl.class);
 		ctx.refresh();
 		AnnotatedService s = ctx.getBean(AnnotatedService.class);
-		assertThat(AopUtils.isCglibProxy(s)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(s)).isTrue();
 		assertThat(s).isInstanceOf(NonAnnotatedServiceImpl.class);
 	}
 

@@ -106,7 +106,7 @@ public class JmsListenerContainerFactoryIntegrationTests {
 	}
 
 	@Test
-	public void parameterAnnotationWithCglibProxy() throws JMSException {
+	public void parameterAnnotationWithClassBasedProxy() throws JMSException {
 		ProxyFactory pf = new ProxyFactory(sample);
 		pf.setProxyTargetClass(true);
 		listener = (JmsEndpointSampleBean) pf.getProxy();

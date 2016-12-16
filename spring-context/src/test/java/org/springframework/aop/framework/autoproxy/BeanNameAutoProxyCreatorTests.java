@@ -143,10 +143,10 @@ class BeanNameAutoProxyCreatorTests {
 	}
 
 	@Test
-	void cglibProxyWithWildcardMatch() {
-		TestBean tb = (TestBean) beanFactory.getBean("cglib1");
-		cglibAssertions(tb);
-		assertThat(tb.getName()).isEqualTo("cglib1");
+	void classBasedProxyWithWildcardMatch() {
+		TestBean tb = (TestBean) beanFactory.getBean("classBased1");
+		classBasedAssertions(tb);
+		assertThat(tb.getName()).isEqualTo("classBased1");
 	}
 
 	@Test
@@ -179,12 +179,12 @@ class BeanNameAutoProxyCreatorTests {
 	/**
 	 * Also has counting before advice.
 	 */
-	private void cglibAssertions(TestBean tb) {
+	private void classBasedAssertions(TestBean tb) {
 		CountingBeforeAdvice cba = (CountingBeforeAdvice) beanFactory.getBean("countingBeforeAdvice");
 		NopInterceptor nop = (NopInterceptor) beanFactory.getBean("nopInterceptor");
 		assertThat(cba.getCalls()).isEqualTo(0);
 		assertThat(nop.getCount()).isEqualTo(0);
-		assertThat(AopUtils.isCglibProxy(tb)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(tb)).isTrue();
 		int age = 5;
 		tb.setAge(age);
 		assertThat(tb.getAge()).isEqualTo(age);

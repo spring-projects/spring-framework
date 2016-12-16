@@ -136,7 +136,7 @@ class AopTestUtilsTests {
 		pf.setTarget(foo);
 		pf.setProxyTargetClass(true);
 		Foo proxy = (Foo) pf.getProxy();
-		assertThat(AopUtils.isCglibProxy(proxy)).as("Proxy is a CGLIB proxy").isTrue();
+		assertThat(AopUtils.isClassBasedProxy(proxy)).as("Proxy is a CGLIB proxy").isTrue();
 		assertThat(proxy).isInstanceOf(FooImpl.class);
 		return proxy;
 	}

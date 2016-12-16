@@ -254,7 +254,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	/**
 	 * Prepare the Configuration classes for servicing bean requests at runtime
-	 * by replacing them with CGLIB-enhanced subclasses.
+	 * by replacing them with enhanced subclasses.
 	 */
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
@@ -433,7 +433,17 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			return;
 		}
 
-		ConfigurationClassEnhancer enhancer = new ConfigurationClassEnhancer();
+		ConfigurationClassEnhancer enhancer;
+		String codegen = System.getProperty("org.springframework.codegen", "cglib");
+		if (codegen.equalsIgnoreCase("cglib")) {
+			enhancer = new CglibConfigurationClassEnhancer();
+		}
+		else if (codegen.equalsIgnoreCase("bytebuddy")) {
+			enhancer = new ByteBuddyConfigurationClassEnhancer();
+		}
+		else {
+			throw new IllegalStateException("Unknown code generation strategy: " + codegen + " - must be [cglib, bytebuddy]");
+		}
 		for (Map.Entry<String, AbstractBeanDefinition> entry : configBeanDefs.entrySet()) {
 			AbstractBeanDefinition beanDef = entry.getValue();
 			// If a @Configuration class gets proxied, always proxy the target class

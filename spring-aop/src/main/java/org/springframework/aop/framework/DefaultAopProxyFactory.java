@@ -67,7 +67,16 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 			if (targetClass.isInterface() || Proxy.isProxyClass(targetClass)) {
 				return new JdkDynamicAopProxy(config);
 			}
-			return new ObjenesisCglibAopProxy(config);
+			String codegen = System.getProperty("org.springframework.codegen", "cglib");
+			if (codegen.equalsIgnoreCase("cglib")) {
+				return new ObjenesisCglibAopProxy(config);
+			}
+			else if (codegen.equalsIgnoreCase("bytebuddy")) {
+				return new ObjenesisByteBuddyAopProxy(config);
+			}
+			else {
+				throw new IllegalStateException("Unknown code generation strategy: " + codegen + " - must be [cglib, bytebuddy]");
+			}
 		}
 		else {
 			return new JdkDynamicAopProxy(config);

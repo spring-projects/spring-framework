@@ -86,7 +86,7 @@ public class ComponentScanParserScopedProxyTests {
 
 		ScopedProxyTestBean bean = (ScopedProxyTestBean) context.getBean("scopedProxyTestBean");
 		// should be a class-based proxy
-		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
+		assertThat(AopUtils.isClassBasedProxy(bean)).isTrue();
 		// test serializability
 		assertThat(bean.foo(1)).isEqualTo("bar");
 		ScopedProxyTestBean deserialized = SerializationTestUtils.serializeAndDeserialize(bean);
