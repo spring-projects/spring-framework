@@ -15,24 +15,22 @@
  */
 package org.springframework.web.reactive.socket.server;
 
-import java.nio.charset.StandardCharsets;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.reactivex.netty.protocol.http.client.HttpClient;
-import io.reactivex.netty.protocol.http.ws.client.WebSocketResponse;
 import org.junit.Test;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import rx.Observable;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketSession;
+import org.springframework.web.reactive.socket.client.RxNettyWebSocketClient;
 
 import static org.junit.Assert.assertEquals;
 
@@ -42,7 +40,7 @@ import static org.junit.Assert.assertEquals;
  * @author Rossen Stoyanchev
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
-public class ServerWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
+public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 
 	@Override
@@ -54,21 +52,20 @@ public class ServerWebSocketIntegrationTests extends AbstractWebSocketIntegratio
 	@Test
 	public void echo() throws Exception {
 		int count = 100;
-		Observable<String> input = Observable.range(1, count).map(index -> "msg-" + index);
-		Observable<String> output = HttpClient.newClient("localhost", this.port)
-				.createGet("/echo")
-				.requestWebSocketUpgrade()
-				.flatMap(WebSocketResponse::getWebSocketConnection)
-				.flatMap(conn -> conn
-						.write(input.map(TextWebSocketFrame::new)).cast(WebSocketFrame.class)
-						.mergeWith(conn.getInput())
-						.take(count)
-						.map(frame -> {
-							String text = frame.content().toString(StandardCharsets.UTF_8);
-							frame.release();
-							return text;
-						}));
-		assertEquals(input.toList().toBlocking().first(), output.toList().toBlocking().first());
+		Flux<String> input = Flux.range(1, count).map(index -> "msg-" + index);
+		Flux<String> output = new RxNettyWebSocketClient()
+				.connect(new URI("ws://localhost:" + this.port + "/echo"))
+				.flatMap(session -> session
+						.send(input.map(session::textMessage))
+						.thenMany(session.receive()
+								.take(count)
+								.map(message -> {
+									String text = message.getPayloadAsText();
+									DataBufferUtils.release(message.getPayload());
+									return text;
+								})
+						));
+		assertEquals(input.collectList().blockMillis(5000), output.collectList().blockMillis(5000));
 	}
 
 
