@@ -15,44 +15,41 @@
  */
 package org.springframework.web.reactive.socket.adapter;
 
-import java.net.URI;
-
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 
 /**
- * Base class for {@link WebSocketHandler} adapters to underlying WebSocket
- * handler APIs.
+ * Base class for {@link WebSocketHandler} adapters to WebSocket handler APIs
+ * of underlying runtimes.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public abstract class WebSocketHandlerAdapterSupport {
 
-	private final URI uri;
+	private final HandshakeInfo handshakeInfo;
 
 	private final WebSocketHandler delegate;
 
 	private final DataBufferFactory bufferFactory;
 
 
-	protected WebSocketHandlerAdapterSupport(ServerHttpRequest request, ServerHttpResponse response,
+	protected WebSocketHandlerAdapterSupport(HandshakeInfo handshakeInfo, DataBufferFactory bufferFactory,
 			WebSocketHandler handler) {
 
-		Assert.notNull("ServerHttpRequest is required");
-		Assert.notNull("ServerHttpResponse is required");
-		Assert.notNull("WebSocketHandler handler is required");
-		this.uri = request.getURI();
-		this.bufferFactory = response.bufferFactory();
+		Assert.notNull(handshakeInfo, "HandshakeInfo is required.");
+		Assert.notNull(bufferFactory, "DataBufferFactory is required");
+		Assert.notNull(handler, "WebSocketHandler handler is required");
+
+		this.handshakeInfo = handshakeInfo;
+		this.bufferFactory = bufferFactory;
 		this.delegate = handler;
 	}
 
 
-	protected URI getUri() {
-		return this.uri;
+	protected HandshakeInfo getHandshakeInfo() {
+		return this.handshakeInfo;
 	}
 
 	protected WebSocketHandler getDelegate() {

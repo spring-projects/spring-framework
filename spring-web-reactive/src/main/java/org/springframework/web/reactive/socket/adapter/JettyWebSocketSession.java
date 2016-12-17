@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.socket.adapter;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -41,8 +40,8 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Session> {
 
 
-	public JettyWebSocketSession(Session session, URI uri, DataBufferFactory bufferFactory) {
-		super(session, ObjectUtils.getIdentityHexString(session), uri, bufferFactory);
+	public JettyWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory bufferFactory) {
+		super(session, ObjectUtils.getIdentityHexString(session), info, bufferFactory);
 	}
 
 

@@ -28,8 +28,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -47,10 +46,10 @@ public class TomcatWebSocketHandlerAdapter extends WebSocketHandlerAdapterSuppor
 	private TomcatWebSocketSession session;
 
 
-	public TomcatWebSocketHandlerAdapter(ServerHttpRequest request, ServerHttpResponse response,
+	public TomcatWebSocketHandlerAdapter(HandshakeInfo handshakeInfo, DataBufferFactory bufferFactory,
 			WebSocketHandler delegate) {
 
-		super(request, response, delegate);
+		super(handshakeInfo, bufferFactory, delegate);
 	}
 
 
@@ -67,8 +66,9 @@ public class TomcatWebSocketHandlerAdapter extends WebSocketHandlerAdapterSuppor
 
 		@Override
 		public void onOpen(Session session, EndpointConfig config) {
-			TomcatWebSocketHandlerAdapter.this.session =
-					new TomcatWebSocketSession(session, getUri(), getBufferFactory());
+
+			TomcatWebSocketHandlerAdapter.this.session = new TomcatWebSocketSession(
+					session, getHandshakeInfo(), getBufferFactory());
 
 			session.addMessageHandler(String.class, message -> {
 				WebSocketMessage webSocketMessage = toMessage(message);

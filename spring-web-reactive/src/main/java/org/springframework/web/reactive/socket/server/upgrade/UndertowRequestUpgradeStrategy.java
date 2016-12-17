@@ -16,11 +16,17 @@
 
 package org.springframework.web.reactive.socket.server.upgrade;
 
+import java.net.URI;
+import java.security.Principal;
+
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.UndertowServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.adapter.HandshakeInfo;
 import org.springframework.web.reactive.socket.adapter.UndertowWebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
@@ -38,12 +44,21 @@ import reactor.core.publisher.Mono;
  */
 public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
+
 	@Override
 	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler) {
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
-		WebSocketConnectionCallback callback = new UndertowWebSocketHandlerAdapter(request, response, handler);
+
+		URI uri = request.getURI();
+		HttpHeaders headers = request.getHeaders();
+		Mono<Principal> principal = exchange.getPrincipal();
+		HandshakeInfo info = new HandshakeInfo(uri, headers, principal);
+		DataBufferFactory bufferFactory = response.bufferFactory();
+
+		WebSocketConnectionCallback callback =
+				new UndertowWebSocketHandlerAdapter(info, bufferFactory, handler);
 
 		Assert.isTrue(request instanceof UndertowServerHttpRequest);
 		HttpServerExchange httpExchange = ((UndertowServerHttpRequest) request).getUndertowExchange();

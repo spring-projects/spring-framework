@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.socket.adapter;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -43,8 +42,10 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<WebSocketChannel> {
 
 
-	public UndertowWebSocketSession(WebSocketChannel channel, URI url, DataBufferFactory bufferFactory) {
-		super(channel, ObjectUtils.getIdentityHexString(channel), url, bufferFactory);
+	public UndertowWebSocketSession(WebSocketChannel channel, HandshakeInfo handshakeInfo,
+			DataBufferFactory bufferFactory) {
+
+		super(channel, ObjectUtils.getIdentityHexString(channel), handshakeInfo, bufferFactory);
 	}
 
 

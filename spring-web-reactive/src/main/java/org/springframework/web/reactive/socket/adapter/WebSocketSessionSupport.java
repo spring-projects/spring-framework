@@ -16,12 +16,13 @@
 
 package org.springframework.web.reactive.socket.adapter;
 
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -48,23 +49,25 @@ public abstract class WebSocketSessionSupport<T> implements WebSocketSession {
 
 	private final String id;
 
-	private final URI uri;
+	private final HandshakeInfo handshakeInfo;
 
 	private final DataBufferFactory bufferFactory;
 
 
 	/**
 	 * Create a new instance and associate the given attributes with it.
-	 * @param delegate the underlying WebSocket connection
 	 */
-	protected WebSocketSessionSupport(T delegate, String id, URI uri, DataBufferFactory bufferFactory) {
+	protected WebSocketSessionSupport(T delegate, String id, HandshakeInfo handshakeInfo,
+			DataBufferFactory bufferFactory) {
+
 		Assert.notNull(delegate, "Native session is required.");
-		Assert.notNull(id, "'id' is required.");
-		Assert.notNull(uri, "URI is required.");
-		Assert.notNull(bufferFactory, "DataBufferFactory is required.");
+		Assert.notNull(id, "Session id is required.");
+		Assert.notNull(handshakeInfo, "HandshakeInfo is required.");
+		Assert.notNull(bufferFactory, "DataBuffer factory is required.");
+
 		this.delegate = delegate;
 		this.id = id;
-		this.uri = uri;
+		this.handshakeInfo = handshakeInfo;
 		this.bufferFactory = bufferFactory;
 	}
 
@@ -82,8 +85,18 @@ public abstract class WebSocketSessionSupport<T> implements WebSocketSession {
 	}
 
 	@Override
-	public URI getUri() {
-		return this.uri;
+	public HandshakeInfo getHandshakeInfo() {
+		return this.handshakeInfo;
+	}
+
+	@Override
+	public Flux<WebSocketMessage> receive() {
+		return null;
+	}
+
+	@Override
+	public Mono<Void> send(Publisher<WebSocketMessage> messages) {
+		return null;
 	}
 
 	@Override
@@ -129,7 +142,7 @@ public abstract class WebSocketSessionSupport<T> implements WebSocketSession {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[id=" + getId() + ", uri=" + getUri() + "]";
+		return getClass().getSimpleName() + "[id=" + getId() + ", uri=" + getHandshakeInfo().getUri() + "]";
 	}
 
 }

@@ -15,7 +15,6 @@
  */
 package org.springframework.web.reactive.socket.adapter;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,8 +53,8 @@ public abstract class NettyWebSocketSessionSupport<T> extends WebSocketSessionSu
 	}
 
 
-	protected NettyWebSocketSessionSupport(T delegate, URI uri, NettyDataBufferFactory bufferFactory) {
-		super(delegate, ObjectUtils.getIdentityHexString(delegate), uri, bufferFactory);
+	protected NettyWebSocketSessionSupport(T delegate, HandshakeInfo info, NettyDataBufferFactory factory) {
+		super(delegate, ObjectUtils.getIdentityHexString(delegate), info, factory);
 	}
 
 

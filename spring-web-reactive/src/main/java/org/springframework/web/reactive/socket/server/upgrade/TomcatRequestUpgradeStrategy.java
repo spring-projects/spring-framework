@@ -17,9 +17,9 @@
 package org.springframework.web.reactive.socket.server.upgrade;
 
 import java.io.IOException;
+import java.net.URI;
+import java.security.Principal;
 import java.util.Collections;
-import java.util.Map;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -28,17 +28,20 @@ import javax.websocket.Endpoint;
 import javax.websocket.server.ServerEndpointConfig;
 
 import org.apache.tomcat.websocket.server.WsServerContainer;
+import reactor.core.publisher.Mono;
+
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServletServerHttpRequest;
 import org.springframework.http.server.reactive.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.adapter.HandshakeInfo;
 import org.springframework.web.reactive.socket.adapter.TomcatWebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
-
-import reactor.core.publisher.Mono;
 
 /**
  * A {@link RequestUpgradeStrategy} for use with Tomcat.
@@ -56,10 +59,16 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
-		Endpoint endpoint = new TomcatWebSocketHandlerAdapter(request, response, handler).getEndpoint();
 
 		HttpServletRequest servletRequest = getHttpServletRequest(request);
 		HttpServletResponse servletResponse = getHttpServletResponse(response);
+
+		URI uri = request.getURI();
+		HttpHeaders headers = request.getHeaders();
+		Mono<Principal> principal = exchange.getPrincipal();
+		HandshakeInfo info = new HandshakeInfo(uri, headers, principal);
+		DataBufferFactory bufferFactory = response.bufferFactory();
+		Endpoint endpoint = new TomcatWebSocketHandlerAdapter(info, bufferFactory, handler).getEndpoint();
 
 		String requestURI = servletRequest.getRequestURI();
 		ServerEndpointConfig config = new ServerEndpointRegistration(requestURI, endpoint);

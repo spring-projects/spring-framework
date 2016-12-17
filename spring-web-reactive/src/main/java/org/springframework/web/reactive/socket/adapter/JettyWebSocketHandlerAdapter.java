@@ -32,8 +32,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -54,17 +53,16 @@ public class JettyWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupport
 	private JettyWebSocketSession session;
 
 
-	public JettyWebSocketHandlerAdapter(ServerHttpRequest request, ServerHttpResponse response,
+	public JettyWebSocketHandlerAdapter(HandshakeInfo handshakeInfo, DataBufferFactory bufferFactory,
 			WebSocketHandler delegate) {
 
-		super(request, response, delegate);
+		super(handshakeInfo, bufferFactory, delegate);
 	}
 
 
 	@OnWebSocketConnect
 	public void onWebSocketConnect(Session session) {
-		this.session = new JettyWebSocketSession(session, getUri(), getBufferFactory());
-
+		this.session = new JettyWebSocketSession(session, getHandshakeInfo(), getBufferFactory());
 		HandlerResultSubscriber subscriber = new HandlerResultSubscriber();
 		getDelegate().handle(this.session).subscribe(subscriber);
 	}

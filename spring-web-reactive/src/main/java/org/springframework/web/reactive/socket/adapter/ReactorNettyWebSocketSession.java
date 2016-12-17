@@ -15,8 +15,6 @@
  */
 package org.springframework.web.reactive.socket.adapter;
 
-import java.net.URI;
-
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -42,10 +40,10 @@ public class ReactorNettyWebSocketSession
 		extends NettyWebSocketSessionSupport<ReactorNettyWebSocketSession.WebSocketConnection> {
 
 
-	protected ReactorNettyWebSocketSession(WebsocketInbound inbound, WebsocketOutbound outbound,
-			URI uri, NettyDataBufferFactory factory) {
+	public ReactorNettyWebSocketSession(WebsocketInbound inbound, WebsocketOutbound outbound,
+			HandshakeInfo handshakeInfo, NettyDataBufferFactory bufferFactory) {
 
-		super(new WebSocketConnection(inbound, outbound), uri, factory);
+		super(new WebSocketConnection(inbound, outbound), handshakeInfo, bufferFactory);
 	}
 
 

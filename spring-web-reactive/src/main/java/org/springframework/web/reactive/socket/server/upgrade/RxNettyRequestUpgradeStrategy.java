@@ -15,17 +15,22 @@
  */
 package org.springframework.web.reactive.socket.server.upgrade;
 
+import java.net.URI;
+import java.security.Principal;
 import java.util.List;
-import java.util.Map;
 
 import reactor.core.publisher.Mono;
 import rx.Observable;
 import rx.RxReactiveStreams;
 
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.RxNettyServerHttpRequest;
 import org.springframework.http.server.reactive.RxNettyServerHttpResponse;
 import org.springframework.web.reactive.socket.WebSocketHandler;
-import org.springframework.web.reactive.socket.adapter.RxNettyWebSocketHandlerAdapter;
+import org.springframework.web.reactive.socket.WebSocketSession;
+import org.springframework.web.reactive.socket.adapter.HandshakeInfo;
+import org.springframework.web.reactive.socket.adapter.RxNettyWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -37,18 +42,25 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class RxNettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
+
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler webSocketHandler) {
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler) {
 
 		RxNettyServerHttpRequest request = (RxNettyServerHttpRequest) exchange.getRequest();
 		RxNettyServerHttpResponse response = (RxNettyServerHttpResponse) exchange.getResponse();
 
-		RxNettyWebSocketHandlerAdapter rxNettyHandler =
-				new RxNettyWebSocketHandlerAdapter(request, response, webSocketHandler);
+		URI uri = request.getURI();
+		HttpHeaders headers = request.getHeaders();
+		Mono<Principal> principal = exchange.getPrincipal();
+		HandshakeInfo handshakeInfo = new HandshakeInfo(uri, headers, principal);
+		NettyDataBufferFactory bufferFactory = (NettyDataBufferFactory) response.bufferFactory();
 
 		Observable<Void> completion = response.getRxNettyResponse()
-				.acceptWebSocketUpgrade(rxNettyHandler)
-				.subprotocol(getSubProtocols(webSocketHandler));
+				.acceptWebSocketUpgrade(conn -> {
+					WebSocketSession session = new RxNettyWebSocketSession(conn, handshakeInfo, bufferFactory);
+					return RxReactiveStreams.toObservable(handler.handle(session));
+				})
+				.subprotocol(getSubProtocols(handler));
 
 		return Mono.from(RxReactiveStreams.toPublisher(completion));
 	}

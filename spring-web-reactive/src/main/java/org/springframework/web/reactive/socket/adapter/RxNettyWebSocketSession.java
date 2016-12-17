@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.socket.adapter;
 
-import java.net.URI;
-
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.reactivex.netty.protocol.http.ws.WebSocketConnection;
 import org.reactivestreams.Publisher;
@@ -41,8 +39,8 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public class RxNettyWebSocketSession extends NettyWebSocketSessionSupport<WebSocketConnection> {
 
 
-	public RxNettyWebSocketSession(WebSocketConnection conn, URI uri, NettyDataBufferFactory factory) {
-		super(conn, uri, factory);
+	public RxNettyWebSocketSession(WebSocketConnection conn, HandshakeInfo info, NettyDataBufferFactory factory) {
+		super(conn, info, factory);
 	}
 
 

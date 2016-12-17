@@ -16,6 +16,8 @@
 package org.springframework.web.reactive.socket;
 
 import java.net.URI;
+import java.security.Principal;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
@@ -24,6 +26,8 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.reactive.socket.adapter.HandshakeInfo;
 
 /**
  * Representation for a WebSocket session.
@@ -39,13 +43,13 @@ public interface WebSocketSession {
 	String getId();
 
 	/**
-	 * Return the WebSocket endpoint URI.
+	 * Return information from the handshake request.
 	 */
-	URI getUri();
+	HandshakeInfo getHandshakeInfo();
 
 	/**
-	 * Return a {@link DataBufferFactory} that can be used for creating message payloads.
-	 * @return a buffer factory
+	 * Return a {@code DataBuffer} Factory to create message payloads.
+	 * @return the buffer factory for the session
 	 */
 	DataBufferFactory bufferFactory();
 

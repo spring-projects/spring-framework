@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.socket.adapter;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.reactivestreams.Publisher;
@@ -55,8 +54,10 @@ public abstract class AbstractListenerWebSocketSession<T> extends WebSocketSessi
 	private final AtomicBoolean sendCalled = new AtomicBoolean();
 
 
-	public AbstractListenerWebSocketSession(T delegate, String id, URI uri, DataBufferFactory bufferFactory) {
-		super(delegate, id, uri, bufferFactory);
+	public AbstractListenerWebSocketSession(T delegate, String id, HandshakeInfo handshakeInfo,
+			DataBufferFactory bufferFactory) {
+
+		super(delegate, id, handshakeInfo, bufferFactory);
 	}
 
 

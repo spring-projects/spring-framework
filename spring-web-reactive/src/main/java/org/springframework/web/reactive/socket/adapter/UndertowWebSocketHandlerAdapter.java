@@ -30,8 +30,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -50,16 +49,16 @@ public class UndertowWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupp
 	private UndertowWebSocketSession session;
 
 
-	public UndertowWebSocketHandlerAdapter(ServerHttpRequest request, ServerHttpResponse response,
+	public UndertowWebSocketHandlerAdapter(HandshakeInfo handshakeInfo, DataBufferFactory bufferFactory,
 			WebSocketHandler delegate) {
 
-		super(request, response, delegate);
+		super(handshakeInfo, bufferFactory, delegate);
 	}
 
 
 	@Override
 	public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel channel) {
-		this.session = new UndertowWebSocketSession(channel, getUri(), getBufferFactory());
+		this.session = new UndertowWebSocketSession(channel, getHandshakeInfo(), getBufferFactory());
 		channel.getReceiveSetter().set(new UndertowReceiveListener());
 		channel.resumeReceives();
 

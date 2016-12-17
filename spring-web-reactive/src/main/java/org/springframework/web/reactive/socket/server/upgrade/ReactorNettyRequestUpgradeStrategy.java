@@ -15,15 +15,20 @@
  */
 package org.springframework.web.reactive.socket.server.upgrade;
 
+import java.net.URI;
+import java.security.Principal;
 import java.util.List;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ReactorServerHttpRequest;
 import org.springframework.http.server.reactive.ReactorServerHttpResponse;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.socket.WebSocketHandler;
-import org.springframework.web.reactive.socket.adapter.ReactorNettyWebSocketHandlerAdapter;
+import org.springframework.web.reactive.socket.adapter.HandshakeInfo;
+import org.springframework.web.reactive.socket.adapter.ReactorNettyWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -36,18 +41,23 @@ import org.springframework.web.server.ServerWebExchange;
 public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler webSocketHandler) {
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler) {
 
 		ReactorServerHttpRequest request = (ReactorServerHttpRequest) exchange.getRequest();
 		ReactorServerHttpResponse response = (ReactorServerHttpResponse) exchange.getResponse();
 
-		ReactorNettyWebSocketHandlerAdapter reactorHandler =
-				new ReactorNettyWebSocketHandlerAdapter(request, response, webSocketHandler);
+		URI uri = request.getURI();
+		HttpHeaders headers = request.getHeaders();
+		Mono<Principal> principal = exchange.getPrincipal();
+		HandshakeInfo handshakeInfo = new HandshakeInfo(uri, headers, principal);
+		NettyDataBufferFactory bufferFactory = (NettyDataBufferFactory) response.bufferFactory();
 
-		String protocols = StringUtils.arrayToCommaDelimitedString(getSubProtocols(webSocketHandler));
+		String protocols = StringUtils.arrayToCommaDelimitedString(getSubProtocols(handler));
 		protocols = (StringUtils.hasText(protocols) ? protocols : null);
 
-		return response.getReactorResponse().sendWebsocket(protocols, reactorHandler);
+		return response.getReactorResponse().sendWebsocket(protocols,
+				(inbound, outbound) -> handler.handle(
+						new ReactorNettyWebSocketSession(inbound, outbound, handshakeInfo, bufferFactory)));
 	}
 
 	private static String[] getSubProtocols(WebSocketHandler webSocketHandler) {
