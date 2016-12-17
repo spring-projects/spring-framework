@@ -46,16 +46,15 @@ import org.springframework.web.reactive.socket.server.upgrade.TomcatRequestUpgra
 import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpgradeStrategy;
 
 /**
- * Base class for WebSocket integration tests involving a server-side
- * {@code WebSocketHandler}. Sub-classes to return a Spring configuration class
- * via {@link #getWebConfigClass()} containing a SimpleUrlHandlerMapping with
- * pattern-to-WebSocketHandler mappings.
+ * Base class for WebSocket integration tests.
+ * Sub-classes must implement {@link #getWebConfigClass()} to return Spring
+ * config class with handler mappings to {@code WebSocketHandler}'s.
  *
  * @author Rossen Stoyanchev
  */
 @RunWith(Parameterized.class)
 @SuppressWarnings({"unused", "WeakerAccess"})
-public abstract class AbstractWebSocketHandlerIntegrationTests {
+public abstract class AbstractWebSocketIntegrationTests {
 
 	protected int port;
 
