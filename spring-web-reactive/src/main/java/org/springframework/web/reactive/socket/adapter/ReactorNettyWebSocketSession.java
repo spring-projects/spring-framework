@@ -41,8 +41,8 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public class ReactorNettyWebSocketSession
 		extends NettyWebSocketSessionSupport<ReactorNettyWebSocketSession.WebSocketConnection> {
 
-	protected ReactorNettyWebSocketSession(WebsocketInbound inbound,
-			WebsocketOutbound outbound,
+
+	protected ReactorNettyWebSocketSession(WebsocketInbound inbound, WebsocketOutbound outbound,
 			URI uri, NettyDataBufferFactory factory) {
 
 		super(new WebSocketConnection(inbound, outbound), uri, factory);

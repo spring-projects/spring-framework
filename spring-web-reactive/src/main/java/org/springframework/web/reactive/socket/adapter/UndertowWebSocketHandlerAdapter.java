@@ -59,7 +59,7 @@ public class UndertowWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupp
 
 	@Override
 	public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel channel) {
-		this.session = new UndertowWebSocketSession(channel, getUri());
+		this.session = new UndertowWebSocketSession(channel, getUri(), getBufferFactory());
 		channel.getReceiveSetter().set(new UndertowReceiveListener());
 		channel.resumeReceives();
 

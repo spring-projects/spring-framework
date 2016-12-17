@@ -40,6 +40,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  */
 public class RxNettyWebSocketSession extends NettyWebSocketSessionSupport<WebSocketConnection> {
 
+
 	public RxNettyWebSocketSession(WebSocketConnection conn, URI uri, NettyDataBufferFactory factory) {
 		super(conn, uri, factory);
 	}

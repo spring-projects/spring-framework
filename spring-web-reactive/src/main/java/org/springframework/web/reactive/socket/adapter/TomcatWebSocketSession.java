@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.socket.adapter;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import javax.websocket.CloseReason;
@@ -27,6 +28,7 @@ import javax.websocket.Session;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
@@ -40,8 +42,9 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  */
 public class TomcatWebSocketSession extends AbstractListenerWebSocketSession<Session> {
 
-	public TomcatWebSocketSession(Session session) {
-		super(session, session.getId(), session.getRequestURI());
+
+	public TomcatWebSocketSession(Session session, URI uri, DataBufferFactory bufferFactory) {
+		super(session, session.getId(), uri, bufferFactory);
 	}
 
 

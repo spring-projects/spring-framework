@@ -16,10 +16,13 @@
 
 package org.springframework.web.reactive.socket.adapter;
 
+import java.net.URI;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketSession;
@@ -39,14 +42,26 @@ public abstract class WebSocketSessionSupport<T> implements WebSocketSession {
 
 	private final T delegate;
 
+	private final String id;
+
+	private final URI uri;
+
+	private final DataBufferFactory bufferFactory;
+
 
 	/**
 	 * Create a new instance and associate the given attributes with it.
 	 * @param delegate the underlying WebSocket connection
 	 */
-	protected WebSocketSessionSupport(T delegate) {
-		Assert.notNull(delegate, "'delegate' session is required.");
+	protected WebSocketSessionSupport(T delegate, String id, URI uri, DataBufferFactory bufferFactory) {
+		Assert.notNull(delegate, "Native session is required.");
+		Assert.notNull(id, "'id' is required.");
+		Assert.notNull(uri, "URI is required.");
+		Assert.notNull(bufferFactory, "DataBufferFactory is required.");
 		this.delegate = delegate;
+		this.id = id;
+		this.uri = uri;
+		this.bufferFactory = bufferFactory;
 	}
 
 
@@ -55,6 +70,21 @@ public abstract class WebSocketSessionSupport<T> implements WebSocketSession {
 	 */
 	public T getDelegate() {
 		return this.delegate;
+	}
+
+	@Override
+	public String getId() {
+		return this.id;
+	}
+
+	@Override
+	public URI getUri() {
+		return this.uri;
+	}
+
+	@Override
+	public DataBufferFactory bufferFactory() {
+		return this.bufferFactory;
 	}
 
 

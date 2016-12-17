@@ -27,6 +27,7 @@ import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.core.WebSockets;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -41,8 +42,9 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  */
 public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<WebSocketChannel> {
 
-	public UndertowWebSocketSession(WebSocketChannel channel, URI url) {
-		super(channel, ObjectUtils.getIdentityHexString(channel), url);
+
+	public UndertowWebSocketSession(WebSocketChannel channel, URI url, DataBufferFactory bufferFactory) {
+		super(channel, ObjectUtils.getIdentityHexString(channel), url, bufferFactory);
 	}
 
 

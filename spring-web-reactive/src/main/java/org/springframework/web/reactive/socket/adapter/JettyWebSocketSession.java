@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.socket.adapter;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -24,6 +25,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WriteCallback;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -38,9 +40,9 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  */
 public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Session> {
 
-	public JettyWebSocketSession(Session session) {
-		super(session, ObjectUtils.getIdentityHexString(session),
-				session.getUpgradeRequest().getRequestURI());
+
+	public JettyWebSocketSession(Session session, URI uri, DataBufferFactory bufferFactory) {
+		super(session, ObjectUtils.getIdentityHexString(session), uri, bufferFactory);
 	}
 
 

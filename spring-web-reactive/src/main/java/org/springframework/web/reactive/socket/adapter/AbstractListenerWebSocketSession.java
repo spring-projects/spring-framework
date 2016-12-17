@@ -24,9 +24,9 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.server.reactive.AbstractListenerReadPublisher;
 import org.springframework.http.server.reactive.AbstractListenerWriteProcessor;
-import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketMessage.Type;
@@ -48,10 +48,6 @@ public abstract class AbstractListenerWebSocketSession<T> extends WebSocketSessi
 	private static final int RECEIVE_BUFFER_SIZE = 8192;
 
 
-	private final String id;
-
-	private final URI uri;
-
 	private final WebSocketReceivePublisher receivePublisher = new WebSocketReceivePublisher();
 
 	private volatile WebSocketSendProcessor sendProcessor;
@@ -59,24 +55,10 @@ public abstract class AbstractListenerWebSocketSession<T> extends WebSocketSessi
 	private final AtomicBoolean sendCalled = new AtomicBoolean();
 
 
-	public AbstractListenerWebSocketSession(T delegate, String id, URI uri) {
-		super(delegate);
-		Assert.notNull(id, "'id' is required.");
-		Assert.notNull(uri, "'uri' is required.");
-		this.id = id;
-		this.uri = uri;
+	public AbstractListenerWebSocketSession(T delegate, String id, URI uri, DataBufferFactory bufferFactory) {
+		super(delegate, id, uri, bufferFactory);
 	}
 
-
-	@Override
-	public String getId() {
-		return this.id;
-	}
-
-	@Override
-	public URI getUri() {
-		return this.uri;
-	}
 
 	protected WebSocketSendProcessor getSendProcessor() {
 		return this.sendProcessor;

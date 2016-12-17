@@ -63,7 +63,7 @@ public class JettyWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupport
 
 	@OnWebSocketConnect
 	public void onWebSocketConnect(Session session) {
-		this.session = new JettyWebSocketSession(session);
+		this.session = new JettyWebSocketSession(session, getUri(), getBufferFactory());
 
 		HandlerResultSubscriber subscriber = new HandlerResultSubscriber();
 		getDelegate().handle(this.session).subscribe(subscriber);

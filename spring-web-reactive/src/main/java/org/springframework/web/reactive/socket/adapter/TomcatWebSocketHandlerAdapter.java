@@ -67,7 +67,8 @@ public class TomcatWebSocketHandlerAdapter extends WebSocketHandlerAdapterSuppor
 
 		@Override
 		public void onOpen(Session session, EndpointConfig config) {
-			TomcatWebSocketHandlerAdapter.this.session = new TomcatWebSocketSession(session);
+			TomcatWebSocketHandlerAdapter.this.session =
+					new TomcatWebSocketSession(session, getUri(), getBufferFactory());
 
 			session.addMessageHandler(String.class, message -> {
 				WebSocketMessage webSocketMessage = toMessage(message);

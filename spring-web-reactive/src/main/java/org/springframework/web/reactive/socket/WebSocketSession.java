@@ -21,6 +21,8 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.DataBufferFactory;
+
 /**
  * Representation for a WebSocket session.
  *
@@ -38,6 +40,12 @@ public interface WebSocketSession {
 	 * Return the WebSocket endpoint URI.
 	 */
 	URI getUri();
+
+	/**
+	 * Return a {@link DataBufferFactory} that can be used for creating message payloads.
+	 * @return a buffer factory
+	 */
+	DataBufferFactory bufferFactory();
 
 	/**
 	 * Get the flux of incoming messages.

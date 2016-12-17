@@ -31,7 +31,6 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
@@ -55,32 +54,16 @@ public abstract class NettyWebSocketSessionSupport<T> extends WebSocketSessionSu
 	}
 
 
-	protected final String id;
-
-	protected final URI uri;
-
-	protected final NettyDataBufferFactory bufferFactory;
-
-
-	protected NettyWebSocketSessionSupport(T delegate, URI uri, NettyDataBufferFactory factory) {
-		super(delegate);
-		Assert.notNull(uri, "'uri' is required.");
-		Assert.notNull(uri, "'bufferFactory' is required.");
-		this.uri = uri;
-		this.bufferFactory = factory;
-		this.id = ObjectUtils.getIdentityHexString(getDelegate());
+	protected NettyWebSocketSessionSupport(T delegate, URI uri, NettyDataBufferFactory bufferFactory) {
+		super(delegate, ObjectUtils.getIdentityHexString(delegate), uri, bufferFactory);
 	}
 
 
 	@Override
-	public String getId() {
-		return this.id;
+	public NettyDataBufferFactory bufferFactory() {
+		return (NettyDataBufferFactory) super.bufferFactory();
 	}
 
-	@Override
-	public URI getUri() {
-		return this.uri;
-	}
 
 	protected Flux<WebSocketMessage> toMessageFlux(Flux<WebSocketFrame> frameFlux) {
 		return frameFlux
@@ -94,11 +77,11 @@ public abstract class NettyWebSocketSessionSupport<T> extends WebSocketSessionSu
 	private WebSocketMessage toMessage(List<WebSocketFrame> frames) {
 		Class<?> frameType = frames.get(0).getClass();
 		if (frames.size() == 1) {
-			NettyDataBuffer buffer = this.bufferFactory.wrap(frames.get(0).content());
+			NettyDataBuffer buffer = bufferFactory().wrap(frames.get(0).content());
 			return WebSocketMessage.create(MESSAGE_TYPES.get(frameType), buffer);
 		}
 		return frames.stream()
-				.map(socketFrame -> bufferFactory.wrap(socketFrame.content()))
+				.map(socketFrame -> bufferFactory().wrap(socketFrame.content()))
 				.reduce(NettyDataBuffer::write)
 				.map(buffer -> WebSocketMessage.create(MESSAGE_TYPES.get(frameType), buffer))
 				.get();
