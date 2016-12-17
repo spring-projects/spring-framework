@@ -253,13 +253,24 @@ public class DeferredResult<T> {
 		return new DeferredResultProcessingInterceptorAdapter() {
 			@Override
 			public <S> boolean handleTimeout(NativeWebRequest request, DeferredResult<S> deferredResult) {
-				if (timeoutCallback != null) {
-					timeoutCallback.run();
+				boolean continueProcessing = true;
+				try {
+					if (timeoutCallback != null) {
+						timeoutCallback.run();
+					}
 				}
-				if (timeoutResult != RESULT_NONE) {
-					setResultInternal(timeoutResult);
+				finally {
+					if (timeoutResult != RESULT_NONE) {
+						continueProcessing = false;
+						try {
+							setResultInternal(timeoutResult);
+						}
+						catch (Throwable ex) {
+							logger.debug("Failed to handle timeout result", ex);
+						}
+					}
 				}
-				return true;
+				return continueProcessing;
 			}
 			@Override
 			public <S> void afterCompletion(NativeWebRequest request, DeferredResult<S> deferredResult) {
