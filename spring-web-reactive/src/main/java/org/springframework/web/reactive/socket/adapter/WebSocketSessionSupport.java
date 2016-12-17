@@ -17,14 +17,18 @@
 package org.springframework.web.reactive.socket.adapter;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.CloseStatus;
+import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
@@ -87,6 +91,30 @@ public abstract class WebSocketSessionSupport<T> implements WebSocketSession {
 		return this.bufferFactory;
 	}
 
+	@Override
+	public WebSocketMessage textMessage(String payload) {
+		byte[] bytes = payload.getBytes(StandardCharsets.UTF_8);
+		DataBuffer buffer = bufferFactory().wrap(bytes);
+		return new WebSocketMessage(WebSocketMessage.Type.TEXT, buffer);
+	}
+
+	@Override
+	public WebSocketMessage binaryMessage(Function<DataBufferFactory, DataBuffer> payloadFactory) {
+		DataBuffer payload = payloadFactory.apply(bufferFactory());
+		return new WebSocketMessage(WebSocketMessage.Type.BINARY, payload);
+	}
+
+	@Override
+	public WebSocketMessage pingMessage(Function<DataBufferFactory, DataBuffer> payloadFactory) {
+		DataBuffer payload = payloadFactory.apply(bufferFactory());
+		return new WebSocketMessage(WebSocketMessage.Type.PING, payload);
+	}
+
+	@Override
+	public WebSocketMessage pongMessage(Function<DataBufferFactory, DataBuffer> payloadFactory) {
+		DataBuffer payload = payloadFactory.apply(bufferFactory());
+		return new WebSocketMessage(WebSocketMessage.Type.PONG, payload);
+	}
 
 	@Override
 	public final Mono<Void> close(CloseStatus status) {

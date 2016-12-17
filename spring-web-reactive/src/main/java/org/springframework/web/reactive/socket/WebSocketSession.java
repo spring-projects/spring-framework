@@ -16,11 +16,13 @@
 package org.springframework.web.reactive.socket;
 
 import java.net.URI;
+import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 
 /**
@@ -57,6 +59,30 @@ public interface WebSocketSession {
 	 * @param messages the messages to write
 	 */
 	Mono<Void> send(Publisher<WebSocketMessage> messages);
+
+	/**
+	 * Factory method to create a text {@link WebSocketMessage} using the
+	 * {@link #bufferFactory()} for the session.
+	 */
+	WebSocketMessage textMessage(String payload);
+
+	/**
+	 * Factory method to create a binary WebSocketMessage using the
+	 * {@link #bufferFactory()} for the session.
+	 */
+	WebSocketMessage binaryMessage(Function<DataBufferFactory, DataBuffer> payloadFactory);
+
+	/**
+	 * Factory method to create a ping WebSocketMessage using the
+	 * {@link #bufferFactory()} for the session.
+	 */
+	WebSocketMessage pingMessage(Function<DataBufferFactory, DataBuffer> payloadFactory);
+
+	/**
+	 * Factory method to create a pong WebSocketMessage using the
+	 * {@link #bufferFactory()} for the session.
+	 */
+	WebSocketMessage pongMessage(Function<DataBufferFactory, DataBuffer> payloadFactory);
 
 	/**
 	 * Close the WebSocket session with {@link CloseStatus#NORMAL}.

@@ -101,15 +101,15 @@ public class JettyWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupport
 		if (Type.TEXT.equals(type)) {
 			byte[] bytes = ((String) message).getBytes(StandardCharsets.UTF_8);
 			DataBuffer buffer = getBufferFactory().wrap(bytes);
-			return WebSocketMessage.create(Type.TEXT, buffer);
+			return new WebSocketMessage(Type.TEXT, buffer);
 		}
 		else if (Type.BINARY.equals(type)) {
 			DataBuffer buffer = getBufferFactory().wrap((ByteBuffer) message);
-			return WebSocketMessage.create(Type.BINARY, buffer);
+			return new WebSocketMessage(Type.BINARY, buffer);
 		}
 		else if (Type.PONG.equals(type)) {
 			DataBuffer buffer = getBufferFactory().wrap((ByteBuffer) message);
-			return WebSocketMessage.create(Type.PONG, buffer);
+			return new WebSocketMessage(Type.PONG, buffer);
 		}
 		else {
 			throw new IllegalArgumentException("Unexpected message type: " + message);

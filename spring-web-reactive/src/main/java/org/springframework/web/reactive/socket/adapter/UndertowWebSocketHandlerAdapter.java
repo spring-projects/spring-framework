@@ -102,15 +102,15 @@ public class UndertowWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupp
 		private <T> WebSocketMessage toMessage(Type type, T message) {
 			if (Type.TEXT.equals(type)) {
 				byte[] bytes = ((String) message).getBytes(StandardCharsets.UTF_8);
-				return WebSocketMessage.create(Type.TEXT, getBufferFactory().wrap(bytes));
+				return new WebSocketMessage(Type.TEXT, getBufferFactory().wrap(bytes));
 			}
 			else if (Type.BINARY.equals(type)) {
 				DataBuffer buffer = getBufferFactory().allocateBuffer().write((ByteBuffer[]) message);
-				return WebSocketMessage.create(Type.BINARY, buffer);
+				return new WebSocketMessage(Type.BINARY, buffer);
 			}
 			else if (Type.PONG.equals(type)) {
 				DataBuffer buffer = getBufferFactory().allocateBuffer().write((ByteBuffer[]) message);
-				return WebSocketMessage.create(Type.PONG, buffer);
+				return new WebSocketMessage(Type.PONG, buffer);
 			}
 			else {
 				throw new IllegalArgumentException("Unexpected message type: " + message);

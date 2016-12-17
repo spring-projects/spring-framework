@@ -78,12 +78,12 @@ public abstract class NettyWebSocketSessionSupport<T> extends WebSocketSessionSu
 		Class<?> frameType = frames.get(0).getClass();
 		if (frames.size() == 1) {
 			NettyDataBuffer buffer = bufferFactory().wrap(frames.get(0).content());
-			return WebSocketMessage.create(MESSAGE_TYPES.get(frameType), buffer);
+			return new WebSocketMessage(MESSAGE_TYPES.get(frameType), buffer);
 		}
 		return frames.stream()
 				.map(socketFrame -> bufferFactory().wrap(socketFrame.content()))
 				.reduce(NettyDataBuffer::write)
-				.map(buffer -> WebSocketMessage.create(MESSAGE_TYPES.get(frameType), buffer))
+				.map(buffer -> new WebSocketMessage(MESSAGE_TYPES.get(frameType), buffer))
 				.get();
 	}
 

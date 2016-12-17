@@ -90,15 +90,15 @@ public class TomcatWebSocketHandlerAdapter extends WebSocketHandlerAdapterSuppor
 		private <T> WebSocketMessage toMessage(T message) {
 			if (message instanceof String) {
 				byte[] bytes = ((String) message).getBytes(StandardCharsets.UTF_8);
-				return WebSocketMessage.create(Type.TEXT, getBufferFactory().wrap(bytes));
+				return new WebSocketMessage(Type.TEXT, getBufferFactory().wrap(bytes));
 			}
 			else if (message instanceof ByteBuffer) {
 				DataBuffer buffer = getBufferFactory().wrap((ByteBuffer) message);
-				return WebSocketMessage.create(Type.BINARY, buffer);
+				return new WebSocketMessage(Type.BINARY, buffer);
 			}
 			else if (message instanceof PongMessage) {
 				DataBuffer buffer = getBufferFactory().wrap(((PongMessage) message).getApplicationData());
-				return WebSocketMessage.create(Type.PONG, buffer);
+				return new WebSocketMessage(Type.PONG, buffer);
 			}
 			else {
 				throw new IllegalArgumentException("Unexpected message type: " + message);
