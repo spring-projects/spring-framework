@@ -1295,7 +1295,6 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		}
 		catch (UnsatisfiedDependencyException ex) {
 			// expected
-			ex.printStackTrace();
 			assertSame(CustomAnnotationRequiredFieldResourceInjectionBean.class,
 					ex.getInjectionPoint().getField().getDeclaringClass());
 		}
@@ -1680,9 +1679,6 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(sr, bean.stringRepositoryMap.get("stringRepo"));
 		assertSame(ir, bean.integerRepositoryMap.get("integerRepository"));
 	}
-
-	@Qualifier("integerRepo")
-	private Repository<?> integerRepositoryQualifierProvider;
 
 	@Test
 	public void testGenericsBasedFieldInjectionWithSimpleMatch() {
@@ -2192,6 +2188,10 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		assertNotNull(bf.getBean("annotatedBean"));
 	}
+
+
+	@Qualifier("integerRepo")
+	private Repository<?> integerRepositoryQualifierProvider;
 
 
 	public static class ResourceInjectionBean {

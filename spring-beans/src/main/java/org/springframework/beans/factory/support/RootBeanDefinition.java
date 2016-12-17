@@ -65,7 +65,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	volatile Class<?> resolvedTargetType;
 
 	/** Package-visible field for caching the return type of a generically typed factory method */
-	volatile Class<?> resolvedFactoryMethodReturnType;
+	volatile ResolvableType factoryMethodReturnType;
 
 	/** Common lock for the four constructor fields below */
 	final Object constructorArgumentLock = new Object();

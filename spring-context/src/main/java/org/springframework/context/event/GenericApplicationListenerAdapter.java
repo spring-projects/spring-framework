@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,8 +60,8 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 	@SuppressWarnings("unchecked")
 	public boolean supportsEventType(ResolvableType eventType) {
 		if (this.delegate instanceof SmartApplicationListener) {
-			Class<? extends ApplicationEvent> eventClass = (Class<? extends ApplicationEvent>) eventType.getRawClass();
-			return ((SmartApplicationListener) this.delegate).supportsEventType(eventClass);
+			Class<? extends ApplicationEvent> eventClass = (Class<? extends ApplicationEvent>) eventType.resolve();
+			return (eventClass != null && ((SmartApplicationListener) this.delegate).supportsEventType(eventClass));
 		}
 		else {
 			return (this.declaredEventType == null || this.declaredEventType.isAssignableFrom(eventType));
@@ -70,7 +70,7 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 
 	@Override
 	public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
-		return supportsEventType(ResolvableType.forType(eventType));
+		return supportsEventType(ResolvableType.forClass(eventType));
 	}
 
 	@Override

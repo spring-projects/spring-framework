@@ -513,7 +513,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			// Retrieve corresponding bean definition.
 			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 
-			Class<?> classToMatch = typeToMatch.getRawClass();
+			Class<?> classToMatch = typeToMatch.resolve();
+			if (classToMatch == null) {
+				classToMatch = FactoryBean.class;
+			}
 			Class<?>[] typesToMatch = (FactoryBean.class == classToMatch ?
 					new Class<?>[] {classToMatch} : new Class<?>[] {FactoryBean.class, classToMatch});
 
@@ -553,6 +556,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 			}
 
+			ResolvableType resolvableType = mbd.targetType;
+			if (resolvableType == null) {
+				resolvableType = mbd.factoryMethodReturnType;
+			}
+			if (resolvableType != null && resolvableType.resolve() == beanType) {
+				return typeToMatch.isAssignableFrom(resolvableType);
+			}
 			return typeToMatch.isAssignableFrom(beanType);
 		}
 	}
@@ -1443,6 +1453,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return the type of the bean, or {@code null} if not predictable
 	 */
 	protected Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class<?>... typesToMatch) {
+		Class<?> targetType = mbd.getTargetType();
+		if (targetType != null) {
+			return targetType;
+		}
 		if (mbd.getFactoryMethodName() != null) {
 			return null;
 		}

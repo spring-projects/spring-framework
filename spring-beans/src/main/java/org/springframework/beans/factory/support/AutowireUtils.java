@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,8 +162,8 @@ abstract class AutowireUtils {
 	 * Determine the target type for the generic return type of the given
 	 * <em>generic factory method</em>, where formal type variables are declared
 	 * on the given method itself.
-	 * <p>For example, given a factory method with the following signature,
-	 * if {@code resolveReturnTypeForFactoryMethod()} is invoked with the reflected
+	 * <p>For example, given a factory method with the following signature, if
+	 * {@code resolveReturnTypeForFactoryMethod()} is invoked with the reflected
 	 * method for {@code creatProxy()} and an {@code Object[]} array containing
 	 * {@code MyService.class}, {@code resolveReturnTypeForFactoryMethod()} will
 	 * infer that the target return type is {@code MyService}.
@@ -184,9 +184,9 @@ abstract class AutowireUtils {
 	 * @param method the method to introspect (never {@code null})
 	 * @param args the arguments that will be supplied to the method when it is
 	 * invoked (never {@code null})
-	 * @param classLoader the ClassLoader to resolve class names against, if necessary
-	 * (never {@code null})
-	 * @return the resolved target return type, the standard return type, or {@code null}
+	 * @param classLoader the ClassLoader to resolve class names against,
+	 * if necessary (never {@code null})
+	 * @return the resolved target return type or the standard method return type
 	 * @since 3.2.5
 	 */
 	public static Class<?> resolveReturnTypeForFactoryMethod(Method method, Object[] args, ClassLoader classLoader) {

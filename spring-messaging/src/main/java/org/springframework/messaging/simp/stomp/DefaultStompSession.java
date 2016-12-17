@@ -436,7 +436,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			return;
 		}
 		Type type = handler.getPayloadType(stompHeaders);
-		Class<?> payloadType = ResolvableType.forType(type).getRawClass();
+		Class<?> payloadType = ResolvableType.forType(type).resolve();
 		Object object = getMessageConverter().fromMessage(message, payloadType);
 		if (object == null) {
 			throw new MessageConversionException("No suitable converter, payloadType=" + payloadType +

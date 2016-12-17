@@ -43,6 +43,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DescriptiveResource;
@@ -50,6 +51,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 import static org.junit.Assert.*;
 
@@ -520,6 +522,33 @@ public class ConfigurationClassPostProcessorTests {
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
 
 		assertSame(beanFactory.getBean("genericRepo"), beanFactory.getBean("repoConsumer"));
+	}
+
+	@Test
+	public void genericsBasedInjectionWithLateGenericsMatching() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		beanFactory.preInstantiateSingletons();
+
+		String[] beanNames = beanFactory.getBeanNamesForType(Repository.class);
+		assertTrue(ObjectUtils.containsElement(beanNames, "stringRepo"));
+
+		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(Repository.class, String.class));
+		assertEquals(1, beanNames.length);
+		assertEquals("stringRepo", beanNames[0]);
+	}
+
+	@Test
+	public void genericsBasedInjectionWithEarlyGenericsMatching() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+
+		String[] beanNames = beanFactory.getBeanNamesForType(Repository.class);
+		assertTrue(ObjectUtils.containsElement(beanNames, "stringRepo"));
+
+		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(Repository.class, String.class));
+		assertEquals(1, beanNames.length);
+		assertEquals("stringRepo", beanNames[0]);
 	}
 
 	@Test

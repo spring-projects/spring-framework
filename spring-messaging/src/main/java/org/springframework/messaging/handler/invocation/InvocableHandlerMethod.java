@@ -283,7 +283,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				return this.returnValue.getClass();
 			}
 			if (!ResolvableType.NONE.equals(this.returnType)) {
-				return this.returnType.getRawClass();
+				return this.returnType.resolve();
 			}
 			return super.getParameterType();
 		}
