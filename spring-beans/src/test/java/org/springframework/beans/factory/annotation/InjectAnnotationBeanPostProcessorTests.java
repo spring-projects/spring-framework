@@ -17,6 +17,8 @@
 package org.springframework.beans.factory.annotation;
 
 import java.io.Serializable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -571,6 +573,60 @@ public class InjectAnnotationBeanPostProcessorTests {
 		assertEquals("The FactoryBeanDependentBean should have been autowired 'by type' with the StringFactoryBean.",
 				factoryBean, bean.getFactoryBean());
 
+		bf.destroySingletons();
+	}
+
+	@Test
+	public void testNullableFieldInjectionWithBeanAvailable() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(NullableFieldInjectionBean.class));
+		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
+
+		NullableFieldInjectionBean bean = (NullableFieldInjectionBean) bf.getBean("annotatedBean");
+		assertSame(bf.getBean("testBean"), bean.getTestBean());
+		bf.destroySingletons();
+	}
+
+	@Test
+	public void testNullableFieldInjectionWithBeanNotAvailable() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(NullableFieldInjectionBean.class));
+
+		NullableFieldInjectionBean bean = (NullableFieldInjectionBean) bf.getBean("annotatedBean");
+		assertNull(bean.getTestBean());
+		bf.destroySingletons();
+	}
+
+	@Test
+	public void testNullableMethodInjectionWithBeanAvailable() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(NullableMethodInjectionBean.class));
+		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
+
+		NullableMethodInjectionBean bean = (NullableMethodInjectionBean) bf.getBean("annotatedBean");
+		assertSame(bf.getBean("testBean"), bean.getTestBean());
+		bf.destroySingletons();
+	}
+
+	@Test
+	public void testNullableMethodInjectionWithBeanNotAvailable() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(NullableMethodInjectionBean.class));
+
+		NullableMethodInjectionBean bean = (NullableMethodInjectionBean) bf.getBean("annotatedBean");
+		assertNull(bean.getTestBean());
 		bf.destroySingletons();
 	}
 
@@ -1275,6 +1331,36 @@ public class InjectAnnotationBeanPostProcessorTests {
 	}
 
 
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface Nullable {}
+
+
+	public static class NullableFieldInjectionBean {
+
+		@Inject @Nullable
+		private TestBean testBean;
+
+		public TestBean getTestBean() {
+			return this.testBean;
+		}
+	}
+
+
+	public static class NullableMethodInjectionBean {
+
+		private TestBean testBean;
+
+		@Inject
+		public void setTestBean(@Nullable TestBean testBean) {
+			this.testBean = testBean;
+		}
+
+		public TestBean getTestBean() {
+			return this.testBean;
+		}
+	}
+
+
 	public static class OptionalFieldInjectionBean {
 
 		@Inject
@@ -1291,8 +1377,8 @@ public class InjectAnnotationBeanPostProcessorTests {
 		private Optional<TestBean> testBean;
 
 		@Inject
-		public void setTestBean(Optional<TestBean> testBeanFactory) {
-			this.testBean = testBeanFactory;
+		public void setTestBean(Optional<TestBean> testBean) {
+			this.testBean = testBean;
 		}
 
 		public Optional<TestBean> getTestBean() {
@@ -1317,8 +1403,8 @@ public class InjectAnnotationBeanPostProcessorTests {
 		private Optional<List<TestBean>> testBean;
 
 		@Inject
-		public void setTestBean(Optional<List<TestBean>> testBeanFactory) {
-			this.testBean = testBeanFactory;
+		public void setTestBean(Optional<List<TestBean>> testBean) {
+			this.testBean = testBean;
 		}
 
 		public Optional<List<TestBean>> getTestBean() {
@@ -1343,8 +1429,8 @@ public class InjectAnnotationBeanPostProcessorTests {
 		private Provider<Optional<TestBean>> testBean;
 
 		@Inject
-		public void setTestBean(Provider<Optional<TestBean>> testBeanFactory) {
-			this.testBean = testBeanFactory;
+		public void setTestBean(Provider<Optional<TestBean>> testBean) {
+			this.testBean = testBean;
 		}
 
 		public Optional<TestBean> getTestBean() {

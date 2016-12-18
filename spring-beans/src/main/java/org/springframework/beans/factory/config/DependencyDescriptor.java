@@ -19,6 +19,7 @@ package org.springframework.beans.factory.config;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -155,6 +156,10 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	/**
 	 * Return whether this dependency is required.
+	 * <p>Optional semantics are derived from Java 8's {@link java.util.Optional},
+	 * any variant of a parameter-level {@code Nullable} annotation (such as from
+	 * JSR-305 or the FindBugs set of annotations), or a language-level nullable
+	 * type declaration in Kotlin.
 	 */
 	public boolean isRequired() {
 		if (!this.required) {
@@ -162,12 +167,26 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 		}
 
 		if (this.field != null) {
-			return !(this.field.getType() == Optional.class ||
+			return !(this.field.getType() == Optional.class || hasNullableAnnotation() ||
 					(kotlinPresent && KotlinDelegate.isNullable(this.field)));
 		}
 		else {
 			return !this.methodParameter.isOptional();
 		}
+	}
+
+	/**
+	 * Check whether the underlying field is annotated with any variant of a
+	 * {@code Nullable} annotation, e.g. {@code javax.annotation.Nullable} or
+	 * {@code edu.umd.cs.findbugs.annotations.Nullable}.
+	 */
+	private boolean hasNullableAnnotation() {
+		for (Annotation ann : getAnnotations()) {
+			if ("Nullable".equals(ann.annotationType().getSimpleName())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

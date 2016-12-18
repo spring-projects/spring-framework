@@ -322,14 +322,30 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Return whether this method indicates a parameter which is not required
-	 * (either in the form of Java 8's {@link java.util.Optional} or Kotlin's
-	 * nullable type).
+	 * Return whether this method indicates a parameter which is not required:
+	 * either in the form of Java 8's {@link java.util.Optional}, any variant
+	 * of a parameter-level {@code Nullable} annotation (such as from JSR-305
+	 * or the FindBugs set of annotations), or a language-level nullable type
+	 * declaration in Kotlin.
 	 * @since 4.3
 	 */
 	public boolean isOptional() {
-		return (getParameterType() == Optional.class ||
+		return (getParameterType() == Optional.class || hasNullableAnnotation() ||
 				(kotlinPresent && KotlinDelegate.isNullable(this)));
+	}
+
+	/**
+	 * Check whether this method parameter is annotated with any variant of a
+	 * {@code Nullable} annotation, e.g. {@code javax.annotation.Nullable} or
+	 * {@code edu.umd.cs.findbugs.annotations.Nullable}.
+	 */
+	private boolean hasNullableAnnotation() {
+		for (Annotation ann : getParameterAnnotations()) {
+			if ("Nullable".equals(ann.annotationType().getSimpleName())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
