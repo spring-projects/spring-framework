@@ -22,6 +22,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -116,10 +117,43 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/**
 	 * Create a new RootBeanDefinition for a singleton.
 	 * @param beanClass the class of the bean to instantiate
+	 * @see #setBeanClass
 	 */
 	public RootBeanDefinition(Class<?> beanClass) {
 		super();
 		setBeanClass(beanClass);
+	}
+
+	/**
+	 * Create a new RootBeanDefinition for a singleton bean, constructing each instance
+	 * through calling the given supplier (possibly a lambda or method reference).
+	 * @param beanClass the class of the bean to instantiate
+	 * @param instanceSupplier the supplier to construct a bean instance,
+	 * as an alternative to a declaratively specified factory method
+	 * @since 5.0
+	 * @see #setInstanceSupplier(Supplier)
+	 */
+	public <T> RootBeanDefinition(Class<T> beanClass, Supplier<T> instanceSupplier) {
+		super();
+		setBeanClass(beanClass);
+		setInstanceSupplier(instanceSupplier);
+	}
+
+	/**
+	 * Create a new RootBeanDefinition for a scoped bean, constructing each instance
+	 * through calling the given supplier (possibly a lambda or method reference).
+	 * @param beanClass the class of the bean to instantiate
+	 * @param scope the name of the corresponding scope
+	 * @param instanceSupplier the supplier to construct a bean instance,
+	 * as an alternative to a declaratively specified factory method
+	 * @since 5.0
+	 * @see #setInstanceSupplier(Supplier)
+	 */
+	public <T> RootBeanDefinition(Class<T> beanClass, String scope, Supplier<T> instanceSupplier) {
+		super();
+		setBeanClass(beanClass);
+		setScope(scope);
+		setInstanceSupplier(instanceSupplier);
 	}
 
 	/**
