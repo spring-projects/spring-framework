@@ -15,6 +15,7 @@
  */
 package org.springframework.web.reactive.socket.server;
 
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +30,9 @@ import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketSession;
+import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.RxNettyWebSocketClient;
+import org.springframework.web.reactive.socket.client.WebSocketClient;
 
 import static org.junit.Assert.assertEquals;
 
@@ -48,13 +51,22 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 
 
 	@Test
-	public void echo() throws Exception {
+	public void echoReactorNettyClient() throws Exception {
+		testEcho(new ReactorNettyWebSocketClient());
+	}
+
+	@Test
+	public void echoRxNettyClient() throws Exception {
+		testEcho(new RxNettyWebSocketClient());
+	}
+
+	private void testEcho(WebSocketClient client) throws URISyntaxException {
 		int count = 100;
 		Flux<String> input = Flux.range(1, count).map(index -> "msg-" + index);
-		ReplayProcessor<Object> emitter = ReplayProcessor.create(count);
+		ReplayProcessor<Object> output = ReplayProcessor.create(count);
 
-		new RxNettyWebSocketClient()
-				.execute(getUrl("/echo"), session -> session
+		client.execute(getUrl("/echo"),
+				session -> session
 						.send(input.map(session::textMessage))
 						.thenMany(session.receive()
 								.take(count)
@@ -63,11 +75,11 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 									message.release();
 									return text;
 								}))
-						.subscribeWith(emitter)
+						.subscribeWith(output)
 						.then())
 				.blockMillis(5000);
 
-		assertEquals(input.collectList().blockMillis(5000), emitter.collectList().blockMillis(5000));
+		assertEquals(input.collectList().blockMillis(5000), output.collectList().blockMillis(5000));
 	}
 
 
