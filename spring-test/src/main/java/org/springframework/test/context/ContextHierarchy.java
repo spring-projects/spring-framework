@@ -139,7 +139,7 @@ import java.lang.annotation.Target;
  * @see ContextConfiguration
  * @see org.springframework.context.ApplicationContext
  */
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited

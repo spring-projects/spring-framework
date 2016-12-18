@@ -20,6 +20,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
 
@@ -39,7 +40,10 @@ import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.TestContextBootstrapper;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Abstract base class for tests involving {@link ContextLoaderUtils},
@@ -70,6 +74,18 @@ abstract class AbstractContextConfigurationUtilsTests {
 			Class<? extends ContextLoader> expectedContextLoaderClass, boolean expectedInheritLocations) {
 
 		assertEquals("declaring class", expectedDeclaringClass, attributes.getDeclaringClass());
+		assertArrayEquals("locations", expectedLocations, attributes.getLocations());
+		assertArrayEquals("classes", expectedClasses, attributes.getClasses());
+		assertEquals("inherit locations", expectedInheritLocations, attributes.isInheritLocations());
+		assertEquals("context loader", expectedContextLoaderClass, attributes.getContextLoaderClass());
+	}
+
+	void assertAttributes(ContextConfigurationAttributes attributes, Class<?> expectedDeclaringClass,
+			Method expectedDeclaringMethod, String[] expectedLocations, Class<?>[] expectedClasses,
+			Class<? extends ContextLoader> expectedContextLoaderClass, boolean expectedInheritLocations) {
+
+		assertEquals("declaring class", expectedDeclaringClass, attributes.getDeclaringClass());
+		assertEquals("declaring method", expectedDeclaringMethod, attributes.getDeclaringMethod());
 		assertArrayEquals("locations", expectedLocations, attributes.getLocations());
 		assertArrayEquals("classes", expectedClasses, attributes.getClasses());
 		assertEquals("inherit locations", expectedInheritLocations, attributes.isInheritLocations());
@@ -129,14 +145,14 @@ abstract class AbstractContextConfigurationUtilsTests {
 	@ContextConfiguration("/foo.xml")
 	@ActiveProfiles(profiles = "foo")
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	public static @interface MetaLocationsFooConfig {
 	}
 
 	@ContextConfiguration
 	@ActiveProfiles
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	public static @interface MetaLocationsFooConfigWithOverrides {
 
 		String[] locations() default "/foo.xml";
@@ -147,7 +163,7 @@ abstract class AbstractContextConfigurationUtilsTests {
 	@ContextConfiguration("/bar.xml")
 	@ActiveProfiles(profiles = "bar")
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	public static @interface MetaLocationsBarConfig {
 	}
 
@@ -211,6 +227,70 @@ abstract class AbstractContextConfigurationUtilsTests {
 	@ContextConfiguration(classes = FooConfig.class, loader = GenericPropertiesContextLoader.class)
 	@ActiveProfiles("foo")
 	static class PropertiesClassesFoo {
+	}
+
+
+	static class BareMethodAnnotations {
+		@ContextConfiguration
+		public void something() {
+			// for test purposes
+		}
+	}
+
+	static class LocationsMethodFoo {
+		@ContextConfiguration(locations = "/foo.xml", inheritLocations = false)
+		public void something() {
+			// for test purposes
+		}
+	}
+
+	static class ClassesMethodFoo {
+		@ContextConfiguration(classes = FooConfig.class, inheritLocations = false)
+		public void something() {
+			// for test purposes
+		}
+	}
+
+	static class LocationsMethodBar extends LocationsMethodFoo {
+		@ContextConfiguration(locations = "/bar.xml", inheritLocations = true, loader = AnnotationConfigContextLoader.class)
+		public void something() {
+			// for test purposes
+		}
+	}
+
+	static class ClassesMethodBar extends ClassesMethodFoo {
+		@ContextConfiguration(classes = BarConfig.class, inheritLocations = true, loader = AnnotationConfigContextLoader.class)
+		public void something() {
+			// for test purposes
+		}
+	}
+
+	static class MetaLocationsMethodFoo {
+		@MetaLocationsFooConfig
+		public void something() {
+			// for test purposes
+		}
+	}
+
+	static class MetaLocationsMethodBar extends MetaLocationsMethodFoo {
+		@MetaLocationsBarConfig
+		public void something() {
+			// for test purposes
+		}
+	}
+
+	static class MetaLocationsMethodFooWithOverrides {
+		@MetaLocationsFooConfigWithOverrides
+		public void something() {
+			// for test purposes
+		}
+	}
+
+	static class MetaLocationsMethodFooWithOverriddenAttributes {
+		@MetaLocationsFooConfigWithOverrides(locations = {"foo1.xml", "foo2.xml"}, profiles = {"foo1", "foo2"})
+		public void something() {
+			// for test purposes
+		}
 	}
 
 }

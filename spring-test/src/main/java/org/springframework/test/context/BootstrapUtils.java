@@ -17,6 +17,7 @@
 package org.springframework.test.context;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -49,6 +50,9 @@ abstract class BootstrapUtils {
 
 	private static final String DEFAULT_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME =
 			"org.springframework.test.context.support.DefaultTestContextBootstrapper";
+
+	private static final String DEFAULT_TEST_METHOD_CONTEXT_BOOTSTRAPPER_CLASS_NAME =
+			"org.springframework.test.context.support.DefaultTestMethodContextBootstrapper";
 
 	private static final String DEFAULT_WEB_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME =
 			"org.springframework.test.context.web.WebTestContextBootstrapper";
@@ -134,6 +138,42 @@ abstract class BootstrapUtils {
 			}
 			TestContextBootstrapper testContextBootstrapper =
 					BeanUtils.instantiateClass(clazz, TestContextBootstrapper.class);
+			testContextBootstrapper.setBootstrapContext(bootstrapContext);
+			return testContextBootstrapper;
+		}
+		catch (IllegalStateException ex) {
+			throw ex;
+		}
+		catch (Throwable ex) {
+			throw new IllegalStateException("Could not load TestContextBootstrapper [" + clazz +
+					"]. Specify @BootstrapWith's 'value' attribute or make the default bootstrapper class available.",
+					ex);
+		}
+	}
+
+	/**
+	 * Resolve the {@link TestContextBootstrapper} type for the supplied test method.
+	 * <p>Will use
+	 * {@link org.springframework.test.context.support.DefaultTestMethodContextBootstrapper
+	 * DefaultTestMethodContextBootstrapper}.
+	 * @param testMethod the method for which to create context bootstrapper
+	 * @return a fully configured {@code TestContextBootstrapper} for particular method
+	 */
+	@SuppressWarnings("unchecked")
+	static TestContextBootstrapper resolveTestContextBootstrapper(Method testMethod) {
+		final BootstrapContext bootstrapContext = createBootstrapContext(testMethod.getDeclaringClass());
+		Class<?> testClass = bootstrapContext.getTestClass();
+
+		Class<?> clazz = null;
+		try {
+			clazz = ClassUtils.forName(DEFAULT_TEST_METHOD_CONTEXT_BOOTSTRAPPER_CLASS_NAME,
+					BootstrapUtils.class.getClassLoader());
+			if (logger.isDebugEnabled()) {
+				logger.debug(String.format("Instantiating TestContextBootstrapper for test class [%s] from class [%s]",
+						testClass.getName(), clazz.getName()));
+			}
+			TestContextBootstrapper testContextBootstrapper = BeanUtils.instantiateClass(
+					(Constructor<? extends TestContextBootstrapper>) clazz.getConstructor(Method.class), testMethod);
 			testContextBootstrapper.setBootstrapContext(bootstrapContext);
 			return testContextBootstrapper;
 		}

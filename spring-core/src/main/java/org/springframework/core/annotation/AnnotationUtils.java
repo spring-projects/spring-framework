@@ -731,7 +731,7 @@ public abstract class AnnotationUtils {
 	 * @see Class#isAnnotationPresent(Class)
 	 * @see Class#getDeclaredAnnotations()
 	 * @see #findAnnotationDeclaringClassForTypes(List, Class)
-	 * @see #isAnnotationDeclaredLocally(Class, Class)
+	 * @see #isAnnotationDeclaredLocally(Class, AnnotatedElement)
 	 */
 	public static Class<?> findAnnotationDeclaringClass(Class<? extends Annotation> annotationType, Class<?> clazz) {
 		Assert.notNull(annotationType, "Annotation type must not be null");
@@ -766,7 +766,7 @@ public abstract class AnnotationUtils {
 	 * @see Class#isAnnotationPresent(Class)
 	 * @see Class#getDeclaredAnnotations()
 	 * @see #findAnnotationDeclaringClass(Class, Class)
-	 * @see #isAnnotationDeclaredLocally(Class, Class)
+	 * @see #isAnnotationDeclaredLocally(Class, AnnotatedElement)
 	 */
 	public static Class<?> findAnnotationDeclaringClassForTypes(List<Class<? extends Annotation>> annotationTypes, Class<?> clazz) {
 		Assert.notEmpty(annotationTypes, "List of annotation types must not be empty");
@@ -784,33 +784,34 @@ public abstract class AnnotationUtils {
 	/**
 	 * Determine whether an annotation of the specified {@code annotationType}
 	 * is declared locally (i.e., <em>directly present</em>) on the supplied
-	 * {@code clazz}.
-	 * <p>The supplied {@link Class} may represent any type.
+	 * {@code annotatedElement}.
+	 * <p>The supplied {@link AnnotatedElement} may represents any annotated element.
 	 * <p>Meta-annotations will <em>not</em> be searched.
 	 * <p>Note: This method does <strong>not</strong> determine if the annotation
 	 * is {@linkplain java.lang.annotation.Inherited inherited}. For greater
 	 * clarity regarding inherited annotations, consider using
 	 * {@link #isAnnotationInherited(Class, Class)} instead.
 	 * @param annotationType the annotation type to look for
-	 * @param clazz the class to check for the annotation on
+	 * @param annotatedElement the element to check for the annotation on
 	 * @return {@code true} if an annotation of the specified {@code annotationType}
 	 * is <em>directly present</em>
 	 * @see java.lang.Class#getDeclaredAnnotations()
 	 * @see java.lang.Class#getDeclaredAnnotation(Class)
 	 * @see #isAnnotationInherited(Class, Class)
 	 */
-	public static boolean isAnnotationDeclaredLocally(Class<? extends Annotation> annotationType, Class<?> clazz) {
+	public static boolean isAnnotationDeclaredLocally(Class<? extends Annotation> annotationType,
+			AnnotatedElement annotatedElement) {
 		Assert.notNull(annotationType, "Annotation type must not be null");
-		Assert.notNull(clazz, "Class must not be null");
+		Assert.notNull(annotatedElement, "Annotated element must not be null");
 		try {
-			for (Annotation ann : clazz.getDeclaredAnnotations()) {
+			for (Annotation ann : annotatedElement.getDeclaredAnnotations()) {
 				if (ann.annotationType() == annotationType) {
 					return true;
 				}
 			}
 		}
 		catch (Throwable ex) {
-			handleIntrospectionFailure(clazz, ex);
+			handleIntrospectionFailure(annotatedElement, ex);
 		}
 		return false;
 	}
@@ -832,7 +833,7 @@ public abstract class AnnotationUtils {
 	 * @return {@code true} if an annotation of the specified {@code annotationType}
 	 * is <em>present</em> and <em>inherited</em>
 	 * @see Class#isAnnotationPresent(Class)
-	 * @see #isAnnotationDeclaredLocally(Class, Class)
+	 * @see #isAnnotationDeclaredLocally(Class, AnnotatedElement)
 	 */
 	public static boolean isAnnotationInherited(Class<? extends Annotation> annotationType, Class<?> clazz) {
 		Assert.notNull(annotationType, "Annotation type must not be null");

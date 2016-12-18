@@ -83,7 +83,7 @@ import org.springframework.core.annotation.AliasFor;
  * @see MergedContextConfiguration
  * @see org.springframework.context.ApplicationContext
  */
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited

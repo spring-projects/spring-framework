@@ -491,7 +491,7 @@ public class MetaAnnotationUtilsTests {
 	@Component(value = "meta1")
 	@Order
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Documented
 	static @interface Meta1 {
 	}
@@ -499,21 +499,21 @@ public class MetaAnnotationUtilsTests {
 	@Component(value = "meta2")
 	@Transactional
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Documented
 	static @interface Meta2 {
 	}
 
 	@Meta2
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Documented
 	@interface MetaMeta {
 	}
 
 	@MetaMeta
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Documented
 	@interface MetaMetaMeta {
 	}
@@ -534,14 +534,14 @@ public class MetaAnnotationUtilsTests {
 
 	@MetaCycle2
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Documented
 	@interface MetaCycle3 {
 	}
 
 	@ContextConfiguration
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Documented
 	static @interface MetaConfig {
 

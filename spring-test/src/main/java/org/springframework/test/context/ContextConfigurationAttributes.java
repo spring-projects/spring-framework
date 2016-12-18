@@ -16,6 +16,7 @@
 
 package org.springframework.test.context;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
@@ -50,6 +51,8 @@ public class ContextConfigurationAttributes {
 	private static final Log logger = LogFactory.getLog(ContextConfigurationAttributes.class);
 
 	private final Class<?> declaringClass;
+
+	private final Method declaringMethod;
 
 	private Class<?>[] classes;
 
@@ -149,6 +152,14 @@ public class ContextConfigurationAttributes {
 			Class<?> declaringClass, String[] locations, Class<?>[] classes, boolean inheritLocations,
 			Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>[] initializers,
 			boolean inheritInitializers, String name, Class<? extends ContextLoader> contextLoaderClass) {
+		this(declaringClass, null, locations, classes, inheritLocations, initializers, inheritInitializers,
+				name, contextLoaderClass);
+	}
+
+	public ContextConfigurationAttributes(
+			Class<?> declaringClass, Method declaringMethod, String[] locations, Class<?>[] classes, boolean inheritLocations,
+			Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>[] initializers,
+			boolean inheritInitializers, String name, Class<? extends ContextLoader> contextLoaderClass) {
 
 		Assert.notNull(declaringClass, "declaringClass must not be null");
 		Assert.notNull(contextLoaderClass, "contextLoaderClass must not be null");
@@ -156,13 +167,14 @@ public class ContextConfigurationAttributes {
 		if (!ObjectUtils.isEmpty(locations) && !ObjectUtils.isEmpty(classes) && logger.isDebugEnabled()) {
 			logger.debug(String.format(
 					"Test class [%s] has been configured with @ContextConfiguration's 'locations' (or 'value') %s " +
-					"and 'classes' %s attributes. Most SmartContextLoader implementations support " +
-					"only one declaration of resources per @ContextConfiguration annotation.",
+							"and 'classes' %s attributes. Most SmartContextLoader implementations support " +
+							"only one declaration of resources per @ContextConfiguration annotation.",
 					declaringClass.getName(), ObjectUtils.nullSafeToString(locations),
 					ObjectUtils.nullSafeToString(classes)));
 		}
 
 		this.declaringClass = declaringClass;
+		this.declaringMethod = declaringMethod;
 		this.locations = locations;
 		this.classes = classes;
 		this.inheritLocations = inheritLocations;
@@ -181,6 +193,16 @@ public class ContextConfigurationAttributes {
 	 */
 	public Class<?> getDeclaringClass() {
 		return this.declaringClass;
+	}
+
+	/**
+	 * Get the {@linkplain Method method} that declared the
+	 * {@link ContextConfiguration @ContextConfiguration} annotation, either explicitly
+	 * or implicitly.
+	 * @return the declaring method (may be {@code null})
+	 */
+	public Method getDeclaringMethod() {
+		return this.declaringMethod;
 	}
 
 	/**
