@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.RxNettyWebSocketClient;
@@ -68,13 +69,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		client.execute(getUrl("/echo"),
 				session -> session
 						.send(input.map(session::textMessage))
-						.thenMany(session.receive()
-								.take(count)
-								.map(message -> {
-									String text = message.getPayloadAsText();
-									message.release();
-									return text;
-								}))
+						.thenMany(session.receive().take(count).map(WebSocketMessage::getPayloadAsText))
 						.subscribeWith(output)
 						.then())
 				.blockMillis(5000);
