@@ -114,11 +114,13 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/pdf}.
+	 * @since 4.3
 	 */
 	public final static MediaType APPLICATION_PDF;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_PDF}.
+	 * @since 4.3
 	 */
 	public final static String APPLICATION_PDF_VALUE = "application/pdf";
 
@@ -183,6 +185,17 @@ public class MediaType extends MimeType implements Serializable {
 	public final static String MULTIPART_FORM_DATA_VALUE = "multipart/form-data";
 
 	/**
+	 * Public constant media type for {@code text/event-stream}.
+	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
+	 */
+	public final static MediaType TEXT_EVENT_STREAM;
+
+	/**
+	 * A String equivalent of {@link MediaType#TEXT_EVENT_STREAM}.
+	 */
+	public final static String TEXT_EVENT_STREAM_VALUE = "text/event-stream";
+
+	/**
 	 * Public constant media type for {@code text/html}.
 	 */
 	public final static MediaType TEXT_HTML;
@@ -194,11 +207,13 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code text/markdown}.
+	 * @since 4.3
 	 */
 	public final static MediaType TEXT_MARKDOWN;
 
 	/**
 	 * A String equivalent of {@link MediaType#TEXT_MARKDOWN}.
+	 * @since 4.3
 	 */
 	public final static String TEXT_MARKDOWN_VALUE = "text/markdown";
 
@@ -240,6 +255,7 @@ public class MediaType extends MimeType implements Serializable {
 		IMAGE_JPEG = valueOf(IMAGE_JPEG_VALUE);
 		IMAGE_PNG = valueOf(IMAGE_PNG_VALUE);
 		MULTIPART_FORM_DATA = valueOf(MULTIPART_FORM_DATA_VALUE);
+		TEXT_EVENT_STREAM = valueOf(TEXT_EVENT_STREAM_VALUE);
 		TEXT_HTML = valueOf(TEXT_HTML_VALUE);
 		TEXT_MARKDOWN = valueOf(TEXT_MARKDOWN_VALUE);
 		TEXT_PLAIN = valueOf(TEXT_PLAIN_VALUE);
@@ -265,7 +281,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
 	public MediaType(String type, String subtype) {
-		super(type, subtype, Collections.<String, String>emptyMap());
+		super(type, subtype, Collections.emptyMap());
 	}
 
 	/**
@@ -296,6 +312,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @param other the other media type
 	 * @param charset the character set
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
+	 * @since 4.3
 	 */
 	public MediaType(MediaType other, Charset charset) {
 		super(other, charset);
@@ -439,7 +456,7 @@ public class MediaType extends MimeType implements Serializable {
 		if (!StringUtils.hasLength(mediaTypes)) {
 			return Collections.emptyList();
 		}
-		String[] tokens = mediaTypes.split(",\\s*");
+		String[] tokens = StringUtils.tokenizeToStringArray(mediaTypes, ",");
 		List<MediaType> result = new ArrayList<>(tokens.length);
 		for (String token : tokens) {
 			result.add(parseMediaType(token));
@@ -458,7 +475,7 @@ public class MediaType extends MimeType implements Serializable {
 	 */
 	public static List<MediaType> parseMediaTypes(List<String> mediaTypes) {
 		if (CollectionUtils.isEmpty(mediaTypes)) {
-			return Collections.<MediaType>emptyList();
+			return Collections.emptyList();
 		}
 		else if (mediaTypes.size() == 1) {
 			return parseMediaTypes(mediaTypes.get(0));

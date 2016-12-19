@@ -40,7 +40,8 @@ import org.springframework.messaging.tcp.FixedIntervalReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.messaging.tcp.TcpConnectionHandler;
 import org.springframework.messaging.tcp.TcpOperations;
-import org.springframework.messaging.tcp.reactor.Reactor2TcpClient;
+import org.springframework.messaging.tcp.reactor.ReactorNettyCodec;
+import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -335,7 +336,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	/**
 	 * Configure a TCP client for managing TCP connections to the STOMP broker.
-	 * By default {@link Reactor2TcpClient} is used.
+	 * By default {@link ReactorNettyTcpClient} is used.
 	 */
 	public void setTcpClient(TcpOperations<byte[]> tcpClient) {
 		this.tcpClient = tcpClient;
@@ -387,8 +388,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		if (this.tcpClient == null) {
 			StompDecoder decoder = new StompDecoder();
 			decoder.setHeaderInitializer(getHeaderInitializer());
-			Reactor2StompCodec codec = new Reactor2StompCodec(new StompEncoder(), decoder);
-			this.tcpClient = new StompTcpClientFactory().create(this.relayHost, this.relayPort, codec);
+			ReactorNettyCodec<byte[]> codec = new StompReactorNettyCodec(decoder);
+			this.tcpClient = new ReactorNettyTcpClient<>(this.relayHost, this.relayPort, codec);
 		}
 
 		if (logger.isInfoEnabled()) {
@@ -768,7 +769,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		public ListenableFuture<Void> forward(final Message<?> message, final StompHeaderAccessor accessor) {
 			TcpConnection<byte[]> conn = this.tcpConnection;
 
-			if (!this.isStompConnected) {
+			if (!this.isStompConnected || conn == null) {
 				if (this.isRemoteClientSession) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("TCP connection closed already, ignoring " +
@@ -969,15 +970,6 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			}
 		}
 	}
-
-
-	private static class StompTcpClientFactory {
-
-		public TcpOperations<byte[]> create(String relayHost, int relayPort, Reactor2StompCodec codec) {
-			return new Reactor2TcpClient<>(relayHost, relayPort, codec);
-		}
-	}
-
 
 	private static class VoidCallable implements Callable<Void> {
 

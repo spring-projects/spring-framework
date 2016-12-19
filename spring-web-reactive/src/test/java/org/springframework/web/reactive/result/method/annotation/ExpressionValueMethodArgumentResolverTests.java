@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
-import java.net.URI;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,20 +25,17 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.MockServerHttpRequest;
-import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ExpressionValueMethodArgumentResolver}.
@@ -58,12 +54,11 @@ public class ExpressionValueMethodArgumentResolverTests {
 
 	@Before
 	public void setUp() throws Exception {
-		ConversionService conversionService = new GenericConversionService();
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
-		this.resolver = new ExpressionValueMethodArgumentResolver(conversionService, context.getBeanFactory());
+		this.resolver = new ExpressionValueMethodArgumentResolver(context.getBeanFactory());
 
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
 		WebSessionManager sessionManager = new MockWebSessionManager();
 		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 
@@ -83,7 +78,9 @@ public class ExpressionValueMethodArgumentResolverTests {
 	public void resolveSystemProperty() throws Exception {
 		System.setProperty("systemProperty", "22");
 		try {
-			Mono<Object> mono = this.resolver.resolveArgument(this.paramSystemProperty, null, this.exchange);
+			Mono<Object> mono = this.resolver.resolveArgument(
+					this.paramSystemProperty,  new BindingContext(), this.exchange);
+
 			Object value = mono.block();
 			assertEquals(22, value);
 		}
@@ -97,8 +94,7 @@ public class ExpressionValueMethodArgumentResolverTests {
 
 
 	@SuppressWarnings("unused")
-	public void params(@Value("#{systemProperties.systemProperty}") int param1,
-					   String notSupported) {
+	public void params(@Value("#{systemProperties.systemProperty}") int param1, String notSupported) {
 	}
 
 }

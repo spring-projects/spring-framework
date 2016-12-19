@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,9 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
-import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
 
 
@@ -105,15 +105,15 @@ public class HttpMessageWriterView implements View {
 	}
 
 	@Override
-	public Mono<Void> render(HandlerResult result, MediaType contentType, ServerWebExchange exchange) {
-		Object value = extractObjectToRender(result);
+	public Mono<Void> render(Map<String, ?> model, MediaType contentType,
+			ServerWebExchange exchange) {
+		Object value = extractObjectToRender(model);
 		return applyMessageWriter(value, contentType, exchange);
 	}
 
-	protected Object extractObjectToRender(HandlerResult result) {
-		ModelMap model = result.getModel();
+	protected Object extractObjectToRender(Map<String, ?> model) {
 		Map<String, Object> map = new HashMap<>(model.size());
-		for (Map.Entry<String, Object> entry : model.entrySet()) {
+		for (Map.Entry<String, ?> entry : model.entrySet()) {
 			if (isEligibleAttribute(entry.getKey(), entry.getValue())) {
 				map.put(entry.getKey(), entry.getValue());
 			}
@@ -164,7 +164,8 @@ public class HttpMessageWriterView implements View {
 		Publisher<? extends T> stream = Mono.just((T) value);
 		ResolvableType type = ResolvableType.forClass(value.getClass());
 		ServerHttpResponse response = exchange.getResponse();
-		return ((HttpMessageWriter<T>) getMessageWriter()).write(stream, type, contentType, response);
+		return ((HttpMessageWriter<T>) getMessageWriter()).write(stream, type, contentType,
+				response, Collections.emptyMap());
 	}
 
 }

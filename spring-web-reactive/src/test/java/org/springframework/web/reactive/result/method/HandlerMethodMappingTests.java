@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,13 +26,13 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.MockServerHttpRequest;
-import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.stereotype.Controller;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -101,7 +100,7 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping("/fo?", this.handler, this.method2);
 		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, "/foo"));
 
-		TestSubscriber.subscribe(result).assertError(IllegalStateException.class);
+		StepVerifier.create(result).expectError(IllegalStateException.class).verify();
 	}
 
 	@Test
@@ -151,7 +150,7 @@ public class HandlerMethodMappingTests {
 
 
 	private ServerWebExchange createExchange(HttpMethod httpMethod, String path) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(httpMethod, new URI(path));
+		ServerHttpRequest request = new MockServerHttpRequest(httpMethod, path);
 		WebSessionManager sessionManager = new MockWebSessionManager();
 		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 	}
@@ -194,11 +193,13 @@ public class HandlerMethodMappingTests {
 	@Controller
 	private static class MyHandler {
 
-		@RequestMapping @SuppressWarnings("unused")
+		@RequestMapping
+		@SuppressWarnings("unused")
 		public void handlerMethod1() {
 		}
 
-		@RequestMapping @SuppressWarnings("unused")
+		@RequestMapping
+		@SuppressWarnings("unused")
 		public void handlerMethod2() {
 		}
 	}

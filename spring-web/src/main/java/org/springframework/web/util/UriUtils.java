@@ -18,6 +18,7 @@ package org.springframework.web.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
 import org.springframework.util.Assert;
 
@@ -183,8 +184,26 @@ public abstract class UriUtils {
 	 * @see java.net.URLDecoder#decode(String, String)
 	 */
 	public static String decode(String source, String encoding) throws UnsupportedEncodingException {
-		Assert.notNull(source, "Source must not be null");
-		Assert.hasLength(encoding, "Encoding must not be empty");
+		return decode(source, Charset.forName(encoding));
+	}
+
+	/**
+	 * Decodes the given encoded source String into an URI. Based on the following rules:
+	 * <ul>
+	 * <li>Alphanumeric characters {@code "a"} through {@code "z"}, {@code "A"} through {@code "Z"}, and
+	 * {@code "0"} through {@code "9"} stay the same.</li>
+	 * <li>Special characters {@code "-"}, {@code "_"}, {@code "."}, and {@code "*"} stay the same.</li>
+	 * <li>A sequence "{@code %<i>xy</i>}" is interpreted as a hexadecimal representation of the character.</li>
+	 * </ul>
+	 * @param source the source string
+	 * @param charset the character set
+	 * @return the decoded URI
+	 * @throws IllegalArgumentException when the given source contains invalid encoded sequences
+	 * @see java.net.URLDecoder#decode(String, String)
+	 */
+	public static String decode(String source, Charset charset) {
+		Assert.notNull(source, "'source' must not be null");
+		Assert.notNull(charset, "'charset' must not be null");
 		int length = source.length();
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(length);
 		boolean changed = false;
@@ -211,7 +230,7 @@ public abstract class UriUtils {
 				bos.write(ch);
 			}
 		}
-		return (changed ? new String(bos.toByteArray(), encoding) : source);
+		return (changed ? new String(bos.toByteArray(), charset) : source);
 	}
 
 	/**

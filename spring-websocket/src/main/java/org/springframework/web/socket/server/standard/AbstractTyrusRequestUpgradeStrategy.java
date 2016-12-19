@@ -110,7 +110,7 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 
 	@Override
 	public String[] getSupportedVersions() {
-		return StringUtils.commaDelimitedListToStringArray(Version.getSupportedWireProtocolVersions());
+		return StringUtils.tokenizeToStringArray(Version.getSupportedWireProtocolVersions(), ",");
 	}
 
 	protected List<WebSocketExtension> getInstalledExtensions(WebSocketContainer container) {

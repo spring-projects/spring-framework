@@ -23,7 +23,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
@@ -44,7 +43,7 @@ import org.springframework.web.server.ServerWebExchange;
 public abstract class AbstractMappingContentTypeResolver implements MappingContentTypeResolver {
 
 	/** Primary lookup for media types by key (e.g. "json" -> "application/json") */
-	private final ConcurrentMap<String, MediaType> mediaTypeLookup = new ConcurrentHashMap<>(64);
+	private final Map<String, MediaType> mediaTypeLookup = new ConcurrentHashMap<>(64);
 
 	/** Reverse lookup for keys associated with a media type */
 	private final MultiValueMap<MediaType, String> keyLookup = new LinkedMultiValueMap<>(64);
@@ -65,6 +64,10 @@ public abstract class AbstractMappingContentTypeResolver implements MappingConte
 	}
 
 
+	public Map<String, MediaType> getMediaTypes() {
+		return this.mediaTypeLookup;
+	}
+
 	/**
 	 * Sub-classes can use this method to look up a MediaType by key.
 	 * @param key the key converted to lower case
@@ -77,7 +80,7 @@ public abstract class AbstractMappingContentTypeResolver implements MappingConte
 	/**
 	 * Sub-classes can use this method get all mapped media types.
 	 */
-	protected List<MediaType> getMediaTypes() {
+	protected List<MediaType> getAllMediaTypes() {
 		return new ArrayList<>(this.mediaTypeLookup.values());
 	}
 

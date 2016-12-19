@@ -20,14 +20,12 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.MethodParameter;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -40,8 +38,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  * @see PathVariableMethodArgumentResolver
  */
-public class PathVariableMapMethodArgumentResolver implements HandlerMethodArgumentResolver {
-
+public class PathVariableMapMethodArgumentResolver implements SyncHandlerMethodArgumentResolver {
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -54,12 +51,12 @@ public class PathVariableMapMethodArgumentResolver implements HandlerMethodArgum
 	 * Return a Map with all URI template variables or an empty map.
 	 */
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter parameter, ModelMap model,
+	public Optional<Object> resolveArgumentValue(MethodParameter parameter, BindingContext bindingContext,
 			ServerWebExchange exchange) {
 
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		Optional<Object> value = exchange.getAttribute(name);
-		return (value.isPresent() ? Mono.just(value.get()) : Mono.just(Collections.emptyMap()));
+		Object value = exchange.getAttribute(name).orElse(Collections.emptyMap());
+		return Optional.of(value);
 	}
 
 }

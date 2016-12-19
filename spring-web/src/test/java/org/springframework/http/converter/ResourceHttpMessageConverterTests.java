@@ -16,14 +16,6 @@
 
 package org.springframework.http.converter;
 
-import static org.hamcrest.core.Is.*;
-import static org.hamcrest.core.IsInstanceOf.*;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +31,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.util.FileCopyUtils;
+
+import static org.hamcrest.core.Is.*;
+import static org.hamcrest.core.IsInstanceOf.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Arjen Poutsma

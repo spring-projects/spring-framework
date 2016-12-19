@@ -69,6 +69,10 @@ public class PrintingResultHandlerTests {
 	public void printRequest() throws Exception {
 		this.request.addParameter("param", "paramValue");
 		this.request.addHeader("header", "headerValue");
+		this.request.setCharacterEncoding("UTF-16");
+		String palindrome = "ablE was I ere I saw Elba";
+		byte[] bytes = palindrome.getBytes("UTF-16");
+		this.request.setContent(bytes);
 
 		this.handler.handle(this.mvcResult);
 
@@ -82,6 +86,7 @@ public class PrintingResultHandlerTests {
 		assertValue("MockHttpServletRequest", "Request URI", this.request.getRequestURI());
 		assertValue("MockHttpServletRequest", "Parameters", params);
 		assertValue("MockHttpServletRequest", "Headers", headers);
+		assertValue("MockHttpServletRequest", "Body", palindrome);
 	}
 
 	@Test
@@ -131,6 +136,51 @@ public class PrintingResultHandlerTests {
 		assertTrue(cookie2.startsWith("[" + Cookie.class.getSimpleName()));
 		assertTrue(cookie2.contains("name = 'enigma', value = '42', comment = 'This is a comment', domain = '.example.com', maxAge = 1234, path = '/crumbs', secure = true, version = 0, httpOnly = true"));
 		assertTrue(cookie2.endsWith("]"));
+	}
+
+	@Test
+	public void printRequestWithCharacterEncoding() throws Exception {
+		this.request.setCharacterEncoding("UTF-8");
+		this.request.setContent("text".getBytes("UTF-8"));
+
+		this.handler.handle(this.mvcResult);
+
+		assertValue("MockHttpServletRequest", "Body", "text");
+	}
+
+	@Test
+	public void printRequestWithoutCharacterEncoding() throws Exception {
+		this.handler.handle(this.mvcResult);
+
+		assertValue("MockHttpServletRequest", "Body", "<no character encoding set>");
+	}
+
+	@Test
+	public void printResponseWithCharacterEncoding() throws Exception {
+		this.response.setCharacterEncoding("UTF-8");
+		this.response.getWriter().print("text");
+
+		this.handler.handle(this.mvcResult);
+		assertValue("MockHttpServletResponse", "Body", "text");
+	}
+
+	@Test
+	public void printResponseWithDefaultCharacterEncoding() throws Exception {
+		this.response.getWriter().print("text");
+
+		this.handler.handle(this.mvcResult);
+
+		assertValue("MockHttpServletResponse", "Body", "text");
+	}
+
+	@Test
+	public void printResponseWithoutCharacterEncoding() throws Exception {
+		this.response.setCharacterEncoding(null);
+		this.response.getWriter().print("text");
+
+		this.handler.handle(this.mvcResult);
+
+		assertValue("MockHttpServletResponse", "Body", "<no character encoding set>");
 	}
 
 	@Test
@@ -223,8 +273,9 @@ public class PrintingResultHandlerTests {
 
 	private void assertValue(String heading, String label, Object value) {
 		Map<String, Map<String, Object>> printedValues = this.handler.getPrinter().printedValues;
-		assertTrue("Heading " + heading + " not printed", printedValues.containsKey(heading));
-		assertEquals(value, printedValues.get(heading).get(label));
+		assertTrue("Heading '" + heading + "' not printed", printedValues.containsKey(heading));
+		assertEquals("For label '" + label + "' under heading '" + heading + "' =>", value,
+				printedValues.get(heading).get(label));
 	}
 
 

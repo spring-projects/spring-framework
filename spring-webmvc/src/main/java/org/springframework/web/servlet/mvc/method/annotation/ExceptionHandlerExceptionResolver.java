@@ -26,17 +26,18 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.transform.Source;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -54,6 +55,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionResolver;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
  * An {@link AbstractHandlerMethodExceptionResolver} that resolves exceptions
@@ -302,6 +305,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		// Type-based argument resolution
 		resolvers.add(new ServletRequestMethodArgumentResolver());
 		resolvers.add(new ServletResponseMethodArgumentResolver());
+		resolvers.add(new RedirectAttributesMethodArgumentResolver());
 		resolvers.add(new ModelMethodProcessor());
 
 		// Custom arguments
@@ -379,10 +383,13 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 				exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, handlerMethod);
 			}
 		}
-		catch (Exception invocationEx) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Failed to invoke @ExceptionHandler method: " + exceptionHandlerMethod, invocationEx);
+		catch (Throwable invocationEx) {
+			// Any other than the original exception is unintended here,
+			// probably an accident (e.g. failed assertion or the like).
+			if (invocationEx != exception && logger.isWarnEnabled()) {
+				logger.warn("Failed to invoke @ExceptionHandler method: " + exceptionHandlerMethod, invocationEx);
 			}
+			// Continue with default processing of the original exception...
 			return null;
 		}
 
@@ -390,10 +397,17 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			return new ModelAndView();
 		}
 		else {
-			ModelAndView mav = new ModelAndView().addAllObjects(mavContainer.getModel());
+			ModelMap model = mavContainer.getModel();
+			HttpStatus status = mavContainer.getStatus();
+			ModelAndView mav = new ModelAndView(mavContainer.getViewName(), model, status);
 			mav.setViewName(mavContainer.getViewName());
 			if (!mavContainer.isViewReference()) {
 				mav.setView((View) mavContainer.getView());
+			}
+			if (model instanceof RedirectAttributes) {
+				Map<String, ?> flashAttributes = ((RedirectAttributes) model).getFlashAttributes();
+				request = webRequest.getNativeRequest(HttpServletRequest.class);
+				RequestContextUtils.getOutputFlashMap(request).putAll(flashAttributes);
 			}
 			return mav;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ package org.springframework.context;
  * @see org.springframework.context.ApplicationEvent
  * @see org.springframework.context.event.EventPublicationInterceptor
  */
+@FunctionalInterface
 public interface ApplicationEventPublisher {
 
 	/**
@@ -37,7 +38,9 @@ public interface ApplicationEventPublisher {
 	 * @param event the event to publish
 	 * @see org.springframework.web.context.support.RequestHandledEvent
 	 */
-	void publishEvent(ApplicationEvent event);
+	default void publishEvent(ApplicationEvent event) {
+		publishEvent((Object) event);
+	}
 
 	/**
 	 * Notify all <strong>matching</strong> listeners registered with this

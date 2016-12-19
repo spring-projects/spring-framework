@@ -17,8 +17,11 @@
 package org.springframework.http;
 
 import java.io.Serializable;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,6 +39,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -59,6 +63,7 @@ import org.springframework.util.StringUtils;
  * @author Sebastien Deleuze
  * @author Brian Clozel
  * @author Juergen Hoeller
+ * @author Josh Long
  * @since 3.0
  */
 public class HttpHeaders implements MultiValueMap<String, String>, Serializable {
@@ -92,42 +97,42 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public static final String ACCEPT_RANGES = "Accept-Ranges";
 	/**
 	 * The CORS {@code Access-Control-Allow-Credentials} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
 	/**
 	 * The CORS {@code Access-Control-Allow-Headers} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
 	/**
 	 * The CORS {@code Access-Control-Allow-Methods} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
 	/**
 	 * The CORS {@code Access-Control-Allow-Origin} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
 	/**
 	 * The CORS {@code Access-Control-Expose-Headers} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
 	/**
 	 * The CORS {@code Access-Control-Max-Age} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age";
 	/**
 	 * The CORS {@code Access-Control-Request-Headers} request header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_REQUEST_HEADERS = "Access-Control-Request-Headers";
 	/**
 	 * The CORS {@code Access-Control-Request-Method} request header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method";
 	/**
@@ -382,6 +387,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	private static final Pattern ETAG_HEADER_VALUE_PATTERN = Pattern.compile("\\*|\\s*((W\\/)?(\"[^\"]*\"))\\s*,?");
 
+	private static final DecimalFormatSymbols DECIMAL_FORMAT_SYMBOLS = new DecimalFormatSymbols(Locale.ENGLISH);
+
 	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 
@@ -433,6 +440,60 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
+	 * Set the acceptable language ranges, as specified by the
+	 * {@literal Accept-Language} header.
+	 * @see Locale.LanguageRange
+	 * @since 5.0
+	 */
+	public void setAcceptLanguage(List<Locale.LanguageRange> languages) {
+		Assert.notNull(languages, "'languages' must not be null");
+		DecimalFormat decimal = new DecimalFormat("0.0", DECIMAL_FORMAT_SYMBOLS);
+		List<String> values = languages.stream()
+				.map(range ->
+						range.getWeight() == Locale.LanguageRange.MAX_WEIGHT ?
+								range.getRange() :
+								range.getRange() + ";q=" + decimal.format(range.getWeight()))
+				.collect(Collectors.toList());
+		set(ACCEPT_LANGUAGE, toCommaDelimitedString(values));
+	}
+
+	/**
+	 * Return the acceptable language ranges from the
+	 * {@literal Accept-Language} header
+	 * <p>If you only need the most preferred locale use
+	 * {@link #getAcceptLanguageAsLocale()} or if you need to filter based on
+	 * a list of supporeted locales you can pass the returned list to
+	 * {@link Locale#filter(List, Collection)}.
+	 * @see Locale.LanguageRange
+	 * @since 5.0
+	 */
+	public List<Locale.LanguageRange> getAcceptLanguage() {
+		String value = getFirst(ACCEPT_LANGUAGE);
+		if (value != null) {
+			return Locale.LanguageRange.parse(value);
+		}
+		return Collections.emptyList();
+	}
+
+	/**
+	 * A variant of {@link #getAcceptLanguage()} that converts each
+	 * {@link java.util.Locale.LanguageRange} to a {@link Locale} and returns
+	 * the first one on the list.
+	 * @since 5.0
+	 */
+	public Locale getAcceptLanguageAsLocale() {
+		List<Locale.LanguageRange> ranges = getAcceptLanguage();
+		if (ranges.isEmpty()) {
+			return null;
+		}
+		return ranges.stream()
+				.map(range -> Locale.forLanguageTag(range.getRange()))
+				.filter(locale -> StringUtils.hasText(locale.getDisplayName()))
+				.findFirst()
+				.orElse(null);
+	}
+
+	/**
 	 * Set the (new) value of the {@code Access-Control-Allow-Credentials} response header.
 	 */
 	public void setAccessControlAllowCredentials(boolean allowCredentials) {
@@ -474,7 +535,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		List<HttpMethod> result = new ArrayList<>();
 		String value = getFirst(ACCESS_CONTROL_ALLOW_METHODS);
 		if (value != null) {
-			String[] tokens = StringUtils.tokenizeToStringArray(value, ",", true, true);
+			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
 			for (String token : tokens) {
 				HttpMethod resolved = HttpMethod.resolve(token);
 				if (resolved != null) {
@@ -546,8 +607,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the (new) value of the {@code Access-Control-Request-Method} request header.
 	 */
-	public void setAccessControlRequestMethod(HttpMethod requestedMethod) {
-		set(ACCESS_CONTROL_REQUEST_METHOD, requestedMethod.name());
+	public void setAccessControlRequestMethod(HttpMethod requestMethod) {
+		set(ACCESS_CONTROL_REQUEST_METHOD, requestMethod.name());
 	}
 
 	/**
@@ -578,10 +639,10 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * as specified by the {@code Accept-Charset} header.
 	 */
 	public List<Charset> getAcceptCharset() {
-		List<Charset> result = new ArrayList<>();
 		String value = getFirst(ACCEPT_CHARSET);
 		if (value != null) {
-			String[] tokens = value.split(",\\s*");
+			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
+			List<Charset> result = new ArrayList<>(tokens.length);
 			for (String token : tokens) {
 				int paramIdx = token.indexOf(';');
 				String charsetName;
@@ -595,8 +656,11 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 					result.add(Charset.forName(charsetName));
 				}
 			}
+			return result;
 		}
-		return result;
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 	/**
@@ -615,8 +679,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public Set<HttpMethod> getAllow() {
 		String value = getFirst(ALLOW);
 		if (!StringUtils.isEmpty(value)) {
-			List<HttpMethod> result = new LinkedList<>();
-			String[] tokens = value.split(",\\s*");
+			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
+			List<HttpMethod> result = new ArrayList<>(tokens.length);
 			for (String token : tokens) {
 				HttpMethod resolved = HttpMethod.resolve(token);
 				if (resolved != null) {
@@ -670,16 +734,86 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * for {@code form-data}.
 	 * @param name the control name
 	 * @param filename the filename (may be {@code null})
+	 * @see #setContentDisposition(ContentDisposition)
+	 * @see #getContentDisposition()
 	 */
 	public void setContentDispositionFormData(String name, String filename) {
+		setContentDispositionFormData(name, filename, null);
+	}
+
+	/**
+	 * Set the (new) value of the {@code Content-Disposition} header
+	 * for {@code form-data}, optionally encoding the filename using the RFC 5987.
+	 * <p>Only the US-ASCII, UTF-8 and ISO-8859-1 charsets are supported.
+	 * @param name the control name
+	 * @param filename the filename (may be {@code null})
+	 * @param charset the charset used for the filename (may be {@code null})
+	 * @since 4.3.3
+	 * @see #setContentDisposition(ContentDisposition)
+	 * @see #getContentDisposition()
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.4">RFC 7230 Section 3.2.4</a>
+	 */
+	public void setContentDispositionFormData(String name, String filename, Charset charset) {
 		Assert.notNull(name, "'name' must not be null");
-		StringBuilder builder = new StringBuilder("form-data; name=\"");
-		builder.append(name).append('\"');
-		if (filename != null) {
-			builder.append("; filename=\"");
-			builder.append(filename).append('\"');
+		ContentDisposition disposition = ContentDisposition.builder("form-data")
+				.name(name).filename(filename, charset).build();
+		setContentDisposition(disposition);
+	}
+
+	/**
+	 * Set the (new) value of the {@literal Content-Disposition} header. Supports the
+	 * disposition type and {@literal filename}, {@literal filename*} (encoded according
+	 * to RFC 5987, only the US-ASCII, UTF-8 and ISO-8859-1 charsets are supported),
+	 * {@literal name}, {@literal size} parameters.
+	 * @since 5.0
+	 * @see #getContentDisposition()
+	 */
+	public void setContentDisposition(ContentDisposition contentDisposition) {
+		set(CONTENT_DISPOSITION, contentDisposition.toString());
+	}
+
+	/**
+	 * Return the {@literal Content-Disposition} header parsed as a {@link ContentDisposition}
+	 * instance. Supports the disposition type and {@literal filename}, {@literal filename*}
+	 * (encoded according to RFC 5987, only the US-ASCII, UTF-8 and ISO-8859-1 charsets are
+	 * supported), {@literal name}, {@literal size} parameters.
+	 * @since 5.0
+	 * @see #setContentDisposition(ContentDisposition)
+	 */
+	public ContentDisposition getContentDisposition() {
+		String contentDisposition = getFirst(CONTENT_DISPOSITION);
+		if (contentDisposition != null) {
+			return ContentDisposition.parse(contentDisposition);
 		}
-		set(CONTENT_DISPOSITION, builder.toString());
+		return ContentDisposition.empty();
+	}
+
+	/**
+	 * Set the {@link Locale} of the content language,
+	 * as specified by the {@literal Content-Language} header.
+	 * <p>Use {@code set(CONTENT_LANGUAGE, ...)} if you need
+	 * to set multiple content languages.</p>
+	 * @since 5.0
+	 */
+	public void setContentLanguage(Locale locale) {
+		Assert.notNull(locale, "'locale' must not be null");
+		set(CONTENT_LANGUAGE, locale.toLanguageTag());
+	}
+
+	/**
+	 * Return the first {@link Locale} of the content languages,
+	 * as specified by the {@literal Content-Language} header.
+	 * <p>Returns {@code null} when the content language is unknown.
+	 * <p>Use {@code getValuesAsList(CONTENT_LANGUAGE)} if you need
+	 * to get multiple content languages.</p>
+	 * @since 5.0
+	 */
+	public Locale getContentLanguage() {
+		return getValuesAsList(CONTENT_LANGUAGE)
+				.stream()
+				.findFirst()
+				.map(Locale::forLanguageTag)
+				.orElse(null);
 	}
 
 	/**
@@ -778,6 +912,49 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public long getExpires() {
 		return getFirstDate(EXPIRES, false);
+	}
+
+	/**
+	 * Set the (new) value of the {@code Host} header.
+	 * <p>If the given {@linkplain InetSocketAddress#getPort() port} is {@code 0},
+	 * the host header will only contain the
+	 * {@linkplain InetSocketAddress#getHostString() hostname}.
+	 * @since 5.0
+	 */
+	public void setHost(InetSocketAddress host) {
+		String value = (host.getPort() != 0 ?
+				String.format("%s:%d", host.getHostString(), host.getPort()) : host.getHostString());
+		set(HOST, value);
+	}
+
+	/**
+	 * Return the value of the required {@code Host} header.
+	 * <p>If the header value does not contain a port, the returned
+	 * {@linkplain InetSocketAddress#getPort() port} will be {@code 0}.
+	 * @since 5.0
+	 */
+	public InetSocketAddress getHost() {
+		String value = getFirst(HOST);
+		if (value == null) {
+			return null;
+		}
+		int idx = value.lastIndexOf(':');
+		String hostname = null;
+		int port = 0;
+		if (idx != -1 && idx < value.length() - 1) {
+			hostname = value.substring(0, idx);
+			String portString = value.substring(idx + 1);
+			try {
+				port = Integer.parseInt(portString);
+			}
+			catch (NumberFormatException ex) {
+				// ignored
+			}
+		}
+		if (hostname == null) {
+			hostname = value;
+		}
+		return InetSocketAddress.createUnresolved(hostname, port);
 	}
 
 	/**

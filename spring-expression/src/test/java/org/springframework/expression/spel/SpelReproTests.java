@@ -1663,15 +1663,15 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	public void SPR10146_malformedExpressions() throws Exception {
-		doTestSpr10146("/foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146("*foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146("%foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146("<foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146(">foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146("&&foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146("||foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146("&foo", "EL1069E:(pos 0): missing expected character '&'");
-		doTestSpr10146("|foo", "EL1069E:(pos 0): missing expected character '|'");
+		doTestSpr10146("/foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146("*foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146("%foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146("<foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146(">foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146("&&foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146("||foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146("&foo", "EL1069E: missing expected character '&'");
+		doTestSpr10146("|foo", "EL1069E: missing expected character '|'");
 	}
 
 	private void doTestSpr10146(String expression, String expectedMessage) {
@@ -1702,7 +1702,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	@Test
 	public void SPR10328() throws Exception {
 		thrown.expect(SpelParseException.class);
-		thrown.expectMessage("EL1071E:(pos 2): A required selection expression has not been specified");
+		thrown.expectMessage("EL1071E: A required selection expression has not been specified");
 		Expression exp = parser.parseExpression("$[]");
 		exp.getValue(Arrays.asList("foo", "bar", "baz"));
 	}
@@ -1964,7 +1964,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		assertEquals("custard", expr.getValue(context));
 		expr = new SpelExpressionParser().parseRaw("&foo");
 		assertEquals("foo factory",expr.getValue(context));
-	
+
 		try {
 			expr = new SpelExpressionParser().parseRaw("&@foo");
 			fail("Illegal syntax, error expected");
@@ -1973,7 +1973,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 			assertEquals(SpelMessage.INVALID_BEAN_REFERENCE,spe.getMessageCode());
 			assertEquals(0,spe.getPosition());
 		}
-	
+
 		try {
 			expr = new SpelExpressionParser().parseRaw("@&foo");
 			fail("Illegal syntax, error expected");
@@ -1981,7 +1981,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		catch (SpelParseException spe) {
 			assertEquals(SpelMessage.INVALID_BEAN_REFERENCE,spe.getMessageCode());
 			assertEquals(0,spe.getPosition());
-		}	
+		}
 	}
 
 	@Test

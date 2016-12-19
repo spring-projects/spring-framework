@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.IntPredicate;
 
 import org.reactivestreams.Publisher;
@@ -77,14 +78,14 @@ public class StringDecoder extends AbstractDecoder<String> {
 
 
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
-		return (super.canDecode(elementType, mimeType, hints) &&
+	public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
+		return (super.canDecode(elementType, mimeType) &&
 				String.class.equals(elementType.getRawClass()));
 	}
 
 	@Override
 	public Flux<String> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Object... hints) {
+			MimeType mimeType, Map<String, Object> hints) {
 
 		Flux<DataBuffer> inputFlux = Flux.from(inputStream);
 		if (this.splitOnNewline) {
@@ -95,7 +96,7 @@ public class StringDecoder extends AbstractDecoder<String> {
 
 	@Override
 	public Mono<String> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Object... hints) {
+			MimeType mimeType, Map<String, Object> hints) {
 
 		return Flux.from(inputStream)
 				.reduce(DataBuffer::write)

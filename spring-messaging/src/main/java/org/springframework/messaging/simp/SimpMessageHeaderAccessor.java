@@ -65,6 +65,8 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	public static final String CONNECT_MESSAGE_HEADER = "simpConnectMessage";
 
+	public static final String DISCONNECT_MESSAGE_HEADER = "simpDisconnectMessage";
+
 	public static final String HEART_BEAT_HEADER = "simpHeartbeat";
 
 

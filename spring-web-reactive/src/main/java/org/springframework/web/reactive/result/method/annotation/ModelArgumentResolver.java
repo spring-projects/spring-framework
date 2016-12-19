@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
-import reactor.core.publisher.Mono;
+import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -29,8 +30,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ModelArgumentResolver implements HandlerMethodArgumentResolver {
-
+public class ModelArgumentResolver implements SyncHandlerMethodArgumentResolver {
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -38,8 +38,10 @@ public class ModelArgumentResolver implements HandlerMethodArgumentResolver {
 	}
 
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter parameter, ModelMap model, ServerWebExchange exchange) {
-		return Mono.just(model);
+	public Optional<Object> resolveArgumentValue(MethodParameter parameter, BindingContext bindingContext,
+			ServerWebExchange exchange) {
+
+		return Optional.of(bindingContext.getModel());
 	}
 
 }

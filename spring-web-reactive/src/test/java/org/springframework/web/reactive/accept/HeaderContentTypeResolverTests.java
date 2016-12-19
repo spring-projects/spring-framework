@@ -15,7 +15,6 @@
  */
 package org.springframework.web.reactive.accept;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -24,8 +23,8 @@ import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.server.reactive.MockServerHttpRequest;
-import org.springframework.http.server.reactive.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -71,7 +70,7 @@ public class HeaderContentTypeResolverTests {
 
 
 	private ServerWebExchange createExchange(String accept) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
 		if (accept != null) {
 			request.getHeaders().add("Accept", accept);
 		}

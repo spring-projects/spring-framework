@@ -371,8 +371,50 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		}
 	}
 
+	/**
+	 * Set the content of the request body as a byte array.
+	 * <p>If the supplied byte array represents text such as XML or JSON, the
+	 * {@link #setCharacterEncoding character encoding} should typically be
+	 * set as well.
+	 * @see #setCharacterEncoding(String)
+	 * @see #getContentAsByteArray()
+	 * @see #getContentAsString()
+	 */
 	public void setContent(byte[] content) {
 		this.content = content;
+	}
+
+	/**
+	 * Get the content of the request body as a byte array.
+	 * @return the content as a byte array, potentially {@code null}
+	 * @since 5.0
+	 * @see #setContent(byte[])
+	 * @see #getContentAsString()
+	 */
+	public byte[] getContentAsByteArray() {
+		return this.content;
+	}
+
+	/**
+	 * Get the content of the request body as a {@code String}, using the configured
+	 * {@linkplain #getCharacterEncoding character encoding}.
+	 * @return the content as a {@code String}, potentially {@code null}
+	 * @throws IllegalStateException if the character encoding has not been set
+	 * @throws UnsupportedEncodingException if the character encoding is not supported
+	 * @since 5.0
+	 * @see #setContent(byte[])
+	 * @see #setCharacterEncoding(String)
+	 * @see #getContentAsByteArray()
+	 */
+	public String getContentAsString() throws IllegalStateException, UnsupportedEncodingException {
+		Assert.state(this.characterEncoding != null,
+				"Cannot get content as a String for a null character encoding. " +
+				"Consider setting the characterEncoding in the request.");
+
+		if (this.content == null) {
+			return null;
+		}
+		return new String(this.content, this.characterEncoding);
 	}
 
 	@Override

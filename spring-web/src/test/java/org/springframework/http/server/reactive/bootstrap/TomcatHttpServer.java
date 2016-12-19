@@ -24,6 +24,7 @@ import org.apache.catalina.startup.Tomcat;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
+import org.springframework.util.Assert;
 
 /**
  * @author Rossen Stoyanchev
@@ -36,12 +37,19 @@ public class TomcatHttpServer extends HttpServerSupport implements HttpServer, I
 
 	private String baseDir;
 
+	private Class<?> wsListener;
+
 
 	public TomcatHttpServer() {
 	}
 
 	public TomcatHttpServer(String baseDir) {
 		this.baseDir = baseDir;
+	}
+
+	public TomcatHttpServer(String baseDir, Class<?> wsListener) {
+		this.baseDir = baseDir;
+		this.wsListener = wsListener;
 	}
 
 
@@ -54,12 +62,25 @@ public class TomcatHttpServer extends HttpServerSupport implements HttpServer, I
 		this.tomcatServer.setHostname(getHost());
 		this.tomcatServer.setPort(getPort());
 
-		ServletHttpHandlerAdapter servlet = new ServletHttpHandlerAdapter(getHttpHandler());
+		ServletHttpHandlerAdapter servlet = initServletHttpHandlerAdapter();
 
 		File base = new File(System.getProperty("java.io.tmpdir"));
 		Context rootContext = tomcatServer.addContext("", base.getAbsolutePath());
 		Tomcat.addServlet(rootContext, "httpHandlerServlet", servlet);
-		rootContext.addServletMapping("/", "httpHandlerServlet");
+		rootContext.addServletMappingDecoded("/", "httpHandlerServlet");
+		if (wsListener != null) {
+			rootContext.addApplicationListener(wsListener.getName());
+		}
+	}
+
+	private ServletHttpHandlerAdapter initServletHttpHandlerAdapter() {
+		if (getHttpHandlerMap() != null) {
+			return new ServletHttpHandlerAdapter(getHttpHandlerMap());
+		}
+		else {
+			Assert.notNull(getHttpHandler());
+			return new ServletHttpHandlerAdapter(getHttpHandler());
+		}
 	}
 
 

@@ -17,15 +17,14 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.Map;
-
-import reactor.core.publisher.Mono;
+import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -41,7 +40,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  * @see RequestHeaderMethodArgumentResolver
  */
-public class RequestHeaderMapMethodArgumentResolver implements HandlerMethodArgumentResolver {
+public class RequestHeaderMapMethodArgumentResolver implements SyncHandlerMethodArgumentResolver {
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -50,14 +49,17 @@ public class RequestHeaderMapMethodArgumentResolver implements HandlerMethodArgu
 	}
 
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter parameter, ModelMap model, ServerWebExchange exchange) {
+	public Optional<Object> resolveArgumentValue(MethodParameter parameter, BindingContext context,
+			ServerWebExchange exchange) {
+
 		HttpHeaders headers = exchange.getRequest().getHeaders();
-		if (MultiValueMap.class.isAssignableFrom(parameter.getParameterType())) {
-			return Mono.just(headers);
-		}
-		else {
-			return Mono.just(headers.toSingleValueMap());
-		}
+		Object value = (isMultiValueMap(parameter) ? headers : headers.toSingleValueMap());
+		return Optional.of(value);
+	}
+
+	private boolean isMultiValueMap(MethodParameter parameter) {
+		Class<?> paramType = parameter.getParameterType();
+		return MultiValueMap.class.isAssignableFrom(paramType);
 	}
 
 }

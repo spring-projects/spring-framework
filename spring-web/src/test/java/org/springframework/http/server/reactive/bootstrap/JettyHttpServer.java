@@ -39,7 +39,7 @@ public class JettyHttpServer extends HttpServerSupport implements HttpServer, In
 	public void afterPropertiesSet() throws Exception {
 		this.jettyServer = new Server();
 
-		ServletHttpHandlerAdapter servlet = new ServletHttpHandlerAdapter(getHttpHandler());
+		ServletHttpHandlerAdapter servlet = initServletHttpHandlerAdapter();
 		ServletHolder servletHolder = new ServletHolder(servlet);
 
 		ServletContextHandler contextHandler = new ServletContextHandler(this.jettyServer, "", false, false);
@@ -49,6 +49,16 @@ public class JettyHttpServer extends HttpServerSupport implements HttpServer, In
 		connector.setHost(getHost());
 		connector.setPort(getPort());
 		this.jettyServer.addConnector(connector);
+	}
+
+	private ServletHttpHandlerAdapter initServletHttpHandlerAdapter() {
+		if (getHttpHandlerMap() != null) {
+			return new ServletHttpHandlerAdapter(getHttpHandlerMap());
+		}
+		else {
+			Assert.notNull(getHttpHandler());
+			return new ServletHttpHandlerAdapter(getHttpHandler());
+		}
 	}
 
 	@Override

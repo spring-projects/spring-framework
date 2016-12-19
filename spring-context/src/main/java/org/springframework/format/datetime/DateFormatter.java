@@ -191,7 +191,7 @@ public class DateFormatter implements Formatter<Date> {
 			if (timeStyle != -1) {
 				return DateFormat.getTimeInstance(timeStyle, locale);
 			}
-			throw new IllegalStateException("Unsupported style pattern '"+ this.stylePattern+ "'");
+			throw new IllegalStateException("Unsupported style pattern '" + this.stylePattern + "'");
 
 		}
 		return DateFormat.getDateInstance(this.style, locale);

@@ -436,7 +436,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			return;
 		}
 		Type type = handler.getPayloadType(stompHeaders);
-		Class<?> payloadType = ResolvableType.forType(type).getRawClass();
+		Class<?> payloadType = ResolvableType.forType(type).resolve();
 		Object object = getMessageConverter().fromMessage(message, payloadType);
 		if (object == null) {
 			throw new MessageConversionException("No suitable converter, payloadType=" + payloadType +
@@ -480,8 +480,8 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			logger.debug("Connection closed session id=" + this.sessionId);
 		}
 		if (!this.closing) {
-			handleFailure(new ConnectionLostException("Connection closed"));
 			resetConnection();
+			handleFailure(new ConnectionLostException("Connection closed"));
 		}
 	}
 
@@ -671,8 +671,8 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			if (logger.isDebugEnabled()) {
 				logger.debug(error);
 			}
-			handleFailure(new IllegalStateException(error));
 			resetConnection();
+			handleFailure(new IllegalStateException(error));
 		}
 	}
 

@@ -31,7 +31,7 @@ import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.test.web.client.ExpectedCount.max;
 import static org.springframework.test.web.client.ExpectedCount.min;
 import static org.springframework.test.web.client.ExpectedCount.once;
-import static org.springframework.test.web.client.ExpectedCount.times;
+import static org.springframework.test.web.client.ExpectedCount.twice;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -76,8 +76,8 @@ public class UnorderedRequestExpectationManagerTests {
 
 	@Test
 	public void repeatedRequests() throws Exception {
-		this.manager.expectRequest(times(2), requestTo("/foo")).andExpect(method(GET)).andRespond(withSuccess());
-		this.manager.expectRequest(times(2), requestTo("/bar")).andExpect(method(GET)).andRespond(withSuccess());
+		this.manager.expectRequest(twice(), requestTo("/foo")).andExpect(method(GET)).andRespond(withSuccess());
+		this.manager.expectRequest(twice(), requestTo("/bar")).andExpect(method(GET)).andRespond(withSuccess());
 
 		this.manager.validateRequest(createRequest(GET, "/bar"));
 		this.manager.validateRequest(createRequest(GET, "/foo"));

@@ -95,6 +95,12 @@ public class DefaultDataBufferFactory implements DataBufferFactory {
 	}
 
 	@Override
+	public DataBuffer wrap(byte[] bytes) {
+		ByteBuffer wrapper = ByteBuffer.wrap(bytes);
+		return new DefaultDataBuffer(wrapper, 0, bytes.length, this);
+	}
+
+	@Override
 	public String toString() {
 		return "DefaultDataBufferFactory (preferDirect=" + this.preferDirect + ")";
 	}

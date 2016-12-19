@@ -572,7 +572,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 					new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
 			throw new ConversionNotSupportedException(pce, requiredType, ex);
 		}
-		catch (Throwable ex) {
+		catch (IllegalArgumentException ex) {
 			PropertyChangeEvent pce =
 					new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
 			throw new TypeMismatchException(pce, requiredType, ex);

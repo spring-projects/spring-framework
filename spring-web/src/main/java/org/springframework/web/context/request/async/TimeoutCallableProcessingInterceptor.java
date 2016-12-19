@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,11 @@ import org.springframework.web.context.request.NativeWebRequest;
 
 /**
  * Sends a 503 (SERVICE_UNAVAILABLE) in case of a timeout if the response is not
- * already committed. Registered at the end, after all other interceptors and
+ * already committed. As of 4.2.8 this is done indirectly by setting the result
+ * to an {@link AsyncRequestTimeoutException} which is then handled by
+ * Spring MVC's default exception handling as a 503 error.
+ *
+ * <p>Registered at the end, after all other interceptors and
  * therefore invoked only if no other interceptor handles the timeout.
  *
  * <p>Note that according to RFC 7231, a 503 without a 'Retry-After' header is
@@ -39,11 +43,7 @@ public class TimeoutCallableProcessingInterceptor extends CallableProcessingInte
 
 	@Override
 	public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
-		HttpServletResponse servletResponse = request.getNativeResponse(HttpServletResponse.class);
-		if (!servletResponse.isCommitted()) {
-			servletResponse.sendError(HttpStatus.SERVICE_UNAVAILABLE.value());
-		}
-		return CallableProcessingInterceptor.RESPONSE_HANDLED;
+		return new AsyncRequestTimeoutException();
 	}
 
 }

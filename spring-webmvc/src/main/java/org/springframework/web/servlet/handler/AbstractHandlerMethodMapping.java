@@ -480,11 +480,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		private final MultiValueMap<String, T> urlLookup = new LinkedMultiValueMap<>();
 
-		private final Map<String, List<HandlerMethod>> nameLookup =
-				new ConcurrentHashMap<>();
+		private final Map<String, List<HandlerMethod>> nameLookup = new ConcurrentHashMap<>();
 
-		private final Map<HandlerMethod, CorsConfiguration> corsLookup =
-				new ConcurrentHashMap<>();
+		private final Map<HandlerMethod, CorsConfiguration> corsLookup = new ConcurrentHashMap<>();
 
 		private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
@@ -590,7 +588,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		private void addMappingName(String name, HandlerMethod handlerMethod) {
 			List<HandlerMethod> oldList = this.nameLookup.get(name);
 			if (oldList == null) {
-				oldList = Collections.<HandlerMethod>emptyList();
+				oldList = Collections.emptyList();
 			}
 
 			for (HandlerMethod current : oldList) {
@@ -685,7 +683,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			Assert.notNull(handlerMethod);
 			this.mapping = mapping;
 			this.handlerMethod = handlerMethod;
-			this.directUrls = (directUrls != null ? directUrls : Collections.<String>emptyList());
+			this.directUrls = (directUrls != null ? directUrls : Collections.emptyList());
 			this.mappingName = mappingName;
 		}
 

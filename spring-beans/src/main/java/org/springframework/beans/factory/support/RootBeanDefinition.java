@@ -16,11 +16,13 @@
 
 package org.springframework.beans.factory.support;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -52,17 +54,19 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	private BeanDefinitionHolder decoratedDefinition;
 
+	private AnnotatedElement qualifiedElement;
+
 	boolean allowCaching = true;
 
-	volatile ResolvableType targetType;
-
 	boolean isFactoryMethodUnique = false;
+
+	volatile ResolvableType targetType;
 
 	/** Package-visible field for caching the determined Class of a given bean definition */
 	volatile Class<?> resolvedTargetType;
 
 	/** Package-visible field for caching the return type of a generically typed factory method */
-	volatile Class<?> resolvedFactoryMethodReturnType;
+	volatile ResolvableType factoryMethodReturnType;
 
 	/** Common lock for the four constructor fields below */
 	final Object constructorArgumentLock = new Object();
@@ -113,10 +117,43 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/**
 	 * Create a new RootBeanDefinition for a singleton.
 	 * @param beanClass the class of the bean to instantiate
+	 * @see #setBeanClass
 	 */
 	public RootBeanDefinition(Class<?> beanClass) {
 		super();
 		setBeanClass(beanClass);
+	}
+
+	/**
+	 * Create a new RootBeanDefinition for a singleton bean, constructing each instance
+	 * through calling the given supplier (possibly a lambda or method reference).
+	 * @param beanClass the class of the bean to instantiate
+	 * @param instanceSupplier the supplier to construct a bean instance,
+	 * as an alternative to a declaratively specified factory method
+	 * @since 5.0
+	 * @see #setInstanceSupplier(Supplier)
+	 */
+	public <T> RootBeanDefinition(Class<T> beanClass, Supplier<T> instanceSupplier) {
+		super();
+		setBeanClass(beanClass);
+		setInstanceSupplier(instanceSupplier);
+	}
+
+	/**
+	 * Create a new RootBeanDefinition for a scoped bean, constructing each instance
+	 * through calling the given supplier (possibly a lambda or method reference).
+	 * @param beanClass the class of the bean to instantiate
+	 * @param scope the name of the corresponding scope
+	 * @param instanceSupplier the supplier to construct a bean instance,
+	 * as an alternative to a declaratively specified factory method
+	 * @since 5.0
+	 * @see #setInstanceSupplier(Supplier)
+	 */
+	public <T> RootBeanDefinition(Class<T> beanClass, String scope, Supplier<T> instanceSupplier) {
+		super();
+		setBeanClass(beanClass);
+		setScope(scope);
+		setInstanceSupplier(instanceSupplier);
 	}
 
 	/**
@@ -179,9 +216,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	public RootBeanDefinition(RootBeanDefinition original) {
 		super(original);
 		this.decoratedDefinition = original.decoratedDefinition;
+		this.qualifiedElement = original.qualifiedElement;
 		this.allowCaching = original.allowCaching;
-		this.targetType = original.targetType;
 		this.isFactoryMethodUnique = original.isFactoryMethodUnique;
+		this.targetType = original.targetType;
 	}
 
 	/**
@@ -218,6 +256,26 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public BeanDefinitionHolder getDecoratedDefinition() {
 		return this.decoratedDefinition;
+	}
+
+	/**
+	 * Specify the {@link AnnotatedElement} defining qualifiers,
+	 * to be used instead of the target class or factory method.
+	 * @since 4.3.3
+	 * @see #setTargetType(ResolvableType)
+	 * @see #getResolvedFactoryMethod()
+	 */
+	public void setQualifiedElement(AnnotatedElement qualifiedElement) {
+		this.qualifiedElement = qualifiedElement;
+	}
+
+	/**
+	 * Return the {@link AnnotatedElement} defining qualifiers, if any.
+	 * Otherwise, the factory method and target class will be checked.
+	 * @since 4.3.3
+	 */
+	public AnnotatedElement getQualifiedElement() {
+		return this.qualifiedElement;
 	}
 
 	/**

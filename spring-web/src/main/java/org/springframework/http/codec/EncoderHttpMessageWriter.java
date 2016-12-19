@@ -18,6 +18,7 @@ package org.springframework.http.codec;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -59,8 +60,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 
 	@Override
-	public boolean canWrite(ResolvableType type, MediaType mediaType) {
-		return this.encoder != null && this.encoder.canEncode(type, mediaType);
+	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
+		return this.encoder != null && this.encoder.canEncode(elementType, mediaType);
 	}
 
 	@Override
@@ -70,8 +71,9 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 
 	@Override
-	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType type,
-			MediaType contentType, ReactiveHttpOutputMessage outputMessage) {
+	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType elementType,
+			MediaType mediaType, ReactiveHttpOutputMessage outputMessage,
+			Map<String, Object> hints) {
 
 		if (this.encoder == null) {
 			return Mono.error(new IllegalStateException("No decoder set"));
@@ -79,19 +81,19 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 		HttpHeaders headers = outputMessage.getHeaders();
 		if (headers.getContentType() == null) {
-			MediaType contentTypeToUse = contentType;
-			if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
-				contentTypeToUse = getDefaultContentType(type);
+			MediaType contentTypeToUse = mediaType;
+			if (mediaType == null || mediaType.isWildcardType() || mediaType.isWildcardSubtype()) {
+				contentTypeToUse = getDefaultContentType(elementType);
 			}
-			else if (MediaType.APPLICATION_OCTET_STREAM.equals(contentType)) {
-				MediaType mediaType = getDefaultContentType(type);
-				contentTypeToUse = (mediaType != null ? mediaType : contentTypeToUse);
+			else if (MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
+				MediaType contentType = getDefaultContentType(elementType);
+				contentTypeToUse = (contentType != null ? contentType : contentTypeToUse);
 			}
 			if (contentTypeToUse != null) {
 				if (contentTypeToUse.getCharset() == null) {
-					MediaType mediaType = getDefaultContentType(type);
-					if (mediaType != null && mediaType.getCharset() != null) {
-						contentTypeToUse = new MediaType(contentTypeToUse, mediaType.getCharset());
+					MediaType contentType = getDefaultContentType(elementType);
+					if (contentType != null && contentType.getCharset() != null) {
+						contentTypeToUse = new MediaType(contentTypeToUse, contentType.getCharset());
 					}
 				}
 				headers.setContentType(contentTypeToUse);
@@ -99,7 +101,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		}
 
 		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
-		Flux<DataBuffer> body = this.encoder.encode(inputStream, bufferFactory, type, contentType);
+		Flux<DataBuffer> body = this.encoder.encode(inputStream, bufferFactory, elementType, mediaType, hints);
 		return outputMessage.writeWith(body);
 	}
 
@@ -108,13 +110,15 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	 * Used when {@link #write} is called without a concrete content type.
 	 *
 	 * <p>By default returns the first of {@link Encoder#getEncodableMimeTypes()
-	 * encodableMimeTypes}, if any.
+	 * encodableMimeTypes} that is concrete({@link MediaType#isConcrete()}), if any.
 	 *
 	 * @param elementType the type of element for encoding
 	 * @return the content type, or {@code null}
 	 */
 	protected MediaType getDefaultContentType(ResolvableType elementType) {
-		return (!this.writableMediaTypes.isEmpty() ? this.writableMediaTypes.get(0) : null);
+		return writableMediaTypes.stream()
+				.filter(MediaType::isConcrete)
+				.findFirst().orElse(null);
 	}
 
 }

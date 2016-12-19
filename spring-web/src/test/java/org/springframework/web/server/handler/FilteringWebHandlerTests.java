@@ -16,8 +16,6 @@
 package org.springframework.web.server.handler;
 
 
-import java.net.URI;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
@@ -27,8 +25,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.http.server.reactive.MockServerHttpRequest;
-import org.springframework.http.server.reactive.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
@@ -56,7 +54,7 @@ public class FilteringWebHandlerTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("http://localhost"));
+		this.request = new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
 		this.response = new MockServerHttpResponse();
 	}
 

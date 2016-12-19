@@ -62,7 +62,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 
 
 	private static List<RequestMethod> asList(RequestMethod... requestMethods) {
-		return (requestMethods != null ? Arrays.asList(requestMethods) : Collections.<RequestMethod>emptyList());
+		return (requestMethods != null ? Arrays.asList(requestMethods) : Collections.emptyList());
 	}
 
 

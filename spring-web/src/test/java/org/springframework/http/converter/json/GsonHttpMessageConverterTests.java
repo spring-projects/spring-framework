@@ -131,12 +131,11 @@ public class GsonHttpMessageConverterTests {
 
 	@Test
 	public void writeUTF16() throws IOException {
-		Charset utf16 = Charset.forName("UTF-16BE");
-		MediaType contentType = new MediaType("application", "json", utf16);
+		MediaType contentType = new MediaType("application", "json", StandardCharsets.UTF_16BE);
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		String body = "H\u00e9llo W\u00f6rld";
 		this.converter.write(body, contentType, outputMessage);
-		assertEquals("Invalid result", "\"" + body + "\"", outputMessage.getBodyAsString(utf16));
+		assertEquals("Invalid result", "\"" + body + "\"", outputMessage.getBodyAsString(StandardCharsets.UTF_16BE));
 		assertEquals("Invalid content-type", contentType, outputMessage.getHeaders().getContentType());
 	}
 

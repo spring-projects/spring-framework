@@ -35,8 +35,9 @@ import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTe
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.WebSession;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.assertEquals;
@@ -63,7 +64,7 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		this.restTemplate = new RestTemplate();
 	}
 
-	protected URI createUri(String pathAndQuery) throws URISyntaxException {
+	private URI createUri(String pathAndQuery) throws URISyntaxException {
 		boolean prefix = !StringUtils.hasText(pathAndQuery) || !pathAndQuery.startsWith("/");
 		pathAndQuery = (prefix ? "/" + pathAndQuery : pathAndQuery);
 		return new URI("http://localhost:" + port + pathAndQuery);
@@ -106,11 +107,7 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		assertNotNull(id);
 		assertEquals(1, this.handler.getCount());
 
-		// Set (server-side) clock back 31 minutes
-		Clock clock = this.sessionManager.getClock();
-		this.sessionManager.setClock(Clock.offset(clock, Duration.ofMinutes(-31)));
-
-		// Second request: lastAccessTime updated (with offset clock)
+		// Second request: same session
 		request = RequestEntity.get(createUri("/")).header("Cookie", "SESSION=" + id).build();
 		response = this.restTemplate.exchange(request, Void.class);
 
@@ -118,7 +115,12 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		assertNull(response.getHeaders().get("Set-Cookie"));
 		assertEquals(2, this.handler.getCount());
 
-		// Third request: new session replaces expired session
+		// Update lastAccessTime of the created session to -31 min
+		WebSession session = this.sessionManager.getSessionStore().retrieveSession(id).block();
+		((DefaultWebSession) session).setLastAccessTime(
+				Clock.offset(this.sessionManager.getClock(), Duration.ofMinutes(-31)).instant());
+
+		// Third request: expired session, new session created
 		request = RequestEntity.get(createUri("/")).header("Cookie", "SESSION=" + id).build();
 		response = this.restTemplate.exchange(request, Void.class);
 

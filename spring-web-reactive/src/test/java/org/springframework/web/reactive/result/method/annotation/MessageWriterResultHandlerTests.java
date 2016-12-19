@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -29,10 +28,12 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import io.reactivex.Flowable;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 import rx.Completable;
 import rx.Observable;
 
@@ -49,10 +50,9 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
-import org.springframework.http.server.reactive.MockServerHttpRequest;
-import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.tests.TestSubscriber;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -61,9 +61,11 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.*;
-import static org.springframework.http.MediaType.*;
-import static org.springframework.web.reactive.HandlerMapping.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
+import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 
 /**
  * Unit tests for {@link AbstractMessageWriterResultHandler}.
@@ -81,7 +83,7 @@ public class MessageWriterResultHandlerTests {
 	@Before
 	public void setUp() throws Exception {
 		this.resultHandler = createResultHandler();
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/path");
 		this.exchange = new DefaultServerWebExchange(request, this.response, new MockWebSessionManager());
 	}
 
@@ -112,8 +114,11 @@ public class MessageWriterResultHandlerTests {
 		testVoidReturnType(null, ResolvableType.forType(void.class));
 		testVoidReturnType(Mono.empty(), ResolvableType.forClassWithGenerics(Mono.class, Void.class));
 		testVoidReturnType(Completable.complete(), ResolvableType.forClass(Completable.class));
+		testVoidReturnType(io.reactivex.Completable.complete(), ResolvableType.forClass(io.reactivex.Completable.class));
 		testVoidReturnType(Flux.empty(), ResolvableType.forClassWithGenerics(Flux.class, Void.class));
 		testVoidReturnType(Observable.empty(), ResolvableType.forClassWithGenerics(Observable.class, Void.class));
+		testVoidReturnType(io.reactivex.Observable.empty(), ResolvableType.forClassWithGenerics(io.reactivex.Observable.class, Void.class));
+		testVoidReturnType(Flowable.empty(), ResolvableType.forClassWithGenerics(Flowable.class, Void.class));
 	}
 
 	private void testVoidReturnType(Object body, ResolvableType type) {
@@ -131,7 +136,7 @@ public class MessageWriterResultHandlerTests {
 		HttpMessageWriter<?> writer = new EncoderHttpMessageWriter<>(new ByteBufferEncoder());
 		Mono<Void> mono = createResultHandler(writer).writeBody(body, returnType(type), this.exchange);
 
-		TestSubscriber.subscribe(mono).assertError(IllegalStateException.class);
+		StepVerifier.create(mono).expectError(IllegalStateException.class).verify();
 	}
 
 	@Test  // SPR-12811
@@ -188,9 +193,11 @@ public class MessageWriterResultHandlerTests {
 	}
 
 	private void assertResponseBody(String responseBody) {
-		TestSubscriber.subscribe(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals(responseBody,
-						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)));
+		StepVerifier.create(this.response.getBody())
+				.consumeNextWith(buf -> assertEquals(responseBody,
+						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)))
+				.expectComplete()
+				.verify();
 	}
 
 
@@ -203,7 +210,7 @@ public class MessageWriterResultHandlerTests {
 		public ParentClass() {
 		}
 
-		public ParentClass(String parentProperty) {
+		ParentClass(String parentProperty) {
 			this.parentProperty = parentProperty;
 		}
 
@@ -227,7 +234,7 @@ public class MessageWriterResultHandlerTests {
 	@JsonTypeName("bar")
 	private static class Bar extends ParentClass {
 
-		public Bar(String parentProperty) {
+		Bar(String parentProperty) {
 			super(parentProperty);
 		}
 	}
@@ -245,7 +252,7 @@ public class MessageWriterResultHandlerTests {
 
 		private String name;
 
-		public SimpleBean(Long id, String name) {
+		SimpleBean(Long id, String name) {
 			this.id = id;
 			this.name = name;
 		}
@@ -273,9 +280,15 @@ public class MessageWriterResultHandlerTests {
 
 		Completable completable() { return null; }
 
+		io.reactivex.Completable rxJava2Completable() { return null; }
+
 		Flux<Void> fluxVoid() { return null; }
 
 		Observable<Void> observableVoid() { return null; }
+
+		io.reactivex.Observable<Void> rxJava2ObservableVoid() { return null; }
+
+		Flowable<Void> flowableVoid() { return null; }
 
 		OutputStream outputStream() { return null; }
 

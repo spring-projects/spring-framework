@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.channels.ReadableByteChannel;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -166,6 +167,15 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	@Override
 	public File getFile() {
 		return this.file;
+	}
+
+	/**
+	 * This implementation opens a FileChannel for the underlying file.
+	 * @see java.nio.channels.FileChannel
+	 */
+	@Override
+	public ReadableByteChannel readableChannel() throws IOException {
+		return new FileInputStream(this.file).getChannel();
 	}
 
 	/**

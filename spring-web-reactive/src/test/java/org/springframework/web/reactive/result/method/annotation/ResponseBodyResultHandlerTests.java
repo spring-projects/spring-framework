@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,25 +23,27 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 import rx.Completable;
 import rx.Single;
 
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
-import org.springframework.http.server.reactive.MockServerHttpRequest;
-import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ExtendedModelMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
@@ -78,7 +79,7 @@ public class ResponseBodyResultHandlerTests {
 	@Before
 	public void setUp() throws Exception {
 		this.resultHandler = createHandler();
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/path");
 		this.exchange = new DefaultServerWebExchange(request, this.response, new MockWebSessionManager());
 	}
 
@@ -115,9 +116,25 @@ public class ResponseBodyResultHandlerTests {
 		testSupports(controller, "handleToMonoResponseEntity", false);
 	}
 
+	@Test
+	public void writeResponseStatus() throws NoSuchMethodException {
+		Object controller = new TestRestController();
+		HandlerMethod hm = handlerMethod(controller, "handleToString");
+		HandlerResult handlerResult = new HandlerResult(hm, null, hm.getReturnType());
+
+		StepVerifier.create(this.resultHandler.handleResult(this.exchange, handlerResult)).expectComplete().verify();
+		assertEquals(HttpStatus.NO_CONTENT, this.response.getStatusCode());
+
+		hm = handlerMethod(controller, "handleToMonoVoid");
+		handlerResult = new HandlerResult(hm, null, hm.getReturnType());
+
+		StepVerifier.create(this.resultHandler.handleResult(this.exchange, handlerResult)).expectComplete().verify();
+		assertEquals(HttpStatus.CREATED, this.response.getStatusCode());
+	}
+
 	private void testSupports(Object controller, String method, boolean result) throws NoSuchMethodException {
 		HandlerMethod hm = handlerMethod(controller, method);
-		HandlerResult handlerResult = new HandlerResult(hm, null, hm.getReturnType(), new ExtendedModelMap());
+		HandlerResult handlerResult = new HandlerResult(hm, null, hm.getReturnType());
 		assertEquals(result, this.resultHandler.supports(handlerResult));
 	}
 
@@ -135,6 +152,10 @@ public class ResponseBodyResultHandlerTests {
 	@RestController @SuppressWarnings("unused")
 	private static class TestRestController {
 
+		@ResponseStatus(code = HttpStatus.CREATED)
+		public Mono<Void> handleToMonoVoid() { return null;}
+
+		@ResponseStatus(code = HttpStatus.NO_CONTENT)
 		public String handleToString() {
 			return null;
 		}

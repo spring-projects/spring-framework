@@ -16,13 +16,15 @@
 
 package org.springframework.http.server.reactive;
 
-import java.util.function.Function;
+import java.util.Map;
+import java.util.function.BiFunction;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.HttpChannel;
+import reactor.ipc.netty.http.server.HttpServerRequest;
+import reactor.ipc.netty.http.server.HttpServerResponse;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
-import org.springframework.util.Assert;
 
 /**
  * Adapt {@link HttpHandler} to the Reactor Netty channel handling function.
@@ -30,23 +32,33 @@ import org.springframework.util.Assert;
  * @author Stephane Maldini
  * @since 5.0
  */
-public class ReactorHttpHandlerAdapter implements Function<HttpChannel, Mono<Void>> {
-
-	private final HttpHandler httpHandler;
+public class ReactorHttpHandlerAdapter extends HttpHandlerAdapterSupport
+		implements BiFunction<HttpServerRequest, HttpServerResponse, Mono<Void>> {
 
 
 	public ReactorHttpHandlerAdapter(HttpHandler httpHandler) {
-		Assert.notNull(httpHandler, "'httpHandler' is required.");
-		this.httpHandler = httpHandler;
+		super(httpHandler);
+	}
+
+	public ReactorHttpHandlerAdapter(Map<String, HttpHandler> handlerMap) {
+		super(handlerMap);
 	}
 
 
 	@Override
-	public Mono<Void> apply(HttpChannel channel) {
-		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(channel.delegate().alloc());
-		ReactorServerHttpRequest adaptedRequest = new ReactorServerHttpRequest(channel, bufferFactory);
-		ReactorServerHttpResponse adaptedResponse = new ReactorServerHttpResponse(channel, bufferFactory);
-		return this.httpHandler.handle(adaptedRequest, adaptedResponse);
+	public Mono<Void> apply(HttpServerRequest request, HttpServerResponse response) {
+
+		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(response.alloc());
+		ReactorServerHttpRequest req = new ReactorServerHttpRequest(request, bufferFactory);
+		ReactorServerHttpResponse resp = new ReactorServerHttpResponse(response, bufferFactory);
+
+		return getHttpHandler().handle(req, resp)
+				.otherwise(ex -> {
+					logger.error("Could not complete request", ex);
+					response.status(HttpResponseStatus.INTERNAL_SERVER_ERROR);
+					return Mono.empty();
+				})
+				.doOnSuccess(aVoid -> logger.debug("Successfully completed request"));
 	}
 
 }

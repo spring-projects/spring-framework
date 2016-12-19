@@ -100,8 +100,9 @@ in any one of the following ways:
 * `Mono<Account>` -- serialize without blocking the given Account when the `Mono` completes.
 * `Single<Account>` -- same but using RxJava.
 * `Flux<Account>` -- streaming scenario, possibly SSE depending on the requested content type.
-* `Flux<SseEvent>` -- SSE streaming.
-* `Observable<SseEvent>` -- same but using RxJava.
+* `Observable<Account>` -- same but using RxJava `Observable` type.
+* `Flowable<Account>` -- same but using RxJava 2 `Flowable` type.
+* `Flux<ServerSentEvent>` -- SSE streaming.
 * `Mono<Void>` -- request handling completes when the `Mono` completes.
 * `void` -- request handling completes when the method returns;
 implies a synchronous, non-blocking controller method.
@@ -114,10 +115,11 @@ implies a synchronous, non-blocking controller method.
 
 Spring Framework 5 adds a new reactive `WebClient` in addition to the existing `RestTemplate`.
 
-Each supported HTTP client (e.g. Reactor Netty) is adapted to a set of shared,
+A `WebClient` instance use a `ClientHttpConnector` implementation to drive the underlying
+supported HTTP client (e.g. Reactor Netty). This client is adapted to a set of shared,
 reactive `ClientHttpRequest` and `ClientHttpResponse` abstractions that expose the request
 and response body as `Flux<DataBuffer>` with full backpressure support on the read and
-the write side. The `Encoder` and `Decoder` abstractions from `spring-core` are also used on
+the write side. The `HttpMessageReader` and `HttpMessageWriter` abstractions are also used on
 the client side for the serialization of a `Flux` of bytes to and from typed objects.
 
 An example of using the `WebClient`:
@@ -125,26 +127,16 @@ An example of using the `WebClient`:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-ClientHttpConnector httpConnector = new ReactorClientHttpConnector();
-WebClient webClient = new WebClient(httpConnector);
+// create an immutable instance of WebClient
+WebClient webClient = WebClient.create(new ReactorClientHttpConnector());
 
-Mono<Account> response = webClient
-		.perform(get("http://example.com/accounts/1").accept(APPLICATION_JSON))
-		.extract(body(Account.class));
+ClientRequest<Void> request = ClientRequest.GET("http://example.com/accounts/{id}", 1L)
+				.accept(MediaType.APPLICATION_JSON).build();
+
+Mono<Account> account = this.webClient
+				.exchange(request)
+				.then(response -> response.body(toMono(Account.class)));
 ----
-
-The above assumes static method imports from `ClientWebRequestBuilders` and `ResponseExtractors`
-that enable a fluent syntax. The same can also be done with RxJava using static imports from
-`RxJava1ClientWebRequestBuilder` and `RxJava1ResponseExtractors` instead:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-Single<Account> response = webClient
-		.perform(get("http://example.com/accounts/1").accept(APPLICATION_JSON))
-		.extract(body(Account.class));
-----
-
 
 [[web-reactive-getting-started]]
 == Getting Started
@@ -153,8 +145,10 @@ Single<Account> response = webClient
 [[web-reactive-getting-started-boot]]
 === Spring Boot Starter
 
-The experimental Spring Boot Web Reactive starter available via http://start.spring.io
-is the quickest way to get started. It does all the work so you can start
+The
+https://github.com/bclozel/spring-boot-web-reactive#spring-boot-web-reactive-starter[Spring Boot Web Reactive starter]
+available via http://start.spring.io
+is the fastest way to get started. It does all that's necessary so you can start
 writing `@Controller` classes. By default it runs on Tomcat but the dependencies can
 be changed as usual with Spring Boot to switch to a different runtime.
 
@@ -162,38 +156,64 @@ be changed as usual with Spring Boot to switch to a different runtime.
 [[web-reactive-getting-started-manual]]
 === Manual Bootstrapping
 
-It is also easy to get started by writing a few lines of code:
+This section outlines the steps to get up and running without Spring Boot.
+
+For dependencies start with `spring-web-reactive` and `spring-context`.
+Then add `jackson-databind` and `io.netty:netty-buffer:4.1.3.Final`
+(temporarily see https://jira.spring.io/browse/SPR-14528[SPR-14528]) for JSON support.
+Lastly add the dependencies for one of the supported runtimes:
+
+* Tomcat -- `org.apache.tomcat.embed:tomcat-embed-core`
+* Jetty -- `org.eclipse.jetty:jetty-server` and `org.eclipse.jetty:jetty-servlet`
+* Reactor Netty -- `io.projectreactor.ipc:reactor-netty`
+* RxNetty -- `io.reactivex:rxnetty-common` and `io.reactivex:rxnetty-http`
+* Undertow -- `io.undertow:undertow-core`
+
+For the bootstrap code start with:
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+ApplicationContext context = new AnnotationConfigApplicationContext(DelegatingWebReactiveConfiguration.class);  // (1)
+HttpHandler handler = DispatcherHandler.toHttpHandler(context);  // (2)
+----
+
+The above loads default Spring Web Reactive config (1), then creates a
+`DispatcherHandler`, the main class driving request processing (2), and adapts
+it to `HttpHandler`, the lowest level Spring abstraction for reactive HTTP request handling.
+An `HttpHandler` can then be installed in each supported runtime:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-AnnotationConfigApplicationContext context;
-context = new AnnotationConfigApplicationContext();
-context.register(WebReactiveConfiguration.class); 	// (1)
-context.refresh();
+// Tomcat and Jetty (also see notes below)
+HttpServlet servlet = new ServletHttpHandlerAdapter(handler);
+...
 
-DispatcherHandler handler = new DispatcherHandler();	// (2)
-handler.setApplicationContext(context);
-HttpHandler httpHandler = WebHttpHandlerBuilder.webHandler(handler).build();
+// Reactor Netty
+ReactorHttpHandlerAdapter adapter = new ReactorHttpHandlerAdapter(handler);
+HttpServer server = HttpServer.create(host, port);
+server.startAndAwait(adapter);
 
-HttpServer server = new TomcatHttpServer();	// (3)
-server.setPort(8080);
-server.setHandler(httpHandler);
-server.afterPropertiesSet();
+// RxNetty
+RxNettyHttpHandlerAdapter adapter = new RxNettyHttpHandlerAdapter(handler);
+HttpServer server = HttpServer.newServer(new InetSocketAddress(host, port));
+server.startAndAwait(adapter);
+
+// Undertow
+UndertowHttpHandlerAdapter adapter = new UndertowHttpHandlerAdapter(handler);
+Undertow server = Undertow.builder().addHttpListener(port, host).setHandler(adapter).build();
 server.start();
 ----
 
-The `WebReactiveConfiguration` at (1) is the Java config from `spring-web-reactive`
-and is similar in purpose to the MVC Java config from `spring-webmvc`. It provides the
-web framework configuration required to get started leaving you only to
-declare your own `@Controller` beans.
+[NOTE]
+====
+For Servlet runtimes you can use the `AbstractAnnotationConfigDispatcherHandlerInitializer`,
+which as a `WebApplicationInitializer` is auto-detected by Servlet containers
+and it registers for you the `ServletHttpHandlerAdapter` shown above.
+Only implement one method to point to your Spring Java configuration classes.
+====
 
-The `DispatcherHandler` at (2) is the equivalent of the `DispatcherServlet` in Spring MVC.
 
-The `HttpServer` at (3) is an abstraction from the
-https://github.com/spring-projects/spring-framework/tree/master/spring-web/src/test/java/org/springframework/http/server/reactive/bootstrap[test sources]
-of `spring-web-reactive` used for Spring Framework's own integration tests.
-The abstraction comes with basic implementations for each supported runtime.
 
 
 [[web-reactive-getting-started-M1]]

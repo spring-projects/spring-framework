@@ -17,7 +17,7 @@
 package org.springframework.beans.factory;
 
 import org.springframework.beans.BeansException;
-import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Exception thrown when a bean depends on other beans or simple properties
@@ -46,7 +46,7 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 
 		super(resourceDescription, beanName,
 				"Unsatisfied dependency expressed through bean property '" + propertyName + "'" +
-				(msg != null ? ": " + msg : ""));
+				(StringUtils.hasLength(msg) ? ": " + msg : ""));
 	}
 
 	/**
@@ -59,7 +59,7 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 	public UnsatisfiedDependencyException(
 			String resourceDescription, String beanName, String propertyName, BeansException ex) {
 
-		this(resourceDescription, beanName, propertyName, (ex != null ? ex.getMessage() : ""));
+		this(resourceDescription, beanName, propertyName, "");
 		initCause(ex);
 	}
 
@@ -74,7 +74,9 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 	public UnsatisfiedDependencyException(
 			String resourceDescription, String beanName, InjectionPoint injectionPoint, String msg) {
 
-		super(resourceDescription, beanName, "Unsatisfied dependency expressed through " + injectionPoint + ": " + msg);
+		super(resourceDescription, beanName,
+				"Unsatisfied dependency expressed through " + injectionPoint +
+				(StringUtils.hasLength(msg) ? ": " + msg : ""));
 		this.injectionPoint = injectionPoint;
 	}
 
@@ -89,7 +91,7 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 	public UnsatisfiedDependencyException(
 			String resourceDescription, String beanName, InjectionPoint injectionPoint, BeansException ex) {
 
-		this(resourceDescription, beanName, injectionPoint, (ex != null ? ex.getMessage() : ""));
+		this(resourceDescription, beanName, injectionPoint, "");
 		initCause(ex);
 	}
 

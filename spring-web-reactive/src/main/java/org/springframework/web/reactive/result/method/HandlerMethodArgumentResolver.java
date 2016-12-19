@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,17 @@ package org.springframework.web.reactive.result.method;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.ui.ModelMap;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 
-
 /**
+ * Strategy interface for resolving method parameters into argument values in
+ * the context of a given request.
+ *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public interface HandlerMethodArgumentResolver {
-
 
 	boolean supportsParameter(MethodParameter parameter);
 
@@ -37,9 +38,10 @@ public interface HandlerMethodArgumentResolver {
 	 * does not resolve to any value, which will result in {@code null} passed
 	 * as the argument value.
 	 * @param parameter the method parameter
-	 * @param model the implicit model for request handling
+	 * @param bindingContext the binding context to use
 	 * @param exchange the current exchange
 	 */
-	Mono<Object> resolveArgument(MethodParameter parameter, ModelMap model, ServerWebExchange exchange);
+	Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext,
+			ServerWebExchange exchange);
 
 }

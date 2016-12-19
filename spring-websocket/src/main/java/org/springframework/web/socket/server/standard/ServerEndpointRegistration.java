@@ -107,8 +107,7 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 
 	@Override
 	public Class<? extends Endpoint> getEndpointClass() {
-		return (this.endpoint != null) ?
-				this.endpoint.getClass() : ((Class<? extends Endpoint>) this.endpointProvider.getHandlerType());
+		return (this.endpoint != null ? this.endpoint.getClass() : this.endpointProvider.getHandlerType());
 	}
 
 	public Endpoint getEndpoint() {

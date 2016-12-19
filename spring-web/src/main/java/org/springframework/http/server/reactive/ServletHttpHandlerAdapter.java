@@ -17,15 +17,17 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
+import java.util.Map;
 import javax.servlet.AsyncContext;
-import javax.servlet.ServletException;
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -35,7 +37,7 @@ import org.springframework.util.Assert;
 
 /**
  * Adapt {@link HttpHandler} to an {@link HttpServlet} using Servlet Async
- * support and Servlet 3.1 Non-blocking I/O.
+ * support and Servlet 3.1 non-blocking I/O.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -43,13 +45,10 @@ import org.springframework.util.Assert;
  */
 @WebServlet(asyncSupported = true)
 @SuppressWarnings("serial")
-public class ServletHttpHandlerAdapter extends HttpServlet {
+public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport implements Servlet {
 
 	private static final int DEFAULT_BUFFER_SIZE = 8192;
 
-	private static Log logger = LogFactory.getLog(ServletHttpHandlerAdapter.class);
-
-	private final HttpHandler handler;
 
 	// Servlet is based on blocking I/O, hence the usage of non-direct, heap-based buffers
 	// (i.e. 'false' as constructor argument)
@@ -57,48 +56,83 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 	private int bufferSize = DEFAULT_BUFFER_SIZE;
 
-	/**
-	 * Create a new {@code ServletHttpHandlerAdapter} with the given HTTP handler.
-	 * @param handler the handler
-     */
-	public ServletHttpHandlerAdapter(HttpHandler handler) {
-		Assert.notNull(handler, "'handler' must not be null");
-		this.handler = handler;
+
+	public ServletHttpHandlerAdapter(HttpHandler httpHandler) {
+		super(httpHandler);
 	}
+
+	public ServletHttpHandlerAdapter(Map<String, HttpHandler> handlerMap) {
+		super(handlerMap);
+	}
+
 
 	public void setDataBufferFactory(DataBufferFactory dataBufferFactory) {
 		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
 		this.dataBufferFactory = dataBufferFactory;
 	}
 
+	public DataBufferFactory getDataBufferFactory() {
+		return this.dataBufferFactory;
+	}
+
+	/**
+	 * Set the size of the input buffer used for reading in bytes.
+	 * <p>By default this is set to 8192.
+	 */
 	public void setBufferSize(int bufferSize) {
 		Assert.isTrue(bufferSize > 0);
 		this.bufferSize = bufferSize;
 	}
 
-	@Override
-	protected void service(HttpServletRequest servletRequest,
-			HttpServletResponse servletResponse) throws ServletException, IOException {
-
-		AsyncContext asyncContext = servletRequest.startAsync();
-
-		ServletServerHttpRequest request =
-				new ServletServerHttpRequest(servletRequest, this.dataBufferFactory,
-						this.bufferSize);
-
-		ServletServerHttpResponse response =
-				new ServletServerHttpResponse(servletResponse, this.dataBufferFactory,
-						this.bufferSize);
-
-		HandlerResultSubscriber resultSubscriber =
-				new HandlerResultSubscriber(asyncContext);
-
-		this.handler.handle(request, response).subscribe(resultSubscriber);
+	/**
+	 * Return the configured input buffer size.
+	 */
+	public int getBufferSize() {
+		return this.bufferSize;
 	}
 
-	private static class HandlerResultSubscriber implements Subscriber<Void> {
+
+	@Override
+	public void service(ServletRequest request, ServletResponse response) throws IOException {
+
+		// Start async before Read/WriteListener registration
+		AsyncContext asyncContext = request.startAsync();
+
+		ServerHttpRequest httpRequest = new ServletServerHttpRequest(
+				((HttpServletRequest) request), asyncContext, getDataBufferFactory(), getBufferSize());
+
+		ServerHttpResponse httpResponse = new ServletServerHttpResponse(
+				((HttpServletResponse) response), asyncContext, getDataBufferFactory(), getBufferSize());
+
+		HandlerResultSubscriber subscriber = new HandlerResultSubscriber(asyncContext);
+		getHttpHandler().handle(httpRequest, httpResponse).subscribe(subscriber);
+	}
+
+	// Other Servlet methods...
+
+	@Override
+	public void init(ServletConfig config) {
+	}
+
+	@Override
+	public ServletConfig getServletConfig() {
+		return null;
+	}
+
+	@Override
+	public String getServletInfo() {
+		return "";
+	}
+
+	@Override
+	public void destroy() {
+	}
+
+
+	private class HandlerResultSubscriber implements Subscriber<Void> {
 
 		private final AsyncContext asyncContext;
+
 
 		public HandlerResultSubscriber(AsyncContext asyncContext) {
 			this.asyncContext = asyncContext;
@@ -116,18 +150,17 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 		@Override
 		public void onError(Throwable ex) {
-			logger.error("Error from request handling. Completing the request.", ex);
-			HttpServletResponse response =
-					(HttpServletResponse) this.asyncContext.getResponse();
+			logger.error("Could not complete request", ex);
+			HttpServletResponse response = (HttpServletResponse) this.asyncContext.getResponse();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			this.asyncContext.complete();
 		}
 
 		@Override
 		public void onComplete() {
+			logger.debug("Successfully completed request");
 			this.asyncContext.complete();
 		}
 	}
-
 
 }

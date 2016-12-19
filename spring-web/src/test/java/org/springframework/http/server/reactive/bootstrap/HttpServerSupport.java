@@ -16,6 +16,9 @@
 
 package org.springframework.http.server.reactive.bootstrap;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.SocketUtils;
 
@@ -29,6 +32,9 @@ public class HttpServerSupport {
 	private int port = -1;
 
 	private HttpHandler httpHandler;
+
+	private Map<String, HttpHandler> handlerMap;
+
 
 	public void setHost(String host) {
 		this.host = host;
@@ -55,6 +61,17 @@ public class HttpServerSupport {
 
 	public HttpHandler getHttpHandler() {
 		return this.httpHandler;
+	}
+
+	public void registerHttpHandler(String contextPath, HttpHandler handler) {
+		if (this.handlerMap == null) {
+			this.handlerMap = new LinkedHashMap<>();
+		}
+		this.handlerMap.put(contextPath, handler);
+	}
+
+	public Map<String, HttpHandler> getHttpHandlerMap() {
+		return this.handlerMap;
 	}
 
 }

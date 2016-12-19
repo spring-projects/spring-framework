@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.socket.server.standard;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +64,7 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 		Map<String, String> pathParams = Collections.<String, String> emptyMap();
 
 		ServerEndpointRegistration endpointConfig = new ServerEndpointRegistration(path, endpoint);
-		endpointConfig.setSubprotocols(Arrays.asList(selectedProtocol));
+		endpointConfig.setSubprotocols(Collections.singletonList(selectedProtocol));
 		endpointConfig.setExtensions(selectedExtensions);
 
 		try {

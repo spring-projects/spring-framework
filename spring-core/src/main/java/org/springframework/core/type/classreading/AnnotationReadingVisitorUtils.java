@@ -80,10 +80,10 @@ abstract class AnnotationReadingVisitorUtils {
 					value = convArray;
 				}
 				else if (classValuesAsString) {
-					if (value instanceof Class<?>) {
+					if (value instanceof Class) {
 						value = ((Class<?>) value).getName();
 					}
-					else if (value instanceof Class<?>[]) {
+					else if (value instanceof Class[]) {
 						Class<?>[] clazzArray = (Class<?>[]) value;
 						String[] newValue = new String[clazzArray.length];
 						for (int i = 0; i < clazzArray.length; i++) {

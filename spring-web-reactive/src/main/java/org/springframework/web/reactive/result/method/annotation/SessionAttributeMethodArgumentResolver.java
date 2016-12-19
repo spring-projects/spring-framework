@@ -21,7 +21,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.server.ServerWebExchange;
@@ -34,13 +33,11 @@ import org.springframework.web.server.ServerWebInputException;
  * @since 5.0
  * @see RequestAttributeMethodArgumentResolver
  */
-public class SessionAttributeMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
+public class SessionAttributeMethodArgumentResolver extends AbstractNamedValueArgumentResolver {
 
 
-	public SessionAttributeMethodArgumentResolver(ConversionService conversionService,
-			ConfigurableBeanFactory beanFactory) {
-
-		super(conversionService, beanFactory);
+	public SessionAttributeMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
+		super(beanFactory);
 	}
 
 
@@ -56,9 +53,13 @@ public class SessionAttributeMethodArgumentResolver extends AbstractNamedValueMe
 	}
 
 	@Override
-	protected Mono<Object> resolveName(String name, MethodParameter parameter, ServerWebExchange exchange){
-		return exchange.getSession().map(session ->  session.getAttribute(name))
-				.filter(Optional::isPresent).map(Optional::get);
+	protected Mono<Object> resolveName(String name, MethodParameter parameter,
+			ServerWebExchange exchange) {
+
+		return exchange.getSession()
+				.map(session -> session.getAttribute(name))
+				.filter(Optional::isPresent)
+				.map(Optional::get);
 	}
 
 	@Override

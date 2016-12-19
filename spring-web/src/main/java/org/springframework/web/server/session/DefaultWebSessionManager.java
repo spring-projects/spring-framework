@@ -137,10 +137,13 @@ public class DefaultWebSessionManager implements WebSessionManager {
 
 	protected Mono<Void> saveSession(ServerWebExchange exchange, WebSession session) {
 
-		Assert.isTrue(!session.isExpired(), "Sessions are checked for expiration and have their " +
-				"access time updated when first accessed during request processing. " +
-				"However this session is expired meaning that maxIdleTime elapsed " +
-				"since then and before the call to session.save().");
+		if (session.isExpired()) {
+			return Mono.error(new IllegalStateException(
+					"Sessions are checked for expiration and have their " +
+					"access time updated when first accessed during request processing. " +
+					"However this session is expired meaning that maxIdleTime elapsed " +
+					"since then and before the call to session.save()."));
+		}
 
 		if (!session.isStarted()) {
 			return Mono.empty();

@@ -17,6 +17,7 @@
 package org.springframework.core.codec;
 
 import java.io.ByteArrayInputStream;
+import java.util.Map;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -45,16 +46,16 @@ public class ResourceDecoder extends AbstractDecoder<Resource> {
 
 
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
+	public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
 		Class<?> clazz = elementType.getRawClass();
 		return (InputStreamResource.class.equals(clazz) ||
 				clazz.isAssignableFrom(ByteArrayResource.class)) &&
-				super.canDecode(elementType, mimeType, hints);
+				super.canDecode(elementType, mimeType);
 	}
 
 	@Override
 	public Flux<Resource> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Object... hints) {
+			MimeType mimeType, Map<String, Object> hints) {
 
 		Class<?> clazz = elementType.getRawClass();
 

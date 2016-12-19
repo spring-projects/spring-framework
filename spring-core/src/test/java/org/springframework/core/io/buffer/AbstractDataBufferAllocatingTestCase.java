@@ -27,7 +27,7 @@ import org.junit.runners.Parameterized;
 
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Arjen Poutsma
@@ -40,7 +40,7 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 
 	@Parameterized.Parameters(name = "{0}")
 	public static Object[][] dataBufferFactories() {
-		return new Object[][]{
+		return new Object[][] {
 				{new NettyDataBufferFactory(new UnpooledByteBufAllocator(true))},
 				{new NettyDataBufferFactory(new UnpooledByteBufAllocator(false))},
 				{new NettyDataBufferFactory(new PooledByteBufAllocator(true))},

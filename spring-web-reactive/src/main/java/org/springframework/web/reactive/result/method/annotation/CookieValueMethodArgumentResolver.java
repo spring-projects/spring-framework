@@ -16,11 +16,10 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import reactor.core.publisher.Mono;
+import java.util.Optional;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpCookie;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.server.ServerWebExchange;
@@ -36,7 +35,7 @@ import org.springframework.web.server.ServerWebInputException;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class CookieValueMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
+public class CookieValueMethodArgumentResolver extends AbstractNamedValueSyncArgumentResolver {
 
 
 	/**
@@ -44,10 +43,8 @@ public class CookieValueMethodArgumentResolver extends AbstractNamedValueMethodA
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to contain expressions
 	 */
-	public CookieValueMethodArgumentResolver(ConversionService conversionService,
-			ConfigurableBeanFactory beanFactory) {
-
-		super(conversionService, beanFactory);
+	public CookieValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
+		super(beanFactory);
 	}
 
 
@@ -63,16 +60,19 @@ public class CookieValueMethodArgumentResolver extends AbstractNamedValueMethodA
 	}
 
 	@Override
-	protected Mono<Object> resolveName(String name, MethodParameter parameter, ServerWebExchange exchange) {
+	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter,
+			ServerWebExchange exchange) {
+
 		HttpCookie cookie = exchange.getRequest().getCookies().getFirst(name);
-		if (HttpCookie.class.isAssignableFrom(parameter.getNestedParameterType())) {
-			return Mono.justOrEmpty(cookie);
+		Class<?> paramType = parameter.getNestedParameterType();
+		if (HttpCookie.class.isAssignableFrom(paramType)) {
+			return Optional.ofNullable(cookie);
 		}
 		else if (cookie != null) {
-			return Mono.justOrEmpty(cookie.getValue());
+			return Optional.ofNullable(cookie.getValue());
 		}
 		else {
-			return Mono.empty();
+			return Optional.empty();
 		}
 	}
 

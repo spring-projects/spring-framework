@@ -24,10 +24,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.config.WebReactiveConfiguration;
+import org.springframework.web.reactive.config.EnableWebReactive;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -55,20 +57,27 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 	@Test
 	public void handleWithParam() throws Exception {
 		String expected = "Hello George!";
-		assertEquals(expected, performGet("/param?name=George", null, String.class).getBody());
+		assertEquals(expected, performGet("/param?name=George", new HttpHeaders(), String.class).getBody());
 	}
 
 	@Test
-	public void streamResult() throws Exception {
+	public void longStreamResult() throws Exception {
 		String[] expected = {"0", "1", "2", "3", "4"};
-		assertArrayEquals(expected, performGet("/stream-result", null, String[].class).getBody());
+		assertArrayEquals(expected, performGet("/long-stream-result", new HttpHeaders(), String[].class).getBody());
+	}
+
+	@Test
+	public void objectStreamResultWithAllMediaType() throws Exception {
+		String expected = "[{\"name\":\"bar\"}]";
+		assertEquals(expected, performGet("/object-stream-result", MediaType.ALL, String.class).getBody());
 	}
 
 
 	@Configuration
+	@EnableWebReactive
 	@ComponentScan(resourcePattern = "**/RequestMappingIntegrationTests$*.class")
 	@SuppressWarnings({"unused", "WeakerAccess"})
-	static class WebConfig extends WebReactiveConfiguration {
+	static class WebConfig {
 	}
 
 	@RestController
@@ -80,11 +89,36 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 			return Flux.just("Hello ", name, "!");
 		}
 
-		@GetMapping("/stream-result")
-		public Publisher<Long> stringStreamResponseBody() {
+		@GetMapping("/long-stream-result")
+		public Publisher<Long> longStreamResponseBody() {
 			return Flux.intervalMillis(100).take(5);
 		}
 
+		@GetMapping("/object-stream-result")
+		public Publisher<Foo> objectStreamResponseBody() {
+			return Flux.just(new Foo("bar"));
+		}
+
+	}
+
+	private static class Foo {
+
+		private String name;
+
+		public Foo() {
+		}
+
+		public Foo(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
 	}
 
 }

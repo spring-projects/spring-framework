@@ -371,8 +371,8 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		String metaDataSchemaName = metaDataSchemaNameToUse(tmd.getSchemaName());
 		String metaDataTableName = tableNameToUse(tmd.getTableName());
 		if (logger.isDebugEnabled()) {
-			logger.debug("Retrieving metadata for " + metaDataCatalogName + "/" +
-					metaDataSchemaName + "/" + metaDataTableName);
+			logger.debug("Retrieving metadata for " + metaDataCatalogName + '/' +
+					metaDataSchemaName + '/' + metaDataTableName);
 		}
 		try {
 			tableColumns = databaseMetaData.getColumns(

@@ -61,12 +61,14 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 
 	private final FormHttpMessageConverter formConverter = new AllEncompassingFormHttpMessageConverter();
 
+
 	/**
 	 * The default character set to use for reading form data.
 	 */
 	public void setCharset(Charset charset) {
 		this.formConverter.setCharset(charset);
 	}
+
 
 	@Override
 	protected void doFilterInternal(final HttpServletRequest request, HttpServletResponse response,
@@ -104,29 +106,30 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 		}
 	}
 
+
 	private static class HttpPutFormContentRequestWrapper extends HttpServletRequestWrapper {
 
 		private MultiValueMap<String, String> formParameters;
 
 		public HttpPutFormContentRequestWrapper(HttpServletRequest request, MultiValueMap<String, String> parameters) {
 			super(request);
-			this.formParameters = (parameters != null) ? parameters : new LinkedMultiValueMap<>();
+			this.formParameters = (parameters != null ? parameters : new LinkedMultiValueMap<>());
 		}
 
 		@Override
 		public String getParameter(String name) {
 			String queryStringValue = super.getParameter(name);
 			String formValue = this.formParameters.getFirst(name);
-			return (queryStringValue != null) ?  queryStringValue : formValue;
+			return (queryStringValue != null ? queryStringValue : formValue);
 		}
 
 		@Override
 		public Map<String, String[]> getParameterMap() {
 			Map<String, String[]> result = new LinkedHashMap<>();
-			Enumeration<String> names = this.getParameterNames();
+			Enumeration<String> names = getParameterNames();
 			while (names.hasMoreElements()) {
 				String name = names.nextElement();
-				result.put(name, this.getParameterValues(name));
+				result.put(name, getParameterValues(name));
 			}
 			return result;
 		}
@@ -150,7 +153,7 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 				return formValues.toArray(new String[formValues.size()]);
 			}
 			else {
-				List<String> result = new ArrayList<>();
+				List<String> result = new ArrayList<>(queryStringValues.length + formValues.size());
 				result.addAll(Arrays.asList(queryStringValues));
 				result.addAll(formValues);
 				return result.toArray(new String[result.size()]);

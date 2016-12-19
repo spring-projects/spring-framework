@@ -194,7 +194,7 @@ public class XpathRequestMatchers {
 				matchInternal(mockRequest);
 			}
 			catch (Exception ex) {
-				throw new AssertionError("Failed to parse XML request content: " + ex.getMessage());
+				throw new AssertionError("Failed to parse XML request content", ex);
 			}
 		}
 

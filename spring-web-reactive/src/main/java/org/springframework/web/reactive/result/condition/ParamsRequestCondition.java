@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -141,12 +143,18 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 
 		@Override
 		protected boolean matchName(ServerWebExchange exchange) {
-			return exchange.getRequest().getQueryParams().containsKey(this.name);
+			return getRequestParams(exchange).containsKey(this.name);
 		}
 
 		@Override
 		protected boolean matchValue(ServerWebExchange exchange) {
-			return this.value.equals(exchange.getRequest().getQueryParams().getFirst(this.name));
+			return this.value.equals(getRequestParams(exchange).getFirst(this.name));
+		}
+
+		private MultiValueMap<String, String> getRequestParams(ServerWebExchange exchange) {
+			MultiValueMap<String, String> params = exchange.getRequestParams().subscribe().peek();
+			Assert.notNull(params, "Expected form data (if any) to be parsed.");
+			return params;
 		}
 	}
 

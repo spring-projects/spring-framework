@@ -18,7 +18,6 @@ package org.springframework.http.converter.json;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -132,12 +131,11 @@ public class MappingJackson2HttpMessageConverterTests {
 
 	@Test
 	public void writeUTF16() throws IOException {
-		Charset utf16 = Charset.forName("UTF-16BE");
-		MediaType contentType = new MediaType("application", "json", utf16);
+		MediaType contentType = new MediaType("application", "json", StandardCharsets.UTF_16BE);
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		String body = "H\u00e9llo W\u00f6rld";
 		converter.write(body, contentType, outputMessage);
-		assertEquals("Invalid result", "\"" + body + "\"", outputMessage.getBodyAsString(utf16));
+		assertEquals("Invalid result", "\"" + body + "\"", outputMessage.getBodyAsString(StandardCharsets.UTF_16BE));
 		assertEquals("Invalid content-type", contentType, outputMessage.getHeaders().getContentType());
 	}
 
@@ -223,6 +221,20 @@ public class MappingJackson2HttpMessageConverterTests {
 		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
 
 		assertEquals("{" + NEWLINE_SYSTEM_PROPERTY + "  \"name\" : \"Jason\"" + NEWLINE_SYSTEM_PROPERTY + "}", result);
+	}
+
+	@Test
+	public void prettyPrintWithSse() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		outputMessage.getHeaders().setContentType(MediaType.TEXT_EVENT_STREAM);
+		PrettyPrintBean bean = new PrettyPrintBean();
+		bean.setName("Jason");
+
+		this.converter.setPrettyPrint(true);
+		this.converter.writeInternal(bean, null, outputMessage);
+		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
+
+		assertEquals("{\ndata:  \"name\" : \"Jason\"\ndata:}", result);
 	}
 
 	@Test

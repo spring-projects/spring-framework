@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
-import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,20 +27,18 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.MockServerHttpRequest;
-import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.ui.ModelMap;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link PathVariableMapMethodArgumentResolver}.
@@ -63,7 +60,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 	public void setUp() throws Exception {
 		this.resolver = new PathVariableMapMethodArgumentResolver();
 
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
 		WebSessionManager sessionManager = new MockWebSessionManager();
 		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 
@@ -72,6 +69,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 		this.paramNamedMap = new MethodParameter(method, 1);
 		this.paramMapNoAnnot = new MethodParameter(method, 2);
 	}
+
 
 	@Test
 	public void supportsParameter() {
@@ -87,7 +85,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 		uriTemplateVars.put("name2", "value2");
 		this.exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
-		Mono<Object> mono = this.resolver.resolveArgument(this.paramMap, new ModelMap(), this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(this.paramMap, new BindingContext(), this.exchange);
 		Object result = mono.block();
 
 		assertEquals(uriTemplateVars, result);
@@ -95,7 +93,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 
 	@Test
 	public void resolveArgumentNoUriVars() throws Exception {
-		Mono<Object> mono = this.resolver.resolveArgument(this.paramMap, new ModelMap(), this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(this.paramMap, new BindingContext(), this.exchange);
 		Object result = mono.block();
 
 		assertEquals(Collections.emptyMap(), result);

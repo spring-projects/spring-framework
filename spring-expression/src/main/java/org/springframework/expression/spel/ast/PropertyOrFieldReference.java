@@ -354,10 +354,12 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 		@Override
 		public TypedValue getValue() {
-			TypedValue value = this.ref.getValueInternal(this.contextObject, this.evalContext, this.autoGrowNullReferences);
-			if (this.ref.cachedReadAccessor instanceof CompilablePropertyAccessor) {
-				CompilablePropertyAccessor accessor = (CompilablePropertyAccessor) this.ref.cachedReadAccessor;
-				this.ref.exitTypeDescriptor = CodeFlow.toDescriptor(accessor.getPropertyType());
+			TypedValue value =
+					this.ref.getValueInternal(this.contextObject, this.evalContext, this.autoGrowNullReferences);
+			PropertyAccessor accessorToUse = this.ref.cachedReadAccessor;
+			if (accessorToUse instanceof CompilablePropertyAccessor) {
+				this.ref.exitTypeDescriptor =
+						CodeFlow.toDescriptor(((CompilablePropertyAccessor) accessorToUse).getPropertyType());
 			}
 			return value;
 		}

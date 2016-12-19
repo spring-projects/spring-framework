@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
@@ -174,6 +175,14 @@ public class ResolvableTypeTests {
 		ResolvableType type = ResolvableType.forField(field);
 		assertThat(type.getType(), equalTo(field.getGenericType()));
 		assertThat(type.resolve(), equalTo((Class) List.class));
+
+		Field field2 = Fields.class.getDeclaredField("otherPrivateField");
+		ResolvableType type2 = ResolvableType.forField(field2);
+		assertThat(type2.getType(), equalTo(field2.getGenericType()));
+		assertThat(type2.resolve(), equalTo((Class) List.class));
+
+		assertEquals(type, type2);
+		assertEquals(type.hashCode(), type2.hashCode());
 	}
 
 	@Test
@@ -846,7 +855,7 @@ public class ResolvableTypeTests {
 		VariableResolver variableResolver = mock(VariableResolver.class);
 		given(variableResolver.getSource()).willReturn(this);
 		ResolvableType longType = ResolvableType.forClass(Long.class);
-		given(variableResolver.resolveVariable((TypeVariable<?>) anyObject())).willReturn(longType);
+		given(variableResolver.resolveVariable(any())).willReturn(longType);
 
 		ResolvableType variable = ResolvableType.forType(
 				Fields.class.getField("typeVariableType").getGenericType(), variableResolver);
@@ -1084,7 +1093,6 @@ public class ResolvableTypeTests {
 
 	@Test
 	public void isAssignableFromForWildcards() throws Exception {
-
 		ResolvableType object = ResolvableType.forClass(Object.class);
 		ResolvableType charSequence = ResolvableType.forClass(CharSequence.class);
 		ResolvableType string = ResolvableType.forClass(String.class);
@@ -1287,6 +1295,15 @@ public class ResolvableTypeTests {
 		assertThat(((ParameterizedType) type).getActualTypeArguments()[0], is(equalTo(String.class)));
 	}
 
+	@Test
+	public void testSpr14648() throws Exception {
+		ResolvableType collectionClass = ResolvableType.forRawClass(Collection.class);
+		ResolvableType setClass = ResolvableType.forRawClass(Set.class);
+		ResolvableType fromReturnType = ResolvableType.forMethodReturnType(Methods.class.getMethod("wildcardSet"));
+		assertTrue(collectionClass.isAssignableFrom(fromReturnType));
+		assertTrue(setClass.isAssignableFrom(fromReturnType));
+	}
+
 
 	private ResolvableType testSerialization(ResolvableType type) throws Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -1375,6 +1392,9 @@ public class ResolvableTypeTests {
 		@SuppressWarnings("unused")
 		private List<String> privateField;
 
+		@SuppressWarnings("unused")
+		private List<String> otherPrivateField;
+
 		public Map<Map<String, Integer>, Map<Byte, Long>> nested;
 
 		public T[] variableTypeGenericArray;
@@ -1385,7 +1405,7 @@ public class ResolvableTypeTests {
 	}
 
 
-	static interface Methods<T> {
+	interface Methods<T> {
 
 		List<CharSequence> charSequenceReturn();
 
@@ -1398,6 +1418,8 @@ public class ResolvableTypeTests {
 		void typedParameter(T p);
 
 		T typedReturn();
+
+		Set<?> wildcardSet();
 	}
 
 
@@ -1453,7 +1475,7 @@ public class ResolvableTypeTests {
 	}
 
 
-	static interface TypedMethods extends Methods<String> {
+	interface TypedMethods extends Methods<String> {
 	}
 
 
@@ -1526,19 +1548,19 @@ public class ResolvableTypeTests {
 	}
 
 
-	static interface Wildcard<T extends Number> extends List<T> {
+	interface Wildcard<T extends Number> extends List<T> {
 	}
 
 
-	static interface RawExtendsWildcard extends Wildcard {
+	interface RawExtendsWildcard extends Wildcard {
 	}
 
 
-	static interface VariableNameSwitch<V, K> extends MultiValueMap<K, V> {
+	interface VariableNameSwitch<V, K> extends MultiValueMap<K, V> {
 	}
 
 
-	static interface ListOfGenericArray extends List<List<String>[]> {
+	interface ListOfGenericArray extends List<List<String>[]> {
 	}
 
 

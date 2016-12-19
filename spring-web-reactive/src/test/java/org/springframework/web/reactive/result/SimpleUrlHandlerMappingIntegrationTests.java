@@ -39,7 +39,7 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
-import org.springframework.web.reactive.ResponseStatusExceptionHandler;
+import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
@@ -61,10 +61,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		wac.register(WebConfig.class);
 		wac.refresh();
 
-		DispatcherHandler dispatcherHandler = new DispatcherHandler();
-		dispatcherHandler.setApplicationContext(wac);
-
-		return WebHttpHandlerBuilder.webHandler(dispatcherHandler)
+		return WebHttpHandlerBuilder.webHandler(new DispatcherHandler(wac))
 				.exceptionHandlers(new ResponseStatusExceptionHandler())
 				.build();
 	}

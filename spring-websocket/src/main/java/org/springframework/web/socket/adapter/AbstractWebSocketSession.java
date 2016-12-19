@@ -42,15 +42,13 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	protected static final Log logger = LogFactory.getLog(NativeWebSocketSession.class);
 
+	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
 	private T nativeSession;
-
-	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
 
 	/**
 	 * Create a new instance and associate the given attributes with it.
-	 *
 	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket
 	 * session; the provided attributes are copied, the original map is not used.
 	 */
@@ -83,7 +81,7 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 	}
 
 	public void initializeNativeSession(T session) {
-		Assert.notNull(session, "session must not be null");
+		Assert.notNull(session, "WebSocket session must not be null");
 		this.nativeSession = session;
 	}
 
@@ -124,6 +122,7 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 	protected abstract void sendPingMessage(PingMessage message) throws IOException;
 
 	protected abstract void sendPongMessage(PongMessage message) throws IOException;
+
 
 	@Override
 	public final void close() throws IOException {

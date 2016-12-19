@@ -17,9 +17,13 @@ package org.springframework.web.filter;
 
 import java.io.IOException;
 import java.util.Enumeration;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +41,7 @@ import static org.junit.Assert.assertTrue;
  * Unit tests for {@link ForwardedHeaderFilter}.
  * @author Rossen Stoyanchev
  * @author Eddú Meléndez
+ * @author Rob Winch
  */
 public class ForwardedHeaderFilterTests {
 
@@ -220,6 +225,157 @@ public class ForwardedHeaderFilterTests {
 
 		String actual = filterAndGetContextPath();
 		assertEquals("/prefix", actual);
+	}
+
+	@Test
+	public void sendRedirectWithAbsolutePath() throws Exception {
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "example.com");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+
+		String redirectedUrl = sendRedirect("/foo/bar");
+		assertEquals("https://example.com/foo/bar", redirectedUrl);
+	}
+
+	@Test
+	public void sendRedirectWithContextPath() throws Exception {
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "example.com");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+		this.request.setContextPath("/context");
+
+		String redirectedUrl = sendRedirect("/foo/bar");
+		assertEquals("https://example.com/context/foo/bar", redirectedUrl);
+	}
+
+	@Test
+	public void sendRedirectWithXForwardedPrefix() throws Exception {
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "example.com");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix");
+
+		String redirectedUrl = sendRedirect("/foo/bar");
+		assertEquals("https://example.com/prefix/foo/bar", redirectedUrl);
+	}
+
+	@Test
+	public void sendRedirectWithXForwardedPrefixAndContextPath() throws Exception {
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "example.com");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix");
+		this.request.setContextPath("/context");
+
+		String redirectedUrl = sendRedirect("/foo/bar");
+		assertEquals("https://example.com/prefix/foo/bar", redirectedUrl);
+	}
+
+	@Test
+	public void sendRedirectWithRelativePath() throws Exception {
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "example.com");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+		this.request.setRequestURI("/parent/");
+
+		String redirectedUrl = sendRedirect("foo/bar");
+		assertEquals("https://example.com/parent/foo/bar", redirectedUrl);
+	}
+
+	@Test
+	public void sendRedirectWithFileInPathAndRelativeRedirect() throws Exception {
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "example.com");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+		this.request.setRequestURI("/context/a");
+
+		String redirectedUrl = sendRedirect("foo/bar");
+		assertEquals("https://example.com/context/foo/bar", redirectedUrl);
+	}
+
+	@Test
+	public void sendRedirectWithRelativePathIgnoresFile() throws Exception {
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "example.com");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+		this.request.setRequestURI("/parent");
+
+		String redirectedUrl = sendRedirect("foo/bar");
+		assertEquals("https://example.com/foo/bar", redirectedUrl);
+	}
+
+	@Test
+	public void sendRedirectWithLocationDotDotPath() throws Exception {
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "example.com");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+
+		String redirectedUrl = sendRedirect("parent/../foo/bar");
+		assertEquals("https://example.com/foo/bar", redirectedUrl);
+	}
+
+	@Test
+	public void sendRedirectWithLocationHasScheme() throws Exception {
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "example.com");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+
+		String location = "http://other.info/foo/bar";
+		String redirectedUrl = sendRedirect(location);
+		assertEquals(location, redirectedUrl);
+	}
+
+	@Test
+	public void sendRedirectWithLocationSlashSlash() throws Exception {
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "example.com");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+
+		String location = "//other.info/foo/bar";
+		String redirectedUrl = sendRedirect(location);
+		assertEquals("https:" + location, redirectedUrl);
+	}
+
+	@Test
+	public void sendRedirectWithLocationSlashSlashParentDotDot() throws Exception {
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "example.com");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
+
+		String location = "//other.info/parent/../foo/bar";
+		String redirectedUrl = sendRedirect(location);
+		assertEquals("https:" + location, redirectedUrl);
+	}
+
+	@Test
+	public void sendRedirectWithNoXForwardedAndAbsolutePath() throws Exception {
+		String redirectedUrl = sendRedirect("/foo/bar");
+		assertEquals("/foo/bar", redirectedUrl);
+	}
+
+	@Test
+	public void sendRedirectWithNoXForwardedAndDotDotPath() throws Exception {
+		String redirectedUrl = sendRedirect("../foo/bar");
+		assertEquals("../foo/bar", redirectedUrl);
+	}
+
+	private String sendRedirect(final String location) throws ServletException, IOException {
+		MockHttpServletResponse response = doWithFiltersAndGetResponse(this.filter, new OncePerRequestFilter() {
+			@Override
+			protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+					throws ServletException, IOException {
+				response.sendRedirect(location);
+			}
+		});
+
+		return response.getRedirectedUrl();
+	}
+
+	private MockHttpServletResponse doWithFiltersAndGetResponse(Filter... filters) throws ServletException, IOException {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		FilterChain filterChain = new MockFilterChain(new HttpServlet() {}, filters);
+		filterChain.doFilter(request, response);
+		return response;
 	}
 
 	private String filterAndGetContextPath() throws ServletException, IOException {

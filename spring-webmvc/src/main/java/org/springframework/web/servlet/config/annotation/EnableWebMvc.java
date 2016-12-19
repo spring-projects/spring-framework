@@ -31,8 +31,8 @@ import org.springframework.context.annotation.Import;
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableWebMvc
- * &#064;ComponentScan(basePackageClasses = { MyConfiguration.class })
- * public class MyWebConfiguration {
+ * &#064;ComponentScan(basePackageClasses = MyConfiguration.class)
+ * public class MyConfiguration {
  *
  * }
  * </pre>
@@ -44,7 +44,7 @@ import org.springframework.context.annotation.Import;
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableWebMvc
- * &#064;ComponentScan(basePackageClasses = { MyConfiguration.class })
+ * &#064;ComponentScan(basePackageClasses = MyConfiguration.class)
  * public class MyConfiguration extends WebMvcConfigurerAdapter {
  *
  * 	   &#064;Override
@@ -57,12 +57,17 @@ import org.springframework.context.annotation.Import;
  *         converters.add(new MyHttpMessageConverter());
  * 	   }
  *
- *     // More overridden methods ...
  * }
  * </pre>
  *
- * <p>If {@link WebMvcConfigurer} does not expose some advanced setting that
- * needs to be configured, consider removing the {@code @EnableWebMvc}
+ * <p><strong>Note:</strong> only one {@code @Configuration} class may have the
+ * {@code @EnableWebMvc} annotation to import the Spring Web MVC
+ * configuration. There can however be multiple {@code @Configuration} classes
+ * implementing {@code WebMvcConfigurer} in order to customize the provided
+ * configuration.
+ *
+ * <p>If {@link WebMvcConfigurer} does not expose some more advanced setting that
+ * needs to be configured consider removing the {@code @EnableWebMvc}
  * annotation and extending directly from {@link WebMvcConfigurationSupport}
  * or {@link DelegatingWebMvcConfiguration}, e.g.:
  *

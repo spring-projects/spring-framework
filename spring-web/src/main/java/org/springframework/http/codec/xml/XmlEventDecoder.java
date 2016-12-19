@@ -19,6 +19,7 @@ package org.springframework.http.codec.xml;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -89,7 +90,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Flux<XMLEvent> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Object... hints) {
+			MimeType mimeType, Map<String, Object> hints) {
 
 		Flux<DataBuffer> flux = Flux.from(inputStream);
 		if (useAalto && aaltoPresent) {

@@ -278,15 +278,15 @@ class TypeConverterDelegate {
 
 				// Definitely doesn't match: throw IllegalArgumentException/IllegalStateException
 				StringBuilder msg = new StringBuilder();
-				msg.append("Cannot convert value of type [").append(ClassUtils.getDescriptiveType(newValue));
-				msg.append("] to required type [").append(ClassUtils.getQualifiedName(requiredType)).append("]");
+				msg.append("Cannot convert value of type '").append(ClassUtils.getDescriptiveType(newValue));
+				msg.append("' to required type '").append(ClassUtils.getQualifiedName(requiredType)).append("'");
 				if (propertyName != null) {
 					msg.append(" for property '").append(propertyName).append("'");
 				}
 				if (editor != null) {
 					msg.append(": PropertyEditor [").append(editor.getClass().getName()).append(
-							"] returned inappropriate value of type [").append(
-							ClassUtils.getDescriptiveType(convertedValue)).append("]");
+							"] returned inappropriate value of type '").append(
+							ClassUtils.getDescriptiveType(convertedValue)).append("'");
 					throw new IllegalArgumentException(msg.toString());
 				}
 				else {

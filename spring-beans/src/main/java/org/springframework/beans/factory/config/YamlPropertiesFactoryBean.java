@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,27 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.Map;
 import java.util.Properties;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.CollectionFactory;
 
 /**
- * Factory for Java Properties that reads from a YAML source. YAML is a nice
- * human-readable format for configuration, and it has some useful hierarchical
- * properties. It's more or less a superset of JSON, so it has a lot of similar
- * features. The Properties created by this factory have nested paths for
- * hierarchical objects, so for instance this YAML
+ * Factory for {@link java.util.Properties} that reads from a YAML source,
+ * exposing a flat structure of String property values.
+ *
+ * <p>YAML is a nice human-readable format for configuration, and it has some
+ * useful hierarchical properties. It's more or less a superset of JSON, so it
+ * has a lot of similar features.
+ *
+ * <p><b>Note: All exposed values are of type {@code String}</b> for access through
+ * the common {@link Properties#getProperty} method (e.g. in configuration property
+ * resolution through {@link PropertyResourceConfigurer#setProperties(Properties)}).
+ * If this is not desirable, use {@link YamlMapFactoryBean} instead.
+ *
+ * <p>The Properties created by this factory have nested paths for hierarchical
+ * objects, so for instance this YAML
  *
  * <pre class="code">
  * environments:
@@ -39,7 +48,7 @@ import org.springframework.beans.factory.InitializingBean;
  *     name: My Cool App
  * </pre>
  *
- * is transformed into these Properties:
+ * is transformed into these properties:
  *
  * <pre class="code">
  * environments.dev.url=http://dev.bar.com
@@ -57,7 +66,7 @@ import org.springframework.beans.factory.InitializingBean;
  * - foo.bar.com
  * </pre>
  *
- * becomes Java Properties like this:
+ * becomes properties like this:
  *
  * <pre class="code">
  * servers[0]=dev.bar.com
@@ -66,6 +75,7 @@ import org.springframework.beans.factory.InitializingBean;
  *
  * @author Dave Syer
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.1
  */
 public class YamlPropertiesFactoryBean extends YamlProcessor implements FactoryBean<Properties>, InitializingBean {
@@ -116,13 +126,8 @@ public class YamlPropertiesFactoryBean extends YamlProcessor implements FactoryB
 	 * @see #process(MatchCallback) ()
 	 */
 	protected Properties createProperties() {
-		final Properties result = new Properties();
-		process(new MatchCallback() {
-			@Override
-			public void process(Properties properties, Map<String, Object> map) {
-				result.putAll(properties);
-			}
-		});
+		Properties result = CollectionFactory.createStringAdaptingProperties();
+		process((properties, map) -> result.putAll(properties));
 		return result;
 	}
 

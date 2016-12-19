@@ -54,6 +54,9 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class PrintingResultHandler implements ResultHandler {
 
+	private static final String MISSING_CHARACTER_ENCODING = "<no character encoding set>";
+
+
 	private final ResultValuePrinter printer;
 
 
@@ -103,10 +106,14 @@ public class PrintingResultHandler implements ResultHandler {
 	 * Print the request.
 	 */
 	protected void printRequest(MockHttpServletRequest request) throws Exception {
+		String body = (request.getCharacterEncoding() != null ?
+				request.getContentAsString() : MISSING_CHARACTER_ENCODING);
+
 		this.printer.printValue("HTTP Method", request.getMethod());
 		this.printer.printValue("Request URI", request.getRequestURI());
 		this.printer.printValue("Parameters", getParamsMultiValueMap(request));
 		this.printer.printValue("Headers", getRequestHeaders(request));
+		this.printer.printValue("Body", body);
 	}
 
 	protected final HttpHeaders getRequestHeaders(MockHttpServletRequest request) {
@@ -222,11 +229,14 @@ public class PrintingResultHandler implements ResultHandler {
 	 * Print the response.
 	 */
 	protected void printResponse(MockHttpServletResponse response) throws Exception {
+		String body = (response.getCharacterEncoding() != null ?
+				response.getContentAsString() : MISSING_CHARACTER_ENCODING);
+
 		this.printer.printValue("Status", response.getStatus());
 		this.printer.printValue("Error message", response.getErrorMessage());
 		this.printer.printValue("Headers", getResponseHeaders(response));
 		this.printer.printValue("Content type", response.getContentType());
-		this.printer.printValue("Body", response.getContentAsString());
+		this.printer.printValue("Body", body);
 		this.printer.printValue("Forwarded URL", response.getForwardedUrl());
 		this.printer.printValue("Redirected URL", response.getRedirectedUrl());
 		printCookies(response.getCookies());

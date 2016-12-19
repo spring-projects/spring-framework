@@ -15,7 +15,6 @@
  */
 package org.springframework.web.reactive.handler;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.junit.Test;
@@ -25,8 +24,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.MockServerHttpRequest;
-import org.springframework.http.server.reactive.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
@@ -121,7 +120,7 @@ public class SimpleUrlHandlerMappingTests {
 	}
 
 	private ServerWebExchange createExchange(String path) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI(path));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, path);
 		WebSessionManager sessionManager = new MockWebSessionManager();
 		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 	}
@@ -129,7 +128,7 @@ public class SimpleUrlHandlerMappingTests {
 
 	@Configuration
 	static class WebConfig {
-		
+	
 		@Bean @SuppressWarnings("unused")
 		public SimpleUrlHandlerMapping handlerMapping() {
 			SimpleUrlHandlerMapping hm = new SimpleUrlHandlerMapping();

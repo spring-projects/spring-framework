@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view.freemarker;
 
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
@@ -25,24 +25,23 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import reactor.test.StepVerifier;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.MockServerHttpRequest;
-import org.springframework.http.server.reactive.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
-import org.springframework.tests.TestSubscriber;
-import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rossen Stoyanchev
@@ -78,7 +77,7 @@ public class FreeMarkerViewTests {
 		FreeMarkerView fv = new FreeMarkerView();
 		fv.setApplicationContext(this.context);
 
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
+		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/path");
 		this.response = new MockServerHttpResponse();
 		WebSessionManager manager = new DefaultWebSessionManager();
 		this.exchange = new DefaultServerWebExchange(request, response, manager);
@@ -122,14 +121,14 @@ public class FreeMarkerViewTests {
 
 		ModelMap model = new ExtendedModelMap();
 		model.addAttribute("hello", "hi FreeMarker");
-		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("handle"), -1);
-		HandlerResult result = new HandlerResult(new Object(), "", returnType, model);
-		view.render(result, null, this.exchange);
+		view.render(model, null, this.exchange);
 
-		TestSubscriber
-				.subscribe(this.response.getBody())
-				.assertValuesWith(dataBuffer ->
-					assertEquals("<html><body>hi FreeMarker</body></html>", asString(dataBuffer)));
+		StepVerifier.create(this.response.getBody())
+				.consumeNextWith(buf -> {
+					assertEquals("<html><body>hi FreeMarker</body></html>", asString(buf));
+				})
+				.expectComplete()
+				.verify();
 	}
 
 

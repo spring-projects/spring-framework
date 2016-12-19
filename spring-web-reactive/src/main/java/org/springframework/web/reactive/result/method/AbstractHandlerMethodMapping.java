@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import reactor.core.publisher.Mono;
@@ -37,6 +38,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
@@ -68,6 +71,23 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * but duplicated here to avoid a hard dependency on the spring-aop module.
 	 */
 	private static final String SCOPED_TARGET_NAME_PREFIX = "scopedTarget.";
+
+	/**
+	 * HandlerMethod to return on a pre-flight request match when the request
+	 * mappings are more nuanced than the access control headers.
+	 */
+	private static final HandlerMethod PREFLIGHT_AMBIGUOUS_MATCH =
+			new HandlerMethod(new PreFlightAmbiguousMatchHandler(),
+					ClassUtils.getMethod(PreFlightAmbiguousMatchHandler.class, "handle"));
+
+	private static final CorsConfiguration ALLOW_CORS_CONFIG = new CorsConfiguration();
+
+	static {
+		ALLOW_CORS_CONFIG.addAllowedOrigin("*");
+		ALLOW_CORS_CONFIG.addAllowedMethod("*");
+		ALLOW_CORS_CONFIG.addAllowedHeader("*");
+		ALLOW_CORS_CONFIG.setAllowCredentials(true);
+	}
 
 
 	private final MappingRegistry mappingRegistry = new MappingRegistry();
@@ -213,6 +233,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	/**
+	 * Extract and return the CORS configuration for the mapping.
+	 */
+	protected CorsConfiguration initCorsConfiguration(Object handler, Method method, T mapping) {
+		return null;
+	}
+
+	/**
 	 * Invoked after all handler methods have been detected.
 	 * @param handlerMethods a read-only map with handler methods and mappings.
 	 */
@@ -227,29 +254,37 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @param exchange the current exchange
 	 */
 	@Override
-	public Mono<Object> getHandler(ServerWebExchange exchange) {
+	public Mono<HandlerMethod> getHandlerInternal(ServerWebExchange exchange) {
 		String lookupPath = getPathHelper().getLookupPathForRequest(exchange);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking up handler method for path " + lookupPath);
 		}
 		this.mappingRegistry.acquireReadLock();
+
 		try {
-			HandlerMethod handlerMethod = null;
-			try {
-				handlerMethod = lookupHandlerMethod(lookupPath, exchange);
-			}
-			catch (Exception ex) {
-				return Mono.error(ex);
-			}
-			if (logger.isDebugEnabled()) {
-				if (handlerMethod != null) {
-					logger.debug("Returning handler method [" + handlerMethod + "]");
-				}
-				else {
-					logger.debug("Did not find handler method for [" + lookupPath + "]");
-				}
-			}
-			return (handlerMethod != null ? Mono.just(handlerMethod.createWithResolvedBean()) : Mono.empty());
+			// Ensure form data is parsed for "params" conditions...
+			return exchange.getRequestParams()
+					.then(() -> {
+						HandlerMethod handlerMethod = null;
+						try {
+							handlerMethod = lookupHandlerMethod(lookupPath, exchange);
+						}
+						catch (Exception ex) {
+							return Mono.error(ex);
+						}
+						if (logger.isDebugEnabled()) {
+							if (handlerMethod != null) {
+								logger.debug("Returning handler method [" + handlerMethod + "]");
+							}
+							else {
+								logger.debug("Did not find handler method for [" + lookupPath + "]");
+							}
+						}
+						if (handlerMethod != null) {
+							handlerMethod = handlerMethod.createWithResolvedBean();
+						}
+						return Mono.justOrEmpty(handlerMethod);
+					});
 		}
 		finally {
 			this.mappingRegistry.releaseReadLock();
@@ -287,6 +322,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			}
 			Match bestMatch = matches.get(0);
 			if (matches.size() > 1) {
+				if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
+					return PREFLIGHT_AMBIGUOUS_MATCH;
+				}
 				Match secondBestMatch = matches.get(1);
 				if (comparator.compare(bestMatch, secondBestMatch) == 0) {
 					Method m1 = bestMatch.handlerMethod.getMethod();
@@ -333,6 +371,20 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			throws Exception {
 
 		return null;
+	}
+
+	@Override
+	protected CorsConfiguration getCorsConfiguration(Object handler, ServerWebExchange exchange) {
+		CorsConfiguration corsConfig = super.getCorsConfiguration(handler, exchange);
+		if (handler instanceof HandlerMethod) {
+			HandlerMethod handlerMethod = (HandlerMethod) handler;
+			if (handlerMethod.equals(PREFLIGHT_AMBIGUOUS_MATCH)) {
+				return ALLOW_CORS_CONFIG;
+			}
+			CorsConfiguration methodConfig = this.mappingRegistry.getCorsConfiguration(handlerMethod);
+			corsConfig = (corsConfig != null ? corsConfig.combine(methodConfig) : methodConfig);
+		}
+		return corsConfig;
 	}
 
 
@@ -392,6 +444,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		private final MultiValueMap<String, T> urlLookup = new LinkedMultiValueMap<>();
 
+		private final Map<HandlerMethod, CorsConfiguration> corsLookup = new ConcurrentHashMap<>();
+
 		private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
 		/**
@@ -408,6 +462,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		 */
 		public List<T> getMappingsByUrl(String urlPath) {
 			return this.urlLookup.get(urlPath);
+		}
+
+		/**
+		 * Return CORS configuration. Thread-safe for concurrent use.
+		 */
+		public CorsConfiguration getCorsConfiguration(HandlerMethod handlerMethod) {
+			HandlerMethod original = handlerMethod.getResolvedFromHandlerMethod();
+			return this.corsLookup.get(original != null ? original : handlerMethod);
 		}
 
 		/**
@@ -438,6 +500,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				List<String> directUrls = getDirectUrls(mapping);
 				for (String url : directUrls) {
 					this.urlLookup.add(url, mapping);
+				}
+
+				CorsConfiguration corsConfig = initCorsConfiguration(handler, method, mapping);
+				if (corsConfig != null) {
+					this.corsLookup.put(handlerMethod, corsConfig);
 				}
 
 				this.registry.put(mapping, new MappingRegistration<>(mapping, handlerMethod, directUrls));
@@ -486,6 +553,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 						}
 					}
 				}
+				this.corsLookup.remove(definition.getHandlerMethod());
 			}
 			finally {
 				this.readWriteLock.writeLock().unlock();
@@ -558,6 +626,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		@Override
 		public int compare(Match match1, Match match2) {
 			return this.comparator.compare(match1.mapping, match2.mapping);
+		}
+	}
+
+	private static class PreFlightAmbiguousMatchHandler {
+
+		public void handle() {
+			throw new UnsupportedOperationException("not implemented");
 		}
 	}
 

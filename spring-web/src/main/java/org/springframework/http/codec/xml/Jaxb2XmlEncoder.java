@@ -18,6 +18,7 @@ package org.springframework.http.codec.xml;
 
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -52,8 +53,8 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType, Object... hints) {
-		if (super.canEncode(elementType, mimeType, hints)) {
+	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
+		if (super.canEncode(elementType, mimeType)) {
 			Class<?> outputClass = elementType.getRawClass();
 			return (outputClass.isAnnotationPresent(XmlRootElement.class) ||
 					outputClass.isAnnotationPresent(XmlType.class));
@@ -66,7 +67,7 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 
 	@Override
 	protected Flux<DataBuffer> encode(Object value, DataBufferFactory dataBufferFactory,
-			ResolvableType type, MimeType mimeType, Object... hints) {
+			ResolvableType type, MimeType mimeType, Map<String, Object> hints) {
 		try {
 			DataBuffer buffer = dataBufferFactory.allocateBuffer(1024);
 			OutputStream outputStream = buffer.asOutputStream();

@@ -16,7 +16,10 @@
 
 package org.springframework.http.server.reactive.bootstrap;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import reactor.core.Loopback;
+import reactor.ipc.netty.NettyContext;
 
 import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
 import org.springframework.util.Assert;
@@ -28,53 +31,53 @@ public class ReactorHttpServer extends HttpServerSupport implements HttpServer, 
 
 	private ReactorHttpHandlerAdapter reactorHandler;
 
-	private reactor.ipc.netty.http.HttpServer reactorServer;
+	private reactor.ipc.netty.http.server.HttpServer reactorServer;
 
-	private boolean running;
+	private AtomicReference<NettyContext> nettyContext = new AtomicReference<>();
 
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-
-		Assert.notNull(getHttpHandler());
-		this.reactorHandler = new ReactorHttpHandlerAdapter(getHttpHandler());
-		this.reactorServer = reactor.ipc.netty.http.HttpServer.create(getHost(), getPort());
+		if (getHttpHandlerMap() != null) {
+			this.reactorHandler = new ReactorHttpHandlerAdapter(getHttpHandlerMap());
+		}
+		else {
+			Assert.notNull(getHttpHandler());
+			this.reactorHandler = new ReactorHttpHandlerAdapter(getHttpHandler());
+		}
+		this.reactorServer = reactor.ipc.netty.http.server.HttpServer
+				.create(getHost(), getPort());
 	}
 
 
 	@Override
 	public boolean isRunning() {
-		return this.running;
+		NettyContext context = this.nettyContext.get();
+		return (context != null && context.channel().isActive());
 	}
 
 	@Override
 	public Object connectedInput() {
-		return reactorServer;
+		return this.reactorServer;
 	}
 
 	@Override
 	public Object connectedOutput() {
-		return reactorServer;
+		return this.reactorServer;
 	}
 
 	@Override
 	public void start() {
-		if (!this.running) {
-			try {
-				this.reactorServer.startAndAwait(reactorHandler);
-				this.running = true;
-			}
-			catch (InterruptedException ex) {
-				throw new IllegalStateException(ex);
-			}
+		if (this.nettyContext.get() == null) {
+			this.nettyContext.set(this.reactorServer.newHandler(reactorHandler).block());
 		}
 	}
 
 	@Override
 	public void stop() {
-		if (this.running) {
-			this.reactorServer.shutdown();
-			this.running = false;
+		NettyContext context = this.nettyContext.getAndSet(null);
+		if (context != null) {
+			context.dispose();
 		}
 	}
 }

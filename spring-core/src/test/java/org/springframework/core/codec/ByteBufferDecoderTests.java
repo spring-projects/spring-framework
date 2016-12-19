@@ -17,15 +17,16 @@
 package org.springframework.core.codec;
 
 import java.nio.ByteBuffer;
+import java.util.Collections;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.assertFalse;
@@ -40,9 +41,12 @@ public class ByteBufferDecoderTests extends AbstractDataBufferAllocatingTestCase
 
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class), MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Integer.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class), MimeTypeUtils.APPLICATION_JSON));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class),
+				MimeTypeUtils.TEXT_PLAIN));
+		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Integer.class),
+				MimeTypeUtils.TEXT_PLAIN));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class),
+				MimeTypeUtils.APPLICATION_JSON));
 	}
 
 	@Test
@@ -52,11 +56,11 @@ public class ByteBufferDecoderTests extends AbstractDataBufferAllocatingTestCase
 		Flux<DataBuffer> source = Flux.just(fooBuffer, barBuffer);
 		Flux<ByteBuffer> output = this.decoder.decode(source,
 				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
-				null);
-		TestSubscriber
-				.subscribe(output)
-				.assertNoError()
-				.assertComplete()
-				.assertValues(ByteBuffer.wrap("foo".getBytes()), ByteBuffer.wrap("bar".getBytes()));
+				null, Collections.emptyMap());
+
+		StepVerifier.create(output)
+				.expectNext(ByteBuffer.wrap("foo".getBytes()), ByteBuffer.wrap("bar".getBytes()))
+				.expectComplete()
+				.verify();
 	}
 }

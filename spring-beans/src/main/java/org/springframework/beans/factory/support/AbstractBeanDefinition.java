@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.springframework.beans.BeanMetadataAttributeAccessor;
 import org.springframework.beans.MutablePropertyValues;
@@ -165,6 +166,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private MethodOverrides methodOverrides = new MethodOverrides();
 
+	private Supplier<?> instanceSupplier;
+
 	private String factoryBeanName;
 
 	private String factoryMethodName;
@@ -234,6 +237,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			setPrimary(originalAbd.isPrimary());
 			setNonPublicAccessAllowed(originalAbd.isNonPublicAccessAllowed());
 			setLenientConstructorResolution(originalAbd.isLenientConstructorResolution());
+			setInstanceSupplier(originalAbd.getInstanceSupplier());
 			setInitMethodName(originalAbd.getInitMethodName());
 			setEnforceInitMethod(originalAbd.isEnforceInitMethod());
 			setDestroyMethodName(originalAbd.getDestroyMethodName());
@@ -298,6 +302,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			setDependsOn(otherAbd.getDependsOn());
 			setNonPublicAccessAllowed(otherAbd.isNonPublicAccessAllowed());
 			setLenientConstructorResolution(otherAbd.isLenientConstructorResolution());
+			setInstanceSupplier(otherAbd.getInstanceSupplier());
 			if (StringUtils.hasLength(otherAbd.getInitMethodName())) {
 				setInitMethodName(otherAbd.getInitMethodName());
 				setEnforceInitMethod(otherAbd.isEnforceInitMethod());
@@ -737,6 +742,28 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		return this.methodOverrides;
 	}
 
+
+	/**
+	 * Specify a callback for creating an instance of the bean,
+	 * as an alternative to a declaratively specified factory method.
+	 * <p>If such a callback is set, it will override any other constructor
+	 * or factory method metadata. However, bean property population and
+	 * potential annotation-driven injection will still apply as usual.
+	 * @since 5.0
+	 * @see #setConstructorArgumentValues(ConstructorArgumentValues)
+	 * @see #setPropertyValues(MutablePropertyValues)
+	 */
+	public void setInstanceSupplier(Supplier<?> instanceSupplier) {
+		this.instanceSupplier = instanceSupplier;
+	}
+
+	/**
+	 * Return a callback for creating an instance of the bean, if any.
+	 * @since 5.0
+	 */
+	public Supplier<?> getInstanceSupplier() {
+		return this.instanceSupplier;
+	}
 
 	@Override
 	public void setFactoryBeanName(String factoryBeanName) {

@@ -166,8 +166,13 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 				listener.onApplicationEvent(event);
 			}
 			catch (ClassCastException ex) {
-				// Possibly a lambda-defined listener which we could not resolve the generic event type for
-				LogFactory.getLog(getClass()).debug("Non-matching event type for listener: " + listener, ex);
+				if (ex.getMessage().startsWith(event.getClass().getName())) {
+					// Possibly a lambda-defined listener which we could not resolve the generic event type for
+					LogFactory.getLog(getClass()).debug("Non-matching event type for listener: " + listener, ex);
+				}
+				else {
+					throw ex;
+				}
 			}
 		}
 	}

@@ -24,8 +24,10 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
+import org.springframework.web.socket.sockjs.transport.SockJsSession;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
+import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSession;
 
 /**
@@ -49,6 +51,11 @@ public class XhrPollingTransportHandler extends AbstractHttpSendingTransportHand
 	@Override
 	protected SockJsFrameFormat getFrameFormat(ServerHttpRequest request) {
 		return new DefaultSockJsFrameFormat("%s\n");
+	}
+
+	@Override
+	public boolean checkSessionType(SockJsSession session) {
+		return session instanceof PollingSockJsSession;
 	}
 
 	@Override

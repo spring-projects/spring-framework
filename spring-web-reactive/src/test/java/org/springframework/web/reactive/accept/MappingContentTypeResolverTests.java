@@ -98,7 +98,7 @@ public class MappingContentTypeResolverTests {
 		assertEquals("application/xml", mediaTypes.get(0).toString());
 	}
 
-	
+
 	private static class TestMappingContentTypeResolver extends AbstractMappingContentTypeResolver {
 
 		private final String key;

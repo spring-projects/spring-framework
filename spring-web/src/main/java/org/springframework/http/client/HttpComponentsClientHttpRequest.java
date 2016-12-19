@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
- * Apache HttpComponents HttpClient to execute requests.
+ * {@link ClientHttpRequest} implementation based on
+ * Apache HttpComponents HttpClient.
  *
  * <p>Created via the {@link HttpComponentsClientHttpRequestFactory}.
- *
- * <p><b>NOTE:</b> Requires Apache HttpComponents 4.3 or higher, as of Spring 4.0.
  *
  * @author Oleg Kalnichevski
  * @author Arjen Poutsma
@@ -57,10 +55,10 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 	private final HttpContext httpContext;
 
 
-	HttpComponentsClientHttpRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext) {
-		this.httpClient = httpClient;
-		this.httpRequest = httpRequest;
-		this.httpContext = httpContext;
+	HttpComponentsClientHttpRequest(HttpClient client, HttpUriRequest request, HttpContext context) {
+		this.httpClient = client;
+		this.httpRequest = request;
+		this.httpContext = context;
 	}
 
 

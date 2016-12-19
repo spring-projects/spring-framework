@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 
 import org.springframework.core.NestedIOException;
 import org.springframework.util.Assert;
@@ -120,6 +122,15 @@ public abstract class AbstractResource implements Resource {
 	@Override
 	public File getFile() throws IOException {
 		throw new FileNotFoundException(getDescription() + " cannot be resolved to absolute file path");
+	}
+
+	/**
+	 * This implementation returns {@link Channels#newChannel(InputStream)} with the result of
+	 * {@link #getInputStream()}.
+	 */
+	@Override
+	public ReadableByteChannel readableChannel() throws IOException {
+		return Channels.newChannel(getInputStream());
 	}
 
 	/**

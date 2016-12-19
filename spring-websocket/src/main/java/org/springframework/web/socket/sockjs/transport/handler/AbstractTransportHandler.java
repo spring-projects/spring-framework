@@ -23,12 +23,14 @@ import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 
 /**
+ * Common base class for {@link TransportHandler} inplementations.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public abstract class AbstractTransportHandler implements TransportHandler {
 
-	protected final Log logger = LogFactory.getLog(this.getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private SockJsServiceConfig serviceConfig;
 

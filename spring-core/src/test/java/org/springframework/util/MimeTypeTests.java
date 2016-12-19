@@ -16,7 +16,6 @@
 
 package org.springframework.util;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -76,7 +75,7 @@ public class MimeTypeTests {
 		MimeType mimeType = MimeType.valueOf(s);
 		assertEquals("Invalid type", "text", mimeType.getType());
 		assertEquals("Invalid subtype", "html", mimeType.getSubtype());
-		assertEquals("Invalid charset", Charset.forName("ISO-8859-1"), mimeType.getCharset());
+		assertEquals("Invalid charset", StandardCharsets.ISO_8859_1, mimeType.getCharset());
 	}
 
 	@Test
@@ -86,6 +85,16 @@ public class MimeTypeTests {
 		assertEquals("Invalid type", "application", mimeType.getType());
 		assertEquals("Invalid subtype", "xml", mimeType.getSubtype());
 		assertEquals("Invalid charset", StandardCharsets.UTF_8, mimeType.getCharset());
+	}
+
+	@Test
+	public void parseQuotedSeparator() {
+		String s = "application/xop+xml;charset=utf-8;type=\"application/soap+xml;action=\\\"http://x.y.z\\\"\"";
+		MimeType mimeType = MimeType.valueOf(s);
+		assertEquals("Invalid type", "application", mimeType.getType());
+		assertEquals("Invalid subtype", "xop+xml", mimeType.getSubtype());
+		assertEquals("Invalid charset", StandardCharsets.UTF_8, mimeType.getCharset());
+		assertEquals("\"application/soap+xml;action=\\\"http://x.y.z\\\"\"", mimeType.getParameter("type"));
 	}
 
 	@Test

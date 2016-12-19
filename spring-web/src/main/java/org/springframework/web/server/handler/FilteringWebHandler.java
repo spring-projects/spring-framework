@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server.handler;
 
 import java.util.Arrays;
@@ -21,10 +22,10 @@ import java.util.List;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.ServerWebExchange;
 
 /**
  * WebHandler that delegates to a chain of {@link WebFilter} instances and then
@@ -44,7 +45,7 @@ public class FilteringWebHandler extends WebHandlerDecorator {
 	}
 
 	private static List<WebFilter> initList(WebFilter[] list) {
-		return (list != null ? Collections.unmodifiableList(Arrays.asList(list)): Collections.emptyList());
+		return (list != null ? Collections.unmodifiableList(Arrays.asList(list)) : Collections.emptyList());
 	}
 
 
@@ -64,7 +65,6 @@ public class FilteringWebHandler extends WebHandlerDecorator {
 	private class DefaultWebFilterChain implements WebFilterChain {
 
 		private int index;
-
 
 		@Override
 		public Mono<Void> filter(ServerWebExchange exchange) {

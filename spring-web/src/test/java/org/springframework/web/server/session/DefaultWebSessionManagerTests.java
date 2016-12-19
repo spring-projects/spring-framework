@@ -15,7 +15,6 @@
  */
 package org.springframework.web.server.session;
 
-import java.net.URI;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -28,8 +27,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.MockServerHttpRequest;
-import org.springframework.http.server.reactive.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -57,7 +56,7 @@ public class DefaultWebSessionManagerTests {
 	public void setUp() throws Exception {
 		this.manager.setSessionIdResolver(this.idResolver);
 
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
+		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/path");
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(request, response, this.manager);
 	}

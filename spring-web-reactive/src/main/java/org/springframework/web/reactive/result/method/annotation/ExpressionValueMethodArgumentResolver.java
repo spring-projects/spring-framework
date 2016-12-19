@@ -16,12 +16,11 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import reactor.core.publisher.Mono;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -34,18 +33,16 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
+public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueSyncArgumentResolver {
 
-	
+
 	/**
 	 * @param beanFactory a bean factory to use for resolving  ${...}
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to contain expressions
 	 */
-	public ExpressionValueMethodArgumentResolver(ConversionService conversionService,
-			ConfigurableBeanFactory beanFactory) {
-
-		super(conversionService, beanFactory);
+	public ExpressionValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
+		super(beanFactory);
 	}
 
 
@@ -61,9 +58,11 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMet
 	}
 
 	@Override
-	protected Mono<Object> resolveName(String name, MethodParameter parameter, ServerWebExchange exchange) {
+	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter,
+			ServerWebExchange exchange) {
+
 		// No name to resolve
-		return Mono.empty();
+		return Optional.empty();
 	}
 
 	@Override

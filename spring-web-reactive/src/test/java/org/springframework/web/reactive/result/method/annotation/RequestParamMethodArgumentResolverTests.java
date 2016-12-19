@@ -17,29 +17,30 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
-import java.net.URI;
-import java.util.Arrays;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.core.convert.support.GenericConversionService;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.MockServerHttpRequest;
-import org.springframework.http.server.reactive.MockServerHttpResponse;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.tests.TestSubscriber;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -51,6 +52,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.web.util.UriComponentsBuilder.fromPath;
 
 /**
  * Unit tests for {@link RequestParamMethodArgumentResolver}.
@@ -61,8 +63,6 @@ public class RequestParamMethodArgumentResolverTests {
 
 	private RequestParamMethodArgumentResolver resolver;
 
-	private ServerWebExchange exchange;
-
 	private MethodParameter paramNamedDefaultValueString;
 	private MethodParameter paramNamedStringArray;
 	private MethodParameter paramNamedMap;
@@ -72,18 +72,15 @@ public class RequestParamMethodArgumentResolverTests {
 	private MethodParameter paramNotRequired;
 	private MethodParameter paramOptional;
 
+	private BindingContext bindContext;
+
 
 	@Before @SuppressWarnings("ConfusingArgumentToVarargsMethod")
 	public void setUp() throws Exception {
-		ConversionService conversionService = new DefaultConversionService();
-		this.resolver = new RequestParamMethodArgumentResolver(conversionService, null, true);
+		this.resolver = new RequestParamMethodArgumentResolver(null, true);
 
 		ParameterNameDiscoverer paramNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 		Method method = ReflectionUtils.findMethod(getClass(), "handle", (Class<?>[]) null);
-
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
-		WebSessionManager sessionManager = new MockWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 
 		this.paramNamedDefaultValueString = new SynthesizingMethodParameter(method, 0);
 		this.paramNamedStringArray = new SynthesizingMethodParameter(method, 1);
@@ -94,12 +91,17 @@ public class RequestParamMethodArgumentResolverTests {
 		this.paramRequired = new SynthesizingMethodParameter(method, 5);
 		this.paramNotRequired = new SynthesizingMethodParameter(method, 6);
 		this.paramOptional = new SynthesizingMethodParameter(method, 7);
+
+
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultFormattingConversionService());
+		this.bindContext = new BindingContext(initializer);
 	}
 
 
 	@Test
 	public void supportsParameter() {
-		this.resolver = new RequestParamMethodArgumentResolver(new GenericConversionService(), null, true);
+		this.resolver = new RequestParamMethodArgumentResolver(null, true);
 		assertTrue(this.resolver.supportsParameter(this.paramNamedDefaultValueString));
 		assertTrue(this.resolver.supportsParameter(this.paramNamedStringArray));
 		assertTrue(this.resolver.supportsParameter(this.paramNamedMap));
@@ -109,111 +111,116 @@ public class RequestParamMethodArgumentResolverTests {
 		assertTrue(this.resolver.supportsParameter(this.paramNotRequired));
 		assertTrue(this.resolver.supportsParameter(this.paramOptional));
 
-		this.resolver = new RequestParamMethodArgumentResolver(new GenericConversionService(), null, false);
+		this.resolver = new RequestParamMethodArgumentResolver(null, false);
 		assertFalse(this.resolver.supportsParameter(this.paramStringNotAnnot));
 	}
 
 	@Test
-	public void resolveString() throws Exception {
-		String expected = "foo";
-		this.exchange.getRequest().getQueryParams().set("name", expected);
+	public void resolveWithQueryString() throws Exception {
+		assertEquals("foo", resolve(this.paramNamedDefaultValueString, exchangeWithQuery("name=foo")));
+	}
 
-		Mono<Object> mono = this.resolver.resolveArgument(this.paramNamedDefaultValueString, null, this.exchange);
-		Object result = mono.block();
-
-		assertTrue(result instanceof String);
-		assertEquals("Invalid result", expected, result);
+	@Test
+	public void resolveWithFormData() throws Exception {
+		assertEquals("foo", resolve(this.paramNamedDefaultValueString, exchangeWithFormData("name=foo")));
 	}
 
 	@Test
 	public void resolveStringArray() throws Exception {
-		String[] expected = {"foo", "bar"};
-		this.exchange.getRequest().getQueryParams().put("name", Arrays.asList(expected));
-
-		Mono<Object> mono = this.resolver.resolveArgument(this.paramNamedStringArray, null, this.exchange);
-		Object result = mono.block();
-
+		Object result = resolve(this.paramNamedStringArray, exchangeWithQuery("name=foo&name=bar"));
 		assertTrue(result instanceof String[]);
-		assertArrayEquals(expected, (String[]) result);
+		assertArrayEquals(new String[] {"foo", "bar"}, (String[]) result);
 	}
 
 	@Test
 	public void resolveDefaultValue() throws Exception {
-		Mono<Object> mono = this.resolver.resolveArgument(paramNamedDefaultValueString, null, this.exchange);
-		Object result = mono.block();
-
-		assertTrue(result instanceof String);
-		assertEquals("Invalid result", "bar", result);
+		Object result = resolve(this.paramNamedDefaultValueString, exchange());
+		assertEquals("bar", result);
 	}
 
 	@Test
 	public void missingRequestParam() throws Exception {
-		Mono<Object> mono = this.resolver.resolveArgument(paramNamedStringArray, null, this.exchange);
-		TestSubscriber
-				.subscribe(mono)
-				.assertError(ServerWebInputException.class);
+
+		Mono<Object> mono = this.resolver.resolveArgument(
+				this.paramNamedStringArray, this.bindContext, exchange());
+
+		StepVerifier.create(mono)
+				.expectNextCount(0)
+				.expectError(ServerWebInputException.class)
+				.verify();
 	}
 
 	@Test
 	public void resolveSimpleTypeParam() throws Exception {
-		this.exchange.getRequest().getQueryParams().set("stringNotAnnot", "plainValue");
-		Mono<Object> mono = this.resolver.resolveArgument(paramStringNotAnnot, null, this.exchange);
-		Object result = mono.block();
-
-		assertTrue(result instanceof String);
+		ServerWebExchange exchange = exchangeWithQuery("stringNotAnnot=plainValue");
+		Object result = resolve(this.paramStringNotAnnot, exchange);
 		assertEquals("plainValue", result);
 	}
 
 	@Test  // SPR-8561
 	public void resolveSimpleTypeParamToNull() throws Exception {
-		Mono<Object> mono = this.resolver.resolveArgument(paramStringNotAnnot, null, this.exchange);
-		Object result = mono.block();
-
-		assertNull(result);
+		assertNull(resolve(this.paramStringNotAnnot, exchange()));
 	}
 
 	@Test  // SPR-10180
 	public void resolveEmptyValueToDefault() throws Exception {
-		this.exchange.getRequest().getQueryParams().set("name", "");
-		Mono<Object> mono = this.resolver.resolveArgument(paramNamedDefaultValueString, null, this.exchange);
-		Object result = mono.block();
-
+		ServerWebExchange exchange = exchangeWithQuery("name=");
+		Object result = resolve(this.paramNamedDefaultValueString, exchange);
 		assertEquals("bar", result);
 	}
 
 	@Test
 	public void resolveEmptyValueWithoutDefault() throws Exception {
-		this.exchange.getRequest().getQueryParams().set("stringNotAnnot", "");
-		Mono<Object> mono = this.resolver.resolveArgument(paramStringNotAnnot, null, this.exchange);
-		Object result = mono.block();
-
-		assertEquals("", result);
+		assertEquals("", resolve(this.paramStringNotAnnot, exchangeWithQuery("stringNotAnnot=")));
 	}
 
 	@Test
 	public void resolveEmptyValueRequiredWithoutDefault() throws Exception {
-		this.exchange.getRequest().getQueryParams().set("name", "");
-		Mono<Object> mono = this.resolver.resolveArgument(paramRequired, null, this.exchange);
-		Object result = mono.block();
-
-		assertEquals("", result);
+		assertEquals("", resolve(this.paramRequired, exchangeWithQuery("name=")));
 	}
 
 	@Test
 	public void resolveOptionalParamValue() throws Exception {
-		Mono<Object> mono = this.resolver.resolveArgument(paramOptional, null, this.exchange);
-		Object result = mono.block();
-
+		ServerWebExchange exchange = exchange();
+		Object result = resolve(this.paramOptional, exchange);
 		assertEquals(Optional.empty(), result);
 
-		this.exchange.getRequest().getQueryParams().set("name", "123");
-		mono = resolver.resolveArgument(paramOptional, null, this.exchange);
-		result = mono.block();
+		exchange = exchangeWithQuery("name=123");
+		result = resolve(this.paramOptional, exchange);
 
 		assertEquals(Optional.class, result.getClass());
 		Optional<?> value = (Optional<?>) result;
 		assertTrue(value.isPresent());
 		assertEquals(123, value.get());
+	}
+
+
+	private ServerWebExchange exchangeWithQuery(String query) throws URISyntaxException {
+		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
+		MultiValueMap<String, String> params = fromPath("/").query(query).build().getQueryParams();
+		request.getQueryParams().putAll(params);
+		return exchange(request);
+	}
+
+	private ServerWebExchange exchangeWithFormData(String formData) throws URISyntaxException {
+		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
+		request.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		request.setBody(formData);
+		return exchange(request);
+	}
+
+	private ServerWebExchange exchange() {
+		return exchange(new MockServerHttpRequest(HttpMethod.GET, "/"));
+	}
+
+	private ServerWebExchange exchange(ServerHttpRequest request) {
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		WebSessionManager manager = new MockWebSessionManager();
+		return new DefaultServerWebExchange(request, response, manager);
+	}
+
+	private Object resolve(MethodParameter parameter, ServerWebExchange exchange) {
+		return this.resolver.resolveArgument(parameter, this.bindContext, exchange).blockMillis(0);
 	}
 
 

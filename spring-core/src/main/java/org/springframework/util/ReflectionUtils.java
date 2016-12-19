@@ -60,14 +60,12 @@ public abstract class ReflectionUtils {
 	 * Cache for {@link Class#getDeclaredMethods()} plus equivalent default methods
 	 * from Java 8 based interfaces, allowing for fast iteration.
 	 */
-	private static final Map<Class<?>, Method[]> declaredMethodsCache =
-			new ConcurrentReferenceHashMap<>(256);
+	private static final Map<Class<?>, Method[]> declaredMethodsCache = new ConcurrentReferenceHashMap<>(256);
 
 	/**
 	 * Cache for {@link Class#getDeclaredFields()}, allowing for fast iteration.
 	 */
-	private static final Map<Class<?>, Field[]> declaredFieldsCache =
-			new ConcurrentReferenceHashMap<>(256);
+	private static final Map<Class<?>, Field[]> declaredFieldsCache = new ConcurrentReferenceHashMap<>(256);
 
 
 	/**
@@ -499,6 +497,7 @@ public abstract class ReflectionUtils {
 	 * @param clazz the class to introspect
 	 * @param mc the callback to invoke for each method
 	 * @since 4.2
+	 * @throws IllegalStateException if introspection fails
 	 * @see #doWithMethods
 	 */
 	public static void doWithLocalMethods(Class<?> clazz, MethodCallback mc) {
@@ -520,6 +519,7 @@ public abstract class ReflectionUtils {
 	 * twice, unless excluded by a {@link MethodFilter}.
 	 * @param clazz the class to introspect
 	 * @param mc the callback to invoke for each method
+	 * @throws IllegalStateException if introspection fails
 	 * @see #doWithMethods(Class, MethodCallback, MethodFilter)
 	 */
 	public static void doWithMethods(Class<?> clazz, MethodCallback mc) {
@@ -534,6 +534,7 @@ public abstract class ReflectionUtils {
 	 * @param clazz the class to introspect
 	 * @param mc the callback to invoke for each method
 	 * @param mf the filter that determines the methods to apply the callback to
+	 * @throws IllegalStateException if introspection fails
 	 */
 	public static void doWithMethods(Class<?> clazz, MethodCallback mc, MethodFilter mf) {
 		// Keep backing up the inheritance hierarchy.
@@ -563,6 +564,7 @@ public abstract class ReflectionUtils {
 	 * Get all declared methods on the leaf class and all superclasses.
 	 * Leaf class methods are included first.
 	 * @param leafClass the class to introspect
+	 * @throws IllegalStateException if introspection fails
 	 */
 	public static Method[] getAllDeclaredMethods(Class<?> leafClass) {
 		final List<Method> methods = new ArrayList<>(32);
@@ -580,6 +582,7 @@ public abstract class ReflectionUtils {
 	 * Leaf class methods are included first and while traversing the superclass hierarchy
 	 * any methods found with signatures matching a method already included are filtered out.
 	 * @param leafClass the class to introspect
+	 * @throws IllegalStateException if introspection fails
 	 */
 	public static Method[] getUniqueDeclaredMethods(Class<?> leafClass) {
 		final List<Method> methods = new ArrayList<>(32);
@@ -620,26 +623,34 @@ public abstract class ReflectionUtils {
 	 * interfaces, since those are effectively to be treated just like declared methods.
 	 * @param clazz the class to introspect
 	 * @return the cached array of methods
+	 * @throws IllegalStateException if introspection fails
 	 * @see Class#getDeclaredMethods()
 	 */
 	private static Method[] getDeclaredMethods(Class<?> clazz) {
+		Assert.notNull(clazz, "Class must not be null");
 		Method[] result = declaredMethodsCache.get(clazz);
 		if (result == null) {
-			Method[] declaredMethods = clazz.getDeclaredMethods();
-			List<Method> defaultMethods = findConcreteMethodsOnInterfaces(clazz);
-			if (defaultMethods != null) {
-				result = new Method[declaredMethods.length + defaultMethods.size()];
-				System.arraycopy(declaredMethods, 0, result, 0, declaredMethods.length);
-				int index = declaredMethods.length;
-				for (Method defaultMethod : defaultMethods) {
-					result[index] = defaultMethod;
-					index++;
+			try {
+				Method[] declaredMethods = clazz.getDeclaredMethods();
+				List<Method> defaultMethods = findConcreteMethodsOnInterfaces(clazz);
+				if (defaultMethods != null) {
+					result = new Method[declaredMethods.length + defaultMethods.size()];
+					System.arraycopy(declaredMethods, 0, result, 0, declaredMethods.length);
+					int index = declaredMethods.length;
+					for (Method defaultMethod : defaultMethods) {
+						result[index] = defaultMethod;
+						index++;
+					}
 				}
+				else {
+					result = declaredMethods;
+				}
+				declaredMethodsCache.put(clazz, (result.length == 0 ? NO_METHODS : result));
 			}
-			else {
-				result = declaredMethods;
+			catch (Throwable ex) {
+				throw new IllegalStateException("Failed to introspect Class [" + clazz.getName() +
+						"] from ClassLoader [" + clazz.getClassLoader() + "]", ex);
 			}
-			declaredMethodsCache.put(clazz, (result.length == 0 ? NO_METHODS : result));
 		}
 		return result;
 	}
@@ -665,6 +676,7 @@ public abstract class ReflectionUtils {
 	 * @param clazz the target class to analyze
 	 * @param fc the callback to invoke for each field
 	 * @since 4.2
+	 * @throws IllegalStateException if introspection fails
 	 * @see #doWithFields
 	 */
 	public static void doWithLocalFields(Class<?> clazz, FieldCallback fc) {
@@ -683,6 +695,7 @@ public abstract class ReflectionUtils {
 	 * class hierarchy to get all declared fields.
 	 * @param clazz the target class to analyze
 	 * @param fc the callback to invoke for each field
+	 * @throws IllegalStateException if introspection fails
 	 */
 	public static void doWithFields(Class<?> clazz, FieldCallback fc) {
 		doWithFields(clazz, fc, null);
@@ -694,6 +707,7 @@ public abstract class ReflectionUtils {
 	 * @param clazz the target class to analyze
 	 * @param fc the callback to invoke for each field
 	 * @param ff the filter that determines the fields to apply the callback to
+	 * @throws IllegalStateException if introspection fails
 	 */
 	public static void doWithFields(Class<?> clazz, FieldCallback fc, FieldFilter ff) {
 		// Keep backing up the inheritance hierarchy.
@@ -721,13 +735,21 @@ public abstract class ReflectionUtils {
 	 * in order to avoid the JVM's SecurityManager check and defensive array copying.
 	 * @param clazz the class to introspect
 	 * @return the cached array of fields
+	 * @throws IllegalStateException if introspection fails
 	 * @see Class#getDeclaredFields()
 	 */
 	private static Field[] getDeclaredFields(Class<?> clazz) {
+		Assert.notNull(clazz, "Class must not be null");
 		Field[] result = declaredFieldsCache.get(clazz);
 		if (result == null) {
-			result = clazz.getDeclaredFields();
-			declaredFieldsCache.put(clazz, (result.length == 0 ? NO_FIELDS : result));
+			try {
+				result = clazz.getDeclaredFields();
+				declaredFieldsCache.put(clazz, (result.length == 0 ? NO_FIELDS : result));
+			}
+			catch (Throwable ex) {
+				throw new IllegalStateException("Failed to introspect Class [" + clazz.getName() +
+						"] from ClassLoader [" + clazz.getClassLoader() + "]", ex);
+			}
 		}
 		return result;
 	}
@@ -736,6 +758,7 @@ public abstract class ReflectionUtils {
 	 * Given the source object and the destination, which must be the same class
 	 * or a subclass, copy all fields, including inherited fields. Designed to
 	 * work on objects with public no-arg constructors.
+	 * @throws IllegalStateException if introspection fails
 	 */
 	public static void shallowCopyFieldState(final Object src, final Object dest) {
 		if (src == null) {

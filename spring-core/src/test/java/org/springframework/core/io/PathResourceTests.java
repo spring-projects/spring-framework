@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,10 @@ package org.springframework.core.io;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -42,6 +46,7 @@ import static org.mockito.BDDMockito.*;
  * @author Nicholas Williams
  * @author Stephane Nicoll
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  */
 public class PathResourceTests {
 
@@ -285,6 +290,42 @@ public class PathResourceTests {
 		PathResource resource = new PathResource(TEST_DIR);
 		thrown.expect(FileNotFoundException.class);
 		resource.getOutputStream();
+	}
+
+	@Test
+	public void getReadableByteChannel() throws Exception {
+		PathResource resource = new PathResource(TEST_FILE);
+		ReadableByteChannel channel = null;
+		try {
+			channel = resource.readableChannel();
+			ByteBuffer buffer = ByteBuffer.allocate((int) resource.contentLength());
+			channel.read(buffer);
+			buffer.rewind();
+			assertThat(buffer.limit(), greaterThan(0));
+		}
+		finally {
+			if (channel != null) {
+				channel.close();
+			}
+		}
+	}
+
+	@Test
+	public void getReadableByteChannelForDir() throws Exception {
+		PathResource resource = new PathResource(TEST_DIR);
+		try {
+			resource.readableChannel();
+		}
+		catch (AccessDeniedException ex) {
+			// on Windows
+		}
+	}
+
+	@Test
+	public void getReadableByteChannelDoesNotExist() throws Exception {
+		PathResource resource = new PathResource(NON_EXISTING_FILE);
+		thrown.expect(NoSuchFileException.class);
+		resource.readableChannel();
 	}
 
 }

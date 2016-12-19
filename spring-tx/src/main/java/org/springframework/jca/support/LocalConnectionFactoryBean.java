@@ -28,7 +28,7 @@ import org.springframework.beans.factory.InitializingBean;
  * a local JCA connection factory in "non-managed" mode (as defined by the
  * Java Connector Architecture specification). This is a direct alternative
  * to a {@link org.springframework.jndi.JndiObjectFactoryBean} definition that
- * obtains a connection factory handle from a J2EE server's naming environment.
+ * obtains a connection factory handle from a Java EE server's naming environment.
  *
  * <p>The type of the connection factory is dependent on the actual connector:
  * the connector can either expose its native API (such as a JDBC
@@ -45,7 +45,7 @@ import org.springframework.beans.factory.InitializingBean;
  *
  * <p><b>NOTE:</b> In non-managed mode, a connector is not deployed on an
  * application server, or more specificially not interacting with an application
- * server. Consequently, it cannot use a J2EE server's system contracts:
+ * server. Consequently, it cannot use a Java EE server's system contracts:
  * connection management, transaction management, and security management.
  * A custom ConnectionManager implementation has to be used for applying those
  * services in conjunction with a standalone transaction coordinator etc.

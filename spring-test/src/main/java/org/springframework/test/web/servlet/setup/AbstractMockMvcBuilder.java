@@ -22,6 +22,7 @@ import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 
 import org.springframework.mock.web.MockServletConfig;
+import org.springframework.test.web.servlet.DispatcherServletCustomizer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MockMvcBuilderSupport;
 import org.springframework.test.web.servlet.RequestBuilder;
@@ -42,6 +43,7 @@ import org.springframework.web.context.WebApplicationContext;
  * pass to the DispatcherServlet.
  *
  * @author Rossen Stoyanchev
+ * @author Stephane Nicoll
  * @since 4.0
  */
 public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>>
@@ -55,12 +57,11 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 
 	private final List<ResultHandler> globalResultHandlers = new ArrayList<>();
 
-	private Boolean dispatchOptions = Boolean.TRUE;
+	private final List<DispatcherServletCustomizer> dispatcherServletCustomizers = new ArrayList<>();
 
 	private final List<MockMvcConfigurer> configurers = new ArrayList<>(4);
 
 
-	@SuppressWarnings("unchecked")
 	public final <T extends B> T addFilters(Filter... filters) {
 		Assert.notNull(filters, "filters cannot be null");
 
@@ -68,10 +69,9 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 			Assert.notNull(f, "filters cannot contain null values");
 			this.filters.add(f);
 		}
-		return (T) this;
+		return self();
 	}
 
-	@SuppressWarnings("unchecked")
 	public final <T extends B> T addFilter(Filter filter, String... urlPatterns) {
 
 		Assert.notNull(filter, "filter cannot be null");
@@ -82,37 +82,42 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 		}
 
 		this.filters.add(filter);
-		return (T) this;
+		return self();
 	}
 
-	@SuppressWarnings("unchecked")
 	public final <T extends B> T defaultRequest(RequestBuilder requestBuilder) {
 		this.defaultRequestBuilder = requestBuilder;
-		return (T) this;
+		return self();
 	}
 
-	@SuppressWarnings("unchecked")
 	public final <T extends B> T alwaysExpect(ResultMatcher resultMatcher) {
 		this.globalResultMatchers.add(resultMatcher);
-		return (T) this;
+		return self();
 	}
 
-	@SuppressWarnings("unchecked")
 	public final <T extends B> T alwaysDo(ResultHandler resultHandler) {
 		this.globalResultHandlers.add(resultHandler);
-		return (T) this;
+		return self();
 	}
 
-	@SuppressWarnings("unchecked")
+	public final <T extends B> T addDispatcherServletCustomizer(DispatcherServletCustomizer customizer) {
+		this.dispatcherServletCustomizers.add(customizer);
+		return self();
+	}
+
 	public final <T extends B> T dispatchOptions(boolean dispatchOptions) {
-		this.dispatchOptions = dispatchOptions;
-		return (T) this;
+		return addDispatcherServletCustomizer(
+				dispatcherServlet -> dispatcherServlet.setDispatchOptionsRequest(dispatchOptions));
 	}
 
-	@SuppressWarnings("unchecked")
 	public final <T extends B> T apply(MockMvcConfigurer configurer) {
 		configurer.afterConfigurerAdded(this);
 		this.configurers.add(configurer);
+		return self();
+	}
+
+	@SuppressWarnings("unchecked")
+	protected <T extends B> T self() {
 		return (T) this;
 	}
 
@@ -144,7 +149,7 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 		Filter[] filterArray = this.filters.toArray(new Filter[this.filters.size()]);
 
 		return super.createMockMvc(filterArray, mockServletConfig, wac, this.defaultRequestBuilder,
-				this.globalResultMatchers, this.globalResultHandlers, this.dispatchOptions);
+				this.globalResultMatchers, this.globalResultHandlers, this.dispatcherServletCustomizers);
 	}
 
 	/**

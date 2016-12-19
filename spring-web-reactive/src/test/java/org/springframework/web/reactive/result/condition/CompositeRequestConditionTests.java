@@ -16,14 +16,12 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import java.net.URI;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.MockServerHttpRequest;
-import org.springframework.http.server.reactive.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.server.ServerWebExchange;
@@ -58,7 +56,7 @@ public class CompositeRequestConditionTests {
 	@Before
 	public void setup() throws Exception {
 		WebSessionManager sessionManager = new MockWebSessionManager();
-		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
+		this.request = new MockServerHttpRequest(HttpMethod.GET, "/");
 		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 
 		this.param1 = new ParamsRequestCondition("param1");

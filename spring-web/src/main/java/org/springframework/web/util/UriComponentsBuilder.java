@@ -51,6 +51,7 @@ import org.springframework.web.util.HierarchicalUriComponents.PathComponent;
  * @author Rossen Stoyanchev
  * @author Phillip Webb
  * @author Oliver Gierke
+ * @author Brian Clozel
  * @since 3.1
  * @see #newInstance()
  * @see #fromPath(String)
@@ -673,7 +674,7 @@ public class UriComponentsBuilder implements Cloneable {
 	UriComponentsBuilder adaptFromForwardedHeaders(HttpHeaders headers) {
 		String forwardedHeader = headers.getFirst("Forwarded");
 		if (StringUtils.hasText(forwardedHeader)) {
-			String forwardedToUse = StringUtils.commaDelimitedListToStringArray(forwardedHeader)[0];
+			String forwardedToUse = StringUtils.tokenizeToStringArray(forwardedHeader, ",")[0];
 			Matcher matcher = FORWARDED_HOST_PATTERN.matcher(forwardedToUse);
 			if (matcher.find()) {
 				host(matcher.group(1).trim());
@@ -686,12 +687,11 @@ public class UriComponentsBuilder implements Cloneable {
 		else {
 			String hostHeader = headers.getFirst("X-Forwarded-Host");
 			if (StringUtils.hasText(hostHeader)) {
-				String[] hosts = StringUtils.commaDelimitedListToStringArray(hostHeader);
-				String hostToUse = hosts[0];
-				if (hostToUse.contains(":")) {
-					String[] hostAndPort = StringUtils.split(hostToUse, ":");
-					host(hostAndPort[0]);
-					port(Integer.parseInt(hostAndPort[1]));
+				String hostToUse = StringUtils.tokenizeToStringArray(hostHeader, ",")[0];
+				int portSeparatorIdx = hostToUse.lastIndexOf(":");
+				if (portSeparatorIdx > hostToUse.lastIndexOf("]")) {
+					host(hostToUse.substring(0, portSeparatorIdx));
+					port(Integer.parseInt(hostToUse.substring(portSeparatorIdx + 1)));
 				}
 				else {
 					host(hostToUse);
@@ -701,19 +701,17 @@ public class UriComponentsBuilder implements Cloneable {
 
 			String portHeader = headers.getFirst("X-Forwarded-Port");
 			if (StringUtils.hasText(portHeader)) {
-				String[] ports = StringUtils.commaDelimitedListToStringArray(portHeader);
-				port(Integer.parseInt(ports[0]));
+				port(Integer.parseInt(StringUtils.tokenizeToStringArray(portHeader, ",")[0]));
 			}
 
 			String protocolHeader = headers.getFirst("X-Forwarded-Proto");
 			if (StringUtils.hasText(protocolHeader)) {
-				String[] protocols = StringUtils.commaDelimitedListToStringArray(protocolHeader);
-				scheme(protocols[0]);
+				scheme(StringUtils.tokenizeToStringArray(protocolHeader, ",")[0]);
 			}
 		}
 
-		if ((this.scheme.equals("http") && "80".equals(this.port)) ||
-				(this.scheme.equals("https") && "443".equals(this.port))) {
+		if ((this.scheme != null) && ((this.scheme.equals("http") && "80".equals(this.port)) ||
+				(this.scheme.equals("https") && "443".equals(this.port)))) {
 			this.port = null;
 		}
 

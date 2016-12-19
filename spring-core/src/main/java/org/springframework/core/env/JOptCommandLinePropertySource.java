@@ -101,7 +101,7 @@ public class JOptCommandLinePropertySource extends CommandLinePropertySource<Opt
 			stringArgValues.add(argValue instanceof String ? (String) argValue : argValue.toString());
 		}
 		if (stringArgValues.isEmpty()) {
-			return (this.source.has(name) ? Collections.<String>emptyList() : null);
+			return (this.source.has(name) ? Collections.emptyList() : null);
 		}
 		return Collections.unmodifiableList(stringArgValues);
 	}
@@ -114,7 +114,7 @@ public class JOptCommandLinePropertySource extends CommandLinePropertySource<Opt
 			Assert.isInstanceOf(String.class, argValue, "Argument values must be of type String");
 			stringArgValues.add((String) argValue);
 		}
-		return (stringArgValues.isEmpty() ? Collections.<String>emptyList() :
+		return (stringArgValues.isEmpty() ? Collections.emptyList() :
 				Collections.unmodifiableList(stringArgValues));
 	}
 

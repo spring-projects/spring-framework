@@ -19,7 +19,6 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -123,23 +122,21 @@ public class OkHttpClientHttpRequestFactory
 	}
 
 
-	static Request buildRequest(HttpHeaders headers, byte[] content, URI uri,
-			HttpMethod method) throws MalformedURLException {
+	static Request buildRequest(HttpHeaders headers, byte[] content, URI uri, HttpMethod method)
+			throws MalformedURLException {
 
 		com.squareup.okhttp.MediaType contentType = getContentType(headers);
-		RequestBody body = (content.length > 0 ? RequestBody.create(contentType, content) : null);
+		RequestBody body = (content.length > 0 ||
+				com.squareup.okhttp.internal.http.HttpMethod.requiresRequestBody(method.name()) ?
+				RequestBody.create(contentType, content) : null);
 
-		URL url = uri.toURL();
-		String methodName = method.name();
-		Request.Builder builder = new Request.Builder().url(url).method(methodName, body);
-
+		Request.Builder builder = new Request.Builder().url(uri.toURL()).method(method.name(), body);
 		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
 			String headerName = entry.getKey();
 			for (String headerValue : entry.getValue()) {
 				builder.addHeader(headerName, headerValue);
 			}
 		}
-
 		return builder.build();
 	}
 

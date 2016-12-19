@@ -468,7 +468,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		}
 
 		public List<Message<byte[]>> decode(WebSocketMessage<?> webSocketMessage) {
-			List<Message<byte[]>> result = Collections.<Message<byte[]>>emptyList();
+			List<Message<byte[]>> result = Collections.emptyList();
 			ByteBuffer byteBuffer;
 			if (webSocketMessage instanceof TextMessage) {
 				byteBuffer = ByteBuffer.wrap(((TextMessage) webSocketMessage).asBytes());

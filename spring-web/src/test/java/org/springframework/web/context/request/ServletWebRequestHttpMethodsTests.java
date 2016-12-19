@@ -94,9 +94,16 @@ public class ServletWebRequestHttpMethodsTests {
 		servletRequest.addHeader("If-Modified-Since", epochTime);
 		servletResponse.setStatus(0);
 
-		assertTrue(request.checkNotModified(epochTime));
-		assertEquals(304, servletResponse.getStatus());
-		assertEquals(dateFormat.format(epochTime), servletResponse.getHeader("Last-Modified"));
+		assertFalse(request.checkNotModified(epochTime));
+	}
+
+	@Test // SPR-14559
+	public void checkNotModifiedInvalidIfNoneMatchHeader() {
+		String eTag = "\"etagvalue\"";
+		servletRequest.addHeader("If-None-Match", "missingquotes");
+		assertFalse(request.checkNotModified(eTag));
+		assertEquals(200, servletResponse.getStatus());
+		assertEquals(eTag, servletResponse.getHeader("ETag"));
 	}
 
 	@Test
@@ -193,13 +200,13 @@ public class ServletWebRequestHttpMethodsTests {
 	}
 
 	@Test
-	public void checkNotModifiedWildcardETag() {
+	public void checkNotModifiedWildcardIsIgnored() {
 		String eTag = "\"Foo\"";
 		servletRequest.addHeader("If-None-Match", "*");
 
-		assertTrue(request.checkNotModified(eTag));
+		assertFalse(request.checkNotModified(eTag));
 
-		assertEquals(304, servletResponse.getStatus());
+		assertEquals(200, servletResponse.getStatus());
 		assertEquals(eTag, servletResponse.getHeader("ETag"));
 	}
 

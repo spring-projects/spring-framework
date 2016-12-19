@@ -23,12 +23,11 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 
 /**
- * Represent the result of the invocation of a handler.
+ * Represent the result of the invocation of a handler or a handler method.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -37,12 +36,11 @@ public class HandlerResult {
 
 	private final Object handler;
 
-	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-	private final Optional<Object> returnValue;
+	private final Object returnValue;
 
 	private final ResolvableType returnType;
 
-	private final ModelMap model;
+	private final BindingContext bindingContext;
 
 	private Function<Throwable, Mono<HandlerResult>> exceptionHandler;
 
@@ -62,15 +60,17 @@ public class HandlerResult {
 	 * @param handler the handler that handled the request
 	 * @param returnValue the return value from the handler possibly {@code null}
 	 * @param returnType the return value type
-	 * @param model the model used for request handling
+	 * @param context the binding context used for request handling
 	 */
-	public HandlerResult(Object handler, Object returnValue, MethodParameter returnType, ModelMap model) {
+	public HandlerResult(Object handler, Object returnValue, MethodParameter returnType,
+			BindingContext context) {
+
 		Assert.notNull(handler, "'handler' is required");
 		Assert.notNull(returnType, "'returnType' is required");
 		this.handler = handler;
-		this.returnValue = Optional.ofNullable(returnValue);
+		this.returnValue = returnValue;
 		this.returnType = ResolvableType.forMethodParameter(returnType);
-		this.model = (model != null ? model : new ExtendedModelMap());
+		this.bindingContext = (context != null ? context : new BindingContext());
 	}
 
 
@@ -85,7 +85,7 @@ public class HandlerResult {
 	 * Return the value returned from the handler wrapped as {@link Optional}.
 	 */
 	public Optional<Object> getReturnValue() {
-		return this.returnValue;
+		return Optional.ofNullable(this.returnValue);
 	}
 
 	/**
@@ -104,11 +104,18 @@ public class HandlerResult {
 	}
 
 	/**
-	 * Return the model used during request handling with attributes that may be
-	 * used to render HTML templates with.
+	 * Return the BindingContext used for request handling.
 	 */
-	public ModelMap getModel() {
-		return this.model;
+	public BindingContext getBindingContext() {
+		return this.bindingContext;
+	}
+
+	/**
+	 * Return the model used for request handling. This is a shortcut for
+	 * {@code getBindingContext().getModel()}.
+	 */
+	public Model getModel() {
+		return this.bindingContext.getModel();
 	}
 
 	/**

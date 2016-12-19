@@ -16,21 +16,26 @@
 
 package org.springframework.http.codec.json;
 
+import java.util.Collections;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
-import org.springframework.tests.TestSubscriber;
+import org.springframework.http.codec.ServerSentEvent;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze
@@ -42,48 +47,50 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 
 	@Test
 	public void canEncode() {
-		assertTrue(this.encoder.canEncode(null, MediaType.APPLICATION_JSON));
-		assertFalse(this.encoder.canEncode(null, MediaType.APPLICATION_XML));
+		ResolvableType pojoType = ResolvableType.forClass(Pojo.class);
+		assertTrue(this.encoder.canEncode(pojoType, MediaType.APPLICATION_JSON));
+		assertTrue(this.encoder.canEncode(pojoType, null));
+		assertFalse(this.encoder.canEncode(pojoType, MediaType.APPLICATION_XML));
+		ResolvableType sseType = ResolvableType.forClass(ServerSentEvent.class);
+		assertFalse(this.encoder.canEncode(sseType, MediaType.APPLICATION_JSON));
 	}
 
 	@Test
-	public void encode() {
+	public void encode() throws Exception {
 		Flux<Pojo> source = Flux.just(
 				new Pojo("foo", "bar"),
 				new Pojo("foofoo", "barbar"),
 				new Pojo("foofoofoo", "barbarbar")
 		);
 		ResolvableType type = ResolvableType.forClass(Pojo.class);
-		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null);
+		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null, Collections.emptyMap());
 
-		TestSubscriber.subscribe(output)
-				.assertComplete()
-				.assertNoError()
-				.assertValuesWith(
-						stringConsumer("["),
-						stringConsumer("{\"foo\":\"foo\",\"bar\":\"bar\"}"),
-						stringConsumer(","),
-						stringConsumer("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"),
-						stringConsumer(","),
-						stringConsumer("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"),
-						stringConsumer("]")
-				);
+		StepVerifier.create(output)
+				.consumeNextWith(stringConsumer("["))
+				.consumeNextWith(stringConsumer("{\"foo\":\"foo\",\"bar\":\"bar\"}"))
+				.consumeNextWith(stringConsumer(","))
+				.consumeNextWith(stringConsumer("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"))
+				.consumeNextWith(stringConsumer(","))
+				.consumeNextWith(stringConsumer("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"))
+				.consumeNextWith(stringConsumer("]"))
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
-	public void encodeWithType() {
+	public void encodeWithType() throws Exception {
 		Flux<ParentClass> source = Flux.just(new Foo(), new Bar());
 		ResolvableType type = ResolvableType.forClass(ParentClass.class);
-		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null);
+		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null, Collections.emptyMap());
 
-		TestSubscriber.subscribe(output)
-				.assertComplete()
-				.assertNoError()
-				.assertValuesWith(stringConsumer("["),
-						stringConsumer("{\"type\":\"foo\"}"),
-						stringConsumer(","),
-						stringConsumer("{\"type\":\"bar\"}"),
-						stringConsumer("]"));
+		StepVerifier.create(output)
+				.consumeNextWith(stringConsumer("["))
+				.consumeNextWith(stringConsumer("{\"type\":\"foo\"}"))
+				.consumeNextWith(stringConsumer(","))
+				.consumeNextWith(stringConsumer("{\"type\":\"bar\"}"))
+				.consumeNextWith(stringConsumer("]"))
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
@@ -93,16 +100,17 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 		bean.setWithView2("with");
 		bean.setWithoutView("without");
 
-		ResolvableType type =  ResolvableType.forMethodReturnType(JacksonController.class.getMethod("foo"));
-		Flux<DataBuffer> output = this.encoder.encode(Mono.just(bean), this.bufferFactory, type, null);
+		ResolvableType type = ResolvableType.forClass(JacksonViewBean.class);
+		Map<String, Object> hints = Collections.singletonMap(Jackson2JsonEncoder.JSON_VIEW_HINT, MyJacksonView1.class);
+		Flux<DataBuffer> output = this.encoder.encode(Mono.just(bean), this.bufferFactory, type, null, hints);
 
-		TestSubscriber.subscribe(output)
-				.assertComplete()
-				.assertNoError()
-				.assertValuesWith(stringConsumer("{\"withView1\":\"with\"}"));
+		StepVerifier.create(output)
+				.consumeNextWith(stringConsumer("{\"withView1\":\"with\"}"))
+				.expectComplete()
+				.verify();
 	}
 
-	
+
 	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 	private static class ParentClass {
 	}
@@ -154,15 +162,6 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 
 		public void setWithoutView(String withoutView) {
 			this.withoutView = withoutView;
-		}
-	}
-
-
-	private static class JacksonController {
-
-		@JsonView(MyJacksonView1.class)
-		public JacksonViewBean foo() {
-			return null;
 		}
 	}
 

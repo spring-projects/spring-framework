@@ -25,8 +25,10 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
 import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
+import org.springframework.web.socket.sockjs.transport.SockJsSession;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
+import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
 
 /**
@@ -55,6 +57,11 @@ public class XhrStreamingTransportHandler extends AbstractHttpSendingTransportHa
 	@Override
 	protected MediaType getContentType() {
 		return new MediaType("application", "javascript", StandardCharsets.UTF_8);
+	}
+
+	@Override
+	public boolean checkSessionType(SockJsSession session) {
+		return session instanceof XhrStreamingSockJsSession;
 	}
 
 	@Override

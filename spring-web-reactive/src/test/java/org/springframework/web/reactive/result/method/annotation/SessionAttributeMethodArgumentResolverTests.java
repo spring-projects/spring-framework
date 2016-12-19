@@ -13,30 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
-import java.net.URI;
 import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.MockServerHttpRequest;
-import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.tests.TestSubscriber;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.WebSession;
@@ -44,15 +45,8 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link SessionAttributeMethodArgumentResolver}.
@@ -74,13 +68,12 @@ public class SessionAttributeMethodArgumentResolverTests {
 	public void setUp() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
-		ConversionService cs = new DefaultConversionService();
-		this.resolver = new SessionAttributeMethodArgumentResolver(cs, context.getBeanFactory());
+		this.resolver = new SessionAttributeMethodArgumentResolver(context.getBeanFactory());
 
 		this.session = mock(WebSession.class);
 		when(this.session.getAttribute(any())).thenReturn(Optional.empty());
 
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
 		WebSessionManager sessionManager = new MockWebSessionManager(this.session);
 		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 
@@ -96,14 +89,12 @@ public class SessionAttributeMethodArgumentResolverTests {
 	@Test
 	public void resolve() throws Exception {
 		MethodParameter param = initMethodParameter(0);
-		Mono<Object> mono = this.resolver.resolveArgument(param, null, this.exchange);
-		TestSubscriber
-				.subscribe(mono)
-				.assertError(ServerWebInputException.class);
+		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
+		StepVerifier.create(mono).expectError(ServerWebInputException.class).verify();
 
 		Foo foo = new Foo();
 		when(this.session.getAttribute("foo")).thenReturn(Optional.of(foo));
-		mono = this.resolver.resolveArgument(param, null, this.exchange);
+		mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertSame(foo, mono.block());
 	}
 
@@ -112,33 +103,37 @@ public class SessionAttributeMethodArgumentResolverTests {
 		MethodParameter param = initMethodParameter(1);
 		Foo foo = new Foo();
 		when(this.session.getAttribute("specialFoo")).thenReturn(Optional.of(foo));
-		Mono<Object> mono = this.resolver.resolveArgument(param, null, this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertSame(foo, mono.block());
 	}
 
 	@Test
 	public void resolveNotRequired() throws Exception {
 		MethodParameter param = initMethodParameter(2);
-		Mono<Object> mono = this.resolver.resolveArgument(param, null, this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertNull(mono.block());
 
 		Foo foo = new Foo();
 		when(this.session.getAttribute("foo")).thenReturn(Optional.of(foo));
-		mono = this.resolver.resolveArgument(param, null, this.exchange);
+		mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertSame(foo, mono.block());
 	}
 
 	@Test
 	public void resolveOptional() throws Exception {
 		MethodParameter param = initMethodParameter(3);
-		Mono<Object> mono = this.resolver.resolveArgument(param, null, this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertNotNull(mono.block());
 		assertEquals(Optional.class, mono.block().getClass());
 		assertFalse(((Optional) mono.block()).isPresent());
 
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultFormattingConversionService());
+		BindingContext bindingContext = new BindingContext(initializer);
+
 		Foo foo = new Foo();
 		when(this.session.getAttribute("foo")).thenReturn(Optional.of(foo));
-		mono = this.resolver.resolveArgument(param, null, this.exchange);
+		mono = this.resolver.resolveArgument(param, bindingContext, this.exchange);
 
 		assertNotNull(mono.block());
 		assertEquals(Optional.class, mono.block().getClass());

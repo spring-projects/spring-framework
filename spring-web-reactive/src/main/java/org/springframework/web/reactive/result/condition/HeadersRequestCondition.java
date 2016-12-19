@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -37,7 +38,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public final class HeadersRequestCondition extends AbstractRequestCondition<HeadersRequestCondition> {
 
-//	private final static HeadersRequestCondition PRE_FLIGHT_MATCH = new HeadersRequestCondition();
+	private final static HeadersRequestCondition PRE_FLIGHT_MATCH = new HeadersRequestCondition();
 
 
 	private final Set<HeaderExpression> expressions;
@@ -107,9 +108,9 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	 */
 	@Override
 	public HeadersRequestCondition getMatchingCondition(ServerWebExchange exchange) {
-//		if (CorsUtils.isPreFlightRequest(request)) {
-//			return PRE_FLIGHT_MATCH;
-//		}
+		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
+			return PRE_FLIGHT_MATCH;
+		}
 		for (HeaderExpression expression : expressions) {
 			if (!expression.match(exchange)) {
 				return null;

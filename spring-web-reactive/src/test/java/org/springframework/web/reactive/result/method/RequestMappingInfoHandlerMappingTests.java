@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,19 +29,17 @@ import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.server.reactive.MockServerHttpRequest;
-import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.stereotype.Controller;
-import org.springframework.tests.TestSubscriber;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -50,10 +47,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.ResolvableMethod;
-import org.springframework.web.reactive.result.method.RequestMappingInfo.BuilderConfiguration;
+import org.springframework.web.reactive.result.method.RequestMappingInfo.*;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -62,18 +60,12 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
-import org.springframework.web.util.HttpRequestPathHelper;
+import org.springframework.web.server.support.HttpRequestPathHelper;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
-import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
-import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static org.springframework.web.reactive.result.method.RequestMappingInfo.*;
 
 /**
  * Unit tests for {@link RequestMappingInfoHandlerMapping}.
@@ -167,7 +159,9 @@ public class RequestMappingInfoHandlerMappingTests {
 		this.handlerMapping.registerHandler(new UserController());
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
-		TestSubscriber.subscribe(mono).assertError(NotAcceptableStatusException.class);
+		StepVerifier.create(mono)
+				.expectError(NotAcceptableStatusException.class)
+				.verify();
 	}
 
 	@Test // SPR-8462
@@ -345,7 +339,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 
 	private ServerWebExchange createExchange(HttpMethod method, String url) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(method, new URI(url));
+		ServerHttpRequest request = new MockServerHttpRequest(method, url);
 		WebSessionManager sessionManager = new MockWebSessionManager();
 		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 
@@ -353,12 +347,14 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> void assertError(Mono<Object> mono, final Class<T> exceptionClass, final Consumer<T> consumer)  {
-		TestSubscriber
-				.subscribe(mono)
-				.assertErrorWith(ex -> {
-					assertEquals(exceptionClass, ex.getClass());
-					consumer.accept((T) ex);
-				});
+
+		StepVerifier.create(mono)
+				.consumeErrorWith(error -> {
+					assertEquals(exceptionClass, error.getClass());
+					consumer.accept((T) error);
+
+				})
+				.verify();
 	}
 
 
@@ -377,8 +373,9 @@ public class RequestMappingInfoHandlerMappingTests {
 		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, requestURI);
 		HandlerMethod handlerMethod = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
 
-		ModelMap model = new ExtendedModelMap();
-		Mono<HandlerResult> mono = new InvocableHandlerMethod(handlerMethod).invokeForRequest(exchange, model);
+		BindingContext bindingContext = new BindingContext();
+		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
+		Mono<HandlerResult> mono = invocable.invoke(exchange, bindingContext);
 
 		HandlerResult result = mono.block();
 		assertNotNull(result);

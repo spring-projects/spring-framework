@@ -175,7 +175,7 @@ public class WebMvcConfigurationSupportTests {
 		ApplicationContext context = initContext(WebConfig.class);
 		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
-		assertEquals(9, converters.size());
+		assertEquals(11, converters.size());
 		converters.stream()
 				.filter(converter -> converter instanceof AbstractJackson2HttpMessageConverter)
 				.forEach(converter -> {
@@ -333,10 +333,10 @@ public class WebMvcConfigurationSupportTests {
 
 
 	@EnableWebMvc
-	@Configuration @SuppressWarnings("unused")
+	@Configuration
 	static class WebConfig {
 
-		@Bean(name="/testController")
+		@Bean("/testController")
 		public TestController testController() {
 			return new TestController();
 		}
@@ -350,7 +350,7 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 
-	@Configuration @SuppressWarnings("unused")
+	@Configuration
 	static class ViewResolverConfig {
 
 		@Bean
@@ -387,7 +387,7 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 
-	@Controller @SuppressWarnings("unused")
+	@Controller
 	private static class TestController {
 
 		@RequestMapping("/")
@@ -413,7 +413,7 @@ public class WebMvcConfigurationSupportTests {
 
 
 	@Controller
-	@Scope(value="prototype", proxyMode=ScopedProxyMode.TARGET_CLASS)
+	@Scope(scopeName = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
 	static class ScopedProxyController {
 
 		@RequestMapping("/scopedProxy")

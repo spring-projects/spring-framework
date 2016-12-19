@@ -16,13 +16,20 @@
 
 package org.springframework.http.server.reactive;
 
+import java.util.Map;
+
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import io.reactivex.netty.protocol.http.server.RequestHandler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
-import reactor.adapter.RxJava1Adapter;
+import reactor.core.publisher.Mono;
 import rx.Observable;
+import rx.RxReactiveStreams;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.util.Assert;
@@ -33,24 +40,38 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBuf> {
-
-	private final HttpHandler httpHandler;
+public class RxNettyHttpHandlerAdapter extends HttpHandlerAdapterSupport
+		implements RequestHandler<ByteBuf, ByteBuf> {
 
 
 	public RxNettyHttpHandlerAdapter(HttpHandler httpHandler) {
-		Assert.notNull(httpHandler, "'httpHandler' is required");
-		this.httpHandler = httpHandler;
+		super(httpHandler);
+	}
+
+	public RxNettyHttpHandlerAdapter(Map<String, HttpHandler> handlerMap) {
+		super(handlerMap);
 	}
 
 
 	@Override
-	public Observable<Void> handle(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response) {
-		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(response.unsafeNettyChannel().alloc());
-		RxNettyServerHttpRequest adaptedRequest = new RxNettyServerHttpRequest(request, bufferFactory);
-		RxNettyServerHttpResponse adaptedResponse = new RxNettyServerHttpResponse(response, bufferFactory);
-		Publisher<Void> result = this.httpHandler.handle(adaptedRequest, adaptedResponse);
-		return RxJava1Adapter.publisherToObservable(result);
+	public Observable<Void> handle(HttpServerRequest<ByteBuf> nativeRequest,
+			HttpServerResponse<ByteBuf> nativeResponse) {
+
+		ByteBufAllocator allocator = nativeResponse.unsafeNettyChannel().alloc();
+		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(allocator);
+
+		RxNettyServerHttpRequest request = new RxNettyServerHttpRequest(nativeRequest, bufferFactory);
+		RxNettyServerHttpResponse response = new RxNettyServerHttpResponse(nativeResponse, bufferFactory);
+
+		Publisher<Void> result = getHttpHandler().handle(request, response)
+				.otherwise(ex -> {
+					logger.error("Could not complete request", ex);
+					nativeResponse.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
+					return Mono.empty();
+				})
+				.doOnSuccess(aVoid -> logger.debug("Successfully completed request"));
+
+		return RxReactiveStreams.toObservable(result);
 	}
 
 }

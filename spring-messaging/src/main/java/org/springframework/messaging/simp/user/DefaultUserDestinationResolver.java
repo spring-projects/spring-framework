@@ -188,7 +188,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 					}
 				}
 				else {
-					sessionIds = Collections.<String>emptySet();
+					sessionIds = Collections.emptySet();
 				}
 			}
 			if (!this.keepLeadingSlash) {

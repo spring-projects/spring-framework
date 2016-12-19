@@ -235,7 +235,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 		@Override
 		public Set<DataWithMediaType> build() {
 			if ((this.sb == null || this.sb.length() == 0) && this.dataToSend.isEmpty()) {
-				return Collections.<DataWithMediaType>emptySet();
+				return Collections.emptySet();
 			}
 			append("\n");
 			saveAppendedText();

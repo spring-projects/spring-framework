@@ -16,6 +16,7 @@
 
 package org.springframework.http;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -87,7 +88,7 @@ public class HttpHeadersTests {
 	@Test
 	public void acceptCharsets() {
 		Charset charset1 = StandardCharsets.UTF_8;
-		Charset charset2 = Charset.forName("ISO-8859-1");
+		Charset charset2 = StandardCharsets.ISO_8859_1;
 		List<Charset> charsets = new ArrayList<>(2);
 		charsets.add(charset1);
 		charsets.add(charset2);
@@ -99,7 +100,7 @@ public class HttpHeadersTests {
 	@Test
 	public void acceptCharsetWildcard() {
 		headers.set("Accept-Charset", "ISO-8859-1,utf-8;q=0.7,*;q=0.7");
-		assertEquals("Invalid Accept header", Arrays.asList(Charset.forName("ISO-8859-1"), StandardCharsets.UTF_8),
+		assertEquals("Invalid Accept header", Arrays.asList(StandardCharsets.ISO_8859_1, StandardCharsets.UTF_8),
 				headers.getAcceptCharset());
 	}
 
@@ -141,6 +142,22 @@ public class HttpHeadersTests {
 		headers.setETag(eTag);
 		assertEquals("Invalid ETag header", eTag, headers.getETag());
 		assertEquals("Invalid ETag header", "\"v2.6\"", headers.getFirst("ETag"));
+	}
+
+	@Test
+	public void host() {
+		InetSocketAddress host = InetSocketAddress.createUnresolved("localhost", 8080);
+		headers.setHost(host);
+		assertEquals("Invalid Host header", host, headers.getHost());
+		assertEquals("Invalid Host header", "localhost:8080", headers.getFirst("Host"));
+	}
+
+	@Test
+	public void hostNoPort() {
+		InetSocketAddress host = InetSocketAddress.createUnresolved("localhost", 0);
+		headers.setHost(host);
+		assertEquals("Invalid Host header", host, headers.getHost());
+		assertEquals("Invalid Host header", "localhost", headers.getFirst("Host"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -314,13 +331,13 @@ public class HttpHeadersTests {
 
 	@Test
 	public void contentDisposition() {
-		headers.setContentDispositionFormData("name", null);
-		assertEquals("Invalid Content-Disposition header", "form-data; name=\"name\"",
-				headers.getFirst("Content-Disposition"));
+		ContentDisposition disposition = headers.getContentDisposition();
+		assertNotNull(disposition);
+		assertEquals("Invalid Content-Disposition header", ContentDisposition.empty(), headers.getContentDisposition());
 
-		headers.setContentDispositionFormData("name", "filename");
-		assertEquals("Invalid Content-Disposition header", "form-data; name=\"name\"; filename=\"filename\"",
-				headers.getFirst("Content-Disposition"));
+		disposition = ContentDisposition.builder("attachment").name("foo").filename("foo.txt").size(123L).build();
+		headers.setContentDisposition(disposition);
+		assertEquals("Invalid Content-Disposition header", disposition, headers.getContentDisposition());
 	}
 
 	@Test  // SPR-11917
@@ -403,6 +420,37 @@ public class HttpHeadersTests {
 		assertNull(headers.getAccessControlRequestMethod());
 		headers.setAccessControlRequestMethod(HttpMethod.POST);
 		assertEquals(HttpMethod.POST, headers.getAccessControlRequestMethod());
+	}
+
+	@Test
+	public void acceptLanguage() {
+		String headerValue = "fr-ch, fr;q=0.9, en-*;q=0.8, de;q=0.7, *;q=0.5";
+		headers.setAcceptLanguage(Locale.LanguageRange.parse(headerValue));
+		assertEquals(headerValue, headers.getFirst(HttpHeaders.ACCEPT_LANGUAGE));
+
+		List<Locale.LanguageRange> expectedRanges = Arrays.asList(
+				new Locale.LanguageRange("fr-ch"),
+				new Locale.LanguageRange("fr", 0.9),
+				new Locale.LanguageRange("en-*", 0.8),
+				new Locale.LanguageRange("de", 0.7),
+				new Locale.LanguageRange("*", 0.5)
+		);
+		assertEquals(expectedRanges, headers.getAcceptLanguage());
+
+		assertEquals(Locale.forLanguageTag("fr-ch"), headers.getAcceptLanguageAsLocale());
+	}
+
+	@Test
+	public void contentLanguage() {
+		headers.setContentLanguage(Locale.FRANCE);
+		assertEquals(Locale.FRANCE, headers.getContentLanguage());
+		assertEquals("fr-FR", headers.getFirst(HttpHeaders.CONTENT_LANGUAGE));
+	}
+
+	@Test
+	public void contentLanguageSerialized() {
+		headers.set(HttpHeaders.CONTENT_LANGUAGE,  "de, en_CA");
+		assertEquals("Expected one (first) locale", Locale.GERMAN, headers.getContentLanguage());
 	}
 
 }

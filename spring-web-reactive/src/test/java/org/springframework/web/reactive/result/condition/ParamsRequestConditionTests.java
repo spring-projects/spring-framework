@@ -16,16 +16,17 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 
 import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.MockServerHttpRequest;
-import org.springframework.http.server.reactive.MockServerHttpResponse;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
@@ -36,9 +37,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.web.util.UriComponentsBuilder.fromPath;
 
 /**
- * @author Arjen Poutsma
+ * Unit tests for {@link ParamsRequestCondition}.
+ * @author Rossen Stoyanchev
  */
 public class ParamsRequestConditionTests {
 
@@ -53,47 +56,45 @@ public class ParamsRequestConditionTests {
 
 	@Test
 	public void paramPresent() throws Exception {
-		ServerWebExchange exchange = createExchange("foo", "");
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
 
-		assertNotNull(condition.getMatchingCondition(exchange));
+		assertNotNull(condition.getMatchingCondition(exchangeWithQuery("foo=")));
+		assertNotNull(condition.getMatchingCondition(exchangeWithFormData("foo=")));
 	}
 
 	@Test
 	public void paramPresentNoMatch() throws Exception {
-		ServerWebExchange exchange = createExchange("bar", "");
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
 
-		assertNull(condition.getMatchingCondition(exchange));
+		assertNull(condition.getMatchingCondition(exchangeWithQuery("bar=")));
+		assertNull(condition.getMatchingCondition(exchangeWithFormData("bar=")));
 	}
 
 	@Test
 	public void paramNotPresent() throws Exception {
-		ServerWebExchange exchange = createExchange();
-		ParamsRequestCondition condition = new ParamsRequestCondition("!foo");
-
-		assertNotNull(condition.getMatchingCondition(exchange));
+		ServerWebExchange exchange = exchange();
+		assertNotNull(new ParamsRequestCondition("!foo").getMatchingCondition(exchange));
 	}
 
 	@Test
 	public void paramValueMatch() throws Exception {
-		ServerWebExchange exchange = createExchange("foo", "bar");
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo=bar");
 
-		assertNotNull(condition.getMatchingCondition(exchange));
+		assertNotNull(condition.getMatchingCondition(exchangeWithQuery("foo=bar")));
+		assertNotNull(condition.getMatchingCondition(exchangeWithFormData("foo=bar")));
 	}
 
 	@Test
 	public void paramValueNoMatch() throws Exception {
-		ServerWebExchange exchange = createExchange("foo", "bazz");
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo=bar");
 
-		assertNull(condition.getMatchingCondition(exchange));
+		assertNull(condition.getMatchingCondition(exchangeWithQuery("foo=bazz")));
+		assertNull(condition.getMatchingCondition(exchangeWithFormData("foo=bazz")));
 	}
 
 	@Test
 	public void compareTo() throws Exception {
-		ServerWebExchange exchange = createExchange();
+		ServerWebExchange exchange = exchange(new MockServerHttpRequest(HttpMethod.GET, "/"));
 
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("foo", "bar", "baz");
 		ParamsRequestCondition condition2 = new ParamsRequestCondition("foo", "bar");
@@ -115,31 +116,29 @@ public class ParamsRequestConditionTests {
 		assertEquals(2, conditions.size());
 	}
 
-	@Test
-	public void getMatchingCondition() throws Exception {
-		ServerWebExchange exchange = createExchange("foo", "bar");
-		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
 
-		ParamsRequestCondition result = condition.getMatchingCondition(exchange);
-		assertEquals(condition, result);
-
-		condition = new ParamsRequestCondition("bar");
-
-		result = condition.getMatchingCondition(exchange);
-		assertNull(result);
+	private ServerWebExchange exchangeWithQuery(String query) throws URISyntaxException {
+		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
+		MultiValueMap<String, String> params = fromPath("/").query(query).build().getQueryParams();
+		request.getQueryParams().putAll(params);
+		return exchange(request);
 	}
 
-	private ServerWebExchange createExchange() throws URISyntaxException {
-		return createExchange(null, null);
+	private ServerWebExchange exchangeWithFormData(String formData) throws URISyntaxException {
+		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
+		request.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		request.setBody(formData);
+		return exchange(request);
 	}
 
-	private ServerWebExchange createExchange(String paramName, String paramValue) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
-		if (paramName != null) {
-			request.getQueryParams().add(paramName, paramValue);
-		}
-		WebSessionManager sessionManager = new MockWebSessionManager();
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
+	private ServerWebExchange exchange() {
+		return exchange(new MockServerHttpRequest(HttpMethod.GET, "/"));
+	}
+
+	private ServerWebExchange exchange(ServerHttpRequest request) {
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		WebSessionManager manager = new MockWebSessionManager();
+		return new DefaultServerWebExchange(request, response, manager);
 	}
 
 }

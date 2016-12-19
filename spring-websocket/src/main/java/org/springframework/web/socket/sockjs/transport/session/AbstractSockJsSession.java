@@ -27,11 +27,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.NestedCheckedException;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
@@ -81,16 +80,18 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	private static final Set<String> disconnectedClientExceptions;
 
 	static {
-		Set<String> set = new HashSet<>(2);
-		set.add("ClientAbortException"); // Tomcat
-		set.add("EOFException"); // Tomcat
-		set.add("EofException"); // Jetty
+		Set<String> set = new HashSet<String>(4);
+		set.add("ClientAbortException");  // Tomcat
+		set.add("EOFException");  // Tomcat
+		set.add("EofException");  // Jetty
 		// java.io.IOException "Broken pipe" on WildFly, Glassfish (already covered)
 		disconnectedClientExceptions = Collections.unmodifiableSet(set);
 	}
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
+
+	protected final Object responseLock = new Object();
 
 	private final String id;
 
@@ -106,9 +107,9 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	private volatile long timeLastActive = this.timeCreated;
 
-	private volatile ScheduledFuture<?> heartbeatTask;
+	private ScheduledFuture<?> heartbeatFuture;
 
-	private final Lock heartbeatLock = new ReentrantLock();
+	private HeartbeatTask heartbeatTask;
 
 	private volatile boolean heartbeatDisabled;
 
@@ -207,7 +208,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 						writeFrameInternal(SockJsFrame.closeFrame(status.getCode(), status.getReason()));
 					}
 					catch (Throwable ex) {
-						logger.debug("Failure while send SockJS close frame", ex);
+						logger.debug("Failure while sending SockJS close frame", ex);
 					}
 				}
 				updateLastActiveTime();
@@ -248,16 +249,11 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		cancelHeartbeat();
 	}
 
-	public void sendHeartbeat() throws SockJsTransportFailureException {
-		if (isActive()) {
-			if (heartbeatLock.tryLock()) {
-				try {
-					writeFrame(SockJsFrame.heartbeatFrame());
-					scheduleHeartbeat();
-				}
-				finally {
-					heartbeatLock.unlock();
-				}
+	protected void sendHeartbeat() throws SockJsTransportFailureException {
+		synchronized (this.responseLock) {
+			if (isActive() && !this.heartbeatDisabled) {
+				writeFrame(SockJsFrame.heartbeatFrame());
+				scheduleHeartbeat();
 			}
 		}
 	}
@@ -266,56 +262,33 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		if (this.heartbeatDisabled) {
 			return;
 		}
-
-		Assert.state(this.config.getTaskScheduler() != null, "Expected SockJS TaskScheduler");
-		cancelHeartbeat();
-		if (!isActive()) {
-			return;
-		}
-
-		Date time = new Date(System.currentTimeMillis() + this.config.getHeartbeatTime());
-		this.heartbeatTask = this.config.getTaskScheduler().schedule(new Runnable() {
-			public void run() {
-				try {
-					sendHeartbeat();
-				}
-				catch (Throwable ex) {
-					// ignore
-				}
+		synchronized (this.responseLock) {
+			cancelHeartbeat();
+			if (!isActive()) {
+				return;
 			}
-		}, time);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Scheduled heartbeat in session " + getId());
+			Date time = new Date(System.currentTimeMillis() + this.config.getHeartbeatTime());
+			this.heartbeatTask = new HeartbeatTask();
+			this.heartbeatFuture = this.config.getTaskScheduler().schedule(this.heartbeatTask, time);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Scheduled heartbeat in session " + getId());
+			}
 		}
 	}
 
 	protected void cancelHeartbeat() {
-		try {
-			ScheduledFuture<?> task = this.heartbeatTask;
-			this.heartbeatTask = null;
-			if (task == null || task.isCancelled()) {
-				return;
+		synchronized (this.responseLock) {
+			if (this.heartbeatFuture != null) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Cancelling heartbeat in session " + getId());
+				}
+				this.heartbeatFuture.cancel(false);
+				this.heartbeatFuture = null;
 			}
-
-			if (logger.isTraceEnabled()) {
-				logger.trace("Cancelling heartbeat in session " + getId());
+			if (this.heartbeatTask != null) {
+				this.heartbeatTask.cancel();
+				this.heartbeatTask = null;
 			}
-			if (task.cancel(false)) {
-				return;
-			}
-
-			if (logger.isTraceEnabled()) {
-				logger.trace("Failed to cancel heartbeat, acquiring heartbeat write lock.");
-			}
-			this.heartbeatLock.lock();
-
-			if (logger.isTraceEnabled()) {
-				logger.trace("Releasing heartbeat lock.");
-			}
-			this.heartbeatLock.unlock();
-		}
-		catch (Throwable ex) {
-			logger.debug("Failure while cancelling heartbeat in session " + getId(), ex);
 		}
 	}
 
@@ -423,7 +396,12 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		if (!isClosed()) {
 			try {
 				updateLastActiveTime();
-				cancelHeartbeat();
+				// Avoid cancelHeartbeat() and responseLock within server "close" callback
+				ScheduledFuture<?> future = this.heartbeatFuture;
+				if (future != null) {
+					this.heartbeatFuture = null;
+					future.cancel(false);
+				}
 			}
 			finally {
 				this.state = State.CLOSED;
@@ -463,6 +441,30 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + "[id=" + getId() + "]";
+	}
+
+
+	private class HeartbeatTask implements Runnable {
+
+		private boolean expired;
+
+		@Override
+		public void run() {
+			synchronized (responseLock) {
+				if (!this.expired && !isClosed()) {
+					try {
+						sendHeartbeat();
+					}
+					finally {
+						this.expired = true;
+					}
+				}
+			}
+		}
+
+		void cancel() {
+			this.expired = true;
+		}
 	}
 
 }

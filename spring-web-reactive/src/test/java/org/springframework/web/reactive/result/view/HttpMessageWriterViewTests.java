@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.view;
 
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,24 +25,21 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
+import reactor.test.StepVerifier;
 
-import org.springframework.core.MethodParameter;
 import org.springframework.core.codec.CharSequenceEncoder;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
-import org.springframework.http.server.reactive.MockServerHttpRequest;
-import org.springframework.http.server.reactive.MockServerHttpResponse;
-import org.springframework.tests.TestSubscriber;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.MimeType;
-import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
@@ -64,16 +60,7 @@ public class HttpMessageWriterViewTests {
 
 	private HttpMessageWriterView view = new HttpMessageWriterView(new Jackson2JsonEncoder());
 
-	private HandlerResult result;
-
 	private ModelMap model = new ExtendedModelMap();
-
-
-	@Before
-	public void setup() throws Exception {
-		MethodParameter param = ResolvableMethod.onClass(this.getClass()).name("handle").resolveReturnType();
-		this.result = new HandlerResult(this, null, param, this.model);
-	}
 
 
 	@Test
@@ -92,7 +79,7 @@ public class HttpMessageWriterViewTests {
 		this.model.addAttribute("foo2", "bar2");
 		this.model.addAttribute("foo3", "bar3");
 
-		assertEquals("bar2", this.view.extractObjectToRender(this.result));
+		assertEquals("bar2", this.view.extractObjectToRender(this.model));
 	}
 
 	@Test
@@ -100,7 +87,7 @@ public class HttpMessageWriterViewTests {
 		this.view.setModelKeys(Collections.singleton("foo2"));
 		this.model.addAttribute("foo1", "bar1");
 
-		assertNull(this.view.extractObjectToRender(this.result));
+		assertNull(this.view.extractObjectToRender(this.model));
 	}
 
 	@Test
@@ -110,7 +97,7 @@ public class HttpMessageWriterViewTests {
 		this.model.addAttribute("foo2", "bar2");
 		this.model.addAttribute("foo3", "bar3");
 
-		Object value = this.view.extractObjectToRender(this.result);
+		Object value = this.view.extractObjectToRender(this.model);
 		assertNotNull(value);
 		assertEquals(HashMap.class, value.getClass());
 
@@ -128,7 +115,7 @@ public class HttpMessageWriterViewTests {
 		this.model.addAttribute("foo2", "bar2");
 
 		try {
-			view.extractObjectToRender(this.result);
+			view.extractObjectToRender(this.model);
 			fail();
 		}
 		catch (IllegalStateException ex) {
@@ -144,7 +131,7 @@ public class HttpMessageWriterViewTests {
 		this.model.addAttribute("foo1", "bar1");
 
 		try {
-			view.extractObjectToRender(this.result);
+			view.extractObjectToRender(this.model);
 			fail();
 		}
 		catch (IllegalStateException ex) {
@@ -161,17 +148,19 @@ public class HttpMessageWriterViewTests {
 		this.model.addAttribute("pojoData", pojoData);
 		this.view.setModelKeys(Collections.singleton("pojoData"));
 
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
+		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/path");
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		WebSessionManager manager = new DefaultWebSessionManager();
 		ServerWebExchange exchange = new DefaultServerWebExchange(request, response, manager);
 
-		this.view.render(result, MediaType.APPLICATION_JSON, exchange);
+		this.view.render(this.model, MediaType.APPLICATION_JSON, exchange);
 
-		TestSubscriber
-				.subscribe(response.getBody())
-				.assertValuesWith(buf -> assertEquals("{\"foo\":\"f\",\"bar\":\"b\"}",
-						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)));
+		StepVerifier.create(response.getBody())
+				.consumeNextWith( buf -> assertEquals("{\"foo\":\"f\",\"bar\":\"b\"}",
+						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8))
+				)
+				.expectComplete()
+				.verify();
 	}
 
 

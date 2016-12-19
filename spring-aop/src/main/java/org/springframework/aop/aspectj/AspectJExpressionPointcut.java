@@ -262,6 +262,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		catch (BCException ex) {
 			logger.debug("PointcutExpression matching rejected target class", ex);
 		}
+		catch (IllegalStateException ex) {
+			// AspectJ 1.8.10: encountered invalid signature
+			logger.debug("PointcutExpression matching rejected target class", ex);
+		}
 		return false;
 	}
 
@@ -414,39 +418,46 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 				shadowMatch = this.shadowMatchCache.get(targetMethod);
 				if (shadowMatch == null) {
 					try {
-						shadowMatch = this.pointcutExpression.matchesMethodExecution(methodToMatch);
-					}
-					catch (ReflectionWorldException ex) {
-						// Failed to introspect target method, probably because it has been loaded
-						// in a special ClassLoader. Let's try the declaring ClassLoader instead...
-						try {
-							fallbackExpression = getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
-							if (fallbackExpression != null) {
-								shadowMatch = fallbackExpression.matchesMethodExecution(methodToMatch);
-							}
-						}
-						catch (ReflectionWorldException ex2) {
-							fallbackExpression = null;
-						}
-					}
-					if (shadowMatch == null && targetMethod != originalMethod) {
-						methodToMatch = originalMethod;
 						try {
 							shadowMatch = this.pointcutExpression.matchesMethodExecution(methodToMatch);
 						}
-						catch (ReflectionWorldException ex3) {
-							// Could neither introspect the target class nor the proxy class ->
-							// let's try the original method's declaring class before we give up...
+						catch (ReflectionWorldException ex) {
+							// Failed to introspect target method, probably because it has been loaded
+							// in a special ClassLoader. Let's try the declaring ClassLoader instead...
 							try {
 								fallbackExpression = getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
 								if (fallbackExpression != null) {
 									shadowMatch = fallbackExpression.matchesMethodExecution(methodToMatch);
 								}
 							}
-							catch (ReflectionWorldException ex4) {
+							catch (ReflectionWorldException ex2) {
 								fallbackExpression = null;
 							}
 						}
+						if (shadowMatch == null && targetMethod != originalMethod) {
+							methodToMatch = originalMethod;
+							try {
+								shadowMatch = this.pointcutExpression.matchesMethodExecution(methodToMatch);
+							}
+							catch (ReflectionWorldException ex3) {
+								// Could neither introspect the target class nor the proxy class ->
+								// let's try the original method's declaring class before we give up...
+								try {
+									fallbackExpression = getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
+									if (fallbackExpression != null) {
+										shadowMatch = fallbackExpression.matchesMethodExecution(methodToMatch);
+									}
+								}
+								catch (ReflectionWorldException ex4) {
+									fallbackExpression = null;
+								}
+							}
+						}
+					}
+					catch (IllegalStateException ex) {
+						// AspectJ 1.8.10: encountered invalid signature
+						logger.debug("PointcutExpression matching rejected target method", ex);
+						fallbackExpression = null;
 					}
 					if (shadowMatch == null) {
 						shadowMatch = new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO, null, null, null);

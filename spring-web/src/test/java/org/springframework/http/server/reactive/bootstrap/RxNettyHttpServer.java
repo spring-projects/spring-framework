@@ -37,8 +37,14 @@ public class RxNettyHttpServer extends HttpServerSupport implements HttpServer {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(getHttpHandler());
-		this.rxNettyHandler = new RxNettyHttpHandlerAdapter(getHttpHandler());
+
+		if (getHttpHandlerMap() != null) {
+			this.rxNettyHandler = new RxNettyHttpHandlerAdapter(getHttpHandlerMap());
+		}
+		else {
+			Assert.notNull(getHttpHandler());
+			this.rxNettyHandler = new RxNettyHttpHandlerAdapter(getHttpHandler());
+		}
 
 		this.rxNettyServer = io.reactivex.netty.protocol.http.server.HttpServer
 				.newServer(new InetSocketAddress(getHost(), getPort()));

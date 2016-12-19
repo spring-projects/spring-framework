@@ -316,8 +316,8 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		String metaDataSchemaName = metaDataSchemaNameToUse(schemaName);
 		String metaDataProcedureName = procedureNameToUse(procedureName);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Retrieving metadata for " + metaDataCatalogName + "/" +
-					metaDataSchemaName + "/" + metaDataProcedureName);
+			logger.debug("Retrieving metadata for " + metaDataCatalogName + '/' +
+					metaDataSchemaName + '/' + metaDataProcedureName);
 		}
 
 		ResultSet procs = null;
@@ -325,8 +325,8 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 			procs = databaseMetaData.getProcedures(metaDataCatalogName, metaDataSchemaName, metaDataProcedureName);
 			List<String> found = new ArrayList<>();
 			while (procs.next()) {
-				found.add(procs.getString("PROCEDURE_CAT") + "." + procs.getString("PROCEDURE_SCHEM") +
-						"." + procs.getString("PROCEDURE_NAME"));
+				found.add(procs.getString("PROCEDURE_CAT") + '.' + procs.getString("PROCEDURE_SCHEM") +
+						'.' + procs.getString("PROCEDURE_NAME"));
 			}
 			procs.close();
 

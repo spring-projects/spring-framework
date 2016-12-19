@@ -18,9 +18,6 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.net.URI;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,30 +28,31 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 import rx.Observable;
 import rx.Single;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.server.reactive.MockServerHttpRequest;
-import org.springframework.http.server.reactive.MockServerHttpResponse;
-import org.springframework.tests.TestSubscriber;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
@@ -67,6 +65,7 @@ import static org.springframework.core.ResolvableType.*;
 
 /**
  * Unit tests for {@link AbstractMessageReaderArgumentResolver}.
+ *
  * @author Rossen Stoyanchev
  */
 public class MessageReaderArgumentResolverTests {
@@ -77,40 +76,44 @@ public class MessageReaderArgumentResolverTests {
 
 	private MockServerHttpRequest request;
 
+	private BindingContext bindingContext;
+
 	private ResolvableMethod testMethod = ResolvableMethod.onClass(this.getClass()).name("handle");
 
 
 	@Before
 	public void setUp() throws Exception {
-		this.request = new MockServerHttpRequest(HttpMethod.POST, new URI("/path"));
+		this.request = new MockServerHttpRequest(HttpMethod.POST, "/path");
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(this.request, response, new MockWebSessionManager());
+
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setValidator(new TestBeanValidator());
+		this.bindingContext = new BindingContext(initializer);
 	}
 
 
 	@Test
 	public void missingContentType() throws Exception {
-		String body = "{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}";
-		this.request.writeWith(Flux.just(dataBuffer(body)));
+		this.request.setBody("{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}");
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
 		MethodParameter param = this.testMethod.resolveParam(type);
-		Mono<Object> result = this.resolver.readBody(param, true, this.exchange);
+		Mono<Object> result = this.resolver.readBody(param, true, this.bindingContext, this.exchange);
 
-		TestSubscriber.subscribe(result)
-				.assertError(UnsupportedMediaTypeStatusException.class);
+		StepVerifier.create(result).expectError(UnsupportedMediaTypeStatusException.class).verify();
 	}
 
 	// More extensive "empty body" tests in RequestBody- and HttpEntityArgumentResolverTests
 
 	@Test @SuppressWarnings("unchecked") // SPR-9942
 	public void emptyBody() throws Exception {
-		this.request.writeWith(Flux.empty());
-		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+		this.request.setHeader("Content-Type", "application/json");
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
 		MethodParameter param = this.testMethod.resolveParam(type);
-		Mono<TestBean> result = (Mono<TestBean>) this.resolver.readBody(param, true, this.exchange).block();
+		Mono<TestBean> result = (Mono<TestBean>) this.resolver.readBody(
+				param, true, this.bindingContext, this.exchange).block();
 
-		TestSubscriber.subscribe(result).assertError(ServerWebInputException.class);
+		StepVerifier.create(result).expectError(ServerWebInputException.class).verify();
 	}
 
 	@Test
@@ -145,6 +148,26 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 	@Test
+	public void rxJava2SingleTestBean() throws Exception {
+		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
+		ResolvableType type = forClassWithGenerics(io.reactivex.Single.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		io.reactivex.Single<TestBean> single = resolveValue(param, body);
+
+		assertEquals(new TestBean("f1", "b1"), single.blockingGet());
+	}
+
+	@Test
+	public void rxJava2MaybeTestBean() throws Exception {
+		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
+		ResolvableType type = forClassWithGenerics(Maybe.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		Maybe<TestBean> maybe = resolveValue(param, body);
+
+		assertEquals(new TestBean("f1", "b1"), maybe.blockingGet());
+	}
+
+	@Test
 	public void observableTestBean() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
 		ResolvableType type = forClassWithGenerics(Observable.class, TestBean.class);
@@ -153,6 +176,28 @@ public class MessageReaderArgumentResolverTests {
 
 		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
 				observable.toList().toBlocking().first());
+	}
+
+	@Test
+	public void rxJava2ObservableTestBean() throws Exception {
+		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
+		ResolvableType type = forClassWithGenerics(io.reactivex.Observable.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		io.reactivex.Observable<?> observable = resolveValue(param, body);
+
+		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
+				observable.toList().blockingGet());
+	}
+
+	@Test
+	public void flowableTestBean() throws Exception {
+		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
+		ResolvableType type = forClassWithGenerics(Flowable.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		Flowable<?> flowable = resolveValue(param, body);
+
+		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
+				flowable.toList().blockingGet());
 	}
 
 	@Test
@@ -218,35 +263,36 @@ public class MessageReaderArgumentResolverTests {
 		assertArrayEquals(new TestBean[] {new TestBean("f1", "b1"), new TestBean("f2", "b2")}, value);
 	}
 
-	@Test @SuppressWarnings("unchecked")
+	@Test
+	@SuppressWarnings("unchecked")
 	public void validateMonoTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\"}";
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
 		MethodParameter param = this.testMethod.resolveParam(type);
 		Mono<TestBean> mono = resolveValue(param, body);
 
-		TestSubscriber.subscribe(mono)
-				.assertNoValues()
-				.assertError(ServerWebInputException.class);
+		StepVerifier.create(mono).expectNextCount(0).expectError(ServerWebInputException.class).verify();
 	}
 
-	@Test @SuppressWarnings("unchecked")
+	@Test
+	@SuppressWarnings("unchecked")
 	public void validateFluxTestBean() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\"}]";
 		ResolvableType type = forClassWithGenerics(Flux.class, TestBean.class);
 		MethodParameter param = this.testMethod.resolveParam(type);
 		Flux<TestBean> flux = resolveValue(param, body);
 
-		TestSubscriber.subscribe(flux)
-				.assertValues(new TestBean("f1", "b1"))
-				.assertError(ServerWebInputException.class);
+		StepVerifier.create(flux)
+				.expectNext(new TestBean("f1", "b1"))
+				.expectError(ServerWebInputException.class)
+				.verify();
 	}
 
-	@Test // SPR-9964
+	@Test  // SPR-9964
 	public void parameterizedMethodArgument() throws Exception {
 		Method method = AbstractParameterizedController.class.getMethod("handleDto", Identifiable.class);
- 		HandlerMethod handlerMethod = new HandlerMethod(new ConcreteParameterizedController(), method);
- 		MethodParameter methodParam = handlerMethod.getMethodParameters()[0];
+		HandlerMethod handlerMethod = new HandlerMethod(new ConcreteParameterizedController(), method);
+		MethodParameter methodParam = handlerMethod.getMethodParameters()[0];
 		SimpleBean simpleBean = resolveValue(methodParam, "{\"name\" : \"Jad\"}");
 
 		assertEquals("Jad", simpleBean.getName());
@@ -255,11 +301,8 @@ public class MessageReaderArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValue(MethodParameter param, String body) {
-
-		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-		this.request.writeWith(Flux.just(dataBuffer(body)));
-
-		Mono<Object> result = this.resolver.readBody(param, true, this.exchange);
+		this.request.setHeader("Content-Type", "application/json").setBody(body);
+		Mono<Object> result = this.resolver.readBody(param, true, this.bindingContext, this.exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
 		assertNotNull(value);
@@ -273,13 +316,7 @@ public class MessageReaderArgumentResolverTests {
 	private AbstractMessageReaderArgumentResolver resolver(Decoder<?>... decoders) {
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
 		Arrays.asList(decoders).forEach(decoder -> readers.add(new DecoderHttpMessageReader<>(decoder)));
-		return new AbstractMessageReaderArgumentResolver(readers, new TestBeanValidator()) {};
-	}
-
-	private DataBuffer dataBuffer(String body) {
-		byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
-		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-		return new DefaultDataBufferFactory().wrap(byteBuffer);
+		return new AbstractMessageReaderArgumentResolver(readers) {};
 	}
 
 
@@ -288,14 +325,19 @@ public class MessageReaderArgumentResolverTests {
 			@Validated Mono<TestBean> monoTestBean,
 			@Validated Flux<TestBean> fluxTestBean,
 			Single<TestBean> singleTestBean,
+			io.reactivex.Single<TestBean> rxJava2SingleTestBean,
+			Maybe<TestBean> rxJava2MaybeTestBean,
 			Observable<TestBean> observableTestBean,
+			io.reactivex.Observable<TestBean> rxJava2ObservableTestBean,
+			Flowable<TestBean> flowableTestBean,
 			CompletableFuture<TestBean> futureTestBean,
 			TestBean testBean,
 			Map<String, String> map,
 			List<TestBean> list,
 			Mono<List<TestBean>> monoList,
 			Set<TestBean> set,
-			TestBean[] array) {}
+			TestBean[] array) {
+	}
 
 
 	@XmlRootElement
@@ -353,6 +395,7 @@ public class MessageReaderArgumentResolverTests {
 		}
 	}
 
+
 	private static class TestBeanValidator implements Validator {
 
 		@Override
@@ -369,14 +412,17 @@ public class MessageReaderArgumentResolverTests {
 		}
 	}
 
+
 	private static abstract class AbstractParameterizedController<DTO extends Identifiable> {
 
 		@SuppressWarnings("unused")
 		public void handleDto(DTO dto) {}
 	}
 
+
 	private static class ConcreteParameterizedController extends AbstractParameterizedController<SimpleBean> {
 	}
+
 
 	private interface Identifiable extends Serializable {
 
@@ -385,7 +431,8 @@ public class MessageReaderArgumentResolverTests {
 		void setId(Long id);
 	}
 
-	@SuppressWarnings({ "serial" })
+
+	@SuppressWarnings({"serial"})
 	private static class SimpleBean implements Identifiable {
 
 		private Long id;

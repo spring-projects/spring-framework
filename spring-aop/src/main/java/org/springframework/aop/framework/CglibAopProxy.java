@@ -351,7 +351,8 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 */
 	private static Object processReturnType(Object proxy, Object target, Method method, Object retVal) {
 		// Massage return value if necessary
-		if (retVal != null && retVal == target && !RawTargetAccess.class.isAssignableFrom(method.getDeclaringClass())) {
+		if (retVal != null && retVal == target &&
+				!RawTargetAccess.class.isAssignableFrom(method.getDeclaringClass())) {
 			// Special case: it returned "this". Note that we can't help
 			// if the target sets a reference to itself in another returned object.
 			retVal = proxy;

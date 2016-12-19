@@ -95,6 +95,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Stephane Nicoll
+ * @author Kazuki Shimizu
  * @see #setAllowedFields
  * @see #setRequiredFields
  * @see #registerCustomEditor
@@ -143,11 +144,13 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	private String[] requiredFields;
 
+	private ConversionService conversionService;
+
+	private MessageCodesResolver messageCodesResolver;
+
 	private BindingErrorProcessor bindingErrorProcessor = new DefaultBindingErrorProcessor();
 
 	private final List<Validator> validators = new ArrayList<>();
-
-	private ConversionService conversionService;
 
 
 	/**
@@ -213,8 +216,12 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Specify the limit for array and collection auto-growing.
 	 * <p>Default is 256, preventing OutOfMemoryErrors in case of large indexes.
 	 * Raise this limit if your auto-growing needs are unusually high.
+	 * @see #initBeanPropertyAccess()
+	 * @see org.springframework.beans.BeanWrapper#setAutoGrowCollectionLimit
 	 */
 	public void setAutoGrowCollectionLimit(int autoGrowCollectionLimit) {
+		Assert.state(this.bindingResult == null,
+				"DataBinder is already initialized - call setAutoGrowCollectionLimit before other configuration methods");
 		this.autoGrowCollectionLimit = autoGrowCollectionLimit;
 	}
 
@@ -245,9 +252,14 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected AbstractPropertyBindingResult createBeanPropertyBindingResult() {
 		BeanPropertyBindingResult result = new BeanPropertyBindingResult(getTarget(),
 				getObjectName(), isAutoGrowNestedPaths(), getAutoGrowCollectionLimit());
+
 		if (this.conversionService != null) {
 			result.initConversion(this.conversionService);
 		}
+		if (this.messageCodesResolver != null) {
+			result.setMessageCodesResolver(this.messageCodesResolver);
+		}
+
 		return result;
 	}
 
@@ -271,9 +283,14 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected AbstractPropertyBindingResult createDirectFieldBindingResult() {
 		DirectFieldBindingResult result = new DirectFieldBindingResult(getTarget(),
 				getObjectName(), isAutoGrowNestedPaths());
+
 		if (this.conversionService != null) {
 			result.initConversion(this.conversionService);
 		}
+		if (this.messageCodesResolver != null) {
+			result.setMessageCodesResolver(this.messageCodesResolver);
+		}
+
 		return result;
 	}
 
@@ -464,16 +481,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
-	 * Set whether to extract the old field value when applying a
-	 * property editor to a new value for a field.
-	 * <p>Default is "true", exposing previous field values to custom editors.
-	 * Turn this to "false" to avoid side effects caused by getters.
-	 */
-	public void setExtractOldValueForEditor(boolean extractOldValueForEditor) {
-		getPropertyAccessor().setExtractOldValueForEditor(extractOldValueForEditor);
-	}
-
-	/**
 	 * Set the strategy to use for resolving errors into message codes.
 	 * Applies the given strategy to the underlying errors holder.
 	 * <p>Default is a DefaultMessageCodesResolver.
@@ -481,7 +488,11 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see DefaultMessageCodesResolver
 	 */
 	public void setMessageCodesResolver(MessageCodesResolver messageCodesResolver) {
-		getInternalBindingResult().setMessageCodesResolver(messageCodesResolver);
+		Assert.state(this.messageCodesResolver == null, "DataBinder is already initialized with MessageCodesResolver");
+		this.messageCodesResolver = messageCodesResolver;
+		if (this.bindingResult != null && messageCodesResolver != null) {
+			this.bindingResult.setMessageCodesResolver(messageCodesResolver);
+		}
 	}
 
 	/**

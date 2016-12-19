@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
+import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -41,12 +42,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Factory for collections that is aware of Java 5, Java 6, and Spring
- * collection types.
+ * Factory for collections that is aware of Java 5, Java 6, and Spring collection types.
+ *
  * <p>Mainly for internal use within the framework.
- * <p>The goal of this class is to avoid runtime dependencies on a specific
- * Java version, while nevertheless using the best collection implementation
- * that is available at runtime.
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
@@ -323,6 +321,23 @@ public abstract class CollectionFactory {
 				throw new IllegalArgumentException("Could not instantiate Map type: " + mapType.getName(), ex);
 			}
 		}
+	}
+
+	/**
+	 * Create a variant of {@code java.util.Properties} that automatically adapts
+	 * non-String values to String representations on {@link Properties#getProperty}.
+	 * @return a new {@code Properties} instance
+	 * @since 4.3.4
+	 */
+	@SuppressWarnings("serial")
+	public static Properties createStringAdaptingProperties() {
+		return new Properties() {
+			@Override
+			public String getProperty(String key) {
+				Object value = get(key);
+				return (value != null ? value.toString() : null);
+			}
+		};
 	}
 
 	/**

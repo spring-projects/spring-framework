@@ -51,6 +51,7 @@ import org.springframework.util.Assert;
  *
  * @author Sam Brannen
  * @since 5.0
+ * @see org.springframework.test.context.junit.jupiter.DisabledIf
  * @see org.springframework.test.context.junit.jupiter.SpringJUnitConfig
  * @see org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig
  * @see org.springframework.test.context.TestContextManager
@@ -64,6 +65,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * by test class.
 	 */
 	private static final Namespace namespace = Namespace.create(SpringExtension.class);
+
 
 	/**
 	 * Delegates to {@link TestContextManager#beforeTestClass}.
@@ -184,7 +186,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * application context
 	 * @see org.springframework.test.context.TestContext#getApplicationContext()
 	 */
-	private ApplicationContext getApplicationContext(ExtensionContext context) {
+	static ApplicationContext getApplicationContext(ExtensionContext context) {
 		return getTestContextManager(context).getTestContext().getApplicationContext();
 	}
 
@@ -193,7 +195,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * {@code ExtensionContext}.
 	 * @return the {@code TestContextManager}; never {@code null}
 	 */
-	private TestContextManager getTestContextManager(ExtensionContext context) {
+	private static TestContextManager getTestContextManager(ExtensionContext context) {
 		Assert.notNull(context, "ExtensionContext must not be null");
 		Class<?> testClass = context.getTestClass().get();
 		Store store = context.getStore(namespace);

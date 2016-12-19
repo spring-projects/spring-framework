@@ -133,13 +133,11 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		if (returnType.hasMethodAnnotation(SendTo.class) ||
+		return (returnType.hasMethodAnnotation(SendTo.class) ||
 				AnnotatedElementUtils.hasAnnotation(returnType.getDeclaringClass(), SendTo.class) ||
 				returnType.hasMethodAnnotation(SendToUser.class) ||
-				AnnotatedElementUtils.hasAnnotation(returnType.getDeclaringClass(), SendToUser.class)) {
-			return true;
-		}
-		return !this.annotationRequired;
+				AnnotatedElementUtils.hasAnnotation(returnType.getDeclaringClass(), SendToUser.class) ||
+				!this.annotationRequired);
 	}
 
 	@Override
@@ -188,54 +186,32 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	}
 
 	private Object findAnnotation(MethodParameter returnType) {
-		Annotation[] annot = new Annotation[4];
-		annot[0] = AnnotatedElementUtils.findMergedAnnotation(returnType.getMethod(), SendToUser.class);
-		annot[1] = AnnotatedElementUtils.findMergedAnnotation(returnType.getMethod(), SendTo.class);
-		annot[2] = AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendToUser.class);
-		annot[3] = AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendTo.class);
+		Annotation[] anns = new Annotation[4];
+		anns[0] = AnnotatedElementUtils.findMergedAnnotation(returnType.getMethod(), SendToUser.class);
+		anns[1] = AnnotatedElementUtils.findMergedAnnotation(returnType.getMethod(), SendTo.class);
+		anns[2] = AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendToUser.class);
+		anns[3] = AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendTo.class);
 
-		if (annot[0] != null && !ObjectUtils.isEmpty(((SendToUser) annot[0]).value())) {
-			return annot[0];
+		if (anns[0] != null && !ObjectUtils.isEmpty(((SendToUser) anns[0]).value())) {
+			return anns[0];
 		}
-		if (annot[1] != null && !ObjectUtils.isEmpty(((SendTo) annot[1]).value())) {
-			return annot[1];
+		if (anns[1] != null && !ObjectUtils.isEmpty(((SendTo) anns[1]).value())) {
+			return anns[1];
 		}
-		if (annot[2] != null && !ObjectUtils.isEmpty(((SendToUser) annot[2]).value())) {
-			return annot[2];
+		if (anns[2] != null && !ObjectUtils.isEmpty(((SendToUser) anns[2]).value())) {
+			return anns[2];
 		}
-		if (annot[3] != null && !ObjectUtils.isEmpty(((SendTo) annot[3]).value())) {
-			return annot[3];
+		if (anns[3] != null && !ObjectUtils.isEmpty(((SendTo) anns[3]).value())) {
+			return anns[3];
 		}
 
 		for (int i=0; i < 4; i++) {
-			if (annot[i] != null) {
-				return annot[i];
+			if (anns[i] != null) {
+				return anns[i];
 			}
 		}
 
 		return null;
-	}
-
-	private SendToUser getSendToUser(MethodParameter returnType) {
-		SendToUser annot = AnnotatedElementUtils.findMergedAnnotation(returnType.getMethod(), SendToUser.class);
-		if (annot != null && !ObjectUtils.isEmpty(annot.value())) {
-			return annot;
-		}
-		SendToUser typeAnnot = AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendToUser.class);
-		if (typeAnnot != null && !ObjectUtils.isEmpty(typeAnnot.value())) {
-			return typeAnnot;
-		}
-		return (annot != null ? annot : typeAnnot);
-	}
-
-	private SendTo getSendTo(MethodParameter returnType) {
-		SendTo sendTo = AnnotatedElementUtils.findMergedAnnotation(returnType.getMethod(), SendTo.class);
-		if (sendTo != null && !ObjectUtils.isEmpty(sendTo.value())) {
-			return sendTo;
-		}
-		else {
-			return AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendTo.class);
-		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -268,7 +244,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		}
 
 		return (destination.startsWith("/") ?
-				new String[] {defaultPrefix + destination} : new String[] {defaultPrefix + "/" + destination});
+				new String[] {defaultPrefix + destination} : new String[] {defaultPrefix + '/' + destination});
 	}
 
 	private MessageHeaders createHeaders(String sessionId, MethodParameter returnType) {

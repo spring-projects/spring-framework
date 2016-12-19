@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
  * import static org.springframework.test.web.client.ExpectedCount.*
  *
  * once()
+ * twice()
  * manyTimes()
  * times(5)
  * min(2)
@@ -75,6 +76,13 @@ public class ExpectedCount {
 	 */
 	public static ExpectedCount once() {
 		return new ExpectedCount(1, 1);
+	}
+
+	/**
+	 * Exactly twice.
+	 */
+	public static ExpectedCount twice() {
+		return new ExpectedCount(2, 2);
 	}
 
 	/**

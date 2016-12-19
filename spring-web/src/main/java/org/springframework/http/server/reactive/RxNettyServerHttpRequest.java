@@ -16,15 +16,17 @@
 
 package org.springframework.http.server.reactive;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
-import reactor.adapter.RxJava1Adapter;
 import reactor.core.publisher.Flux;
 import rx.Observable;
+import rx.RxReactiveStreams;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
@@ -34,6 +36,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 /**
  * Adapt {@link ServerHttpRequest} to the RxNetty {@link HttpServerRequest}.
@@ -48,12 +51,47 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final NettyDataBufferFactory dataBufferFactory;
 
+
 	public RxNettyServerHttpRequest(HttpServerRequest<ByteBuf> request,
 			NettyDataBufferFactory dataBufferFactory) {
-		Assert.notNull("'request', request must not be null");
+
+		super(initUri(request), initHeaders(request));
+
 		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
-		this.dataBufferFactory = dataBufferFactory;
 		this.request = request;
+		this.dataBufferFactory = dataBufferFactory;
+	}
+
+	private static URI initUri(HttpServerRequest<ByteBuf> request) {
+		Assert.notNull("'request', request must not be null");
+		try {
+			URI uri = new URI(request.getUri());
+			InetSocketAddress remoteAddress = null;
+			if (!StringUtils.isEmpty(request.getHostHeader())) {
+				HttpHeaders headers = new HttpHeaders();
+				headers.add("Host", request.getHostHeader());
+				remoteAddress = headers.getHost();
+			}
+			return new URI(
+					uri.getScheme(),
+					uri.getUserInfo(),
+					(remoteAddress != null ? remoteAddress.getHostString() : null),
+					(remoteAddress != null ? remoteAddress.getPort() : -1),
+					uri.getPath(),
+					uri.getQuery(),
+					uri.getFragment());
+		}
+		catch (URISyntaxException ex) {
+			throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
+		}
+	}
+
+	private static HttpHeaders initHeaders(HttpServerRequest<ByteBuf> request) {
+		HttpHeaders headers = new HttpHeaders();
+		for (String name : request.getHeaderNames()) {
+			headers.put(name, request.getAllHeaderValues(name));
+		}
+		return headers;
 	}
 
 
@@ -64,20 +102,6 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	public HttpMethod getMethod() {
 		return HttpMethod.valueOf(this.request.getHttpMethod().name());
-	}
-
-	@Override
-	protected URI initUri() throws URISyntaxException {
-		return new URI(this.request.getUri());
-	}
-
-	@Override
-	protected HttpHeaders initHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		for (String name : this.request.getHeaderNames()) {
-			headers.put(name, this.request.getAllHeaderValues(name));
-		}
-		return headers;
 	}
 
 	@Override
@@ -95,7 +119,7 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	public Flux<DataBuffer> getBody() {
 		Observable<DataBuffer> content = this.request.getContent().map(dataBufferFactory::wrap);
-		return RxJava1Adapter.observableToFlux(content);
+		return Flux.from(RxReactiveStreams.toPublisher(content));
 	}
 
 }

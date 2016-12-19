@@ -51,7 +51,7 @@ import org.springframework.util.CollectionUtils;
  * <tr>
  *     <td>{@link #ignoreAcceptHeader}</td>
  *     <td>{@link HeaderContentTypeResolver Header resolver}</td>
- *     <td>On</td>
+ *     <td>Off</td>
  * </tr>
  * <tr>
  *     <td>{@link #defaultContentType}</td>
@@ -218,7 +218,7 @@ public class RequestedContentTypeResolverBuilder {
 	}
 
 
-	public RequestedContentTypeResolver build() {
+	public CompositeContentTypeResolver build() {
 		List<RequestedContentTypeResolver> resolvers = new ArrayList<>();
 
 		if (this.favorPathExtension) {

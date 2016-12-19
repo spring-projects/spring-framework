@@ -205,6 +205,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		this.resourceLoader = resourceLoader;
+		if (!this.setMetadataReaderFactoryCalled) {
+			this.metadataReaderFactory = new CachingMetadataReaderFactory(resourceLoader);
+		}
 	}
 
 	@Override

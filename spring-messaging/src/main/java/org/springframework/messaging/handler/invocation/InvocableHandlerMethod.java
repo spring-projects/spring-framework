@@ -28,6 +28,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.HandlerMethod;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -106,15 +107,13 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	public Object invoke(Message<?> message, Object... providedArgs) throws Exception {
 		Object[] args = getMethodArgumentValues(message, providedArgs);
 		if (logger.isTraceEnabled()) {
-			StringBuilder sb = new StringBuilder("Invoking [");
-			sb.append(getBeanType().getSimpleName()).append(".");
-			sb.append(getMethod().getName()).append("] method with arguments ");
-			sb.append(Arrays.asList(args));
-			logger.trace(sb.toString());
+			logger.trace("Invoking '" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) +
+					"' with arguments " + Arrays.toString(args));
 		}
 		Object returnValue = doInvoke(args);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Method [" + getMethod().getName() + "] returned [" + returnValue + "]");
+			logger.trace("Method [" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) +
+					"] returned [" + returnValue + "]");
 		}
 		return returnValue;
 	}
@@ -284,7 +283,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				return this.returnValue.getClass();
 			}
 			if (!ResolvableType.NONE.equals(this.returnType)) {
-				return this.returnType.getRawClass();
+				return this.returnType.resolve();
 			}
 			return super.getParameterType();
 		}
