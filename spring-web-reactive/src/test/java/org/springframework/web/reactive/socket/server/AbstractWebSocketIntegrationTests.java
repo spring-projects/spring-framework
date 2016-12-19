@@ -69,7 +69,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	public static Object[][] arguments() {
 		File base = new File(System.getProperty("java.io.tmpdir"));
 		return new Object[][] {
-				{new ReactorHttpServer(), ReactorNettyConfig.class},
+				//{new ReactorHttpServer(), ReactorNettyConfig.class},
 				{new RxNettyHttpServer(), RxNettyConfig.class},
 				{new TomcatHttpServer(base.getAbsolutePath(), WsContextListener.class), TomcatConfig.class},
 				{new UndertowHttpServer(), UndertowConfig.class},
