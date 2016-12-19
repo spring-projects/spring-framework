@@ -490,13 +490,12 @@ Boolean b = simple.booleanList.get(0);
     <section xml:id="expressions-ref-literal">
       <title>Literal expressions</title>
 
-      <para>The types of literal expressions supported are strings, dates,
-      numeric values (int, real, and hex), boolean and null. Strings are
-      delimited by single quotes. To put a single quote itself in a string use
-      two single quote characters. The following listing shows simple usage of
-      literals. Typically they would not be used in isolation like this, but
-      as part of a more complex expression, for example using a literal on one
-      side of a logical comparison operator.</para>
+      <para>The types of literal expressions supported are strings, numeric values
+      (int, real, hex), boolean and null. Strings are delimited by single quotes.
+      To put a single quote itself in a string, use two single quote characters.
+      The following listing shows simple usage of literals. Typically they would not
+      be used in isolation like this but rather as part of a more complex expression,
+      for example using a literal on one side of a logical comparison operator.</para>
 
       <programlisting language="java">ExpressionParser parser = new SpelExpressionParser();
 
@@ -626,8 +625,8 @@ int[][] numbers3 = (int[][]) parser.parseExpression("new int[4][5]").getValue(co
 String c = parser.parseExpression("'abc'.substring(2, 3)").getValue(String.class);
 
 // evaluates to true
-boolean isMember = parser.parseExpression("isMember('Mihajlo Pupin')").getValue(societyContext,
-                                                                                Boolean.class);</programlisting>
+boolean isMember = parser.parseExpression("isMember('Mihajlo Pupin')").getValue(societyContext, Boolean.class);
+      </programlisting>
     </section>
 
     <section xml:id="expressions-operators">
@@ -640,15 +639,24 @@ boolean isMember = parser.parseExpression("isMember('Mihajlo Pupin')").getValue(
         or equal, greater than, and greater than or equal are supported using
         standard operator notation.</para>
 
-        <para><programlisting language="java">// evaluates to true
+        <programlisting language="java">// evaluates to true
 boolean trueValue = parser.parseExpression("2 == 2").getValue(Boolean.class);
 
 // evaluates to false
 boolean falseValue = parser.parseExpression("2 &lt; -5.0").getValue(Boolean.class);
 
 // evaluates to true
-boolean trueValue = parser.parseExpression("'black' &lt; 'block'").getValue(Boolean.class);</programlisting>
-        In addition to standard relational operators SpEL supports the
+boolean trueValue = parser.parseExpression("'black' &lt; 'block'").getValue(Boolean.class);
+        </programlisting>
+
+        <para>Greater/less-than comparisons against `null` follow a simple rule: `null`
+        is treated as nothing here (i.e. NOT as zero). As a consequence, any other value
+        is always greater than `null` (`X &gt; null` is always `true`) and no other value
+        is ever less than nothing (`X &lt; null` is always `false`). If you prefer numeric
+        comparisons instead, please avoid number-based `null` comparisons in favor of
+        comparisons against zero (e.g. `X &gt; 0` or `X &lt; 0`).</para>
+
+        <para>In addition to standard relational operators SpEL supports the
         'instanceof' and regular expression based 'matches' operator.</para>
 
         <programlisting language="java">// evaluates to false
@@ -661,14 +669,13 @@ boolean trueValue =
 //evaluates to false
 boolean falseValue =
      parser.parseExpression("'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
+        </programlisting>
 
-</programlisting>
-      <para>Each symbolic operator can also be specified as a purely alphabetic equivalent.  This avoids
-      problems where the symbols used have special meaning for the document type in which
-      the expression is embedded (eg. an XML document).  The textual equivalents are shown
-      here: lt ('&lt;'), gt ('&gt;'), le ('&lt;='), ge ('&gt;='),
-      eq ('=='), ne ('!='), div ('/'), mod ('%'), not ('!').
-      These are case insensitive.</para>
+        <para>Each symbolic operator can also be specified as a purely alphabetic equivalent.
+        This avoids problems where the symbols used have special meaning for the document type
+        in which the expression is embedded (eg. an XML document). The textual equivalents are
+        shown here: lt ('&lt;'), gt ('&gt;'), le ('&lt;='), ge ('&gt;='), eq ('=='), ne ('!='),
+        div ('/'), mod ('%'), not ('!'). These are case insensitive.</para>
       </section>
 
       <section xml:id="expressions-operators-logical">
