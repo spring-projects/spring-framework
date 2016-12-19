@@ -24,10 +24,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 
 /**
- * Simple container of information from a WebSocket handshake request.
+ * Simple container of information related to the handshake request that started
+ * the {@link WebSocketSession} session.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see WebSocketSession#getHandshakeInfo()
  */
 public class HandshakeInfo {
 
@@ -35,30 +37,40 @@ public class HandshakeInfo {
 
 	private final HttpHeaders headers;
 
-	private final Mono<Principal> principal;
+	private final Mono<Principal> principalMono;
 
 
-	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal) {
+	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principalMono) {
 		Assert.notNull(uri, "URI is required.");
 		Assert.notNull(headers, "HttpHeaders are required.");
-		Assert.notNull(principal, "Prinicpal is required.");
+		Assert.notNull(principalMono, "Principal is required.");
 		this.uri = uri;
 		this.headers = headers;
-		this.principal = principal;
+		this.principalMono = principalMono;
 	}
 
 
+	/**
+	 * Return the URL for the WebSocket endpoint.
+	 */
 	public URI getUri() {
 		return this.uri;
 	}
 
+	/**
+	 * Return the headers from the handshake HTTP request.
+	 */
 	public HttpHeaders getHeaders() {
 		return this.headers;
 	}
 
+	/**
+	 * Return the principal associated with the handshake HTTP request, if any.
+	 */
 	public Mono<Principal> getPrincipal() {
-		return this.principal;
+		return this.principalMono;
 	}
+
 
 	@Override
 	public String toString() {

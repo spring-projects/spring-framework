@@ -17,8 +17,6 @@
 package org.springframework.web.reactive.socket.server.upgrade;
 
 import java.io.IOException;
-import java.net.URI;
-import java.security.Principal;
 import java.util.Collections;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -31,7 +29,6 @@ import org.apache.tomcat.websocket.server.WsServerContainer;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServletServerHttpRequest;
@@ -39,7 +36,7 @@ import org.springframework.http.server.reactive.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.HandshakeInfo;
-import org.springframework.web.reactive.socket.adapter.TomcatWebSocketHandlerAdapter;
+import org.springframework.web.reactive.socket.adapter.StandardWebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -63,15 +60,13 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		HttpServletRequest servletRequest = getHttpServletRequest(request);
 		HttpServletResponse servletResponse = getHttpServletResponse(response);
 
-		URI uri = request.getURI();
-		HttpHeaders headers = request.getHeaders();
-		Mono<Principal> principal = exchange.getPrincipal();
-		HandshakeInfo info = new HandshakeInfo(uri, headers, principal);
-		DataBufferFactory bufferFactory = response.bufferFactory();
-		Endpoint endpoint = new TomcatWebSocketHandlerAdapter(info, bufferFactory, handler).getEndpoint();
+		HandshakeInfo info = getHandshakeInfo(exchange);
+		DataBufferFactory factory = response.bufferFactory();
+		Endpoint endpoint = new StandardWebSocketHandlerAdapter(handler, info, factory).getEndpoint();
 
 		String requestURI = servletRequest.getRequestURI();
-		ServerEndpointConfig config = new ServerEndpointRegistration(requestURI, endpoint);
+		ServerEndpointConfig config = new DefaultServerEndpointConfig(requestURI, endpoint);
+
 		try {
 			WsServerContainer container = getContainer(servletRequest);
 			container.doUpgrade(servletRequest, servletResponse, config, Collections.emptyMap());
@@ -91,6 +86,11 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	private HttpServletResponse getHttpServletResponse(ServerHttpResponse response) {
 		Assert.isTrue(response instanceof ServletServerHttpResponse);
 		return ((ServletServerHttpResponse) response).getServletResponse();
+	}
+
+	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange) {
+		ServerHttpRequest request = exchange.getRequest();
+		return new HandshakeInfo(request.getURI(), request.getHeaders(), exchange.getPrincipal());
 	}
 
 	private WsServerContainer getContainer(HttpServletRequest request) {

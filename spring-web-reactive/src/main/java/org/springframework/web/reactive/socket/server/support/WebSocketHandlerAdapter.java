@@ -26,9 +26,10 @@ import org.springframework.web.reactive.socket.server.WebSocketService;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * {@code HandlerAdapter} that allows using a {@link WebSocketHandler} contract
- * with the generic {@link DispatcherHandler} mapping URLs directly to such
- * handlers. Requests are handled through the configured {@link WebSocketService}.
+ * {@link HandlerAdapter} that allows using a {@link WebSocketHandler} with the
+ * generic {@link DispatcherHandler} mapping URLs directly to such handlers.
+ * Requests are handled by delegating to the configured {@link WebSocketService}
+ * which by default is {@link HandshakeWebSocketService}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -40,8 +41,7 @@ public class WebSocketHandlerAdapter implements HandlerAdapter {
 
 	/**
 	 * Default constructor that creates and uses a
-	 * {@link HandshakeWebSocketService} for a straight-up WebSocket interaction,
-	 * i.e. treating incoming requests as WebSocket handshake requests.
+	 * {@link HandshakeWebSocketService}.
 	 */
 	public WebSocketHandlerAdapter() {
 		this(new HandshakeWebSocketService());

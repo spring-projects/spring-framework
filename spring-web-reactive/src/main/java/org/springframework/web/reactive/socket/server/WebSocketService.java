@@ -18,19 +18,18 @@ package org.springframework.web.reactive.socket.server;
 import reactor.core.publisher.Mono;
 
 import org.springframework.web.reactive.socket.WebSocketHandler;
-import org.springframework.web.reactive.socket.server.support.HandshakeWebSocketService;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
  * A service to delegate WebSocket-related HTTP requests to.
  *
- * <p>For a straight-up WebSocket endpoint this means handling the initial
- * handshake request but for a SockJS endpoint this means handling all HTTP
+ * <p>For a WebSocket endpoint this means handling the initial WebSocket HTTP
+ * handshake request. For a SockJS endpoint it could mean handling all HTTP
  * requests defined in the SockJS protocol.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
- * @see HandshakeWebSocketService
+ * @see org.springframework.web.reactive.socket.server.support.HandshakeWebSocketService;
  */
 public interface WebSocketService {
 

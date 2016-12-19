@@ -25,7 +25,15 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 
 /**
- * Representation for a WebSocket session.
+ * Represents a WebSocket session with Reactive Streams input and output.
+ *
+ * <p>On the server side a WebSocket session can be handled by mapping
+ * requests to a {@link WebSocketHandler} and ensuring there is a
+ * {@link org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter
+ * WebSocketHandlerAdapter} strategy registered in Spring configuration.
+ * On the client side a {@link WebSocketHandler} can be provided to a
+ * {@link org.springframework.web.reactive.socket.client.WebSocketClient
+ * WebSocketClient}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

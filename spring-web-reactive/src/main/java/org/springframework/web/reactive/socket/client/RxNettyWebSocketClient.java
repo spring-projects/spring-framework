@@ -39,7 +39,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.adapter.RxNettyWebSocketSession;
 
 /**
- * A {@link WebSocketClient} based on RxNetty.
+ * An RxNetty based implementation of {@link WebSocketClient}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

@@ -34,10 +34,11 @@ import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
- * Spring {@link WebSocketSession} adapter for Undertow's
+ * Spring {@link WebSocketSession} implementation that adapts to an Undertow
  * {@link io.undertow.websockets.core.WebSocketChannel}.
  * 
  * @author Violeta Georgieva
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<WebSocketChannel> {
@@ -90,7 +91,7 @@ public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<W
 	}
 
 	@Override
-	protected Mono<Void> closeInternal(CloseStatus status) {
+	public Mono<Void> close(CloseStatus status) {
 		CloseMessage cm = new CloseMessage(status.getCode(), status.getReason());
 		if (!getDelegate().isCloseFrameSent()) {
 			WebSockets.sendClose(cm, getDelegate(), null);

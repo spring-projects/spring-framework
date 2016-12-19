@@ -28,20 +28,19 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.Assert;
-import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
- * Base class for {@link WebSocketSession} implementations wrapping and
- * delegating to the native WebSocket session (or connection) of the underlying
- * WebSocket runtime.
+ * Convenient base class for {@link WebSocketSession} implementations that
+ * holds common fields and exposes accessors. Also implements the
+ * {@code WebSocketMessage} factory methods.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public abstract class WebSocketSessionSupport<T> implements WebSocketSession {
+public abstract class AbstractWebSocketSession<T> implements WebSocketSession {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -58,7 +57,7 @@ public abstract class WebSocketSessionSupport<T> implements WebSocketSession {
 	/**
 	 * Create a new instance and associate the given attributes with it.
 	 */
-	protected WebSocketSessionSupport(T delegate, String id, HandshakeInfo handshakeInfo,
+	protected AbstractWebSocketSession(T delegate, String id, HandshakeInfo handshakeInfo,
 			DataBufferFactory bufferFactory) {
 
 		Assert.notNull(delegate, "Native session is required.");
@@ -73,10 +72,7 @@ public abstract class WebSocketSessionSupport<T> implements WebSocketSession {
 	}
 
 
-	/**
-	 * Return the native session of the underlying runtime.
-	 */
-	public T getDelegate() {
+	protected T getDelegate() {
 		return this.delegate;
 	}
 
@@ -105,6 +101,9 @@ public abstract class WebSocketSessionSupport<T> implements WebSocketSession {
 		return this.bufferFactory;
 	}
 
+
+	// WebSocketMessage factory methods
+
 	@Override
 	public WebSocketMessage textMessage(String payload) {
 		byte[] bytes = payload.getBytes(StandardCharsets.UTF_8);
@@ -129,16 +128,6 @@ public abstract class WebSocketSessionSupport<T> implements WebSocketSession {
 		DataBuffer payload = payloadFactory.apply(bufferFactory());
 		return new WebSocketMessage(WebSocketMessage.Type.PONG, payload);
 	}
-
-	@Override
-	public final Mono<Void> close(CloseStatus status) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Closing " + this);
-		}
-		return closeInternal(status);
-	}
-
-	protected abstract Mono<Void> closeInternal(CloseStatus status);
 
 
 	@Override

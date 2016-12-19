@@ -33,13 +33,15 @@ import org.springframework.web.reactive.socket.WebSocketMessage.Type;
 import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
- * Base class for Listener-based {@link WebSocketSession} adapters.
+ * Base class for {@link WebSocketSession} implementations that bridge between
+ * event-listener WebSocket APIs (e.g. Java WebSocket API JSR-356, Jetty,
+ * Undertow) and Reactive Streams.
  *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public abstract class AbstractListenerWebSocketSession<T> extends WebSocketSessionSupport<T> {
+public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSocketSession<T> {
 
 	/**
 	 * The "back-pressure" buffer size to use if the underlying WebSocket API

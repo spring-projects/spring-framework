@@ -31,8 +31,8 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 
 
 /**
- * Spring {@link WebSocketSession} adapter for RxNetty's
- * {@link io.reactivex.netty.protocol.http.ws.WebSocketConnection}.
+ * Spring {@link WebSocketSession} implementation that adapts to Reactor Netty's
+ * WebSocket {@link NettyInbound} and {@link NettyOutbound}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -42,9 +42,9 @@ public class ReactorNettyWebSocketSession
 
 
 	public ReactorNettyWebSocketSession(NettyInbound inbound, NettyOutbound outbound,
-			HandshakeInfo handshakeInfo, NettyDataBufferFactory bufferFactory) {
+			HandshakeInfo info, NettyDataBufferFactory bufferFactory) {
 
-		super(new WebSocketConnection(inbound, outbound), handshakeInfo, bufferFactory);
+		super(new WebSocketConnection(inbound, outbound), info, bufferFactory);
 	}
 
 
@@ -64,10 +64,11 @@ public class ReactorNettyWebSocketSession
 	}
 
 	@Override
-	protected Mono<Void> closeInternal(CloseStatus status) {
+	public Mono<Void> close(CloseStatus status) {
 		return Mono.error(new UnsupportedOperationException(
-				"Currently in Reactor Netty applications are expected to use the Cancellation" +
-						"returned from subscribing to the input Flux to close the WebSocket session."));
+				"Currently in Reactor Netty applications are expected to use the " +
+						"Cancellation returned from subscribing to the \"receive\"-side Flux " +
+						"in order to close the WebSocket session."));
 	}
 
 

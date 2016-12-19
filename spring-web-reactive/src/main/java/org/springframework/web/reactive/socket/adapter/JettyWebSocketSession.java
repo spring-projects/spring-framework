@@ -32,10 +32,11 @@ import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
- * Spring {@link WebSocketSession} adapter for Jetty's
- * {@link org.eclipse.jetty.websocket.api.Session}.
+ * Spring {@link WebSocketSession} implementation that adapts to a Jetty
+ * WebSocket {@link org.eclipse.jetty.websocket.api.Session}.
  * 
  * @author Violeta Georgieva
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Session> {
@@ -86,7 +87,7 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 	}
 
 	@Override
-	protected Mono<Void> closeInternal(CloseStatus status) {
+	public Mono<Void> close(CloseStatus status) {
 		getDelegate().close(status.getCode(), status.getReason());
 		return Mono.empty();
 	}

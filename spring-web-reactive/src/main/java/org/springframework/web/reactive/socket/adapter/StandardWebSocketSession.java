@@ -38,12 +38,13 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  * {@link javax.websocket.Session}.
  * 
  * @author Violeta Georgieva
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class TomcatWebSocketSession extends AbstractListenerWebSocketSession<Session> {
+public class StandardWebSocketSession extends AbstractListenerWebSocketSession<Session> {
 
 
-	public TomcatWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory bufferFactory) {
+	public StandardWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory bufferFactory) {
 		super(session, session.getId(), info, bufferFactory);
 	}
 
@@ -88,7 +89,7 @@ public class TomcatWebSocketSession extends AbstractListenerWebSocketSession<Ses
 	}
 
 	@Override
-	protected Mono<Void> closeInternal(CloseStatus status) {
+	public Mono<Void> close(CloseStatus status) {
 		try {
 			CloseReason.CloseCode code = CloseCodes.getCloseCode(status.getCode());
 			getDelegate().close(new CloseReason(code, status.getReason()));

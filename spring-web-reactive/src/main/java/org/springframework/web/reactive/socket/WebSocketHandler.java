@@ -21,7 +21,7 @@ import java.util.List;
 import reactor.core.publisher.Mono;
 
 /**
- * Handler for a WebSocket-style session interaction.
+ * Handler for a WebSocket session.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -37,9 +37,10 @@ public interface WebSocketHandler {
 	}
 
 	/**
-	 * Handle the given WebSocket session.
-	 * @param session the session
-	 * @return signals completion for session handling
+	 * Handle the WebSocket session.
+	 * @param session the session to handle
+	 * @return completion {@code Mono<Void>} to indicate the outcome of the
+	 * WebSocket session handling.
 	 */
 	Mono<Void> handle(WebSocketSession session);
 

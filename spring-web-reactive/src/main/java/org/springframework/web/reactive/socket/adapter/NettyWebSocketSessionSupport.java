@@ -36,12 +36,14 @@ import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
- * Base class for Netty-based {@link WebSocketSession} adapters.
+ * Base class for Netty-based {@link WebSocketSession} adapters that provides
+ * convenience methods to convert Netty {@link WebSocketFrame}s to and from
+ * {@link WebSocketMessage}s.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public abstract class NettyWebSocketSessionSupport<T> extends WebSocketSessionSupport<T> {
+public abstract class NettyWebSocketSessionSupport<T> extends AbstractWebSocketSession<T> {
 
 	private static final Map<Class<?>, WebSocketMessage.Type> MESSAGE_TYPES;
 

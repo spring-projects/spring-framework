@@ -24,7 +24,9 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Representation of a WebSocket message.
- * Use one of the static factory methods in this class to create a message.
+ * <p>See static factory methods in {@link WebSocketSession} for creating messages
+ * with the {@link org.springframework.core.io.buffer.DataBufferFactory
+ * DataBufferFactory} for the session.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -37,15 +39,10 @@ public class WebSocketMessage {
 
 
 	/**
-	 * Constructor for a WebSocketMessage. To create, see factory methods:
-	 * <ul>
-	 * <li>{@link WebSocketSession#textMessage}
-	 * <li>{@link WebSocketSession#binaryMessage}
-	 * <li>{@link WebSocketSession#pingMessage}
-	 * <li>{@link WebSocketSession#pongMessage}
-	 * </ul>
-	 * <p>Alternatively use {@link WebSocketSession#bufferFactory()} to create
-	 * the payload and then invoke this constructor.
+	 * Constructor for a WebSocketMessage.
+	 * <p>See static factory methods in {@link WebSocketSession} or alternatively
+	 * use {@link WebSocketSession#bufferFactory()} to create the payload and
+	 * then invoke this constructor.
 	 */
 	public WebSocketMessage(Type type, DataBuffer payload) {
 		Assert.notNull(type, "'type' must not be null");
@@ -81,7 +78,7 @@ public class WebSocketMessage {
 
 	/**
 	 * Retain the data buffer for the message payload, which is useful on
-	 * runtimes with pooled buffers, e.g. Netty. A shortcut for:
+	 * runtimes (e.g. Netty) with pooled buffers. A shortcut for:
 	 * <pre>
 	 * DataBuffer payload = message.getPayload();
 	 * DataBufferUtils.retain(payload);
@@ -94,8 +91,8 @@ public class WebSocketMessage {
 	}
 
 	/**
-	 * Release the payload {@code DataBuffer} which is useful on runtimes with
-	 * pooled buffers such as Netty. Effectively a shortcut for:
+	 * Release the payload {@code DataBuffer} which is useful on runtimes
+	 * (e.g. Netty) with pooled buffers such as Netty. A shortcut for:
 	 * <pre>
 	 * DataBuffer payload = message.getPayload();
 	 * DataBufferUtils.release(payload);

@@ -36,7 +36,7 @@ public interface WebSocketClient {
 	 * @param url the handshake url
 	 * @param handler the handler of the WebSocket session
 	 * @return completion {@code Mono<Void>} to indicate the outcome of the
-	 * WebSocket session handling
+	 * WebSocket session handling.
 	 */
 	Mono<Void> execute(URI url, WebSocketHandler handler);
 
@@ -46,7 +46,7 @@ public interface WebSocketClient {
 	 * @param headers custom headers for the handshake request
 	 * @param handler the handler of the WebSocket session
 	 * @return completion {@code Mono<Void>} to indicate the outcome of the
-	 * WebSocket session handling
+	 * WebSocket session handling.
 	 */
 	Mono<Void> execute(URI url, HttpHeaders headers, WebSocketHandler handler);
 

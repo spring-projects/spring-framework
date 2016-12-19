@@ -38,33 +38,34 @@ import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketMessage.Type;
 
 /**
- * Undertow {@code WebSocketHandler} implementation adapting and
- * delegating to a Spring {@link WebSocketHandler}.
+ * Undertow {@link WebSocketConnectionCallback} implementation that adapts and
+ * delegates to a Spring {@link WebSocketHandler}.
  * 
  * @author Violeta Georgieva
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class UndertowWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupport
 		implements WebSocketConnectionCallback {
 
-	private UndertowWebSocketSession session;
+	private UndertowWebSocketSession delegateSession;
 
 
-	public UndertowWebSocketHandlerAdapter(HandshakeInfo handshakeInfo, DataBufferFactory bufferFactory,
-			WebSocketHandler delegate) {
+	public UndertowWebSocketHandlerAdapter(WebSocketHandler delegate, HandshakeInfo info,
+			DataBufferFactory bufferFactory) {
 
-		super(handshakeInfo, bufferFactory, delegate);
+		super(delegate, info, bufferFactory);
 	}
 
 
 	@Override
 	public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel channel) {
-		this.session = new UndertowWebSocketSession(channel, getHandshakeInfo(), getBufferFactory());
+		this.delegateSession = new UndertowWebSocketSession(channel, getHandshakeInfo(), bufferFactory());
 		channel.getReceiveSetter().set(new UndertowReceiveListener());
 		channel.resumeReceives();
 
 		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber();
-		getDelegate().handle(this.session).subscribe(resultSubscriber);
+		getDelegate().handle(this.delegateSession).subscribe(resultSubscriber);
 	}
 
 
@@ -72,44 +73,44 @@ public class UndertowWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupp
 
 		@Override
 		protected void onFullTextMessage(WebSocketChannel channel, BufferedTextMessage message) {
-			session.handleMessage(Type.TEXT, toMessage(Type.TEXT, message.getData()));
+			delegateSession.handleMessage(Type.TEXT, toMessage(Type.TEXT, message.getData()));
 		}
 
 		@Override
 		protected void onFullBinaryMessage(WebSocketChannel channel, BufferedBinaryMessage message) {
-			session.handleMessage(Type.BINARY, toMessage(Type.BINARY, message.getData().getResource()));
+			delegateSession.handleMessage(Type.BINARY, toMessage(Type.BINARY, message.getData().getResource()));
 			message.getData().free();
 		}
 
 		@Override
 		protected void onFullPongMessage(WebSocketChannel channel, BufferedBinaryMessage message) {
-			session.handleMessage(Type.PONG, toMessage(Type.PONG, message.getData().getResource()));
+			delegateSession.handleMessage(Type.PONG, toMessage(Type.PONG, message.getData().getResource()));
 			message.getData().free();
 		}
 
 		@Override
 		protected void onFullCloseMessage(WebSocketChannel channel, BufferedBinaryMessage message) {
 			CloseMessage closeMessage = new CloseMessage(message.getData().getResource());
-			session.handleClose(new CloseStatus(closeMessage.getCode(), closeMessage.getReason()));
+			delegateSession.handleClose(new CloseStatus(closeMessage.getCode(), closeMessage.getReason()));
 			message.getData().free();
 		}
 
 		@Override
 		protected void onError(WebSocketChannel channel, Throwable error) {
-			session.handleError(error);
+			delegateSession.handleError(error);
 		}
 
 		private <T> WebSocketMessage toMessage(Type type, T message) {
 			if (Type.TEXT.equals(type)) {
 				byte[] bytes = ((String) message).getBytes(StandardCharsets.UTF_8);
-				return new WebSocketMessage(Type.TEXT, getBufferFactory().wrap(bytes));
+				return new WebSocketMessage(Type.TEXT, bufferFactory().wrap(bytes));
 			}
 			else if (Type.BINARY.equals(type)) {
-				DataBuffer buffer = getBufferFactory().allocateBuffer().write((ByteBuffer[]) message);
+				DataBuffer buffer = bufferFactory().allocateBuffer().write((ByteBuffer[]) message);
 				return new WebSocketMessage(Type.BINARY, buffer);
 			}
 			else if (Type.PONG.equals(type)) {
-				DataBuffer buffer = getBufferFactory().allocateBuffer().write((ByteBuffer[]) message);
+				DataBuffer buffer = bufferFactory().allocateBuffer().write((ByteBuffer[]) message);
 				return new WebSocketMessage(Type.PONG, buffer);
 			}
 			else {
@@ -133,12 +134,13 @@ public class UndertowWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupp
 
 		@Override
 		public void onError(Throwable ex) {
-			session.close(new CloseStatus(CloseStatus.SERVER_ERROR.getCode(), ex.getMessage()));
+			int code = CloseStatus.SERVER_ERROR.getCode();
+			delegateSession.close(new CloseStatus(code, ex.getMessage()));
 		}
 
 		@Override
 		public void onComplete() {
-			session.close();
+			delegateSession.close();
 		}
 	}
 

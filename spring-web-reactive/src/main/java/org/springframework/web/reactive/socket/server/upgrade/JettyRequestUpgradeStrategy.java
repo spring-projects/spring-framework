@@ -17,8 +17,6 @@
 package org.springframework.web.reactive.socket.server.upgrade;
 
 import java.io.IOException;
-import java.net.URI;
-import java.security.Principal;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,14 +28,13 @@ import reactor.core.publisher.Mono;
 import org.springframework.context.Lifecycle;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServletServerHttpRequest;
 import org.springframework.http.server.reactive.ServletServerHttpResponse;
 import org.springframework.util.Assert;
-import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.HandshakeInfo;
+import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
@@ -111,13 +108,9 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		HttpServletRequest servletRequest = getHttpServletRequest(request);
 		HttpServletResponse servletResponse = getHttpServletResponse(response);
 
-		URI uri = request.getURI();
-		HttpHeaders headers = request.getHeaders();
-		Mono<Principal> principal = exchange.getPrincipal();
-		HandshakeInfo info = new HandshakeInfo(uri, headers, principal);
-		DataBufferFactory bufferFactory = response.bufferFactory();
-
-		JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(info, bufferFactory, handler);
+		HandshakeInfo info = getHandshakeInfo(exchange);
+		DataBufferFactory factory = response.bufferFactory();
+		JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(handler, info, factory);
 
 		startLazily(servletRequest);
 
@@ -146,6 +139,11 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	private HttpServletResponse getHttpServletResponse(ServerHttpResponse response) {
 		Assert.isTrue(response instanceof ServletServerHttpResponse);
 		return ((ServletServerHttpResponse) response).getServletResponse();
+	}
+
+	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange) {
+		ServerHttpRequest request = exchange.getRequest();
+		return new HandshakeInfo(request.getURI(), request.getHeaders(), exchange.getPrincipal());
 	}
 
 	private void startLazily(HttpServletRequest request) {

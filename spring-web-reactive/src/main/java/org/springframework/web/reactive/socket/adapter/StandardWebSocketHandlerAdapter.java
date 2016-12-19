@@ -36,21 +36,22 @@ import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketMessage.Type;
 
 /**
- * Tomcat {@code WebSocketHandler} implementation adapting and
- * delegating to a Spring {@link WebSocketHandler}.
- * 
+ * Adapter for Java WebSocket API (JSR-356) {@link Endpoint} delegating events
+ * to a reactive {@link WebSocketHandler} and its session.
+ *
  * @author Violeta Georgieva
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class TomcatWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupport {
+public class StandardWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupport {
 
-	private TomcatWebSocketSession session;
+	private StandardWebSocketSession delegateSession;
 
 
-	public TomcatWebSocketHandlerAdapter(HandshakeInfo handshakeInfo, DataBufferFactory bufferFactory,
-			WebSocketHandler delegate) {
+	public StandardWebSocketHandlerAdapter(WebSocketHandler delegate, HandshakeInfo info,
+			DataBufferFactory bufferFactory) {
 
-		super(handshakeInfo, bufferFactory, delegate);
+		super(delegate, info, bufferFactory);
 	}
 
 
@@ -58,47 +59,42 @@ public class TomcatWebSocketHandlerAdapter extends WebSocketHandlerAdapterSuppor
 		return new StandardEndpoint();
 	}
 
-	private TomcatWebSocketSession getSession() {
-		return this.session;
-	}
-
 
 	private class StandardEndpoint extends Endpoint {
 
 		@Override
-		public void onOpen(Session session, EndpointConfig config) {
+		public void onOpen(Session nativeSession, EndpointConfig config) {
 
-			TomcatWebSocketHandlerAdapter.this.session = new TomcatWebSocketSession(
-					session, getHandshakeInfo(), getBufferFactory());
+			delegateSession = new StandardWebSocketSession(nativeSession, getHandshakeInfo(), bufferFactory());
 
-			session.addMessageHandler(String.class, message -> {
+			nativeSession.addMessageHandler(String.class, message -> {
 				WebSocketMessage webSocketMessage = toMessage(message);
-				getSession().handleMessage(webSocketMessage.getType(), webSocketMessage);
+				delegateSession.handleMessage(webSocketMessage.getType(), webSocketMessage);
 			});
-			session.addMessageHandler(ByteBuffer.class, message -> {
+			nativeSession.addMessageHandler(ByteBuffer.class, message -> {
 				WebSocketMessage webSocketMessage = toMessage(message);
-				getSession().handleMessage(webSocketMessage.getType(), webSocketMessage);
+				delegateSession.handleMessage(webSocketMessage.getType(), webSocketMessage);
 			});
-			session.addMessageHandler(PongMessage.class, message -> {
+			nativeSession.addMessageHandler(PongMessage.class, message -> {
 				WebSocketMessage webSocketMessage = toMessage(message);
-				getSession().handleMessage(webSocketMessage.getType(), webSocketMessage);
+				delegateSession.handleMessage(webSocketMessage.getType(), webSocketMessage);
 			});
 
 			HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber();
-			getDelegate().handle(TomcatWebSocketHandlerAdapter.this.session).subscribe(resultSubscriber);
+			getDelegate().handle(delegateSession).subscribe(resultSubscriber);
 		}
 
 		private <T> WebSocketMessage toMessage(T message) {
 			if (message instanceof String) {
 				byte[] bytes = ((String) message).getBytes(StandardCharsets.UTF_8);
-				return new WebSocketMessage(Type.TEXT, getBufferFactory().wrap(bytes));
+				return new WebSocketMessage(Type.TEXT, bufferFactory().wrap(bytes));
 			}
 			else if (message instanceof ByteBuffer) {
-				DataBuffer buffer = getBufferFactory().wrap((ByteBuffer) message);
+				DataBuffer buffer = bufferFactory().wrap((ByteBuffer) message);
 				return new WebSocketMessage(Type.BINARY, buffer);
 			}
 			else if (message instanceof PongMessage) {
-				DataBuffer buffer = getBufferFactory().wrap(((PongMessage) message).getApplicationData());
+				DataBuffer buffer = bufferFactory().wrap(((PongMessage) message).getApplicationData());
 				return new WebSocketMessage(Type.PONG, buffer);
 			}
 			else {
@@ -108,16 +104,16 @@ public class TomcatWebSocketHandlerAdapter extends WebSocketHandlerAdapterSuppor
 
 		@Override
 		public void onClose(Session session, CloseReason reason) {
-			if (getSession() != null) {
+			if (delegateSession != null) {
 				int code = reason.getCloseCode().getCode();
-				getSession().handleClose(new CloseStatus(code, reason.getReasonPhrase()));
+				delegateSession.handleClose(new CloseStatus(code, reason.getReasonPhrase()));
 			}
 		}
 
 		@Override
 		public void onError(Session session, Throwable exception) {
-			if (getSession() != null) {
-				getSession().handleError(exception);
+			if (delegateSession != null) {
+				delegateSession.handleError(exception);
 			}
 		}
 	}
@@ -136,15 +132,16 @@ public class TomcatWebSocketHandlerAdapter extends WebSocketHandlerAdapterSuppor
 
 		@Override
 		public void onError(Throwable ex) {
-			if (getSession() != null) {
-				getSession().close(new CloseStatus(CloseStatus.SERVER_ERROR.getCode(), ex.getMessage()));
+			if (delegateSession != null) {
+				int code = CloseStatus.SERVER_ERROR.getCode();
+				delegateSession.close(new CloseStatus(code, ex.getMessage()));
 			}
 		}
 
 		@Override
 		public void onComplete() {
-			if (getSession() != null) {
-				getSession().close();
+			if (delegateSession != null) {
+				delegateSession.close();
 			}
 		}
 	}

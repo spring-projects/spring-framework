@@ -37,9 +37,10 @@ import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A {@code WebSocketService} implementation that handles a WebSocket handshake
- * and upgrades to a WebSocket interaction through the configured or
- * auto-detected {@link RequestUpgradeStrategy}.
+ * {@code WebSocketService} implementation that handles a WebSocket HTTP
+ * handshake request by delegating to a {@link RequestUpgradeStrategy} which
+ * is either auto-detected (no-arg constructor) from the classpath but can
+ * also be explicitly configured.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

@@ -34,7 +34,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.adapter.ReactorNettyWebSocketSession;
 
 /**
- * A {@link WebSocketClient} based on Reactor Netty.
+ * A Reactor Netty based implementation of {@link WebSocketClient}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

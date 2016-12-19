@@ -31,7 +31,7 @@ import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
- * Spring {@link WebSocketSession} adapter for RxNetty's
+ * Spring {@link WebSocketSession} implementation that adapts to the RxNetty
  * {@link io.reactivex.netty.protocol.http.ws.WebSocketConnection}.
  *
  * @author Rossen Stoyanchev
@@ -40,7 +40,9 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public class RxNettyWebSocketSession extends NettyWebSocketSessionSupport<WebSocketConnection> {
 
 
-	public RxNettyWebSocketSession(WebSocketConnection conn, HandshakeInfo info, NettyDataBufferFactory factory) {
+	public RxNettyWebSocketSession(WebSocketConnection conn, HandshakeInfo info,
+			NettyDataBufferFactory factory) {
+
 		super(conn, info, factory);
 	}
 
@@ -60,7 +62,7 @@ public class RxNettyWebSocketSession extends NettyWebSocketSessionSupport<WebSoc
 	}
 
 	@Override
-	protected Mono<Void> closeInternal(CloseStatus status) {
+	public Mono<Void> close(CloseStatus status) {
 		Observable<Void> completion = getDelegate().close();
 		return Mono.from(RxReactiveStreams.toPublisher(completion));
 	}

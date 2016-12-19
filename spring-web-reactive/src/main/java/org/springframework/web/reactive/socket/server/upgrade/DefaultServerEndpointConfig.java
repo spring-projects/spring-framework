@@ -30,37 +30,33 @@ import javax.websocket.server.ServerEndpointConfig;
 import org.springframework.util.Assert;
 
 /**
- * An implementation of {@link javax.websocket.server.ServerEndpointConfig} for use in
- * Spring applications.
- *
- * <p>Class constructor accept a singleton {@link javax.websocket.Endpoint} instance.
- *
- * <p>This class also extends
- * {@link javax.websocket.server.ServerEndpointConfig.Configurator} to make it easier to
- * override methods for customizing the handshake process.
+ * Default implementation of {@link javax.websocket.server.ServerEndpointConfig}
+ * for use in {@code RequestUpgradeStrategy} implementations.
  *
  * @author Violeta Georgieva
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ServerEndpointRegistration extends ServerEndpointConfig.Configurator 
+class DefaultServerEndpointConfig extends ServerEndpointConfig.Configurator
 		implements ServerEndpointConfig {
 
 	private final String path;
 
 	private final Endpoint endpoint;
 
+
 	/**
-	 * Create a new {@link ServerEndpointRegistration} instance from an
-	 * {@code javax.websocket.Endpoint} instance.
+	 * Constructor with a path and an {@code javax.websocket.Endpoint}.
 	 * @param path the endpoint path
 	 * @param endpoint the endpoint instance
 	 */
-	public ServerEndpointRegistration(String path, Endpoint endpoint) {
+	public DefaultServerEndpointConfig(String path, Endpoint endpoint) {
 		Assert.hasText(path, "path must not be empty");
 		Assert.notNull(endpoint, "endpoint must not be null");
 		this.path = path;
 		this.endpoint = endpoint;
 	}
+
 
 	@Override
 	public List<Class<? extends Encoder>> getEncoders() {
@@ -80,10 +76,6 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 	@Override
 	public Class<?> getEndpointClass() {
 		return this.endpoint.getClass();
-	}
-
-	public Endpoint getEndpoint() {
-		return this.endpoint;
 	}
 
 	@Override
@@ -108,13 +100,13 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T getEndpointInstance(Class<T> endpointClass)
-			throws InstantiationException {
-		return (T) getEndpoint();
+	public <T> T getEndpointInstance(Class<T> endpointClass) throws InstantiationException {
+		return (T) this.endpoint;
 	}
 
 	@Override
 	public String toString() {
-		return "ServerEndpointRegistration for path '" + getPath() + "': " + getEndpointClass();
+		return "DefaultServerEndpointConfig for path '" + getPath() + "': " + getEndpointClass();
 	}
+
 }

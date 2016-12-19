@@ -21,44 +21,45 @@ import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 
 /**
- * Base class for {@link WebSocketHandler} adapters to WebSocket handler APIs
- * of underlying runtimes.
+ * Base class for adapters from event-listener WebSocket APIs (e.g. Java
+ * WebSocket API JSR-356, Jetty, Undertow) to the Reactive Streams based
+ * {@link WebSocketHandler}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public abstract class WebSocketHandlerAdapterSupport {
 
-	private final HandshakeInfo handshakeInfo;
-
 	private final WebSocketHandler delegate;
+
+	private final HandshakeInfo handshakeInfo;
 
 	private final DataBufferFactory bufferFactory;
 
 
-	protected WebSocketHandlerAdapterSupport(HandshakeInfo handshakeInfo, DataBufferFactory bufferFactory,
-			WebSocketHandler handler) {
+	protected WebSocketHandlerAdapterSupport(WebSocketHandler delegate, HandshakeInfo info,
+			DataBufferFactory bufferFactory) {
 
-		Assert.notNull(handshakeInfo, "HandshakeInfo is required.");
+		Assert.notNull(delegate, "WebSocketHandler delegate is required");
+		Assert.notNull(info, "HandshakeInfo is required.");
 		Assert.notNull(bufferFactory, "DataBufferFactory is required");
-		Assert.notNull(handler, "WebSocketHandler handler is required");
 
-		this.handshakeInfo = handshakeInfo;
+		this.delegate = delegate;
+		this.handshakeInfo = info;
 		this.bufferFactory = bufferFactory;
-		this.delegate = handler;
 	}
 
-
-	protected HandshakeInfo getHandshakeInfo() {
-		return this.handshakeInfo;
-	}
 
 	protected WebSocketHandler getDelegate() {
 		return this.delegate;
 	}
 
+	protected HandshakeInfo getHandshakeInfo() {
+		return this.handshakeInfo;
+	}
+
 	@SuppressWarnings("unchecked")
-	protected <T extends DataBufferFactory> T getBufferFactory() {
+	protected <T extends DataBufferFactory> T bufferFactory() {
 		return (T) this.bufferFactory;
 	}
 

@@ -15,19 +15,16 @@
  */
 package org.springframework.web.reactive.socket.server.upgrade;
 
-import java.net.URI;
-import java.security.Principal;
 import java.util.List;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.server.reactive.ReactorServerHttpRequest;
 import org.springframework.http.server.reactive.ReactorServerHttpResponse;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.StringUtils;
-import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.HandshakeInfo;
+import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.ReactorNettyWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
@@ -43,13 +40,8 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 	@Override
 	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler) {
 
-		ReactorServerHttpRequest request = (ReactorServerHttpRequest) exchange.getRequest();
 		ReactorServerHttpResponse response = (ReactorServerHttpResponse) exchange.getResponse();
-
-		URI uri = request.getURI();
-		HttpHeaders headers = request.getHeaders();
-		Mono<Principal> principal = exchange.getPrincipal();
-		HandshakeInfo handshakeInfo = new HandshakeInfo(uri, headers, principal);
+		HandshakeInfo handshakeInfo = getHandshakeInfo(exchange);
 		NettyDataBufferFactory bufferFactory = (NettyDataBufferFactory) response.bufferFactory();
 
 		String protocols = StringUtils.arrayToCommaDelimitedString(getSubProtocols(handler));
@@ -58,6 +50,11 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 		return response.getReactorResponse().sendWebsocket(protocols,
 				(inbound, outbound) -> handler.handle(
 						new ReactorNettyWebSocketSession(inbound, outbound, handshakeInfo, bufferFactory)));
+	}
+
+	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange) {
+		ServerHttpRequest request = exchange.getRequest();
+		return new HandshakeInfo(request.getURI(), request.getHeaders(), exchange.getPrincipal());
 	}
 
 	private static String[] getSubProtocols(WebSocketHandler webSocketHandler) {
