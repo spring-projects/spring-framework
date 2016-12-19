@@ -99,6 +99,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Stephane Nicoll
+ * @author Kazuki Shimizu
  * @see #setAllowedFields
  * @see #setRequiredFields
  * @see #registerCustomEditor

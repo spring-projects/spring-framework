@@ -186,44 +186,6 @@ public final class ModelFactory {
 	}
 
 	/**
-	 * Derives the model attribute name for a method parameter based on:
-	 * <ol>
-	 * <li>The parameter {@code @ModelAttribute} annotation value
-	 * <li>The parameter type
-	 * </ol>
-	 * @return the derived name; never {@code null} or an empty string
-	 */
-	public static String getNameForParameter(MethodParameter parameter) {
-		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
-		String name = (ann != null ? ann.value() : null);
-		return StringUtils.hasText(name) ? name : Conventions.getVariableNameForParameter(parameter);
-	}
-
-	/**
-	 * Derive the model attribute name for the given return value using one of:
-	 * <ol>
-	 * <li>The method {@code ModelAttribute} annotation value
-	 * <li>The declared return type if it is more specific than {@code Object}
-	 * <li>The actual return value type
-	 * </ol>
-	 * @param returnValue the value returned from a method invocation
-	 * @param returnType the return type of the method
-	 * @return the model name, never {@code null} nor empty
-	 */
-	public static String getNameForReturnValue(Object returnValue, MethodParameter returnType) {
-		ModelAttribute ann = returnType.getMethodAnnotation(ModelAttribute.class);
-		if (ann != null && StringUtils.hasText(ann.value())) {
-			return ann.value();
-		}
-		else {
-			Method method = returnType.getMethod();
-			Class<?> containingClass = returnType.getContainingClass();
-			Class<?> resolvedType = GenericTypeResolver.resolveReturnType(method, containingClass);
-			return Conventions.getVariableNameForReturnType(method, resolvedType, returnValue);
-		}
-	}
-
-	/**
 	 * Promote model attributes listed as {@code @SessionAttributes} to the session.
 	 * Add {@link BindingResult} attributes where necessary.
 	 * @param request the current request
@@ -275,6 +237,46 @@ public final class ModelFactory {
 
 		return (value != null && !value.getClass().isArray() && !(value instanceof Collection) &&
 				!(value instanceof Map) && !BeanUtils.isSimpleValueType(value.getClass()));
+	}
+
+
+	/**
+	 * Derive the model attribute name for a method parameter based on:
+	 * <ol>
+	 * <li>the parameter {@code @ModelAttribute} annotation value
+	 * <li>the parameter type
+	 * </ol>
+	 * @param parameter a descriptor for the method parameter
+	 * @return the derived name (never {@code null} or empty String)
+	 */
+	public static String getNameForParameter(MethodParameter parameter) {
+		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
+		String name = (ann != null ? ann.value() : null);
+		return (StringUtils.hasText(name) ? name : Conventions.getVariableNameForParameter(parameter));
+	}
+
+	/**
+	 * Derive the model attribute name for the given return value based on:
+	 * <ol>
+	 * <li>the method {@code ModelAttribute} annotation value
+	 * <li>the declared return type if it is more specific than {@code Object}
+	 * <li>the actual return value type
+	 * </ol>
+	 * @param returnValue the value returned from a method invocation
+	 * @param returnType a descriptor for the return type of the method
+	 * @return the derived name (never {@code null} or empty String)
+	 */
+	public static String getNameForReturnValue(Object returnValue, MethodParameter returnType) {
+		ModelAttribute ann = returnType.getMethodAnnotation(ModelAttribute.class);
+		if (ann != null && StringUtils.hasText(ann.value())) {
+			return ann.value();
+		}
+		else {
+			Method method = returnType.getMethod();
+			Class<?> containingClass = returnType.getContainingClass();
+			Class<?> resolvedType = GenericTypeResolver.resolveReturnType(method, containingClass);
+			return Conventions.getVariableNameForReturnType(method, resolvedType, returnValue);
+		}
 	}
 
 
