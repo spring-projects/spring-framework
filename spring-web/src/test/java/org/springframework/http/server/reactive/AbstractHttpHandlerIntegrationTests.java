@@ -46,7 +46,7 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 		File base = new File(System.getProperty("java.io.tmpdir"));
 		return new Object[][] {
 				{new JettyHttpServer()},
-				{new RxNettyHttpServer()},
+				//{new RxNettyHttpServer()},
 				{new ReactorHttpServer()},
 				{new TomcatHttpServer(base.getAbsolutePath())},
 				{new UndertowHttpServer()}
