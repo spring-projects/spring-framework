@@ -83,7 +83,7 @@ import org.springframework.util.ObjectUtils;
  * via the {@link #setListeners(MBeanExporterListener[]) listeners} property, allowing
  * application code to be notified of MBean registration and unregistration events.
  *
- * <p>This exporter is compatible with MBeans and MXBeans on Java 6 and above.
+ * <p>This exporter is compatible with MBeans as well as MXBeans.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -466,7 +466,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 				objectName = JmxUtils.appendIdentityToObjectName(objectName, managedResource);
 			}
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new MBeanExportException("Unable to generate ObjectName for MBean [" + managedResource + "]", ex);
 		}
 		registerManagedResource(managedResource, objectName);
@@ -578,7 +578,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @param mapValue the value configured for this bean in the beans map;
 	 * may be either the {@code String} name of a bean, or the bean itself
 	 * @param beanKey the key associated with this bean in the beans map
-	 * @return the {@code ObjectName} under which the resource was registered
+	 * @return the {@code ObjectName} under which the resource was registered,
+	 * or {@code null} if the actual resource was {@code null} as well
 	 * @throws MBeanExportException if the export failed
 	 * @see #setBeans
 	 * @see #registerBeanInstance
@@ -599,12 +600,14 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 				}
 				else {
 					Object bean = this.beanFactory.getBean(beanName);
-					ObjectName objectName = registerBeanInstance(bean, beanKey);
-					replaceNotificationListenerBeanNameKeysIfNecessary(beanName, objectName);
-					return objectName;
+					if (bean != null) {
+						ObjectName objectName = registerBeanInstance(bean, beanKey);
+						replaceNotificationListenerBeanNameKeysIfNecessary(beanName, objectName);
+						return objectName;
+					}
 				}
 			}
-			else {
+			else if (mapValue != null) {
 				// Plain bean instance -> register it directly.
 				if (this.beanFactory != null) {
 					Map<String, ?> beansOfSameType =
@@ -621,10 +624,11 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 				return registerBeanInstance(mapValue, beanKey);
 			}
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new UnableToRegisterMBeanException(
 					"Unable to register MBean [" + mapValue + "] with key '" + beanKey + "'", ex);
 		}
+		return null;
 	}
 
 	/**
@@ -816,7 +820,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 			mbean.setManagedResource(managedResource, MR_TYPE_OBJECT_REFERENCE);
 			return mbean;
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new MBeanExportException("Could not create ModelMBean for managed resource [" +
 					managedResource + "] with key '" + beanKey + "'", ex);
 		}
@@ -984,7 +988,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 						}
 					}
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					throw new MBeanExportException("Unable to register NotificationListener", ex);
 				}
 			}
@@ -1004,7 +1008,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 					this.server.removeNotificationListener(mappedObjectName, bean.getNotificationListener(),
 							bean.getNotificationFilter(), bean.getHandback());
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Unable to unregister NotificationListener", ex);
 					}
