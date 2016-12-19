@@ -160,11 +160,13 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	private String[] requiredFields;
 
+	private ConversionService conversionService;
+
+	private MessageCodesResolver messageCodesResolver;
+
 	private BindingErrorProcessor bindingErrorProcessor = new DefaultBindingErrorProcessor();
 
 	private final List<Validator> validators = new ArrayList<Validator>();
-
-	private ConversionService conversionService;
 
 
 	/**
@@ -271,9 +273,14 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected AbstractPropertyBindingResult createBeanPropertyBindingResult() {
 		BeanPropertyBindingResult result = new BeanPropertyBindingResult(getTarget(),
 				getObjectName(), isAutoGrowNestedPaths(), getAutoGrowCollectionLimit());
+
 		if (this.conversionService != null) {
 			result.initConversion(this.conversionService);
 		}
+		if (this.messageCodesResolver != null) {
+			result.setMessageCodesResolver(this.messageCodesResolver);
+		}
+
 		return result;
 	}
 
@@ -297,9 +304,14 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected AbstractPropertyBindingResult createDirectFieldBindingResult() {
 		DirectFieldBindingResult result = new DirectFieldBindingResult(getTarget(),
 				getObjectName(), isAutoGrowNestedPaths());
+
 		if (this.conversionService != null) {
 			result.initConversion(this.conversionService);
 		}
+		if (this.messageCodesResolver != null) {
+			result.setMessageCodesResolver(this.messageCodesResolver);
+		}
+
 		return result;
 	}
 
@@ -494,7 +506,11 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * property editor to a new value for a field.
 	 * <p>Default is "true", exposing previous field values to custom editors.
 	 * Turn this to "false" to avoid side effects caused by getters.
+	 * @deprecated as of Spring 4.3.5, in favor of customizing this in
+	 * {@link #createBeanPropertyBindingResult()} or
+	 * {@link #createDirectFieldBindingResult()} itself
 	 */
+	@Deprecated
 	public void setExtractOldValueForEditor(boolean extractOldValueForEditor) {
 		getPropertyAccessor().setExtractOldValueForEditor(extractOldValueForEditor);
 	}
@@ -507,7 +523,11 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see DefaultMessageCodesResolver
 	 */
 	public void setMessageCodesResolver(MessageCodesResolver messageCodesResolver) {
-		getInternalBindingResult().setMessageCodesResolver(messageCodesResolver);
+		Assert.state(this.messageCodesResolver == null, "DataBinder is already initialized with MessageCodesResolver");
+		this.messageCodesResolver = messageCodesResolver;
+		if (this.bindingResult != null && messageCodesResolver != null) {
+			this.bindingResult.setMessageCodesResolver(messageCodesResolver);
+		}
 	}
 
 	/**
