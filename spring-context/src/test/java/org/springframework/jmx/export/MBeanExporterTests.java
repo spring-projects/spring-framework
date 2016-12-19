@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,10 @@ import javax.management.modelmbean.ModelMBeanInfo;
 import org.junit.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jmx.AbstractMBeanServerTests;
@@ -677,6 +679,37 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 				ObjectNameManager.getInstance(objectName2));
 	}
 
+	@Test
+	public void testRegisterFactoryBean() throws MalformedObjectNameException {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition("spring:type=FactoryBean", new RootBeanDefinition(ProperSomethingFactoryBean.class));
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(getServer());
+		exporter.setBeanFactory(factory);
+		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ALL);
+		exporter.afterPropertiesSet();
+
+		assertIsRegistered("Non-null FactoryBean object registered",
+				ObjectNameManager.getInstance("spring:type=FactoryBean"));
+	}
+
+	@Test
+	public void testIgnoreNullObjectFromFactoryBean() throws MalformedObjectNameException {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition("spring:type=FactoryBean", new RootBeanDefinition(NullSomethingFactoryBean.class));
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(getServer());
+		exporter.setBeanFactory(factory);
+		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ALL);
+		exporter.afterPropertiesSet();
+
+		assertIsNotRegistered("Null FactoryBean object not registered",
+				ObjectNameManager.getInstance("spring:type=FactoryBean"));
+	}
+
+
 	private Map<String, Object> getBeanMap() {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put(OBJECT_NAME, new JmxTestBean());
@@ -802,6 +835,43 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		@Override
 		public boolean includeBean(Class<?> beanClass, String beanName) {
 			return this.namedBean.equals(beanName);
+		}
+	}
+
+
+	public interface SomethingMBean {}
+
+	public static class Something implements SomethingMBean {}
+
+
+	public static class ProperSomethingFactoryBean implements FactoryBean<Something> {
+
+		public Something getObject() {
+			return new Something();
+		}
+
+		public Class<?> getObjectType() {
+			return Something.class;
+		}
+
+		public boolean isSingleton() {
+			return true;
+		}
+	}
+
+
+	public static class NullSomethingFactoryBean implements FactoryBean<Something> {
+
+		public Something getObject() {
+			return null;
+		}
+
+		public Class<?> getObjectType() {
+			return Something.class;
+		}
+
+		public boolean isSingleton() {
+			return true;
 		}
 	}
 

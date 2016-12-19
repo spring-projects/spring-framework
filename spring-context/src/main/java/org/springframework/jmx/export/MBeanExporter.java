@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -446,7 +446,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 				objectName = JmxUtils.appendIdentityToObjectName(objectName, managedResource);
 			}
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new MBeanExportException("Unable to generate ObjectName for MBean [" + managedResource + "]", ex);
 		}
 		registerManagedResource(managedResource, objectName);
@@ -548,7 +548,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * should be exposed to the {@code MBeanServer}. Specifically, if the
 	 * supplied {@code mapValue} is the name of a bean that is configured
 	 * for lazy initialization, then a proxy to the resource is registered with
-	 * the {@code MBeanServer} so that the the lazy load behavior is
+	 * the {@code MBeanServer} so that the lazy load behavior is
 	 * honored. If the bean is already an MBean then it will be registered
 	 * directly with the {@code MBeanServer} without any intervention. For
 	 * all other beans or bean names, the resource itself is registered with
@@ -556,7 +556,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @param mapValue the value configured for this bean in the beans map;
 	 * may be either the {@code String} name of a bean, or the bean itself
 	 * @param beanKey the key associated with this bean in the beans map
-	 * @return the {@code ObjectName} under which the resource was registered
+	 * @return the {@code ObjectName} under which the resource was registered,
+	 * or {@code null} if the actual resource was {@code null} as well
 	 * @throws MBeanExportException if the export failed
 	 * @see #setBeans
 	 * @see #registerBeanInstance
@@ -577,12 +578,14 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 				}
 				else {
 					Object bean = this.beanFactory.getBean(beanName);
-					ObjectName objectName = registerBeanInstance(bean, beanKey);
-					replaceNotificationListenerBeanNameKeysIfNecessary(beanName, objectName);
-					return objectName;
+					if (bean != null) {
+						ObjectName objectName = registerBeanInstance(bean, beanKey);
+						replaceNotificationListenerBeanNameKeysIfNecessary(beanName, objectName);
+						return objectName;
+					}
 				}
 			}
-			else {
+			else if (mapValue != null) {
 				// Plain bean instance -> register it directly.
 				if (this.beanFactory != null) {
 					Map<String, ?> beansOfSameType =
@@ -599,10 +602,11 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 				return registerBeanInstance(mapValue, beanKey);
 			}
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new UnableToRegisterMBeanException(
 					"Unable to register MBean [" + mapValue + "] with key '" + beanKey + "'", ex);
 		}
+		return null;
 	}
 
 	/**
@@ -794,7 +798,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 			mbean.setManagedResource(managedResource, MR_TYPE_OBJECT_REFERENCE);
 			return mbean;
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new MBeanExportException("Could not create ModelMBean for managed resource [" +
 					managedResource + "] with key '" + beanKey + "'", ex);
 		}
@@ -960,7 +964,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 						}
 					}
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					throw new MBeanExportException("Unable to register NotificationListener", ex);
 				}
 			}
@@ -980,7 +984,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 					this.server.removeNotificationListener(mappedObjectName, bean.getNotificationListener(),
 							bean.getNotificationFilter(), bean.getHandback());
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Unable to unregister NotificationListener", ex);
 					}
