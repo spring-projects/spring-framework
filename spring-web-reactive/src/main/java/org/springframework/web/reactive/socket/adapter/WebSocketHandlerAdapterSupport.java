@@ -17,6 +17,7 @@ package org.springframework.web.reactive.socket.adapter;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.Assert;
+import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 
 /**

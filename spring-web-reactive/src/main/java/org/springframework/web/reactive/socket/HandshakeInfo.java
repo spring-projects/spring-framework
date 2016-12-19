@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.reactive.socket.adapter;
+package org.springframework.web.reactive.socket;
 
 import java.net.URI;
 import java.security.Principal;

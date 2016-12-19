@@ -15,9 +15,6 @@
  */
 package org.springframework.web.reactive.socket;
 
-import java.net.URI;
-import java.security.Principal;
-import java.util.Optional;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
@@ -26,8 +23,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.web.reactive.socket.adapter.HandshakeInfo;
 
 /**
  * Representation for a WebSocket session.
@@ -65,6 +60,22 @@ public interface WebSocketSession {
 	Mono<Void> send(Publisher<WebSocketMessage> messages);
 
 	/**
+	 * Close the WebSocket session with {@link CloseStatus#NORMAL}.
+	 */
+	default Mono<Void> close() {
+		return close(CloseStatus.NORMAL);
+	}
+
+	/**
+	 * Close the WebSocket session with the given status.
+	 * @param status the close status
+	 */
+	Mono<Void> close(CloseStatus status);
+
+
+	// WebSocketMessage factory methods
+
+	/**
 	 * Factory method to create a text {@link WebSocketMessage} using the
 	 * {@link #bufferFactory()} for the session.
 	 */
@@ -87,18 +98,5 @@ public interface WebSocketSession {
 	 * {@link #bufferFactory()} for the session.
 	 */
 	WebSocketMessage pongMessage(Function<DataBufferFactory, DataBuffer> payloadFactory);
-
-	/**
-	 * Close the WebSocket session with {@link CloseStatus#NORMAL}.
-	 */
-	default Mono<Void> close() {
-		return close(CloseStatus.NORMAL);
-	}
-
-	/**
-	 * Close the WebSocket session with the given status.
-	 * @param status the close status
-	 */
-	Mono<Void> close(CloseStatus status);
 
 }

@@ -88,20 +88,21 @@ public class WebSocketMessage {
 	 * </pre>
 	 * @see DataBufferUtils#retain(DataBuffer)
 	 */
-	public void retainPayload() {
+	public WebSocketMessage retain() {
 		DataBufferUtils.retain(this.payload);
+		return this;
 	}
 
 	/**
-	 * Release the data buffer for the message payload, which is useful on
-	 * runtimes with pooled buffers, e.g. Netty. This is a shortcut for:
+	 * Release the payload {@code DataBuffer} which is useful on runtimes with
+	 * pooled buffers such as Netty. Effectively a shortcut for:
 	 * <pre>
 	 * DataBuffer payload = message.getPayload();
 	 * DataBufferUtils.release(payload);
 	 * </pre>
 	 * @see DataBufferUtils#release(DataBuffer)
 	 */
-	public void releasePayload() {
+	public void release() {
 		DataBufferUtils.release(this.payload);
 	}
 

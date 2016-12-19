@@ -29,7 +29,7 @@ import org.springframework.http.server.reactive.RxNettyServerHttpRequest;
 import org.springframework.http.server.reactive.RxNettyServerHttpResponse;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketSession;
-import org.springframework.web.reactive.socket.adapter.HandshakeInfo;
+import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.adapter.RxNettyWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;

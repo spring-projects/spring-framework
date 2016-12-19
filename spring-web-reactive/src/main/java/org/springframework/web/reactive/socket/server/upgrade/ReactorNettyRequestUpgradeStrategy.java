@@ -27,7 +27,7 @@ import org.springframework.http.server.reactive.ReactorServerHttpRequest;
 import org.springframework.http.server.reactive.ReactorServerHttpResponse;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.socket.WebSocketHandler;
-import org.springframework.web.reactive.socket.adapter.HandshakeInfo;
+import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.adapter.ReactorNettyWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;

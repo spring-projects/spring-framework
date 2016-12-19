@@ -25,7 +25,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -61,7 +60,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 								.take(count)
 								.map(message -> {
 									String text = message.getPayloadAsText();
-									DataBufferUtils.release(message.getPayload());
+									message.release();
 									return text;
 								})
 						));
