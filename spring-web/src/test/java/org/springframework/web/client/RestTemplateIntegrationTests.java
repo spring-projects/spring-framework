@@ -155,6 +155,15 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 	}
 
 	@Test
+	public void patchForObject() throws URISyntaxException {
+		// JDK client does not support the PATCH method
+		Assume.assumeThat(this.clientHttpRequestFactory,
+				Matchers.not(Matchers.instanceOf(SimpleClientHttpRequestFactory.class)));
+		String s = template.patchForObject(baseUrl + "/{method}", helloWorld, String.class, "patch");
+		assertEquals("Invalid content", helloWorld, s);
+	}
+
+	@Test
 	public void notFound() {
 		try {
 			template.execute(baseUrl + "/status/notfound", HttpMethod.GET, null, null);

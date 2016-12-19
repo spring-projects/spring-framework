@@ -445,6 +445,39 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 
+	// PATCH
+
+	@Override
+	public <T> T patchForObject(String url, Object request, Class<T> responseType,
+			Object... uriVariables) throws RestClientException {
+
+		RequestCallback requestCallback = httpEntityCallback(request, responseType);
+		HttpMessageConverterExtractor<T> responseExtractor =
+				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters(), logger);
+		return execute(url, HttpMethod.PATCH, requestCallback, responseExtractor, uriVariables);
+	}
+
+	@Override
+	public <T> T patchForObject(String url, Object request, Class<T> responseType,
+			Map<String, ?> uriVariables) throws RestClientException {
+
+		RequestCallback requestCallback = httpEntityCallback(request, responseType);
+		HttpMessageConverterExtractor<T> responseExtractor =
+				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters(), logger);
+		return execute(url, HttpMethod.PATCH, requestCallback, responseExtractor, uriVariables);
+	}
+
+	@Override
+	public <T> T patchForObject(URI url, Object request, Class<T> responseType)
+			throws RestClientException {
+
+		RequestCallback requestCallback = httpEntityCallback(request, responseType);
+		HttpMessageConverterExtractor<T> responseExtractor =
+				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters());
+		return execute(url, HttpMethod.PATCH, requestCallback, responseExtractor);
+	}
+
+
 	// DELETE
 
 	@Override
@@ -647,8 +680,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * @param method the HTTP method to execute (GET, POST, etc.)
 	 * @param response the resulting {@link ClientHttpResponse}
 	 * @throws IOException if propagated from {@link ResponseErrorHandler}
-	 * @see #setErrorHandler
 	 * @since 4.1.6
+	 * @see #setErrorHandler
 	 */
 	protected void handleResponse(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
 		ResponseErrorHandler errorHandler = getErrorHandler();
