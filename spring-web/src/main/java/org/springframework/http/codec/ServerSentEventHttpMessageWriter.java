@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
 
 /**
- * Encoder that supports a stream of {@link ServerSentEvent}s and also plain
+ * Writer that supports a stream of {@link ServerSentEvent}s and also plain
  * {@link Object}s which is the same as an {@link ServerSentEvent} with data
  * only.
  *
