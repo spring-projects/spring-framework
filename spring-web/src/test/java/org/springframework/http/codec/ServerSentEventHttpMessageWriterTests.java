@@ -45,26 +45,23 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 	private ServerSentEventHttpMessageWriter messageWriter = new ServerSentEventHttpMessageWriter(
 			Collections.singletonList(new Jackson2JsonEncoder()));
 
-
 	@Test
-	public void nullMimeType() {
-		assertTrue(messageWriter.canWrite(ResolvableType.forClass(Object.class), null));
-	}
-
-	@Test
-	public void unsupportedMimeType() {
+	public void cantRead() {
 		assertFalse(messageWriter.canWrite(ResolvableType.forClass(Object.class),
 				new MediaType("foo", "bar")));
 	}
 
 	@Test
-	public void supportedMimeType() {
+	public void canRead() {
+		assertTrue(messageWriter.canWrite(ResolvableType.forClass(Object.class), null));
 		assertTrue(messageWriter.canWrite(ResolvableType.forClass(Object.class),
 				new MediaType("text", "event-stream")));
+		assertTrue(messageWriter.canWrite(ResolvableType.forClass(ServerSentEvent.class),
+				new MediaType("bar", "bar")));
 	}
 
 	@Test
-	public void encodeServerSentEvent() {
+	public void writeServerSentEvent() {
 		ServerSentEvent<String> event = ServerSentEvent.<String>builder().
 				data("bar").id("c42").event("foo").comment("bla\nbla bla\nbla bla bla")
 				.retry(Duration.ofMillis(123L)).build();
@@ -76,14 +73,14 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 
 		Publisher<? extends Publisher<? extends DataBuffer>> result = Flux.from(outputMessage.getBodyWithFlush());
 		StepVerifier.create(result)
-				.consumeNextWith(sseConsumer("id:c42\n" + "event:foo\n" + "retry:123\n" +
-						":bla\n:bla bla\n:bla bla bla\n" + "data:bar\n"))
+				.consumeNextWith(sseConsumer(
+						"id:c42\nevent:foo\nretry:123\n:bla\n:bla bla\n:bla bla bla\ndata:bar\n"))
 				.expectComplete()
 				.verify();
 	}
 
 	@Test
-	public void encodeString() {
+	public void writeString() {
 		Flux<String> source = Flux.just("foo", "bar");
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		messageWriter.write(source, ResolvableType.forClass(String.class),
@@ -98,7 +95,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 	}
 
 	@Test
-	public void encodeMultiLineString() {
+	public void writeMultiLineString() {
 		Flux<String> source = Flux.just("foo\nbar", "foo\nbaz");
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		messageWriter.write(source, ResolvableType.forClass(String.class),
@@ -113,7 +110,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 	}
 
 	@Test
-	public void encodePojo() {
+	public void writePojo() {
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"),
 				new Pojo("foofoofoo", "barbarbar"));
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
@@ -129,7 +126,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 	}
 
 	@Test  // SPR-14899
-	public void encodePojoWithPrettyPrint() {
+	public void writePojoWithPrettyPrint() {
 		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json().indentOutput(true).build();
 		this.messageWriter = new ServerSentEventHttpMessageWriter(Collections.singletonList(new Jackson2JsonEncoder(mapper)));
 
