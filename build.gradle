@@ -52,11 +52,11 @@ configure(allprojects) { project ->
 	ext.hsqldbVersion        = "2.3.4"
 	ext.httpasyncVersion     = "4.1.2"
 	ext.httpclientVersion    = "4.5.2"
-	ext.jackson2Version      = "2.8.4"
+	ext.jackson2Version      = "2.8.5"
 	ext.jasperreportsVersion = "6.2.1"  // our tests fail with JR-internal NPEs against 6.2.2 and higher
 	ext.javamailVersion      = "1.5.6"
-	ext.jettyVersion         = "9.3.13.v20161014"
-	ext.jetty94Version       = "9.4.0.v20161208" // for spring-websocket support
+	ext.jettyVersion         = "9.3.14.v20161028"
+	ext.jetty94Version       = "9.4.0.v20161208"  // for spring-websocket support
 	ext.jodaVersion          = "2.9.6"
 	ext.jrubyVersion         = "1.7.26"  // JRuby 9000 only supported through JSR-223 (StandardScriptFactory)
 	ext.jtaVersion           = "1.2"
@@ -64,7 +64,7 @@ configure(allprojects) { project ->
 	ext.log4jVersion         = "1.2.17"
 	ext.nettyVersion         = "4.1.6.Final"
 	ext.okhttpVersion        = "2.7.5"
-	ext.okhttp3Version       = "3.4.2"
+	ext.okhttp3Version       = "3.5.0"
 	ext.openjpaVersion       = "2.4.1"
 	ext.poiVersion           = "3.14"
 	ext.reactorVersion       = "2.0.8.RELEASE"
@@ -75,7 +75,7 @@ configure(allprojects) { project ->
 	ext.testngVersion        = "6.9.10"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.7"
-	ext.tomcatVersion        = "8.5.8"
+	ext.tomcatVersion        = "8.5.9"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
 	ext.undertowVersion      = "1.3.25.Final"
 	ext.xmlunitVersion       = "1.6"
