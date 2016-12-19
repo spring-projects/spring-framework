@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.util.xml;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.Socket;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLStreamException;
@@ -30,7 +29,6 @@ import javax.xml.transform.stream.StreamResult;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
@@ -58,10 +56,12 @@ public abstract class AbstractStaxHandlerTestCase {
 
 	private XMLReader xmlReader;
 
+
 	@Before
 	public void createXMLReader() throws Exception {
 		xmlReader = XMLReaderFactory.createXMLReader();
 	}
+
 
 	@Test
 	public void noNamespacePrefixes() throws Exception {
@@ -109,8 +109,7 @@ public abstract class AbstractStaxHandlerTestCase {
 
 	@Test
 	public void noNamespacePrefixesDom() throws Exception {
-		DocumentBuilderFactory documentBuilderFactory =
-				DocumentBuilderFactory.newInstance();
+		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 		documentBuilderFactory.setNamespaceAware(true);
 		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 
@@ -131,8 +130,7 @@ public abstract class AbstractStaxHandlerTestCase {
 
 	@Test
 	public void namespacePrefixesDom() throws Exception {
-		DocumentBuilderFactory documentBuilderFactory =
-				DocumentBuilderFactory.newInstance();
+		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 		documentBuilderFactory.setNamespaceAware(true);
 		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 

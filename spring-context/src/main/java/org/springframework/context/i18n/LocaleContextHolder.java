@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,7 +154,7 @@ public abstract class LocaleContextHolder {
 
 	/**
 	 * Return the Locale associated with the current thread, if any,
-	 * or the system default Locale else. This is effectively a
+	 * or the system default Locale otherwise. This is effectively a
 	 * replacement for {@link java.util.Locale#getDefault()},
 	 * able to optionally respect a user-level Locale setting.
 	 * <p>Note: This method has a fallback to the system default Locale.
@@ -219,10 +219,10 @@ public abstract class LocaleContextHolder {
 
 	/**
 	 * Return the TimeZone associated with the current thread, if any,
-	 * or the system default TimeZone else. This is effectively a
+	 * or the system default TimeZone otherwise. This is effectively a
 	 * replacement for {@link java.util.TimeZone#getDefault()},
 	 * able to optionally respect a user-level TimeZone setting.
-	 * <p>Note: This method has a fallback to the system default Locale.
+	 * <p>Note: This method has a fallback to the system default TimeZone.
 	 * If you'd like to check for the raw LocaleContext content
 	 * (which may indicate no specific time zone through {@code null}, use
 	 * {@link #getLocaleContext()} and call {@link TimeZoneAwareLocaleContext#getTimeZone()}

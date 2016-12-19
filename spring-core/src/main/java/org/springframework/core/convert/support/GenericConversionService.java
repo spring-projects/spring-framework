@@ -138,14 +138,14 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	@Override
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
-		Assert.notNull(targetType, "targetType to convert to cannot be null");
+		Assert.notNull(targetType, "Target type to convert to cannot be null");
 		return canConvert((sourceType != null ? TypeDescriptor.valueOf(sourceType) : null),
 				TypeDescriptor.valueOf(targetType));
 	}
 
 	@Override
 	public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		Assert.notNull(targetType, "targetType to convert to cannot be null");
+		Assert.notNull(targetType, "Target type to convert to cannot be null");
 		if (sourceType == null) {
 			return true;
 		}
@@ -154,9 +154,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 	}
 
 	/**
-	 * Return whether conversion between the sourceType and targetType can be bypassed.
+	 * Return whether conversion between the source type and the target type can be bypassed.
 	 * <p>More precisely, this method will return true if objects of sourceType can be
-	 * converted to the targetType by returning the source object unchanged.
+	 * converted to the target type by returning the source object unchanged.
 	 * @param sourceType context about the source type to convert from
 	 * (may be {@code null} if source is {@code null})
 	 * @param targetType context about the target type to convert to (required)
@@ -165,7 +165,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 * @since 3.2
 	 */
 	public boolean canBypassConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		Assert.notNull(targetType, "targetType to convert to cannot be null");
+		Assert.notNull(targetType, "Target type to convert to cannot be null");
 		if (sourceType == null) {
 			return true;
 		}
@@ -176,20 +176,20 @@ public class GenericConversionService implements ConfigurableConversionService {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T convert(Object source, Class<T> targetType) {
-		Assert.notNull(targetType, "targetType to convert to cannot be null");
+		Assert.notNull(targetType, "Target type to convert to cannot be null");
 		return (T) convert(source, TypeDescriptor.forObject(source), TypeDescriptor.valueOf(targetType));
 	}
 
 	@Override
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		Assert.notNull(targetType, "targetType to convert to cannot be null");
+		Assert.notNull(targetType, "Target type to convert to cannot be null");
 		if (sourceType == null) {
-			Assert.isTrue(source == null, "source must be [null] if sourceType == [null]");
+			Assert.isTrue(source == null, "Source must be [null] if source type == [null]");
 			return handleResult(null, targetType, convertNullSource(null, targetType));
 		}
 		if (source != null && !sourceType.getObjectType().isInstance(source)) {
-			throw new IllegalArgumentException("source to convert from must be an instance of " +
-					sourceType + "; instead it was a " + source.getClass().getName());
+			throw new IllegalArgumentException("Source to convert from must be an instance of [" +
+					sourceType + "]; instead it was a [" + source.getClass().getName() + "]");
 		}
 		GenericConverter converter = getConverter(sourceType, targetType);
 		if (converter != null) {
@@ -201,9 +201,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	/**
 	 * Convenience operation for converting a source object to the specified targetType,
-	 * where the targetType is a descriptor that provides additional conversion context.
+	 * where the target type is a descriptor that provides additional conversion context.
 	 * Simply delegates to {@link #convert(Object, TypeDescriptor, TypeDescriptor)} and
-	 * encapsulates the construction of the sourceType descriptor using
+	 * encapsulates the construction of the source type descriptor using
 	 * {@link TypeDescriptor#forObject(Object)}.
 	 * @param source the source object
 	 * @param targetType the target type
@@ -230,8 +230,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 * {@link java.util.Optional#empty()} instance if the target type is
 	 * {@code java.util.Optional}. Subclasses may override this to return
 	 * custom {@code null} objects for specific target types.
-	 * @param sourceType the sourceType to convert from
-	 * @param targetType the targetType to convert to
+	 * @param sourceType the source type to convert from
+	 * @param targetType the target type to convert to
 	 * @return the converted null object
 	 */
 	protected Object convertNullSource(TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -275,7 +275,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	/**
 	 * Return the default converter if no converter is found for the given sourceType/targetType pair.
-	 * <p>Returns a NO_OP Converter if the sourceType is assignable to the targetType.
+	 * <p>Returns a NO_OP Converter if the source type is assignable to the target type.
 	 * Returns {@code null} otherwise, indicating no suitable converter could be found.
 	 * @param sourceType the source type to convert from
 	 * @param targetType the target type to convert to

@@ -58,10 +58,8 @@ import org.springframework.web.util.UriTemplateHandler;
  * wrappers as opposed to concrete results.
  *
  * <p>The {@code AsyncRestTemplate} exposes a synchronous {@link RestTemplate} via the
- * {@link #getRestOperations()} method, and it shares its
- * {@linkplain #setErrorHandler(ResponseErrorHandler) error handler} and
- * {@linkplain #setMessageConverters(List) message converters} with this
- * {@code RestTemplate}.
+ * {@link #getRestOperations()} method and shares its {@linkplain #setErrorHandler error handler}
+ * and {@linkplain #setMessageConverters message converters} with that {@code RestTemplate}.
  *
  * <p><strong>Note:</strong> by default {@code AsyncRestTemplate} relies on
  * standard JDK facilities to establish HTTP connections. You can switch to use
