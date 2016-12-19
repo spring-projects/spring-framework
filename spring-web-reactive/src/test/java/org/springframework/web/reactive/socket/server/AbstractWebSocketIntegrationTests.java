@@ -16,8 +16,11 @@
 package org.springframework.web.reactive.socket.server;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.apache.tomcat.websocket.server.WsContextListener;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -111,6 +114,12 @@ public abstract class AbstractWebSocketIntegrationTests {
 			return new DispatcherHandler();
 		}
 	}
+
+	@NotNull
+	protected URI getUrl(String path) throws URISyntaxException {
+		return new URI("ws://localhost:" + this.port + path);
+	}
+
 
 	static abstract class AbstractHandlerAdapterConfig {
 

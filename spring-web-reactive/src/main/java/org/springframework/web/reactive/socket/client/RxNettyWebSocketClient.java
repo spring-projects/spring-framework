@@ -18,7 +18,6 @@ package org.springframework.web.reactive.socket.client;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.util.function.Function;
-
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 
@@ -34,8 +33,9 @@ import rx.RxReactiveStreams;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.HandshakeInfo;
+import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.adapter.RxNettyWebSocketSession;
 
 /**
@@ -85,18 +85,18 @@ public class RxNettyWebSocketClient implements WebSocketClient {
 
 
 	@Override
-	public Mono<WebSocketSession> connect(URI url) {
-		return connect(url, new HttpHeaders());
+	public Mono<Void> execute(URI url, WebSocketHandler handler) {
+		return execute(url, new HttpHeaders(), handler);
 	}
 
 	@Override
-	public Mono<WebSocketSession> connect(URI url, HttpHeaders headers) {
+	public Mono<Void> execute(URI url, HttpHeaders headers, WebSocketHandler handler) {
 		HandshakeInfo info = new HandshakeInfo(url, headers, Mono.empty());
-		Observable<WebSocketSession> observable = connectInternal(info);
-		return Mono.from(RxReactiveStreams.toPublisher(observable));
+		Observable<Void> completion = connectInternal(handler, info);
+		return Mono.from(RxReactiveStreams.toPublisher(completion));
 	}
 
-	private Observable<WebSocketSession> connectInternal(HandshakeInfo info) {
+	private Observable<Void> connectInternal(WebSocketHandler handler, HandshakeInfo info) {
 		return createWebSocketRequest(info.getUri())
 				.flatMap(response -> {
 					ByteBufAllocator allocator = response.unsafeNettyChannel().alloc();
@@ -104,10 +104,11 @@ public class RxNettyWebSocketClient implements WebSocketClient {
 					Observable<WebSocketConnection> conn = response.getWebSocketConnection();
 					return Observable.zip(conn, Observable.just(bufferFactory), Tuples::of);
 				})
-				.map(tuple -> {
+				.flatMap(tuple -> {
 					WebSocketConnection conn = tuple.getT1();
 					NettyDataBufferFactory bufferFactory = tuple.getT2();
-					return new RxNettyWebSocketSession(conn, info, bufferFactory);
+					WebSocketSession session = new RxNettyWebSocketSession(conn, info, bufferFactory);
+					return RxReactiveStreams.toObservable(handler.handle(session));
 				});
 	}
 

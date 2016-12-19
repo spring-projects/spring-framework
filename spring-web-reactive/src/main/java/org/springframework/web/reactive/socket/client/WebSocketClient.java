@@ -20,10 +20,10 @@ import java.net.URI;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.reactive.socket.WebSocketSession;
+import org.springframework.web.reactive.socket.WebSocketHandler;
 
 /**
- * Contract for starting a WebSocket interaction.
+ * Contract for connecting and handling a WebSocket session.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -31,18 +31,23 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public interface WebSocketClient {
 
 	/**
-	 * Start a WebSocket interaction to the given url.
+	 * Execute a handshake request to the given url and handle the resulting
+	 * WebSocket session with the given handler.
 	 * @param url the handshake url
-	 * @return the session for the WebSocket interaction
+	 * @param handler the handler of the WebSocket session
+	 * @return completion {@code Mono<Void>} to indicate the outcome of the
+	 * WebSocket session handling
 	 */
-	Mono<WebSocketSession> connect(URI url);
+	Mono<Void> execute(URI url, WebSocketHandler handler);
 
 	/**
-	 * Start a WebSocket interaction to the given url.
+	 * A variant of {@link #execute(URI, WebSocketHandler)} with custom headers.
 	 * @param url the handshake url
-	 * @param headers headers for the handshake request
-	 * @return the session for the WebSocket interaction
+	 * @param headers custom headers for the handshake request
+	 * @param handler the handler of the WebSocket session
+	 * @return completion {@code Mono<Void>} to indicate the outcome of the
+	 * WebSocket session handling
 	 */
-	Mono<WebSocketSession> connect(URI url, HttpHeaders headers);
+	Mono<Void> execute(URI url, HttpHeaders headers, WebSocketHandler handler);
 
 }

@@ -15,13 +15,13 @@
  */
 package org.springframework.web.reactive.socket.server;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.ReplayProcessor;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +35,6 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Integration tests with server-side {@link WebSocketHandler}s.
- *
  * @author Rossen Stoyanchev
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
@@ -52,9 +51,10 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 	public void echo() throws Exception {
 		int count = 100;
 		Flux<String> input = Flux.range(1, count).map(index -> "msg-" + index);
-		Flux<String> output = new RxNettyWebSocketClient()
-				.connect(new URI("ws://localhost:" + this.port + "/echo"))
-				.flatMap(session -> session
+		ReplayProcessor<Object> emitter = ReplayProcessor.create(count);
+
+		new RxNettyWebSocketClient()
+				.execute(getUrl("/echo"), session -> session
 						.send(input.map(session::textMessage))
 						.thenMany(session.receive()
 								.take(count)
@@ -62,9 +62,12 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 									String text = message.getPayloadAsText();
 									message.release();
 									return text;
-								})
-						));
-		assertEquals(input.collectList().blockMillis(5000), output.collectList().blockMillis(5000));
+								}))
+						.subscribeWith(emitter)
+						.then())
+				.blockMillis(5000);
+
+		assertEquals(input.collectList().blockMillis(5000), emitter.collectList().blockMillis(5000));
 	}
 
 
