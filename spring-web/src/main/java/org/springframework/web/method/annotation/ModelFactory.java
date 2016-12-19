@@ -250,10 +250,8 @@ public final class ModelFactory {
 		List<String> keyNames = new ArrayList<String>(model.keySet());
 		for (String name : keyNames) {
 			Object value = model.get(name);
-
 			if (isBindingCandidate(name, value)) {
 				String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + name;
-
 				if (!model.containsAttribute(bindingResultKey)) {
 					WebDataBinder dataBinder = this.dataBinderFactory.createBinder(request, value, name);
 					model.put(bindingResultKey, dataBinder.getBindingResult());
@@ -270,7 +268,7 @@ public final class ModelFactory {
 			return false;
 		}
 
-		Class<?> attrType = (value != null) ? value.getClass() : null;
+		Class<?> attrType = (value != null ? value.getClass() : null);
 		if (this.sessionAttributesHandler.isHandlerSessionAttribute(attributeName, attrType)) {
 			return true;
 		}
@@ -286,7 +284,7 @@ public final class ModelFactory {
 
 		private final Set<String> dependencies = new HashSet<String>();
 
-		private ModelMethod(InvocableHandlerMethod handlerMethod) {
+		public ModelMethod(InvocableHandlerMethod handlerMethod) {
 			this.handlerMethod = handlerMethod;
 			for (MethodParameter parameter : handlerMethod.getMethodParameters()) {
 				if (parameter.hasParameterAnnotation(ModelAttribute.class)) {
