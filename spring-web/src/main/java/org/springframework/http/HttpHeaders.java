@@ -476,6 +476,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
+	 * A variant of {@link #setAcceptLanguage(List)} that sets the {@literal Accept-Language}
+	 * header value to the specified locale.
+	 * @since 5.0
+	 */
+	public void setAcceptLanguageAsLocale(Locale locale) {
+		setAcceptLanguage(Collections.singletonList(new Locale.LanguageRange(locale.toLanguageTag())));
+	}
+
+	/**
 	 * A variant of {@link #getAcceptLanguage()} that converts each
 	 * {@link java.util.Locale.LanguageRange} to a {@link Locale} and returns
 	 * the first one on the list.
