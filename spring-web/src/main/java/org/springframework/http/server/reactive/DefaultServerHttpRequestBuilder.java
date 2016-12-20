@@ -17,6 +17,7 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -25,6 +26,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * Package private default implementation of {@link ServerHttpRequest.Builder}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
@@ -36,6 +38,8 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	private String path;
 
 	private String contextPath;
+
+	private HttpHeaders httpHeaders;
 
 
 	public DefaultServerHttpRequestBuilder(ServerHttpRequest delegate) {
@@ -63,13 +67,22 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	}
 
 	@Override
+	public ServerHttpRequest.Builder header(String key, String value) {
+		if (this.httpHeaders == null) {
+			this.httpHeaders = new HttpHeaders();
+		}
+		this.httpHeaders.add(key, value);
+		return this;
+	}
+
+	@Override
 	public ServerHttpRequest build() {
 		URI uri = null;
 		if (this.path != null) {
 			uri = this.delegate.getURI();
 			uri = UriComponentsBuilder.fromUri(uri).replacePath(this.path).build(true).toUri();
 		}
-		return new MutativeDecorator(this.delegate, this.httpMethod, uri, this.contextPath);
+		return new MutativeDecorator(this.delegate, this.httpMethod, uri, this.contextPath, this.httpHeaders);
 	}
 
 
@@ -85,14 +98,24 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 		private final String contextPath;
 
+		private final HttpHeaders httpHeaders;
+
 
 		public MutativeDecorator(ServerHttpRequest delegate, HttpMethod httpMethod,
-				URI uri, String contextPath) {
+				URI uri, String contextPath, HttpHeaders httpHeaders) {
 
 			super(delegate);
 			this.httpMethod = httpMethod;
 			this.uri = uri;
 			this.contextPath = contextPath;
+			if (httpHeaders != null) {
+				this.httpHeaders = new HttpHeaders();
+				this.httpHeaders.putAll(super.getHeaders());
+				this.httpHeaders.putAll(httpHeaders);
+			}
+			else {
+				this.httpHeaders = null;
+			}
 		}
 
 		@Override
@@ -110,6 +133,10 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 			return (this.contextPath != null ? this.contextPath : super.getContextPath());
 		}
 
+		@Override
+		public HttpHeaders getHeaders() {
+			return (this.httpHeaders != null ? this.httpHeaders : super.getHeaders());
+		}
 	}
 
 }

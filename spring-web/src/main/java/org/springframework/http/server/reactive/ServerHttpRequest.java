@@ -16,13 +16,7 @@
 
 package org.springframework.http.server.reactive;
 
-import java.net.URI;
-
-import reactor.core.publisher.Flux;
-
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ReactiveHttpInputMessage;
@@ -89,6 +83,11 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 		 * Set the contextPath to return.
 		 */
 		Builder contextPath(String contextPath);
+
+		/**
+		 * Set or override the specified header.
+		 */
+		Builder header(String key, String value);
 
 		/**
 		 * Build a {@link ServerHttpRequest} decorator with the mutated properties.
