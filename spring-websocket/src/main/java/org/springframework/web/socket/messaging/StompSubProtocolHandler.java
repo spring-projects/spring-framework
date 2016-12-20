@@ -175,7 +175,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	/**
 	 * Configure a {@link StompEncoder} for encoding STOMP frames
-	 * @param encoder the encoder
 	 * @since 4.3.5
 	 */
 	public void setEncoder(StompEncoder encoder) {
@@ -184,7 +183,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	/**
 	 * Configure a {@link StompDecoder} for decoding STOMP frames
-	 * @param decoder the decoder
 	 * @since 4.3.5
 	 */
 	public void setDecoder(StompDecoder decoder) {
