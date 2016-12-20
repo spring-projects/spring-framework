@@ -17,7 +17,9 @@
 package org.springframework.context.annotation;
 
 import java.lang.annotation.Annotation;
+import java.util.function.Supplier;
 
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
@@ -83,6 +85,7 @@ public class AnnotatedBeanDefinitionReader {
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 	}
 
+
 	/**
 	 * Return the BeanDefinitionRegistry that this scanner operates on.
 	 */
@@ -117,28 +120,94 @@ public class AnnotatedBeanDefinitionReader {
 				(scopeMetadataResolver != null ? scopeMetadataResolver : new AnnotationScopeMetadataResolver());
 	}
 
+
+	/**
+	 * Register one or more annotated classes to be processed.
+	 * <p>Calls to {@code register} are idempotent; adding the same
+	 * annotated class more than once has no additional effect.
+	 * @param annotatedClasses one or more annotated classes,
+	 * e.g. {@link Configuration @Configuration} classes
+	 */
 	public void register(Class<?>... annotatedClasses) {
 		for (Class<?> annotatedClass : annotatedClasses) {
 			registerBean(annotatedClass);
 		}
 	}
 
+	/**
+	 * Register a bean from the given bean class, deriving its metadata from
+	 * class-declared annotations.
+	 * @param annotatedClass the class of the bean
+	 */
+	@SuppressWarnings("unchecked")
 	public void registerBean(Class<?> annotatedClass) {
-		registerBean(annotatedClass, null, (Class<? extends Annotation>[]) null);
+		registerBean(annotatedClass, null, null, (Class<? extends Annotation>[]) null);
 	}
 
+	/**
+	 * Register a bean from the given bean class, deriving its metadata from
+	 * class-declared annotations.
+	 * @param annotatedClass the class of the bean
+	 * @param qualifiers specific qualifier annotations to consider,
+	 * in addition to qualifiers at the bean class level
+	 */
 	@SuppressWarnings("unchecked")
 	public void registerBean(Class<?> annotatedClass, Class<? extends Annotation>... qualifiers) {
-		registerBean(annotatedClass, null, qualifiers);
+		registerBean(annotatedClass, null, null, qualifiers);
 	}
 
+	/**
+	 * Register a bean from the given bean class, deriving its metadata from
+	 * class-declared annotations.
+	 * @param annotatedClass the class of the bean
+	 * @param name an explicit name for the bean
+	 * @param qualifiers specific qualifier annotations to consider,
+	 * in addition to qualifiers at the bean class level
+	 */
 	@SuppressWarnings("unchecked")
 	public void registerBean(Class<?> annotatedClass, String name, Class<? extends Annotation>... qualifiers) {
+		registerBean(annotatedClass, null, name, qualifiers);
+	}
+
+	/**
+	 * Register a bean from the given bean class, deriving its metadata from
+	 * class-declared annotations, using the given supplier for obtaining a new
+	 * instance (possibly declared as a lambda expression or method reference).
+	 * @param annotatedClass the class of the bean
+	 * @param instanceSupplier a callback for creating an instance of the bean
+	 * (may be {@code null})
+	 * @return the registered bean definition, or {@code null} if skipped due to
+	 * a declared condition
+	 * @since 5.0
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> AnnotatedBeanDefinition registerBean(Class<T> annotatedClass, Supplier<T> instanceSupplier) {
+		return registerBean(annotatedClass, instanceSupplier, null, (Class<? extends Annotation>[]) null);
+	}
+
+	/**
+	 * Register a bean from the given bean class, deriving its metadata from
+	 * class-declared annotations.
+	 * @param annotatedClass the class of the bean
+	 * @param instanceSupplier a callback for creating an instance of the bean
+	 * (may be {@code null})
+	 * @param name an explicit name for the bean
+	 * @param qualifiers specific qualifier annotations to consider, if any,
+	 * in addition to qualifiers at the bean class level
+	 * @return the registered bean definition, or {@code null} if skipped due to
+	 * a declared condition
+	 * @since 5.0
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> AnnotatedBeanDefinition registerBean(Class<T> annotatedClass, Supplier<T> instanceSupplier,
+			String name, Class<? extends Annotation>... qualifiers) {
+
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
-			return;
+			return null;
 		}
 
+		abd.setInstanceSupplier(instanceSupplier);
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
 		abd.setScope(scopeMetadata.getScopeName());
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
@@ -160,6 +229,7 @@ public class AnnotatedBeanDefinitionReader {
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
 		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
+		return abd;
 	}
 
 
