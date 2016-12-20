@@ -17,6 +17,12 @@ package org.springframework.web.reactive.socket.client;
 
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -26,6 +32,7 @@ import io.netty.buffer.ByteBufAllocator;
 import io.reactivex.netty.protocol.http.client.HttpClient;
 import io.reactivex.netty.protocol.http.ws.WebSocketConnection;
 import io.reactivex.netty.protocol.http.ws.client.WebSocketRequest;
+import io.reactivex.netty.protocol.http.ws.client.WebSocketResponse;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 import rx.Observable;
@@ -33,6 +40,7 @@ import rx.RxReactiveStreams;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketSession;
@@ -44,7 +52,7 @@ import org.springframework.web.reactive.socket.adapter.RxNettyWebSocketSession;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class RxNettyWebSocketClient implements WebSocketClient {
+public class RxNettyWebSocketClient extends WebSocketClientSupport implements WebSocketClient {
 
 	private final Function<URI, HttpClient<ByteBuf, ByteBuf>> httpClientFactory;
 
@@ -91,32 +99,65 @@ public class RxNettyWebSocketClient implements WebSocketClient {
 
 	@Override
 	public Mono<Void> execute(URI url, HttpHeaders headers, WebSocketHandler handler) {
-		HandshakeInfo info = new HandshakeInfo(url, headers, Mono.empty());
-		Observable<Void> completion = connectInternal(handler, info);
+		Observable<Void> completion = connectInternal(url, headers, handler);
 		return Mono.from(RxReactiveStreams.toPublisher(completion));
 	}
 
-	private Observable<Void> connectInternal(WebSocketHandler handler, HandshakeInfo info) {
-		return createWebSocketRequest(info.getUri())
+	private Observable<Void> connectInternal(URI url, HttpHeaders headers, WebSocketHandler handler) {
+		return createRequest(url, headers, handler)
 				.flatMap(response -> {
-					ByteBufAllocator allocator = response.unsafeNettyChannel().alloc();
-					NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(allocator);
 					Observable<WebSocketConnection> conn = response.getWebSocketConnection();
-					return Observable.zip(conn, Observable.just(bufferFactory), Tuples::of);
+					return Observable.zip(Observable.just(response), conn, Tuples::of);
 				})
 				.flatMap(tuple -> {
-					WebSocketConnection conn = tuple.getT1();
-					NettyDataBufferFactory bufferFactory = tuple.getT2();
-					WebSocketSession session = new RxNettyWebSocketSession(conn, info, bufferFactory);
+					WebSocketResponse<ByteBuf> response = tuple.getT1();
+					HttpHeaders responseHeaders = getResponseHeaders(response);
+					Optional<String> protocol = Optional.ofNullable(response.getAcceptedSubProtocol());
+					HandshakeInfo info = new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);
+
+					ByteBufAllocator allocator = response.unsafeNettyChannel().alloc();
+					NettyDataBufferFactory factory = new NettyDataBufferFactory(allocator);
+
+					WebSocketConnection conn = tuple.getT2();
+					WebSocketSession session = new RxNettyWebSocketSession(conn, info, factory);
 					return RxReactiveStreams.toObservable(handler.handle(session));
 				});
 	}
 
-	private WebSocketRequest<ByteBuf> createWebSocketRequest(URI url) {
+	private WebSocketRequest<ByteBuf> createRequest(URI url, HttpHeaders headers, WebSocketHandler handler) {
+
 		String query = url.getRawQuery();
-		return this.httpClientFactory.apply(url)
-				.createGet(url.getRawPath() + (query != null ? "?" + query : ""))
+		String requestUrl = url.getRawPath() + (query != null ? "?" + query : "");
+
+		WebSocketRequest<ByteBuf> request = this.httpClientFactory.apply(url)
+				.createGet(requestUrl)
+				.setHeaders(toObjectValueMap(headers))
 				.requestWebSocketUpgrade();
+
+		String[] protocols = getSubProtocols(headers, handler);
+		if (!ObjectUtils.isEmpty(protocols)) {
+			request = request.requestSubProtocols(protocols);
+		}
+
+		return request;
+	}
+
+	private Map<String, List<Object>> toObjectValueMap(HttpHeaders headers) {
+		if (headers.isEmpty()) {
+			return Collections.emptyMap();
+		}
+		Map<String, List<Object>> map = new HashMap<>(headers.size());
+		headers.keySet().stream().forEach(key -> map.put(key, new ArrayList<>(headers.get(key))));
+		return map;
+	}
+
+	private HttpHeaders getResponseHeaders(WebSocketResponse<ByteBuf> response) {
+		HttpHeaders headers = new HttpHeaders();
+		response.headerIterator().forEachRemaining(entry -> {
+			String name = entry.getKey().toString();
+			headers.put(name, response.getAllHeaderValues(name));
+		});
+		return headers;
 	}
 
 }

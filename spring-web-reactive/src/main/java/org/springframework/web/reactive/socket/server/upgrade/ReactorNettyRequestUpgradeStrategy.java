@@ -15,14 +15,14 @@
  */
 package org.springframework.web.reactive.socket.server.upgrade;
 
-import java.util.List;
+import java.security.Principal;
+import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.server.reactive.ReactorServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.ReactorNettyWebSocketSession;
@@ -35,31 +35,26 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler) {
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
+			Optional<String> subProtocol) {
 
 		ReactorServerHttpResponse response = (ReactorServerHttpResponse) exchange.getResponse();
-		HandshakeInfo handshakeInfo = getHandshakeInfo(exchange);
+		HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
 		NettyDataBufferFactory bufferFactory = (NettyDataBufferFactory) response.bufferFactory();
 
-		String protocols = StringUtils.arrayToCommaDelimitedString(getSubProtocols(handler));
-		protocols = (StringUtils.hasText(protocols) ? protocols : null);
-
-		return response.getReactorResponse().sendWebsocket(protocols,
-				(inbound, outbound) -> handler.handle(
-						new ReactorNettyWebSocketSession(inbound, outbound, handshakeInfo, bufferFactory)));
+		return response.getReactorResponse().sendWebsocket(subProtocol.orElse(null),
+				(in, out) -> handler.handle(
+						new ReactorNettyWebSocketSession(in, out, info, bufferFactory)));
 	}
 
-	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange) {
+	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, Optional<String> protocol) {
 		ServerHttpRequest request = exchange.getRequest();
-		return new HandshakeInfo(request.getURI(), request.getHeaders(), exchange.getPrincipal());
-	}
-
-	private static String[] getSubProtocols(WebSocketHandler webSocketHandler) {
-		List<String> subProtocols = webSocketHandler.getSubProtocols();
-		return subProtocols.toArray(new String[subProtocols.size()]);
+		Mono<Principal> principal = exchange.getPrincipal();
+		return new HandshakeInfo(request.getURI(), request.getHeaders(), principal, protocol);
 	}
 
 }

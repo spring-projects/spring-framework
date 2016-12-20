@@ -16,9 +16,18 @@
 
 package org.springframework.web.reactive.socket.server.upgrade;
 
+import java.security.Principal;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 import io.undertow.server.HttpServerExchange;
 import io.undertow.websockets.WebSocketConnectionCallback;
 import io.undertow.websockets.WebSocketProtocolHandshakeHandler;
+import io.undertow.websockets.core.protocol.Handshake;
+import io.undertow.websockets.core.protocol.version13.Hybi13Handshake;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -38,16 +47,18 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Violeta Georgieva
  * @since 5.0
  */
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler) {
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
+			Optional<String> subProtocol) {
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 
-		HandshakeInfo info = getHandshakeInfo(exchange);
+		HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
 		DataBufferFactory bufferFactory = response.bufferFactory();
 
 		Assert.isTrue(request instanceof UndertowServerHttpRequest);
@@ -56,8 +67,12 @@ public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		WebSocketConnectionCallback callback =
 				new UndertowWebSocketHandlerAdapter(handler, info, bufferFactory);
 
+		Set<String> protocols = subProtocol.map(Collections::singleton).orElse(Collections.emptySet());
+		Hybi13Handshake handshake = new Hybi13Handshake(protocols, false);
+		List<Handshake> handshakes = Collections.singletonList(handshake);
+
 		try {
-			new WebSocketProtocolHandshakeHandler(callback).handleRequest(httpExchange);
+			new WebSocketProtocolHandshakeHandler(handshakes, callback).handleRequest(httpExchange);
 		}
 		catch (Exception ex) {
 			return Mono.error(ex);
@@ -66,9 +81,10 @@ public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		return Mono.empty();
 	}
 
-	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange) {
+	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, Optional<String> protocol) {
 		ServerHttpRequest request = exchange.getRequest();
-		return new HandshakeInfo(request.getURI(), request.getHeaders(), exchange.getPrincipal());
+		Mono<Principal> principal = exchange.getPrincipal();
+		return new HandshakeInfo(request.getURI(), request.getHeaders(), principal, protocol);
 	}
 
 }

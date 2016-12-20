@@ -15,6 +15,8 @@
  */
 package org.springframework.web.reactive.socket.server;
 
+import java.util.Optional;
+
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -40,9 +42,12 @@ public interface RequestUpgradeStrategy {
 	 * Upgrade to a WebSocket session and handle it with the given handler.
 	 * @param exchange the current exchange
 	 * @param webSocketHandler handler for the WebSocket session
+	 * @param subProtocol the selected sub-protocol got the handler
 	 * @return completion {@code Mono<Void>} to indicate the outcome of the
 	 * WebSocket session handling.
 	 */
-	Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler webSocketHandler);
+	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+	Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler webSocketHandler,
+			Optional<String> subProtocol);
 
 }

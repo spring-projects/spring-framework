@@ -13,35 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.reactive.socket;
+package org.springframework.web.reactive.socket.client;
 
-import java.util.Collections;
-import java.util.List;
-
-import reactor.core.publisher.Mono;
+import org.springframework.http.HttpHeaders;
+import org.springframework.util.StringUtils;
+import org.springframework.web.reactive.socket.WebSocketHandler;
 
 /**
- * Handler for a WebSocket session.
+ * Base class for {@link WebSocketClient} implementations.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public interface WebSocketHandler {
+public class WebSocketClientSupport {
 
-	/**
-	 * Return the list of sub-protocols supported by this handler.
-	 * <p>By default an empty array is returned.
-	 */
-	default String[] getSubProtocols() {
-		return new String[0];
+	protected static final String SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
+
+
+	protected String[] getSubProtocols(HttpHeaders headers, WebSocketHandler handler) {
+		String value = headers.getFirst(SEC_WEBSOCKET_PROTOCOL);
+		return (value != null ?
+				StringUtils.commaDelimitedListToStringArray(value) :
+				handler.getSubProtocols());
 	}
-
-	/**
-	 * Handle the WebSocket session.
-	 * @param session the session to handle
-	 * @return completion {@code Mono<Void>} to indicate the outcome of the
-	 * WebSocket session handling.
-	 */
-	Mono<Void> handle(WebSocketSession session);
 
 }

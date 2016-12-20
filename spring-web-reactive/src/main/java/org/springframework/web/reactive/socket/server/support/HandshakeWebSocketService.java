@@ -15,8 +15,10 @@
  */
 package org.springframework.web.reactive.socket.server.support;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,6 +32,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.WebSocketService;
@@ -48,6 +51,8 @@ import org.springframework.web.server.ServerWebExchange;
 public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 	private static final String SEC_WEBSOCKET_KEY = "Sec-WebSocket-Key";
+
+	private static final String SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
 
 
 	private static final boolean tomcatPresent = ClassUtils.isPresent(
@@ -171,7 +176,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 
 	@Override
-	public Mono<Void> handleRequest(ServerWebExchange exchange, WebSocketHandler webSocketHandler) {
+	public Mono<Void> handleRequest(ServerWebExchange exchange, WebSocketHandler handler) {
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
@@ -190,7 +195,9 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 			return response.setComplete();
 		}
 
-		return getUpgradeStrategy().upgrade(exchange, webSocketHandler);
+		Optional<String> subProtocol = selectSubProtocol(request, handler);
+
+		return getUpgradeStrategy().upgrade(exchange, handler, subProtocol);
 	}
 
 	private boolean isWebSocketUpgrade(ServerHttpRequest request) {
@@ -215,6 +222,17 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 			return false;
 		}
 		return true;
+	}
+
+	private Optional<String> selectSubProtocol(ServerHttpRequest request, WebSocketHandler handler) {
+		String protocolHeader = request.getHeaders().getFirst(SEC_WEBSOCKET_PROTOCOL);
+		if (protocolHeader == null) {
+			return Optional.empty();
+		}
+		String[] protocols = handler.getSubProtocols();
+		return StringUtils.commaDelimitedListToSet(protocolHeader).stream()
+				.filter(protocol -> Arrays.stream(protocols).anyMatch(protocol::equals))
+				.findFirst();
 	}
 
 }

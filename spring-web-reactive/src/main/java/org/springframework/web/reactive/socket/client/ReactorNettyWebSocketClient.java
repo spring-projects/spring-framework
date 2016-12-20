@@ -16,6 +16,7 @@
 package org.springframework.web.reactive.socket.client;
 
 import java.net.URI;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -25,6 +26,7 @@ import reactor.ipc.netty.NettyOutbound;
 import reactor.ipc.netty.http.client.HttpClient;
 import reactor.ipc.netty.http.client.HttpClientOptions;
 import reactor.ipc.netty.http.client.HttpClientRequest;
+import reactor.ipc.netty.http.client.HttpClientResponse;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
@@ -39,7 +41,7 @@ import org.springframework.web.reactive.socket.adapter.ReactorNettyWebSocketSess
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ReactorNettyWebSocketClient implements WebSocketClient {
+public class ReactorNettyWebSocketClient extends WebSocketClientSupport implements WebSocketClient {
 
 	private final HttpClient httpClient;
 
@@ -61,30 +63,47 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	@Override
 	public Mono<Void> execute(URI url, HttpHeaders headers, WebSocketHandler handler) {
 
-		// We have to store the NettyOutbound fow now..
-		// The alternative HttpClientResponse#receiveWebSocket does not work at present
+		// TODO: https://github.com/reactor/reactor-netty/issues/19
 		AtomicReference<NettyOutbound> outboundRef = new AtomicReference<>();
+
+		String[] protocols = getSubProtocols(headers, handler);
+		// TODO: https://github.com/reactor/reactor-netty/issues/20
 
 		return this.httpClient
 				.get(url.toString(), request -> {
-					addHeaders(request, headers);
+					addRequestHeaders(request, headers);
 					NettyOutbound outbound = request.sendWebsocket();
 					outboundRef.set(outbound);
 					return outbound;
 				})
-				.then(inbound -> {
-					ByteBufAllocator allocator = inbound.channel().alloc();
+				.then(in -> {
+					HttpHeaders responseHeaders = getResponseHeaders(in);
+					String protocol = responseHeaders.getFirst(SEC_WEBSOCKET_PROTOCOL);
+					HandshakeInfo info = new HandshakeInfo(url, responseHeaders, Mono.empty(),
+							Optional.ofNullable(protocol));
+
+					ByteBufAllocator allocator = in.channel().alloc();
 					NettyDataBufferFactory factory = new NettyDataBufferFactory(allocator);
-					NettyOutbound outbound = outboundRef.get();
-					HandshakeInfo info = new HandshakeInfo(url, headers, Mono.empty());
-					WebSocketSession session = new ReactorNettyWebSocketSession(inbound, outbound, info,  factory);
+
+					NettyOutbound out = outboundRef.get();
+					WebSocketSession session = new ReactorNettyWebSocketSession(in, out, info, factory);
 					return handler.handle(session);
 				});
 	}
 
-	private void addHeaders(HttpClientRequest request, HttpHeaders headers) {
-		headers.entrySet().stream()
-				.forEach(e -> request.requestHeaders().set(e.getKey(), e.getValue()));
+	private void addRequestHeaders(HttpClientRequest request, HttpHeaders headers) {
+		headers.keySet().stream()
+				.forEach(key -> headers.get(key).stream()
+						.forEach(value -> request.addHeader(key, value)));
+	}
+
+	private HttpHeaders getResponseHeaders(HttpClientResponse response) {
+		HttpHeaders headers = new HttpHeaders();
+		response.responseHeaders().forEach(entry -> {
+			String name = entry.getKey();
+			headers.put(name, response.responseHeaders().getAll(name));
+		});
+		return headers;
 	}
 
 }

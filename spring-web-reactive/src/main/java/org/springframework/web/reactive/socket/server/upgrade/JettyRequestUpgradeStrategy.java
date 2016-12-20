@@ -17,6 +17,8 @@
 package org.springframework.web.reactive.socket.server.upgrade;
 
 import java.io.IOException;
+import java.security.Principal;
+import java.util.Optional;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,9 +48,10 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Lifecycle {
 
-	private static final ThreadLocal<JettyWebSocketHandlerAdapter> adapterHolder =
+	private static final ThreadLocal<WebSocketHandlerContainer> adapterHolder =
 			new NamedThreadLocal<>("JettyWebSocketHandlerAdapter");
 
 
@@ -68,7 +71,14 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 				this.running = true;
 				try {
 					this.factory = new WebSocketServerFactory(this.servletContext);
-					this.factory.setCreator((request, response) -> adapterHolder.get());
+					this.factory.setCreator((request, response) -> {
+						WebSocketHandlerContainer container = adapterHolder.get();
+						String protocol = container.getProtocol().orElse(null);
+						if (protocol != null) {
+							response.setAcceptedSubProtocol(protocol);
+						}
+						return container.getAdapter();
+					});
 					this.factory.start();
 				}
 				catch (Throwable ex) {
@@ -100,7 +110,8 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler) {
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
+			Optional<String> subProtocol) {
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
@@ -108,7 +119,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		HttpServletRequest servletRequest = getHttpServletRequest(request);
 		HttpServletResponse servletResponse = getHttpServletResponse(response);
 
-		HandshakeInfo info = getHandshakeInfo(exchange);
+		HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
 		DataBufferFactory factory = response.bufferFactory();
 		JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(handler, info, factory);
 
@@ -118,7 +129,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		Assert.isTrue(isUpgrade, "Not a WebSocket handshake");
 
 		try {
-			adapterHolder.set(adapter);
+			adapterHolder.set(new WebSocketHandlerContainer(adapter, subProtocol));
 			this.factory.acceptWebSocket(servletRequest, servletResponse);
 		}
 		catch (IOException ex) {
@@ -141,9 +152,10 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		return ((ServletServerHttpResponse) response).getServletResponse();
 	}
 
-	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange) {
+	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, Optional<String> protocol) {
 		ServerHttpRequest request = exchange.getRequest();
-		return new HandshakeInfo(request.getURI(), request.getHeaders(), exchange.getPrincipal());
+		Mono<Principal> principal = exchange.getPrincipal();
+		return new HandshakeInfo(request.getURI(), request.getHeaders(), principal, protocol);
 	}
 
 	private void startLazily(HttpServletRequest request) {
@@ -159,4 +171,25 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		}
 	}
 
+
+	private static class WebSocketHandlerContainer {
+
+		private final JettyWebSocketHandlerAdapter adapter;
+
+		private final Optional<String> protocol;
+
+
+		public WebSocketHandlerContainer(JettyWebSocketHandlerAdapter adapter, Optional<String> protocol) {
+			this.adapter = adapter;
+			this.protocol = protocol;
+		}
+
+		public JettyWebSocketHandlerAdapter getAdapter() {
+			return this.adapter;
+		}
+
+		public Optional<String> getProtocol() {
+			return this.protocol;
+		}
+	}
 }

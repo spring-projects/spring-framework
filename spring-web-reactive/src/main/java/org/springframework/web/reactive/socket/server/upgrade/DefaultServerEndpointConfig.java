@@ -44,6 +44,8 @@ class DefaultServerEndpointConfig extends ServerEndpointConfig.Configurator
 
 	private final Endpoint endpoint;
 
+	private List<String> protocols = new ArrayList<>();
+
 
 	/**
 	 * Constructor with a path and an {@code javax.websocket.Endpoint}.
@@ -83,9 +85,13 @@ class DefaultServerEndpointConfig extends ServerEndpointConfig.Configurator
 		return this.path;
 	}
 
+	public void setSubprotocols(List<String> protocols) {
+		this.protocols = protocols;
+	}
+
 	@Override
 	public List<String> getSubprotocols() {
-		return new ArrayList<>();
+		return this.protocols;
 	}
 
 	@Override

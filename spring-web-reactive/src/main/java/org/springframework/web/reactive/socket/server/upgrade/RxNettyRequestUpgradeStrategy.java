@@ -15,10 +15,11 @@
  */
 package org.springframework.web.reactive.socket.server.upgrade;
 
-import java.util.List;
+import java.security.Principal;
+import java.util.Optional;
 
+import io.reactivex.netty.protocol.http.ws.server.WebSocketHandshaker;
 import reactor.core.publisher.Mono;
-import rx.Observable;
 import rx.RxReactiveStreams;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
@@ -37,34 +38,39 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class RxNettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler) {
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
+			Optional<String> subProtocol) {
 
 		RxNettyServerHttpResponse response = (RxNettyServerHttpResponse) exchange.getResponse();
-		HandshakeInfo handshakeInfo = getHandshakeInfo(exchange);
-		NettyDataBufferFactory bufferFactory = (NettyDataBufferFactory) response.bufferFactory();
+		HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
+		NettyDataBufferFactory factory = (NettyDataBufferFactory) response.bufferFactory();
 
-		Observable<Void> completion = response.getRxNettyResponse()
+		WebSocketHandshaker handshaker = response.getRxNettyResponse()
 				.acceptWebSocketUpgrade(conn -> {
-					WebSocketSession session = new RxNettyWebSocketSession(conn, handshakeInfo, bufferFactory);
+					WebSocketSession session = new RxNettyWebSocketSession(conn, info, factory);
 					return RxReactiveStreams.toObservable(handler.handle(session));
-				})
-				.subprotocol(getSubProtocols(handler));
+				});
 
-		return Mono.from(RxReactiveStreams.toPublisher(completion));
+		if (subProtocol.isPresent()) {
+			handshaker = handshaker.subprotocol(subProtocol.get());
+		}
+		else {
+			// TODO: https://github.com/reactor/reactor-netty/issues/20
+			handshaker = handshaker.subprotocol(new String[0]);
+		}
+
+		return Mono.from(RxReactiveStreams.toPublisher(handshaker));
 	}
 
-	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange) {
+	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, Optional<String> protocol) {
 		ServerHttpRequest request = exchange.getRequest();
-		return new HandshakeInfo(request.getURI(), request.getHeaders(), exchange.getPrincipal());
-	}
-
-	private static String[] getSubProtocols(WebSocketHandler webSocketHandler) {
-		List<String> subProtocols = webSocketHandler.getSubProtocols();
-		return subProtocols.toArray(new String[subProtocols.size()]);
+		Mono<Principal> principal = exchange.getPrincipal();
+		return new HandshakeInfo(request.getURI(), request.getHeaders(), principal, protocol);
 	}
 
 }
