@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,6 +158,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * Set whether it should be allowed to override bean definitions by registering
 	 * a different definition with the same name, automatically replacing the former.
 	 * If not, an exception will be thrown. Default is "true".
+	 * @since 3.0
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
 	 */
 	public void setAllowBeanDefinitionOverriding(boolean allowBeanDefinitionOverriding) {
@@ -169,6 +170,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * try to resolve them.
 	 * <p>Default is "true". Turn this off to throw an exception when encountering
 	 * a circular reference, disallowing them completely.
+	 * @since 3.0
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowCircularReferences
 	 */
 	public void setAllowCircularReferences(boolean allowCircularReferences) {
@@ -197,6 +199,10 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 		this.resourceLoader = resourceLoader;
 	}
 
+
+	//---------------------------------------------------------------------
+	// ResourceLoader / ResourcePatternResolver override if necessary
+	//---------------------------------------------------------------------
 
 	/**
 	 * This implementation delegates to this context's ResourceLoader if set,
