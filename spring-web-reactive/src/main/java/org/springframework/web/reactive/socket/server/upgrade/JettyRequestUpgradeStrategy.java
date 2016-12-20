@@ -56,7 +56,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 	private WebSocketServerFactory factory;
 
-	private ServletContext servletContext;
+	private volatile ServletContext servletContext;
 
 	private volatile boolean running = false;
 
