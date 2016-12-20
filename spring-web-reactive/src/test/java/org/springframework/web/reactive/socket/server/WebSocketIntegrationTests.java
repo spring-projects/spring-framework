@@ -38,6 +38,7 @@ import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
+import org.springframework.web.reactive.socket.client.JettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.RxNettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.WebSocketClient;
@@ -69,6 +70,14 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		testEcho(new RxNettyWebSocketClient());
 	}
 
+	@Test
+	public void echoJettyClient() throws Exception {
+		JettyWebSocketClient client = new JettyWebSocketClient();
+		client.start();
+		testEcho(client);
+		client.stop();
+	}
+
 	private void testEcho(WebSocketClient client) throws URISyntaxException {
 		int count = 100;
 		Flux<String> input = Flux.range(1, count).map(index -> "msg-" + index);
@@ -94,6 +103,14 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 	@Test
 	public void subProtocolRxNettyClient() throws Exception {
 		testSubProtocol(new RxNettyWebSocketClient());
+	}
+
+	@Test
+	public void subProtocolJettyClient() throws Exception {
+		JettyWebSocketClient client = new JettyWebSocketClient();
+		client.start();
+		testSubProtocol(client);
+		client.stop();
 	}
 
 	private void testSubProtocol(WebSocketClient client) throws URISyntaxException {

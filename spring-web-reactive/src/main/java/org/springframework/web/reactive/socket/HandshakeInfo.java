@@ -37,12 +37,16 @@ public class HandshakeInfo {
 
 	private final URI uri;
 
-	private final HttpHeaders headers;
-
 	private final Mono<Principal> principalMono;
 
-	private final Optional<String> protocol;
+	private HttpHeaders headers;
 
+	private Optional<String> protocol;
+
+
+	public HandshakeInfo(URI uri, Mono<Principal> principal) {
+		this(uri, new HttpHeaders(), principal, Optional.empty());
+	}
 
 	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal,
 			Optional<String> subProtocol) {
@@ -74,6 +78,15 @@ public class HandshakeInfo {
 	}
 
 	/**
+	 * Sets the handshake HTTP headers. Those are the request headers for a
+	 * server session and the response headers for a client session.
+	 * @param headers the handshake HTTP headers.
+	 */
+	public void setHeaders(HttpHeaders headers) {
+		this.headers = headers;
+	}
+
+	/**
 	 * Return the principal associated with the handshake HTTP request.
 	 */
 	public Mono<Principal> getPrincipal() {
@@ -87,6 +100,14 @@ public class HandshakeInfo {
 	 */
 	public Optional<String> getSubProtocol() {
 		return this.protocol;
+	}
+
+	/**
+	 * Sets the sub-protocol negotiated at handshake time.
+	 * @param protocol the sub-protocol negotiated at handshake time.
+	 */
+	public void setSubProtocol(Optional<String> protocol) {
+		this.protocol = protocol;
 	}
 
 

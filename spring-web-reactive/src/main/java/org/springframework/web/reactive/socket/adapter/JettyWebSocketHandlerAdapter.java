@@ -30,6 +30,7 @@ import org.eclipse.jetty.websocket.api.extensions.Frame;
 import org.eclipse.jetty.websocket.common.OpCode;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -54,11 +55,20 @@ public class JettyWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupport
 
 	private JettyWebSocketSession delegateSession;
 
+	private final MonoProcessor<Void> completionMono;
+
 
 	public JettyWebSocketHandlerAdapter(WebSocketHandler delegate, HandshakeInfo info,
 			DataBufferFactory bufferFactory) {
 
+		this(delegate, info, bufferFactory, null);
+	}
+
+	public JettyWebSocketHandlerAdapter(WebSocketHandler delegate, HandshakeInfo info,
+			DataBufferFactory bufferFactory, MonoProcessor<Void> completionMono) {
+
 		super(delegate, info, bufferFactory);
+		this.completionMono = completionMono;
 	}
 
 
@@ -145,6 +155,9 @@ public class JettyWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupport
 
 		@Override
 		public void onError(Throwable ex) {
+			if (completionMono != null) {
+				completionMono.onError(ex);
+			}
 			if (delegateSession != null) {
 				int code = CloseStatus.SERVER_ERROR.getCode();
 				delegateSession.close(new CloseStatus(code, ex.getMessage()));
@@ -153,6 +166,9 @@ public class JettyWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupport
 
 		@Override
 		public void onComplete() {
+			if (completionMono != null) {
+				completionMono.onComplete();
+			}
 			if (delegateSession != null) {
 				delegateSession.close();
 			}
