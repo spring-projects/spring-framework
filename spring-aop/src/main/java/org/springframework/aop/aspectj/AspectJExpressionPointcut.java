@@ -28,7 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.aspectj.weaver.BCException;
 import org.aspectj.weaver.patterns.NamePattern;
 import org.aspectj.weaver.reflect.ReflectionWorld.ReflectionWorldException;
 import org.aspectj.weaver.reflect.ShadowMatchImpl;
@@ -259,11 +258,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 				}
 			}
 		}
-		catch (BCException ex) {
-			logger.debug("PointcutExpression matching rejected target class", ex);
-		}
-		catch (IllegalStateException ex) {
-			// AspectJ 1.8.10: encountered invalid signature
+		catch (Throwable ex) {
 			logger.debug("PointcutExpression matching rejected target class", ex);
 		}
 		return false;
@@ -331,7 +326,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 		catch (IllegalStateException ex) {
 			// No current invocation...
-			// TODO: Should we really proceed here?
 			if (logger.isDebugEnabled()) {
 				logger.debug("Could not access current invocation - matching with limited context: " + ex);
 			}
@@ -454,8 +448,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 							}
 						}
 					}
-					catch (IllegalStateException ex) {
-						// AspectJ 1.8.10: encountered invalid signature
+					catch (Throwable ex) {
+						// Possibly AspectJ 1.8.10 encountering an invalid signature
 						logger.debug("PointcutExpression matching rejected target method", ex);
 						fallbackExpression = null;
 					}
