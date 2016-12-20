@@ -151,7 +151,6 @@ class ConfigurationClassEnhancer {
 	 * must remain public in order to allow access to subclasses generated from other
 	 * packages (i.e. user code).
 	 */
-	@FunctionalInterface
 	public interface EnhancedConfiguration extends BeanFactoryAware {
 	}
 
@@ -160,7 +159,6 @@ class ConfigurationClassEnhancer {
 	 * Conditional {@link Callback}.
 	 * @see ConditionalCallbackFilter
 	 */
-	@FunctionalInterface
 	private interface ConditionalCallback extends Callback {
 
 		boolean isMatch(Method candidateMethod);
