@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,6 +135,16 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 		this.scanner.setScopeMetadataResolver(scopeMetadataResolver);
 	}
 
+	@Override
+	protected void prepareRefresh() {
+		this.scanner.clearCache();
+		super.prepareRefresh();
+	}
+
+
+	//---------------------------------------------------------------------
+	// Implementation of AnnotationConfigRegistry
+	//---------------------------------------------------------------------
 
 	/**
 	 * Register one or more annotated classes to be processed.
@@ -161,13 +171,6 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	public void scan(String... basePackages) {
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		this.scanner.scan(basePackages);
-	}
-
-
-	@Override
-	protected void prepareRefresh() {
-		this.scanner.clearCache();
-		super.prepareRefresh();
 	}
 
 }

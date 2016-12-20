@@ -54,6 +54,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * Name of the ConversionService bean in the factory.
 	 * If none is supplied, default conversion rules apply.
 	 * @see org.springframework.core.convert.ConversionService
+	 * @since 3.0
 	 */
 	String CONVERSION_SERVICE_BEAN_NAME = "conversionService";
 
@@ -61,12 +62,14 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * Name of the LoadTimeWeaver bean in the factory. If such a bean is supplied,
 	 * the context will use a temporary ClassLoader for type matching, in order
 	 * to allow the LoadTimeWeaver to process all actual bean classes.
+	 * @since 2.5
 	 * @see org.springframework.instrument.classloading.LoadTimeWeaver
 	 */
 	String LOAD_TIME_WEAVER_BEAN_NAME = "loadTimeWeaver";
 
 	/**
 	 * Name of the {@link Environment} bean in the factory.
+	 * @since 3.1
 	 */
 	String ENVIRONMENT_BEAN_NAME = "environment";
 
@@ -85,6 +88,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 
 	/**
 	 * Set the unique id of this application context.
+	 * @since 3.0
 	 */
 	void setId(String id);
 
@@ -100,6 +104,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 
 	/**
 	 * Return the Environment for this application context in configurable form.
+	 * @since 3.1
 	 */
 	@Override
 	ConfigurableEnvironment getEnvironment();
@@ -107,6 +112,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	/**
 	 * Set the {@code Environment} for this application context.
 	 * @param environment the new environment
+	 * @since 3.1
 	 */
 	void setEnvironment(ConfigurableEnvironment environment);
 
