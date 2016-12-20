@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -75,11 +74,11 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 	private final WebSocketServerFactory factory;
 
-	private volatile List<WebSocketExtension> supportedExtensions;
-
 	private ServletContext servletContext;
 
 	private volatile boolean running = false;
+
+	private volatile List<WebSocketExtension> supportedExtensions;
 
 
 	/**
@@ -215,16 +214,18 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 		private final List<ExtensionConfig> extensionConfigs;
 
-		public WebSocketHandlerContainer(JettyWebSocketHandlerAdapter handler, String protocol, List<WebSocketExtension> extensions) {
+		public WebSocketHandlerContainer(
+				JettyWebSocketHandlerAdapter handler, String protocol, List<WebSocketExtension> extensions) {
+
 			this.handler = handler;
 			this.selectedProtocol = protocol;
 			if (CollectionUtils.isEmpty(extensions)) {
 				this.extensionConfigs = null;
 			}
 			else {
-				this.extensionConfigs = new ArrayList<ExtensionConfig>();
-				for (WebSocketExtension e : extensions) {
-					this.extensionConfigs.add(new WebSocketToJettyExtensionConfigAdapter(e));
+				this.extensionConfigs = new ArrayList<ExtensionConfig>(extensions.size());
+				for (WebSocketExtension extension : extensions) {
+					this.extensionConfigs.add(new WebSocketToJettyExtensionConfigAdapter(extension));
 				}
 			}
 		}

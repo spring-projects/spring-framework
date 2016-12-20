@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,6 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	/**
 	 * Create a new {@link JettyWebSocketSession} instance.
-	 *
 	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket session
 	 */
 	public JettyWebSocketSession(Map<String, Object> attributes) {
@@ -71,11 +70,10 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	/**
 	 * Create a new {@link JettyWebSocketSession} instance associated with the given user.
-	 *
 	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket
 	 * session; the provided attributes are copied, the original map is not used.
-	 * @param user the user associated with the session; if {@code null} we'll fallback on the user
-	 *  available via {@link org.eclipse.jetty.websocket.api.Session#getUpgradeRequest()}
+	 * @param user the user associated with the session; if {@code null} we'll fallback on the
+	 * user available via {@link org.eclipse.jetty.websocket.api.Session#getUpgradeRequest()}
 	 */
 	public JettyWebSocketSession(Map<String, Object> attributes, Principal user) {
 		super(attributes);
@@ -156,8 +154,9 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	@Override
 	public boolean isOpen() {
-		return ((getNativeSession() != null) && getNativeSession().isOpen());
+		return (getNativeSession() != null && getNativeSession().isOpen());
 	}
+
 
 	@Override
 	public void initializeNativeSession(Session session) {
