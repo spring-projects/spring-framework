@@ -37,7 +37,6 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -91,11 +90,11 @@ import static org.springframework.context.annotation.AnnotationConfigUtils.*;
 public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
 		PriorityOrdered, ResourceLoaderAware, BeanClassLoaderAware, EnvironmentAware {
 
-	private static final String IMPORT_AWARE_PROCESSOR_BEAN_NAME =
-			ConfigurationClassPostProcessor.class.getName() + ".importAwareProcessor";
-
 	private static final String IMPORT_REGISTRY_BEAN_NAME =
 			ConfigurationClassPostProcessor.class.getName() + ".importRegistry";
+
+	private static final String IMPORT_AWARE_PROCESSOR_BEAN_NAME =
+			ConfigurationClassPostProcessor.class.getName() + ".importAwareProcessor";
 
 	private static final String ENHANCED_CONFIGURATION_PROCESSOR_BEAN_NAME =
 			ConfigurationClassPostProcessor.class.getName() + ".enhancedConfigurationProcessor";
@@ -260,6 +259,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			// Simply call processConfigurationClasses lazily at this point then.
 			processConfigBeanDefinitions((BeanDefinitionRegistry) beanFactory);
 		}
+
 		enhanceConfigurationClasses(beanFactory);
 	}
 
@@ -455,10 +455,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	/**
 	 * {@link InstantiationAwareBeanPostProcessorAdapter} that ensures
 	 * {@link EnhancedConfiguration} beans are injected with the {@link BeanFactory}
-	 * before the {@link AutowiredAnnotationBeanPostProcessor} runs (SPR-10668).
+	 * before the {@code AutowiredAnnotationBeanPostProcessor} runs (SPR-10668).
 	 */
 	private static class EnhancedConfigurationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
-			implements PriorityOrdered, BeanFactoryAware {
+			implements BeanFactoryAware, PriorityOrdered {
 
 		private BeanFactory beanFactory;
 
