@@ -65,7 +65,6 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 						uri.toString(),
 						httpClientRequest -> requestCallback
 								.apply(new ReactorClientHttpRequest(method, uri, httpClientRequest)))
-				.otherwise(HttpClientException.class, exc -> Mono.just(exc.getResponse()))
 				.map(ReactorClientHttpResponse::new);
 	}
 

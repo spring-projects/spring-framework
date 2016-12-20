@@ -53,7 +53,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 			HttpClientRequest httpRequest) {
 		this.httpMethod = httpMethod;
 		this.uri = uri;
-		this.httpRequest = httpRequest;
+		this.httpRequest = httpRequest.failOnClientError(false);
 		this.bufferFactory = new NettyDataBufferFactory(httpRequest.alloc());
 	}
 
