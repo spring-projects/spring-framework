@@ -310,12 +310,12 @@ public interface RestOperations {
 
 	/**
 	 * Update a resource by PATCHing the given object to the URI template,
-	 * and returns the representation found in the response.
+	 * and return the representation found in the response.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
-	 * @param request the Object to be PATCHed (may be {@code null})
+	 * @param request the object to be PATCHed (may be {@code null})
 	 * @param responseType the type of the return value
 	 * @param uriVariables the variables to expand the template
 	 * @return the converted object
@@ -327,12 +327,12 @@ public interface RestOperations {
 
 	/**
 	 * Update a resource by PATCHing the given object to the URI template,
-	 * and returns the representation found in the response.
+	 * and return the representation found in the response.
 	 * <p>URI Template variables are expanded using the given map.
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
-	 * @param request the Object to be PATCHed (may be {@code null})
+	 * @param request the object to be PATCHed (may be {@code null})
 	 * @param responseType the type of the return value
 	 * @param uriVariables the variables to expand the template
 	 * @return the converted object
@@ -344,11 +344,11 @@ public interface RestOperations {
 
 	/**
 	 * Update a resource by PATCHing the given object to the URL,
-	 * and returns the representation found in the response.
+	 * and return the representation found in the response.
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
-	 * @param request the Object to be PATCHed (may be {@code null})
+	 * @param request the object to be PATCHed (may be {@code null})
 	 * @param responseType the type of the return value
 	 * @return the converted object
 	 * @since 4.3.5

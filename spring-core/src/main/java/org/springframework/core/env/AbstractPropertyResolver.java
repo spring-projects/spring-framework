@@ -248,16 +248,16 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 		if (targetType == null) {
 			return (T) value;
 		}
-		ConversionService csToUse = this.conversionService;
-		if (csToUse == null) {
+		ConversionService conversionServiceToUse = this.conversionService;
+		if (conversionServiceToUse == null) {
 			// Avoid initialization of shared DefaultConversionService if
 			// no standard type conversion is needed in the first place...
 			if (ClassUtils.isAssignableValue(targetType, value)) {
 				return (T) value;
 			}
-			csToUse = DefaultConversionService.getSharedInstance();
+			conversionServiceToUse = DefaultConversionService.getSharedInstance();
 		}
-		return csToUse.convert(value, targetType);
+		return conversionServiceToUse.convert(value, targetType);
 	}
 
 

@@ -250,7 +250,7 @@ public class SQLErrorCodesFactory {
 	/**
 	 * Clear the cache for the specified {@link DataSource}, if registered.
 	 * @param dataSource the {@code DataSource} identifying the database
-	 * @return the corresponding {@code SQLErrorCodes} object,
+	 * @return the corresponding {@code SQLErrorCodes} object that got removed,
 	 * or {@code null} if not registered
 	 * @since 4.3.5
 	 * @see #registerDatabase(DataSource, String)
