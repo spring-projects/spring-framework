@@ -26,7 +26,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.util.DecoratedObjectFactory;
 import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
 import org.eclipse.jetty.websocket.server.HandshakeRFC6455;
@@ -296,7 +295,6 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 
 		@Override
 		protected WebSocketServerFactory createFactory(WebSocketPolicy policy) throws Exception {
-			servletContext.setAttribute(DecoratedObjectFactory.ATTR, new DecoratedObjectFactory());
 			return new WebSocketServerFactory(servletContext, policy);
 		}
 

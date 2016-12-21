@@ -18,7 +18,6 @@ package org.springframework.web.socket;
 
 import java.io.File;
 import java.io.IOException;
-
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 
@@ -82,13 +81,8 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 			return tempFolder;
 		}
 		catch (IOException ex) {
-			throw new RuntimeException("Unable to create temp directory", ex);
+			throw new IllegalStateException("Unable to create temp directory", ex);
 		}
-	}
-
-	@Override
-	public int getPort() {
-		return this.port;
 	}
 
 	@Override
@@ -110,11 +104,6 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 			filterMap.setDispatcher("REQUEST,FORWARD,INCLUDE,ASYNC");
 			this.context.addFilterMap(filterMap);
 		}
-	}
-
-	@Override
-	public ServletContext getServletContext() {
-		return this.context.getServletContext();
 	}
 
 	@Override
@@ -141,6 +130,16 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 	@Override
 	public void stop() throws Exception {
 		this.tomcatServer.stop();
+	}
+
+	@Override
+	public int getPort() {
+		return this.port;
+	}
+
+	@Override
+	public ServletContext getServletContext() {
+		return this.context.getServletContext();
 	}
 
 }
