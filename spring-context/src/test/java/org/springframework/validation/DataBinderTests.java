@@ -40,6 +40,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
@@ -2013,6 +2014,77 @@ public class DataBinderTests {
 		binder.setAutoGrowCollectionLimit(257);
 	}
 
+	@Test // SPR-15009
+	public void testSetCustomMessageCodesResolverBeforeInitializeBindingResultForBeanPropertyAccess() {
+		TestBean testBean = new TestBean();
+		DataBinder binder = new DataBinder(testBean, "testBean");
+		DefaultMessageCodesResolver messageCodesResolver = new DefaultMessageCodesResolver();
+		messageCodesResolver.setPrefix("errors.");
+		binder.setMessageCodesResolver(messageCodesResolver);
+		binder.setAutoGrowCollectionLimit(512); // allow configuration after set a MessageCodesResolver
+		binder.initBeanPropertyAccess();
+
+		MutablePropertyValues mpv = new MutablePropertyValues();
+		mpv.add("age", "invalid");
+		binder.bind(mpv);
+		assertEquals("errors.typeMismatch", binder.getBindingResult().getFieldError("age").getCode());
+		assertEquals(512, BeanWrapper.class.cast(binder.getInternalBindingResult().getPropertyAccessor()).getAutoGrowCollectionLimit());
+	}
+
+	@Test // SPR-15009
+	public void testSetCustomMessageCodesResolverBeforeInitializeBindingResultForDirectFieldAccess() {
+		TestBean testBean = new TestBean();
+		DataBinder binder = new DataBinder(testBean, "testBean");
+		DefaultMessageCodesResolver messageCodesResolver = new DefaultMessageCodesResolver();
+		messageCodesResolver.setPrefix("errors.");
+		binder.setMessageCodesResolver(messageCodesResolver);
+		binder.initDirectFieldAccess();
+
+		MutablePropertyValues mpv = new MutablePropertyValues();
+		mpv.add("age", "invalid");
+		binder.bind(mpv);
+		assertEquals("errors.typeMismatch", binder.getBindingResult().getFieldError("age").getCode());
+	}
+
+	@Test  // SPR-15009
+	public void testSetCustomMessageCodesResolverAfterInitializeBindingResult() {
+		TestBean testBean = new TestBean();
+		DataBinder binder = new DataBinder(testBean, "testBean");
+		binder.initBeanPropertyAccess();
+		DefaultMessageCodesResolver messageCodesResolver = new DefaultMessageCodesResolver();
+		messageCodesResolver.setPrefix("errors.");
+		binder.setMessageCodesResolver(messageCodesResolver);
+
+		MutablePropertyValues mpv = new MutablePropertyValues();
+		mpv.add("age", "invalid");
+		binder.bind(mpv);
+		assertEquals("errors.typeMismatch", binder.getBindingResult().getFieldError("age").getCode());
+	}
+
+	@Test  // SPR-15009
+	public void testSetMessageCodesResolverIsNullAfterInitializeBindingResult() {
+		TestBean testBean = new TestBean();
+		DataBinder binder = new DataBinder(testBean, "testBean");
+		binder.initBeanPropertyAccess();
+		binder.setMessageCodesResolver(null);
+
+		MutablePropertyValues mpv = new MutablePropertyValues();
+		mpv.add("age", "invalid");
+		binder.bind(mpv);
+		assertEquals("typeMismatch", binder.getBindingResult().getFieldError("age").getCode()); // Keep a default MessageCodesResolver
+	}
+
+	@Test  // SPR-15009
+	public void testCallSetMessageCodesResolverTwice() {
+		expectedException.expect(IllegalStateException.class);
+		expectedException.expectMessage("DataBinder is already initialized with MessageCodesResolver");
+
+		TestBean testBean = new TestBean();
+		DataBinder binder = new DataBinder(testBean, "testBean");
+		binder.setMessageCodesResolver(new DefaultMessageCodesResolver());
+		binder.setMessageCodesResolver(new DefaultMessageCodesResolver());
+
+	}
 
 	@SuppressWarnings("unused")
 	private static class BeanWithIntegerList {
