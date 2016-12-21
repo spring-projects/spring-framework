@@ -32,6 +32,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Properties;
 
 /**
@@ -74,6 +75,9 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 */
 	private static final ThreadLocal<TransactionInfo> transactionInfoHolder =
 			new NamedThreadLocal<TransactionInfo>("Current aspect-driven transaction");
+
+	private final ConcurrentHashMap<String,PlatformTransactionManager> transactionManagerCache =
+			new ConcurrentHashMap<String,PlatformTransactionManager>();
 
 
 	/**
@@ -323,16 +327,28 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		if (this.transactionManager != null || this.beanFactory == null || txAttr == null) {
 			return this.transactionManager;
 		}
+
+                PlatformTransactionManager toReturn = null;
+
 		String qualifier = txAttr.getQualifier();
 		if (StringUtils.hasLength(qualifier)) {
-			return BeanFactoryAnnotationUtils.qualifiedBeanOfType(this.beanFactory, PlatformTransactionManager.class, qualifier);
+                        toReturn = transactionManagerCache.get(qualifier);
+                        if(toReturn == null) {
+			    toReturn = BeanFactoryAnnotationUtils.qualifiedBeanOfType(this.beanFactory, PlatformTransactionManager.class, qualifier);
+                            transactionManagerCache.putIfAbsent(qualifier,toReturn);
+                        }
 		}
 		else if (this.transactionManagerBeanName != null) {
-			return this.beanFactory.getBean(this.transactionManagerBeanName, PlatformTransactionManager.class);
+                        toReturn = transactionManagerCache.get(this.transactionManagerBeanName);
+                        if(toReturn == null) {
+			    toReturn = this.beanFactory.getBean(this.transactionManagerBeanName, PlatformTransactionManager.class);
+                            transactionManagerCache.putIfAbsent(this.transactionManagerBeanName,toReturn);
+                        }
 		}
 		else {
-			return this.beanFactory.getBean(PlatformTransactionManager.class);
+			toReturn = this.beanFactory.getBean(PlatformTransactionManager.class);
 		}
+                return toReturn;
 	}
 
 	/**
