@@ -149,7 +149,8 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 
 		@Override
 		public Mono<Void> handle(WebSocketSession session) {
-			return session.send(session.receive());
+			// Use retain() for Reactor Netty
+			return session.send(session.receive().doOnNext(WebSocketMessage::retain));
 		}
 	}
 
