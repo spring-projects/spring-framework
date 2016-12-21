@@ -2,6 +2,29 @@ SPRING FRAMEWORK CHANGELOG
 ===========================
 http://www.spring.io
 
+Changes in version 3.2.18 (2016-12-21)
+-------------------------------------
+fixed Constructor sets the source incorrectly in org.springframework.beans.PropertyValue (SPR-8337)
+fixed ObjectToObjectConverter should be able to use constructors on non-public classes (SPR-14304)
+fixed Async advisor retrieval blocks when triggered by singleton init method (SPR-14324)
+fixed Deadlock while creating a new thread on bean initialization with transactional code invocation (SPR-14388)
+fixed CronSequenceGenerator causes StackOverflowError with reversed range values (SPR-14462)
+fixed Ineffective synchronization in StandardTypeConverter constructor (SPR-14465)
+fixed ResourcePatternUtils.getResourcePatternResolver does not accept null arg (SPR-14500)
+fixed LinkedCaseInsensitiveMap doesn't override HashMap.clone() (SPR-14509)
+fixed StackOverflowError for advisor search against factory-bean reference to FactoryBean (SPR-14551)
+fixed StringUtils.parseLocaleString(): does not parse locale string in java 7 for Serbian (Latin) (SPR-14718)
+fixed Concurrency problem in DeferredResult: potential double execution of handleResult (SPR-14978)
+fixed MBeanExporter fails against null beans (SPR-15031)
+improved ModelAndViewResolver still refers to raw Class type (SPR-7860)
+improved Allow method inlining of ObjectUtils.nullSafeEquals() (SPR-14349)
+improved Normalize resource URL in ResourceServlet (SPR-14946)
+improved documentation for @Bean(autowire=NO) (SPR-14282)
+improved documentation Label "for" attribute is wrongly documented as required (SPR-14287)
+improved documentation of SpEL behavior when comparing value to null (SPR-14361) 
+improved documentation of cache abstraction (SPR-14399)
+improved documentation og SpEL and Date Literals (SPR-14987)
+
 
 Changes in version 3.2.17 (2016-05-06)
 -------------------------------------
