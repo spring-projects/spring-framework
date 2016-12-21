@@ -17,7 +17,6 @@
 package org.springframework.web.servlet;
 
 import java.io.IOException;
-
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -271,18 +270,18 @@ public class ResourceServlet extends HttpServletBean {
 		if (this.contentType != null) {
 			response.setContentType(this.contentType);
 		}
-		String[] resourceUrls =
-			StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS);
-		for (int i = 0; i < resourceUrls.length; i++) {
+		String[] resourceUrls = StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS);
+		for (String url : resourceUrls) {
+			String path = StringUtils.cleanPath(url);
 			// check whether URL matches allowed resources
-			if (this.allowedResources != null && !this.pathMatcher.match(this.allowedResources, resourceUrls[i])) {
-				throw new ServletException("Resource [" + resourceUrls[i] +
+			if (this.allowedResources != null && !this.pathMatcher.match(this.allowedResources, path)) {
+				throw new ServletException("Resource [" + path +
 						"] does not match allowed pattern [" + this.allowedResources + "]");
 			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("Including resource [" + resourceUrls[i] + "]");
+				logger.debug("Including resource [" + path + "]");
 			}
-			RequestDispatcher rd = request.getRequestDispatcher(resourceUrls[i]);
+			RequestDispatcher rd = request.getRequestDispatcher(path);
 			rd.include(request, response);
 		}
 	}
