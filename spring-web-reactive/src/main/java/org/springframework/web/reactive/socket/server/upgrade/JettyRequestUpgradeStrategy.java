@@ -23,7 +23,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.util.DecoratedObjectFactory;
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
 import reactor.core.publisher.Mono;
 
@@ -165,7 +164,6 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		synchronized (this.lifecycleMonitor) {
 			if (this.servletContext == null) {
 				this.servletContext = request.getServletContext();
-				this.servletContext.setAttribute(DecoratedObjectFactory.ATTR, new DecoratedObjectFactory());
 				start();
 			}
 		}
