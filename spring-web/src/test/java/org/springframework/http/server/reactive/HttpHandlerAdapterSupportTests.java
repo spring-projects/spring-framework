@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.util.Arrays;
@@ -35,10 +36,10 @@ import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link HttpHandlerAdapterSupport}.
+ *
  * @author Rossen Stoyanchev
  */
 public class HttpHandlerAdapterSupportTests {
-
 
 	@Test
 	public void invalidContextPath() throws Exception {
@@ -94,7 +95,7 @@ public class HttpHandlerAdapterSupportTests {
 	@Test
 	public void matchWithNativeContextPath() throws Exception {
 		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/yet/another/path");
-		request.setContextPath("/yet"); // contextPath in underlying request
+		request.setContextPath("/yet");  // contextPath in underlying request
 
 		TestHttpHandler handler = new TestHttpHandler();
 		Map<String, HttpHandler> map = Collections.singletonMap("/another/path", handler);
@@ -139,7 +140,6 @@ public class HttpHandlerAdapterSupportTests {
 	@SuppressWarnings("WeakerAccess")
 	private static class TestHttpHandlerAdapter extends HttpHandlerAdapterSupport {
 
-
 		public TestHttpHandlerAdapter(Map<String, HttpHandler> handlerMap) {
 			super(handlerMap);
 		}
@@ -156,14 +156,14 @@ public class HttpHandlerAdapterSupportTests {
 		}
 	}
 
+
 	@SuppressWarnings("WeakerAccess")
 	private static class TestHttpHandler implements HttpHandler {
 
 		private ServerHttpRequest request;
 
-
 		public boolean wasInvoked() {
-			return this.request != null;
+			return (this.request != null);
 		}
 
 		public ServerHttpRequest getRequest() {

@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.filter;
 
 import java.io.IOException;
 import java.util.Enumeration;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -32,20 +32,18 @@ import org.springframework.mock.web.test.MockFilterChain;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ForwardedHeaderFilter}.
+ *
  * @author Rossen Stoyanchev
  * @author Eddú Meléndez
  * @author Rob Winch
  */
 public class ForwardedHeaderFilterTests {
 
-	private static final String X_FORWARDED_PROTO = "x-forwarded-proto"; // SPR-14372 (case insensitive)
+	private static final String X_FORWARDED_PROTO = "x-forwarded-proto";  // SPR-14372 (case insensitive)
 	private static final String X_FORWARDED_HOST = "x-forwarded-host";
 	private static final String X_FORWARDED_PORT = "x-forwarded-port";
 	private static final String X_FORWARDED_PREFIX = "x-forwarded-prefix";
@@ -133,9 +131,7 @@ public class ForwardedHeaderFilterTests {
 	@Test
 	public void caseInsensitiveForwardedPrefix() throws Exception {
 		this.request = new MockHttpServletRequest() {
-
 			// Make it case-sensitive (SPR-14372)
-
 			@Override
 			public String getHeader(String header) {
 				Enumeration<String> names = getHeaderNames();
@@ -359,6 +355,7 @@ public class ForwardedHeaderFilterTests {
 		assertEquals("../foo/bar", redirectedUrl);
 	}
 
+
 	private String sendRedirect(final String location) throws ServletException, IOException {
 		MockHttpServletResponse response = doWithFiltersAndGetResponse(this.filter, new OncePerRequestFilter() {
 			@Override
@@ -367,10 +364,10 @@ public class ForwardedHeaderFilterTests {
 				response.sendRedirect(location);
 			}
 		});
-
 		return response.getRedirectedUrl();
 	}
 
+	@SuppressWarnings("serial")
 	private MockHttpServletResponse doWithFiltersAndGetResponse(Filter... filters) throws ServletException, IOException {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		FilterChain filterChain = new MockFilterChain(new HttpServlet() {}, filters);
