@@ -83,7 +83,7 @@ configure(allprojects) { project ->
 	ext.romeVersion            = "1.7.0"
 	ext.rxjavaVersion          = '1.2.4'
 	ext.rxjavaAdapterVersion   = '1.2.1'
-	ext.rxjava2Version         = '2.0.2'
+	ext.rxjava2Version         = '2.0.3'
 	ext.rxnettyVersion         = '0.5.2-rc.5'
 	ext.servletVersion         = "3.1.0"
 	ext.slf4jVersion           = "1.7.22"
@@ -96,7 +96,7 @@ configure(allprojects) { project ->
 	ext.undertowVersion        = "1.4.7.Final"
 	ext.websocketVersion       = "1.1"
 	ext.woodstoxVersion        = "5.0.3"
-	ext.xmlunitVersion         = "2.2.1"
+	ext.xmlunitVersion         = "2.3.0"
 	ext.xnioVersion            = "3.4.2.Final"
 	ext.xstreamVersion         = "1.4.9"
 
