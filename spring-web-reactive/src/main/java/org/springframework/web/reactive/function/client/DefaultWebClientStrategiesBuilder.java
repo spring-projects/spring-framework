@@ -36,6 +36,7 @@ import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
+import org.springframework.http.codec.ServerSentEventHttpMessageReader;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
@@ -70,13 +71,17 @@ class DefaultWebClientStrategiesBuilder implements WebClientStrategies.Builder {
 	public void defaultConfiguration() {
 		messageReader(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		messageReader(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
+		if (jackson2Present) {
+			messageReader(new ServerSentEventHttpMessageReader(Collections.singletonList(new Jackson2JsonDecoder())));
+		}
+		else {
+			messageReader(new ServerSentEventHttpMessageReader(Collections.emptyList()));
+		}
 		messageReader(new DecoderHttpMessageReader<>(new StringDecoder(false)));
-
 		messageWriter(new EncoderHttpMessageWriter<>(new ByteArrayEncoder()));
 		messageWriter(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
 		messageWriter(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 		messageWriter(new ResourceHttpMessageWriter());
-
 		if (jaxb2Present) {
 			messageReader(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
 			messageWriter(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
