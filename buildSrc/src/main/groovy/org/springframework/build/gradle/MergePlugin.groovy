@@ -68,8 +68,8 @@ class MergePlugin implements Plugin<Project> {
 		Configuration runtimeMerge = project.configurations.create("runtimeMerge")
 
 		// Ensure the IDE can reference merged projects
-		project.eclipse.classpath.plusConfigurations += [runtimeMerge]
-		project.idea.module.scopes.PROVIDED.plus += runtimeMerge
+		project.eclipse.classpath.plusConfigurations += [ runtimeMerge ]
+		project.idea.module.scopes.PROVIDED.plus += [ runtimeMerge ]
 
 		// Hook to perform the actual merge logic
 		project.afterEvaluate{
@@ -132,8 +132,9 @@ class MergePlugin implements Plugin<Project> {
 						intoConfiguration.dependencies.add(it)
 					}
 				}
+				def index = project.parent.childProjects.findIndexOf {p -> p.getValue() == project}
 				project.merge.into.install.repositories.mavenInstaller.pom.scopeMappings.addMapping(
-					mapping.priority + 100, intoConfiguration, mapping.scope)
+					mapping.priority + 100 + index, intoConfiguration, mapping.scope)
 			}
 		}
 	}
