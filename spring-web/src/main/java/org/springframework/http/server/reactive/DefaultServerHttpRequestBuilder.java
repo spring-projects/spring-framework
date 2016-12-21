@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Package private default implementation of {@link ServerHttpRequest.Builder}.
+ * Package-private default implementation of {@link ServerHttpRequest.Builder}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -43,7 +44,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 
 	public DefaultServerHttpRequestBuilder(ServerHttpRequest delegate) {
-		Assert.notNull(delegate, "ServerHttpRequest delegate is required.");
+		Assert.notNull(delegate, "ServerHttpRequest delegate is required");
 		this.delegate = delegate;
 	}
 
@@ -80,7 +81,13 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		URI uri = null;
 		if (this.path != null) {
 			uri = this.delegate.getURI();
-			uri = UriComponentsBuilder.fromUri(uri).replacePath(this.path).build(true).toUri();
+			try {
+				uri = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(),
+						this.path, uri.getQuery(), uri.getFragment());
+			}
+			catch (URISyntaxException ex) {
+				throw new IllegalStateException("Invalid URI path: \"" + this.path + "\"");
+			}
 		}
 		return new MutativeDecorator(this.delegate, this.httpMethod, uri, this.contextPath, this.httpHeaders);
 	}
@@ -99,7 +106,6 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		private final String contextPath;
 
 		private final HttpHeaders httpHeaders;
-
 
 		public MutativeDecorator(ServerHttpRequest delegate, HttpMethod httpMethod,
 				URI uri, String contextPath, HttpHeaders httpHeaders) {
