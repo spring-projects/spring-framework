@@ -63,7 +63,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 		StepVerifier.create(result)
 				.expectNext("data0data1")
 				.expectComplete()
-				.verify(Duration.ofSeconds(5L));
+				.verify(Duration.ofSeconds(10L));
 	}
 
 	@Test  // SPR-14991
@@ -77,7 +77,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 		StepVerifier.create(result)
 				.consumeNextWith(value -> Assert.isTrue(value.length() == 200000))
 				.expectComplete()
-				.verify(Duration.ofSeconds(5L));
+				.verify(Duration.ofSeconds(10L));
 	}
 
 	@Test  // SPR-14992
@@ -90,7 +90,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 		StepVerifier.create(result)
 				.expectNextMatches(s -> s.startsWith("0123456789"))
 				.thenCancel()
-				.verify(Duration.ofSeconds(5L));
+				.verify(Duration.ofSeconds(10L));
 	}
 
 	@Override
