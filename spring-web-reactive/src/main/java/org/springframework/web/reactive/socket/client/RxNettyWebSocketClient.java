@@ -29,6 +29,7 @@ import javax.net.ssl.SSLEngine;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.reactivex.netty.protocol.http.HttpHandlerNames;
 import io.reactivex.netty.protocol.http.client.HttpClient;
 import io.reactivex.netty.protocol.http.ws.WebSocketConnection;
 import io.reactivex.netty.protocol.http.ws.client.WebSocketRequest;
@@ -119,7 +120,10 @@ public class RxNettyWebSocketClient extends WebSocketClientSupport implements We
 					NettyDataBufferFactory factory = new NettyDataBufferFactory(allocator);
 
 					WebSocketConnection conn = tuple.getT2();
-					WebSocketSession session = new RxNettyWebSocketSession(conn, info, factory);
+					RxNettyWebSocketSession session = new RxNettyWebSocketSession(conn, info, factory);
+					String name = HttpHandlerNames.WsClientDecoder.getName();
+					session.aggregateFrames(response.unsafeNettyChannel(), name);
+
 					return RxReactiveStreams.toObservable(handler.handle(session));
 				});
 	}

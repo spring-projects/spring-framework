@@ -16,19 +16,16 @@
 package org.springframework.web.reactive.socket.adapter;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import reactor.core.publisher.Flux;
 
-import org.springframework.core.io.buffer.NettyDataBuffer;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.socket.HandshakeInfo;
@@ -44,6 +41,12 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  * @since 5.0
  */
 public abstract class NettyWebSocketSessionSupport<T> extends AbstractWebSocketSession<T> {
+
+	/**
+	 * The default max size for aggregating inbound WebSocket frames.
+	 */
+	protected static final int DEFAULT_FRAME_MAX_SIZE = 64 * 1024;
+
 
 	private static final Map<Class<?>, WebSocketMessage.Type> MESSAGE_TYPES;
 
@@ -66,27 +69,9 @@ public abstract class NettyWebSocketSessionSupport<T> extends AbstractWebSocketS
 		return (NettyDataBufferFactory) super.bufferFactory();
 	}
 
-
-	protected Flux<WebSocketMessage> toMessageFlux(Flux<WebSocketFrame> frameFlux) {
-		return frameFlux
-				.filter(frame -> !(frame instanceof CloseWebSocketFrame))
-				.window()
-				.concatMap(flux -> flux.takeUntil(WebSocketFrame::isFinalFragment).buffer())
-				.map(this::toMessage);
-	}
-
-	@SuppressWarnings("OptionalGetWithoutIsPresent")
-	private WebSocketMessage toMessage(List<WebSocketFrame> frames) {
-		Class<?> frameType = frames.get(0).getClass();
-		if (frames.size() == 1) {
-			NettyDataBuffer buffer = bufferFactory().wrap(frames.get(0).content());
-			return new WebSocketMessage(MESSAGE_TYPES.get(frameType), buffer);
-		}
-		return frames.stream()
-				.map(socketFrame -> bufferFactory().wrap(socketFrame.content()))
-				.reduce(NettyDataBuffer::write)
-				.map(buffer -> new WebSocketMessage(MESSAGE_TYPES.get(frameType), buffer))
-				.get();
+	protected WebSocketMessage toMessage(WebSocketFrame frame) {
+		DataBuffer payload = bufferFactory().wrap(frame.content());
+		return new WebSocketMessage(MESSAGE_TYPES.get(frame.getClass()), payload);
 	}
 
 	protected WebSocketFrame toFrame(WebSocketMessage message) {

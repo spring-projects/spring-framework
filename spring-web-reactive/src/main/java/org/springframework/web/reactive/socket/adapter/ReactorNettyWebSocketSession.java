@@ -22,6 +22,8 @@ import reactor.core.publisher.Mono;
 import reactor.ipc.netty.NettyInbound;
 import reactor.ipc.netty.NettyOutbound;
 import reactor.ipc.netty.NettyPipeline;
+import reactor.ipc.netty.http.websocket.WebsocketInbound;
+import reactor.ipc.netty.http.websocket.WebsocketOutbound;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.web.reactive.socket.CloseStatus;
@@ -41,7 +43,7 @@ public class ReactorNettyWebSocketSession
 		extends NettyWebSocketSessionSupport<ReactorNettyWebSocketSession.WebSocketConnection> {
 
 
-	public ReactorNettyWebSocketSession(NettyInbound inbound, NettyOutbound outbound,
+	public ReactorNettyWebSocketSession(WebsocketInbound inbound, WebsocketOutbound outbound,
 			HandshakeInfo info, NettyDataBufferFactory bufferFactory) {
 
 		super(new WebSocketConnection(inbound, outbound), info, bufferFactory);
@@ -50,17 +52,19 @@ public class ReactorNettyWebSocketSession
 
 	@Override
 	public Flux<WebSocketMessage> receive() {
-		NettyInbound inbound = getDelegate().getInbound();
-		return toMessageFlux(inbound.receiveObject().cast(WebSocketFrame.class));
+		return getDelegate().getInbound()
+				.aggregateFrames(DEFAULT_FRAME_MAX_SIZE)
+				.receiveFrames()
+				.map(super::toMessage);
 	}
 
 	@Override
 	public Mono<Void> send(Publisher<WebSocketMessage> messages) {
-		Flux<WebSocketFrame> frameFlux = Flux.from(messages).map(this::toFrame);
-		NettyOutbound outbound = getDelegate().getOutbound();
-		return outbound.options(NettyPipeline.SendOptions::flushOnEach)
-		               .sendObject(frameFlux)
-		               .then();
+		Flux<WebSocketFrame> frames = Flux.from(messages).map(this::toFrame);
+		return getDelegate().getOutbound()
+				.options(NettyPipeline.SendOptions::flushOnEach)
+				.sendObject(frames)
+				.then();
 	}
 
 	@Override
@@ -77,21 +81,21 @@ public class ReactorNettyWebSocketSession
 	 */
 	public static class WebSocketConnection {
 
-		private final NettyInbound inbound;
+		private final WebsocketInbound inbound;
 
-		private final NettyOutbound outbound;
+		private final WebsocketOutbound outbound;
 
 
-		public WebSocketConnection(NettyInbound inbound, NettyOutbound outbound) {
+		public WebSocketConnection(WebsocketInbound inbound, WebsocketOutbound outbound) {
 			this.inbound = inbound;
 			this.outbound = outbound;
 		}
 
-		public NettyInbound getInbound() {
+		public WebsocketInbound getInbound() {
 			return this.inbound;
 		}
 
-		public NettyOutbound getOutbound() {
+		public WebsocketOutbound getOutbound() {
 			return this.outbound;
 		}
 	}

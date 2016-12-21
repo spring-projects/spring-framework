@@ -17,12 +17,10 @@ package org.springframework.web.reactive.socket.client;
 
 import java.net.URI;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import io.netty.buffer.ByteBufAllocator;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.NettyOutbound;
 import reactor.ipc.netty.http.client.HttpClient;
 import reactor.ipc.netty.http.client.HttpClientOptions;
 import reactor.ipc.netty.http.client.HttpClientRequest;
@@ -63,31 +61,27 @@ public class ReactorNettyWebSocketClient extends WebSocketClientSupport implemen
 	@Override
 	public Mono<Void> execute(URI url, HttpHeaders headers, WebSocketHandler handler) {
 
-		// TODO: https://github.com/reactor/reactor-netty/issues/19
-		AtomicReference<NettyOutbound> outboundRef = new AtomicReference<>();
-
 		String[] protocols = getSubProtocols(headers, handler);
 		// TODO: https://github.com/reactor/reactor-netty/issues/20
 
 		return this.httpClient
 				.get(url.toString(), request -> {
 					addRequestHeaders(request, headers);
-					NettyOutbound outbound = request.sendWebsocket();
-					outboundRef.set(outbound);
-					return outbound;
+					return request.sendWebsocket();
 				})
-				.then(in -> {
-					HttpHeaders responseHeaders = getResponseHeaders(in);
+				.then(response -> {
+					HttpHeaders responseHeaders = getResponseHeaders(response);
 					String protocol = responseHeaders.getFirst(SEC_WEBSOCKET_PROTOCOL);
 					HandshakeInfo info = new HandshakeInfo(url, responseHeaders, Mono.empty(),
 							Optional.ofNullable(protocol));
 
-					ByteBufAllocator allocator = in.channel().alloc();
+					ByteBufAllocator allocator = response.channel().alloc();
 					NettyDataBufferFactory factory = new NettyDataBufferFactory(allocator);
 
-					NettyOutbound out = outboundRef.get();
-					WebSocketSession session = new ReactorNettyWebSocketSession(in, out, info, factory);
-					return handler.handle(session);
+					return response.receiveWebsocket((in, out) -> {
+						WebSocketSession session = new ReactorNettyWebSocketSession(in, out, info, factory);
+						return handler.handle(session);
+					});
 				});
 	}
 

@@ -18,6 +18,8 @@ package org.springframework.web.reactive.socket.server.upgrade;
 import java.security.Principal;
 import java.util.Optional;
 
+import io.reactivex.netty.protocol.http.HttpHandlerNames;
+import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import io.reactivex.netty.protocol.http.ws.server.WebSocketHandshaker;
 import reactor.core.publisher.Mono;
 import rx.RxReactiveStreams;
@@ -27,7 +29,6 @@ import org.springframework.http.server.reactive.RxNettyServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
-import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.adapter.RxNettyWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
@@ -47,12 +48,16 @@ public class RxNettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 			Optional<String> subProtocol) {
 
 		RxNettyServerHttpResponse response = (RxNettyServerHttpResponse) exchange.getResponse();
+		HttpServerResponse<?> rxNettyResponse = response.getRxNettyResponse();
+
 		HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
 		NettyDataBufferFactory factory = (NettyDataBufferFactory) response.bufferFactory();
 
-		WebSocketHandshaker handshaker = response.getRxNettyResponse()
+		WebSocketHandshaker handshaker = rxNettyResponse
 				.acceptWebSocketUpgrade(conn -> {
-					WebSocketSession session = new RxNettyWebSocketSession(conn, info, factory);
+					RxNettyWebSocketSession session = new RxNettyWebSocketSession(conn, info, factory);
+					String name = HttpHandlerNames.WsServerDecoder.getName();
+					session.aggregateFrames(rxNettyResponse.unsafeNettyChannel(), name);
 					return RxReactiveStreams.toObservable(handler.handle(session));
 				});
 
