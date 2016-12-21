@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,13 @@
 
 package org.springframework.web.socket;
 
+import java.io.IOException;
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.servlet.api.DeploymentInfo;
@@ -24,22 +31,13 @@ import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.InstanceFactory;
 import io.undertow.servlet.api.InstanceHandle;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
-
-import java.io.IOException;
-
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import org.xnio.OptionMap;
+import org.xnio.Xnio;
 
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
-
-import org.xnio.OptionMap;
-import org.xnio.Xnio;
 
 import static io.undertow.servlet.Servlets.*;
 
@@ -61,11 +59,6 @@ public class UndertowTestServer implements WebSocketTestServer {
 	@Override
 	public void setup() {
 		this.port = SocketUtils.findAvailableTcpPort();
-	}
-
-	@Override
-	public int getPort() {
-		return this.port;
 	}
 
 	@Override
@@ -109,11 +102,6 @@ public class UndertowTestServer implements WebSocketTestServer {
 	}
 
 	@Override
-	public ServletContext getServletContext() {
-		return this.manager.getDeployment().getServletContext();
-	}
-
-	@Override
 	public void undeployConfig() {
 		this.manager.undeploy();
 	}
@@ -126,6 +114,16 @@ public class UndertowTestServer implements WebSocketTestServer {
 	@Override
 	public void stop() throws Exception {
 		this.server.stop();
+	}
+
+	@Override
+	public int getPort() {
+		return this.port;
+	}
+
+	@Override
+	public ServletContext getServletContext() {
+		return this.manager.getDeployment().getServletContext();
 	}
 
 
@@ -150,6 +148,7 @@ public class UndertowTestServer implements WebSocketTestServer {
 			};
 		}
 	}
+
 
 	private static class FilterInstanceFactory implements InstanceFactory<Filter> {
 
