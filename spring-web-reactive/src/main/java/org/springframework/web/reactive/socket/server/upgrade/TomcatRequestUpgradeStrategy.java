@@ -25,7 +25,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.websocket.Endpoint;
-import javax.websocket.server.ServerEndpointConfig;
 
 import org.apache.tomcat.websocket.server.WsServerContainer;
 import reactor.core.publisher.Mono;

@@ -41,6 +41,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.client.JettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.RxNettyWebSocketClient;
+import org.springframework.web.reactive.socket.client.StandardWebSocketClient;
 import org.springframework.web.reactive.socket.client.WebSocketClient;
 
 import static org.junit.Assert.assertEquals;
@@ -78,6 +79,11 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		client.stop();
 	}
 
+	@Test
+	public void echoStandardClient() throws Exception {
+		testEcho(new StandardWebSocketClient());
+	}
+
 	private void testEcho(WebSocketClient client) throws URISyntaxException {
 		int count = 100;
 		Flux<String> input = Flux.range(1, count).map(index -> "msg-" + index);
@@ -111,6 +117,11 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		client.start();
 		testSubProtocol(client);
 		client.stop();
+	}
+
+	@Test
+	public void subProtocolStandardClient() throws Exception {
+		testSubProtocol(new StandardWebSocketClient());
 	}
 
 	private void testSubProtocol(WebSocketClient client) throws URISyntaxException {
