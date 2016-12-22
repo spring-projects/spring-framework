@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,8 +118,7 @@ import org.springframework.util.ObjectUtils;
  * @see org.springframework.jms.listener.SessionAwareMessageListener
  * @see org.springframework.jms.listener.AbstractMessageListenerContainer#setMessageListener
  */
-public class MessageListenerAdapter extends AbstractAdaptableMessageListener
-		implements SubscriptionNameProvider {
+public class MessageListenerAdapter extends AbstractAdaptableMessageListener implements SubscriptionNameProvider {
 
 	/**
 	 * Out-of-the-box value for the default listener method: "handleMessage".
@@ -135,7 +134,9 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener
 	/**
 	 * Create a new {@link MessageListenerAdapter} with default settings.
 	 */
+	@SuppressWarnings("deprecation")
 	public MessageListenerAdapter() {
+		initDefaultStrategies();
 		this.delegate = this;
 	}
 
@@ -143,10 +144,21 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener
 	 * Create a new {@link MessageListenerAdapter} for the given delegate.
 	 * @param delegate the delegate object
 	 */
+	@SuppressWarnings("deprecation")
 	public MessageListenerAdapter(Object delegate) {
+		initDefaultStrategies();
 		setDelegate(delegate);
 	}
 
+
+	/**
+	 * Initialize the default implementations for the adapter's strategies.
+	 * @deprecated as of 4.1, in favor of calling the corresponding setters
+	 * in the subclass constructor
+	 */
+	@Deprecated
+	protected void initDefaultStrategies() {
+	}
 
 	/**
 	 * Set a target object to delegate message listening to.
@@ -183,6 +195,7 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener
 	protected String getDefaultListenerMethod() {
 		return this.defaultListenerMethod;
 	}
+
 
 	/**
 	 * Spring {@link SessionAwareMessageListener} entry point.
