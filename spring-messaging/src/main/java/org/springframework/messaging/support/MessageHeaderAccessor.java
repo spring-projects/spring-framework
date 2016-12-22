@@ -24,9 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
@@ -122,8 +119,6 @@ public class MessageHeaderAccessor {
 			new MimeType("text", "*"), new MimeType("application", "*+json"), new MimeType("application", "*+xml")
 	};
 
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final MutableMessageHeaders headers;
 
