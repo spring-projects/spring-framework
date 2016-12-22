@@ -16,7 +16,6 @@
 package org.springframework.web.reactive.socket.client;
 
 import java.net.URI;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import io.netty.buffer.ByteBufAllocator;
@@ -61,7 +60,7 @@ public class ReactorNettyWebSocketClient extends WebSocketClientSupport implemen
 	@Override
 	public Mono<Void> execute(URI url, HttpHeaders headers, WebSocketHandler handler) {
 
-		String[] protocols = getSubProtocols(headers, handler);
+		String[] protocols = beforeHandshake(url, headers, handler);
 		// TODO: https://github.com/reactor/reactor-netty/issues/20
 
 		return this.httpClient
@@ -71,9 +70,7 @@ public class ReactorNettyWebSocketClient extends WebSocketClientSupport implemen
 				})
 				.then(response -> {
 					HttpHeaders responseHeaders = getResponseHeaders(response);
-					String protocol = responseHeaders.getFirst(SEC_WEBSOCKET_PROTOCOL);
-					HandshakeInfo info = new HandshakeInfo(url, responseHeaders, Mono.empty(),
-							Optional.ofNullable(protocol));
+					HandshakeInfo info = afterHandshake(url,  response.status().code(), responseHeaders);
 
 					ByteBufAllocator allocator = response.channel().alloc();
 					NettyDataBufferFactory factory = new NettyDataBufferFactory(allocator);

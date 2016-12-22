@@ -17,8 +17,10 @@
 package org.springframework.web.reactive.socket.adapter;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameAggregator;
 import io.reactivex.netty.protocol.http.ws.WebSocketConnection;
@@ -45,8 +47,8 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public class RxNettyWebSocketSession extends NettyWebSocketSessionSupport<WebSocketConnection> {
 
 	/**
-	 * The name of the {@link WebSocketFrameAggregator} inserted by
-	 * {@link #aggregateFrames(Channel, String)}.
+	 * The {@code ChannelHandler} name to use when inserting a
+	 * {@link WebSocketFrameAggregator} in the channel pipeline.
 	 */
 	public static final String FRAME_AGGREGATOR_NAME = "websocket-frame-aggregator";
 
@@ -70,18 +72,21 @@ public class RxNettyWebSocketSession extends NettyWebSocketSessionSupport<WebSoc
 			logger.trace("WebSocketFrameAggregator already registered.");
 			return this;
 		}
-		ChannelHandlerContext context = pipeline.context(frameDecoderName);
-		Assert.notNull(context, "WebSocketFrameDecoder not found: " + frameDecoderName);
-		WebSocketFrameAggregator aggregator = new WebSocketFrameAggregator(DEFAULT_FRAME_MAX_SIZE);
-		pipeline.addAfter(context.name(), FRAME_AGGREGATOR_NAME, aggregator);
+		ChannelHandlerContext frameDecoder = pipeline.context(frameDecoderName);
+		Assert.notNull(frameDecoder, "WebSocketFrameDecoder not found: " + frameDecoderName);
+		ChannelHandler frameAggregator = new WebSocketFrameAggregator(DEFAULT_FRAME_MAX_SIZE);
+		pipeline.addAfter(frameDecoder.name(), FRAME_AGGREGATOR_NAME, frameAggregator);
 		return this;
 	}
 
 
 	@Override
 	public Flux<WebSocketMessage> receive() {
-		Observable<WebSocketMessage> observable = getDelegate().getInput().map(super::toMessage);
-		return Flux.from(RxReactiveStreams.toPublisher(observable));
+		Observable<WebSocketMessage> messages = getDelegate()
+				.getInput()
+				.filter(frame -> !(frame instanceof CloseWebSocketFrame))
+				.map(super::toMessage);
+		return Flux.from(RxReactiveStreams.toPublisher(messages));
 	}
 
 	@Override

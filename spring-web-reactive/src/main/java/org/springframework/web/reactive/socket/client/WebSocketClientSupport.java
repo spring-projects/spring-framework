@@ -15,8 +15,16 @@
  */
 package org.springframework.web.reactive.socket.client;
 
+import java.net.URI;
+import java.util.Optional;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import reactor.core.publisher.Mono;
+
 import org.springframework.http.HttpHeaders;
-import org.springframework.util.StringUtils;
+import org.springframework.util.Assert;
+import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 
 /**
@@ -30,11 +38,23 @@ public class WebSocketClientSupport {
 	protected static final String SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
 
 
-	protected String[] getSubProtocols(HttpHeaders headers, WebSocketHandler handler) {
-		String value = headers.getFirst(SEC_WEBSOCKET_PROTOCOL);
-		return (value != null ?
-				StringUtils.commaDelimitedListToStringArray(value) :
-				handler.getSubProtocols());
+	protected final Log logger = LogFactory.getLog(getClass());
+
+
+	protected String[] beforeHandshake(URI url, HttpHeaders headers, WebSocketHandler handler) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Executing handshake to " + url);
+		}
+		return handler.getSubProtocols();
+	}
+
+	protected HandshakeInfo afterHandshake(URI url, int statusCode, HttpHeaders headers) {
+		Assert.isTrue(statusCode == 101);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Handshake response: " + url + ", " + headers);
+		}
+		String protocol = headers.getFirst(SEC_WEBSOCKET_PROTOCOL);
+		return new HandshakeInfo(url, headers, Mono.empty(), Optional.ofNullable(protocol));
 	}
 
 }

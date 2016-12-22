@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -44,7 +43,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
-import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.adapter.RxNettyWebSocketSession;
 
 /**
@@ -105,7 +103,10 @@ public class RxNettyWebSocketClient extends WebSocketClientSupport implements We
 	}
 
 	private Observable<Void> connectInternal(URI url, HttpHeaders headers, WebSocketHandler handler) {
-		return createRequest(url, headers, handler)
+
+		String[] protocols = beforeHandshake(url, headers, handler);
+
+		return createRequest(url, headers, protocols)
 				.flatMap(response -> {
 					Observable<WebSocketConnection> conn = response.getWebSocketConnection();
 					return Observable.zip(Observable.just(response), conn, Tuples::of);
@@ -113,8 +114,7 @@ public class RxNettyWebSocketClient extends WebSocketClientSupport implements We
 				.flatMap(tuple -> {
 					WebSocketResponse<ByteBuf> response = tuple.getT1();
 					HttpHeaders responseHeaders = getResponseHeaders(response);
-					Optional<String> protocol = Optional.ofNullable(response.getAcceptedSubProtocol());
-					HandshakeInfo info = new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);
+					HandshakeInfo info = afterHandshake(url,  response.getStatus().code(), responseHeaders);
 
 					ByteBufAllocator allocator = response.unsafeNettyChannel().alloc();
 					NettyDataBufferFactory factory = new NettyDataBufferFactory(allocator);
@@ -128,7 +128,7 @@ public class RxNettyWebSocketClient extends WebSocketClientSupport implements We
 				});
 	}
 
-	private WebSocketRequest<ByteBuf> createRequest(URI url, HttpHeaders headers, WebSocketHandler handler) {
+	private WebSocketRequest<ByteBuf> createRequest(URI url, HttpHeaders headers, String[] protocols) {
 
 		String query = url.getRawQuery();
 		String requestUrl = url.getRawPath() + (query != null ? "?" + query : "");
@@ -138,7 +138,6 @@ public class RxNettyWebSocketClient extends WebSocketClientSupport implements We
 				.setHeaders(toObjectValueMap(headers))
 				.requestWebSocketUpgrade();
 
-		String[] protocols = getSubProtocols(headers, handler);
 		if (!ObjectUtils.isEmpty(protocols)) {
 			request = request.requestSubProtocols(protocols);
 		}

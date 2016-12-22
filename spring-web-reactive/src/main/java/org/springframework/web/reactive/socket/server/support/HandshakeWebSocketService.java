@@ -25,10 +25,9 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.Lifecycle;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -38,6 +37,7 @@ import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.WebSocketService;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.ServerWebInputException;
 
 /**
  * {@code WebSocketService} implementation that handles a WebSocket HTTP
@@ -179,53 +179,44 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 	public Mono<Void> handleRequest(ServerWebExchange exchange, WebSocketHandler handler) {
 
 		ServerHttpRequest request = exchange.getRequest();
-		ServerHttpResponse response = exchange.getResponse();
+		HttpMethod method = request.getMethod();
+		HttpHeaders headers = request.getHeaders();
 
-		if (logger.isTraceEnabled()) {
-			logger.trace("Processing " + request.getMethod() + " " + request.getURI());
+		if (logger.isDebugEnabled()) {
+			logger.debug("Handling " + request.getURI() + " with headers: " + headers);
 		}
 
-		if (HttpMethod.GET != request.getMethod()) {
-			return Mono.error(new MethodNotAllowedException(
-					request.getMethod().name(), Collections.singleton("GET")));
+		if (HttpMethod.GET != method) {
+			return Mono.error(new MethodNotAllowedException(method.name(), Collections.singleton("GET")));
 		}
 
-		if (!isWebSocketUpgrade(request)) {
-			response.setStatusCode(HttpStatus.BAD_REQUEST);
-			return response.setComplete();
+		if (!"WebSocket".equalsIgnoreCase(headers.getUpgrade())) {
+			return handleBadRequest("Invalid 'Upgrade' header: " + headers);
 		}
 
-		Optional<String> subProtocol = selectSubProtocol(request, handler);
-
-		return getUpgradeStrategy().upgrade(exchange, handler, subProtocol);
-	}
-
-	private boolean isWebSocketUpgrade(ServerHttpRequest request) {
-		if (!"WebSocket".equalsIgnoreCase(request.getHeaders().getUpgrade())) {
-			if (logger.isErrorEnabled()) {
-				logger.error("Invalid 'Upgrade' header: " + request.getHeaders());
-			}
-			return false;
-		}
-		List<String> connectionValue = request.getHeaders().getConnection();
+		List<String> connectionValue = headers.getConnection();
 		if (!connectionValue.contains("Upgrade") && !connectionValue.contains("upgrade")) {
-			if (logger.isErrorEnabled()) {
-				logger.error("Invalid 'Connection' header: " + request.getHeaders());
-			}
-			return false;
+			return handleBadRequest("Invalid 'Connection' header: " + headers);
 		}
-		String key = request.getHeaders().getFirst(SEC_WEBSOCKET_KEY);
+
+		String key = headers.getFirst(SEC_WEBSOCKET_KEY);
 		if (key == null) {
-			if (logger.isErrorEnabled()) {
-				logger.error("Missing \"Sec-WebSocket-Key\" header");
-			}
-			return false;
+			return handleBadRequest("Missing \"Sec-WebSocket-Key\" header");
 		}
-		return true;
+
+		Optional<String> protocol = selectProtocol(headers, handler);
+		return this.upgradeStrategy.upgrade(exchange, handler, protocol);
 	}
 
-	private Optional<String> selectSubProtocol(ServerHttpRequest request, WebSocketHandler handler) {
-		String protocolHeader = request.getHeaders().getFirst(SEC_WEBSOCKET_PROTOCOL);
+	private Mono<Void> handleBadRequest(String reason) {
+		if (logger.isDebugEnabled()) {
+			logger.debug(reason);
+		}
+		return Mono.error(new ServerWebInputException(reason));
+	}
+
+	private Optional<String> selectProtocol(HttpHeaders headers, WebSocketHandler handler) {
+		String protocolHeader = headers.getFirst(SEC_WEBSOCKET_PROTOCOL);
 		if (protocolHeader == null) {
 			return Optional.empty();
 		}
