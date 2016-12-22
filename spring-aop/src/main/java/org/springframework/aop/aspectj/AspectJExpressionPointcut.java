@@ -186,11 +186,22 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			throw new IllegalStateException("Must set property 'expression' before attempting to match");
 		}
 		if (this.pointcutExpression == null) {
-			this.pointcutClassLoader = (this.beanFactory instanceof ConfigurableBeanFactory ?
-					((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader() :
-					ClassUtils.getDefaultClassLoader());
+			this.pointcutClassLoader = determinePointcutClassLoader();
 			this.pointcutExpression = buildPointcutExpression(this.pointcutClassLoader);
 		}
+	}
+
+	/**
+	 * Determine the ClassLoader to use for pointcut evaluation.
+	 */
+	private ClassLoader determinePointcutClassLoader() {
+		if (this.beanFactory instanceof ConfigurableBeanFactory) {
+			return ((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader();
+		}
+		if (this.pointcutDeclarationScope != null) {
+			return this.pointcutDeclarationScope.getClassLoader();
+		}
+		return ClassUtils.getDefaultClassLoader();
 	}
 
 	/**

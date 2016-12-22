@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.aspectj.lang.reflect.PerClauseKind;
 
@@ -50,7 +50,7 @@ import org.springframework.util.ClassUtils;
 public class AspectJProxyFactory extends ProxyCreatorSupport {
 
 	/** Cache for singleton aspect instances */
-	private static final Map<Class<?>, Object> aspectCache = new HashMap<Class<?>, Object>();
+	private static final Map<Class<?>, Object> aspectCache = new ConcurrentHashMap<Class<?>, Object>();
 
 	private final AspectJAdvisorFactory aspectFactory = new ReflectiveAspectJAdvisorFactory();
 
@@ -144,7 +144,7 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	private MetadataAwareAspectInstanceFactory createAspectInstanceFactory(
 			AspectMetadata am, Class<?> aspectClass, String aspectName) {
 
-		MetadataAwareAspectInstanceFactory instanceFactory = null;
+		MetadataAwareAspectInstanceFactory instanceFactory;
 		if (am.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
 			// Create a shared aspect instance.
 			Object instance = getSingletonAspectInstance(aspectClass);
@@ -162,23 +162,29 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 * is created if one cannot be found in the instance cache.
 	 */
 	private Object getSingletonAspectInstance(Class<?> aspectClass) {
-		synchronized (aspectCache) {
-			Object instance = aspectCache.get(aspectClass);
-			if (instance != null) {
-				return instance;
-			}
-			try {
-				instance = aspectClass.newInstance();
-				aspectCache.put(aspectClass, instance);
-				return instance;
-			}
-			catch (InstantiationException ex) {
-				throw new AopConfigException("Unable to instantiate aspect class [" + aspectClass.getName() + "]", ex);
-			}
-			catch (IllegalAccessException ex) {
-				throw new AopConfigException("Cannot access aspect class [" + aspectClass.getName() + "]", ex);
+		// Quick check without a lock...
+		Object instance = aspectCache.get(aspectClass);
+		if (instance == null) {
+			synchronized (aspectCache) {
+				// To be safe, check within full lock now...
+				instance = aspectCache.get(aspectClass);
+				if (instance != null) {
+					return instance;
+				}
+				try {
+					instance = aspectClass.newInstance();
+					aspectCache.put(aspectClass, instance);
+					return instance;
+				}
+				catch (InstantiationException ex) {
+					throw new AopConfigException("Unable to instantiate aspect class [" + aspectClass.getName() + "]", ex);
+				}
+				catch (IllegalAccessException ex) {
+					throw new AopConfigException("Cannot access aspect class [" + aspectClass.getName() + "]", ex);
+				}
 			}
 		}
+		return instance;
 	}
 
 
