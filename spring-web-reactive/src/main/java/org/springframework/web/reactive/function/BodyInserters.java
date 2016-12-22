@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.function;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -119,7 +118,7 @@ public abstract class BodyInserters {
 		return (response, context) -> {
 					HttpMessageWriter<Resource> messageWriter = resourceHttpMessageWriter(context);
 					return messageWriter.write(Mono.just(resource), RESOURCE_TYPE, null,
-							response, Collections.emptyMap());
+							response, context.hints());
 				};
 	}
 
@@ -146,7 +145,7 @@ public abstract class BodyInserters {
 		return (response, context) -> {
 					HttpMessageWriter<ServerSentEvent<T>> messageWriter = sseMessageWriter(context);
 					return messageWriter.write(eventsPublisher, SERVER_SIDE_EVENT_TYPE,
-							MediaType.TEXT_EVENT_STREAM, response, Collections.emptyMap());
+							MediaType.TEXT_EVENT_STREAM, response, context.hints());
 				};
 	}
 
@@ -186,7 +185,7 @@ public abstract class BodyInserters {
 		return (outputMessage, context) -> {
 					HttpMessageWriter<T> messageWriter = sseMessageWriter(context);
 					return messageWriter.write(eventsPublisher, eventType,
-							MediaType.TEXT_EVENT_STREAM, outputMessage, Collections.emptyMap());
+							MediaType.TEXT_EVENT_STREAM, outputMessage, context.hints());
 
 				};
 	}
@@ -227,8 +226,7 @@ public abstract class BodyInserters {
 					.findFirst()
 					.map(BodyInserters::cast)
 					.map(messageWriter -> messageWriter
-							.write(body, bodyType, contentType, m, Collections
-									.emptyMap()))
+							.write(body, bodyType, contentType, m, context.hints()))
 					.orElseGet(() -> {
 						List<MediaType> supportedMediaTypes = messageWriters.get()
 								.flatMap(reader -> reader.getWritableMediaTypes().stream())

@@ -21,10 +21,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -51,6 +54,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
+import static org.springframework.http.codec.json.AbstractJackson2Codec.JSON_VIEW_HINT;
 
 /**
  * @author Arjen Poutsma
@@ -58,6 +62,8 @@ import static org.junit.Assert.assertArrayEquals;
 public class BodyInsertersTests {
 
 	private BodyInserter.Context context;
+
+	private Map<String, Object> hints;
 
 	@Before
 	public void createContext() {
@@ -71,19 +77,23 @@ public class BodyInsertersTests {
 		messageWriters
 				.add(new ServerSentEventHttpMessageWriter(Collections.singletonList(jsonEncoder)));
 
-
+		this.hints = new HashMap();
 		this.context = new BodyInserter.Context() {
 			@Override
 			public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
 				return messageWriters::stream;
 			}
+
+			@Override
+			public Map<String, Object> hints() {
+				return hints;
+			}
 		};
 
 	}
 
-
 	@Test
-	public void ofObject() throws Exception {
+	public void ofString() throws Exception {
 		String body = "foo";
 		BodyInserter<String, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body);
 
@@ -95,6 +105,35 @@ public class BodyInsertersTests {
 		DataBuffer buffer = new DefaultDataBufferFactory().wrap(byteBuffer);
 		StepVerifier.create(response.getBody())
 				.expectNext(buffer)
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void ofObject() throws Exception {
+		User body = new User("foo", "bar");
+		BodyInserter<User, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body);
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Mono<Void> result = inserter.insert(response, this.context);
+		StepVerifier.create(result).expectComplete().verify();
+
+		StepVerifier.create(response.getBodyAsString())
+				.expectNext("{\"username\":\"foo\",\"password\":\"bar\"}")
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void ofObjectWithHints() throws Exception {
+		User body = new User("foo", "bar");
+		BodyInserter<User, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body);
+		this.hints.put(JSON_VIEW_HINT, SafeToSerialize.class);
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Mono<Void> result = inserter.insert(response, this.context);
+		StepVerifier.create(result).expectComplete().verify();
+
+		StepVerifier.create(response.getBodyAsString())
+				.expectNext("{\"username\":\"foo\"}")
 				.expectComplete()
 				.verify();
 	}
@@ -177,6 +216,41 @@ public class BodyInsertersTests {
 				.expectNext(dataBuffer)
 				.expectComplete()
 				.verify();
+	}
+
+
+	interface SafeToSerialize {}
+
+	private static class User {
+
+		@JsonView(SafeToSerialize.class)
+		private String username;
+
+		private String password;
+
+		public User() {
+		}
+
+		public User(String username, String password) {
+			this.username = username;
+			this.password = password;
+		}
+
+		public String getUsername() {
+			return username;
+		}
+
+		public void setUsername(String username) {
+			this.username = username;
+		}
+
+		public String getPassword() {
+			return password;
+		}
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
 	}
 
 

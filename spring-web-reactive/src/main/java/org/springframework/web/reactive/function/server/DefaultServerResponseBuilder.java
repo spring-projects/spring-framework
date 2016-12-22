@@ -22,6 +22,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -61,6 +62,8 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	private final HttpStatus statusCode;
 
 	private final HttpHeaders headers = new HttpHeaders();
+
+	private final Map<String, Object> hints = new HashMap<>();
 
 
 	public DefaultServerResponseBuilder(HttpStatus statusCode) {
@@ -119,6 +122,12 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 			}
 		}
 		this.headers.setETag(eTag);
+		return this;
+	}
+
+	@Override
+	public ServerResponse.BodyBuilder hint(String key, Object value) {
+		this.hints.put(key, value);
 		return this;
 	}
 
@@ -182,7 +191,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	public <T> Mono<ServerResponse> body(BodyInserter<T, ? super ServerHttpResponse> inserter) {
 		Assert.notNull(inserter, "'inserter' must not be null");
 		return Mono
-				.just(new BodyInserterServerResponse<T>(this.statusCode, this.headers, inserter));
+				.just(new BodyInserterServerResponse<T>(this.statusCode, this.headers, inserter, this.hints));
 	}
 
 	@Override
@@ -276,11 +285,14 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		private final BodyInserter<T, ? super ServerHttpResponse> inserter;
 
+		private final Map<String, Object> hints;
+
 		public BodyInserterServerResponse(HttpStatus statusCode, HttpHeaders headers,
-				BodyInserter<T, ? super ServerHttpResponse> inserter) {
+				BodyInserter<T, ? super ServerHttpResponse> inserter, Map<String, Object> hints) {
 
 			super(statusCode, headers);
 			this.inserter = inserter;
+			this.hints = hints;
 		}
 
 		@Override
@@ -291,6 +303,10 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				@Override
 				public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
 					return strategies.messageWriters();
+				}
+				@Override
+				public Map<String, Object> hints() {
+					return hints;
 				}
 			});
 		}

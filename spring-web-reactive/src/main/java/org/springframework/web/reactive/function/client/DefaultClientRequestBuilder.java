@@ -22,6 +22,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -219,6 +221,11 @@ class DefaultClientRequestBuilder implements ClientRequest.BodyBuilder {
 				@Override
 				public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
 					return strategies.messageWriters();
+				}
+
+				@Override
+				public Map<String, Object> hints() {
+					return Collections.emptyMap();
 				}
 			});
 		}
