@@ -479,9 +479,9 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		private void writeHeaders() throws IOException {
 			if (!this.headersWritten) {
 				for (Map.Entry<String, List<String>> entry : this.headers.entrySet()) {
-					byte[] headerName = getAsciiBytes(entry.getKey());
+					byte[] headerName = getFilenameBytes(entry.getKey());
 					for (String headerValueString : entry.getValue()) {
-						byte[] headerValue = getAsciiBytes(headerValueString);
+						byte[] headerValue = getFilenameBytes(headerValueString);
 						this.outputStream.write(headerName);
 						this.outputStream.write(':');
 						this.outputStream.write(' ');
@@ -494,9 +494,10 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			}
 		}
 
-		private byte[] getAsciiBytes(String name) {
-			return name.getBytes(StandardCharsets.US_ASCII);
-		}
+        private byte[] getFilenameBytes(String name) {
+            return name.getBytes(StandardCharsets.UTF_8);
+        }
+
 	}
 
 
