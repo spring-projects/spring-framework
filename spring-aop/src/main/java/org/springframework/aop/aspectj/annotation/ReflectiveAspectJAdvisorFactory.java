@@ -46,6 +46,7 @@ import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.aop.aspectj.DeclareParentsAdvisor;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConvertingComparator;
@@ -92,6 +93,30 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 					}
 				}));
 		METHOD_COMPARATOR = comparator;
+	}
+
+
+	private final BeanFactory beanFactory;
+
+
+	/**
+	 * Create a new {@code ReflectiveAspectJAdvisorFactory}.
+	 */
+	public ReflectiveAspectJAdvisorFactory() {
+		this(null);
+	}
+
+	/**
+	 * Create a new {@code ReflectiveAspectJAdvisorFactory}, propagating the given
+	 * {@link BeanFactory} to the created {@link AspectJExpressionPointcut} instances,
+	 * for bean pointcut handling as well as consistent {@link ClassLoader} resolution.
+	 * @param beanFactory the BeanFactory to propagate (may be {@code null}}
+	 * @since 4.3.6
+	 * @see AspectJExpressionPointcut#setBeanFactory
+	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#getBeanClassLoader()
+	 */
+	public ReflectiveAspectJAdvisorFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
 	}
 
 
@@ -161,9 +186,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		}
 
 		if (DeclareParents.class == declareParents.defaultImpl()) {
-			// This is what comes back if it wasn't set. This seems bizarre...
-			// TODO this restriction possibly should be relaxed
-			throw new IllegalStateException("defaultImpl must be set on DeclareParents");
+			throw new IllegalStateException("'defaultImpl' attribute must be set on DeclareParents");
 		}
 
 		return new DeclareParentsAdvisor(
@@ -197,6 +220,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		AspectJExpressionPointcut ajexp =
 				new AspectJExpressionPointcut(candidateAspectClass, new String[0], new Class<?>[0]);
 		ajexp.setExpression(aspectJAnnotation.getPointcutExpression());
+		ajexp.setBeanFactory(this.beanFactory);
 		return ajexp;
 	}
 

@@ -187,11 +187,22 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			throw new IllegalStateException("Must set property 'expression' before attempting to match");
 		}
 		if (this.pointcutExpression == null) {
-			this.pointcutClassLoader = (this.beanFactory instanceof ConfigurableBeanFactory ?
-					((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader() :
-					ClassUtils.getDefaultClassLoader());
+			this.pointcutClassLoader = determinePointcutClassLoader();
 			this.pointcutExpression = buildPointcutExpression(this.pointcutClassLoader);
 		}
+	}
+
+	/**
+	 * Determine the ClassLoader to use for pointcut evaluation.
+	 */
+	private ClassLoader determinePointcutClassLoader() {
+		if (this.beanFactory instanceof ConfigurableBeanFactory) {
+			return ((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader();
+		}
+		if (this.pointcutDeclarationScope != null) {
+			return this.pointcutDeclarationScope.getClassLoader();
+		}
+		return ClassUtils.getDefaultClassLoader();
 	}
 
 	/**
@@ -211,10 +222,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	/**
 	 * Initialize the underlying AspectJ pointcut parser.
 	 */
-	private PointcutParser initializePointcutParser(ClassLoader cl) {
+	private PointcutParser initializePointcutParser(ClassLoader classLoader) {
 		PointcutParser parser = PointcutParser
 				.getPointcutParserSupportingSpecifiedPrimitivesAndUsingSpecifiedClassLoaderForResolution(
-						SUPPORTED_PRIMITIVES, cl);
+						SUPPORTED_PRIMITIVES, classLoader);
 		parser.registerPointcutDesignatorHandler(new BeanPointcutDesignatorHandler());
 		return parser;
 	}
@@ -608,7 +619,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 
 		private boolean matchesBean(String advisedBeanName) {
-			return BeanFactoryAnnotationUtils.isQualifierMatch(this.expressionPattern::matches, advisedBeanName, beanFactory);
+			return BeanFactoryAnnotationUtils.isQualifierMatch(
+					this.expressionPattern::matches, advisedBeanName, beanFactory);
 		}
 	}
 

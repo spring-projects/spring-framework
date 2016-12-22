@@ -38,7 +38,6 @@ import org.aspectj.lang.reflect.AjType;
 import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
 
-import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -120,49 +119,6 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 					"This is not supported in Spring AOP.");
 		}
 	}
-
-	/**
-	 * The pointcut and advice annotations both have an "argNames" member which contains a
-	 * comma-separated list of the argument names. We use this (if non-empty) to build the
-	 * formal parameters for the pointcut.
-	 */
-	protected AspectJExpressionPointcut createPointcutExpression(
-			Method annotatedMethod, Class<?> declarationScope, String[] pointcutParameterNames) {
-
-		Class<?> [] pointcutParameterTypes = new Class<?>[0];
-		if (pointcutParameterNames != null) {
-			pointcutParameterTypes = extractPointcutParameterTypes(pointcutParameterNames,annotatedMethod);
-		}
-
-		AspectJExpressionPointcut ajexp =
-				new AspectJExpressionPointcut(declarationScope,pointcutParameterNames,pointcutParameterTypes);
-		ajexp.setLocation(annotatedMethod.toString());
-		return ajexp;
-	}
-
-	/**
-	 * Create the pointcut parameters needed by aspectj based on the given argument names
-	 * and the argument types that are available from the adviceMethod. Needs to take into
-	 * account (ignore) any JoinPoint based arguments as these are not pointcut context but
-	 * rather part of the advice execution context (thisJoinPoint, thisJoinPointStaticPart)
-	 */
-	private Class<?>[] extractPointcutParameterTypes(String[] argNames, Method adviceMethod) {
-		Class<?>[] ret = new Class<?>[argNames.length];
-		Class<?>[] paramTypes = adviceMethod.getParameterTypes();
-		if (argNames.length > paramTypes.length) {
-			throw new IllegalStateException("Expecting at least " + argNames.length +
-					" arguments in the advice declaration, but only found " + paramTypes.length);
-		}
-
-		// Make the simplifying assumption for now that all of the JoinPoint based arguments
-		// come first in the advice declaration.
-		int typeOffset = paramTypes.length - argNames.length;
-		for (int i = 0; i < ret.length; i++) {
-			ret[i] = paramTypes[i + typeOffset];
-		}
-		return ret;
-	}
-
 
 	/**
 	 * Find and return the first AspectJ annotation on the given method
