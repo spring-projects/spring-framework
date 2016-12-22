@@ -17,6 +17,8 @@
 package org.springframework.context.support;
 
 import java.lang.management.ManagementFactory;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -26,6 +28,7 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.mock.env.MockEnvironment;
 
 import static org.junit.Assert.*;
@@ -95,11 +98,62 @@ public class LiveBeansViewTests {
 		assertEquals(0, searchLiveBeansViewMeans().size());
 	}
 
+	@Test
+	public void orderOfApplicationContextsShouldBeRootFirst() {
+		ConfigurableApplicationContext root = createApplicationContext("root");
+		ConfigurableApplicationContext childCtx1 = createApplicationContext("ctx1");
+		ConfigurableApplicationContext childCtx11 = createApplicationContext("ctx11");
+		ConfigurableApplicationContext childCtx12 = createApplicationContext("ctx12");
+		ConfigurableApplicationContext childCtx123 = createApplicationContext("ctx123");
+		ConfigurableApplicationContext childCtx2 = createApplicationContext("ctx2");
+		ConfigurableApplicationContext childCtx21 = createApplicationContext("ctx21");
+		ConfigurableApplicationContext childCtx22 = createApplicationContext("ctx21");
+		ConfigurableApplicationContext childCtx223 = createApplicationContext("ctx21");
+		setParent(childCtx1, root);
+		setParent(childCtx2, root);
+		setParent(childCtx11, childCtx1);
+		setParent(childCtx12, childCtx1);
+		setParent(childCtx123, childCtx12);
+		setParent(childCtx21, childCtx2);
+		setParent(childCtx22, childCtx2);
+		setParent(childCtx223, childCtx22);
+
+
+		Set<ConfigurableApplicationContext> contextsSet = new HashSet<>();
+		contextsSet.add(childCtx1);
+		contextsSet.add(childCtx2);
+		contextsSet.add(root);
+		contextsSet.add(childCtx11);
+		contextsSet.add(childCtx12);
+		contextsSet.add(childCtx123);
+		contextsSet.add(childCtx21);
+		contextsSet.add(childCtx22);
+		contextsSet.add(childCtx223);
+
+
+		LiveBeansView liveBeansView = new LiveBeansView();
+		List<ConfigurableApplicationContext> orderedCtx = liveBeansView.orderedApplicationContexts(contextsSet);
+		assertEquals(root, orderedCtx.get(0));
+		assertTrue((orderedCtx.indexOf(childCtx1) < orderedCtx.indexOf(childCtx11)) &&
+				(orderedCtx.indexOf(childCtx1) < orderedCtx.indexOf(childCtx12)));
+
+		assertTrue((orderedCtx.indexOf(childCtx2) < orderedCtx.indexOf(childCtx21)) &&
+				(orderedCtx.indexOf(childCtx2) < orderedCtx.indexOf(childCtx22)));
+
+		assertTrue((orderedCtx.indexOf(childCtx12) < orderedCtx.indexOf(childCtx123)));
+		assertTrue((orderedCtx.indexOf(childCtx22) < orderedCtx.indexOf(childCtx223)));
+	}
+
+
 	private ConfigurableApplicationContext createApplicationContext(String applicationName) {
 		ConfigurableApplicationContext context = mock(ConfigurableApplicationContext.class);
 		given(context.getEnvironment()).willReturn(this.environment);
 		given(context.getApplicationName()).willReturn(applicationName);
 		return context;
+	}
+
+	private void setParent(ConfigurableApplicationContext child, ConfigurableApplicationContext parent) {
+		given(child.getParent()).willReturn(parent);
 	}
 
 	public void assertSingleLiveBeansViewMbean(String applicationName) throws MalformedObjectNameException {
