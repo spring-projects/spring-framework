@@ -6,6 +6,26 @@ install {
 	}
 }
 
+task generatePom {
+	group = 'Build'
+	description = 'Generates a Maven pom.xml'
+
+	ext.generatedPomFileName = "pom.xml"
+	onlyIf { install.enabled }
+
+	inputs.files(fileTree(project.rootProject.rootDir).include("**/*.gradle").files)
+	inputs.files(new File(project.rootProject.rootDir, Project.GRADLE_PROPERTIES))
+	outputs.files(generatedPomFileName)
+
+	doLast() {
+		def p = pom {}
+		customizePom(p, project)
+		p.writeTo(generatedPomFileName)
+	}
+}
+
+build.dependsOn generatePom
+
 def customizePom(pom, gradleProject) {
 	pom.whenConfigured { generatedPom ->
 		// eliminate test-scoped dependencies (no need in maven central poms)
