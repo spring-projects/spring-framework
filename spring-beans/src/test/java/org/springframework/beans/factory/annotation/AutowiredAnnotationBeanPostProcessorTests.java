@@ -1137,7 +1137,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertEquals(bf.getBean("testBean"), bean.getTestBean());
 		assertEquals(bf.getBean("testBean", "myName"), bean.getTestBean("myName"));
 		assertEquals(bf.getBean("testBean"), bean.getOptionalTestBean());
+		assertEquals(bf.getBean("testBean"), bean.getOptionalTestBeanWithDefault());
 		assertEquals(bf.getBean("testBean"), bean.getUniqueTestBean());
+		assertEquals(bf.getBean("testBean"), bean.getUniqueTestBeanWithDefault());
 		bf.destroySingletons();
 	}
 
@@ -1153,7 +1155,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		SmartObjectFactoryInjectionBean bean = (SmartObjectFactoryInjectionBean) bf.getBean("annotatedBean");
 		assertSame(bf.getBean("testBean"), bean.getTestBean());
 		assertSame(bf.getBean("testBean"), bean.getOptionalTestBean());
+		assertSame(bf.getBean("testBean"), bean.getOptionalTestBeanWithDefault());
 		assertSame(bf.getBean("testBean"), bean.getUniqueTestBean());
+		assertSame(bf.getBean("testBean"), bean.getUniqueTestBeanWithDefault());
 		bf.destroySingletons();
 	}
 
@@ -1174,6 +1178,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			// expected
 		}
 		assertNull(bean.getOptionalTestBean());
+		assertEquals(new TestBean("default"), bean.getOptionalTestBeanWithDefault());
+		assertEquals(new TestBean("default"), bean.getUniqueTestBeanWithDefault());
 		assertNull(bean.getUniqueTestBean());
 		bf.destroySingletons();
 	}
@@ -2732,8 +2738,16 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			return this.testBeanFactory.getIfAvailable();
 		}
 
+		public TestBean getOptionalTestBeanWithDefault() {
+			return this.testBeanFactory.getIfAvailable(() -> new TestBean("default"));
+		}
+
 		public TestBean getUniqueTestBean() {
 			return this.testBeanFactory.getIfUnique();
+		}
+
+		public TestBean getUniqueTestBeanWithDefault() {
+			return this.testBeanFactory.getIfUnique(() -> new TestBean("default"));
 		}
 	}
 
