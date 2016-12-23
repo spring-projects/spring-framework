@@ -31,6 +31,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.json.AbstractJackson2Codec;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.reactive.function.BodyExtractor;
 
@@ -40,6 +41,7 @@ import org.springframework.web.reactive.function.BodyExtractor;
  * {@link #body(BodyExtractor)} respectively.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public interface ServerRequest {
@@ -71,8 +73,19 @@ public interface ServerRequest {
 	 * @param extractor the {@code BodyExtractor} that reads from the request
 	 * @param <T> the type of the body returned
 	 * @return the extracted body
+	 * @see #body(BodyExtractor, Map)
 	 */
 	<T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor);
+
+	/**
+	 * Extract the body with the given {@code BodyExtractor} and hints.
+	 * @param extractor the {@code BodyExtractor} that reads from the request
+	 * @param hints the map of hints like {@link AbstractJackson2Codec#JSON_VIEW_HINT}
+	 * to use to customize body extraction
+	 * @param <T> the type of the body returned
+	 * @return the extracted body
+	 */
+	<T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor, Map<String, Object> hints);
 
 	/**
 	 * Extract the body to a {@code Mono}.

@@ -18,6 +18,7 @@ package org.springframework.web.reactive.function.client;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Function;
@@ -73,6 +74,10 @@ class DefaultClientResponse implements ClientResponse {
 			@Override
 			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
 				return strategies.messageReaders();
+			}
+			@Override
+			public Map<String, Object> hints() {
+				return Collections.emptyMap();
 			}
 		});
 	}

@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function;
 
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -52,6 +53,11 @@ public interface BodyExtractor<T, M extends ReactiveHttpInputMessage> {
 		 * @return the stream of message readers
 		 */
 		Supplier<Stream<HttpMessageReader<?>>> messageReaders();
+
+		/**
+		 * Return the map of hints to use to customize body extraction.
+		 */
+		Map<String, Object> hints();
 	}
 
 }

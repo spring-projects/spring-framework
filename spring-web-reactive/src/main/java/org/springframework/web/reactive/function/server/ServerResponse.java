@@ -31,6 +31,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.json.AbstractJackson2Codec;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.BodyInserter;
@@ -42,6 +43,7 @@ import org.springframework.web.server.ServerWebExchange;
  * {@linkplain HandlerFunction handler function} or {@linkplain HandlerFilterFunction filter function}.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public interface ServerResponse {
@@ -311,6 +313,12 @@ public interface ServerResponse {
 		 * @see HttpHeaders#setContentType(MediaType)
 		 */
 		BodyBuilder contentType(MediaType contentType);
+
+		/**
+		 * Add a serialization hint like {@link AbstractJackson2Codec#JSON_VIEW_HINT} to
+		 * customize how the body will be serialized.
+		 */
+		BodyBuilder hint(String key, Object value);
 
 		/**
 		 * Set the body of the response to the given {@code Publisher} and return it. This

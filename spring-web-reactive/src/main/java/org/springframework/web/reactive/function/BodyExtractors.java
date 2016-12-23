@@ -65,7 +65,7 @@ public abstract class BodyExtractors {
 		Assert.notNull(elementType, "'elementType' must not be null");
 		return (request, context) -> readWithMessageReaders(request, context,
 				elementType,
-				reader -> reader.readMono(elementType, request, Collections.emptyMap()),
+				reader -> reader.readMono(elementType, request, context.hints()),
 				Mono::error);
 	}
 
@@ -90,7 +90,7 @@ public abstract class BodyExtractors {
 		Assert.notNull(elementType, "'elementType' must not be null");
 		return (inputMessage, context) -> readWithMessageReaders(inputMessage, context,
 				elementType,
-				reader -> reader.read(elementType, inputMessage, Collections.emptyMap()),
+				reader -> reader.read(elementType, inputMessage, context.hints()),
 				Flux::error);
 	}
 

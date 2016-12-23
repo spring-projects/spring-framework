@@ -100,6 +100,11 @@ public class MockServerRequest implements ServerRequest {
 	}
 
 	@Override
+	public <S> S body(BodyExtractor<S, ? super ServerHttpRequest> extractor, Map<String, Object> hints) {
+		return (S) this.body;
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public <S> Mono<S> bodyToMono(Class<? extends S> elementClass) {
 		return (Mono<S>) this.body;

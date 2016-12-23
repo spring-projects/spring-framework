@@ -92,6 +92,11 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
+	public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor, Map<String, Object> hints) {
+		return this.request.body(extractor, hints);
+	}
+
+	@Override
 	public <T> Mono<T> bodyToMono(Class<? extends T> elementClass) {
 		return this.request.bodyToMono(elementClass);
 	}

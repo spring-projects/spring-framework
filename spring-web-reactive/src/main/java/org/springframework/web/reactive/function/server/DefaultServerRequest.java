@@ -78,12 +78,21 @@ class DefaultServerRequest implements ServerRequest {
 
 	@Override
 	public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor) {
+		return body(extractor, Collections.emptyMap());
+	}
+
+	@Override
+	public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor, Map<String, Object> hints) {
 		Assert.notNull(extractor, "'extractor' must not be null");
 		return extractor.extract(request(),
 				new BodyExtractor.Context() {
 					@Override
 					public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
 						return DefaultServerRequest.this.strategies.messageReaders();
+					}
+					@Override
+					public Map<String, Object> hints() {
+						return hints;
 					}
 				});
 	}

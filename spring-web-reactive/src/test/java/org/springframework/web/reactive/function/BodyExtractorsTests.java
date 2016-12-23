@@ -19,10 +19,14 @@ package org.springframework.web.reactive.function;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -43,12 +47,19 @@ import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 
+import static org.springframework.http.codec.json.AbstractJackson2Codec.JSON_VIEW_HINT;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 /**
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  */
 public class BodyExtractorsTests {
 
 	private BodyExtractor.Context context;
+
+	private Map<String, Object> hints;
 
 	@Before
 	public void createContext() {
@@ -63,8 +74,12 @@ public class BodyExtractorsTests {
 			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
 				return messageReaders::stream;
 			}
+			@Override
+			public Map<String, Object> hints() {
+				return hints;
+			}
 		};
-
+		this.hints = new HashMap();
 	}
 
 	@Test
@@ -83,6 +98,31 @@ public class BodyExtractorsTests {
 
 		StepVerifier.create(result)
 				.expectNext("foo")
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void toMonoWithHints() throws Exception {
+		BodyExtractor<Mono<User>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(User.class);
+		this.hints.put(JSON_VIEW_HINT, SafeToDeserialize.class);
+
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer =
+				factory.wrap(ByteBuffer.wrap("{\"username\":\"foo\",\"password\":\"bar\"}".getBytes(StandardCharsets.UTF_8)));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+
+		MockServerHttpRequest request = new MockServerHttpRequest();
+		request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+		request.setBody(body);
+
+		Mono<User> result = extractor.extract(request, this.context);
+
+		StepVerifier.create(result)
+				.consumeNextWith(user -> {
+					assertEquals("foo", user.getUsername());
+					assertNull(user.getPassword());
+				})
 				.expectComplete()
 				.verify();
 	}
@@ -108,6 +148,35 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
+	public void toFluxWithHints() throws Exception {
+		BodyExtractor<Flux<User>, ReactiveHttpInputMessage> extractor = BodyExtractors.toFlux(User.class);
+		this.hints.put(JSON_VIEW_HINT, SafeToDeserialize.class);
+
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer =
+				factory.wrap(ByteBuffer.wrap("[{\"username\":\"foo\",\"password\":\"bar\"},{\"username\":\"bar\",\"password\":\"baz\"}]".getBytes(StandardCharsets.UTF_8)));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+
+		MockServerHttpRequest request = new MockServerHttpRequest();
+		request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+		request.setBody(body);
+
+		Flux<User> result = extractor.extract(request, this.context);
+
+		StepVerifier.create(result)
+				.consumeNextWith(user -> {
+					assertEquals("foo", user.getUsername());
+					assertNull(user.getPassword());
+				})
+				.consumeNextWith(user -> {
+					assertEquals("bar", user.getUsername());
+					assertNull(user.getPassword());
+				})
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
 	public void toFluxUnacceptable() throws Exception {
 		BodyExtractor<Flux<String>, ReactiveHttpInputMessage> extractor = BodyExtractors.toFlux(String.class);
 
@@ -124,6 +193,10 @@ public class BodyExtractorsTests {
 			@Override
 			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
 				return Stream::empty;
+			}
+			@Override
+			public Map<String, Object> hints() {
+				return Collections.emptyMap();
 			}
 		};
 
@@ -151,6 +224,41 @@ public class BodyExtractorsTests {
 				.expectNext(dataBuffer)
 				.expectComplete()
 				.verify();
+	}
+
+
+	interface SafeToDeserialize {}
+
+	private static class User {
+
+		@JsonView(SafeToDeserialize.class)
+		private String username;
+
+		private String password;
+
+		public User() {
+		}
+
+		public User(String username, String password) {
+			this.username = username;
+			this.password = password;
+		}
+
+		public String getUsername() {
+			return username;
+		}
+
+		public void setUsername(String username) {
+			this.username = username;
+		}
+
+		public String getPassword() {
+			return password;
+		}
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
 	}
 
 }
