@@ -18,7 +18,7 @@ package org.springframework.context.annotation;
 
 import java.util.function.Supplier;
 
-import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.GenericApplicationContext;
@@ -183,36 +183,6 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 
 	/**
 	 * Register a bean from the given bean class, deriving its metadata from
-	 * class-declared annotations, using the given supplier for obtaining a new
-	 * instance (possibly declared as a lambda expression or method reference).
-	 * <p>The bean name will be generated according to annotated component rules.
-	 * @param annotatedClass the class of the bean
-	 * @param instanceSupplier a callback for creating an instance of the bean
-	 * @since 5.0
-	 * @see #setBeanNameGenerator
-	 */
-	@SuppressWarnings("unchecked")
-	public <T> void registerBean(Class<T> annotatedClass, Supplier<T> instanceSupplier) {
-		registerBean(null, annotatedClass, instanceSupplier);
-	}
-
-	/**
-	 * Register a bean from the given bean class, deriving its metadata from
-	 * class-declared annotations, using the given supplier for obtaining a new
-	 * instance (possibly declared as a lambda expression or method reference).
-	 * @param beanName the name of the bean (may be {@code null})
-	 * @param annotatedClass the class of the bean
-	 * @param instanceSupplier a callback for creating an instance of the bean
-	 * @since 5.0
-	 */
-	@SuppressWarnings("unchecked")
-	public <T> void registerBean(String beanName, Class<T> annotatedClass, Supplier<T> instanceSupplier) {
-		Assert.notNull(instanceSupplier, "Supplier must not be null");
-		this.reader.registerBean(annotatedClass, instanceSupplier, beanName);
-	}
-
-	/**
-	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations, and optionally providing explicit constructor
 	 * arguments for consideration in the autowiring process.
 	 * <p>The bean name will be generated according to annotated component rules.
@@ -222,9 +192,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * specific ones, with the rest to be resolved through regular autowiring
 	 * (may be {@code null} or empty)
 	 * @since 5.0
-	 * @see #setBeanNameGenerator
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> void registerBean(Class<T> annotatedClass, Object... constructorArguments) {
 		registerBean(null, annotatedClass, constructorArguments);
 	}
@@ -241,14 +209,20 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * (may be {@code null} or empty)
 	 * @since 5.0
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> void registerBean(String beanName, Class<T> annotatedClass, Object... constructorArguments) {
-		AnnotatedBeanDefinition abd = this.reader.registerBean(annotatedClass, null, beanName);
-		if (constructorArguments != null) {
-			for (Object arg : constructorArguments) {
-				abd.getConstructorArgumentValues().addGenericArgumentValue(arg);
-			}
-		}
+		this.reader.doRegisterBean(annotatedClass, null, beanName, null,
+				bd -> {
+					for (Object arg : constructorArguments) {
+						bd.getConstructorArgumentValues().addGenericArgumentValue(arg);
+					}
+				});
+	}
+
+	@Override
+	public <T> void registerBean(String beanName, Class<T> beanClass, Supplier<T> supplier,
+			BeanDefinitionCustomizer... customizers) {
+
+		this.reader.doRegisterBean(beanClass, supplier, beanName, null, customizers);
 	}
 
 }

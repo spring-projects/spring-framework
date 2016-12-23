@@ -52,6 +52,7 @@ public class AnnotationConfigApplicationContextTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.scan("org.springframework.context.annotation6");
 		context.refresh();
+
 		context.getBean(uncapitalize(ConfigForScanning.class.getSimpleName()));
 		context.getBean("testBean"); // contributed by ConfigForScanning
 		context.getBean(uncapitalize(ComponentForScanning.class.getSimpleName()));
@@ -65,6 +66,7 @@ public class AnnotationConfigApplicationContextTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(Config.class, NameConfig.class);
 		context.refresh();
+
 		context.getBean("testBean");
 		context.getBean("name");
 		Map<String, Object> beans = context.getBeansWithAnnotation(Configuration.class);
@@ -76,6 +78,7 @@ public class AnnotationConfigApplicationContextTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(Config.class, NameConfig.class, UntypedFactoryBean.class);
 		context.refresh();
+
 		context.getBean("testBean");
 		context.getBean("name");
 		Map<String, Object> beans = context.getBeansWithAnnotation(Configuration.class);
@@ -121,6 +124,7 @@ public class AnnotationConfigApplicationContextTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(BeanA.class, BeanB.class, BeanC.class);
 		context.refresh();
+
 		assertSame(context.getBean(BeanB.class), context.getBean(BeanA.class).b);
 		assertSame(context.getBean(BeanC.class), context.getBean(BeanA.class).c);
 		assertSame(context, context.getBean(BeanB.class).applicationContext);
@@ -133,6 +137,7 @@ public class AnnotationConfigApplicationContextTests {
 		context.registerBean("b", BeanB.class);
 		context.registerBean("c", BeanC.class);
 		context.refresh();
+
 		assertSame(context.getBean("b"), context.getBean("a", BeanA.class).b);
 		assertSame(context.getBean("c"), context.getBean("a", BeanA.class).c);
 		assertSame(context, context.getBean("b", BeanB.class).applicationContext);
@@ -146,6 +151,24 @@ public class AnnotationConfigApplicationContextTests {
 		context.registerBean(BeanB.class, BeanB::new);
 		context.registerBean(BeanC.class, BeanC::new);
 		context.refresh();
+
+		assertTrue(context.getBeanFactory().containsSingleton("annotationConfigApplicationContextTests.BeanA"));
+		assertSame(context.getBean(BeanB.class), context.getBean(BeanA.class).b);
+		assertSame(context.getBean(BeanC.class), context.getBean(BeanA.class).c);
+		assertSame(context, context.getBean(BeanB.class).applicationContext);
+	}
+
+	@Test
+	public void individualBeanWithSupplierAndCustomizer() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.registerBean(BeanA.class,
+				() -> new BeanA(context.getBean(BeanB.class), context.getBean(BeanC.class)),
+				bd -> bd.setLazyInit(true));
+		context.registerBean(BeanB.class, BeanB::new);
+		context.registerBean(BeanC.class, BeanC::new);
+		context.refresh();
+
+		assertFalse(context.getBeanFactory().containsSingleton("annotationConfigApplicationContextTests.BeanA"));
 		assertSame(context.getBean(BeanB.class), context.getBean(BeanA.class).b);
 		assertSame(context.getBean(BeanC.class), context.getBean(BeanA.class).c);
 		assertSame(context, context.getBean(BeanB.class).applicationContext);
@@ -159,6 +182,24 @@ public class AnnotationConfigApplicationContextTests {
 		context.registerBean("b", BeanB.class, BeanB::new);
 		context.registerBean("c", BeanC.class, BeanC::new);
 		context.refresh();
+
+		assertTrue(context.getBeanFactory().containsSingleton("a"));
+		assertSame(context.getBean("b", BeanB.class), context.getBean(BeanA.class).b);
+		assertSame(context.getBean("c"), context.getBean("a", BeanA.class).c);
+		assertSame(context, context.getBean("b", BeanB.class).applicationContext);
+	}
+
+	@Test
+	public void individualNamedBeanWithSupplierAndCustomizer() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.registerBean("a", BeanA.class,
+				() -> new BeanA(context.getBean(BeanB.class), context.getBean(BeanC.class)),
+				bd -> bd.setLazyInit(true));
+		context.registerBean("b", BeanB.class, BeanB::new);
+		context.registerBean("c", BeanC.class, BeanC::new);
+		context.refresh();
+
+		assertFalse(context.getBeanFactory().containsSingleton("a"));
 		assertSame(context.getBean("b", BeanB.class), context.getBean(BeanA.class).b);
 		assertSame(context.getBean("c"), context.getBean("a", BeanA.class).c);
 		assertSame(context, context.getBean("b", BeanB.class).applicationContext);
@@ -171,6 +212,7 @@ public class AnnotationConfigApplicationContextTests {
 		BeanC c = new BeanC();
 		context.registerBean(BeanA.class, b, c);
 		context.refresh();
+
 		assertSame(b, context.getBean(BeanA.class).b);
 		assertSame(c, context.getBean(BeanA.class).c);
 		assertNull(b.applicationContext);
@@ -183,6 +225,7 @@ public class AnnotationConfigApplicationContextTests {
 		BeanC c = new BeanC();
 		context.registerBean("a", BeanA.class, b, c);
 		context.refresh();
+
 		assertSame(b, context.getBean("a", BeanA.class).b);
 		assertSame(c, context.getBean("a", BeanA.class).c);
 		assertNull(b.applicationContext);
@@ -195,6 +238,7 @@ public class AnnotationConfigApplicationContextTests {
 		context.registerBean(BeanA.class, c);
 		context.registerBean(BeanB.class);
 		context.refresh();
+
 		assertSame(context.getBean(BeanB.class), context.getBean(BeanA.class).b);
 		assertSame(c, context.getBean(BeanA.class).c);
 		assertSame(context, context.getBean(BeanB.class).applicationContext);
@@ -207,6 +251,7 @@ public class AnnotationConfigApplicationContextTests {
 		context.registerBean("a", BeanA.class, c);
 		context.registerBean("b", BeanB.class);
 		context.refresh();
+
 		assertSame(context.getBean("b", BeanB.class), context.getBean("a", BeanA.class).b);
 		assertSame(c, context.getBean("a", BeanA.class).c);
 		assertSame(context, context.getBean("b", BeanB.class).applicationContext);

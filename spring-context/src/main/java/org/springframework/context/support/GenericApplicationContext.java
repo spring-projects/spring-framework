@@ -18,13 +18,16 @@ package org.springframework.context.support;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -348,6 +351,76 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	@Override
 	public boolean isAlias(String beanName) {
 		return this.beanFactory.isAlias(beanName);
+	}
+
+
+	//---------------------------------------------------------------------
+	// Convenient methods for registering individual beans
+	//---------------------------------------------------------------------
+
+	/**
+	 * Register a bean from the given bean class, optionally customizing its
+	 * bean definition metadata (typically declared as a lambda expression
+	 * or method reference).
+	 * @param beanClass the class of the bean
+	 * @param customizers one or more callbacks for customizing the
+	 * factory's {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
+	 * @since 5.0
+	 */
+	public <T> void registerBean(Class<T> beanClass, BeanDefinitionCustomizer... customizers) {
+		registerBean(null, beanClass, null, customizers);
+	}
+
+	/**
+	 * Register a bean from the given bean class, using the given supplier for
+	 * obtaining a new instance (typically declared as a lambda expression or
+	 * method reference), optionally customizing its bean definition metadata
+	 * (again typically declared as a lambda expression or method reference).
+	 * @param beanName the name of the bean (may be {@code null})
+	 * @param beanClass the class of the bean
+	 * @param customizers one or more callbacks for customizing the
+	 * factory's {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
+	 * @since 5.0
+	 */
+	public <T> void registerBean(String beanName, Class<T> beanClass, BeanDefinitionCustomizer... customizers) {
+		registerBean(beanName, beanClass, null, customizers);
+	}
+
+	/**
+	 * Register a bean from the given bean class, using the given supplier for
+	 * obtaining a new instance (typically declared as a lambda expression or
+	 * method reference), optionally customizing its bean definition metadata
+	 * (again typically declared as a lambda expression or method reference).
+	 * @param beanClass the class of the bean
+	 * @param supplier a callback for creating an instance of the bean
+	 * @param customizers one or more callbacks for customizing the
+	 * factory's {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
+	 * @since 5.0
+	 */
+	public <T> void registerBean(Class<T> beanClass, Supplier<T> supplier, BeanDefinitionCustomizer... customizers) {
+		registerBean(null, beanClass, supplier, customizers);
+	}
+
+	/**
+	 * Register a bean from the given bean class, using the given supplier for
+	 * obtaining a new instance (typically declared as a lambda expression or
+	 * method reference), optionally customizing its bean definition metadata
+	 * (again typically declared as a lambda expression or method reference).
+	 * @param beanName the name of the bean (may be {@code null})
+	 * @param beanClass the class of the bean
+	 * @param supplier a callback for creating an instance of the bean
+	 * @param customizers one or more callbacks for customizing the
+	 * factory's {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
+	 * @since 5.0
+	 */
+	public <T> void registerBean(String beanName, Class<T> beanClass, Supplier<T> supplier,
+			BeanDefinitionCustomizer... customizers) {
+
+		Assert.isTrue(beanName != null || beanClass != null, "Either bean name or bean class must be specified");
+		String nameToUse = (beanName != null ? beanName : beanClass.getName());
+		BeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(beanClass, supplier).
+				applyCustomizers(customizers).getRawBeanDefinition();
+		registerBeanDefinition(nameToUse, beanDefinition);
 	}
 
 }
