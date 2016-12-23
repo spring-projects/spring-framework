@@ -25,20 +25,17 @@ import io.undertow.websockets.core.BufferedBinaryMessage;
 import io.undertow.websockets.core.BufferedTextMessage;
 import io.undertow.websockets.core.CloseMessage;
 import io.undertow.websockets.core.WebSocketChannel;
-import io.undertow.websockets.spi.WebSocketHttpExchange;
-
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-
 import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.CloseStatus;
-import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketMessage.Type;
+import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
  * Undertow {@link WebSocketConnectionCallback} implementation that adapts and
@@ -48,36 +45,35 @@ import org.springframework.web.reactive.socket.WebSocketMessage.Type;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class UndertowWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupport
-		implements WebSocketConnectionCallback {
+public class UndertowWebSocketHandlerAdapter {
 
-	private UndertowWebSocketSession delegateSession;
+	private final WebSocketHandler delegateHandler;
 
 	private final MonoProcessor<Void> completionMono;
 
+	private UndertowWebSocketSession delegateSession;
 
-	public UndertowWebSocketHandlerAdapter(WebSocketHandler delegate, HandshakeInfo info,
-			DataBufferFactory bufferFactory) {
 
-		this(delegate, info, bufferFactory, null);
+	public UndertowWebSocketHandlerAdapter(WebSocketHandler handler) {
+		this(handler, null);
 	}
 
-	public UndertowWebSocketHandlerAdapter(WebSocketHandler delegate, HandshakeInfo info,
-			DataBufferFactory bufferFactory, MonoProcessor<Void> completionMono) {
+	public UndertowWebSocketHandlerAdapter(WebSocketHandler handler, MonoProcessor<Void> completionMono) {
 
-		super(delegate, info, bufferFactory);
+		Assert.notNull("WebSocketHandler is required");
+		Assert.notNull("'sessionFactory' is required");
+		this.delegateHandler = handler;
 		this.completionMono = completionMono;
 	}
 
 
-	@Override
-	public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel channel) {
-		this.delegateSession = new UndertowWebSocketSession(channel, getHandshakeInfo(), bufferFactory());
-		channel.getReceiveSetter().set(new UndertowReceiveListener());
-		channel.resumeReceives();
+	public void handle(UndertowWebSocketSession webSocketSession) {
+		this.delegateSession = webSocketSession;
+		webSocketSession.getDelegate().getReceiveSetter().set(new UndertowReceiveListener());
+		webSocketSession.getDelegate().resumeReceives();
 
 		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber();
-		getDelegate().handle(this.delegateSession).subscribe(resultSubscriber);
+		this.delegateHandler.handle(this.delegateSession).subscribe(resultSubscriber);
 	}
 
 
@@ -113,16 +109,18 @@ public class UndertowWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupp
 		}
 
 		private <T> WebSocketMessage toMessage(Type type, T message) {
+			WebSocketSession session = delegateSession;
+			Assert.state(session != null, "Cannot create message without a session");
 			if (Type.TEXT.equals(type)) {
 				byte[] bytes = ((String) message).getBytes(StandardCharsets.UTF_8);
-				return new WebSocketMessage(Type.TEXT, bufferFactory().wrap(bytes));
+				return new WebSocketMessage(Type.TEXT, session.bufferFactory().wrap(bytes));
 			}
 			else if (Type.BINARY.equals(type)) {
-				DataBuffer buffer = bufferFactory().allocateBuffer().write((ByteBuffer[]) message);
+				DataBuffer buffer = session.bufferFactory().allocateBuffer().write((ByteBuffer[]) message);
 				return new WebSocketMessage(Type.BINARY, buffer);
 			}
 			else if (Type.PONG.equals(type)) {
-				DataBuffer buffer = bufferFactory().allocateBuffer().write((ByteBuffer[]) message);
+				DataBuffer buffer = session.bufferFactory().allocateBuffer().write((ByteBuffer[]) message);
 				return new WebSocketMessage(Type.PONG, buffer);
 			}
 			else {

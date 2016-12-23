@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.socket.server.upgrade;
 
+import java.net.URI;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
@@ -25,18 +26,21 @@ import java.util.Set;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.websockets.WebSocketConnectionCallback;
 import io.undertow.websockets.WebSocketProtocolHandshakeHandler;
+import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.core.protocol.Handshake;
 import io.undertow.websockets.core.protocol.version13.Hybi13Handshake;
+import io.undertow.websockets.spi.WebSocketHttpExchange;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.UndertowServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.UndertowWebSocketHandlerAdapter;
+import org.springframework.web.reactive.socket.adapter.UndertowWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -55,22 +59,15 @@ public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 			Optional<String> subProtocol) {
 
 		ServerHttpRequest request = exchange.getRequest();
-		ServerHttpResponse response = exchange.getResponse();
-
-		HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
-		DataBufferFactory bufferFactory = response.bufferFactory();
-
 		Assert.isTrue(request instanceof UndertowServerHttpRequest);
 		HttpServerExchange httpExchange = ((UndertowServerHttpRequest) request).getUndertowExchange();
-
-		WebSocketConnectionCallback callback =
-				new UndertowWebSocketHandlerAdapter(handler, info, bufferFactory);
 
 		Set<String> protocols = subProtocol.map(Collections::singleton).orElse(Collections.emptySet());
 		Hybi13Handshake handshake = new Hybi13Handshake(protocols, false);
 		List<Handshake> handshakes = Collections.singletonList(handshake);
 
 		try {
+			DefaultCallback callback = new DefaultCallback(exchange, handler, subProtocol);
 			new WebSocketProtocolHandshakeHandler(handshakes, callback).handleRequest(httpExchange);
 		}
 		catch (Exception ex) {
@@ -80,10 +77,44 @@ public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		return Mono.empty();
 	}
 
-	private HandshakeInfo getHandshakeInfo(ServerWebExchange exchange, Optional<String> protocol) {
-		ServerHttpRequest request = exchange.getRequest();
-		Mono<Principal> principal = exchange.getPrincipal();
-		return new HandshakeInfo(request.getURI(), request.getHeaders(), principal, protocol);
+
+	private class DefaultCallback implements WebSocketConnectionCallback {
+
+		private final ServerWebExchange exchange;
+
+		private final WebSocketHandler handler;
+
+		private final Optional<String> subProtocol;
+
+
+		public DefaultCallback(ServerWebExchange exchange, WebSocketHandler handler,
+				Optional<String> subProtocol) {
+
+			this.exchange = exchange;
+			this.handler = handler;
+			this.subProtocol = subProtocol;
+		}
+
+		@Override
+		public void onConnect(WebSocketHttpExchange httpExchange, WebSocketChannel channel) {
+			UndertowWebSocketHandlerAdapter adapter = new UndertowWebSocketHandlerAdapter(this.handler);
+			UndertowWebSocketSession session = createWebSocketSession(channel);
+			adapter.handle(session);
+		}
+
+		private UndertowWebSocketSession createWebSocketSession(WebSocketChannel channel) {
+			HandshakeInfo info = getHandshakeInfo();
+			DataBufferFactory bufferFactory = this.exchange.getResponse().bufferFactory();
+			return new UndertowWebSocketSession(channel, info, bufferFactory);
+		}
+
+		private HandshakeInfo getHandshakeInfo() {
+			ServerHttpRequest request = this.exchange.getRequest();
+			URI url = request.getURI();
+			HttpHeaders headers = request.getHeaders();
+			Mono<Principal> principal = this.exchange.getPrincipal();
+			return new HandshakeInfo(url, headers, principal, this.subProtocol);
+		}
 	}
 
 }

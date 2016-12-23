@@ -114,7 +114,7 @@ public class RxNettyWebSocketClient extends WebSocketClientSupport implements We
 				.flatMap(tuple -> {
 					WebSocketResponse<ByteBuf> response = tuple.getT1();
 					HttpHeaders responseHeaders = getResponseHeaders(response);
-					HandshakeInfo info = afterHandshake(url,  response.getStatus().code(), responseHeaders);
+					HandshakeInfo info = afterHandshake(url, responseHeaders);
 
 					ByteBufAllocator allocator = response.unsafeNettyChannel().alloc();
 					NettyDataBufferFactory factory = new NettyDataBufferFactory(allocator);

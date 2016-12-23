@@ -20,25 +20,25 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import javax.websocket.ClientEndpointConfig;
+import javax.websocket.ClientEndpointConfig.Configurator;
 import javax.websocket.ContainerProvider;
 import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
 import javax.websocket.HandshakeResponse;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
-import javax.websocket.ClientEndpointConfig.Configurator;
 
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
-import org.springframework.web.reactive.socket.adapter.StandardEndpoint;
+import org.springframework.web.reactive.socket.adapter.StandardWebSocketHandlerAdapter;
+import org.springframework.web.reactive.socket.adapter.StandardWebSocketSession;
 
 /**
  * A Java WebSocket API (JSR-356) based implementation of
@@ -78,68 +78,57 @@ public class StandardWebSocketClient extends WebSocketClientSupport implements W
 
 	@Override
 	public Mono<Void> execute(URI url, HttpHeaders headers, WebSocketHandler handler) {
-		return connectInternal(url, headers, handler);
+		return executeInternal(url, headers, handler);
 	}
 
-	private Mono<Void> connectInternal(URI url, HttpHeaders headers, WebSocketHandler handler) {
-		MonoProcessor<Void> processor = MonoProcessor.create();
-		return Mono.fromCallable(() -> {
-					StandardWebSocketClientConfigurator configurator =
-							new StandardWebSocketClientConfigurator(headers);
-
-					ClientEndpointConfig endpointConfig = createClientEndpointConfig(
-							configurator, beforeHandshake(url, headers, handler));
-
-					HandshakeInfo info = new HandshakeInfo(url, Mono.empty());
-
-					Endpoint endpoint = new StandardClientEndpoint(handler, info,
-							this.bufferFactory, configurator, processor);
-
-					Session session = this.wsContainer.connectToServer(endpoint, endpointConfig, url);
-					return session;
-				}).then(processor);
+	private Mono<Void> executeInternal(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
+		MonoProcessor<Void> completionMono = MonoProcessor.create();
+		return Mono.fromCallable(
+				() -> {
+					String[] subProtocols = beforeHandshake(url, requestHeaders, handler);
+					DefaultConfigurator configurator = new DefaultConfigurator(requestHeaders);
+					ClientEndpointConfig config = createEndpointConfig(configurator, subProtocols);
+					Endpoint endpoint = createEndpoint(url, handler, completionMono, configurator);
+					return this.wsContainer.connectToServer(endpoint, config, url);
+				})
+				.subscribeOn(Schedulers.elastic()) // connectToServer is blocking
+				.then(completionMono);
 	}
 
-	private ClientEndpointConfig createClientEndpointConfig(
-			StandardWebSocketClientConfigurator configurator, String[] subProtocols) {
-
+	private ClientEndpointConfig createEndpointConfig(Configurator configurator, String[] subProtocols) {
 		return ClientEndpointConfig.Builder.create()
 				.configurator(configurator)
 				.preferredSubprotocols(Arrays.asList(subProtocols))
 				.build();
 	}
 
+	private StandardWebSocketHandlerAdapter createEndpoint(URI url, WebSocketHandler handler,
+			MonoProcessor<Void> completion, DefaultConfigurator configurator) {
 
-	private static final class StandardClientEndpoint extends StandardEndpoint {
+		return new StandardWebSocketHandlerAdapter(handler, completion,
+				session -> createSession(url, configurator.getResponseHeaders(), session));
+	}
 
-		private final StandardWebSocketClientConfigurator configurator;
-
-		public StandardClientEndpoint(WebSocketHandler handler, HandshakeInfo info,
-				DataBufferFactory bufferFactory, StandardWebSocketClientConfigurator configurator,
-				MonoProcessor<Void> processor) {
-			super(handler, info, bufferFactory, processor);
-			this.configurator = configurator;
-		}
-
-		@Override
-		public void onOpen(Session nativeSession, EndpointConfig config) {
-			getHandshakeInfo().setHeaders(this.configurator.getResponseHeaders());
-			getHandshakeInfo().setSubProtocol(
-					Optional.ofNullable(nativeSession.getNegotiatedSubprotocol()));
-
-			super.onOpen(nativeSession, config);
-		}
+	private StandardWebSocketSession createSession(URI url, HttpHeaders responseHeaders, Session session) {
+		HandshakeInfo info = afterHandshake(url, responseHeaders);
+		return new StandardWebSocketSession(session, info, this.bufferFactory);
 	}
 
 
-	private static final class StandardWebSocketClientConfigurator extends Configurator {
+	private static final class DefaultConfigurator extends Configurator {
 
 		private final HttpHeaders requestHeaders;
 
-		private HttpHeaders responseHeaders = new HttpHeaders();
+		private final HttpHeaders responseHeaders = new HttpHeaders();
 
-		public StandardWebSocketClientConfigurator(HttpHeaders requestHeaders) {
+
+		public DefaultConfigurator(HttpHeaders requestHeaders) {
 			this.requestHeaders = requestHeaders;
+		}
+
+
+		public HttpHeaders getResponseHeaders() {
+			return this.responseHeaders;
 		}
 
 		@Override
@@ -149,11 +138,7 @@ public class StandardWebSocketClient extends WebSocketClientSupport implements W
 
 		@Override
 		public void afterResponse(HandshakeResponse response) {
-			response.getHeaders().forEach((k, v) -> responseHeaders.put(k, v));
-		}
-
-		public HttpHeaders getResponseHeaders() {
-			return this.responseHeaders;
+			response.getHeaders().forEach(this.responseHeaders::put);
 		}
 	}
 

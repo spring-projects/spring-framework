@@ -23,26 +23,20 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.function.Function;
-
 import javax.net.ssl.SSLContext;
 
 import io.undertow.protocols.ssl.UndertowXnioSsl;
 import io.undertow.server.DefaultByteBufferPool;
-import io.undertow.websockets.WebSocketExtension;
+import io.undertow.websockets.client.WebSocketClient.ConnectionBuilder;
 import io.undertow.websockets.client.WebSocketClientNegotiation;
 import io.undertow.websockets.core.WebSocketChannel;
-
-import org.xnio.IoFuture;
-import org.xnio.IoFuture.Notifier;
 import org.xnio.IoFuture.Status;
 import org.xnio.OptionMap;
 import org.xnio.Options;
 import org.xnio.Xnio;
 import org.xnio.XnioWorker;
-
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
@@ -52,11 +46,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.UndertowWebSocketHandlerAdapter;
+import org.springframework.web.reactive.socket.adapter.UndertowWebSocketSession;
 
 /**
  * An Undertow based implementation of {@link WebSocketClient}.
  *
  * @author Violeta Georgieva
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class UndertowWebSocketClient extends WebSocketClientSupport implements WebSocketClient {
@@ -82,7 +78,10 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 		}
 	}
 
-	private final Function<URI, io.undertow.websockets.client.WebSocketClient.ConnectionBuilder> builder;
+
+	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+
+	private final Function<URI, ConnectionBuilder> builder;
 
 
 	/**
@@ -100,15 +99,13 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 	 * instance.
 	 * @param builder a connection builder that can be used to create a web socket connection.
 	 */
-	public UndertowWebSocketClient(Function<URI,
-			io.undertow.websockets.client.WebSocketClient.ConnectionBuilder> builder) {
+	public UndertowWebSocketClient(Function<URI, ConnectionBuilder> builder) {
 		this.builder = builder;
 	}
 
-	private static io.undertow.websockets.client.WebSocketClient.ConnectionBuilder createDefaultConnectionBuilder(
-			URI url) {
+	private static ConnectionBuilder createDefaultConnectionBuilder(URI url) {
 
-		io.undertow.websockets.client.WebSocketClient.ConnectionBuilder builder =
+		ConnectionBuilder builder =
 				io.undertow.websockets.client.WebSocketClient.connectionBuilder(
 				worker, new DefaultByteBufferPool(false, DEFAULT_BUFFER_SIZE), url);
 
@@ -135,99 +132,77 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 
 	@Override
 	public Mono<Void> execute(URI url, HttpHeaders headers, WebSocketHandler handler) {
-		return connectInternal(url, headers, handler);
+		return executeInternal(url, headers, handler);
 	}
 
-	private Mono<Void> connectInternal(URI url, HttpHeaders headers, WebSocketHandler handler) {
-		MonoProcessor<Void> processor = MonoProcessor.create();
+	private Mono<Void> executeInternal(URI url, HttpHeaders headers, WebSocketHandler handler) {
+		MonoProcessor<Void> completionMono = MonoProcessor.create();
 		return Mono.fromCallable(
 				() -> {
-					WSClientNegotiation clientNegotiation =
-							new WSClientNegotiation(beforeHandshake(url, headers, handler),
-									Collections.emptyList(), headers);
+					String[] subProtocols = beforeHandshake(url, headers, handler);
+					DefaultNegotiation negotiation = new DefaultNegotiation(subProtocols, headers);
 
-					io.undertow.websockets.client.WebSocketClient.ConnectionBuilder builder =
-							this.builder.apply(url).setClientNegotiation(clientNegotiation);
-
-					IoFuture<WebSocketChannel> future = builder.connect();
-					future.addNotifier(new ResultNotifier(url, handler, clientNegotiation, processor), new Object());
-					return future;
+					return this.builder.apply(url)
+							.setClientNegotiation(negotiation)
+							.connect()
+							.addNotifier((future, attachment) -> {
+								if (Status.DONE.equals(future.getStatus())) {
+									WebSocketChannel channel;
+									try {
+										channel = future.get();
+									}
+									catch (CancellationException | IOException ex) {
+										completionMono.onError(ex);
+										return;
+									}
+									handleWebSocket(url, handler, completionMono, negotiation, channel);
+								}
+								else if (Status.FAILED.equals(future.getStatus())) {
+									completionMono.onError(future.getException());
+								}
+								else {
+									String message = "Failed to connect" + future.getStatus();
+									completionMono.onError(new IllegalStateException(message));
+								}
+							}, null);
 				})
-				.then(processor);
+				.then(completionMono);
+	}
+
+	private void handleWebSocket(URI url, WebSocketHandler handler, MonoProcessor<Void> completionMono,
+			DefaultNegotiation negotiation, WebSocketChannel channel) {
+
+		HandshakeInfo info = afterHandshake(url, negotiation.getResponseHeaders());
+		UndertowWebSocketSession session = new UndertowWebSocketSession(channel, info, this.bufferFactory);
+		new UndertowWebSocketHandlerAdapter(handler, completionMono).handle(session);
 	}
 
 
-	private static final class ResultNotifier implements Notifier<WebSocketChannel, Object> {
-
-		private final URI url;
-
-		private final WebSocketHandler handler;
-
-		private final WSClientNegotiation clientNegotiation;
-
-		private final MonoProcessor<Void> processor;
-
-		public ResultNotifier(URI url, WebSocketHandler handler,
-				WSClientNegotiation clientNegotiation, MonoProcessor<Void> processor) {
-			this.url = url;
-			this.handler = handler;
-			this.clientNegotiation = clientNegotiation;
-			this.processor = processor;
-		}
-
-		@Override
-		public void notify(IoFuture<? extends WebSocketChannel> ioFuture,
-				Object attachment) {
-			if (Status.CANCELLED.equals(ioFuture.getStatus())) {
-				processor.onError(null);
-			}
-			else if (Status.FAILED.equals(ioFuture.getStatus())) {
-				processor.onError(ioFuture.getException());
-			}
-			else if (Status.DONE.equals(ioFuture.getStatus())) {
-				try {
-					WebSocketChannel channel = ioFuture.get();
-					DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-					HandshakeInfo info = new HandshakeInfo(url, clientNegotiation.getResponseHeaders(),
-							Mono.empty(), Optional.ofNullable(channel.getSubProtocol()));
-
-					UndertowWebSocketHandlerAdapter adapter =
-							new UndertowWebSocketHandlerAdapter(handler,
-									info, bufferFactory, processor);
-					adapter.onConnect(null, channel);
-				}
-				catch (CancellationException | IOException ex) {
-					processor.onError(ex);
-				}
-			}
-		}
-	}
-
-
-	private static final class WSClientNegotiation extends WebSocketClientNegotiation {
+	private static final class DefaultNegotiation extends WebSocketClientNegotiation {
 
 		private final HttpHeaders requestHeaders;
 
 		private HttpHeaders responseHeaders = new HttpHeaders();
 
-		public WSClientNegotiation(String[] subProtocols,
-				List<WebSocketExtension> extensions, HttpHeaders requestHeaders) {
-			super(Arrays.asList(subProtocols), extensions);
+
+		public DefaultNegotiation(String[] subProtocols, HttpHeaders requestHeaders) {
+			super(Arrays.asList(subProtocols), Collections.emptyList());
 			this.requestHeaders = requestHeaders;
+		}
+
+
+		public HttpHeaders getResponseHeaders() {
+			return this.responseHeaders;
 		}
 
 		@Override
 		public void beforeRequest(Map<String, List<String>> headers) {
-			requestHeaders.forEach((k, v) -> headers.put(k, v));
+			this.requestHeaders.forEach(headers::put);
 		}
 
 		@Override
 		public void afterRequest(Map<String, List<String>> headers) {
-			headers.forEach((k, v) -> responseHeaders.put(k, v));
-		}
-
-		public HttpHeaders getResponseHeaders() {
-			return responseHeaders;
+			headers.forEach((k, v) -> this.responseHeaders.put(k, v));
 		}
 	}
 

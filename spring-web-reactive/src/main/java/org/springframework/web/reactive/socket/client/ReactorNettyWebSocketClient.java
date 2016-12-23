@@ -70,7 +70,7 @@ public class ReactorNettyWebSocketClient extends WebSocketClientSupport implemen
 				})
 				.then(response -> {
 					HttpHeaders responseHeaders = getResponseHeaders(response);
-					HandshakeInfo info = afterHandshake(url,  response.status().code(), responseHeaders);
+					HandshakeInfo info = afterHandshake(url, responseHeaders);
 
 					ByteBufAllocator allocator = response.channel().alloc();
 					NettyDataBufferFactory factory = new NettyDataBufferFactory(allocator);

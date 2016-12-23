@@ -18,6 +18,7 @@ package org.springframework.web.reactive.socket.adapter;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Function;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
@@ -33,12 +34,12 @@ import org.reactivestreams.Subscription;
 import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.CloseStatus;
-import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketMessage.Type;
+import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
  * Jetty {@link WebSocket @WebSocket} handler that delegates events to a
@@ -49,34 +50,41 @@ import org.springframework.web.reactive.socket.WebSocketMessage.Type;
  * @since 5.0
  */
 @WebSocket
-public class JettyWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupport {
+public class JettyWebSocketHandlerAdapter {
 
 	private static final ByteBuffer EMPTY_PAYLOAD = ByteBuffer.wrap(new byte[0]);
 
-	private JettyWebSocketSession delegateSession;
+
+	private final WebSocketHandler delegateHandler;
 
 	private final MonoProcessor<Void> completionMono;
 
+	private final Function<Session, JettyWebSocketSession> sessionFactory;
 
-	public JettyWebSocketHandlerAdapter(WebSocketHandler delegate, HandshakeInfo info,
-			DataBufferFactory bufferFactory) {
+	private JettyWebSocketSession delegateSession;
 
-		this(delegate, info, bufferFactory, null);
+
+	public JettyWebSocketHandlerAdapter(WebSocketHandler handler,
+			Function<Session, JettyWebSocketSession> sessionFactory) {
+
+		this(handler, null, sessionFactory);
 	}
 
-	public JettyWebSocketHandlerAdapter(WebSocketHandler delegate, HandshakeInfo info,
-			DataBufferFactory bufferFactory, MonoProcessor<Void> completionMono) {
+	public JettyWebSocketHandlerAdapter(WebSocketHandler handler, MonoProcessor<Void> completionMono,
+			Function<Session, JettyWebSocketSession> sessionFactory) {
 
-		super(delegate, info, bufferFactory);
+		Assert.notNull("WebSocketHandler is required");
+		Assert.notNull("'sessionFactory' is required");
+		this.delegateHandler = handler;
 		this.completionMono = completionMono;
+		this.sessionFactory = sessionFactory;
 	}
-
 
 	@OnWebSocketConnect
 	public void onWebSocketConnect(Session session) {
-		this.delegateSession = new JettyWebSocketSession(session, getHandshakeInfo(), bufferFactory());
+		this.delegateSession = sessionFactory.apply(session);
 		HandlerResultSubscriber subscriber = new HandlerResultSubscriber();
-		getDelegate().handle(this.delegateSession).subscribe(subscriber);
+		this.delegateHandler.handle(this.delegateSession).subscribe(subscriber);
 	}
 
 	@OnWebSocketMessage
@@ -108,17 +116,19 @@ public class JettyWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupport
 	}
 
 	private <T> WebSocketMessage toMessage(Type type, T message) {
+		WebSocketSession session = this.delegateSession;
+		Assert.state(session != null, "Cannot create message without a session");
 		if (Type.TEXT.equals(type)) {
 			byte[] bytes = ((String) message).getBytes(StandardCharsets.UTF_8);
-			DataBuffer buffer = bufferFactory().wrap(bytes);
+			DataBuffer buffer = session.bufferFactory().wrap(bytes);
 			return new WebSocketMessage(Type.TEXT, buffer);
 		}
 		else if (Type.BINARY.equals(type)) {
-			DataBuffer buffer = bufferFactory().wrap((ByteBuffer) message);
+			DataBuffer buffer = session.bufferFactory().wrap((ByteBuffer) message);
 			return new WebSocketMessage(Type.BINARY, buffer);
 		}
 		else if (Type.PONG.equals(type)) {
-			DataBuffer buffer = bufferFactory().wrap((ByteBuffer) message);
+			DataBuffer buffer = session.bufferFactory().wrap((ByteBuffer) message);
 			return new WebSocketMessage(Type.PONG, buffer);
 		}
 		else {

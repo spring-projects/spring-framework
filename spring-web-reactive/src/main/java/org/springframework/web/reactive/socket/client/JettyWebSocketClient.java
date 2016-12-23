@@ -17,13 +17,10 @@
 package org.springframework.web.reactive.socket.client;
 
 import java.net.URI;
-import java.util.Optional;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.UpgradeResponse;
-import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
-
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
@@ -31,15 +28,16 @@ import org.springframework.context.Lifecycle;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketHandlerAdapter;
+import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
 
 /**
  * A Jetty based implementation of {@link WebSocketClient}.
  * 
  * @author Violeta Georgieva
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class JettyWebSocketClient extends WebSocketClientSupport implements WebSocketClient, Lifecycle {
@@ -76,31 +74,38 @@ public class JettyWebSocketClient extends WebSocketClientSupport implements WebS
 
 	@Override
 	public Mono<Void> execute(URI url, HttpHeaders headers, WebSocketHandler handler) {
-		return connectInternal(url, headers, handler);
+		return executeInternal(url, headers, handler);
 	}
 
-	private Mono<Void> connectInternal(URI url, HttpHeaders headers, WebSocketHandler handler) {
-		MonoProcessor<Void> processor = MonoProcessor.create();
+	private Mono<Void> executeInternal(URI url, HttpHeaders headers, WebSocketHandler handler) {
+		MonoProcessor<Void> completionMono = MonoProcessor.create();
 		return Mono.fromCallable(
 				() -> {
-					HandshakeInfo info = new HandshakeInfo(url, Mono.empty());
-					Object adapter = new JettyClientAdapter(handler, info, this.bufferFactory, processor);
-					ClientUpgradeRequest request = createRequest(url, headers, handler);
-					return this.wsClient.connect(adapter, url, request);
+					String[] protocols = beforeHandshake(url, headers, handler);
+					ClientUpgradeRequest upgradeRequest = createRequest(url, headers, protocols);
+					Object jettyHandler = createJettyHandler(url, handler, completionMono);
+					return this.wsClient.connect(jettyHandler, url, upgradeRequest);
 				})
-				.then(processor);
+				.then(completionMono);
 	}
 
-	private ClientUpgradeRequest createRequest(URI url, HttpHeaders headers, WebSocketHandler handler) {
+	private Object createJettyHandler(URI url, WebSocketHandler handler, MonoProcessor<Void> completion) {
+		return new JettyWebSocketHandlerAdapter(
+				handler, completion, session -> createJettySession(url, session));
+	}
+
+	private JettyWebSocketSession createJettySession(URI url, Session session) {
+		UpgradeResponse response = session.getUpgradeResponse();
+		HttpHeaders responseHeaders = new HttpHeaders();
+		response.getHeaders().forEach(responseHeaders::put);
+		HandshakeInfo info = afterHandshake(url, responseHeaders);
+		return new JettyWebSocketSession(session, info, bufferFactory);
+	}
+
+	private ClientUpgradeRequest createRequest(URI url, HttpHeaders headers, String[] protocols) {
 		ClientUpgradeRequest request = new ClientUpgradeRequest();
-
-		String[] protocols = beforeHandshake(url, headers, handler);
-		if (!ObjectUtils.isEmpty(protocols)) {
-			request.setSubProtocols(protocols);
-		}
-
-		headers.forEach((k, v) -> request.setHeader(k, v));
-
+		request.setSubProtocols(protocols);
+		headers.forEach(request::setHeader);
 		return request;
 	}
 
@@ -138,34 +143,6 @@ public class JettyWebSocketClient extends WebSocketClientSupport implements WebS
 		synchronized (this.lifecycleMonitor) {
 			return this.wsClient.isStarted();
 		}
-	}
-
-
-	@WebSocket
-	private static final class JettyClientAdapter extends JettyWebSocketHandlerAdapter {
-
-		public JettyClientAdapter(WebSocketHandler delegate,
-				HandshakeInfo info, DataBufferFactory bufferFactory, MonoProcessor<Void> processor) {
-			super(delegate, info, bufferFactory, processor);
-		}
-
-		@Override
-		public void onWebSocketConnect(Session session) {
-			UpgradeResponse response = session.getUpgradeResponse();
-
-			getHandshakeInfo().setHeaders(getResponseHeaders(response));
-			getHandshakeInfo().setSubProtocol(
-					Optional.ofNullable(response.getAcceptedSubProtocol()));
-
-			super.onWebSocketConnect(session);
-		}
-
-		private HttpHeaders getResponseHeaders(UpgradeResponse response) {
-			HttpHeaders responseHeaders = new HttpHeaders();
-			response.getHeaders().forEach((k, v) -> responseHeaders.put(k, v));
-			return responseHeaders;
-		}
-
 	}
 
 }

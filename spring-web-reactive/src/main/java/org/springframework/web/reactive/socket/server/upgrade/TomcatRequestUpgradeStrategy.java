@@ -38,6 +38,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.adapter.StandardWebSocketHandlerAdapter;
+import org.springframework.web.reactive.socket.adapter.StandardWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -63,9 +64,12 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		HttpServletRequest servletRequest = getHttpServletRequest(request);
 		HttpServletResponse servletResponse = getHttpServletResponse(response);
 
-		HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
-		DataBufferFactory factory = response.bufferFactory();
-		Endpoint endpoint = new StandardWebSocketHandlerAdapter(handler, info, factory).getEndpoint();
+		Endpoint endpoint = new StandardWebSocketHandlerAdapter(handler,
+				session -> {
+					HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
+					DataBufferFactory factory = response.bufferFactory();
+					return new StandardWebSocketSession(session, info, factory);
+				});
 
 		String requestURI = servletRequest.getRequestURI();
 		DefaultServerEndpointConfig config = new DefaultServerEndpointConfig(requestURI, endpoint);

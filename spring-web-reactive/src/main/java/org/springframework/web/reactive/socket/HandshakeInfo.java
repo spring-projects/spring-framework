@@ -39,26 +39,27 @@ public class HandshakeInfo {
 
 	private final Mono<Principal> principalMono;
 
-	private HttpHeaders headers;
+	private final HttpHeaders headers;
 
-	private Optional<String> protocol;
+	private final Optional<String> protocol;
 
 
-	public HandshakeInfo(URI uri, Mono<Principal> principal) {
-		this(uri, new HttpHeaders(), principal, Optional.empty());
-	}
-
-	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal,
-			Optional<String> subProtocol) {
-
+	/**
+	 * Constructor with information about the handshake.
+	 * @param uri the endpoint URL
+	 * @param headers request headers for server or response headers or client
+	 * @param principal the principal for the session
+	 * @param protocol the negotiated sub-protocol
+	 */
+	public HandshakeInfo(URI uri, HttpHeaders headers, Mono<Principal> principal, Optional<String> protocol) {
 		Assert.notNull(uri, "URI is required.");
 		Assert.notNull(headers, "HttpHeaders are required.");
 		Assert.notNull(principal, "Principal is required.");
-		Assert.notNull(subProtocol, "Sub-protocol is required.");
+		Assert.notNull(protocol, "Sub-protocol is required.");
 		this.uri = uri;
 		this.headers = headers;
 		this.principalMono = principal;
-		this.protocol = subProtocol;
+		this.protocol = protocol;
 	}
 
 
@@ -78,15 +79,6 @@ public class HandshakeInfo {
 	}
 
 	/**
-	 * Sets the handshake HTTP headers. Those are the request headers for a
-	 * server session and the response headers for a client session.
-	 * @param headers the handshake HTTP headers.
-	 */
-	public void setHeaders(HttpHeaders headers) {
-		this.headers = headers;
-	}
-
-	/**
 	 * Return the principal associated with the handshake HTTP request.
 	 */
 	public Mono<Principal> getPrincipal() {
@@ -100,14 +92,6 @@ public class HandshakeInfo {
 	 */
 	public Optional<String> getSubProtocol() {
 		return this.protocol;
-	}
-
-	/**
-	 * Sets the sub-protocol negotiated at handshake time.
-	 * @param protocol the sub-protocol negotiated at handshake time.
-	 */
-	public void setSubProtocol(Optional<String> protocol) {
-		this.protocol = protocol;
 	}
 
 

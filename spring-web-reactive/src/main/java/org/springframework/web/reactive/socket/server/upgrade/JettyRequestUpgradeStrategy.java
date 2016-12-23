@@ -37,6 +37,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketHandlerAdapter;
+import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -118,9 +119,12 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		HttpServletRequest servletRequest = getHttpServletRequest(request);
 		HttpServletResponse servletResponse = getHttpServletResponse(response);
 
-		HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
-		DataBufferFactory factory = response.bufferFactory();
-		JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(handler, info, factory);
+		JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(handler,
+				null, session -> {
+					HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
+					DataBufferFactory factory = response.bufferFactory();
+					return new JettyWebSocketSession(session, info, factory);
+				});
 
 		startLazily(servletRequest);
 

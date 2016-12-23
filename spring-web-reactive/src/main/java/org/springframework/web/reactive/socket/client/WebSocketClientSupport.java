@@ -41,20 +41,19 @@ public class WebSocketClientSupport {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 
-	protected String[] beforeHandshake(URI url, HttpHeaders headers, WebSocketHandler handler) {
+	protected String[] beforeHandshake(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing handshake to " + url);
 		}
 		return handler.getSubProtocols();
 	}
 
-	protected HandshakeInfo afterHandshake(URI url, int statusCode, HttpHeaders headers) {
-		Assert.isTrue(statusCode == 101);
+	protected HandshakeInfo afterHandshake(URI url, HttpHeaders responseHeaders) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Handshake response: " + url + ", " + headers);
+			logger.debug("Handshake response: " + url + ", " + responseHeaders);
 		}
-		String protocol = headers.getFirst(SEC_WEBSOCKET_PROTOCOL);
-		return new HandshakeInfo(url, headers, Mono.empty(), Optional.ofNullable(protocol));
+		String protocol = responseHeaders.getFirst(SEC_WEBSOCKET_PROTOCOL);
+		return new HandshakeInfo(url, responseHeaders, Mono.empty(), Optional.ofNullable(protocol));
 	}
 
 }
