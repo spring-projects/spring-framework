@@ -1281,14 +1281,14 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	static class FooBarConfiguration {
 
-		@Bean @DependsOn("bar")
-		public FooImpl foo() {
-			return new FooImpl();
-		}
-
 		@Bean
 		public BarInterface bar() {
 			return new BarImpl();
+		}
+
+		@Bean
+		public FooImpl foo() {
+			return new FooImpl();
 		}
 	}
 
