@@ -17,8 +17,11 @@
 package org.springframework.web.multipart.commons;
 
 import java.util.List;
+import java.util.Locale;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -26,9 +29,11 @@ import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.filter.HiddenHttpMethodFilter;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -63,6 +68,7 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		implements MultipartResolver, ServletContextAware {
 
 	private boolean resolveLazily = false;
+	private String methodParam = HiddenHttpMethodFilter.DEFAULT_METHOD_PARAM;
 
 
 	/**
@@ -137,9 +143,27 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		}
 		else {
 			MultipartParsingResult parsingResult = parseRequest(request);
-			return new DefaultMultipartHttpServletRequest(request, parsingResult.getMultipartFiles(),
+			String[] methodValues = parsingResult.getMultipartParameters().get(methodParam);
+			HttpServletRequest parsingRequest = request;
+			if(!ObjectUtils.isEmpty(methodValues) && StringUtils.hasLength(methodValues[0]) && "POST".equals(request.getMethod())){
+				final String method = methodValues[0].toUpperCase(Locale.ENGLISH);
+				parsingRequest = new HttpServletRequestWrapper(request){
+					@Override
+					public String getMethod() {
+						return method;
+					}
+				};
+			} 
+			return new DefaultMultipartHttpServletRequest(parsingRequest, parsingResult.getMultipartFiles(),
 					parsingResult.getMultipartParameters(), parsingResult.getMultipartParameterContentTypes());
 		}
+	}
+	
+	/**
+	 * @param methodParam the methodParam to set
+	 */
+	public void setMethodParam(String methodParam) {
+		this.methodParam = methodParam;
 	}
 
 	/**
