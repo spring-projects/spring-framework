@@ -32,6 +32,7 @@ import reactor.core.publisher.ReplayProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.socket.HandshakeInfo;
@@ -42,6 +43,7 @@ import org.springframework.web.reactive.socket.client.JettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.RxNettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.StandardWebSocketClient;
+import org.springframework.web.reactive.socket.client.UndertowWebSocketClient;
 import org.springframework.web.reactive.socket.client.WebSocketClient;
 
 import static org.junit.Assert.assertEquals;
@@ -84,6 +86,21 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		testEcho(new StandardWebSocketClient());
 	}
 
+	@Test
+	public void echoUndertowClient() throws Exception {
+		if (server instanceof RxNettyHttpServer) {
+			// Caused by: java.io.IOException: Upgrade responses cannot have a transfer coding
+			// at org.xnio.http.HttpUpgrade$HttpUpgradeState.handleUpgrade(HttpUpgrade.java:490)
+			// at org.xnio.http.HttpUpgrade$HttpUpgradeState.access$1200(HttpUpgrade.java:165)
+			// at org.xnio.http.HttpUpgrade$HttpUpgradeState$UpgradeResultListener.handleEvent(HttpUpgrade.java:461)
+			// at org.xnio.http.HttpUpgrade$HttpUpgradeState$UpgradeResultListener.handleEvent(HttpUpgrade.java:400)
+			// at org.xnio.ChannelListeners.invokeChannelListener(ChannelListeners.java:92)
+
+			return;
+		}
+		testEcho(new UndertowWebSocketClient());
+	}
+
 	private void testEcho(WebSocketClient client) throws URISyntaxException {
 		int count = 100;
 		Flux<String> input = Flux.range(1, count).map(index -> "msg-" + index);
@@ -122,6 +139,21 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 	@Test
 	public void subProtocolStandardClient() throws Exception {
 		testSubProtocol(new StandardWebSocketClient());
+	}
+
+	@Test
+	public void subProtocolUndertowClient() throws Exception {
+		if (server instanceof RxNettyHttpServer) {
+			// Caused by: java.io.IOException: Upgrade responses cannot have a transfer coding
+			// at org.xnio.http.HttpUpgrade$HttpUpgradeState.handleUpgrade(HttpUpgrade.java:490)
+			// at org.xnio.http.HttpUpgrade$HttpUpgradeState.access$1200(HttpUpgrade.java:165)
+			// at org.xnio.http.HttpUpgrade$HttpUpgradeState$UpgradeResultListener.handleEvent(HttpUpgrade.java:461)
+			// at org.xnio.http.HttpUpgrade$HttpUpgradeState$UpgradeResultListener.handleEvent(HttpUpgrade.java:400)
+			// at org.xnio.ChannelListeners.invokeChannelListener(ChannelListeners.java:92)
+
+			return;
+		}
+		testSubProtocol(new UndertowWebSocketClient());
 	}
 
 	private void testSubProtocol(WebSocketClient client) throws URISyntaxException {

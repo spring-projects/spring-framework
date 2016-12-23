@@ -26,8 +26,11 @@ import io.undertow.websockets.core.BufferedTextMessage;
 import io.undertow.websockets.core.CloseMessage;
 import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
+
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+
+import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -50,11 +53,20 @@ public class UndertowWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupp
 
 	private UndertowWebSocketSession delegateSession;
 
+	private final MonoProcessor<Void> completionMono;
+
 
 	public UndertowWebSocketHandlerAdapter(WebSocketHandler delegate, HandshakeInfo info,
 			DataBufferFactory bufferFactory) {
 
+		this(delegate, info, bufferFactory, null);
+	}
+
+	public UndertowWebSocketHandlerAdapter(WebSocketHandler delegate, HandshakeInfo info,
+			DataBufferFactory bufferFactory, MonoProcessor<Void> completionMono) {
+
 		super(delegate, info, bufferFactory);
+		this.completionMono = completionMono;
 	}
 
 
@@ -117,8 +129,8 @@ public class UndertowWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupp
 				throw new IllegalArgumentException("Unexpected message type: " + message);
 			}
 		}
-
 	}
+
 
 	private final class HandlerResultSubscriber implements Subscriber<Void> {
 
@@ -134,12 +146,18 @@ public class UndertowWebSocketHandlerAdapter extends WebSocketHandlerAdapterSupp
 
 		@Override
 		public void onError(Throwable ex) {
+			if (completionMono != null) {
+				completionMono.onError(ex);
+			}
 			int code = CloseStatus.SERVER_ERROR.getCode();
 			delegateSession.close(new CloseStatus(code, ex.getMessage()));
 		}
 
 		@Override
 		public void onComplete() {
+			if (completionMono != null) {
+				completionMono.onComplete();
+			}
 			delegateSession.close();
 		}
 	}
