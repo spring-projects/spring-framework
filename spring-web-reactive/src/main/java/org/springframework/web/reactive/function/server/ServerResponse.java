@@ -312,6 +312,8 @@ public interface ServerResponse {
 		 */
 		BodyBuilder contentType(MediaType contentType);
 
+		BodyBuilder hint(String key, Object value);
+
 		/**
 		 * Set the body of the response to the given {@code Publisher} and return it. This
 		 * convenience method combines {@link #body(BodyInserter)} and

@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function;
 
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -53,6 +54,8 @@ public interface BodyInserter<T, M extends ReactiveHttpOutputMessage> {
 		 * @return the stream of message writers
 		 */
 		Supplier<Stream<HttpMessageWriter<?>>> messageWriters();
+
+		Map<String, Object> hints();
 
 	}
 
