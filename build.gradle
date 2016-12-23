@@ -170,10 +170,9 @@ configure(allprojects) { project ->
 	}
 
 	repositories {
-	  	mavenLocal()
 		maven { url "https://repo.spring.io/libs-release" }
 		maven { url "https://repo.spring.io/milestone" }
-		maven { url "https://repo.spring.io/snapshot" } // reactor-netty 0.6 snapshots
+		maven { url "https://repo.spring.io/snapshot" } // reactor-netty still pulls reactor-ipc 0.6 snapshots
 	}
 
 	dependencies {
