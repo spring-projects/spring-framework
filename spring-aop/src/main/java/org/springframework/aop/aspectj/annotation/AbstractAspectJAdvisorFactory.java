@@ -167,8 +167,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 		private static final String[] EXPRESSION_PROPERTIES = new String[] {"value", "pointcut"};
 
-		private static Map<Class<?>, AspectJAnnotationType> annotationTypes =
-				new HashMap<>();
+		private static Map<Class<?>, AspectJAnnotationType> annotationTypes = new HashMap<>();
 
 		static {
 			annotationTypes.put(Pointcut.class,AspectJAnnotationType.AtPointcut);
