@@ -35,7 +35,7 @@ import java.util.Set;
  * @author Juergen Hoeller
  * @since 3.0
  */
-public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializable {
+public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializable, Cloneable {
 
 	private static final long serialVersionUID = 3801124242820219131L;
 
@@ -177,18 +177,6 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 
 
 	/**
-	 * Create a regular copy of this Map.
-	 * @return a shallow copy of this Map, reusing this Map's value-holding List entries
-	 * @since 4.2
-	 * @see LinkedMultiValueMap#LinkedMultiValueMap(Map)
-	 * @see #deepCopy()
-	 */
-	@Override
-	public LinkedMultiValueMap<K, V> clone() {
-		return new LinkedMultiValueMap<>(this);
-	}
-
-	/**
 	 * Create a deep copy of this Map.
 	 * @return a copy of this Map, including a copy of each value-holding List entry
 	 * @since 4.2
@@ -202,6 +190,17 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 		return copy;
 	}
 
+	/**
+	 * Create a regular copy of this Map.
+	 * @return a shallow copy of this Map, reusing this Map's value-holding List entries
+	 * @since 4.2
+	 * @see LinkedMultiValueMap#LinkedMultiValueMap(Map)
+	 * @see #deepCopy()
+	 */
+	@Override
+	public LinkedMultiValueMap<K, V> clone() {
+		return new LinkedMultiValueMap<>(this);
+	}
 
 	@Override
 	public boolean equals(Object obj) {
