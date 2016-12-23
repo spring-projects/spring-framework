@@ -82,7 +82,7 @@ public class JettyWebSocketClient extends WebSocketClientSupport implements WebS
 		return Mono.fromCallable(
 				() -> {
 					String[] protocols = beforeHandshake(url, headers, handler);
-					ClientUpgradeRequest upgradeRequest = createRequest(url, headers, protocols);
+					ClientUpgradeRequest upgradeRequest = createRequest(headers, protocols);
 					Object jettyHandler = createJettyHandler(url, handler, completionMono);
 					return this.wsClient.connect(jettyHandler, url, upgradeRequest);
 				})
@@ -91,18 +91,20 @@ public class JettyWebSocketClient extends WebSocketClientSupport implements WebS
 
 	private Object createJettyHandler(URI url, WebSocketHandler handler, MonoProcessor<Void> completion) {
 		return new JettyWebSocketHandlerAdapter(
-				handler, completion, session -> createJettySession(url, session));
+				handler, session -> createJettySession(url, completion, session));
 	}
 
-	private JettyWebSocketSession createJettySession(URI url, Session session) {
+	private JettyWebSocketSession createJettySession(URI url, MonoProcessor<Void> completion,
+			Session session) {
+
 		UpgradeResponse response = session.getUpgradeResponse();
 		HttpHeaders responseHeaders = new HttpHeaders();
 		response.getHeaders().forEach(responseHeaders::put);
 		HandshakeInfo info = afterHandshake(url, responseHeaders);
-		return new JettyWebSocketSession(session, info, bufferFactory);
+		return new JettyWebSocketSession(session, info, this.bufferFactory, completion);
 	}
 
-	private ClientUpgradeRequest createRequest(URI url, HttpHeaders headers, String[] protocols) {
+	private ClientUpgradeRequest createRequest(HttpHeaders headers, String[] protocols) {
 		ClientUpgradeRequest request = new ClientUpgradeRequest();
 		request.setSubProtocols(protocols);
 		headers.forEach(request::setHeader);

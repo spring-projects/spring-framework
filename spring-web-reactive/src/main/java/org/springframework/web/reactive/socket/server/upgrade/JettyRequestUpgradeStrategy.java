@@ -120,7 +120,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		HttpServletResponse servletResponse = getHttpServletResponse(response);
 
 		JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(handler,
-				null, session -> {
+				session -> {
 					HandshakeInfo info = getHandshakeInfo(exchange, subProtocol);
 					DataBufferFactory factory = response.bufferFactory();
 					return new JettyWebSocketSession(session, info, factory);

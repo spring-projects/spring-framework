@@ -25,6 +25,7 @@ import io.undertow.websockets.core.WebSocketCallback;
 import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.core.WebSockets;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.ObjectUtils;
@@ -44,10 +45,14 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<WebSocketChannel> {
 
 
-	public UndertowWebSocketSession(WebSocketChannel channel, HandshakeInfo handshakeInfo,
-			DataBufferFactory bufferFactory) {
+	public UndertowWebSocketSession(WebSocketChannel channel, HandshakeInfo info, DataBufferFactory factory) {
+		this(channel, info, factory, null);
+	}
 
-		super(channel, ObjectUtils.getIdentityHexString(channel), handshakeInfo, bufferFactory);
+	public UndertowWebSocketSession(WebSocketChannel channel, HandshakeInfo info,
+			DataBufferFactory factory, MonoProcessor<Void> completionMono) {
+
+		super(channel, ObjectUtils.getIdentityHexString(channel), info, factory, completionMono);
 	}
 
 

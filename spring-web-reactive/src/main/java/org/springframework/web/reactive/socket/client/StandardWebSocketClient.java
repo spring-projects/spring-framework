@@ -105,13 +105,15 @@ public class StandardWebSocketClient extends WebSocketClientSupport implements W
 	private StandardWebSocketHandlerAdapter createEndpoint(URI url, WebSocketHandler handler,
 			MonoProcessor<Void> completion, DefaultConfigurator configurator) {
 
-		return new StandardWebSocketHandlerAdapter(handler, completion,
-				session -> createSession(url, configurator.getResponseHeaders(), session));
+		return new StandardWebSocketHandlerAdapter(handler,
+				session -> createSession(url, configurator.getResponseHeaders(), completion, session));
 	}
 
-	private StandardWebSocketSession createSession(URI url, HttpHeaders responseHeaders, Session session) {
+	private StandardWebSocketSession createSession(URI url, HttpHeaders responseHeaders,
+			MonoProcessor<Void> completion, Session session) {
+
 		HandshakeInfo info = afterHandshake(url, responseHeaders);
-		return new StandardWebSocketSession(session, info, this.bufferFactory);
+		return new StandardWebSocketSession(session, info, this.bufferFactory, completion);
 	}
 
 

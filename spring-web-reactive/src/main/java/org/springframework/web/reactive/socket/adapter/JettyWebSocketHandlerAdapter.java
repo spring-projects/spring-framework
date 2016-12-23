@@ -29,9 +29,6 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.api.extensions.Frame;
 import org.eclipse.jetty.websocket.common.OpCode;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.Assert;
@@ -57,8 +54,6 @@ public class JettyWebSocketHandlerAdapter {
 
 	private final WebSocketHandler delegateHandler;
 
-	private final MonoProcessor<Void> completionMono;
-
 	private final Function<Session, JettyWebSocketSession> sessionFactory;
 
 	private JettyWebSocketSession delegateSession;
@@ -67,24 +62,17 @@ public class JettyWebSocketHandlerAdapter {
 	public JettyWebSocketHandlerAdapter(WebSocketHandler handler,
 			Function<Session, JettyWebSocketSession> sessionFactory) {
 
-		this(handler, null, sessionFactory);
-	}
-
-	public JettyWebSocketHandlerAdapter(WebSocketHandler handler, MonoProcessor<Void> completionMono,
-			Function<Session, JettyWebSocketSession> sessionFactory) {
-
 		Assert.notNull("WebSocketHandler is required");
 		Assert.notNull("'sessionFactory' is required");
 		this.delegateHandler = handler;
-		this.completionMono = completionMono;
 		this.sessionFactory = sessionFactory;
 	}
+
 
 	@OnWebSocketConnect
 	public void onWebSocketConnect(Session session) {
 		this.delegateSession = sessionFactory.apply(session);
-		HandlerResultSubscriber subscriber = new HandlerResultSubscriber();
-		this.delegateHandler.handle(this.delegateSession).subscribe(subscriber);
+		this.delegateHandler.handle(this.delegateSession).subscribe(this.delegateSession);
 	}
 
 	@OnWebSocketMessage
@@ -147,41 +135,6 @@ public class JettyWebSocketHandlerAdapter {
 	public void onWebSocketError(Throwable cause) {
 		if (this.delegateSession != null) {
 			this.delegateSession.handleError(cause);
-		}
-	}
-
-
-	private final class HandlerResultSubscriber implements Subscriber<Void> {
-
-		@Override
-		public void onSubscribe(Subscription subscription) {
-			subscription.request(Long.MAX_VALUE);
-		}
-
-		@Override
-		public void onNext(Void aVoid) {
-			// no op
-		}
-
-		@Override
-		public void onError(Throwable ex) {
-			if (completionMono != null) {
-				completionMono.onError(ex);
-			}
-			if (delegateSession != null) {
-				int code = CloseStatus.SERVER_ERROR.getCode();
-				delegateSession.close(new CloseStatus(code, ex.getMessage()));
-			}
-		}
-
-		@Override
-		public void onComplete() {
-			if (completionMono != null) {
-				completionMono.onComplete();
-			}
-			if (delegateSession != null) {
-				delegateSession.close();
-			}
 		}
 	}
 

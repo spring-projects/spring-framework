@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WriteCallback;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.ObjectUtils;
@@ -42,8 +43,14 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Session> {
 
 
-	public JettyWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory bufferFactory) {
-		super(session, ObjectUtils.getIdentityHexString(session), info, bufferFactory);
+	public JettyWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory) {
+		this(session, info, factory, null);
+	}
+
+	public JettyWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory,
+			MonoProcessor<Void> completionMono) {
+
+		super(session, ObjectUtils.getIdentityHexString(session), info, factory, completionMono);
 	}
 
 

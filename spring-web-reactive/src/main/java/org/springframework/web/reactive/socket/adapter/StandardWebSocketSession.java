@@ -26,6 +26,7 @@ import javax.websocket.SendResult;
 import javax.websocket.Session;
 
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.web.reactive.socket.CloseStatus;
@@ -44,8 +45,14 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public class StandardWebSocketSession extends AbstractListenerWebSocketSession<Session> {
 
 
-	public StandardWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory bufferFactory) {
-		super(session, session.getId(), info, bufferFactory);
+	public StandardWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory) {
+		this(session, info, factory, null);
+	}
+
+	public StandardWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory,
+			MonoProcessor<Void> completionMono) {
+
+		super(session, session.getId(), info, factory, completionMono);
 	}
 
 

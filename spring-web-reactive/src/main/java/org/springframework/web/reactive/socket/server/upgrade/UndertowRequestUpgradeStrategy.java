@@ -66,8 +66,14 @@ public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		Hybi13Handshake handshake = new Hybi13Handshake(protocols, false);
 		List<Handshake> handshakes = Collections.singletonList(handshake);
 
+		URI url = request.getURI();
+		HttpHeaders headers = request.getHeaders();
+		Mono<Principal> principal = exchange.getPrincipal();
+		HandshakeInfo info = new HandshakeInfo(url, headers, principal, subProtocol);
+		DataBufferFactory bufferFactory = exchange.getResponse().bufferFactory();
+
 		try {
-			DefaultCallback callback = new DefaultCallback(exchange, handler, subProtocol);
+			DefaultCallback callback = new DefaultCallback(info, handler, bufferFactory);
 			new WebSocketProtocolHandshakeHandler(handshakes, callback).handleRequest(httpExchange);
 		}
 		catch (Exception ex) {
@@ -80,40 +86,35 @@ public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	private class DefaultCallback implements WebSocketConnectionCallback {
 
-		private final ServerWebExchange exchange;
+		private final HandshakeInfo handshakeInfo;
 
 		private final WebSocketHandler handler;
 
-		private final Optional<String> subProtocol;
+		private final DataBufferFactory bufferFactory;
 
 
-		public DefaultCallback(ServerWebExchange exchange, WebSocketHandler handler,
-				Optional<String> subProtocol) {
+		public DefaultCallback(HandshakeInfo handshakeInfo, WebSocketHandler handler,
+				DataBufferFactory bufferFactory) {
 
-			this.exchange = exchange;
+			this.handshakeInfo = handshakeInfo;
 			this.handler = handler;
-			this.subProtocol = subProtocol;
+			this.bufferFactory = bufferFactory;
 		}
 
 		@Override
 		public void onConnect(WebSocketHttpExchange httpExchange, WebSocketChannel channel) {
-			UndertowWebSocketHandlerAdapter adapter = new UndertowWebSocketHandlerAdapter(this.handler);
-			UndertowWebSocketSession session = createWebSocketSession(channel);
-			adapter.handle(session);
+
+			UndertowWebSocketSession session = createSession(channel);
+			UndertowWebSocketHandlerAdapter adapter = new UndertowWebSocketHandlerAdapter(session);
+
+			channel.getReceiveSetter().set(adapter);
+			channel.resumeReceives();
+
+			this.handler.handle(session).subscribe(session);
 		}
 
-		private UndertowWebSocketSession createWebSocketSession(WebSocketChannel channel) {
-			HandshakeInfo info = getHandshakeInfo();
-			DataBufferFactory bufferFactory = this.exchange.getResponse().bufferFactory();
-			return new UndertowWebSocketSession(channel, info, bufferFactory);
-		}
-
-		private HandshakeInfo getHandshakeInfo() {
-			ServerHttpRequest request = this.exchange.getRequest();
-			URI url = request.getURI();
-			HttpHeaders headers = request.getHeaders();
-			Mono<Principal> principal = this.exchange.getPrincipal();
-			return new HandshakeInfo(url, headers, principal, this.subProtocol);
+		private UndertowWebSocketSession createSession(WebSocketChannel channel) {
+			return new UndertowWebSocketSession(channel, this.handshakeInfo, this.bufferFactory);
 		}
 	}
 

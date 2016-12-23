@@ -169,12 +169,17 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 				.then(completionMono);
 	}
 
-	private void handleWebSocket(URI url, WebSocketHandler handler, MonoProcessor<Void> completionMono,
+	private void handleWebSocket(URI url, WebSocketHandler handler, MonoProcessor<Void> completion,
 			DefaultNegotiation negotiation, WebSocketChannel channel) {
 
 		HandshakeInfo info = afterHandshake(url, negotiation.getResponseHeaders());
-		UndertowWebSocketSession session = new UndertowWebSocketSession(channel, info, this.bufferFactory);
-		new UndertowWebSocketHandlerAdapter(handler, completionMono).handle(session);
+		UndertowWebSocketSession session = new UndertowWebSocketSession(channel, info, bufferFactory, completion);
+		UndertowWebSocketHandlerAdapter adapter = new UndertowWebSocketHandlerAdapter(session);
+
+		channel.getReceiveSetter().set(adapter);
+		channel.resumeReceives();
+
+		handler.handle(session).subscribe(session);
 	}
 
 

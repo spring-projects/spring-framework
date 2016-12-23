@@ -25,10 +25,6 @@ import javax.websocket.EndpointConfig;
 import javax.websocket.PongMessage;
 import javax.websocket.Session;
 
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-import reactor.core.publisher.MonoProcessor;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.CloseStatus;
@@ -49,8 +45,6 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 
 	private final WebSocketHandler delegateHandler;
 
-	private final MonoProcessor<Void> completionMono;
-
 	private Function<Session, StandardWebSocketSession> sessionFactory;
 
 	private StandardWebSocketSession delegateSession;
@@ -59,16 +53,9 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 	public StandardWebSocketHandlerAdapter(WebSocketHandler handler,
 			Function<Session, StandardWebSocketSession> sessionFactory) {
 
-		this(handler, null, sessionFactory);
-	}
-
-	public StandardWebSocketHandlerAdapter(WebSocketHandler handler, MonoProcessor<Void> completionMono,
-			Function<Session, StandardWebSocketSession> sessionFactory) {
-
 		Assert.notNull("WebSocketHandler is required");
 		Assert.notNull("'sessionFactory' is required");
 		this.delegateHandler = handler;
-		this.completionMono = completionMono;
 		this.sessionFactory = sessionFactory;
 	}
 
@@ -91,8 +78,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 			this.delegateSession.handleMessage(webSocketMessage.getType(), webSocketMessage);
 		});
 
-		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber();
-		this.delegateHandler.handle(this.delegateSession).subscribe(resultSubscriber);
+		this.delegateHandler.handle(this.delegateSession).subscribe(this.delegateSession);
 	}
 
 	private <T> WebSocketMessage toMessage(T message) {
@@ -127,41 +113,6 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 	public void onError(Session session, Throwable exception) {
 		if (this.delegateSession != null) {
 			this.delegateSession.handleError(exception);
-		}
-	}
-
-
-	private final class HandlerResultSubscriber implements Subscriber<Void> {
-
-		@Override
-		public void onSubscribe(Subscription subscription) {
-			subscription.request(Long.MAX_VALUE);
-		}
-
-		@Override
-		public void onNext(Void aVoid) {
-			// no op
-		}
-
-		@Override
-		public void onError(Throwable ex) {
-			if (completionMono != null) {
-				completionMono.onError(ex);
-			}
-			if (delegateSession != null) {
-				int code = CloseStatus.SERVER_ERROR.getCode();
-				delegateSession.close(new CloseStatus(code, ex.getMessage()));
-			}
-		}
-
-		@Override
-		public void onComplete() {
-			if (completionMono != null) {
-				completionMono.onComplete();
-			}
-			if (delegateSession != null) {
-				delegateSession.close();
-			}
 		}
 	}
 
