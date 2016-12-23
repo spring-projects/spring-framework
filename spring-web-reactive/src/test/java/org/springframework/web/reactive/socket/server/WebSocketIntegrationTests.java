@@ -197,6 +197,35 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		testCustomHeader(new RxNettyWebSocketClient());
 	}
 
+	@Test
+	@Ignore
+	public void customHeaderJettyClient() throws Exception {
+		JettyWebSocketClient client = new JettyWebSocketClient();
+		client.start();
+		testCustomHeader(client);
+		client.stop();
+	}
+
+	@Test
+	public void customHeaderStandardClient() throws Exception {
+		testCustomHeader(new StandardWebSocketClient());
+	}
+
+	@Test
+	public void customHeaderUndertowClient() throws Exception {
+		if (server instanceof RxNettyHttpServer) {
+			// Caused by: java.io.IOException: Upgrade responses cannot have a transfer coding
+			// at org.xnio.http.HttpUpgrade$HttpUpgradeState.handleUpgrade(HttpUpgrade.java:490)
+			// at org.xnio.http.HttpUpgrade$HttpUpgradeState.access$1200(HttpUpgrade.java:165)
+			// at org.xnio.http.HttpUpgrade$HttpUpgradeState$UpgradeResultListener.handleEvent(HttpUpgrade.java:461)
+			// at org.xnio.http.HttpUpgrade$HttpUpgradeState$UpgradeResultListener.handleEvent(HttpUpgrade.java:400)
+			// at org.xnio.ChannelListeners.invokeChannelListener(ChannelListeners.java:92)
+
+			return;
+		}
+		testCustomHeader(new UndertowWebSocketClient());
+	}
+
 	private void testCustomHeader(WebSocketClient client) throws Exception {
 
 		HttpHeaders headers = new HttpHeaders();
