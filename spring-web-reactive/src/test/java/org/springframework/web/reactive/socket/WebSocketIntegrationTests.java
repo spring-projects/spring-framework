@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.reactive.socket.server;
+package org.springframework.web.reactive.socket;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,10 +32,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
-import org.springframework.web.reactive.socket.HandshakeInfo;
-import org.springframework.web.reactive.socket.WebSocketHandler;
-import org.springframework.web.reactive.socket.WebSocketMessage;
-import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.client.JettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 

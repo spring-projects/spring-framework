@@ -25,7 +25,6 @@ import javax.websocket.ClientEndpointConfig.Configurator;
 import javax.websocket.ContainerProvider;
 import javax.websocket.Endpoint;
 import javax.websocket.HandshakeResponse;
-import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
 import reactor.core.publisher.Mono;
@@ -41,22 +40,23 @@ import org.springframework.web.reactive.socket.adapter.StandardWebSocketHandlerA
 import org.springframework.web.reactive.socket.adapter.StandardWebSocketSession;
 
 /**
- * A Java WebSocket API (JSR-356) based implementation of
- * {@link WebSocketClient}.
+ * Java WebSocket API (JSR-356) implementation of {@link WebSocketClient}.
  * 
  * @author Violeta Georgieva
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class StandardWebSocketClient extends WebSocketClientSupport implements WebSocketClient {
 
 	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
-	private final WebSocketContainer wsContainer;
+	private final WebSocketContainer webSocketContainer;
 
 
 	/**
-	 * Default constructor that calls {@code ContainerProvider.getWebSocketContainer()}
-	 * to obtain a (new) {@link WebSocketContainer} instance.
+	 * Default constructor that calls
+	 * {@code ContainerProvider.getWebSocketContainer()} to obtain a (new)
+	 * {@link WebSocketContainer} instance.
 	 */
 	public StandardWebSocketClient() {
 		this(ContainerProvider.getWebSocketContainer());
@@ -64,10 +64,10 @@ public class StandardWebSocketClient extends WebSocketClientSupport implements W
 
 	/**
 	 * Constructor accepting an existing {@link WebSocketContainer} instance.
-	 * @param wsContainer a web socket container
+	 * @param webSocketContainer a web socket container
 	 */
-	public StandardWebSocketClient(WebSocketContainer wsContainer) {
-		this.wsContainer = wsContainer;
+	public StandardWebSocketClient(WebSocketContainer webSocketContainer) {
+		this.webSocketContainer = webSocketContainer;
 	}
 
 
@@ -87,9 +87,9 @@ public class StandardWebSocketClient extends WebSocketClientSupport implements W
 				() -> {
 					String[] subProtocols = beforeHandshake(url, requestHeaders, handler);
 					DefaultConfigurator configurator = new DefaultConfigurator(requestHeaders);
-					ClientEndpointConfig config = createEndpointConfig(configurator, subProtocols);
 					Endpoint endpoint = createEndpoint(url, handler, completionMono, configurator);
-					return this.wsContainer.connectToServer(endpoint, config, url);
+					ClientEndpointConfig config = createEndpointConfig(configurator, subProtocols);
+					return this.webSocketContainer.connectToServer(endpoint, config, url);
 				})
 				.subscribeOn(Schedulers.elastic()) // connectToServer is blocking
 				.then(completionMono);
@@ -105,15 +105,11 @@ public class StandardWebSocketClient extends WebSocketClientSupport implements W
 	private StandardWebSocketHandlerAdapter createEndpoint(URI url, WebSocketHandler handler,
 			MonoProcessor<Void> completion, DefaultConfigurator configurator) {
 
-		return new StandardWebSocketHandlerAdapter(handler,
-				session -> createSession(url, configurator.getResponseHeaders(), completion, session));
-	}
-
-	private StandardWebSocketSession createSession(URI url, HttpHeaders responseHeaders,
-			MonoProcessor<Void> completion, Session session) {
-
-		HandshakeInfo info = afterHandshake(url, responseHeaders);
-		return new StandardWebSocketSession(session, info, this.bufferFactory, completion);
+		return new StandardWebSocketHandlerAdapter(handler, session -> {
+			HttpHeaders responseHeaders = configurator.getResponseHeaders();
+			HandshakeInfo info = afterHandshake(url, responseHeaders);
+			return new StandardWebSocketSession(session, info, this.bufferFactory, completion);
+		});
 	}
 
 

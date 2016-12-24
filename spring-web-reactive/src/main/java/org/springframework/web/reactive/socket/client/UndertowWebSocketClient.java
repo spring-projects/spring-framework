@@ -27,6 +27,7 @@ import java.util.concurrent.CancellationException;
 import java.util.function.Function;
 import javax.net.ssl.SSLContext;
 
+import io.undertow.connector.ByteBufferPool;
 import io.undertow.protocols.ssl.UndertowXnioSsl;
 import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.websockets.client.WebSocketClient.ConnectionBuilder;
@@ -37,6 +38,7 @@ import org.xnio.OptionMap;
 import org.xnio.Options;
 import org.xnio.Xnio;
 import org.xnio.XnioWorker;
+import org.xnio.ssl.XnioSsl;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
@@ -49,7 +51,7 @@ import org.springframework.web.reactive.socket.adapter.UndertowWebSocketHandlerA
 import org.springframework.web.reactive.socket.adapter.UndertowWebSocketSession;
 
 /**
- * An Undertow based implementation of {@link WebSocketClient}.
+ * Undertow based implementation of {@link WebSocketClient}.
  *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
@@ -79,24 +81,23 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 	}
 
 
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-
 	private final Function<URI, ConnectionBuilder> builder;
+
+	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 
 	/**
 	 * Default constructor that uses
 	 * {@link io.undertow.websockets.client.WebSocketClient#connectionBuilder(XnioWorker, ByteBufferPool, URI)}
-	 * to create a web socket connection.
+	 * to create WebSocket connections.
 	 */
 	public UndertowWebSocketClient() {
 		this(UndertowWebSocketClient::createDefaultConnectionBuilder);
 	}
 
 	/**
-	 * Constructor that accepts an existing
-	 * {@link io.undertow.websockets.client.WebSocketClient#connectionBuilder(XnioWorker, ByteBufferPool, URI)}
-	 * instance.
+	 * Constructor that accepts a {@link Function} to prepare a
+	 * {@link ConnectionBuilder} for WebSocket connections.
 	 * @param builder a connection builder that can be used to create a web socket connection.
 	 */
 	public UndertowWebSocketClient(Function<URI, ConnectionBuilder> builder) {
@@ -105,15 +106,13 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 
 	private static ConnectionBuilder createDefaultConnectionBuilder(URI url) {
 
-		ConnectionBuilder builder =
-				io.undertow.websockets.client.WebSocketClient.connectionBuilder(
+		ConnectionBuilder builder = io.undertow.websockets.client.WebSocketClient.connectionBuilder(
 				worker, new DefaultByteBufferPool(false, DEFAULT_BUFFER_SIZE), url);
 
 		boolean secure = "wss".equals(url.getScheme());
 		if (secure) {
 			try {
-				UndertowXnioSsl ssl = new UndertowXnioSsl(Xnio.getInstance(),
-						OptionMap.EMPTY, SSLContext.getDefault());
+				XnioSsl ssl = new UndertowXnioSsl(Xnio.getInstance(), OptionMap.EMPTY, SSLContext.getDefault());
 				builder.setSsl(ssl);
 			}
 			catch (NoSuchAlgorithmException ex) {
@@ -136,7 +135,7 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 	}
 
 	private Mono<Void> executeInternal(URI url, HttpHeaders headers, WebSocketHandler handler) {
-		MonoProcessor<Void> completionMono = MonoProcessor.create();
+		MonoProcessor<Void> completion = MonoProcessor.create();
 		return Mono.fromCallable(
 				() -> {
 					String[] subProtocols = beforeHandshake(url, headers, handler);
@@ -147,29 +146,26 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 							.connect()
 							.addNotifier((future, attachment) -> {
 								if (Status.DONE.equals(future.getStatus())) {
-									WebSocketChannel channel;
 									try {
-										channel = future.get();
+										handleChannel(url, handler, completion, negotiation, future.get());
 									}
 									catch (CancellationException | IOException ex) {
-										completionMono.onError(ex);
-										return;
+										completion.onError(ex);
 									}
-									handleWebSocket(url, handler, completionMono, negotiation, channel);
 								}
 								else if (Status.FAILED.equals(future.getStatus())) {
-									completionMono.onError(future.getException());
+									completion.onError(future.getException());
 								}
 								else {
 									String message = "Failed to connect" + future.getStatus();
-									completionMono.onError(new IllegalStateException(message));
+									completion.onError(new IllegalStateException(message));
 								}
 							}, null);
 				})
-				.then(completionMono);
+				.then(completion);
 	}
 
-	private void handleWebSocket(URI url, WebSocketHandler handler, MonoProcessor<Void> completion,
+	private void handleChannel(URI url, WebSocketHandler handler, MonoProcessor<Void> completion,
 			DefaultNegotiation negotiation, WebSocketChannel channel) {
 
 		HandshakeInfo info = afterHandshake(url, negotiation.getResponseHeaders());

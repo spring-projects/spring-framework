@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 
@@ -35,7 +34,7 @@ import org.springframework.web.reactive.socket.WebSocketHandler;
  */
 public class WebSocketClientSupport {
 
-	protected static final String SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
+	private static final String SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
 
 
 	protected final Log logger = LogFactory.getLog(getClass());

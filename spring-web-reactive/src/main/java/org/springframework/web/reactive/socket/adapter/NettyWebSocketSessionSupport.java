@@ -69,6 +69,7 @@ public abstract class NettyWebSocketSessionSupport<T> extends AbstractWebSocketS
 		return (NettyDataBufferFactory) super.bufferFactory();
 	}
 
+
 	protected WebSocketMessage toMessage(WebSocketFrame frame) {
 		DataBuffer payload = bufferFactory().wrap(frame.content());
 		return new WebSocketMessage(MESSAGE_TYPES.get(frame.getClass()), payload);

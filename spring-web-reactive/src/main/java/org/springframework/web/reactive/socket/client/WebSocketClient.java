@@ -23,7 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 
 /**
- * Contract for connecting and handling a WebSocket session.
+ * Contract for reactive-style handling of a WebSocket session.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

@@ -34,7 +34,7 @@ import org.springframework.web.reactive.socket.adapter.JettyWebSocketHandlerAdap
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
 
 /**
- * A Jetty based implementation of {@link WebSocketClient}.
+ * Jetty based implementation of {@link WebSocketClient}.
  * 
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
@@ -42,9 +42,9 @@ import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
  */
 public class JettyWebSocketClient extends WebSocketClientSupport implements WebSocketClient, Lifecycle {
 
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+	private final org.eclipse.jetty.websocket.client.WebSocketClient jettyClient;
 
-	private final org.eclipse.jetty.websocket.client.WebSocketClient wsClient;
+	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 	private final Object lifecycleMonitor = new Object();
 
@@ -60,10 +60,46 @@ public class JettyWebSocketClient extends WebSocketClientSupport implements WebS
 	/**
 	 * Constructor that accepts an existing
 	 * {@link org.eclipse.jetty.websocket.client.WebSocketClient} instance.
-	 * @param wsClient a web socket client
+	 * @param jettyClient a web socket client
 	 */
-	public JettyWebSocketClient(org.eclipse.jetty.websocket.client.WebSocketClient wsClient) {
-		this.wsClient = wsClient;
+	public JettyWebSocketClient(org.eclipse.jetty.websocket.client.WebSocketClient jettyClient) {
+		this.jettyClient = jettyClient;
+	}
+
+
+	@Override
+	public void start() {
+		synchronized (this.lifecycleMonitor) {
+			if (!isRunning()) {
+				try {
+					this.jettyClient.start();
+				}
+				catch (Exception ex) {
+					throw new IllegalStateException("Failed to start Jetty WebSocketClient", ex);
+				}
+			}
+		}
+	}
+
+	@Override
+	public void stop() {
+		synchronized (this.lifecycleMonitor) {
+			if (isRunning()) {
+				try {
+					this.jettyClient.stop();
+				}
+				catch (Exception ex) {
+					throw new IllegalStateException("Error stopping Jetty WebSocketClient", ex);
+				}
+			}
+		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		synchronized (this.lifecycleMonitor) {
+			return this.jettyClient.isStarted();
+		}
 	}
 
 
@@ -84,19 +120,17 @@ public class JettyWebSocketClient extends WebSocketClientSupport implements WebS
 					String[] protocols = beforeHandshake(url, headers, handler);
 					ClientUpgradeRequest upgradeRequest = createRequest(headers, protocols);
 					Object jettyHandler = createJettyHandler(url, handler, completionMono);
-					return this.wsClient.connect(jettyHandler, url, upgradeRequest);
+					return this.jettyClient.connect(jettyHandler, url, upgradeRequest);
 				})
 				.then(completionMono);
 	}
 
 	private Object createJettyHandler(URI url, WebSocketHandler handler, MonoProcessor<Void> completion) {
-		return new JettyWebSocketHandlerAdapter(
-				handler, session -> createJettySession(url, completion, session));
+		return new JettyWebSocketHandlerAdapter(handler,
+				session -> createJettySession(url, completion, session));
 	}
 
-	private JettyWebSocketSession createJettySession(URI url, MonoProcessor<Void> completion,
-			Session session) {
-
+	private JettyWebSocketSession createJettySession(URI url, MonoProcessor<Void> completion, Session session) {
 		UpgradeResponse response = session.getUpgradeResponse();
 		HttpHeaders responseHeaders = new HttpHeaders();
 		response.getHeaders().forEach(responseHeaders::put);
@@ -109,42 +143,6 @@ public class JettyWebSocketClient extends WebSocketClientSupport implements WebS
 		request.setSubProtocols(protocols);
 		headers.forEach(request::setHeader);
 		return request;
-	}
-
-
-	@Override
-	public void start() {
-		synchronized (this.lifecycleMonitor) {
-			if (!isRunning()) {
-				try {
-					this.wsClient.start();
-				}
-				catch (Exception ex) {
-					throw new IllegalStateException("Failed to start Jetty WebSocketClient", ex);
-				}
-			}
-		}
-	}
-
-	@Override
-	public void stop() {
-		synchronized (this.lifecycleMonitor) {
-			if (isRunning()) {
-				try {
-					this.wsClient.stop();
-				}
-				catch (Exception ex) {
-					throw new IllegalStateException("Error stopping Jetty WebSocketClient", ex);
-				}
-			}
-		}
-	}
-
-	@Override
-	public boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return this.wsClient.isStarted();
-		}
 	}
 
 }

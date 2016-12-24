@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.reactive.socket.server;
+package org.springframework.web.reactive.socket;
 
 import java.io.File;
 import java.net.URI;
@@ -49,6 +49,8 @@ import org.springframework.web.reactive.socket.client.RxNettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.StandardWebSocketClient;
 import org.springframework.web.reactive.socket.client.UndertowWebSocketClient;
 import org.springframework.web.reactive.socket.client.WebSocketClient;
+import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
+import org.springframework.web.reactive.socket.server.WebSocketService;
 import org.springframework.web.reactive.socket.server.support.HandshakeWebSocketService;
 import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.server.upgrade.JettyRequestUpgradeStrategy;
@@ -60,9 +62,9 @@ import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpg
 import static org.junit.Assume.assumeFalse;
 
 /**
- * Base class for WebSocket integration tests.
- * Sub-classes must implement {@link #getWebConfigClass()} to return Spring
- * config class with handler mappings to {@code WebSocketHandler}'s.
+ * Base class for WebSocket integration tests. Sub-classes must implement
+ * {@link #getWebConfigClass()} to return Spring config class with (server-side)
+ * handler mappings to {@code WebSocketHandler}'s.
  *
  * @author Rossen Stoyanchev
  */
