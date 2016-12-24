@@ -32,7 +32,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
-import org.springframework.web.reactive.socket.client.JettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 
 import static org.junit.Assert.assertEquals;
@@ -109,10 +108,6 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 
 	@Test
 	public void customHeader() throws Exception {
-
-		// TODO
-		assumeFalse(client instanceof JettyWebSocketClient);
-
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("my-header", "my-value");
 		MonoProcessor<Object> output = MonoProcessor.create();
