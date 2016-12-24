@@ -146,6 +146,16 @@ public class DateFormatterTests {
 		assertThat(formatter.print(date, Locale.US), is("2009-06-01T14:23:05.003+0000"));
 		assertThat(formatter.parse("2009-06-01T14:23:05.003+0000", Locale.US), is(date));
 	}
+	
+	@Test
+	public void shouldPrintAndParseISODateTimeInZuluTimezone() throws Exception {
+		DateFormatter formatter = new DateFormatter();
+		formatter.setTimeZone(UTC);
+		formatter.setIso(ISO.DATE_TIME);
+		Date date = getDate(2009, Calendar.JUNE, 1, 14, 23, 5, 3);
+		assertThat(formatter.print(date, Locale.US), is("2009-06-01T14:23:05.003Z"));
+		assertThat(formatter.parse("2009-06-01T14:23:05.003Z", Locale.US), is(date));
+	}
 
 	@Test
 	public void shouldSupportJodaStylePatterns() throws Exception {
