@@ -26,9 +26,12 @@ import javax.annotation.PostConstruct;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.FactoryBean;
@@ -525,6 +528,19 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
+	public void genericsBasedInjectionWithEarlyGenericsMatching() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+
+		String[] beanNames = beanFactory.getBeanNamesForType(Repository.class);
+		assertTrue(ObjectUtils.containsElement(beanNames, "stringRepo"));
+
+		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(Repository.class, String.class));
+		assertEquals(1, beanNames.length);
+		assertEquals("stringRepo", beanNames[0]);
+	}
+
+	@Test
 	public void genericsBasedInjectionWithLateGenericsMatching() {
 		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
@@ -539,9 +555,14 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void genericsBasedInjectionWithEarlyGenericsMatching() {
+	public void genericsBasedInjectionWithEarlyGenericsMatchingOnCglibProxy() {
 		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+		autoProxyCreator.setProxyTargetClass(true);
+		autoProxyCreator.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(autoProxyCreator);
+		beanFactory.registerSingleton("traceInterceptor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
 
 		String[] beanNames = beanFactory.getBeanNamesForType(Repository.class);
 		assertTrue(ObjectUtils.containsElement(beanNames, "stringRepo"));
@@ -549,6 +570,109 @@ public class ConfigurationClassPostProcessorTests {
 		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(Repository.class, String.class));
 		assertEquals(1, beanNames.length);
 		assertEquals("stringRepo", beanNames[0]);
+
+		assertTrue(AopUtils.isCglibProxy(beanFactory.getBean("stringRepo")));
+	}
+
+	@Test
+	public void genericsBasedInjectionWithLateGenericsMatchingOnCglibProxy() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+		autoProxyCreator.setProxyTargetClass(true);
+		autoProxyCreator.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(autoProxyCreator);
+		beanFactory.registerSingleton("traceInterceptor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+		beanFactory.preInstantiateSingletons();
+
+		String[] beanNames = beanFactory.getBeanNamesForType(Repository.class);
+		assertTrue(ObjectUtils.containsElement(beanNames, "stringRepo"));
+
+		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(Repository.class, String.class));
+		assertEquals(1, beanNames.length);
+		assertEquals("stringRepo", beanNames[0]);
+
+		assertTrue(AopUtils.isCglibProxy(beanFactory.getBean("stringRepo")));
+	}
+
+	@Test
+	public void genericsBasedInjectionWithLateGenericsMatchingOnCglibProxyAndRawFactoryMethod() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RawRepositoryConfiguration.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+		autoProxyCreator.setProxyTargetClass(true);
+		autoProxyCreator.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(autoProxyCreator);
+		beanFactory.registerSingleton("traceInterceptor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+		beanFactory.preInstantiateSingletons();
+
+		String[] beanNames = beanFactory.getBeanNamesForType(Repository.class);
+		assertTrue(ObjectUtils.containsElement(beanNames, "stringRepo"));
+
+		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(Repository.class, String.class));
+		assertEquals(1, beanNames.length);
+		assertEquals("stringRepo", beanNames[0]);
+
+		assertTrue(AopUtils.isCglibProxy(beanFactory.getBean("stringRepo")));
+	}
+
+	@Test
+	public void genericsBasedInjectionWithEarlyGenericsMatchingOnJdkProxy() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+		autoProxyCreator.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(autoProxyCreator);
+		beanFactory.registerSingleton("traceInterceptor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+
+		String[] beanNames = beanFactory.getBeanNamesForType(RepositoryInterface.class);
+		assertTrue(ObjectUtils.containsElement(beanNames, "stringRepo"));
+
+		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(RepositoryInterface.class, String.class));
+		assertEquals(1, beanNames.length);
+		assertEquals("stringRepo", beanNames[0]);
+
+		assertTrue(AopUtils.isJdkDynamicProxy(beanFactory.getBean("stringRepo")));
+	}
+
+	@Test
+	public void genericsBasedInjectionWithLateGenericsMatchingOnJdkProxy() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RepositoryConfiguration.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+		autoProxyCreator.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(autoProxyCreator);
+		beanFactory.registerSingleton("traceInterceptor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+		beanFactory.preInstantiateSingletons();
+
+		String[] beanNames = beanFactory.getBeanNamesForType(RepositoryInterface.class);
+		assertTrue(ObjectUtils.containsElement(beanNames, "stringRepo"));
+
+		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(RepositoryInterface.class, String.class));
+		assertEquals(1, beanNames.length);
+		assertEquals("stringRepo", beanNames[0]);
+
+		assertTrue(AopUtils.isJdkDynamicProxy(beanFactory.getBean("stringRepo")));
+	}
+
+	@Test
+	public void genericsBasedInjectionWithLateGenericsMatchingOnJdkProxyAndRawFactoryMethod() {
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(RawRepositoryConfiguration.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+		autoProxyCreator.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(autoProxyCreator);
+		beanFactory.registerSingleton("traceInterceptor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+		beanFactory.preInstantiateSingletons();
+
+		String[] beanNames = beanFactory.getBeanNamesForType(RepositoryInterface.class);
+		assertTrue(ObjectUtils.containsElement(beanNames, "stringRepo"));
+
+		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(RepositoryInterface.class, String.class));
+		assertEquals(1, beanNames.length);
+		assertEquals("stringRepo", beanNames[0]);
+
+		assertTrue(AopUtils.isJdkDynamicProxy(beanFactory.getBean("stringRepo")));
 	}
 
 	@Test
@@ -752,7 +876,12 @@ public class ConfigurationClassPostProcessorTests {
 		}
 	}
 
-	public static class Repository<T> {
+	public interface RepositoryInterface<T> {
+
+		String toString();
+	}
+
+	public static class Repository<T> implements RepositoryInterface<T> {
 	}
 
 	public static class GenericRepository<T> extends Repository<T> {
@@ -814,6 +943,21 @@ public class ConfigurationClassPostProcessorTests {
 				@Override
 				public String toString() {
 					return "Repository<Object>";
+				}
+			};
+		}
+	}
+
+
+	@Configuration
+	public static class RawRepositoryConfiguration {
+
+		@Bean
+		public Repository stringRepo() {
+			return new Repository<String>() {
+				@Override
+				public String toString() {
+					return "Repository<String>";
 				}
 			};
 		}
