@@ -30,8 +30,7 @@ import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
- * Formats fields annotated with the {@link DateTimeFormat} annotation using
- * a {@link DateFormatter}.
+ * Formats fields annotated with the {@link DateTimeFormat} annotation using a {@link DateFormatter}.
  *
  * @author Phillip Webb
  * @since 3.2
@@ -39,7 +38,6 @@ import org.springframework.format.annotation.DateTimeFormat;
  */
 public class DateTimeFormatAnnotationFormatterFactory  extends EmbeddedValueResolutionSupport
 		implements AnnotationFormatterFactory<DateTimeFormat> {
-
 
 	private static final Set<Class<?>> FIELD_TYPES;
 

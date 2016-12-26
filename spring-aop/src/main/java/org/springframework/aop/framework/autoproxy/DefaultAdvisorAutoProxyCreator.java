@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,16 @@ package org.springframework.aop.framework.autoproxy;
 import org.springframework.beans.factory.BeanNameAware;
 
 /**
- * BeanPostProcessor implementation that creates AOP proxies based on all candidate
- * Advisors in the current BeanFactory. This class is completely generic; it contains
- * no special code to handle any particular aspects, such as pooling aspects.
+ * {@code BeanPostProcessor} implementation that creates AOP proxies based on all
+ * candidate {@code Advisor}s in the current {@code BeanFactory}. This class is
+ * completely generic; it contains no special code to handle any particular aspects,
+ * such as pooling aspects.
  *
  * <p>It's possible to filter out advisors - for example, to use multiple post processors
- * of this type in the same factory - by setting the {@code usePrefix} property
- * to true, in which case only advisors beginning with the DefaultAdvisorAutoProxyCreator's
- * bean name followed by a dot (like "aapc.") will be used. This default prefix can be
- * changed from the bean name by setting the {@code advisorBeanNamePrefix} property.
+ * of this type in the same factory - by setting the {@code usePrefix} property to true,
+ * in which case only advisors beginning with the DefaultAdvisorAutoProxyCreator's bean
+ * name followed by a dot (like "aapc.") will be used. This default prefix can be changed
+ * from the bean name by setting the {@code advisorBeanNamePrefix} property.
  * The separator (.) will also be used in this case.
  *
  * @author Rod Johnson
@@ -40,22 +41,22 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 	public final static String SEPARATOR = ".";
 
 
-	private boolean usePrefix;
+	private boolean usePrefix = false;
 
 	private String advisorBeanNamePrefix;
 
 
 	/**
-	 * Set whether to exclude advisors with a certain prefix
-	 * in the bean name.
+	 * Set whether to only include advisors with a certain prefix in the bean name.
+	 * <p>Default is {@code false}, including all beans of type {@code Advisor}.
+	 * @see #setAdvisorBeanNamePrefix
 	 */
 	public void setUsePrefix(boolean usePrefix) {
 		this.usePrefix = usePrefix;
 	}
 
 	/**
-	 * Return whether to exclude advisors with a certain prefix
-	 * in the bean name.
+	 * Return whether to only include advisors with a certain prefix in the bean name.
 	 */
 	public boolean isUsePrefix() {
 		return this.usePrefix;
@@ -89,7 +90,7 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 
 
 	/**
-	 * Consider Advisor beans with the specified prefix as eligible, if activated.
+	 * Consider {@code Advisor} beans with the specified prefix as eligible, if activated.
 	 * @see #setUsePrefix
 	 * @see #setAdvisorBeanNamePrefix
 	 */

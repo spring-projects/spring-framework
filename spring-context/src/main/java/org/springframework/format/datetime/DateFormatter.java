@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import org.springframework.format.Formatter;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.util.StringUtils;
 
@@ -42,6 +41,8 @@ import org.springframework.util.StringUtils;
  * @see SimpleDateFormat
  */
 public class DateFormatter implements Formatter<Date> {
+
+	private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
 	private static final Map<ISO, String> ISO_PATTERNS;
 
@@ -176,7 +177,7 @@ public class DateFormatter implements Formatter<Date> {
 				throw new IllegalStateException("Unsupported ISO format " + this.iso);
 			}
 			SimpleDateFormat format = new SimpleDateFormat(pattern);
-			format.setTimeZone(TimeZone.getTimeZone("UTC"));
+			format.setTimeZone(UTC);
 			return format;
 		}
 		if (StringUtils.hasLength(this.stylePattern)) {
