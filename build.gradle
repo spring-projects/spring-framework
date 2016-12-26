@@ -326,7 +326,7 @@ project("spring-build-src") {
 project("spring-core") {
 	description = "Spring Core"
 
-	// Kotlin compiler does not support JDK 9 yet
+	// Kotlin compiler does not support JDK 9 yet, see https://youtrack.jetbrains.com/issue/KT-14988
 	if (!JavaVersion.current().java9Compatible) {
 		apply plugin: "kotlin"
 	}
@@ -430,7 +430,7 @@ project("spring-core") {
 project("spring-beans") {
 	description = "Spring Beans"
 
-	// Kotlin compiler does not support JDK 9 yet
+	// Kotlin compiler does not support JDK 9 yet, see https://youtrack.jetbrains.com/issue/KT-14988
 	if (!JavaVersion.current().java9Compatible) {
 		apply plugin: "kotlin"
 	}
@@ -514,6 +514,10 @@ project("spring-context") {
 	description = "Spring Context"
 
 	apply plugin: "groovy"
+	// Kotlin compiler does not support JDK 9 yet, see https://youtrack.jetbrains.com/issue/KT-14988
+	if (!JavaVersion.current().java9Compatible) {
+		apply plugin: "kotlin"
+	}
 
 	dependencies {
 		compile(project(":spring-aop"))
@@ -536,6 +540,7 @@ project("spring-context") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.beanshell:bsh:2.0b4")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		testCompile("org.apache.commons:commons-pool2:2.4.2")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
 		testCompile("javax.inject:javax.inject-tck:1")
@@ -581,7 +586,7 @@ project("spring-oxm") {
 project("spring-messaging") {
 	description = "Spring Messaging"
 
-	// Kotlin compiler does not support JDK 9 yet
+	// Kotlin compiler does not support JDK 9 yet, see https://youtrack.jetbrains.com/issue/KT-14988
 	if (!JavaVersion.current().java9Compatible) {
 		apply plugin: "kotlin"
 	}
@@ -726,7 +731,7 @@ project("spring-context-indexer") {
 project("spring-web") {
 	description = "Spring Web"
 
-	// Kotlin compiler does not support JDK 9 yet
+	// Kotlin compiler does not support JDK 9 yet, see https://youtrack.jetbrains.com/issue/KT-14988
 	if (!JavaVersion.current().java9Compatible) {
 		apply plugin: "kotlin"
 	}
@@ -819,7 +824,7 @@ project("spring-web") {
 project("spring-web-reactive") {
 	description = "Spring Web Reactive"
 
-	// Kotlin compiler does not support JDK 9 yet
+	// Kotlin compiler does not support JDK 9 yet, see https://youtrack.jetbrains.com/issue/KT-14988
 	if (!JavaVersion.current().java9Compatible) {
 		apply plugin: "kotlin"
 	}
