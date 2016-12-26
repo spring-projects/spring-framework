@@ -624,19 +624,19 @@ public class ResolvableType implements Serializable {
 	 * @see #resolveGenerics()
 	 */
 	public ResolvableType getGeneric(int... indexes) {
-		try {
-			if (indexes == null || indexes.length == 0) {
-				return getGenerics()[0];
-			}
-			ResolvableType generic = this;
-			for (int index : indexes) {
-				generic = generic.getGenerics()[index];
-			}
-			return generic;
+		ResolvableType[] generics = getGenerics();
+		if (indexes == null || indexes.length == 0) {
+			return (generics.length == 0 ? NONE : generics[0]);
 		}
-		catch (IndexOutOfBoundsException ex) {
-			return NONE;
+		ResolvableType generic = this;
+		for (int index : indexes) {
+			generics = generic.getGenerics();
+			if (index < 0 || index >= generics.length) {
+				return NONE;
+			}
+			generic = generics[index];
 		}
+		return generic;
 	}
 
 	/**
@@ -947,6 +947,10 @@ public class ResolvableType implements Serializable {
 	 */
 	public static ResolvableType forRawClass(Class<?> clazz) {
 		return new ResolvableType(clazz) {
+			@Override
+			public ResolvableType[] getGenerics() {
+				return EMPTY_TYPES_ARRAY;
+			}
 			@Override
 			public boolean isAssignableFrom(Class<?> other) {
 				return ClassUtils.isAssignable(getRawClass(), other);
