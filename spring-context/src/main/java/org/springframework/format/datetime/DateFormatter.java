@@ -49,8 +49,8 @@ public class DateFormatter implements Formatter<Date> {
 	static {
 		Map<ISO, String> formats = new HashMap<>(4);
 		formats.put(ISO.DATE, "yyyy-MM-dd");
-		formats.put(ISO.TIME, "HH:mm:ss.SSSZ");
-		formats.put(ISO.DATE_TIME, "yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+		formats.put(ISO.TIME, "HH:mm:ss.SSSXXX");
+		formats.put(ISO.DATE_TIME, "yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 		ISO_PATTERNS = Collections.unmodifiableMap(formats);
 	}
 
