@@ -858,6 +858,8 @@ project("spring-web-reactive") {
 		optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
 			exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
 		}
+		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		testCompile("io.projectreactor.addons:reactor-test:${reactorCoreVersion}")
 		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("org.hibernate:hibernate-validator:${hibval5Version}")
@@ -871,8 +873,6 @@ project("spring-web-reactive") {
 		testCompile("com.fasterxml:aalto-xml:1.0.0")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
-		testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-		testCompile("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	    testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
 		testRuntime("javax.el:javax.el-api:${elApiVersion}")
 		testRuntime("org.glassfish:javax.el:3.0.1-b08")
