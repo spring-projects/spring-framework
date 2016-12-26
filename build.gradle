@@ -93,11 +93,11 @@ configure(allprojects) { project ->
 	ext.tiles3Version          = "3.0.7"
 	ext.tomcatVersion          = "8.5.9"
 	ext.tyrusVersion           = "1.13"
-	ext.undertowVersion        = "1.4.7.Final"
+	ext.undertowVersion        = "1.4.8.Final"
 	ext.websocketVersion       = "1.1"
 	ext.woodstoxVersion        = "5.0.3"
 	ext.xmlunitVersion         = "2.3.0"
-	ext.xnioVersion            = "3.4.2.Final"
+	ext.xnioVersion            = "3.4.3.Final"
 	ext.xstreamVersion         = "1.4.9"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
