@@ -364,7 +364,17 @@ class ConfigurationClassParser {
 			try {
 				AnnotationMetadata asm =
 						this.metadataReaderFactory.getMetadataReader(original.getClassName()).getAnnotationMetadata();
-				beanMethods = asm.getAnnotatedMethods(Bean.class.getName());
+				Set<MethodMetadata> asmMethods = asm.getAnnotatedMethods(Bean.class.getName());
+				Set<MethodMetadata> reflectionMethods = beanMethods;
+				beanMethods = new LinkedHashSet<>();
+				for (MethodMetadata asmMethod : asmMethods) {
+					for (MethodMetadata reflectionMethod : reflectionMethods) {
+						if (reflectionMethod.getMethodName().equals(asmMethod.getMethodName())) {
+							beanMethods.add(reflectionMethod);
+							break;
+						}
+					}
+				}
 			}
 			catch (IOException ex) {
 				logger.debug("Failed to read class file via ASM for determining @Bean method order", ex);
