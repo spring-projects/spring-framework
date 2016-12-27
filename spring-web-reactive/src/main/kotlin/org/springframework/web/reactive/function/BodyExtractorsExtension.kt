@@ -9,6 +9,7 @@ import kotlin.reflect.KClass
  * Extension for [BodyExtactors] providing [KClass] based API and avoiding specifying
  * a class parameter when possible thanks to Kotlin reified type parameters.
  *
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 object BodyExtractorsExtension {

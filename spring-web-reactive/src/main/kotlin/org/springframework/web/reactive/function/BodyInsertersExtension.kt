@@ -8,6 +8,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse
  * Extension for [BodyInserters] providing [KClass] based API and avoiding specifying
  * a class parameter when possible thanks to Kotlin reified type parameters.
  *
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 object BodyInsertersExtension {

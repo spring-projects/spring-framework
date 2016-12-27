@@ -9,6 +9,7 @@ import kotlin.reflect.KClass
  * avoiding specifying a class parameter for the [Supplier] based variant thanks to
  * Kotlin reified type parameters.
  *
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 object GenericApplicationContextExtension {

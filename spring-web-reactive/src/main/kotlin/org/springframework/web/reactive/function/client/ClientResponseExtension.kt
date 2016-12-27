@@ -7,6 +7,7 @@ import kotlin.reflect.KClass
 /**
  * Extension for [ClientResponse] providing [KClass] based API.
  *
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 object ClientResponseExtension {

@@ -5,6 +5,7 @@ import kotlin.reflect.KClass
 /**
  * Extension for [ListableBeanFactory] providing [KClass] based API.
  *
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 object ListableBeanFactoryExtension {
