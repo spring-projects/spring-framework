@@ -69,7 +69,7 @@ configure(allprojects) { project ->
 	ext.junitVersion           = "4.12"
 	ext.junitJupiterVersion    = '5.0.0-M3'
 	ext.junitPlatformVersion   = '1.0.0-M3'
-	ext.kotlinVersion          = "1.0.5-3"
+	ext.kotlinVersion          = "1.0.6"
 	ext.log4jVersion           = '2.7'
 	ext.nettyVersion           = "4.1.6.Final"
 	ext.okhttpVersion          = "2.7.5"
