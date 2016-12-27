@@ -314,6 +314,8 @@ public interface RestOperations {
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
+	 * <p><b>NOTE: The standard JDK HTTP library does not support HTTP PATCH.
+	 * You need to use the Apache HttpComponents or OkHttp request factory.</b>
 	 * @param url the URL
 	 * @param request the object to be PATCHed (may be {@code null})
 	 * @param responseType the type of the return value
@@ -321,6 +323,9 @@ public interface RestOperations {
 	 * @return the converted object
 	 * @since 4.3.5
 	 * @see HttpEntity
+	 * @see RestTemplate#setRequestFactory
+	 * @see org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory
+	 * @see org.springframework.http.client.OkHttp3ClientHttpRequestFactory
 	 */
 	<T> T patchForObject(String url, Object request, Class<T> responseType, Object... uriVariables)
 			throws RestClientException;
@@ -331,6 +336,8 @@ public interface RestOperations {
 	 * <p>URI Template variables are expanded using the given map.
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
+	 * <p><b>NOTE: The standard JDK HTTP library does not support HTTP PATCH.
+	 * You need to use the Apache HttpComponents or OkHttp request factory.</b>
 	 * @param url the URL
 	 * @param request the object to be PATCHed (may be {@code null})
 	 * @param responseType the type of the return value
@@ -338,6 +345,9 @@ public interface RestOperations {
 	 * @return the converted object
 	 * @since 4.3.5
 	 * @see HttpEntity
+	 * @see RestTemplate#setRequestFactory
+	 * @see org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory
+	 * @see org.springframework.http.client.OkHttp3ClientHttpRequestFactory
 	 */
 	<T> T patchForObject(String url, Object request, Class<T> responseType, Map<String, ?> uriVariables)
 			throws RestClientException;
@@ -347,12 +357,17 @@ public interface RestOperations {
 	 * and return the representation found in the response.
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
+	 * <p><b>NOTE: The standard JDK HTTP library does not support HTTP PATCH.
+	 * You need to use the Apache HttpComponents or OkHttp request factory.</b>
 	 * @param url the URL
 	 * @param request the object to be PATCHed (may be {@code null})
 	 * @param responseType the type of the return value
 	 * @return the converted object
 	 * @since 4.3.5
 	 * @see HttpEntity
+	 * @see RestTemplate#setRequestFactory
+	 * @see org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory
+	 * @see org.springframework.http.client.OkHttp3ClientHttpRequestFactory
 	 */
 	<T> T patchForObject(URI url, Object request, Class<T> responseType) throws RestClientException;
 
