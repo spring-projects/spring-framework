@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,8 +98,6 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 
 		// Delegate bean definition registration to scanner class.
 		ClassPathBeanDefinitionScanner scanner = createScanner(parserContext.getReaderContext(), useDefaultFilters);
-		scanner.setResourceLoader(parserContext.getReaderContext().getResourceLoader());
-		scanner.setEnvironment(parserContext.getReaderContext().getEnvironment());
 		scanner.setBeanDefinitionDefaults(parserContext.getDelegate().getBeanDefinitionDefaults());
 		scanner.setAutowireCandidatePatterns(parserContext.getDelegate().getAutowireCandidatePatterns());
 
@@ -127,7 +125,8 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	protected ClassPathBeanDefinitionScanner createScanner(XmlReaderContext readerContext, boolean useDefaultFilters) {
-		return new ClassPathBeanDefinitionScanner(readerContext.getRegistry(), useDefaultFilters);
+		return new ClassPathBeanDefinitionScanner(readerContext.getRegistry(), useDefaultFilters,
+				readerContext.getEnvironment(), readerContext.getResourceLoader());
 	}
 
 	protected void registerComponents(
@@ -266,7 +265,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 			throw new IllegalArgumentException("Class [" + className + "] for strategy [" +
 					strategyType.getName() + "] not found", ex);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new IllegalArgumentException("Unable to instantiate class [" + className + "] for strategy [" +
 					strategyType.getName() + "]: a zero-argument constructor is required", ex);
 		}

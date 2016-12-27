@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.core.io.ResourceLoader;
 
 /**
  * Caching implementation of the {@link MetadataReaderFactory} interface,
- * caching {@link MetadataReader} per Spring {@link Resource} handle
+ * caching a {@link MetadataReader} instance per Spring {@link Resource} handle
  * (i.e. per ".class" file).
  *
  * @author Juergen Hoeller
@@ -77,7 +77,7 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 
 	/**
 	 * Specify the maximum number of entries for the MetadataReader cache.
-	 * Default is 256.
+	 * <p>Default is 256.
 	 */
 	public void setCacheLimit(int cacheLimit) {
 		this.cacheLimit = cacheLimit;

@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  * deliberately override certain bean definitions via an extra {@code @Configuration}
  * class.
  *
- * <p>See @{@link Configuration} Javadoc for usage examples.
+ * <p>See @{@link Configuration}'s javadoc for usage examples.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
