@@ -57,17 +57,23 @@ public class RequestContext {
 
 	private final MessageSource messageSource;
 
-	private Boolean defaultHtmlEscape;
-
-	private Map<String, Errors> errorsMap;
-
 	private Locale locale;
 
 	private TimeZone timeZone;
 
+	private Boolean defaultHtmlEscape;
 
-	public RequestContext(ServerWebExchange exchange, Map<String, Object> model,
-			MessageSource messageSource) {
+	private Map<String, Errors> errorsMap;
+
+	private RequestDataValueProcessor dataValueProcessor;
+
+
+	public RequestContext(ServerWebExchange exchange, Map<String, Object> model, MessageSource messageSource) {
+		this(exchange, model, messageSource, null);
+	}
+
+	public RequestContext(ServerWebExchange exchange, Map<String, Object> model, MessageSource messageSource,
+			RequestDataValueProcessor dataValueProcessor) {
 
 		Assert.notNull(exchange, "'exchange' is required");
 		Assert.notNull(model, "'model' is required");
@@ -75,11 +81,13 @@ public class RequestContext {
 		this.exchange = exchange;
 		this.model = model;
 		this.messageSource = messageSource;
-		this.defaultHtmlEscape = null; // TODO
 
 		Locale acceptLocale = exchange.getRequest().getHeaders().getAcceptLanguageAsLocale();
 		this.locale = acceptLocale != null ? acceptLocale : Locale.getDefault();
 		this.timeZone = TimeZone.getDefault(); // TODO
+
+		this.defaultHtmlEscape = null; // TODO
+		this.dataValueProcessor = dataValueProcessor;
 	}
 
 
@@ -156,6 +164,14 @@ public class RequestContext {
 	 */
 	public Boolean getDefaultHtmlEscape() {
 		return this.defaultHtmlEscape;
+	}
+
+	/**
+	 * Return the {@link RequestDataValueProcessor} instance to apply to in form
+	 * tag libraries and to redirect URLs.
+	 */
+	public Optional<RequestDataValueProcessor> getRequestDataValueProcessor() {
+		return Optional.ofNullable(this.dataValueProcessor);
 	}
 
 	/**

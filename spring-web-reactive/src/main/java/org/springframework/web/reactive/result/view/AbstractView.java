@@ -41,6 +41,10 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public abstract class AbstractView implements View, ApplicationContextAware {
 
+	/** Well-known name for the RequestDataValueProcessor in the bean factory. */
+	public static final String REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME = "requestDataValueProcessor";
+
+
 	/** Logger that is available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -179,7 +183,21 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 	 * @see #setRequestContextAttribute
 	 */
 	protected RequestContext createRequestContext(ServerWebExchange exchange, Map<String, Object> model) {
-		return new RequestContext(exchange, model, this.applicationContext);
+		return new RequestContext(exchange, model, getApplicationContext(), getRequestDataValueProcessor());
+	}
+
+	/**
+	 * Return the {@link RequestDataValueProcessor} to use.
+	 * <p>The default implementation looks in the {@link #getApplicationContext()
+	 * Spring configuration} for a {@code RequestDataValueProcessor} bean with
+	 * the name {@link #REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME}.
+	 */
+	protected RequestDataValueProcessor getRequestDataValueProcessor() {
+		if (getApplicationContext() != null) {
+			String beanName = REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME;
+			return getApplicationContext().getBean(beanName, RequestDataValueProcessor.class);
+		}
+		return null;
 	}
 
 	/**

@@ -186,8 +186,10 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Create the target URL if necessary pre-pending the contextPath, expanding
-	 * URI template variables, and appending the current request query.
+	 * Create the target URL and, if necessary, pre-pend the contextPath, expand
+	 * URI template variables, append the current request query, and apply the
+	 * configured {@link #getRequestDataValueProcessor()
+	 * RequestDataValueProcessor}.
 	 */
 	protected final String createTargetUrl(Map<String, Object> model, ServerWebExchange exchange) {
 
@@ -206,7 +208,10 @@ public class RedirectView extends AbstractUrlBasedView {
 			targetUrl = appendCurrentRequestQuery(targetUrl.toString(), exchange.getRequest());
 		}
 
-		return targetUrl.toString();
+		String result = targetUrl.toString();
+
+		RequestDataValueProcessor processor = getRequestDataValueProcessor();
+		return (processor != null ? processor.processUrl(exchange, result) : result);
 	}
 
 	@SuppressWarnings("unchecked")
