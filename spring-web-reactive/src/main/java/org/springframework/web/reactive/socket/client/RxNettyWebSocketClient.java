@@ -16,14 +16,11 @@
 package org.springframework.web.reactive.socket.client;
 
 import java.net.URI;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -89,20 +86,8 @@ public class RxNettyWebSocketClient extends WebSocketClientSupport implements We
 
 	private static HttpClient<ByteBuf, ByteBuf> getDefaultHttpClientProvider(URI url) {
 		boolean secure = "wss".equals(url.getScheme());
-		int port = url.getPort() > 0 ? url.getPort() : secure ? 443 : 80;
-		HttpClient<ByteBuf, ByteBuf> client = HttpClient.newClient(url.getHost(), port);
-		if (secure) {
-			try {
-				SSLContext context = SSLContext.getDefault();
-				SSLEngine engine = context.createSSLEngine(url.getHost(), port);
-				engine.setUseClientMode(true);
-				client.secure(engine);
-			}
-			catch (NoSuchAlgorithmException ex) {
-				throw new IllegalStateException("Failed to create HttpClient for " + url, ex);
-			}
-		}
-		return client;
+		int port = (url.getPort() > 0 ? url.getPort() : secure ? 443 : 80);
+		return HttpClient.newClient(url.getHost(), port);
 	}
 
 

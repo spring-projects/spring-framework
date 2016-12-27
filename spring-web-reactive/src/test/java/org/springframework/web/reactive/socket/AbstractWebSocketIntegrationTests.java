@@ -16,6 +16,7 @@
 package org.springframework.web.reactive.socket;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -27,6 +28,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import org.xnio.OptionMap;
+import org.xnio.Xnio;
 import reactor.core.publisher.Flux;
 import reactor.util.function.Tuple3;
 
@@ -72,6 +75,9 @@ import static org.junit.Assume.assumeFalse;
 @SuppressWarnings({"unused", "WeakerAccess"})
 public abstract class AbstractWebSocketIntegrationTests {
 
+	private static final File TMP_DIR = new File(System.getProperty("java.io.tmpdir"));
+
+
 	protected int port;
 
 	@Parameter(0)
@@ -85,19 +91,17 @@ public abstract class AbstractWebSocketIntegrationTests {
 
 
 	@Parameters(name = "client[{0}] - server [{1}]")
-	public static Object[][] arguments() {
-
-		File base = new File(System.getProperty("java.io.tmpdir"));
+	public static Object[][] arguments() throws IOException {
 
 		Flux<? extends WebSocketClient> clients = Flux.concat(
 				Flux.just(new StandardWebSocketClient()).repeat(5),
 				Flux.just(new JettyWebSocketClient()).repeat(5),
 				Flux.just(new ReactorNettyWebSocketClient()).repeat(5),
 				Flux.just(new RxNettyWebSocketClient()).repeat(5),
-				Flux.just(new UndertowWebSocketClient()).repeat(5));
+				Flux.just(new UndertowWebSocketClient(Xnio.getInstance().createWorker(OptionMap.EMPTY))).repeat(5));
 
 		Flux<? extends HttpServer> servers = Flux.just(
-				new TomcatHttpServer(base.getAbsolutePath(), WsContextListener.class),
+				new TomcatHttpServer(TMP_DIR.getAbsolutePath(), WsContextListener.class),
 				new JettyHttpServer(),
 				new ReactorHttpServer(),
 				new RxNettyHttpServer(),
