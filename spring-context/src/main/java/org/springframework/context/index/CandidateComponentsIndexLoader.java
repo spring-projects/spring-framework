@@ -40,8 +40,11 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  */
 public class CandidateComponentsIndexLoader {
 
-
-	private static final Log logger = LogFactory.getLog(CandidateComponentsIndexLoader.class);
+	/**
+	 * The location to look for components.
+	 * <p>Can be present in multiple JAR files.
+	 */
+	public static final String COMPONENTS_RESOURCE_LOCATION = "META-INF/spring.components";
 
 	/**
 	 * System property that instructs Spring to ignore the index, i.e.
@@ -54,18 +57,13 @@ public class CandidateComponentsIndexLoader {
 	 */
 	public static final String IGNORE_INDEX = "spring.index.ignore";
 
-	private static final boolean shouldIgnoreIndex =
-			SpringProperties.getFlag(IGNORE_INDEX);
 
+	private static final boolean shouldIgnoreIndex = SpringProperties.getFlag(IGNORE_INDEX);
 
-	/**
-	 * The location to look for components.
-	 * <p>Can be present in multiple JAR files.
-	 */
-	public static final String COMPONENTS_RESOURCE_LOCATION = "META-INF/spring.components";
+	private static final Log logger = LogFactory.getLog(CandidateComponentsIndexLoader.class);
 
-	private static final ConcurrentMap<ClassLoader, CandidateComponentsIndex> cache
-			= new ConcurrentReferenceHashMap<>();
+	private static final ConcurrentMap<ClassLoader, CandidateComponentsIndex> cache =
+			new ConcurrentReferenceHashMap<>();
 
 
 	/**
@@ -107,8 +105,8 @@ public class CandidateComponentsIndexLoader {
 			return (totalCount > 0 ? new CandidateComponentsIndex(result) : null);
 		}
 		catch (IOException ex) {
-			throw new IllegalArgumentException("Unable to load indexes from location ["
-					+ COMPONENTS_RESOURCE_LOCATION + "]", ex);
+			throw new IllegalArgumentException("Unable to load indexes from location [" +
+					COMPONENTS_RESOURCE_LOCATION + "]", ex);
 		}
 	}
 

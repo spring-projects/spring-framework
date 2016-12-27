@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,15 @@ package org.springframework.core.type.classreading;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
 /**
  * Caching implementation of the {@link MetadataReaderFactory} interface,
- * caching {@link MetadataReader} per Spring {@link Resource} handle
+ * caching a {@link MetadataReader} instance per Spring {@link Resource} handle
  * (i.e. per ".class" file).
  *
  * @author Juergen Hoeller
@@ -34,69 +36,86 @@ import org.springframework.core.io.ResourceLoader;
  */
 public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 
-	/** Default maximum number of entries for the MetadataReader cache: 256 */
+	/** Default maximum number of entries for a local MetadataReader cache: 256 */
 	public static final int DEFAULT_CACHE_LIMIT = 256;
 
-
-	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
-
-	@SuppressWarnings("serial")
-	private final Map<Resource, MetadataReader> metadataReaderCache =
-			new LinkedHashMap<Resource, MetadataReader>(DEFAULT_CACHE_LIMIT, 0.75f, true) {
-				@Override
-				protected boolean removeEldestEntry(Map.Entry<Resource, MetadataReader> eldest) {
-					return size() > getCacheLimit();
-				}
-			};
+	/** MetadataReader cache: either local or shared at the ResourceLoader level */
+	private Map<Resource, MetadataReader> metadataReaderCache;
 
 
 	/**
-	 * Create a new CachingMetadataReaderFactory for the default class loader.
+	 * Create a new CachingMetadataReaderFactory for the default class loader,
+	 * using a local resource cache.
 	 */
 	public CachingMetadataReaderFactory() {
 		super();
+		setCacheLimit(DEFAULT_CACHE_LIMIT);
 	}
 
 	/**
-	 * Create a new CachingMetadataReaderFactory for the given resource loader.
-	 * @param resourceLoader the Spring ResourceLoader to use
-	 * (also determines the ClassLoader to use)
-	 */
-	public CachingMetadataReaderFactory(ResourceLoader resourceLoader) {
-		super(resourceLoader);
-	}
-
-	/**
-	 * Create a new CachingMetadataReaderFactory for the given class loader.
+	 * Create a new CachingMetadataReaderFactory for the given {@link ClassLoader},
+	 * using a local resource cache.
 	 * @param classLoader the ClassLoader to use
 	 */
 	public CachingMetadataReaderFactory(ClassLoader classLoader) {
 		super(classLoader);
+		setCacheLimit(DEFAULT_CACHE_LIMIT);
+	}
+
+	/**
+	 * Create a new CachingMetadataReaderFactory for the given {@link ResourceLoader},
+	 * using a shared resource cache if supported or a local resource cache otherwise.
+	 * @param resourceLoader the Spring ResourceLoader to use
+	 * (also determines the ClassLoader to use)
+	 * @see DefaultResourceLoader#getResourceCache
+	 */
+	public CachingMetadataReaderFactory(ResourceLoader resourceLoader) {
+		super(resourceLoader);
+		if (resourceLoader instanceof DefaultResourceLoader) {
+			this.metadataReaderCache =
+					((DefaultResourceLoader) resourceLoader).getResourceCache(MetadataReader.class);
+		}
+		else {
+			setCacheLimit(DEFAULT_CACHE_LIMIT);
+		}
 	}
 
 
 	/**
 	 * Specify the maximum number of entries for the MetadataReader cache.
-	 * Default is 256.
+	 * <p>Default is 256 for a local cache, whereas a shared cache is
+	 * typically unbounded. This method enforces a local resource cache,
+	 * even if the {@link ResourceLoader} supports a shared resource cache.
 	 */
 	public void setCacheLimit(int cacheLimit) {
-		this.cacheLimit = cacheLimit;
+		if (cacheLimit <= 0) {
+			this.metadataReaderCache = null;
+		}
+		else if (this.metadataReaderCache instanceof LocalResourceCache) {
+			((LocalResourceCache) this.metadataReaderCache).setCacheLimit(cacheLimit);
+		}
+		else {
+			this.metadataReaderCache = new LocalResourceCache(cacheLimit);
+		}
 	}
 
 	/**
 	 * Return the maximum number of entries for the MetadataReader cache.
 	 */
 	public int getCacheLimit() {
-		return this.cacheLimit;
+		if (this.metadataReaderCache instanceof LocalResourceCache) {
+			return ((LocalResourceCache) this.metadataReaderCache).getCacheLimit();
+		}
+		else {
+			return (this.metadataReaderCache != null ? Integer.MAX_VALUE : 0);
+		}
 	}
 
 
 	@Override
 	public MetadataReader getMetadataReader(Resource resource) throws IOException {
-		if (getCacheLimit() <= 0) {
-			return super.getMetadataReader(resource);
-		}
-		synchronized (this.metadataReaderCache) {
+		if (this.metadataReaderCache instanceof ConcurrentMap) {
+			// No synchronization necessary...
 			MetadataReader metadataReader = this.metadataReaderCache.get(resource);
 			if (metadataReader == null) {
 				metadataReader = super.getMetadataReader(resource);
@@ -104,14 +123,53 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 			}
 			return metadataReader;
 		}
+		else if (this.metadataReaderCache != null) {
+			synchronized (this.metadataReaderCache) {
+				MetadataReader metadataReader = this.metadataReaderCache.get(resource);
+				if (metadataReader == null) {
+					metadataReader = super.getMetadataReader(resource);
+					this.metadataReaderCache.put(resource, metadataReader);
+				}
+				return metadataReader;
+			}
+		}
+		else {
+			return super.getMetadataReader(resource);
+		}
 	}
 
 	/**
-	 * Clear the entire MetadataReader cache, removing all cached class metadata.
+	 * Clear the local MetadataReader cache, if any, removing all cached class metadata.
 	 */
 	public void clearCache() {
-		synchronized (this.metadataReaderCache) {
-			this.metadataReaderCache.clear();
+		if (this.metadataReaderCache instanceof LocalResourceCache) {
+			synchronized (this.metadataReaderCache) {
+				this.metadataReaderCache.clear();
+			}
+		}
+	}
+
+
+	@SuppressWarnings("serial")
+	private static class LocalResourceCache extends LinkedHashMap<Resource, MetadataReader> {
+
+		private volatile int cacheLimit;
+
+		public LocalResourceCache(int cacheLimit) {
+			super(cacheLimit, 0.75f, true);
+		}
+
+		public void setCacheLimit(int cacheLimit) {
+			this.cacheLimit = cacheLimit;
+		}
+
+		public int getCacheLimit() {
+			return this.cacheLimit;
+		}
+
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<Resource, MetadataReader> eldest) {
+			return size() > this.cacheLimit;
 		}
 	}
 

@@ -41,7 +41,6 @@ import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
@@ -63,7 +62,7 @@ import org.springframework.util.ClassUtils;
  * use {@link CandidateComponentsIndex the index} if it is available of scans the
  * classpath otherwise. Candidate components are identified by applying exclude and
  * include filters. {@link AnnotationTypeFilter}, {@link AssignableTypeFilter} include
- * filters on an annotation/super-class that are annotated with {@link Indexed} are
+ * filters on an annotation/superclass that are annotated with {@link Indexed} are
  * supported: if any other include filter is specified, the index is ignored and
  * classpath scanning is used instead.
  *
@@ -86,16 +85,8 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
 
+
 	protected final Log logger = LogFactory.getLog(getClass());
-
-	private Environment environment;
-
-	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
-
-	private MetadataReaderFactory metadataReaderFactory =
-			new CachingMetadataReaderFactory(this.resourcePatternResolver);
-
-	private CandidateComponentsIndex componentsIndex;
 
 	private String resourcePattern = DEFAULT_RESOURCE_PATTERN;
 
@@ -103,8 +94,23 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	private final List<TypeFilter> excludeFilters = new LinkedList<>();
 
+	private Environment environment;
+
 	private ConditionEvaluator conditionEvaluator;
 
+	private ResourcePatternResolver resourcePatternResolver;
+
+	private MetadataReaderFactory metadataReaderFactory;
+
+	private CandidateComponentsIndex componentsIndex;
+
+
+	/**
+	 * Protected constructor for flexible subclass initialization.
+	 * @since 4.3.6
+	 */
+	protected ClassPathScanningCandidateComponentProvider() {
+	}
 
 	/**
 	 * Create a ClassPathScanningCandidateComponentProvider with a {@link StandardEnvironment}.
@@ -131,74 +137,10 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		if (useDefaultFilters) {
 			registerDefaultFilters();
 		}
-		Assert.notNull(environment, "Environment must not be null");
-		this.environment = environment;
+		setEnvironment(environment);
+		setResourceLoader(null);
 	}
 
-
-	/**
-	 * Set the ResourceLoader to use for resource locations.
-	 * This will typically be a ResourcePatternResolver implementation.
-	 * <p>Default is PathMatchingResourcePatternResolver, also capable of
-	 * resource pattern resolving through the ResourcePatternResolver interface.
-	 * @see org.springframework.core.io.support.ResourcePatternResolver
-	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
-	 */
-	@Override
-	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
-		this.metadataReaderFactory = new CachingMetadataReaderFactory(resourceLoader);
-		this.componentsIndex = CandidateComponentsIndexLoader.loadIndex(resourceLoader.getClassLoader());
-	}
-
-	/**
-	 * Return the ResourceLoader that this component provider uses.
-	 */
-	public final ResourceLoader getResourceLoader() {
-		return this.resourcePatternResolver;
-	}
-
-	/**
-	 * Set the {@link MetadataReaderFactory} to use.
-	 * <p>Default is a {@link CachingMetadataReaderFactory} for the specified
-	 * {@linkplain #setResourceLoader resource loader}.
-	 * <p>Call this setter method <i>after</i> {@link #setResourceLoader} in order
-	 * for the given MetadataReaderFactory to override the default factory.
-	 */
-	public void setMetadataReaderFactory(MetadataReaderFactory metadataReaderFactory) {
-		this.metadataReaderFactory = metadataReaderFactory;
-	}
-
-	/**
-	 * Return the MetadataReaderFactory used by this component provider.
-	 */
-	public final MetadataReaderFactory getMetadataReaderFactory() {
-		return this.metadataReaderFactory;
-	}
-
-	/**
-	 * Set the Environment to use when resolving placeholders and evaluating
-	 * {@link Conditional @Conditional}-annotated component classes.
-	 * <p>The default is a {@link StandardEnvironment}.
-	 * @param environment the Environment to use
-	 */
-	public void setEnvironment(Environment environment) {
-		Assert.notNull(environment, "Environment must not be null");
-		this.environment = environment;
-		this.conditionEvaluator = null;
-	}
-
-	@Override
-	public final Environment getEnvironment() {
-		return this.environment;
-	}
-
-	/**
-	 * Returns the {@link BeanDefinitionRegistry} used by this scanner, if any.
-	 */
-	protected BeanDefinitionRegistry getRegistry() {
-		return null;
-	}
 
 	/**
 	 * Set the resource pattern to use when scanning the classpath.
@@ -271,6 +213,70 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		catch (ClassNotFoundException ex) {
 			// JSR-330 API not available - simply skip.
 		}
+	}
+
+	/**
+	 * Set the Environment to use when resolving placeholders and evaluating
+	 * {@link Conditional @Conditional}-annotated component classes.
+	 * <p>The default is a {@link StandardEnvironment}.
+	 * @param environment the Environment to use
+	 */
+	public void setEnvironment(Environment environment) {
+		Assert.notNull(environment, "Environment must not be null");
+		this.environment = environment;
+		this.conditionEvaluator = null;
+	}
+
+	@Override
+	public final Environment getEnvironment() {
+		return this.environment;
+	}
+
+	/**
+	 * Return the {@link BeanDefinitionRegistry} used by this scanner, if any.
+	 */
+	protected BeanDefinitionRegistry getRegistry() {
+		return null;
+	}
+
+	/**
+	 * Set the {@link ResourceLoader} to use for resource locations.
+	 * This will typically be a {@link ResourcePatternResolver} implementation.
+	 * <p>Default is a {@code PathMatchingResourcePatternResolver}, also capable of
+	 * resource pattern resolving through the {@code ResourcePatternResolver} interface.
+	 * @see org.springframework.core.io.support.ResourcePatternResolver
+	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
+	 */
+	@Override
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
+		this.metadataReaderFactory = new CachingMetadataReaderFactory(resourceLoader);
+		this.componentsIndex = CandidateComponentsIndexLoader.loadIndex(this.resourcePatternResolver.getClassLoader());
+	}
+
+	/**
+	 * Return the ResourceLoader that this component provider uses.
+	 */
+	public final ResourceLoader getResourceLoader() {
+		return this.resourcePatternResolver;
+	}
+
+	/**
+	 * Set the {@link MetadataReaderFactory} to use.
+	 * <p>Default is a {@link CachingMetadataReaderFactory} for the specified
+	 * {@linkplain #setResourceLoader resource loader}.
+	 * <p>Call this setter method <i>after</i> {@link #setResourceLoader} in order
+	 * for the given MetadataReaderFactory to override the default factory.
+	 */
+	public void setMetadataReaderFactory(MetadataReaderFactory metadataReaderFactory) {
+		this.metadataReaderFactory = metadataReaderFactory;
+	}
+
+	/**
+	 * Return the MetadataReaderFactory used by this component provider.
+	 */
+	public final MetadataReaderFactory getMetadataReaderFactory() {
+		return this.metadataReaderFactory;
 	}
 
 
@@ -496,10 +502,12 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	}
 
 	/**
-	 * Clear the underlying metadata cache, removing all cached class metadata.
+	 * Clear the local metadata cache, if any, removing all cached class metadata.
 	 */
 	public void clearCache() {
 		if (this.metadataReaderFactory instanceof CachingMetadataReaderFactory) {
+			// Clear cache in externally provided MetadataReaderFactory; this is a no-op
+			// for a shared cache since it'll be cleared by the ApplicationContext.
 			((CachingMetadataReaderFactory) this.metadataReaderFactory).clearCache();
 		}
 	}
