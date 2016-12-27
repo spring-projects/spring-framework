@@ -18,7 +18,6 @@ package org.springframework.web.reactive.socket.client;
 
 import java.net.URI;
 
-import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.UpgradeRequest;
 import org.eclipse.jetty.websocket.api.UpgradeResponse;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
@@ -36,8 +35,14 @@ import org.springframework.web.reactive.socket.adapter.JettyWebSocketHandlerAdap
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
 
 /**
- * Jetty based implementation of {@link WebSocketClient}.
- * 
+ * A {@link WebSocketClient} implementation for use with Jetty
+ * {@link org.eclipse.jetty.websocket.client.WebSocketClient}.
+ *
+ * <p><strong>Note: </strong> the Jetty {@code WebSocketClient} requires
+ * lifecycle management and must be started and stopped. This is automatically
+ * managed when this class is declared as a Spring bean and created with the
+ * default constructor. See constructor notes for more details.
+ *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -46,34 +51,60 @@ public class JettyWebSocketClient extends WebSocketClientSupport implements WebS
 
 	private final org.eclipse.jetty.websocket.client.WebSocketClient jettyClient;
 
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+	private final boolean externallyManaged;
+
+	private boolean running = false;
 
 	private final Object lifecycleMonitor = new Object();
 
+	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+
 
 	/**
-	 * Default constructor that creates an instance of
-	 * {@link org.eclipse.jetty.websocket.client.WebSocketClient}.
+	 * Default constructor that creates and manages an instance of a Jetty
+	 * {@link org.eclipse.jetty.websocket.client.WebSocketClient WebSocketClient}.
+	 * The instance can be obtained with {@link #getJettyClient()} for further
+	 * configuration.
+	 *
+	 * <p><strong>Note: </strong> When this constructor is used {@link Lifecycle}
+	 * methods of this class are delegated to the Jetty {@code WebSocketClient}.
 	 */
 	public JettyWebSocketClient() {
-		this(new org.eclipse.jetty.websocket.client.WebSocketClient());
+		this.jettyClient = new org.eclipse.jetty.websocket.client.WebSocketClient();
+		this.externallyManaged = false;
 	}
 
 	/**
-	 * Constructor that accepts an existing
-	 * {@link org.eclipse.jetty.websocket.client.WebSocketClient} instance.
-	 * @param jettyClient a web socket client
+	 * Constructor that accepts an existing instance of a Jetty
+	 * {@link org.eclipse.jetty.websocket.client.WebSocketClient WebSocketClient}.
+	 *
+	 * <p><strong>Note: </strong> Use of this constructor implies the Jetty
+	 * {@code WebSocketClient} is externally managed and hence {@link Lifecycle}
+	 * methods of this class are not delegated to it.
 	 */
 	public JettyWebSocketClient(org.eclipse.jetty.websocket.client.WebSocketClient jettyClient) {
 		this.jettyClient = jettyClient;
+		this.externallyManaged = true;
+	}
+
+
+	/**
+	 * Return the underlying Jetty {@code WebSocketClient}.
+	 */
+	public org.eclipse.jetty.websocket.client.WebSocketClient getJettyClient() {
+		return this.jettyClient;
 	}
 
 
 	@Override
 	public void start() {
+		if (this.externallyManaged) {
+			return;
+		}
 		synchronized (this.lifecycleMonitor) {
 			if (!isRunning()) {
 				try {
+					this.running = true;
 					this.jettyClient.start();
 				}
 				catch (Exception ex) {
@@ -85,9 +116,13 @@ public class JettyWebSocketClient extends WebSocketClientSupport implements WebS
 
 	@Override
 	public void stop() {
+		if (this.externallyManaged) {
+			return;
+		}
 		synchronized (this.lifecycleMonitor) {
 			if (isRunning()) {
 				try {
+					this.running = false;
 					this.jettyClient.stop();
 				}
 				catch (Exception ex) {
@@ -100,7 +135,7 @@ public class JettyWebSocketClient extends WebSocketClientSupport implements WebS
 	@Override
 	public boolean isRunning() {
 		synchronized (this.lifecycleMonitor) {
-			return this.jettyClient.isStarted();
+			return this.running;
 		}
 	}
 
@@ -131,15 +166,13 @@ public class JettyWebSocketClient extends WebSocketClientSupport implements WebS
 
 	private Object createJettyHandler(URI url, WebSocketHandler handler, MonoProcessor<Void> completion) {
 		return new JettyWebSocketHandlerAdapter(handler,
-				session -> createJettySession(url, completion, session));
-	}
-
-	private JettyWebSocketSession createJettySession(URI url, MonoProcessor<Void> completion, Session session) {
-		UpgradeResponse response = session.getUpgradeResponse();
-		HttpHeaders responseHeaders = new HttpHeaders();
-		response.getHeaders().forEach(responseHeaders::put);
-		HandshakeInfo info = afterHandshake(url, responseHeaders);
-		return new JettyWebSocketSession(session, info, this.bufferFactory, completion);
+				session -> {
+					UpgradeResponse response = session.getUpgradeResponse();
+					HttpHeaders responseHeaders = new HttpHeaders();
+					response.getHeaders().forEach(responseHeaders::put);
+					HandshakeInfo info = afterHandshake(url, responseHeaders);
+					return new JettyWebSocketSession(session, info, this.bufferFactory, completion);
+				});
 	}
 
 

@@ -18,7 +18,6 @@ package org.springframework.web.reactive.socket.client;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,11 +27,12 @@ import javax.net.ssl.SSLEngine;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import io.reactivex.netty.protocol.http.HttpHandlerNames;
 import io.reactivex.netty.protocol.http.client.HttpClient;
+import io.reactivex.netty.protocol.http.client.HttpClientRequest;
 import io.reactivex.netty.protocol.http.ws.WebSocketConnection;
 import io.reactivex.netty.protocol.http.ws.client.WebSocketRequest;
 import io.reactivex.netty.protocol.http.ws.client.WebSocketResponse;
+import io.reactivex.netty.threads.RxEventLoopProvider;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 import rx.Observable;
@@ -45,49 +45,83 @@ import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.RxNettyWebSocketSession;
 
+import static io.reactivex.netty.protocol.http.HttpHandlerNames.WsClientDecoder;
+
 /**
- * An RxNetty based implementation of {@link WebSocketClient}.
+ * {@link WebSocketClient} implementation for use with RxNetty.
+ *
+ * <p><strong>Note: </strong> RxNetty {@link HttpClient} instances require a host
+ * and port in order to be created. Hence it is not possible to configure a
+ * single {@code HttpClient} instance to use upfront. Instead the constructors
+ * accept a function for obtaining client instances when establishing a
+ * connection to a specific URI. By default new instances are created per
+ * connection with a shared Netty {@code EventLoopGroup}. See constructors for
+ * more details.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class RxNettyWebSocketClient extends WebSocketClientSupport implements WebSocketClient {
 
-	private final Function<URI, HttpClient<ByteBuf, ByteBuf>> httpClientFactory;
+	private final Function<URI, HttpClient<ByteBuf, ByteBuf>> httpClientProvider;
 
 
 	/**
-	 * Default constructor that uses {@link HttpClient#newClient(String, int)}
-	 * to create HTTP client instances when connecting.
+	 * Default constructor that creates {@code HttpClient} instances via
+	 * {@link HttpClient#newClient(String, int)} using port 80 or 443 depending
+	 * on the target URL scheme.
+	 *
+	 * <p><strong>Note: </strong> By default a new {@link HttpClient} instance
+	 * is created per WebSocket connection. Those instances will share a global
+	 * {@code EventLoopGroup} that RxNetty obtains via
+	 * {@link RxEventLoopProvider#globalClientEventLoop(boolean)}.
 	 */
 	public RxNettyWebSocketClient() {
-		this(RxNettyWebSocketClient::createDefaultHttpClient);
+		this(RxNettyWebSocketClient::getDefaultHttpClientProvider);
 	}
 
 	/**
-	 * Constructor with a function to create {@link HttpClient} instances.
-	 * @param httpClientFactory factory to create clients
+	 * Constructor with a function to use to obtain {@link HttpClient} instances.
 	 */
-	public RxNettyWebSocketClient(Function<URI, HttpClient<ByteBuf, ByteBuf>> httpClientFactory) {
-		this.httpClientFactory = httpClientFactory;
+	public RxNettyWebSocketClient(Function<URI, HttpClient<ByteBuf, ByteBuf>> httpClientProvider) {
+		this.httpClientProvider = httpClientProvider;
 	}
 
-	private static HttpClient<ByteBuf, ByteBuf> createDefaultHttpClient(URI url) {
+	private static HttpClient<ByteBuf, ByteBuf> getDefaultHttpClientProvider(URI url) {
 		boolean secure = "wss".equals(url.getScheme());
 		int port = url.getPort() > 0 ? url.getPort() : secure ? 443 : 80;
-		HttpClient<ByteBuf, ByteBuf> httpClient = HttpClient.newClient(url.getHost(), port);
+		HttpClient<ByteBuf, ByteBuf> client = HttpClient.newClient(url.getHost(), port);
 		if (secure) {
 			try {
 				SSLContext context = SSLContext.getDefault();
 				SSLEngine engine = context.createSSLEngine(url.getHost(), port);
 				engine.setUseClientMode(true);
-				httpClient.secure(engine);
+				client.secure(engine);
 			}
 			catch (NoSuchAlgorithmException ex) {
 				throw new IllegalStateException("Failed to create HttpClient for " + url, ex);
 			}
 		}
-		return httpClient;
+		return client;
+	}
+
+
+	/**
+	 * Return the configured {@link HttpClient} provider depending on which
+	 * constructor was used.
+	 */
+	public Function<URI, HttpClient<ByteBuf, ByteBuf>> getHttpClientProvider() {
+		return this.httpClientProvider;
+	}
+
+	/**
+	 * Return an {@link HttpClient} instance to use to connect to the given URI.
+	 * The default implementation invokes the {@link #getHttpClientProvider()}
+	 * provider} function created or supplied at construction time.
+	 * @param url the full URL of the WebSocket endpoint.
+	 */
+	public HttpClient<ByteBuf, ByteBuf> getHttpClient(URI url) {
+		return this.httpClientProvider.apply(url);
 	}
 
 
@@ -98,14 +132,12 @@ public class RxNettyWebSocketClient extends WebSocketClientSupport implements We
 
 	@Override
 	public Mono<Void> execute(URI url, HttpHeaders headers, WebSocketHandler handler) {
-		Observable<Void> completion = connectInternal(url, headers, handler);
+		Observable<Void> completion = executeInternal(url, headers, handler);
 		return Mono.from(RxReactiveStreams.toPublisher(completion));
 	}
 
-	private Observable<Void> connectInternal(URI url, HttpHeaders headers, WebSocketHandler handler) {
-
+	private Observable<Void> executeInternal(URI url, HttpHeaders headers, WebSocketHandler handler) {
 		String[] protocols = beforeHandshake(url, headers, handler);
-
 		return createRequest(url, headers, protocols)
 				.flatMap(response -> {
 					Observable<WebSocketConnection> conn = response.getWebSocketConnection();
@@ -113,48 +145,35 @@ public class RxNettyWebSocketClient extends WebSocketClientSupport implements We
 				})
 				.flatMap(tuple -> {
 					WebSocketResponse<ByteBuf> response = tuple.getT1();
-					HttpHeaders responseHeaders = getResponseHeaders(response);
-					HandshakeInfo info = afterHandshake(url, responseHeaders);
+					WebSocketConnection conn = tuple.getT2();
 
+					HandshakeInfo info = afterHandshake(url, toHttpHeaders(response));
 					ByteBufAllocator allocator = response.unsafeNettyChannel().alloc();
 					NettyDataBufferFactory factory = new NettyDataBufferFactory(allocator);
-
-					WebSocketConnection conn = tuple.getT2();
 					RxNettyWebSocketSession session = new RxNettyWebSocketSession(conn, info, factory);
-					String name = HttpHandlerNames.WsClientDecoder.getName();
-					session.aggregateFrames(response.unsafeNettyChannel(), name);
+					session.aggregateFrames(response.unsafeNettyChannel(), WsClientDecoder.getName());
 
 					return RxReactiveStreams.toObservable(handler.handle(session));
 				});
 	}
 
 	private WebSocketRequest<ByteBuf> createRequest(URI url, HttpHeaders headers, String[] protocols) {
-
 		String query = url.getRawQuery();
 		String requestUrl = url.getRawPath() + (query != null ? "?" + query : "");
+		HttpClientRequest<ByteBuf, ByteBuf> request = getHttpClient(url).createGet(requestUrl);
 
-		WebSocketRequest<ByteBuf> request = this.httpClientFactory.apply(url)
-				.createGet(requestUrl)
-				.setHeaders(toObjectValueMap(headers))
-				.requestWebSocketUpgrade();
-
-		if (!ObjectUtils.isEmpty(protocols)) {
-			request = request.requestSubProtocols(protocols);
+		if (!headers.isEmpty()) {
+			Map<String, List<Object>> map = new HashMap<>(headers.size());
+			headers.forEach((key, values) -> map.put(key, new ArrayList<>(headers.get(key))));
+			request = request.setHeaders(map);
 		}
 
-		return request;
+		return (ObjectUtils.isEmpty(protocols) ?
+				request.requestWebSocketUpgrade() :
+				request.requestWebSocketUpgrade().requestSubProtocols(protocols));
 	}
 
-	private Map<String, List<Object>> toObjectValueMap(HttpHeaders headers) {
-		if (headers.isEmpty()) {
-			return Collections.emptyMap();
-		}
-		Map<String, List<Object>> map = new HashMap<>(headers.size());
-		headers.keySet().stream().forEach(key -> map.put(key, new ArrayList<>(headers.get(key))));
-		return map;
-	}
-
-	private HttpHeaders getResponseHeaders(WebSocketResponse<ByteBuf> response) {
+	private HttpHeaders toHttpHeaders(WebSocketResponse<ByteBuf> response) {
 		HttpHeaders headers = new HttpHeaders();
 		response.headerIterator().forEachRemaining(entry -> {
 			String name = entry.getKey().toString();

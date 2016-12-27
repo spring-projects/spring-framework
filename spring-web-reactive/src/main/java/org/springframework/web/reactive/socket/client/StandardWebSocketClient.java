@@ -40,11 +40,12 @@ import org.springframework.web.reactive.socket.adapter.StandardWebSocketHandlerA
 import org.springframework.web.reactive.socket.adapter.StandardWebSocketSession;
 
 /**
- * Java WebSocket API (JSR-356) implementation of {@link WebSocketClient}.
- * 
+ * {@link WebSocketClient} implementation for use with the Java WebSocket API.
+ *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see <a href="https://www.jcp.org/en/jsr/detail?id=356">https://www.jcp.org/en/jsr/detail?id=356</a>
  */
 public class StandardWebSocketClient extends WebSocketClientSupport implements WebSocketClient {
 
@@ -68,6 +69,14 @@ public class StandardWebSocketClient extends WebSocketClientSupport implements W
 	 */
 	public StandardWebSocketClient(WebSocketContainer webSocketContainer) {
 		this.webSocketContainer = webSocketContainer;
+	}
+
+
+	/**
+	 * Return the configured {@link WebSocketContainer} to use.
+	 */
+	public WebSocketContainer getWebSocketContainer() {
+		return this.webSocketContainer;
 	}
 
 
@@ -95,13 +104,6 @@ public class StandardWebSocketClient extends WebSocketClientSupport implements W
 				.then(completionMono);
 	}
 
-	private ClientEndpointConfig createEndpointConfig(Configurator configurator, String[] subProtocols) {
-		return ClientEndpointConfig.Builder.create()
-				.configurator(configurator)
-				.preferredSubprotocols(Arrays.asList(subProtocols))
-				.build();
-	}
-
 	private StandardWebSocketHandlerAdapter createEndpoint(URI url, WebSocketHandler handler,
 			MonoProcessor<Void> completion, DefaultConfigurator configurator) {
 
@@ -110,6 +112,13 @@ public class StandardWebSocketClient extends WebSocketClientSupport implements W
 			HandshakeInfo info = afterHandshake(url, responseHeaders);
 			return new StandardWebSocketSession(session, info, this.bufferFactory, completion);
 		});
+	}
+
+	private ClientEndpointConfig createEndpointConfig(Configurator configurator, String[] subProtocols) {
+		return ClientEndpointConfig.Builder.create()
+				.configurator(configurator)
+				.preferredSubprotocols(Arrays.asList(subProtocols))
+				.build();
 	}
 
 

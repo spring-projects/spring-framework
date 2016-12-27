@@ -33,7 +33,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.adapter.ReactorNettyWebSocketSession;
 
 /**
- * A Reactor Netty based implementation of {@link WebSocketClient}.
+ * {@link WebSocketClient} implementation for use with Reactor Netty.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -43,12 +43,27 @@ public class ReactorNettyWebSocketClient extends WebSocketClientSupport implemen
 	private final HttpClient httpClient;
 
 
+	/**
+	 * Default constructor.
+	 */
 	public ReactorNettyWebSocketClient() {
-		this.httpClient = HttpClient.create();
+		this(options -> {});
 	}
 
+	/**
+	 * Constructor that accepts an {@link HttpClientOptions} consumer to supply
+	 * to {@link HttpClient#create(Consumer)}.
+	 */
 	public ReactorNettyWebSocketClient(Consumer<? super HttpClientOptions> clientOptions) {
 		this.httpClient = HttpClient.create(clientOptions);
+	}
+
+
+	/**
+	 * Return the configured {@link HttpClient}.
+	 */
+	public HttpClient getHttpClient() {
+		return this.httpClient;
 	}
 
 
@@ -63,18 +78,12 @@ public class ReactorNettyWebSocketClient extends WebSocketClientSupport implemen
 		String[] protocols = beforeHandshake(url, headers, handler);
 		// TODO: https://github.com/reactor/reactor-netty/issues/20
 
-		return this.httpClient
-				.get(url.toString(), request -> {
-					addRequestHeaders(request, headers);
-					return request.sendWebsocket();
-				})
+		return getHttpClient()
+				.get(url.toString(), request -> addHeaders(request, headers).sendWebsocket())
 				.then(response -> {
-					HttpHeaders responseHeaders = getResponseHeaders(response);
-					HandshakeInfo info = afterHandshake(url, responseHeaders);
-
+					HandshakeInfo info = afterHandshake(url, toHttpHeaders(response));
 					ByteBufAllocator allocator = response.channel().alloc();
 					NettyDataBufferFactory factory = new NettyDataBufferFactory(allocator);
-
 					return response.receiveWebsocket((in, out) -> {
 						WebSocketSession session = new ReactorNettyWebSocketSession(in, out, info, factory);
 						return handler.handle(session);
@@ -82,13 +91,12 @@ public class ReactorNettyWebSocketClient extends WebSocketClientSupport implemen
 				});
 	}
 
-	private void addRequestHeaders(HttpClientRequest request, HttpHeaders headers) {
-		headers.keySet().stream()
-				.forEach(key -> headers.get(key).stream()
-						.forEach(value -> request.addHeader(key, value)));
+	private HttpClientRequest addHeaders(HttpClientRequest request, HttpHeaders headers) {
+		headers.keySet().stream().forEach(key -> request.requestHeaders().set(key, headers.get(key)));
+		return request;
 	}
 
-	private HttpHeaders getResponseHeaders(HttpClientResponse response) {
+	private HttpHeaders toHttpHeaders(HttpClientResponse response) {
 		HttpHeaders headers = new HttpHeaders();
 		response.responseHeaders().forEach(entry -> {
 			String name = entry.getKey();

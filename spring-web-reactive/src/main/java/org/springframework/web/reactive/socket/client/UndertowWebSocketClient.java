@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CancellationException;
 import java.util.function.Function;
 import javax.net.ssl.SSLContext;
 
@@ -33,7 +32,7 @@ import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.websockets.client.WebSocketClient.ConnectionBuilder;
 import io.undertow.websockets.client.WebSocketClientNegotiation;
 import io.undertow.websockets.core.WebSocketChannel;
-import org.xnio.IoFuture.Status;
+import org.xnio.IoFuture;
 import org.xnio.OptionMap;
 import org.xnio.Options;
 import org.xnio.Xnio;
@@ -138,27 +137,22 @@ public class UndertowWebSocketClient extends WebSocketClientSupport implements W
 		MonoProcessor<Void> completion = MonoProcessor.create();
 		return Mono.fromCallable(
 				() -> {
-					String[] subProtocols = beforeHandshake(url, headers, handler);
-					DefaultNegotiation negotiation = new DefaultNegotiation(subProtocols, headers);
+					String[] protocols = beforeHandshake(url, headers, handler);
+					DefaultNegotiation negotiation = new DefaultNegotiation(protocols, headers);
 
 					return this.builder.apply(url)
 							.setClientNegotiation(negotiation)
 							.connect()
-							.addNotifier((future, attachment) -> {
-								if (Status.DONE.equals(future.getStatus())) {
-									try {
-										handleChannel(url, handler, completion, negotiation, future.get());
-									}
-									catch (CancellationException | IOException ex) {
-										completion.onError(ex);
-									}
+							.addNotifier(new IoFuture.HandlingNotifier<WebSocketChannel, Object>() {
+
+								@Override
+								public void handleDone(WebSocketChannel channel, Object attachment) {
+									handleChannel(url, handler, completion, negotiation, channel);
 								}
-								else if (Status.FAILED.equals(future.getStatus())) {
-									completion.onError(future.getException());
-								}
-								else {
-									String message = "Failed to connect" + future.getStatus();
-									completion.onError(new IllegalStateException(message));
+
+								@Override
+								public void handleFailed(IOException ex, Object attachment) {
+									completion.onError(new IllegalStateException("Failed to connect", ex));
 								}
 							}, null);
 				})
