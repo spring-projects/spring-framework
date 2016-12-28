@@ -116,12 +116,15 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 			return handleShuttingDownConnectFailure(handler);
 		}
 
+		// Report first connect to the ListenableFuture
 		MonoProcessor<Void> connectMono = MonoProcessor.create();
+
 		this.tcpClient
 				.newHandler(new ReactorNettyHandler(handler))
-				.doOnNext(connectFailureConsumer(connectMono))
-				.doOnError(connectFailureConsumer(connectMono))
-				.then(NettyContext::onClose)
+				.doOnNext(updateConnectMono(connectMono))
+				.doOnError(updateConnectMono(connectMono))
+				.doOnError(handler::afterConnectFailure)    // report all connect failures to the handler
+				.then(NettyContext::onClose)                // post-connect issues
 				.retryWhen(reconnectFunction(strategy))
 				.repeatWhen(reconnectFunction(strategy))
 				.subscribe();
@@ -135,7 +138,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 		return new MonoToListenableFutureAdapter<>(Mono.error(ex));
 	}
 
-	private <T> Consumer<T> connectFailureConsumer(MonoProcessor<Void> connectMono) {
+	private <T> Consumer<T> updateConnectMono(MonoProcessor<Void> connectMono) {
 		return o -> {
 			if (!connectMono.isTerminated()) {
 				if (o instanceof Throwable) {
