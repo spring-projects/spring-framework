@@ -15,19 +15,27 @@
  */
 package org.springframework.messaging.simp.stomp;
 
-import org.springframework.messaging.tcp.reactor.ReactorNettyCodec;
+import java.nio.ByteBuffer;
+import java.util.List;
+
+import org.springframework.messaging.Message;
+import org.springframework.messaging.tcp.reactor.AbstractNioBufferReactorNettyCodec;
 
 /**
- * {@code ReactorNettyCodec} that delegates to {@link StompDecoder} and
- * {@link StompEncoder}.
+ * Simple delegation to StompDecoder and StompEncoder.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-class StompReactorNettyCodec extends ReactorNettyCodec<byte[]> {
+class StompReactorNettyCodec extends AbstractNioBufferReactorNettyCodec<byte[]> {
+
+	private final StompDecoder decoder;
+
+	private final StompEncoder encoder;
+
 
 	public StompReactorNettyCodec() {
-		this(new StompDecoder(), new StompEncoder());
+		this(new StompDecoder());
 	}
 
 	public StompReactorNettyCodec(StompDecoder decoder) {
@@ -35,8 +43,18 @@ class StompReactorNettyCodec extends ReactorNettyCodec<byte[]> {
 	}
 
 	public StompReactorNettyCodec(StompDecoder decoder, StompEncoder encoder) {
-		super(byteBuf -> decoder.decode(byteBuf.nioBuffer()),
-				(byteBuf, message) -> byteBuf.writeBytes(encoder.encode(message)));
+		this.decoder = decoder;
+		this.encoder = encoder;
+	}
+
+
+	@Override
+	protected List<Message<byte[]>> decodeInternal(ByteBuffer nioBuffer) {
+		return this.decoder.decode(nioBuffer);
+	}
+
+	protected ByteBuffer encodeInternal(Message<byte[]> message) {
+		return ByteBuffer.wrap(this.encoder.encode(message));
 	}
 
 }

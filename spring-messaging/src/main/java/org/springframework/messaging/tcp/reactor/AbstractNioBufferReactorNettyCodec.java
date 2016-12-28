@@ -15,35 +15,39 @@
  */
 package org.springframework.messaging.tcp.reactor;
 
+import java.nio.ByteBuffer;
 import java.util.Collection;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.util.List;
 
 import io.netty.buffer.ByteBuf;
 
 import org.springframework.messaging.Message;
 
 /**
- * Simple holder for a decoding {@link Function} and an encoding
- * {@link BiConsumer} to use with Reactor Netty.
+ * Convenient base class for {@link ReactorNettyCodec} implementations that need
+ * to work with NIO {@link ByteBuffer}s.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public interface ReactorNettyCodec<P> {
+public abstract class AbstractNioBufferReactorNettyCodec<P> implements ReactorNettyCodec<P> {
 
-	/**
-	 * Decode the input {@link ByteBuf} into one or more {@link Message}s.
-	 * @param inputBuffer the input buffer to decode from
-	 * @return 0 or more decoded messages
-	 */
-	Collection<Message<P>> decode(ByteBuf inputBuffer);
+	@Override
+	public Collection<Message<P>> decode(ByteBuf inputBuffer) {
+		ByteBuffer nioBuffer = inputBuffer.nioBuffer();
+		int start = nioBuffer.position();
+		List<Message<P>> messages = decodeInternal(nioBuffer);
+		inputBuffer.skipBytes(nioBuffer.position() - start);
+		return messages;
+	}
 
-	/**
-	 * Encode the given {@link Message} to the output {@link ByteBuf}.
-	 * @param message the message the encode
-	 * @param outputBuffer the buffer to write to
-	 */
-	void encode(Message<P> message, ByteBuf outputBuffer);
+	protected abstract List<Message<P>> decodeInternal(ByteBuffer nioBuffer);
+
+	@Override
+	public void encode(Message<P> message, ByteBuf outputBuffer) {
+		outputBuffer.writeBytes(encodeInternal(message));
+	}
+
+	protected abstract ByteBuffer encodeInternal(Message<P> message);
 
 }

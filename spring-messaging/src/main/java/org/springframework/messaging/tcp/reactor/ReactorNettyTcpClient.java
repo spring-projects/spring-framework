@@ -16,13 +16,18 @@
 
 package org.springframework.messaging.tcp.reactor;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.ChannelGroupFuture;
 import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.DirectProcessor;
@@ -39,6 +44,7 @@ import reactor.ipc.netty.options.ClientOptions;
 import reactor.ipc.netty.tcp.TcpClient;
 import reactor.util.concurrent.QueueSupplier;
 
+import org.springframework.messaging.Message;
 import org.springframework.messaging.tcp.ReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.messaging.tcp.TcpConnectionHandler;
@@ -170,6 +176,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 			this.connectionHandler = handler;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public Publisher<Void> apply(NettyInbound inbound, NettyOutbound outbound) {
 
@@ -177,16 +184,32 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 			TcpConnection<P> connection = new ReactorNettyTcpConnection<>(inbound, outbound,  codec, completion);
 			scheduler.schedule(() -> connectionHandler.afterConnected(connection));
 
-			inbound.receive()
-					.map(codec.getDecoder())
+			inbound.context().addDecoder(new StompMessageDecoder<>(codec));
+
+			inbound.receiveObject()
+					.cast(Message.class)
 					.publishOn(scheduler, QueueSupplier.SMALL_BUFFER_SIZE)
-					.flatMapIterable(Function.identity())
 					.subscribe(
 							connectionHandler::handleMessage,
 							connectionHandler::handleFailure,
 							connectionHandler::afterConnectionClosed);
 
 			return completion;
+		}
+	}
+
+	private static class StompMessageDecoder<P> extends ByteToMessageDecoder {
+
+		private final ReactorNettyCodec<P> codec;
+
+		public StompMessageDecoder(ReactorNettyCodec<P> codec) {
+			this.codec = codec;
+		}
+
+		@Override
+		protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+			Collection<Message<P>> messages = codec.decode(in);
+			out.addAll(messages);
 		}
 	}
 
