@@ -20,9 +20,11 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -844,7 +846,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				HttpHeaders httpHeaders = httpRequest.getHeaders();
 				HttpHeaders requestHeaders = this.requestEntity.getHeaders();
 				if (!requestHeaders.isEmpty()) {
-					httpHeaders.putAll(requestHeaders);
+					httpHeaders.putAll(readWriteHttpHeaderMap(requestHeaders));
 				}
 				if (httpHeaders.getContentLength() < 0) {
 					httpHeaders.setContentLength(0L);
@@ -862,7 +864,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 						GenericHttpMessageConverter<Object> genericMessageConverter = (GenericHttpMessageConverter<Object>) messageConverter;
 						if (genericMessageConverter.canWrite(requestBodyType, requestBodyClass, requestContentType)) {
 							if (!requestHeaders.isEmpty()) {
-								httpRequest.getHeaders().putAll(requestHeaders);
+								httpRequest.getHeaders().putAll(readWriteHttpHeaderMap(requestHeaders));
 							}
 							if (logger.isDebugEnabled()) {
 								if (requestContentType != null) {
@@ -881,7 +883,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 					}
 					else if (messageConverter.canWrite(requestBodyClass, requestContentType)) {
 						if (!requestHeaders.isEmpty()) {
-							httpRequest.getHeaders().putAll(requestHeaders);
+							httpRequest.getHeaders().putAll(readWriteHttpHeaderMap(requestHeaders));
 						}
 						if (logger.isDebugEnabled()) {
 							if (requestContentType != null) {
@@ -906,8 +908,12 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				throw new RestClientException(message);
 			}
 		}
-	}
 
+		private Map<String, List<String>> readWriteHttpHeaderMap(HttpHeaders httpHeaders) {
+			return httpHeaders.entrySet().stream().collect(
+					  Collectors.toMap(Map.Entry::getKey, (entry) -> new LinkedList<>(entry.getValue())));
+		}
+	}
 
 	/**
 	 * Response extractor for {@link HttpEntity}.
