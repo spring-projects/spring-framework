@@ -20,6 +20,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Arrays;
 import java.util.List;
 import javax.annotation.PostConstruct;
 
@@ -94,6 +95,7 @@ public class ConfigurationClassPostProcessorTests {
 		Foo foo = beanFactory.getBean("foo", Foo.class);
 		Bar bar = beanFactory.getBean("bar", Bar.class);
 		assertSame(foo, bar.foo);
+		assertTrue(Arrays.asList(beanFactory.getDependentBeans("foo")).contains("bar"));
 	}
 
 	@Test
