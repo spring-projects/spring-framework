@@ -437,11 +437,6 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			}
 			return bean;
 		}
-
-		@Override
-		public Object postProcessAfterInitialization(Object bean, String beanName) {
-			return bean;
-		}
 	}
 
 }

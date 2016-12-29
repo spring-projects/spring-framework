@@ -45,11 +45,13 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 
 	private WebClient webClient;
 
+
 	@Before
 	public void setup() throws Exception {
 		super.setup();
 		this.webClient = WebClient.create(new ReactorClientHttpConnector());
 	}
+
 
 	@Test
 	public void writeAndFlushWith() throws Exception {
@@ -93,10 +95,12 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 				.verify(Duration.ofSeconds(10L));
 	}
 
+
 	@Override
 	protected HttpHandler createHttpHandler() {
 		return new FlushingHandler();
 	}
+
 
 	private static class FlushingHandler implements HttpHandler {
 
@@ -136,7 +140,6 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 			buffer.write(data);
 			return buffer;
 		}
-
 	}
 
 }
