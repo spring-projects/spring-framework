@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.annotation;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,6 +32,7 @@ import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.scheduling.config.TaskManagementConfigUtils;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
@@ -86,6 +88,8 @@ public class EnableSchedulingTests {
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get(), greaterThanOrEqualTo(10));
 		assertThat(ctx.getBean(ExplicitSchedulerConfig.class).threadName, startsWith("explicitScheduler-"));
+		assertTrue(Arrays.asList(ctx.getDefaultListableBeanFactory().getDependentBeans("myTaskScheduler")).contains(
+				TaskManagementConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 
 	@Test
@@ -201,7 +205,7 @@ public class EnableSchedulingTests {
 		String threadName;
 
 		@Bean
-		public TaskScheduler taskScheduler() {
+		public TaskScheduler myTaskScheduler() {
 			ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 			scheduler.setThreadNamePrefix("explicitScheduler-");
 			return scheduler;
@@ -273,10 +277,6 @@ public class EnableSchedulingTests {
 		public void task() {
 			threadName = Thread.currentThread().getName();
 			counter().incrementAndGet();
-		}
-
-		public Object getScheduler() {
-			return null;
 		}
 
 		@Override
