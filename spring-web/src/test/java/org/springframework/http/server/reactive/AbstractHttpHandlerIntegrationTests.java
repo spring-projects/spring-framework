@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,9 @@ import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
 import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
 import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.util.SocketUtils;
-
 
 @RunWith(Parameterized.class)
 public abstract class AbstractHttpHandlerIntegrationTests {
@@ -56,6 +57,8 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 
 	@Before
 	public void setup() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		this.port = SocketUtils.findAvailableTcpPort();
 		this.server.setPort(this.port);
 		this.server.setHandler(createHttpHandler());
@@ -63,11 +66,12 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 		this.server.start();
 	}
 
-	protected abstract HttpHandler createHttpHandler();
-
 	@After
 	public void tearDown() throws Exception {
 		this.server.stop();
 	}
+
+
+	protected abstract HttpHandler createHttpHandler();
 
 }
