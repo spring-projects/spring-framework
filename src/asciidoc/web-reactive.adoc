@@ -310,7 +310,7 @@ ApplicationContext context = new AnnotationConfigApplicationContext(DelegatingWe
 HttpHandler handler = DispatcherHandler.toHttpHandler(context);  // (2)
 ----
 
-The above loads default Spring Web Reactive config (1), then creates a
+The above loads default Spring Web framework configuration (1), then creates a
 `DispatcherHandler`, the main class driving request processing (2), and adapts
 it to `HttpHandler` -- the lowest level Spring abstraction for reactive HTTP request handling.
 
@@ -369,14 +369,14 @@ Spring configuration.
 [[web-reactive-getting-started-examples]]
 === Examples
 
-You will find code examples useful to build your own Spring Web Reactive application in these projects:
+You will find code examples useful to build reactive Web application in the following projects:
 
 * https://github.com/bclozel/spring-boot-web-reactive[Spring Boot Web Reactive Starter]: sources of the reactive starter available at http://start.spring.io
 * https://github.com/poutsma/web-function-sample[Functional programming model sample]
-* https://github.com/sdeleuze/spring-reactive-playground[Spring Reactive Playground]: plaground for most Spring Web Reactive features
-* https://github.com/reactor/projectreactor.io/tree/spring-functional[Reactor website]: the `spring-functional` branch is a Spring Web Reactive functional web application
-* https://github.com/bclozel/spring-reactive-university[Spring Reactive University]: live-coded project from https://www.youtube.com/watch?v=Cj4foJzPF80[this Devoxx BE 2106 university talk]
+* https://github.com/sdeleuze/spring-reactive-playground[Spring Reactive Playground]: playground for most Spring Web reactive features
+* https://github.com/reactor/projectreactor.io/tree/spring-functional[Reactor website]: the `spring-functional` branch is a Spring 5 functional, Java 8 lambda-style application
+* https://github.com/bclozel/spring-reactive-university[Spring Reactive University session]: live-coded project from https://www.youtube.com/watch?v=Cj4foJzPF80[this Devoxx BE 2106 university talk]
 * https://github.com/thymeleaf/thymeleafsandbox-biglist-reactive[Reactive Thymeleaf Sandbox]
 * https://github.com/mix-it/mixit/[Mix-it 2017 website]: Kotlin + Reactive + Functional web and bean registration API application
 * https://github.com/simonbasle/reactor-by-example[Reactor by example]: code snippets coming from this https://www.infoq.com/articles/reactor-by-example[InfoQ article]
-* https://github.com/spring-projects/spring-framework/tree/master/spring-web-reactive/src/test/java/org/springframework/web/reactive/result/method/annotation[Spring Web Reactive integration tests]: various features tested with Reactor https://projectreactor.io/docs/test/release/api/index.html?reactor/test/StepVerifier.html[`StepVerifier`]
+* https://github.com/spring-projects/spring-framework/tree/master/spring-web-reactive/src/test/java/org/springframework/web/reactive/result/method/annotation[Spring integration tests]: various features tested with Reactor https://projectreactor.io/docs/test/release/api/index.html?reactor/test/StepVerifier.html[`StepVerifier`]
