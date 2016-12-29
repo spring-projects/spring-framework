@@ -28,8 +28,7 @@ import org.springframework.messaging.handler.annotation.support.MessageHandlerMe
 import org.springframework.util.Assert;
 
 /**
- * Helper bean for registering {@link JmsListenerEndpoint} with
- * a {@link JmsListenerEndpointRegistry}.
+ * Helper bean for registering {@link JmsListenerEndpoint} with a {@link JmsListenerEndpointRegistry}.
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
