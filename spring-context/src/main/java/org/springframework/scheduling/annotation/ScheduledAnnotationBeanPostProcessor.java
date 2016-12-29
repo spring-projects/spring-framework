@@ -33,12 +33,18 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.beans.factory.config.NamedBeanHolder;
+import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
@@ -85,8 +91,9 @@ import org.springframework.util.StringValueResolver;
  * @see org.springframework.scheduling.config.ScheduledTaskRegistrar
  * @see AsyncAnnotationBeanPostProcessor
  */
-public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBeanPostProcessor,
-		Ordered, EmbeddedValueResolverAware, BeanFactoryAware, ApplicationContextAware,
+public class ScheduledAnnotationBeanPostProcessor
+		implements MergedBeanDefinitionPostProcessor, DestructionAwareBeanPostProcessor,
+		Ordered, EmbeddedValueResolverAware, BeanNameAware, BeanFactoryAware, ApplicationContextAware,
 		SmartInitializingSingleton, ApplicationListener<ContextRefreshedEvent>, DisposableBean {
 
 	/**
@@ -103,6 +110,8 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 	private Object scheduler;
 
 	private StringValueResolver embeddedValueResolver;
+
+	private String beanName;
 
 	private BeanFactory beanFactory;
 
@@ -138,6 +147,11 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.embeddedValueResolver = resolver;
+	}
+
+	@Override
+	public void setBeanName(String beanName) {
+		this.beanName = beanName;
 	}
 
 	/**
@@ -199,12 +213,11 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 			Assert.state(this.beanFactory != null, "BeanFactory must be set to find scheduler by type");
 			try {
 				// Search for TaskScheduler bean...
-				this.registrar.setTaskScheduler(this.beanFactory.getBean(TaskScheduler.class));
+				this.registrar.setTaskScheduler(resolveSchedulerBean(TaskScheduler.class, false));
 			}
 			catch (NoUniqueBeanDefinitionException ex) {
 				try {
-					this.registrar.setTaskScheduler(
-							this.beanFactory.getBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, TaskScheduler.class));
+					this.registrar.setTaskScheduler(resolveSchedulerBean(TaskScheduler.class, true));
 				}
 				catch (NoSuchBeanDefinitionException ex2) {
 					if (logger.isInfoEnabled()) {
@@ -220,12 +233,11 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 				logger.debug("Could not find default TaskScheduler bean", ex);
 				// Search for ScheduledExecutorService bean next...
 				try {
-					this.registrar.setScheduler(this.beanFactory.getBean(ScheduledExecutorService.class));
+					this.registrar.setScheduler(resolveSchedulerBean(ScheduledExecutorService.class, false));
 				}
 				catch (NoUniqueBeanDefinitionException ex2) {
 					try {
-						this.registrar.setScheduler(
-								this.beanFactory.getBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, ScheduledExecutorService.class));
+						this.registrar.setScheduler(resolveSchedulerBean(ScheduledExecutorService.class, true));
 					}
 					catch (NoSuchBeanDefinitionException ex3) {
 						if (logger.isInfoEnabled()) {
@@ -248,6 +260,32 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 		this.registrar.afterPropertiesSet();
 	}
 
+	private <T> T resolveSchedulerBean(Class<T> schedulerType, boolean byName) {
+		if (byName) {
+			T scheduler = this.beanFactory.getBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, schedulerType);
+			if (this.beanFactory instanceof ConfigurableBeanFactory) {
+				((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(
+						DEFAULT_TASK_SCHEDULER_BEAN_NAME, this.beanName);
+			}
+			return scheduler;
+		}
+		else if (this.beanFactory instanceof AutowireCapableBeanFactory) {
+			NamedBeanHolder<T> holder = ((AutowireCapableBeanFactory) this.beanFactory).resolveNamedBean(schedulerType);
+			if (this.beanFactory instanceof ConfigurableBeanFactory) {
+				((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(
+						holder.getBeanName(), this.beanName);
+			}
+			return holder.getBeanInstance();
+		}
+		else {
+			return this.beanFactory.getBean(schedulerType);
+		}
+	}
+
+
+	@Override
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+	}
 
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) {

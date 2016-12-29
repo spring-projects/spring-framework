@@ -983,7 +983,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (parent instanceof AutowireCapableBeanFactory) {
 			return ((AutowireCapableBeanFactory) parent).resolveNamedBean(requiredType);
 		}
-		return null;
+		throw new NoSuchBeanDefinitionException(requiredType);
 	}
 
 	@SuppressWarnings("unchecked")
