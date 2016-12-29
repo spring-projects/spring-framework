@@ -356,10 +356,10 @@ class ConfigurationClassEnhancer {
 				return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);
 			}
 			else {
-				// The user (i.e. not the factory) is requesting this bean through a
-				// call to the bean method, direct or indirect. The bean may have already been
-				// marked as 'in creation' in certain autowiring scenarios; if so, temporarily
-				// set the in-creation status to false in order to avoid an exception.
+				// The user (i.e. not the factory) is requesting this bean through a call to
+				// the bean method, direct or indirect. The bean may have already been marked
+				// as 'in creation' in certain autowiring scenarios; if so, temporarily set
+				// the in-creation status to false in order to avoid an exception.
 				boolean alreadyInCreation = beanFactory.isCurrentlyInCreation(beanName);
 				try {
 					if (alreadyInCreation) {
@@ -392,6 +392,11 @@ class ConfigurationClassEnhancer {
 							// Ignore - simply no detailed message then.
 						}
 						throw new IllegalStateException(msg);
+					}
+					Method currentlyInvoked = SimpleInstantiationStrategy.getCurrentlyInvokedFactoryMethod();
+					if (currentlyInvoked != null) {
+						String outerBeanName = BeanAnnotationHelper.determineBeanNameFor(currentlyInvoked);
+						beanFactory.registerDependentBean(beanName, outerBeanName);
 					}
 					return beanInstance;
 				}
