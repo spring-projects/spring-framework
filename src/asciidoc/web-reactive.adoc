@@ -1,5 +1,6 @@
 [[web-reactive]]
-= Web Reactive Framework
+= Reactive Web Applications
+
 This section provides basic information on the reactive programming
 support for Web applications in Spring Framework 5.
 
@@ -15,16 +16,17 @@ In plain terms reactive programming is about non-blocking applications that are 
 and event-driven and require a small number of threads to scale vertically (i.e. within the
 JVM) rather than horizontally (i.e. through clustering).
 
-A key aspect of the reactive applications is the concept of backpressure which is
+A key aspect of reactive applications is the concept of backpressure which is
 a mechanism to ensure producers don't overwhelm consumers. For example in a pipeline
-of reactive components extending from the database to the HTTP connection when the
-HTTP client is slow the data repository also slows down or stops until capacity frees up.
+of reactive components extending from the database to the HTTP response when the
+HTTP connection is too slow the data repository can also slow down or stop completely
+until network capacity frees up.
 
-Reactive programming also involves a major shift from imperative style logic
-to declarative async composition of logic. It is comparable to using `CompletableFuture`
-in Java 8 and composing follow-up actions via lambda expressions.
+Reactive programming also leads to a major shift from imperative to declarative async
+composition of logic. It is comparable to writing blocking code vs using the
+`CompletableFuture` from Java 8 to compose follow-up actions via lambda expressions.
 
-For a more extended introduction to reactive programming check the excellent multi-part series
+For a longer introduction check the blog series
 https://spring.io/blog/2016/06/07/notes-on-reactive-programming-part-i-the-reactive-landscape["Notes on Reactive Programming"]
 by Dave Syer.
 
@@ -51,14 +53,14 @@ by Sebastien Deleuze.
 
 
 [[web-reactive-feature-overview]]
-== Spring Web Reactive Overview
+== Spring Web Reactive Module
 
 Spring Framework 5 includes a new `spring-web-reactive` module. The module contains support
 for reactive HTTP and WebSocket clients as well as for reactive server web applications
 including REST, HTML browser, and WebSocket style interactions.
 
 [[web-reactive-server]]
-=== Server-Side Reactive Web Support
+=== Server Side
 
 On the server-side the new reactive module supports 2 distinct programming models:
 
@@ -153,7 +155,7 @@ https://spring.io/blog/2016/09/22/new-in-spring-5-functional-web-framework[M3 re
 
 
 [[web-reactive-client]]
-=== Client-Side Reactive Web Support
+=== Client Side
 
 Spring Framework 5 includes a functional, reactive `WebClient` that offers a fully
 non-blocking and reactive alternative to the `RestTemplate`. It exposes network
@@ -190,7 +192,7 @@ still based and relies on `InputStream` and `OutputStream`.
 
 
 [[web-reactive-http-body]]
-=== Encoding and Decoding the Request and Response Body
+=== Request and Response Body Conversion
 
 The `spring-core` module provides reactive `Encoder` and `Decoder` contracts
 that enable the serialization of a `Flux` of bytes to and from typed objects.
