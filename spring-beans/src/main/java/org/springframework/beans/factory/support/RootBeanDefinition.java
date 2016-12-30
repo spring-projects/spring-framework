@@ -103,10 +103,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * Create a new RootBeanDefinition, to be configured through its bean
 	 * properties and configuration methods.
 	 * @see #setBeanClass
-	 * @see #setBeanClassName
 	 * @see #setScope
-	 * @see #setAutowireMode
-	 * @see #setDependencyCheck
 	 * @see #setConstructorArgumentValues
 	 * @see #setPropertyValues
 	 */
@@ -131,7 +128,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param instanceSupplier the supplier to construct a bean instance,
 	 * as an alternative to a declaratively specified factory method
 	 * @since 5.0
-	 * @see #setInstanceSupplier(Supplier)
+	 * @see #setInstanceSupplier
 	 */
 	public <T> RootBeanDefinition(Class<T> beanClass, Supplier<T> instanceSupplier) {
 		super();
@@ -147,7 +144,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param instanceSupplier the supplier to construct a bean instance,
 	 * as an alternative to a declaratively specified factory method
 	 * @since 5.0
-	 * @see #setInstanceSupplier(Supplier)
+	 * @see #setInstanceSupplier
 	 */
 	public <T> RootBeanDefinition(Class<T> beanClass, String scope, Supplier<T> instanceSupplier) {
 		super();

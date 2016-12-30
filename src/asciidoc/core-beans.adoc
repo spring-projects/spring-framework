@@ -2002,6 +2002,14 @@ makes that specific bean definition unavailable to the autowiring infrastructure
 (including annotation style configurations such as <<beans-autowired-annotation,
 `@Autowired`>>).
 
+[NOTE]
+====
+The `autowire-candidate` attribute is designed to only affect type-based autowiring.
+It does not affect explicit references by name, which will get resolved even if the
+specified bean is not marked as an autowire candidate. As a consequence, autowiring
+by name will nevertheless inject a bean if the name matches.
+====
+
 You can also limit autowire candidates based on pattern-matching against bean names. The
 top-level `<beans/>` element accepts one or more patterns within its
 `default-autowire-candidates` attribute. For example, to limit autowire candidate status
