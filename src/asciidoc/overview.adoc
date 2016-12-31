@@ -736,22 +736,22 @@ implementation itself. In Maven you would do that like this
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
-			<version>1.5.8</version>
+			<version>1.7.22</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.5.8</version>
+			<version>1.7.22</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.5.8</version>
+			<version>1.7.22</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>1.2.14</version>
+			<version>1.2.17</version>
 		</dependency>
 	</dependencies>
 ----
@@ -770,18 +770,80 @@ also need to exclude the slf4j-api dependency from other external dependencies (
 Spring), because you only want one version of that API on the classpath.
 
 
-[[overview-logging-log4j]]
-===== Using Log4J
+[[overview-logging-log4j2]]
+===== Using Log4j 2.x
 Many people use http://logging.apache.org/log4j[Log4j] as a logging framework for
 configuration and management purposes. It's efficient and well-established, and in fact
 it's what we use at runtime when we build and test Spring. Spring also provides some
 utilities for configuring and initializing Log4j, so it has an optional compile-time
 dependency on Log4j in some modules.
 
-To make Log4j work with the default JCL dependency ( `commons-logging`) all you need to
-do is put Log4j on the classpath, and provide it with a configuration file (
-`log4j.properties` or `log4j.xml` in the root of the classpath). So for Maven users this
-is your dependency declaration:
+To use Log4j 2 with JCL, all you need to do is put Log4j 2 on the classpath and provide
+it with a configuration file (`log4j2.xml`, `log4j2.properties`, or other
+http://logging.apache.org/log4j/2.x/manual/configuration.html[supported configuration
+formats]). For Maven users, the minimal dependencies needed are:
+
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+<dependencies>
+  <dependency>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-core</artifactId>
+    <version>2.7</version>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-jcl</artifactId>
+    <version>2.7</version>
+  </dependency>
+</dependencies>
+----
+
+If you also wish to use SLF4J, the following dependencies are also needed:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+<dependencies>
+  <dependency>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-slf4j-impl</artifactId>
+    <version>2.7</version>
+  </dependency>
+</dependencies>
+----
+
+Here is an example log4j2.xml for logging to the console:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <Logger name="org.springframework.beans.factory" level="DEBUG"/>
+    <Root level="error">
+      <AppenderRef ref="Console"/>
+    </Root>
+  </Loggers>
+</Configuration>
+----
+
+
+[[overview-logging-log4j]]
+===== Using Log4J 1.x
+To make http://logging.apache.org/log4j/1.2/[Log4j 1.x] work with the default JCL
+dependency (`commons-logging`) all you need to do is put Log4j on the classpath, and
+provide it with a configuration file (`log4j.properties` or `log4j.xml` in the root of
+the classpath). So for Maven users this is your dependency declaration:
+
 
 [source,xml,indent=0]
 [subs="verbatim,quotes,attributes"]
@@ -795,7 +857,7 @@ is your dependency declaration:
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>1.2.14</version>
+			<version>1.2.17</version>
 		</dependency>
 	</dependencies>
 ----
