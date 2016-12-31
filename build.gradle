@@ -1,11 +1,12 @@
 buildscript {
 	repositories {
 		maven { url "https://repo.spring.io/plugins-release" }
+		maven { url "http://dl.bintray.com/kotlin/kotlin-eap-1.1" }
 	}
 	dependencies {
 		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
 		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.3")
-		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.5-2"
+		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.1-M04"
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
 	}
 }
@@ -69,7 +70,7 @@ configure(allprojects) { project ->
 	ext.junitVersion           = "4.12"
 	ext.junitJupiterVersion    = '5.0.0-M3'
 	ext.junitPlatformVersion   = '1.0.0-M3'
-	ext.kotlinVersion          = "1.0.6"
+	ext.kotlinVersion          = "1.1-M04" // Also change kotlin-gradle-plugin version when upgrading
 	ext.log4jVersion           = '2.7'
 	ext.nettyVersion           = "4.1.6.Final"
 	ext.okhttpVersion          = "2.7.5"
@@ -106,6 +107,15 @@ configure(allprojects) { project ->
 	apply plugin: "java"
 	apply plugin: "test-source-set-dependencies"
 	apply from: "${gradleScriptDir}/ide.gradle"
+
+	// Kotlin compiler does not support JDK 9 yet, see https://youtrack.jetbrains.com/issue/KT-14988
+	if (!JavaVersion.current().java9Compatible) {
+		apply plugin: "kotlin"
+		compileKotlin {
+			kotlinOptions.apiVersion = 1.0
+			kotlinOptions.languageVersion = 1.0
+		}
+	}
 
 	configurations {
 		sniffer
@@ -172,6 +182,7 @@ configure(allprojects) { project ->
 	repositories {
 		maven { url "https://repo.spring.io/libs-release" }
 		maven { url "https://repo.spring.io/milestone" }
+		maven { url "http://dl.bintray.com/kotlin/kotlin-eap-1.1" }
 	}
 
 	dependencies {
@@ -325,11 +336,6 @@ project("spring-build-src") {
 project("spring-core") {
 	description = "Spring Core"
 
-	// Kotlin compiler does not support JDK 9 yet, see https://youtrack.jetbrains.com/issue/KT-14988
-	if (!JavaVersion.current().java9Compatible) {
-		apply plugin: "kotlin"
-	}
-
 	// As of Spring 4.0.3, spring-core includes asm 5.x and repackages cglib 3.2, inlining
 	// both into the spring-core jar. cglib 3.2 itself depends on asm 5.x and is therefore
 	// further transformed by the JarJar task to depend on org.springframework.asm; this
@@ -429,11 +435,6 @@ project("spring-core") {
 project("spring-beans") {
 	description = "Spring Beans"
 
-	// Kotlin compiler does not support JDK 9 yet, see https://youtrack.jetbrains.com/issue/KT-14988
-	if (!JavaVersion.current().java9Compatible) {
-		apply plugin: "kotlin"
-	}
-
 	dependencies {
 		compile(project(":spring-core"))
 		compile(files(project(":spring-core").cglibRepackJar))
@@ -513,10 +514,6 @@ project("spring-context") {
 	description = "Spring Context"
 
 	apply plugin: "groovy"
-	// Kotlin compiler does not support JDK 9 yet, see https://youtrack.jetbrains.com/issue/KT-14988
-	if (!JavaVersion.current().java9Compatible) {
-		apply plugin: "kotlin"
-	}
 
 	dependencies {
 		compile(project(":spring-aop"))
@@ -584,11 +581,6 @@ project("spring-oxm") {
 
 project("spring-messaging") {
 	description = "Spring Messaging"
-
-	// Kotlin compiler does not support JDK 9 yet, see https://youtrack.jetbrains.com/issue/KT-14988
-	if (!JavaVersion.current().java9Compatible) {
-		apply plugin: "kotlin"
-	}
 
 	dependencies {
 		compile(project(":spring-beans"))
@@ -730,10 +722,7 @@ project("spring-context-indexer") {
 project("spring-web") {
 	description = "Spring Web"
 
-	// Kotlin compiler does not support JDK 9 yet, see https://youtrack.jetbrains.com/issue/KT-14988
-	if (!JavaVersion.current().java9Compatible) {
-		apply plugin: "kotlin"
-	}
+
 	apply plugin: "groovy"
 
 	dependencies {
@@ -822,11 +811,6 @@ project("spring-web") {
 
 project("spring-web-reactive") {
 	description = "Spring Web Reactive"
-
-	// Kotlin compiler does not support JDK 9 yet, see https://youtrack.jetbrains.com/issue/KT-14988
-	if (!JavaVersion.current().java9Compatible) {
-		apply plugin: "kotlin"
-	}
 
 	dependencies {
 		compile(project(":spring-core"))
