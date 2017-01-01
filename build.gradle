@@ -969,6 +969,15 @@ project("spring-webmvc") {
 		testCompile("org.mozilla:rhino:1.7.7.1")
 		testRuntime("org.jruby:jruby:9.1.6.0")
 		testRuntime("org.python:jython-standalone:2.5.3")
+		// Ideally, kotlin-script-runtime should be enough for JSR-223, but that's not
+		// the case yet, so we depend on kotlin-script-util and exclude these
+		// dependencies only used for artifact retrieval. Point raised to Kotlin team.
+		testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
+		testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}") {
+			exclude group: "com.jcabi", module: "jcabi-aether"
+			exclude group: "org.apache.maven", module: "maven-core"
+			exclude group: "org.sonatype.aether", module: "aether-api"
+		}
 		testRuntime("org.webjars:underscorejs:1.8.3")
 		testRuntime("org.glassfish:javax.el:3.0.1-b08")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
