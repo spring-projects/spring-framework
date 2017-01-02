@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
@@ -40,6 +41,9 @@ import org.springframework.util.StreamUtils;
  * @since 4.3
  */
 public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
+
+	private static final boolean jafPresent = ClassUtils.isPresent(
+			"javax.activation.FileTypeMap", ResourceHttpMessageConverter.class.getClassLoader());
 
 	public ResourceRegionHttpMessageConverter() {
 		super(MediaType.ALL);
@@ -69,6 +73,23 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 			throws IOException, HttpMessageNotReadableException {
 
 		return null;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	protected MediaType getDefaultContentType(Object object) {
+		if (jafPresent) {
+			if(object instanceof ResourceRegion) {
+				return ActivationMediaTypeFactory.getMediaType(((ResourceRegion) object).getResource());
+			}
+			else {
+				Collection<ResourceRegion> regions = (Collection<ResourceRegion>) object;
+				if(regions.size() > 0) {
+					return ActivationMediaTypeFactory.getMediaType(regions.iterator().next().getResource());
+				}
+			}
+		}
+		return MediaType.APPLICATION_OCTET_STREAM;
 	}
 
 	@Override
