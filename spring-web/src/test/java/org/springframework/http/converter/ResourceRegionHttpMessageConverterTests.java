@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,17 @@
 
 package org.springframework.http.converter;
 
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
+import org.mockito.BDDMockito;
+import org.mockito.Mockito;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
@@ -34,8 +38,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.util.StringUtils;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test cases for {@link ResourceRegionHttpMessageConverter} class.
@@ -137,6 +143,23 @@ public class ResourceRegionHttpMessageConverterTests {
 		assertThat(ranges[13], is("Content-Type: text/plain"));
 		assertThat(ranges[14], is("Content-Range: bytes 22-38/39"));
 		assertThat(ranges[15], is("resource content."));
+	}
+
+	@Test // SPR-15041
+	public void applicationOctetStreamDefaultContentType() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		ClassPathResource body = Mockito.mock(ClassPathResource.class);
+		BDDMockito.given(body.getFilename()).willReturn("spring.dat");
+		BDDMockito.given(body.contentLength()).willReturn(12L);
+		BDDMockito.given(body.getInputStream()).willReturn(new ByteArrayInputStream("Spring Framework".getBytes()));
+		HttpRange range = HttpRange.createByteRange(0, 5);
+		ResourceRegion resourceRegion = range.toResourceRegion(body);
+
+		converter.write(Collections.singletonList(resourceRegion), null, outputMessage);
+
+		assertThat(outputMessage.getHeaders().getContentType(), is(MediaType.APPLICATION_OCTET_STREAM));
+		assertThat(outputMessage.getHeaders().getFirst(HttpHeaders.CONTENT_RANGE), is("bytes 0-5/12"));
+		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8), is("Spring"));
 	}
 
 }
