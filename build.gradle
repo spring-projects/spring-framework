@@ -6,7 +6,7 @@ buildscript {
 	dependencies {
 		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
 		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.3")
-		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.1-M04"
+		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.6"
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
 	}
 }
@@ -70,7 +70,7 @@ configure(allprojects) { project ->
 	ext.junitVersion           = "4.12"
 	ext.junitJupiterVersion    = '5.0.0-M3'
 	ext.junitPlatformVersion   = '1.0.0-M3'
-	ext.kotlinVersion          = "1.1-M04" // Also change kotlin-gradle-plugin version when upgrading
+	ext.kotlinVersion          = "1.0.6" // Also change kotlin-gradle-plugin version when upgrading
 	ext.log4jVersion           = '2.7'
 	ext.nettyVersion           = "4.1.6.Final"
 	ext.okhttpVersion          = "2.7.5"
@@ -111,10 +111,10 @@ configure(allprojects) { project ->
 	// Kotlin compiler does not support JDK 9 yet, see https://youtrack.jetbrains.com/issue/KT-14988
 	if (!JavaVersion.current().java9Compatible) {
 		apply plugin: "kotlin"
-		compileKotlin {
-			kotlinOptions.apiVersion = 1.0
-			kotlinOptions.languageVersion = 1.0
-		}
+		//compileKotlin {
+		//	kotlinOptions.apiVersion = 1.0
+		//	kotlinOptions.languageVersion = 1.0
+		//}
 	}
 
 	configurations {
@@ -972,12 +972,12 @@ project("spring-webmvc") {
 		// Ideally, kotlin-script-runtime should be enough for JSR-223, but that's not
 		// the case yet, so we depend on kotlin-script-util and exclude these
 		// dependencies only used for artifact retrieval. Point raised to Kotlin team.
-		testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
-		testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}") {
-			exclude group: "com.jcabi", module: "jcabi-aether"
-			exclude group: "org.apache.maven", module: "maven-core"
-			exclude group: "org.sonatype.aether", module: "aether-api"
-		}
+		//testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
+		//testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}") {
+		//	exclude group: "com.jcabi", module: "jcabi-aether"
+		//	exclude group: "org.apache.maven", module: "maven-core"
+		//	exclude group: "org.sonatype.aether", module: "aether-api"
+		//}
 		testRuntime("org.webjars:underscorejs:1.8.3")
 		testRuntime("org.glassfish:javax.el:3.0.1-b08")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
