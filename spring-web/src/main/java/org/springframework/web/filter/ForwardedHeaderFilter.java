@@ -262,7 +262,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			// Relative to Servlet container root or to current request
 			String path;
 			if (location.startsWith(FOLDER_SEPARATOR)) {
-				path = this.request.getContextPath() + location;
+				path = location;
 			}
 			else {
 				path = StringUtils.applyRelativePath(this.request.getRequestURI(), location);
