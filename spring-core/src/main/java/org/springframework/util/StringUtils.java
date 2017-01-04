@@ -516,15 +516,22 @@ public abstract class StringUtils {
 		if (str == null || str.length() == 0) {
 			return str;
 		}
-		StringBuilder sb = new StringBuilder(str.length());
-		if (capitalize) {
-			sb.append(Character.toUpperCase(str.charAt(0)));
-		}
 		else {
-			sb.append(Character.toLowerCase(str.charAt(0)));
+			char baseChar = str.charAt(0);
+			char updatedChar;
+			if (capitalize) {
+				updatedChar = Character.toUpperCase(baseChar);
+			}
+			else {
+				updatedChar = Character.toLowerCase(baseChar);
+			}
+			if (baseChar == updatedChar) {
+				return str;
+			}
+			char[] chars = str.toCharArray();
+			chars[0] = updatedChar;
+			return new String(chars, 0, chars.length);
 		}
-		sb.append(str.substring(1));
-		return sb.toString();
 	}
 
 	/**
