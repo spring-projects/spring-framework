@@ -1,5 +1,8 @@
 [[websocket]]
 = WebSocket Support
+:doc-spring-security: {doc-root}/spring-security/site/docs/current/reference
+
+
 This part of the reference documentation covers Spring Framework's support for
 WebSocket-style messaging in web applications including use of STOMP as an
 application level WebSocket sub-protocol.
@@ -1233,7 +1236,7 @@ The `@EnableWebSocketMessageBroker` Java config and the `<websocket:message-brok
 both assemble a concrete message flow. Below is a diagram of the part of the setup when using
 the simple, in-memory broker:
 
-image::images/message-flow-simple-broker.png[width=640]
+image::images/message-flow-simple-broker.png[]
 
 The above setup that includes 3 message channels:
 
@@ -1244,7 +1247,7 @@ The above setup that includes 3 message channels:
 The same three channels are also used with a dedicated broker except here a
 "broker relay" takes the place of the simple broker:
 
-image::images/message-flow-broker-relay.png[width=640]
+image::images/message-flow-broker-relay.png[]
 
 Messages on the `"clientInboundChannel"` can flow to annotated
 methods for application handling (e.g. a stock trade execution request) or can

@@ -1,5 +1,9 @@
 [[spring-integration]]
 = Integration
+:doc-root: https://docs.spring.io
+:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
+:doc-spring-amqp: {doc-root}/spring-amqp/docs/current/reference
+:doc-spring-gemfire: {doc-root}/spring-gemfire/docs/current/reference
 
 [partintro]
 --

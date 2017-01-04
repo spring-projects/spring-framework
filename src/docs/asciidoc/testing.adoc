@@ -1,5 +1,8 @@
 [[testing]]
 = Testing
+:doc-root: https://docs.spring.io
+:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
+:doc-spring-boot: {doc-root}/spring-boot/docs/current/reference
 
 [partintro]
 --

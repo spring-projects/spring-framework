@@ -1,5 +1,7 @@
 [[spring-introduction]]
 = Overview of Spring Framework
+:doc-root: https://docs.spring.io
+:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 
 [partintro]
 --
@@ -116,7 +118,7 @@ are grouped into Core Container, Data Access/Integration, Web, AOP (Aspect Orien
 Programming), Instrumentation, Messaging, and Test, as shown in the following diagram.
 
 .Overview of the Spring Framework
-image::images/spring-overview.png[width=400]
+image::images/spring-overview.png[]
 
 The following sections list the available modules for each feature along with their
 artifact names and the topics they cover. Artifact names correlate to _artifact IDs_ used
@@ -245,7 +247,7 @@ enterprise applications that use Spring's transaction management functionality a
 framework integration.
 
 .Typical full-fledged Spring web application
-image::images/overview-full.png[width=400]
+image::images/overview-full.png[]
 
 Spring's <<transaction-declarative,declarative transaction management features>> make
 the web application fully transactional, just as it would be if you used EJB
@@ -260,7 +262,7 @@ seamlessly integrate the web-layer with the domain model, removing the need for
 domain model.
 
 .Spring middle-tier using a third-party web framework
-image::images/overview-thirdparty-web.png[width=400]
+image::images/overview-thirdparty-web.png[]
 
 Sometimes circumstances do not allow you to completely switch to a different framework.
 The Spring Framework does __not__ force you to use everything within it; it is not an
@@ -271,14 +273,14 @@ using an `ApplicationContext` and use a `WebApplicationContext` to integrate you
 layer.
 
 .Remoting usage scenario
-image::images/overview-remoting.png[width=400]
+image::images/overview-remoting.png[]
 
 When you need to access existing code through web services, you can use Spring's
 `Hessian-`, `Rmi-` or `HttpInvokerProxyFactoryBean` classes. Enabling remote access to
 existing applications is not difficult.
 
 .EJBs - Wrapping existing POJOs
-image::images/overview-ejb.png[width=400]
+image::images/overview-ejb.png[]
 
 The Spring Framework also provides an <<ejb,access and abstraction layer>> for
 Enterprise JavaBeans, enabling you to reuse your existing POJOs and wrap them in

@@ -1,5 +1,7 @@
 [[spring-data-tier]]
 = Data Access
+:doc-root: https://docs.spring.io
+:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 
 [partintro]
 --
@@ -551,7 +553,7 @@ Spring AOP is covered in <<aop>>.
 
 Conceptually, calling a method on a transactional proxy looks like this...
 
-image::images/tx.png[width=400]
+image::images/tx.png[]
 
 
 
@@ -1445,7 +1447,7 @@ __logical__ transactions, and how the propagation setting applies to this differ
 
 [[tx-propagation-required]]
 ===== Required
-image::images/tx_prop_required.png[width=400]
+image::images/tx_prop_required.png[]
 
 PROPAGATION_REQUIRED
 
@@ -1471,7 +1473,7 @@ indicate clearly that a rollback was performed instead.
 
 [[tx-propagation-requires_new]]
 ===== RequiresNew
-image::images/tx_prop_requires_new.png[width=400]
+image::images/tx_prop_requires_new.png[]
 
 PROPAGATION_REQUIRES_NEW
 
@@ -2092,7 +2094,7 @@ The exception hierarchy that Spring provides can be seen below. (Please note tha
 class hierarchy detailed in the image shows only a subset of the entire
 `DataAccessException` hierarchy.)
 
-image::images/DataAccessException.gif[width=400]
+image::images/DataAccessException.gif[]
 
 
 
@@ -6201,7 +6203,7 @@ underlying O/X mapping tool does not do so.
 
 The O/X Mapping exception hierarchy is shown in the following figure:
 
-image::images/oxm-exceptions.png[width=400]
+image::images/oxm-exceptions.png[]
 
 O/X Mapping exception hierarchy
 

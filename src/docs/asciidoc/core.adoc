@@ -1,5 +1,7 @@
 [[spring-core]]
-= Core Technologies 
+= Core Technologies
+:doc-root: https://docs.spring.io
+:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 
 [partintro]
 --
@@ -28,15 +30,15 @@ also provided.
 
 
 
-include::core-beans.adoc[leveloffset=+1]
+include::core/core-beans.adoc[leveloffset=+1]
 
-include::core-resources.adoc[leveloffset=+1]
+include::core/core-resources.adoc[leveloffset=+1]
 
-include::core-validation.adoc[leveloffset=+1]
+include::core/core-validation.adoc[leveloffset=+1]
 
-include::core-expressions.adoc[leveloffset=+1]
+include::core/core-expressions.adoc[leveloffset=+1]
 
-include::core-aop.adoc[leveloffset=+1]
+include::core/core-aop.adoc[leveloffset=+1]
 
-include::core-aop-api.adoc[leveloffset=+1]
+include::core/core-aop-api.adoc[leveloffset=+1]
 

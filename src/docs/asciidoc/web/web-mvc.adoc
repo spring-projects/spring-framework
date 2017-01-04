@@ -1,6 +1,6 @@
 [[mvc]]
 = Web MVC framework
-
+:doc-spring-security: {doc-root}/spring-security/site/docs/current/reference
 
 [[mvc-introduction]]
 == Introduction to Spring Web MVC framework
@@ -157,7 +157,7 @@ in the following diagram. The pattern-savvy reader will recognize that the
 pattern that Spring Web MVC shares with many other leading web frameworks).
 
 .The request processing workflow in Spring Web MVC (high level)
-image::images/mvc.png[width=400]
+image::images/mvc.png[]
 
 The `DispatcherServlet` is an actual `Servlet` (it inherits from the `HttpServlet` base
 class), and as such is declared in your web application. You need to map requests that
@@ -226,7 +226,7 @@ instances. These inherited beans can be overridden in the servlet-specific
 scope, and you can define new scope-specific beans local to a given Servlet instance.
 
 .Typical context hierarchy in Spring Web MVC
-image::images/mvc-context-hierarchy.png[width=400]
+image::images/mvc-context-hierarchy.png[]
 
 Upon initialization of a `DispatcherServlet`, Spring MVC looks for a file named
 __[servlet-name]-servlet.xml__ in the `WEB-INF` directory of your web application and
@@ -259,7 +259,7 @@ configuration file through a Servlet initialization parameter (see below for det
 It is also possible to have just one root context for single DispatcherServlet scenarios.
 
 .Single root context in Spring Web MVC
-image::images/mvc-root-context.png[width=400]
+image::images/mvc-root-context.png[]
 
 This can be configured by setting an empty contextConfigLocation servlet init parameter,
 as shown below:

@@ -1,0 +1,19 @@
+= Spring Framework Reference Documentation
+The Spring Framework team and contributors https://github.com/spring-projects/spring-framework/graphs/contributors
+:doc-root: https://docs.spring.io
+:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
+
+
+<<overview.adoc#spring-introduction,Overview>>
+
+<<core.adoc#spring-core,Core>>
+
+<<testing.adoc#testing,Testing>>
+
+<<data-access.adoc#spring-data-tier,Data Access>>
+
+<<web.adoc#spring-web,Web>>
+
+<<integration.adoc#spring-integration,Integration>>
+
+<<appendix.adoc#spring-appendices,Appendix>>

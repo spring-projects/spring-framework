@@ -1,5 +1,7 @@
 [[spring-web]]
 = The Web
+:doc-root: https://docs.spring.io
+:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 
 [partintro]
 --
@@ -20,14 +22,14 @@ The section then concludes with comprehensive coverage of the Spring Framework
 * <<websocket>>
 --
 
-include::web-mvc.adoc[leveloffset=+1]
+include::web/web-mvc.adoc[leveloffset=+1]
 
-include::web-view.adoc[leveloffset=+1]
+include::web/web-view.adoc[leveloffset=+1]
 
-include::web-cors.adoc[leveloffset=+1]
+include::web/web-cors.adoc[leveloffset=+1]
 
-include::web-integration.adoc[leveloffset=+1]
+include::web/web-integration.adoc[leveloffset=+1]
 
-include::web-websocket.adoc[leveloffset=+1]
+include::web/web-websocket.adoc[leveloffset=+1]
 
-include::web-flux.adoc[leveloffset=+1]
+include::web/web-flux.adoc[leveloffset=+1]

@@ -1,5 +1,8 @@
 [[spring-appendices]]
 = Appendices
+:doc-root: https://docs.spring.io
+:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
+:wiki-spring-framework: https://github.com/spring-projects/spring-framework/wiki
 
 
 [[spring-whats-new]]
@@ -3960,7 +3963,7 @@ support described in this chapter.
 
 
 
-include::appx-spring-tld.adoc[leveloffset=+1]
+include::appendix/appx-spring-tld.adoc[leveloffset=+1]
 
-include::appx-spring-form-tld.adoc[leveloffset=+1]
+include::appendix/appx-spring-form-tld.adoc[leveloffset=+1]
 

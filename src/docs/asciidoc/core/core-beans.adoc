@@ -78,7 +78,7 @@ created and initialized, you have a fully configured and executable system or
 application.
 
 .The Spring IoC container
-image::images/container-magic.png[width=250]
+image::images/container-magic.png[]
 
 
 
@@ -2458,7 +2458,7 @@ defined by that bean definition. This single instance is stored in a cache of su
 singleton beans, and __all subsequent requests and references__ for that named bean
 return the cached object.
 
-image::images/singleton.png[width=400]
+image::images/singleton.png[]
 
 Spring's concept of a singleton bean differs from the Singleton pattern as defined in
 the Gang of Four (GoF) patterns book. The GoF Singleton hard-codes the scope of an
@@ -2494,7 +2494,7 @@ The following diagram illustrates the Spring prototype scope. __A data access ob
 any conversational state; it was just easier for this author to reuse the core of the
 singleton diagram.__
 
-image::images/prototype.png[width=400]
+image::images/prototype.png[]
 
 The following example defines a bean as a prototype in XML:
 

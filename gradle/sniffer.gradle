@@ -1,0 +1,67 @@
+/*
+ * Copyright 2002-2017 the original author or authors.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+configure(allprojects) { project ->
+
+	ext.snifferVersion = "1.15"
+
+	configurations {
+		sniffer
+		javaApiSignature
+	}
+
+	dependencies {
+		sniffer("org.codehaus.mojo:animal-sniffer-ant-tasks:${snifferVersion}")
+		javaApiSignature("org.codehaus.mojo.signature:java18:1.0@signature")
+	}
+}
+
+task copyJavaApiSignature(type: Copy) {
+	ext.to = file("$buildDir/javaApiSignature/")
+	description "Copy the resolved Animal Sniffer signature dependency artifact to a known location and name"
+	from configurations.javaApiSignature
+	into to
+	rename '.*signature', 'javaApi.signature'
+}
+
+task sniff {
+	group = "Verification"
+	description = "Checks the Java API signatures"
+
+	dependsOn compileJava
+	dependsOn copyJavaApiSignature
+
+	inputs.dir sourceSets.main.output.classesDir
+	inputs.dir copyJavaApiSignature.to
+
+	doLast {
+		ant.taskdef(
+				name: 'animalSniffer',
+				classname: 'org.codehaus.mojo.animal_sniffer.ant.CheckSignatureTask',
+				classpath: configurations.sniffer.asPath
+		)
+
+		// TODO: Animal Sniffer currently chokes on optional JDK 9 bytecode in AspectJ 1.9 beta 5
+		// ant.animalSniffer(
+		// 		signature: "$buildDir/javaApiSignature/javaApi.signature",
+		// 		classpath: sourceSets.main.compileClasspath.asPath) {
+		// 	path(path: sourceSets.main.output.classesDir)
+		// 	annotation(className: "org.springframework.lang.UsesSunHttpServer")
+		// }
+	}
+}
+
+

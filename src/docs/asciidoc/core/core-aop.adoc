@@ -2506,7 +2506,7 @@ code snippet.
 If you invoke a method on an object reference, the method is invoked __directly__ on
 that object reference, as can be seen below.
 
-image::images/aop-proxy-plain-pojo-call.png[width=400]
+image::images/aop-proxy-plain-pojo-call.png[]
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2526,7 +2526,7 @@ image::images/aop-proxy-plain-pojo-call.png[width=400]
 Things change slightly when the reference that client code has is a proxy. Consider the
 following diagram and code snippet.
 
-image::images/aop-proxy-call.png[width=400]
+image::images/aop-proxy-call.png[]
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
