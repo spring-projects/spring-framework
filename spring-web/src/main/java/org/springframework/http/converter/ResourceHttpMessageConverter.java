@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,9 +49,27 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	private static final boolean jafPresent = ClassUtils.isPresent(
 			"javax.activation.FileTypeMap", ResourceHttpMessageConverter.class.getClassLoader());
 
+	private final boolean supportsReadStreaming;
 
+	/**
+	 * Create a new instance of the {@code ResourceHttpMessageConverter}
+	 * that supports read streaming, i.e. can convert an
+	 * {@code HttpInputMessage} to {@code InputStreamResource}.
+	 */
 	public ResourceHttpMessageConverter() {
 		super(MediaType.ALL);
+		this.supportsReadStreaming = true;
+	}
+
+	/**
+	 * Create a new instance of the {@code ResourceHttpMessageConverter}
+	 * @param supportsReadStreaming whether the converter should support
+	 * read streaming, i.e. convert to {@code InputStreamResource}.
+	 * @since 5.0
+	 */
+	public ResourceHttpMessageConverter(boolean supportsReadStreaming) {
+		super(MediaType.ALL);
+		this.supportsReadStreaming = supportsReadStreaming;
 	}
 
 
@@ -64,7 +82,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	protected Resource readInternal(Class<? extends Resource> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
-		if (InputStreamResource.class == clazz) {
+		if (supportsReadStreaming && InputStreamResource.class == clazz) {
 			return new InputStreamResource(inputMessage.getBody());
 		}
 		else if (clazz.isAssignableFrom(ByteArrayResource.class)) {
