@@ -81,6 +81,7 @@ import org.springframework.web.method.annotation.RequestHeaderMapMethodArgumentR
 import org.springframework.web.method.annotation.RequestHeaderMethodArgumentResolver;
 import org.springframework.web.method.annotation.RequestParamMapMethodArgumentResolver;
 import org.springframework.web.method.annotation.RequestParamMethodArgumentResolver;
+import org.springframework.web.method.annotation.RequestedMediaTypesArgumentResolver;
 import org.springframework.web.method.annotation.SessionAttributesHandler;
 import org.springframework.web.method.annotation.SessionStatusMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -522,6 +523,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		resolvers.add(new ErrorsMethodArgumentResolver());
 		resolvers.add(new SessionStatusMethodArgumentResolver());
 		resolvers.add(new UriComponentsBuilderMethodArgumentResolver());
+		resolvers.add(new RequestedMediaTypesArgumentResolver(contentNegotiationManager));
 
 		// Custom arguments
 		if (getCustomArgumentResolvers() != null) {

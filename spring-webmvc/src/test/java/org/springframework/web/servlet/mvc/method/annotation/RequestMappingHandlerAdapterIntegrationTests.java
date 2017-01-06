@@ -44,18 +44,19 @@ import javax.validation.Valid;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockMultipartFile;
 import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -143,13 +144,14 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		Class<?>[] parameterTypes = new Class<?>[] { int.class, String.class, String.class, String.class, Map.class,
 				Date.class, Map.class, String.class, String.class, TestBean.class, Errors.class, TestBean.class,
 				Color.class, HttpServletRequest.class, HttpServletResponse.class, User.class, OtherUser.class,
-				Model.class, UriComponentsBuilder.class };
+				Model.class, UriComponentsBuilder.class,List.class };
 
 		String datePattern = "yyyy.MM.dd";
 		String formattedDate = "2011.03.16";
 		Date date = new GregorianCalendar(2011, Calendar.MARCH, 16).getTime();
 
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
+		request.addHeader("Accept",MediaType.APPLICATION_JSON_VALUE+","+MediaType.APPLICATION_XML_VALUE);
 		request.addHeader("header", "headerValue");
 		request.addHeader("anotherHeader", "anotherHeaderValue");
 		request.addParameter("datePattern", datePattern);
@@ -210,6 +212,12 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		assertEquals(OtherUser.class, model.get("otherUser").getClass());
 
 		assertEquals(new URI("http://localhost/contextPath/main/path"), model.get("url"));
+		
+		@SuppressWarnings("unchecked")
+		List<MediaType> requestedMediaTypes = (List<MediaType>) model.get("requestedMediaTypes");
+		assertEquals(2,requestedMediaTypes.size());
+		assertEquals(MediaType.APPLICATION_JSON,requestedMediaTypes.get(0));
+		assertEquals(MediaType.APPLICATION_XML,requestedMediaTypes.get(1));
 	}
 
 	@Test
@@ -343,14 +351,16 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 						 	User user,
 						 	@ModelAttribute OtherUser otherUser,
 						 	Model model,
-						 	UriComponentsBuilder builder) throws Exception {
+						 	UriComponentsBuilder builder,
+						 	List<MediaType> requestedMediaTypes) throws Exception {
 
 			model.addAttribute("cookie", cookie).addAttribute("pathvar", pathvar).addAttribute("header", header)
 					.addAttribute("systemHeader", systemHeader).addAttribute("headerMap", headerMap)
 					.addAttribute("dateParam", dateParam).addAttribute("paramMap", paramMap)
 					.addAttribute("paramByConvention", paramByConvention).addAttribute("value", value)
 					.addAttribute("customArg", customArg).addAttribute(user)
-					.addAttribute("url", builder.path("/path").build().toUri());
+					.addAttribute("url", builder.path("/path").build().toUri())
+					.addAttribute("requestedMediaTypes",requestedMediaTypes);
 
 			assertNotNull(request);
 			assertNotNull(response);

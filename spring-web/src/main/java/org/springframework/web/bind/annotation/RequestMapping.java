@@ -157,6 +157,10 @@ import java.util.concurrent.Callable;
  * (Servlet-only, {@literal @MVC 3.1-only})
  * for preparing a URL relative to the current request's host, port, scheme,
  * context path, and the literal part of the servlet mapping.
+ * <li>{@link java.util.Collection} or {@link java.util.List} of 
+ * {@link org.springframework.http.MediaType} for the requested media types, computed
+ * by the {@link org.springframework.web.accept.ContentNegotiationManager}, 
+ * using the Accept HTTP header.
  * </ul>
  *
  * <p>The following return types are supported for handler methods:
