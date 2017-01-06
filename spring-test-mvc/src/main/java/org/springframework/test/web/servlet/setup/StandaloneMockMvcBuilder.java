@@ -208,6 +208,13 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 		this.handlerExceptionResolvers = exceptionResolvers;
 		return this;
 	}
+	
+	/**
+	 * Set the HandlerExceptionResolver types to use.
+	 */
+	public StandaloneMockMvcBuilder setHandlerExceptionResolvers(List ... exceptionResolvers) {
+		return setHandlerExceptionResolvers(Arrays.asList(exceptionResolvers));
+	}
 
 	/**
 	 * Set the HandlerExceptionResolver types to use as an array.
