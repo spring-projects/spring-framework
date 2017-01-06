@@ -36,6 +36,7 @@ import org.springframework.web.socket.WebSocketSession;
  * An abstract base class for implementations of {@link WebSocketSession}.
  *
  * @author Rossen Stoyanchev
+ * @author Venil Noronha
  * @since 4.0
  */
 public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSession {
