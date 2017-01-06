@@ -368,7 +368,7 @@ public class TaskExecutorExample {
     <para>Spring provides annotation support for both task scheduling and
     asynchronous method execution.</para>
 
-    <section xml:id="secheduling-enable-annotation-support">
+    <section xml:id="scheduling-enable-annotation-support">
 
       <title>Enable scheduling annotations</title>
 
