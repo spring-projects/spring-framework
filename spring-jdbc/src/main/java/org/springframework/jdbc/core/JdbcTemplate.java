@@ -42,6 +42,7 @@ import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.SQLWarningException;
 import org.springframework.jdbc.datasource.ConnectionProxy;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.support.JdbcAccessor;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
@@ -176,6 +177,30 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		setDataSource(dataSource);
 		setLazyInit(lazyInit);
 		afterPropertiesSet();
+	}
+	
+	/**
+	 * Construct a new JdbcTemplate with a given connection.
+	 * <p>Note: uses a {@link SingleConnectionDataSource} internally.
+	 * Most people will use this constructor with the {@code suppressClose}
+	 * parameter set to true and would then better off use the other 
+	 * connection-based constructor.
+	 * @param connection connection used to execute queries
+	 * @param suppressClose whether or not closing the connection after use.
+	 */
+	public JdbcTemplate(Connection connection,boolean suppressClose) {
+		setDataSource(new SingleConnectionDataSource(connection, suppressClose));
+		afterPropertiesSet();
+	}
+
+	/**
+	 * Construct a new JdbcTemplate with a given connection.
+	 * <p>Note: uses a {@link SingleConnectionDataSource} internally, and
+	 * never closes the connection.
+	 * @param connection connection used to execute queries
+	 */
+	public JdbcTemplate(Connection connection) {
+		this(connection,true);
 	}
 
 
