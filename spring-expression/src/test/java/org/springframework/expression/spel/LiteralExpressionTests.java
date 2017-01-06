@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,11 +42,14 @@ public class LiteralExpressionTests {
 		checkString("somevalue", lEx.getValue(new Rooty()));
 		checkString("somevalue", lEx.getValue(new Rooty(), String.class));
 		checkString("somevalue", lEx.getValue(ctx, new Rooty()));
-		checkString("somevalue", lEx.getValue(ctx, new Rooty(),String.class));
+		checkString("somevalue", lEx.getValue(ctx, new Rooty(), String.class));
 		assertEquals("somevalue", lEx.getExpressionString());
 		assertFalse(lEx.isWritable(new StandardEvaluationContext()));
 		assertFalse(lEx.isWritable(new Rooty()));
 		assertFalse(lEx.isWritable(new StandardEvaluationContext(), new Rooty()));
+
+		lEx = new LiteralExpression("1");
+		assertEquals(new Integer(1), lEx.getValue(ctx, new Rooty(), Integer.class));
 	}
 
 	static class Rooty {}
