@@ -17,6 +17,7 @@
 package org.springframework.util;
 
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Simple customizable helper class for creating new {@link Thread} instances.
@@ -40,9 +41,7 @@ public class CustomizableThreadCreator implements Serializable {
 
 	private ThreadGroup threadGroup;
 
-	private int threadCount = 0;
-
-	private final Object threadCountMonitor = new SerializableMonitor();
+	private final AtomicInteger threadCount = new AtomicInteger();
 
 
 	/**
@@ -160,12 +159,7 @@ public class CustomizableThreadCreator implements Serializable {
 	 * @see #getThreadNamePrefix()
 	 */
 	protected String nextThreadName() {
-		int threadNumber = 0;
-		synchronized (this.threadCountMonitor) {
-			this.threadCount++;
-			threadNumber = this.threadCount;
-		}
-		return getThreadNamePrefix() + threadNumber;
+		return getThreadNamePrefix() + threadCount.incrementAndGet();
 	}
 
 	/**
@@ -174,13 +168,6 @@ public class CustomizableThreadCreator implements Serializable {
 	 */
 	protected String getDefaultThreadNamePrefix() {
 		return ClassUtils.getShortName(getClass()) + "-";
-	}
-
-
-	/**
-	 * Empty class used for a serializable monitor object.
-	 */
-	private static class SerializableMonitor implements Serializable {
 	}
 
 }
