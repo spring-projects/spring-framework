@@ -18,8 +18,6 @@ package org.springframework.test.web.client.match;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.xml.xpath.XPathExpressionException;
@@ -34,9 +32,7 @@ import org.springframework.test.web.client.RequestMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.UriUtils;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.*;
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.util.AssertionErrors.*;
