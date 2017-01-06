@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		}
 
 		try {
-			className = HandshakeWebSocketService.class.getPackage().getName() + "." + className;
+			className = "org.springframework.web.reactive.socket.server.upgrade." + className;
 			Class<?> clazz = ClassUtils.forName(className, HandshakeWebSocketService.class.getClassLoader());
 			return (RequestUpgradeStrategy) ReflectionUtils.accessibleConstructor(clazz).newInstance();
 		}
