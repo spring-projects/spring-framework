@@ -39,6 +39,7 @@ import org.springframework.web.socket.WebSocketSession;
  * and return the "last" session.
  *
  * @author Rossen Stoyanchev
+ * @author Venil Noronha
  * @since 4.0.3
  */
 public class WebSocketSessionDecorator implements WebSocketSession {
