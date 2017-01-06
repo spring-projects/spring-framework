@@ -545,6 +545,7 @@ project("spring-tx") {
 		optional("com.ibm.websphere:uow:6.0.2.17")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile("org.eclipse.persistence:javax.persistence:2.0.0")
+		testCompile("org.codehaus.groovy:groovy-all:${groovyVersion}")
 	}
 }
 
