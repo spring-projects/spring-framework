@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,6 @@
 
 package org.springframework.http.server.reactive;
 
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.isA;
-import static org.mockito.Mockito.mock;
-
 import java.io.IOException;
 
 import org.junit.Test;
@@ -27,8 +23,12 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+
 import org.springframework.core.io.buffer.DataBuffer;
 
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.mock;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -40,8 +40,8 @@ import static org.junit.Assert.assertTrue;
 public class ListenerReadPublisherTests {
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testReceiveTwoRequestCallsWhenOnSubscribe() {
-		@SuppressWarnings("unchecked")
 		Subscriber<DataBuffer> subscriber = mock(Subscriber.class);
 		doAnswer(new SubscriptionAnswer()).when(subscriber).onSubscribe(isA(Subscription.class));
 
@@ -84,4 +84,5 @@ public class ListenerReadPublisherTests {
 		}
 
 	}
+
 }

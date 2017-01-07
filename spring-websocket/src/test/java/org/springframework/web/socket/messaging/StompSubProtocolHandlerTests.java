@@ -545,9 +545,9 @@ public class StompSubProtocolHandlerTests {
 
 	private static class TestMessageHandler implements MessageHandler {
 
-		private final List<Message> messages = new ArrayList<>();
+		private final List<Message<?>> messages = new ArrayList<>();
 
-		public List<Message> getMessages() {
+		public List<Message<?>> getMessages() {
 			return this.messages;
 		}
 

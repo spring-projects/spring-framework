@@ -18,7 +18,6 @@ package org.springframework.core.codec;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.util.MimeType;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.DigestUtils;
-import org.springframework.util.FileCopyUtils;
 
 /**
  * A {@code VersionStrategy} that calculates an Hex MD5 hashes from the content
