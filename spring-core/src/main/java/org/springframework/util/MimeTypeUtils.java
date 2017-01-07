@@ -103,6 +103,16 @@ public abstract class MimeTypeUtils {
 	public final static String APPLICATION_OCTET_STREAM_VALUE = "application/octet-stream";
 
 	/**
+	 * Public constant mime type for {@code application/rss+xml}.
+	 */
+	public final static MimeType APPLICATION_RSS_XML;
+
+	/**
+	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_RSS_XML}.
+	 */
+	public final static String APPLICATION_RSS_XML_VALUE = "application/rss+xml";
+
+	/**
 	 * Public constant mime type for {@code application/xhtml+xml}.
 	 *  */
 	public final static MimeType APPLICATION_XHTML_XML;
@@ -199,6 +209,7 @@ public abstract class MimeTypeUtils {
 		APPLICATION_FORM_URLENCODED = MimeType.valueOf(APPLICATION_FORM_URLENCODED_VALUE);
 		APPLICATION_JSON = MimeType.valueOf(APPLICATION_JSON_VALUE);
 		APPLICATION_OCTET_STREAM = MimeType.valueOf(APPLICATION_OCTET_STREAM_VALUE);
+		APPLICATION_RSS_XML = MimeType.valueOf(APPLICATION_RSS_XML_VALUE);
 		APPLICATION_XHTML_XML = MimeType.valueOf(APPLICATION_XHTML_XML_VALUE);
 		APPLICATION_XML = MimeType.valueOf(APPLICATION_XML_VALUE);
 		IMAGE_GIF = MimeType.valueOf(IMAGE_GIF_VALUE);

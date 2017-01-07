@@ -38,7 +38,7 @@ import org.springframework.http.MediaType;
 public class RssChannelHttpMessageConverter extends AbstractWireFeedHttpMessageConverter<Channel> {
 
 	public RssChannelHttpMessageConverter() {
-		super(new MediaType("application", "rss+xml"));
+		super(MediaType.APPLICATION_RSS_XML);
 	}
 
 	@Override
