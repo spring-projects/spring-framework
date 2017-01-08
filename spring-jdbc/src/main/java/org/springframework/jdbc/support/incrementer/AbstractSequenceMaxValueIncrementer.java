@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,27 +60,19 @@ public abstract class AbstractSequenceMaxValueIncrementer extends AbstractDataFi
 	 */
 	@Override
 	protected long getNextKey() throws DataAccessException {
-		Connection con = DataSourceUtils.getConnection(getDataSource());
-		Statement stmt = null;
-		ResultSet rs = null;
-		try {
-			stmt = con.createStatement();
+		try (Connection con = DataSourceUtils.getConnection(getDataSource());
+		     Statement stmt = con.createStatement()) {
 			DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
-			rs = stmt.executeQuery(getSequenceQuery());
-			if (rs.next()) {
-				return rs.getLong(1);
-			}
-			else {
-				throw new DataAccessResourceFailureException("Sequence query did not return a result");
+			try (ResultSet rs = stmt.executeQuery(getSequenceQuery())) {
+				if (rs.next()) {
+					return rs.getLong(1);
+				} else {
+					throw new DataAccessResourceFailureException("Sequence query did not return a result");
+				}
 			}
 		}
 		catch (SQLException ex) {
 			throw new DataAccessResourceFailureException("Could not obtain sequence value", ex);
-		}
-		finally {
-			JdbcUtils.closeResultSet(rs);
-			JdbcUtils.closeStatement(stmt);
-			DataSourceUtils.releaseConnection(con, getDataSource());
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,11 +108,8 @@ public class DatabaseStartupValidator implements InitializingBean {
 			SQLException latestEx = null;
 
 			while (!validated && System.currentTimeMillis() < deadLine) {
-				Connection con = null;
-				Statement stmt = null;
-				try {
-					con = this.dataSource.getConnection();
-					stmt = con.createStatement();
+				try (Connection con = this.dataSource.getConnection();
+				     Statement stmt = con.createStatement()) {
 					stmt.execute(this.validationQuery);
 					validated = true;
 				}
@@ -124,10 +121,6 @@ public class DatabaseStartupValidator implements InitializingBean {
 						logger.warn("Database has not started up yet - retrying in " + this.interval +
 								" seconds (timeout in " + rest + " seconds)");
 					}
-				}
-				finally {
-					JdbcUtils.closeStatement(stmt);
-					JdbcUtils.closeConnection(con);
 				}
 
 				if (!validated) {
