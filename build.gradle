@@ -865,6 +865,8 @@ project("spring-web-reactive") {
 		testRuntime("org.jboss.xnio:xnio-nio:${xnioVersion}")
 		testRuntime("org.jboss.logging:jboss-logging:3.3.0.Final")
 		testRuntime("org.webjars:underscorejs:1.8.3")
+		testRuntime("org.jruby:jruby:9.1.6.0")
+		testRuntime("org.python:jython-standalone:2.5.3")
 	}
 
 	if (JavaVersion.current().java9Compatible) {
