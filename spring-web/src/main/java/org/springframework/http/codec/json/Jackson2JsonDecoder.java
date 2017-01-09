@@ -118,7 +118,7 @@ public class Jackson2JsonDecoder extends AbstractJackson2Codec implements Decode
 						return value;
 					}
 					catch (IOException ex) {
-						return Flux.error(new CodecException("Error while reading the data", ex));
+						throw new CodecException("Error while reading the data", ex);
 					}
 				});
 	}
