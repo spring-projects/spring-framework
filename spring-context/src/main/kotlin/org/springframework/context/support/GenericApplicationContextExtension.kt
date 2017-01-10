@@ -24,11 +24,25 @@ object GenericApplicationContextExtension {
 	}
 
 	/**
+	 * @see GenericApplicationContext.registerBean(Class<T>, BeanDefinitionCustomizer...)
+	 */
+	inline fun <reified T : Any> GenericApplicationContext.registerBean(vararg customizers: BeanDefinitionCustomizer) {
+					registerBean(T::class.java, *customizers)
+	}
+
+	/**
 	 * @see GenericApplicationContext.registerBean(String, Class<T>, BeanDefinitionCustomizer...)
 	 */
 	fun <T : Any> GenericApplicationContext.registerBean(beanName: String, beanClass: KClass<T>,
 			vararg customizers: BeanDefinitionCustomizer) {
 					registerBean(beanName, beanClass.java, *customizers)
+	}
+
+	/**
+	 * @see GenericApplicationContext.registerBean(String, Class<T>, BeanDefinitionCustomizer...)
+	 */
+	inline fun <reified T : Any> GenericApplicationContext.registerBean(beanName: String, vararg customizers: BeanDefinitionCustomizer) {
+					registerBean(beanName, T::class.java, *customizers)
 	}
 
 	/**
@@ -46,4 +60,6 @@ object GenericApplicationContextExtension {
 			vararg customizers: BeanDefinitionCustomizer, crossinline function: (ApplicationContext) -> T) {
 					registerBean(name, T::class.java, Supplier { function.invoke(this) }, *customizers)
 	}
+
+	fun GenericApplicationContext(configure: GenericApplicationContext.()->Unit) = GenericApplicationContext().apply(configure)
 }

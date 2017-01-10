@@ -4,6 +4,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.springframework.context.support.GenericApplicationContextExtension.registerBean
 import org.springframework.beans.factory.BeanFactoryExtension.getBean
+import org.springframework.context.support.GenericApplicationContextExtension.GenericApplicationContext
 
 class GenericApplicationContextExtensionTests {
 
@@ -57,6 +58,17 @@ class GenericApplicationContextExtensionTests {
 		context.refresh()
 		assertNotNull(context.getBean("a"))
 		assertNotNull(context.getBean("b"))
+	}
+
+	@Test
+	fun registerBeanWithGradleStyleApi() {
+		val context = GenericApplicationContext {
+			registerBean<BeanA>()
+			registerBean { BeanB(it.getBean<BeanA>()) }
+		}
+		context.refresh()
+		assertNotNull(context.getBean<BeanA>())
+		assertNotNull(context.getBean<BeanB>())
 	}
 
 	internal class BeanA
