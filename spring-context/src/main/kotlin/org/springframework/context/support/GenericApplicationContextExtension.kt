@@ -1,6 +1,7 @@
 package org.springframework.context.support
 
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer
+import org.springframework.context.ApplicationContext
 import java.util.function.Supplier
 import kotlin.reflect.KClass
 
@@ -34,7 +35,7 @@ object GenericApplicationContextExtension {
 	 * @see GenericApplicationContext.registerBean(Class<T>, Supplier<T>, BeanDefinitionCustomizer...)
 	 */
 	inline fun <reified T : Any> GenericApplicationContext.registerBean(
-			vararg customizers: BeanDefinitionCustomizer, crossinline function: (GenericApplicationContext) -> T) {
+			vararg customizers: BeanDefinitionCustomizer, crossinline function: (ApplicationContext) -> T) {
 					registerBean(T::class.java, Supplier { function.invoke(this) }, *customizers)
 	}
 
@@ -42,7 +43,7 @@ object GenericApplicationContextExtension {
 	 * @see GenericApplicationContext.registerBean(String, Class<T>, Supplier<T>, BeanDefinitionCustomizer...)
 	 */
 	inline fun <reified T : Any> GenericApplicationContext.registerBean(name: String,
-			vararg customizers: BeanDefinitionCustomizer, crossinline function: (GenericApplicationContext) -> T) {
+			vararg customizers: BeanDefinitionCustomizer, crossinline function: (ApplicationContext) -> T) {
 					registerBean(name, T::class.java, Supplier { function.invoke(this) }, *customizers)
 	}
 }
