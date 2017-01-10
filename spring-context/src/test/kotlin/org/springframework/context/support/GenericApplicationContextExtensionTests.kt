@@ -26,7 +26,7 @@ class GenericApplicationContextExtensionTests {
 	@Test
 	fun registerBeanWithSupplier() {
 		val context = GenericApplicationContext()
-		context.registerBean({ BeanA() })
+		context.registerBean { BeanA() }
 		context.refresh()
 		assertNotNull(context.getBean(BeanA::class))
 	}
@@ -34,11 +34,33 @@ class GenericApplicationContextExtensionTests {
 	@Test
 	fun registerBeanWithNameAndSupplier() {
 		val context = GenericApplicationContext()
-		context.registerBean("a", { BeanA() })
+		context.registerBean("a") { BeanA() }
 		context.refresh()
 		assertNotNull(context.getBean("a"))
 	}
 
+	@Test
+	fun registerBeanWithFunction() {
+		val context = GenericApplicationContext()
+		context.registerBean(BeanA::class)
+		context.registerBean { BeanB(it.getBean(BeanA::class)) }
+		context.refresh()
+		assertNotNull(context.getBean(BeanA::class))
+		assertNotNull(context.getBean(BeanB::class))
+	}
+
+	@Test
+	fun registerBeanWithNameAndFunction() {
+		val context = GenericApplicationContext()
+		context.registerBean("a", BeanA::class)
+		context.registerBean("b") { BeanB(it.getBean(BeanA::class)) }
+		context.refresh()
+		assertNotNull(context.getBean("a"))
+		assertNotNull(context.getBean("b"))
+	}
+
 	internal class BeanA
+
+	internal class BeanB(val a: BeanA)
 
 }
