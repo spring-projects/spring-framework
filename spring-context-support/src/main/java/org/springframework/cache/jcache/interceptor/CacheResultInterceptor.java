@@ -59,7 +59,7 @@ class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheResultOper
 
 		try {
 			Object invocationResult = invoker.invoke();
-			cache.put(cacheKey, invocationResult);
+			doPut(cache, cacheKey, invocationResult);
 			return invocationResult;
 		}
 		catch (CacheOperationInvoker.ThrowableWrapper ex) {
@@ -88,7 +88,7 @@ class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheResultOper
 			return;
 		}
 		if (filter.match(ex.getClass())) {
-			exceptionCache.put(cacheKey, ex);
+			doPut(exceptionCache, cacheKey, ex);
 		}
 	}
 
