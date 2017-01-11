@@ -79,6 +79,11 @@ public class PathPatternMatcherTests {
 
 	@Test
 	public void captureTheRest() {
+		checkMatches("/resource/{*foobar}", "/resource");
+		checkNoMatch("/resource/{*foobar}", "/resourceX");
+		checkNoMatch("/resource/{*foobar}", "/resourceX/foobar");
+		checkMatches("/resource/{*foobar}", "/resource/foobar");
+		checkCapture("/resource/{*foobar}", "/resource/foobar", "foobar", "/foobar");
 		checkCapture("/customer/{*something}", "/customer/99", "something", "/99");
 		checkCapture("/customer/{*something}", "/customer/aa/bb/cc", "something",
 				"/aa/bb/cc");
@@ -124,6 +129,11 @@ public class PathPatternMatcherTests {
 		checkMatches("a/*","a/");
 		checkMatches("a/*","a/a");
 		checkNoMatch("a/*","a/a/");
+		
+		checkMatches("/resource/**", "/resource");
+		checkNoMatch("/resource/**", "/resourceX");
+		checkNoMatch("/resource/**", "/resourceX/foobar");
+		checkMatches("/resource/**", "/resource/foobar");
 	}
 
 	@Test

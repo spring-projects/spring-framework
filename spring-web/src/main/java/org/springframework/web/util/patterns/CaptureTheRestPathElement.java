@@ -45,6 +45,12 @@ class CaptureTheRestPathElement extends PathElement {
 		// No need to handle 'match start' checking as this captures everything
 		// anyway and cannot be followed by anything else
 		// assert next == null
+		
+		// If there is more data, it must start with the separator
+		if (candidateIndex<matchingContext.candidateLength &&
+			matchingContext.candidate[candidateIndex] != separator) {
+			return false;
+		}
 		while ((candidateIndex+1)<matchingContext.candidateLength &&
 				matchingContext.candidate[candidateIndex+1] == separator) {
 			candidateIndex++;

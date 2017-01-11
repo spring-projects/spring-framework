@@ -34,6 +34,11 @@ class WildcardTheRestPathElement extends PathElement {
 
 	@Override
 	public boolean matches(int candidateIndex, MatchingContext matchingContext) {
+		// If there is more data, it must start with the separator
+		if (candidateIndex < matchingContext.candidateLength &&
+			matchingContext.candidate[candidateIndex] != separator) {
+			return false;
+		}
 		return true;
 	}
 
