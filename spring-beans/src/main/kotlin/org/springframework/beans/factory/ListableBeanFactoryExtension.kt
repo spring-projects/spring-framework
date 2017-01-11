@@ -11,53 +11,29 @@ import kotlin.reflect.KClass
 object ListableBeanFactoryExtension {
 
 	/**
-	 * @see ListableBeanFactory.getBeanNamesForType(Class<?>)
-	 */
-	fun <T : Any> ListableBeanFactory.getBeanNamesForType(type: KClass<T>) =
-			getBeanNamesForType(type.java)
-
-	/**
-	 * @see ListableBeanFactory.getBeanNamesForType(Class<?>)
-	 */
-	inline fun <reified T : Any> ListableBeanFactory.getBeanNamesForType() =
-			getBeanNamesForType(T::class.java)
-
-	/**
 	 * @see ListableBeanFactory.getBeanNamesForType(Class<?>, boolean, boolean)
 	 */
 	fun <T : Any> ListableBeanFactory.getBeanNamesForType(type: KClass<T>,
-			includeNonSingletons: Boolean, allowEagerInit: Boolean) =
+			includeNonSingletons: Boolean = true, allowEagerInit: Boolean = true) =
 					getBeanNamesForType(type.java, includeNonSingletons, allowEagerInit)
 
 	/**
 	 * @see ListableBeanFactory.getBeanNamesForType(Class<?>, boolean, boolean)
 	 */
-	inline fun <reified T : Any> ListableBeanFactory.getBeanNamesForType(includeNonSingletons: Boolean, allowEagerInit: Boolean) =
+	inline fun <reified T : Any> ListableBeanFactory.getBeanNamesForType(includeNonSingletons: Boolean = true, allowEagerInit: Boolean = true) =
 					getBeanNamesForType(T::class.java, includeNonSingletons, allowEagerInit)
-
-	/**
-	 * @see ListableBeanFactory.getBeansOfType(Class<T>)
-	 */
-	fun <T : Any> ListableBeanFactory.getBeansOfType(type: KClass<T>) =
-			getBeansOfType(type.java)
-
-	/**
-	 * @see ListableBeanFactory.getBeansOfType(Class<T>)
-	 */
-	inline fun <reified T : Any> ListableBeanFactory.getBeansOfType() =
-			getBeansOfType(T::class.java)
 
 	/**
 	 * @see ListableBeanFactory.getBeansOfType(Class<T>, boolean, boolean)
 	 */
 	fun <T : Any> ListableBeanFactory.getBeansOfType(type: KClass<T>,
-			includeNonSingletons: Boolean, allowEagerInit: Boolean) =
+			includeNonSingletons: Boolean = true, allowEagerInit: Boolean = true) =
 					getBeansOfType(type.java, includeNonSingletons, allowEagerInit)
 
 	/**
 	 * @see ListableBeanFactory.getBeansOfType(Class<T>, boolean, boolean)
 	 */
-	inline fun <reified T : Any> ListableBeanFactory.getBeansOfType(includeNonSingletons: Boolean, allowEagerInit: Boolean) =
+	inline fun <reified T : Any> ListableBeanFactory.getBeansOfType(includeNonSingletons: Boolean = true, allowEagerInit: Boolean = true) =
 					getBeansOfType(T::class.java, includeNonSingletons, allowEagerInit)
 
 	/**
