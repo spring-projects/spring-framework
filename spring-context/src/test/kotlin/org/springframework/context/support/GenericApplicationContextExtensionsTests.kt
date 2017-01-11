@@ -2,11 +2,9 @@ package org.springframework.context.support
 
 import org.junit.Assert.assertNotNull
 import org.junit.Test
-import org.springframework.context.support.GenericApplicationContextExtension.registerBean
-import org.springframework.beans.factory.BeanFactoryExtension.getBean
-import org.springframework.context.support.GenericApplicationContextExtension.GenericApplicationContext
+import org.springframework.beans.factory.getBean
 
-class GenericApplicationContextExtensionTests {
+class GenericApplicationContextExtensionsTests {
 
 	@Test
 	fun registerBeanWithClass() {

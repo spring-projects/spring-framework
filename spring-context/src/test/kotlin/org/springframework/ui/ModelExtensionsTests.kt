@@ -16,23 +16,18 @@
 
 package org.springframework.ui
 
-/**
- * Extension for [Model] providing idiomatic Kotlin API
- *
- * @author Mario Arias
- * @since 5.0
- */
-object ModelExtension {
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
 
-	/** Array like setter for [Model]
-	 *
-	 * ```kotlin
-	 * model["firstName"] = "Mario"
-	 * ```
-	 *
-	 * @see Model.addAttribute
-	 */
-	operator fun Model.set(attributeName: String, attributeValue: Any) {
-		this.addAttribute(attributeName, attributeValue)
+
+class ModelExtensionsTests {
+
+	@Test
+	fun setAttribute() {
+		val model:Model = ConcurrentModel()
+		model["foo"] = "bing"
+		assertTrue(model.containsAttribute("foo"))
+		assertEquals("bing", model.asMap()["foo"])
 	}
 }

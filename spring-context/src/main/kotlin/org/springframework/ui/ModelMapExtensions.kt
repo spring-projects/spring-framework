@@ -16,19 +16,17 @@
 
 package org.springframework.ui
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
-import org.springframework.ui.ModelMapExtension.set
-
-
-class ModelMapExtensionTests {
-
-	@Test
-	fun setAttribute() {
-		val model = ModelMap()
-		model["foo"] = "bing"
-		assertTrue(model.containsAttribute("foo"))
-		assertEquals("bing", model["foo"])
-	}
+/**
+ *
+ * Extension for [ModelMap] providing Array like setter.
+ *
+ * ```kotlin
+ * model["firstName"] = "Mario"
+ * ```
+ *
+ * @author Mario Arias
+ * @since 5.0
+ */
+operator fun ModelMap.set(attributeName: String, attributeValue: Any) {
+	this.addAttribute(attributeName, attributeValue)
 }

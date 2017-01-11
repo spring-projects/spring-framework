@@ -16,19 +16,16 @@
 
 package org.springframework.ui
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
-import org.springframework.ui.ModelExtension.set
-
-
-class ModelExtensionTests {
-
-	@Test
-	fun setAttribute() {
-		val model:Model = ConcurrentModel()
-		model["foo"] = "bing"
-		assertTrue(model.containsAttribute("foo"))
-		assertEquals("bing", model.asMap()["foo"])
-	}
+/**
+ * Extension for [Model.addAttribute] providing Array like setter.
+ *
+ * ```kotlin
+ * model["firstName"] = "Mario"
+ * ```
+ *
+ * @author Mario Arias
+ * @since 5.0
+ */
+operator fun Model.set(attributeName: String, attributeValue: Any) {
+	this.addAttribute(attributeName, attributeValue)
 }

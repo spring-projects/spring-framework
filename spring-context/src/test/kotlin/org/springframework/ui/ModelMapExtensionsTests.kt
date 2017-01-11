@@ -16,23 +16,18 @@
 
 package org.springframework.ui
 
-/**
- * Extension for [ModelMap] providing idiomatic Kotlin API
- *
- * @author Mario Arias
- * @since 5.0
- */
-object ModelMapExtension {
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
 
-	/** Array like setter for [ModelMap]
-	 *
-	 * ```kotlin
-	 * model["firstName"] = "Mario"
-	 * ```
-	 *
-	 * @see ModelMap.addAttribute
-	 */
-	operator fun ModelMap.set(attributeName: String, attributeValue: Any) {
-		this.addAttribute(attributeName, attributeValue)
+
+class ModelMapExtensionsTests {
+
+	@Test
+	fun setAttribute() {
+		val model = ModelMap()
+		model["foo"] = "bing"
+		assertTrue(model.containsAttribute("foo"))
+		assertEquals("bing", model["foo"])
 	}
 }
