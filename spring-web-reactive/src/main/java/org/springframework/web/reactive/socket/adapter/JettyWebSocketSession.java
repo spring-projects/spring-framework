@@ -21,11 +21,13 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.SuspendToken;
 import org.eclipse.jetty.websocket.api.WriteCallback;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.HandshakeInfo;
@@ -42,6 +44,8 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  */
 public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Session> {
 
+	private SuspendToken suspendToken;
+
 
 	public JettyWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory) {
 		this(session, info, factory, null);
@@ -56,17 +60,20 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 
 	@Override
 	protected boolean canSuspendReceiving() {
-		return false;
+		return true;
 	}
 
 	@Override
 	protected void suspendReceiving() {
-		// no-op
+		Assert.isNull(this.suspendToken);
+		this.suspendToken = getDelegate().suspend();
 	}
 
 	@Override
 	protected void resumeReceiving() {
-		// no-op
+		Assert.notNull(this.suspendToken);
+		this.suspendToken.resume();
+		this.suspendToken = null;
 	}
 
 	@Override
