@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
 import javax.validation.Validation;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import org.junit.Before;
@@ -45,6 +46,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Kazuki Shimizu
+ * @author Juergen Hoeller
  * @since 4.3
  */
 public class SpringValidatorAdapterTests {
@@ -65,6 +67,20 @@ public class SpringValidatorAdapterTests {
 
 
 	@Test  // SPR-13406
+	public void testNoStringArgumentValue() {
+		TestBean testBean = new TestBean();
+		testBean.setPassword("pass");
+		testBean.setConfirmPassword("pass");
+
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(testBean, "testBean");
+		validatorAdapter.validate(testBean, errors);
+
+		assertThat(errors.getFieldErrorCount("password"), is(1));
+		assertThat(messageSource.getMessage(errors.getFieldError("password"), Locale.ENGLISH),
+				is("Size of Password is must be between 8 and 128"));
+	}
+
+	@Test  // SPR-13406
 	public void testApplyMessageSourceResolvableToStringArgumentValueWithResolvedLogicalFieldName() {
 		TestBean testBean = new TestBean();
 		testBean.setPassword("password");
@@ -76,7 +92,6 @@ public class SpringValidatorAdapterTests {
 		assertThat(errors.getFieldErrorCount("password"), is(1));
 		assertThat(messageSource.getMessage(errors.getFieldError("password"), Locale.ENGLISH),
 				is("Password must be same value with Password(Confirm)"));
-
 	}
 
 	@Test  // SPR-13406
@@ -89,24 +104,30 @@ public class SpringValidatorAdapterTests {
 		validatorAdapter.validate(testBean, errors);
 
 		assertThat(errors.getFieldErrorCount("email"), is(1));
+		assertThat(errors.getFieldErrorCount("confirmEmail"), is(1));
 		assertThat(messageSource.getMessage(errors.getFieldError("email"), Locale.ENGLISH),
 				is("email must be same value with confirmEmail"));
-
+		assertThat(messageSource.getMessage(errors.getFieldError("confirmEmail"), Locale.ENGLISH),
+				is("Email required"));
 	}
 
-	@Test  // SPR-13406
-	public void testNoStringArgumentValue() {
+	@Test  // SPR-15123
+	public void testApplyMessageSourceResolvableToStringArgumentValueWithAlwaysUseMessageFormat() {
+		messageSource.setAlwaysUseMessageFormat(true);
+
 		TestBean testBean = new TestBean();
-		testBean.setPassword("pass");
-		testBean.setConfirmPassword("pass");
+		testBean.setEmail("test@example.com");
+		testBean.setConfirmEmail("TEST@EXAMPLE.IO");
 
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(testBean, "testBean");
 		validatorAdapter.validate(testBean, errors);
 
-		assertThat(errors.getFieldErrorCount("password"), is(1));
-		assertThat(messageSource.getMessage(errors.getFieldError("password"), Locale.ENGLISH),
-				is("Size of Password is must be between 8 and 128"));
-
+		assertThat(errors.getFieldErrorCount("email"), is(1));
+		assertThat(errors.getFieldErrorCount("confirmEmail"), is(1));
+		assertThat(messageSource.getMessage(errors.getFieldError("email"), Locale.ENGLISH),
+				is("email must be same value with confirmEmail"));
+		assertThat(messageSource.getMessage(errors.getFieldError("confirmEmail"), Locale.ENGLISH),
+				is("Email required"));
 	}
 
 
@@ -116,9 +137,12 @@ public class SpringValidatorAdapterTests {
 
 		@Size(min = 8, max = 128)
 		private String password;
+
 		private String confirmPassword;
 
 		private String email;
+
+		@Pattern(regexp = "[\\p{L} -]*", message = "Email required")
 		private String confirmEmail;
 
 		public String getPassword() {
@@ -189,6 +213,7 @@ public class SpringValidatorAdapterTests {
 
 		Same[] value();
 	}
+
 
 	public static class SameValidator implements ConstraintValidator<Same, Object> {
 

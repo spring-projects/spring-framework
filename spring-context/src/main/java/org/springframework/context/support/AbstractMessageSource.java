@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,30 +160,21 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	}
 
 	@Override
-	public final String getMessage(MessageSourceResolvable resolvable, Locale locale)
-			throws NoSuchMessageException {
-
+	public final String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
 		String[] codes = resolvable.getCodes();
-		if (codes == null) {
-			codes = new String[0];
-		}
-		for (String code : codes) {
-			String msg = getMessageInternal(code, resolvable.getArguments(), locale);
-			if (msg != null) {
-				return msg;
+		if (codes != null) {
+			for (String code : codes) {
+				String message = getMessageInternal(code, resolvable.getArguments(), locale);
+				if (message != null) {
+					return message;
+				}
 			}
 		}
-		String defaultMessage = resolvable.getDefaultMessage();
+		String defaultMessage = getDefaultMessage(resolvable, locale);
 		if (defaultMessage != null) {
-			return renderDefaultMessage(defaultMessage, resolvable.getArguments(), locale);
+			return defaultMessage;
 		}
-		if (codes.length > 0) {
-			String fallback = getDefaultMessage(codes[0]);
-			if (fallback != null) {
-				return fallback;
-			}
-		}
-		throw new NoSuchMessageException(codes.length > 0 ? codes[codes.length - 1] : null, locale);
+		throw new NoSuchMessageException(!ObjectUtils.isEmpty(codes) ? codes[codes.length - 1] : null, locale);
 	}
 
 
@@ -194,7 +185,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * @param code the code to lookup up, such as 'calculator.noRateSet'
 	 * @param args array of arguments that will be filled in for params
 	 * within the message
-	 * @param locale the Locale in which to do the lookup
+	 * @param locale the locale in which to do the lookup
 	 * @return the resolved message, or {@code null} if not found
 	 * @see #getMessage(String, Object[], String, Locale)
 	 * @see #getMessage(String, Object[], Locale)
@@ -249,11 +240,11 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	}
 
 	/**
-	 * Try to retrieve the given message from the parent MessageSource, if any.
+	 * Try to retrieve the given message from the parent {@code MessageSource}, if any.
 	 * @param code the code to lookup up, such as 'calculator.noRateSet'
 	 * @param args array of arguments that will be filled in for params
 	 * within the message
-	 * @param locale the Locale in which to do the lookup
+	 * @param locale the locale in which to do the lookup
 	 * @return the resolved message, or {@code null} if not found
 	 * @see #getParentMessageSource()
 	 */
@@ -275,10 +266,35 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	}
 
 	/**
+	 * Get a default message for the given {@code MessageSourceResolvable}.
+	 * <p>This implementation fully renders the default message if available,
+	 * or just returns the plain default message {@code String} if the primary
+	 * message code is being used as a default message.
+	 * @param resolvable the value object to resolve a default message for
+	 * @param locale the current locale
+	 * @return the default message, or {@code null} if none
+	 * @since 4.3.6
+	 * @see #renderDefaultMessage(String, Object[], Locale)
+	 * @see #getDefaultMessage(String)
+	 */
+	protected String getDefaultMessage(MessageSourceResolvable resolvable, Locale locale) {
+		String defaultMessage = resolvable.getDefaultMessage();
+		String[] codes = resolvable.getCodes();
+		if (defaultMessage != null) {
+			if (!ObjectUtils.isEmpty(codes) && defaultMessage.equals(codes[0])) {
+				// Never format a code-as-default-message, even with alwaysUseMessageFormat=true
+				return defaultMessage;
+			}
+			return renderDefaultMessage(defaultMessage, resolvable.getArguments(), locale);
+		}
+		return (!ObjectUtils.isEmpty(codes) ? getDefaultMessage(codes[0]) : null);
+	}
+
+	/**
 	 * Return a fallback default message for the given code, if any.
 	 * <p>Default is to return the code itself if "useCodeAsDefaultMessage" is activated,
 	 * or return no fallback else. In case of no fallback, the caller will usually
-	 * receive a NoSuchMessageException from {@code getMessage}.
+	 * receive a {@code NoSuchMessageException} from {@code getMessage}.
 	 * @param code the message code that we couldn't resolve
 	 * and that we didn't receive an explicit default message for
 	 * @return the default message to use, or {@code null} if none
@@ -328,7 +344,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * pattern doesn't contain argument placeholders in the first place. Therefore,
 	 * it is advisable to circumvent MessageFormat for messages without arguments.
 	 * @param code the code of the message to resolve
-	 * @param locale the Locale to resolve the code for
+	 * @param locale the locale to resolve the code for
 	 * (subclasses are encouraged to support internationalization)
 	 * @return the message String, or {@code null} if not found
 	 * @see #resolveCode
@@ -352,7 +368,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * for messages without arguments, not involving MessageFormat.</b>
 	 * See the {@link #resolveCodeWithoutArguments} javadoc for details.
 	 * @param code the code of the message to resolve
-	 * @param locale the Locale to resolve the code for
+	 * @param locale the locale to resolve the code for
 	 * (subclasses are encouraged to support internationalization)
 	 * @return the MessageFormat for the message, or {@code null} if not found
 	 * @see #resolveCodeWithoutArguments(String, java.util.Locale)
