@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,12 @@ public class LinkedCaseInsensitiveMapTests {
 		assertEquals("value3", map.get("key"));
 		assertEquals("value3", map.get("KEY"));
 		assertEquals("value3", map.get("Key"));
+		assertTrue(map.containsKey("key"));
+		assertTrue(map.containsKey("KEY"));
+		assertTrue(map.containsKey("Key"));
+		assertTrue(map.keySet().contains("key"));
+		assertTrue(map.keySet().contains("KEY"));
+		assertTrue(map.keySet().contains("Key"));
 	}
 
 	@Test
@@ -48,6 +54,12 @@ public class LinkedCaseInsensitiveMapTests {
 		assertEquals("value3", map.get("key"));
 		assertEquals("value3", map.get("KEY"));
 		assertEquals("value3", map.get("Key"));
+		assertTrue(map.containsKey("key"));
+		assertTrue(map.containsKey("KEY"));
+		assertTrue(map.containsKey("Key"));
+		assertTrue(map.keySet().contains("key"));
+		assertTrue(map.keySet().contains("KEY"));
+		assertTrue(map.keySet().contains("Key"));
 	}
 
 	@Test
