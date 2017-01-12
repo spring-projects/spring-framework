@@ -38,6 +38,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 /**
  * Adapt {@link ServerHttpRequest} to the Undertow {@link HttpServerExchange}.
@@ -63,9 +64,10 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	private static URI initUri(HttpServerExchange exchange) {
 		Assert.notNull(exchange, "HttpServerExchange is required.");
 		try {
+			String query = exchange.getQueryString();
 			return new URI(exchange.getRequestScheme(), null,
 					exchange.getHostName(), exchange.getHostPort(),
-					exchange.getRequestURI(), exchange.getQueryString(), null);
+					exchange.getRequestURI(), StringUtils.hasText(query) ? query : null, null);
 		}
 		catch (URISyntaxException ex) {
 			throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
