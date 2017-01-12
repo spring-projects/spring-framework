@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,10 +45,7 @@ import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for building a {@link MockHttpServletRequest} with
@@ -68,6 +65,7 @@ public class MockHttpServletRequestBuilderTests {
 	public void setUp() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/foo/bar");
 	}
+
 
 	@Test
 	public void method() {
@@ -99,9 +97,7 @@ public class MockHttpServletRequestBuilderTests {
 		assertEquals("/foo%20bar", request.getRequestURI());
 	}
 
-	// SPR-13435
-
-	@Test
+	@Test  // SPR-13435
 	public void requestUriWithDoubleSlashes() throws URISyntaxException {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, new URI("/test//currentlyValid/0"));
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
@@ -112,7 +108,6 @@ public class MockHttpServletRequestBuilderTests {
 	@Test
 	public void contextPathEmpty() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/foo");
-
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
 		assertEquals("", request.getContextPath());
@@ -124,7 +119,6 @@ public class MockHttpServletRequestBuilderTests {
 	public void contextPathServletPathEmpty() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/travel/hotels/42");
 		this.builder.contextPath("/travel");
-
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
 		assertEquals("/travel", request.getContextPath());
@@ -148,10 +142,8 @@ public class MockHttpServletRequestBuilderTests {
 	@Test
 	public void contextPathServletPathInfoEmpty() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/travel/hotels/42");
-
 		this.builder.contextPath("/travel");
 		this.builder.servletPath("/hotels/42");
-
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
 		assertEquals("/travel", request.getContextPath());
@@ -164,7 +156,6 @@ public class MockHttpServletRequestBuilderTests {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
 		this.builder.servletPath("/index.html");
 		this.builder.pathInfo(null);
-
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
 		assertEquals("", request.getContextPath());
@@ -174,12 +165,11 @@ public class MockHttpServletRequestBuilderTests {
 
 	@Test
 	public void contextPathServletPathInvalid() {
-
-		testContextPathServletPathInvalid("/Foo", "", "requestURI [/foo/bar] does not start with contextPath [/Foo]");
+		testContextPathServletPathInvalid("/Foo", "", "Request URI [/foo/bar] does not start with context path [/Foo]");
 		testContextPathServletPathInvalid("foo", "", "Context path must start with a '/'");
 		testContextPathServletPathInvalid("/foo/", "", "Context path must not end with a '/'");
 
-		testContextPathServletPathInvalid("/foo", "/Bar", "Invalid servletPath [/Bar] for requestURI [/foo/bar]");
+		testContextPathServletPathInvalid("/foo", "/Bar", "Invalid servlet path [/Bar] for request URI [/foo/bar]");
 		testContextPathServletPathInvalid("/foo", "bar", "Servlet path must start with a '/'");
 		testContextPathServletPathInvalid("/foo", "/bar/", "Servlet path must not end with a '/'");
 	}
@@ -245,9 +235,7 @@ public class MockHttpServletRequestBuilderTests {
 		assertEquals("bar=baz", request.getParameter("foo"));
 	}
 
-	// SPR-11043
-
-	@Test
+	@Test  // SPR-11043
 	public void requestParameterFromQueryNull() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/?foo");
 
@@ -258,9 +246,7 @@ public class MockHttpServletRequestBuilderTests {
 		assertEquals("foo", request.getQueryString());
 	}
 
-	// SPR-13801
-
-	@Test
+	@Test  // SPR-13801
 	public void requestParameterFromMultiValueMap() throws Exception {
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		params.add("foo", "bar");
@@ -326,9 +312,7 @@ public class MockHttpServletRequestBuilderTests {
 		assertEquals("text/html", contentTypes.get(0));
 	}
 
-	// SPR-11308
-
-	@Test
+	@Test  // SPR-11308
 	public void contentTypeViaHeader() {
 		this.builder.header("Content-Type", MediaType.TEXT_HTML_VALUE);
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
@@ -337,15 +321,12 @@ public class MockHttpServletRequestBuilderTests {
 		assertEquals("text/html", contentType);
 	}
 
-	// SPR-11308
-
-	@Test
+	@Test  // SPR-11308
 	public void contentTypeViaMultipleHeaderValues() {
 		this.builder.header("Content-Type", MediaType.TEXT_HTML_VALUE, MediaType.ALL_VALUE);
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
-		String contentType = request.getContentType();
 
-		assertEquals("text/html, */*", contentType);
+		assertEquals("text/html", request.getContentType());
 	}
 
 	@Test
@@ -489,40 +470,38 @@ public class MockHttpServletRequestBuilderTests {
 		assertEquals(user, request.getUserPrincipal());
 	}
 
-	// SPR-12945
-
-	@Test
+	@Test  // SPR-12945
 	public void mergeInvokesDefaultRequestPostProcessorFirst() {
 		final String ATTR = "ATTR";
-		final String EXEPCTED = "override";
+		final String EXPECTED = "override";
 
 		MockHttpServletRequestBuilder defaultBuilder =
 				new MockHttpServletRequestBuilder(HttpMethod.GET, "/foo/bar")
-				.with(requestAttr(ATTR).value("default"));
-
-		builder
-				.with(requestAttr(ATTR).value(EXEPCTED));
+						.with(requestAttr(ATTR).value("default"))
+						.with(requestAttr(ATTR).value(EXPECTED));
 
 		builder.merge(defaultBuilder);
 
 		MockHttpServletRequest request = builder.buildRequest(servletContext);
 		request = builder.postProcessRequest(request);
 
-		assertEquals(EXEPCTED, request.getAttribute(ATTR));
+		assertEquals(EXPECTED, request.getAttribute(ATTR));
 	}
 
-	// SPR-13719
-
-	@Test
+	@Test  // SPR-13719
 	public void arbitraryMethod() {
 		String httpMethod = "REPort";
 		URI url = UriComponentsBuilder.fromPath("/foo/{bar}").buildAndExpand(42).toUri();
 		this.builder = new MockHttpServletRequestBuilder(httpMethod, url);
-
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
 		assertEquals(httpMethod, request.getMethod());
 		assertEquals("/foo/42", request.getPathInfo());
+	}
+
+
+	private static RequestAttributePostProcessor requestAttr(String attrName) {
+		return new RequestAttributePostProcessor().attr(attrName);
 	}
 
 
@@ -534,9 +513,6 @@ public class MockHttpServletRequestBuilderTests {
 		}
 	}
 
-	private static RequestAttributePostProcessor requestAttr(String attrName) {
-		return new RequestAttributePostProcessor().attr(attrName);
-	}
 
 	private static class RequestAttributePostProcessor implements RequestPostProcessor {
 
@@ -559,4 +535,5 @@ public class MockHttpServletRequestBuilderTests {
 			return request;
 		}
 	}
+
 }
