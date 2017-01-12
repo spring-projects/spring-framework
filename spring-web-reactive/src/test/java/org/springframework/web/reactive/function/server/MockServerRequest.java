@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
+import org.springframework.web.server.WebSession;
 
 /**
  * @author Arjen Poutsma
@@ -61,10 +62,12 @@ public class MockServerRequest implements ServerRequest {
 
 	private final Map<String, String> pathVariables;
 
+	private final WebSession session;
+
 	private MockServerRequest(HttpMethod method, URI uri,
 			MockHeaders headers, Object body, Map<String, Object> attributes,
 			MultiValueMap<String, String> queryParams,
-			Map<String, String> pathVariables) {
+			Map<String, String> pathVariables, WebSession session) {
 		this.method = method;
 		this.uri = uri;
 		this.headers = headers;
@@ -72,6 +75,7 @@ public class MockServerRequest implements ServerRequest {
 		this.attributes = attributes;
 		this.queryParams = queryParams;
 		this.pathVariables = pathVariables;
+		this.session = session;
 	}
 
 	public static Builder builder() {
@@ -132,6 +136,11 @@ public class MockServerRequest implements ServerRequest {
 		return Collections.unmodifiableMap(this.pathVariables);
 	}
 
+	@Override
+	public Mono<WebSession> session() {
+		return Mono.justOrEmpty(this.session);
+	}
+
 	public interface Builder {
 
 		Builder method(HttpMethod method);
@@ -154,6 +163,8 @@ public class MockServerRequest implements ServerRequest {
 
 		Builder pathVariables(Map<String, String> pathVariables);
 
+		Builder session(WebSession session);
+
 		MockServerRequest body(Object body);
 
 		MockServerRequest build();
@@ -175,6 +186,8 @@ public class MockServerRequest implements ServerRequest {
 		private MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 
 		private Map<String, String> pathVariables = new LinkedHashMap<>();
+
+		private WebSession session;
 
 		@Override
 		public Builder method(HttpMethod method) {
@@ -251,16 +264,23 @@ public class MockServerRequest implements ServerRequest {
 		}
 
 		@Override
+		public Builder session(WebSession session) {
+			Assert.notNull(session, "'session' must not be null");
+			this.session = session;
+			return this;
+		}
+
+		@Override
 		public MockServerRequest body(Object body) {
 			this.body = body;
 			return new MockServerRequest(this.method, this.uri, this.headers, this.body,
-					this.attributes, this.queryParams, this.pathVariables);
+					this.attributes, this.queryParams, this.pathVariables, this.session);
 		}
 
 		@Override
 		public MockServerRequest build() {
 			return new MockServerRequest(this.method, this.uri, this.headers, null,
-					this.attributes, this.queryParams, this.pathVariables);
+					this.attributes, this.queryParams, this.pathVariables, this.session);
 		}
 
 	}

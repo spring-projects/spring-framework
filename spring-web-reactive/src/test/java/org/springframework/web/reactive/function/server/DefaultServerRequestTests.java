@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebSession;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -136,6 +137,14 @@ public class DefaultServerRequestTests {
 		when(mockExchange.getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(Optional.of(pathVariables));
 
 		assertEquals(pathVariables, defaultRequest.pathVariables());
+	}
+
+	@Test
+	public void session() throws Exception {
+		WebSession session = mock(WebSession.class);
+		when(mockExchange.getSession()).thenReturn(Mono.just(session));
+
+		assertEquals(session, defaultRequest.session().block());
 	}
 
 	@Test

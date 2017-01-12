@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.server.HandlerFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.server.WebSession;
 
 /**
  * Implementation of the {@link ServerRequest} interface that can be subclassed to adapt the request to a
@@ -129,6 +130,11 @@ public class ServerRequestWrapper implements ServerRequest {
 	@Override
 	public Map<String, String> pathVariables() {
 		return this.request.pathVariables();
+	}
+
+	@Override
+	public Mono<WebSession> session() {
+		return this.request.session();
 	}
 
 	/**

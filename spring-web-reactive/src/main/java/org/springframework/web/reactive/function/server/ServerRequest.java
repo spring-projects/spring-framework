@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.AbstractJackson2Codec;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.reactive.function.BodyExtractor;
+import org.springframework.web.server.WebSession;
 
 /**
  * Represents a server-side HTTP request, as handled by a {@code HandlerFunction}.
@@ -151,6 +152,15 @@ public interface ServerRequest {
 	 * @return the path variables
 	 */
 	Map<String, String> pathVariables();
+
+	/**
+	 * Return the web session for the current request. Always guaranteed  to
+	 * return an instance either matching to the session id requested by the
+	 * client, or with a new session id either because the client did not
+	 * specify one or because the underlying session had expired. Use of this
+	 * method does not automatically create a session.
+	 */
+	Mono<WebSession> session();
 
 
 	/**
