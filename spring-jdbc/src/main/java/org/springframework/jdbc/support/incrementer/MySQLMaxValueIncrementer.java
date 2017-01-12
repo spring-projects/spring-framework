@@ -67,12 +67,7 @@ public class MySQLMaxValueIncrementer extends AbstractColumnMaxValueIncrementer 
 	/** The max id to serve */
 	private long maxId = 0;
 
-	/**
-	 * Whether or not to use a new connection for the incrementer. Defaults to true
-	 * in order to support transactional storage engines. Set this to false if the storage engine
-	 * for the  incrementer table is non-transactional like MYISAM and you prefer to not acquire
-	 * an additional database connection
-	 */
+	/** Whether or not to use a new connection for the incrementer */
 	private boolean useNewConnection = true;
 
 
@@ -88,40 +83,29 @@ public class MySQLMaxValueIncrementer extends AbstractColumnMaxValueIncrementer 
 	/**
 	 * Convenience constructor.
 	 * @param dataSource the DataSource to use
-	 * @param incrementerName the name of the sequence/table to use
+	 * @param incrementerName the name of the sequence table to use
 	 * @param columnName the name of the column in the sequence table to use
 	 */
 	public MySQLMaxValueIncrementer(DataSource dataSource, String incrementerName, String columnName) {
 		super(dataSource, incrementerName, columnName);
 	}
 
-	/**
-	 * Convenience constructor for setting whether to use a new connection for the incrementer.
-	 * @param dataSource the DataSource to use
-	 * @param incrementerName the name of the sequence/table to use
-	 * @param columnName the name of the column in the sequence table to use
-	 * @param useNewConnection whether to use a new connection for the incrementer
-	 */
-	public MySQLMaxValueIncrementer(DataSource dataSource, String incrementerName, String columnName,
-	                                boolean useNewConnection) {
-		super(dataSource, incrementerName, columnName);
-		this.useNewConnection = useNewConnection;
-	}
-
-
-	/**
-	 * Return whether to use a new connection for the incrementer.
-	 */
-	public boolean isUseNewConnection() {
-		return useNewConnection;
-	}
 
 	/**
 	 * Set whether to use a new connection for the incrementer.
+	 * <p>{@code true} is necessary to support transactional storage engines,
+	 * using an isolated separate transaction for the increment operation.
+	 * {@code false} is sufficient if the storage engine of the sequence table
+	 * is non-transactional (like MYISAM), avoiding the effort of acquiring an
+	 * extra {@code Connection} for the increment operation.
+	 * <p>Default is {@code true} since Spring Framework 5.0.
+	 * @since 4.3.6
+	 * @see DataSource#getConnection()
 	 */
 	public void setUseNewConnection(boolean useNewConnection) {
 		this.useNewConnection = useNewConnection;
 	}
+
 
 	@Override
 	protected synchronized long getNextKey() throws DataAccessException {
@@ -138,7 +122,7 @@ public class MySQLMaxValueIncrementer extends AbstractColumnMaxValueIncrementer 
 			Statement stmt = null;
 			boolean mustRestoreAutoCommit = false;
 			try {
-				if (useNewConnection) {
+				if (this.useNewConnection) {
 					con = getDataSource().getConnection();
 					if (con.getAutoCommit()) {
 						mustRestoreAutoCommit = true;
@@ -149,7 +133,7 @@ public class MySQLMaxValueIncrementer extends AbstractColumnMaxValueIncrementer 
 					con = DataSourceUtils.getConnection(getDataSource());
 				}
 				stmt = con.createStatement();
-				if (!useNewConnection) {
+				if (!this.useNewConnection) {
 					DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
 				}
 				// Increment the sequence column...
@@ -180,23 +164,23 @@ public class MySQLMaxValueIncrementer extends AbstractColumnMaxValueIncrementer 
 			}
 			finally {
 				JdbcUtils.closeStatement(stmt);
-				if (useNewConnection) {
-					try {
-						con.commit();
-						if (mustRestoreAutoCommit) {
-							con.setAutoCommit(true);
+				if (con != null) {
+					if (this.useNewConnection) {
+						try {
+							con.commit();
+							if (mustRestoreAutoCommit) {
+								con.setAutoCommit(true);
+							}
 						}
+						catch (SQLException ignore) {
+							throw new DataAccessResourceFailureException(
+									"Unable to commit new sequence value changes for " + getIncrementerName());
+						}
+						JdbcUtils.closeConnection(con);
 					}
-					catch (SQLException ignore) {
-						throw new DataAccessResourceFailureException(
-								"Unable to commit new sequence value changes for " + getIncrementerName());
+					else {
+						DataSourceUtils.releaseConnection(con, getDataSource());
 					}
-					try {
-						con.close();
-					} catch (SQLException ignore) {}
-				}
-				else {
-					DataSourceUtils.releaseConnection(con, getDataSource());
 				}
 			}
 		}

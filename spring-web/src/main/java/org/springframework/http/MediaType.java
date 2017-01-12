@@ -126,11 +126,13 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/rss+xml}.
+	 * @since 4.3.6
 	 */
 	public final static MediaType APPLICATION_RSS_XML;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_RSS_XML}.
+	 * @since 4.3.6
 	 */
 	public final static String APPLICATION_RSS_XML_VALUE = "application/rss+xml";
 
@@ -196,12 +198,14 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code text/event-stream}.
+	 * @since 4.3.6
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 	 */
 	public final static MediaType TEXT_EVENT_STREAM;
 
 	/**
 	 * A String equivalent of {@link MediaType#TEXT_EVENT_STREAM}.
+	 * @since 4.3.6
 	 */
 	public final static String TEXT_EVENT_STREAM_VALUE = "text/event-stream";
 
