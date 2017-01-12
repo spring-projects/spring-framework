@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -422,6 +422,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return (this.content != null ? this.content.length : -1);
 	}
 
+	@Override
 	public long getContentLengthLong() {
 		return getContentLength();
 	}
@@ -475,28 +476,25 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * <p>If there are already one or more values registered for the given
 	 * parameter name, they will be replaced.
 	 */
-	public void setParameter(String name, String[] values) {
+	public void setParameter(String name, String... values) {
 		Assert.notNull(name, "Parameter name must not be null");
 		this.parameters.put(name, values);
 	}
 
 	/**
-	 * Sets all provided parameters <strong>replacing</strong> any existing
+	 * Set all provided parameters <strong>replacing</strong> any existing
 	 * values for the provided parameter names. To add without replacing
 	 * existing values, use {@link #addParameters(java.util.Map)}.
 	 */
-	@SuppressWarnings("rawtypes")
-	public void setParameters(Map params) {
+	public void setParameters(Map<String, ?> params) {
 		Assert.notNull(params, "Parameter map must not be null");
-		for (Object key : params.keySet()) {
-			Assert.isInstanceOf(String.class, key,
-					"Parameter map key must be of type [" + String.class.getName() + "]");
+		for (String key : params.keySet()) {
 			Object value = params.get(key);
 			if (value instanceof String) {
-				this.setParameter((String) key, (String) value);
+				setParameter(key, (String) value);
 			}
 			else if (value instanceof String[]) {
-				this.setParameter((String) key, (String[]) value);
+				setParameter(key, (String[]) value);
 			}
 			else {
 				throw new IllegalArgumentException(
@@ -519,7 +517,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * <p>If there are already one or more values registered for the given
 	 * parameter name, the given values will be added to the end of the list.
 	 */
-	public void addParameter(String name, String[] values) {
+	public void addParameter(String name, String... values) {
 		Assert.notNull(name, "Parameter name must not be null");
 		String[] oldArr = this.parameters.get(name);
 		if (oldArr != null) {
@@ -538,18 +536,15 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * existing values. To replace existing values, use
 	 * {@link #setParameters(java.util.Map)}.
 	 */
-	@SuppressWarnings("rawtypes")
-	public void addParameters(Map params) {
+	public void addParameters(Map<String, ?> params) {
 		Assert.notNull(params, "Parameter map must not be null");
-		for (Object key : params.keySet()) {
-			Assert.isInstanceOf(String.class, key,
-					"Parameter map key must be of type [" + String.class.getName() + "]");
+		for (String key : params.keySet()) {
 			Object value = params.get(key);
 			if (value instanceof String) {
-				this.addParameter((String) key, (String) value);
+				this.addParameter(key, (String) value);
 			}
 			else if (value instanceof String[]) {
-				this.addParameter((String) key, (String[]) value);
+				this.addParameter(key, (String[]) value);
 			}
 			else {
 				throw new IllegalArgumentException("Parameter map value must be single value " +
@@ -929,14 +924,14 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * @see #getDateHeader
 	 */
 	public void addHeader(String name, Object value) {
-		if (CONTENT_TYPE_HEADER.equalsIgnoreCase(name)) {
-			setContentType((String) value);
-			return;
+		if (CONTENT_TYPE_HEADER.equalsIgnoreCase(name) && !this.headers.containsKey(CONTENT_TYPE_HEADER)) {
+			setContentType(value.toString());
 		}
-		doAddHeaderValue(name, value, false);
+		else {
+			doAddHeaderValue(name, value, false);
+		}
 	}
 
-	@SuppressWarnings("rawtypes")
 	private void doAddHeaderValue(String name, Object value, boolean replace) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		Assert.notNull(value, "Header value must not be null");

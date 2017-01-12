@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -83,37 +82,37 @@ public class MockHttpServletRequestBuilder
 
 	private final URI url;
 
-	private final MultiValueMap<String, Object> headers = new LinkedMultiValueMap<>();
+	private String contextPath = "";
 
-	private String contentType;
+	private String servletPath = "";
 
-	private byte[] content;
-
-	private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-
-	private final List<Cookie> cookies = new ArrayList<>();
-
-	private Locale locale;
-
-	private String characterEncoding;
+	private String pathInfo = "";
 
 	private Boolean secure;
 
 	private Principal principal;
 
-	private final Map<String, Object> attributes = new LinkedHashMap<>();
-
 	private MockHttpSession session;
+
+	private String characterEncoding;
+
+	private byte[] content;
+
+	private String contentType;
+
+	private final MultiValueMap<String, Object> headers = new LinkedMultiValueMap<>();
+
+	private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+
+	private final List<Cookie> cookies = new ArrayList<>();
+
+	private final List<Locale> locales = new ArrayList<>();
+
+	private final Map<String, Object> requestAttributes = new LinkedHashMap<>();
 
 	private final Map<String, Object> sessionAttributes = new LinkedHashMap<>();
 
 	private final Map<String, Object> flashAttributes = new LinkedHashMap<>();
-
-	private String contextPath = "";
-
-	private String servletPath = "";
-
-	private String pathInfo = ValueConstants.DEFAULT_NONE;
 
 	private final List<RequestPostProcessor> postProcessors = new ArrayList<>();
 
@@ -158,59 +157,95 @@ public class MockHttpServletRequestBuilder
 
 
 	/**
-	 * Add a request parameter to the {@link MockHttpServletRequest}.
-	 * <p>If called more than once, new values get added to existing ones.
-	 * @param name the parameter name
-	 * @param values one or more values
+	 * Specify the portion of the requestURI that represents the context path.
+	 * The context path, if specified, must match to the start of the request URI.
+	 * <p>In most cases, tests can be written by omitting the context path from
+	 * the requestURI. This is because most applications don't actually depend
+	 * on the name under which they're deployed. If specified here, the context
+	 * path must start with a "/" and must not end with a "/".
+	 * @see javax.servlet.http.HttpServletRequest#getContextPath()
 	 */
-	public MockHttpServletRequestBuilder param(String name, String... values) {
-		addToMultiValueMap(this.parameters, name, values);
+	public MockHttpServletRequestBuilder contextPath(String contextPath) {
+		if (StringUtils.hasText(contextPath)) {
+			Assert.isTrue(contextPath.startsWith("/"), "Context path must start with a '/'");
+			Assert.isTrue(!contextPath.endsWith("/"), "Context path must not end with a '/'");
+		}
+		this.contextPath = (contextPath != null ? contextPath : "");
 		return this;
 	}
 
 	/**
-	 * Add a map of request parameters to the {@link MockHttpServletRequest},
-	 * for example when testing a form submission.
-	 * <p>If called more than once, new values get added to existing ones.
-	 * @param params the parameters to add
-	 * @since 4.2.4
+	 * Specify the portion of the requestURI that represents the path to which
+	 * the Servlet is mapped. This is typically a portion of the requestURI
+	 * after the context path.
+	 * <p>In most cases, tests can be written by omitting the servlet path from
+	 * the requestURI. This is because most applications don't actually depend
+	 * on the prefix to which a servlet is mapped. For example if a Servlet is
+	 * mapped to {@code "/main/*"}, tests can be written with the requestURI
+	 * {@code "/accounts/1"} as opposed to {@code "/main/accounts/1"}.
+	 * If specified here, the servletPath must start with a "/" and must not
+	 * end with a "/".
+	 * @see javax.servlet.http.HttpServletRequest#getServletPath()
 	 */
-	public MockHttpServletRequestBuilder params(MultiValueMap<String, String> params) {
-		for (String name : params.keySet()) {
-			for (String value : params.get(name)) {
-				this.parameters.add(name, value);
-			}
+	public MockHttpServletRequestBuilder servletPath(String servletPath) {
+		if (StringUtils.hasText(servletPath)) {
+			Assert.isTrue(servletPath.startsWith("/"), "Servlet path must start with a '/'");
+			Assert.isTrue(!servletPath.endsWith("/"), "Servlet path must not end with a '/'");
 		}
+		this.servletPath = (servletPath != null ? servletPath : "");
 		return this;
 	}
 
 	/**
-	 * Add a header to the request. Values are always added.
-	 * @param name the header name
-	 * @param values one or more header values
+	 * Specify the portion of the requestURI that represents the pathInfo.
+	 * <p>If left unspecified (recommended), the pathInfo will be automatically derived
+	 * by removing the contextPath and the servletPath from the requestURI and using any
+	 * remaining part. If specified here, the pathInfo must start with a "/".
+	 * <p>If specified, the pathInfo will be used as-is.
+	 * @see javax.servlet.http.HttpServletRequest#getPathInfo()
 	 */
-	public MockHttpServletRequestBuilder header(String name, Object... values) {
-		if ("Content-Type".equalsIgnoreCase(name)) {
-			List<MediaType> mediaTypes = MediaType.parseMediaTypes(StringUtils.arrayToCommaDelimitedString(values));
-			this.contentType = MediaType.toString(mediaTypes);
+	public MockHttpServletRequestBuilder pathInfo(String pathInfo) {
+		if (StringUtils.hasText(pathInfo)) {
+			Assert.isTrue(pathInfo.startsWith("/"), "Path info must start with a '/'");
 		}
-		addToMultiValueMap(this.headers, name, values);
+		this.pathInfo = pathInfo;
 		return this;
 	}
 
 	/**
-	 * Add all headers to the request. Values are always added.
-	 * @param httpHeaders the headers and values to add
+	 * Set the secure property of the {@link ServletRequest} indicating use of a
+	 * secure channel, such as HTTPS.
+	 * @param secure whether the request is using a secure channel
 	 */
-	public MockHttpServletRequestBuilder headers(HttpHeaders httpHeaders) {
-		MediaType mediaType = httpHeaders.getContentType();
-		if (mediaType != null) {
-			this.contentType = mediaType.toString();
-		}
-		for (String name : httpHeaders.keySet()) {
-			Object[] values = ObjectUtils.toObjectArray(httpHeaders.get(name).toArray());
-			addToMultiValueMap(this.headers, name, values);
-		}
+	public MockHttpServletRequestBuilder secure(boolean secure){
+		this.secure = secure;
+		return this;
+	}
+
+	/**
+	 * Set the character encoding of the request.
+	 * @param encoding the character encoding
+	 */
+	public MockHttpServletRequestBuilder characterEncoding(String encoding) {
+		this.characterEncoding = encoding;
+		return this;
+	}
+
+	/**
+	 * Set the request body.
+	 * @param content the body content
+	 */
+	public MockHttpServletRequestBuilder content(byte[] content) {
+		this.content = content;
+		return this;
+	}
+
+	/**
+	 * Set the request body as a UTF-8 String.
+	 * @param content the body content
+	 */
+	public MockHttpServletRequestBuilder content(String content) {
+		this.content = content.getBytes(StandardCharsets.UTF_8);
 		return this;
 	}
 
@@ -221,7 +256,6 @@ public class MockHttpServletRequestBuilder
 	public MockHttpServletRequestBuilder contentType(MediaType contentType) {
 		Assert.notNull(contentType, "'contentType' must not be null");
 		this.contentType = contentType.toString();
-		this.headers.set("Content-Type", this.contentType);
 		return this;
 	}
 
@@ -232,7 +266,6 @@ public class MockHttpServletRequestBuilder
 	 */
 	public MockHttpServletRequestBuilder contentType(String contentType) {
 		this.contentType = MediaType.parseMediaType(contentType).toString();
-		this.headers.set("Content-Type", this.contentType);
 		return this;
 	}
 
@@ -261,20 +294,51 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
-	 * Set the request body.
-	 * @param content the body content
+	 * Add a header to the request. Values are always added.
+	 * @param name the header name
+	 * @param values one or more header values
 	 */
-	public MockHttpServletRequestBuilder content(byte[] content) {
-		this.content = content;
+	public MockHttpServletRequestBuilder header(String name, Object... values) {
+		addToMultiValueMap(this.headers, name, values);
 		return this;
 	}
 
 	/**
-	 * Set the request body as a UTF-8 String.
-	 * @param content the body content
+	 * Add all headers to the request. Values are always added.
+	 * @param httpHeaders the headers and values to add
 	 */
-	public MockHttpServletRequestBuilder content(String content) {
-		this.content = content.getBytes(StandardCharsets.UTF_8);
+	public MockHttpServletRequestBuilder headers(HttpHeaders httpHeaders) {
+		for (String name : httpHeaders.keySet()) {
+			Object[] values = ObjectUtils.toObjectArray(httpHeaders.get(name).toArray());
+			addToMultiValueMap(this.headers, name, values);
+		}
+		return this;
+	}
+
+	/**
+	 * Add a request parameter to the {@link MockHttpServletRequest}.
+	 * <p>If called more than once, new values get added to existing ones.
+	 * @param name the parameter name
+	 * @param values one or more values
+	 */
+	public MockHttpServletRequestBuilder param(String name, String... values) {
+		addToMultiValueMap(this.parameters, name, values);
+		return this;
+	}
+
+	/**
+	 * Add a map of request parameters to the {@link MockHttpServletRequest},
+	 * for example when testing a form submission.
+	 * <p>If called more than once, new values get added to existing ones.
+	 * @param params the parameters to add
+	 * @since 4.2.4
+	 */
+	public MockHttpServletRequestBuilder params(MultiValueMap<String, String> params) {
+		for (String name : params.keySet()) {
+			for (String value : params.get(name)) {
+				this.parameters.add(name, value);
+			}
+		}
 		return this;
 	}
 
@@ -289,20 +353,27 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
-	 * Set the locale of the request.
-	 * @param locale the locale
+	 * Add the specified locales as preferred request locales.
+	 * @param locales the locales to add
+	 * @since 4.3.6
+	 * @see #locale(Locale)
 	 */
-	public MockHttpServletRequestBuilder locale(Locale locale) {
-		this.locale = locale;
+	public MockHttpServletRequestBuilder locale(Locale... locales) {
+		Assert.notEmpty(locales, "'locales' must not be empty");
+		this.locales.addAll(Arrays.asList(locales));
 		return this;
 	}
 
 	/**
-	 * Set the character encoding of the request.
-	 * @param encoding the character encoding
+	 * Set the locale of the request, overriding any previous locales.
+	 * @param locale the locale, or {@code null} to reset it
+	 * @see #locale(Locale...)
 	 */
-	public MockHttpServletRequestBuilder characterEncoding(String encoding) {
-		this.characterEncoding = encoding;
+	public MockHttpServletRequestBuilder locale(Locale locale) {
+		this.locales.clear();
+		if (locale != null) {
+			this.locales.add(locale);
+		}
 		return this;
 	}
 
@@ -312,7 +383,7 @@ public class MockHttpServletRequestBuilder
 	 * @param value the attribute value
 	 */
 	public MockHttpServletRequestBuilder requestAttr(String name, Object value) {
-		addToMap(this.attributes, name, value);
+		addToMap(this.requestAttributes, name, value);
 		return this;
 	}
 
@@ -383,73 +454,6 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
-	 * Specify the portion of the requestURI that represents the context path.
-	 * The context path, if specified, must match to the start of the request URI.
-	 * <p>In most cases, tests can be written by omitting the context path from
-	 * the requestURI. This is because most applications don't actually depend
-	 * on the name under which they're deployed. If specified here, the context
-	 * path must start with a "/" and must not end with a "/".
-	 * @see <a href="http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html#getContextPath%28%29">HttpServletRequest.getContextPath()</a>
-	 */
-	public MockHttpServletRequestBuilder contextPath(String contextPath) {
-		if (StringUtils.hasText(contextPath)) {
-			Assert.isTrue(contextPath.startsWith("/"), "Context path must start with a '/'");
-			Assert.isTrue(!contextPath.endsWith("/"), "Context path must not end with a '/'");
-		}
-		this.contextPath = (contextPath != null) ? contextPath : "";
-		return this;
-	}
-
-	/**
-	 * Specify the portion of the requestURI that represents the path to which
-	 * the Servlet is mapped. This is typically a portion of the requestURI
-	 * after the context path.
-	 * <p>In most cases, tests can be written by omitting the servlet path from
-	 * the requestURI. This is because most applications don't actually depend
-	 * on the prefix to which a servlet is mapped. For example if a Servlet is
-	 * mapped to {@code "/main/*"}, tests can be written with the requestURI
-	 * {@code "/accounts/1"} as opposed to {@code "/main/accounts/1"}.
-	 * If specified here, the servletPath must start with a "/" and must not
-	 * end with a "/".
-	 * @see <a href="http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html#getServletPath%28%29">HttpServletRequest.getServletPath()</a>
-	 */
-	public MockHttpServletRequestBuilder servletPath(String servletPath) {
-		if (StringUtils.hasText(servletPath)) {
-			Assert.isTrue(servletPath.startsWith("/"), "Servlet path must start with a '/'");
-			Assert.isTrue(!servletPath.endsWith("/"), "Servlet path must not end with a '/'");
-		}
-		this.servletPath = (servletPath != null) ? servletPath : "";
-		return this;
-	}
-
-	/**
-	 * Specify the portion of the requestURI that represents the pathInfo.
-	 * <p>If left unspecified (recommended), the pathInfo will be automatically
-	 * derived by removing the contextPath and the servletPath from the
-	 * requestURI and using any remaining part. If specified here, the pathInfo
-	 * must start with a "/".
-	 * <p>If specified, the pathInfo will be used as is.
-	 * @see <a href="http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html#getPathInfo%28%29">HttpServletRequest.getServletPath()</a>
-	 */
-	public MockHttpServletRequestBuilder pathInfo(String pathInfo) {
-		if (StringUtils.hasText(pathInfo)) {
-			Assert.isTrue(pathInfo.startsWith("/"), "pathInfo must start with a '/'");
-		}
-		this.pathInfo = pathInfo;
-		return this;
-	}
-
-	/**
-	 * Set the secure property of the {@link ServletRequest} indicating use of a
-	 * secure channel, such as HTTPS.
-	 * @param secure whether the request is using a secure channel
-	 */
-	public MockHttpServletRequestBuilder secure(boolean secure){
-		this.secure = secure;
-		return this;
-	}
-
-	/**
 	 * An extension point for further initialization of {@link MockHttpServletRequest}
 	 * in ways not built directly into the {@code MockHttpServletRequestBuilder}.
 	 * Implementation of this interface can have builder-style methods themselves
@@ -489,19 +493,41 @@ public class MockHttpServletRequestBuilder
 		}
 		MockHttpServletRequestBuilder parentBuilder = (MockHttpServletRequestBuilder) parent;
 
+		if (!StringUtils.hasText(this.contextPath)) {
+			this.contextPath = parentBuilder.contextPath;
+		}
+		if (!StringUtils.hasText(this.servletPath)) {
+			this.servletPath = parentBuilder.servletPath;
+		}
+		if ("".equals(this.pathInfo)) {
+			this.pathInfo = parentBuilder.pathInfo;
+		}
+
+		if (this.secure == null) {
+			this.secure = parentBuilder.secure;
+		}
+		if (this.principal == null) {
+			this.principal = parentBuilder.principal;
+		}
+		if (this.session == null) {
+			this.session = parentBuilder.session;
+		}
+
+		if (this.characterEncoding == null) {
+			this.characterEncoding = parentBuilder.characterEncoding;
+		}
+		if (this.content == null) {
+			this.content = parentBuilder.content;
+		}
+		if (this.contentType == null) {
+			this.contentType = parentBuilder.contentType;
+		}
+
 		for (String headerName : parentBuilder.headers.keySet()) {
 			if (!this.headers.containsKey(headerName)) {
 				this.headers.put(headerName, parentBuilder.headers.get(headerName));
 			}
 		}
-
-		if (this.contentType == null) {
-			this.contentType = parentBuilder.contentType;
-		}
-		if (this.content == null) {
-			this.content = parentBuilder.content;
-		}
-
 		for (String paramName : parentBuilder.parameters.keySet()) {
 			if (!this.parameters.containsKey(paramName)) {
 				this.parameters.put(paramName, parentBuilder.parameters.get(paramName));
@@ -512,53 +538,26 @@ public class MockHttpServletRequestBuilder
 				this.cookies.add(cookie);
 			}
 		}
-
-		if (this.locale == null) {
-			this.locale = parentBuilder.locale;
-		}
-		if (this.characterEncoding == null) {
-			this.characterEncoding = parentBuilder.characterEncoding;
-		}
-
-		if (this.secure == null) {
-			this.secure = parentBuilder.secure;
-		}
-		if (this.principal == null) {
-			this.principal = parentBuilder.principal;
-		}
-
-		for (String attributeName : parentBuilder.attributes.keySet()) {
-			if (!this.attributes.containsKey(attributeName)) {
-				this.attributes.put(attributeName, parentBuilder.attributes.get(attributeName));
+		for (Locale locale : parentBuilder.locales) {
+			if (!this.locales.contains(locale)) {
+				this.locales.add(locale);
 			}
 		}
 
-		if (this.session == null) {
-			this.session = parentBuilder.session;
-		}
-
-		for (String sessionAttributeName : parentBuilder.sessionAttributes.keySet()) {
-			if (!this.sessionAttributes.containsKey(sessionAttributeName)) {
-				this.sessionAttributes.put(sessionAttributeName, parentBuilder.sessionAttributes.get(sessionAttributeName));
+		for (String attributeName : parentBuilder.requestAttributes.keySet()) {
+			if (!this.requestAttributes.containsKey(attributeName)) {
+				this.requestAttributes.put(attributeName, parentBuilder.requestAttributes.get(attributeName));
 			}
 		}
-
-		for (String flashAttributeName : parentBuilder.flashAttributes.keySet()) {
-			if (!this.flashAttributes.containsKey(flashAttributeName)) {
-				this.flashAttributes.put(flashAttributeName, parentBuilder.flashAttributes.get(flashAttributeName));
+		for (String attributeName : parentBuilder.sessionAttributes.keySet()) {
+			if (!this.sessionAttributes.containsKey(attributeName)) {
+				this.sessionAttributes.put(attributeName, parentBuilder.sessionAttributes.get(attributeName));
 			}
 		}
-
-		if (!StringUtils.hasText(this.contextPath)) {
-			this.contextPath = parentBuilder.contextPath;
-		}
-
-		if (!StringUtils.hasText(this.servletPath)) {
-			this.servletPath = parentBuilder.servletPath;
-		}
-
-		if (ValueConstants.DEFAULT_NONE.equals(this.pathInfo)) {
-			this.pathInfo = parentBuilder.pathInfo;
+		for (String attributeName : parentBuilder.flashAttributes.keySet()) {
+			if (!this.flashAttributes.containsKey(attributeName)) {
+				this.flashAttributes.put(attributeName, parentBuilder.flashAttributes.get(attributeName));
+			}
 		}
 
 		this.postProcessors.addAll(0, parentBuilder.postProcessors);
@@ -582,9 +581,11 @@ public class MockHttpServletRequestBuilder
 	public final MockHttpServletRequest buildRequest(ServletContext servletContext) {
 		MockHttpServletRequest request = createServletRequest(servletContext);
 
+		request.setAsyncSupported(true);
+		request.setMethod(this.method);
+
 		String requestUri = this.url.getRawPath();
 		request.setRequestURI(requestUri);
-		updatePathRequestProperties(request, requestUri);
 
 		if (this.url.getScheme() != null) {
 			request.setScheme(this.url.getScheme());
@@ -596,7 +597,21 @@ public class MockHttpServletRequestBuilder
 			request.setServerPort(this.url.getPort());
 		}
 
-		request.setMethod(this.method);
+		updatePathRequestProperties(request, requestUri);
+
+		if (this.secure != null) {
+			request.setSecure(this.secure);
+		}
+		if (this.principal != null) {
+			request.setUserPrincipal(this.principal);
+		}
+		if (this.session != null) {
+			request.setSession(this.session);
+		}
+
+		request.setCharacterEncoding(this.characterEncoding);
+		request.setContent(this.content);
+		request.setContentType(this.contentType);
 
 		for (String name : this.headers.keySet()) {
 			for (Object value : this.headers.get(name)) {
@@ -615,10 +630,6 @@ public class MockHttpServletRequestBuilder
 			}
 		}
 
-		request.setContentType(this.contentType);
-		request.setContent(this.content);
-		request.setCharacterEncoding(this.characterEncoding);
-
 		if (this.content != null && this.contentType != null) {
 			MediaType mediaType = MediaType.parseMediaType(this.contentType);
 			if (MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType)) {
@@ -629,24 +640,12 @@ public class MockHttpServletRequestBuilder
 		if (!ObjectUtils.isEmpty(this.cookies)) {
 			request.setCookies(this.cookies.toArray(new Cookie[this.cookies.size()]));
 		}
-
-		if (this.locale != null) {
-			request.addPreferredLocale(this.locale);
+		if (!ObjectUtils.isEmpty(this.locales)) {
+			request.setPreferredLocales(this.locales);
 		}
 
-		if (this.secure != null) {
-			request.setSecure(this.secure);
-		}
-
-		request.setUserPrincipal(this.principal);
-
-		for (String name : this.attributes.keySet()) {
-			request.setAttribute(name, this.attributes.get(name));
-		}
-
-		// Set session before session and flash attributes
-		if (this.session != null) {
-			request.setSession(this.session);
+		for (String name : this.requestAttributes.keySet()) {
+			request.setAttribute(name, this.requestAttributes.get(name));
 		}
 		for (String name : this.sessionAttributes.keySet()) {
 			request.getSession().setAttribute(name, this.sessionAttributes.get(name));
@@ -654,11 +653,8 @@ public class MockHttpServletRequestBuilder
 
 		FlashMap flashMap = new FlashMap();
 		flashMap.putAll(this.flashAttributes);
-
 		FlashMapManager flashMapManager = getFlashMapManager(request);
 		flashMapManager.saveOutputFlashMap(flashMap, request, new MockHttpServletResponse());
-
-		request.setAsyncSupported(true);
 
 		return request;
 	}
@@ -676,15 +672,20 @@ public class MockHttpServletRequestBuilder
 	 * Update the contextPath, servletPath, and pathInfo of the request.
 	 */
 	private void updatePathRequestProperties(MockHttpServletRequest request, String requestUri) {
-		Assert.isTrue(requestUri.startsWith(this.contextPath),
-				"requestURI [" + requestUri + "] does not start with contextPath [" + this.contextPath + "]");
+		if (!requestUri.startsWith(this.contextPath)) {
+			throw new IllegalArgumentException(
+					"Request URI [" + requestUri + "] does not start with context path [" + this.contextPath + "]");
+		}
 		request.setContextPath(this.contextPath);
 		request.setServletPath(this.servletPath);
-		if (ValueConstants.DEFAULT_NONE.equals(this.pathInfo)) {
-			Assert.isTrue(requestUri.startsWith(this.contextPath + this.servletPath),
-					"Invalid servletPath [" + this.servletPath + "] for requestURI [" + requestUri + "]");
+
+		if ("".equals(this.pathInfo)) {
+			if (!requestUri.startsWith(this.contextPath + this.servletPath)) {
+				throw new IllegalArgumentException(
+						"Invalid servlet path [" + this.servletPath + "] for request URI [" + requestUri + "]");
+			}
 			String extraPath = requestUri.substring(this.contextPath.length() + this.servletPath.length());
-			this.pathInfo = (StringUtils.hasText(extraPath)) ? extraPath : null;
+			this.pathInfo = (StringUtils.hasText(extraPath) ? extraPath : null);
 		}
 		request.setPathInfo(this.pathInfo);
 	}
@@ -704,13 +705,11 @@ public class MockHttpServletRequestBuilder
 	}
 
 	private MultiValueMap<String, String> parseFormData(final MediaType mediaType) {
-		MultiValueMap<String, String> map;
 		HttpInputMessage message = new HttpInputMessage() {
 			@Override
 			public InputStream getBody() throws IOException {
 				return new ByteArrayInputStream(content);
 			}
-
 			@Override
 			public HttpHeaders getHeaders() {
 				HttpHeaders headers = new HttpHeaders();
@@ -718,13 +717,13 @@ public class MockHttpServletRequestBuilder
 				return headers;
 			}
 		};
+
 		try {
-			map = new FormHttpMessageConverter().read(null, message);
+			return new FormHttpMessageConverter().read(null, message);
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException("Failed to parse form data in request body", ex);
 		}
-		return map;
 	}
 
 	private FlashMapManager getFlashMapManager(MockHttpServletRequest request) {
