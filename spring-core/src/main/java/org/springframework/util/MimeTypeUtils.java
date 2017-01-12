@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,26 +63,6 @@ public abstract class MimeTypeUtils {
 	public static final String ALL_VALUE = "*/*";
 
 	/**
-	 *  Public constant mime type for {@code application/atom+xml}.
-	 */
-	public final static MimeType APPLICATION_ATOM_XML;
-
-	/**
-	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_ATOM_XML}.
-	 */
-	public final static String APPLICATION_ATOM_XML_VALUE = "application/atom+xml";
-
-	/**
-	 * Public constant mime type for {@code application/x-www-form-urlencoded}.
-	 *  */
-	public final static MimeType APPLICATION_FORM_URLENCODED;
-
-	/**
-	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_FORM_URLENCODED}.
-	 */
-	public final static String APPLICATION_FORM_URLENCODED_VALUE = "application/x-www-form-urlencoded";
-
-	/**
 	 * Public constant mime type for {@code application/json}.
 	 * */
 	public final static MimeType APPLICATION_JSON;
@@ -101,26 +81,6 @@ public abstract class MimeTypeUtils {
 	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_OCTET_STREAM}.
 	 */
 	public final static String APPLICATION_OCTET_STREAM_VALUE = "application/octet-stream";
-
-	/**
-	 * Public constant mime type for {@code application/rss+xml}.
-	 */
-	public final static MimeType APPLICATION_RSS_XML;
-
-	/**
-	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_RSS_XML}.
-	 */
-	public final static String APPLICATION_RSS_XML_VALUE = "application/rss+xml";
-
-	/**
-	 * Public constant mime type for {@code application/xhtml+xml}.
-	 *  */
-	public final static MimeType APPLICATION_XHTML_XML;
-
-	/**
-	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_XHTML_XML}.
-	 */
-	public final static String APPLICATION_XHTML_XML_VALUE = "application/xhtml+xml";
 
 	/**
 	 * Public constant mime type for {@code application/xml}.
@@ -163,16 +123,6 @@ public abstract class MimeTypeUtils {
 	public final static String IMAGE_PNG_VALUE = "image/png";
 
 	/**
-	 * Public constant mime type for {@code multipart/form-data}.
-	 *  */
-	public final static MimeType MULTIPART_FORM_DATA;
-
-	/**
-	 * A String equivalent of {@link MimeTypeUtils#MULTIPART_FORM_DATA}.
-	 */
-	public final static String MULTIPART_FORM_DATA_VALUE = "multipart/form-data";
-
-	/**
 	 * Public constant mime type for {@code text/html}.
 	 *  */
 	public final static MimeType TEXT_HTML;
@@ -205,17 +155,12 @@ public abstract class MimeTypeUtils {
 
 	static {
 		ALL = MimeType.valueOf(ALL_VALUE);
-		APPLICATION_ATOM_XML = MimeType.valueOf(APPLICATION_ATOM_XML_VALUE);
-		APPLICATION_FORM_URLENCODED = MimeType.valueOf(APPLICATION_FORM_URLENCODED_VALUE);
 		APPLICATION_JSON = MimeType.valueOf(APPLICATION_JSON_VALUE);
 		APPLICATION_OCTET_STREAM = MimeType.valueOf(APPLICATION_OCTET_STREAM_VALUE);
-		APPLICATION_RSS_XML = MimeType.valueOf(APPLICATION_RSS_XML_VALUE);
-		APPLICATION_XHTML_XML = MimeType.valueOf(APPLICATION_XHTML_XML_VALUE);
 		APPLICATION_XML = MimeType.valueOf(APPLICATION_XML_VALUE);
 		IMAGE_GIF = MimeType.valueOf(IMAGE_GIF_VALUE);
 		IMAGE_JPEG = MimeType.valueOf(IMAGE_JPEG_VALUE);
 		IMAGE_PNG = MimeType.valueOf(IMAGE_PNG_VALUE);
-		MULTIPART_FORM_DATA = MimeType.valueOf(MULTIPART_FORM_DATA_VALUE);
 		TEXT_HTML = MimeType.valueOf(TEXT_HTML_VALUE);
 		TEXT_PLAIN = MimeType.valueOf(TEXT_PLAIN_VALUE);
 		TEXT_XML = MimeType.valueOf(TEXT_XML_VALUE);
