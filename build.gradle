@@ -57,7 +57,7 @@ configure(allprojects) { project ->
 	ext.javamailVersion      = "1.5.6"
 	ext.jettyVersion         = "9.3.14.v20161028"  // as of 9.3.15, Jetty has hard Servlet 3.1 requirement
 	ext.jetty94Version       = "9.4.0.v20161208"  // for spring-websocket support, optimized for Jetty 9.4
-	ext.jodaVersion          = "2.9.6"
+	ext.jodaVersion          = "2.9.7"
 	ext.jrubyVersion         = "1.7.26"  // JRuby 9000 only supported through JSR-223 (StandardScriptFactory)
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
@@ -251,16 +251,16 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 		options.links(project.ext.javadocLinks)
 		options.addStringOption('Xdoclint:none', '-quiet')
 
-		// suppress warnings due to cross-module @see and @link references;
-		// note that global 'api' task does display all warnings.
+		// Suppress warnings due to cross-module @see and @link references.
+		// Note that global 'api' task does display all warnings.
 		logging.captureStandardError LogLevel.INFO
-		logging.captureStandardOutput LogLevel.INFO // suppress "## warnings" message
+		logging.captureStandardOutput LogLevel.INFO  // suppress "## warnings" message
 	}
 
 	task sourcesJar(type: Jar, dependsOn: classes) {
 		classifier = 'sources'
 		from sourceSets.main.allSource
-		// don't include or exclude anything explicitly by default. See SPR-12085.
+		// Don't include or exclude anything explicitly by default. See SPR-12085.
 	}
 
 	task javadocJar(type: Jar) {
@@ -401,8 +401,8 @@ project("spring-beans-groovy") {
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 	}
 
-	// this module's Java and Groovy sources need to be compiled together
-	compileJava.enabled=false
+	// This module's Java and Groovy sources need to be compiled together.
+	compileJava.enabled = false
 	sourceSets {
 		main {
 			groovy {
