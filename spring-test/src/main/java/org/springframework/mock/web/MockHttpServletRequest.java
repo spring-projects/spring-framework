@@ -541,10 +541,10 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		for (String key : params.keySet()) {
 			Object value = params.get(key);
 			if (value instanceof String) {
-				this.addParameter(key, (String) value);
+				addParameter(key, (String) value);
 			}
 			else if (value instanceof String[]) {
-				this.addParameter(key, (String[]) value);
+				addParameter(key, (String[]) value);
 			}
 			else {
 				throw new IllegalArgumentException("Parameter map value must be single value " +

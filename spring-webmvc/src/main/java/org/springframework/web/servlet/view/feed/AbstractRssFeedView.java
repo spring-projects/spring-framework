@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.rometools.rome.feed.rss.Channel;
 import com.rometools.rome.feed.rss.Item;
 
-import org.springframework.util.MimeTypeUtils;
+import org.springframework.http.MediaType;
 
 /**
  * Abstract superclass for RSS Feed views, using the
@@ -48,8 +48,9 @@ import org.springframework.util.MimeTypeUtils;
 public abstract class AbstractRssFeedView extends AbstractFeedView<Channel> {
 
 	public AbstractRssFeedView() {
-		setContentType(MimeTypeUtils.APPLICATION_RSS_XML_VALUE);
+		setContentType(MediaType.APPLICATION_RSS_XML_VALUE);
 	}
+
 
 	/**
 	 * Create a new Channel instance to hold the entries.

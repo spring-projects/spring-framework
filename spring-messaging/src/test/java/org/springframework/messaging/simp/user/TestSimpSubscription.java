@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.messaging.simp.user;
 
+package org.springframework.messaging.simp.user;
 
 import org.springframework.util.ObjectUtils;
 
+/**
+ * @author Rossen Stoyanchev
+ */
 public class TestSimpSubscription implements SimpSubscription {
 
-	private String id;
+	private final String destination;
+
+	private final String id;
 
 	private TestSimpSession session;
-
-	private String destination;
 
 
 	public TestSimpSubscription(String id, String destination) {
 		this.destination = destination;
 		this.id = id;
 	}
+
 
 	@Override
 	public String getId() {
@@ -50,6 +54,7 @@ public class TestSimpSubscription implements SimpSubscription {
 	public String getDestination() {
 		return destination;
 	}
+
 
 	@Override
 	public boolean equals(Object other) {

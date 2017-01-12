@@ -458,7 +458,7 @@ project("spring-beans-groovy") {
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 	}
 
-	// this module's Java and Groovy sources need to be compiled together
+	// This module's Java and Groovy sources need to be compiled together.
 	compileJava.enabled = false
 	sourceSets {
 		main {

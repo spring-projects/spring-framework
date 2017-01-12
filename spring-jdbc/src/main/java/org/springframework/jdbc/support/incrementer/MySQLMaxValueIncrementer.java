@@ -34,7 +34,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  *
  * <p>The sequence is kept in a table; there should be one sequence table per
  * table that needs an auto-generated key. The storage engine used by the sequence table
- * can be MYISAM or INNODB since the sequences are allocated using a separate connection 
+ * can be MYISAM or INNODB since the sequences are allocated using a separate connection
  * without being affected by any other transactions that might be in progress.
  *
  * <p>Example:
@@ -47,7 +47,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  * database. If the server or your application is stopped or crashes or a transaction
  * is rolled back, the unused values will never be served. The maximum hole size in
  * numbering is consequently the value of cacheSize.
- * 
+ *
  * <p>It is possible to avoid acquiring a new connection for the incrementer by setting the
  * "useNewConnection" property to false. In this case you <i>MUST</i> use a non-transactional
  * storage engine like MYISAM when defining the incrementer table.
