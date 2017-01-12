@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,6 +124,18 @@ public class MediaType extends MimeType implements Serializable {
 	public final static String APPLICATION_PDF_VALUE = "application/pdf";
 
 	/**
+	 * Public constant media type for {@code application/rss+xml}.
+	 * @since 4.3.6
+	 */
+	public final static MediaType APPLICATION_RSS_XML;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_RSS_XML}.
+	 * @since 4.3.6
+	 */
+	public final static String APPLICATION_RSS_XML_VALUE = "application/rss+xml";
+
+	/**
 	 * Public constant media type for {@code application/xhtml+xml}.
 	 */
 	public final static MediaType APPLICATION_XHTML_XML;
@@ -184,6 +196,19 @@ public class MediaType extends MimeType implements Serializable {
 	public final static String MULTIPART_FORM_DATA_VALUE = "multipart/form-data";
 
 	/**
+	 * Public constant media type for {@code text/event-stream}.
+	 * @since 4.3.6
+	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
+	 */
+	public final static MediaType TEXT_EVENT_STREAM;
+
+	/**
+	 * A String equivalent of {@link MediaType#TEXT_EVENT_STREAM}.
+	 * @since 4.3.6
+	 */
+	public final static String TEXT_EVENT_STREAM_VALUE = "text/event-stream";
+
+	/**
 	 * Public constant media type for {@code text/html}.
 	 */
 	public final static MediaType TEXT_HTML;
@@ -237,12 +262,14 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_JSON_UTF8 = valueOf(APPLICATION_JSON_UTF8_VALUE);
 		APPLICATION_OCTET_STREAM = valueOf(APPLICATION_OCTET_STREAM_VALUE);
 		APPLICATION_PDF = valueOf(APPLICATION_PDF_VALUE);
+		APPLICATION_RSS_XML = valueOf(APPLICATION_RSS_XML_VALUE);
 		APPLICATION_XHTML_XML = valueOf(APPLICATION_XHTML_XML_VALUE);
 		APPLICATION_XML = valueOf(APPLICATION_XML_VALUE);
 		IMAGE_GIF = valueOf(IMAGE_GIF_VALUE);
 		IMAGE_JPEG = valueOf(IMAGE_JPEG_VALUE);
 		IMAGE_PNG = valueOf(IMAGE_PNG_VALUE);
 		MULTIPART_FORM_DATA = valueOf(MULTIPART_FORM_DATA_VALUE);
+		TEXT_EVENT_STREAM = valueOf(TEXT_EVENT_STREAM_VALUE);
 		TEXT_HTML = valueOf(TEXT_HTML_VALUE);
 		TEXT_MARKDOWN = valueOf(TEXT_MARKDOWN_VALUE);
 		TEXT_PLAIN = valueOf(TEXT_PLAIN_VALUE);
