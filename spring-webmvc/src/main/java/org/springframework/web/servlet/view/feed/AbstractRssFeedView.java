@@ -24,6 +24,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.rometools.rome.feed.rss.Channel;
 import com.rometools.rome.feed.rss.Item;
 
+import org.springframework.util.MimeTypeUtils;
+
 /**
  * Abstract superclass for RSS Feed views, using the
  * <a href="https://github.com/rometools/rome">ROME</a> package.
@@ -46,7 +48,7 @@ import com.rometools.rome.feed.rss.Item;
 public abstract class AbstractRssFeedView extends AbstractFeedView<Channel> {
 
 	public AbstractRssFeedView() {
-		setContentType("application/rss+xml");
+		setContentType(MimeTypeUtils.APPLICATION_RSS_XML_VALUE);
 	}
 
 	/**
