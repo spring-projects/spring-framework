@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -516,15 +516,22 @@ public abstract class StringUtils {
 		if (str == null || str.length() == 0) {
 			return str;
 		}
-		StringBuilder sb = new StringBuilder(str.length());
-		if (capitalize) {
-			sb.append(Character.toUpperCase(str.charAt(0)));
-		}
 		else {
-			sb.append(Character.toLowerCase(str.charAt(0)));
+			char baseChar = str.charAt(0);
+			char updatedChar;
+			if (capitalize) {
+				updatedChar = Character.toUpperCase(baseChar);
+			}
+			else {
+				updatedChar = Character.toLowerCase(baseChar);
+			}
+			if (baseChar == updatedChar) {
+				return str;
+			}
+			char[] chars = str.toCharArray();
+			chars[0] = updatedChar;
+			return new String(chars, 0, chars.length);
 		}
-		sb.append(str.substring(1));
-		return sb.toString();
 	}
 
 	/**
