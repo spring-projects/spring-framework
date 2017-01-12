@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -930,6 +930,28 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	public void testConstructorInjectionWithCustomMapAsBean() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(CustomMapConstructorInjectionBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		RootBeanDefinition tbm = new RootBeanDefinition(CustomCollectionFactoryMethods.class);
+		tbm.setUniqueFactoryMethodName("testBeanMap");
+		bf.registerBeanDefinition("myTestBeanMap", tbm);
+		bf.registerSingleton("testBean1", new TestBean());
+		bf.registerSingleton("testBean2", new TestBean());
+
+		CustomMapConstructorInjectionBean bean = (CustomMapConstructorInjectionBean) bf.getBean("annotatedBean");
+		assertSame(bf.getBean("myTestBeanMap"), bean.getTestBeanMap());
+		bean = (CustomMapConstructorInjectionBean) bf.getBean("annotatedBean");
+		assertSame(bf.getBean("myTestBeanMap"), bean.getTestBeanMap());
+	}
+
+	@Test
 	public void testConstructorInjectionWithTypedSetAsBean() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
@@ -969,6 +991,26 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		SetConstructorInjectionBean bean = (SetConstructorInjectionBean) bf.getBean("annotatedBean");
 		assertSame(bf.getBean("myTestBeanSet"), bean.getTestBeanSet());
 		bean = (SetConstructorInjectionBean) bf.getBean("annotatedBean");
+		assertSame(bf.getBean("myTestBeanSet"), bean.getTestBeanSet());
+	}
+
+	@Test
+	public void testConstructorInjectionWithCustomSetAsBean() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(CustomSetConstructorInjectionBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		RootBeanDefinition tbs = new RootBeanDefinition(CustomCollectionFactoryMethods.class);
+		tbs.setUniqueFactoryMethodName("testBeanSet");
+		bf.registerBeanDefinition("myTestBeanSet", tbs);
+
+		CustomSetConstructorInjectionBean bean = (CustomSetConstructorInjectionBean) bf.getBean("annotatedBean");
+		assertSame(bf.getBean("myTestBeanSet"), bean.getTestBeanSet());
+		bean = (CustomSetConstructorInjectionBean) bf.getBean("annotatedBean");
 		assertSame(bf.getBean("myTestBeanSet"), bean.getTestBeanSet());
 	}
 
@@ -2189,6 +2231,18 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertNotNull(bf.getBean("annotatedBean"));
 	}
 
+	@Test @Ignore  // SPR-15125
+	public void testFactoryBeanSelfInjection() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SelfInjectingFactoryBean.class));
+
+		SelfInjectingFactoryBean bean = bf.getBean(SelfInjectingFactoryBean.class);
+		assertSame(bf.getBean("annotatedBean"), bean.testBean);
+	}
+
 
 	@Qualifier("integerRepo")
 	private Repository<?> integerRepositoryQualifierProvider;
@@ -3237,7 +3291,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 	public interface GenericInterface2<K> {
 
-		public String doSomethingMoreGeneric(K o);
+		String doSomethingMoreGeneric(K o);
 	}
 
 
@@ -3423,10 +3477,98 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
+	public static class CustomCollectionFactoryMethods {
+
+		public static CustomMap<String, TestBean> testBeanMap() {
+			CustomMap<String, TestBean> tbm = new CustomHashMap<>();
+			tbm.put("testBean1", new TestBean("tb1"));
+			tbm.put("testBean2", new TestBean("tb2"));
+			return tbm;
+		}
+
+		public static CustomSet<TestBean> testBeanSet() {
+			CustomSet<TestBean> tbs = new CustomHashSet<>();
+			tbs.add(new TestBean("tb1"));
+			tbs.add(new TestBean("tb2"));
+			return tbs;
+		}
+	}
+
+
+	public static class CustomMapConstructorInjectionBean {
+
+		private CustomMap<String, TestBean> testBeanMap;
+
+		@Autowired
+		public CustomMapConstructorInjectionBean(CustomMap<String, TestBean> testBeanMap) {
+			this.testBeanMap = testBeanMap;
+		}
+
+		public CustomMap<String, TestBean> getTestBeanMap() {
+			return this.testBeanMap;
+		}
+	}
+
+
+	public static class CustomSetConstructorInjectionBean {
+
+		private CustomSet<TestBean> testBeanSet;
+
+		@Autowired
+		public CustomSetConstructorInjectionBean(CustomSet<TestBean> testBeanSet) {
+			this.testBeanSet = testBeanSet;
+		}
+
+		public CustomSet<TestBean> getTestBeanSet() {
+			return this.testBeanSet;
+		}
+	}
+
+
+	public interface CustomMap<K, V> extends Map<K, V> {
+	}
+
+
+	public static class CustomHashMap<K, V> extends LinkedHashMap<K, V> implements CustomMap<K, V> {
+	}
+
+
+	public interface CustomSet<E> extends Set<E> {
+	}
+
+
+	public static class CustomHashSet<E> extends LinkedHashSet<E> implements CustomSet<E> {
+	}
+
+
 	public static class AnnotatedDefaultConstructorBean {
 
 		@Autowired
 		public AnnotatedDefaultConstructorBean() {
+		}
+	}
+
+
+	public static class SelfInjectingFactoryBean implements FactoryBean<TestBean> {
+
+		private final TestBean exposedTestBean = new TestBean();
+
+		@Autowired
+		TestBean testBean;
+
+		@Override
+		public TestBean getObject() {
+			return exposedTestBean;
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return TestBean.class;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return true;
 		}
 	}
 
