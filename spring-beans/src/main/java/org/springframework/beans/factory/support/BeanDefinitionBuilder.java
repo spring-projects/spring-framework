@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,10 +176,22 @@ public class BeanDefinitionBuilder {
 	}
 
 	/**
-	 * Set the name of the factory method to use for this definition.
+	 * Set the name of a static factory method to use for this definition,
+	 * to be called on this bean's class.
 	 */
 	public BeanDefinitionBuilder setFactoryMethod(String factoryMethod) {
 		this.beanDefinition.setFactoryMethodName(factoryMethod);
+		return this;
+	}
+
+	/**
+	 * Set the name of a non-static factory method to use for this definition,
+	 * including the bean name of the factory instance to call the method on.
+	 * @since 4.3.6
+	 */
+	public BeanDefinitionBuilder setFactoryMethodOnBean(String factoryMethod, String factoryBean) {
+		this.beanDefinition.setFactoryMethodName(factoryMethod);
+		this.beanDefinition.setFactoryBeanName(factoryBean);
 		return this;
 	}
 
