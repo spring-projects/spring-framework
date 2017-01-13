@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 import org.xmlunit.util.Predicate;
 
 import static org.junit.Assert.*;
@@ -59,12 +58,14 @@ public abstract class AbstractStaxHandlerTestCase {
 	private static final Predicate<Node> nodeFilter = (n -> n.getNodeType() != Node.COMMENT_NODE &&
 			n.getNodeType() != Node.DOCUMENT_TYPE_NODE && n.getNodeType() != Node.PROCESSING_INSTRUCTION_NODE);
 
+
 	private XMLReader xmlReader;
 
 
 	@Before
+	@SuppressWarnings("deprecation")  // on JDK 9
 	public void createXMLReader() throws Exception {
-		xmlReader = XMLReaderFactory.createXMLReader();
+		xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
 	}
 
 

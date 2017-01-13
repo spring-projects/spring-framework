@@ -183,6 +183,7 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	 * @return the XMLReader
 	 * @throws SAXException if thrown by JAXP methods
 	 */
+	@SuppressWarnings("deprecation")  // on JDK 9
 	protected XMLReader createXmlReader() throws SAXException {
 		XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
 		xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
