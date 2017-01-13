@@ -30,7 +30,6 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
@@ -41,10 +40,13 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link RequestAttributeMethodArgumentResolver}.
@@ -67,9 +69,8 @@ public class RequestAttributeMethodArgumentResolverTests {
 		context.refresh();
 		this.resolver = new RequestAttributeMethodArgumentResolver(context.getBeanFactory());
 
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
-		WebSessionManager sessionManager = new MockWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
+		ServerHttpRequest request = MockServerHttpRequest.get("/").build();
+		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
 
 		this.handleMethod = ReflectionUtils.findMethod(getClass(), "handleWithRequestAttribute", (Class<?>[]) null);
 	}

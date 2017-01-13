@@ -18,24 +18,22 @@ package org.springframework.http.codec;
 
 import java.time.Duration;
 import java.util.Collections;
-import java.util.function.Consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze
@@ -69,12 +67,16 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		Mono<ServerSentEvent<String>> source = Mono.just(event);
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		messageWriter.write(source, ResolvableType.forClass(ServerSentEvent.class),
-				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
+				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap()).blockMillis(5000);
 
-		Publisher<? extends Publisher<? extends DataBuffer>> result = Flux.from(outputMessage.getBodyWithFlush());
-		StepVerifier.create(result)
-				.consumeNextWith(sseConsumer(
-						"id:c42\nevent:foo\nretry:123\n:bla\n:bla bla\n:bla bla bla\ndata:bar\n"))
+		StepVerifier.create(outputMessage.getBodyAsString())
+				.expectNext("id:c42\n" +
+						"event:foo\n" +
+						"retry:123\n" +
+						":bla\n" +
+						":bla bla\n" +
+						":bla bla bla\n" +
+						"data:bar\n\n")
 				.expectComplete()
 				.verify();
 	}
@@ -84,12 +86,10 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		Flux<String> source = Flux.just("foo", "bar");
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		messageWriter.write(source, ResolvableType.forClass(String.class),
-				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
+				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap()).blockMillis(5000);
 
-		Publisher<? extends Publisher<? extends DataBuffer>> result = outputMessage.getBodyWithFlush();
-		StepVerifier.create(result)
-				.consumeNextWith(sseConsumer("data:foo\n"))
-				.consumeNextWith(sseConsumer("data:bar\n"))
+		StepVerifier.create(outputMessage.getBodyAsString())
+				.expectNext("data:foo\n\ndata:bar\n\n")
 				.expectComplete()
 				.verify();
 	}
@@ -99,12 +99,13 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		Flux<String> source = Flux.just("foo\nbar", "foo\nbaz");
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		messageWriter.write(source, ResolvableType.forClass(String.class),
-				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
+				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap()).blockMillis(5000);
 
-		Publisher<? extends Publisher<? extends DataBuffer>> result = outputMessage.getBodyWithFlush();
-		StepVerifier.create(result)
-				.consumeNextWith(sseConsumer("data:foo\ndata:bar\n"))
-				.consumeNextWith(sseConsumer("data:foo\ndata:baz\n"))
+		StepVerifier.create(outputMessage.getBodyAsString())
+				.expectNext("data:foo\n" +
+						"data:bar\n\n" +
+						"data:foo\n" +
+						"data:baz\n\n")
 				.expectComplete()
 				.verify();
 	}
@@ -115,12 +116,11 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				new Pojo("foofoofoo", "barbarbar"));
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		messageWriter.write(source, ResolvableType.forClass(Pojo.class),
-				MediaType.TEXT_EVENT_STREAM, outputMessage, Collections.emptyMap());
+				MediaType.TEXT_EVENT_STREAM, outputMessage, Collections.emptyMap()).blockMillis(5000);
 
-		Publisher<? extends Publisher<? extends DataBuffer>> result = outputMessage.getBodyWithFlush();
-		StepVerifier.create(result)
-				.consumeNextWith(sseConsumer("data:", "{\"foo\":\"foofoo\",\"bar\":\"barbar\"}", "\n"))
-				.consumeNextWith(sseConsumer("data:", "{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}", "\n"))
+		StepVerifier.create(outputMessage.getBodyAsString())
+				.expectNext("data:{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n\n" +
+						"data:{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n\n")
 				.expectComplete()
 				.verify();
 	}
@@ -128,35 +128,24 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 	@Test  // SPR-14899
 	public void writePojoWithPrettyPrint() {
 		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json().indentOutput(true).build();
-		this.messageWriter = new ServerSentEventHttpMessageWriter(Collections.singletonList(new Jackson2JsonEncoder(mapper)));
+		this.messageWriter = new ServerSentEventHttpMessageWriter(
+				Collections.singletonList(new Jackson2JsonEncoder(mapper)));
 
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"),
 				new Pojo("foofoofoo", "barbarbar"));
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		messageWriter.write(source, ResolvableType.forClass(Pojo.class),
-				MediaType.TEXT_EVENT_STREAM, outputMessage, Collections.emptyMap());
+				MediaType.TEXT_EVENT_STREAM, outputMessage, Collections.emptyMap()).blockMillis(5000);
 
-		Publisher<? extends Publisher<? extends DataBuffer>> result = outputMessage.getBodyWithFlush();
-		StepVerifier.create(result)
-				.consumeNextWith(sseConsumer("data:", "{\n" +
+		StepVerifier.create(outputMessage.getBodyAsString())
+				.expectNext("data:{\n" +
 						"data:  \"foo\" : \"foofoo\",\n" +
-						"data:  \"bar\" : \"barbar\"\n" + "data:}", "\n"))
-				.consumeNextWith(sseConsumer("data:", "{\n" +
+						"data:  \"bar\" : \"barbar\"\n" + "data:}\n\n" +
+						"data:{\n" +
 						"data:  \"foo\" : \"foofoofoo\",\n" +
-						"data:  \"bar\" : \"barbarbar\"\n" + "data:}", "\n"))
+						"data:  \"bar\" : \"barbarbar\"\n" + "data:}\n\n")
 				.expectComplete()
 				.verify();
-	}
-
-
-	private Consumer<Publisher<? extends DataBuffer>> sseConsumer(String... expected) {
-		return publisher -> {
-			StepVerifier.Step<DataBuffer> builder = StepVerifier.create(publisher);
-			for (String value : expected) {
-				builder = builder.consumeNextWith(stringConsumer(value));
-			}
-			builder.consumeNextWith(stringConsumer("\n")).expectComplete().verify();
-		};
 	}
 
 }

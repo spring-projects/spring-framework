@@ -29,7 +29,6 @@ import reactor.test.StepVerifier;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
@@ -41,10 +40,10 @@ import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link PathVariableMethodArgumentResolver}.
@@ -71,9 +70,8 @@ public class PathVariableMethodArgumentResolverTests {
 	public void setUp() throws Exception {
 		this.resolver = new PathVariableMethodArgumentResolver(null);
 
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
-		WebSessionManager sessionManager = new MockWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
+		ServerHttpRequest request = MockServerHttpRequest.get("/").build();
+		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
 
 		Method method = ReflectionUtils.findMethod(getClass(), "handle", (Class<?>[]) null);
 		paramNamedString = new SynthesizingMethodParameter(method, 0);

@@ -20,7 +20,6 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
@@ -28,8 +27,6 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 
@@ -48,10 +45,9 @@ public class ExceptionHandlingHttpHandlerTests {
 
 	@Before
 	public void setUp() throws Exception {
-		WebSessionManager sessionManager = new MockWebSessionManager();
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "http://localhost:8080");
+		MockServerHttpRequest request = MockServerHttpRequest.get("http://localhost:8080").build();
 		this.response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(request, this.response, sessionManager);
+		this.exchange = new DefaultServerWebExchange(request, this.response);
 		this.targetHandler = new StubWebHandler(new IllegalStateException("boo"));
 	}
 

@@ -24,7 +24,6 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.reactive.BindingContext;
@@ -35,10 +34,14 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link InvocableHandlerMethod}.
@@ -53,7 +56,7 @@ public class InvocableHandlerMethodTests {
 	@Before
 	public void setUp() throws Exception {
 		this.exchange = new DefaultServerWebExchange(
-				new MockServerHttpRequest(HttpMethod.GET, "http://localhost:8080/path"),
+				MockServerHttpRequest.get("http://localhost:8080/path").build(),
 				new MockServerHttpResponse(),
 				new MockWebSessionManager());
 	}

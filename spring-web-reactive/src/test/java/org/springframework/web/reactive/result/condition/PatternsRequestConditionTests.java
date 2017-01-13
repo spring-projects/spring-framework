@@ -22,14 +22,11 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import org.springframework.http.HttpMethod;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -225,9 +222,8 @@ public class PatternsRequestConditionTests {
 
 
 	private ServerWebExchange createExchange(String path) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, path);
-		WebSessionManager sessionManager = new MockWebSessionManager();
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
+		ServerHttpRequest request = MockServerHttpRequest.get(path).build();
+		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
 	}
 
 }

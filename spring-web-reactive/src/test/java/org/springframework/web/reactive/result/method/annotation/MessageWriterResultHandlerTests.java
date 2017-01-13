@@ -44,7 +44,6 @@ import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
@@ -59,7 +58,6 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuild
 import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -83,8 +81,8 @@ public class MessageWriterResultHandlerTests {
 	@Before
 	public void setUp() throws Exception {
 		this.resultHandler = createResultHandler();
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/path");
-		this.exchange = new DefaultServerWebExchange(request, this.response, new MockWebSessionManager());
+		ServerHttpRequest request = MockServerHttpRequest.get("/path").build();
+		this.exchange = new DefaultServerWebExchange(request, this.response);
 	}
 
 

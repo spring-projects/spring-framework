@@ -29,7 +29,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.mock.web.test.MockServletContext;
@@ -80,10 +79,9 @@ public class ResourceUrlProviderTests {
 
 	@Test // SPR-13374
 	public void getStaticResourceUrlRequestWithQueryOrHash() {
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		WebSessionManager manager = new DefaultWebSessionManager();
-		ServerWebExchange exchange = new DefaultServerWebExchange(request, response, manager);
+		ServerWebExchange exchange = new DefaultServerWebExchange(request, response);
 
 		String url = "/resources/foo.css?foo=bar&url=http://example.org";
 		String resolvedUrl = this.urlProvider.getForRequestUrl(exchange, url).blockMillis(5000);

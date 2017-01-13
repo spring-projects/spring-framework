@@ -17,7 +17,7 @@
 package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
-import java.net.URISyntaxException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -51,21 +51,25 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.ResolvableMethod;
-import org.springframework.web.reactive.result.method.RequestMappingInfo.*;
+import org.springframework.web.reactive.result.method.RequestMappingInfo.BuilderConfiguration;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 import org.springframework.web.server.support.HttpRequestPathHelper;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
-import static org.springframework.web.reactive.result.method.RequestMappingInfo.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
+import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
+import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
 
 /**
  * Unit tests for {@link RequestMappingInfoHandlerMapping}.
@@ -74,6 +78,8 @@ import static org.springframework.web.reactive.result.method.RequestMappingInfo.
 public class RequestMappingInfoHandlerMappingTests {
 
 	private TestRequestMappingInfoHandlerMapping handlerMapping;
+
+	private ServerHttpRequest request;
 
 
 	@Before
@@ -98,8 +104,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		String[] params = new String[] {};
 		Method expected = resolveMethod(new TestController(), patterns, null, params);
 
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/foo");
-		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
+		this.request = MockServerHttpRequest.get("/foo").build();
+		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(createExchange()).block();
 
 		assertEquals(expected, hm.getMethod());
 	}
@@ -110,8 +116,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		RequestMethod[] methods = new RequestMethod[] {GET, HEAD};
 		Method expected = resolveMethod(new TestController(), patterns, methods, null);
 
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/bar");
-		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
+		this.request = MockServerHttpRequest.get("/bar").build();
+		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(createExchange()).block();
 
 		assertEquals(expected, hm.getMethod());
 	}
@@ -121,12 +127,12 @@ public class RequestMappingInfoHandlerMappingTests {
 		String[] patterns = new String[] {""};
 		Method expected = resolveMethod(new TestController(), patterns, null, null);
 
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "");
-		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
+		this.request = MockServerHttpRequest.get("").build();
+		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(createExchange()).block();
 		assertEquals(expected, hm.getMethod());
 
-		exchange = createExchange(HttpMethod.GET, "/");
-		hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
+		this.request = MockServerHttpRequest.get("/").build();
+		hm = (HandlerMethod) this.handlerMapping.getHandler(createExchange()).block();
 		assertEquals(expected, hm.getMethod());
 	}
 
@@ -136,17 +142,16 @@ public class RequestMappingInfoHandlerMappingTests {
 		String[] params = new String[] {"p"};
 		Method expected = resolveMethod(new TestController(), patterns, null, params);
 
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/foo");
-		exchange.getRequest().getQueryParams().add("p", "anything");
-		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
+		this.request = MockServerHttpRequest.get("/foo?p=anything").build();
+		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(createExchange()).block();
 
 		assertEquals(expected, hm.getMethod());
 	}
 
 	@Test
 	public void getHandlerRequestMethodNotAllowed() throws Exception {
-		ServerWebExchange exchange = createExchange(HttpMethod.POST, "/bar");
-		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
+		this.request = MockServerHttpRequest.post("/bar").build();
+		Mono<Object> mono = this.handlerMapping.getHandler(createExchange());
 
 		assertError(mono, MethodNotAllowedException.class,
 				ex -> assertEquals(new HashSet<>(Arrays.asList("GET", "HEAD")), ex.getSupportedMethods()));
@@ -154,10 +159,9 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test // SPR-9603
 	public void getHandlerRequestMethodMatchFalsePositive() throws Exception {
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/users");
-		exchange.getRequest().getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
+		this.request = MockServerHttpRequest.get("/users").accept(MediaType.APPLICATION_XML).build();
 		this.handlerMapping.registerHandler(new UserController());
-		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
+		Mono<Object> mono = this.handlerMapping.getHandler(createExchange());
 
 		StepVerifier.create(mono)
 				.expectError(NotAcceptableStatusException.class)
@@ -173,9 +177,8 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void getHandlerTestInvalidContentType() throws Exception {
-		ServerWebExchange exchange = createExchange(HttpMethod.PUT, "/person/1");
-		exchange.getRequest().getHeaders().add("Content-Type", "bogus");
-		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
+		this.request = MockServerHttpRequest.put("/person/1").header("content-type", "bogus").build();
+		Mono<Object> mono = this.handlerMapping.getHandler(createExchange());
 
 		assertError(mono, UnsupportedMediaTypeStatusException.class,
 				ex -> assertEquals("Request failure [status: 415, " +
@@ -192,8 +195,8 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test // SPR-12854
 	public void getHandlerTestRequestParamMismatch() throws Exception {
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/params");
-		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
+		this.request = MockServerHttpRequest.get("/params").build();
+		Mono<Object> mono = this.handlerMapping.getHandler(createExchange());
 		assertError(mono, ServerWebInputException.class, ex -> {
 			assertThat(ex.getReason(), containsString("[foo=bar]"));
 			assertThat(ex.getReason(), containsString("[bar=baz]"));
@@ -210,15 +213,15 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void getHandlerProducibleMediaTypesAttribute() throws Exception {
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/content");
-		exchange.getRequest().getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
+		this.request = MockServerHttpRequest.get("/content").accept(MediaType.APPLICATION_XML).build();
+		ServerWebExchange exchange = createExchange();
 		this.handlerMapping.getHandler(exchange).block();
 
 		String name = HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 		assertEquals(Collections.singleton(MediaType.APPLICATION_XML), exchange.getAttributes().get(name));
 
-		exchange = createExchange(HttpMethod.GET, "/content");
-		exchange.getRequest().getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+		this.request = MockServerHttpRequest.get("/content").accept(MediaType.APPLICATION_JSON).build();
+		exchange = createExchange();
 		this.handlerMapping.getHandler(exchange).block();
 
 		assertNull("Negated expression shouldn't be listed as producible type",
@@ -227,9 +230,11 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test @SuppressWarnings("unchecked")
 	public void handleMatchUriTemplateVariables() throws Exception {
+		String lookupPath = "/1/2";
+		this.request = MockServerHttpRequest.get(lookupPath).build();
+		ServerWebExchange exchange = createExchange();
+
 		RequestMappingInfo key = paths("/{path1}/{path2}").build();
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/1/2");
-		String lookupPath = exchange.getRequest().getURI().getPath();
 		this.handlerMapping.handleMatch(key, lookupPath, exchange);
 
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
@@ -243,7 +248,8 @@ public class RequestMappingInfoHandlerMappingTests {
 	@Test // SPR-9098
 	public void handleMatchUriTemplateVariablesDecode() throws Exception {
 		RequestMappingInfo key = paths("/{group}/{identifier}").build();
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/group/a%2Fb");
+		this.request = MockServerHttpRequest.method(HttpMethod.GET, URI.create("/group/a%2Fb")).build();
+		ServerWebExchange exchange = createExchange();
 
 		HttpRequestPathHelper pathHelper = new HttpRequestPathHelper();
 		pathHelper.setUrlDecode(false);
@@ -264,7 +270,8 @@ public class RequestMappingInfoHandlerMappingTests {
 	@Test
 	public void handleMatchBestMatchingPatternAttribute() throws Exception {
 		RequestMappingInfo key = paths("/{path1}/2", "/**").build();
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/1/2");
+		this.request = MockServerHttpRequest.get("/1/2").build();
+		ServerWebExchange exchange = createExchange();
 		this.handlerMapping.handleMatch(key, "/1/2", exchange);
 
 		assertEquals("/{path1}/2", exchange.getAttributes().get(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE));
@@ -273,7 +280,8 @@ public class RequestMappingInfoHandlerMappingTests {
 	@Test
 	public void handleMatchBestMatchingPatternAttributeNoPatternsDefined() throws Exception {
 		RequestMappingInfo key = paths().build();
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/1/2");
+		this.request = MockServerHttpRequest.get("/1/2").build();
+		ServerWebExchange exchange = createExchange();
 
 		this.handlerMapping.handleMatch(key, "/1/2", exchange);
 
@@ -286,7 +294,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		MultiValueMap<String, String> matrixVariables;
 		Map<String, String> uriVariables;
 
-		exchange = createExchange(HttpMethod.GET, "/");
+		this.request = MockServerHttpRequest.get("/").build();
+		exchange = createExchange();
 		handleMatch(exchange, "/{cars}", "/cars;colors=red,blue,green;year=2012");
 
 		matrixVariables = getMatrixVariables(exchange, "cars");
@@ -297,7 +306,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertEquals("2012", matrixVariables.getFirst("year"));
 		assertEquals("cars", uriVariables.get("cars"));
 
-		exchange = createExchange(HttpMethod.GET, "/");
+		this.request = MockServerHttpRequest.get("/").build();
+		exchange = createExchange();
 		handleMatch(exchange, "/{cars:[^;]+}{params}", "/cars;colors=red,blue,green;year=2012");
 
 		matrixVariables = getMatrixVariables(exchange, "params");
@@ -309,7 +319,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertEquals("cars", uriVariables.get("cars"));
 		assertEquals(";colors=red,blue,green;year=2012", uriVariables.get("params"));
 
-		exchange = createExchange(HttpMethod.GET, "/");
+		this.request = MockServerHttpRequest.get("/").build();
+		exchange = createExchange();
 		handleMatch(exchange, "/{cars:[^;]+}{params}", "/cars");
 
 		matrixVariables = getMatrixVariables(exchange, "params");
@@ -326,7 +337,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		urlPathHelper.setUrlDecode(false);
 		this.handlerMapping.setPathHelper(urlPathHelper);
 
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/");
+		this.request = MockServerHttpRequest.get("/").build();
+		ServerWebExchange exchange = createExchange();
 		handleMatch(exchange, "/path{filter}", "/path;mvar=a%2fb");
 
 		MultiValueMap<String, String> matrixVariables = getMatrixVariables(exchange, "filter");
@@ -338,10 +350,8 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 
-	private ServerWebExchange createExchange(HttpMethod method, String url) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(method, url);
-		WebSessionManager sessionManager = new MockWebSessionManager();
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
+	private ServerWebExchange createExchange() {
+		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 
 	}
 
@@ -359,9 +369,8 @@ public class RequestMappingInfoHandlerMappingTests {
 
 
 	private void testHttpMediaTypeNotSupportedException(String url) throws Exception {
-		ServerWebExchange exchange = createExchange(HttpMethod.PUT, url);
-		exchange.getRequest().getHeaders().setContentType(MediaType.APPLICATION_JSON);
-		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
+		this.request = MockServerHttpRequest.put(url).contentType(MediaType.APPLICATION_JSON).build();
+		Mono<Object> mono = this.handlerMapping.getHandler(createExchange());
 
 		assertError(mono, UnsupportedMediaTypeStatusException.class, ex ->
 				assertEquals("Invalid supported consumable media types",
@@ -370,8 +379,9 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	private void testHttpOptions(String requestURI, String allowHeader) throws Exception {
-		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, requestURI);
-		HandlerMethod handlerMethod = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
+		this.request = MockServerHttpRequest.options(requestURI).build();
+		ServerWebExchange exchange = createExchange();
+		HandlerMethod handlerMethod = (HandlerMethod) this.handlerMapping.getHandler(createExchange()).block();
 
 		BindingContext bindingContext = new BindingContext();
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
@@ -387,9 +397,8 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	private void testMediaTypeNotAcceptable(String url) throws Exception {
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, url);
-		exchange.getRequest().getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
+		this.request = MockServerHttpRequest.get(url).accept(MediaType.APPLICATION_JSON).build();
+		Mono<Object> mono = this.handlerMapping.getHandler(createExchange());
 
 		assertError(mono, NotAcceptableStatusException.class, ex ->
 				assertEquals("Invalid supported producible media types",

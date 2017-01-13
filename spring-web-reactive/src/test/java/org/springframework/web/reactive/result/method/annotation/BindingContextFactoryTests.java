@@ -25,7 +25,6 @@ import reactor.core.publisher.Mono;
 import rx.Single;
 
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.ui.Model;
@@ -42,11 +41,9 @@ import org.springframework.web.reactive.config.WebReactiveConfigurationSupport;
 import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.DefaultWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link BindingContextFactory}.
@@ -67,10 +64,9 @@ public class BindingContextFactoryTests {
 		adapter.afterPropertiesSet();
 		this.contextFactory = new BindingContextFactory(adapter);
 
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/path");
+		MockServerHttpRequest request = MockServerHttpRequest.get("/path").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		WebSessionManager manager = new DefaultWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(request, response, manager);
+		this.exchange = new DefaultServerWebExchange(request, response);
 	}
 
 

@@ -21,23 +21,18 @@ import java.util.Collection;
 
 import org.junit.Test;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.web.util.UriComponentsBuilder.fromPath;
 
 /**
  * Unit tests for {@link ParamsRequestCondition}.
@@ -94,7 +89,8 @@ public class ParamsRequestConditionTests {
 
 	@Test
 	public void compareTo() throws Exception {
-		ServerWebExchange exchange = exchange(new MockServerHttpRequest(HttpMethod.GET, "/"));
+		ServerHttpRequest request = MockServerHttpRequest.get("/").build();
+		ServerWebExchange exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
 
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("foo", "bar", "baz");
 		ParamsRequestCondition condition2 = new ParamsRequestCondition("foo", "bar");
@@ -118,27 +114,20 @@ public class ParamsRequestConditionTests {
 
 
 	private ServerWebExchange exchangeWithQuery(String query) throws URISyntaxException {
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
-		MultiValueMap<String, String> params = fromPath("/").query(query).build().getQueryParams();
-		request.getQueryParams().putAll(params);
-		return exchange(request);
+		ServerHttpRequest request = MockServerHttpRequest.get("/path?" + query).build();
+		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
 	}
 
 	private ServerWebExchange exchangeWithFormData(String formData) throws URISyntaxException {
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
-		request.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-		request.setBody(formData);
-		return exchange(request);
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.body(formData);
+		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
 	}
 
 	private ServerWebExchange exchange() {
-		return exchange(new MockServerHttpRequest(HttpMethod.GET, "/"));
-	}
-
-	private ServerWebExchange exchange(ServerHttpRequest request) {
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		WebSessionManager manager = new MockWebSessionManager();
-		return new DefaultServerWebExchange(request, response, manager);
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
+		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
 	}
 
 }

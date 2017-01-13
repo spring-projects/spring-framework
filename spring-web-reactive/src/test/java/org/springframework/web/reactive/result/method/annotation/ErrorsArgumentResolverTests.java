@@ -24,7 +24,6 @@ import reactor.core.publisher.MonoProcessor;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
-import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.validation.BindingResult;
@@ -35,13 +34,12 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.*;
+import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
 
 /**
  * Unit tests for {@link ErrorsMethodArgumentResolver}.
@@ -65,10 +63,9 @@ public class ErrorsArgumentResolverTests {
 	public void setUp() throws Exception {
 		this.resolver = new ErrorsMethodArgumentResolver(new ReactiveAdapterRegistry());
 
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.POST, "/path");
+		MockServerHttpRequest request = MockServerHttpRequest.post("/path").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		WebSessionManager manager = new MockWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(request, response, manager);
+		this.exchange = new DefaultServerWebExchange(request, response);
 
 		Foo foo = new Foo();
 		WebExchangeDataBinder binder = this.bindingContext.createDataBinder(this.exchange, foo, "foo");

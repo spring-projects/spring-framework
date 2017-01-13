@@ -24,14 +24,12 @@ import org.junit.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -105,7 +103,7 @@ public class RequestMethodsRequestConditionTests {
 		RequestMethodsRequestCondition c2 = new RequestMethodsRequestCondition(POST);
 		RequestMethodsRequestCondition c3 = new RequestMethodsRequestCondition();
 
-		ServerWebExchange exchange = createExchange();
+		ServerWebExchange exchange = createExchange("GET");
 
 		int result = c1.compareTo(c2, exchange);
 		assertTrue("Invalid comparison result: " + result, result < 0);
@@ -142,15 +140,9 @@ public class RequestMethodsRequestConditionTests {
 		assertNull(condition.getMatchingCondition(exchange));
 	}
 
-
-	private ServerWebExchange createExchange() throws URISyntaxException {
-		return createExchange(null);
-	}
-
 	private ServerWebExchange createExchange(String method) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.resolve(method), "/");
-		WebSessionManager sessionManager = new MockWebSessionManager();
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
+		ServerHttpRequest request = MockServerHttpRequest.method(HttpMethod.valueOf(method), "/").build();
+		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
 	}
 
 }

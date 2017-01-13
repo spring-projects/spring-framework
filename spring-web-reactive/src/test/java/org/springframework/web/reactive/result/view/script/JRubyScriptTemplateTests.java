@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result.view.script;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -35,6 +34,8 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for ERB templates running on JRuby.
@@ -63,7 +64,7 @@ public class JRubyScriptTemplateTests {
 
 	private MockServerHttpResponse renderViewWithModel(String viewUrl, Map<String, Object> model) throws Exception {
 		ScriptTemplateView view = createViewWithUrl(viewUrl);
-		MockServerHttpRequest request = new MockServerHttpRequest();
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		WebSessionManager manager = new DefaultWebSessionManager();
 		ServerWebExchange exchange = new DefaultServerWebExchange(request, response, manager);

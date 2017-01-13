@@ -24,7 +24,6 @@ import java.util.Map;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
@@ -94,8 +93,10 @@ public class HttpHandlerAdapterSupportTests {
 
 	@Test
 	public void matchWithNativeContextPath() throws Exception {
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/yet/another/path");
-		request.setContextPath("/yet");  // contextPath in underlying request
+		MockServerHttpRequest request = MockServerHttpRequest
+				.get("/yet/another/path")
+				.contextPath("/yet")  // contextPath in underlying request
+				.build();
 
 		TestHttpHandler handler = new TestHttpHandler();
 		Map<String, HttpHandler> map = Collections.singletonMap("/another/path", handler);
@@ -145,7 +146,7 @@ public class HttpHandlerAdapterSupportTests {
 		}
 
 		public ServerHttpResponse handle(String path) {
-			ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, path);
+			ServerHttpRequest request = MockServerHttpRequest.get(path).build();
 			return handle(request);
 		}
 

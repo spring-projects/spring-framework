@@ -22,7 +22,6 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
@@ -34,7 +33,10 @@ import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rossen Stoyanchev
@@ -50,7 +52,7 @@ public class FilteringWebHandlerTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.request = new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
+		this.request = MockServerHttpRequest.get("http://localhost").build();
 		this.response = new MockServerHttpResponse();
 	}
 

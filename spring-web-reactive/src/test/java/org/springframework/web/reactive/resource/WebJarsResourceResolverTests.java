@@ -24,14 +24,11 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.DefaultWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
@@ -66,10 +63,9 @@ public class WebJarsResourceResolverTests {
 		this.resolver = new WebJarsResourceResolver();
 		this.chain = mock(ResourceResolverChain.class);
 
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "");
+		MockServerHttpRequest request = MockServerHttpRequest.get("").build();
 		ServerHttpResponse response = new MockServerHttpResponse();
-		WebSessionManager manager = new DefaultWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(request, response, manager);
+		this.exchange = new DefaultServerWebExchange(request, response);
 	}
 
 

@@ -29,7 +29,6 @@ import rx.Single;
 
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
@@ -51,7 +50,6 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 
@@ -71,7 +69,7 @@ public class ResponseBodyResultHandlerTests {
 
 	private ResponseBodyResultHandler resultHandler;
 
-	private MockServerHttpResponse response = new MockServerHttpResponse();
+	private MockServerHttpResponse response;
 
 	private ServerWebExchange exchange;
 
@@ -79,8 +77,13 @@ public class ResponseBodyResultHandlerTests {
 	@Before
 	public void setUp() throws Exception {
 		this.resultHandler = createHandler();
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/path");
-		this.exchange = new DefaultServerWebExchange(request, this.response, new MockWebSessionManager());
+		initExchange();
+	}
+
+	private void initExchange() {
+		ServerHttpRequest request = MockServerHttpRequest.get("/").build();
+		this.response = new MockServerHttpResponse();
+		this.exchange = new DefaultServerWebExchange(request, this.response);
 	}
 
 
@@ -122,12 +125,14 @@ public class ResponseBodyResultHandlerTests {
 		HandlerMethod hm = handlerMethod(controller, "handleToString");
 		HandlerResult handlerResult = new HandlerResult(hm, null, hm.getReturnType());
 
+		initExchange();
 		StepVerifier.create(this.resultHandler.handleResult(this.exchange, handlerResult)).expectComplete().verify();
 		assertEquals(HttpStatus.NO_CONTENT, this.response.getStatusCode());
 
 		hm = handlerMethod(controller, "handleToMonoVoid");
 		handlerResult = new HandlerResult(hm, null, hm.getReturnType());
 
+		initExchange();
 		StepVerifier.create(this.resultHandler.handleResult(this.exchange, handlerResult)).expectComplete().verify();
 		assertEquals(HttpStatus.CREATED, this.response.getStatusCode());
 	}

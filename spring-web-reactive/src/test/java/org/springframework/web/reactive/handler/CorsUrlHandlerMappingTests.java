@@ -17,8 +17,6 @@ package org.springframework.web.reactive.handler;
 
 import java.util.Collections;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertSame;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,8 +29,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 /**
  * Unit tests for CORS support at {@link AbstractUrlHandlerMapping} level.
@@ -135,12 +137,12 @@ public class CorsUrlHandlerMappingTests {
 	private ServerWebExchange createExchange(HttpMethod method, String path, String origin,
 			String accessControlRequestMethod) {
 
-		ServerHttpRequest request = new MockServerHttpRequest(method, "http://localhost" + path);
-		request.getHeaders().add(HttpHeaders.ORIGIN, origin);
-		request.getHeaders().add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, accessControlRequestMethod);
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		WebSessionManager sessionManager = new MockWebSessionManager();
-		return new DefaultServerWebExchange(request, response, sessionManager);
+		ServerHttpRequest request = MockServerHttpRequest
+				.method(method, "http://localhost" + path)
+				.header("Origin", origin)
+				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, accessControlRequestMethod)
+				.build();
+		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
 	}
 
 

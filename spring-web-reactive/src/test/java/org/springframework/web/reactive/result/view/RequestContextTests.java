@@ -27,7 +27,6 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.DefaultWebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 
@@ -39,8 +38,6 @@ public class RequestContextTests {
 
 	private ServerWebExchange exchange;
 
-	private MockServerHttpRequest request;
-
 	private GenericApplicationContext applicationContext;
 
 	private Map<String, Object> model = new HashMap<>();
@@ -48,24 +45,21 @@ public class RequestContextTests {
 
 	@Before
 	public void init() {
-		this.request = new MockServerHttpRequest();
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").contextPath("foo/").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(this.request, response, sessionManager);
+		this.exchange = new DefaultServerWebExchange(request, response);
 		this.applicationContext = new GenericApplicationContext();
 		this.applicationContext.refresh();
 	}
 
 	@Test
 	public void testGetContextUrl() throws Exception {
-		this.request.setContextPath("foo/");
 		RequestContext context = new RequestContext(this.exchange, this.model, this.applicationContext);
 		assertEquals("foo/bar", context.getContextUrl("bar"));
 	}
 
 	@Test
 	public void testGetContextUrlWithMap() throws Exception {
-		this.request.setContextPath("foo/");
 		RequestContext context = new RequestContext(this.exchange, this.model, this.applicationContext);
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
@@ -75,7 +69,6 @@ public class RequestContextTests {
 
 	@Test
 	public void testGetContextUrlWithMapEscaping() throws Exception {
-		this.request.setContextPath("foo/");
 		RequestContext context = new RequestContext(this.exchange, this.model, this.applicationContext);
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar baz");

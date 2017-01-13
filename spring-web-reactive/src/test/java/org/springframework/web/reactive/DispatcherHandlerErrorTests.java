@@ -19,6 +19,7 @@ package org.springframework.web.reactive;
 import java.time.Duration;
 import java.util.Collections;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -29,7 +30,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
@@ -50,7 +50,6 @@ import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
-import org.springframework.web.server.session.MockWebSessionManager;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.startsWith;
@@ -58,6 +57,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 
 /**
@@ -76,28 +76,20 @@ public class DispatcherHandlerErrorTests {
 
 	private MockServerHttpRequest request;
 
-	private ServerWebExchange exchange;
-
 
 	@Before
 	public void setUp() throws Exception {
 		AnnotationConfigApplicationContext appContext = new AnnotationConfigApplicationContext();
 		appContext.register(TestConfig.class);
 		appContext.refresh();
-
 		this.dispatcherHandler = new DispatcherHandler(appContext);
-
-		this.request = new MockServerHttpRequest(HttpMethod.GET, "/");
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		MockWebSessionManager sessionManager = new MockWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(this.request, response, sessionManager);
 	}
 
 
 	@Test
 	public void noHandler() throws Exception {
-		this.request.setUri("/does-not-exist");
-		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
+		this.request = MockServerHttpRequest.get("/does-not-exist").build();
+		Mono<Void> publisher = this.dispatcherHandler.handle(createExchange());
 
 		StepVerifier.create(publisher)
 				.consumeErrorWith(error -> {
@@ -110,8 +102,8 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void controllerReturnsMonoError() throws Exception {
-		this.request.setUri("/error-signal");
-		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
+		this.request = MockServerHttpRequest.get("/error-signal").build();
+		Mono<Void> publisher = this.dispatcherHandler.handle(createExchange());
 
 		StepVerifier.create(publisher)
 				.consumeErrorWith(error -> assertSame(EXCEPTION, error))
@@ -120,8 +112,8 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void controllerThrowsException() throws Exception {
-		this.request.setUri("/raise-exception");
-		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
+		this.request = MockServerHttpRequest.get("/raise-exception").build();
+		Mono<Void> publisher = this.dispatcherHandler.handle(createExchange());
 
 		StepVerifier.create(publisher)
 				.consumeErrorWith(error -> assertSame(EXCEPTION, error))
@@ -130,8 +122,8 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void unknownReturnType() throws Exception {
-		this.request.setUri("/unknown-return-type");
-		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
+		this.request = MockServerHttpRequest.get("/unknown-return-type").build();
+		Mono<Void> publisher = this.dispatcherHandler.handle(createExchange());
 
 		StepVerifier.create(publisher)
 				.consumeErrorWith(error -> {
@@ -143,8 +135,8 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void responseBodyMessageConversionError() throws Exception {
-		this.request.setUri("/request-body").setHeader("Accept", "application/json").setBody("body");
-		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
+		this.request = MockServerHttpRequest.post("/request-body").accept(APPLICATION_JSON).body("body");
+		Mono<Void> publisher = this.dispatcherHandler.handle(createExchange());
 
 		StepVerifier.create(publisher)
 				.consumeErrorWith(error -> assertThat(error, instanceOf(NotAcceptableStatusException.class)))
@@ -153,8 +145,8 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void requestBodyError() throws Exception {
-		this.request.setUri("/request-body").setBody(Mono.error(EXCEPTION));
-		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
+		this.request = MockServerHttpRequest.post("/request-body").body(Mono.error(EXCEPTION));
+		Mono<Void> publisher = this.dispatcherHandler.handle(createExchange());
 
 		StepVerifier.create(publisher)
 				.consumeErrorWith(error -> {
@@ -166,13 +158,19 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void webExceptionHandler() throws Exception {
-		this.request.setUri("/unknown-argument-type");
+		this.request = MockServerHttpRequest.get("/unknown-argument-type").build();
+		ServerWebExchange exchange = createExchange();
 
 		WebExceptionHandler exceptionHandler = new ServerError500ExceptionHandler();
 		WebHandler webHandler = new ExceptionHandlingWebHandler(this.dispatcherHandler, exceptionHandler);
-		webHandler.handle(this.exchange).block(Duration.ofSeconds(5));
+		webHandler.handle(exchange).block(Duration.ofSeconds(5));
 
-		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.exchange.getResponse().getStatusCode());
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exchange.getResponse().getStatusCode());
+	}
+
+	@NotNull
+	private ServerWebExchange createExchange() {
+		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}
 
 

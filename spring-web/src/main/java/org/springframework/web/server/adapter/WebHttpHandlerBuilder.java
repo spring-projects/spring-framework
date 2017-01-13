@@ -193,6 +193,7 @@ public class WebHttpHandlerBuilder {
 		}
 		WebExceptionHandler[] array = new WebExceptionHandler[this.exceptionHandlers.size()];
 		webHandler = new ExceptionHandlingWebHandler(webHandler,  this.exceptionHandlers.toArray(array));
+		// TODO: protected method for further decoration
 		HttpWebHandlerAdapter httpHandler = new HttpWebHandlerAdapter(webHandler);
 		if (this.sessionManager != null) {
 			httpHandler.setSessionManager(this.sessionManager);

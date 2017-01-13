@@ -30,7 +30,6 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
@@ -147,12 +146,12 @@ public class HttpMessageWriterViewTests {
 		this.model.addAttribute("pojoData", pojoData);
 		this.view.setModelKeys(Collections.singleton("pojoData"));
 
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/path");
+		MockServerHttpRequest request = MockServerHttpRequest.get("/path").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		WebSessionManager manager = new DefaultWebSessionManager();
 		ServerWebExchange exchange = new DefaultServerWebExchange(request, response, manager);
 
-		this.view.render(this.model, MediaType.APPLICATION_JSON, exchange);
+		this.view.render(this.model, MediaType.APPLICATION_JSON, exchange).blockMillis(5000);
 
 		StepVerifier.create(response.getBody())
 				.consumeNextWith( buf -> assertEquals("{\"foo\":\"f\",\"bar\":\"b\"}",

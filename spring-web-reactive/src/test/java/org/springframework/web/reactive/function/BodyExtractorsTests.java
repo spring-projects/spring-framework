@@ -47,9 +47,9 @@ import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 
-import static org.springframework.http.codec.json.AbstractJackson2Codec.JSON_VIEW_HINT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.springframework.http.codec.json.AbstractJackson2Codec.JSON_VIEW_HINT;
 
 /**
  * @author Arjen Poutsma
@@ -91,9 +91,7 @@ public class BodyExtractorsTests {
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
-		MockServerHttpRequest request = new MockServerHttpRequest();
-		request.setBody(body);
-
+		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(body);
 		Mono<String> result = extractor.extract(request, this.context);
 
 		StepVerifier.create(result)
@@ -112,9 +110,9 @@ public class BodyExtractorsTests {
 				factory.wrap(ByteBuffer.wrap("{\"username\":\"foo\",\"password\":\"bar\"}".getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
-		MockServerHttpRequest request = new MockServerHttpRequest();
-		request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-		request.setBody(body);
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(body);
 
 		Mono<User> result = extractor.extract(request, this.context);
 
@@ -136,9 +134,7 @@ public class BodyExtractorsTests {
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
-		MockServerHttpRequest request = new MockServerHttpRequest();
-		request.setBody(body);
-
+		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(body);
 		Flux<String> result = extractor.extract(request, this.context);
 
 		StepVerifier.create(result)
@@ -157,9 +153,9 @@ public class BodyExtractorsTests {
 				factory.wrap(ByteBuffer.wrap("[{\"username\":\"foo\",\"password\":\"bar\"},{\"username\":\"bar\",\"password\":\"baz\"}]".getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
-		MockServerHttpRequest request = new MockServerHttpRequest();
-		request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-		request.setBody(body);
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(body);
 
 		Flux<User> result = extractor.extract(request, this.context);
 
@@ -185,9 +181,9 @@ public class BodyExtractorsTests {
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
-		MockServerHttpRequest request = new MockServerHttpRequest();
-		request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-		request.setBody(body);
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(body);
 
 		BodyExtractor.Context emptyContext = new BodyExtractor.Context() {
 			@Override
@@ -215,9 +211,7 @@ public class BodyExtractorsTests {
 				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
-		MockServerHttpRequest request = new MockServerHttpRequest();
-		request.setBody(body);
-
+		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(body);
 		Flux<DataBuffer> result = extractor.extract(request, this.context);
 
 		StepVerifier.create(result)
@@ -229,6 +223,7 @@ public class BodyExtractorsTests {
 
 	interface SafeToDeserialize {}
 
+	@SuppressWarnings("unused")
 	private static class User {
 
 		@JsonView(SafeToDeserialize.class)

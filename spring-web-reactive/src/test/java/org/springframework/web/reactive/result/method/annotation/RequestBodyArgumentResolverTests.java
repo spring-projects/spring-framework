@@ -35,7 +35,6 @@ import rx.Single;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.StringDecoder;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
@@ -46,10 +45,14 @@ import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
 
 /**
  * Unit tests for {@link RequestBodyArgumentResolver}. When adding a test also
@@ -62,18 +65,11 @@ public class RequestBodyArgumentResolverTests {
 
 	private RequestBodyArgumentResolver resolver = resolver();
 
-	private ServerWebExchange exchange;
-
-	private MockServerHttpRequest request;
-
 	private ResolvableMethod testMethod = ResolvableMethod.onClass(this.getClass()).name("handle");
 
 
 	@Before
 	public void setUp() throws Exception {
-		this.request = new MockServerHttpRequest(HttpMethod.POST, "/path");
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(this.request, response, new MockWebSessionManager());
 	}
 
 	private RequestBodyArgumentResolver resolver() {
@@ -219,8 +215,9 @@ public class RequestBodyArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValue(MethodParameter param, String body) {
-		this.request.setBody(body);
-		Mono<Object> result = this.resolver.readBody(param, true, new BindingContext(), this.exchange);
+		MockServerHttpRequest request = MockServerHttpRequest.post("/path").body(body);
+		ServerWebExchange exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
+		Mono<Object> result = this.resolver.readBody(param, true, new BindingContext(), exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
 		assertNotNull(value);
@@ -233,8 +230,10 @@ public class RequestBodyArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValueWithEmptyBody(ResolvableType bodyType, boolean isRequired) {
+		MockServerHttpRequest request = MockServerHttpRequest.post("/path").build();
+		ServerWebExchange exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
 		MethodParameter param = this.testMethod.resolveParam(bodyType, requestBody(isRequired));
-		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
+		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
 		if (value != null) {
@@ -254,6 +253,7 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	void handle(
 			@RequestBody String string,
 			@RequestBody Mono<String> mono,

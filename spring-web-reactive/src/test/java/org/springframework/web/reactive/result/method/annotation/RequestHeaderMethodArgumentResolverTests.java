@@ -19,10 +19,10 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.lang.reflect.Method;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -32,7 +32,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
@@ -40,13 +39,13 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.BindingContext;
-import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link RequestHeaderMethodArgumentResolver}.
@@ -66,7 +65,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 	private MethodParameter paramDate;
 	private MethodParameter paramInstant;
 
-	private ServerWebExchange exchange;
+	private ServerHttpRequest request;
 
 	private BindingContext bindingContext;
 
@@ -88,9 +87,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 		this.paramDate = new SynthesizingMethodParameter(method, 6);
 		this.paramInstant = new SynthesizingMethodParameter(method, 7);
 
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
-		WebSessionManager sessionManager = new MockWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
+		this.request = MockServerHttpRequest.get("/").build();
 
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultFormattingConversionService());
@@ -108,10 +105,10 @@ public class RequestHeaderMethodArgumentResolverTests {
 	@Test
 	public void resolveStringArgument() throws Exception {
 		String expected = "foo";
-		this.exchange.getRequest().getHeaders().add("name", expected);
+		this.request = MockServerHttpRequest.get("/").header("name", expected).build();
 
 		Mono<Object> mono = this.resolver.resolveArgument(
-				this.paramNamedDefaultValueStringHeader, this.bindingContext, this.exchange);
+				this.paramNamedDefaultValueStringHeader, this.bindingContext, createExchange());
 
 		Object result = mono.block();
 		assertTrue(result instanceof String);
@@ -120,21 +117,20 @@ public class RequestHeaderMethodArgumentResolverTests {
 
 	@Test
 	public void resolveStringArrayArgument() throws Exception {
-		String[] expected = new String[] {"foo", "bar"};
-		this.exchange.getRequest().getHeaders().put("name", Arrays.asList(expected));
+		this.request = MockServerHttpRequest.get("/").header("name", "foo", "bar").build();
 
 		Mono<Object> mono = this.resolver.resolveArgument(
-				this.paramNamedValueStringArray, this.bindingContext, this.exchange);
+				this.paramNamedValueStringArray, this.bindingContext, createExchange());
 
 		Object result = mono.block();
 		assertTrue(result instanceof String[]);
-		assertArrayEquals(expected, (String[]) result);
+		assertArrayEquals(new String[] {"foo", "bar"}, (String[]) result);
 	}
 
 	@Test
 	public void resolveDefaultValue() throws Exception {
 		Mono<Object> mono = this.resolver.resolveArgument(
-				this.paramNamedDefaultValueStringHeader, this.bindingContext, this.exchange);
+				this.paramNamedDefaultValueStringHeader, this.bindingContext, createExchange());
 
 		Object result = mono.block();
 		assertTrue(result instanceof String);
@@ -146,7 +142,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 		System.setProperty("systemProperty", "bar");
 		try {
 			Mono<Object> mono = this.resolver.resolveArgument(
-					this.paramSystemProperty, this.bindingContext, this.exchange);
+					this.paramSystemProperty, this.bindingContext, createExchange());
 
 			Object result = mono.block();
 			assertTrue(result instanceof String);
@@ -160,12 +156,12 @@ public class RequestHeaderMethodArgumentResolverTests {
 	@Test
 	public void resolveNameFromSystemPropertyThroughExpression() throws Exception {
 		String expected = "foo";
-		this.exchange.getRequest().getHeaders().add("bar", expected);
+		this.request = MockServerHttpRequest.get("/").header("bar", expected).build();
 
 		System.setProperty("systemProperty", "bar");
 		try {
 			Mono<Object> mono = this.resolver.resolveArgument(
-					this.paramResolvedNameWithExpression, this.bindingContext, this.exchange);
+					this.paramResolvedNameWithExpression, this.bindingContext, createExchange());
 
 			Object result = mono.block();
 			assertTrue(result instanceof String);
@@ -179,12 +175,12 @@ public class RequestHeaderMethodArgumentResolverTests {
 	@Test
 	public void resolveNameFromSystemPropertyThroughPlaceholder() throws Exception {
 		String expected = "foo";
-		this.exchange.getRequest().getHeaders().add("bar", expected);
+		this.request = MockServerHttpRequest.get("/").header("bar", expected).build();
 
 		System.setProperty("systemProperty", "bar");
 		try {
 			Mono<Object> mono = this.resolver.resolveArgument(
-					this.paramResolvedNameWithPlaceholder, this.bindingContext, this.exchange);
+					this.paramResolvedNameWithPlaceholder, this.bindingContext, createExchange());
 
 			Object result = mono.block();
 			assertTrue(result instanceof String);
@@ -198,7 +194,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 	@Test
 	public void notFound() throws Exception {
 		Mono<Object> mono = resolver.resolveArgument(
-				this.paramNamedValueStringArray, this.bindingContext, this.exchange);
+				this.paramNamedValueStringArray, this.bindingContext, createExchange());
 
 		StepVerifier.create(mono)
 				.expectNextCount(0)
@@ -210,9 +206,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 	@SuppressWarnings("deprecation")
 	public void dateConversion() throws Exception {
 		String rfc1123val = "Thu, 21 Apr 2016 17:11:08 +0100";
-		this.exchange.getRequest().getHeaders().add("name", rfc1123val);
+		this.request = MockServerHttpRequest.get("/").header("name", rfc1123val).build();
 
-		Mono<Object> mono = this.resolver.resolveArgument(this.paramDate, this.bindingContext, this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(this.paramDate, this.bindingContext, createExchange());
 		Object result = mono.block();
 
 		assertTrue(result instanceof Date);
@@ -222,13 +218,18 @@ public class RequestHeaderMethodArgumentResolverTests {
 	@Test
 	public void instantConversion() throws Exception {
 		String rfc1123val = "Thu, 21 Apr 2016 17:11:08 +0100";
-		this.exchange.getRequest().getHeaders().add("name", rfc1123val);
+		this.request = MockServerHttpRequest.get("/").header("name", rfc1123val).build();
 
-		Mono<Object> mono = this.resolver.resolveArgument(this.paramInstant, this.bindingContext, this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(this.paramInstant, this.bindingContext, createExchange());
 		Object result = mono.block();
 
 		assertTrue(result instanceof Instant);
 		assertEquals(Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(rfc1123val)), result);
+	}
+
+	@NotNull
+	private DefaultServerWebExchange createExchange() {
+		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
 	}
 
 

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,7 +35,6 @@ import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
@@ -63,13 +63,19 @@ import org.springframework.web.reactive.result.view.ViewResolutionResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewResolver;
-import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.*;
-import static org.springframework.http.MediaType.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
+import static org.springframework.http.MediaType.APPLICATION_XML;
+import static org.springframework.http.MediaType.IMAGE_PNG;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 /**
  * Unit tests for {@link WebReactiveConfigurationSupport}.
@@ -79,14 +85,10 @@ public class WebReactiveConfigurationSupportTests {
 
 	private MockServerHttpRequest request;
 
-	private ServerWebExchange exchange;
-
 
 	@Before
 	public void setUp() throws Exception {
-		this.request = new MockServerHttpRequest(HttpMethod.GET, "/");
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(this.request, response, new MockWebSessionManager());
+		this.request = MockServerHttpRequest.get("/").build();
 	}
 
 
@@ -108,12 +110,12 @@ public class WebReactiveConfigurationSupportTests {
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
 		assertSame(resolver, mapping.getContentTypeResolver());
 
-		this.request.setUri("/path.json");
+		this.request = MockServerHttpRequest.get("/path.json").build();
 		List<MediaType> list = Collections.singletonList(MediaType.APPLICATION_JSON);
-		assertEquals(list, resolver.resolveMediaTypes(this.exchange));
+		assertEquals(list, resolver.resolveMediaTypes(createExchange()));
 
-		this.request.setUri("/path.xml");
-		assertEquals(Collections.emptyList(), resolver.resolveMediaTypes(this.exchange));
+		this.request = MockServerHttpRequest.get("/path.xml").build();
+		assertEquals(Collections.emptyList(), resolver.resolveMediaTypes(createExchange()));
 	}
 
 	@Test
@@ -265,6 +267,11 @@ public class WebReactiveConfigurationSupportTests {
 		SimpleUrlHandlerMapping urlHandlerMapping = (SimpleUrlHandlerMapping) handlerMapping;
 		WebHandler webHandler = (WebHandler) urlHandlerMapping.getUrlMap().get("/images/**");
 		assertNotNull(webHandler);
+	}
+
+	@NotNull
+	private DefaultServerWebExchange createExchange() {
+		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}
 
 

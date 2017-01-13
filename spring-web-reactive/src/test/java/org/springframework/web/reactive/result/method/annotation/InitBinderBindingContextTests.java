@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
+import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
@@ -35,11 +37,12 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
-import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.DefaultWebSessionManager;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 /**
  * Unit tests for {@link InitBinderBindingContext}.
@@ -51,14 +54,18 @@ public class InitBinderBindingContextTests {
 
 	private final List<SyncHandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>();
 
-	private final ServerWebExchange exchange = new DefaultServerWebExchange(
-			new MockServerHttpRequest(), new MockServerHttpResponse(), new DefaultWebSessionManager());
+	private MockServerHttpRequest request;
 
+
+	@Before
+	public void setUp() throws Exception {
+		this.request = MockServerHttpRequest.get("/").build();
+	}
 
 	@Test
 	public void createBinder() throws Exception {
 		BindingContext context = createBindingContext("initBinder", WebDataBinder.class);
-		WebDataBinder dataBinder = context.createDataBinder(this.exchange, null, null);
+		WebDataBinder dataBinder = context.createDataBinder(createExchange(), null, null);
 
 		assertNotNull(dataBinder.getDisallowedFields());
 		assertEquals("id", dataBinder.getDisallowedFields()[0]);
@@ -70,7 +77,7 @@ public class InitBinderBindingContextTests {
 		bindingInitializer.setConversionService(conversionService);
 
 		BindingContext context = createBindingContext("initBinder", WebDataBinder.class);
-		WebDataBinder dataBinder = context.createDataBinder(this.exchange, null, null);
+		WebDataBinder dataBinder = context.createDataBinder(createExchange(), null, null);
 
 		assertSame(conversionService, dataBinder.getConversionService());
 	}
@@ -78,7 +85,7 @@ public class InitBinderBindingContextTests {
 	@Test
 	public void createBinderWithAttrName() throws Exception {
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
-		WebDataBinder dataBinder = context.createDataBinder(this.exchange, null, "foo");
+		WebDataBinder dataBinder = context.createDataBinder(createExchange(), null, "foo");
 
 		assertNotNull(dataBinder.getDisallowedFields());
 		assertEquals("id", dataBinder.getDisallowedFields()[0]);
@@ -87,7 +94,7 @@ public class InitBinderBindingContextTests {
 	@Test
 	public void createBinderWithAttrNameNoMatch() throws Exception {
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
-		WebDataBinder dataBinder = context.createDataBinder(this.exchange, null, "invalidName");
+		WebDataBinder dataBinder = context.createDataBinder(createExchange(), null, "invalidName");
 
 		assertNull(dataBinder.getDisallowedFields());
 	}
@@ -95,7 +102,7 @@ public class InitBinderBindingContextTests {
 	@Test
 	public void createBinderNullAttrName() throws Exception {
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
-		WebDataBinder dataBinder = context.createDataBinder(this.exchange, null, null);
+		WebDataBinder dataBinder = context.createDataBinder(createExchange(), null, null);
 
 		assertNull(dataBinder.getDisallowedFields());
 	}
@@ -103,21 +110,25 @@ public class InitBinderBindingContextTests {
 	@Test(expected = IllegalStateException.class)
 	public void returnValueNotExpected() throws Exception {
 		BindingContext context = createBindingContext("initBinderReturnValue", WebDataBinder.class);
-		context.createDataBinder(this.exchange, null, "invalidName");
+		context.createDataBinder(createExchange(), null, "invalidName");
 	}
 
 	@Test
 	public void createBinderTypeConversion() throws Exception {
-		this.exchange.getRequest().getQueryParams().add("requestParam", "22");
+		this.request = MockServerHttpRequest.get("/path?requestParam=22").build();
 		this.argumentResolvers.add(new RequestParamMethodArgumentResolver(null, false));
 
 		BindingContext context = createBindingContext("initBinderTypeConversion", WebDataBinder.class, int.class);
-		WebDataBinder dataBinder = context.createDataBinder(this.exchange, null, "foo");
+		WebDataBinder dataBinder = context.createDataBinder(createExchange(), null, "foo");
 
 		assertNotNull(dataBinder.getDisallowedFields());
 		assertEquals("requestParam-22", dataBinder.getDisallowedFields()[0]);
 	}
 
+	@NotNull
+	private DefaultServerWebExchange createExchange() {
+		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
+	}
 
 	private BindingContext createBindingContext(String methodName, Class<?>... parameterTypes)
 			throws Exception {

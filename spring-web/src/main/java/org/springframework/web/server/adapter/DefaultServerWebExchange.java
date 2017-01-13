@@ -44,6 +44,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
+import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 /**
@@ -81,6 +82,17 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	private volatile boolean notModified;
 
 
+	/**
+	 * Constructor with a request and response only.
+	 * By default creates a session manager of type {@link DefaultWebSessionManager}.
+	 */
+	public DefaultServerWebExchange(ServerHttpRequest request, ServerHttpResponse response) {
+		this(request, response, new DefaultWebSessionManager());
+	}
+
+	/**
+	 * Alternate constructor with a WebSessionManager parameter.
+	 */
 	public DefaultServerWebExchange(ServerHttpRequest request, ServerHttpResponse response,
 			WebSessionManager sessionManager) {
 

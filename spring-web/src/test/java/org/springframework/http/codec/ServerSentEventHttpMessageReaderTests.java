@@ -19,9 +19,6 @@ package org.springframework.http.codec;
 import java.time.Duration;
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -31,6 +28,10 @@ import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze
@@ -57,10 +58,12 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 	@Test
 	public void readServerSentEvents() {
-		MockServerHttpRequest request = new MockServerHttpRequest();
-		request.setBody("id:c42\nevent:foo\nretry:123\n:bla\n:bla bla\n:bla bla bla\ndata:bar\n\n" +
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(
+				"id:c42\nevent:foo\nretry:123\n:bla\n:bla bla\n:bla bla bla\ndata:bar\n\n" +
 			 	"id:c43\nevent:bar\nretry:456\ndata:baz\n\n");
-		Flux<ServerSentEvent> events = messageReader
+
+		Flux<ServerSentEvent> events = this.messageReader
 				.read(ResolvableType.forClassWithGenerics(ServerSentEvent.class, String.class),
 						request, Collections.emptyMap()).cast(ServerSentEvent.class);
 
@@ -85,9 +88,13 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 	@Test
 	public void readServerSentEventsWithMultipleChunks() {
-		MockServerHttpRequest request = new MockServerHttpRequest();
-		request.setBody(Flux.just(stringBuffer("id:c42\nev"), stringBuffer("ent:foo\nretry:123\n:bla\n:bla bla\n:bla bla bla\ndata:"),
-				stringBuffer("bar\n\nid:c43\nevent:bar\nretry:456\ndata:baz\n\n")));
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.body(Flux.just(
+						stringBuffer("id:c42\nev"),
+						stringBuffer("ent:foo\nretry:123\n:bla\n:bla bla\n:bla bla bla\ndata:"),
+						stringBuffer("bar\n\nid:c43\nevent:bar\nretry:456\ndata:baz\n\n")));
+
 		Flux<ServerSentEvent> events = messageReader
 				.read(ResolvableType.forClassWithGenerics(ServerSentEvent.class, String.class),
 						request, Collections.emptyMap()).cast(ServerSentEvent.class);
@@ -113,8 +120,10 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 	@Test
 	public void readString() {
-		MockServerHttpRequest request = new MockServerHttpRequest();
-		request.setBody("data:foo\ndata:bar\n\ndata:baz\n\n");
+
+		String body = "data:foo\ndata:bar\n\ndata:baz\n\n";
+		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(body);
+
 		Flux<String> data = messageReader.read(ResolvableType.forClass(String.class),
 				request, Collections.emptyMap()).cast(String.class);
 
@@ -127,9 +136,11 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 
 	@Test
 	public void readPojo() {
-		MockServerHttpRequest request = new MockServerHttpRequest();
-		request.setBody("data:{\"foo\": \"foofoo\", \"bar\": \"barbar\"}\n\n" +
-		"data:{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}\n\n");
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(
+				"data:{\"foo\": \"foofoo\", \"bar\": \"barbar\"}\n\n" +
+				"data:{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}\n\n");
+
 		Flux<Pojo> data = messageReader.read(ResolvableType.forClass(Pojo.class), request,
 				Collections.emptyMap()).cast(Pojo.class);
 

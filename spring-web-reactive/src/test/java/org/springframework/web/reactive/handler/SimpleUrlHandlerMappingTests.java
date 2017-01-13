@@ -15,6 +15,7 @@
  */
 package org.springframework.web.reactive.handler;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.junit.Test;
@@ -24,14 +25,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -103,9 +102,7 @@ public class SimpleUrlHandlerMappingTests {
 
 	}
 
-	private void testUrl(String url, Object bean, HandlerMapping handlerMapping, String pathWithinMapping)
-			throws URISyntaxException {
-
+	private void testUrl(String url, Object bean, HandlerMapping handlerMapping, String pathWithinMapping) {
 		ServerWebExchange exchange = createExchange(url);
 		Object actual = handlerMapping.getHandler(exchange).block();
 		if (bean != null) {
@@ -119,10 +116,9 @@ public class SimpleUrlHandlerMappingTests {
 		}
 	}
 
-	private ServerWebExchange createExchange(String path) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, path);
-		WebSessionManager sessionManager = new MockWebSessionManager();
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
+	private ServerWebExchange createExchange(String path) {
+		ServerHttpRequest request = MockServerHttpRequest.method(HttpMethod.GET, URI.create(path)).build();
+		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
 	}
 
 

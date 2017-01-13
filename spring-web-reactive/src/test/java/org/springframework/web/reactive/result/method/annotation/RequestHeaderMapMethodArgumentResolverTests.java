@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -27,17 +28,14 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -57,7 +55,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 	private MethodParameter paramHttpHeaders;
 	private MethodParameter paramUnsupported;
 
-	private ServerWebExchange exchange;
+	private ServerHttpRequest request;
 
 
 	@Before
@@ -70,9 +68,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		paramHttpHeaders = new SynthesizingMethodParameter(method, 2);
 		paramUnsupported = new SynthesizingMethodParameter(method, 3);
 
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
-		WebSessionManager sessionManager = new MockWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
+		this.request = MockServerHttpRequest.get("/").build();
 	}
 
 
@@ -89,9 +85,9 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		String name = "foo";
 		String value = "bar";
 		Map<String, String> expected = Collections.singletonMap(name, value);
-		this.exchange.getRequest().getHeaders().add(name, value);
+		this.request = MockServerHttpRequest.get("/").header(name, value).build();
 
-		Mono<Object> mono = this.resolver.resolveArgument(paramMap, null, this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(paramMap, null, createExchange());
 		Object result = mono.block();
 
 		assertTrue(result instanceof Map);
@@ -103,15 +99,13 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		String name = "foo";
 		String value1 = "bar";
 		String value2 = "baz";
-
-		this.exchange.getRequest().getHeaders().add(name, value1);
-		this.exchange.getRequest().getHeaders().add(name, value2);
+		this.request = MockServerHttpRequest.get("/").header(name, value1, value2).build();
 
 		MultiValueMap<String, String> expected = new LinkedMultiValueMap<>(1);
 		expected.add(name, value1);
 		expected.add(name, value2);
 
-		Mono<Object> mono = this.resolver.resolveArgument(paramMultiValueMap, null, this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(paramMultiValueMap, null, createExchange());
 		Object result = mono.block();
 
 		assertTrue(result instanceof MultiValueMap);
@@ -123,19 +117,22 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		String name = "foo";
 		String value1 = "bar";
 		String value2 = "baz";
-
-		this.exchange.getRequest().getHeaders().add(name, value1);
-		this.exchange.getRequest().getHeaders().add(name, value2);
+		this.request = MockServerHttpRequest.get("/").header(name, value1, value2).build();
 
 		HttpHeaders expected = new HttpHeaders();
 		expected.add(name, value1);
 		expected.add(name, value2);
 
-		Mono<Object> mono = this.resolver.resolveArgument(paramHttpHeaders, null, this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(paramHttpHeaders, null, createExchange());
 		Object result = mono.block();
 
 		assertTrue(result instanceof HttpHeaders);
 		assertEquals("Invalid result", expected, result);
+	}
+
+	@NotNull
+	private DefaultServerWebExchange createExchange() {
+		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}
 
 

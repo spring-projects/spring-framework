@@ -31,10 +31,13 @@ import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link ServerWebExchangeArgumentResolver}.
@@ -51,13 +54,10 @@ public class ServerWebExchangeArgumentResolverTests {
 
 	@Before
 	public void setUp() throws Exception {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/path");
+		ServerHttpRequest request = MockServerHttpRequest.get("/path").build();
 		ServerHttpResponse response = new MockServerHttpResponse();
 
-		WebSession session = mock(WebSession.class);
-		WebSessionManager sessionManager = mock(WebSessionManager.class);
-		when(sessionManager.getSession(any())).thenReturn(Mono.just(session));
-
+		WebSessionManager sessionManager = new MockWebSessionManager(mock(WebSession.class));
 		this.exchange = new DefaultServerWebExchange(request, response, sessionManager);
 	}
 

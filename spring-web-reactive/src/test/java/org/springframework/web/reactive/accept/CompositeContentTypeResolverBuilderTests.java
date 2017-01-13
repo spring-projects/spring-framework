@@ -17,19 +17,17 @@ package org.springframework.web.reactive.accept;
 
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.Test;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 
@@ -54,14 +52,13 @@ public class CompositeContentTypeResolverBuilderTests {
 		assertEquals("Should ignore unknown extensions by default",
 				Collections.<MediaType>emptyList(), resolver.resolveMediaTypes(exchange));
 
-		exchange = createExchange("/flower");
-		exchange.getRequest().getQueryParams().add("format", "gif");
+		exchange = createExchange("/flower?format=gif");
 
 		assertEquals("Should not resolve request parameters by default",
 				Collections.<MediaType>emptyList(), resolver.resolveMediaTypes(exchange));
 
-		exchange = createExchange("/flower");
-		exchange.getRequest().getHeaders().setAccept(Collections.singletonList(MediaType.IMAGE_GIF));
+		ServerHttpRequest request = MockServerHttpRequest.get("/flower").accept(MediaType.IMAGE_GIF).build();
+		exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
 
 		assertEquals("Should resolve Accept header by default",
 				Collections.singletonList(MediaType.IMAGE_GIF), resolver.resolveMediaTypes(exchange));
@@ -108,9 +105,7 @@ public class CompositeContentTypeResolverBuilderTests {
 				.ignoreUnknownPathExtensions(false)
 				.build();
 
-		ServerWebExchange exchange = createExchange("/flower.xyz");
-		exchange.getRequest().getQueryParams().add("format", "json");
-
+		ServerWebExchange exchange = createExchange("/flower.xyz?format=json");
 		resolver.resolveMediaTypes(exchange);
 	}
 
@@ -121,11 +116,9 @@ public class CompositeContentTypeResolverBuilderTests {
 				.mediaType("json", MediaType.APPLICATION_JSON)
 				.build();
 
-		ServerWebExchange exchange = createExchange("/flower");
-		exchange.getRequest().getQueryParams().add("format", "json");
+		ServerWebExchange exchange = createExchange("/flower?format=json");
 
-		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON),
-				resolver.resolveMediaTypes(exchange));
+		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON), resolver.resolveMediaTypes(exchange));
 	}
 
 	@Test(expected = NotAcceptableStatusException.class) // SPR-10170
@@ -134,9 +127,7 @@ public class CompositeContentTypeResolverBuilderTests {
 				.favorParameter(true)
 				.build();
 
-		ServerWebExchange exchange = createExchange("/flower");
-		exchange.getRequest().getQueryParams().add("format", "xyz");
-
+		ServerWebExchange exchange = createExchange("/flower?format=xyz");
 		resolver.resolveMediaTypes(exchange);
 	}
 
@@ -146,8 +137,8 @@ public class CompositeContentTypeResolverBuilderTests {
 				.ignoreAcceptHeader(true)
 				.build();
 
-		ServerWebExchange exchange = createExchange("/flower");
-		exchange.getRequest().getHeaders().setAccept(Collections.singletonList(MediaType.IMAGE_GIF));
+		ServerHttpRequest request = MockServerHttpRequest.get("/flower").accept(MediaType.IMAGE_GIF).build();
+		ServerWebExchange exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
 
 		assertEquals(Collections.<MediaType>emptyList(), resolver.resolveMediaTypes(exchange));
 	}
@@ -158,15 +149,10 @@ public class CompositeContentTypeResolverBuilderTests {
 				.defaultContentType(MediaType.APPLICATION_JSON)
 				.build();
 
-		ServerWebExchange exchange = createExchange("/");
+		ServerHttpRequest request = MockServerHttpRequest.get("/").accept(MediaType.ALL).build();
+		ServerWebExchange exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
 
-		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON),
-				resolver.resolveMediaTypes(exchange));
-
-		exchange.getRequest().getHeaders().setAccept(Collections.singletonList(MediaType.ALL));
-
-		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON),
-				resolver.resolveMediaTypes(exchange));
+		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON), resolver.resolveMediaTypes(exchange));
 	}
 
 	@Test // SPR-12286
@@ -175,21 +161,20 @@ public class CompositeContentTypeResolverBuilderTests {
 				.defaultContentTypeResolver(new FixedContentTypeResolver(MediaType.APPLICATION_JSON))
 				.build();
 
+		List<MediaType> expected = Collections.singletonList(MediaType.APPLICATION_JSON);
+
 		ServerWebExchange exchange = createExchange("/");
+		assertEquals(expected, resolver.resolveMediaTypes(exchange));
 
-		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON),
-				resolver.resolveMediaTypes(exchange));
-
-		exchange.getRequest().getHeaders().setAccept(Collections.singletonList(MediaType.ALL));
-		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON),
-				resolver.resolveMediaTypes(exchange));
+		ServerHttpRequest request = MockServerHttpRequest.get("/").accept(MediaType.ALL).build();
+		exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
+		assertEquals(expected, resolver.resolveMediaTypes(exchange));
 	}
 
 
-	private ServerWebExchange createExchange(String path) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, path);
-		WebSessionManager sessionManager = new MockWebSessionManager();
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
+	private ServerWebExchange createExchange(String url) throws URISyntaxException {
+		ServerHttpRequest request = MockServerHttpRequest.get(url).build();
+		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
 	}
 
 }

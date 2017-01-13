@@ -41,7 +41,7 @@ import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
@@ -52,10 +52,13 @@ import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
 
 /**
  * Unit tests for {@link HttpEntityArgumentResolver}.When adding a test also
@@ -69,8 +72,6 @@ public class HttpEntityArgumentResolverTests {
 
 	private HttpEntityArgumentResolver resolver = createResolver();
 
-	private ServerWebExchange exchange;
-
 	private MockServerHttpRequest request;
 
 	private ResolvableMethod testMethod = ResolvableMethod.onClass(getClass()).name("handle");
@@ -78,9 +79,7 @@ public class HttpEntityArgumentResolverTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.request = new MockServerHttpRequest(HttpMethod.POST, "/path");
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(this.request, response, new MockWebSessionManager());
+		this.request = MockServerHttpRequest.post("/path").build();
 	}
 
 	private HttpEntityArgumentResolver createResolver() {
@@ -318,11 +317,13 @@ public class HttpEntityArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValue(ResolvableType type, String body) {
-		this.request.setHeader("foo", "bar").setHeader("Content-Type", "text/plain");
-		this.request.setBody(body);
+		this.request = MockServerHttpRequest.post("/path").header("foo", "bar")
+				.contentType(MediaType.TEXT_PLAIN)
+				.body(body);
+		ServerWebExchange exchange = new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 
 		MethodParameter param = this.testMethod.resolveParam(type);
-		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
+		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
 		assertNotNull(value);
@@ -334,8 +335,9 @@ public class HttpEntityArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> HttpEntity<T> resolveValueWithEmptyBody(ResolvableType type) {
+		ServerWebExchange exchange = new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 		MethodParameter param = this.testMethod.resolveParam(type);
-		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
+		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), exchange);
 		HttpEntity<String> httpEntity = (HttpEntity<String>) result.block(Duration.ofSeconds(5));
 
 		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());

@@ -30,7 +30,6 @@ import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.CacheControl;
-import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.reactive.HandlerMapping;
@@ -47,8 +46,6 @@ import org.springframework.web.reactive.resource.VersionResourceResolver;
 import org.springframework.web.reactive.resource.WebJarsResourceResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.DefaultWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -78,10 +75,9 @@ public class ResourceHandlerRegistryTests {
 		this.registration = this.registry.addResourceHandler("/resources/**");
 		this.registration.addResourceLocations("classpath:org/springframework/web/reactive/config/");
 
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "");
+		MockServerHttpRequest request = MockServerHttpRequest.get("").build();
 		this.response = new MockServerHttpResponse();
-		WebSessionManager manager = new DefaultWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(request, this.response, manager);
+		this.exchange = new DefaultServerWebExchange(request, this.response);
 	}
 
 

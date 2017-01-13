@@ -20,15 +20,16 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.server.ServerWebExchange;
@@ -50,8 +51,6 @@ import static org.junit.Assert.assertNull;
  */
 public class RequestMappingInfoTests {
 
-	private ServerWebExchange exchange;
-
 	private ServerHttpRequest request;
 
 
@@ -59,11 +58,8 @@ public class RequestMappingInfoTests {
 
 	@Before
 	public void setUp() throws Exception {
-		WebSessionManager sessionManager = new MockWebSessionManager();
-		this.request = new MockServerHttpRequest(HttpMethod.GET, "/foo");
-		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
+		this.request = MockServerHttpRequest.get("/foo").build();
 	}
-
 
 	@Test
 	public void createEmpty() {
@@ -85,105 +81,103 @@ public class RequestMappingInfoTests {
 		RequestMappingInfo expected = new RequestMappingInfo(
 				new PatternsRequestCondition("/foo*"), null, null, null, null, null, null);
 
-		assertEquals(expected, info.getMatchingCondition(this.exchange));
+		assertEquals(expected, info.getMatchingCondition(createExchange()));
 
 		info = new RequestMappingInfo(
 				new PatternsRequestCondition("/**", "/foo*", "/foo"), null, null, null, null, null, null);
 		expected = new RequestMappingInfo(
 				new PatternsRequestCondition("/foo", "/foo*", "/**"), null, null, null, null, null, null);
 
-		assertEquals(expected, info.getMatchingCondition(this.exchange));
+		assertEquals(expected, info.getMatchingCondition(createExchange()));
 	}
 
 	@Test
 	public void matchParamsCondition() {
-		this.request.getQueryParams().add("foo", "bar");
+		this.request = MockServerHttpRequest.get("/foo?foo=bar").build();
 
-		RequestMappingInfo info =
-				new RequestMappingInfo(
-						new PatternsRequestCondition("/foo"), null,
-						new ParamsRequestCondition("foo=bar"), null, null, null, null);
-		RequestMappingInfo match = info.getMatchingCondition(this.exchange);
+		RequestMappingInfo info = new RequestMappingInfo(
+				new PatternsRequestCondition("/foo"), null,
+				new ParamsRequestCondition("foo=bar"), null, null, null, null);
+		RequestMappingInfo match = info.getMatchingCondition(createExchange());
 
 		assertNotNull(match);
 
 		info = new RequestMappingInfo(
 				new PatternsRequestCondition("/foo"), null,
 				new ParamsRequestCondition("foo!=bar"), null, null, null, null);
-		match = info.getMatchingCondition(this.exchange);
+		match = info.getMatchingCondition(createExchange());
 
 		assertNull(match);
 	}
 
 	@Test
 	public void matchHeadersCondition() {
-		this.request.getHeaders().add("foo", "bar");
+		this.request = MockServerHttpRequest.get("/foo").header("foo", "bar").build();
 
 		RequestMappingInfo info =
 				new RequestMappingInfo(
 						new PatternsRequestCondition("/foo"), null, null,
 						new HeadersRequestCondition("foo=bar"), null, null, null);
-		RequestMappingInfo match = info.getMatchingCondition(this.exchange);
+		RequestMappingInfo match = info.getMatchingCondition(createExchange());
 
 		assertNotNull(match);
 
 		info = new RequestMappingInfo(
 				new PatternsRequestCondition("/foo"), null, null,
 				new HeadersRequestCondition("foo!=bar"), null, null, null);
-		match = info.getMatchingCondition(this.exchange);
+		match = info.getMatchingCondition(createExchange());
 
 		assertNull(match);
 	}
 
 	@Test
 	public void matchConsumesCondition() {
-		this.request.getHeaders().setContentType(MediaType.TEXT_PLAIN);
+		this.request = MockServerHttpRequest.post("/foo").contentType(MediaType.TEXT_PLAIN).build();
 
 		RequestMappingInfo info =
 			new RequestMappingInfo(
 				new PatternsRequestCondition("/foo"), null, null, null,
 				new ConsumesRequestCondition("text/plain"), null, null);
-		RequestMappingInfo match = info.getMatchingCondition(this.exchange);
+		RequestMappingInfo match = info.getMatchingCondition(createExchange());
 
 		assertNotNull(match);
 
 		info = new RequestMappingInfo(
 				new PatternsRequestCondition("/foo"), null, null, null,
 				new ConsumesRequestCondition("application/xml"), null, null);
-		match = info.getMatchingCondition(this.exchange);
+		match = info.getMatchingCondition(createExchange());
 
 		assertNull(match);
 	}
 
 	@Test
 	public void matchProducesCondition() {
-		this.request.getHeaders().setAccept(Collections.singletonList(MediaType.TEXT_PLAIN));
+		this.request = MockServerHttpRequest.get("/foo").accept(MediaType.TEXT_PLAIN).build();
 
-		RequestMappingInfo info =
-			new RequestMappingInfo(
-					new PatternsRequestCondition("/foo"), null, null, null, null,
-					new ProducesRequestCondition("text/plain"), null);
-		RequestMappingInfo match = info.getMatchingCondition(this.exchange);
+		RequestMappingInfo info = new RequestMappingInfo(
+				new PatternsRequestCondition("/foo"), null, null, null, null,
+				new ProducesRequestCondition("text/plain"), null);
+		RequestMappingInfo match = info.getMatchingCondition(createExchange());
 
 		assertNotNull(match);
 
 		info = new RequestMappingInfo(
 				new PatternsRequestCondition("/foo"), null, null, null, null,
 				new ProducesRequestCondition("application/xml"), null);
-		match = info.getMatchingCondition(this.exchange);
+		match = info.getMatchingCondition(createExchange());
 
 		assertNull(match);
 	}
 
 	@Test
 	public void matchCustomCondition() {
-		this.request.getQueryParams().add("foo", "bar");
+		this.request = MockServerHttpRequest.get("/foo?foo=bar").build();
 
 		RequestMappingInfo info =
 				new RequestMappingInfo(
 						new PatternsRequestCondition("/foo"), null, null, null, null, null,
 						new ParamsRequestCondition("foo=bar"));
-		RequestMappingInfo match = info.getMatchingCondition(this.exchange);
+		RequestMappingInfo match = info.getMatchingCondition(createExchange());
 
 		assertNotNull(match);
 
@@ -191,7 +185,7 @@ public class RequestMappingInfoTests {
 				new PatternsRequestCondition("/foo"), null,
 				new ParamsRequestCondition("foo!=bar"), null, null, null,
 				new ParamsRequestCondition("foo!=bar"));
-		match = info.getMatchingCondition(this.exchange);
+		match = info.getMatchingCondition(createExchange());
 
 		assertNull(match);
 	}
@@ -207,7 +201,7 @@ public class RequestMappingInfoTests {
 						new RequestMethodsRequestCondition(RequestMethod.GET),
 						new ParamsRequestCondition("foo"), null, null, null, null);
 
-		Comparator<RequestMappingInfo> comparator = (info, otherInfo) -> info.compareTo(otherInfo, exchange);
+		Comparator<RequestMappingInfo> comparator = (info, otherInfo) -> info.compareTo(otherInfo, createExchange());
 
 		List<RequestMappingInfo> list = asList(none, oneMethod, oneMethodOneParam);
 		Collections.shuffle(list);
@@ -329,9 +323,10 @@ public class RequestMappingInfoTests {
 	@Test
 	@Ignore
 	public void preFlightRequest() throws Exception {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.OPTIONS, "/foo");
-		request.getHeaders().setOrigin("http://domain.com");
-		request.getHeaders().setAccessControlRequestMethod(HttpMethod.POST);
+		ServerHttpRequest request = MockServerHttpRequest.options("/foo")
+				.header("Origin", "http://domain.com")
+				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "POST")
+				.build();
 
 		WebSessionManager manager = new MockWebSessionManager();
 		MockServerHttpResponse response = new MockServerHttpResponse();
@@ -348,6 +343,11 @@ public class RequestMappingInfoTests {
 				null, null, null, null);
 		match = info.getMatchingCondition(exchange);
 		assertNull("Pre-flight should match the ACCESS_CONTROL_REQUEST_METHOD", match);
+	}
+
+	@NotNull
+	private DefaultServerWebExchange createExchange() {
+		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}
 
 }

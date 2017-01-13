@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.client.reactive.test;
+package org.springframework.mock.http.client.reactive;
 
 import java.net.URI;
 
@@ -28,60 +28,43 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.AbstractClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Mock implementation of {@link ClientHttpRequest}.
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class MockClientHttpRequest extends AbstractClientHttpRequest {
 
 	private HttpMethod httpMethod;
 
-	private URI uri;
+	private URI url;
 
 	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 	private Flux<DataBuffer> body;
 
-	private Flux<Publisher<DataBuffer>> bodyWithFlushes;
 
-
-	public MockClientHttpRequest() {
+	public MockClientHttpRequest(HttpMethod httpMethod, String urlTemplate, Object... vars) {
+		this(httpMethod, UriComponentsBuilder.fromUriString(urlTemplate).buildAndExpand(vars).encode().toUri());
 	}
 
-	public MockClientHttpRequest(HttpMethod httpMethod, String uri) {
-		this(httpMethod, (uri != null ? URI.create(uri) : null));
-	}
-
-	public MockClientHttpRequest(HttpMethod httpMethod, URI uri) {
-		super();
+	public MockClientHttpRequest(HttpMethod httpMethod, URI url) {
 		this.httpMethod = httpMethod;
-		this.uri = uri;
+		this.url = url;
 	}
+
 
 	@Override
 	public HttpMethod getMethod() {
 		return this.httpMethod;
 	}
 
-	public MockClientHttpRequest setMethod(HttpMethod httpMethod) {
-		this.httpMethod = httpMethod;
-		return this;
-	}
-
 	@Override
 	public URI getURI() {
-		return this.uri;
-	}
-
-	public MockClientHttpRequest setUri(String uri) {
-		this.uri = URI.create(uri);
-		return this;
-	}
-
-	public MockClientHttpRequest setUri(URI uri) {
-		this.uri = uri;
-		return this;
+		return this.url;
 	}
 
 	@Override
@@ -89,34 +72,35 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest {
 		return this.bufferFactory;
 	}
 
+	public Flux<DataBuffer> getBody() {
+		return this.body;
+	}
+
 	@Override
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 		this.body = Flux.from(body);
-		return doCommit(() -> this.body.then());
+		return doCommit(() -> {
+			this.body = Flux.from(body);
+			return Mono.empty();
+		});
 	}
 
 	@Override
 	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		this.bodyWithFlushes = Flux.from(body).map(p -> Flux.from(p));
-		return doCommit(() -> this.bodyWithFlushes.then());
+		return writeWith(Flux.from(body).flatMap(p -> p));
 	}
 
-	public Publisher<DataBuffer> getBody() {
-		return body;
+	@Override
+	protected void applyHeaders() {
 	}
 
-	public Publisher<Publisher<DataBuffer>> getBodyWithFlush() {
-		return bodyWithFlushes;
+	@Override
+	protected void applyCookies() {
 	}
 
 	@Override
 	public Mono<Void> setComplete() {
-		return doCommit().then();
+		return doCommit(Mono::empty);
 	}
 
-	@Override
-	protected void applyHeaders() { }
-
-	@Override
-	protected void applyCookies() { }
 }

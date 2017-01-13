@@ -29,7 +29,6 @@ import rx.Single;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
@@ -43,8 +42,6 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
@@ -282,12 +279,9 @@ public class ModelAttributeMethodArgumentResolverTests {
 	}
 
 	private ServerWebExchange exchange(String formData) throws URISyntaxException {
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
-		request.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-		request.setBody(formData);
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		WebSessionManager manager = new MockWebSessionManager();
-		return new DefaultServerWebExchange(request, response, manager);
+		MediaType mediaType = MediaType.APPLICATION_FORM_URLENCODED;
+		MockServerHttpRequest request = MockServerHttpRequest.post("/").contentType(mediaType).body(formData);
+		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
 	}
 
 

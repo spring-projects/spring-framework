@@ -5,17 +5,14 @@ import org.junit.Test
 import org.springframework.core.MethodParameter
 import org.springframework.core.annotation.SynthesizingMethodParameter
 import org.springframework.format.support.DefaultFormattingConversionService
-import org.springframework.http.HttpMethod
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.util.ReflectionUtils
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer
 import org.springframework.web.reactive.BindingContext
-import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.ServerWebInputException
 import org.springframework.web.server.adapter.DefaultServerWebExchange
-import org.springframework.web.server.session.MockWebSessionManager
 import reactor.test.StepVerifier
 
 /**
@@ -26,7 +23,7 @@ import reactor.test.StepVerifier
 class RequestParamMethodArgumentResolverKotlinTests {
 
     lateinit var resolver: RequestParamMethodArgumentResolver
-    lateinit var exchange: ServerWebExchange
+    lateinit var request: MockServerHttpRequest
     lateinit var bindingContext: BindingContext
 
     lateinit var nullableParamRequired: MethodParameter
@@ -37,10 +34,8 @@ class RequestParamMethodArgumentResolverKotlinTests {
 
     @Before
     fun setup() {
-        resolver = RequestParamMethodArgumentResolver(null, true)
-        val request = MockServerHttpRequest(HttpMethod.GET, "/")
-        val sessionManager = MockWebSessionManager()
-        exchange = DefaultServerWebExchange(request, MockServerHttpResponse(), sessionManager)
+        this.resolver = RequestParamMethodArgumentResolver(null, true)
+        this.request = MockServerHttpRequest.get("/").build()
         val initializer = ConfigurableWebBindingInitializer()
         initializer.conversionService = DefaultFormattingConversionService()
         bindingContext = BindingContext(initializer)
@@ -56,55 +51,57 @@ class RequestParamMethodArgumentResolverKotlinTests {
 
     @Test
     fun resolveNullableRequiredWithParameter() {
-        exchange.request.queryParams.set("name", "123")
-        var result = resolver.resolveArgument(nullableParamRequired, bindingContext, exchange)
+        this.request = MockServerHttpRequest.get("/path?name=123").build()
+        var result = resolver.resolveArgument(nullableParamRequired, bindingContext, createExchange())
         StepVerifier.create(result).expectNext("123").expectComplete().verify()
     }
 
     @Test
     fun resolveNullableRequiredWithoutParameter() {
-        var result = resolver.resolveArgument(nullableParamRequired, bindingContext, exchange)
+        var result = resolver.resolveArgument(nullableParamRequired, bindingContext, createExchange())
         StepVerifier.create(result).expectComplete().verify()
     }
 
     @Test
     fun resolveNullableNotRequiredWithParameter() {
-        exchange.request.queryParams.set("name", "123")
-        var result = resolver.resolveArgument(nullableParamNotRequired, bindingContext, exchange)
+        this.request = MockServerHttpRequest.get("/path?name=123").build()
+        var result = resolver.resolveArgument(nullableParamNotRequired, bindingContext, createExchange())
         StepVerifier.create(result).expectNext("123").expectComplete().verify()
     }
 
     @Test
     fun resolveNullableNotRequiredWithoutParameter() {
-        var result = resolver.resolveArgument(nullableParamNotRequired, bindingContext, exchange)
+        var result = resolver.resolveArgument(nullableParamNotRequired, bindingContext, createExchange())
         StepVerifier.create(result).expectComplete().verify()
     }
 
     @Test
     fun resolveNonNullableRequiredWithParameter() {
-        exchange.request.queryParams.set("name", "123")
-        var result = resolver.resolveArgument(nonNullableParamRequired, bindingContext, exchange)
+        this.request = MockServerHttpRequest.get("/path?name=123").build()
+        var result = resolver.resolveArgument(nonNullableParamRequired, bindingContext, createExchange())
         StepVerifier.create(result).expectNext("123").expectComplete().verify()
     }
 
     @Test
     fun resolveNonNullableRequiredWithoutParameter() {
-        var result = resolver.resolveArgument(nonNullableParamRequired, bindingContext, exchange)
+        var result = resolver.resolveArgument(nonNullableParamRequired, bindingContext, createExchange())
         StepVerifier.create(result).expectError(ServerWebInputException::class.java).verify()
     }
 
     @Test
     fun resolveNonNullableNotRequiredWithParameter() {
-        exchange.request.queryParams.set("name", "123")
-        var result = resolver.resolveArgument(nonNullableParamNotRequired, bindingContext, exchange)
+        this.request = MockServerHttpRequest.get("/path?name=123").build()
+        var result = resolver.resolveArgument(nonNullableParamNotRequired, bindingContext, createExchange())
         StepVerifier.create(result).expectNext("123").expectComplete().verify()
     }
 
     @Test
     fun resolveNonNullableNotRequiredWithoutParameter() {
-        var result = resolver.resolveArgument(nonNullableParamNotRequired, bindingContext, exchange)
+        var result = resolver.resolveArgument(nonNullableParamNotRequired, bindingContext, createExchange())
         StepVerifier.create(result).expectComplete().verify()
     }
+
+    private fun createExchange() = DefaultServerWebExchange(this.request, MockServerHttpResponse())
 
 
     @Suppress("unused_parameter")

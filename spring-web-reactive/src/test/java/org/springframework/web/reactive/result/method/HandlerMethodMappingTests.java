@@ -150,7 +150,7 @@ public class HandlerMethodMappingTests {
 
 
 	private ServerWebExchange createExchange(HttpMethod httpMethod, String path) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(httpMethod, path);
+		ServerHttpRequest request = MockServerHttpRequest.method(httpMethod, path).build();
 		WebSessionManager sessionManager = new MockWebSessionManager();
 		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 	}

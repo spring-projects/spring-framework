@@ -15,16 +15,14 @@
  */
 package org.springframework.web.reactive.result;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
@@ -33,7 +31,6 @@ import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.http.MediaType.ALL;
@@ -55,15 +52,11 @@ public class HandlerResultHandlerTests {
 
 	private MockServerHttpRequest request;
 
-	private ServerWebExchange exchange;
-
 
 	@Before
 	public void setUp() throws Exception {
 		this.resultHandler = new TestResultHandler();
-		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
-		this.exchange = new DefaultServerWebExchange(
-				this.request, new MockServerHttpResponse(), new MockWebSessionManager());
+		this.request = MockServerHttpRequest.get("/path").build();
 	}
 
 
@@ -71,28 +64,30 @@ public class HandlerResultHandlerTests {
 	public void usesContentTypeResolver() throws Exception {
 		TestResultHandler resultHandler = new TestResultHandler(new FixedContentTypeResolver(IMAGE_GIF));
 		List<MediaType> mediaTypes = Arrays.asList(IMAGE_JPEG, IMAGE_GIF, IMAGE_PNG);
-		MediaType actual = resultHandler.selectMediaType(this.exchange, () -> mediaTypes);
+		MediaType actual = resultHandler.selectMediaType(exchange(), () -> mediaTypes);
 
 		assertEquals(IMAGE_GIF, actual);
 	}
 
 	@Test
 	public void producibleMediaTypesRequestAttribute() throws Exception {
-		Set<MediaType> producible = Collections.singleton(IMAGE_GIF);
-		this.exchange.getAttributes().put(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, producible);
+		ServerWebExchange exchange = exchange();
+		exchange.getAttributes().put(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, Collections.singleton(IMAGE_GIF));
 
 		List<MediaType> mediaTypes = Arrays.asList(IMAGE_JPEG, IMAGE_GIF, IMAGE_PNG);
-		MediaType actual = resultHandler.selectMediaType(this.exchange, () -> mediaTypes);
+		MediaType actual = resultHandler.selectMediaType(exchange, () -> mediaTypes);
 
 		assertEquals(IMAGE_GIF, actual);
 	}
 
 	@Test  // SPR-9160
 	public void sortsByQuality() throws Exception {
-		this.request.setHeader("Accept", "text/plain; q=0.5, application/json");
+		this.request = MockServerHttpRequest.get("/path")
+				.header("Accept", "text/plain; q=0.5, application/json")
+				.build();
 
 		List<MediaType> mediaTypes = Arrays.asList(TEXT_PLAIN, APPLICATION_JSON_UTF8);
-		MediaType actual = this.resultHandler.selectMediaType(this.exchange, () -> mediaTypes);
+		MediaType actual = this.resultHandler.selectMediaType(exchange(), () -> mediaTypes);
 
 		assertEquals(APPLICATION_JSON_UTF8, actual);
 	}
@@ -101,9 +96,8 @@ public class HandlerResultHandlerTests {
 	public void charsetFromAcceptHeader() throws Exception {
 		MediaType text8859 = MediaType.parseMediaType("text/plain;charset=ISO-8859-1");
 		MediaType textUtf8 = MediaType.parseMediaType("text/plain;charset=UTF-8");
-		this.request.getHeaders().setAccept(Collections.singletonList(text8859));
-		MediaType actual = this.resultHandler.selectMediaType(this.exchange,
-				() -> Collections.singletonList(textUtf8));
+		this.request = MockServerHttpRequest.get("/path").accept(text8859).build();
+		MediaType actual = this.resultHandler.selectMediaType(exchange(), () -> Collections.singletonList(textUtf8));
 
 		assertEquals(text8859, actual);
 	}
@@ -111,9 +105,14 @@ public class HandlerResultHandlerTests {
 	@Test // SPR-12894
 	public void noConcreteMediaType() throws Exception {
 		List<MediaType> producible = Collections.singletonList(ALL);
-		MediaType actual = this.resultHandler.selectMediaType(this.exchange, () -> producible);
+		MediaType actual = this.resultHandler.selectMediaType(exchange(), () -> producible);
 
 		assertEquals(APPLICATION_OCTET_STREAM, actual);
+	}
+
+	@NotNull
+	private DefaultServerWebExchange exchange() {
+		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}
 
 

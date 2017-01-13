@@ -36,7 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.web.client.reactive.test.MockClientHttpRequest;
+import org.springframework.mock.http.client.reactive.test.MockClientHttpRequest;
 import org.springframework.web.reactive.function.BodyInserter;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -171,7 +171,7 @@ public class DefaultClientRequestBuilderTests {
 				.cookie("foo", "bar")
 				.build();
 
-		MockClientHttpRequest request = new MockClientHttpRequest();
+		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, "/");
 		WebClientStrategies strategies = mock(WebClientStrategies.class);
 
 		result.writeTo(request, strategies).block();
@@ -196,14 +196,13 @@ public class DefaultClientRequestBuilderTests {
 		ClientRequest<String> result = ClientRequest.POST("http://example.com")
 				.body(inserter);
 
-		MockClientHttpRequest request = new MockClientHttpRequest();
-
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
-		messageWriters.add(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder()));
+		messageWriters.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 
 		WebClientStrategies strategies = mock(WebClientStrategies.class);
 		when(strategies.messageWriters()).thenReturn(messageWriters::stream);
 
+		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, "/");
 		result.writeTo(request, strategies).block();
 		assertNotNull(request.getBody());
 	}

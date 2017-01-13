@@ -29,14 +29,11 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.DefaultWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -44,9 +41,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.mock;
 
 /**
- * Unit tests for
- * {@link AppCacheManifestTransformer}.
- *
+ * Unit tests for {@link AppCacheManifestTransformer}.
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
@@ -55,8 +50,6 @@ public class AppCacheManifestTransformerTests {
 	private AppCacheManifestTransformer transformer;
 
 	private ResourceTransformerChain chain;
-
-	private ServerWebExchange exchange;
 
 
 	@Before
@@ -75,7 +68,7 @@ public class AppCacheManifestTransformerTests {
 
 		CssLinkResourceTransformer cssLinkResourceTransformer = new CssLinkResourceTransformer();
 		cssLinkResourceTransformer.setResourceUrlProvider(resourceUrlProvider);
-		List<ResourceTransformer> transformers = Arrays.asList(cssLinkResourceTransformer);
+		List<ResourceTransformer> transformers = Collections.singletonList(cssLinkResourceTransformer);
 		this.chain = new DefaultResourceTransformerChain(resolverChain, transformers);
 		this.transformer = new AppCacheManifestTransformer();
 		this.transformer.setResourceUrlProvider(resourceUrlProvider);
@@ -88,30 +81,30 @@ public class AppCacheManifestTransformerTests {
 
 	@Test
 	public void noTransformIfExtensionNoMatch() throws Exception {
-		initExchange(HttpMethod.GET, "/static/foobar.file");
+		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/static/foobar.file");
 		this.chain = mock(ResourceTransformerChain.class);
 		Resource resource = mock(Resource.class);
 		given(resource.getFilename()).willReturn("foobar.file");
-		given(this.chain.transform(this.exchange, resource)).willReturn(Mono.just(resource));
+		given(this.chain.transform(exchange, resource)).willReturn(Mono.just(resource));
 
-		Resource result = this.transformer.transform(this.exchange, resource, this.chain).blockMillis(5000);
+		Resource result = this.transformer.transform(exchange, resource, this.chain).blockMillis(5000);
 		assertEquals(resource, result);
 	}
 
 	@Test
 	public void syntaxErrorInManifest() throws Exception {
-		initExchange(HttpMethod.GET, "/static/error.appcache");
+		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/static/error.appcache");
 		this.chain = mock(ResourceTransformerChain.class);
 		Resource resource = new ClassPathResource("test/error.appcache", getClass());
-		given(this.chain.transform(this.exchange, resource)).willReturn(Mono.just(resource));
+		given(this.chain.transform(exchange, resource)).willReturn(Mono.just(resource));
 
-		Resource result = this.transformer.transform(this.exchange, resource, this.chain).blockMillis(5000);
+		Resource result = this.transformer.transform(exchange, resource, this.chain).blockMillis(5000);
 		assertEquals(resource, result);
 	}
 
 	@Test
 	public void transformManifest() throws Exception {
-		initExchange(HttpMethod.GET, "/static/test.appcache");
+		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/static/test.appcache");
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
 
@@ -126,7 +119,7 @@ public class AppCacheManifestTransformerTests {
 		this.chain = new DefaultResourceTransformerChain(resolverChain, transformers);
 
 		Resource resource = new ClassPathResource("test/test.appcache", getClass());
-		Resource result = this.transformer.transform(this.exchange, resource, this.chain).blockMillis(5000);
+		Resource result = this.transformer.transform(exchange, resource, this.chain).blockMillis(5000);
 		byte[] bytes = FileCopyUtils.copyToByteArray(result.getInputStream());
 		String content = new String(bytes, "UTF-8");
 
@@ -146,10 +139,8 @@ public class AppCacheManifestTransformerTests {
 				Matchers.containsString("# Hash: 4bf0338bcbeb0a5b3a4ec9ed8864107d"));
 	}
 
-	private void initExchange(HttpMethod method, String url) {
-		MockServerHttpRequest request = new MockServerHttpRequest(method, url);
-		ServerHttpResponse response = new MockServerHttpResponse();
-		WebSessionManager manager = new DefaultWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(request, response, manager);
+	private ServerWebExchange createExchange(HttpMethod method, String url) {
+		MockServerHttpRequest request = MockServerHttpRequest.method(method, url).build();
+		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
 	}
 }

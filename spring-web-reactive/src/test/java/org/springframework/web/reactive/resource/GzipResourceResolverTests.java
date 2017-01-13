@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,15 +38,10 @@ import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.DefaultWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -63,8 +59,6 @@ public class GzipResourceResolverTests {
 	private List<Resource> locations;
 
 	private Cache cache;
-
-	private ServerWebExchange exchange;
 
 	private MockServerHttpRequest request;
 
@@ -106,18 +100,16 @@ public class GzipResourceResolverTests {
 		this.locations.add(new ClassPathResource("test/", getClass()));
 		this.locations.add(new ClassPathResource("testalternatepath/", getClass()));
 
-		this.request = new MockServerHttpRequest(HttpMethod.GET, "");
-		ServerHttpResponse response = new MockServerHttpResponse();
-		WebSessionManager manager = new DefaultWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(request, response, manager);
+		this.request = MockServerHttpRequest.get("").build();
 	}
 
 
 	@Test
 	public void resolveGzippedFile() throws IOException {
-		this.request.addHeader("Accept-Encoding", "gzip");
+		this.request = MockServerHttpRequest.get("").header("Accept-Encoding", "gzip").build();
+
 		String file = "js/foo.js";
-		Resource resolved = this.resolver.resolveResource(this.exchange, file, this.locations).blockMillis(5000);
+		Resource resolved = this.resolver.resolveResource(createExchange(), file, this.locations).blockMillis(5000);
 
 		String gzFile = file+".gz";
 		Resource resource = new ClassPathResource("test/" + gzFile, getClass());
@@ -129,9 +121,10 @@ public class GzipResourceResolverTests {
 
 	@Test
 	public void resolveFingerprintedGzippedFile() throws IOException {
-		this.request.addHeader("Accept-Encoding", "gzip");
+		this.request = MockServerHttpRequest.get("").header("Accept-Encoding", "gzip").build();
+
 		String file = "foo-e36d2e05253c6c7085a91522ce43a0b4.css";
-		Resource resolved = this.resolver.resolveResource(this.exchange, file, this.locations).blockMillis(5000);
+		Resource resolved = this.resolver.resolveResource(createExchange(), file, this.locations).blockMillis(5000);
 
 		String gzFile = file + ".gz";
 		Resource resource = new ClassPathResource("test/" + gzFile, getClass());
@@ -143,9 +136,10 @@ public class GzipResourceResolverTests {
 
 	@Test
 	public void resolveFromCacheWithEncodingVariants() throws IOException {
-		this.request.addHeader("Accept-Encoding", "gzip");
+		this.request = MockServerHttpRequest.get("").header("Accept-Encoding", "gzip").build();
+
 		String file = "js/foo.js";
-		Resource resolved = this.resolver.resolveResource(this.exchange, file, this.locations).blockMillis(5000);
+		Resource resolved = this.resolver.resolveResource(createExchange(), file, this.locations).blockMillis(5000);
 
 		String gzFile = file+".gz";
 		Resource gzResource = new ClassPathResource("test/"+gzFile, getClass());
@@ -156,11 +150,8 @@ public class GzipResourceResolverTests {
 
 		// resolved resource is now cached in CachingResourceResolver
 
-		this.request = new MockServerHttpRequest(HttpMethod.GET, "/js/foo.js");
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(this.request, response, new DefaultWebSessionManager());
-
-		resolved = this.resolver.resolveResource(this.exchange, file, this.locations).blockMillis(5000);
+		this.request = MockServerHttpRequest.get("/js/foo.js").build();
+		resolved = this.resolver.resolveResource(createExchange(), file, this.locations).blockMillis(5000);
 
 		Resource resource = new ClassPathResource("test/"+file, getClass());
 		assertEquals(resource.getDescription(), resolved.getDescription());
@@ -180,5 +171,10 @@ public class GzipResourceResolverTests {
 		assertEquals(new ClassPathResource("test/" + file).getFilename(), resolved.getFilename());
 		assertTrue("Expected " + resolved + " to be of type " + HttpResource.class,
 				resolved instanceof HttpResource);
+	}
+
+	@NotNull
+	private DefaultServerWebExchange createExchange() {
+		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}
 }

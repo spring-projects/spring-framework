@@ -22,7 +22,6 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.HttpHandler;
@@ -145,8 +144,7 @@ public class RouterFunctionsTests {
 		HttpHandler result = RouterFunctions.toHttpHandler(routerFunction, strategies);
 		assertNotNull(result);
 
-		MockServerHttpRequest httpRequest =
-				new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
+		MockServerHttpRequest httpRequest = MockServerHttpRequest.get("http://localhost").build();
 		MockServerHttpResponse serverHttpResponse = new MockServerHttpResponse();
 		result.handle(httpRequest, serverHttpResponse);
 	}

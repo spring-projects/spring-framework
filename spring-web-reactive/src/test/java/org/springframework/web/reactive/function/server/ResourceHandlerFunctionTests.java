@@ -51,8 +51,7 @@ public class ResourceHandlerFunctionTests {
 
 	@Test
 	public void get() throws IOException {
-		MockServerHttpRequest mockRequest =
-				new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("http://localhost").build();
 		MockServerHttpResponse mockResponse = new MockServerHttpResponse();
 		ServerWebExchange exchange = new DefaultServerWebExchange(mockRequest, mockResponse,
 				new MockWebSessionManager());
@@ -93,8 +92,7 @@ TODO: enable when ServerEntityResponse is reintroduced
 
 	@Test
 	public void head() throws IOException {
-		MockServerHttpRequest mockRequest =
-				new MockServerHttpRequest(HttpMethod.HEAD, "http://localhost");
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.head("http://localhost").build();
 		MockServerHttpResponse mockResponse = new MockServerHttpResponse();
 		ServerWebExchange exchange = new DefaultServerWebExchange(mockRequest, mockResponse,
 				new MockWebSessionManager());
@@ -123,8 +121,7 @@ TODO: enable when ServerEntityResponse is reintroduced
 
 	@Test
 	public void options() {
-		MockServerHttpRequest mockRequest =
-				new MockServerHttpRequest(HttpMethod.OPTIONS, "http://localhost");
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.options("http://localhost").build();
 		MockServerHttpResponse mockResponse = new MockServerHttpResponse();
 		ServerWebExchange exchange = new DefaultServerWebExchange(mockRequest, mockResponse,
 				new MockWebSessionManager());

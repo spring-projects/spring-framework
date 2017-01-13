@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -40,7 +41,6 @@ import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -59,8 +59,6 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuild
 import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -85,18 +83,20 @@ public class ResponseEntityResultHandlerTests {
 
 	private MockServerHttpRequest request;
 
-	private MockServerHttpResponse response = new MockServerHttpResponse();
-
-	private ServerWebExchange exchange;
+	private MockServerHttpResponse response;
 
 
 	@Before
 	public void setUp() throws Exception {
 		this.resultHandler = createHandler();
-		this.request = new MockServerHttpRequest(HttpMethod.GET, "/path");
-		WebSessionManager manager = new MockWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(this.request, this.response, manager);
+		initExchange();
 	}
+
+	private void initExchange() {
+		this.request = MockServerHttpRequest.get("/path").build();
+		this.response = new MockServerHttpResponse();
+	}
+
 
 	private ResponseEntityResultHandler createHandler(HttpMessageWriter<?>... writers) {
 		List<HttpMessageWriter<?>> writerList;
@@ -152,7 +152,7 @@ public class ResponseEntityResultHandlerTests {
 		ResponseEntity<Void> value = ResponseEntity.noContent().build();
 		ResolvableType type = responseEntity(Void.class);
 		HandlerResult result = handlerResult(value, type);
-		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
+		this.resultHandler.handleResult(createExchange(), result).block(Duration.ofSeconds(5));
 
 		assertEquals(HttpStatus.NO_CONTENT, this.response.getStatusCode());
 		assertEquals(0, this.response.getHeaders().size());
@@ -165,7 +165,7 @@ public class ResponseEntityResultHandlerTests {
 		ResolvableType type = responseEntity(Void.class);
 		ResponseEntity<Void> value = ResponseEntity.created(location).build();
 		HandlerResult result = handlerResult(value, type);
-		this.resultHandler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
+		this.resultHandler.handleResult(createExchange(), result).block(Duration.ofSeconds(5));
 
 		assertEquals(HttpStatus.CREATED, this.response.getStatusCode());
 		assertEquals(1, this.response.getHeaders().size());
@@ -178,7 +178,7 @@ public class ResponseEntityResultHandlerTests {
 		Object returnValue = Mono.just(notFound().build());
 		ResolvableType returnType = forClassWithGenerics(Mono.class, responseEntity(String.class));
 		HandlerResult result = handlerResult(returnValue, returnType);
-		this.resultHandler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
+		this.resultHandler.handleResult(createExchange(), result).block(Duration.ofSeconds(5));
 		assertEquals(HttpStatus.NOT_FOUND, this.response.getStatusCode());
 		assertNull(this.response.getBody());
 	}
@@ -206,11 +206,11 @@ public class ResponseEntityResultHandlerTests {
 	public void handleReturnValueLastModified() throws Exception {
 		Instant currentTime = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 		Instant oneMinAgo = currentTime.minusSeconds(60);
-		this.request.getHeaders().setIfModifiedSince(currentTime.toEpochMilli());
+		this.request = MockServerHttpRequest.get("/path").ifModifiedSince(currentTime.toEpochMilli()).build();
 
 		ResponseEntity<String> entity = ok().lastModified(oneMinAgo.toEpochMilli()).body("body");
 		HandlerResult result = handlerResult(entity, responseEntity(String.class));
-		this.resultHandler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
+		this.resultHandler.handleResult(createExchange(), result).block(Duration.ofSeconds(5));
 
 		assertConditionalResponse(HttpStatus.NOT_MODIFIED, null, null, oneMinAgo);
 	}
@@ -218,22 +218,22 @@ public class ResponseEntityResultHandlerTests {
 	@Test
 	public void handleReturnValueEtag() throws Exception {
 		String etagValue = "\"deadb33f8badf00d\"";
-		this.request.getHeaders().setIfNoneMatch(etagValue);
+		this.request = MockServerHttpRequest.get("/path").ifNoneMatch(etagValue).build();
 
 		ResponseEntity<String> entity = ok().eTag(etagValue).body("body");
 		HandlerResult result = handlerResult(entity, responseEntity(String.class));
-		this.resultHandler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
+		this.resultHandler.handleResult(createExchange(), result).block(Duration.ofSeconds(5));
 
 		assertConditionalResponse(HttpStatus.NOT_MODIFIED, null, etagValue, Instant.MIN);
 	}
 
 	@Test // SPR-14559
 	public void handleReturnValueEtagInvalidIfNoneMatch() throws Exception {
-		this.request.getHeaders().setIfNoneMatch("unquoted");
+		this.request = MockServerHttpRequest.get("/path").ifNoneMatch("unquoted").build();
 
 		ResponseEntity<String> entity = ok().eTag("\"deadb33f8badf00d\"").body("body");
 		HandlerResult result = handlerResult(entity, responseEntity(String.class));
-		this.resultHandler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
+		this.resultHandler.handleResult(createExchange(), result).block(Duration.ofSeconds(5));
 
 		assertEquals(HttpStatus.OK, this.response.getStatusCode());
 		assertResponseBody("body");
@@ -242,15 +242,18 @@ public class ResponseEntityResultHandlerTests {
 	@Test
 	public void handleReturnValueETagAndLastModified() throws Exception {
 		String eTag = "\"deadb33f8badf00d\"";
-		this.request.getHeaders().setIfNoneMatch(eTag);
 
 		Instant currentTime = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 		Instant oneMinAgo = currentTime.minusSeconds(60);
-		this.request.getHeaders().setIfModifiedSince(currentTime.toEpochMilli());
+
+		this.request = MockServerHttpRequest.get("/path")
+				.ifNoneMatch(eTag)
+				.ifModifiedSince(currentTime.toEpochMilli())
+				.build();
 
 		ResponseEntity<String> entity = ok().eTag(eTag).lastModified(oneMinAgo.toEpochMilli()).body("body");
 		HandlerResult result = handlerResult(entity, responseEntity(String.class));
-		this.resultHandler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
+		this.resultHandler.handleResult(createExchange(), result).block(Duration.ofSeconds(5));
 
 		assertConditionalResponse(HttpStatus.NOT_MODIFIED, null, eTag, oneMinAgo);
 	}
@@ -259,15 +262,18 @@ public class ResponseEntityResultHandlerTests {
 	public void handleReturnValueChangedETagAndLastModified() throws Exception {
 		String etag = "\"deadb33f8badf00d\"";
 		String newEtag = "\"changed-etag-value\"";
-		this.request.getHeaders().setIfNoneMatch(etag);
 
 		Instant currentTime = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 		Instant oneMinAgo = currentTime.minusSeconds(60);
-		this.request.getHeaders().setIfModifiedSince(currentTime.toEpochMilli());
+
+		this.request = MockServerHttpRequest.get("/path")
+				.ifNoneMatch(etag)
+				.ifModifiedSince(currentTime.toEpochMilli())
+				.build();
 
 		ResponseEntity<String> entity = ok().eTag(newEtag).lastModified(oneMinAgo.toEpochMilli()).body("body");
 		HandlerResult result = handlerResult(entity, responseEntity(String.class));
-		this.resultHandler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
+		this.resultHandler.handleResult(createExchange(), result).block(Duration.ofSeconds(5));
 
 		assertConditionalResponse(HttpStatus.OK, "body", newEtag, oneMinAgo);
 	}
@@ -275,7 +281,8 @@ public class ResponseEntityResultHandlerTests {
 	@Test // SPR-14877
 	public void handleMonoWithWildcardBodyType() throws Exception {
 
-		this.exchange.getAttributes().put(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE,
+		ServerWebExchange exchange = createExchange();
+		exchange.getAttributes().put(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE,
 				Collections.singleton(MediaType.APPLICATION_JSON));
 
 		HandlerResult result = new HandlerResult(new TestController(), Mono.just(ok().body("body")),
@@ -283,7 +290,7 @@ public class ResponseEntityResultHandlerTests {
 						.name("monoResponseEntityWildcard")
 						.resolveReturnType());
 
-		this.resultHandler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
+		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
 
 		assertEquals(HttpStatus.OK, this.response.getStatusCode());
 		assertResponseBody("\"body\"");
@@ -292,7 +299,8 @@ public class ResponseEntityResultHandlerTests {
 	@Test // SPR-14877
 	public void handleMonoWithWildcardBodyTypeAndNullBody() throws Exception {
 
-		this.exchange.getAttributes().put(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE,
+		ServerWebExchange exchange = createExchange();
+		exchange.getAttributes().put(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE,
 				Collections.singleton(MediaType.APPLICATION_JSON));
 
 		HandlerResult result = new HandlerResult(new TestController(), Mono.just(notFound().build()),
@@ -300,7 +308,7 @@ public class ResponseEntityResultHandlerTests {
 						.name("monoResponseEntityWildcard")
 						.resolveReturnType());
 
-		this.resultHandler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
+		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
 
 		assertEquals(HttpStatus.NOT_FOUND, this.response.getStatusCode());
 		assertNull(this.response.getBody());
@@ -308,14 +316,20 @@ public class ResponseEntityResultHandlerTests {
 
 
 	private void testHandle(Object returnValue, ResolvableType type) {
+		initExchange();
+
 		HandlerResult result = handlerResult(returnValue, type);
-		this.resultHandler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
+		this.resultHandler.handleResult(createExchange(), result).block(Duration.ofSeconds(5));
 
 		assertEquals(HttpStatus.OK, this.response.getStatusCode());
 		assertEquals("text/plain;charset=UTF-8", this.response.getHeaders().getFirst("Content-Type"));
 		assertResponseBody("abc");
 	}
 
+	@NotNull
+	private DefaultServerWebExchange createExchange() {
+		return new DefaultServerWebExchange(this.request, this.response);
+	}
 
 	private ResolvableType responseEntity(Class<?> bodyType) {
 		return forClassWithGenerics(ResponseEntity.class, ResolvableType.forClass(bodyType));
