@@ -46,7 +46,7 @@ configure(allprojects) { project ->
 	ext.elApiVersion           = "3.0.1-b04"
 	ext.fileuploadVersion      = "1.3.2"
 	ext.freemarkerVersion      = "2.3.25-incubating"
-	ext.groovyVersion          = "2.4.7"
+	ext.groovyVersion          = "2.4.8"
 	ext.gsonVersion            = "2.8.0"
 	ext.hamcrestVersion        = "1.3"
 	ext.hibernate5Version      = "5.2.6.Final"
@@ -189,7 +189,7 @@ configure(allprojects) { project ->
 		testCompile("junit:junit:${junitVersion}") {
 			exclude group:'org.hamcrest', module:'hamcrest-core'
 		}
-		testCompile("org.mockito:mockito-core:2.2.11") {
+		testCompile("org.mockito:mockito-core:2.6.1") {
 			exclude group:'org.hamcrest', module:'hamcrest-core'
 		}
 		testCompile("org.hamcrest:hamcrest-all:${hamcrestVersion}")
