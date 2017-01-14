@@ -65,6 +65,13 @@ public class ServerHttpRequestTests {
 	}
 
 	@Test
+	public void queryParamsWithUrlEncodedValue() throws Exception {
+		MultiValueMap<String, String> params = createHttpRequest("/path?a=%20%2B+%C3%A0").getQueryParams();
+		assertEquals(1, params.size());
+		assertEquals(Collections.singletonList(" + \u00e0"), params.get("a"));
+	}
+
+	@Test
 	public void queryParamsWithEmptyValue() throws Exception {
 		MultiValueMap<String, String> params = createHttpRequest("/path?a=").getQueryParams();
 		assertEquals(1, params.size());
