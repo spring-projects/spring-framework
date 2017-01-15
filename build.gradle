@@ -678,6 +678,8 @@ project("spring-jdbc") {
 		optional("com.h2database:h2:1.4.193")
 		optional("org.apache.derby:derby:10.13.1.1")
 		optional("org.apache.derby:derbyclient:10.13.1.1")
+		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	}
 }
 
