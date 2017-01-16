@@ -2231,13 +2231,27 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertNotNull(bf.getBean("annotatedBean"));
 	}
 
-	@Test @Ignore  // SPR-15125
+	@Test  // SPR-15125
 	public void testFactoryBeanSelfInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SelfInjectingFactoryBean.class));
+
+		SelfInjectingFactoryBean bean = bf.getBean(SelfInjectingFactoryBean.class);
+		assertSame(bf.getBean("annotatedBean"), bean.testBean);
+	}
+
+	@Test  // SPR-15125
+	public void testFactoryBeanSelfInjectionViaFactoryMethod() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(SelfInjectingFactoryBean.class);
+		bd.setFactoryMethodName("create");
+		bf.registerBeanDefinition("annotatedBean", bd);
 
 		SelfInjectingFactoryBean bean = bf.getBean(SelfInjectingFactoryBean.class);
 		assertSame(bf.getBean("annotatedBean"), bean.testBean);
@@ -3569,6 +3583,10 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		@Override
 		public boolean isSingleton() {
 			return true;
+		}
+
+		public static SelfInjectingFactoryBean create() {
+			return new SelfInjectingFactoryBean();
 		}
 	}
 

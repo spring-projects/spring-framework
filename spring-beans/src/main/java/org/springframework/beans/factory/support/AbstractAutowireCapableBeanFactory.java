@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -773,8 +773,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	@Override
 	protected Class<?> getTypeForFactoryBean(String beanName, RootBeanDefinition mbd) {
-		class Holder { Class<?> value = null; }
-		final Holder objectType = new Holder();
 		String factoryBeanName = mbd.getFactoryBeanName();
 		final String factoryMethodName = mbd.getFactoryMethodName();
 
@@ -782,24 +780,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (factoryMethodName != null) {
 				// Try to obtain the FactoryBean's object type without instantiating it at all.
 				BeanDefinition fbDef = getBeanDefinition(factoryBeanName);
-				if (fbDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) fbDef).hasBeanClass()) {
-					// CGLIB subclass methods hide generic parameters; look at the original user class.
-					Class<?> fbClass = ClassUtils.getUserClass(((AbstractBeanDefinition) fbDef).getBeanClass());
-					// Find the given factory method, taking into account that in the case of
-					// @Bean methods, there may be parameters present.
-					ReflectionUtils.doWithMethods(fbClass,
-							new ReflectionUtils.MethodCallback() {
-								@Override
-								public void doWith(Method method) {
-									if (method.getName().equals(factoryMethodName) &&
-											FactoryBean.class.isAssignableFrom(method.getReturnType())) {
-										objectType.value = GenericTypeResolver.resolveReturnTypeArgument(
-												method, FactoryBean.class);
-									}
-								}
-							});
-					if (objectType.value != null && Object.class != objectType.value) {
-						return objectType.value;
+				if (fbDef instanceof AbstractBeanDefinition) {
+					AbstractBeanDefinition afbDef = (AbstractBeanDefinition) fbDef;
+					if (afbDef.hasBeanClass()) {
+						Class<?> result = getTypeForFactoryBeanFromMethod(afbDef.getBeanClass(), factoryMethodName);
+						if (result != null) {
+							return result;
+						}
 					}
 				}
 			}
@@ -817,9 +804,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		if (fb != null) {
 			// Try to obtain the FactoryBean's object type from this early stage of the instance.
-			objectType.value = getTypeForFactoryBean(fb);
-			if (objectType.value != null) {
-				return objectType.value;
+			Class<?> result = getTypeForFactoryBean(fb);
+			if (result != null) {
+				return result;
 			}
 			else {
 				// No type found for shortcut FactoryBean instance:
@@ -828,7 +815,50 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 
+		if (factoryBeanName == null && mbd.hasBeanClass()) {
+			// No early bean instantiation possible: determine FactoryBean's type from
+			// static factory method signature or from class inheritance hierarchy...
+			if (factoryMethodName != null) {
+				return getTypeForFactoryBeanFromMethod(mbd.getBeanClass(), factoryMethodName);
+			}
+			else {
+				return GenericTypeResolver.resolveTypeArgument(mbd.getBeanClass(), FactoryBean.class);
+			}
+		}
+
 		return null;
+	}
+
+	/**
+	 * Introspect the factory method signatures on the given bean class,
+	 * trying to find a common {@code FactoryBean} object type declared there.
+	 * @param beanClass the bean class to find the factory method on
+	 * @param factoryMethodName the name of the factory method
+	 * @return the common {@code FactoryBean} object type, or {@code null} if none
+	 */
+	private Class<?> getTypeForFactoryBeanFromMethod(Class<?> beanClass, final String factoryMethodName) {
+		class Holder { Class<?> value = null; }
+		final Holder objectType = new Holder();
+
+		// CGLIB subclass methods hide generic parameters; look at the original user class.
+		Class<?> fbClass = ClassUtils.getUserClass(beanClass);
+		// Find the given factory method, taking into account that in the case of
+		// @Bean methods, there may be parameters present.
+		ReflectionUtils.doWithMethods(fbClass,
+				new ReflectionUtils.MethodCallback() {
+					@Override
+					public void doWith(Method method) {
+						if (method.getName().equals(factoryMethodName) &&
+								FactoryBean.class.isAssignableFrom(method.getReturnType())) {
+							Class<?> currentType = GenericTypeResolver.resolveReturnTypeArgument(
+									method, FactoryBean.class);
+							if (currentType != null) {
+								objectType.value = ClassUtils.determineCommonAncestor(currentType, objectType.value);
+							}
+						}
+					}
+				});
+		return (objectType.value != null && Object.class != objectType.value ? objectType.value : null);
 	}
 
 	/**
