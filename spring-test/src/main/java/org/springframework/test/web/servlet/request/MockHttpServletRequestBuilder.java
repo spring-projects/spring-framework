@@ -70,6 +70,7 @@ import org.springframework.web.util.UriUtils;
  * {@code MockHttpServletRequest} can be plugged in via {@link #with(RequestPostProcessor)}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @author Arjen Poutsma
  * @author Sam Brannen
  * @author Kamill Sokol
@@ -633,10 +634,13 @@ public class MockHttpServletRequestBuilder
 			}
 		}
 
-		if (this.content != null && this.contentType != null) {
-			MediaType mediaType = MediaType.parseMediaType(this.contentType);
-			if (MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType)) {
-				addRequestParams(request, parseFormData(mediaType));
+		if (this.content != null && this.content.length > 0) {
+			String requestContentType = request.getContentType();
+			if (requestContentType != null) {
+				MediaType mediaType = MediaType.parseMediaType(requestContentType);
+				if (MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType)) {
+					addRequestParams(request, parseFormData(mediaType));
+				}
 			}
 		}
 
