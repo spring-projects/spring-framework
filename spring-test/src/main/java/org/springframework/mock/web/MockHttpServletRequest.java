@@ -940,7 +940,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			this.headers.put(name, header);
 		}
 		if (value instanceof Collection) {
-			header.addValues((Collection) value);
+			header.addValues((Collection<?>) value);
 		}
 		else if (value.getClass().isArray()) {
 			header.addValueArray(value);
