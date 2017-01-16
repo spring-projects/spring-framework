@@ -3543,6 +3543,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class CustomHashMap<K, V> extends LinkedHashMap<K, V> implements CustomMap<K, V> {
 	}
 
@@ -3551,6 +3552,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class CustomHashSet<E> extends LinkedHashSet<E> implements CustomSet<E> {
 	}
 

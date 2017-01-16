@@ -774,11 +774,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	@Override
 	protected Class<?> getTypeForFactoryBean(String beanName, RootBeanDefinition mbd) {
 		String factoryBeanName = mbd.getFactoryBeanName();
-		final String factoryMethodName = mbd.getFactoryMethodName();
+		String factoryMethodName = mbd.getFactoryMethodName();
 
 		if (factoryBeanName != null) {
 			if (factoryMethodName != null) {
-				// Try to obtain the FactoryBean's object type without instantiating it at all.
+				// Try to obtain the FactoryBean's object type from its factory method declaration
+				// without instantiating the containing bean at all.
 				BeanDefinition fbDef = getBeanDefinition(factoryBeanName);
 				if (fbDef instanceof AbstractBeanDefinition) {
 					AbstractBeanDefinition afbDef = (AbstractBeanDefinition) fbDef;
@@ -798,6 +799,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 
+		// Let's obtain a shortcut instance for an early getObjectType() call...
 		FactoryBean<?> fb = (mbd.isSingleton() ?
 				getSingletonFactoryBeanForTypeCheck(beanName, mbd) :
 				getNonSingletonFactoryBeanForTypeCheck(beanName, mbd));
@@ -842,6 +844,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// CGLIB subclass methods hide generic parameters; look at the original user class.
 		Class<?> fbClass = ClassUtils.getUserClass(beanClass);
+
 		// Find the given factory method, taking into account that in the case of
 		// @Bean methods, there may be parameters present.
 		ReflectionUtils.doWithMethods(fbClass,
@@ -858,6 +861,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						}
 					}
 				});
+
 		return (objectType.value != null && Object.class != objectType.value ? objectType.value : null);
 	}
 
@@ -908,6 +912,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					(mbd.getFactoryBeanName() != null && isSingletonCurrentlyInCreation(mbd.getFactoryBeanName()))) {
 				return null;
 			}
+
 			Object instance = null;
 			try {
 				// Mark this bean as currently in creation, even if just partially.
@@ -923,6 +928,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				// Finished partial creation of this bean.
 				afterSingletonCreation(beanName);
 			}
+
 			FactoryBean<?> fb = getFactoryBean(beanName, instance);
 			if (bw != null) {
 				this.factoryBeanInstanceCache.put(beanName, bw);
@@ -943,6 +949,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (isPrototypeCurrentlyInCreation(beanName)) {
 			return null;
 		}
+
 		Object instance = null;
 		try {
 			// Mark this bean as currently in creation, even if just partially.
@@ -966,6 +973,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// Finished partial creation of this bean.
 			afterPrototypeCreation(beanName);
 		}
+
 		return getFactoryBean(beanName, instance);
 	}
 
