@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,13 +107,9 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			}
 			setMultipartFiles(files);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new MultipartException("Could not parse multipart servlet request", ex);
 		}
-	}
-
-	private String extractFilename(String contentDisposition) {
-		return extractFilename(contentDisposition, FILENAME_KEY);
 	}
 
 	private String extractFilename(String contentDisposition, String key) {
@@ -138,6 +134,10 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			}
 		}
 		return filename;
+	}
+
+	private String extractFilename(String contentDisposition) {
+		return extractFilename(contentDisposition, FILENAME_KEY);
 	}
 
 	private String extractFilenameWithCharset(String contentDisposition) {
@@ -220,7 +220,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			Part part = getPart(paramOrFileName);
 			return (part != null ? part.getContentType() : null);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new MultipartException("Could not access multipart servlet request", ex);
 		}
 	}
@@ -240,7 +240,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 				return null;
 			}
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new MultipartException("Could not access multipart servlet request", ex);
 		}
 	}
