@@ -18,6 +18,7 @@ package org.springframework.messaging.handler.annotation.support;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.handler.invocation.MethodArgumentResolutionException;
 
 /**
  * Exception that indicates that a method argument has not the expected type.
@@ -25,8 +26,8 @@ import org.springframework.messaging.Message;
  * @author Stephane Nicoll
  * @since 4.0.3
  */
-@SuppressWarnings({"serial", "deprecation"})
-public class MethodArgumentTypeMismatchException extends AbstractMethodArgumentResolutionException {
+@SuppressWarnings("serial")
+public class MethodArgumentTypeMismatchException extends MethodArgumentResolutionException {
 
 	public MethodArgumentTypeMismatchException(Message<?> message, MethodParameter parameter, String description) {
 		super(message, parameter, description);
