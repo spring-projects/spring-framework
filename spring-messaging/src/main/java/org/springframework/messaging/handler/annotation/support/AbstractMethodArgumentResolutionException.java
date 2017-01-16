@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.messaging.handler.annotation.support;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.handler.invocation.MethodArgumentResolutionException;
 
 /**
  * Base class for exceptions resulting from the invocation of
@@ -26,43 +26,24 @@ import org.springframework.messaging.MessagingException;
  *
  * @author Rossen Stoyanchev
  * @since 4.0.3
+ * @deprecated as of 4.3.6, in favor of the invocation-associated
+ * {@link MethodArgumentResolutionException}
  */
+@Deprecated
 @SuppressWarnings("serial")
-public abstract class AbstractMethodArgumentResolutionException extends MessagingException {
+public abstract class AbstractMethodArgumentResolutionException extends MethodArgumentResolutionException {
 
-	private final MethodParameter parameter;
-
-
-	/**
-	 * Create a new instance providing the invalid {@code MethodParameter}.
-	 */
 	protected AbstractMethodArgumentResolutionException(Message<?> message, MethodParameter parameter) {
-		this(message, parameter, getMethodParamMessage(parameter));
+		super(message, parameter);
 	}
 
-	/**
-	 * Create a new instance providing the invalid {@code MethodParameter} and
-	 * a prepared description. Subclasses should prepend the description with
-	 * the help of {@link #getMethodParamMessage(org.springframework.core.MethodParameter)}.
-	 */
-	protected AbstractMethodArgumentResolutionException(Message<?> message, MethodParameter param, String description) {
-		super(message, description);
-		this.parameter = param;
-	}
-
-
-	/**
-	 * Return the MethodParameter that was rejected.
-	 */
-	public final MethodParameter getMethodParameter() {
-		return this.parameter;
+	protected AbstractMethodArgumentResolutionException(Message<?> message, MethodParameter parameter, String description) {
+		super(message, parameter, description);
 	}
 
 
 	protected static String getMethodParamMessage(MethodParameter param) {
-		return new StringBuilder("Could not resolve method parameter at index ")
-				.append(param.getParameterIndex()).append(" in method: ")
-				.append(param.getMethod().toGenericString()).append(" ").toString();
+		return "";
 	}
 
 }

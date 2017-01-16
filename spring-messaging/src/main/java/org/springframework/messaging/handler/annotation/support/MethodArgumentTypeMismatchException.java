@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,16 @@ import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 
 /**
- * Exception that indicates that a method argument has not the
- * expected type.
+ * Exception that indicates that a method argument has not the expected type.
  *
  * @author Stephane Nicoll
  * @since 4.0.3
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "deprecation"})
 public class MethodArgumentTypeMismatchException extends AbstractMethodArgumentResolutionException {
 
-	/**
-	 * Create a new instance with the invalid {@code MethodParameter}.
-	 */
-	public MethodArgumentTypeMismatchException(Message<?> message, MethodParameter param, String description) {
-		super(message, param, getMethodParamMessage(param) + description);
+	public MethodArgumentTypeMismatchException(Message<?> message, MethodParameter parameter, String description) {
+		super(message, parameter, description);
 	}
 
 }
