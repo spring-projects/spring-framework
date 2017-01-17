@@ -3518,7 +3518,7 @@ maximum age. Find below an example of defining a `CookieLocaleResolver`.
 | The name of the cookie
 
 | cookieMaxAge
-| Integer.MAX_INT
+| Servlet container default
 | The maximum time a cookie will stay persistent on the client. If -1 is specified, the
   cookie will not be persisted; it will only be available until the client shuts down
   their browser.
