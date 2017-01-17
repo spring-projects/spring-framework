@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ import org.springframework.core.codec.ByteArrayEncoder;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
+import org.springframework.core.codec.DataBufferDecoder;
+import org.springframework.core.codec.DataBufferEncoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
@@ -328,6 +330,7 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 	protected final void addDefaultHttpMessageReaders(List<HttpMessageReader<?>> readers) {
 		readers.add(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		readers.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
+		readers.add(new DecoderHttpMessageReader<>(new DataBufferDecoder()));
 		readers.add(new DecoderHttpMessageReader<>(new StringDecoder()));
 		readers.add(new DecoderHttpMessageReader<>(new ResourceDecoder()));
 		if (jaxb2Present) {
@@ -476,6 +479,7 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 		List<Encoder<?>> sseDataEncoders = new ArrayList<>();
 		writers.add(new EncoderHttpMessageWriter<>(new ByteArrayEncoder()));
 		writers.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
+		writers.add(new EncoderHttpMessageWriter<>(new DataBufferEncoder()));
 		writers.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 		writers.add(new ResourceHttpMessageWriter());
 		if (jaxb2Present) {

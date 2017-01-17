@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteBufferDecoder;
+import org.springframework.core.codec.DataBufferDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
@@ -96,6 +97,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	public RequestMappingHandlerAdapter() {
 		this.messageReaders.add(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		this.messageReaders.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
+		this.messageReaders.add(new DecoderHttpMessageReader<>(new DataBufferDecoder()));
 		this.messageReaders.add(new DecoderHttpMessageReader<>(new StringDecoder()));
 	}
 

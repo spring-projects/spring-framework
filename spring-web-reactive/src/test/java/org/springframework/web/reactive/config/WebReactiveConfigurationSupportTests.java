@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,7 +139,7 @@ public class WebReactiveConfigurationSupportTests {
 		assertNotNull(adapter);
 
 		List<HttpMessageReader<?>> readers = adapter.getMessageReaders();
-		assertEquals(6, readers.size());
+		assertEquals(7, readers.size());
 
 		assertHasMessageReader(readers, byte[].class, APPLICATION_OCTET_STREAM);
 		assertHasMessageReader(readers, ByteBuffer.class, APPLICATION_OCTET_STREAM);
@@ -189,7 +189,7 @@ public class WebReactiveConfigurationSupportTests {
 		assertEquals(0, handler.getOrder());
 
 		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertEquals(7, writers.size());
+		assertEquals(8, writers.size());
 
 		assertHasMessageWriter(writers, byte[].class, APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, ByteBuffer.class, APPLICATION_OCTET_STREAM);
@@ -215,7 +215,7 @@ public class WebReactiveConfigurationSupportTests {
 		assertEquals(100, handler.getOrder());
 
 		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertEquals(7, writers.size());
+		assertEquals(8, writers.size());
 
 		assertHasMessageWriter(writers, byte[].class, APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, ByteBuffer.class, APPLICATION_OCTET_STREAM);
