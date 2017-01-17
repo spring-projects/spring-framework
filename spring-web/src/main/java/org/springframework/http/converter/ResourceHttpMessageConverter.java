@@ -31,13 +31,12 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StreamUtils;
 
 /**
- * Implementation of {@link HttpMessageConverter} that can read and write {@link Resource Resources}
+ * Implementation of {@link HttpMessageConverter} that can read/write {@link Resource Resources}
  * and supports byte range requests.
  *
  * <p>By default, this converter can read all media types. The Java Activation Framework (JAF) -
  * if available - is used to determine the {@code Content-Type} of written resources.
  * If JAF is not available, {@code application/octet-stream} is used.
- *
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -51,6 +50,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 
 	private final boolean supportsReadStreaming;
 
+
 	/**
 	 * Create a new instance of the {@code ResourceHttpMessageConverter}
 	 * that supports read streaming, i.e. can convert an
@@ -62,9 +62,9 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	}
 
 	/**
-	 * Create a new instance of the {@code ResourceHttpMessageConverter}
+	 * Create a new instance of the {@code ResourceHttpMessageConverter}.
 	 * @param supportsReadStreaming whether the converter should support
-	 * read streaming, i.e. convert to {@code InputStreamResource}.
+	 * read streaming, i.e. convert to {@code InputStreamResource}
 	 * @since 5.0
 	 */
 	public ResourceHttpMessageConverter(boolean supportsReadStreaming) {
@@ -82,7 +82,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	protected Resource readInternal(Class<? extends Resource> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
-		if (supportsReadStreaming && InputStreamResource.class == clazz) {
+		if (this.supportsReadStreaming && InputStreamResource.class == clazz) {
 			return new InputStreamResource(inputMessage.getBody());
 		}
 		else if (clazz.isAssignableFrom(ByteArrayResource.class)) {
