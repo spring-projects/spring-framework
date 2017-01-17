@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -282,31 +282,6 @@ public enum SpelMessage {
 				break;
 		}
 		formattedMessage.append(": ");
-		formattedMessage.append(MessageFormat.format(this.message, inserts));
-		return formattedMessage.toString();
-	}
-
-	/**
-	 * Produce a complete message including the prefix, the position (if known)
-	 * and with the inserts applied to the message.
-	 * @param pos the position (ignored and not included in the message if less than 0)
-	 * @param inserts the inserts to put into the formatted message
-	 * @return a formatted message
-	 * @deprecated as of Spring 4.3.5, in favor of {@link #formatMessage(Object...)}
-	 */
-	@Deprecated
-	public String formatMessage(int pos, Object... inserts) {
-		StringBuilder formattedMessage = new StringBuilder();
-		formattedMessage.append("EL").append(this.code);
-		switch (this.kind) {
-			case ERROR:
-				formattedMessage.append("E");
-				break;
-		}
-		formattedMessage.append(":");
-		if (pos >= 0) {
-			formattedMessage.append("(pos ").append(pos).append("): ");
-		}
 		formattedMessage.append(MessageFormat.format(this.message, inserts));
 		return formattedMessage.toString();
 	}

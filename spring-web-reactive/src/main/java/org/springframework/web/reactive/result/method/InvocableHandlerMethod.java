@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.web.server.ServerWebExchange;
  * a {@link ServerWebExchange} and use that to invoke the underlying method.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 5.0
  */
 public class InvocableHandlerMethod extends HandlerMethod {
@@ -89,14 +90,13 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	/**
 	 * Invoke the method for the given exchange.
-	 *
 	 * @param exchange the current exchange
 	 * @param bindingContext the binding context to use
 	 * @param providedArgs optional list of argument values to match by type
 	 * @return Mono with a {@link HandlerResult}.
 	 */
-	public Mono<HandlerResult> invoke(ServerWebExchange exchange,
-			BindingContext bindingContext, Object... providedArgs) {
+	public Mono<HandlerResult> invoke(ServerWebExchange exchange, BindingContext bindingContext,
+			Object... providedArgs) {
 
 		return resolveArguments(exchange, bindingContext, providedArgs).then(args -> {
 			try {
@@ -108,14 +108,13 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				return Mono.error(ex.getTargetException());
 			}
 			catch (Throwable ex) {
-				String msg = getInvocationErrorMessage(args);
-				return Mono.error(new IllegalStateException(msg));
+				return Mono.error(new IllegalStateException(getInvocationErrorMessage(args)));
 			}
 		});
 	}
 
-	private Mono<Object[]> resolveArguments(ServerWebExchange exchange,
-			BindingContext bindingContext, Object... providedArgs) {
+	private Mono<Object[]> resolveArguments(ServerWebExchange exchange, BindingContext bindingContext,
+			Object... providedArgs) {
 
 		if (ObjectUtils.isEmpty(getMethodParameters())) {
 			return EMPTY_ARGS;
@@ -125,7 +124,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 					.map(param -> {
 						param.initParameterNameDiscovery(this.parameterNameDiscoverer);
 						GenericTypeResolver.resolveParameterType(param, getBean().getClass());
-						return findProvidedArg(param, providedArgs)
+						return findProvidedArgument(param, providedArgs)
 								.map(Mono::just)
 								.orElseGet(() -> {
 									HandlerMethodArgumentResolver resolver = findResolver(param);
@@ -144,12 +143,12 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		}
 	}
 
-	private Optional<Object> findProvidedArg(MethodParameter param, Object... providedArgs) {
+	private Optional<Object> findProvidedArgument(MethodParameter parameter, Object... providedArgs) {
 		if (ObjectUtils.isEmpty(providedArgs)) {
 			return Optional.empty();
 		}
 		return Arrays.stream(providedArgs)
-				.filter(arg -> param.getParameterType().isInstance(arg))
+				.filter(arg -> parameter.getParameterType().isInstance(arg))
 				.findFirst();
 	}
 
@@ -157,34 +156,33 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		return this.resolvers.stream()
 				.filter(r -> r.supportsParameter(param))
 				.findFirst()
-				.orElseThrow(() -> getArgumentError("No resolver for ", param, null));
+				.orElseThrow(() -> getArgumentError("No suitable resolver for", param, null));
 	}
 
-	private Mono<Object> resolveArg(HandlerMethodArgumentResolver resolver, MethodParameter param,
+	private Mono<Object> resolveArg(HandlerMethodArgumentResolver resolver, MethodParameter parameter,
 			BindingContext bindingContext, ServerWebExchange exchange) {
 
 		try {
-			return resolver.resolveArgument(param, bindingContext, exchange)
+			return resolver.resolveArgument(parameter, bindingContext, exchange)
 					.defaultIfEmpty(NO_ARG_VALUE)
 					.doOnError(cause -> {
 						if(logger.isDebugEnabled()) {
-							logger.debug(getDetailedErrorMessage("Error resolving ", param), cause);
+							logger.debug(getDetailedErrorMessage("Failed to resolve", parameter), cause);
 						}
 					});
 		}
 		catch (Exception ex) {
-			throw getArgumentError("Error resolving ", param, ex);
+			throw getArgumentError("Failed to resolve", parameter, ex);
 		}
 	}
 
-	private IllegalStateException getArgumentError(String message, MethodParameter param, Throwable ex) {
-		return new IllegalStateException(getDetailedErrorMessage(message, param), ex);
+	private IllegalStateException getArgumentError(String text, MethodParameter parameter, Throwable ex) {
+		return new IllegalStateException(getDetailedErrorMessage(text, parameter), ex);
 	}
 
-	private String getDetailedErrorMessage(String message, MethodParameter param) {
-		return message + "argument [" + param.getParameterIndex() + "] " +
-				"of type [" + param.getParameterType().getName() + "] " +
-				"on method [" + getBridgedMethod().toGenericString() + "]";
+	private String getDetailedErrorMessage(String text, MethodParameter param) {
+		return text + " argument " + param.getParameterIndex() + " of type '" +
+				param.getParameterType().getName() + "' on " + getBridgedMethod().toGenericString();
 	}
 
 	private Object doInvoke(Object[] args) throws Exception {
@@ -207,8 +205,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 						"[" + i + "][type=" + args[i].getClass().getName() + "][value=" + args[i] + "]" :
 						"[" + i + "][null]"))
 				.collect(Collectors.joining(",", " ", " "));
-		return "Failed to invoke controller with resolved arguments:" + argumentDetails +
-				"on method [" + getBridgedMethod().toGenericString() + "]";
+		return "Failed to invoke handler method with resolved arguments:" + argumentDetails +
+				"on " + getBridgedMethod().toGenericString();
 	}
 
 }
