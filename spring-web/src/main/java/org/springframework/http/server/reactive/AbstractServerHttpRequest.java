@@ -16,9 +16,7 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,6 +27,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Common base class for {@link ServerHttpRequest} implementations.
@@ -80,22 +79,6 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	}
 
 	/**
-	 * A method for decoding name and value string in a name-value pair.
-	 * <p>Note that the plus sign "+" is converted into a space character " ".</p>
-	 * @param encodedString the string to be decoded
-	 * @return the decoded string
-	 * @see java.net.URLDecoder#decode(String, String)
-	 */
-	private static String decodeQueryParam(final String encodedString) {
-		try {
-			return URLDecoder.decode(encodedString, StandardCharsets.UTF_8.name());
-		} catch (UnsupportedEncodingException e) {
-			// StandardCharsets are guaranteed to be available on every implementation of the Java platform, so this should never happen.
-			throw new IllegalStateException(e);
-		}
-	}
-
-	/**
 	 * A method for parsing of the query into name-value pairs. The return
 	 * value is turned into an immutable map and cached.
 	 *
@@ -113,11 +96,14 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 				String eq = matcher.group(2);
 				String value = matcher.group(3);
 				value = (value != null ? value : (StringUtils.hasLength(eq) ? "" : null));
-				queryParams.add(decodeQueryParam(name),
-						value != null ? decodeQueryParam(value) : null);
+				queryParams.add(decodeQueryParam(name), decodeQueryParam(value));
 			}
 		}
 		return queryParams;
+	}
+
+	private static String decodeQueryParam(String value) {
+		return (value != null ? UriUtils.decode(value, StandardCharsets.UTF_8) : null);
 	}
 
 	@Override

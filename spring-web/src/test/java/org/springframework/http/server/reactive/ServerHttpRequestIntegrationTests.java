@@ -36,9 +36,9 @@ public class ServerHttpRequestIntegrationTests extends AbstractHttpHandlerIntegr
 
 	@Test
 	public void checkUri() throws Exception {
-		RestTemplate restTemplate = new RestTemplate();
-		RequestEntity<Void> request = RequestEntity.post(new URI("http://localhost:" + port + "/foo?param=bar")).build();
-		ResponseEntity<Void> response = restTemplate.exchange(request, Void.class);
+		URI url = new URI("http://localhost:" + port + "/foo?param=bar");
+		RequestEntity<Void> request = RequestEntity.post(url).build();
+		ResponseEntity<Void> response = new RestTemplate().exchange(request, Void.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 

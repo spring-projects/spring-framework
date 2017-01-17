@@ -60,6 +60,12 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 		assertEquals(expected, performGet("/param?name=George", new HttpHeaders(), String.class).getBody());
 	}
 
+	@Test // SPR-15140
+	public void handleWithEncodedParam() throws Exception {
+		String expected = "Hello  ++\u00e0!";
+		assertEquals(expected, performGet("/param?name=%20%2B+%C3%A0", new HttpHeaders(), String.class).getBody());
+	}
+
 	@Test
 	public void longStreamResult() throws Exception {
 		String[] expected = {"0", "1", "2", "3", "4"};
