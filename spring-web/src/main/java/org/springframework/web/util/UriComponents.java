@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.util;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -44,7 +43,9 @@ import org.springframework.util.MultiValueMap;
 @SuppressWarnings("serial")
 public abstract class UriComponents implements Serializable {
 
-	/** Captures URI template variable names. */
+	/**
+	 * Captures URI template variable names.
+	 */
 	private static final Pattern NAMES_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
 
@@ -59,57 +60,57 @@ public abstract class UriComponents implements Serializable {
 	}
 
 
-	// component getters
+	// Component getters
 
 	/**
-	 * Returns the scheme. Can be {@code null}.
+	 * Return the scheme. Can be {@code null}.
 	 */
 	public final String getScheme() {
 		return this.scheme;
 	}
 
 	/**
-	 * Returns the scheme specific part. Can be {@code null}.
+	 * Return the scheme specific part. Can be {@code null}.
 	 */
 	public abstract String getSchemeSpecificPart();
 
 	/**
-	 * Returns the user info. Can be {@code null}.
+	 * Return the user info. Can be {@code null}.
 	 */
 	public abstract String getUserInfo();
 
 	/**
-	 * Returns the host. Can be {@code null}.
+	 * Return the host. Can be {@code null}.
 	 */
 	public abstract String getHost();
 
 	/**
-	 * Returns the port. Returns {@code -1} if no port has been set.
+	 * Return the port. {@code -1} if no port has been set.
 	 */
 	public abstract int getPort();
 
 	/**
-	 * Returns the path. Can be {@code null}.
+	 * Return the path. Can be {@code null}.
 	 */
 	public abstract String getPath();
 
 	/**
-	 * Returns the list of path segments. Empty if no path has been set.
+	 * Return the list of path segments. Empty if no path has been set.
 	 */
 	public abstract List<String> getPathSegments();
 
 	/**
-	 * Returns the query. Can be {@code null}.
+	 * Return the query. Can be {@code null}.
 	 */
 	public abstract String getQuery();
 
 	/**
-	 * Returns the map of query parameters. Empty if no query has been set.
+	 * Return the map of query parameters. Empty if no query has been set.
 	 */
 	public abstract MultiValueMap<String, String> getQueryParams();
 
 	/**
-	 * Returns the fragment. Can be {@code null}.
+	 * Return the fragment. Can be {@code null}.
 	 */
 	public final String getFragment() {
 		return this.fragment;
@@ -122,13 +123,7 @@ public abstract class UriComponents implements Serializable {
 	 * @return the encoded URI components
 	 */
 	public final UriComponents encode() {
-		try {
-			return encode(StandardCharsets.UTF_8);
-		}
-		catch (UnsupportedEncodingException ex) {
-			// should not occur
-			throw new IllegalStateException(ex);
-		}
+		return encode(StandardCharsets.UTF_8);
 	}
 
 	/**
@@ -136,9 +131,8 @@ public abstract class UriComponents implements Serializable {
 	 * returns the result as a new {@code UriComponents} instance.
 	 * @param charset the encoding of the values contained in this map
 	 * @return the encoded URI components
-	 * @throws UnsupportedEncodingException if the given encoding is not supported
 	 */
-	public abstract UriComponents encode(Charset charset) throws UnsupportedEncodingException;
+	public abstract UriComponents encode(Charset charset) ;
 
 	/**
 	 * Replace all URI template variables with the values from a given map.

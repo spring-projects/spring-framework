@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.UriUtils;
 
 /**
  * Common base class for {@link ServerHttpRequest} implementations.
@@ -81,7 +80,6 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	/**
 	 * A method for parsing of the query into name-value pairs. The return
 	 * value is turned into an immutable map and cached.
-	 *
 	 * <p>Note that this method is invoked lazily on first access to
 	 * {@link #getQueryParams()}. The invocation is not synchronized but the
 	 * parsing is thread-safe nevertheless.
@@ -102,8 +100,8 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		return queryParams;
 	}
 
-	private static String decodeQueryParam(String value) {
-		return (value != null ? UriUtils.decode(value, StandardCharsets.UTF_8) : null);
+	private String decodeQueryParam(String value) {
+		return StringUtils.uriDecode(value, StandardCharsets.UTF_8);
 	}
 
 	@Override

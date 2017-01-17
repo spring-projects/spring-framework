@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.UriUtils;
 
 /**
  * Lookup function used by {@link RouterFunctions#resources(String, Resource)}.
@@ -55,7 +54,7 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 	public Mono<Resource> apply(ServerRequest request) {
 		String path = processPath(request.path());
 		if (path.contains("%")) {
-			path = UriUtils.decode(path, StandardCharsets.UTF_8);
+			path = StringUtils.uriDecode(path, StandardCharsets.UTF_8);
 		}
 		if (!StringUtils.hasLength(path) || isInvalidPath(path)) {
 			return Mono.empty();
@@ -116,8 +115,7 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 		return false;
 	}
 
-	private boolean isResourceUnderLocation(Resource resource) throws
-			IOException {
+	private boolean isResourceUnderLocation(Resource resource) throws IOException {
 		if (resource.getClass() != this.location.getClass()) {
 			return false;
 		}
@@ -148,7 +146,7 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 		}
 
 		if (resourcePath.contains("%")) {
-			if (UriUtils.decode(resourcePath, "UTF-8").contains("../")) {
+			if (StringUtils.uriDecode(resourcePath, StandardCharsets.UTF_8).contains("../")) {
 				return false;
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,9 @@ package org.springframework.web.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,6 +48,9 @@ import org.springframework.util.StringUtils;
 final class HierarchicalUriComponents extends UriComponents {
 
 	private static final char PATH_DELIMITER = '/';
+
+	private static final String PATH_DELIMITER_STRING = "/";
+
 
 	private final String userInfo;
 
@@ -183,10 +184,9 @@ final class HierarchicalUriComponents extends UriComponents {
 	 * the result as a new {@code UriComponents} instance.
 	 * @param charset the encoding of the values contained in this map
 	 * @return the encoded uri components
-	 * @throws UnsupportedEncodingException if the given encoding is not supported
 	 */
 	@Override
-	public HierarchicalUriComponents encode(Charset charset) throws UnsupportedEncodingException {
+	public HierarchicalUriComponents encode(Charset charset) {
 		if (this.encoded) {
 			return this;
 		}
@@ -200,7 +200,7 @@ final class HierarchicalUriComponents extends UriComponents {
 				pathTo, paramsTo, fragmentTo, true, false);
 	}
 
-	private MultiValueMap<String, String> encodeQueryParams(Charset charset) throws UnsupportedEncodingException {
+	private MultiValueMap<String, String> encodeQueryParams(Charset charset) {
 		int size = this.queryParams.size();
 		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(size);
 		for (Map.Entry<String, List<String>> entry : this.queryParams.entrySet()) {
@@ -234,21 +234,19 @@ final class HierarchicalUriComponents extends UriComponents {
 	 * @param charset the encoding of the source string
 	 * @param type the URI component for the source
 	 * @return the encoded URI
-	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
+	 * @throws IllegalArgumentException when the given value is not a valid URI component
 	 */
 	static String encodeUriComponent(String source, Charset charset, Type type) {
-		if (source == null) {
-			return null;
+		if (!StringUtils.hasLength(source)) {
+			return source;
 		}
-		byte[] bytes = encodeBytes(source.getBytes(charset), type);
-		return new String(bytes, StandardCharsets.US_ASCII);
-	}
-
-	private static byte[] encodeBytes(byte[] source, Type type) {
-		Assert.notNull(source, "Source must not be null");
+		Assert.notNull(charset, "Charset must not be null");
 		Assert.notNull(type, "Type must not be null");
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(source.length);
-		for (byte b : source) {
+
+		byte[] bytes = source.getBytes(charset);
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(bytes.length);
+		boolean changed = false;
+		for (byte b : bytes) {
 			if (b < 0) {
 				b += 256;
 			}
@@ -261,13 +259,14 @@ final class HierarchicalUriComponents extends UriComponents {
 				char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
 				bos.write(hex1);
 				bos.write(hex2);
+				changed = true;
 			}
 		}
-		return bos.toByteArray();
+		return (changed ? new String(bos.toByteArray(), charset) : source);
 	}
 
 	private Type getHostType() {
-		return (this.host != null && this.host.startsWith("[")) ? Type.HOST_IPV6 : Type.HOST_IPV4;
+		return (this.host != null && this.host.startsWith("[") ? Type.HOST_IPV6 : Type.HOST_IPV4);
 	}
 
 
@@ -586,7 +585,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isAlpha(int c) {
-			return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
+			return (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z');
 		}
 
 		/**
@@ -594,7 +593,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isDigit(int c) {
-			return c >= '0' && c <= '9';
+			return (c >= '0' && c <= '9');
 		}
 
 		/**
@@ -602,7 +601,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isGenericDelimiter(int c) {
-			return ':' == c || '/' == c || '?' == c || '#' == c || '[' == c || ']' == c || '@' == c;
+			return (':' == c || '/' == c || '?' == c || '#' == c || '[' == c || ']' == c || '@' == c);
 		}
 
 		/**
@@ -610,8 +609,8 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isSubDelimiter(int c) {
-			return '!' == c || '$' == c || '&' == c || '\'' == c || '(' == c || ')' == c || '*' == c || '+' == c ||
-					',' == c || ';' == c || '=' == c;
+			return ('!' == c || '$' == c || '&' == c || '\'' == c || '(' == c || ')' == c || '*' == c || '+' == c ||
+					',' == c || ';' == c || '=' == c);
 		}
 
 		/**
@@ -619,7 +618,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isReserved(int c) {
-			return isGenericDelimiter(c) || isSubDelimiter(c);
+			return (isGenericDelimiter(c) || isSubDelimiter(c));
 		}
 
 		/**
@@ -627,7 +626,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isUnreserved(int c) {
-			return isAlpha(c) || isDigit(c) || '-' == c || '.' == c || '_' == c || '~' == c;
+			return (isAlpha(c) || isDigit(c) || '-' == c || '.' == c || '_' == c || '~' == c);
 		}
 
 		/**
@@ -635,7 +634,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isPchar(int c) {
-			return isUnreserved(c) || isSubDelimiter(c) || ':' == c || '@' == c;
+			return (isUnreserved(c) || isSubDelimiter(c) || ':' == c || '@' == c);
 		}
 	}
 
@@ -649,7 +648,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		List<String> getPathSegments();
 
-		PathComponent encode(Charset charset) throws UnsupportedEncodingException;
+		PathComponent encode(Charset charset);
 
 		void verify();
 
@@ -666,7 +665,6 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		private final String path;
 
-
 		public FullPathComponent(String path) {
 			this.path = path;
 		}
@@ -678,13 +676,12 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public List<String> getPathSegments() {
-			String delimiter = new String(new char[] {PATH_DELIMITER});
-			String[] pathSegments = StringUtils.tokenizeToStringArray(path, delimiter);
-			return Collections.unmodifiableList(Arrays.asList(pathSegments));
+			String[] segments = StringUtils.tokenizeToStringArray(this.path, PATH_DELIMITER_STRING);
+			return Collections.unmodifiableList(Arrays.asList(segments));
 		}
 
 		@Override
-		public PathComponent encode(Charset charset) throws UnsupportedEncodingException {
+		public PathComponent encode(Charset charset) {
 			String encodedPath = encodeUriComponent(getPath(), charset, Type.PATH);
 			return new FullPathComponent(encodedPath);
 		}
@@ -750,7 +747,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 
 		@Override
-		public PathComponent encode(Charset charset) throws UnsupportedEncodingException {
+		public PathComponent encode(Charset charset) {
 			List<String> pathSegments = getPathSegments();
 			List<String> encodedPathSegments = new ArrayList<>(pathSegments.size());
 			for (String pathSegment : pathSegments) {
@@ -827,7 +824,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 
 		@Override
-		public PathComponent encode(Charset charset) throws UnsupportedEncodingException {
+		public PathComponent encode(Charset charset) {
 			List<PathComponent> encodedComponents = new ArrayList<>(this.pathComponents.size());
 			for (PathComponent pathComponent : this.pathComponents) {
 				encodedComponents.add(pathComponent.encode(charset));
@@ -873,7 +870,7 @@ final class HierarchicalUriComponents extends UriComponents {
 			return Collections.emptyList();
 		}
 		@Override
-		public PathComponent encode(Charset charset) throws UnsupportedEncodingException {
+		public PathComponent encode(Charset charset) {
 			return this;
 		}
 		@Override
