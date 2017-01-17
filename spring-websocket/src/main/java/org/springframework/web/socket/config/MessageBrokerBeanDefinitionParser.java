@@ -104,6 +104,10 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 	public static final String SOCKJS_SCHEDULER_BEAN_NAME = "messageBrokerSockJsScheduler";
 
+	public static final String MESSAGING_TEMPLATE_BEAN_NAME = "brokerMessagingTemplate";
+
+	public static final String MESSAGE_CONVERTER_BEAN_NAME = "brokerMessageConverter";
+
 	private static final int DEFAULT_MAPPING_ORDER = 1;
 
 	private static final boolean jackson2Present = ClassUtils.isPresent(
@@ -482,7 +486,9 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addIndexedArgumentValue(0, converters);
 		RootBeanDefinition messageConverterDef = new RootBeanDefinition(CompositeMessageConverter.class, cavs, null);
-		return new RuntimeBeanReference(registerBeanDef(messageConverterDef, context, source));
+		String name = MESSAGE_CONVERTER_BEAN_NAME;
+		registerBeanDefByName(name, messageConverterDef, context, source);
+		return new RuntimeBeanReference(name);
 	}
 
 	private RuntimeBeanReference registerMessagingTemplate(Element element, RuntimeBeanReference brokerChannel,
@@ -495,7 +501,9 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			beanDef.getPropertyValues().add("userDestinationPrefix", element.getAttribute("user-destination-prefix"));
 		}
 		beanDef.getPropertyValues().add("messageConverter", messageConverter);
-		return new RuntimeBeanReference(registerBeanDef(beanDef,context, source));
+		String name = MESSAGING_TEMPLATE_BEAN_NAME;
+		registerBeanDefByName(name, beanDef, context, source);
+		return new RuntimeBeanReference(name);
 	}
 
 	private void registerAnnotationMethodMessageHandler(Element messageBrokerElement,
