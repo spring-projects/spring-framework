@@ -92,23 +92,22 @@ class RouterFunctionExtensionsTests {
 				.verifyComplete()
 	}
 
-
 	class FooController : RouterFunction<ServerResponse> {
 
-		override fun route(request: ServerRequest) = route(request) {
-			(GET("/foo/") or GET("/foos/")) { handle() }
+		override fun route(req: ServerRequest) = route(req) {
+			(GET("/foo/") or GET("/foos/")) { handle(req) }
 			accept(APPLICATION_JSON).apply {
-				POST("/api/foo/") { handle() }
-				PUT("/api/foo/") { handle() }
-				DELETE("/api/foo/") { handle() }
+				POST("/api/foo/", ::handle)
+				PUT("/api/foo/", ::handle)
+				DELETE("/api/foo/", ::handle)
 			}
-			accept(APPLICATION_ATOM_XML) { handle() }
-			contentType(APPLICATION_OCTET_STREAM) { handle() }
-			method(HttpMethod.PATCH) { handle() }
+			accept(APPLICATION_ATOM_XML, ::handle)
+			contentType(APPLICATION_OCTET_STREAM) { handle(req) }
+			method(HttpMethod.PATCH) { handle(req) }
 			headers({ it.accept().contains(APPLICATION_JSON) }).apply {
-				GET("/api/foo/") { handle() }
+				GET("/api/foo/", ::handle)
 			}
-			headers({ it.header("bar").isNotEmpty() }) { handle() }
+			headers({ it.header("bar").isNotEmpty() }, ::handle)
 			resources("/org/springframework/web/reactive/function/**",
 					ClassPathResource("/org/springframework/web/reactive/function/response.txt"))
 			resources {
@@ -119,11 +118,10 @@ class RouterFunctionExtensionsTests {
 					Mono.empty()
 				}
 			}
-			path("/baz") { handle() }
+			path("/baz") { handle(req) }
 		}
-
-		fun handle() = HandlerFunction { ok().build() }
-
 	}
-
 }
+
+private fun handle(req: ServerRequest) = ok().build()
+
