@@ -4,6 +4,7 @@ configurations {
 	xmlbeans
 	jibx
 }
+
 dependencies {
 	castor "org.codehaus.castor:castor-anttasks:1.4.1"
 	jibx "org.jibx:jibx-bind:1.2.6"
@@ -75,7 +76,7 @@ task genJaxb {
 
 			javac(destdir: classesDir, source: 1.6, target: 1.6, debug: true,
 					debugLevel: "lines,vars,source",
-					classpath: configurations.castor.asPath) {
+					classpath: configurations.xjc.asPath) {
 				src(path: sourcesDir)
 				include(name: "**/*.java")
 				include(name: "*.java")
