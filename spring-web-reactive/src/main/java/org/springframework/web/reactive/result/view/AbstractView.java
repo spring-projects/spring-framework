@@ -191,11 +191,12 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 	 * <p>The default implementation looks in the {@link #getApplicationContext()
 	 * Spring configuration} for a {@code RequestDataValueProcessor} bean with
 	 * the name {@link #REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME}.
+	 * @return the RequestDataValueProcessor, or null if there is none at the application context.
 	 */
 	protected RequestDataValueProcessor getRequestDataValueProcessor() {
-		if (getApplicationContext() != null) {
-			String beanName = REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME;
-			return getApplicationContext().getBean(beanName, RequestDataValueProcessor.class);
+		ApplicationContext appCtx = getApplicationContext();
+		if (appCtx != null && appCtx.containsBean(REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME)) {
+			return appCtx.getBean(REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME, RequestDataValueProcessor.class);
 		}
 		return null;
 	}
