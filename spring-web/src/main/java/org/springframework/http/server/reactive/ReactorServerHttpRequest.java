@@ -56,20 +56,17 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	private static URI initUri(HttpServerRequest channel) {
 		Assert.notNull("'channel' must not be null");
+		InetSocketAddress address = channel.remoteAddress();
+		return (address == null ? URI.create(channel.uri()) : getBaseUrl(address).resolve(channel.uri()));
+	}
+
+	private static URI getBaseUrl(InetSocketAddress address) {
 		try {
-			URI uri = new URI(channel.uri());
-			InetSocketAddress remoteAddress = channel.remoteAddress();
-			return new URI(
-					uri.getScheme(),
-					uri.getUserInfo(),
-					(remoteAddress != null ? remoteAddress.getHostString() : null),
-					(remoteAddress != null ? remoteAddress.getPort() : -1),
-					uri.getPath(),
-					uri.getQuery(),
-					uri.getFragment());
+			return new URI(null, null, address.getHostString(), address.getPort(), null, null, null);
 		}
 		catch (URISyntaxException ex) {
-			throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
+			// Should not happen...
+			throw new IllegalStateException(ex);
 		}
 	}
 

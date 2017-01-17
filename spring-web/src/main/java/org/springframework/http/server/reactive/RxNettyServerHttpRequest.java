@@ -63,25 +63,20 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 
 	private static URI initUri(HttpServerRequest<ByteBuf> request) {
 		Assert.notNull("'request', request must not be null");
+		return StringUtils.isEmpty(request.getHostHeader()) ?
+				URI.create(request.getUri()) : getBaseUrl(request).resolve(request.getUri());
+	}
+
+	private static URI getBaseUrl(HttpServerRequest<ByteBuf> request) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Host", request.getHostHeader());
+		InetSocketAddress address = headers.getHost();
 		try {
-			URI uri = new URI(request.getUri());
-			InetSocketAddress remoteAddress = null;
-			if (!StringUtils.isEmpty(request.getHostHeader())) {
-				HttpHeaders headers = new HttpHeaders();
-				headers.add("Host", request.getHostHeader());
-				remoteAddress = headers.getHost();
-			}
-			return new URI(
-					uri.getScheme(),
-					uri.getUserInfo(),
-					(remoteAddress != null ? remoteAddress.getHostString() : null),
-					(remoteAddress != null ? remoteAddress.getPort() : -1),
-					uri.getPath(),
-					uri.getQuery(),
-					uri.getFragment());
+			return new URI(null, null, address.getHostString(), address.getPort(), null, null, null);
 		}
 		catch (URISyntaxException ex) {
-			throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
+			// Should not happen...
+			throw new IllegalStateException(ex);
 		}
 	}
 

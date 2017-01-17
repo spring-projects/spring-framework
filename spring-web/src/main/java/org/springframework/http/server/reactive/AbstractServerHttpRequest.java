@@ -17,6 +17,7 @@
 package org.springframework.http.server.reactive;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,6 +27,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Common base class for {@link ServerHttpRequest} implementations.
@@ -94,10 +96,14 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 				String eq = matcher.group(2);
 				String value = matcher.group(3);
 				value = (value != null ? value : (StringUtils.hasLength(eq) ? "" : null));
-				queryParams.add(name, value);
+				queryParams.add(decodeQueryParam(name), decodeQueryParam(value));
 			}
 		}
 		return queryParams;
+	}
+
+	private static String decodeQueryParam(String value) {
+		return (value != null ? UriUtils.decode(value, StandardCharsets.UTF_8) : null);
 	}
 
 	@Override
