@@ -39,107 +39,110 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.server.WebSession;
 
 /**
- * Implementation of the {@link ServerRequest} interface that can be subclassed to adapt the request to a
- * {@link HandlerFunction handler function}. All methods default to calling through to the wrapped request.
+ * Implementation of the {@link ServerRequest} interface that can be subclassed
+ * to adapt the request to a {@link HandlerFunction handler function}.
+ * All methods default to calling through to the wrapped request.
  *
  * @author Arjen Poutsma
  * @since 5.0
  */
 public class ServerRequestWrapper implements ServerRequest {
 
-	private final ServerRequest request;
+	private final ServerRequest delegate;
 
 
 	/**
 	 * Create a new {@code RequestWrapper} that wraps the given request.
-	 *
-	 * @param request the request to wrap
+	 * @param delegate the request to wrap
 	 */
-	public ServerRequestWrapper(ServerRequest request) {
-		Assert.notNull(request, "'request' must not be null");
-		this.request = request;
+	public ServerRequestWrapper(ServerRequest delegate) {
+		Assert.notNull(delegate, "Delegate must not be null");
+		this.delegate = delegate;
 	}
+
 
 	/**
 	 * Return the wrapped request.
 	 */
 	public ServerRequest request() {
-		return this.request;
+		return this.delegate;
 	}
 
 	@Override
 	public HttpMethod method() {
-		return this.request.method();
+		return this.delegate.method();
 	}
 
 	@Override
 	public URI uri() {
-		return this.request.uri();
+		return this.delegate.uri();
 	}
 
 	@Override
 	public String path() {
-		return this.request.path();
+		return this.delegate.path();
 	}
 
 	@Override
 	public Headers headers() {
-		return this.request.headers();
+		return this.delegate.headers();
 	}
 
 	@Override
 	public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor) {
-		return this.request.body(extractor);
+		return this.delegate.body(extractor);
 	}
 
 	@Override
 	public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor, Map<String, Object> hints) {
-		return this.request.body(extractor, hints);
+		return this.delegate.body(extractor, hints);
 	}
 
 	@Override
 	public <T> Mono<T> bodyToMono(Class<? extends T> elementClass) {
-		return this.request.bodyToMono(elementClass);
+		return this.delegate.bodyToMono(elementClass);
 	}
 
 	@Override
 	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
-		return this.request.bodyToFlux(elementClass);
+		return this.delegate.bodyToFlux(elementClass);
 	}
 
 	@Override
 	public <T> Optional<T> attribute(String name) {
-		return this.request.attribute(name);
+		return this.delegate.attribute(name);
 	}
 
 	@Override
 	public Optional<String> queryParam(String name) {
-		return this.request.queryParam(name);
+		return this.delegate.queryParam(name);
 	}
 
 	@Override
 	public List<String> queryParams(String name) {
-		return this.request.queryParams(name);
+		return this.delegate.queryParams(name);
 	}
 
 	@Override
 	public String pathVariable(String name) {
-		return this.request.pathVariable(name);
+		return this.delegate.pathVariable(name);
 	}
 
 	@Override
 	public Map<String, String> pathVariables() {
-		return this.request.pathVariables();
+		return this.delegate.pathVariables();
 	}
 
 	@Override
 	public Mono<WebSession> session() {
-		return this.request.session();
+		return this.delegate.session();
 	}
 
+
 	/**
-	 * Implementation of the {@link Headers} interface that can be subclassed to adapt the headers to a
-	 * {@link HandlerFunction handler function}. All methods default to calling through to the wrapped headers.
+	 * Implementation of the {@code Headers} interface that can be subclassed
+	 * to adapt the headers to a {@link HandlerFunction handler function}.
+	 * All methods default to calling through to the wrapped headers.
 	 */
 	public static class HeadersWrapper implements ServerRequest.Headers {
 
@@ -147,7 +150,6 @@ public class ServerRequestWrapper implements ServerRequest {
 
 		/**
 		 * Create a new {@code HeadersWrapper} that wraps the given request.
-		 *
 		 * @param headers the headers to wrap
 		 */
 		public HeadersWrapper(Headers headers) {

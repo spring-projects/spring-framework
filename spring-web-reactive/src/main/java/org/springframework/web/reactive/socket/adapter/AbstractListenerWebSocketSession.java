@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  * event-listener WebSocket APIs (e.g. Java WebSocket API JSR-356, Jetty,
  * Undertow) and Reactive Streams.
  *
- * <p>Also an implementation of {@link Subscriber<Void>} so it can be used as
+ * <p>Also an implementation of {@code Subscriber&lt;Void&gt;} so it can be used as
  * the completion subscriber for session handling
  *
  * @author Violeta Georgieva
@@ -80,7 +80,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	}
 
 	/**
-	 * Alternative constructor with completion {@link Mono<Void>} to propagate
+	 * Alternative constructor with completion {@code Mono&lt;Void&gt;} to propagate
 	 * the session completion (success or error) (for client-side use).
 	 */
 	public AbstractListenerWebSocketSession(T delegate, String id, HandshakeInfo handshakeInfo,
@@ -232,6 +232,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		}
 	}
 
+
 	protected final class WebSocketSendProcessor extends AbstractListenerWriteProcessor<WebSocketMessage> {
 
 		private volatile boolean isReady = true;
@@ -243,20 +244,17 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 		@Override
 		protected void releaseData() {
-			if (logger.isTraceEnabled()) {
-				logger.trace("releaseData: " + this.currentData);
-			}
 			this.currentData = null;
 		}
 
 		@Override
 		protected boolean isDataEmpty(WebSocketMessage message) {
-			return message.getPayload().readableByteCount() == 0;
+			return (message.getPayload().readableByteCount() == 0);
 		}
 
 		@Override
 		protected boolean isWritePossible() {
-			return this.isReady && this.currentData != null;
+			return (this.isReady && this.currentData != null);
 		}
 
 		/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package org.springframework.web.reactive.socket.adapter;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -41,9 +39,6 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  * @since 5.0
  */
 public abstract class AbstractWebSocketSession<T> implements WebSocketSession {
-
-	protected final Log logger = LogFactory.getLog(getClass());
-
 
 	private final T delegate;
 

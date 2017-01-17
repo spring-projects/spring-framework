@@ -442,7 +442,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the acceptable language ranges, as specified by the
 	 * {@literal Accept-Language} header.
-	 * @see Locale.LanguageRange
 	 * @since 5.0
 	 */
 	public void setAcceptLanguage(List<Locale.LanguageRange> languages) {
@@ -464,7 +463,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * {@link #getAcceptLanguageAsLocale()} or if you need to filter based on
 	 * a list of supporeted locales you can pass the returned list to
 	 * {@link Locale#filter(List, Collection)}.
-	 * @see Locale.LanguageRange
 	 * @since 5.0
 	 */
 	public List<Locale.LanguageRange> getAcceptLanguage() {

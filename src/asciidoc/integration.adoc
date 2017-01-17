@@ -2099,7 +2099,7 @@ details of how it is represented as a JMS message.
 The sandbox currently includes a `MapMessageConverter` which uses reflection to convert
 between a JavaBean and a `MapMessage`. Other popular implementation choices you might
 implement yourself are Converters that use an existing XML marshalling package, such as
-JAXB, Castor, XMLBeans, or XStream, to create a `TextMessage` representing the object.
+JAXB, Castor or XStream, to create a `TextMessage` representing the object.
 
 To accommodate the setting of a message's properties, headers, and body that can not be
 generically encapsulated inside a converter class, the `MessagePostProcessor` interface

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import rx.Observable;
 import rx.RxReactiveStreams;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
-import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -53,15 +52,13 @@ public class RxNettyWebSocketSession extends NettyWebSocketSessionSupport<WebSoc
 	public static final String FRAME_AGGREGATOR_NAME = "websocket-frame-aggregator";
 
 
-	public RxNettyWebSocketSession(WebSocketConnection conn, HandshakeInfo info,
-			NettyDataBufferFactory factory) {
-
+	public RxNettyWebSocketSession(WebSocketConnection conn, HandshakeInfo info, NettyDataBufferFactory factory) {
 		super(conn, info, factory);
 	}
 
 
 	/**
-	 * Inserts an {@link WebSocketFrameAggregator} after the
+	 * Insert an {@link WebSocketFrameAggregator} after the
 	 * {@code WebSocketFrameDecoder} for receiving full messages.
 	 * @param channel the channel for the session
 	 * @param frameDecoderName the name of the WebSocketFrame decoder
@@ -69,11 +66,12 @@ public class RxNettyWebSocketSession extends NettyWebSocketSessionSupport<WebSoc
 	public RxNettyWebSocketSession aggregateFrames(Channel channel, String frameDecoderName) {
 		ChannelPipeline pipeline = channel.pipeline();
 		if (pipeline.context(FRAME_AGGREGATOR_NAME) != null) {
-			logger.trace("WebSocketFrameAggregator already registered.");
 			return this;
 		}
 		ChannelHandlerContext frameDecoder = pipeline.context(frameDecoderName);
-		Assert.notNull(frameDecoder, "WebSocketFrameDecoder not found: " + frameDecoderName);
+		if (frameDecoder == null) {
+			throw new IllegalArgumentException("WebSocketFrameDecoder not found: " + frameDecoderName);
+		}
 		ChannelHandler frameAggregator = new WebSocketFrameAggregator(DEFAULT_FRAME_MAX_SIZE);
 		pipeline.addAfter(frameDecoder.name(), FRAME_AGGREGATOR_NAME, frameAggregator);
 		return this;

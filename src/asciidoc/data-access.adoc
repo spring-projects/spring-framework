@@ -6101,7 +6101,7 @@ Spring's O/X mapping operates through two global interfaces: the `Marshaller` an
 with relative ease, with little or no changes required on the classes that do the
 marshalling. This approach has the additional benefit of making it possible to do XML
 marshalling with a mix-and-match approach (e.g. some marshalling performed using JAXB,
-other using XMLBeans) in a non-intrusive fashion, leveraging the strength of each
+other using Castor) in a non-intrusive fashion, leveraging the strength of each
 technology.
 
 
@@ -6374,9 +6374,8 @@ preamble of the XML configuration file. Note the 'oxm' related text below:
 Currently, the following tags are available:
 
 * <<oxm-jaxb2-xsd, `jaxb2-marshaller`>>
-* <<oxm-xmlbeans-xsd, `xmlbeans-marshaller`>>
-* <<oxm-castor-xsd, `castor-marshaller`>>
 * <<oxm-jibx-xsd, `jibx-marshaller`>>
+* <<oxm-castor-xsd, `castor-marshaller`>>
 
 Each tag will be explained in its respective marshaller's section. As an example though,
 here is how the configuration of a JAXB2 marshaller might look like:
