@@ -439,7 +439,6 @@ project("spring-beans") {
 		compile(project(":spring-core"))
 		compile(files(project(":spring-core").cglibRepackJar))
 		optional("javax.inject:javax.inject:1")
-		optional("javax.el:javax.el-api:${elApiVersion}")
 		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		optional("org.yaml:snakeyaml:${snakeyamlVersion}")
@@ -721,7 +720,6 @@ project("spring-context-indexer") {
 
 project("spring-web") {
 	description = "Spring Web"
-
 
 	apply plugin: "groovy"
 

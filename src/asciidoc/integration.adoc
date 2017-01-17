@@ -1641,58 +1641,8 @@ lookups simply provides consistent and more explicit EJB access configuration.
 
 
 
-[[ejb-implementation]]
-=== Using Spring's EJB implementation support classes
-
-
-
-[[ejb-implementation-ejb3]]
-==== EJB 3 injection interceptor
-For EJB 3 Session Beans and Message-Driven Beans, Spring provides a convenient
-interceptor that resolves Spring's `@Autowired` annotation in the EJB component
-class: `org.springframework.ejb.interceptor.SpringBeanAutowiringInterceptor`. This
-interceptor can be applied through an `@Interceptors` annotation in the EJB component
-class, or through an `interceptor-binding` XML element in the EJB deployment descriptor.
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@Stateless
-	@Interceptors(SpringBeanAutowiringInterceptor.class)
-	public class MyFacadeEJB implements MyFacadeLocal {
-
-		// automatically injected with a matching Spring bean
-		@Autowired
-		private MyComponent myComp;
-
-		// for business method, delegate to POJO service impl.
-		public String myFacadeMethod(...) {
-			return myComp.myMethod(...);
-		}
-
-		...
-
-	}
-----
-
-`SpringBeanAutowiringInterceptor` by default obtains target beans from a
-`ContextSingletonBeanFactoryLocator`, with the context defined in a bean definition file
-named `beanRefContext.xml`. By default, a single context definition is expected, which
-is obtained by type rather than by name. However, if you need to choose between multiple
-context definitions, a specific locator key is required. The locator key (i.e. the name
-of the context definition in `beanRefContext.xml`) can be explicitly specified either
-through overriding the `getBeanFactoryLocatorKey` method in a custom
-`SpringBeanAutowiringInterceptor` subclass.
-
-Alternatively, consider overriding `SpringBeanAutowiringInterceptor`'s `getBeanFactory`
-method, e.g. obtaining a shared `ApplicationContext` from a custom holder class.
-
-
-
-
 [[jms]]
 == JMS (Java Message Service)
-
 
 
 
