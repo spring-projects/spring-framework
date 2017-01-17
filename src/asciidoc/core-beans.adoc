@@ -8737,37 +8737,3 @@ the various `ApplicationContext` implementations are preferred above plain `Bean
 implementations in the vast majority of Spring-backed applications, especially when
 using ``BeanFactoryPostProcessor``s and ``BeanPostProcessor``s. These mechanisms implement
 important functionality such as property placeholder replacement and AOP.
-
-
-
-[[beans-servicelocator]]
-=== Glue code and the evil singleton
-
-It is best to write most application code in a dependency-injection (DI) style, where
-that code is served out of a Spring IoC container, has its own dependencies supplied by
-the container when it is created, and is completely unaware of the container. However,
-for the small glue layers of code that are sometimes needed to tie other code together,
-you sometimes need a singleton (or quasi-singleton) style access to a Spring IoC
-container. For example, third-party code may try to construct new objects directly (
-`Class.forName()` style), without the ability to get these objects out of a Spring IoC
-container.If the object constructed by the third-party code is a small stub or proxy,
-which then uses a singleton style access to a Spring IoC container to get a real object
-to delegate to, then inversion of control has still been achieved for the majority of
-the code (the object coming out of the container). Thus most code is still unaware of
-the container or how it is accessed, and remains decoupled from other code, with all
-ensuing benefits. EJBs may also use this stub/proxy approach to delegate to a plain Java
-implementation object, retrieved from a Spring IoC container. While the Spring IoC
-container itself ideally does not have to be a singleton, it may be unrealistic in terms
-of memory usage or initialization times (when using beans in the Spring IoC container
-such as a Hibernate `SessionFactory`) for each bean to use its own, non-singleton Spring
-IoC container.
-
-Looking up the application context in a service locator style is sometimes the only
-option for accessing shared Spring-managed components, such as in an EJB 2.1
-environment, or when you want to share a single ApplicationContext as a parent to
-WebApplicationContexts across WAR files. In this case you should look into using the
-utility class
-{api-spring-framework}/context/access/ContextSingletonBeanFactoryLocator.html[`ContextSingletonBeanFactoryLocator`]
-locator that is described in this
-https://spring.io/blog/2007/06/11/using-a-shared-parent-application-context-in-a-multi-war-spring-application/[Spring
-team blog entry].

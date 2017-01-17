@@ -507,10 +507,7 @@ public class ContextLoader {
 	}
 
 	/**
-	 * Close Spring's web application context for the given servlet context. If
-	 * the default {@link #loadParentContext(ServletContext)} implementation,
-	 * which uses ContextSingletonBeanFactoryLocator, has loaded any shared
-	 * parent context, release one reference to that shared parent context.
+	 * Close Spring's web application context for the given servlet context.
 	 * <p>If overriding {@link #loadParentContext(ServletContext)}, you may have
 	 * to override this method as well.
 	 * @param servletContext the ServletContext that the WebApplicationContext runs in
