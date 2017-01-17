@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,9 +155,9 @@ public abstract class UriUtils {
 	 * <a href="https://tools.ietf.org/html/rfc3986#section-2">RFC 3986 Section 2</a>.
 	 * <p>This can be used to ensure the given String will not contain any
 	 * characters with reserved URI meaning regardless of URI component.
-	 * @param source the string to be encoded
+	 * @param source the String to be encoded
 	 * @param encoding the character encoding to encode to
-	 * @return the encoded string
+	 * @return the encoded String
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encode(String source, String encoding) throws UnsupportedEncodingException {

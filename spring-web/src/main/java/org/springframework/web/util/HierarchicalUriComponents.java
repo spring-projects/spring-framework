@@ -39,6 +39,7 @@ import org.springframework.util.StringUtils;
  * Extension of {@link UriComponents} for hierarchical URIs.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @author Phillip Webb
  * @since 3.1.3
@@ -95,7 +96,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 
-	// component getters
+	// Component getters
 
 	@Override
 	public String getSchemeSpecificPart() {
@@ -169,7 +170,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 	/**
-	 * Returns the map of query parameters. Empty if no query has been set.
+	 * Return the map of query parameters. Empty if no query has been set.
 	 */
 	@Override
 	public MultiValueMap<String, String> getQueryParams() {
@@ -177,13 +178,13 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 
-	// encoding
+	// Encoding
 
 	/**
 	 * Encode all URI components using their specific encoding rules and return
 	 * the result as a new {@code UriComponents} instance.
-	 * @param charset the encoding of the values contained in this map
-	 * @return the encoded uri components
+	 * @param charset the encoding of the values
+	 * @return the encoded URI components
 	 */
 	@Override
 	public HierarchicalUriComponents encode(Charset charset) {
@@ -217,11 +218,11 @@ final class HierarchicalUriComponents extends UriComponents {
 	/**
 	 * Encode the given source into an encoded String using the rules specified
 	 * by the given component and with the given options.
-	 * @param source the source string
-	 * @param encoding the encoding of the source string
+	 * @param source the source String
+	 * @param encoding the encoding of the source String
 	 * @param type the URI component for the source
 	 * @return the encoded URI
-	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
+	 * @throws IllegalArgumentException when the given value is not a valid URI component
 	 */
 	static String encodeUriComponent(String source, String encoding, Type type) {
 		return encodeUriComponent(source, Charset.forName(encoding), type);
@@ -230,8 +231,8 @@ final class HierarchicalUriComponents extends UriComponents {
 	/**
 	 * Encode the given source into an encoded String using the rules specified
 	 * by the given component and with the given options.
-	 * @param source the source string
-	 * @param charset the encoding of the source string
+	 * @param source the source String
+	 * @param charset the encoding of the source String
 	 * @param type the URI component for the source
 	 * @return the encoded URI
 	 * @throws IllegalArgumentException when the given value is not a valid URI component
@@ -270,7 +271,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 
-	// verifying
+	// Verifying
 
 	/**
 	 * Verifies all URI components to determine whether they contain any illegal
@@ -326,7 +327,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 
-	// expanding
+	// Expanding
 
 	@Override
 	protected HierarchicalUriComponents expandInternal(UriTemplateVariables uriVariables) {
@@ -372,10 +373,10 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 
-	// other functionality
+	// Other functionality
 
 	/**
-	 * Returns a URI string from this {@code UriComponents} instance.
+	 * Returns a URI String from this {@code UriComponents} instance.
 	 */
 	@Override
 	public String toUriString() {
@@ -487,7 +488,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 
-	// inner types
+	// Nested types
 
 	/**
 	 * Enumeration used to identify the allowed characters per URI component.
@@ -659,7 +660,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 
 	/**
-	 * Represents a path backed by a string.
+	 * Represents a path backed by a String.
 	 */
 	static final class FullPathComponent implements PathComponent {
 
@@ -716,14 +717,14 @@ final class HierarchicalUriComponents extends UriComponents {
 
 
 	/**
-	 * Represents a path backed by a string list (i.e. path segments).
+	 * Represents a path backed by a String list (i.e. path segments).
 	 */
 	static final class PathSegmentComponent implements PathComponent {
 
 		private final List<String> pathSegments;
 
 		public PathSegmentComponent(List<String> pathSegments) {
-			Assert.notNull(pathSegments);
+			Assert.notNull(pathSegments, "List must not be null");
 			this.pathSegments = Collections.unmodifiableList(new ArrayList<>(pathSegments));
 		}
 
@@ -889,7 +890,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 		@Override
 		public int hashCode() {
-			return 42;
+			return getClass().hashCode();
 		}
 	};
 
