@@ -36,6 +36,8 @@ import org.springframework.util.MultiValueMap;
  * URI template variables.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 3.1
  * @see UriComponentsBuilder
  */
@@ -178,7 +180,7 @@ public abstract class UriComponents implements Serializable {
 	 * Replace all URI template variables with the values from the given {@link
 	 * UriTemplateVariables}
 	 * @param uriVariables URI template values
-	 * @return the expanded uri components
+	 * @return the expanded URI components
 	 */
 	abstract UriComponents expandInternal(UriTemplateVariables uriVariables);
 

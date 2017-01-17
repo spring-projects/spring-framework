@@ -39,6 +39,7 @@ import org.springframework.util.StringUtils;
  * Extension of {@link UriComponents} for hierarchical URIs.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @author Phillip Webb
  * @since 3.1.3
@@ -95,7 +96,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 
-	// component getters
+	// Component getters
 
 	@Override
 	public String getSchemeSpecificPart() {
@@ -169,7 +170,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 	/**
-	 * Returns the map of query parameters. Empty if no query has been set.
+	 * Return the map of query parameters. Empty if no query has been set.
 	 */
 	@Override
 	public MultiValueMap<String, String> getQueryParams() {
@@ -177,12 +178,12 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 
-	// encoding
+	// Encoding
 
 	/**
 	 * Encode all URI components using their specific encoding rules and return
 	 * the result as a new {@code UriComponents} instance.
-	 * @param encoding the encoding of the values contained in this map
+	 * @param encoding the encoding of the values
 	 * @return the encoded uri components
 	 * @throws UnsupportedEncodingException if the given encoding is not supported
 	 */
@@ -223,7 +224,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	 * @param encoding the encoding of the source String
 	 * @param type the URI component for the source
 	 * @return the encoded URI
-	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
+	 * @throws IllegalArgumentException when the given value is not a valid URI component
 	 */
 	static String encodeUriComponent(String source, String encoding, Type type) throws UnsupportedEncodingException {
 		if (source == null) {
@@ -261,7 +262,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 
-	// verifying
+	// Verifying
 
 	/**
 	 * Verifies all URI components to determine whether they contain any illegal
@@ -317,7 +318,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 
-	// expanding
+	// Expanding
 
 	@Override
 	protected HierarchicalUriComponents expandInternal(UriTemplateVariables uriVariables) {
@@ -363,7 +364,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 
-	// other functionality
+	// Other functionality
 
 	/**
 	 * Returns a URI String from this {@code UriComponents} instance.
@@ -478,7 +479,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 
-	// inner types
+	// Nested types
 
 	/**
 	 * Enumeration used to identify the allowed characters per URI component.
@@ -576,7 +577,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isAlpha(int c) {
-			return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
+			return (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z');
 		}
 
 		/**
@@ -584,7 +585,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isDigit(int c) {
-			return c >= '0' && c <= '9';
+			return (c >= '0' && c <= '9');
 		}
 
 		/**
@@ -592,7 +593,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isGenericDelimiter(int c) {
-			return ':' == c || '/' == c || '?' == c || '#' == c || '[' == c || ']' == c || '@' == c;
+			return (':' == c || '/' == c || '?' == c || '#' == c || '[' == c || ']' == c || '@' == c);
 		}
 
 		/**
@@ -600,8 +601,8 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isSubDelimiter(int c) {
-			return '!' == c || '$' == c || '&' == c || '\'' == c || '(' == c || ')' == c || '*' == c || '+' == c ||
-					',' == c || ';' == c || '=' == c;
+			return ('!' == c || '$' == c || '&' == c || '\'' == c || '(' == c || ')' == c || '*' == c || '+' == c ||
+					',' == c || ';' == c || '=' == c);
 		}
 
 		/**
@@ -609,7 +610,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isReserved(int c) {
-			return isGenericDelimiter(c) || isSubDelimiter(c);
+			return (isGenericDelimiter(c) || isSubDelimiter(c));
 		}
 
 		/**
@@ -617,7 +618,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isUnreserved(int c) {
-			return isAlpha(c) || isDigit(c) || '-' == c || '.' == c || '_' == c || '~' == c;
+			return (isAlpha(c) || isDigit(c) || '-' == c || '.' == c || '_' == c || '~' == c);
 		}
 
 		/**
@@ -625,7 +626,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isPchar(int c) {
-			return isUnreserved(c) || isSubDelimiter(c) || ':' == c || '@' == c;
+			return (isUnreserved(c) || isSubDelimiter(c) || ':' == c || '@' == c);
 		}
 	}
 
@@ -880,7 +881,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 		@Override
 		public int hashCode() {
-			return 42;
+			return getClass().hashCode();
 		}
 	};
 
