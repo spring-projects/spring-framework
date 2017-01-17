@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,12 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StreamUtils;
 
 /**
- * Implementation of {@link HttpMessageConverter} that can read and write {@link Resource Resources}
+ * Implementation of {@link HttpMessageConverter} that can read/write {@link Resource Resources}
  * and supports byte range requests.
  *
  * <p>By default, this converter can read all media types. The Java Activation Framework (JAF) -
  * if available - is used to determine the {@code Content-Type} of written resources.
  * If JAF is not available, {@code application/octet-stream} is used.
- *
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller

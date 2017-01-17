@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,14 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.CacheControl;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
-import org.springframework.http.CacheControl;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.WebContentGenerator;
@@ -115,6 +114,9 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
 	 * and a various Ant-style pattern matches, e.g. a registered "/t*" matches
 	 * both "/test" and "/team". For details, see the AntPathMatcher javadoc.
+	 * <p><b>NOTE:</b> Path patterns are not supposed to overlap. If a request
+	 * matches several mappings, it is effectively undefined which one will apply
+	 * (due to the lack of key ordering in {@code java.util.Properties}).
 	 * @param cacheMappings a mapping between URL paths (as keys) and
 	 * cache seconds (as values, need to be integer-parsable)
 	 * @see #setCacheSeconds
@@ -138,11 +140,14 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
 	 * and a various Ant-style pattern matches, e.g. a registered "/t*" matches
 	 * both "/test" and "/team". For details, see the AntPathMatcher javadoc.
+	 * <p><b>NOTE:</b> Path patterns are not supposed to overlap. If a request
+	 * matches several mappings, it is effectively undefined which one will apply
+	 * (due to the lack of key ordering in the underlying {@code java.util.HashMap}).
 	 * @param cacheControl the {@code CacheControl} to use
 	 * @param paths URL paths that will map to the given {@code CacheControl}
+	 * @since 4.2
 	 * @see #setCacheSeconds
 	 * @see org.springframework.util.AntPathMatcher
-	 * @since 4.2
 	 */
 	public void addCacheMapping(CacheControl cacheControl, String... paths) {
 		for (String path : paths) {
@@ -211,15 +216,16 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	protected CacheControl lookupCacheControl(String urlPath) {
 		// Direct match?
 		CacheControl cacheControl = this.cacheControlMappings.get(urlPath);
-		if (cacheControl == null) {
-			// Pattern match?
-			for (String registeredPath : this.cacheControlMappings.keySet()) {
-				if (this.pathMatcher.match(registeredPath, urlPath)) {
-					cacheControl = this.cacheControlMappings.get(registeredPath);
-				}
+		if (cacheControl != null) {
+			return cacheControl;
+		}
+		// Pattern match?
+		for (String registeredPath : this.cacheControlMappings.keySet()) {
+			if (this.pathMatcher.match(registeredPath, urlPath)) {
+				return this.cacheControlMappings.get(registeredPath);
 			}
 		}
-		return cacheControl;
+		return null;
 	}
 
 	/**
@@ -234,15 +240,16 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	protected Integer lookupCacheSeconds(String urlPath) {
 		// Direct match?
 		Integer cacheSeconds = this.cacheMappings.get(urlPath);
-		if (cacheSeconds == null) {
-			// Pattern match?
-			for (String registeredPath : this.cacheMappings.keySet()) {
-				if (this.pathMatcher.match(registeredPath, urlPath)) {
-					cacheSeconds = this.cacheMappings.get(registeredPath);
-				}
+		if (cacheSeconds != null) {
+			return cacheSeconds;
+		}
+		// Pattern match?
+		for (String registeredPath : this.cacheMappings.keySet()) {
+			if (this.pathMatcher.match(registeredPath, urlPath)) {
+				return this.cacheMappings.get(registeredPath);
 			}
 		}
-		return cacheSeconds;
+		return null;
 	}
 
 
