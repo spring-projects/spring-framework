@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public abstract class UriComponents implements Serializable {
 
 	private static final String DEFAULT_ENCODING = "UTF-8";
 
-	/** Captures URI template variable names. */
+	/** Captures URI template variable names */
 	private static final Pattern NAMES_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
 
@@ -59,57 +59,57 @@ public abstract class UriComponents implements Serializable {
 	}
 
 
-	// component getters
+	// Component getters
 
 	/**
-	 * Returns the scheme. Can be {@code null}.
+	 * Return the scheme. Can be {@code null}.
 	 */
 	public final String getScheme() {
 		return this.scheme;
 	}
 
 	/**
-	 * Returns the scheme specific part. Can be {@code null}.
+	 * Return the scheme specific part. Can be {@code null}.
 	 */
 	public abstract String getSchemeSpecificPart();
 
 	/**
-	 * Returns the user info. Can be {@code null}.
+	 * Return the user info. Can be {@code null}.
 	 */
 	public abstract String getUserInfo();
 
 	/**
-	 * Returns the host. Can be {@code null}.
+	 * Return the host. Can be {@code null}.
 	 */
 	public abstract String getHost();
 
 	/**
-	 * Returns the port. Returns {@code -1} if no port has been set.
+	 * Return the port. {@code -1} if no port has been set.
 	 */
 	public abstract int getPort();
 
 	/**
-	 * Returns the path. Can be {@code null}.
+	 * Return the path. Can be {@code null}.
 	 */
 	public abstract String getPath();
 
 	/**
-	 * Returns the list of path segments. Empty if no path has been set.
+	 * Return the list of path segments. Empty if no path has been set.
 	 */
 	public abstract List<String> getPathSegments();
 
 	/**
-	 * Returns the query. Can be {@code null}.
+	 * Return the query. Can be {@code null}.
 	 */
 	public abstract String getQuery();
 
 	/**
-	 * Returns the map of query parameters. Empty if no query has been set.
+	 * Return the map of query parameters. Empty if no query has been set.
 	 */
 	public abstract MultiValueMap<String, String> getQueryParams();
 
 	/**
-	 * Returns the fragment. Can be {@code null}.
+	 * Return the fragment. Can be {@code null}.
 	 */
 	public final String getFragment() {
 		return this.fragment;
@@ -189,7 +189,7 @@ public abstract class UriComponents implements Serializable {
 	public abstract UriComponents normalize();
 
 	/**
-	 * Return a URI string from this {@code UriComponents} instance.
+	 * Return a URI String from this {@code UriComponents} instance.
 	 */
 	public abstract String toUriString();
 
@@ -210,7 +210,7 @@ public abstract class UriComponents implements Serializable {
 	protected abstract void copyToUriComponentsBuilder(UriComponentsBuilder builder);
 
 
-	// static expansion helpers
+	// Static expansion helpers
 
 	static String expandUriComponent(String source, UriTemplateVariables uriVariables) {
 		if (source == null) {

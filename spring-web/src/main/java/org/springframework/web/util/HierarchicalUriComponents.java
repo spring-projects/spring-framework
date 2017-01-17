@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,9 @@ import org.springframework.util.StringUtils;
 final class HierarchicalUriComponents extends UriComponents {
 
 	private static final char PATH_DELIMITER = '/';
+
+	private static final String PATH_DELIMITER_STRING = "/";
+
 
 	private final String userInfo;
 
@@ -216,15 +219,13 @@ final class HierarchicalUriComponents extends UriComponents {
 	/**
 	 * Encode the given source into an encoded String using the rules specified
 	 * by the given component and with the given options.
-	 * @param source the source string
-	 * @param encoding the encoding of the source string
+	 * @param source the source String
+	 * @param encoding the encoding of the source String
 	 * @param type the URI component for the source
 	 * @return the encoded URI
 	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
 	 */
-	static String encodeUriComponent(String source, String encoding, Type type)
-			throws UnsupportedEncodingException {
-
+	static String encodeUriComponent(String source, String encoding, Type type) throws UnsupportedEncodingException {
 		if (source == null) {
 			return null;
 		}
@@ -256,7 +257,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 	private Type getHostType() {
-		return (this.host != null && this.host.startsWith("[")) ? Type.HOST_IPV6 : Type.HOST_IPV4;
+		return (this.host != null && this.host.startsWith("[") ? Type.HOST_IPV6 : Type.HOST_IPV4);
 	}
 
 
@@ -365,7 +366,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	// other functionality
 
 	/**
-	 * Returns a URI string from this {@code UriComponents} instance.
+	 * Returns a URI String from this {@code UriComponents} instance.
 	 */
 	@Override
 	public String toUriString() {
@@ -649,12 +650,11 @@ final class HierarchicalUriComponents extends UriComponents {
 
 
 	/**
-	 * Represents a path backed by a string.
+	 * Represents a path backed by a String.
 	 */
 	static final class FullPathComponent implements PathComponent {
 
 		private final String path;
-
 
 		public FullPathComponent(String path) {
 			this.path = path;
@@ -667,15 +667,15 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public List<String> getPathSegments() {
-			String delimiter = new String(new char[]{PATH_DELIMITER});
-			String[] pathSegments = StringUtils.tokenizeToStringArray(path, delimiter);
-			return Collections.unmodifiableList(Arrays.asList(pathSegments));
+			String[] segments = StringUtils.tokenizeToStringArray(this.path, PATH_DELIMITER_STRING);
+			return Collections.unmodifiableList(Arrays.asList(segments));
 		}
 
 		@Override
 		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
-			String encodedPath = encodeUriComponent(getPath(),encoding, Type.PATH);
-			return new FullPathComponent(encodedPath);		}
+			String encodedPath = encodeUriComponent(getPath(), encoding, Type.PATH);
+			return new FullPathComponent(encodedPath);
+		}
 
 		@Override
 		public void verify() {
@@ -707,14 +707,14 @@ final class HierarchicalUriComponents extends UriComponents {
 
 
 	/**
-	 * Represents a path backed by a string list (i.e. path segments).
+	 * Represents a path backed by a String list (i.e. path segments).
 	 */
 	static final class PathSegmentComponent implements PathComponent {
 
 		private final List<String> pathSegments;
 
 		public PathSegmentComponent(List<String> pathSegments) {
-			Assert.notNull(pathSegments);
+			Assert.notNull(pathSegments, "List must not be null");
 			this.pathSegments = Collections.unmodifiableList(new ArrayList<String>(pathSegments));
 		}
 

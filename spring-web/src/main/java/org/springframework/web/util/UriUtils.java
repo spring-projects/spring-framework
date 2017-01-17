@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import org.springframework.util.Assert;
 public abstract class UriUtils {
 
 	/**
-	 * Encodes the given URI scheme with the given encoding.
+	 * Encode the given URI scheme with the given encoding.
 	 * @param scheme the scheme to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded scheme
@@ -52,7 +52,7 @@ public abstract class UriUtils {
 	}
 
 	/**
-	 * Encodes the given URI authority with the given encoding.
+	 * Encode the given URI authority with the given encoding.
 	 * @param authority the authority to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded authority
@@ -63,7 +63,7 @@ public abstract class UriUtils {
 	}
 
 	/**
-	 * Encodes the given URI user info with the given encoding.
+	 * Encode the given URI user info with the given encoding.
 	 * @param userInfo the user info to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded user info
@@ -74,7 +74,7 @@ public abstract class UriUtils {
 	}
 
 	/**
-	 * Encodes the given URI host with the given encoding.
+	 * Encode the given URI host with the given encoding.
 	 * @param host the host to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded host
@@ -85,7 +85,7 @@ public abstract class UriUtils {
 	}
 
 	/**
-	 * Encodes the given URI port with the given encoding.
+	 * Encode the given URI port with the given encoding.
 	 * @param port the port to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded port
@@ -96,7 +96,7 @@ public abstract class UriUtils {
 	}
 
 	/**
-	 * Encodes the given URI path with the given encoding.
+	 * Encode the given URI path with the given encoding.
 	 * @param path the path to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded path
@@ -107,7 +107,7 @@ public abstract class UriUtils {
 	}
 
 	/**
-	 * Encodes the given URI path segment with the given encoding.
+	 * Encode the given URI path segment with the given encoding.
 	 * @param segment the segment to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded segment
@@ -118,7 +118,7 @@ public abstract class UriUtils {
 	}
 
 	/**
-	 * Encodes the given URI query with the given encoding.
+	 * Encode the given URI query with the given encoding.
 	 * @param query the query to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded query
@@ -129,7 +129,7 @@ public abstract class UriUtils {
 	}
 
 	/**
-	 * Encodes the given URI query parameter with the given encoding.
+	 * Encode the given URI query parameter with the given encoding.
 	 * @param queryParam the query parameter to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded query parameter
@@ -140,7 +140,7 @@ public abstract class UriUtils {
 	}
 
 	/**
-	 * Encodes the given URI fragment with the given encoding.
+	 * Encode the given URI fragment with the given encoding.
 	 * @param fragment the fragment to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded fragment
@@ -155,9 +155,9 @@ public abstract class UriUtils {
 	 * <a href="https://tools.ietf.org/html/rfc3986#section-2">RFC 3986 Section 2</a>.
 	 * <p>This can be used to ensure the given String will not contain any
 	 * characters with reserved URI meaning regardless of URI component.
-	 * @param source the string to be encoded
+	 * @param source the String to be encoded
 	 * @param encoding the character encoding to encode to
-	 * @return the encoded string
+	 * @return the encoded String
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encode(String source, String encoding) throws UnsupportedEncodingException {
@@ -165,25 +165,25 @@ public abstract class UriUtils {
 		return HierarchicalUriComponents.encodeUriComponent(source, encoding, type);
 	}
 
-	// decoding
-
 	/**
-	 * Decodes the given encoded source String into an URI. Based on the following rules:
+	 * Decode the given encoded URI component.
 	 * <ul>
 	 * <li>Alphanumeric characters {@code "a"} through {@code "z"}, {@code "A"} through {@code "Z"}, and
 	 * {@code "0"} through {@code "9"} stay the same.</li>
 	 * <li>Special characters {@code "-"}, {@code "_"}, {@code "."}, and {@code "*"} stay the same.</li>
 	 * <li>A sequence "{@code %<i>xy</i>}" is interpreted as a hexadecimal representation of the character.</li>
 	 * </ul>
-	 * @param source the source string
+	 * @param source the encoded String
 	 * @param encoding the encoding
-	 * @return the decoded URI
+	 * @return the decoded value
 	 * @throws IllegalArgumentException when the given source contains invalid encoded sequences
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 * @see java.net.URLDecoder#decode(String, String)
 	 */
 	public static String decode(String source, String encoding) throws UnsupportedEncodingException {
-		Assert.notNull(source, "Source must not be null");
+		if (source == null) {
+			return null;
+		}
 		Assert.hasLength(encoding, "Encoding must not be empty");
 		int length = source.length();
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(length);
