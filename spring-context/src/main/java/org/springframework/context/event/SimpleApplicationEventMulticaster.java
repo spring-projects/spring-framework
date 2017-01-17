@@ -168,7 +168,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 			}
 			catch (ClassCastException ex) {
 				String msg = ex.getMessage();
-				if (msg != null && msg.startsWith(event.getClass().getName())) {
+				if (msg == null || msg.startsWith(event.getClass().getName())) {
 					// Possibly a lambda-defined listener which we could not resolve the generic event type for
 					Log logger = LogFactory.getLog(getClass());
 					if (logger.isDebugEnabled()) {
