@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.index.metadata;
+package org.springframework.context.index;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -28,16 +28,18 @@ import java.util.Set;
  * @author Stephane Nicoll
  * @since 5.0
  */
-public class ItemMetadata {
+class ItemMetadata {
 
 	private final String type;
 
 	private final Set<String> stereotypes;
 
+
 	public ItemMetadata(String type, Set<String> stereotypes) {
 		this.type = type;
 		this.stereotypes = new HashSet<>(stereotypes);
 	}
+
 
 	public String getType() {
 		return this.type;

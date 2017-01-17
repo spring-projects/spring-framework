@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +87,7 @@ public class CandidateComponentsIndexLoader {
 		if (shouldIgnoreIndex) {
 			return null;
 		}
+
 		try {
 			Enumeration<URL> urls = classLoader.getResources(COMPONENTS_RESOURCE_LOCATION);
 			if (!urls.hasMoreElements()) {
@@ -98,14 +99,14 @@ public class CandidateComponentsIndexLoader {
 				Properties properties = PropertiesLoaderUtils.loadProperties(new UrlResource(url));
 				result.add(properties);
 			}
-			if (logger.isTraceEnabled()) {
-				logger.trace("Loaded " + result.size() + "] index(es)");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loaded " + result.size() + "] index(es)");
 			}
 			int totalCount = result.stream().mapToInt(Properties::size).sum();
 			return (totalCount > 0 ? new CandidateComponentsIndex(result) : null);
 		}
 		catch (IOException ex) {
-			throw new IllegalArgumentException("Unable to load indexes from location [" +
+			throw new IllegalStateException("Unable to load indexes from location [" +
 					COMPONENTS_RESOURCE_LOCATION + "]", ex);
 		}
 	}

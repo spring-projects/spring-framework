@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,17 +31,20 @@ import javax.lang.model.util.Types;
  * Type utilities.
  *
  * @author Stephane Nicoll
+ * @since 5.0
  */
-class TypeUtils {
+class TypeHelper {
 
 	private final ProcessingEnvironment env;
 
 	private final Types types;
 
-	TypeUtils(ProcessingEnvironment env) {
+
+	public TypeHelper(ProcessingEnvironment env) {
 		this.env = env;
 		this.types = env.getTypeUtils();
 	}
+
 
 	public String getType(Element element) {
 		return getType(element != null ? element.asType() : null);

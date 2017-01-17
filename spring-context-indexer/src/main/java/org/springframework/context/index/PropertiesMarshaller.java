@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.index.metadata;
+package org.springframework.context.index;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,17 +31,15 @@ import java.util.Set;
  * @author Stephane Nicoll
  * @since 5.0
  */
-public class PropertiesMarshaller {
+abstract class PropertiesMarshaller {
 
-	public void write(CandidateComponentsMetadata metadata, OutputStream out)
-			throws IOException {
-
+	public static void write(CandidateComponentsMetadata metadata, OutputStream out) throws IOException {
 		Properties props = new Properties();
 		metadata.getItems().forEach(m -> props.put(m.getType(), String.join(",", m.getStereotypes())));
 		props.store(out, "");
 	}
 
-	public CandidateComponentsMetadata read(InputStream in) throws IOException {
+	public static CandidateComponentsMetadata read(InputStream in) throws IOException {
 		CandidateComponentsMetadata result = new CandidateComponentsMetadata();
 		Properties props = new Properties();
 		props.load(in);

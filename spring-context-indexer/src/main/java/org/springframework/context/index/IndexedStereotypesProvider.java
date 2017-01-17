@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,16 +29,19 @@ import javax.lang.model.element.ElementKind;
  * honors stereotypes defined this way on meta-annotations.
  *
  * @author Stephane Nicoll
+ * @since 5.0
  */
 class IndexedStereotypesProvider implements StereotypesProvider {
 
 	private static final String INDEXED_ANNOTATION = "org.springframework.stereotype.Indexed";
 
-	private final TypeUtils typeUtils;
+	private final TypeHelper typeHelper;
 
-	public IndexedStereotypesProvider(TypeUtils typeUtils) {
-		this.typeUtils = typeUtils;
+
+	public IndexedStereotypesProvider(TypeHelper typeHelper) {
+		this.typeHelper = typeHelper;
 	}
+
 
 	@Override
 	public Set<String> getStereotypes(Element element) {
@@ -56,7 +59,7 @@ class IndexedStereotypesProvider implements StereotypesProvider {
 
 	private void collectStereotypesOnAnnotations(Set<Element> seen, Set<String> stereotypes,
 			Element element) {
-		for (AnnotationMirror annotation : this.typeUtils.getAllAnnotationMirrors(element)) {
+		for (AnnotationMirror annotation : this.typeHelper.getAllAnnotationMirrors(element)) {
 			Element next = collectStereotypes(seen, stereotypes, element, annotation);
 			if (next != null) {
 				collectStereotypesOnAnnotations(seen, stereotypes, next);
@@ -70,21 +73,22 @@ class IndexedStereotypesProvider implements StereotypesProvider {
 		if (!seen.contains(type)) {
 			seen.add(type);
 			if (isAnnotatedWithIndexed(type)) {
-				stereotypes.add(this.typeUtils.getType(type));
+				stereotypes.add(this.typeHelper.getType(type));
 			}
-			Element superClass = this.typeUtils.getSuperClass(type);
+			Element superClass = this.typeHelper.getSuperClass(type);
 			if (superClass != null) {
 				collectStereotypesOnTypes(seen, stereotypes, superClass);
 			}
-			this.typeUtils.getDirectInterfaces(type).forEach(
+			this.typeHelper.getDirectInterfaces(type).forEach(
 					i -> collectStereotypesOnTypes(seen, stereotypes, i));
 		}
 	}
 
 	private Element collectStereotypes(Set<Element> seen, Set<String> stereotypes,
 			Element element, AnnotationMirror annotation) {
+
 		if (isIndexedAnnotation(annotation)) {
-			stereotypes.add(this.typeUtils.getType(element));
+			stereotypes.add(this.typeHelper.getType(element));
 		}
 		return getCandidateAnnotationElement(seen, annotation);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.index.test;
+package org.springframework.context.index;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,9 +22,6 @@ import java.util.stream.Collectors;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
-
-import org.springframework.context.index.metadata.ItemMetadata;
-import org.springframework.context.index.metadata.CandidateComponentsMetadata;
 
 /**
  * Hamcrest {@link org.hamcrest.Matcher Matcher} to help test {@link CandidateComponentsMetadata}.
@@ -40,6 +37,7 @@ public class Metadata {
 	public static ItemMetadataMatcher hasComponent(String type, String... stereotypes) {
 		return new ItemMetadataMatcher(type, stereotypes);
 	}
+
 
 	private static class ItemMetadataMatcher extends BaseMatcher<CandidateComponentsMetadata> {
 

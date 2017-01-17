@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.index.metadata;
+package org.springframework.context.index;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.springframework.context.index.test.Metadata.*;
+import static org.springframework.context.index.Metadata.*;
 
 /**
  * Tests for {@link PropertiesMarshaller}.
@@ -42,9 +42,8 @@ public class PropertiesMarshallerTests {
 		metadata.add(createItem("com.bar", "first"));
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		PropertiesMarshaller marshaller = new PropertiesMarshaller();
-		marshaller.write(metadata, outputStream);
-		CandidateComponentsMetadata readMetadata = marshaller.read(
+		PropertiesMarshaller.write(metadata, outputStream);
+		CandidateComponentsMetadata readMetadata = PropertiesMarshaller.read(
 				new ByteArrayInputStream(outputStream.toByteArray()));
 		assertThat(readMetadata, hasComponent("com.foo", "first", "second"));
 		assertThat(readMetadata, hasComponent("com.bar", "first"));
