@@ -146,7 +146,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	}
 
 
-	private static NioEventLoopGroup initEventLoopGroup() {
+	public static NioEventLoopGroup initEventLoopGroup() {
 		int ioThreadCount;
 		try {
 			ioThreadCount = Integer.parseInt(System.getProperty("reactor.tcp.ioThreadCount"));

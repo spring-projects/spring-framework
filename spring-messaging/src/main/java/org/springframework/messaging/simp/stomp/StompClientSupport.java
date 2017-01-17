@@ -18,6 +18,9 @@ package org.springframework.messaging.simp.stomp;
 
 import java.util.Arrays;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.SimpleMessageConverter;
 import org.springframework.scheduling.TaskScheduler;
@@ -39,6 +42,8 @@ import org.springframework.util.Assert;
  * @since 4.2
  */
 public abstract class StompClientSupport {
+
+	protected Log logger = LogFactory.getLog(getClass());
 
 	private MessageConverter messageConverter = new SimpleMessageConverter();
 
