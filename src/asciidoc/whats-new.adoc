@@ -19,7 +19,6 @@ is available on the {wiki-spring-framework}[Spring Framework GitHub Wiki].
 
 
 
-
 === Improved Getting Started Experience
 The new https://spring.io[spring.io] website provides a whole series of
 https://spring.io/guides["Getting Started"] guides to help you learn Spring. You
@@ -30,7 +29,6 @@ additional projects that are released under the Spring umbrella.
 If you are a Maven user you may also be interested in the helpful
 <<overview-maven-bom,bill of materials>> POM file that is now published with each Spring
 Framework release.
-
 
 
 
@@ -52,7 +50,6 @@ retained for the time being where Spring 3.2 had it; now just in deprecated form
 
 
 
-
 === Java 8 (as well as 6 and 7)
 Spring Framework 4.0 provides support for several Java 8 features. You can make use of
 __lambda expressions__ and __method references__ with Spring's callback interfaces. There
@@ -65,7 +62,6 @@ Spring remains compatible with older versions of Java and the JDK: concretely, J
 (specifically, a minimum level equivalent to JDK 6 update 18, as released in January 2010)
 and above are still fully supported. However, for newly started development projects
 based on Spring 4, we recommend the use of Java 7 or 8.
-
 
 
 
@@ -96,7 +92,6 @@ Spring Framework 4.0. The same applies to Hibernate Validator 5.0 as a Bean Vali
 
 
 
-[[groovy-bean-definition-dsl]]
 === Groovy Bean Definition DSL
 Beginning with Spring Framework 4.0, it is possible to define external bean configuration
 using a Groovy DSL. This is similar in concept to using XML bean definitions but allows
@@ -131,7 +126,6 @@ For more information consult the `GroovyBeanDefinitionReader`
 
 
 
-
 === Core Container Improvements
 There have been several general improvements to the core container:
 
@@ -159,7 +153,6 @@ There have been several general improvements to the core container:
 
 
 
-
 === General Web Improvements
 Deployment to Servlet 2.5 servers remains an option, but Spring Framework 4.0 is now
 focused primarily on Servlet 3.0+ environments. If you are using the
@@ -176,7 +169,6 @@ have been made to Spring's Web modules:
   non-blocking asynchronous support>> when developing REST clients.
 * Spring now offers <<mvc-timezone,comprehensive timezone support>> when developing
   Spring MVC applications.
-
 
 
 
@@ -198,7 +190,6 @@ http://projects.spring.io/spring-integration/[Spring Integration] project such a
 for messaging-based applications.
 
 For further details, including a more thorough introduction, see the <<websocket>> section.
-
 
 
 
@@ -386,6 +377,7 @@ method has been added.
   was added to make it easy to apply Spring Security setup but can be used to encapsulate
   common setup for any 3rd party framework or within a project.
 * `MockRestServiceServer` now supports the `AsyncRestTemplate` for client-side testing.
+
 
 
 
@@ -621,6 +613,7 @@ public @interface MyTestConfig {
 * `MockHttpServletRequest` and `MockHttpServletResponse` now provide better
   support for date header formatting via the `getDateHeader` and `setDateHeader`
   methods.
+
 
 
 
