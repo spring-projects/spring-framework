@@ -48,6 +48,9 @@ import org.springframework.util.Assert;
  * <p>Allows to use a pre-configured {@link EventLoopGroup} instance: useful for
  * sharing across multiple clients.
  *
+ * <p>Note that this implementation consistently closes the HTTP connection on each
+ * request.
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Brian Clozel
@@ -77,8 +80,6 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	private int readTimeout = -1;
 
 	private volatile Bootstrap bootstrap;
-
-	private volatile Bootstrap sslBootstrap;
 
 
 	/**
@@ -177,20 +178,17 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	private Bootstrap getBootstrap(URI uri) {
 		boolean isSecure = (uri.getPort() == 443 || "https".equalsIgnoreCase(uri.getScheme()));
 		if (isSecure) {
-			if (this.sslBootstrap == null) {
-				this.sslBootstrap = buildBootstrap(true);
-			}
-			return this.sslBootstrap;
+			return buildBootstrap(uri, true);
 		}
 		else {
 			if (this.bootstrap == null) {
-				this.bootstrap = buildBootstrap(false);
+				this.bootstrap = buildBootstrap(uri, false);
 			}
 			return this.bootstrap;
 		}
 	}
 
-	private Bootstrap buildBootstrap(final boolean isSecure) {
+	private Bootstrap buildBootstrap(final URI uri, final boolean isSecure) {
 		Bootstrap bootstrap = new Bootstrap();
 		bootstrap.group(this.eventLoopGroup).channel(NioSocketChannel.class)
 				.handler(new ChannelInitializer<SocketChannel>() {
@@ -200,7 +198,7 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 						ChannelPipeline pipeline = channel.pipeline();
 						if (isSecure) {
 							Assert.notNull(sslContext, "sslContext should not be null");
-							pipeline.addLast(sslContext.newHandler(channel.alloc()));
+							pipeline.addLast(sslContext.newHandler(channel.alloc(), uri.getHost(), uri.getPort()));
 						}
 						pipeline.addLast(new HttpClientCodec());
 						pipeline.addLast(new HttpObjectAggregator(maxResponseSize));
