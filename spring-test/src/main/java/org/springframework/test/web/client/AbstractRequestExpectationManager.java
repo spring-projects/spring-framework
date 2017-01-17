@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,8 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 
 	private final List<ClientHttpRequest> requests = new LinkedList<ClientHttpRequest>();
 
+	private final Object lock = new Object();
+
 
 	protected List<RequestExpectation> getExpectations() {
 		return this.expectations;
@@ -66,12 +68,14 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 
 	@Override
 	public ClientHttpResponse validateRequest(ClientHttpRequest request) throws IOException {
-		if (getRequests().isEmpty()) {
-			afterExpectationsDeclared();
+		synchronized (this.lock) {
+			if (getRequests().isEmpty()) {
+				afterExpectationsDeclared();
+			}
+			ClientHttpResponse response = validateRequestInternal(request);
+			getRequests().add(request);
+			return response;
 		}
-		ClientHttpResponse response = validateRequestInternal(request);
-		getRequests().add(request);
-		return response;
 	}
 
 	/**
