@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
+import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.codec.UnsupportedMediaTypeException;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Implementations of {@link BodyInserter} that write various bodies, such a reactive streams,
@@ -48,6 +50,10 @@ public abstract class BodyInserters {
 
 	private static final ResolvableType SERVER_SIDE_EVENT_TYPE =
 			ResolvableType.forClass(ServerSentEvent.class);
+
+	private static final ResolvableType FORM_TYPE =
+			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
+
 
 	private static final BodyInserter<Void, ReactiveHttpOutputMessage> EMPTY =
 					(response, context) -> response.setComplete();
@@ -109,16 +115,16 @@ public abstract class BodyInserters {
 	 * If the resource can be resolved to a {@linkplain Resource#getFile() file}, it will be copied
 	 * using
 	 * <a href="https://en.wikipedia.org/wiki/Zero-copy">zero-copy</a>
-	 * @param resource the resource to write to the response
+	 * @param resource the resource to write to the output message
 	 * @param <T> the type of the {@code Resource}
 	 * @return a {@code BodyInserter} that writes a {@code Publisher}
 	 */
 	public static <T extends Resource> BodyInserter<T, ReactiveHttpOutputMessage> fromResource(T resource) {
 		Assert.notNull(resource, "'resource' must not be null");
-		return (response, context) -> {
+		return (outputMessage, context) -> {
 					HttpMessageWriter<Resource> messageWriter = resourceHttpMessageWriter(context);
 					return messageWriter.write(Mono.just(resource), RESOURCE_TYPE, null,
-							response, context.hints());
+							outputMessage, context.hints());
 				};
 	}
 
@@ -143,10 +149,11 @@ public abstract class BodyInserters {
 
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
 		return (response, context) -> {
-					HttpMessageWriter<ServerSentEvent<T>> messageWriter = sseMessageWriter(context);
-					return messageWriter.write(eventsPublisher, SERVER_SIDE_EVENT_TYPE,
-							MediaType.TEXT_EVENT_STREAM, response, context.hints());
-				};
+			HttpMessageWriter<ServerSentEvent<T>> messageWriter =
+					findMessageWriter(context, SERVER_SIDE_EVENT_TYPE, MediaType.TEXT_EVENT_STREAM);
+			return messageWriter.write(eventsPublisher, SERVER_SIDE_EVENT_TYPE,
+					MediaType.TEXT_EVENT_STREAM, response, context.hints());
+		};
 	}
 
 	/**
@@ -183,12 +190,44 @@ public abstract class BodyInserters {
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
 		Assert.notNull(eventType, "'eventType' must not be null");
 		return (outputMessage, context) -> {
-					HttpMessageWriter<T> messageWriter = sseMessageWriter(context);
-					return messageWriter.write(eventsPublisher, eventType,
-							MediaType.TEXT_EVENT_STREAM, outputMessage, context.hints());
+			HttpMessageWriter<T> messageWriter =
+					findMessageWriter(context, SERVER_SIDE_EVENT_TYPE, MediaType.TEXT_EVENT_STREAM);
+			return messageWriter.write(eventsPublisher, eventType,
+					MediaType.TEXT_EVENT_STREAM, outputMessage, context.hints());
 
-				};
+		};
 	}
+
+	/**
+	 * Return a {@code BodyInserter} that writes the given {@code MultiValueMap} as URL-encoded
+	 * form data.
+	 * @param formData the form data to write to the output message
+	 * @return a {@code BodyInserter} that writes form data
+	 */
+	public static BodyInserter<MultiValueMap<String, String>, ClientHttpRequest> fromFormData(MultiValueMap<String, String> formData) {
+		Assert.notNull(formData, "'formData' must not be null");
+
+		return (outputMessage, context) -> {
+			HttpMessageWriter<MultiValueMap<String, String>> messageWriter =
+					findMessageWriter(context, FORM_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
+			return messageWriter.write(Mono.just(formData), FORM_TYPE,
+					MediaType.APPLICATION_FORM_URLENCODED, outputMessage, context.hints());
+		};
+	}
+
+	private static <T> HttpMessageWriter<T> findMessageWriter(BodyInserter.Context context,
+			ResolvableType type,
+			MediaType mediaType) {
+
+		return context.messageWriters().get()
+				.filter(messageWriter -> messageWriter.canWrite(type, mediaType))
+				.findFirst()
+				.map(BodyInserters::<T>cast)
+				.orElseThrow(() -> new IllegalStateException(
+						"Could not find HttpMessageWriter that supports " + mediaType));
+	}
+
+
 
 	/**
 	 * Return a {@code BodyInserter} that writes the given {@code Publisher<DataBuffer>} to the
@@ -204,16 +243,6 @@ public abstract class BodyInserters {
 		return (outputMessage, context) -> outputMessage.writeWith(publisher);
 	}
 
-	private static <T> HttpMessageWriter<T> sseMessageWriter(BodyInserter.Context context) {
-		return context.messageWriters().get()
-				.filter(messageWriter -> messageWriter
-						.canWrite(SERVER_SIDE_EVENT_TYPE, MediaType.TEXT_EVENT_STREAM))
-				.findFirst()
-				.map(BodyInserters::<T>cast)
-				.orElseThrow(() -> new IllegalStateException(
-						"Could not find HttpMessageWriter that supports " +
-								MediaType.TEXT_EVENT_STREAM_VALUE));
-	}
 
 	private static <T, P extends Publisher<?>, M extends ReactiveHttpOutputMessage> BodyInserter<T, M> bodyInserterFor(P body, ResolvableType bodyType) {
 

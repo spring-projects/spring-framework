@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function;
 
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -41,8 +42,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ReactiveHttpOutputMessage;
+import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
+import org.springframework.http.codec.FormHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.ServerSentEvent;
@@ -50,7 +54,10 @@ import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.mock.http.client.reactive.test.MockClientHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
@@ -77,6 +84,7 @@ public class BodyInsertersTests {
 		messageWriters.add(new EncoderHttpMessageWriter<>(jsonEncoder));
 		messageWriters
 				.add(new ServerSentEventHttpMessageWriter(Collections.singletonList(jsonEncoder)));
+		messageWriters.add(new FormHttpMessageWriter());
 
 		this.context = new BodyInserter.Context() {
 			@Override
@@ -196,6 +204,33 @@ public class BodyInsertersTests {
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
 		StepVerifier.create(result).expectNextCount(0).expectComplete().verify();
+	}
+
+	@Test
+	public void ofFormData() throws Exception {
+		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+		body.set("name 1", "value 1");
+		body.add("name 2", "value 2+1");
+		body.add("name 2", "value 2+2");
+		body.add("name 3", null);
+
+		BodyInserter<MultiValueMap<String, String>, ClientHttpRequest>
+				inserter = BodyInserters.fromFormData(body);
+
+		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("http://example.com"));
+		Mono<Void> result = inserter.insert(request, this.context);
+		StepVerifier.create(result).expectComplete().verify();
+
+		StepVerifier.create(request.getBody())
+				.consumeNextWith(dataBuffer -> {
+					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
+					dataBuffer.read(resultBytes);
+					assertArrayEquals("name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3".getBytes(StandardCharsets.UTF_8),
+							resultBytes);
+				})
+				.expectComplete()
+				.verify();
+
 	}
 
 	@Test

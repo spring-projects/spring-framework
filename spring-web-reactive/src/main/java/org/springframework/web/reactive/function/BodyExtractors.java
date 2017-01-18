@@ -33,7 +33,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.UnsupportedMediaTypeException;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Implementations of {@link BodyExtractor} that read various bodies, such a reactive streams.
@@ -42,6 +44,10 @@ import org.springframework.util.Assert;
  * @since 5.0
  */
 public abstract class BodyExtractors {
+
+	private static final ResolvableType FORM_TYPE =
+			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
+
 
 	/**
 	 * Return a {@code BodyExtractor} that reads into a Reactor {@link Mono}.
@@ -92,6 +98,29 @@ public abstract class BodyExtractors {
 				reader -> reader.read(elementType, inputMessage, context.hints()),
 				Flux::error);
 	}
+
+	/**
+	 * Return a {@code BodyExtractor} that reads form data into a {@link MultiValueMap}.
+	 * @return a {@code BodyExtractor} that reads form data
+	 */
+	public static BodyExtractor<Mono<MultiValueMap<String, String>>, ServerHttpRequest> toFormData() {
+		return (serverRequest, context) -> {
+					HttpMessageReader<MultiValueMap<String, String>> messageReader = formMessageReader(context);
+					return messageReader.readMono(FORM_TYPE, serverRequest, context.hints());
+				};
+	}
+
+	private static HttpMessageReader<MultiValueMap<String, String>> formMessageReader(BodyExtractor.Context context) {
+		return context.messageReaders().get()
+				.filter(messageReader -> messageReader
+						.canRead(FORM_TYPE, MediaType.APPLICATION_FORM_URLENCODED))
+				.findFirst()
+				.map(BodyExtractors::<MultiValueMap<String, String>>cast)
+				.orElseThrow(() -> new IllegalStateException(
+						"Could not find HttpMessageReader that supports " +
+								MediaType.APPLICATION_FORM_URLENCODED_VALUE));
+	}
+
 
 	/**
 	 * Return a {@code BodyExtractor} that returns the body of the message as a {@link Flux} of
