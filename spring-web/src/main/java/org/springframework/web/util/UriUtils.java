@@ -164,6 +164,7 @@ public abstract class UriUtils {
 		HierarchicalUriComponents.Type type = HierarchicalUriComponents.Type.URI;
 		return HierarchicalUriComponents.encodeUriComponent(source, encoding, type);
 	}
+
 	/**
 	 * Decode the given encoded URI component.
 	 * <p>See {@link StringUtils#uriDecode(String, Charset) for the decoding rules.
