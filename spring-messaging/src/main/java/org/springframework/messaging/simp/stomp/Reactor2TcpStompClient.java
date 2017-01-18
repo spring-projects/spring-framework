@@ -16,16 +16,8 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-
 import io.netty.channel.EventLoopGroup;
 import reactor.Environment;
-import reactor.core.config.ConfigurationReader;
-import reactor.core.config.DispatcherConfiguration;
-import reactor.core.config.DispatcherType;
-import reactor.core.config.ReactorConfiguration;
 import reactor.io.net.NetStreams.TcpClientFactory;
 import reactor.io.net.Spec.TcpClientSpec;
 import reactor.io.net.impl.netty.NettyClientSocketOptions;
@@ -61,9 +53,7 @@ public class Reactor2TcpStompClient extends StompClientSupport implements Lifecy
 	}
 
 	/**
-	 * Create an instance with the given host and port.
-	 * @param host the host
-	 * @param port the port
+	 * Create an instance with the given host and port to connect to
 	 */
 	public Reactor2TcpStompClient(String host, int port) {
 		this.eventLoopGroup = Reactor2TcpClient.initEventLoopGroup();
@@ -87,7 +77,6 @@ public class Reactor2TcpStompClient extends StompClientSupport implements Lifecy
 	public void start() {
 		if (!isRunning()) {
 			this.running = true;
-
 		}
 	}
 
@@ -108,7 +97,6 @@ public class Reactor2TcpStompClient extends StompClientSupport implements Lifecy
 					logger.error("Failed to shutdown gracefully", ex);
 				}
 			}
-
 		}
 	}
 
@@ -149,52 +137,37 @@ public class Reactor2TcpStompClient extends StompClientSupport implements Lifecy
 	}
 
 
-	/**
-	 * A ConfigurationReader with a thread pool-based dispatcher.
-	 */
-	private static class StompClientDispatcherConfigReader implements ConfigurationReader {
-
-		@Override
-		public ReactorConfiguration read() {
-			String dispatcherName = "StompClient";
-			DispatcherType dispatcherType = DispatcherType.DISPATCHER_GROUP;
-			DispatcherConfiguration config = new DispatcherConfiguration(dispatcherName, dispatcherType, 128, 0);
-			List<DispatcherConfiguration> configList = Collections.<DispatcherConfiguration>singletonList(config);
-			return new ReactorConfiguration(configList, dispatcherName, new Properties());
-		}
-	}
-
-
 	private static class StompTcpClientSpecFactory implements TcpClientFactory<Message<byte[]>, Message<byte[]>> {
 
 		private final String host;
 
 		private final int port;
 
-		private final EventLoopGroup eventLoopGroup;
+		private final NettyClientSocketOptions socketOptions;
 
 		private final Environment environment;
 
+		private final Reactor2StompCodec codec;
 
-		public StompTcpClientSpecFactory(String host, int port, EventLoopGroup group, Environment environment) {
+
+		StompTcpClientSpecFactory(String host, int port, EventLoopGroup group, Environment environment) {
 			this.host = host;
 			this.port = port;
-			this.eventLoopGroup = group;
+			this.socketOptions = new NettyClientSocketOptions().eventLoopGroup(group);
 			this.environment = environment;
+			this.codec = new Reactor2StompCodec(new StompEncoder(), new StompDecoder());
 		}
 
 		@Override
 		public TcpClientSpec<Message<byte[]>, Message<byte[]>> apply(
-				TcpClientSpec<Message<byte[]>, Message<byte[]>> tcpClientSpec) {
+				TcpClientSpec<Message<byte[]>, Message<byte[]>> clientSpec) {
 
-			final Reactor2StompCodec codec = new Reactor2StompCodec(new StompEncoder(), new StompDecoder());
-
-			return tcpClientSpec
+			return clientSpec
 					.env(this.environment)
 					.dispatcher(this.environment.getDispatcher(Environment.WORK_QUEUE))
 					.connect(this.host, this.port)
-					.codec(codec)
-					.options(new NettyClientSocketOptions().eventLoopGroup(this.eventLoopGroup));
+					.codec(this.codec)
+					.options(this.socketOptions);
 		}
 	}
 
