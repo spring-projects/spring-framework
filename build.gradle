@@ -6,13 +6,14 @@ buildscript {
 	dependencies {
 		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
 		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.3")
-		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.6"
+		classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.6")
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
 	}
 }
 
 plugins {
 	id "org.sonarqube" version "2.2.1"
+	id "io.spring.dependency-management" version "1.0.0.RC2"
 }
 
 ext {
@@ -78,9 +79,7 @@ configure(allprojects) { project ->
 	ext.poiVersion             = "3.15"
 	ext.protobufVersion        = "3.1.0"
 	ext.quartzVersion          = "2.2.3"
-	ext.reactivestreamsVersion = "1.0.0"
-	ext.reactorCoreVersion     = '3.0.4.RELEASE'
-	ext.reactorNettyVersion    = '0.6.0.RELEASE'
+	ext.reactorVersion         = "Aluminium-RELEASE"
 	ext.romeVersion            = "1.7.0"
 	ext.rxjavaVersion          = '1.2.5'
 	ext.rxjavaAdapterVersion   = '1.2.1'
@@ -132,11 +131,6 @@ configure(allprojects) { project ->
 				details.useVersion nettyVersion
 			}
 		}
-		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-			if (details.requested.name == 'reactor-core' && details.requested.version.startsWith('3.')) {
-				details.useVersion reactorCoreVersion
-			}
-		}
 	}
 
 	compileJava.options*.compilerArgs = [
@@ -180,9 +174,19 @@ configure(allprojects) { project ->
 	}
 
 	repositories {
+		maven { url "https://repo.spring.io/libs-snapshot" }
 		maven { url "https://repo.spring.io/libs-release" }
 		maven { url "https://repo.spring.io/milestone" }
 		maven { url "http://dl.bintray.com/kotlin/kotlin-eap-1.1" }
+	}
+
+	dependencyManagement {
+		imports {
+			mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
+		}
+		resolutionStrategy {
+			cacheChangingModulesFor 0, 'seconds'
+		}
 	}
 
 	dependencies {
@@ -263,7 +267,6 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 	configurations {
 		jacoco
 	}
-
 	dependencies {
 		jacoco("org.jacoco:org.jacoco.agent:0.7.5.201505241946:runtime")
 	}
@@ -403,13 +406,13 @@ project("spring-core") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-		optional("org.reactivestreams:reactive-streams:${reactivestreamsVersion}")
-		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
+		optional("org.reactivestreams:reactive-streams")
+		optional("io.projectreactor:reactor-core")
 		optional "io.reactivex:rxjava:${rxjavaVersion}"
 		optional "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 		optional "io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}"
 		optional("io.netty:netty-buffer:${nettyVersion}")
-		testCompile("io.projectreactor.addons:reactor-test:${reactorCoreVersion}")
+		testCompile("io.projectreactor.addons:reactor-test")
 		testCompile("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
@@ -586,8 +589,8 @@ project("spring-messaging") {
 		compile(project(":spring-core"))
 		compile(project(":spring-context"))
 		optional(project(":spring-oxm"))
-		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
-		optional("io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}")
+		optional("io.projectreactor:reactor-core")
+		optional("io.projectreactor.ipc:reactor-netty")
 		optional("io.netty:netty-all:${nettyVersion}")
 		optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
@@ -738,9 +741,9 @@ project("spring-web") {
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("com.caucho:hessian:4.0.38")
 		optional("commons-fileupload:commons-fileupload:${fileuploadVersion}")
-		optional("org.reactivestreams:reactive-streams:${reactivestreamsVersion}")
-		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
-		optional("io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}")
+		optional("org.reactivestreams:reactive-streams")
+		optional("io.projectreactor:reactor-core")
+		optional("io.projectreactor.ipc:reactor-netty")
 		optional("io.reactivex:rxnetty-http:${rxnettyVersion}") {
 			exclude group: 'io.reactivex', module: 'rxjava'
 		}
@@ -779,7 +782,7 @@ project("spring-web") {
 		optional("javax.mail:javax.mail-api:${javamailVersion}")
 		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
-		testCompile("io.projectreactor.addons:reactor-test:${reactorCoreVersion}")
+		testCompile("io.projectreactor.addons:reactor-test")
 		testCompile("org.apache.taglibs:taglibs-standard-jstlel:1.2.1") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 		}
@@ -813,8 +816,8 @@ project("spring-web-reactive") {
 	dependencies {
 		compile(project(":spring-core"))
 		compile(project(":spring-web"))
-		compile "org.reactivestreams:reactive-streams:${reactivestreamsVersion}"
-		compile "io.projectreactor:reactor-core:${reactorCoreVersion}"
+		compile "org.reactivestreams:reactive-streams"
+		compile "io.projectreactor:reactor-core"
 		optional(project(":spring-context-support"))  // for FreeMarker support
 		provided "javax.servlet:javax.servlet-api:${servletVersion}"
 		optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
@@ -822,7 +825,7 @@ project("spring-web-reactive") {
 		optional("org.freemarker:freemarker:${freemarkerVersion}")
 		optional "org.apache.httpcomponents:httpclient:${httpclientVersion}"
 		optional('org.webjars:webjars-locator:0.32')
-		optional("io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}")
+		optional("io.projectreactor.ipc:reactor-netty")
 		optional("io.reactivex:rxnetty-http:${rxnettyVersion}") {
 			exclude group: 'io.reactivex', module: 'rxjava'
 		}
@@ -841,7 +844,7 @@ project("spring-web-reactive") {
 		}
 		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-		testCompile("io.projectreactor.addons:reactor-test:${reactorCoreVersion}")
+		testCompile("io.projectreactor.addons:reactor-test")
 		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("org.hibernate:hibernate-validator:${hibval5Version}")
 		testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
@@ -1025,8 +1028,8 @@ project("spring-websocket") {
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
-		testCompile("io.projectreactor:reactor-core:${reactorCoreVersion}")
-		testCompile("io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}")
+		testCompile("io.projectreactor:reactor-core")
+		testCompile("io.projectreactor.ipc:reactor-netty")
 		testCompile("io.netty:netty-all:${nettyVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testRuntime("org.jboss.xnio:xnio-nio:${xnioVersion}")
@@ -1077,8 +1080,8 @@ project("spring-test") {
 		}
 		optional("org.skyscreamer:jsonassert:1.4.0")
 		optional("com.jayway.jsonpath:json-path:2.2.0")
-		optional("org.reactivestreams:reactive-streams:${reactivestreamsVersion}")
-		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
+		optional("org.reactivestreams:reactive-streams")
+		optional("io.projectreactor:reactor-core")
 		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
 		testCompile("javax.mail:javax.mail-api:${javamailVersion}")
