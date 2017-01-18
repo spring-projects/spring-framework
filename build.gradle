@@ -1,6 +1,6 @@
 buildscript {
 	repositories {
-		maven { url "https://repo.spring.io/plugins-release" }
+		maven { url "https://repo.spring.io/plugins-snapshot" }
 		maven { url "http://dl.bintray.com/kotlin/kotlin-eap-1.1" }
 	}
 	dependencies {
@@ -8,12 +8,12 @@ buildscript {
 		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.3")
 		classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.6")
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
+		classpath("io.spring.gradle:dependency-management-plugin:1.0.0.BUILD-SNAPSHOT")
 	}
 }
 
 plugins {
 	id "org.sonarqube" version "2.2.1"
-	id "io.spring.dependency-management" version "1.0.0.RC2"
 }
 
 ext {
@@ -102,6 +102,7 @@ configure(allprojects) { project ->
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
+	apply plugin: "io.spring.dependency-management"
 	apply plugin: "propdeps"
 	apply plugin: "java"
 	apply plugin: "test-source-set-dependencies"
@@ -1181,6 +1182,12 @@ project("spring-aspects") {
 
 project("spring-framework-bom") {
 	description = "Spring Framework (Bill of Materials)"
+	
+	dependencyManagement {
+		generatedPomCustomization {
+			enabled = false
+		}
+	}
 
 	configurations.archives.artifacts.clear()
 	artifacts {
