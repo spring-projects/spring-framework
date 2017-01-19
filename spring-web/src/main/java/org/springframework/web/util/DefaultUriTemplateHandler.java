@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 
 package org.springframework.web.util;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -127,10 +125,7 @@ public class DefaultUriTemplateHandler extends AbstractUriTemplateHandler {
 			return builder.buildAndExpand(uriVariables).encode();
 		}
 		else {
-			Map<String, Object> encodedUriVars = new HashMap<>(uriVariables.size());
-			for (Map.Entry<String, ?> entry : uriVariables.entrySet()) {
-				encodedUriVars.put(entry.getKey(), applyStrictEncoding(entry.getValue()));
-			}
+			Map<String, ?> encodedUriVars = UriUtils.encodeUriVariables(uriVariables);
 			return builder.buildAndExpand(encodedUriVars);
 		}
 	}
@@ -140,22 +135,8 @@ public class DefaultUriTemplateHandler extends AbstractUriTemplateHandler {
 			return builder.buildAndExpand(uriVariables).encode();
 		}
 		else {
-			Object[] encodedUriVars = new Object[uriVariables.length];
-			for (int i = 0; i < uriVariables.length; i++) {
-				encodedUriVars[i] = applyStrictEncoding(uriVariables[i]);
-			}
+			Object[] encodedUriVars = UriUtils.encodeUriVariables(uriVariables);
 			return builder.buildAndExpand(encodedUriVars);
-		}
-	}
-
-	private String applyStrictEncoding(Object value) {
-		String stringValue = (value != null ? value.toString() : "");
-		try {
-			return UriUtils.encode(stringValue, "UTF-8");
-		}
-		catch (UnsupportedEncodingException ex) {
-			// Should never happen
-			throw new IllegalStateException("Failed to encode URI variable", ex);
 		}
 	}
 

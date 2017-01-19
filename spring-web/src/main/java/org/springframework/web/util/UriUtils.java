@@ -18,6 +18,11 @@ package org.springframework.web.util;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.util.StringUtils;
 
@@ -163,6 +168,52 @@ public abstract class UriUtils {
 	public static String encode(String source, String encoding) throws UnsupportedEncodingException {
 		HierarchicalUriComponents.Type type = HierarchicalUriComponents.Type.URI;
 		return HierarchicalUriComponents.encodeUriComponent(source, encoding, type);
+	}
+
+	/**
+	 * Encode characters outside the unreserved character set as defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2">RFC 3986 Section 2</a>.
+	 * <p>This can be used to ensure the given String will not contain any
+	 * characters with reserved URI meaning regardless of URI component.
+	 * @param source the String to be encoded
+	 * @param charset the character encoding to encode to
+	 * @return the encoded String
+	 */
+	public static String encode(String source, Charset charset) {
+		HierarchicalUriComponents.Type type = HierarchicalUriComponents.Type.URI;
+		return HierarchicalUriComponents.encodeUriComponent(source, charset, type);
+	}
+
+	/**
+	 * Apply {@link #encode(String, String)} to the values in the given URI
+	 * variables and return a new Map containing the encoded values.
+	 * @param uriVariables the URI variable values to be encoded
+	 * @return the encoded String
+	 * @since 5.0
+	 */
+	public static Map<String, String> encodeUriVariables(Map<String, ?> uriVariables) {
+		Map<String, String> result = new LinkedHashMap<>(uriVariables.size());
+		uriVariables.entrySet().stream().forEach(entry -> {
+			String stringValue = (entry.getValue() != null ? entry.getValue().toString() : "");
+			result.put(entry.getKey(), encode(stringValue, StandardCharsets.UTF_8));
+		});
+		return result;
+	}
+
+	/**
+	 * Apply {@link #encode(String, String)} to the values in the given URI
+	 * variables and return a new array containing the encoded values.
+	 * @param uriVariables the URI variable values to be encoded
+	 * @return the encoded String
+	 * @since 5.0
+	 */
+	public static Object[] encodeUriVariables(Object... uriVariables) {
+		return Arrays.stream(uriVariables)
+				.map(value -> {
+					String stringValue = (value != null ? value.toString() : "");
+					return encode(stringValue, StandardCharsets.UTF_8);
+				})
+				.collect(Collectors.toList()).toArray();
 	}
 
 	/**
