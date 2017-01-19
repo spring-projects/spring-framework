@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
+import org.springframework.http.codec.FormHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
@@ -82,6 +83,7 @@ class DefaultWebClientStrategiesBuilder implements WebClientStrategies.Builder {
 		messageWriter(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
 		messageWriter(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 		messageWriter(new ResourceHttpMessageWriter());
+		messageWriter(new FormHttpMessageWriter());
 		if (jaxb2Present) {
 			messageReader(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
 			messageWriter(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
