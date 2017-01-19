@@ -20,8 +20,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.server.reactive.HttpHandler;
@@ -118,21 +118,15 @@ public class WebHttpHandlerBuilder {
 
 		// WebFilter...
 
-		Collection<WebFilter> filters = BeanFactoryUtils.beansOfTypeIncludingAncestors(
-				context, WebFilter.class, true, false).values();
-
-		WebFilter[] sortedFilters = filters.toArray(new WebFilter[filters.size()]);
-		AnnotationAwareOrderComparator.sort(sortedFilters);
-		builder.filters(sortedFilters);
+		AutowiredFiltersContainer filtersContainer = new AutowiredFiltersContainer();
+		context.getAutowireCapableBeanFactory().autowireBean(filtersContainer);
+		builder.filters(filtersContainer.getFilters());
 
 		// WebExceptionHandler...
 
-		Collection<WebExceptionHandler> handlers = BeanFactoryUtils.beansOfTypeIncludingAncestors(
-				context, WebExceptionHandler.class, true, false).values();
-
-		WebExceptionHandler[] sortedHandlers = handlers.toArray(new WebExceptionHandler[handlers.size()]);
-		AnnotationAwareOrderComparator.sort(sortedHandlers);
-		builder.exceptionHandlers(sortedHandlers);
+		AutowiredExceptionHandlersContainer handlersContainer = new AutowiredExceptionHandlersContainer();
+		context.getAutowireCapableBeanFactory().autowireBean(handlersContainer);
+		builder.exceptionHandlers(handlersContainer.getExceptionHandlers());
 
 		// WebSessionManager
 
@@ -153,8 +147,16 @@ public class WebHttpHandlerBuilder {
 	 * @param filters the filters to add
 	 */
 	public WebHttpHandlerBuilder filters(WebFilter... filters) {
+		return filters(Arrays.asList(filters));
+	}
+
+	/**
+	 * Add the given filters to use for processing requests.
+	 * @param filters the filters to add
+	 */
+	public WebHttpHandlerBuilder filters(Collection<? extends WebFilter> filters) {
 		if (!ObjectUtils.isEmpty(filters)) {
-			this.filters.addAll(Arrays.asList(filters));
+			this.filters.addAll(filters);
 		}
 		return this;
 	}
@@ -164,8 +166,16 @@ public class WebHttpHandlerBuilder {
 	 * @param exceptionHandlers the exception handlers
 	 */
 	public WebHttpHandlerBuilder exceptionHandlers(WebExceptionHandler... exceptionHandlers) {
+		return exceptionHandlers(Arrays.asList(exceptionHandlers));
+	}
+
+	/**
+	 * Add the given exception handler to apply at the end of request processing.
+	 * @param exceptionHandlers the exception handlers
+	 */
+	public WebHttpHandlerBuilder exceptionHandlers(List<WebExceptionHandler> exceptionHandlers) {
 		if (!ObjectUtils.isEmpty(exceptionHandlers)) {
-			this.exceptionHandlers.addAll(Arrays.asList(exceptionHandlers));
+			this.exceptionHandlers.addAll(exceptionHandlers);
 		}
 		return this;
 	}
@@ -199,6 +209,35 @@ public class WebHttpHandlerBuilder {
 			httpHandler.setSessionManager(this.sessionManager);
 		}
 		return httpHandler;
+	}
+
+
+	private static class AutowiredFiltersContainer {
+
+		private List<WebFilter> filters;
+
+		@Autowired(required = false)
+		public void setFilters(List<WebFilter> filters) {
+			this.filters = filters;
+		}
+
+		public List<WebFilter> getFilters() {
+			return this.filters;
+		}
+	}
+
+	private static class AutowiredExceptionHandlersContainer {
+
+		private List<WebExceptionHandler> exceptionHandlers;
+
+		@Autowired(required = false)
+		public void setExceptionHandlers(List<WebExceptionHandler> exceptionHandlers) {
+			this.exceptionHandlers = exceptionHandlers;
+		}
+
+		public List<WebExceptionHandler> getExceptionHandlers() {
+			return this.exceptionHandlers;
+		}
 	}
 
 }
