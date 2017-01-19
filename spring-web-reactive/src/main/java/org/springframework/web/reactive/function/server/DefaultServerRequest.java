@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -39,7 +40,9 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyExtractors;
+import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.WebSession;
 
 /**
@@ -47,6 +50,12 @@ import org.springframework.web.server.WebSession;
  * @author Arjen Poutsma
  */
 class DefaultServerRequest implements ServerRequest {
+
+	private static final Function<UnsupportedMediaTypeException, UnsupportedMediaTypeStatusException> ERROR_MAPPER =
+			ex -> ex.getContentType()
+					.map(contentType -> new UnsupportedMediaTypeStatusException(contentType,
+							ex.getSupportedMediaTypes()))
+					.orElseGet(() -> new UnsupportedMediaTypeStatusException(ex.getMessage()));
 
 	private final ServerWebExchange exchange;
 
@@ -100,12 +109,14 @@ class DefaultServerRequest implements ServerRequest {
 
 	@Override
 	public <T> Mono<T> bodyToMono(Class<? extends T> elementClass) {
-		return body(BodyExtractors.toMono(elementClass));
+		Mono<T> mono = body(BodyExtractors.toMono(elementClass));
+		return mono.mapError(UnsupportedMediaTypeException.class, ERROR_MAPPER);
 	}
 
 	@Override
 	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
-		return body(BodyExtractors.toFlux(elementClass));
+		Flux<T> flux = body(BodyExtractors.toFlux(elementClass));
+		return flux.mapError(UnsupportedMediaTypeException.class, ERROR_MAPPER);
 	}
 
 	@Override

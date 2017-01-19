@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -48,6 +49,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.WebSession;
 
 import static org.junit.Assert.assertEquals;
@@ -233,6 +235,27 @@ public class DefaultServerRequestTests {
 		Flux<String> resultFlux = defaultRequest.bodyToFlux(String.class);
 		Mono<List<String>> result = resultFlux.collectList();
 		assertEquals(Collections.singletonList("foo"), result.block());
+	}
+
+	@Test
+	public void bodyUnacceptable() throws Exception {
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer =
+				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
+		when(mockRequest.getHeaders()).thenReturn(httpHeaders);
+		when(mockRequest.getBody()).thenReturn(body);
+
+		Set<HttpMessageReader<?>> messageReaders = Collections.emptySet();
+		when(mockHandlerStrategies.messageReaders()).thenReturn(messageReaders::stream);
+
+		Flux<String> resultFlux = defaultRequest.bodyToFlux(String.class);
+		StepVerifier.create(resultFlux)
+				.expectError(UnsupportedMediaTypeStatusException.class)
+				.verify();
 	}
 
 }
