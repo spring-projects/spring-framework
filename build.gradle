@@ -50,7 +50,7 @@ configure(allprojects) { project ->
 	ext.groovyVersion          = "2.4.8"
 	ext.gsonVersion            = "2.8.0"
 	ext.hamcrestVersion        = "1.3"
-	ext.hibernate5Version      = "5.2.6.Final"
+	ext.hibernate5Version      = "5.2.7.Final"
 	ext.hibval5Version         = "5.4.0.CR1"
 	ext.hsqldbVersion          = "2.3.4"
 	ext.httpasyncVersion       = "4.1.2"
@@ -80,7 +80,7 @@ configure(allprojects) { project ->
 	ext.protobufVersion        = "3.1.0"
 	ext.quartzVersion          = "2.2.3"
 	ext.reactorVersion         = "Aluminium-BUILD-SNAPSHOT"
-	ext.romeVersion            = "1.7.0"
+	ext.romeVersion            = "1.7.1"
 	ext.rxjavaVersion          = '1.2.5'
 	ext.rxjavaAdapterVersion   = '1.2.1'
 	ext.rxjava2Version         = '2.0.4'
