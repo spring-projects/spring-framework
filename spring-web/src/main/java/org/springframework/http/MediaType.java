@@ -43,6 +43,7 @@ import org.springframework.util.comparator.CompoundComparator;
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Kazuki Shimizu
  * @since 3.0
  * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.1.1">HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
  */
@@ -251,6 +252,31 @@ public class MediaType extends MimeType implements Serializable {
 	 */
 	public final static String TEXT_XML_VALUE = "text/xml";
 
+	/**
+	 * Public constant media type for {@code application/problem+json}.
+	 * @since 4.3.6
+	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.1">Problem Details for HTTP APIs, 6.1. application/problem+json</a>
+	 */
+	public final static MediaType APPLICATION_PROBLEM_JSON;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_JSON}.
+	 * @since 4.3.6
+	 */
+	public final static String APPLICATION_PROBLEM_JSON_VALUE = "application/problem+json";
+
+	/**
+	 * Public constant media type for {@code application/problem+xml}.
+	 * @since 4.3.6
+	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.2">Problem Details for HTTP APIs, 6.2. application/problem+xml</a>
+	 */
+	public final static MediaType APPLICATION_PROBLEM_XML;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_XML}.
+	 * @since 4.3.6
+	 */
+	public final static String APPLICATION_PROBLEM_XML_VALUE = "application/problem+xml";
 
 	private static final String PARAM_QUALITY_FACTOR = "q";
 
@@ -275,6 +301,8 @@ public class MediaType extends MimeType implements Serializable {
 		TEXT_MARKDOWN = valueOf(TEXT_MARKDOWN_VALUE);
 		TEXT_PLAIN = valueOf(TEXT_PLAIN_VALUE);
 		TEXT_XML = valueOf(TEXT_XML_VALUE);
+		APPLICATION_PROBLEM_JSON = valueOf(APPLICATION_PROBLEM_JSON_VALUE);
+		APPLICATION_PROBLEM_XML = valueOf(APPLICATION_PROBLEM_XML_VALUE);
 	}
 
 
