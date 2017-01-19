@@ -103,10 +103,8 @@ configure(allprojects) { project ->
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
 	apply plugin: "propdeps"
-	apply plugin: "propdeps-maven"
 	apply plugin: "java"
 	apply plugin: "test-source-set-dependencies"
-	apply plugin: "io.spring.dependency-management"
 	apply from: "${gradleScriptDir}/ide.gradle"
 
 	// Kotlin compiler does not support JDK 9 yet, see https://youtrack.jetbrains.com/issue/KT-14988
@@ -176,16 +174,6 @@ configure(allprojects) { project ->
 		maven { url "https://repo.spring.io/libs-release" }
 		maven { url "https://repo.spring.io/milestone" }
 		maven { url "http://dl.bintray.com/kotlin/kotlin-eap-1.1" }
-	}
-
-	dependencyManagement {
-		imports {
-			mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
-		}
-		resolutionStrategy {
-			cacheChangingModulesFor 0, 'seconds'
-		}
-		applyMavenExclusions = false
 	}
 
 	dependencies {
@@ -262,6 +250,17 @@ configure(allprojects) { project ->
 configure(subprojects - project(":spring-build-src")) { subproject ->
 	apply plugin: "merge"
 	apply from: "${gradleScriptDir}/publish-maven.gradle"
+	apply plugin: "io.spring.dependency-management"
+
+	dependencyManagement {
+		imports {
+			mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
+		}
+		resolutionStrategy {
+			cacheChangingModulesFor 0, 'seconds'
+		}
+		applyMavenExclusions = false
+	}
 
 	configurations {
 		jacoco
