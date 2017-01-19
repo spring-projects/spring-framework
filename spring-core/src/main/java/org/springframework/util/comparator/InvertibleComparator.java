@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,15 +103,14 @@ public class InvertibleComparator<T> implements Comparator<T>, Serializable {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof InvertibleComparator)) {
+		if (!(obj instanceof InvertibleComparator<?>)) {
 			return false;
 		}
-		InvertibleComparator<T> other = (InvertibleComparator<T>) obj;
+		InvertibleComparator<?> other = (InvertibleComparator<?>) obj;
 		return (this.comparator.equals(other.comparator) && this.ascending == other.ascending);
 	}
 

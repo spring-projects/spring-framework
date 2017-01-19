@@ -50,8 +50,8 @@ import static org.junit.Assert.*;
  */
 public class ConcurrentReferenceHashMapTests {
 
-	private static final Comparator<? super String> NULL_SAFE_STRING_SORT = new NullSafeComparator<String>(
-			new ComparableComparator<String>(), true);
+	private static final Comparator<String> NULL_SAFE_STRING_SORT = new NullSafeComparator<String>(
+			ComparableComparator.get(), true);
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();

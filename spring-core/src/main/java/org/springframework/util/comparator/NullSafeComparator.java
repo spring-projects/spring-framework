@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * @since 1.2.2
  * @see Comparable
  */
-public class NullSafeComparator<T> implements Comparator<T> {
+public class NullSafeComparator<T extends Comparable<T>> implements Comparator<T> {
 
 	/**
 	 * A shared default instance of this comparator, treating nulls lower
@@ -56,17 +56,16 @@ public class NullSafeComparator<T> implements Comparator<T> {
 	 * <p>When comparing two non-null objects, their Comparable implementation
 	 * will be used: this means that non-null elements (that this Comparator
 	 * will be applied to) need to implement Comparable.
-	 * <p>As a convenience, you can use the default shared instances:
-	 * {@code NullSafeComparator.NULLS_LOW} and
-	 * {@code NullSafeComparator.NULLS_HIGH}.
+	 * <p>As a convenience, you can use the type safe methods:
+	 * {@code NullSafeComparator.nullsLow()} and
+	 * {@code NullSafeComparator.nullsHigh()}.
 	 * @param nullsLow whether to treat nulls lower or higher than non-null objects
 	 * @see Comparable
-	 * @see #NULLS_LOW
-	 * @see #NULLS_HIGH
+	 * @see #nullsLow()
+	 * @see #nullsHigh()
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes"})
 	private NullSafeComparator(boolean nullsLow) {
-		this.nonNullComparator = new ComparableComparator();
+		this.nonNullComparator = ComparableComparator.get();
 		this.nullsLow = nullsLow;
 	}
 
@@ -85,6 +84,41 @@ public class NullSafeComparator<T> implements Comparator<T> {
 		this.nullsLow = nullsLow;
 	}
 
+	/**
+	 * Returns a type safe instance of this comparator, treating nulls lower
+	 * than non-null objects.
+	 *
+	 * <p>This example illustrates the type-safe way to obtain an instance:
+	 * <pre>
+	 *     NullSafeComparator&lt;Date&gt; s = NullSafeComparator.nullsLow();
+	 * </pre>
+	 *
+	 * @param <T> type of elements
+	 * @return a NullSafeComparator instance
+	 *
+	 */
+	@SuppressWarnings("unchecked")
+	public static final <T extends Comparable<T>> NullSafeComparator<T> nullsLow() {
+		return (NullSafeComparator<T>) NULLS_LOW;
+	}
+
+	/**
+	 * Returns a type safe instance of this comparator, treating nulls higher
+	 * than non-null objects.
+	 *
+	 * <p>This example illustrates the type-safe way to obtain an instance:
+	 * <pre>
+	 *     NullSafeComparator&lt;Date&gt; s = NullSafeComparator.nullsHigh();
+	 * </pre>
+	 *
+	 * @param <T> type of elements
+	 * @return a NullSafeComparator instance
+	 *
+	 */
+	@SuppressWarnings("unchecked")
+	public static final <T extends Comparable<T>> NullSafeComparator<T> nullsHigh() {
+		return (NullSafeComparator<T>) NULLS_HIGH;
+	}
 
 	@Override
 	public int compare(T o1, T o2) {
@@ -101,15 +135,14 @@ public class NullSafeComparator<T> implements Comparator<T> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof NullSafeComparator)) {
+		if (!(obj instanceof NullSafeComparator<?>)) {
 			return false;
 		}
-		NullSafeComparator<T> other = (NullSafeComparator<T>) obj;
+		NullSafeComparator<?> other = (NullSafeComparator<?>) obj;
 		return (this.nonNullComparator.equals(other.nonNullComparator) && this.nullsLow == other.nullsLow);
 	}
 

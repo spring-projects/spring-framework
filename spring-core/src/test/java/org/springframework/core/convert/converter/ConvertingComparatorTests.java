@@ -94,16 +94,18 @@ public class ConvertingComparatorTests {
 
 	@Test
 	public void shouldGetMapEntryKeys() throws Exception {
-		ArrayList<Entry<String, Integer>> list = createReverseOrderMapEntryList();
-		Comparator<Map.Entry<String, Integer>> comparator = ConvertingComparator.mapEntryKeys(new ComparableComparator<String>());
+		final ArrayList<Entry<String, Integer>> list = createReverseOrderMapEntryList();
+		final Comparator<String> stringComparator = ComparableComparator.get();
+		final Comparator<Map.Entry<String, Integer>> comparator = ConvertingComparator.mapEntryKeys(stringComparator);
 		Collections.sort(list, comparator);
 		assertThat(list.get(0).getKey(), is("a"));
 	}
 
 	@Test
 	public void shouldGetMapEntryValues() throws Exception {
-		ArrayList<Entry<String, Integer>> list = createReverseOrderMapEntryList();
-		Comparator<Map.Entry<String, Integer>> comparator = ConvertingComparator.mapEntryValues(new ComparableComparator<Integer>());
+		final ArrayList<Entry<String, Integer>> list = createReverseOrderMapEntryList();
+		final Comparator<Integer> integerComparator = ComparableComparator.get();
+		final Comparator<Map.Entry<String, Integer>> comparator = ConvertingComparator.mapEntryValues(integerComparator);
 		Collections.sort(list, comparator);
 		assertThat(list.get(0).getValue(), is(1));
 	}
@@ -129,7 +131,6 @@ public class ConvertingComparatorTests {
 
 
 	private static class TestComparator extends ComparableComparator<Integer> {
-
 		private boolean called;
 
 		@Override
@@ -138,7 +139,7 @@ public class ConvertingComparatorTests {
 			assertThat(o2, instanceOf(Integer.class));
 			this.called = true;
 			return super.compare(o1, o2);
-		};
+		}
 
 		public void assertCalled() {
 			assertThat(this.called, is(true));
