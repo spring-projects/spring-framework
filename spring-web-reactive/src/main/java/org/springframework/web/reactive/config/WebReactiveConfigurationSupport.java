@@ -29,6 +29,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteArrayEncoder;
 import org.springframework.core.codec.ByteBufferDecoder;
@@ -128,6 +129,7 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 	}
 
 	@Bean
+	@Order(0)
 	public WebExceptionHandler responseStatusExceptionHandler() {
 		return new ResponseStatusExceptionHandler();
 	}
