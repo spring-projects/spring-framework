@@ -102,8 +102,8 @@ configure(allprojects) { project ->
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
-	apply plugin: "io.spring.dependency-management"
 	apply plugin: "propdeps"
+	apply plugin: "propdeps-maven"
 	apply plugin: "java"
 	apply plugin: "test-source-set-dependencies"
 	apply plugin: "io.spring.dependency-management"
@@ -1187,7 +1187,7 @@ project("spring-aspects") {
 
 project("spring-framework-bom") {
 	description = "Spring Framework (Bill of Materials)"
-	
+
 	dependencyManagement {
 		generatedPomCustomization {
 			enabled = false
