@@ -29,8 +29,6 @@ import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
 import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
 import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 import org.springframework.util.SocketUtils;
 
 @RunWith(Parameterized.class)
@@ -57,8 +55,6 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 
 	@Before
 	public void setup() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		this.port = SocketUtils.findAvailableTcpPort();
 		this.server.setPort(this.port);
 		this.server.setHandler(createHttpHandler());
