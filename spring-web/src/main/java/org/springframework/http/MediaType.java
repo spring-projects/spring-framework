@@ -254,27 +254,27 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/problem+json}.
-	 * @since 5.0.0
+	 * @since 5.0
 	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.1">Problem Details for HTTP APIs, 6.1. application/problem+json</a>
 	 */
 	public final static MediaType APPLICATION_PROBLEM_JSON;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_JSON}.
-	 * @since 5.0.0
+	 * @since 5.0
 	 */
 	public final static String APPLICATION_PROBLEM_JSON_VALUE = "application/problem+json";
 
 	/**
 	 * Public constant media type for {@code application/problem+xml}.
-	 * @since 5.0.0
+	 * @since 5.0
 	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.2">Problem Details for HTTP APIs, 6.2. application/problem+xml</a>
 	 */
 	public final static MediaType APPLICATION_PROBLEM_XML;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_XML}.
-	 * @since 5.0.0
+	 * @since 5.0
 	 */
 	public final static String APPLICATION_PROBLEM_XML_VALUE = "application/problem+xml";
 

@@ -57,19 +57,16 @@ class IndexedStereotypesProvider implements StereotypesProvider {
 		return stereotypes;
 	}
 
-	private void collectStereotypesOnAnnotations(Set<Element> seen, Set<String> stereotypes,
-			Element element) {
+	private void collectStereotypesOnAnnotations(Set<Element> seen, Set<String> stereotypes, Element element) {
 		for (AnnotationMirror annotation : this.typeHelper.getAllAnnotationMirrors(element)) {
 			Element next = collectStereotypes(seen, stereotypes, element, annotation);
 			if (next != null) {
 				collectStereotypesOnAnnotations(seen, stereotypes, next);
 			}
 		}
-
 	}
 
-	private void collectStereotypesOnTypes(Set<Element> seen, Set<String> stereotypes,
-			Element type) {
+	private void collectStereotypesOnTypes(Set<Element> seen, Set<String> stereotypes, Element type) {
 		if (!seen.contains(type)) {
 			seen.add(type);
 			if (isAnnotatedWithIndexed(type)) {
@@ -84,8 +81,8 @@ class IndexedStereotypesProvider implements StereotypesProvider {
 		}
 	}
 
-	private Element collectStereotypes(Set<Element> seen, Set<String> stereotypes,
-			Element element, AnnotationMirror annotation) {
+	private Element collectStereotypes(Set<Element> seen, Set<String> stereotypes, Element element,
+			AnnotationMirror annotation) {
 
 		if (isIndexedAnnotation(annotation)) {
 			stereotypes.add(this.typeHelper.getType(element));
