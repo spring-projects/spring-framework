@@ -21,7 +21,6 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -41,7 +40,6 @@ import org.springframework.web.server.session.WebSessionManager;
  *
  * @author Sebastien Deleuze
  */
-@Ignore // Temporary disabled since Kotlin 1.1-M04 generates bytecode not Kotlin 1.0 compliant, will be enable as soon as Kotlin 1.1-M05 is available
 public class KotlinScriptTemplateTests {
 
 	private StaticApplicationContext context;
