@@ -725,8 +725,8 @@ into logging calls to the SLF4J API, so if other libraries in your application u
 API, then you have a single place to configure and manage logging.
 
 A common choice might be to bridge Spring to SLF4J, and then provide explicit binding
-from SLF4J to Log4J. You need to supply 4 dependencies (and exclude the existing
-`commons-logging`): the bridge, the SLF4J API, the binding to Log4J, and the Log4J
+from SLF4J to Log4j. You need to supply 4 dependencies (and exclude the existing
+`commons-logging`): the bridge, the SLF4J API, the binding to Log4j, and the Log4j
 implementation itself. In Maven you would do that like this
 
 [source,xml,indent=0]
@@ -782,14 +782,17 @@ Spring), because you only want one version of that API on the classpath.
 
 
 [[overview-logging-log4j]]
-===== Using Log4J
+===== Using Log4j
+
+NOTE: Log4j 1.x is EOL and Log4j 2.3 is the last Java 6 compatible release
+
 Many people use http://logging.apache.org/log4j[Log4j] as a logging framework for
 configuration and management purposes. It's efficient and well-established, and in fact
 it's what we use at runtime when we build and test Spring. Spring also provides some
 utilities for configuring and initializing Log4j, so it has an optional compile-time
 dependency on Log4j in some modules.
 
-To make Log4j work with the default JCL dependency ( `commons-logging`) all you need to
+To make Log4j 1 work with the default JCL dependency ( `commons-logging`) all you need to
 do is put Log4j on the classpath, and provide it with a configuration file (
 `log4j.properties` or `log4j.xml` in the root of the classpath). So for Maven users this
 is your dependency declaration:
@@ -825,6 +828,64 @@ log4j.appender.stdout.layout.ConversionPattern=%d{ABSOLUTE} %5p %t %c{2}:%L - %m
 log4j.category.org.springframework.beans.factory=DEBUG
 ----
 
+To use Log4j 2 with JCL, all you need to do is put Log4j on the classpath and provide
+it with a configuration file (`log4j2.xml`, `log4j2.properties`, or other
+http://logging.apache.org/log4j/2.x/manual/configuration.html[supported configuration
+formats]). For Maven users, the minimal dependencies needed are:
+
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-jcl</artifactId>
+			<version>2.7</version>
+		</dependency>
+	</dependencies>
+----
+
+If you also wish to use SLF4J, the following dependencies are also needed:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	<dependencies>
+	  <dependency>
+		<groupId>org.apache.logging.log4j</groupId>
+		<artifactId>log4j-slf4j-impl</artifactId>
+		<version>2.7</version>
+	  </dependency>
+	</dependencies>
+----
+
+Here is an example `log4j2.xml` for logging to the console:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<Configuration status="WARN">
+	  <Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+		  <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+		</Console>
+	  </Appenders>
+	  <Loggers>
+		<Logger name="org.springframework.beans.factory" level="DEBUG"/>
+		<Root level="error">
+		  <AppenderRef ref="Console"/>
+		</Root>
+	  </Loggers>
+	</Configuration>
+----
+
 [[overview-native-jcl]]
 ====== Runtime Containers with Native JCL
 Many people run their Spring applications in a container that itself provides an
@@ -834,11 +895,11 @@ excluding `commons-logging` from your application is not enough in most situatio
 
 To be clear about this: the problems reported are usually not with JCL per se, or even
 with `commons-logging`: rather they are to do with binding `commons-logging` to another
-framework (often Log4J). This can fail because `commons-logging` changed the way they do
+framework (often Log4j). This can fail because `commons-logging` changed the way they do
 the runtime discovery in between the older versions (1.0) found in some containers and
 the modern versions that most people use now (1.1). Spring does not use any unusual
 parts of the JCL API, so nothing breaks there, but as soon as Spring or your application
-tries to do any logging you can find that the bindings to Log4J are not working.
+tries to do any logging you can find that the bindings to Log4j are not working.
 
 In such cases with WAS the easiest thing to do is to invert the class loader hierarchy
 (IBM calls it "parent last") so that the application controls the JCL dependency, not
