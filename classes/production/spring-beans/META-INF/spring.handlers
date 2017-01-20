@@ -1,0 +1,3 @@
+http\://www.springframework.org/schema/c=org.springframework.beans.factory.xml.SimpleConstructorNamespaceHandler
+http\://www.springframework.org/schema/p=org.springframework.beans.factory.xml.SimplePropertyNamespaceHandler
+http\://www.springframework.org/schema/util=org.springframework.beans.factory.xml.UtilNamespaceHandler

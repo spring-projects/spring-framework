@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+	<aop:config>
+		<aop:aspect ref="monitoringAspect">
+			<aop:before method="before" pointcut="execution(* increment*())" />
+			<aop:around method="around" pointcut="execution(* increment*())" />
+		</aop:aspect>
+	</aop:config>
+
+	<bean id="monitoringAspect" class="org.springframework.aop.aspectj.JoinPointMonitorAspect">
+		<property name="counter" ref="counter"/>
+	</bean>
+
+	<bean id="counter" class="org.springframework.aop.aspectj.Counter"/>
+
+</beans>

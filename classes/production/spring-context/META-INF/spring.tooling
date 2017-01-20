@@ -1,0 +1,24 @@
+# Tooling related information for the context namespace
+http\://www.springframework.org/schema/context@name=context Namespace
+http\://www.springframework.org/schema/context@prefix=context
+http\://www.springframework.org/schema/context@icon=org/springframework/context/config/spring-context.gif
+
+# Tooling related information for the jee namespace
+http\://www.springframework.org/schema/jee@name=jee Namespace
+http\://www.springframework.org/schema/jee@prefix=jee
+http\://www.springframework.org/schema/jee@icon=org/springframework/ejb/config/spring-jee.gif
+
+# Tooling related information for the scheduling namespace
+http\://www.springframework.org/schema/task@name=task Namespace
+http\://www.springframework.org/schema/task@prefix=task
+http\://www.springframework.org/schema/task@icon=org/springframework/scheduling/config/spring-task.gif
+
+# Tooling related information for the lang namespace
+http\://www.springframework.org/schema/lang@name=lang Namespace
+http\://www.springframework.org/schema/lang@prefix=lang
+http\://www.springframework.org/schema/lang@icon=org/springframework/scripting/config/spring-lang.gif
+
+# Tooling related information for the cache namespace
+http\://www.springframework.org/schema/cache@name=cache Namespace
+http\://www.springframework.org/schema/cache@prefix=cache
+http\://www.springframework.org/schema/cache@icon=org/springframework/cache/config/spring-cache.gif

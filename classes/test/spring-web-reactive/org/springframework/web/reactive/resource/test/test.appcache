@@ -1,0 +1,17 @@
+CACHE MANIFEST
+
+# this is a comment
+CACHE:
+bar.css
+foo.css
+//example.org/style.css
+
+NETWORK:
+*
+
+CACHE:
+js/bar.js
+http://example.org/image.png
+
+FALLBACK:
+/main /static.html

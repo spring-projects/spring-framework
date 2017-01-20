@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="proxyCreator" class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
+
+	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
+
+	<bean id="advisor" class="org.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor">
+		<property name="expression"
+				value="execution(org.springframework.tests.sample.beans.ITestBean[] org.springframework.tests.sample.beans.ITestBean.*(..))"/>
+		<property name="advice" ref="interceptor"/>
+	</bean>
+
+	<bean id="interceptor" class="org.springframework.aop.aspectj.CallCountingInterceptor"/>
+
+</beans>

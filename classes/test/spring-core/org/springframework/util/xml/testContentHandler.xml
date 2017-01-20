@@ -1,0 +1,2 @@
+<h:hello xmlns:h="http://www.greeting.com/hello/" id="a1" h:person="David"><prefix:goodbye
+		xmlns:prefix="http://www.greeting.com/goodbye/" h:person="Arjen"> Some text </prefix:goodbye><h:so-long> </h:so-long></h:hello>

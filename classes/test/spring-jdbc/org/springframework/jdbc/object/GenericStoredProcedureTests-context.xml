@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd">
+
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.TestDataSourceWrapper"/>
+
+	<bean id="genericProcedure" class="org.springframework.jdbc.object.GenericStoredProcedure">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="sql" value="add_invoice"/>
+		<property name="parameters">
+			<list>
+				<bean class="org.springframework.jdbc.core.SqlParameter">
+					<constructor-arg index="0" value="amount"/>
+					<constructor-arg index="1">
+						<util:constant static-field="java.sql.Types.INTEGER"/>
+					</constructor-arg>
+				</bean>
+				<bean class="org.springframework.jdbc.core.SqlParameter">
+					<constructor-arg index="0" value="custid"/>
+					<constructor-arg index="1">
+						<util:constant static-field="java.sql.Types.INTEGER"/>
+					</constructor-arg>
+				</bean>
+				<bean class="org.springframework.jdbc.core.SqlOutParameter">
+					<constructor-arg index="0" value="newid"/>
+					<constructor-arg index="1">
+						<util:constant static-field="java.sql.Types.INTEGER"/>
+					</constructor-arg>
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+</beans>

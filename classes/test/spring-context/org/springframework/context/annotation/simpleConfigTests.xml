@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+	<context:annotation-config/>
+
+	<aop:aspectj-autoproxy/>
+
+	<bean class="org.springframework.scheduling.annotation.AsyncAnnotationAdvisor">
+		<!--
+		<property name="taskExecutor">
+			<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"/>
+		</property>
+		-->
+	</bean>
+
+	<bean id="fooServiceImpl" class="example.scannable.FooServiceImpl"/>
+
+	<bean id="serviceInvocationCounter" class="example.scannable.ServiceInvocationCounter"/>
+
+	<bean class="example.scannable.StubFooDao"/>
+
+	<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+		<property name="converters">
+			<bean class="org.springframework.context.annotation.FooServiceDependentConverter">
+				<property name="fooService" ref="fooServiceImpl"/>
+			</bean>
+		</property>
+	</bean>
+
+</beans>

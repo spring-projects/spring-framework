@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+	<mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/">
+		<mvc:cache-control max-age="3600" s-maxage="1800" cache-public="true"/>
+		<mvc:resource-chain resource-cache="false" auto-registration="false">
+			<mvc:resolvers>
+				<mvc:version-resolver>
+					<mvc:fixed-version-strategy version="abc" patterns="/**/*.js"/>
+					<mvc:version-strategy patterns="/**">
+						<bean class="org.springframework.web.servlet.resource.ContentVersionStrategy" />
+					</mvc:version-strategy>
+				</mvc:version-resolver>
+				<ref bean="gzipResourceResolver"/>
+				<bean class="org.springframework.web.servlet.resource.PathResourceResolver"/>
+			</mvc:resolvers>
+			<mvc:transformers>
+				<bean class="org.springframework.web.servlet.resource.CachingResourceTransformer">
+					<constructor-arg name="cache" ref="resourceCache" />
+				</bean>
+				<bean class="org.springframework.web.servlet.resource.AppCacheManifestTransformer"/>
+			</mvc:transformers>
+		</mvc:resource-chain>
+	</mvc:resources>
+
+	<bean id="gzipResourceResolver" class="org.springframework.web.servlet.resource.GzipResourceResolver" />
+	<bean id="resourceCache" class="org.springframework.cache.concurrent.ConcurrentMapCache">
+		<constructor-arg name="name" value="resourceCache"/>
+	</bean>
+
+</beans>

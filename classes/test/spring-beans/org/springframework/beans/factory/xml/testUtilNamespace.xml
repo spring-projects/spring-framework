@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:util="http://www.springframework.org/schema/util"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.1.xsd">
+
+	<util:constant id="min" static-field="
+			java.lang.Integer.
+			MIN_VALUE
+ 	"/>
+
+	<util:constant static-field="java.lang.Integer.MAX_VALUE"/>
+
+	<util:property-path id="name" path="
+			configuredBean.
+			name
+	"/>
+
+	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+		<property name="name">
+			<util:property-path path="configuredBean.name"/>
+		</property>
+		<property name="someProperties">
+			<util:properties location="classpath:/org/springframework/beans/factory/xml/util.properties"/>
+		</property>
+	</bean>
+
+	<bean id="constructedTestBean" class="org.springframework.tests.sample.beans.TestBean">
+		<constructor-arg index="0">
+			<util:property-path path="configuredBean.name"/>
+		</constructor-arg>
+	</bean>
+
+	<bean id="configuredBean" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name" value="Rob Harrop"/>
+	</bean>
+
+	<util:map id="simpleMap">
+		<entry key="foo" value="bar"/>
+	</util:map>
+
+	<util:map id="scopedMap" scope="prototype">
+		<description>My scoped Map</description>
+		<entry key="foo" value="bar"/>
+	</util:map>
+
+	<util:map id="mapWithRef" map-class="java.util.TreeMap">
+		<entry key="bean" value-ref="testBean"/>
+	</util:map>
+
+	<util:map id="mapWithTypes" map-class="org.springframework.util.LinkedCaseInsensitiveMap"
+			  key-type="java.lang.String" value-type="org.springframework.tests.sample.beans.TestBean">
+		<entry key="bean" value-ref="testBean"/>
+	</util:map>
+
+	<util:list id="simpleList">
+		<value>Rob Harrop</value>
+	</util:list>
+
+	<util:list id="scopedList" scope="prototype">
+		<description>My scoped List</description>
+		<value>Rob Harrop</value>
+	</util:list>
+
+	<util:set id="simpleSet">
+		<value>Rob Harrop</value>
+	</util:set>
+
+	<util:set id="scopedSet" scope="prototype">
+		<description>My scoped Set</description>
+		<value>Rob Harrop</value>
+	</util:set>
+
+	<bean id="nestedCollectionsBean" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+		<property name="someList">
+			<util:list>
+				<value>foo</value>
+			</util:list>
+		</property>
+		<property name="someSet">
+			<util:set>
+				<value>bar</value>
+			</util:set>
+		</property>
+		<property name="someMap">
+			<util:map>
+				<entry key="foo">
+					<util:set>
+						<value>bar</value>
+					</util:set>
+				</entry>
+			</util:map>
+		</property>
+	</bean>
+
+	<bean id="nestedShortcutCollections" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+		<property name="stringArray" value="fooStr"/>
+		<property name="someList" value="foo"/>
+		<property name="someSet" value="bar"/>
+	</bean>
+
+	<bean id="nestedCustomTagBean" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+		<property name="someList">
+			<list>
+				<util:constant static-field="java.lang.Integer.MIN_VALUE"/>
+			</list>
+		</property>
+		<property name="someSet">
+			<set>
+				<util:constant static-field="java.lang.Thread$State.NEW"/>
+				<util:constant static-field="java.lang.Thread.State.RUNNABLE"/>
+			</set>
+		</property>
+	  <property name="someMap">
+			<map>
+				<entry>
+					<key><value>min</value></key>
+					<util:constant static-field="org.springframework.tests.sample.beans.CustomEnum.VALUE_1"/>
+				</entry>
+			</map>
+	  </property>
+	</bean>
+
+	<bean id="circularCollectionsBean" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="someList">
+			<util:list>
+				<ref bean="circularCollectionsBean"/>
+			</util:list>
+		</property>
+		<property name="someSet">
+			<util:set>
+				<ref bean="circularCollectionsBean"/>
+			</util:set>
+		</property>
+		<property name="someMap">
+			<util:map>
+				<entry key="foo" value-ref="circularCollectionsBean"/>
+			</util:map>
+		</property>
+	</bean>
+
+	<util:list id="circularList">
+		<ref bean="circularCollectionBeansBean"/>
+	</util:list>
+
+	<util:set id="circularSet">
+		<ref bean="circularCollectionBeansBean"/>
+	</util:set>
+
+	<util:map id="circularMap">
+		<entry key="foo" value-ref="circularCollectionBeansBean"/>
+	</util:map>
+
+	<bean id="circularCollectionBeansBean" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="someList" ref="circularList"/>
+		<property name="someSet" ref="circularSet"/>
+		<property name="someMap" ref="circularMap"/>
+	</bean>
+
+	<util:properties id="myProperties"
+			location="classpath:/org/springframework/beans/factory/xml/util.properties"/>
+
+	<util:properties id="myScopedProperties"
+			location="classpath:/org/springframework/beans/factory/xml/util.properties,classpath:override.properties"
+			ignore-resource-not-found="true" scope="prototype"/>
+
+	<util:properties id="myLocalProperties">
+		<prop key="foo2">bar2</prop>
+	</util:properties>
+
+	<util:properties id="myMergedProperties"
+			location="classpath:/org/springframework/beans/factory/xml/util.properties">
+		<prop key="foo2">bar2</prop>
+	</util:properties>
+
+	<util:properties id="defaultLocalOverrideProperties"
+			location="classpath:/org/springframework/beans/factory/xml/util.properties">
+		<prop key="foo">local</prop>
+		<prop key="foo2">local2</prop>
+	</util:properties>
+
+	<util:properties id="trueLocalOverrideProperties"
+			location="classpath:/org/springframework/beans/factory/xml/util.properties"
+			local-override="true">
+		<prop key="foo">local</prop>
+		<prop key="foo2">local2</prop>
+	</util:properties>
+
+	<util:properties id="falseLocalOverrideProperties"
+			location="classpath:/org/springframework/beans/factory/xml/util.properties"
+			local-override="false">
+		<prop key="foo">local</prop>
+		<prop key="foo2">local2</prop>
+	</util:properties>
+
+</beans>

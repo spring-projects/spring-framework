@@ -1,0 +1,14 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
+	version="1.0">
+
+	<persistence-unit name="OrderManagement5">
+		<provider>com.acme.AcmePersistence</provider>
+		<mapping-file>order1.xml</mapping-file>
+		<mapping-file>order2.xml</mapping-file>
+		<jar-file>order.jar</jar-file>
+		<jar-file>order-supplemental.jar</jar-file>
+	</persistence-unit>
+
+</persistence>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="resource1" class="org.springframework.tests.sample.beans.ResourceTestBean">
+		<property name="resource">
+			<value>test.properties</value>
+		</property>
+		<property name="contextResource">
+			<value>testBeans.properties</value>
+		</property>
+		<property name="inputStream">
+			<value>classpath:org/springframework/beans/factory/xml/test.properties</value>
+		</property>
+	</bean>
+
+</beans>

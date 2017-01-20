@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:oxm="http://www.springframework.org/schema/oxm"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm.xsd">
+
+	<!-- JAXB2 -->
+	<oxm:jaxb2-marshaller id="jaxb2ContextPathMarshaller" context-path="org.springframework.oxm.jaxb.test"/>
+
+	<oxm:jaxb2-marshaller id="jaxb2ClassesMarshaller">
+		<oxm:class-to-be-bound name="org.springframework.oxm.jaxb.test.Flights"/>
+		<oxm:class-to-be-bound name="org.springframework.oxm.jaxb.test.FlightType"/>
+	</oxm:jaxb2-marshaller>
+
+	<!-- Castor -->
+
+	<oxm:castor-marshaller id="castorEncodingMarshaller" encoding="ISO-8859-1"/>
+
+	<oxm:castor-marshaller id="castorTargetClassMarshaller" target-class="org.springframework.oxm.castor.Flight"/>
+
+	<oxm:castor-marshaller id="castorTargetPackageMarshaller" target-package="org.springframework.oxm.castor"/>
+
+	<oxm:castor-marshaller id="castorMappingLocationMarshaller"
+						   mapping-location="classpath:org/springframework/oxm/castor/mapping.xml"/>
+
+</beans>

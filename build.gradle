@@ -75,7 +75,7 @@ configure(allprojects) { project ->
 	ext.testngVersion        = "6.9.10"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.7"
-	ext.tomcatVersion        = "8.5.9"
+	ext.tomcatVersion        = "8.5.11"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
 	ext.undertowVersion      = "1.3.25.Final"
 	ext.xmlunitVersion       = "1.6"

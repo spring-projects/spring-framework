@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="rob" class="org.springframework.tests.sample.beans.TestBean" scope="prototype" autowire="constructor"/>
+
+	<bean id="sally" class="org.springframework.tests.sample.beans.TestBean" scope="prototype"/>
+
+	<bean id="props1" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+	  <property name="properties">
+			<value>name=props1</value>
+	  </property>
+	</bean>
+
+	<bean id="props2" class="org.springframework.beans.factory.config.PropertiesFactoryBean" autowire-candidate="false">
+	  <property name="properties">
+			<value>name=props2</value>
+	  </property>
+	</bean>
+
+</beans>

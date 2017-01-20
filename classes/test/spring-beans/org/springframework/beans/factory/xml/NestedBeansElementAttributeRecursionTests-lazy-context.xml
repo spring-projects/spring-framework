@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+
+	<!-- lazy == false (based on default XSD values) -->
+	<bean id="foo" class="java.lang.Object"/>
+
+	<beans default-lazy-init="true">
+		<!-- lazy == true (explicit default specified) -->
+		<bean id="bar" class="java.lang.Object"/>
+	</beans>
+
+	<beans default-lazy-init="false">
+		<!-- lazy == false (explicit default specified) -->
+		<bean id="baz" class="java.lang.Object"/>
+	</beans>
+
+	<beans default-lazy-init="true">
+		<!-- lazy == true (explicit default specified) -->
+		<bean id="biz" class="java.lang.Object"/>
+
+		<beans>
+			<!-- lazy == true (inherit enclosing <beans> defaults -->
+			<bean id="buz" class="java.lang.Object"/>
+		</beans>
+	</beans>
+</beans>

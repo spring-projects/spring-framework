@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+		<property name="converters">
+			<bean class="org.springframework.context.support.ResourceConverter"/>
+		</property>
+	</bean>
+
+	<bean id="resourceTestBean" class="org.springframework.tests.sample.beans.ResourceTestBean">
+		<property name="resource" value="org/springframework/context/support/conversionService.xml"/>
+		<property name="resourceArray" value="org/springframework/context/support/conversionService.xml"/>
+ 		<property name="resourceMap">
+ 			<map>
+ 				<entry key="key1" value="org/springframework/context/support/conversionService.xml"/>
+ 			</map>
+ 		</property>
+		<property name="resourceArrayMap">
+			<map>
+				<entry key="key1" value="org/springframework/context/support/conversionService.xml"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean class="org.springframework.context.support.ConversionServiceFactoryBeanTests$ComplexConstructorArgument">
+		<constructor-arg>
+			<map>
+				<entry key="mykey" value="java.util.Date"/>
+			</map>
+		</constructor-arg>
+	</bean>
+
+</beans>

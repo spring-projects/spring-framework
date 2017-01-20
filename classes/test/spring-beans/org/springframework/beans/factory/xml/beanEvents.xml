@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans default-lazy-init="true" default-autowire="constructor" default-merge="true"
+		default-init-method="myInit" default-destroy-method="myDestroy">
+
+	<import resource="beanEventsImported.xml"/>
+
+	<alias name="testBean" alias="testBeanAlias1"/>
+
+	<alias name="testBean" alias="testBeanAlias2"/>
+
+	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean">
+		<constructor-arg type="java.lang.String" value="Rob Harrop"/>
+		<property name="friends">
+			<ref bean="testBean2"/>
+		</property>
+		<property name="doctor">
+			<bean class="org.springframework.tests.sample.beans.NestedTestBean">
+				<constructor-arg type="java.lang.String" value="ACME"/>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="testBean2" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name" value="Juergen Hoeller"/>
+		<property name="spouse">
+			<bean class="org.springframework.tests.sample.beans.TestBean">
+				<property name="name" value="Eva Schallmeiner"/>
+			</bean>
+		</property>
+	</bean>
+
+</beans>

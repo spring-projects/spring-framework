@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+	<bean xml:lang="en" id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
+
+	<bean id="fooBean" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="spouse">
+			<bean class="org.springframework.tests.sample.beans.TestBean"/>
+		</property>
+		<property name="friends">
+			<list>
+				<bean class="org.springframework.tests.sample.beans.TestBean"/>
+				<bean class="org.springframework.tests.sample.beans.TestBean"/>
+			</list>
+		</property>
+	</bean>
+
+</beans>

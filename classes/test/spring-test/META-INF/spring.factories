@@ -1,0 +1,2 @@
+# Test configuration file containing a non-existent default TestExecutionListener.
+org.springframework.test.context.TestExecutionListener = org.example.FooListener

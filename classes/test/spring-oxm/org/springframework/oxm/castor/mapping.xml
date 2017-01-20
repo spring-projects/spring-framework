@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE mapping PUBLIC "-//EXOLAB/Castor Mapping DTD Version 1.0//EN" "http://castor.org/mapping.dtd">
+<mapping>
+    <description>Castor generated mapping file</description>
+    <class name="org.springframework.oxm.castor.Flights">
+        <description>
+            Default mapping for class
+            org.springframework.oxm.castor.Flights
+        </description>
+        <map-to xml="flights"
+                ns-uri="http://samples.springframework.org/flight" ns-prefix="tns"/>
+        <field name="flight"
+               type="org.springframework.oxm.castor.Flight"
+               required="true" collection="array">
+            <bind-xml name="tns:flight" node="element" QName-prefix="tns"
+                      xmlns:tns="http://samples.springframework.org/flight"/>
+        </field>
+    </class>
+    <class name="org.springframework.oxm.castor.Flight">
+        <description>
+            Default mapping for class
+            org.springframework.oxm.castor.Flight
+        </description>
+        <map-to xml="flight"
+                ns-uri="http://samples.springframework.org/flight" ns-prefix="tns"/>
+        <field name="number" type="long" required="true">
+            <bind-xml name="tns:number" node="element"
+                      xmlns:tns="http://samples.springframework.org/flight"/>
+        </field>
+    </class>
+</mapping>

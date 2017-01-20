@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="someList">
+			<list value-type="java.lang.Integer">
+				<value>1</value>
+				<value>2</value>
+				<value>3</value>
+			</list>
+		</property>
+		<property name="someSet">
+			<set value-type="java.lang.Integer">
+				<value>1</value>
+				<value>2</value>
+				<value>3</value>
+			</set>
+		</property>
+		<property name="someMap">
+			<map key-type="java.lang.Integer" value-type="java.lang.Boolean">
+				<entry key="1" value="true"/>
+				<entry key="2" value="false"/>
+				<entry key="3" value="false"/>
+				<entry key="4" value="true"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="testBean2" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="someMap">
+			<map key-type="java.lang.Integer" value-type="java.lang.Boolean">
+				<entry>
+					<key>
+						<value>1</value>
+					</key>
+					<value>true</value>
+				</entry>
+				<entry>
+					<key>
+						<value>2</value>
+					</key>
+					<value>false</value>
+				</entry>
+				<entry>
+					<key>
+						<value>3</value>
+					</key>
+					<value>false</value>
+				</entry>
+				<entry>
+					<key>
+						<value>4</value>
+					</key>
+					<value>true</value>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="jumble" class="org.springframework.beans.factory.xml.MixedCollectionBean">
+		<property name="jumble">
+			<list value-type="java.lang.String">
+				<value>literal</value>
+				<array value-type="java.lang.Integer">
+					<value>2</value>
+					<value>4</value>
+				</array>
+				<array value-type="int">
+					<value>3</value>
+					<value>5</value>
+				</array>
+			</list>
+		</property>
+	</bean>
+
+</beans>

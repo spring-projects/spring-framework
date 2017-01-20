@@ -1,0 +1,3 @@
+<persistence>
+	<persistence-unit name="pu1"/>
+</persistence>
