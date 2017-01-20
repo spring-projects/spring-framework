@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
  * min(2)
  * max(4)
  * between(2, 4)
+ * never()
  * </pre>
  *
  * @author Rossen Stoyanchev
@@ -48,7 +49,7 @@ public class ExpectedCount {
 	 * See static factory methods in this class.
 	 */
 	private ExpectedCount(int minCount, int maxCount) {
-		Assert.isTrue(minCount >= 1, "minCount >= 0 is required");
+		Assert.isTrue(minCount >= 0, "minCount >= 0 is required");
 		Assert.isTrue(maxCount >= minCount, "maxCount >= minCount is required");
 		this.minCount = minCount;
 		this.maxCount = maxCount;
@@ -106,6 +107,14 @@ public class ExpectedCount {
 	public static ExpectedCount max(int max) {
 		Assert.isTrue(max >= 1, "'max' must be >= 1");
 		return new ExpectedCount(1, max);
+	}
+
+	/**
+	 * No calls expected at all, i.e. min=0 and max=0.
+	 * @since 4.3.6
+	 */
+	public static ExpectedCount never() {
+		return new ExpectedCount(0, 0);
 	}
 
 	/**
