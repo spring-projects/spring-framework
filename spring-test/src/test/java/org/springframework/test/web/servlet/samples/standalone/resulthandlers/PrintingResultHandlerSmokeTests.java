@@ -19,6 +19,7 @@ package org.springframework.test.web.servlet.samples.standalone.resulthandlers;
 import java.io.StringWriter;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Ignore;
@@ -56,7 +57,10 @@ public class PrintingResultHandlerSmokeTests {
 
 		standaloneSetup(new SimpleController())
 			.build()
-			.perform(get("/").content("Hello Request".getBytes()))
+			.perform(get("/")
+					.content("Hello Request".getBytes())
+					.sessionAttr("jsessionId", "1A530690283A13B04199A42E5D530454")
+					.sessionAttr("userId", "jdoe"))
 			.andDo(log())
 			.andDo(print())
 			.andDo(print(System.err))

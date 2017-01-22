@@ -73,6 +73,8 @@ public class PrintingResultHandlerTests {
 		String palindrome = "ablE was I ere I saw Elba";
 		byte[] bytes = palindrome.getBytes("UTF-16");
 		this.request.setContent(bytes);
+		this.request.getSession().setAttribute("jsessionId", "1A530690283A13B04199A42E5D530454");
+		this.request.getSession().setAttribute("userId", "jdoe");
 
 		this.handler.handle(this.mvcResult);
 
@@ -82,11 +84,16 @@ public class PrintingResultHandlerTests {
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		params.add("param", "paramValue");
 
+		Map<String, Object> sessionAttributes = new HashMap<>();
+		sessionAttributes.put("jsessionId", "1A530690283A13B04199A42E5D530454");
+		sessionAttributes.put("userId", "jdoe");
+
 		assertValue("MockHttpServletRequest", "HTTP Method", this.request.getMethod());
 		assertValue("MockHttpServletRequest", "Request URI", this.request.getRequestURI());
 		assertValue("MockHttpServletRequest", "Parameters", params);
 		assertValue("MockHttpServletRequest", "Headers", headers);
 		assertValue("MockHttpServletRequest", "Body", palindrome);
+		assertValue("MockHttpServletRequest", "Session attributes", sessionAttributes);
 	}
 
 	@Test

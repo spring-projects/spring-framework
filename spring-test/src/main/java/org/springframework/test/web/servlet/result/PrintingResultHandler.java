@@ -17,10 +17,12 @@
 package org.springframework.test.web.servlet.result;
 
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.http.HttpHeaders;
@@ -114,6 +116,23 @@ public class PrintingResultHandler implements ResultHandler {
 		this.printer.printValue("Parameters", getParamsMultiValueMap(request));
 		this.printer.printValue("Headers", getRequestHeaders(request));
 		this.printer.printValue("Body", body);
+		this.printer.printValue("Session attributes", getSessionAttributes(request));
+	}
+
+	protected static Map<String, Object> getSessionAttributes(MockHttpServletRequest request) {
+		Map<String, Object> sessionAttributes = new HashMap<>();
+		HttpSession session = request.getSession();
+		if (session != null) {
+			Enumeration<String> sessionAttributesNames = session.getAttributeNames();
+			while (sessionAttributesNames.hasMoreElements()) {
+				String sessionAttributeName = sessionAttributesNames.nextElement();
+				Object sessionAttribute = session.getAttribute(sessionAttributeName);
+				if (sessionAttribute != null) {
+					sessionAttributes.put(sessionAttributeName, sessionAttribute);
+				}
+			}
+		}
+		return sessionAttributes;
 	}
 
 	protected final HttpHeaders getRequestHeaders(MockHttpServletRequest request) {
