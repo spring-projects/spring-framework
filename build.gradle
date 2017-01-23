@@ -1324,9 +1324,7 @@ configure(rootProject) {
 
 		doFirst {
 			classpath = files(
-                // ensure Servlet 3.x has precedence on the javadoc classpath
-                project(":spring-webmvc").sourceSets.main.compileClasspath.files.find { it =~ "servlet-api" },
-				// ensure the javadoc process can resolve types compiled from .aj sources
+				// Ensure the javadoc process can resolve types compiled from .aj sources
 				project(":spring-aspects").sourceSets.main.output
 			)
 			classpath += files(subprojects.collect { it.sourceSets.main.compileClasspath })
