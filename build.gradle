@@ -46,7 +46,7 @@ configure(allprojects) { project ->
 	ext.hamcrestVersion      = "1.3"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.11.Final"
-	ext.hibernate5Version    = "5.2.6.Final"
+	ext.hibernate5Version    = "5.2.7.Final"
 	ext.hibval4Version       = "4.3.2.Final"
 	ext.hibval5Version       = "5.2.4.Final"
 	ext.hsqldbVersion        = "2.3.4"
@@ -56,7 +56,7 @@ configure(allprojects) { project ->
 	ext.jasperreportsVersion = "6.2.1"  // our tests fail with JR-internal NPEs against 6.2.2 and higher
 	ext.javamailVersion      = "1.5.6"
 	ext.jettyVersion         = "9.3.14.v20161028"  // as of 9.3.15, Jetty has hard Servlet 3.1 requirement
-	ext.jetty94Version       = "9.4.0.v20161208"  // for spring-websocket support, optimized for Jetty 9.4
+	ext.jetty94Version       = "9.4.1.v20170120"  // for spring-websocket support, optimized for Jetty 9.4
 	ext.jodaVersion          = "2.9.7"
 	ext.jrubyVersion         = "1.7.26"  // JRuby 9000 only supported through JSR-223 (StandardScriptFactory)
 	ext.jtaVersion           = "1.2"
@@ -68,7 +68,7 @@ configure(allprojects) { project ->
 	ext.openjpaVersion       = "2.4.1"
 	ext.poiVersion           = "3.14"
 	ext.reactorVersion       = "2.0.8.RELEASE"
-	ext.romeVersion          = "1.7.0"
+	ext.romeVersion          = "1.7.1"
 	ext.slf4jVersion         = "1.7.21"
 	ext.snakeyamlVersion     = "1.17"
 	ext.snifferVersion       = "1.15"
@@ -77,7 +77,7 @@ configure(allprojects) { project ->
 	ext.tiles3Version        = "3.0.7"
 	ext.tomcatVersion        = "8.5.11"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
-	ext.undertowVersion      = "1.3.25.Final"
+	ext.undertowVersion      = "1.3.26.Final"
 	ext.xmlunitVersion       = "1.6"
 	ext.xstreamVersion       = "1.4.9"
 
@@ -217,7 +217,6 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 	configurations {
 		jacoco
 	}
-
 	dependencies {
 		jacoco("org.jacoco:org.jacoco.agent:0.7.5.201505241946:runtime")
 	}
@@ -276,6 +275,7 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 
 project("spring-build-src") {
 	description = "Exposes gradle buildSrc for IDE support"
+
 	apply plugin: "groovy"
 
 	dependencies {
@@ -294,7 +294,7 @@ project("spring-core") {
 	// further transformed by the JarJar task to depend on org.springframework.asm; this
 	// avoids including two different copies of asm unnecessarily.
 	def cglibVersion = "3.2.4"
-	def objenesisVersion = "2.5"
+	def objenesisVersion = "2.5.1"
 
 	configurations {
 		jarjar
@@ -314,9 +314,9 @@ project("spring-core") {
 					configurations.cglib.each { originalJar ->
 						zipfileset(src: originalJar)
 					}
-					// repackage net.sf.cglib => org.springframework.cglib
+					// Repackage net.sf.cglib => org.springframework.cglib
 					rule(pattern: "net.sf.cglib.**", result: "org.springframework.cglib.@1")
-					// as mentioned above, transform cglib"s internal asm dependencies from
+					// As mentioned above, transform cglib"s internal asm dependencies from
 					// org.objectweb.asm => org.springframework.asm. Doing this counts on the
 					// the fact that Spring and cglib depend on the same version of asm!
 					rule(pattern: "org.objectweb.asm.**", result: "org.springframework.asm.@1")
@@ -337,7 +337,7 @@ project("spring-core") {
 					configurations.objenesis.each { originalJar ->
 						zipfileset(src: originalJar)
 					}
-					// repackage org.objenesis => org.springframework.objenesis
+					// Repackage org.objenesis => org.springframework.objenesis
 					rule(pattern: "org.objenesis.**", result: "org.springframework.objenesis.@1")
 				}
 			}
@@ -364,7 +364,7 @@ project("spring-core") {
 	}
 
 	jar {
-		// inline repackaged cglib classes directly into the spring-core jar
+		// Inline repackaged cglib classes directly into spring-core jar
 		dependsOn cglibRepackJar
 		from(zipTree(cglibRepackJar.archivePath)) {
 			include "org/springframework/cglib/**"
@@ -393,6 +393,7 @@ project("spring-beans") {
 
 project("spring-beans-groovy") {
 	description "Groovy Bean Definitions"
+
 	merge.into = project(":spring-beans")
 	apply plugin: "groovy"
 
@@ -468,6 +469,7 @@ project("spring-instrument-tomcat") {
 
 project("spring-context") {
 	description = "Spring Context"
+
 	apply plugin: "groovy"
 
 	dependencies {
@@ -661,6 +663,7 @@ project("spring-context-support") {
 
 project("spring-web") {
 	description = "Spring Web"
+
 	apply plugin: "groovy"
 
 	// Re-generate Protobuf classes from *.proto files and move them in test sources
@@ -1176,7 +1179,7 @@ configure(rootProject) {
 	// don't publish the default jar for the root project
 	configurations.archives.artifacts.clear()
 
-	dependencies { // for integration tests
+	dependencies {  // for integration tests
 		testCompile(project(":spring-aop"))
 		testCompile(project(":spring-beans"))
 		testCompile(project(":spring-context"))
@@ -1225,11 +1228,11 @@ configure(rootProject) {
 
 		doFirst {
 			classpath = files(
-				// ensure Servlet 3.x and Hibernate 4.x have precedence on the javadoc
+				// Ensure Servlet 3.x and Hibernate 4.x have precedence on the javadoc
 				// classpath over their respective 2.5 and 3.x variants
 				project(":spring-webmvc").sourceSets.main.compileClasspath.files.find { it =~ "servlet-api" },
 				rootProject.sourceSets.test.compileClasspath.files.find { it =~ "hibernate-core" },
-				// ensure the javadoc process can resolve types compiled from .aj sources
+				// Ensure the javadoc process can resolve types compiled from .aj sources
 				project(":spring-aspects").sourceSets.main.output
 			)
 			classpath += files(subprojects.collect { it.sourceSets.main.compileClasspath })
