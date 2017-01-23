@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,9 @@ import org.apache.commons.logging.LogFactory;
  * @author Juergen Hoeller
  * @since 1.2
  * @see #monitor
+ * @deprecated as of Spring Framework 4.3.6
  */
+@Deprecated
 public class WeakReferenceMonitor {
 
 	private static final Log logger = LogFactory.getLog(WeakReferenceMonitor.class);

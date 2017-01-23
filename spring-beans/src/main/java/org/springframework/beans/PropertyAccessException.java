@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.springframework.beans;
 
 import java.beans.PropertyChangeEvent;
 
-import org.springframework.core.ErrorCoded;
-
 /**
  * Superclass for exceptions related to a property access,
  * such as type mismatch or invocation target exception.
@@ -27,8 +25,8 @@ import org.springframework.core.ErrorCoded;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-@SuppressWarnings("serial")
-public abstract class PropertyAccessException extends BeansException implements ErrorCoded {
+@SuppressWarnings({"serial", "deprecation"})
+public abstract class PropertyAccessException extends BeansException implements org.springframework.core.ErrorCoded {
 
 	private transient PropertyChangeEvent propertyChangeEvent;
 
@@ -76,5 +74,11 @@ public abstract class PropertyAccessException extends BeansException implements 
 	public Object getValue() {
 		return (this.propertyChangeEvent != null ? this.propertyChangeEvent.getNewValue() : null);
 	}
+
+	/**
+	 * Return a corresponding error code for this type of exception.
+	 */
+	@Override
+	public abstract String getErrorCode();
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import static org.junit.Assert.*;
  * @author Rod Johnson
  * @author Sam Brannen
  */
+@SuppressWarnings("deprecation")
 public class ControlFlowTests {
 
 	@Test
@@ -32,6 +33,7 @@ public class ControlFlowTests {
 		new Two().testing();
 		new Three().test();
 	}
+
 
 	static class One {
 
@@ -45,6 +47,7 @@ public class ControlFlowTests {
 		}
 	}
 
+
 	static class Two {
 
 		void testing() {
@@ -56,6 +59,7 @@ public class ControlFlowTests {
 			assertTrue(cflow.under(Two.class, "testing"));
 		}
 	}
+
 
 	static class Three {
 
