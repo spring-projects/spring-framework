@@ -1,9 +1,0 @@
-example.scannable.AutowiredQualifierFooService=example.scannable.FooService
-example.scannable.DefaultNamedComponent=org.springframework.stereotype.Component
-example.scannable.NamedComponent=org.springframework.stereotype.Component
-example.scannable.FooService=example.scannable.FooService
-example.scannable.FooServiceImpl=org.springframework.stereotype.Component,example.scannable.FooService
-example.scannable.ScopedProxyTestBean=example.scannable.FooService
-example.scannable.StubFooDao=org.springframework.stereotype.Component
-example.scannable.NamedStubDao=org.springframework.stereotype.Component
-example.scannable.ServiceInvocationCounter=org.springframework.stereotype.Component

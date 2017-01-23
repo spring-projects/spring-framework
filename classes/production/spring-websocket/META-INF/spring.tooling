@@ -1,4 +1,0 @@
-# Tooling related information for the mvc namespace
-http\://www.springframework.org/schema/websocket@name=websocket Namespace
-http\://www.springframework.org/schema/websocket@prefix=websocket
-http\://www.springframework.org/schema/websocket@icon=org/springframework/web/socket/config/spring-websocket.gif

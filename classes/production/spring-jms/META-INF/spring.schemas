@@ -1,9 +1,0 @@
-http\://www.springframework.org/schema/jms/spring-jms-2.5.xsd=org/springframework/jms/config/spring-jms.xsd
-http\://www.springframework.org/schema/jms/spring-jms-3.0.xsd=org/springframework/jms/config/spring-jms.xsd
-http\://www.springframework.org/schema/jms/spring-jms-3.1.xsd=org/springframework/jms/config/spring-jms.xsd
-http\://www.springframework.org/schema/jms/spring-jms-3.2.xsd=org/springframework/jms/config/spring-jms.xsd
-http\://www.springframework.org/schema/jms/spring-jms-4.0.xsd=org/springframework/jms/config/spring-jms.xsd
-http\://www.springframework.org/schema/jms/spring-jms-4.1.xsd=org/springframework/jms/config/spring-jms.xsd
-http\://www.springframework.org/schema/jms/spring-jms-4.2.xsd=org/springframework/jms/config/spring-jms.xsd
-http\://www.springframework.org/schema/jms/spring-jms-4.3.xsd=org/springframework/jms/config/spring-jms.xsd
-http\://www.springframework.org/schema/jms/spring-jms.xsd=org/springframework/jms/config/spring-jms.xsd

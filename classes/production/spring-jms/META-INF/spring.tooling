@@ -1,4 +1,0 @@
-# Tooling related information for the jms namespace
-http\://www.springframework.org/schema/jms@name=jms Namespace
-http\://www.springframework.org/schema/jms@prefix=jms
-http\://www.springframework.org/schema/jms@icon=org/springframework/jms/config/spring-jms.gif

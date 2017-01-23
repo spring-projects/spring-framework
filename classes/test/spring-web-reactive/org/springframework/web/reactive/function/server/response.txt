@@ -1,2 +1,0 @@
-Hello World
-This is a sample response text file.

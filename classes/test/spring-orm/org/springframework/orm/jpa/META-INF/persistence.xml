@@ -1,8 +1,0 @@
-<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0">
-
-    <persistence-unit name="OrderManagement">
-        <jar-file>order.jar</jar-file>
-        <jar-file>../../../order-supplemental.jar</jar-file>
-    </persistence-unit>
-
-</persistence>
