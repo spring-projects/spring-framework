@@ -342,7 +342,7 @@ project("spring-core") {
 	// further transformed by the JarJar task to depend on org.springframework.asm; this
 	// avoids including two different copies of asm unnecessarily.
 	def cglibVersion = "3.2.4"
-	def objenesisVersion = "2.5"
+	def objenesisVersion = "2.5.1"
 
 	configurations {
 		jarjar
