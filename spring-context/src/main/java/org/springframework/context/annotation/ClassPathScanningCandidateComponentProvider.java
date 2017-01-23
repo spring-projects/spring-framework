@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
+import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ResourceLoaderAware;
@@ -43,6 +44,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -294,7 +296,62 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		}
 	}
 
-	protected Set<BeanDefinition> addCandidateComponentsFromIndex(String basePackage) {
+	/**
+	 * Determine if the index can be used by this instance.
+	 * @return {@code true} if the index is available and the configuration of this
+	 * instance is supported by it, {@code false} otherwise
+	 * @since 5.0
+	 */
+	protected boolean isIndexSupported() {
+		if (this.componentsIndex == null) {
+			return false;
+		}
+		for (TypeFilter includeFilter : this.includeFilters) {
+			if (!isIndexSupportsIncludeFilter(includeFilter)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Determine if the specified include {@link TypeFilter} is supported by the index.
+	 * @param filter the filter to check
+	 * @return whether the index supports this include filter
+	 * @since 5.0
+	 * @see #extractStereotype(TypeFilter)
+	 */
+	protected boolean isIndexSupportsIncludeFilter(TypeFilter filter) {
+		if (filter instanceof AnnotationTypeFilter) {
+			Class<? extends Annotation> annotation = ((AnnotationTypeFilter) filter).getAnnotationType();
+			return (AnnotationUtils.isAnnotationDeclaredLocally(Indexed.class, annotation) ||
+					annotation.getName().startsWith("javax."));
+		}
+		if (filter instanceof AssignableTypeFilter) {
+			Class<?> target = ((AssignableTypeFilter) filter).getTargetType();
+			return AnnotationUtils.isAnnotationDeclaredLocally(Indexed.class, target);
+		}
+		return false;
+	}
+
+	/**
+	 * Extract the stereotype to use for the specified compatible filter.
+	 * @param filter the filter to handle
+	 * @return the stereotype in the index matching this filter
+	 * @since 5.0
+	 * @see #isIndexSupportsIncludeFilter(TypeFilter)
+	 */
+	protected String extractStereotype(TypeFilter filter) {
+		if (filter instanceof AnnotationTypeFilter) {
+			return ((AnnotationTypeFilter) filter).getAnnotationType().getName();
+		}
+		if (filter instanceof AssignableTypeFilter) {
+			return ((AssignableTypeFilter) filter).getTargetType().getName();
+		}
+		return null;
+	}
+
+	private Set<BeanDefinition> addCandidateComponentsFromIndex(String basePackage) {
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
 			Set<String> types = new HashSet<>();
@@ -337,7 +394,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		return candidates;
 	}
 
-	protected Set<BeanDefinition> scanCandidateComponents(String basePackage) {
+	private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
 			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
@@ -440,66 +497,18 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	/**
 	 * Determine whether the given bean definition qualifies as candidate.
-	 * <p>The default implementation checks whether the class is concrete
-	 * (i.e. not abstract and not an interface). Can be overridden in subclasses.
+	 * <p>The default implementation checks whether the class is not an interface
+	 * and not dependent on an enclosing class.
+	 * <p>Can be overridden in subclasses.
 	 * @param beanDefinition the bean definition to check
 	 * @return whether the bean definition qualifies as a candidate component
 	 */
 	protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
-		return (beanDefinition.getMetadata().isConcrete() && beanDefinition.getMetadata().isIndependent());
+		AnnotationMetadata metadata = beanDefinition.getMetadata();
+		return (metadata.isIndependent() && (metadata.isConcrete() ||
+				(metadata.isAbstract() && metadata.hasAnnotatedMethods(Lookup.class.getName()))));
 	}
 
-	/**
-	 * Determine if the index can be used by this instance.
-	 * @return {@code true} if the index is available and the configuration of this
-	 * instance is supported by it, {@code false otherwise}.
-	 */
-	protected boolean isIndexSupported() {
-		if (this.componentsIndex == null) {
-			return false;
-		}
-		for (TypeFilter includeFilter : this.includeFilters) {
-			if (!isIndexSupportsIncludeFilter(includeFilter)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Determine if the specified include {@link TypeFilter} is supported by the index.
-	 * @param filter the filter to check
-	 * @return whether the index supports this include filter
-	 * @see #extractStereotype(TypeFilter)
-	 */
-	protected boolean isIndexSupportsIncludeFilter(TypeFilter filter) {
-		if (filter instanceof AnnotationTypeFilter) {
-			Class<? extends Annotation> annotation = ((AnnotationTypeFilter) filter).getAnnotationType();
-			return (AnnotationUtils.isAnnotationDeclaredLocally(Indexed.class, annotation)
-					|| annotation.getName().startsWith("javax."));
-		}
-		if (filter instanceof AssignableTypeFilter) {
-			Class<?> target = ((AssignableTypeFilter) filter).getTargetType();
-			return AnnotationUtils.isAnnotationDeclaredLocally(Indexed.class, target);
-		}
-		return false;
-	}
-
-	/**
-	 * Extract the stereotype to use for the specified compatible filter.
-	 * @param filter the filter to handle
-	 * @return the stereotype in the index matching this filter
-	 * @see #isIndexSupportsIncludeFilter(TypeFilter)
-	 */
-	protected String extractStereotype(TypeFilter filter) {
-		if (filter instanceof AnnotationTypeFilter) {
-			return ((AnnotationTypeFilter) filter).getAnnotationType().getName();
-		}
-		if (filter instanceof AssignableTypeFilter) {
-			return ((AssignableTypeFilter) filter).getTargetType().getName();
-		}
-		return null;
-	}
 
 	/**
 	 * Clear the local metadata cache, if any, removing all cached class metadata.
