@@ -1512,7 +1512,16 @@ it acts as a "relay" that forwards messages in both directions.
 
 [NOTE]
 ====
-Please add a dependency on `org.projectreactor:reactor-net` for TCP connection management.
+Spring uses `org.projectreactor:reactor-net` and `io.netty:netty-all` for managing
+TCP connections to the broker both of which need to be added as project dependencies.
+
+The STOMP broker support in Spring Framework 4.3.x is compatible with the 2.0.x
+generation of Reactor. Therefore it is not supported in combination with the
+`spring-cloud-stream-reactive` module which requires Reactor 3.x.
+
+Spring Framework 5 relies on Reactor 3 and Reactor Netty, which has independent
+versioning, for TCP connections to the STOMP broker but also to provide
+broad support for reactive programming models.
 ====
 
 Furthermore, application components (e.g. HTTP request handling methods,
