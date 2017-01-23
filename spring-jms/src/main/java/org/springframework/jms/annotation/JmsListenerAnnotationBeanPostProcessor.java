@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,12 +96,12 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 	private String containerFactoryBeanName = DEFAULT_JMS_LISTENER_CONTAINER_FACTORY_BEAN_NAME;
 
+	private final MessageHandlerMethodFactoryAdapter messageHandlerMethodFactory =
+			new MessageHandlerMethodFactoryAdapter();
+
 	private BeanFactory beanFactory;
 
 	private StringValueResolver embeddedValueResolver;
-
-	private final MessageHandlerMethodFactoryAdapter messageHandlerMethodFactory =
-			new MessageHandlerMethodFactoryAdapter();
 
 	private final JmsListenerEndpointRegistrar registrar = new JmsListenerEndpointRegistrar();
 
@@ -154,14 +154,17 @@ public class JmsListenerAnnotationBeanPostProcessor
 		if (beanFactory instanceof ConfigurableBeanFactory) {
 			this.embeddedValueResolver = new EmbeddedValueResolver((ConfigurableBeanFactory) beanFactory);
 		}
+		this.registrar.setBeanFactory(beanFactory);
 	}
 
 
 	@Override
 	public void afterSingletonsInstantiated() {
-		this.registrar.setBeanFactory(this.beanFactory);
+		// Remove resolved singleton classes from cache
+		this.nonAnnotatedClasses.clear();
 
 		if (this.beanFactory instanceof ListableBeanFactory) {
+			// Apply JmsListenerConfigurer beans from the BeanFactory, if any
 			Map<String, JmsListenerConfigurer> instances =
 					((ListableBeanFactory) this.beanFactory).getBeansOfType(JmsListenerConfigurer.class);
 			for (JmsListenerConfigurer configurer : instances.values()) {
@@ -170,6 +173,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 		}
 
 		if (this.registrar.getEndpointRegistry() == null) {
+			// Determine JmsListenerEndpointRegistry bean from the BeanFactory
 			if (this.endpointRegistry == null) {
 				Assert.state(this.beanFactory != null, "BeanFactory must be set to find endpoint registry by bean name");
 				this.endpointRegistry = this.beanFactory.getBean(
