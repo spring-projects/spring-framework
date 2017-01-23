@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,10 @@ import javax.jms.JMSException;
 import javax.jms.Session;
 
 /**
- * Callback for executing any number of operations on a provided
- * {@link Session}.
+ * Callback for executing any number of operations on a provided {@link Session}.
  *
- * <p>To be used with the {@link JmsTemplate#execute(SessionCallback)}
- * method, often implemented as an anonymous inner class.
+ * <p>To be used with the {@link JmsTemplate#execute(SessionCallback)} method,
+ * often implemented as an anonymous inner class or as a lambda expression.
  *
  * @author Mark Pollack
  * @since 1.1
@@ -33,10 +32,11 @@ import javax.jms.Session;
 public interface SessionCallback<T> {
 
 	/**
-	 * Execute any number of operations against the supplied JMS
-	 * {@link Session}, possibly returning a result.
+	 * Execute any number of operations against the supplied JMS {@link Session},
+	 * possibly returning a result.
 	 * @param session the JMS {@code Session}
-	 * @return a result object from working with the {@code Session}, if any (so can be {@code null})
+	 * @return a result object from working with the {@code Session}, if any
+	 * (or {@code null} if none)
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
 	T doInJms(Session session) throws JMSException;

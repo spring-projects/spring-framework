@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
-import org.springframework.web.socket.sockjs.frame.SockJsFrameType;
 import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 
 /**
@@ -44,19 +43,18 @@ import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
  * Sub-classes implement actual send as well as disconnect logic.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.1
  */
 public abstract class AbstractClientSockJsSession implements WebSocketSession {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-
 	private final TransportRequest request;
 
 	private final WebSocketHandler webSocketHandler;
 
 	private final SettableListenableFuture<WebSocketSession> connectFuture;
-
 
 	private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
 
@@ -127,25 +125,31 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 
 	@Override
 	public boolean isOpen() {
-		return State.OPEN.equals(this.state);
+		return (this.state == State.OPEN);
 	}
 
 	public boolean isDisconnected() {
-		return (State.CLOSING.equals(this.state) || State.CLOSED.equals(this.state));
+		return (this.state == State.CLOSING || this.state == State.CLOSED);
 	}
 
 	@Override
 	public final void sendMessage(WebSocketMessage<?> message) throws IOException {
-		Assert.state(State.OPEN.equals(this.state), this + " is not open, current state=" + this.state);
-		Assert.isInstanceOf(TextMessage.class, message, this + " supports text messages only.");
-		String payload = ((TextMessage) message).getPayload();
-		payload = getMessageCodec().encode(new String[] { payload });
-		payload = payload.substring(1); // the client-side doesn't need message framing (letter "a")
-		message = new TextMessage(payload);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Sending message " + message + " in " + this);
+		if (!(message instanceof TextMessage)) {
+			throw new IllegalArgumentException(this + " supports text messages only.");
 		}
-		sendInternal((TextMessage) message);
+		if (this.state != State.OPEN) {
+			throw new IllegalStateException(this + " is not open: current state " + this.state);
+		}
+
+		String payload = ((TextMessage) message).getPayload();
+		payload = getMessageCodec().encode(payload);
+		payload = payload.substring(1);  // the client-side doesn't need message framing (letter "a")
+
+		TextMessage messageToSend = new TextMessage(payload);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Sending message " + messageToSend + " in " + this);
+		}
+		sendInternal(messageToSend);
 	}
 
 	protected abstract void sendInternal(TextMessage textMessage) throws IOException;
@@ -173,10 +177,13 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 			logger.warn("Ignoring close since connect() was never invoked");
 			return;
 		}
-		if (State.CLOSING.equals(this.state) || State.CLOSED.equals(this.state)) {
-			logger.debug("Ignoring close (already closing or closed), current state=" + this.state);
+		if (isDisconnected()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Ignoring close (already closing or closed): current state " + this.state);
+			}
 			return;
 		}
+
 		this.state = State.CLOSING;
 		this.closeStatus = status;
 		try {
@@ -193,23 +200,20 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 
 	public void handleFrame(String payload) {
 		SockJsFrame frame = new SockJsFrame(payload);
-		if (SockJsFrameType.OPEN.equals(frame.getType())) {
-			handleOpenFrame();
-		}
-		else if (SockJsFrameType.MESSAGE.equals(frame.getType())) {
-			handleMessageFrame(frame);
-		}
-		else if (SockJsFrameType.CLOSE.equals(frame.getType())) {
-			handleCloseFrame(frame);
-		}
-		else if (SockJsFrameType.HEARTBEAT.equals(frame.getType())) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Received heartbeat in " + this);
-			}
-		}
-		else {
-			// should never happen
-			throw new IllegalStateException("Unknown SockJS frame type " + frame + " in " + this);
+		switch (frame.getType()) {
+			case OPEN:
+				handleOpenFrame();
+				break;
+			case HEARTBEAT:
+				if (logger.isTraceEnabled()) {
+					logger.trace("Received heartbeat in " + this);
+				}
+				break;
+			case MESSAGE:
+				handleMessageFrame(frame);
+				break;
+			case CLOSE:
+				handleCloseFrame(frame);
 		}
 	}
 
@@ -217,7 +221,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Processing SockJS open frame in " + this);
 		}
-		if (State.NEW.equals(state)) {
+		if (this.state == State.NEW) {
 			this.state = State.OPEN;
 			try {
 				this.webSocketHandler.afterConnectionEstablished(this);
@@ -225,16 +229,14 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 			}
 			catch (Throwable ex) {
 				if (logger.isErrorEnabled()) {
-					Class<?> type = this.webSocketHandler.getClass();
-					logger.error(type + ".afterConnectionEstablished threw exception in " + this, ex);
+					logger.error("WebSocketHandler.afterConnectionEstablished threw exception in " + this, ex);
 				}
 			}
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Open frame received in " + getId() + " but we're not" +
-						"connecting (current state=" + this.state + "). The server might " +
-						"have been restarted and lost track of the session.");
+				logger.debug("Open frame received in " + getId() + " but we're not connecting (current state " +
+						this.state + "). The server might have been restarted and lost track of the session.");
 			}
 			closeInternal(new CloseStatus(1006, "Server lost session"));
 		}
@@ -243,10 +245,11 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 	private void handleMessageFrame(SockJsFrame frame) {
 		if (!isOpen()) {
 			if (logger.isErrorEnabled()) {
-				logger.error("Ignoring received message due to state=" + this.state + " in " + this);
+				logger.error("Ignoring received message due to state " + this.state + " in " + this);
 			}
 			return;
 		}
+
 		String[] messages;
 		try {
 			messages = getMessageCodec().decode(frame.getFrameData());
@@ -258,18 +261,18 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 			closeInternal(CloseStatus.BAD_DATA);
 			return;
 		}
+
 		if (logger.isTraceEnabled()) {
 			logger.trace("Processing SockJS message frame " + frame.getContent() + " in " + this);
 		}
 		for (String message : messages) {
-			try {
-				if (isOpen()) {
+			if (isOpen()) {
+				try {
 					this.webSocketHandler.handleMessage(this, new TextMessage(message));
 				}
-			}
-			catch (Throwable ex) {
-				Class<?> type = this.webSocketHandler.getClass();
-				logger.error(type + ".handleMessage threw an exception on " + frame + " in " + this, ex);
+				catch (Throwable ex) {
+					logger.error("WebSocketHandler.handleMessage threw an exception on " + frame + " in " + this, ex);
+				}
 			}
 		}
 	}
@@ -300,18 +303,14 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 			}
 			this.webSocketHandler.handleTransportError(this, error);
 		}
-		catch (Exception ex) {
-			Class<?> type = this.webSocketHandler.getClass();
-			if (logger.isErrorEnabled()) {
-				logger.error(type + ".handleTransportError threw an exception", ex);
-			}
+		catch (Throwable ex) {
+			logger.error("WebSocketHandler.handleTransportError threw an exception", ex);
 		}
 	}
 
 	public void afterTransportClosed(CloseStatus closeStatus) {
 		this.closeStatus = (this.closeStatus != null ? this.closeStatus : closeStatus);
 		Assert.state(this.closeStatus != null, "CloseStatus not available");
-
 		if (logger.isDebugEnabled()) {
 			logger.debug("Transport closed with " + this.closeStatus + " in " + this);
 		}
@@ -320,11 +319,8 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 		try {
 			this.webSocketHandler.afterConnectionClosed(this, this.closeStatus);
 		}
-		catch (Exception ex) {
-			if (logger.isErrorEnabled()) {
-				Class<?> type = this.webSocketHandler.getClass();
-				logger.error(type + ".afterConnectionClosed threw an exception", ex);
-			}
+		catch (Throwable ex) {
+			logger.error("WebSocketHandler.afterConnectionClosed threw an exception", ex);
 		}
 	}
 

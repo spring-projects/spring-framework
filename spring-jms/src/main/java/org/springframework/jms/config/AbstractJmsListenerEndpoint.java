@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.listener.endpoint.JmsActivationSpecConfig;
 import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
-import org.springframework.util.Assert;
 
 /**
  * Base model for a JMS listener endpoint
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.1
  * @see MethodJmsListenerEndpoint
  * @see SimpleJmsListenerEndpoint
@@ -150,7 +150,9 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 
 	private void setupMessageListener(MessageListenerContainer container) {
 		MessageListener messageListener = createMessageListener(container);
-		Assert.state(messageListener != null, "Endpoint [" + this + "] must provide a non null message listener");
+		if (messageListener == null) {
+			throw new IllegalStateException("Endpoint [" + this + "] must provide a non-null message listener");
+		}
 		container.setupMessageListener(messageListener);
 	}
 
