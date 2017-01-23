@@ -870,6 +870,7 @@ project("spring-web-reactive") {
 		// the case yet, so we depend on kotlin-script-util and exclude these
 		// dependencies only used for artifact retrieval. Point raised to Kotlin team.
 		testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
+		testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
 		testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}") {
 			exclude group: "com.jcabi", module: "jcabi-aether"
 			exclude group: "org.apache.maven", module: "maven-core"
@@ -983,6 +984,7 @@ project("spring-webmvc") {
 		// the case yet, so we depend on kotlin-script-util and exclude these
 		// dependencies only used for artifact retrieval. Point raised to Kotlin team.
 		testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
+		testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
 		testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}") {
 			exclude group: "com.jcabi", module: "jcabi-aether"
 			exclude group: "org.apache.maven", module: "maven-core"
