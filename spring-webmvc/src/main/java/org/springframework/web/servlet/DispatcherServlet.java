@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1091,7 +1091,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				logger.debug("Request is already a MultipartHttpServletRequest - if not in a forward, " +
 						"this typically results from an additional MultipartFilter in web.xml");
 			}
-			else if (request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE) instanceof MultipartException) {
+			else if (hasMultipartException(request) ) {
 				logger.debug("Multipart resolution failed for current request before - " +
 						"skipping re-resolution for undisturbed error rendering");
 			}
@@ -1101,6 +1101,20 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		// If not returned before: return original request.
 		return request;
+	}
+
+	/**
+	 * Check "javax.servlet.error.exception" attribute for a multipart exception.
+	 */
+	private boolean hasMultipartException(HttpServletRequest request) {
+		Throwable error = (Throwable) request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE);
+		while (error != null) {
+			if (error instanceof MultipartException) {
+				return true;
+			}
+			error = error.getCause();
+		}
+		return false;
 	}
 
 	/**
