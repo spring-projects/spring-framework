@@ -61,7 +61,7 @@ configure(allprojects) { project ->
 	ext.jaxbVersion            = "2.2.11"
 	ext.jaxwsVersion           = "2.2.11"
 	ext.jcaVersion             = "1.7"
-	ext.jettyVersion           = "9.4.0.v20161208"
+	ext.jettyVersion           = "9.4.1.v20170120"
 	ext.jmsVersion             = "2.0.1"
 	ext.jodaVersion            = "2.9.7"
 	ext.jpaVersion             = "2.1.1"
@@ -71,7 +71,7 @@ configure(allprojects) { project ->
 	ext.junitVersion           = "4.12"
 	ext.junitJupiterVersion    = '5.0.0-M3'
 	ext.junitPlatformVersion   = '1.0.0-M3'
-	ext.kotlinVersion          = "1.1.0-beta-17" // Also change kotlin-gradle-plugin version when upgrading
+	ext.kotlinVersion          = "1.1.0-beta-17"  // also change kotlin-gradle-plugin version when upgrading
 	ext.log4jVersion           = '2.7'
 	ext.nettyVersion           = "4.1.7.Final"
 	ext.okhttpVersion          = "2.7.5"
@@ -118,10 +118,10 @@ configure(allprojects) { project ->
 	}
 
 	configurations.all {
-		// check for updates every build
+		// Check for updates every build
 		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 
-		// consistent netty version (e.g. clashes between netty-all vs netty-common)
+		// Consistent netty version (e.g. clashes between netty-all vs netty-common)
 		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
 			if (details.requested.group == 'io.netty') {
 				details.useVersion nettyVersion
@@ -362,9 +362,9 @@ project("spring-core") {
 					configurations.cglib.each { originalJar ->
 						zipfileset(src: originalJar)
 					}
-					// repackage net.sf.cglib => org.springframework.cglib
+					// Repackage net.sf.cglib => org.springframework.cglib
 					rule(pattern: "net.sf.cglib.**", result: "org.springframework.cglib.@1")
-					// as mentioned above, transform cglib"s internal asm dependencies from
+					// As mentioned above, transform cglib"s internal asm dependencies from
 					// org.objectweb.asm => org.springframework.asm. Doing this counts on the
 					// the fact that Spring and cglib depend on the same version of asm!
 					rule(pattern: "org.objectweb.asm.**", result: "org.springframework.asm.@1")
@@ -385,7 +385,7 @@ project("spring-core") {
 					configurations.objenesis.each { originalJar ->
 						zipfileset(src: originalJar)
 					}
-					// repackage org.objenesis => org.springframework.objenesis
+					// Repackage org.objenesis => org.springframework.objenesis
 					rule(pattern: "org.objenesis.**", result: "org.springframework.objenesis.@1")
 				}
 			}
@@ -420,7 +420,7 @@ project("spring-core") {
 	}
 
 	jar {
-		// inline repackaged cglib classes directly into the spring-core jar
+		// Inline repackaged cglib classes directly into spring-core jar
 		dependsOn cglibRepackJar
 		from(zipTree(cglibRepackJar.archivePath)) {
 			include "org/springframework/cglib/**"
