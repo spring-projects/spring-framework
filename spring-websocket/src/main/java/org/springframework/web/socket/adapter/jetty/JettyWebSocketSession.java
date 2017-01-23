@@ -22,6 +22,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +34,7 @@ import org.eclipse.jetty.websocket.api.WebSocketException;
 import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.socket.BinaryMessage;
@@ -213,19 +215,20 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 		this.headers = new HttpHeaders();
 		this.headers.putAll(session.getUpgradeRequest().getHeaders());
-		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
+		this.headers = HttpHeaders.readOnlyHttpHeaders(this.headers);
 
 		this.acceptedProtocol = session.getUpgradeResponse().getAcceptedSubProtocol();
 
-		List<ExtensionConfig> source = session.getUpgradeResponse().getExtensions();
-		if (source != null) {
-			this.extensions = new ArrayList<WebSocketExtension>(source.size());
-			for (ExtensionConfig ec : source) {
-				this.extensions.add(new WebSocketExtension(ec.getName(), ec.getParameters()));
+		List<ExtensionConfig> jettyExtensions = session.getUpgradeResponse().getExtensions();
+		if (!CollectionUtils.isEmpty(jettyExtensions)) {
+			this.extensions = new ArrayList<WebSocketExtension>(jettyExtensions.size());
+			for (ExtensionConfig jettyExtension : jettyExtensions) {
+				this.extensions.add(new WebSocketExtension(jettyExtension.getName(), jettyExtension.getParameters()));
 			}
+			this.extensions = Collections.unmodifiableList(this.extensions);
 		}
 		else {
-			this.extensions = new ArrayList<WebSocketExtension>(0);
+			this.extensions = Collections.emptyList();
 		}
 
 		if (this.user == null) {
@@ -243,19 +246,20 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 		this.headers = new HttpHeaders();
 		this.headers.putAll((Map<String, List<String>>) ReflectionUtils.invokeMethod(getHeaders, request));
-		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
+		this.headers = HttpHeaders.readOnlyHttpHeaders(this.headers);
 
 		this.acceptedProtocol = (String) ReflectionUtils.invokeMethod(getAcceptedSubProtocol, response);
 
-		List<ExtensionConfig> source = (List<ExtensionConfig>) ReflectionUtils.invokeMethod(getExtensions, response);
-		if (source != null) {
-			this.extensions = new ArrayList<WebSocketExtension>(source.size());
-			for (ExtensionConfig ec : source) {
-				this.extensions.add(new WebSocketExtension(ec.getName(), ec.getParameters()));
+		List<ExtensionConfig> extensions = (List<ExtensionConfig>) ReflectionUtils.invokeMethod(getExtensions, response);
+		if (!CollectionUtils.isEmpty(extensions)) {
+			this.extensions = new ArrayList<WebSocketExtension>(extensions.size());
+			for (ExtensionConfig extension : extensions) {
+				this.extensions.add(new WebSocketExtension(extension.getName(), extension.getParameters()));
 			}
+			this.extensions = Collections.unmodifiableList(this.extensions);
 		}
 		else {
-			this.extensions = new ArrayList<WebSocketExtension>(0);
+			this.extensions = Collections.emptyList();
 		}
 
 		if (this.user == null) {
