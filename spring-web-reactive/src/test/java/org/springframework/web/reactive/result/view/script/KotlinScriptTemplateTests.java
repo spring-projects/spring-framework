@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.view.script;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -26,6 +27,7 @@ import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
@@ -50,18 +52,28 @@ public class KotlinScriptTemplateTests {
 	}
 
 	@Test
-	public void renderTemplate() throws Exception {
+	public void renderTemplateWithFrenchLocale() throws Exception {
 		Map<String, Object> model = new HashMap<>();
-		model.put("title", "Layout example");
-		model.put("body", "This is the body");
+		model.put("foo", "Foo");
 		MockServerHttpResponse response = renderViewWithModel("org/springframework/web/reactive/result/view/script/kotlin/template.kts",
-				model, ScriptTemplatingConfiguration.class);
-		assertEquals("<html><head><title>Layout example</title></head><body><p>This is the body</p></body></html>",
+				model, Locale.FRENCH, ScriptTemplatingConfiguration.class);
+		assertEquals("<html><body>\n<p>Bonjour Foo</p>\n</body></html>",
 				response.getBodyAsString().block());
 	}
 
-	private MockServerHttpResponse renderViewWithModel(String viewUrl, Map<String, Object> model, Class<?> configuration) throws Exception {
+	@Test
+	public void renderTemplateWithEnglishLocale() throws Exception {
+		Map<String, Object> model = new HashMap<>();
+		model.put("foo", "Foo");
+		MockServerHttpResponse response = renderViewWithModel("org/springframework/web/reactive/result/view/script/kotlin/template.kts",
+				model, Locale.ENGLISH, ScriptTemplatingConfiguration.class);
+		assertEquals("<html><body>\n<p>Hello Foo</p>\n</body></html>",
+				response.getBodyAsString().block());
+	}
+
+	private MockServerHttpResponse renderViewWithModel(String viewUrl, Map<String, Object> model, Locale locale, Class<?> configuration) throws Exception {
 		ScriptTemplateView view = createViewWithUrl(viewUrl, configuration);
+		view.setLocale(locale);
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		WebSessionManager manager = new DefaultWebSessionManager();
@@ -93,6 +105,13 @@ public class KotlinScriptTemplateTests {
 			configurer.setScripts("org/springframework/web/reactive/result/view/script/kotlin/render.kts");
 			configurer.setRenderFunction("render");
 			return configurer;
+		}
+
+		@Bean
+		public ResourceBundleMessageSource messageSource() {
+			ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+			messageSource.setBasename("org/springframework/web/reactive/result/view/script/messages");
+			return messageSource;
 		}
 	}
 

@@ -16,6 +16,9 @@
 
 package org.springframework.web.servlet.view.script;
 
+import java.util.Locale;
+
+import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
 /**
@@ -56,6 +59,12 @@ public class ScriptTemplateViewResolver extends UrlBasedViewResolver {
 		setSuffix(suffix);
 	}
 
+	@Override
+	protected View createView(String viewName, Locale locale) throws Exception {
+		ScriptTemplateView view = (ScriptTemplateView)super.createView(viewName, locale);
+		view.setLocale(locale);
+		return view;
+	}
 
 	@Override
 	protected Class<?> requiredViewClass() {

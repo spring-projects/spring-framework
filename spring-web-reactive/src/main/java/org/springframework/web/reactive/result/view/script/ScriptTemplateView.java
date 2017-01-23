@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -74,6 +75,8 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	private String engineName;
 
+	private Locale locale;
+
 	private Boolean sharedEngine;
 
 	private String[] scripts;
@@ -117,6 +120,13 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	 */
 	public void setEngineName(String engineName) {
 		this.engineName = engineName;
+	}
+
+	/**
+	 * Set the {@link Locale} to pass to the render function.
+	 */
+	public void setLocale(Locale locale) {
+		this.locale = locale;
 	}
 
 	/**
@@ -284,14 +294,23 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 				Invocable invocable = (Invocable) engine;
 				String url = getUrl();
 				String template = getTemplate(url);
+				Function<String, String> templateLoader = path -> {
+					try {
+						return getTemplate(path);
+					}
+					catch (IOException ex) {
+						throw new IllegalStateException(ex);
+					}
+				};
+				RenderingContext context = new RenderingContext(this.getApplicationContext(), this.locale, templateLoader, url);
 
 				Object html;
 				if (this.renderObject != null) {
 					Object thiz = engine.eval(this.renderObject);
-					html = invocable.invokeMethod(thiz, this.renderFunction, template, model, url);
+					html = invocable.invokeMethod(thiz, this.renderFunction, template, model, context);
 				}
 				else {
-					html = invocable.invokeFunction(this.renderFunction, template, model, url);
+					html = invocable.invokeFunction(this.renderFunction, template, model, context);
 				}
 
 				byte[] bytes = String.valueOf(html).getBytes(StandardCharsets.UTF_8);
