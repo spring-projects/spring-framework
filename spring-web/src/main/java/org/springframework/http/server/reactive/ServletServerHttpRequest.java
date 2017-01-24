@@ -32,6 +32,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import reactor.core.publisher.Flux;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpCookie;
@@ -58,6 +60,12 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final Object cookieLock = new Object();
 
+	private final DataBufferFactory bufferFactory;
+
+	private final byte[] buffer;
+
+	protected final Log logger = LogFactory.getLog(getClass());
+
 
 	public ServletServerHttpRequest(HttpServletRequest request, AsyncContext asyncContext,
 			DataBufferFactory bufferFactory, int bufferSize) throws IOException {
@@ -68,12 +76,14 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		Assert.isTrue(bufferSize > 0, "'bufferSize' must be higher than 0");
 
 		this.request = request;
+		this.bufferFactory = bufferFactory;
+		this.buffer = new byte[bufferSize];
 
 		asyncContext.addListener(new RequestAsyncListener());
 
 		// Tomcat expects ReadListener registration on initial thread
 		ServletInputStream inputStream = request.getInputStream();
-		this.bodyPublisher = new RequestBodyPublisher(inputStream, bufferFactory, bufferSize);
+		this.bodyPublisher = new RequestBodyPublisher(inputStream);
 		this.bodyPublisher.registerReadListener();
 	}
 
@@ -169,6 +179,21 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		return Flux.from(this.bodyPublisher);
 	}
 
+	protected DataBuffer readDataBuffer() throws IOException {
+		int read = this.request.getInputStream().read(this.buffer);
+		if (logger.isTraceEnabled()) {
+			logger.trace("read:" + read);
+		}
+
+		if (read > 0) {
+			DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(read);
+			dataBuffer.write(this.buffer, 0, read);
+			return dataBuffer;
+		}
+
+		return null;
+	}
+
 
 	private final class RequestAsyncListener implements AsyncListener {
 
@@ -193,21 +218,14 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		}
 	}
 
-	private static class RequestBodyPublisher extends AbstractListenerReadPublisher<DataBuffer> {
+	private class RequestBodyPublisher extends AbstractListenerReadPublisher<DataBuffer> {
 
 		private final ServletInputStream inputStream;
 
-		private final DataBufferFactory bufferFactory;
 
-		private final byte[] buffer;
-
-
-		public RequestBodyPublisher(ServletInputStream inputStream,
-				DataBufferFactory bufferFactory, int bufferSize) {
+		public RequestBodyPublisher(ServletInputStream inputStream) {
 
 			this.inputStream = inputStream;
-			this.bufferFactory = bufferFactory;
-			this.buffer = new byte[bufferSize];
 		}
 
 		public void registerReadListener() throws IOException {
@@ -224,16 +242,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		protected DataBuffer read() throws IOException {
 			if (this.inputStream.isReady()) {
-				int read = this.inputStream.read(this.buffer);
-				if (logger.isTraceEnabled()) {
-					logger.trace("read:" + read);
-				}
-
-				if (read > 0) {
-					DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(read);
-					dataBuffer.write(this.buffer, 0, read);
-					return dataBuffer;
-				}
+				return readDataBuffer();
 			}
 			return null;
 		}

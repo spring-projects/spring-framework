@@ -132,6 +132,19 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		return processor;
 	}
 
+	protected int writeDataBuffer(DataBuffer dataBuffer) throws IOException {
+		ServletOutputStream outputStream = response.getOutputStream();
+		InputStream input = dataBuffer.asInputStream();
+		int bytesWritten = 0;
+		byte[] buffer = new byte[this.bufferSize];
+		int bytesRead = -1;
+		while (outputStream.isReady() && (bytesRead = input.read(buffer)) != -1) {
+			outputStream.write(buffer, 0, bytesRead);
+			bytesWritten += bytesRead;
+		}
+		return bytesWritten;
+	}
+
 	private void flush() throws IOException {
 		ServletOutputStream outputStream = this.response.getOutputStream();
 		if (outputStream.isReady()) {
@@ -215,7 +228,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		protected Processor<? super DataBuffer, Void> createWriteProcessor() {
 			try {
 				ServletOutputStream outputStream = response.getOutputStream();
-				bodyProcessor = new ResponseBodyProcessor(outputStream, bufferSize);
+				bodyProcessor = new ResponseBodyProcessor(outputStream);
 				return bodyProcessor;
 			}
 			catch (IOException ex) {
@@ -236,12 +249,9 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 
 		private final ServletOutputStream outputStream;
 
-		private final int bufferSize;
 
-
-		public ResponseBodyProcessor(ServletOutputStream outputStream, int bufferSize) {
+		public ResponseBodyProcessor(ServletOutputStream outputStream) {
 			this.outputStream = outputStream;
-			this.bufferSize = bufferSize;
 		}
 
 		@Override
@@ -287,18 +297,6 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 			else {
 				return false;
 			}
-		}
-
-		private int writeDataBuffer(DataBuffer dataBuffer) throws IOException {
-			InputStream input = dataBuffer.asInputStream();
-			int bytesWritten = 0;
-			byte[] buffer = new byte[this.bufferSize];
-			int bytesRead = -1;
-			while (this.outputStream.isReady() && (bytesRead = input.read(buffer)) != -1) {
-				this.outputStream.write(buffer, 0, bytesRead);
-				bytesWritten += bytesRead;
-			}
-			return bytesWritten;
 		}
 	}
 

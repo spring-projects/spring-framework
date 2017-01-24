@@ -24,6 +24,7 @@ import org.apache.catalina.startup.Tomcat;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
+import org.springframework.http.server.reactive.TomcatHttpHandlerAdapter;
 import org.springframework.util.Assert;
 
 /**
@@ -75,11 +76,11 @@ public class TomcatHttpServer extends HttpServerSupport implements HttpServer, I
 
 	private ServletHttpHandlerAdapter initServletHttpHandlerAdapter() {
 		if (getHttpHandlerMap() != null) {
-			return new ServletHttpHandlerAdapter(getHttpHandlerMap());
+			return new TomcatHttpHandlerAdapter(getHttpHandlerMap());
 		}
 		else {
 			Assert.notNull(getHttpHandler());
-			return new ServletHttpHandlerAdapter(getHttpHandler());
+			return new TomcatHttpHandlerAdapter(getHttpHandler());
 		}
 	}
 
