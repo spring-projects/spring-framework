@@ -257,6 +257,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	 */
 	public void increaseNestingLevel() {
 		this.nestingLevel++;
+		this.resolvableType = null;
 		if (this.methodParameter != null) {
 			this.methodParameter.increaseNestingLevel();
 		}
@@ -270,6 +271,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	 */
 	public void setContainingClass(Class<?> containingClass) {
 		this.containingClass = containingClass;
+		this.resolvableType = null;
 		if (this.methodParameter != null) {
 			GenericTypeResolver.resolveParameterType(this.methodParameter, containingClass);
 		}
