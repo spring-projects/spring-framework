@@ -98,14 +98,26 @@ public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport impleme
 		// Start async before Read/WriteListener registration
 		AsyncContext asyncContext = request.startAsync();
 
-		ServerHttpRequest httpRequest = new ServletServerHttpRequest(
-				((HttpServletRequest) request), asyncContext, getDataBufferFactory(), getBufferSize());
+		ServerHttpRequest httpRequest = createServletServerHttpRequest(
+				((HttpServletRequest) request), asyncContext);
 
-		ServerHttpResponse httpResponse = new ServletServerHttpResponse(
-				((HttpServletResponse) response), asyncContext, getDataBufferFactory(), getBufferSize());
+		ServerHttpResponse httpResponse = createServletServerHttpResponse(
+				((HttpServletResponse) response), asyncContext);
 
 		HandlerResultSubscriber subscriber = new HandlerResultSubscriber(asyncContext);
 		getHttpHandler().handle(httpRequest, httpResponse).subscribe(subscriber);
+	}
+
+	protected ServerHttpRequest createServletServerHttpRequest(HttpServletRequest request,
+			AsyncContext asyncContext) throws IOException {
+		return new ServletServerHttpRequest(
+				request, asyncContext, getDataBufferFactory(), getBufferSize());
+	}
+
+	protected ServerHttpResponse createServletServerHttpResponse(HttpServletResponse response,
+			AsyncContext asyncContext) throws IOException {
+		return new ServletServerHttpResponse(
+				response, asyncContext, getDataBufferFactory(), getBufferSize());
 	}
 
 	// Other Servlet methods...
