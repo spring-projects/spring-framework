@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
-import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -73,6 +72,8 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	private int nestingLevel = 1;
 
 	private Class<?> containingClass;
+
+	private volatile ResolvableType resolvableType;
 
 
 	/**
@@ -279,8 +280,12 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	 * @since 4.0
 	 */
 	public ResolvableType getResolvableType() {
-		return (this.field != null ? ResolvableType.forField(this.field, this.nestingLevel, this.containingClass) :
-				ResolvableType.forMethodParameter(this.methodParameter));
+		if (this.resolvableType == null) {
+			this.resolvableType = (this.field != null ?
+					ResolvableType.forField(this.field, this.nestingLevel, this.containingClass) :
+					ResolvableType.forMethodParameter(this.methodParameter));
+		}
+		return this.resolvableType;
 	}
 
 	/**
@@ -361,36 +366,6 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 		else {
 			return this.methodParameter.getNestedParameterType();
 		}
-	}
-
-	/**
-	 * Determine the generic element type of the wrapped Collection parameter/field, if any.
-	 * @return the generic type, or {@code null} if none
-	 */
-	public Class<?> getCollectionType() {
-		return (this.field != null ?
-				GenericCollectionTypeResolver.getCollectionFieldType(this.field, this.nestingLevel) :
-				GenericCollectionTypeResolver.getCollectionParameterType(this.methodParameter));
-	}
-
-	/**
-	 * Determine the generic key type of the wrapped Map parameter/field, if any.
-	 * @return the generic type, or {@code null} if none
-	 */
-	public Class<?> getMapKeyType() {
-		return (this.field != null ?
-				GenericCollectionTypeResolver.getMapKeyFieldType(this.field, this.nestingLevel) :
-				GenericCollectionTypeResolver.getMapKeyParameterType(this.methodParameter));
-	}
-
-	/**
-	 * Determine the generic value type of the wrapped Map parameter/field, if any.
-	 * @return the generic type, or {@code null} if none
-	 */
-	public Class<?> getMapValueType() {
-		return (this.field != null ?
-				GenericCollectionTypeResolver.getMapValueFieldType(this.field, this.nestingLevel) :
-				GenericCollectionTypeResolver.getMapValueParameterType(this.methodParameter));
 	}
 
 

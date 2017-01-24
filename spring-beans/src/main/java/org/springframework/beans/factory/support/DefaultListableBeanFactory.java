@@ -1138,6 +1138,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		Class<?> type = descriptor.getDependencyType();
 		if (type.isArray()) {
 			Class<?> componentType = type.getComponentType();
+			ResolvableType resolvableType = descriptor.getResolvableType();
+			Class<?> resolvedArrayType = resolvableType.resolve();
+			if (resolvedArrayType != null && resolvedArrayType != type) {
+				type = resolvedArrayType;
+				componentType = resolvableType.getComponentType().resolve();
+			}
+			if (componentType == null) {
+				return null;
+			}
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, componentType,
 					new MultiElementDescriptor(descriptor));
 			if (matchingBeans.isEmpty()) {
@@ -1154,7 +1163,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return result;
 		}
 		else if (Collection.class.isAssignableFrom(type) && type.isInterface()) {
-			Class<?> elementType = descriptor.getCollectionType();
+			Class<?> elementType = descriptor.getResolvableType().asCollection().resolveGeneric();
 			if (elementType == null) {
 				return null;
 			}
@@ -1174,11 +1183,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return result;
 		}
 		else if (Map.class == type) {
-			Class<?> keyType = descriptor.getMapKeyType();
+			ResolvableType mapType = descriptor.getResolvableType().asMap();
+			Class<?> keyType = mapType.resolveGeneric(0);
 			if (String.class != keyType) {
 				return null;
 			}
-			Class<?> valueType = descriptor.getMapValueType();
+			Class<?> valueType = mapType.resolveGeneric(1);
 			if (valueType == null) {
 				return null;
 			}
