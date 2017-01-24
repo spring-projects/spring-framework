@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
-import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
@@ -155,7 +155,7 @@ public abstract class MultipartResolutionDelegate {
 	private static Class<?> getCollectionParameterType(MethodParameter methodParam) {
 		Class<?> paramType = methodParam.getNestedParameterType();
 		if (Collection.class == paramType || List.class.isAssignableFrom(paramType)){
-			Class<?> valueType = GenericCollectionTypeResolver.getCollectionParameterType(methodParam);
+			Class<?> valueType = ResolvableType.forMethodParameter(methodParam).asCollection().resolveGeneric();
 			if (valueType != null) {
 				return valueType;
 			}

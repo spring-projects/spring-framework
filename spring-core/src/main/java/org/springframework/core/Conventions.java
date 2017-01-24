@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,8 @@ public abstract class Conventions {
 	private static final Set<Class<?>> IGNORED_INTERFACES;
 
 	static {
-		IGNORED_INTERFACES = Collections.unmodifiableSet(new HashSet<Class<?>>(Arrays.<Class<?>>asList(
-				Serializable.class, Externalizable.class, Cloneable.class, Comparable.class)));
+		IGNORED_INTERFACES = Collections.unmodifiableSet(new HashSet<Class<?>>(
+				Arrays.<Class<?>>asList(Serializable.class, Externalizable.class, Cloneable.class, Comparable.class)));
 	}
 
 
@@ -114,7 +114,7 @@ public abstract class Conventions {
 			pluralize = true;
 		}
 		else if (Collection.class.isAssignableFrom(parameter.getParameterType())) {
-			valueClass = GenericCollectionTypeResolver.getCollectionParameterType(parameter);
+			valueClass = ResolvableType.forMethodParameter(parameter).asCollection().resolveGeneric();
 			if (valueClass == null) {
 				throw new IllegalArgumentException(
 						"Cannot generate variable name for non-typed Collection parameter type");
@@ -180,7 +180,7 @@ public abstract class Conventions {
 			pluralize = true;
 		}
 		else if (Collection.class.isAssignableFrom(resolvedType)) {
-			valueClass = GenericCollectionTypeResolver.getCollectionReturnType(method);
+			valueClass = ResolvableType.forMethodReturnType(method).asCollection().resolveGeneric();
 			if (valueClass == null) {
 				if (!(value instanceof Collection)) {
 					throw new IllegalArgumentException(

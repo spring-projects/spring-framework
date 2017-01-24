@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
+@SuppressWarnings("deprecation")
 public class GenericCollectionTypeResolverTests {
 
 	protected Class<?> targetClass;
@@ -46,31 +47,15 @@ public class GenericCollectionTypeResolverTests {
 
 	protected Type[] expectedResults;
 
+
 	@Before
 	public void setUp() throws Exception {
 		this.targetClass = Foo.class;
-		this.methods = new String[] { "a", "b", "b2", "b3", "c", "d", "d2", "d3", "e",
-			"e2", "e3" };
-		this.expectedResults = new Class[] { Integer.class, null, Set.class, Set.class,
-			null, Integer.class, Integer.class, Integer.class, Integer.class,
-			Integer.class, Integer.class };
+		this.methods = new String[] {"a", "b", "b2", "b3", "c", "d", "d2", "d3", "e", "e2", "e3"};
+		this.expectedResults = new Class<?>[] {Integer.class, null, Set.class, Set.class, null,
+				Integer.class, Integer.class, Integer.class, Integer.class, Integer.class, Integer.class};
 	}
 
-	protected void executeTest(String methodName) throws NoSuchMethodException {
-		for (int i = 0; i < this.methods.length; i++) {
-			if (methodName.equals(this.methods[i])) {
-				Method method = this.targetClass.getMethod(methodName);
-				Type type = getType(method);
-				assertEquals(this.expectedResults[i], type);
-				return;
-			}
-		}
-		throw new IllegalStateException("Bad test data");
-	}
-
-	protected Type getType(Method method) {
-		return GenericCollectionTypeResolver.getMapValueReturnType(method);
-	}
 
 	@Test
 	public void a() throws Exception {
@@ -130,10 +115,8 @@ public class GenericCollectionTypeResolverTests {
 	@Test
 	public void programmaticListIntrospection() throws Exception {
 		Method setter = GenericObject.class.getMethod("setResourceList", List.class);
-		assertEquals(
-				Resource.class,
-				GenericCollectionTypeResolver.getCollectionParameterType(new MethodParameter(
-						setter, 0)));
+		assertEquals(Resource.class,
+				GenericCollectionTypeResolver.getCollectionParameterType(new MethodParameter(setter, 0)));
 
 		Method getter = GenericObject.class.getMethod("getResourceList");
 		assertEquals(Resource.class,
@@ -150,6 +133,24 @@ public class GenericCollectionTypeResolverTests {
 				GenericCollectionTypeResolver.getMapValueType(CustomMap.class));
 	}
 
+
+	protected void executeTest(String methodName) throws NoSuchMethodException {
+		for (int i = 0; i < this.methods.length; i++) {
+			if (methodName.equals(this.methods[i])) {
+				Method method = this.targetClass.getMethod(methodName);
+				Type type = getType(method);
+				assertEquals(this.expectedResults[i], type);
+				return;
+			}
+		}
+		throw new IllegalStateException("Bad test data");
+	}
+
+	protected Type getType(Method method) {
+		return GenericCollectionTypeResolver.getMapValueReturnType(method);
+	}
+
+
 	private static abstract class CustomSet<T> extends AbstractSet<String> {
 	}
 
@@ -159,8 +160,9 @@ public class GenericCollectionTypeResolverTests {
 	private static abstract class OtherCustomMap<T> implements Map<String, Integer> {
 	}
 
+
 	@SuppressWarnings("rawtypes")
-	private static interface Foo {
+	private interface Foo {
 
 		Map<String, Integer> a();
 

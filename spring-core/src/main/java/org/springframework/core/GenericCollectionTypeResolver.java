@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,9 @@ import java.util.Map;
  * @author Phillip Webb
  * @since 2.0
  * @see ResolvableType
+ * @deprecated as of 4.3.6, in favor of direct {@link ResolvableType} usage
  */
+@Deprecated
 public abstract class GenericCollectionTypeResolver {
 
 	/**
