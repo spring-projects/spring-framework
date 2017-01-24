@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.web.servlet.view.script;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import javax.servlet.ServletContext;
 
@@ -28,6 +30,7 @@ import static org.mockito.Mockito.mock;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
@@ -71,10 +74,31 @@ public class NashornScriptTemplateTests {
 				response.getContentAsString());
 	}
 
+	@Test  // SPR-13508
+	public void renderTemplateWithResourceBundleMessages() throws Exception {
+		MockHttpServletResponse englishResponse = renderViewWithModelAndLocale("org/springframework/web/servlet/view/script/nashorn/template.html",
+				Collections.emptyMap(), Locale.ENGLISH, ScriptTemplatingConfigurationWithResourceBundleMessageSource.class);
+		assertEquals("<html><head><title>Hello Spring!</title></head><body><p>This is the body</p></body></html>",
+				englishResponse.getContentAsString());
+		MockHttpServletResponse frenchResponse = renderViewWithModelAndLocale("org/springframework/web/servlet/view/script/nashorn/template.html",
+				Collections.emptyMap(), Locale.FRENCH, ScriptTemplatingConfigurationWithResourceBundleMessageSource.class);
+		assertEquals("<html><head><title>Bonjour Spring!</title></head><body><p>Voici le corps de la page</p></body></html>",
+				frenchResponse.getContentAsString());
+	}
+
 	private MockHttpServletResponse renderViewWithModel(String viewUrl, Map<String, Object> model, Class<?> configuration) throws Exception {
 		ScriptTemplateView view = createViewWithUrl(viewUrl, configuration);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		MockHttpServletRequest request = new MockHttpServletRequest();
+		view.renderMergedOutputModel(model, request, response);
+		return response;
+	}
+
+	private MockHttpServletResponse renderViewWithModelAndLocale(String viewUrl, Map<String, Object> model, Locale locale, Class<?> configuration) throws Exception {
+		ScriptTemplateView view = createViewWithUrl(viewUrl, configuration);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setPreferredLocales(Collections.singletonList(locale));
 		view.renderMergedOutputModel(model, request, response);
 		return response;
 	}
@@ -115,6 +139,28 @@ public class NashornScriptTemplateTests {
 			configurer.setEngineName("nashorn");
 			configurer.setScripts("org/springframework/web/servlet/view/script/nashorn/render.js");
 			configurer.setRenderFunction("renderWithUrl");
+			return configurer;
+		}
+	}
+
+
+	@Configuration
+	static class ScriptTemplatingConfigurationWithResourceBundleMessageSource {
+
+		@Bean
+		public ResourceBundleMessageSource messageSource() {
+			ResourceBundleMessageSource source = new ResourceBundleMessageSource();
+			source.setBasenames("org/springframework/web/servlet/view/script/messages");
+			return source;
+		}
+
+		@Bean
+		public ScriptTemplateConfigurer nashornConfigurer() {
+			ScriptTemplateConfigurer configurer = new ScriptTemplateConfigurer();
+			configurer.setEngineName("nashorn");
+			configurer.setScripts("org/springframework/web/servlet/view/script/nashorn/render.js");
+			configurer.setRenderFunction("renderWithMessages");
+			configurer.setResourceBundleBasename("org/springframework/web/servlet/view/script/messages");
 			return configurer;
 		}
 	}

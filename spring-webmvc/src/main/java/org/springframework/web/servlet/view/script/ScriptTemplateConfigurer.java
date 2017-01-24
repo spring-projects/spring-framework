@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,8 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	private Charset charset;
 
 	private String resourceLoaderPath;
+
+	private String resourceBundleBasename;
 
 
 	/**
@@ -222,4 +224,16 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 		return this.resourceLoaderPath;
 	}
 
+	/**
+	 * Set the resource bundle basename for i18n.
+	 * @param resourceBundleBasename the resource bundle basename.
+	 */
+	public void setResourceBundleBasename(String resourceBundleBasename) {
+		this.resourceBundleBasename = resourceBundleBasename;
+	}
+
+	@Override
+	public String getResourceBundleBasename() {
+		return this.resourceBundleBasename;
+	}
 }

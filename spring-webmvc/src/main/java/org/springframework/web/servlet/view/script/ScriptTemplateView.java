@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -37,6 +38,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -46,6 +48,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
 /**
@@ -98,6 +101,8 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	private ResourceLoader resourceLoader;
 
 	private volatile ScriptEngineManager scriptEngineManager;
+
+	private String resourceBundleBasename;
 
 
 	/**
@@ -193,6 +198,13 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		}
 	}
 
+	/**
+	 * See {@link ScriptTemplateConfigurer#setResourceBundleBasename(String)} documentation.
+	 */
+	public void setResourceBundleBasename(String resourceBundleBasename) {
+		this.resourceBundleBasename = resourceBundleBasename;
+	}
+
 
 	@Override
 	protected void initApplicationContext(ApplicationContext context) {
@@ -249,6 +261,10 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		}
 
 		Assert.isTrue(this.renderFunction != null, "The 'renderFunction' property must be defined.");
+
+		if (this.resourceBundleBasename == null && viewConfig.getResourceBundleBasename() != null) {
+			this.resourceBundleBasename = viewConfig.getResourceBundleBasename();
+		}
 	}
 
 	protected ScriptEngine getEngine() {
@@ -346,13 +362,23 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			String url = getUrl();
 			String template = getTemplate(url);
 
+			Map<String, Object> messages;
+
+			if (this.resourceBundleBasename != null) {
+				Locale requestLocale = RequestContextUtils.getLocale(request);
+				ResourceBundleMessageSource messageSource = BeanFactoryUtils.beanOfTypeIncludingAncestors(getApplicationContext(), ResourceBundleMessageSource.class, false, false);
+				messages = messageSource.getMessageMap(this.resourceBundleBasename, requestLocale);
+			} else {
+				messages = Collections.emptyMap();
+			}
+
 			Object html;
 			if (this.renderObject != null) {
 				Object thiz = engine.eval(this.renderObject);
-				html = invocable.invokeMethod(thiz, this.renderFunction, template, model, url);
+				html = invocable.invokeMethod(thiz, this.renderFunction, template, model, url, messages);
 			}
 			else {
-				html = invocable.invokeFunction(this.renderFunction, template, model, url);
+				html = invocable.invokeFunction(this.renderFunction, template, model, url, messages);
 			}
 
 			response.getWriter().write(String.valueOf(html));
