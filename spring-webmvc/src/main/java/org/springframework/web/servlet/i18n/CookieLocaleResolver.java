@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,9 +190,24 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 					localePart = value.substring(0, spaceIndex);
 					timeZonePart = value.substring(spaceIndex + 1);
 				}
-				locale = (!"-".equals(localePart) ? parseLocaleValue(localePart) : null);
-				if (timeZonePart != null) {
-					timeZone = StringUtils.parseTimeZoneString(timeZonePart);
+				try {
+					locale = (!"-".equals(localePart) ? parseLocaleValue(localePart) : null);
+					if (timeZonePart != null) {
+						timeZone = StringUtils.parseTimeZoneString(timeZonePart);
+					}
+				}
+				catch (IllegalArgumentException ex) {
+					if (request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE) != null) {
+						// Error dispatch: ignore locale/timezone parse exceptions
+						if (logger.isDebugEnabled()) {
+							logger.debug("Ignoring invalid locale cookie '" + getCookieName() +
+									"' with value [" + value + "] due to error dispatch: " + ex.getMessage());
+						}
+					}
+					else {
+						throw new IllegalStateException("Invalid locale cookie '" + getCookieName() +
+								"' with value [" + value + "]: " + ex.getMessage());
+					}
 				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Parsed cookie value [" + cookie.getValue() + "] into locale '" + locale +
