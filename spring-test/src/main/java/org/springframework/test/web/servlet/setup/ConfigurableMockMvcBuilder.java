@@ -122,6 +122,13 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	/**
 	 * Add a {@code MockMvcConfigurer} that automates MockMvc setup and
 	 * configures it for some specific purpose (e.g. security).
+	 *
+	 * <p>There is a built-in {@link SharedHttpSessionConfigurer} that can be
+	 * used to re-use the HTTP session across requests. 3rd party frameworks
+	 * like Spring Security also use this mechanism to provide configuration
+	 * shortcuts.
+	 *
+	 * @see SharedHttpSessionConfigurer
 	 */
 	<T extends B> T apply(MockMvcConfigurer configurer);
 
