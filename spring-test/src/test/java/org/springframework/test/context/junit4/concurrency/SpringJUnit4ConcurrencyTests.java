@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,14 @@
 
 package org.springframework.test.context.junit4.concurrency;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.IntStream;
+
+import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.ParallelComputer;
 
@@ -37,8 +45,11 @@ import org.springframework.test.web.servlet.samples.context.JavaConfigTests;
 import org.springframework.test.web.servlet.samples.context.WebAppResourceTests;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+import org.springframework.util.ReflectionUtils;
 
-import static org.springframework.test.context.junit4.JUnitTestingUtils.runTestsAndAssertCounters;
+import static java.util.stream.Collectors.*;
+import static org.springframework.core.annotation.AnnotatedElementUtils.*;
+import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
 
 /**
  * Concurrency tests for the {@link SpringRunner}, {@link SpringClassRule}, and
@@ -68,52 +79,55 @@ import static org.springframework.test.context.junit4.JUnitTestingUtils.runTests
 public class SpringJUnit4ConcurrencyTests {
 
 	// @formatter:off
-	private static final Class<?>[] testClasses = new Class[] {
+	private final Class<?>[] testClasses = new Class[] {
 		// Basics
-			/* 9 */ SpringJUnit4ClassRunnerAppCtxTests.class,
-			/* 9 */ InheritedConfigSpringJUnit4ClassRunnerAppCtxTests.class,
-			/* 2 */ SpringJUnit47ClassRunnerRuleTests.class,
-			/* 2 */ ParameterizedSpringRuleTests.class,
+			SpringJUnit4ClassRunnerAppCtxTests.class,
+			InheritedConfigSpringJUnit4ClassRunnerAppCtxTests.class,
+			SpringJUnit47ClassRunnerRuleTests.class,
+			ParameterizedSpringRuleTests.class,
 		// Transactional
-			/* 2 */ MethodLevelTransactionalSpringRunnerTests.class,
-			/* 4 */ TimedTransactionalSpringRunnerTests.class,
+			MethodLevelTransactionalSpringRunnerTests.class,
+			TimedTransactionalSpringRunnerTests.class,
 		// Web and Scopes
-			/* 1 */ DispatcherWacRootWacEarTests.class, /* 2 ignored */
-			/* 3 */ BasicAnnotationConfigWacSpringRuleTests.class,
-			/* 2 */ RequestAndSessionScopedBeansWacTests.class,
-			/* 1 */ WebSocketServletServerContainerFactoryBeanTests.class,
+			DispatcherWacRootWacEarTests.class,
+			BasicAnnotationConfigWacSpringRuleTests.class,
+			RequestAndSessionScopedBeansWacTests.class,
+			WebSocketServletServerContainerFactoryBeanTests.class,
 		// Spring MVC Test
-			/* 2 */ JavaConfigTests.class,
-			/* 3 */ WebAppResourceTests.class,
-			/* 4 */ SampleTests.class
+			JavaConfigTests.class,
+			WebAppResourceTests.class,
+			SampleTests.class
 	};
 	// @formatter:on
 
-	/**
-	 * The number of tests in all {@link #testClasses}.
-	 *
-	 * <p>The current number of tests per test class is tracked as a comment
-	 * before each class reference above. The following constant must therefore
-	 * be the sum of those values.
-	 *
-	 * <p>This is admittedly fragile, but there's unfortunately not really a
-	 * better way to count the number of tests without re-implementing JUnit 4's
-	 * discovery algorithm. Plus, the presence of parameterized tests makes it
-	 * even more difficult to count programmatically.
-	 */
-	private static final int TESTS = 44;
-	private static final int FAILED = 0;
-	private static final int IGNORED = 2;
-	private static final int ABORTED = 0;
-
+	@BeforeClass
+	public static void abortIfLongRunningTestGroupIsNotEnabled() {
+		Assume.group(TestGroup.LONG_RUNNING);
+	}
 
 	@Test
 	public void runAllTestsConcurrently() throws Exception {
-
-		Assume.group(TestGroup.LONG_RUNNING);
+		final int FAILED = 0;
+		final int ABORTED = 0;
+		final int IGNORED = countAnnotatedMethods(Ignore.class);
+		// +1 since ParameterizedSpringRuleTests is parameterized
+		final int TESTS = countAnnotatedMethods(Test.class) + 1 - IGNORED;
 
 		runTestsAndAssertCounters(new ParallelComputer(true, true), TESTS, FAILED, TESTS, IGNORED, ABORTED,
-			testClasses);
+			this.testClasses);
+	}
+
+	private int countAnnotatedMethods(Class<? extends Annotation> annotationType) {
+		return Arrays.stream(this.testClasses)
+				.map(testClass -> getAnnotatedMethods(testClass, annotationType))
+				.flatMapToInt(list -> IntStream.of(list.size()))
+				.sum();
+	}
+
+	private List<Method> getAnnotatedMethods(Class<?> clazz, Class<? extends Annotation> annotationType) {
+		return Arrays.stream(ReflectionUtils.getUniqueDeclaredMethods(clazz))
+				.filter(method -> hasAnnotation(method, annotationType))
+				.collect(toList());
 	}
 
 }
