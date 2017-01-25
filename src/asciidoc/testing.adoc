@@ -3986,7 +3986,7 @@ request but rather you have to set it up:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	mockMvc.perform(fileUpload("/doc").file("a1", "ABC".getBytes("UTF-8")));
+	mockMvc.perform(multipart("/doc").file("a1", "ABC".getBytes("UTF-8")));
 ----
 
 You can specify query parameters in URI template style:

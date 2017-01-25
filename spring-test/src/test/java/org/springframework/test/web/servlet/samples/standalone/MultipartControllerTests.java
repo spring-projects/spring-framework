@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.servlet.samples.standalone;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -26,10 +27,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 
 import org.junit.Test;
 
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.mock.web.MockPart;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.ui.Model;
@@ -40,14 +44,15 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.multipart.MultipartFile;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
  * @author Rossen Stoyanchev
  */
-public class FileUploadControllerTests {
+public class MultipartControllerTests {
 
 	@Test
 	public void multipartRequest() throws Exception {
@@ -57,8 +62,25 @@ public class FileUploadControllerTests {
 		byte[] json = "{\"name\":\"yeeeah\"}".getBytes(StandardCharsets.UTF_8);
 		MockMultipartFile jsonPart = new MockMultipartFile("json", "json", "application/json", json);
 
-		MockMvc mockMvc = standaloneSetup(new MultipartController()).build();
-		mockMvc.perform(fileUpload("/test").file(filePart).file(jsonPart))
+		standaloneSetup(new MultipartController()).build()
+				.perform(multipart("/test-multipartfile").file(filePart).file(jsonPart))
+				.andExpect(status().isFound())
+				.andExpect(model().attribute("fileContent", fileContent))
+				.andExpect(model().attribute("jsonContent", Collections.singletonMap("name", "yeeeah")));
+	}
+
+	@Test
+	public void multipartRequestWithServletParts() throws Exception {
+		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
+		MockPart filePart = new MockPart("file", "orig", new ByteArrayInputStream(fileContent));
+
+		byte[] json = "{\"name\":\"yeeeah\"}".getBytes(StandardCharsets.UTF_8);
+		MockPart jsonPart = new MockPart("json", "json", new ByteArrayInputStream(json));
+		jsonPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+		standaloneSetup(new MultipartController()).build()
+				.perform(multipart("/test-multipartfile").part(filePart).part(jsonPart))
+				.andExpect(status().isFound())
 				.andExpect(model().attribute("fileContent", fileContent))
 				.andExpect(model().attribute("jsonContent", Collections.singletonMap("name", "yeeeah")));
 	}
@@ -72,15 +94,16 @@ public class FileUploadControllerTests {
 		MockMvc mockMvc = standaloneSetup(new MultipartController()).addFilter(filter).build();
 
 		Map<String, String> jsonMap = Collections.singletonMap("name", "yeeeah");
-		mockMvc.perform(fileUpload("/testJson").file(jsonPart)).andExpect(model().attribute("json", jsonMap));
+		mockMvc.perform(multipart("/test-json").file(jsonPart)).andExpect(model().attribute("json", jsonMap));
 	}
 
 
 	@Controller
+	@SuppressWarnings("unused")
 	private static class MultipartController {
 
-		@RequestMapping(value = "/test", method = RequestMethod.POST)
-		public String processMultipart(@RequestParam MultipartFile file,
+		@RequestMapping(value = "/test-multipartfile", method = RequestMethod.POST)
+		public String processMultipartFile(@RequestParam MultipartFile file,
 				@RequestPart Map<String, String> json, Model model) throws IOException {
 
 			model.addAttribute("jsonContent", json);
@@ -89,7 +112,17 @@ public class FileUploadControllerTests {
 			return "redirect:/index";
 		}
 
-		@RequestMapping(value = "/testJson", method = RequestMethod.POST)
+		@RequestMapping(value = "/test-part", method = RequestMethod.POST)
+		public String processPart(@RequestParam Part part,
+				@RequestPart Map<String, String> json, Model model) throws IOException {
+
+			model.addAttribute("jsonContent", json);
+			model.addAttribute("fileContent", part.getInputStream());
+
+			return "redirect:/index";
+		}
+
+		@RequestMapping(value = "/test-json", method = RequestMethod.POST)
 		public String processMultipart(@RequestPart Map<String, String> json, Model model) {
 			model.addAttribute("json", json);
 			return "redirect:/index";
