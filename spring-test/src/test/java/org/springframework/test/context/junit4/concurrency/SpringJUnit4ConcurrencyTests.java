@@ -17,10 +17,7 @@
 package org.springframework.test.context.junit4.concurrency;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.IntStream;
 
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -34,8 +31,8 @@ import org.springframework.test.context.junit4.SpringJUnit47ClassRunnerRuleTests
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunnerAppCtxTests;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.junit4.TimedTransactionalSpringRunnerTests;
+import org.springframework.test.context.junit4.rules.BaseAppCtxRuleTests;
 import org.springframework.test.context.junit4.rules.BasicAnnotationConfigWacSpringRuleTests;
-import org.springframework.test.context.junit4.rules.ParameterizedSpringRuleTests;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.test.context.web.RequestAndSessionScopedBeansWacTests;
@@ -47,7 +44,6 @@ import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.util.ReflectionUtils;
 
-import static java.util.stream.Collectors.*;
 import static org.springframework.core.annotation.AnnotatedElementUtils.*;
 import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
 
@@ -84,7 +80,7 @@ public class SpringJUnit4ConcurrencyTests {
 			SpringJUnit4ClassRunnerAppCtxTests.class,
 			InheritedConfigSpringJUnit4ClassRunnerAppCtxTests.class,
 			SpringJUnit47ClassRunnerRuleTests.class,
-			ParameterizedSpringRuleTests.class,
+			BaseAppCtxRuleTests.class,
 		// Transactional
 			MethodLevelTransactionalSpringRunnerTests.class,
 			TimedTransactionalSpringRunnerTests.class,
@@ -110,24 +106,18 @@ public class SpringJUnit4ConcurrencyTests {
 		final int FAILED = 0;
 		final int ABORTED = 0;
 		final int IGNORED = countAnnotatedMethods(Ignore.class);
-		// +1 since ParameterizedSpringRuleTests is parameterized
-		final int TESTS = countAnnotatedMethods(Test.class) + 1 - IGNORED;
+		final int TESTS = countAnnotatedMethods(Test.class) - IGNORED;
 
 		runTestsAndAssertCounters(new ParallelComputer(true, true), TESTS, FAILED, TESTS, IGNORED, ABORTED,
 			this.testClasses);
 	}
 
 	private int countAnnotatedMethods(Class<? extends Annotation> annotationType) {
-		return Arrays.stream(this.testClasses)
-				.map(testClass -> getAnnotatedMethods(testClass, annotationType))
-				.flatMapToInt(list -> IntStream.of(list.size()))
-				.sum();
-	}
-
-	private List<Method> getAnnotatedMethods(Class<?> clazz, Class<? extends Annotation> annotationType) {
-		return Arrays.stream(ReflectionUtils.getUniqueDeclaredMethods(clazz))
+		return (int) Arrays.stream(this.testClasses)
+				.map(ReflectionUtils::getUniqueDeclaredMethods)
+				.flatMap(Arrays::stream)
 				.filter(method -> hasAnnotation(method, annotationType))
-				.collect(toList());
+				.count();
 	}
 
 }
