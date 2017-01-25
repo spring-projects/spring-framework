@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.mock.web.test;
+package org.springframework.mock.web;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -32,7 +32,7 @@ import org.springframework.util.FileCopyUtils;
  * Mock implementation of {@code javax.servlet.http.Part}.
  *
  * @author Rossen Stoyanchev
- * @since 3.1
+ * @since 5.0
  */
 public class MockPart implements Part {
 
