@@ -123,7 +123,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			List<Mono<Object>> argMonos = Stream.of(getMethodParameters())
 					.map(param -> {
 						param.initParameterNameDiscovery(this.parameterNameDiscoverer);
-						GenericTypeResolver.resolveParameterType(param, getBean().getClass());
 						return findProvidedArgument(param, providedArgs)
 								.map(Mono::just)
 								.orElseGet(() -> {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
@@ -36,9 +37,10 @@ import org.springframework.util.ClassUtils;
  * Provides convenient access to method parameters, the method return value,
  * method annotations, etc.
  *
- * <p>The class may be created with a bean instance or with a bean name (e.g. lazy-init bean,
- * prototype bean). Use {@link #createWithResolvedBean()} to obtain a {@code HandlerMethod}
- * instance with a bean instance resolved through the associated {@link BeanFactory}.
+ * <p>The class may be created with a bean instance or with a bean name
+ * (e.g. lazy-init bean, prototype bean). Use {@link #createWithResolvedBean()}
+ * to obtain a {@code HandlerMethod} instance with a bean instance resolved
+ * through the associated {@link BeanFactory}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -148,7 +150,9 @@ public class HandlerMethod {
 		int count = this.bridgedMethod.getParameterCount();
 		MethodParameter[] result = new MethodParameter[count];
 		for (int i = 0; i < count; i++) {
-			result[i] = new HandlerMethodParameter(i);
+			HandlerMethodParameter parameter = new HandlerMethodParameter(i);
+			GenericTypeResolver.resolveParameterType(parameter, this.beanType);
+			result[i] = parameter;
 		}
 		return result;
 	}
