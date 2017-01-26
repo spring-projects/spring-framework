@@ -748,7 +748,7 @@ project("spring-web") {
 		optional("io.reactivex:rxjava:${rxjavaVersion}")
 		optional "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 		optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
-		optional("org.apache.tomcat:tomcat-catalina:${tomcatVersion}")
+		optional("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		optional("io.undertow:undertow-core:${undertowVersion}")
 		optional("org.jboss.xnio:xnio-api:${xnioVersion}")
 		optional("io.netty:netty-buffer:${nettyVersion}")  // temporarily for JsonObjectDecoder
@@ -856,7 +856,7 @@ project("spring-web-reactive") {
 		testCompile("com.fasterxml:aalto-xml:1.0.0")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
-	    testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
+		testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
 		testRuntime("javax.el:javax.el-api:${elApiVersion}")
 		testRuntime("org.glassfish:javax.el:3.0.1-b08")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
