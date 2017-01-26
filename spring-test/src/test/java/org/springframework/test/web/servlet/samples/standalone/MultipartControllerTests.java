@@ -51,6 +51,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 
 /**
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class MultipartControllerTests {
 
@@ -99,7 +100,6 @@ public class MultipartControllerTests {
 
 
 	@Controller
-	@SuppressWarnings("unused")
 	private static class MultipartController {
 
 		@RequestMapping(value = "/test-multipartfile", method = RequestMethod.POST)
