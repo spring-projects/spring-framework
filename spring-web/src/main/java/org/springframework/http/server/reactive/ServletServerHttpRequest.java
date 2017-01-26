@@ -54,6 +54,9 @@ import org.springframework.util.StringUtils;
  */
 public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
+	protected final Log logger = LogFactory.getLog(getClass());
+
+
 	private final HttpServletRequest request;
 
 	private final RequestBodyPublisher bodyPublisher;
@@ -63,8 +66,6 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	private final DataBufferFactory bufferFactory;
 
 	private final byte[] buffer;
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 
 	public ServletServerHttpRequest(HttpServletRequest request, AsyncContext asyncContext,
@@ -179,7 +180,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		return Flux.from(this.bodyPublisher);
 	}
 
-	protected DataBuffer readDataBuffer() throws IOException {
+	protected DataBuffer readFromInputStream() throws IOException {
 		int read = this.request.getInputStream().read(this.buffer);
 		if (logger.isTraceEnabled()) {
 			logger.trace("read:" + read);
@@ -242,7 +243,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		protected DataBuffer read() throws IOException {
 			if (this.inputStream.isReady()) {
-				return readDataBuffer();
+				return readFromInputStream();
 			}
 			return null;
 		}

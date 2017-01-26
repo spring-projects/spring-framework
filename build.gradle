@@ -748,6 +748,7 @@ project("spring-web") {
 		optional("io.reactivex:rxjava:${rxjavaVersion}")
 		optional "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 		optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
+		optional("org.apache.tomcat:tomcat-catalina:${tomcatVersion}")
 		optional("io.undertow:undertow-core:${undertowVersion}")
 		optional("org.jboss.xnio:xnio-api:${xnioVersion}")
 		optional("io.netty:netty-buffer:${nettyVersion}")  // temporarily for JsonObjectDecoder
@@ -779,7 +780,6 @@ project("spring-web") {
 		optional("javax.xml.ws:jaxws-api:${jaxwsVersion}")
 		optional("javax.mail:javax.mail-api:${javamailVersion}")
 		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-		optional("org.apache.tomcat:tomcat-catalina:${tomcatVersion}")
 		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
 		testCompile("io.projectreactor.addons:reactor-test")
 		testCompile("org.apache.taglibs:taglibs-standard-jstlel:1.2.1") {

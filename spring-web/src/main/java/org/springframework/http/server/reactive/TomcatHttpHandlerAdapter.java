@@ -19,29 +19,28 @@ package org.springframework.http.server.reactive;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
-
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.connector.CoyoteInputStream;
 import org.apache.catalina.connector.CoyoteOutputStream;
+
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 
 /**
- * Adapt {@link HttpHandler} to an {@link HttpServlet} using Servlet Async
- * support and Servlet 3.1 non-blocking I/O. Use Tomcat API for
- * reading/writing with ByteBuffer.
- * 
+ * {@link ServletHttpHandlerAdapter} extension that uses Jetty APIs for reading
+ * from the request and writing to the response with {@link ByteBuffer}.
+ *
  * @author Violeta Georgieva
  * @since 5.0
  */
 @WebServlet(asyncSupported = true)
 public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
+
 
 	public TomcatHttpHandlerAdapter(HttpHandler httpHandler) {
 		super(httpHandler);
@@ -53,35 +52,31 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 
 	@Override
-	protected ServerHttpRequest createServletServerHttpRequest(
-			HttpServletRequest request, AsyncContext asyncContext) throws IOException {
-		return new TomcatServerHttpRequest(
-				request, asyncContext, getDataBufferFactory(), getBufferSize());
+	protected ServerHttpRequest createRequest(HttpServletRequest request, AsyncContext cxt) throws IOException {
+		return new TomcatServerHttpRequest(request, cxt, getDataBufferFactory(), getBufferSize());
 	}
 
 	@Override
-	protected ServerHttpResponse createServletServerHttpResponse(
-			HttpServletResponse response, AsyncContext asyncContext) throws IOException {
-		return new TomcatServerHttpResponse(
-				response, asyncContext, getDataBufferFactory(), getBufferSize());
+	protected ServerHttpResponse createResponse(HttpServletResponse response, AsyncContext cxt) throws IOException {
+		return new TomcatServerHttpResponse(response, cxt, getDataBufferFactory(), getBufferSize());
 	}
 
 
 	private final class TomcatServerHttpRequest extends ServletServerHttpRequest {
 
-		public TomcatServerHttpRequest(HttpServletRequest request, AsyncContext asyncContext,
-				DataBufferFactory bufferFactory, int bufferSize) throws IOException {
-			super(request, asyncContext, bufferFactory, bufferSize);
+		public TomcatServerHttpRequest(HttpServletRequest request, AsyncContext context,
+				DataBufferFactory factory, int bufferSize) throws IOException {
+
+			super(request, context, factory, bufferSize);
 		}
 
 		@Override
-		protected DataBuffer readDataBuffer() throws IOException {
+		protected DataBuffer readFromInputStream() throws IOException {
 			DataBuffer buffer = getDataBufferFactory().allocateBuffer(getBufferSize());
 			ByteBuffer byteBuffer = buffer.asByteBuffer();
 			byteBuffer.limit(byteBuffer.capacity());
 
-			int read = ((CoyoteInputStream) getServletRequest().getInputStream()).read(
-					byteBuffer);
+			int read = ((CoyoteInputStream) getServletRequest().getInputStream()).read(byteBuffer);
 			if (logger.isTraceEnabled()) {
 				logger.trace("read:" + read);
 			}
@@ -97,13 +92,14 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 	private static final class TomcatServerHttpResponse extends ServletServerHttpResponse {
 
-		public TomcatServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,
-				DataBufferFactory bufferFactory, int bufferSize) throws IOException {
-			super(response, asyncContext, bufferFactory, bufferSize);
+		public TomcatServerHttpResponse(HttpServletResponse response, AsyncContext context,
+				DataBufferFactory factory, int bufferSize) throws IOException {
+
+			super(response, context, factory, bufferSize);
 		}
 
 		@Override
-		protected int writeDataBuffer(DataBuffer dataBuffer) throws IOException {
+		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
 			ServletOutputStream outputStream = getServletResponse().getOutputStream();
 			ByteBuffer input = dataBuffer.asByteBuffer();
 			int len = input.remaining();

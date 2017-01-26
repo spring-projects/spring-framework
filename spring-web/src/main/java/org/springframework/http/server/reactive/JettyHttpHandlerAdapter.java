@@ -31,15 +31,15 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 
 /**
- * Adapt {@link HttpHandler} to an {@link HttpServlet} using Servlet Async
- * support and Servlet 3.1 non-blocking I/O. Use Jetty API for writing with
- * ByteBuffer.
+ * {@link ServletHttpHandlerAdapter} extension that uses Jetty APIs for writing
+ * to the response with {@link ByteBuffer}.
  * 
  * @author Violeta Georgieva
  * @since 5.0
  */
 @WebServlet(asyncSupported = true)
 public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
+
 
 	public JettyHttpHandlerAdapter(HttpHandler httpHandler) {
 		super(httpHandler);
@@ -51,22 +51,23 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 
 	@Override
-	protected ServerHttpResponse createServletServerHttpResponse(
-			HttpServletResponse response, AsyncContext asyncContext) throws IOException {
-		return new JettyServerHttpResponse(
-				response, asyncContext, getDataBufferFactory(), getBufferSize());
+	protected ServerHttpResponse createResponse(HttpServletResponse response,
+			AsyncContext context) throws IOException {
+
+		return new JettyServerHttpResponse(response, context, getDataBufferFactory(), getBufferSize());
 	}
 
 
 	private static final class JettyServerHttpResponse extends ServletServerHttpResponse {
 
-		public JettyServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,
-				DataBufferFactory bufferFactory, int bufferSize) throws IOException {
-			super(response, asyncContext, bufferFactory, bufferSize);
+		public JettyServerHttpResponse(HttpServletResponse response, AsyncContext context,
+				DataBufferFactory factory, int bufferSize) throws IOException {
+
+			super(response, context, factory, bufferSize);
 		}
 
 		@Override
-		protected int writeDataBuffer(DataBuffer dataBuffer) throws IOException {
+		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
 			ServletOutputStream outputStream = getServletResponse().getOutputStream();
 			ByteBuffer input = dataBuffer.asByteBuffer();
 			int len = input.remaining();

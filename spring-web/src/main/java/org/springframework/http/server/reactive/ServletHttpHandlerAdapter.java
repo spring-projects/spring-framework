@@ -98,26 +98,23 @@ public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport impleme
 		// Start async before Read/WriteListener registration
 		AsyncContext asyncContext = request.startAsync();
 
-		ServerHttpRequest httpRequest = createServletServerHttpRequest(
-				((HttpServletRequest) request), asyncContext);
-
-		ServerHttpResponse httpResponse = createServletServerHttpResponse(
-				((HttpServletResponse) response), asyncContext);
+		ServerHttpRequest httpRequest = createRequest(((HttpServletRequest) request), asyncContext);
+		ServerHttpResponse httpResponse = createResponse(((HttpServletResponse) response), asyncContext);
 
 		HandlerResultSubscriber subscriber = new HandlerResultSubscriber(asyncContext);
 		getHttpHandler().handle(httpRequest, httpResponse).subscribe(subscriber);
 	}
 
-	protected ServerHttpRequest createServletServerHttpRequest(HttpServletRequest request,
-			AsyncContext asyncContext) throws IOException {
-		return new ServletServerHttpRequest(
-				request, asyncContext, getDataBufferFactory(), getBufferSize());
+	protected ServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context)
+			throws IOException {
+
+		return new ServletServerHttpRequest(request, context, getDataBufferFactory(), getBufferSize());
 	}
 
-	protected ServerHttpResponse createServletServerHttpResponse(HttpServletResponse response,
-			AsyncContext asyncContext) throws IOException {
-		return new ServletServerHttpResponse(
-				response, asyncContext, getDataBufferFactory(), getBufferSize());
+	protected ServerHttpResponse createResponse(HttpServletResponse response, AsyncContext context)
+			throws IOException {
+
+		return new ServletServerHttpResponse(response, context, getDataBufferFactory(), getBufferSize());
 	}
 
 	// Other Servlet methods...

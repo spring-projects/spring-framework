@@ -132,12 +132,12 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		return processor;
 	}
 
-	protected int writeDataBuffer(DataBuffer dataBuffer) throws IOException {
+	protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
 		ServletOutputStream outputStream = response.getOutputStream();
 		InputStream input = dataBuffer.asInputStream();
 		int bytesWritten = 0;
 		byte[] buffer = new byte[this.bufferSize];
-		int bytesRead = -1;
+		int bytesRead;
 		while (outputStream.isReady() && (bytesRead = input.read(buffer)) != -1) {
 			outputStream.write(buffer, 0, bytesRead);
 			bytesWritten += bytesRead;
@@ -287,7 +287,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 			}
 			if (ready) {
 				int total = dataBuffer.readableByteCount();
-				int written = writeDataBuffer(dataBuffer);
+				int written = writeToOutputStream(dataBuffer);
 
 				if (this.logger.isTraceEnabled()) {
 					this.logger.trace("written: " + written + " total: " + total);
