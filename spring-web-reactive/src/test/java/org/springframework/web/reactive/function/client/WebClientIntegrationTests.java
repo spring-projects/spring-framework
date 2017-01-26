@@ -38,37 +38,53 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.Pojo;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriBuilderFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
 import static org.springframework.web.reactive.function.BodyExtractors.toMono;
+import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 
 /**
- * {@link WebClient} integration tests with the {@code Flux} and {@code Mono} API.
+ * Integration tests using a {@link WebClient} through {@link WebClientOperations}.
  *
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  */
 public class WebClientIntegrationTests {
 
 	private MockWebServer server;
 
-	private WebClient webClient;
+	private WebClientOperations operations;
+
 
 	@Before
 	public void setup() {
 		this.server = new MockWebServer();
-		this.webClient = WebClient.create(new ReactorClientHttpConnector());
+
+		WebClient webClient = WebClient.create(new ReactorClientHttpConnector());
+		UriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory(this.server.url("/").toString());
+
+		this.operations = WebClientOperations.builder(webClient)
+				.uriBuilderFactory(uriBuilderFactory)
+				.build();
 	}
+
+	@After
+	public void tearDown() throws Exception {
+		this.server.shutdown();
+	}
+
 
 	@Test
 	public void headers() throws Exception {
-		HttpUrl baseUrl = server.url("/greeting?name=Spring");
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
-		ClientRequest<Void> request = ClientRequest.GET(baseUrl.toString()).build();
-		Mono<HttpHeaders> result = this.webClient
-				.exchange(request)
+		Mono<HttpHeaders> result = this.operations.get()
+				.uri("/greeting?name=Spring")
+				.exchange()
 				.map(response -> response.headers().asHttpHeaders());
 
 		StepVerifier.create(result)
@@ -88,16 +104,13 @@ public class WebClientIntegrationTests {
 
 	@Test
 	public void plainText() throws Exception {
-		HttpUrl baseUrl = server.url("/greeting?name=Spring");
 		this.server.enqueue(new MockResponse().setBody("Hello Spring!"));
 
-		ClientRequest<Void> request = ClientRequest.GET(baseUrl.toString())
+		Mono<String> result = this.operations.get()
+				.uri("/greeting?name=Spring")
 				.header("X-Test-Header", "testvalue")
-				.build();
-
-		Mono<String> result = this.webClient
-				.exchange(request)
-				.then(response -> response.body(toMono(String.class)));
+				.exchange()
+				.then(response -> response.bodyToMono(String.class));
 
 		StepVerifier.create(result)
 				.expectNext("Hello Spring!")
@@ -113,18 +126,15 @@ public class WebClientIntegrationTests {
 
 	@Test
 	public void jsonString() throws Exception {
-		HttpUrl baseUrl = server.url("/json");
 		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
 				.setBody(content));
 
-		ClientRequest<Void> request = ClientRequest.GET(baseUrl.toString())
+		Mono<String> result = this.operations.get()
+				.uri("/json")
 				.accept(MediaType.APPLICATION_JSON)
-				.build();
-
-		Mono<String> result = this.webClient
-				.exchange(request)
-				.then(response -> response.body(toMono(String.class)));
+				.exchange()
+				.then(response -> response.bodyToMono(String.class));
 
 		StepVerifier.create(result)
 				.expectNext(content)
@@ -139,17 +149,14 @@ public class WebClientIntegrationTests {
 
 	@Test
 	public void jsonPojoMono() throws Exception {
-		HttpUrl baseUrl = server.url("/pojo");
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
 				.setBody("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}"));
 
-		ClientRequest<Void> request = ClientRequest.GET(baseUrl.toString())
+		Mono<Pojo> result = this.operations.get()
+				.uri("/pojo")
 				.accept(MediaType.APPLICATION_JSON)
-				.build();
-
-		Mono<Pojo> result = this.webClient
-				.exchange(request)
-				.then(response -> response.body(toMono(Pojo.class)));
+				.exchange()
+				.then(response -> response.bodyToMono(Pojo.class));
 
 		StepVerifier.create(result)
 				.consumeNextWith(p -> assertEquals("barbar", p.getBar()))
@@ -172,9 +179,11 @@ public class WebClientIntegrationTests {
 				.accept(MediaType.APPLICATION_JSON)
 				.build();
 
-		Flux<Pojo> result = this.webClient
-				.exchange(request)
-				.flatMap(response -> response.body(toFlux(Pojo.class)));
+		Flux<Pojo> result = this.operations.get()
+				.uri("/pojos")
+				.accept(MediaType.APPLICATION_JSON)
+				.exchange()
+				.flatMap(response -> response.bodyToFlux(Pojo.class));
 
 		StepVerifier.create(result)
 				.consumeNextWith(p -> assertThat(p.getBar(), Matchers.is("bar1")))
@@ -195,15 +204,12 @@ public class WebClientIntegrationTests {
 				.setHeader("Content-Type", "application/json")
 				.setBody("{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}"));
 
-		Pojo spring = new Pojo("foofoo", "barbar");
-		ClientRequest<Pojo> request = ClientRequest.POST(baseUrl.toString())
+		Mono<Pojo> result = this.operations.post()
+				.uri("/pojo/capitalize")
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(BodyInserters.fromObject(spring));
-
-		Mono<Pojo> result = this.webClient
-				.exchange(request)
-				.then(response -> response.body(BodyExtractors.toMono(Pojo.class)));
+				.exchange(fromObject(new Pojo("foofoo", "barbar")))
+				.then(response -> response.bodyToMono(Pojo.class));
 
 		StepVerifier.create(result)
 				.consumeNextWith(p -> assertEquals("BARBAR", p.getBar()))
@@ -221,17 +227,14 @@ public class WebClientIntegrationTests {
 
 	@Test
 	public void cookies() throws Exception {
-		HttpUrl baseUrl = server.url("/test");
 		this.server.enqueue(new MockResponse()
 				.setHeader("Content-Type", "text/plain").setBody("test"));
 
-		ClientRequest<Void> request = ClientRequest.GET(baseUrl.toString())
+		Mono<String> result = this.operations.get()
+				.uri("/test")
 				.cookie("testkey", "testvalue")
-				.build();
-
-		Mono<String> result = this.webClient
-				.exchange(request)
-				.then(response -> response.body(toMono(String.class)));
+				.exchange()
+				.then(response -> response.bodyToMono(String.class));
 
 		StepVerifier.create(result)
 				.expectNext("test")
@@ -246,19 +249,13 @@ public class WebClientIntegrationTests {
 
 	@Test
 	public void notFound() throws Exception {
-		HttpUrl baseUrl = server.url("/greeting?name=Spring");
 		this.server.enqueue(new MockResponse().setResponseCode(404)
 				.setHeader("Content-Type", "text/plain").setBody("Not Found"));
 
-		ClientRequest<Void> request = ClientRequest.GET(baseUrl.toString()).build();
-
-		Mono<ClientResponse> result = this.webClient
-				.exchange(request);
+		Mono<ClientResponse> result = this.operations.get().uri("/greeting?name=Spring").exchange();
 
 		StepVerifier.create(result)
-				.consumeNextWith(response -> {
-					assertEquals(HttpStatus.NOT_FOUND, response.statusCode());
-				})
+				.consumeNextWith(response -> assertEquals(HttpStatus.NOT_FOUND, response.statusCode()))
 				.expectComplete()
 				.verify(Duration.ofSeconds(3));
 
@@ -270,21 +267,18 @@ public class WebClientIntegrationTests {
 
 	@Test
 	public void buildFilter() throws Exception {
-		HttpUrl baseUrl = server.url("/greeting?name=Spring");
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
-		ExchangeFilterFunction filter = (request, next) -> {
-			ClientRequest<?> filteredRequest = ClientRequest.from(request)
-					.header("foo", "bar").build();
-			return next.exchange(filteredRequest);
-		};
-		WebClient filteredClient = WebClient.builder(new ReactorClientHttpConnector())
-				.filter(filter).build();
+		WebClientOperations filteredClient = this.operations.filter(
+				(request, next) -> {
+					ClientRequest<?> filteredRequest = ClientRequest.from(request).header("foo", "bar").build();
+					return next.exchange(filteredRequest);
+				});
 
-		ClientRequest<Void> request = ClientRequest.GET(baseUrl.toString()).build();
-
-		Mono<String> result = filteredClient.exchange(request)
-				.then(response -> response.body(toMono(String.class)));
+		Mono<String> result = filteredClient.get()
+				.uri("/greeting?name=Spring")
+				.exchange()
+				.then(response -> response.bodyToMono(String.class));
 
 		StepVerifier.create(result)
 				.expectNext("Hello Spring!")
@@ -299,21 +293,18 @@ public class WebClientIntegrationTests {
 
 	@Test
 	public void filter() throws Exception {
-		HttpUrl baseUrl = server.url("/greeting?name=Spring");
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
-		ExchangeFilterFunction filter = (request, next) -> {
-			ClientRequest<?> filteredRequest = ClientRequest.from(request)
-					.header("foo", "bar").build();
-			return next.exchange(filteredRequest);
-		};
-		WebClient client = WebClient.create(new ReactorClientHttpConnector());
-		WebClient filteredClient = client.filter(filter);
+		WebClientOperations filteredClient = this.operations.filter(
+				(request, next) -> {
+					ClientRequest<?> filteredRequest = ClientRequest.from(request).header("foo", "bar").build();
+					return next.exchange(filteredRequest);
+				});
 
-		ClientRequest<Void> request = ClientRequest.GET(baseUrl.toString()).build();
-
-		Mono<String> result = filteredClient.exchange(request)
-				.then(response -> response.body(toMono(String.class)));
+		Mono<String> result = filteredClient.get()
+				.uri("/greeting?name=Spring")
+				.exchange()
+				.then(response -> response.bodyToMono(String.class));
 
 		StepVerifier.create(result)
 				.expectNext("Hello Spring!")
@@ -326,8 +317,4 @@ public class WebClientIntegrationTests {
 
 	}
 
-	@After
-	public void tearDown() throws Exception {
-		this.server.shutdown();
-	}
 }
