@@ -60,8 +60,8 @@ public class ScriptTemplateViewResolver extends UrlBasedViewResolver {
 	}
 
 	@Override
-	protected View createView(String viewName, Locale locale) throws Exception {
-		ScriptTemplateView view = (ScriptTemplateView)super.createView(viewName, locale);
+	public View resolveViewName(String viewName, Locale locale) throws Exception {
+		ScriptTemplateView view = (ScriptTemplateView)super.resolveViewName(viewName, locale);
 		view.setLocale(locale);
 		return view;
 	}
