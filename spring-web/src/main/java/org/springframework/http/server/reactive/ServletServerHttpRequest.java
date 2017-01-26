@@ -180,6 +180,10 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		return Flux.from(this.bodyPublisher);
 	}
 
+	/**
+	 * Read from the request body InputStream and return a DataBuffer.
+	 * Invoked only when {@link ServletInputStream#isReady()} returns "true".
+	 */
 	protected DataBuffer readFromInputStream() throws IOException {
 		int read = this.request.getInputStream().read(this.buffer);
 		if (logger.isTraceEnabled()) {

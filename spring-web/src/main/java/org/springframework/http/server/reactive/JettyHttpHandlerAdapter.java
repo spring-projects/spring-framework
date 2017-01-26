@@ -19,14 +19,12 @@ package org.springframework.http.server.reactive;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
-
 import javax.servlet.AsyncContext;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.server.HttpOutput;
+
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 
@@ -68,12 +66,9 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		@Override
 		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
-			ServletOutputStream outputStream = getServletResponse().getOutputStream();
 			ByteBuffer input = dataBuffer.asByteBuffer();
 			int len = input.remaining();
-			if (outputStream.isReady() && len > 0) {
-				((HttpOutput) outputStream).write(input);
-			}
+			((HttpOutput) getServletResponse().getOutputStream()).write(input);
 			return len;
 		}
 	}

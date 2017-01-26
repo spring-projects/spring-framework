@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import javax.servlet.AsyncContext;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -100,12 +99,9 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		@Override
 		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
-			ServletOutputStream outputStream = getServletResponse().getOutputStream();
 			ByteBuffer input = dataBuffer.asByteBuffer();
 			int len = input.remaining();
-			if (outputStream.isReady() && len > 0) {
-				((CoyoteOutputStream) outputStream).write(input);
-			}
+			((CoyoteOutputStream) getServletResponse().getOutputStream()).write(input);
 			return len;
 		}
 	}

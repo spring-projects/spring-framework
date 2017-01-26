@@ -132,6 +132,12 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		return processor;
 	}
 
+	/**
+	 * Write the DataBuffer to the response body OutputStream.
+	 * Invoked only when {@link ServletOutputStream#isReady()} returns "true"
+	 * and the readable bytes in the DataBuffer is greater than 0.
+	 * @return the number of bytes written
+	 */
 	protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
 		ServletOutputStream outputStream = response.getOutputStream();
 		InputStream input = dataBuffer.asInputStream();
@@ -285,14 +291,13 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 			if (this.logger.isTraceEnabled()) {
 				this.logger.trace("write: " + dataBuffer + " ready: " + ready);
 			}
-			if (ready) {
-				int total = dataBuffer.readableByteCount();
+			int remaining = dataBuffer.readableByteCount();
+			if (ready && remaining > 0) {
 				int written = writeToOutputStream(dataBuffer);
-
 				if (this.logger.isTraceEnabled()) {
-					this.logger.trace("written: " + written + " total: " + total);
+					this.logger.trace("written: " + written + " total: " + remaining);
 				}
-				return written == total;
+				return written == remaining;
 			}
 			else {
 				return false;
