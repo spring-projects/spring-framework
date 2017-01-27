@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 
 	public ReactorServerHttpResponse(HttpServerResponse response, DataBufferFactory bufferFactory) {
 		super(bufferFactory);
-		Assert.notNull("'response' must not be null.");
+		Assert.notNull(response, "'response' must not be null.");
 		this.response = response;
 	}
 

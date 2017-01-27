@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,8 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 	public StandardWebSocketHandlerAdapter(WebSocketHandler handler,
 			Function<Session, StandardWebSocketSession> sessionFactory) {
 
-		Assert.notNull("WebSocketHandler is required");
-		Assert.notNull("'sessionFactory' is required");
+		Assert.notNull(handler, "WebSocketHandler is required");
+		Assert.notNull(sessionFactory, "'sessionFactory' is required");
 		this.delegateHandler = handler;
 		this.sessionFactory = sessionFactory;
 	}
