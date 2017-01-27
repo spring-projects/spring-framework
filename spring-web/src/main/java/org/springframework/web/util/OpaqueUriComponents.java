@@ -137,9 +137,15 @@ final class OpaqueUriComponents extends UriComponents {
 
 	@Override
 	protected void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
-		builder.scheme(getScheme());
-		builder.schemeSpecificPart(getSchemeSpecificPart());
-		builder.fragment(getFragment());
+		if (getScheme() != null) {
+			builder.scheme(getScheme());
+		}
+		if (getSchemeSpecificPart() != null) {
+			builder.schemeSpecificPart(getSchemeSpecificPart());
+		}
+		if (getFragment() != null) {
+			builder.fragment(getFragment());
+		}
 	}
 
 

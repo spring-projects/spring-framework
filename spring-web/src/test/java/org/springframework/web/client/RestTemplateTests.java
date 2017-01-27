@@ -42,7 +42,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.web.util.DefaultUriTemplateHandler;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -83,7 +83,7 @@ public class RestTemplateTests {
 		response = mock(ClientHttpResponse.class);
 		errorHandler = mock(ResponseErrorHandler.class);
 		converter = mock(HttpMessageConverter.class);
-		template = new RestTemplate(Collections.<HttpMessageConverter<?>>singletonList(converter));
+		template = new RestTemplate(Collections.singletonList(converter));
 		template.setRequestFactory(requestFactory);
 		template.setErrorHandler(errorHandler);
 	}
@@ -273,8 +273,7 @@ public class RestTemplateTests {
 	@Test
 	public void getForObjectWithCustomUriTemplateHandler() throws Exception {
 
-		DefaultUriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
-		uriTemplateHandler.setParsePath(true);
+		DefaultUriBuilderFactory uriTemplateHandler = new DefaultUriBuilderFactory();
 		template.setUriTemplateHandler(uriTemplateHandler);
 
 		URI expectedUri = new URI("http://example.com/hotels/1/pic/pics%2Flogo.png/size/150x150");

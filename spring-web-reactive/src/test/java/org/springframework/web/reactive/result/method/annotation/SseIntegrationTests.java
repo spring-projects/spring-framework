@@ -18,14 +18,9 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.time.Duration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import org.junit.Before;
 import org.junit.Test;
-import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
-import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
 import reactor.core.publisher.Flux;
-
 import reactor.test.StepVerifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -40,9 +35,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.config.EnableWebReactive;
-import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientOperations;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriBuilderFactory;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
+import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
 
 
 /**
@@ -52,14 +55,16 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private AnnotationConfigApplicationContext wac;
 
-	private WebClient webClient;
+	private WebClientOperations operations;
 
 
 	@Override
 	@Before
 	public void setup() throws Exception {
 		super.setup();
-		this.webClient = WebClient.create(new ReactorClientHttpConnector());
+		WebClient client = WebClient.create(new ReactorClientHttpConnector());
+		UriBuilderFactory factory = new DefaultUriBuilderFactory("http://localhost:" + this.port + "/sse");
+		this.operations = WebClientOperations.builder(client).uriBuilderFactory(factory).build();
 	}
 
 
@@ -74,14 +79,11 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Test
 	public void sseAsString() throws Exception {
-		ClientRequest<Void> request = ClientRequest
-						.GET("http://localhost:{port}/sse/string", this.port)
-						.accept(TEXT_EVENT_STREAM)
-						.build();
-
-		Flux<String> result = this.webClient
-				.exchange(request)
-				.flatMap(response -> response.body(toFlux(String.class)));
+		Flux<String> result = this.operations.get()
+				.uri("/string")
+				.accept(TEXT_EVENT_STREAM)
+				.exchange()
+				.flatMap(response -> response.bodyToFlux(String.class));
 
 		StepVerifier.create(result)
 				.expectNext("foo 0")
@@ -91,15 +93,11 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	}
 	@Test
 	public void sseAsPerson() throws Exception {
-		ClientRequest<Void> request =
-				ClientRequest
-						.GET("http://localhost:{port}/sse/person", this.port)
-						.accept(TEXT_EVENT_STREAM)
-						.build();
-
-		Flux<Person> result = this.webClient
-				.exchange(request)
-				.flatMap(response -> response.body(toFlux(Person.class)));
+		Flux<Person> result = this.operations.get()
+				.uri("/person")
+				.accept(TEXT_EVENT_STREAM)
+				.exchange()
+				.flatMap(response -> response.bodyToFlux(Person.class));
 
 		StepVerifier.create(result)
 				.expectNext(new Person("foo 0"))
@@ -110,15 +108,11 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Test
 	public void sseAsEvent() throws Exception {
-		ClientRequest<Void> request =
-				ClientRequest
-						.GET("http://localhost:{port}/sse/event", this.port)
-						.accept(TEXT_EVENT_STREAM)
-						.build();
-
-		ResolvableType type = ResolvableType.forClassWithGenerics(ServerSentEvent.class, String.class);
-		Flux<ServerSentEvent<String>> result = this.webClient
-				.exchange(request)
+		ResolvableType type = forClassWithGenerics(ServerSentEvent.class, String.class);
+		Flux<ServerSentEvent<String>> result = this.operations.get()
+				.uri("/event")
+				.accept(TEXT_EVENT_STREAM)
+				.exchange()
 				.flatMap(response -> response.body(toFlux(type)));
 
 		StepVerifier.create(result)
@@ -142,15 +136,12 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Test
 	public void sseAsEventWithoutAcceptHeader() throws Exception {
-		ClientRequest<Void> request =
-		ClientRequest
-				.GET("http://localhost:{port}/sse/event", this.port)
+		Flux<ServerSentEvent<String>> result = this.operations.get()
+				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
-				.build();
-
-		Flux<ServerSentEvent<String>> result = this.webClient
-				.exchange(request)
-				.flatMap(response -> response.body(toFlux(ResolvableType.forClassWithGenerics(ServerSentEvent.class, String.class))));
+				.exchange()
+				.flatMap(response -> response.body(toFlux(
+						forClassWithGenerics(ServerSentEvent.class, String.class))));
 
 		StepVerifier.create(result)
 				.consumeNextWith( event -> {

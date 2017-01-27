@@ -57,7 +57,7 @@ import org.springframework.web.util.HierarchicalUriComponents.PathComponent;
  * @see #fromPath(String)
  * @see #fromUri(URI)
  */
-public class UriComponentsBuilder implements Cloneable {
+public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
 
@@ -360,6 +360,30 @@ public class UriComponentsBuilder implements Cloneable {
 		return build(false).expand(uriVariableValues);
 	}
 
+
+	/**
+	 * Build a {@link URI} instance and replaces URI template variables
+	 * with the values from an array.
+	 * @param uriVariables the map of URI variables
+	 * @return the URI
+	 */
+	@Override
+	public URI build(Object... uriVariables) {
+		return buildAndExpand(uriVariables).encode().toUri();
+	}
+
+	/**
+	 * Build a {@link URI} instance and replaces URI template variables
+	 * with the values from a map.
+	 * @param uriVariables the map of URI variables
+	 * @return the URI
+	 */
+	@Override
+	public URI build(Map<String, ?> uriVariables) {
+		return buildAndExpand(uriVariables).encode().toUri();
+	}
+
+
 	/**
 	 * Build a URI String. This is a shortcut method which combines calls
 	 * to {@link #build()}, then {@link UriComponents#encode()} and finally
@@ -372,10 +396,10 @@ public class UriComponentsBuilder implements Cloneable {
 	}
 
 
-	// URI components methods
+	// Instance methods
 
 	/**
-	 * Initialize all components of this URI builder with the components of the given URI.
+	 * Initialize components of this builder from components of the given URI.
 	 * @param uri the URI
 	 * @return this UriComponentsBuilder
 	 */
@@ -412,6 +436,18 @@ public class UriComponentsBuilder implements Cloneable {
 	}
 
 	/**
+	 * Initialize components of this {@link UriComponentsBuilder} from the
+	 * components of the given {@link UriComponents}.
+	 * @param uriComponents the UriComponents instance
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder uriComponents(UriComponents uriComponents) {
+		Assert.notNull(uriComponents, "UriComponents must not be null");
+		uriComponents.copyToUriComponentsBuilder(this);
+		return this;
+	}
+
+	/**
 	 * Set the URI scheme. The given scheme may contain URI template variables,
 	 * and may also be {@code null} to clear the scheme of this builder.
 	 * @param scheme the URI scheme
@@ -419,17 +455,6 @@ public class UriComponentsBuilder implements Cloneable {
 	 */
 	public UriComponentsBuilder scheme(String scheme) {
 		this.scheme = scheme;
-		return this;
-	}
-
-	/**
-	 * Set all components of this URI builder from the given {@link UriComponents}.
-	 * @param uriComponents the UriComponents instance
-	 * @return this UriComponentsBuilder
-	 */
-	public UriComponentsBuilder uriComponents(UriComponents uriComponents) {
-		Assert.notNull(uriComponents, "UriComponents must not be null");
-		uriComponents.copyToUriComponentsBuilder(this);
 		return this;
 	}
 
