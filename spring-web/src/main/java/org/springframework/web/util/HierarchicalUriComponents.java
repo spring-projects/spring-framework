@@ -455,8 +455,9 @@ final class HierarchicalUriComponents extends UriComponents {
 		if (getHost() != null) {
 			builder.host(getHost());
 		}
-		if (getPort() != -1) {
-			builder.port(getPort());
+		// Avoid parsing the port, may have URI variable..
+		if (this.port != null) {
+			builder.port(this.port);
 		}
 		if (getPath() != null) {
 			this.path.copyToUriComponentsBuilder(builder);

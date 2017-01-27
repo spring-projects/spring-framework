@@ -16,12 +16,14 @@
 package org.springframework.web.util;
 
 import java.net.URI;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 
 import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
 
+import static java.util.Collections.singletonMap;
 import static junit.framework.TestCase.assertEquals;
 
 /**
@@ -29,9 +31,6 @@ import static junit.framework.TestCase.assertEquals;
  * @author Rossen Stoyanchev
  */
 public class DefaultUriBuilderFactoryTests {
-
-	private static final String baseUrl = "http://foo.com/bar";
-
 
 	@Test
 	public void defaultSettings() throws Exception {
@@ -57,25 +56,37 @@ public class DefaultUriBuilderFactoryTests {
 	@Test
 	public void defaultUriVars() throws Exception {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://{host}/bar");
-		factory.setDefaultUriVariables(Collections.singletonMap("host", "foo.com"));
-		URI uri = factory.uriString("/{id}").build(Collections.singletonMap("id", "123"));
+		factory.setDefaultUriVariables(singletonMap("host", "foo.com"));
+		URI uri = factory.uriString("/{id}").build(singletonMap("id", "123"));
 		assertEquals("http://foo.com/bar/123", uri.toString());
 	}
 
 	@Test
 	public void defaultUriVarsWithOverride() throws Exception {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://{host}/bar");
-		factory.setDefaultUriVariables(Collections.singletonMap("host", "spring.io"));
-		URI uri = factory.uriString("/baz").build(Collections.singletonMap("host", "docs.spring.io"));
+		factory.setDefaultUriVariables(singletonMap("host", "spring.io"));
+		URI uri = factory.uriString("/baz").build(singletonMap("host", "docs.spring.io"));
 		assertEquals("http://docs.spring.io/bar/baz", uri.toString());
 	}
 
 	@Test
 	public void defaultUriVarsWithEmptyVarArg() throws Exception {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://{host}/bar");
-		factory.setDefaultUriVariables(Collections.singletonMap("host", "foo.com"));
+		factory.setDefaultUriVariables(singletonMap("host", "foo.com"));
 		URI uri = factory.uriString("/baz").build();
 		assertEquals("Expected delegation to build(Map) method", "http://foo.com/bar/baz", uri.toString());
+	}
+
+	@Test
+	public void defaultUriVarsSpr14147() throws Exception {
+		Map<String, String> defaultUriVars = new HashMap<>(2);
+		defaultUriVars.put("host", "api.example.com");
+		defaultUriVars.put("port", "443");
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+		factory.setDefaultUriVariables(defaultUriVars);
+
+		URI uri = factory.expand("https://{host}:{port}/v42/customers/{id}", singletonMap("id", 123L));
+		assertEquals("https://api.example.com:443/v42/customers/123", uri.toString());
 	}
 
 	@Test
@@ -88,7 +99,18 @@ public class DefaultUriBuilderFactoryTests {
 		String expected = "/foo/a%2Fb/c%2Fd";
 
 		assertEquals(expected, uriBuilder.build(id).toString());
-		assertEquals(expected, uriBuilder.build(Collections.singletonMap("id", id)).toString());
+		assertEquals(expected, uriBuilder.build(singletonMap("id", id)).toString());
+	}
+
+	@Test
+	public void encodingValuesOnlySpr14147() throws Exception {
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+		factory.setEncodingMode(EncodingMode.VALUES_ONLY);
+		factory.setDefaultUriVariables(singletonMap("host", "www.example.com"));
+		UriBuilder uriBuilder = factory.uriString("http://{host}/user/{userId}/dashboard");
+
+		assertEquals("http://www.example.com/user/john%3Bdoe/dashboard",
+				uriBuilder.build(singletonMap("userId", "john;doe")).toString());
 	}
 
 	@Test
@@ -101,7 +123,7 @@ public class DefaultUriBuilderFactoryTests {
 		String expected = "/foo/a%2Fb/c%2Fd";
 
 		assertEquals(expected, uriBuilder.build(id).toString());
-		assertEquals(expected, uriBuilder.build(Collections.singletonMap("id", id)).toString());
+		assertEquals(expected, uriBuilder.build(singletonMap("id", id)).toString());
 	}
 
 	@Test

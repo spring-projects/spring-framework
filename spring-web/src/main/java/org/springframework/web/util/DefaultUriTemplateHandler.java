@@ -33,7 +33,9 @@ import java.util.Map;
  *
  * @author Rossen Stoyanchev
  * @since 4.2
+ * @deprecated as of 5.0 in favor of {@link DefaultUriBuilderFactory}
  */
+@Deprecated
 public class DefaultUriTemplateHandler extends AbstractUriTemplateHandler {
 
 	private boolean parsePath;
