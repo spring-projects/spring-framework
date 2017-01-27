@@ -20,12 +20,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.util.SocketUtils;
+import org.springframework.util.Assert;
 
 /**
  * @author Rossen Stoyanchev
  */
-public class HttpServerSupport {
+public abstract class AbstractHttpServer implements HttpServer {
 
 	private String host = "0.0.0.0";
 
@@ -34,6 +34,10 @@ public class HttpServerSupport {
 	private HttpHandler httpHandler;
 
 	private Map<String, HttpHandler> handlerMap;
+
+	private boolean running;
+
+	private final Object lifecycleMonitor = new Object();
 
 
 	public void setHost(String host) {
@@ -49,9 +53,6 @@ public class HttpServerSupport {
 	}
 
 	public int getPort() {
-		if(this.port == -1) {
-			this.port = SocketUtils.findAvailableTcpPort(8080);
-		}
 		return this.port;
 	}
 
@@ -73,5 +74,77 @@ public class HttpServerSupport {
 	public Map<String, HttpHandler> getHttpHandlerMap() {
 		return this.handlerMap;
 	}
+
+
+	// InitializingBean
+
+	@Override
+	public final void afterPropertiesSet() throws Exception {
+		synchronized (this.lifecycleMonitor) {
+			Assert.isTrue(this.host != null);
+			Assert.isTrue(this.port != -1);
+			Assert.isTrue(this.httpHandler != null || this.handlerMap != null);
+			Assert.isTrue(!this.running);
+
+			initServer();
+		}
+	}
+
+	protected abstract void initServer() throws Exception;
+
+
+	// Lifecycle
+
+	@Override
+	public boolean isRunning() {
+		synchronized (this.lifecycleMonitor) {
+			return this.running;
+		}
+	}
+
+	@Override
+	public final void start() {
+		synchronized (this.lifecycleMonitor) {
+			if (!isRunning()) {
+				this.running = true;
+				try {
+					startInternal();
+				}
+				catch (Exception ex) {
+					throw new IllegalStateException(ex);
+				}
+			}
+		}
+
+	}
+
+	protected abstract void startInternal() throws Exception;
+
+	@Override
+	public final void stop() {
+		synchronized (this.lifecycleMonitor) {
+			if (isRunning()) {
+				this.running = false;
+				try {
+					stopInternal();
+				}
+				catch (Exception ex) {
+					throw new IllegalStateException(ex);
+				}
+				finally {
+					reset();
+				}
+			}
+		}
+	}
+
+	protected void reset() {
+		this.host = "0.0.0.0";
+		this.port = -1;
+		this.httpHandler = null;
+		this.handlerMap = null;
+	}
+
+	protected abstract void stopInternal() throws Exception;
 
 }

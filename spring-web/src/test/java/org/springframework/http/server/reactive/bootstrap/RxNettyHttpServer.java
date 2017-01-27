@@ -19,58 +19,51 @@ package org.springframework.http.server.reactive.bootstrap;
 import java.net.InetSocketAddress;
 
 import io.netty.buffer.ByteBuf;
+import org.jetbrains.annotations.NotNull;
 
 import org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter;
-import org.springframework.util.Assert;
 
 
 /**
  * @author Rossen Stoyanchev
  */
-public class RxNettyHttpServer extends HttpServerSupport implements HttpServer {
+public class RxNettyHttpServer extends AbstractHttpServer {
 
 	private RxNettyHttpHandlerAdapter rxNettyHandler;
 
 	private io.reactivex.netty.protocol.http.server.HttpServer<ByteBuf, ByteBuf> rxNettyServer;
 
-	private boolean running;
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
-
-		if (getHttpHandlerMap() != null) {
-			this.rxNettyHandler = new RxNettyHttpHandlerAdapter(getHttpHandlerMap());
-		}
-		else {
-			Assert.notNull(getHttpHandler());
-			this.rxNettyHandler = new RxNettyHttpHandlerAdapter(getHttpHandler());
-		}
-
+	protected void initServer() throws Exception {
+		this.rxNettyHandler = createHttpHandlerAdapter();
 		this.rxNettyServer = io.reactivex.netty.protocol.http.server.HttpServer
 				.newServer(new InetSocketAddress(getHost(), getPort()));
 	}
 
-
-	@Override
-	public boolean isRunning() {
-		return this.running;
+	@NotNull
+	private RxNettyHttpHandlerAdapter createHttpHandlerAdapter() {
+		return getHttpHandlerMap() != null ?
+				new RxNettyHttpHandlerAdapter(getHttpHandlerMap()) :
+				new RxNettyHttpHandlerAdapter(getHttpHandler());
 	}
 
 
 	@Override
-	public void start() {
-		if (!this.running) {
-			this.running = true;
-			this.rxNettyServer.start(this.rxNettyHandler);
-		}
+	protected void startInternal() {
+		this.rxNettyServer.start(this.rxNettyHandler);
 	}
 
 	@Override
-	public void stop() {
-		if (this.running) {
-			this.running = false;
-			this.rxNettyServer.shutdown();
-		}
+	protected void stopInternal() {
+		this.rxNettyServer.shutdown();
+	}
+
+	@Override
+	protected void reset() {
+		super.reset();
+		this.rxNettyServer = null;
+		this.rxNettyHandler = null;
 	}
 
 }

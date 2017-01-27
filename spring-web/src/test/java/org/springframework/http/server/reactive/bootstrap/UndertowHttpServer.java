@@ -19,55 +19,42 @@ package org.springframework.http.server.reactive.bootstrap;
 import io.undertow.Undertow;
 
 import org.springframework.http.server.reactive.UndertowHttpHandlerAdapter;
-import org.springframework.util.Assert;
 
 /**
  * @author Marek Hawrylczak
  */
-public class UndertowHttpServer extends HttpServerSupport implements HttpServer {
+public class UndertowHttpServer extends AbstractHttpServer {
 
 	private Undertow server;
 
-	private boolean running;
-
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
+	protected void initServer() throws Exception {
 		this.server = Undertow.builder().addHttpListener(getPort(), getHost())
-				.setHandler(initUndertowHttpHandlerAdapter())
+				.setHandler(initHttpHandlerAdapter())
 				.build();
 	}
 
-	private UndertowHttpHandlerAdapter initUndertowHttpHandlerAdapter() {
-		if (getHttpHandlerMap() != null) {
-			return new UndertowHttpHandlerAdapter(getHttpHandlerMap());
-		}
-		else {
-			Assert.notNull(getHttpHandler());
-			return new UndertowHttpHandlerAdapter(getHttpHandler());
-		}
+	private UndertowHttpHandlerAdapter initHttpHandlerAdapter() {
+		return getHttpHandlerMap() != null ?
+				new UndertowHttpHandlerAdapter(getHttpHandlerMap()) :
+				new UndertowHttpHandlerAdapter(getHttpHandler());
 	}
 
 	@Override
-	public void start() {
-		if (!this.running) {
-			this.server.start();
-			this.running = true;
-		}
-
+	protected void startInternal() {
+		this.server.start();
 	}
 
 	@Override
-	public void stop() {
-		if (this.running) {
-			this.server.stop();
-			this.running = false;
-		}
+	protected void stopInternal() {
+		this.server.stop();
 	}
 
 	@Override
-	public boolean isRunning() {
-		return this.running;
+	protected void reset() {
+		super.reset();
+		this.server = null;
 	}
 
 }
