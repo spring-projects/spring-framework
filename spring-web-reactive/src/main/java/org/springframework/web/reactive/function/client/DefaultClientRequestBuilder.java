@@ -17,11 +17,6 @@
 package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
-import java.nio.charset.Charset;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -33,7 +28,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.util.Assert;
@@ -44,12 +38,12 @@ import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 
 /**
- * Default implementation of {@link ClientRequest.BodyBuilder}.
+ * Default implementation of {@link ClientRequest.Builder}.
  *
  * @author Arjen Poutsma
  * @since 5.0
  */
-class DefaultClientRequestBuilder implements ClientRequest.BodyBuilder {
+class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	private final HttpMethod method;
 
@@ -66,7 +60,7 @@ class DefaultClientRequestBuilder implements ClientRequest.BodyBuilder {
 	}
 
 	@Override
-	public ClientRequest.BodyBuilder header(String headerName, String... headerValues) {
+	public ClientRequest.Builder header(String headerName, String... headerValues) {
 		for (String headerValue : headerValues) {
 			this.headers.add(headerName, headerValue);
 		}
@@ -74,7 +68,7 @@ class DefaultClientRequestBuilder implements ClientRequest.BodyBuilder {
 	}
 
 	@Override
-	public ClientRequest.BodyBuilder headers(HttpHeaders headers) {
+	public ClientRequest.Builder headers(HttpHeaders headers) {
 		if (headers != null) {
 			this.headers.putAll(headers);
 		}
@@ -82,39 +76,13 @@ class DefaultClientRequestBuilder implements ClientRequest.BodyBuilder {
 	}
 
 	@Override
-	public ClientRequest.BodyBuilder accept(MediaType... acceptableMediaTypes) {
-		this.headers.setAccept(Arrays.asList(acceptableMediaTypes));
-		return this;
-	}
-
-	@Override
-	public ClientRequest.BodyBuilder acceptCharset(Charset... acceptableCharsets) {
-		this.headers.setAcceptCharset(Arrays.asList(acceptableCharsets));
-		return this;
-	}
-
-	@Override
-	public ClientRequest.BodyBuilder ifModifiedSince(ZonedDateTime ifModifiedSince) {
-		ZonedDateTime gmt = ifModifiedSince.withZoneSameInstant(ZoneId.of("GMT"));
-		String headerValue = DateTimeFormatter.RFC_1123_DATE_TIME.format(gmt);
-		this.headers.set(HttpHeaders.IF_MODIFIED_SINCE, headerValue);
-		return this;
-	}
-
-	@Override
-	public ClientRequest.BodyBuilder ifNoneMatch(String... ifNoneMatches) {
-		this.headers.setIfNoneMatch(Arrays.asList(ifNoneMatches));
-		return this;
-	}
-
-	@Override
-	public ClientRequest.BodyBuilder cookie(String name, String value) {
+	public ClientRequest.Builder cookie(String name, String value) {
 		this.cookies.add(name, value);
 		return this;
 	}
 
 	@Override
-	public ClientRequest.BodyBuilder cookies(MultiValueMap<String, String> cookies) {
+	public ClientRequest.Builder cookies(MultiValueMap<String, String> cookies) {
 		if (cookies != null) {
 			this.cookies.putAll(cookies);
 		}
@@ -124,18 +92,6 @@ class DefaultClientRequestBuilder implements ClientRequest.BodyBuilder {
 	@Override
 	public ClientRequest<Void> build() {
 		return body(BodyInserters.empty());
-	}
-
-	@Override
-	public ClientRequest.BodyBuilder contentLength(long contentLength) {
-		this.headers.setContentLength(contentLength);
-		return this;
-	}
-
-	@Override
-	public ClientRequest.BodyBuilder contentType(MediaType contentType) {
-		this.headers.setContentType(contentType);
-		return this;
 	}
 
 	@Override

@@ -18,7 +18,6 @@ package org.springframework.web.reactive.function.client;
 
 import java.time.Duration;
 
-import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -36,15 +35,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.Pojo;
-import org.springframework.web.reactive.function.BodyExtractors;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
-import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 
 /**
@@ -171,13 +166,8 @@ public class WebClientIntegrationTests {
 
 	@Test
 	public void jsonPojoFlux() throws Exception {
-		HttpUrl baseUrl = server.url("/pojos");
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
 				.setBody("[{\"bar\":\"bar1\",\"foo\":\"foo1\"},{\"bar\":\"bar2\",\"foo\":\"foo2\"}]"));
-
-		ClientRequest<Void> request = ClientRequest.GET(baseUrl.toString())
-				.accept(MediaType.APPLICATION_JSON)
-				.build();
 
 		Flux<Pojo> result = this.operations.get()
 				.uri("/pojos")
@@ -199,7 +189,6 @@ public class WebClientIntegrationTests {
 
 	@Test
 	public void postJsonPojo() throws Exception {
-		HttpUrl baseUrl = server.url("/pojo/capitalize");
 		this.server.enqueue(new MockResponse()
 				.setHeader("Content-Type", "application/json")
 				.setBody("{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}"));

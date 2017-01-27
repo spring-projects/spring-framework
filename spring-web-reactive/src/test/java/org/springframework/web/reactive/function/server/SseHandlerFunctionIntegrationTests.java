@@ -18,22 +18,24 @@ package org.springframework.web.reactive.function.server;
 
 import java.time.Duration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import org.junit.Before;
 import org.junit.Test;
-import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
-import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientOperations;
+import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriBuilderFactory;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
+import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
 import static org.springframework.web.reactive.function.BodyInserters.fromServerSentEvents;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -42,12 +44,15 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  */
 public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
+	private WebClientOperations operations;
 
-	private WebClient webClient;
 
 	@Before
-	public void createWebClient() {
-		this.webClient = WebClient.create(new ReactorClientHttpConnector());
+	public void setup() throws Exception {
+		super.setup();
+		WebClient client = WebClient.create(new ReactorClientHttpConnector());
+		UriBuilderFactory factory = new DefaultUriBuilderFactory("http://localhost:" + this.port);
+		this.operations = WebClientOperations.builder(client).uriBuilderFactory(factory).build();
 	}
 
 	@Override
@@ -60,13 +65,10 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 
 	@Test
 	public void sseAsString() throws Exception {
-		ClientRequest<Void> request = ClientRequest
-						.GET("http://localhost:{port}/string", this.port)
-						.accept(TEXT_EVENT_STREAM)
-						.build();
-
-		Flux<String> result = this.webClient
-				.exchange(request)
+		Flux<String> result = this.operations.get()
+				.uri("/string")
+				.accept(TEXT_EVENT_STREAM)
+				.exchange()
 				.flatMap(response -> response.body(toFlux(String.class)));
 
 		StepVerifier.create(result)
@@ -77,14 +79,10 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 	}
 	@Test
 	public void sseAsPerson() throws Exception {
-		ClientRequest<Void> request =
-				ClientRequest
-						.GET("http://localhost:{port}/person", this.port)
-						.accept(TEXT_EVENT_STREAM)
-						.build();
-
-		Flux<Person> result = this.webClient
-				.exchange(request)
+		Flux<Person> result = this.operations.get()
+				.uri("/person")
+				.accept(TEXT_EVENT_STREAM)
+				.exchange()
 				.flatMap(response -> response.body(toFlux(Person.class)));
 
 		StepVerifier.create(result)
@@ -96,16 +94,12 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 
 	@Test
 	public void sseAsEvent() throws Exception {
-		ClientRequest<Void> request =
-				ClientRequest
-						.GET("http://localhost:{port}/event", this.port)
-						.accept(TEXT_EVENT_STREAM)
-						.build();
-
-		ResolvableType type = ResolvableType.forClassWithGenerics(ServerSentEvent.class, String.class);
-		Flux<ServerSentEvent<String>> result = this.webClient
-				.exchange(request)
-				.flatMap(response -> response.body(toFlux(type)));
+		Flux<ServerSentEvent<String>> result = this.operations.get()
+				.uri("/event")
+				.accept(TEXT_EVENT_STREAM)
+				.exchange()
+				.flatMap(response -> response.body(toFlux(
+						forClassWithGenerics(ServerSentEvent.class, String.class))));
 
 		StepVerifier.create(result)
 				.consumeNextWith( event -> {

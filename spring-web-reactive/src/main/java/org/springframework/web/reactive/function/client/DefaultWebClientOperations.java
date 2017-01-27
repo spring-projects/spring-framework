@@ -17,7 +17,10 @@ package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.function.Function;
 
 import org.jetbrains.annotations.NotNull;
@@ -137,47 +140,53 @@ class DefaultWebClientOperations implements WebClientOperations {
 
 	private class DefaultHeaderSpec implements HeaderSpec {
 
-		private ClientRequest.BodyBuilder requestBuilder;
+		private final ClientRequest.Builder requestBuilder;
+
+		private final HttpHeaders headers = new HttpHeaders();
 
 
-		DefaultHeaderSpec(ClientRequest.BodyBuilder requestBuilder) {
+		DefaultHeaderSpec(ClientRequest.Builder requestBuilder) {
 			this.requestBuilder = requestBuilder;
 		}
 
 
 		@Override
 		public DefaultHeaderSpec header(String headerName, String... headerValues) {
-			this.requestBuilder.header(headerName, headerValues);
+			for (String headerValue : headerValues) {
+				this.headers.add(headerName, headerValue);
+			}
 			return this;
 		}
 
 		@Override
 		public DefaultHeaderSpec headers(HttpHeaders headers) {
-			this.requestBuilder.headers(headers);
+			if (headers != null) {
+				this.headers.putAll(headers);
+			}
 			return this;
 		}
 
 		@Override
 		public DefaultHeaderSpec accept(MediaType... acceptableMediaTypes) {
-			this.requestBuilder.accept(acceptableMediaTypes);
+			this.headers.setAccept(Arrays.asList(acceptableMediaTypes));
 			return this;
 		}
 
 		@Override
 		public DefaultHeaderSpec acceptCharset(Charset... acceptableCharsets) {
-			this.requestBuilder.acceptCharset(acceptableCharsets);
+			this.headers.setAcceptCharset(Arrays.asList(acceptableCharsets));
 			return this;
 		}
 
 		@Override
 		public DefaultHeaderSpec contentType(MediaType contentType) {
-			this.requestBuilder.contentType(contentType);
+			this.headers.setContentType(contentType);
 			return this;
 		}
 
 		@Override
 		public DefaultHeaderSpec contentLength(long contentLength) {
-			this.requestBuilder.contentLength(contentLength);
+			this.headers.setContentLength(contentLength);
 			return this;
 		}
 
@@ -195,31 +204,33 @@ class DefaultWebClientOperations implements WebClientOperations {
 
 		@Override
 		public DefaultHeaderSpec ifModifiedSince(ZonedDateTime ifModifiedSince) {
-			this.requestBuilder.ifModifiedSince(ifModifiedSince);
+			ZonedDateTime gmt = ifModifiedSince.withZoneSameInstant(ZoneId.of("GMT"));
+			String headerValue = DateTimeFormatter.RFC_1123_DATE_TIME.format(gmt);
+			this.headers.set(HttpHeaders.IF_MODIFIED_SINCE, headerValue);
 			return this;
 		}
 
 		@Override
 		public DefaultHeaderSpec ifNoneMatch(String... ifNoneMatches) {
-			this.requestBuilder.ifNoneMatch(ifNoneMatches);
+			this.headers.setIfNoneMatch(Arrays.asList(ifNoneMatches));
 			return this;
 		}
 
 		@Override
 		public Mono<ClientResponse> exchange() {
-			ClientRequest<Void> request = this.requestBuilder.build();
+			ClientRequest<Void> request = this.requestBuilder.headers(this.headers).build();
 			return getWebClient().exchange(request);
 		}
 
 		@Override
 		public <T> Mono<ClientResponse> exchange(BodyInserter<T, ? super ClientHttpRequest> inserter) {
-			ClientRequest<T> request = this.requestBuilder.body(inserter);
+			ClientRequest<T> request = this.requestBuilder.headers(this.headers).body(inserter);
 			return getWebClient().exchange(request);
 		}
 
 		@Override
 		public <T, S extends Publisher<T>> Mono<ClientResponse> exchange(S publisher, Class<T> elementClass) {
-			ClientRequest<S> request = this.requestBuilder.body(publisher, elementClass);
+			ClientRequest<S> request = this.requestBuilder.headers(this.headers).body(publisher, elementClass);
 			return getWebClient().exchange(request);
 		}
 	}

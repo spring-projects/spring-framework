@@ -17,35 +17,31 @@
 package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
-import java.nio.charset.Charset;
-import java.time.ZonedDateTime;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
-import org.springframework.web.util.DefaultUriTemplateHandler;
-import org.springframework.web.util.UriTemplateHandler;
 
 /**
- * Represents a typed, immutable, client-side HTTP request, as executed by the {@link WebClient}.
- * Instances of this interface are created via static builder methods:
- * {@link #method(HttpMethod, String, Object...)}, {@link #GET(String, Object...)}, etc.
+ * Represents a typed, immutable, client-side HTTP request, as executed by the
+ * {@link WebClient}. Instances of this interface can be created via static
+ * builder methods in this class.
  *
+ * <p>Note that applications are more likely to perform requests through
+ * {@link WebClientOperations} rather than using this directly.
+ * :
  * @param <T> the type of the body that this request contains
  * @author Brian Clozel
  * @author Arjen Poutsma
  * @since 5.0
  */
 public interface ClientRequest<T> {
-
-	// Instance methods
 
 	/**
 	 * Return the HTTP method.
@@ -81,6 +77,7 @@ public interface ClientRequest<T> {
 	 */
 	Mono<Void> writeTo(ClientHttpRequest request, WebClientStrategies strategies);
 
+
 	// Static builder methods
 
 	/**
@@ -89,7 +86,7 @@ public interface ClientRequest<T> {
 	 * @param other the request to copy the method, URI, headers, and cookies from
 	 * @return the created builder
 	 */
-	static BodyBuilder from(ClientRequest<?> other) {
+	static Builder from(ClientRequest<?> other) {
 		Assert.notNull(other, "'other' must not be null");
 		return new DefaultClientRequestBuilder(other.method(), other.url())
 				.headers(other.headers())
@@ -102,100 +99,15 @@ public interface ClientRequest<T> {
 	 * @param url the URL
 	 * @return the created builder
 	 */
-	static BodyBuilder method(HttpMethod method, URI url) {
+	static Builder method(HttpMethod method, URI url) {
 		return new DefaultClientRequestBuilder(method, url);
 	}
 
-	/**
-	 * Create a builder with the given method and url template.
-	 * @param method the HTTP method (GET, POST, etc)
-	 * @param urlTemplate the URL template
-	 * @param uriVariables optional variables to expand the template
-	 * @return the created builder
-	 */
-	static BodyBuilder method(HttpMethod method, String urlTemplate, Object... uriVariables) {
-		UriTemplateHandler templateHandler = new DefaultUriTemplateHandler();
-		URI url = templateHandler.expand(urlTemplate, uriVariables);
-		return new DefaultClientRequestBuilder(method, url);
-	}
 
 	/**
-	 * Create an HTTP GET builder with the given url template.
-	 * @param urlTemplate the URL template
-	 * @param uriVariables optional variables to expand the template
-	 * @return the created builder
+	 * Defines a builder for a request.
 	 */
-	static HeadersBuilder<?> GET(String urlTemplate, Object... uriVariables) {
-		return method(HttpMethod.GET, urlTemplate, uriVariables);
-	}
-
-	/**
-	 * Create an HTTP HEAD builder with the given url template.
-	 * @param urlTemplate the URL template
-	 * @param uriVariables optional variables to expand the template
-	 * @return the created builder
-	 */
-	static HeadersBuilder<?> HEAD(String urlTemplate, Object... uriVariables) {
-		return method(HttpMethod.HEAD, urlTemplate, uriVariables);
-	}
-
-	/**
-	 * Create an HTTP POST builder with the given url template.
-	 * @param urlTemplate the URL template
-	 * @param uriVariables optional variables to expand the template
-	 * @return the created builder
-	 */
-	static BodyBuilder POST(String urlTemplate, Object... uriVariables) {
-		return method(HttpMethod.POST, urlTemplate, uriVariables);
-	}
-
-	/**
-	 * Create an HTTP PUT builder with the given url template.
-	 * @param urlTemplate the URL template
-	 * @param uriVariables optional variables to expand the template
-	 * @return the created builder
-	 */
-	static BodyBuilder PUT(String urlTemplate, Object... uriVariables) {
-		return method(HttpMethod.PUT, urlTemplate, uriVariables);
-	}
-
-	/**
-	 * Create an HTTP PATCH builder with the given url template.
-	 * @param urlTemplate the URL template
-	 * @param uriVariables optional variables to expand the template
-	 * @return the created builder
-	 */
-	static BodyBuilder PATCH(String urlTemplate, Object... uriVariables) {
-		return method(HttpMethod.PATCH, urlTemplate, uriVariables);
-	}
-
-	/**
-	 * Create an HTTP DELETE builder with the given url template.
-	 * @param urlTemplate the URL template
-	 * @param uriVariables optional variables to expand the template
-	 * @return the created builder
-	 */
-	static HeadersBuilder<?> DELETE(String urlTemplate, Object... uriVariables) {
-		return method(HttpMethod.DELETE, urlTemplate, uriVariables);
-	}
-
-	/**
-	 * Creates an HTTP OPTIONS builder with the given url template.
-	 * @param urlTemplate the URL template
-	 * @param uriVariables optional variables to expand the template
-	 * @return the created builder
-	 */
-	static HeadersBuilder<?> OPTIONS(String urlTemplate, Object... uriVariables) {
-		return method(HttpMethod.OPTIONS, urlTemplate, uriVariables);
-	}
-
-
-	/**
-	 * Defines a builder that adds headers to the request.
-	 *
-	 * @param <B> the builder subclass
-	 */
-	interface HeadersBuilder<B extends HeadersBuilder<B>> {
+	interface Builder {
 
 		/**
 		 * Add the given, single header value under the given name.
@@ -204,7 +116,7 @@ public interface ClientRequest<T> {
 		 * @return this builder
 		 * @see HttpHeaders#add(String, String)
 		 */
-		B header(String headerName, String... headerValues);
+		Builder header(String headerName, String... headerValues);
 
 		/**
 		 * Copy the given headers into the entity's headers map.
@@ -212,39 +124,7 @@ public interface ClientRequest<T> {
 		 * @param headers the existing HttpHeaders to copy from
 		 * @return this builder
 		 */
-		B headers(HttpHeaders headers);
-
-		/**
-		 * Set the list of acceptable {@linkplain MediaType media types}, as
-		 * specified by the {@code Accept} header.
-		 * @param acceptableMediaTypes the acceptable media types
-		 * @return this builder
-		 */
-		B accept(MediaType... acceptableMediaTypes);
-
-		/**
-		 * Set the list of acceptable {@linkplain Charset charsets}, as specified
-		 * by the {@code Accept-Charset} header.
-		 * @param acceptableCharsets the acceptable charsets
-		 * @return this builder
-		 */
-		B acceptCharset(Charset... acceptableCharsets);
-
-		/**
-		 * Set the value of the {@code If-Modified-Since} header.
-		 * <p>The date should be specified as the number of milliseconds since
-		 * January 1, 1970 GMT.
-		 * @param ifModifiedSince the new value of the header
-		 * @return this builder
-		 */
-		B ifModifiedSince(ZonedDateTime ifModifiedSince);
-
-		/**
-		 * Set the values of the {@code If-None-Match} header.
-		 * @param ifNoneMatches the new value of the header
-		 * @return this builder
-		 */
-		B ifNoneMatch(String... ifNoneMatches);
+		Builder headers(HttpHeaders headers);
 
 		/**
 		 * Add a cookie with the given name and value.
@@ -252,7 +132,7 @@ public interface ClientRequest<T> {
 		 * @param value the cookie value
 		 * @return this builder
 		 */
-		B cookie(String name, String value);
+		Builder cookie(String name, String value);
 
 		/**
 		 * Copy the given cookies into the entity's cookies map.
@@ -260,39 +140,13 @@ public interface ClientRequest<T> {
 		 * @param cookies the existing cookies to copy from
 		 * @return this builder
 		 */
-		B cookies(MultiValueMap<String, String> cookies);
+		Builder cookies(MultiValueMap<String, String> cookies);
 
 		/**
 		 * Builds the request entity with no body.
 		 * @return the request entity
 		 */
 		ClientRequest<Void> build();
-	}
-
-
-	/**
-	 * Defines a builder that adds a body to the request entity.
-	 */
-	interface BodyBuilder extends HeadersBuilder<BodyBuilder> {
-
-
-		/**
-		 * Set the length of the body in bytes, as specified by the
-		 * {@code Content-Length} header.
-		 * @param contentLength the content length
-		 * @return this builder
-		 * @see HttpHeaders#setContentLength(long)
-		 */
-		BodyBuilder contentLength(long contentLength);
-
-		/**
-		 * Set the {@linkplain MediaType media type} of the body, as specified
-		 * by the {@code Content-Type} header.
-		 * @param contentType the content type
-		 * @return this builder
-		 * @see HttpHeaders#setContentType(MediaType)
-		 */
-		BodyBuilder contentType(MediaType contentType);
 
 		/**
 		 * Set the body of the request to the given {@code BodyInserter} and return it.
@@ -313,6 +167,5 @@ public interface ClientRequest<T> {
 		<T, S extends Publisher<T>> ClientRequest<S> body(S publisher, Class<T> elementClass);
 
 	}
-
 
 }

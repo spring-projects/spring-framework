@@ -18,11 +18,7 @@ package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -31,8 +27,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -45,6 +39,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
 
 /**
  * @author Arjen Poutsma
@@ -53,12 +50,12 @@ public class DefaultClientRequestBuilderTests {
 
 	@Test
 	public void from() throws Exception {
-		ClientRequest<Void> other = ClientRequest.GET("http://example.com")
+		ClientRequest<Void> other = ClientRequest.method(GET, URI.create("http://example.com"))
 				.header("foo", "bar")
 				.cookie("baz", "qux").build();
 		ClientRequest<Void> result = ClientRequest.from(other).build();
 		assertEquals(new URI("http://example.com"), result.url());
-		assertEquals(HttpMethod.GET, result.method());
+		assertEquals(GET, result.method());
 		assertEquals("bar", result.headers().getFirst("foo"));
 		assertEquals("qux", result.cookies().getFirst("baz"));
 	}
@@ -66,112 +63,26 @@ public class DefaultClientRequestBuilderTests {
 	@Test
 	public void method() throws Exception {
 		URI url = new URI("http://example.com");
-		ClientRequest<Void> result = ClientRequest.method(HttpMethod.DELETE, url).build();
+		ClientRequest<Void> result = ClientRequest.method(DELETE, url).build();
 		assertEquals(url, result.url());
-		assertEquals(HttpMethod.DELETE, result.method());
-	}
-
-	@Test
-	public void GET() throws Exception {
-		URI url = new URI("http://example.com");
-		ClientRequest<Void> result = ClientRequest.GET(url.toString()).build();
-		assertEquals(url, result.url());
-		assertEquals(HttpMethod.GET, result.method());
-	}
-
-	@Test
-	public void HEAD() throws Exception {
-		URI url = new URI("http://example.com");
-		ClientRequest<Void> result = ClientRequest.HEAD(url.toString()).build();
-		assertEquals(url, result.url());
-		assertEquals(HttpMethod.HEAD, result.method());
-	}
-
-	@Test
-	public void POST() throws Exception {
-		URI url = new URI("http://example.com");
-		ClientRequest<Void> result = ClientRequest.POST(url.toString()).build();
-		assertEquals(url, result.url());
-		assertEquals(HttpMethod.POST, result.method());
-	}
-
-	@Test
-	public void PUT() throws Exception {
-		URI url = new URI("http://example.com");
-		ClientRequest<Void> result = ClientRequest.PUT(url.toString()).build();
-		assertEquals(url, result.url());
-		assertEquals(HttpMethod.PUT, result.method());
-	}
-
-	@Test
-	public void PATCH() throws Exception {
-		URI url = new URI("http://example.com");
-		ClientRequest<Void> result = ClientRequest.PATCH(url.toString()).build();
-		assertEquals(url, result.url());
-		assertEquals(HttpMethod.PATCH, result.method());
-	}
-
-	@Test
-	public void DELETE() throws Exception {
-		URI url = new URI("http://example.com");
-		ClientRequest<Void> result = ClientRequest.DELETE(url.toString()).build();
-		assertEquals(url, result.url());
-		assertEquals(HttpMethod.DELETE, result.method());
-	}
-
-	@Test
-	public void OPTIONS() throws Exception {
-		URI url = new URI("http://example.com");
-		ClientRequest<Void> result = ClientRequest.OPTIONS(url.toString()).build();
-		assertEquals(url, result.url());
-		assertEquals(HttpMethod.OPTIONS, result.method());
-	}
-
-	@Test
-	public void accept() throws Exception {
-		MediaType json = MediaType.APPLICATION_JSON;
-		ClientRequest<Void> result = ClientRequest.GET("http://example.com").accept(json).build();
-		assertEquals(Collections.singletonList(json), result.headers().getAccept());
-	}
-
-	@Test
-	public void acceptCharset() throws Exception {
-		Charset charset = Charset.defaultCharset();
-		ClientRequest<Void> result = ClientRequest.GET("http://example.com")
-				.acceptCharset(charset).build();
-		assertEquals(Collections.singletonList(charset), result.headers().getAcceptCharset());
-	}
-
-	@Test
-	public void ifModifiedSince() throws Exception {
-		ZonedDateTime now = ZonedDateTime.now();
-		ClientRequest<Void> result = ClientRequest.GET("http://example.com")
-				.ifModifiedSince(now).build();
-		assertEquals(now.toInstant().toEpochMilli()/1000, result.headers().getIfModifiedSince()/1000);
-	}
-
-	@Test
-	public void ifNoneMatch() throws Exception {
-		ClientRequest<Void> result = ClientRequest.GET("http://example.com")
-				.ifNoneMatch("\"v2.7\"", "\"v2.8\"").build();
-		assertEquals(Arrays.asList("\"v2.7\"", "\"v2.8\""), result.headers().getIfNoneMatch());
+		assertEquals(DELETE, result.method());
 	}
 
 	@Test
 	public void cookie() throws Exception {
-		ClientRequest<Void> result = ClientRequest.GET("http://example.com")
+		ClientRequest<Void> result = ClientRequest.method(GET, URI.create("http://example.com"))
 				.cookie("foo", "bar").build();
 		assertEquals("bar", result.cookies().getFirst("foo"));
 	}
 
 	@Test
 	public void build() throws Exception {
-		ClientRequest<Void> result = ClientRequest.GET("http://example.com")
+		ClientRequest<Void> result = ClientRequest.method(GET, URI.create("http://example.com"))
 				.header("MyKey", "MyValue")
 				.cookie("foo", "bar")
 				.build();
 
-		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, "/");
+		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");
 		WebClientStrategies strategies = mock(WebClientStrategies.class);
 
 		result.writeTo(request, strategies).block();
@@ -193,7 +104,7 @@ public class DefaultClientRequestBuilderTests {
 					return response.writeWith(Mono.just(buffer));
 				};
 
-		ClientRequest<String> result = ClientRequest.POST("http://example.com")
+		ClientRequest<String> result = ClientRequest.method(POST, URI.create("http://example.com"))
 				.body(inserter);
 
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
@@ -202,7 +113,7 @@ public class DefaultClientRequestBuilderTests {
 		WebClientStrategies strategies = mock(WebClientStrategies.class);
 		when(strategies.messageWriters()).thenReturn(messageWriters::stream);
 
-		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, "/");
+		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");
 		result.writeTo(request, strategies).block();
 		assertNotNull(request.getBody());
 	}
