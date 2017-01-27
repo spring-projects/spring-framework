@@ -62,7 +62,7 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	private static URI initUri(HttpServerRequest<ByteBuf> request) {
-		Assert.notNull("'request', request must not be null");
+		Assert.notNull(request, "'request' must not be null");
 		return StringUtils.isEmpty(request.getHostHeader()) ?
 				URI.create(request.getUri()) : getBaseUrl(request).resolve(request.getUri());
 	}

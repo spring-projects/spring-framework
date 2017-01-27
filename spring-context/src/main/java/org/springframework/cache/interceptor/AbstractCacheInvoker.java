@@ -37,7 +37,7 @@ public abstract class AbstractCacheInvoker {
 	}
 
 	protected AbstractCacheInvoker(CacheErrorHandler errorHandler) {
-		Assert.notNull("ErrorHandler must not be null");
+		Assert.notNull(errorHandler, "ErrorHandler must not be null");
 		this.errorHandler = errorHandler;
 	}
 
