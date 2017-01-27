@@ -52,7 +52,6 @@ import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConve
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.web.util.AbstractUriTemplateHandler;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriTemplateHandler;
 
@@ -263,12 +262,14 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * @param uriVars the default URI variable values
 	 * @since 4.3
 	 */
+	@SuppressWarnings("deprecation")
 	public void setDefaultUriVariables(Map<String, ?> uriVars) {
 		if (this.uriTemplateHandler instanceof DefaultUriBuilderFactory) {
 			((DefaultUriBuilderFactory) this.uriTemplateHandler).setDefaultUriVariables(uriVars);
 		}
-		else if (this.uriTemplateHandler instanceof AbstractUriTemplateHandler) {
-			((AbstractUriTemplateHandler) this.uriTemplateHandler).setDefaultUriVariables(uriVars);
+		else if (this.uriTemplateHandler instanceof org.springframework.web.util.AbstractUriTemplateHandler) {
+			((org.springframework.web.util.AbstractUriTemplateHandler) this.uriTemplateHandler)
+					.setDefaultUriVariables(uriVars);
 		}
 		else {
 			throw new IllegalArgumentException(
