@@ -55,7 +55,7 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	private static URI initUri(HttpServerRequest channel) {
-		Assert.notNull("'channel' must not be null");
+		Assert.notNull(channel, "'channel' must not be null");
 		InetSocketAddress address = channel.remoteAddress();
 		return (address == null ? URI.create(channel.uri()) : getBaseUrl(address).resolve(channel.uri()));
 	}

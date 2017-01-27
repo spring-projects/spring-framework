@@ -73,7 +73,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	 * Create a {@code JmsMessagingTemplate} instance with the {@link JmsTemplate} to use.
 	 */
 	public JmsMessagingTemplate(JmsTemplate jmsTemplate) {
-		Assert.notNull("JmsTemplate must not be null");
+		Assert.notNull(jmsTemplate, "JmsTemplate must not be null");
 		this.jmsTemplate = jmsTemplate;
 	}
 

@@ -56,7 +56,7 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 	public RxNettyServerHttpResponse(HttpServerResponse<ByteBuf> response,
 			NettyDataBufferFactory dataBufferFactory) {
 		super(dataBufferFactory);
-		Assert.notNull("'response', response must not be null.");
+		Assert.notNull(response, "'response' must not be null.");
 
 		this.response = response;
 	}

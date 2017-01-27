@@ -47,7 +47,7 @@ public class UndertowWebSocketHandlerAdapter extends AbstractReceiveListener {
 
 
 	public UndertowWebSocketHandlerAdapter(UndertowWebSocketSession session) {
-		Assert.notNull("UndertowWebSocketSession is required");
+		Assert.notNull(session, "UndertowWebSocketSession is required");
 		this.session = session;
 	}
 

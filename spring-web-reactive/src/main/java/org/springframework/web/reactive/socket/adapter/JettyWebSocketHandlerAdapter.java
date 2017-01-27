@@ -62,8 +62,8 @@ public class JettyWebSocketHandlerAdapter {
 	public JettyWebSocketHandlerAdapter(WebSocketHandler handler,
 			Function<Session, JettyWebSocketSession> sessionFactory) {
 
-		Assert.notNull("WebSocketHandler is required");
-		Assert.notNull("'sessionFactory' is required");
+		Assert.notNull(handler, "WebSocketHandler is required");
+		Assert.notNull(sessionFactory, "'sessionFactory' is required");
 		this.delegateHandler = handler;
 		this.sessionFactory = sessionFactory;
 	}

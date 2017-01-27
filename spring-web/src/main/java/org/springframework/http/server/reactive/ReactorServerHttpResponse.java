@@ -50,7 +50,7 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 
 	public ReactorServerHttpResponse(HttpServerResponse response, DataBufferFactory bufferFactory) {
 		super(bufferFactory);
-		Assert.notNull("'response' must not be null.");
+		Assert.notNull(response, "'response' must not be null.");
 		this.response = response;
 	}
 

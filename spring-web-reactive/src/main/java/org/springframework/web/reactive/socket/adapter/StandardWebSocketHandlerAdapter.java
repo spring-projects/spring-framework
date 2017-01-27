@@ -53,8 +53,8 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 	public StandardWebSocketHandlerAdapter(WebSocketHandler handler,
 			Function<Session, StandardWebSocketSession> sessionFactory) {
 
-		Assert.notNull("WebSocketHandler is required");
-		Assert.notNull("'sessionFactory' is required");
+		Assert.notNull(handler, "WebSocketHandler is required");
+		Assert.notNull(sessionFactory, "'sessionFactory' is required");
 		this.delegateHandler = handler;
 		this.sessionFactory = sessionFactory;
 	}
