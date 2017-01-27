@@ -446,14 +446,27 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	@Override
 	protected void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
-		builder.scheme(getScheme());
-		builder.userInfo(getUserInfo());
-		builder.host(getHost());
-		builder.port(getPort());
-		builder.replacePath("");
-		this.path.copyToUriComponentsBuilder(builder);
-		builder.replaceQueryParams(getQueryParams());
-		builder.fragment(getFragment());
+		if (getScheme() != null) {
+			builder.scheme(getScheme());
+		}
+		if (getUserInfo() != null) {
+			builder.userInfo(getUserInfo());
+		}
+		if (getHost() != null) {
+			builder.host(getHost());
+		}
+		if (getPort() != -1) {
+			builder.port(getPort());
+		}
+		if (getPath() != null) {
+			this.path.copyToUriComponentsBuilder(builder);
+		}
+		if (!getQueryParams().isEmpty()) {
+			builder.queryParams(getQueryParams());
+		}
+		if (getFragment() != null) {
+			builder.fragment(getFragment());
+		}
 	}
 
 
