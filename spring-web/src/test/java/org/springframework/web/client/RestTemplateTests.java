@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,6 +149,21 @@ public class RestTemplateTests {
 		vars.put("first", null);
 		vars.put("last", "foo");
 		template.execute("http://example.com/{first}-{last}", HttpMethod.GET, null, null, vars);
+
+		verify(response).close();
+	}
+
+	@Test // SPR-15201
+	public void uriTemplateWithTrailingSlash() throws Exception {
+		String url = "http://example.com/spring/";
+		given(requestFactory.createRequest(new URI(url), HttpMethod.GET)).willReturn(request);
+		given(request.execute()).willReturn(response);
+		given(errorHandler.hasError(response)).willReturn(false);
+		HttpStatus status = HttpStatus.OK;
+		given(response.getStatusCode()).willReturn(status);
+		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+
+		template.execute(url, HttpMethod.GET, null, null);
 
 		verify(response).close();
 	}

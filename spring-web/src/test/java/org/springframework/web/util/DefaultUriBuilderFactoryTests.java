@@ -127,10 +127,32 @@ public class DefaultUriBuilderFactoryTests {
 	}
 
 	@Test
-	public void initialPathSplitIntoPathSegments() throws Exception {
+	public void parsePathWithDefaultSettings() throws Exception {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("/foo/{bar}");
 		URI uri = factory.uriString("/baz/{id}").build("a/b", "c/d");
 		assertEquals("/foo/a%2Fb/baz/c%2Fd", uri.toString());
+	}
+
+	@Test
+	public void parsePathIsTurnedOff() throws Exception {
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("/foo/{bar}");
+		factory.setParsePath(false);
+		URI uri = factory.uriString("/baz/{id}").build("a/b", "c/d");
+		assertEquals("/foo/a/b/baz/c/d", uri.toString());
+	}
+
+	@Test // SPR-15201
+	public void pathWithTrailingSlash() throws Exception {
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+		URI uri = factory.expand("http://localhost:8080/spring/");
+		assertEquals("http://localhost:8080/spring/", uri.toString());
+	}
+
+	@Test
+	public void pathWithDuplicateSlashes() throws Exception {
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+		URI uri = factory.expand("/foo/////////bar");
+		assertEquals("/foo/bar", uri.toString());
 	}
 
 }

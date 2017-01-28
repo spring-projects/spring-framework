@@ -48,6 +48,8 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 	private EncodingMode encodingMode = EncodingMode.URI_COMPONENT;
 
+	private boolean parsePath = true;
+
 
 	/**
 	 * Default constructor without a base URI.
@@ -126,6 +128,28 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		return this.encodingMode;
 	}
 
+	/**
+	 * Whether to parse the path into path segments for the URI string passed
+	 * into {@link #uriString(String)} or one of the expand methods.
+	 * <p>Setting this property to {@code true} ensures that URI variables
+	 * expanded into the path are subject to path segment encoding rules and
+	 * "/" characters are percent-encoded. If set to {@code false} the path is
+	 * kept as a full path and expanded URI variables will have "/" characters
+	 * preserved.
+	 * <p>By default this is set to {@code true}.
+	 * @param parsePath whether to parse the path into path segments
+	 */
+	public void setParsePath(boolean parsePath) {
+		this.parsePath = parsePath;
+	}
+
+	/**
+	 * Whether the handler is configured to parse the path into path segments.
+	 */
+	public boolean shouldParsePath() {
+		return this.parsePath;
+	}
+
 
 	// UriTemplateHandler
 
@@ -158,16 +182,22 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 		private UriComponentsBuilder initUriComponentsBuilder(String uriTemplate) {
 
-			// Merge base URI with child URI template
 			UriComponentsBuilder result = baseUri.cloneBuilder();
 			UriComponents child = UriComponentsBuilder.fromUriString(uriTemplate).build();
 			result.uriComponents(child);
 
-			// Split path into path segments
-			List<String> pathList = result.build().getPathSegments();
-			String[] pathArray = pathList.toArray(new String[pathList.size()]);
-			result.replacePath(null);
-			result.pathSegment(pathArray);
+			if (shouldParsePath()) {
+				UriComponents uric = result.build();
+				String path = uric.getPath();
+				List<String> pathSegments = uric.getPathSegments();
+
+				result.replacePath(null);
+				result.pathSegment(pathSegments.toArray(new String[0]));
+
+				if (path != null && path.endsWith("/")) {
+					result.path("/");
+				}
+			}
 
 			return result;
 		}
