@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ import org.springframework.web.util.HierarchicalUriComponents.PathComponent;
  * @author Phillip Webb
  * @author Oliver Gierke
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  * @since 3.1
  * @see #newInstance()
  * @see #fromPath(String)
@@ -911,8 +912,9 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		private final List<String> pathSegments = new LinkedList<>();
 
 		public void append(String... pathSegments) {
-			for (String pathSegment : pathSegments) {
-				if (StringUtils.hasText(pathSegment)) {
+			for (int i = 0 ; i < pathSegments.length ; i++) {
+				String pathSegment = pathSegments[i];
+				if (StringUtils.hasText(pathSegment) || (pathSegment != null && i == (pathSegments.length - 1))) {
 					this.pathSegments.add(pathSegment);
 				}
 			}

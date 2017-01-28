@@ -42,6 +42,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @author Phillip Webb
+ * @author Sebastien Deleuze
  * @since 3.1.3
  * @see <a href="http://tools.ietf.org/html/rfc3986#section-1.2.3">Hierarchical URIs</a>
  */
@@ -691,7 +692,8 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public List<String> getPathSegments() {
-			String[] segments = StringUtils.tokenizeToStringArray(this.path, PATH_DELIMITER_STRING);
+			String path = this.path.startsWith("/") ? this.path.substring(1) : this.path;
+			String[] segments = StringUtils.delimitedListToStringArray(path, PATH_DELIMITER_STRING);
 			return Collections.unmodifiableList(Arrays.asList(segments));
 		}
 
