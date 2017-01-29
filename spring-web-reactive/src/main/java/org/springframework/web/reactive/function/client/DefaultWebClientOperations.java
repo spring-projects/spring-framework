@@ -129,7 +129,7 @@ class DefaultWebClientOperations implements WebClientOperations {
 
 		@Override
 		public HeaderSpec uri(String uriTemplate, Object... uriVariables) {
-			return uri(getUriBuilderFactory().expand(uriTemplate));
+			return uri(getUriBuilderFactory().expand(uriTemplate, uriVariables));
 		}
 
 		@Override
