@@ -54,7 +54,7 @@ configure(allprojects) { project ->
 	ext.hibval5Version         = "5.4.0.CR1"
 	ext.hsqldbVersion          = "2.3.4"
 	ext.httpasyncVersion       = "4.1.2"
-	ext.httpclientVersion      = "4.5.2"
+	ext.httpclientVersion      = "4.5.3"
 	ext.interceptorApiVersion  = "1.2"
 	ext.jackson2Version        = "2.8.6"
 	ext.javamailVersion        = "1.5.6"
@@ -72,10 +72,10 @@ configure(allprojects) { project ->
 	ext.junitJupiterVersion    = '5.0.0-M3'
 	ext.junitPlatformVersion   = '1.0.0-M3'
 	ext.kotlinVersion          = "1.1.0-beta-17"  // also change kotlin-gradle-plugin version when upgrading
-	ext.log4jVersion           = '2.7'
+	ext.log4jVersion           = '2.8'
 	ext.nettyVersion           = "4.1.7.Final"
 	ext.okhttpVersion          = "2.7.5"
-	ext.okhttp3Version         = "3.5.0"
+	ext.okhttp3Version         = "3.6.0"
 	ext.poiVersion             = "3.15"
 	ext.protobufVersion        = "3.1.0"
 	ext.quartzVersion          = "2.2.3"
