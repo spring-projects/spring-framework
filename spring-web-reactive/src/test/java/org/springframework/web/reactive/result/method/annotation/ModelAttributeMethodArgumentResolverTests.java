@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.net.URISyntaxException;
@@ -43,18 +44,12 @@ import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static junit.framework.TestCase.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.forClass;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
-import static org.springframework.util.Assert.isTrue;
-
+import static org.junit.Assert.*;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * Unit tests for {@link ModelAttributeMethodArgumentResolver}.
+ *
  * @author Rossen Stoyanchev
  */
 public class ModelAttributeMethodArgumentResolverTests {
@@ -208,7 +203,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 				resolvedArgumentMono -> {
 					Object value = resolvedArgumentMono.blockMillis(5000);
 					assertNotNull(value);
-					isTrue(value instanceof Mono);
+					assertTrue(value instanceof Mono);
 					return (Mono<?>) value;
 				});
 	}
@@ -220,14 +215,13 @@ public class ModelAttributeMethodArgumentResolverTests {
 				resolvedArgumentMono -> {
 					Object value = resolvedArgumentMono.blockMillis(5000);
 					assertNotNull(value);
-					isTrue(value instanceof Single);
+					assertTrue(value instanceof Single);
 					return Mono.from(RxReactiveStreams.toPublisher((Single) value));
 				});
 	}
 
 
 	private void testBindFoo(ResolvableType type, Function<Object, Foo> valueExtractor) throws Exception {
-
 		Object value = createResolver()
 				.resolveArgument(parameter(type), this.bindContext, exchange("name=Robert&age=25"))
 				.blockMillis(0);

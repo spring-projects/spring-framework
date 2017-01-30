@@ -106,7 +106,6 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
-
 		ResolvableType returnType = result.getReturnType();
 		MethodParameter bodyType;
 
@@ -117,7 +116,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(rawClass, optionalValue);
 
 		if (adapter != null) {
-			Assert.isTrue(!adapter.isMultiValue(), "Only a single ResponseEntity supported.");
+			Assert.isTrue(!adapter.isMultiValue(), "Only a single ResponseEntity supported");
 			returnValueMono = Mono.from(adapter.toPublisher(optionalValue));
 			bodyType = new MethodParameter(result.getReturnTypeSource());
 			bodyType.increaseNestingLevel();
@@ -130,8 +129,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 		}
 
 		return returnValueMono.then(returnValue -> {
-
-			Assert.isInstanceOf(HttpEntity.class, returnValue);
+			Assert.isInstanceOf(HttpEntity.class, returnValue, "HttpEntity expected");
 			HttpEntity<?> httpEntity = (HttpEntity<?>) returnValue;
 
 			if (httpEntity instanceof ResponseEntity) {

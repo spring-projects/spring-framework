@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
@@ -26,6 +25,8 @@ import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+
+import org.springframework.util.Assert;
 
 /**
  * An alternative to {@link AbstractListenerWriteProcessor} but instead writing
@@ -127,10 +128,9 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 	private enum State {
 
 		UNSUBSCRIBED {
-
 			@Override
 			public <T> void onSubscribe(AbstractListenerWriteFlushProcessor<T> processor, Subscription subscription) {
-				Objects.requireNonNull(subscription, "Subscription cannot be null");
+				Assert.notNull(subscription, "Subscription must not be null");
 				if (processor.changeState(this, REQUESTED)) {
 					processor.subscription = subscription;
 					subscription.request(1);
@@ -140,8 +140,8 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 				}
 			}
 		},
-		REQUESTED {
 
+		REQUESTED {
 			@Override
 			public <T> void onNext(AbstractListenerWriteFlushProcessor<T> processor, Publisher<? extends T> chunk) {
 				if (processor.changeState(this, RECEIVED)) {
@@ -150,7 +150,6 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 					chunkProcessor.subscribe(new WriteSubscriber(processor));
 				}
 			}
-
 			@Override
 			public <T> void onComplete(AbstractListenerWriteFlushProcessor<T> processor) {
 				if (processor.changeState(this, COMPLETED)) {
@@ -158,8 +157,8 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 				}
 			}
 		},
-		RECEIVED {
 
+		RECEIVED {
 			@Override
 			public <T> void writeComplete(AbstractListenerWriteFlushProcessor<T> processor) {
 				try {
@@ -169,7 +168,6 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 					processor.cancel();
 					processor.onError(ex);
 				}
-
 				if (processor.subscriberCompleted) {
 					if (processor.changeState(this, COMPLETED)) {
 						processor.resultPublisher.publishComplete();
@@ -181,26 +179,21 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 					}
 				}
 			}
-
 			@Override
 			public <T> void onComplete(AbstractListenerWriteFlushProcessor<T> processor) {
 				processor.subscriberCompleted = true;
 			}
 		},
+
 		COMPLETED {
-
 			@Override
-			public <T> void onNext(AbstractListenerWriteFlushProcessor<T> processor,
-					Publisher<? extends T> publisher) {
+			public <T> void onNext(AbstractListenerWriteFlushProcessor<T> processor, Publisher<? extends T> publisher) {
 				// ignore
-
 			}
-
 			@Override
 			public <T> void onError(AbstractListenerWriteFlushProcessor<T> processor, Throwable t) {
 				// ignore
 			}
-
 			@Override
 			public <T> void onComplete(AbstractListenerWriteFlushProcessor<T> processor) {
 				// ignore
@@ -233,7 +226,6 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 		private static class WriteSubscriber implements Subscriber<Void> {
 
 			private final AbstractListenerWriteFlushProcessor<?> processor;
-
 
 			public WriteSubscriber(AbstractListenerWriteFlushProcessor<?> processor) {
 				this.processor = processor;

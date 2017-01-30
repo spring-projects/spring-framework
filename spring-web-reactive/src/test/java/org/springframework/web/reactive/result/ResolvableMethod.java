@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result;
 
 import java.lang.annotation.Annotation;
@@ -70,7 +71,6 @@ public class ResolvableMethod {
 
 	private final Object object;
 
-
 	private String methodName;
 
 	private Class<?>[] argumentTypes;
@@ -84,13 +84,13 @@ public class ResolvableMethod {
 
 
 	private ResolvableMethod(Class<?> objectClass) {
-		Assert.notNull(objectClass);
+		Assert.notNull(objectClass, "Class must not be null");
 		this.objectClass = objectClass;
 		this.object = null;
 	}
 
 	private ResolvableMethod(Object object) {
-		Assert.notNull(object);
+		Assert.notNull(object, "Object must not be null");
 		this.object = object;
 		this.objectClass = object.getClass();
 	}
@@ -136,6 +136,7 @@ public class ResolvableMethod {
 		return this;
 	}
 
+
 	// Resolve methods
 
 	public Method resolve() {
@@ -168,18 +169,17 @@ public class ResolvableMethod {
 					return true;
 				});
 
-		Assert.isTrue(!methods.isEmpty(), "No matching method: " + this);
-		Assert.isTrue(methods.size() == 1, "Multiple matching methods: " + this);
-
+		Assert.state(!methods.isEmpty(), () -> "No matching method: " + this);
+		Assert.state(methods.size() == 1, () -> "Multiple matching methods: " + this);
 		return methods.iterator().next();
 	}
 
 	private String getReturnType() {
-		return this.returnType != null ? this.returnType.toString() : null;
+		return (this.returnType != null ? this.returnType.toString() : null);
 	}
 
 	public InvocableHandlerMethod resolveHandlerMethod() {
-		Assert.notNull(this.object);
+		Assert.state(this.object != null, "Object must not be null");
 		return new InvocableHandlerMethod(this.object, resolve());
 	}
 
@@ -194,9 +194,7 @@ public class ResolvableMethod {
 	}
 
 	@SafeVarargs
-	public final MethodParameter resolveParam(ResolvableType type,
-			Predicate<MethodParameter>... predicates) {
-
+	public final MethodParameter resolveParam(ResolvableType type, Predicate<MethodParameter>... predicates) {
 		List<MethodParameter> matches = new ArrayList<>();
 
 		Method method = resolve();
@@ -215,9 +213,8 @@ public class ResolvableMethod {
 			matches.add(param);
 		}
 
-		Assert.isTrue(!matches.isEmpty(), "No matching arg on " + method.toString());
-		Assert.isTrue(matches.size() == 1, "Multiple matching args: " + matches + " on " + method.toString());
-
+		Assert.state(!matches.isEmpty(), () -> "No matching arg on " + method.toString());
+		Assert.state(matches.size() == 1, () -> "Multiple matching args: " + matches + " on " + method.toString());
 		return matches.get(0);
 	}
 

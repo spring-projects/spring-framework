@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1250,7 +1250,7 @@ public class ConfigurationClassPostProcessorTests {
 
 		@PostConstruct
 		public void validate() {
-			Assert.notNull(provider);
+			Assert.notNull(provider, "No ServiceBeanProvider injected");
 		}
 	}
 
@@ -1291,7 +1291,7 @@ public class ConfigurationClassPostProcessorTests {
 
 		@PostConstruct
 		public void validate() {
-			Assert.notNull(provider);
+			Assert.notNull(provider, "No ServiceBeanProvider injected");
 		}
 	}
 
@@ -1403,7 +1403,7 @@ public class ConfigurationClassPostProcessorTests {
 	static class DependingFoo {
 
 		DependingFoo(BarArgument bar) {
-			Assert.notNull(bar);
+			Assert.notNull(bar, "No BarArgument injected");
 		}
 	}
 

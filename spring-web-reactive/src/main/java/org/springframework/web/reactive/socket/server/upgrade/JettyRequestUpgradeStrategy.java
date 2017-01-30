@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,12 +146,12 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	}
 
 	private HttpServletRequest getHttpServletRequest(ServerHttpRequest request) {
-		Assert.isTrue(request instanceof ServletServerHttpRequest);
+		Assert.isInstanceOf(ServletServerHttpRequest.class, request, "ServletServerHttpRequest required");
 		return ((ServletServerHttpRequest) request).getServletRequest();
 	}
 
 	private HttpServletResponse getHttpServletResponse(ServerHttpResponse response) {
-		Assert.isTrue(response instanceof ServletServerHttpResponse);
+		Assert.isInstanceOf(ServletServerHttpResponse.class, response, "ServletServerHttpResponse required");
 		return ((ServletServerHttpResponse) response).getServletResponse();
 	}
 
@@ -180,7 +180,6 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 		private final Optional<String> protocol;
 
-
 		public WebSocketHandlerContainer(JettyWebSocketHandlerAdapter adapter, Optional<String> protocol) {
 			this.adapter = adapter;
 			this.protocol = protocol;
@@ -194,4 +193,5 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 			return this.protocol;
 		}
 	}
+
 }

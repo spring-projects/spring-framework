@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import org.springframework.web.server.ServerWebExchange;
  * path pattern that matches the current request path.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 5.0
  */
 public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
@@ -137,6 +138,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		if (handler != null) {
 			return handleMatch(handler, urlPath, urlPath, exchange);
 		}
+
 		// Pattern match?
 		List<String> matches = new ArrayList<>();
 		for (String pattern : this.handlerMap.keySet()) {
@@ -149,6 +151,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 				}
 			}
 		}
+
 		String bestMatch = null;
 		Comparator<String> comparator = getPathMatcher().getPatternComparator(urlPath);
 		if (!matches.isEmpty()) {
@@ -161,12 +164,18 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		if (bestMatch != null) {
 			handler = this.handlerMap.get(bestMatch);
 			if (handler == null) {
-				Assert.isTrue(bestMatch.endsWith("/"));
-				handler = this.handlerMap.get(bestMatch.substring(0, bestMatch.length() - 1));
+				if (bestMatch.endsWith("/")) {
+					handler = this.handlerMap.get(bestMatch.substring(0, bestMatch.length() - 1));
+				}
+				if (handler == null) {
+					throw new IllegalStateException(
+							"Could not find handler for best pattern match [" + bestMatch + "]");
+				}
 			}
 			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestMatch, urlPath);
 			return handleMatch(handler, bestMatch, pathWithinMapping, exchange);
 		}
+
 		// No handler found...
 		return null;
 	}

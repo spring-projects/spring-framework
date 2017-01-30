@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -27,6 +26,8 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Operators;
+
+import org.springframework.util.Assert;
 
 /**
  * Abstract base class for {@code Publisher} implementations that bridge between
@@ -48,6 +49,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
+	@SuppressWarnings("unused")
 	private volatile long demand;
 
 	@SuppressWarnings("rawtypes")
@@ -196,7 +198,8 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 		UNSUBSCRIBED {
 			@Override
 			<T> void subscribe(AbstractListenerReadPublisher<T> publisher, Subscriber<? super T> subscriber) {
-				Objects.requireNonNull(subscriber);
+				Assert.notNull(publisher, "Publisher must not be null");
+				Assert.notNull(subscriber, "Subscriber must not be null");
 				if (publisher.changeState(this, NO_DEMAND)) {
 					Subscription subscription = new ReadSubscription(publisher);
 					publisher.subscriber = subscriber;

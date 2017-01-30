@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
@@ -120,7 +119,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * Called when a data item is received via {@link Subscriber#onNext(Object)}
 	 */
 	protected void receiveData(T data) {
-		Assert.state(this.currentData == null);
+		if (this.currentData != null) {
+			throw new IllegalStateException("Current data not processed yet: " + this.currentData);
+		}
 		this.currentData = data;
 	}
 
@@ -185,10 +186,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 		 * #REQUESTED}.
 		 */
 		UNSUBSCRIBED {
-
 			@Override
 			public <T> void onSubscribe(AbstractListenerWriteProcessor<T> processor, Subscription subscription) {
-				Objects.requireNonNull(subscription, "Subscription cannot be null");
+				Assert.notNull(subscription, "Subscription must not be null");
 				if (processor.changeState(this, REQUESTED)) {
 					processor.subscription = subscription;
 					subscription.request(1);
@@ -198,6 +198,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 				}
 			}
 		},
+
 		/**
 		 * State that gets entered after a data has been
 		 * {@linkplain Subscription#request(long) requested}. Responds to {@code onNext}
@@ -205,7 +206,6 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 		 * changing state to {@link #COMPLETED}.
 		 */
 		REQUESTED {
-
 			@Override
 			public <T> void onNext(AbstractListenerWriteProcessor<T> processor, T data) {
 				if (processor.isDataEmpty(data)) {
@@ -218,7 +218,6 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 					}
 				}
 			}
-
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				if (processor.changeState(this, COMPLETED)) {
@@ -226,6 +225,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 				}
 			}
 		},
+
 		/**
 		 * State that gets entered after a data has been
 		 * {@linkplain Subscriber#onNext(Object) received}. Responds to
@@ -233,10 +233,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 		 * the state to {@link #WRITING}. If it can be written completely,
 		 * changes the state to either {@link #REQUESTED} if the subscription
 		 * has not been completed; or {@link #COMPLETED} if it has. If it cannot
-		 * be written completely the state will be changed to {@link #RECEIVED}.
+		 * be written completely the state will be changed to {@code #RECEIVED}.
 		 */
 		RECEIVED {
-
 			@Override
 			public <T> void onWritePossible(AbstractListenerWriteProcessor<T> processor) {
 				if (processor.changeState(this, WRITING)) {
@@ -265,38 +264,35 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 					}
 				}
 			}
-
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				processor.subscriberCompleted = true;
 			}
 		},
+
 		/**
 		 * State that gets entered after a writing of the current data has been
 		 * {@code onWritePossible started}.
 		 */
 		WRITING {
-
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				processor.subscriberCompleted = true;
 			}
 		},
+
 		/**
 		 * The terminal completed state. Does not respond to any events.
 		 */
 		COMPLETED {
-
 			@Override
 			public <T> void onNext(AbstractListenerWriteProcessor<T> processor, T data) {
 				// ignore
 			}
-
 			@Override
 			public <T> void onError(AbstractListenerWriteProcessor<T> processor, Throwable ex) {
 				// ignore
 			}
-
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				// ignore

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,12 +80,12 @@ public abstract class AbstractHttpServer implements HttpServer {
 
 	@Override
 	public final void afterPropertiesSet() throws Exception {
-		synchronized (this.lifecycleMonitor) {
-			Assert.isTrue(this.host != null);
-			Assert.isTrue(this.port != -1);
-			Assert.isTrue(this.httpHandler != null || this.handlerMap != null);
-			Assert.isTrue(!this.running);
+		Assert.notNull(this.host, "Host must not be null");
+		Assert.isTrue(this.port >= 0, "Port must not be a negative number");
+		Assert.isTrue(this.httpHandler != null || this.handlerMap != null, "No HttpHandler configured");
+		Assert.state(!this.running, "Cannot reconfigure while running");
 
+		synchronized (this.lifecycleMonitor) {
 			initServer();
 		}
 	}
@@ -110,7 +110,7 @@ public abstract class AbstractHttpServer implements HttpServer {
 				try {
 					startInternal();
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					throw new IllegalStateException(ex);
 				}
 			}
@@ -128,7 +128,7 @@ public abstract class AbstractHttpServer implements HttpServer {
 				try {
 					stopInternal();
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					throw new IllegalStateException(ex);
 				}
 				finally {

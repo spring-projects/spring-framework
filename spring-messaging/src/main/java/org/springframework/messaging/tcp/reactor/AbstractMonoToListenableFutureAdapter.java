@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ abstract class AbstractMonoToListenableFutureAdapter<S, T> implements Listenable
 
 
 	protected AbstractMonoToListenableFutureAdapter(Mono<S> mono) {
-		Assert.notNull(mono, "'mono' must not be null");
+		Assert.notNull(mono, "Mono must not be null");
 		this.monoProcessor = mono
 				.doOnSuccess(result -> {
 					T adapted;
@@ -73,10 +73,8 @@ abstract class AbstractMonoToListenableFutureAdapter<S, T> implements Listenable
 	}
 
 	@Override
-	public T get(long timeout, TimeUnit unit)
-			throws InterruptedException, ExecutionException, TimeoutException {
-
-		Assert.notNull(unit);
+	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+		Assert.notNull(unit, "TimeUnit must not be null");
 		Duration duration = Duration.ofMillis(TimeUnit.MILLISECONDS.convert(timeout, unit));
 		S result = this.monoProcessor.block(duration);
 		return adapt(result);
@@ -111,6 +109,7 @@ abstract class AbstractMonoToListenableFutureAdapter<S, T> implements Listenable
 		this.registry.addSuccessCallback(successCallback);
 		this.registry.addFailureCallback(failureCallback);
 	}
+
 
 	protected abstract T adapt(S result);
 

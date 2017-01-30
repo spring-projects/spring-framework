@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,13 @@ import org.springframework.web.server.support.HttpRequestPathHelper;
  * implementations.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 5.0
  */
-public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
-		implements HandlerMapping, Ordered {
+public abstract class AbstractHandlerMapping extends ApplicationObjectSupport implements HandlerMapping, Ordered {
+
+	private static final WebHandler REQUEST_HANDLED_HANDLER = exchange -> Mono.empty();
+
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
@@ -158,7 +161,6 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 				CorsConfiguration configA = this.globalCorsConfigSource.getCorsConfiguration(exchange);
 				CorsConfiguration configB = getCorsConfiguration(handler, exchange);
 				CorsConfiguration config = (configA != null ? configA.combine(configB) : configB);
-
 				if (!getCorsProcessor().processRequest(config, exchange) ||
 						CorsUtils.isPreFlightRequest(exchange.getRequest())) {
 					return REQUEST_HANDLED_HANDLER;
@@ -171,13 +173,11 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	/**
 	 * Look up a handler for the given request, returning an empty {@code Mono}
 	 * if no specific one is found. This method is called by {@link #getHandler}.
-	 *
 	 * <p>On CORS pre-flight requests this method should return a match not for
 	 * the pre-flight request but for the expected actual request based on the URL
 	 * path, the HTTP methods from the "Access-Control-Request-Method" header, and
 	 * the headers from the "Access-Control-Request-Headers" header thus allowing
 	 * the CORS configuration to be obtained via {@link #getCorsConfigurations},
-	 *
 	 * @param exchange current exchange
 	 * @return {@code Mono} for the matching handler, if any
 	 */
@@ -185,18 +185,15 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 
 	/**
 	 * Retrieve the CORS configuration for the given handler.
-	 * @param handler the handler to check (never {@code null}).
+	 * @param handler the handler to check (never {@code null})
 	 * @param exchange the current exchange
-	 * @return the CORS configuration for the handler or {@code null}.
+	 * @return the CORS configuration for the handler, or {@code null} if none
 	 */
 	protected CorsConfiguration getCorsConfiguration(Object handler, ServerWebExchange exchange) {
-		if (handler != null && handler instanceof CorsConfigurationSource) {
+		if (handler instanceof CorsConfigurationSource) {
 			return ((CorsConfigurationSource) handler).getCorsConfiguration(exchange);
 		}
 		return null;
 	}
-
-
-	private static final WebHandler REQUEST_HANDLED_HANDLER = exchange -> Mono.empty();
 
 }

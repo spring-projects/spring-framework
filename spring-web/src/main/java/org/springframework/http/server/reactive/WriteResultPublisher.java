@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.http.server.reactive;
 
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
@@ -25,6 +24,8 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Operators;
+
+import org.springframework.util.Assert;
 
 /**
  * Publisher returned from {@link ServerHttpResponse#writeWith(Publisher)}.
@@ -113,12 +114,10 @@ class WriteResultPublisher implements Publisher<Void> {
 
 		UNSUBSCRIBED {
 			@Override
-			void subscribe(WriteResultPublisher publisher,
-					Subscriber<? super Void> subscriber) {
-				Objects.requireNonNull(subscriber);
+			void subscribe(WriteResultPublisher publisher, Subscriber<? super Void> subscriber) {
+				Assert.notNull(subscriber, "Subscriber must not be null");
 				if (publisher.changeState(this, SUBSCRIBED)) {
-					Subscription subscription =
-							new ResponseBodyWriteResultSubscription(publisher);
+					Subscription subscription = new ResponseBodyWriteResultSubscription(publisher);
 					publisher.subscriber = subscriber;
 					subscriber.onSubscribe(subscription);
 					if (publisher.publisherCompleted) {

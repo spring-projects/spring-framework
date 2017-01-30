@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,7 +159,7 @@ public class ReactorNettyTcpStompClientTests {
 		private final List<String> received = new ArrayList<>();
 
 		public ConsumingHandler(String... topics) {
-			Assert.notEmpty(topics);
+			Assert.notEmpty(topics, "Topics must not be empty");
 			this.topics = Arrays.asList(topics);
 			this.subscriptionLatch = new CountDownLatch(this.topics.size());
 		}
@@ -167,7 +167,6 @@ public class ReactorNettyTcpStompClientTests {
 		public List<String> getReceived() {
 			return this.received;
 		}
-
 
 		@Override
 		public void afterConnected(StompSession session, StompHeaders connectedHeaders) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,6 +79,7 @@ import org.springframework.util.StringUtils;
  * Hand written SpEL parser. Instances are reusable but are not thread-safe.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @author Phillip Webb
  * @since 3.0
  */
@@ -128,7 +129,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			if (moreTokens()) {
 				throw new SpelParseException(peekToken().startPos, SpelMessage.MORE_INPUT, toString(nextToken()));
 			}
-			Assert.isTrue(this.constructedNodes.isEmpty());
+			Assert.isTrue(this.constructedNodes.isEmpty(), "At least one node expected");
 			return new SpelExpression(expressionString, ast, this.configuration);
 		}
 		catch (InternalParseException ex) {
@@ -232,7 +233,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				if (tk == TokenKind.EQ) {
 					return new OpEQ(pos, expr, rhExpr);
 				}
-				Assert.isTrue(tk == TokenKind.NE);
+				Assert.isTrue(tk == TokenKind.NE, "Not-equals token expected");
 				return new OpNE(pos, expr, rhExpr);
 			}
 
@@ -244,7 +245,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				return new OperatorMatches(toPos(t), expr, rhExpr);
 			}
 
-			Assert.isTrue(tk == TokenKind.BETWEEN);
+			Assert.isTrue(tk == TokenKind.BETWEEN, "Between token expected");
 			return new OperatorBetween(toPos(t), expr, rhExpr);
 		}
 		return expr;
@@ -281,7 +282,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				expr = new OpDivide(toPos(t), expr, rhExpr);
 			}
 			else {
-				Assert.isTrue(t.kind == TokenKind.MOD);
+				Assert.isTrue(t.kind == TokenKind.MOD, "Mod token expected");
 				expr = new OpModulus(toPos(t), expr, rhExpr);
 			}
 		}
@@ -298,7 +299,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			return new OperatorPower(toPos(t), expr, rhExpr);
 		}
 
-		if (expr != null && peekToken(TokenKind.INC,TokenKind.DEC)) {
+		if (expr != null && peekToken(TokenKind.INC, TokenKind.DEC)) {
 			Token t = nextToken();  //consume INC/DEC
 			if (t.getKind() == TokenKind.INC) {
 				return new OpInc(toPos(t), true, expr);
@@ -321,7 +322,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			if (t.kind == TokenKind.PLUS) {
 				return new OpPlus(toPos(t), expr);
 			}
-			Assert.isTrue(t.kind == TokenKind.MINUS);
+			Assert.isTrue(t.kind == TokenKind.MINUS, "Minus token expected");
 			return new OpMinus(toPos(t), expr);
 
 		}
@@ -356,7 +357,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	// node : ((DOT dottedNode) | (SAFE_NAVI dottedNode) | nonDottedNode)+;
 	private boolean maybeEatNode() {
 		SpelNodeImpl expr = null;
-		if (peekToken(TokenKind.DOT,TokenKind.SAFE_NAVI)) {
+		if (peekToken(TokenKind.DOT, TokenKind.SAFE_NAVI)) {
 			expr = eatDottedNode();
 		}
 		else {
@@ -940,7 +941,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		return false;
 	}
 
-	private boolean peekToken(TokenKind possible1,TokenKind possible2) {
+	private boolean peekToken(TokenKind possible1, TokenKind possible2) {
 		if (!moreTokens()) {
 			return false;
 		}
@@ -948,12 +949,12 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		return (t.kind == possible1 || t.kind == possible2);
 	}
 
-	private boolean peekToken(TokenKind possible1,TokenKind possible2, TokenKind possible3) {
+	private boolean peekToken(TokenKind possible1, TokenKind possible2, TokenKind possible3) {
 		if (!moreTokens()) {
 			return false;
 		}
 		Token t = peekToken();
-		return t.kind == possible1 || t.kind == possible2 || t.kind == possible3;
+		return (t.kind == possible1 || t.kind == possible2 || t.kind == possible3);
 	}
 
 	private boolean peekIdentifierToken(String identifierString) {
@@ -961,7 +962,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			return false;
 		}
 		Token t = peekToken();
-		return t.kind == TokenKind.IDENTIFIER && t.stringValue().equalsIgnoreCase(identifierString);
+		return (t.kind == TokenKind.IDENTIFIER && t.stringValue().equalsIgnoreCase(identifierString));
 	}
 
 	private boolean peekSelectToken() {
@@ -969,8 +970,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			return false;
 		}
 		Token t = peekToken();
-		return t.kind == TokenKind.SELECT || t.kind == TokenKind.SELECT_FIRST
-				|| t.kind == TokenKind.SELECT_LAST;
+		return (t.kind == TokenKind.SELECT || t.kind == TokenKind.SELECT_FIRST || t.kind == TokenKind.SELECT_LAST);
 	}
 
 	private boolean moreTokens() {

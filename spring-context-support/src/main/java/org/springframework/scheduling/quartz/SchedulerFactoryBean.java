@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.scheduling.SchedulingException;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -104,6 +103,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 	private static final ThreadLocal<DataSource> configTimeNonTransactionalDataSourceHolder =
 			new ThreadLocal<>();
+
 
 	/**
 	 * Return the ResourceLoader for the currently configured Quartz Scheduler,
@@ -210,7 +210,6 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * @see #setQuartzProperties
 	 */
 	public void setSchedulerFactoryClass(Class<? extends SchedulerFactory> schedulerFactoryClass) {
-		Assert.isAssignable(SchedulerFactory.class, schedulerFactoryClass);
 		this.schedulerFactoryClass = schedulerFactoryClass;
 	}
 

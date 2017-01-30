@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
 
 /**
  * Adapt {@link ServerHttpResponse} to the Servlet {@link HttpServletResponse}.
+ *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
@@ -66,7 +67,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 
 		Assert.notNull(response, "HttpServletResponse must not be null");
 		Assert.notNull(bufferFactory, "DataBufferFactory must not be null");
-		Assert.isTrue(bufferSize > 0, "'bufferSize' must be greater than 0");
+		Assert.isTrue(bufferSize > 0, "Buffer size must be greater than 0");
 
 		this.response = response;
 		this.bufferSize = bufferSize;
@@ -210,6 +211,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		}
 	}
 
+
 	private class ResponseBodyWriteListener implements WriteListener {
 
 		@Override
@@ -227,6 +229,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 			}
 		}
 	}
+
 
 	private class ResponseBodyFlushProcessor extends AbstractListenerWriteFlushProcessor<DataBuffer> {
 
@@ -251,10 +254,10 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		}
 	}
 
+
 	private class ResponseBodyProcessor extends AbstractListenerWriteProcessor<DataBuffer> {
 
 		private final ServletOutputStream outputStream;
-
 
 		public ResponseBodyProcessor(ServletOutputStream outputStream) {
 			this.outputStream = outputStream;
@@ -268,7 +271,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		@Override
 		protected void releaseData() {
 			if (logger.isTraceEnabled()) {
-				logger.trace("releaseBuffer: " + this.currentData);
+				logger.trace("releaseData: " + this.currentData);
 			}
 			DataBufferUtils.release(this.currentData);
 			this.currentData = null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.util.LinkedHashMap;
@@ -57,11 +58,9 @@ public abstract class HttpHandlerAdapterSupport {
 	/**
 	 * Constructor with {@code HttpHandler}s mapped to distinct context paths.
 	 * Context paths must start but not end with "/" and must be encoded.
-	 *
 	 * <p>At request time context paths are compared against the "raw" path of
 	 * the request URI in the order in which they are provided. The first one
 	 * to match is chosen. If none match the response status is set to 404.
-	 *
 	 * @param handlerMap map with context paths and {@code HttpHandler}s.
 	 * @see ServerHttpRequest#getContextPath()
 	 */
@@ -85,9 +84,8 @@ public abstract class HttpHandlerAdapterSupport {
 
 		private final Map<String, HttpHandler> handlerMap;
 
-
 		public CompositeHttpHandler(Map<String, HttpHandler> handlerMap) {
-			Assert.notEmpty(handlerMap);
+			Assert.notEmpty(handlerMap, "Handler map must not be empty");
 			this.handlerMap = initHandlerMap(handlerMap);
 		}
 
@@ -97,10 +95,10 @@ public abstract class HttpHandlerAdapterSupport {
 		}
 
 		private static void validateContextPath(String contextPath) {
-			Assert.hasText(contextPath, "contextPath must not be empty");
+			Assert.hasText(contextPath, "Context path must not be empty");
 			if (!contextPath.equals("/")) {
-				Assert.isTrue(contextPath.startsWith("/"), "contextPath must begin with '/'");
-				Assert.isTrue(!contextPath.endsWith("/"), "contextPath must not end with '/'");
+				Assert.isTrue(contextPath.startsWith("/"), "Context path must begin with '/'");
+				Assert.isTrue(!contextPath.endsWith("/"), "Context path must not end with '/'");
 			}
 		}
 
@@ -124,7 +122,9 @@ public abstract class HttpHandlerAdapterSupport {
 					});
 		}
 
-		/** Strip the context path from native request if any */
+		/**
+		 * Strip the context path from the native request, if any.
+		 */
 		private String getPathToUse(ServerHttpRequest request) {
 			String path = request.getURI().getRawPath();
 			String contextPath = request.getContextPath();

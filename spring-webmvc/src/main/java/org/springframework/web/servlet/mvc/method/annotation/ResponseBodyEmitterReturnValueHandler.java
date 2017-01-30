@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,7 +146,10 @@ public class ResponseBodyEmitterReturnValueHandler implements AsyncHandlerMethod
 		ShallowEtagHeaderFilter.disableContentCaching(request);
 
 		ResponseBodyEmitterAdapter adapter = getAdapterFor(returnValue.getClass());
-		Assert.notNull(adapter);
+		if (adapter == null) {
+			throw new IllegalStateException(
+					"Could not find ResponseBodyEmitterAdapter for return value type: " + returnValue.getClass());
+		}
 		ResponseBodyEmitter emitter = adapter.adaptToEmitter(returnValue, outputMessage);
 		emitter.extendResponse(outputMessage);
 
@@ -170,7 +173,7 @@ public class ResponseBodyEmitterReturnValueHandler implements AsyncHandlerMethod
 
 		@Override
 		public ResponseBodyEmitter adaptToEmitter(Object returnValue, ServerHttpResponse response) {
-			Assert.isInstanceOf(ResponseBodyEmitter.class, returnValue);
+			Assert.isInstanceOf(ResponseBodyEmitter.class, returnValue, "ResponseBodyEmitter expected");
 			return (ResponseBodyEmitter) returnValue;
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,13 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
-import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientOperations;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze
@@ -52,8 +53,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 
 	@Before
 	public void setup() throws Exception {
-
-		// TODO: fix failing tests
+		// TODO: fix failing RxNetty tests
 		Assume.assumeFalse(this.server instanceof RxNettyHttpServer);
 
 		super.setup();
@@ -88,7 +88,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 				.reduce((s1, s2) -> s1 + s2);
 
 		StepVerifier.create(result)
-				.consumeNextWith(value -> Assert.isTrue(value.length() == 200000))
+				.consumeNextWith(value -> assertTrue(value.length() == 200000))
 				.expectComplete()
 				.verify(Duration.ofSeconds(10L));
 	}

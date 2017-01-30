@@ -240,7 +240,7 @@ public class SpringValidatorAdapterTests {
 			else {
 				context.disableDefaultConstraintViolation();
 				context.buildConstraintViolationWithTemplate(message)
-						.addNode(field)
+						.addPropertyNode(field)
 						.addConstraintViolation();
 				return false;
 			}

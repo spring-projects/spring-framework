@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.broker;
 
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -174,7 +175,9 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * @since 4.2
 	 */
 	public void setHeartbeatValue(long[] heartbeat) {
-		Assert.notNull(heartbeat);
+		if (heartbeat == null || heartbeat.length != 2 || heartbeat[0] < 0 || heartbeat[1] < 0) {
+			throw new IllegalArgumentException("Invalid heart-beat: " + Arrays.toString(heartbeat));
+		}
 		this.heartbeatValue = heartbeat;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public boolean setStatusCode(HttpStatus statusCode) {
-		Assert.notNull(statusCode);
+		Assert.notNull(statusCode, "Status code must not be null");
 		if (this.state.get() == State.COMMITTED) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Can't set the status " + statusCode.toString() +

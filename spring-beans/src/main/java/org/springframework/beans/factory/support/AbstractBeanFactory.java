@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -762,7 +762,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	@Override
 	public void registerCustomEditor(Class<?> requiredType, Class<? extends PropertyEditor> propertyEditorClass) {
 		Assert.notNull(requiredType, "Required type must not be null");
-		Assert.isAssignable(PropertyEditor.class, propertyEditorClass);
+		Assert.notNull(propertyEditorClass, "PropertyEditor class must not be null");
 		this.customEditors.put(requiredType, propertyEditorClass);
 	}
 

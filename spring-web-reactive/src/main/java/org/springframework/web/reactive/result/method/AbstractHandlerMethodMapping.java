@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,11 +52,10 @@ import org.springframework.web.server.ServerWebExchange;
  * <p>For each registered handler method, a unique mapping is maintained with
  * subclasses defining the details of the mapping type {@code <T>}.
  *
- * @param <T> The mapping for a {@link HandlerMethod} containing the conditions
- * needed to match the handler method to incoming request.
- *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @param <T> The mapping for a {@link HandlerMethod} containing the conditions
+ * needed to match the handler method to incoming request.
  */
 public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMapping implements InitializingBean {
 
@@ -570,10 +569,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		private final List<String> directUrls;
 
-
 		public MappingRegistration(T mapping, HandlerMethod handlerMethod, List<String> directUrls) {
-			Assert.notNull(mapping);
-			Assert.notNull(handlerMethod);
+			Assert.notNull(mapping, "Mapping must not be null");
+			Assert.notNull(handlerMethod, "HandlerMethod must not be null");
 			this.mapping = mapping;
 			this.handlerMethod = handlerMethod;
 			this.directUrls = (directUrls != null ? directUrls : Collections.emptyList());
@@ -629,10 +627,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 	}
 
+
 	private static class PreFlightAmbiguousMatchHandler {
 
 		public void handle() {
-			throw new UnsupportedOperationException("not implemented");
+			throw new UnsupportedOperationException("Not implemented");
 		}
 	}
 

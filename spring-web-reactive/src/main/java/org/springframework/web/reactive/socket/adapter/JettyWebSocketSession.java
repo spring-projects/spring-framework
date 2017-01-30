@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  */
 public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Session> {
 
-	private SuspendToken suspendToken;
+	private volatile SuspendToken suspendToken;
 
 
 	public JettyWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory) {
@@ -65,14 +65,15 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 
 	@Override
 	protected void suspendReceiving() {
-		Assert.isNull(this.suspendToken);
+		Assert.state(this.suspendToken == null, "Already suspended");
 		this.suspendToken = getDelegate().suspend();
 	}
 
 	@Override
 	protected void resumeReceiving() {
-		Assert.notNull(this.suspendToken);
-		this.suspendToken.resume();
+		SuspendToken tokenToUse = this.suspendToken;
+		Assert.state(tokenToUse != null, "Not suspended");
+		tokenToUse.resume();
 		this.suspendToken = null;
 	}
 

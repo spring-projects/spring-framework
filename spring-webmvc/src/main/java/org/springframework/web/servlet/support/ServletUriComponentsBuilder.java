@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -186,12 +186,9 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 * Obtain current request through {@link RequestContextHolder}.
 	 */
 	protected static HttpServletRequest getCurrentRequest() {
-		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-		Assert.state(requestAttributes != null, "Could not find current request via RequestContextHolder");
-		Assert.isInstanceOf(ServletRequestAttributes.class, requestAttributes);
-		HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
-		Assert.state(servletRequest != null, "Could not find current HttpServletRequest");
-		return servletRequest;
+		RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
+		Assert.state(attrs instanceof ServletRequestAttributes, "No current ServletRequestAttributes");
+		return ((ServletRequestAttributes) attrs).getRequest();
 	}
 
 

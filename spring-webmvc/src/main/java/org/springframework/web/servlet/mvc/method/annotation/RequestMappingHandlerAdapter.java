@@ -395,7 +395,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * @param interceptors the interceptors to register
 	 */
 	public void setCallableInterceptors(List<CallableProcessingInterceptor> interceptors) {
-		Assert.notNull(interceptors);
+		Assert.notNull(interceptors, "CallableProcessingInterceptor List must not be null");
 		this.callableInterceptors = interceptors.toArray(new CallableProcessingInterceptor[interceptors.size()]);
 	}
 
@@ -404,7 +404,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * @param interceptors the interceptors to register
 	 */
 	public void setDeferredResultInterceptors(List<DeferredResultProcessingInterceptor> interceptors) {
-		Assert.notNull(interceptors);
+		Assert.notNull(interceptors, "DeferredResultProcessingInterceptor List must not be null");
 		this.deferredResultInterceptors = interceptors.toArray(new DeferredResultProcessingInterceptor[interceptors.size()]);
 	}
 

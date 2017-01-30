@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 	 */
 	private enum State {NEW, COMMITTING, COMMITTED}
 
+
 	private final HttpHeaders headers;
 
 	private final MultiValueMap<String, HttpCookie> cookies;
@@ -63,7 +64,7 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 	}
 
 	public AbstractClientHttpRequest(HttpHeaders headers) {
-		Assert.notNull(headers);
+		Assert.notNull(headers, "HttpHeaders must not be null");
 		this.headers = headers;
 		this.cookies = new LinkedMultiValueMap<>();
 	}
@@ -124,7 +125,7 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 	@Override
 	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
-		Assert.notNull(action);
+		Assert.notNull(action, "Action must not be null");
 		this.commitActions.add(action);
 	}
 
@@ -139,6 +140,5 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 	 * underlying response. This method is called once only.
 	 */
 	protected abstract void applyCookies();
-
 
 }

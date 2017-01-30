@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -174,10 +174,10 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Serv
 			String selectedProtocol, List<WebSocketExtension> selectedExtensions, Principal user,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) throws HandshakeFailureException {
 
-		Assert.isInstanceOf(ServletServerHttpRequest.class, request);
+		Assert.isInstanceOf(ServletServerHttpRequest.class, request, "ServletServerHttpRequest required");
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
 
-		Assert.isInstanceOf(ServletServerHttpResponse.class, response);
+		Assert.isInstanceOf(ServletServerHttpResponse.class, response, "ServletServerHttpResponse required");
 		HttpServletResponse servletResponse = ((ServletServerHttpResponse) response).getServletResponse();
 
 		Assert.isTrue(this.factoryAdapter.getFactory().isUpgradeRequest(servletRequest, servletResponse),

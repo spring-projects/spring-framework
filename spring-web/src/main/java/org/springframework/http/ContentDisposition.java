@@ -23,8 +23,7 @@ import java.nio.charset.StandardCharsets;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.charset.StandardCharsets.*;
 
 /**
  * Represent the content disposition type and parameters as defined in RFC 2183.
@@ -121,7 +120,7 @@ public class ContentDisposition {
 	 */
 	public static ContentDisposition parse(String contentDisposition) {
 		String[] parts = StringUtils.tokenizeToStringArray(contentDisposition, ";");
-		Assert.isTrue(parts.length >= 1);
+		Assert.isTrue(parts.length >= 1, "Content-Disposition header must not be empty");
 		String type = parts[0];
 		String name = null;
 		String filename = null;

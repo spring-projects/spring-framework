@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,13 +53,10 @@ import org.springframework.web.server.ServerWebExchange;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
-
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
-			Optional<String> subProtocol) {
-
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, Optional<String> subProtocol) {
 		ServerHttpRequest request = exchange.getRequest();
-		Assert.isTrue(request instanceof UndertowServerHttpRequest);
+		Assert.isInstanceOf(UndertowServerHttpRequest.class, request, "UndertowServerHttpRequest required");
 		HttpServerExchange httpExchange = ((UndertowServerHttpRequest) request).getUndertowExchange();
 
 		Set<String> protocols = subProtocol.map(Collections::singleton).orElse(Collections.emptySet());
@@ -92,10 +89,7 @@ public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 		private final DataBufferFactory bufferFactory;
 
-
-		public DefaultCallback(HandshakeInfo handshakeInfo, WebSocketHandler handler,
-				DataBufferFactory bufferFactory) {
-
+		public DefaultCallback(HandshakeInfo handshakeInfo, WebSocketHandler handler, DataBufferFactory bufferFactory) {
 			this.handshakeInfo = handshakeInfo;
 			this.handler = handler;
 			this.bufferFactory = bufferFactory;
@@ -103,7 +97,6 @@ public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 		@Override
 		public void onConnect(WebSocketHttpExchange httpExchange, WebSocketChannel channel) {
-
 			UndertowWebSocketSession session = createSession(channel);
 			UndertowWebSocketHandlerAdapter adapter = new UndertowWebSocketHandlerAdapter(session);
 

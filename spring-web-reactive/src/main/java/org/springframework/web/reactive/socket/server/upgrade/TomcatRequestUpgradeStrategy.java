@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Optional;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,8 +34,8 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServletServerHttpRequest;
 import org.springframework.http.server.reactive.ServletServerHttpResponse;
 import org.springframework.util.Assert;
-import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.HandshakeInfo;
+import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.StandardWebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.adapter.StandardWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
@@ -55,9 +54,7 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
-			Optional<String> subProtocol){
-
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, Optional<String> subProtocol){
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 
@@ -87,12 +84,12 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	}
 
 	private HttpServletRequest getHttpServletRequest(ServerHttpRequest request) {
-		Assert.isTrue(request instanceof ServletServerHttpRequest);
+		Assert.isInstanceOf(ServletServerHttpRequest.class, request, "ServletServerHttpRequest required");
 		return ((ServletServerHttpRequest) request).getServletRequest();
 	}
 
 	private HttpServletResponse getHttpServletResponse(ServerHttpResponse response) {
-		Assert.isTrue(response instanceof ServletServerHttpResponse);
+		Assert.isInstanceOf(ServletServerHttpResponse.class, response, "ServletServerHttpResponse required");
 		return ((ServletServerHttpResponse) response).getServletResponse();
 	}
 
@@ -103,12 +100,9 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	}
 
 	private WsServerContainer getContainer(HttpServletRequest request) {
-		ServletContext servletContext = request.getServletContext();
-		Object container = servletContext.getAttribute(SERVER_CONTAINER_ATTR);
-		Assert.notNull(container,
-				"No 'javax.websocket.server.ServerContainer' ServletContext attribute. " +
-						"Are you running in a Servlet container that supports JSR-356?");
-		Assert.isTrue(container instanceof WsServerContainer);
+		Object container = request.getServletContext().getAttribute(SERVER_CONTAINER_ATTR);
+		Assert.state(container instanceof WsServerContainer,
+				"No 'javax.websocket.server.ServerContainer' ServletContext attribute in a Tomcat container");
 		return (WsServerContainer) container;
 	}
 
