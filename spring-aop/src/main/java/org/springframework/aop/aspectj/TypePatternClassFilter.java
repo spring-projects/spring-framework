@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
  * Spring AOP {@link ClassFilter} implementation using AspectJ type matching.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class TypePatternClassFilter implements ClassFilter {
@@ -76,16 +77,20 @@ public class TypePatternClassFilter implements ClassFilter {
 	 * or is recognized as invalid
 	 */
 	public void setTypePattern(String typePattern) {
-		Assert.notNull(typePattern);
+		Assert.notNull(typePattern, "Type pattern must not be null");
 		this.typePattern = typePattern;
 		this.aspectJTypePatternMatcher =
 				PointcutParser.getPointcutParserSupportingAllPrimitivesAndUsingContextClassloaderForResolution().
 				parseTypePattern(replaceBooleanOperators(typePattern));
 	}
 
+	/**
+	 * Return the AspectJ type pattern to match.
+	 */
 	public String getTypePattern() {
-		return typePattern;
+		return this.typePattern;
 	}
+
 
 	/**
 	 * Should the pointcut apply to the given interface or target class?
@@ -95,9 +100,7 @@ public class TypePatternClassFilter implements ClassFilter {
 	 */
 	@Override
 	public boolean matches(Class<?> clazz) {
-		if (this.aspectJTypePatternMatcher == null) {
-			throw new IllegalStateException("No 'typePattern' has been set via ctor/setter.");
-		}
+		Assert.state(this.aspectJTypePatternMatcher != null, "No type pattern has been set");
 		return this.aspectJTypePatternMatcher.matches(clazz);
 	}
 
@@ -108,9 +111,8 @@ public class TypePatternClassFilter implements ClassFilter {
 	 * <p>This method converts back to {@code &&} for the AspectJ pointcut parser.
 	 */
 	private String replaceBooleanOperators(String pcExpr) {
-		pcExpr = StringUtils.replace(pcExpr," and "," && ");
-		pcExpr = StringUtils.replace(pcExpr, " or ", " || ");
-		pcExpr = StringUtils.replace(pcExpr, " not ", " ! ");
-		return pcExpr;
+		String result = StringUtils.replace(pcExpr," and "," && ");
+		result = StringUtils.replace(result, " or ", " || ");
+		return StringUtils.replace(result, " not ", " ! ");
 	}
 }

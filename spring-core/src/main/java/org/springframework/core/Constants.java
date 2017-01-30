@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class Constants {
 	 * @throws IllegalArgumentException if the supplied {@code clazz} is {@code null}
 	 */
 	public Constants(Class<?> clazz) {
-		Assert.notNull(clazz);
+		Assert.notNull(clazz, "Class must not be null");
 		this.className = clazz.getName();
 		Field[] fields = clazz.getFields();
 		for (Field field : fields) {

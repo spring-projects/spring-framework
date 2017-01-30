@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,12 +102,12 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClas
 				}
 				else if (value instanceof Class) {
 					Class<?> scopeClass = (Class<?>) value;
-					Assert.isAssignable(Scope.class, scopeClass);
+					Assert.isAssignable(Scope.class, scopeClass, "Invalid scope class");
 					beanFactory.registerScope(scopeKey, (Scope) BeanUtils.instantiateClass(scopeClass));
 				}
 				else if (value instanceof String) {
 					Class<?> scopeClass = ClassUtils.resolveClassName((String) value, this.beanClassLoader);
-					Assert.isAssignable(Scope.class, scopeClass);
+					Assert.isAssignable(Scope.class, scopeClass, "Invalid scope class");
 					beanFactory.registerScope(scopeKey, (Scope) BeanUtils.instantiateClass(scopeClass));
 				}
 				else {

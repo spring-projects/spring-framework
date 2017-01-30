@@ -94,7 +94,9 @@ public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMet
 			throws Exception {
 
 		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
-		Assert.notNull(handler, "No handler for return value type [" + returnType.getParameterType().getName() + "]");
+		if (handler == null) {
+			throw new IllegalStateException("No handler for return value type: " + returnType.getParameterType());
+		}
 		if (logger.isTraceEnabled()) {
 			logger.trace("Processing return value with " + handler);
 		}
@@ -104,14 +106,15 @@ public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMet
 	@Override
 	public boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType) {
 		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
-		return (handler != null && handler instanceof AsyncHandlerMethodReturnValueHandler &&
+		return (handler instanceof AsyncHandlerMethodReturnValueHandler &&
 				((AsyncHandlerMethodReturnValueHandler) handler).isAsyncReturnValue(returnValue, returnType));
 	}
 
 	@Override
 	public ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType) {
 		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
-		Assert.isTrue(handler != null && handler instanceof AsyncHandlerMethodReturnValueHandler);
+		Assert.state(handler instanceof AsyncHandlerMethodReturnValueHandler,
+				"AsyncHandlerMethodReturnValueHandler required");
 		return ((AsyncHandlerMethodReturnValueHandler) handler).toListenableFuture(returnValue, returnType);
 	}
 

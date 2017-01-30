@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -681,8 +681,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		private final String mappingName;
 
 		public MappingRegistration(T mapping, HandlerMethod handlerMethod, List<String> directUrls, String mappingName) {
-			Assert.notNull(mapping);
-			Assert.notNull(handlerMethod);
+			Assert.notNull(mapping, "Mapping must not be null");
+			Assert.notNull(handlerMethod, "HandlerMethod must not be null");
 			this.mapping = mapping;
 			this.handlerMethod = handlerMethod;
 			this.directUrls = (directUrls != null ? directUrls : Collections.<String>emptyList());
@@ -747,7 +747,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	private static class EmptyHandler {
 
 		public void handle() {
-			throw new UnsupportedOperationException("not implemented");
+			throw new UnsupportedOperationException("Not implemented");
 		}
 	}
 

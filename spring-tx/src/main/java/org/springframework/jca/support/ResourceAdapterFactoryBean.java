@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,14 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that bootstraps
- * the specified JCA 1.5 {@link javax.resource.spi.ResourceAdapter},
+ * the specified JCA 1.7 {@link javax.resource.spi.ResourceAdapter},
  * starting it with a local {@link javax.resource.spi.BootstrapContext}
  * and exposing it for bean references. It will also stop the ResourceAdapter
  * on context shutdown. This corresponds to 'non-managed' bootstrap in a
- * local environment, according to the JCA 1.5 specification.
+ * local environment, according to the JCA 1.7 specification.
  *
  * <p>This is essentially an adapter for bean-style bootstrapping of a
  * JCA ResourceAdapter, allowing the BootstrapContext or its elements
@@ -66,9 +65,8 @@ public class ResourceAdapterFactoryBean implements FactoryBean<ResourceAdapter>,
 	 * through the "resourceAdapter" property.
 	 * @see #setResourceAdapter
 	 */
-	public void setResourceAdapterClass(Class<?> resourceAdapterClass) {
-		Assert.isAssignable(ResourceAdapter.class, resourceAdapterClass);
-		this.resourceAdapter = (ResourceAdapter) BeanUtils.instantiateClass(resourceAdapterClass);
+	public void setResourceAdapterClass(Class<? extends ResourceAdapter> resourceAdapterClass) {
+		this.resourceAdapter = BeanUtils.instantiateClass(resourceAdapterClass);
 	}
 
 	/**

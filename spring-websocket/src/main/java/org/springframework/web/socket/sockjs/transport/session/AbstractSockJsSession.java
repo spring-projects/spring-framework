@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,7 +162,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	public final void sendMessage(WebSocketMessage<?> message) throws IOException {
 		Assert.state(!isClosed(), "Cannot send a message when session is closed");
-		Assert.isInstanceOf(TextMessage.class, message, "SockJS supports text messages only: " + message);
+		Assert.isInstanceOf(TextMessage.class, message, "SockJS supports text messages only");
 		sendMessageInternal(((TextMessage) message).getPayload());
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -240,7 +240,7 @@ public class MvcUriComponentsBuilder {
 	 * @return a UriComponents instance
 	 */
 	public static UriComponentsBuilder fromMethodCall(Object info) {
-		Assert.isInstanceOf(MethodInvocationInfo.class, info);
+		Assert.isInstanceOf(MethodInvocationInfo.class, info, "MethodInvocationInfo required");
 		MethodInvocationInfo invocationInfo = (MethodInvocationInfo) info;
 		Class<?> controllerType = invocationInfo.getControllerType();
 		Method method = invocationInfo.getControllerMethod();
@@ -260,7 +260,7 @@ public class MvcUriComponentsBuilder {
 	 * @return a UriComponents instance
 	 */
 	public static UriComponentsBuilder fromMethodCall(UriComponentsBuilder builder, Object info) {
-		Assert.isInstanceOf(MethodInvocationInfo.class, info);
+		Assert.isInstanceOf(MethodInvocationInfo.class, info, "MethodInvocationInfo required");
 		MethodInvocationInfo invocationInfo = (MethodInvocationInfo) info;
 		Class<?> controllerType = invocationInfo.getControllerType();
 		Method method = invocationInfo.getControllerMethod();
@@ -533,18 +533,13 @@ public class MvcUriComponentsBuilder {
 	private static WebApplicationContext getWebApplicationContext() {
 		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 		if (requestAttributes == null) {
-			logger.debug("No request bound to the current thread: is DispatcherSerlvet used?");
+			logger.debug("No request bound to the current thread: not in a DispatcherServlet request?");
 			return null;
 		}
 
 		HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
-		if (request == null) {
-			logger.debug("Request bound to current thread is not an HttpServletRequest");
-			return null;
-		}
-
-		String attributeName = DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE;
-		WebApplicationContext wac = (WebApplicationContext) request.getAttribute(attributeName);
+		WebApplicationContext wac = (WebApplicationContext)
+				request.getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		if (wac == null) {
 			logger.debug("No WebApplicationContext found: not in a DispatcherServlet request?");
 			return null;

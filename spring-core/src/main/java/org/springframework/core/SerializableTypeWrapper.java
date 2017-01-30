@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -408,7 +408,10 @@ abstract class SerializableTypeWrapper {
 		private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
 			inputStream.defaultReadObject();
 			this.method = ReflectionUtils.findMethod(this.declaringClass, this.methodName);
-			Assert.state(Type.class == this.method.getReturnType() || Type[].class == this.method.getReturnType());
+			if (this.method.getReturnType() != Type.class && this.method.getReturnType() != Type[].class) {
+				throw new IllegalStateException(
+						"Invalid return type on deserialized method - needs to be Type or Type[]: " + this.method);
+			}
 		}
 	}
 

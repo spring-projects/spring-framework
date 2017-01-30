@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -517,7 +516,10 @@ public class ContextLoader {
 	private Class<ApplicationContextInitializer<ConfigurableApplicationContext>> loadInitializerClass(String className) {
 		try {
 			Class<?> clazz = ClassUtils.forName(className, ClassUtils.getDefaultClassLoader());
-			Assert.isAssignable(ApplicationContextInitializer.class, clazz);
+			if (!ApplicationContextInitializer.class.isAssignableFrom(clazz)) {
+				throw new ApplicationContextException(
+						"Initializer class does not implement ApplicationContextInitializer interface: " + clazz);
+			}
 			return (Class<ApplicationContextInitializer<ConfigurableApplicationContext>>) clazz;
 		}
 		catch (ClassNotFoundException ex) {

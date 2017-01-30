@@ -793,7 +793,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		private final List<PathComponent> pathComponents;
 
 		public PathComponentComposite(List<PathComponent> pathComponents) {
-			Assert.notNull(pathComponents);
+			Assert.notNull(pathComponents, "PathComponent List must not be null");
 			this.pathComponents = pathComponents;
 		}
 

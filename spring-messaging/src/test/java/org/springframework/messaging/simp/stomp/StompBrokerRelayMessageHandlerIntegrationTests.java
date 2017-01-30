@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -401,7 +401,6 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		}
 
 		public static MessageExchangeBuilder disconnectWithReceipt(String sessionId, String receiptId) {
-
 			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 			headers.setSessionId(sessionId);
 			headers.setReceipt(receiptId);
@@ -413,7 +412,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		}
 
 		public MessageExchangeBuilder andExpectMessage(String sessionId, String subscriptionId) {
-			Assert.isTrue(SimpMessageType.MESSAGE.equals(headers.getMessageType()));
+			Assert.state(SimpMessageType.MESSAGE.equals(this.headers.getMessageType()), "MESSAGE type expected");
 			String destination = this.headers.getDestination();
 			Object payload = this.message.getPayload();
 			this.expected.add(new StompMessageFrameMessageMatcher(sessionId, subscriptionId, destination, payload));
@@ -422,7 +421,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		public MessageExchangeBuilder andExpectError() {
 			String sessionId = this.headers.getSessionId();
-			Assert.notNull(sessionId, "No sessionId to match the ERROR frame to");
+			Assert.state(sessionId != null, "No sessionId to match the ERROR frame to");
 			return andExpectError(sessionId);
 		}
 

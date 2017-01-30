@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,7 +175,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	 * <p>By default set to 15,000 (15 seconds).
 	 */
 	public void setReceiptTimeLimit(long receiptTimeLimit) {
-		Assert.isTrue(receiptTimeLimit > 0);
+		Assert.isTrue(receiptTimeLimit > 0, "Receipt time limit must be larger than zero");
 		this.receiptTimeLimit = receiptTimeLimit;
 	}
 

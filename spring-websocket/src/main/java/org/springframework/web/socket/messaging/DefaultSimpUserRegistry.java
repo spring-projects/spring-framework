@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		return Ordered.LOWEST_PRECEDENCE;
 	}
 
+
 	// SmartApplicationListener methods
 
 	@Override
@@ -69,7 +70,6 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
-
 		AbstractSubProtocolEvent subProtocolEvent = (AbstractSubProtocolEvent) event;
 		Message<?> message = subProtocolEvent.getMessage();
 		SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
@@ -129,6 +129,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		return true;
 	}
 
+
 	// SimpUserRegistry methods
 
 	@Override
@@ -169,12 +170,10 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		private final String name;
 
-		private final Map<String, SimpSession> userSessions =
-				new ConcurrentHashMap<String, SimpSession>(1);
-
+		private final Map<String, SimpSession> userSessions = new ConcurrentHashMap<String, SimpSession>(1);
 
 		public LocalSimpUser(String userName) {
-			Assert.notNull(userName);
+			Assert.notNull(userName, "User name must not be null");
 			this.name = userName;
 		}
 
@@ -208,13 +207,8 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		@Override
 		public boolean equals(Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (other == null || !(other instanceof SimpUser)) {
-				return false;
-			}
-			return this.name.equals(((SimpUser) other).getName());
+			return (this == other ||
+					(other instanceof SimpUser && this.name.equals(((SimpUser) other).getName())));
 		}
 
 		@Override
@@ -228,6 +222,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 	}
 
+
 	private static class LocalSimpSession implements SimpSession {
 
 		private final String id;
@@ -236,10 +231,9 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		private final Map<String, SimpSubscription> subscriptions = new ConcurrentHashMap<String, SimpSubscription>(4);
 
-
 		public LocalSimpSession(String id, LocalSimpUser user) {
-			Assert.notNull(id);
-			Assert.notNull(user);
+			Assert.notNull(id, "Id must not be null");
+			Assert.notNull(user, "User must not be null");
 			this.id = id;
 			this.user = user;
 		}
@@ -268,19 +262,14 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 
 		@Override
-		public int hashCode() {
-			return this.id.hashCode();
+		public boolean equals(Object other) {
+			return (this == other ||
+					(other instanceof SimpSubscription && this.id.equals(((SimpSubscription) other).getId())));
 		}
 
 		@Override
-		public boolean equals(Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (other == null || !(other instanceof SimpSubscription)) {
-				return false;
-			}
-			return this.id.equals(((SimpSubscription) other).getId());
+		public int hashCode() {
+			return this.id.hashCode();
 		}
 
 		@Override
@@ -288,6 +277,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 			return "id=" + this.id + ", subscriptions=" + this.subscriptions;
 		}
 	}
+
 
 	private static class LocalSimpSubscription implements SimpSubscription {
 
@@ -297,11 +287,10 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		private final String destination;
 
-
 		public LocalSimpSubscription(String id, String destination, LocalSimpSession session) {
-			Assert.notNull(id);
-			Assert.hasText(destination);
-			Assert.notNull(session);
+			Assert.notNull(id, "Id must not be null");
+			Assert.hasText(destination, "Destination must not be empty");
+			Assert.notNull(session, "Session must not be null");
 			this.id = id;
 			this.destination = destination;
 			this.session = session;
@@ -323,21 +312,21 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 
 		@Override
-		public int hashCode() {
-			return 31 * this.id.hashCode() + getSession().hashCode();
-		}
-
-		@Override
 		public boolean equals(Object other) {
 			if (this == other) {
 				return true;
 			}
-			if (other == null || !(other instanceof SimpSubscription)) {
+			if (!(other instanceof SimpSubscription)) {
 				return false;
 			}
 			SimpSubscription otherSubscription = (SimpSubscription) other;
-			return (getSession().getId().equals(otherSubscription.getSession().getId()) &&
-					this.id.equals(otherSubscription.getId()));
+			return (this.id.equals(otherSubscription.getId()) &&
+					getSession().getId().equals(otherSubscription.getSession().getId()));
+		}
+
+		@Override
+		public int hashCode() {
+			return this.id.hashCode() * 31 + getSession().getId().hashCode();
 		}
 
 		@Override

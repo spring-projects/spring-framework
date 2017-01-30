@@ -79,7 +79,6 @@ import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.oxm.UnmarshallingFailureException;
 import org.springframework.oxm.XmlMappingException;
 import org.springframework.oxm.support.AbstractMarshaller;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -114,7 +113,7 @@ import org.springframework.util.xml.StaxUtils;
  * @author Juergen Hoeller
  * @since 3.0
  */
-public class XStreamMarshaller extends AbstractMarshaller implements InitializingBean, BeanClassLoaderAware {
+public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLoaderAware, InitializingBean {
 
 	/**
 	 * The default encoding used for stream access: UTF-8.
@@ -130,7 +129,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	private Mapper mapper;
 
-	private Class<?>[] mapperWrappers;
+	private Class<? extends MapperWrapper>[] mapperWrappers;
 
 	private ConverterLookup converterLookup = new DefaultConverterLookup();
 
@@ -210,7 +209,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * of type {@link Mapper} or {@link MapperWrapper}.
 	 * @since 4.0
 	 */
-	public void setMapperWrappers(Class<?>... mapperWrappers) {
+	@SuppressWarnings("unchecked")
+	public void setMapperWrappers(Class<? extends MapperWrapper>... mapperWrappers) {
 		this.mapperWrappers = mapperWrappers;
 	}
 
@@ -413,9 +413,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 			protected MapperWrapper wrapMapper(MapperWrapper next) {
 				MapperWrapper mapperToWrap = next;
 				if (mapperWrappers != null) {
-					for (Class<?> mapperWrapper : mapperWrappers) {
-						Assert.isAssignable(MapperWrapper.class, mapperWrapper);
-						Constructor<?> ctor;
+					for (Class<? extends MapperWrapper> mapperWrapper : mapperWrappers) {
+						Constructor<? extends MapperWrapper> ctor;
 						try {
 							ctor = mapperWrapper.getConstructor(Mapper.class);
 						}
@@ -428,9 +427,9 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 							}
 						}
 						try {
-							mapperToWrap = (MapperWrapper) ctor.newInstance(mapperToWrap);
+							mapperToWrap = ctor.newInstance(mapperToWrap);
 						}
-						catch (Exception ex) {
+						catch (Throwable ex) {
 							throw new IllegalStateException("Failed to construct MapperWrapper: " + mapperWrapper);
 						}
 					}
