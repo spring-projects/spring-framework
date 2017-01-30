@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,13 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
 	 * @param value the value to be added
 	 */
 	void add(K key, V value);
+
+	/**
+	 * Add all the values of the given list to the current list of values for the given key.
+	 * @param key they key
+	 * @param values the values to be added
+	 */
+	void addAll(K key, List<V> values);
 
 	/**
 	 * Set the given single value under the given key.

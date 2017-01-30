@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,12 +75,14 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 
 	@Override
 	public void add(K key, V value) {
-		List<V> values = this.targetMap.get(key);
-		if (values == null) {
-			values = new LinkedList<>();
-			this.targetMap.put(key, values);
-		}
+		List<V> values = this.targetMap.computeIfAbsent(key, k -> new LinkedList<>());
 		values.add(value);
+	}
+
+	@Override
+	public void addAll(K key, List<V> values) {
+		List<V> currentValues = this.targetMap.computeIfAbsent(key, k -> new LinkedList<>());
+		currentValues.addAll(values);
 	}
 
 	@Override

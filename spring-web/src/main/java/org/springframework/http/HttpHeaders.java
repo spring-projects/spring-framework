@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1333,12 +1333,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	@Override
 	public void add(String headerName, String headerValue) {
-		List<String> headerValues = this.headers.get(headerName);
-		if (headerValues == null) {
-			headerValues = new LinkedList<>();
-			this.headers.put(headerName, headerValues);
-		}
+		List<String> headerValues =
+				this.headers.computeIfAbsent(headerName, k -> new LinkedList<>());
 		headerValues.add(headerValue);
+	}
+
+	@Override
+	public void addAll(String key, List<String> values) {
+		List<String> currentValues = this.headers.computeIfAbsent(key, k -> new LinkedList<>());
+		currentValues.addAll(values);
 	}
 
 	/**
