@@ -89,6 +89,14 @@ public abstract class Assert {
 	}
 
 	/**
+	 * @deprecated as of 4.3.7, in favor of {@link #isTrue(boolean, String)}
+	 */
+	@Deprecated
+	public static void isTrue(boolean expression) {
+		isTrue(expression, "[Assertion failed] - this expression must be true");
+	}
+
+	/**
 	 * Assert that an object is {@code null}.
 	 * <pre class="code">
 	 * Assert.isNull(value, () -&gt; "The value '" + value + "' must be null");
@@ -119,6 +127,14 @@ public abstract class Assert {
 	}
 
 	/**
+	 * @deprecated as of 4.3.7, in favor of {@link #isNull(Object, String)}
+	 */
+	@Deprecated
+	public static void isNull(Object object) {
+		isNull(object, "[Assertion failed] - the object argument must be null");
+	}
+
+	/**
 	 * Assert that an object is not {@code null}.
 	 * <pre class="code">
 	 * Assert.notNull(clazz, () -&gt; "The class '" + clazz.getName() + "' must not be null");
@@ -146,6 +162,14 @@ public abstract class Assert {
 		if (object == null) {
 			throw new IllegalArgumentException(message);
 		}
+	}
+
+	/**
+	 * @deprecated as of 4.3.7, in favor of {@link #notNull(Object, String)}
+	 */
+	@Deprecated
+	public static void notNull(Object object) {
+		notNull(object, "[Assertion failed] - this argument is required; it must not be null");
 	}
 
 	/**
@@ -183,6 +207,15 @@ public abstract class Assert {
 	}
 
 	/**
+	 * @deprecated as of 4.3.7, in favor of {@link #hasLength(String, String)}
+	 */
+	@Deprecated
+	public static void hasLength(String text) {
+		hasLength(text,
+				"[Assertion failed] - this String argument must have length; it must not be null or empty");
+	}
+
+	/**
 	 * Assert that the given String contains valid text content; that is, it must not
 	 * be {@code null} and must contain at least one non-whitespace character.
 	 * <pre class="code">
@@ -214,6 +247,15 @@ public abstract class Assert {
 		if (!StringUtils.hasText(text)) {
 			throw new IllegalArgumentException(message);
 		}
+	}
+
+	/**
+	 * @deprecated as of 4.3.7, in favor of {@link #hasText(String, String)}
+	 */
+	@Deprecated
+	public static void hasText(String text) {
+		hasText(text,
+				"[Assertion failed] - this String argument must have text; it must not be null, empty, or blank");
 	}
 
 	/**
@@ -251,6 +293,15 @@ public abstract class Assert {
 	}
 
 	/**
+	 * @deprecated as of 4.3.7, in favor of {@link #doesNotContain(String, String, String)}
+	 */
+	@Deprecated
+	public static void doesNotContain(String textToSearch, String substring) {
+		doesNotContain(textToSearch, substring,
+				() -> "[Assertion failed] - this String argument must not contain the substring [" + substring + "]");
+	}
+
+	/**
 	 * Assert that an array contains elements; that is, it must not be
 	 * {@code null} and must contain at least one element.
 	 * <pre class="code">
@@ -280,6 +331,14 @@ public abstract class Assert {
 		if (ObjectUtils.isEmpty(array)) {
 			throw new IllegalArgumentException(message);
 		}
+	}
+
+	/**
+	 * @deprecated as of 4.3.7, in favor of {@link #notEmpty(Object[], String)}
+	 */
+	@Deprecated
+	public static void notEmpty(Object[] array) {
+		notEmpty(array, "[Assertion failed] - this array must not be empty: it must contain at least 1 element");
 	}
 
 	/**
@@ -323,6 +382,14 @@ public abstract class Assert {
 	}
 
 	/**
+	 * @deprecated as of 4.3.7, in favor of {@link #noNullElements(Object[], String)}
+	 */
+	@Deprecated
+	public static void noNullElements(Object[] array) {
+		noNullElements(array, "[Assertion failed] - this array must not contain any null elements");
+	}
+
+	/**
 	 * Assert that a collection contains elements; that is, it must not be
 	 * {@code null} and must contain at least one element.
 	 * <pre class="code">
@@ -357,6 +424,15 @@ public abstract class Assert {
 	}
 
 	/**
+	 * @deprecated as of 4.3.7, in favor of {@link #notEmpty(Collection, String)}
+	 */
+	@Deprecated
+	public static void notEmpty(Collection<?> collection) {
+		notEmpty(collection,
+				"[Assertion failed] - this collection must not be empty: it must contain at least 1 element");
+	}
+
+	/**
 	 * Assert that a Map contains entries; that is, it must not be {@code null}
 	 * and must contain at least one entry.
 	 * <pre class="code">
@@ -386,6 +462,14 @@ public abstract class Assert {
 		if (CollectionUtils.isEmpty(map)) {
 			throw new IllegalArgumentException(message);
 		}
+	}
+
+	/**
+	 * @deprecated as of 4.3.7, in favor of {@link #notEmpty(Map, String)}
+	 */
+	@Deprecated
+	public static void notEmpty(Map<?, ?> map) {
+		notEmpty(map, "[Assertion failed] - this map must not be empty; it must contain at least one entry");
 	}
 
 	/**
@@ -535,6 +619,14 @@ public abstract class Assert {
 		if (!expression) {
 			throw new IllegalStateException(message);
 		}
+	}
+
+	/**
+	 * @deprecated as of 4.3.7, in favor of {@link #state(boolean, String)}
+	 */
+	@Deprecated
+	public static void state(boolean expression) {
+		state(expression, "[Assertion failed] - this state invariant must be true");
 	}
 
 	private static String nullSafeGet(Supplier<String> messageSupplier) {
