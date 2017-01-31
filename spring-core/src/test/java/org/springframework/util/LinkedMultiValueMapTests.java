@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -32,12 +31,8 @@ import static org.junit.Assert.*;
  */
 public class LinkedMultiValueMapTests {
 
-	private LinkedMultiValueMap<String, String> map;
+	private final LinkedMultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
 
-	@Before
-	public void setUp() {
-		map = new LinkedMultiValueMap<String, String>();
-	}
 
 	@Test
 	public void add() {

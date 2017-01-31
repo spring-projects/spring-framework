@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,12 @@ import java.util.List;
 import org.springframework.http.HttpMethod;
 
 /**
- * Wrapper for a {@link ClientHttpRequestFactory} that has support for {@link ClientHttpRequestInterceptor}s.
+ * {@link ClientHttpRequestFactory} wrapper with support for {@link ClientHttpRequestInterceptor}s.
  *
  * @author Arjen Poutsma
  * @since 3.1
+ * @see ClientHttpRequestFactory
+ * @see ClientHttpRequestInterceptor
  */
 public class InterceptingClientHttpRequestFactory extends AbstractClientHttpRequestFactoryWrapper {
 
@@ -44,6 +46,7 @@ public class InterceptingClientHttpRequestFactory extends AbstractClientHttpRequ
 		super(requestFactory);
 		this.interceptors = (interceptors != null ? interceptors : Collections.<ClientHttpRequestInterceptor>emptyList());
 	}
+
 
 	@Override
 	protected ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod, ClientHttpRequestFactory requestFactory) {

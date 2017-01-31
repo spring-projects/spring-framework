@@ -76,7 +76,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Hand written SpEL parser. Instances are reusable but are not thread-safe.
+ * Hand-written SpEL parser. Instances are reusable but are not thread-safe.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -162,7 +162,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				}
 				nextToken();  // elvis has left the building
 				SpelNodeImpl valueIfNull = eatExpression();
-				if (valueIfNull==null) {
+				if (valueIfNull == null) {
 					valueIfNull = new NullLiteral(toPos(t.startPos + 1, t.endPos + 1));
 				}
 				return new Elvis(toPos(t), expr, valueIfNull);
@@ -364,7 +364,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			expr = maybeEatNonDottedNode();
 		}
 
-		if (expr==null) {
+		if (expr == null) {
 			return false;
 		}
 		else {
@@ -393,11 +393,10 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	//    ))
 	//	;
 	private SpelNodeImpl eatDottedNode() {
-		Token t = nextToken();// it was a '.' or a '?.'
-		boolean nullSafeNavigation = t.kind == TokenKind.SAFE_NAVI;
-		if (maybeEatMethodOrProperty(nullSafeNavigation) || maybeEatFunctionOrVar()
-				|| maybeEatProjection(nullSafeNavigation)
-				|| maybeEatSelection(nullSafeNavigation)) {
+		Token t = nextToken();  // it was a '.' or a '?.'
+		boolean nullSafeNavigation = (t.kind == TokenKind.SAFE_NAVI);
+		if (maybeEatMethodOrProperty(nullSafeNavigation) || maybeEatFunctionOrVar() ||
+				maybeEatProjection(nullSafeNavigation) || maybeEatSelection(nullSafeNavigation)) {
 			return pop();
 		}
 		if (peekToken() == null) {
@@ -405,8 +404,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			raiseInternalException(t.startPos, SpelMessage.OOD);
 		}
 		else {
-			raiseInternalException(t.startPos, SpelMessage.UNEXPECTED_DATA_AFTER_DOT,
-					toString(peekToken()));
+			raiseInternalException(t.startPos, SpelMessage.UNEXPECTED_DATA_AFTER_DOT, toString(peekToken()));
 		}
 		return null;
 	}
@@ -425,13 +423,13 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		Token functionOrVariableName = eatToken(TokenKind.IDENTIFIER);
 		SpelNodeImpl[] args = maybeEatMethodArgs();
 		if (args == null) {
-			push(new VariableReference(functionOrVariableName.data, toPos(t.startPos,
-					functionOrVariableName.endPos)));
+			push(new VariableReference(functionOrVariableName.data,
+					toPos(t.startPos, functionOrVariableName.endPos)));
 			return true;
 		}
 
-		push(new FunctionReference(functionOrVariableName.data, toPos(t.startPos,
-				functionOrVariableName.endPos), args));
+		push(new FunctionReference(functionOrVariableName.data,
+				toPos(t.startPos, functionOrVariableName.endPos), args));
 		return true;
 	}
 
@@ -448,7 +446,8 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 
 	private void eatConstructorArgs(List<SpelNodeImpl> accumulatedArguments) {
 		if (!peekToken(TokenKind.LPAREN)) {
-			throw new InternalParseException(new SpelParseException(this.expressionString,positionOf(peekToken()),SpelMessage.MISSING_CONSTRUCTOR_ARGS));
+			throw new InternalParseException(new SpelParseException(this.expressionString,
+					positionOf(peekToken()), SpelMessage.MISSING_CONSTRUCTOR_ARGS));
 		}
 		consumeArguments(accumulatedArguments);
 		eatToken(TokenKind.RPAREN);
@@ -461,7 +460,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		int pos = peekToken().startPos;
 		Token next;
 		do {
-			nextToken();  // consume ( (first time through) or comma (subsequent times)
+			nextToken();  // consume (first time through) or comma (subsequent times)
 			Token t = peekToken();
 			if (t == null) {
 				raiseInternalException(pos, SpelMessage.RUN_OUT_OF_ARGUMENTS);
@@ -544,13 +543,15 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 						SpelMessage.INVALID_BEAN_REFERENCE);
 			}
 
-			BeanReference beanReference = null;
+			BeanReference beanReference;
 			if (beanRefToken.getKind() == TokenKind.FACTORY_BEAN_REF) {
-				String beanNameString = new StringBuilder().append(TokenKind.FACTORY_BEAN_REF.tokenChars).append(beanName).toString();
-				beanReference = new BeanReference(toPos(beanRefToken.startPos,beanNameToken.endPos),beanNameString);
+				String beanNameString = new StringBuilder().
+						append(TokenKind.FACTORY_BEAN_REF.tokenChars).append(beanName).toString();
+				beanReference = new BeanReference(
+						toPos(beanRefToken.startPos, beanNameToken.endPos), beanNameString);
 			}
 			else {
-				beanReference = new BeanReference(toPos(beanNameToken) ,beanName);
+				beanReference = new BeanReference(toPos(beanNameToken), beanName);
 			}
 			this.constructedNodes.push(beanReference);
 			return true;
@@ -561,14 +562,14 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	private boolean maybeEatTypeReference() {
 		if (peekToken(TokenKind.IDENTIFIER)) {
 			Token typeName = peekToken();
-			if (!typeName.stringValue().equals("T")) {
+			if (!"T".equals(typeName.stringValue())) {
 				return false;
 			}
 			// It looks like a type reference but is T being used as a map key?
 			Token t = nextToken();
 			if (peekToken(TokenKind.RSQUARE)) {
 				// looks like 'T]' (T is map key)
-				push(new PropertyOrFieldReference(false,t.data,toPos(t)));
+				push(new PropertyOrFieldReference(false, t.data, toPos(t)));
 				return true;
 			}
 			eatToken(TokenKind.LPAREN);
@@ -581,7 +582,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				dims++;
 			}
 			eatToken(TokenKind.RPAREN);
-			this.constructedNodes.push(new TypeReference(toPos(typeName),node,dims));
+			this.constructedNodes.push(new TypeReference(toPos(typeName), node, dims));
 			return true;
 		}
 		return false;
@@ -590,7 +591,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	private boolean maybeEatNullReference() {
 		if (peekToken(TokenKind.IDENTIFIER)) {
 			Token nullToken = peekToken();
-			if (!nullToken.stringValue().equalsIgnoreCase("null")) {
+			if (!"null".equalsIgnoreCase(nullToken.stringValue())) {
 				return false;
 			}
 			nextToken();
@@ -623,12 +624,12 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		Token closingCurly = peekToken();
 		if (peekToken(TokenKind.RCURLY, true)) {
 			// empty list '{}'
-			expr = new InlineList(toPos(t.startPos,closingCurly.endPos));
+			expr = new InlineList(toPos(t.startPos, closingCurly.endPos));
 		}
-		else if (peekToken(TokenKind.COLON,true)) {
+		else if (peekToken(TokenKind.COLON, true)) {
 			closingCurly = eatToken(TokenKind.RCURLY);
 			// empty map '{:}'
-			expr = new InlineMap(toPos(t.startPos,closingCurly.endPos));
+			expr = new InlineMap(toPos(t.startPos, closingCurly.endPos));
 		}
 		else {
 			SpelNodeImpl firstExpression = eatExpression();
@@ -636,35 +637,37 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			// '}' - end of list
 			// ',' - more expressions in this list
 			// ':' - this is a map!
-
-			if (peekToken(TokenKind.RCURLY)) { // list with one item in it
+			if (peekToken(TokenKind.RCURLY)) {  // list with one item in it
 				List<SpelNodeImpl> listElements = new ArrayList<SpelNodeImpl>();
 				listElements.add(firstExpression);
 				closingCurly = eatToken(TokenKind.RCURLY);
-				expr = new InlineList(toPos(t.startPos,closingCurly.endPos),listElements.toArray(new SpelNodeImpl[listElements.size()]));
+				expr = new InlineList(toPos(t.startPos, closingCurly.endPos),
+						listElements.toArray(new SpelNodeImpl[listElements.size()]));
 			}
-			else if (peekToken(TokenKind.COMMA, true)) { // multi item list
+			else if (peekToken(TokenKind.COMMA, true)) {  // multi-item list
 				List<SpelNodeImpl> listElements = new ArrayList<SpelNodeImpl>();
 				listElements.add(firstExpression);
 				do {
 					listElements.add(eatExpression());
 				}
-				while (peekToken(TokenKind.COMMA,true));
+				while (peekToken(TokenKind.COMMA, true));
 				closingCurly = eatToken(TokenKind.RCURLY);
-				expr = new InlineList(toPos(t.startPos,closingCurly.endPos),listElements.toArray(new SpelNodeImpl[listElements.size()]));
+				expr = new InlineList(toPos(t.startPos, closingCurly.endPos),
+						listElements.toArray(new SpelNodeImpl[listElements.size()]));
 
 			}
 			else if (peekToken(TokenKind.COLON, true)) {  // map!
 				List<SpelNodeImpl> mapElements = new ArrayList<SpelNodeImpl>();
 				mapElements.add(firstExpression);
 				mapElements.add(eatExpression());
-				while (peekToken(TokenKind.COMMA,true)) {
+				while (peekToken(TokenKind.COMMA, true)) {
 					mapElements.add(eatExpression());
 					eatToken(TokenKind.COLON);
 					mapElements.add(eatExpression());
 				}
 				closingCurly = eatToken(TokenKind.RCURLY);
-				expr = new InlineMap(toPos(t.startPos,closingCurly.endPos),mapElements.toArray(new SpelNodeImpl[mapElements.size()]));
+				expr = new InlineMap(toPos(t.startPos, closingCurly.endPos),
+						mapElements.toArray(new SpelNodeImpl[mapElements.size()]));
 			}
 			else {
 				raiseInternalException(t.startPos, SpelMessage.OOD);
@@ -718,7 +721,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		while (isValidQualifiedId(node)) {
 			nextToken();
 			if (node.kind != TokenKind.DOT) {
-				qualifiedIdPieces.add(new Identifier(node.stringValue(),toPos(node)));
+				qualifiedIdPieces.add(new Identifier(node.stringValue(), toPos(node)));
 			}
 			node = peekToken();
 		}
@@ -729,8 +732,10 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			raiseInternalException(node.startPos, SpelMessage.NOT_EXPECTED_TOKEN,
 					"qualified ID", node.getKind().toString().toLowerCase());
 		}
-		int pos = toPos(qualifiedIdPieces.getFirst().getStartPosition(), qualifiedIdPieces.getLast().getEndPosition());
-		return new QualifiedIdentifier(pos, qualifiedIdPieces.toArray(new SpelNodeImpl[qualifiedIdPieces.size()]));
+		int pos = toPos(qualifiedIdPieces.getFirst().getStartPosition(),
+				qualifiedIdPieces.getLast().getEndPosition());
+		return new QualifiedIdentifier(pos,
+				qualifiedIdPieces.toArray(new SpelNodeImpl[qualifiedIdPieces.size()]));
 	}
 
 	private boolean isValidQualifiedId(Token node) {
@@ -744,19 +749,22 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		return (StringUtils.hasLength(value) && VALID_QUALIFIED_ID_PATTERN.matcher(value).matches());
 	}
 
-	// This is complicated due to the support for dollars in identifiers.  Dollars are normally separate tokens but
-	// there we want to combine a series of identifiers and dollars into a single identifier
+	// This is complicated due to the support for dollars in identifiers.
+	// Dollars are normally separate tokens but there we want to combine
+	// a series of identifiers and dollars into a single identifier.
 	private boolean maybeEatMethodOrProperty(boolean nullSafeNavigation) {
 		if (peekToken(TokenKind.IDENTIFIER)) {
 			Token methodOrPropertyName = nextToken();
 			SpelNodeImpl[] args = maybeEatMethodArgs();
-			if (args==null) {
+			if (args == null) {
 				// property
-				push(new PropertyOrFieldReference(nullSafeNavigation, methodOrPropertyName.data,toPos(methodOrPropertyName)));
+				push(new PropertyOrFieldReference(nullSafeNavigation, methodOrPropertyName.data,
+						toPos(methodOrPropertyName)));
 				return true;
 			}
-			// methodreference
-			push(new MethodReference(nullSafeNavigation, methodOrPropertyName.data, toPos(methodOrPropertyName), args));
+			// method reference
+			push(new MethodReference(nullSafeNavigation, methodOrPropertyName.data,
+					toPos(methodOrPropertyName), args));
 			// TODO what is the end position for a method reference? the name or the last arg?
 			return true;
 		}
@@ -771,7 +779,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			// It looks like a constructor reference but is NEW being used as a map key?
 			if (peekToken(TokenKind.RSQUARE)) {
 				// looks like 'NEW]' (so NEW used as map key)
-				push(new PropertyOrFieldReference(false, newToken.data ,toPos(newToken)));
+				push(new PropertyOrFieldReference(false, newToken.data, toPos(newToken)));
 				return true;
 			}
 			SpelNodeImpl possiblyQualifiedConstructorName = eatPossiblyQualifiedId();
@@ -780,7 +788,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			if (peekToken(TokenKind.LSQUARE)) {
 				// array initializer
 				List<SpelNodeImpl> dimensions = new ArrayList<SpelNodeImpl>();
-				while (peekToken(TokenKind.LSQUARE,true)) {
+				while (peekToken(TokenKind.LSQUARE, true)) {
 					if (!peekToken(TokenKind.RSQUARE)) {
 						dimensions.add(eatExpression());
 					}
@@ -792,7 +800,8 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				if (maybeEatInlineListOrMap()) {
 					nodes.add(pop());
 				}
-				push(new ConstructorReference(toPos(newToken), dimensions.toArray(new SpelNodeImpl[dimensions.size()]),
+				push(new ConstructorReference(toPos(newToken),
+						dimensions.toArray(new SpelNodeImpl[dimensions.size()]),
 						nodes.toArray(new SpelNodeImpl[nodes.size()])));
 			}
 			else {
@@ -915,7 +924,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 	private boolean peekToken(TokenKind desiredTokenKind) {
-		return peekToken(desiredTokenKind,false);
+		return peekToken(desiredTokenKind, false);
 	}
 
 	private boolean peekToken(TokenKind desiredTokenKind, boolean consumeIfMatched) {
@@ -931,9 +940,11 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		}
 
 		if (desiredTokenKind == TokenKind.IDENTIFIER) {
-			// might be one of the textual forms of the operators (e.g. NE for != ) - in which case we can treat it as an identifier
-			// The list is represented here: Tokenizer.alternativeOperatorNames and those ones are in order in the TokenKind enum
-			if (t.kind.ordinal() >= TokenKind.DIV.ordinal() && t.kind.ordinal() <= TokenKind.NOT.ordinal() && t.data != null) {
+			// Might be one of the textual forms of the operators (e.g. NE for != ) -
+			// in which case we can treat it as an identifier. The list is represented here:
+			// Tokenizer.alternativeOperatorNames and those ones are in order in the TokenKind enum.
+			if (t.kind.ordinal() >= TokenKind.DIV.ordinal() && t.kind.ordinal() <= TokenKind.NOT.ordinal() &&
+					t.data != null) {
 				// if t.data were null, we'd know it wasn't the textual form, it was the symbol form
 				return true;
 			}
@@ -1008,7 +1019,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 	private void checkLeftOperand(Token token, SpelNodeImpl operandExpression) {
-		if (operandExpression==null) {
+		if (operandExpression == null) {
 			raiseInternalException(token.startPos, SpelMessage.LEFT_OPERAND_PROBLEM);
 		}
 	}
@@ -1019,10 +1030,8 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		}
 	}
 
-	/**
-	 * Compress the start and end of a token into a single int.
-	 */
 	private int toPos(Token t) {
+		// Compress the start and end of a token into a single int
 		return (t.startPos<<16) + t.endPos;
 	}
 
