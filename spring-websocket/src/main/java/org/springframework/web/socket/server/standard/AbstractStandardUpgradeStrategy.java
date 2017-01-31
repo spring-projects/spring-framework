@@ -71,12 +71,12 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 	}
 
 	protected final HttpServletRequest getHttpServletRequest(ServerHttpRequest request) {
-		Assert.isTrue(request instanceof ServletServerHttpRequest, "ServletServerHttpRequest required");
+		Assert.isInstanceOf(ServletServerHttpRequest.class, request, "ServletServerHttpRequest required");
 		return ((ServletServerHttpRequest) request).getServletRequest();
 	}
 
 	protected final HttpServletResponse getHttpServletResponse(ServerHttpResponse response) {
-		Assert.isTrue(response instanceof ServletServerHttpResponse, "ServletServerHttpResponse required");
+		Assert.isInstanceOf(ServletServerHttpResponse.class, response, "ServletServerHttpResponse required");
 		return ((ServletServerHttpResponse) response).getServletResponse();
 	}
 

@@ -63,9 +63,9 @@ public class ResponseBodyEmitterReturnValueHandler implements AsyncHandlerMethod
 
 
 	public ResponseBodyEmitterReturnValueHandler(List<HttpMessageConverter<?>> messageConverters) {
-		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
+		Assert.notEmpty(messageConverters, "HttpMessageConverter List must not be empty");
 		this.messageConverters = messageConverters;
-		this.adapterMap = new HashMap<>(3);
+		this.adapterMap = new HashMap<>(4);
 		this.adapterMap.put(ResponseBodyEmitter.class, new SimpleResponseBodyEmitterAdapter());
 	}
 

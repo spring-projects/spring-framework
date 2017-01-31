@@ -1333,8 +1333,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	@Override
 	public void add(String headerName, String headerValue) {
-		List<String> headerValues =
-				this.headers.computeIfAbsent(headerName, k -> new LinkedList<>());
+		List<String> headerValues = this.headers.computeIfAbsent(headerName, k -> new LinkedList<>());
 		headerValues.add(headerValue);
 	}
 

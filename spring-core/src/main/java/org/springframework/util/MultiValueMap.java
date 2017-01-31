@@ -45,6 +45,7 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
 	 * Add all the values of the given list to the current list of values for the given key.
 	 * @param key they key
 	 * @param values the values to be added
+	 * @since 5.0
 	 */
 	void addAll(K key, List<V> values);
 

@@ -23,23 +23,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
  */
 public class LinkedMultiValueMapTests {
 
-	private LinkedMultiValueMap<String, String> map;
+	private final LinkedMultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
 
-	@Before
-	public void setUp() {
-		map = new LinkedMultiValueMap<>();
-	}
 
 	@Test
 	public void add() {
