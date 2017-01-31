@@ -51,7 +51,7 @@ configure(allprojects) { project ->
 	ext.hibval5Version       = "5.2.4.Final"
 	ext.hsqldbVersion        = "2.3.4"
 	ext.httpasyncVersion     = "4.1.2"
-	ext.httpclientVersion    = "4.5.2"
+	ext.httpclientVersion    = "4.5.3"
 	ext.jackson2Version      = "2.8.6"
 	ext.jasperreportsVersion = "6.2.1"  // our tests fail with JR-internal NPEs against 6.2.2 and higher
 	ext.javamailVersion      = "1.5.6"
@@ -64,7 +64,7 @@ configure(allprojects) { project ->
 	ext.log4jVersion         = "1.2.17"
 	ext.nettyVersion         = "4.1.7.Final"
 	ext.okhttpVersion        = "2.7.5"
-	ext.okhttp3Version       = "3.5.0"
+	ext.okhttp3Version       = "3.6.0"
 	ext.openjpaVersion       = "2.4.1"
 	ext.poiVersion           = "3.14"
 	ext.reactorVersion       = "2.0.8.RELEASE"
