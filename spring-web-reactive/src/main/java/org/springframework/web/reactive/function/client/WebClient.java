@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,43 +16,97 @@
 
 package org.springframework.web.reactive.function.client;
 
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.time.ZonedDateTime;
+import java.util.function.Function;
+
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
-import org.springframework.util.Assert;
+import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserter;
+import org.springframework.web.util.UriBuilderFactory;
 
 /**
- * Reactive Web client supporting the HTTP/1.1 protocol. Main entry point is through the
- * {@link #exchange(ClientRequest)} method.
+ * The main class for performing Web requests.
  *
- * <p>For example:
  * <pre class="code">
- * WebClient client = WebClient.create(new ReactorClientHttpConnector());
- * ClientRequest&lt;Void&gt; request = ClientRequest.GET("http://example.com/resource").build();
  *
- * Mono&lt;String&gt; result = client
- *   .exchange(request)
- *   .then(response -> response.bodyToMono(String.class));
+ * // Create ExchangeFunction (application-wide)
+ *
+ * ClientHttpConnector connector = new ReactorClientHttpConnector();
+ * ExchangeFunction exchangeFunction = ExchangeFunctions.create(connector);
+ *
+ * // Create WebClient (per base URI)
+ *
+ * String baseUri = "http://abc.com";
+ * UriBuilderFactory factory = new DefaultUriBuilderFactory(baseUri);
+ * WebClient operations = WebClient.create(exchangeFunction, factory);
+ *
+ * // Perform requests...
+ *
+ * Mono<String> result = operations.get()
+ *     .uri("/foo")
+ *     .exchange()
+ *     .then(response -> response.bodyToMono(String.class));
  * </pre>
  *
- * @author Brian Clozel
+ * @author Rossen Stoyanchev
  * @author Arjen Poutsma
  * @since 5.0
  */
-public interface WebClient extends ExchangeFunction {
+public interface WebClient {
 
 	/**
-	 * Exchange the given request for a response mono. Invoking this method performs the actual
-	 * HTTP request/response exchange.
-	 * @param request the request to exchange
-	 * @return the response, wrapped in a {@code Mono}
+	 * Prepare an HTTP GET request.
+	 * @return a spec for specifying the target URL
 	 */
-	@Override
-	Mono<ClientResponse> exchange(ClientRequest<?> request);
+	UriSpec get();
 
 	/**
-	 * Filters this client with the given {@code ExchangeFilterFunction}, resulting in a filtered
-	 * {@code WebClient}.
+	 * Prepare an HTTP HEAD request.
+	 * @return a spec for specifying the target URL
+	 */
+	UriSpec head();
+
+	/**
+	 * Prepare an HTTP POST request.
+	 * @return a spec for specifying the target URL
+	 */
+	UriSpec post();
+
+	/**
+	 * Prepare an HTTP PUT request.
+	 * @return a spec for specifying the target URL
+	 */
+	UriSpec put();
+
+	/**
+	 * Prepare an HTTP PATCH request.
+	 * @return a spec for specifying the target URL
+	 */
+	UriSpec patch();
+
+	/**
+	 * Prepare an HTTP DELETE request.
+	 * @return a spec for specifying the target URL
+	 */
+	UriSpec delete();
+
+	/**
+	 * Prepare an HTTP OPTIONS request.
+	 * @return a spec for specifying the target URL
+	 */
+	UriSpec options();
+
+
+	/**
+	 * Filter the client with the given {@code ExchangeFilterFunction}.
 	 * @param filterFunction the filter to apply to this client
 	 * @return the filtered client
 	 * @see ExchangeFilterFunction#apply(ExchangeFunction)
@@ -60,25 +114,44 @@ public interface WebClient extends ExchangeFunction {
 	WebClient filter(ExchangeFilterFunction filterFunction);
 
 
+	// Static, factory methods
+
 	/**
-	 * Create a new instance of {@code WebClient} with the given connector. This method uses
-	 * {@linkplain WebClientStrategies#withDefaults() default strategies}.
-	 * @param connector the connector to create connections
-	 * @return the created client
+	 * Create {@code WebClient} that uses the given {@link ClientHttpConnector}.
+	 * @param connector the underlying connector to use
 	 */
 	static WebClient create(ClientHttpConnector connector) {
-		return builder(connector).build();
+		return create(ExchangeFunctions.create(connector));
+
 	}
 
 	/**
-	 * Return a builder for a {@code WebClient}.
-	 * @param connector the connector to create connections
-	 * @return a web client builder
+	 * Create {@code WebClient} that uses the given {@link ClientHttpConnector} and
+	 * {@link ExchangeStrategies}.
+	 * @param connector the underlying connector to use
+	 * @param strategies the strategies to use
 	 */
-	static Builder builder(ClientHttpConnector connector) {
-		Assert.notNull(connector, "'connector' must not be null");
-		return new DefaultWebClientBuilder(connector);
+	static WebClient create(ClientHttpConnector connector, ExchangeStrategies strategies) {
+		return create(ExchangeFunctions.create(connector, strategies));
 	}
+
+	/**
+	 * Create {@code WebClient} that wraps the given {@link ExchangeFunction}.
+	 * @param exchangeFunction the underlying exchange function to use
+	 */
+	static WebClient create(ExchangeFunction exchangeFunction) {
+		return builder(exchangeFunction).build();
+	}
+
+	/**
+	 * Create {@code WebClient} with a builder for additional
+	 * configuration options.
+	 * @param exchangeFunction the underlying exchange function to use
+	 */
+	static WebClient.Builder builder(ExchangeFunction exchangeFunction) {
+		return new DefaultWebClientBuilder(exchangeFunction);
+	}
+
 
 	/**
 	 * A mutable builder for a {@link WebClient}.
@@ -86,26 +159,159 @@ public interface WebClient extends ExchangeFunction {
 	interface Builder {
 
 		/**
-		 * Replaces the default strategies with the ones provided by the given
-		 * {@code WebClientStrategies}.
-		 * @param strategies the strategies to use
-		 * @return this builder
+		 * Configure a {@code UriBuilderFactory} for use with this client for
+		 * example to define a common "base" URI.
+		 * @param uriBuilderFactory the URI builder factory
 		 */
-		Builder strategies(WebClientStrategies strategies);
+		Builder uriBuilderFactory(UriBuilderFactory uriBuilderFactory);
 
 		/**
-		 * Adds a filter function <strong>before</strong> the currently registered filters (if any).
-		 * @param filter the filter to add
-		 * @return this builder
-		 */
-		Builder filter(ExchangeFilterFunction filter);
-
-		/**
-		 * Builds the {@code WebClient}.
-		 * @return the built client
+		 * Builder the {@link WebClient} instance.
 		 */
 		WebClient build();
+
 	}
 
+
+	/**
+	 * Contract for specifying the URI for a request.
+	 */
+	interface UriSpec {
+
+		/**
+		 * Specify the URI using an absolute, fully constructed {@link URI}.
+		 */
+		HeaderSpec uri(URI uri);
+
+		/**
+		 * Specify the URI for the request using a URI template and URI variables.
+		 * If a {@link UriBuilderFactory} was configured for the client (e.g.
+		 * with a base URI) it will be used to expand the URI template.
+		 * @see Builder#uriBuilderFactory(UriBuilderFactory)
+		 */
+		HeaderSpec uri(String uri, Object... uriVariables);
+
+		/**
+		 * Build the URI for the request using the {@link UriBuilderFactory}
+		 * configured for this client.
+		 * @see Builder#uriBuilderFactory(UriBuilderFactory)
+		 */
+		HeaderSpec uri(Function<UriBuilderFactory, URI> uriFunction);
+
+	}
+
+	/**
+	 * Contract for specifying request headers leading up to the exchange.
+	 */
+	interface HeaderSpec {
+
+		/**
+		 * Set the list of acceptable {@linkplain MediaType media types}, as
+		 * specified by the {@code Accept} header.
+		 * @param acceptableMediaTypes the acceptable media types
+		 * @return this builder
+		 */
+		HeaderSpec accept(MediaType... acceptableMediaTypes);
+
+		/**
+		 * Set the list of acceptable {@linkplain Charset charsets}, as specified
+		 * by the {@code Accept-Charset} header.
+		 * @param acceptableCharsets the acceptable charsets
+		 * @return this builder
+		 */
+		HeaderSpec acceptCharset(Charset... acceptableCharsets);
+
+		/**
+		 * Set the length of the body in bytes, as specified by the
+		 * {@code Content-Length} header.
+		 * @param contentLength the content length
+		 * @return this builder
+		 * @see HttpHeaders#setContentLength(long)
+		 */
+		HeaderSpec contentLength(long contentLength);
+
+		/**
+		 * Set the {@linkplain MediaType media type} of the body, as specified
+		 * by the {@code Content-Type} header.
+		 * @param contentType the content type
+		 * @return this builder
+		 * @see HttpHeaders#setContentType(MediaType)
+		 */
+		HeaderSpec contentType(MediaType contentType);
+
+		/**
+		 * Add a cookie with the given name and value.
+		 * @param name the cookie name
+		 * @param value the cookie value
+		 * @return this builder
+		 */
+		HeaderSpec cookie(String name, String value);
+
+		/**
+		 * Copy the given cookies into the entity's cookies map.
+		 *
+		 * @param cookies the existing cookies to copy from
+		 * @return this builder
+		 */
+		HeaderSpec cookies(MultiValueMap<String, String> cookies);
+
+		/**
+		 * Set the value of the {@code If-Modified-Since} header.
+		 * <p>The date should be specified as the number of milliseconds since
+		 * January 1, 1970 GMT.
+		 * @param ifModifiedSince the new value of the header
+		 * @return this builder
+		 */
+		HeaderSpec ifModifiedSince(ZonedDateTime ifModifiedSince);
+
+		/**
+		 * Set the values of the {@code If-None-Match} header.
+		 * @param ifNoneMatches the new value of the header
+		 * @return this builder
+		 */
+		HeaderSpec ifNoneMatch(String... ifNoneMatches);
+
+		/**
+		 * Add the given, single header value under the given name.
+		 * @param headerName  the header name
+		 * @param headerValues the header value(s)
+		 * @return this builder
+		 */
+		HeaderSpec header(String headerName, String... headerValues);
+
+		/**
+		 * Copy the given headers into the entity's headers map.
+		 * @param headers the existing headers to copy from
+		 * @return this builder
+		 */
+		HeaderSpec headers(HttpHeaders headers);
+
+		/**
+		 * Perform the request without a request body.
+		 * @return a {@code Mono} with the response
+		 */
+		Mono<ClientResponse> exchange();
+
+		/**
+		 * Set the body of the request to the given {@code BodyInserter} and
+		 * perform the request.
+		 * @param inserter the {@code BodyInserter} that writes to the request
+		 * @param <T> the type contained in the body
+		 * @return a {@code Mono} with the response
+		 */
+		<T> Mono<ClientResponse> exchange(BodyInserter<T, ? super ClientHttpRequest> inserter);
+
+		/**
+		 * Set the body of the request to the given {@code Publisher} and
+		 * perform the request.
+		 * @param publisher the {@code Publisher} to write to the request
+		 * @param elementClass the class of elements contained in the publisher
+		 * @param <T> the type of the elements contained in the publisher
+		 * @param <S> the type of the {@code Publisher}
+		 * @return a {@code Mono} with the response
+		 */
+		<T, S extends Publisher<T>> Mono<ClientResponse> exchange(S publisher, Class<T> elementClass);
+
+	}
 
 }

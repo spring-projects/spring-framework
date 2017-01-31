@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.config.EnableWebReactive;
+import org.springframework.web.reactive.function.client.ExchangeFunction;
+import org.springframework.web.reactive.function.client.ExchangeFunctions;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientOperations;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
@@ -55,16 +56,16 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private AnnotationConfigApplicationContext wac;
 
-	private WebClientOperations operations;
+	private WebClient webClient;
 
 
 	@Override
 	@Before
 	public void setup() throws Exception {
 		super.setup();
-		WebClient client = WebClient.create(new ReactorClientHttpConnector());
+		ExchangeFunction exchangeFunction = ExchangeFunctions.create(new ReactorClientHttpConnector());
 		UriBuilderFactory factory = new DefaultUriBuilderFactory("http://localhost:" + this.port + "/sse");
-		this.operations = WebClientOperations.builder(client).uriBuilderFactory(factory).build();
+		this.webClient = WebClient.builder(exchangeFunction).uriBuilderFactory(factory).build();
 	}
 
 
@@ -79,7 +80,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Test
 	public void sseAsString() throws Exception {
-		Flux<String> result = this.operations.get()
+		Flux<String> result = this.webClient.get()
 				.uri("/string")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
@@ -93,7 +94,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	}
 	@Test
 	public void sseAsPerson() throws Exception {
-		Flux<Person> result = this.operations.get()
+		Flux<Person> result = this.webClient.get()
 				.uri("/person")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
@@ -109,7 +110,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	@Test
 	public void sseAsEvent() throws Exception {
 		ResolvableType type = forClassWithGenerics(ServerSentEvent.class, String.class);
-		Flux<ServerSentEvent<String>> result = this.operations.get()
+		Flux<ServerSentEvent<String>> result = this.webClient.get()
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
@@ -136,7 +137,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Test
 	public void sseAsEventWithoutAcceptHeader() throws Exception {
-		Flux<ServerSentEvent<String>> result = this.operations.get()
+		Flux<ServerSentEvent<String>> result = this.webClient.get()
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()

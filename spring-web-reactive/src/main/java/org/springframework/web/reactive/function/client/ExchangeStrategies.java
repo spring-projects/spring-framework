@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,17 +27,17 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.util.Assert;
 
 /**
- * Defines the strategies to be used by the {@link WebClient}. An instance of
+ * Defines the strategies for invoking {@link ExchangeFunction}s. An instance of
  * this class is immutable; instances are typically created through the mutable {@link Builder}:
  * either through {@link #builder()} to set up default strategies, or {@link #empty()} to start from
- * scratch. Alternatively, {@code WebClientStrategies} instances can be created through
+ * scratch. Alternatively, {@code ExchangeStrategies} instances can be created through
  * {@link #of(Supplier, Supplier)}.
  *
  * @author Brian Clozel
  * @author Arjen Poutsma
  * @since 5.0
  */
-public interface WebClientStrategies {
+public interface ExchangeStrategies {
 
 	// Instance methods
 
@@ -59,38 +59,38 @@ public interface WebClientStrategies {
 	// Static methods
 
 	/**
-	 * Return a new {@code WebClientStrategies} with default initialization.
-	 * @return the new {@code WebClientStrategies}
+	 * Return a new {@code ExchangeStrategies} with default initialization.
+	 * @return the new {@code ExchangeStrategies}
 	 */
-	static WebClientStrategies withDefaults() {
+	static ExchangeStrategies withDefaults() {
 		return builder().build();
 	}
 
 	/**
-	 * Return a new {@code WebClientStrategies} based on the given
+	 * Return a new {@code ExchangeStrategies} based on the given
 	 * {@linkplain ApplicationContext application context}.
 	 * The returned supplier will search for all {@link HttpMessageReader}, and
 	 * {@link HttpMessageWriter} instances in the given application context and return them for
 	 * {@link #messageReaders()}, and {@link #messageWriters()} respectively.
 	 * @param applicationContext the application context to base the strategies on
-	 * @return the new {@code WebClientStrategies}
+	 * @return the new {@code ExchangeStrategies}
 	 */
-	static WebClientStrategies of(ApplicationContext applicationContext) {
+	static ExchangeStrategies of(ApplicationContext applicationContext) {
 		return builder(applicationContext).build();
 	}
 
 	/**
-	 * Return a new {@code WebClientStrategies} described by the given supplier functions.
+	 * Return a new {@code ExchangeStrategies} described by the given supplier functions.
 	 * All provided supplier function parameters can be {@code null} to indicate an empty
 	 * stream is to be returned.
 	 * @param messageReaders the supplier function for {@link HttpMessageReader} instances (can be {@code null})
 	 * @param messageWriters the supplier function for {@link HttpMessageWriter} instances (can be {@code null})
-	 * @return the new {@code WebClientStrategies}
+	 * @return the new {@code ExchangeStrategies}
 	 */
-	static WebClientStrategies of(Supplier<Stream<HttpMessageReader<?>>> messageReaders,
+	static ExchangeStrategies of(Supplier<Stream<HttpMessageReader<?>>> messageReaders,
 			Supplier<Stream<HttpMessageWriter<?>>> messageWriters) {
 
-		return new WebClientStrategies() {
+		return new ExchangeStrategies() {
 			@Override
 			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
 				return checkForNull(messageReaders);
@@ -109,11 +109,11 @@ public interface WebClientStrategies {
 	// Builder methods
 
 	/**
-	 * Return a mutable builder for a {@code WebClientStrategies} with default initialization.
+	 * Return a mutable builder for a {@code ExchangeStrategies} with default initialization.
 	 * @return the builder
 	 */
 	static Builder builder() {
-		DefaultWebClientStrategiesBuilder builder = new DefaultWebClientStrategiesBuilder();
+		DefaultExchangeStrategiesBuilder builder = new DefaultExchangeStrategiesBuilder();
 		builder.defaultConfiguration();
 		return builder;
 	}
@@ -128,22 +128,22 @@ public interface WebClientStrategies {
 	 */
 	static Builder builder(ApplicationContext applicationContext) {
 		Assert.notNull(applicationContext, "ApplicationContext must not be null");
-		DefaultWebClientStrategiesBuilder builder = new DefaultWebClientStrategiesBuilder();
+		DefaultExchangeStrategiesBuilder builder = new DefaultExchangeStrategiesBuilder();
 		builder.applicationContext(applicationContext);
 		return builder;
 	}
 
 	/**
-	 * Return a mutable, empty builder for a {@code WebClientStrategies}.
+	 * Return a mutable, empty builder for a {@code ExchangeStrategies}.
 	 * @return the builder
 	 */
 	static Builder empty() {
-		return new DefaultWebClientStrategiesBuilder();
+		return new DefaultExchangeStrategiesBuilder();
 	}
 
 
 	/**
-	 * A mutable builder for a {@link WebClientStrategies}.
+	 * A mutable builder for a {@link ExchangeStrategies}.
 	 */
 	interface Builder {
 
@@ -180,10 +180,10 @@ public interface WebClientStrategies {
 		Builder encoder(Encoder<?> encoder);
 
 		/**
-		 * Builds the {@link WebClientStrategies}.
+		 * Builds the {@link ExchangeStrategies}.
 		 * @return the built strategies
 		 */
-		WebClientStrategies build();
+		ExchangeStrategies build();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,12 @@ import org.springframework.web.reactive.function.BodyInserter;
 
 /**
  * Represents a typed, immutable, client-side HTTP request, as executed by the
- * {@link WebClient}. Instances of this interface can be created via static
- * builder methods in this class.
+ * {@link ExchangeFunction}. Instances of this interface can be created via static
+ * builder methods.
  *
  * <p>Note that applications are more likely to perform requests through
- * {@link WebClientOperations} rather than using this directly.
- * :
+ * {@link WebClient} rather than using this directly.
+ *
  * @param <T> the type of the body that this request contains
  * @author Brian Clozel
  * @author Arjen Poutsma
@@ -75,7 +75,7 @@ public interface ClientRequest<T> {
 	 * @param strategies the strategies to use when writing
 	 * @return {@code Mono<Void>} to indicate when writing is complete
 	 */
-	Mono<Void> writeTo(ClientHttpRequest request, WebClientStrategies strategies);
+	Mono<Void> writeTo(ClientHttpRequest request, ExchangeStrategies strategies);
 
 
 	// Static builder methods

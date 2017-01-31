@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
@@ -38,26 +39,26 @@ import org.springframework.web.util.UriBuilderFactory;
 
 
 /**
- * Default implementation of {@link WebClientOperations}.
+ * Default implementation of {@link WebClient}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-class DefaultWebClientOperations implements WebClientOperations {
+class DefaultWebClient implements WebClient {
 
-	private final WebClient webClient;
+	private final ExchangeFunction exchangeFunction;
 
 	private final UriBuilderFactory uriBuilderFactory;
 
 
-	DefaultWebClientOperations(WebClient webClient, UriBuilderFactory factory) {
-		this.webClient = webClient;
+	DefaultWebClient(ExchangeFunction exchangeFunction, UriBuilderFactory factory) {
+		this.exchangeFunction = exchangeFunction;
 		this.uriBuilderFactory = (factory != null ? factory : new DefaultUriBuilderFactory());
 	}
 
 
-	private WebClient getWebClient() {
-		return this.webClient;
+	private ExchangeFunction getExchangeFunction() {
+		return this.exchangeFunction;
 	}
 
 	private UriBuilderFactory getUriBuilderFactory() {
@@ -107,9 +108,9 @@ class DefaultWebClientOperations implements WebClientOperations {
 
 
 	@Override
-	public WebClientOperations filter(ExchangeFilterFunction filterFunction) {
-		WebClient filteredWebClient = this.webClient.filter(filterFunction);
-		return new DefaultWebClientOperations(filteredWebClient, this.uriBuilderFactory);
+	public WebClient filter(ExchangeFilterFunction filterFunction) {
+		ExchangeFunction filteredExchangeFunction = this.exchangeFunction.filter(filterFunction);
+		return new DefaultWebClient(filteredExchangeFunction, this.uriBuilderFactory);
 	}
 
 
@@ -219,19 +220,19 @@ class DefaultWebClientOperations implements WebClientOperations {
 		@Override
 		public Mono<ClientResponse> exchange() {
 			ClientRequest<Void> request = this.requestBuilder.headers(this.headers).build();
-			return getWebClient().exchange(request);
+			return getExchangeFunction().exchange(request);
 		}
 
 		@Override
 		public <T> Mono<ClientResponse> exchange(BodyInserter<T, ? super ClientHttpRequest> inserter) {
 			ClientRequest<T> request = this.requestBuilder.headers(this.headers).body(inserter);
-			return getWebClient().exchange(request);
+			return getExchangeFunction().exchange(request);
 		}
 
 		@Override
 		public <T, S extends Publisher<T>> Mono<ClientResponse> exchange(S publisher, Class<T> elementClass) {
 			ClientRequest<S> request = this.requestBuilder.headers(this.headers).body(publisher, elementClass);
-			return getWebClient().exchange(request);
+			return getExchangeFunction().exchange(request);
 		}
 	}
 

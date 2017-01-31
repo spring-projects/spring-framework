@@ -46,22 +46,22 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Default implementation of {@link WebClientStrategies.Builder}.
+ * Default implementation of {@link ExchangeStrategies.Builder}.
  *
  * @author Arjen Poutsma
  * @since 5.0
  */
-class DefaultWebClientStrategiesBuilder implements WebClientStrategies.Builder {
+class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Builder {
 
 	private static final boolean jackson2Present =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					DefaultWebClientStrategiesBuilder.class.getClassLoader()) &&
+					DefaultExchangeStrategiesBuilder.class.getClassLoader()) &&
 					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-							DefaultWebClientStrategiesBuilder.class.getClassLoader());
+							DefaultExchangeStrategiesBuilder.class.getClassLoader());
 
 	private static final boolean jaxb2Present =
 			ClassUtils.isPresent("javax.xml.bind.Binder",
-					DefaultWebClientStrategiesBuilder.class.getClassLoader());
+					DefaultExchangeStrategiesBuilder.class.getClassLoader());
 
 
 	private final List<HttpMessageReader<?>> messageReaders = new ArrayList<>();
@@ -100,43 +100,43 @@ class DefaultWebClientStrategiesBuilder implements WebClientStrategies.Builder {
 	}
 
 	@Override
-	public WebClientStrategies.Builder messageReader(HttpMessageReader<?> messageReader) {
+	public ExchangeStrategies.Builder messageReader(HttpMessageReader<?> messageReader) {
 		Assert.notNull(messageReader, "'messageReader' must not be null");
 		this.messageReaders.add(messageReader);
 		return this;
 	}
 
 	@Override
-	public WebClientStrategies.Builder decoder(Decoder<?> decoder) {
+	public ExchangeStrategies.Builder decoder(Decoder<?> decoder) {
 		Assert.notNull(decoder, "'decoder' must not be null");
 		return messageReader(new DecoderHttpMessageReader<>(decoder));
 	}
 
 	@Override
-	public WebClientStrategies.Builder messageWriter(HttpMessageWriter<?> messageWriter) {
+	public ExchangeStrategies.Builder messageWriter(HttpMessageWriter<?> messageWriter) {
 		Assert.notNull(messageWriter, "'messageWriter' must not be null");
 		this.messageWriters.add(messageWriter);
 		return this;
 	}
 
 	@Override
-	public WebClientStrategies.Builder encoder(Encoder<?> encoder) {
+	public ExchangeStrategies.Builder encoder(Encoder<?> encoder) {
 		Assert.notNull(encoder, "'encoder' must not be null");
 		return messageWriter(new EncoderHttpMessageWriter<>(encoder));
 	}
 
 	@Override
-	public WebClientStrategies build() {
-		return new DefaultWebClientStrategies(this.messageReaders, this.messageWriters);
+	public ExchangeStrategies build() {
+		return new DefaultExchangeStrategies(this.messageReaders, this.messageWriters);
 	}
 
-	private static class DefaultWebClientStrategies implements WebClientStrategies {
+	private static class DefaultExchangeStrategies implements ExchangeStrategies {
 
 		private final List<HttpMessageReader<?>> messageReaders;
 
 		private final List<HttpMessageWriter<?>> messageWriters;
 
-		public DefaultWebClientStrategies(
+		public DefaultExchangeStrategies(
 				List<HttpMessageReader<?>> messageReaders,
 				List<HttpMessageWriter<?>> messageWriters) {
 			this.messageReaders = unmodifiableCopy(messageReaders);

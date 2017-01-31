@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class DefaultClientResponseTests {
 
 	private ClientHttpResponse mockResponse;
 
-	private WebClientStrategies mockWebClientStrategies;
+	private ExchangeStrategies mockExchangeStrategies;
 
 	private DefaultClientResponse defaultClientResponse;
 
@@ -63,9 +63,9 @@ public class DefaultClientResponseTests {
 	@Before
 	public void createMocks() {
 		mockResponse = mock(ClientHttpResponse.class);
-		mockWebClientStrategies = mock(WebClientStrategies.class);
+		mockExchangeStrategies = mock(ExchangeStrategies.class);
 
-		defaultClientResponse = new DefaultClientResponse(mockResponse, mockWebClientStrategies);
+		defaultClientResponse = new DefaultClientResponse(mockResponse, mockExchangeStrategies);
 	}
 
 	@Test
@@ -110,7 +110,7 @@ public class DefaultClientResponseTests {
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
 				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
-		when(mockWebClientStrategies.messageReaders()).thenReturn(messageReaders::stream);
+		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders::stream);
 
 		Mono<String> resultMono = defaultClientResponse.body(toMono(String.class));
 		assertEquals("foo", resultMono.block());
@@ -131,7 +131,7 @@ public class DefaultClientResponseTests {
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
 				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
-		when(mockWebClientStrategies.messageReaders()).thenReturn(messageReaders::stream);
+		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders::stream);
 
 		Mono<String> resultMono = defaultClientResponse.bodyToMono(String.class);
 		assertEquals("foo", resultMono.block());
@@ -146,7 +146,7 @@ public class DefaultClientResponseTests {
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
 				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
-		when(mockWebClientStrategies.messageReaders()).thenReturn(messageReaders::stream);
+		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders::stream);
 
 		Mono<String> resultMono = defaultClientResponse.bodyToMono(String.class);
 
@@ -170,7 +170,7 @@ public class DefaultClientResponseTests {
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
 				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
-		when(mockWebClientStrategies.messageReaders()).thenReturn(messageReaders::stream);
+		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders::stream);
 
 		Flux<String> resultFlux = defaultClientResponse.bodyToFlux(String.class);
 		Mono<List<String>> result = resultFlux.collectList();
@@ -186,7 +186,7 @@ public class DefaultClientResponseTests {
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
 				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
-		when(mockWebClientStrategies.messageReaders()).thenReturn(messageReaders::stream);
+		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders::stream);
 
 		Flux<String> resultFlux = defaultClientResponse.bodyToFlux(String.class);
 		StepVerifier.create(resultFlux)

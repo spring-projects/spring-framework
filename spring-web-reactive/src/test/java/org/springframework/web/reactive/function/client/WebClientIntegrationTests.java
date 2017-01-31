@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import static org.junit.Assert.assertThat;
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 
 /**
- * Integration tests using a {@link WebClient} through {@link WebClientOperations}.
+ * Integration tests using a {@link ExchangeFunction} through {@link WebClient}.
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev
@@ -52,17 +52,17 @@ public class WebClientIntegrationTests {
 
 	private MockWebServer server;
 
-	private WebClientOperations operations;
+	private WebClient webClient;
 
 
 	@Before
 	public void setup() {
 		this.server = new MockWebServer();
 
-		WebClient webClient = WebClient.create(new ReactorClientHttpConnector());
+		ExchangeFunction exchangeFunction = ExchangeFunctions.create(new ReactorClientHttpConnector());
 		UriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory(this.server.url("/").toString());
 
-		this.operations = WebClientOperations.builder(webClient)
+		this.webClient = WebClient.builder(exchangeFunction)
 				.uriBuilderFactory(uriBuilderFactory)
 				.build();
 	}
@@ -77,7 +77,7 @@ public class WebClientIntegrationTests {
 	public void headers() throws Exception {
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
-		Mono<HttpHeaders> result = this.operations.get()
+		Mono<HttpHeaders> result = this.webClient.get()
 				.uri("/greeting?name=Spring")
 				.exchange()
 				.map(response -> response.headers().asHttpHeaders());
@@ -101,7 +101,7 @@ public class WebClientIntegrationTests {
 	public void plainText() throws Exception {
 		this.server.enqueue(new MockResponse().setBody("Hello Spring!"));
 
-		Mono<String> result = this.operations.get()
+		Mono<String> result = this.webClient.get()
 				.uri("/greeting?name=Spring")
 				.header("X-Test-Header", "testvalue")
 				.exchange()
@@ -125,7 +125,7 @@ public class WebClientIntegrationTests {
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
 				.setBody(content));
 
-		Mono<String> result = this.operations.get()
+		Mono<String> result = this.webClient.get()
 				.uri("/json")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
@@ -147,7 +147,7 @@ public class WebClientIntegrationTests {
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
 				.setBody("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}"));
 
-		Mono<Pojo> result = this.operations.get()
+		Mono<Pojo> result = this.webClient.get()
 				.uri("/pojo")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
@@ -169,7 +169,7 @@ public class WebClientIntegrationTests {
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
 				.setBody("[{\"bar\":\"bar1\",\"foo\":\"foo1\"},{\"bar\":\"bar2\",\"foo\":\"foo2\"}]"));
 
-		Flux<Pojo> result = this.operations.get()
+		Flux<Pojo> result = this.webClient.get()
 				.uri("/pojos")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
@@ -193,7 +193,7 @@ public class WebClientIntegrationTests {
 				.setHeader("Content-Type", "application/json")
 				.setBody("{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}"));
 
-		Mono<Pojo> result = this.operations.post()
+		Mono<Pojo> result = this.webClient.post()
 				.uri("/pojo/capitalize")
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -219,7 +219,7 @@ public class WebClientIntegrationTests {
 		this.server.enqueue(new MockResponse()
 				.setHeader("Content-Type", "text/plain").setBody("test"));
 
-		Mono<String> result = this.operations.get()
+		Mono<String> result = this.webClient.get()
 				.uri("/test")
 				.cookie("testkey", "testvalue")
 				.exchange()
@@ -241,7 +241,7 @@ public class WebClientIntegrationTests {
 		this.server.enqueue(new MockResponse().setResponseCode(404)
 				.setHeader("Content-Type", "text/plain").setBody("Not Found"));
 
-		Mono<ClientResponse> result = this.operations.get().uri("/greeting?name=Spring").exchange();
+		Mono<ClientResponse> result = this.webClient.get().uri("/greeting?name=Spring").exchange();
 
 		StepVerifier.create(result)
 				.consumeNextWith(response -> assertEquals(HttpStatus.NOT_FOUND, response.statusCode()))
@@ -258,7 +258,7 @@ public class WebClientIntegrationTests {
 	public void buildFilter() throws Exception {
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
-		WebClientOperations filteredClient = this.operations.filter(
+		WebClient filteredClient = this.webClient.filter(
 				(request, next) -> {
 					ClientRequest<?> filteredRequest = ClientRequest.from(request).header("foo", "bar").build();
 					return next.exchange(filteredRequest);
@@ -284,7 +284,7 @@ public class WebClientIntegrationTests {
 	public void filter() throws Exception {
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
-		WebClientOperations filteredClient = this.operations.filter(
+		WebClient filteredClient = this.webClient.filter(
 				(request, next) -> {
 					ClientRequest<?> filteredRequest = ClientRequest.from(request).header("foo", "bar").build();
 					return next.exchange(filteredRequest);

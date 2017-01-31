@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,11 +42,11 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Arjen Poutsma
  */
-public class WebClientStrategiesTests {
+public class ExchangeStrategiesTests {
 
 	@Test
 	public void empty() {
-		WebClientStrategies strategies = WebClientStrategies.empty().build();
+		ExchangeStrategies strategies = ExchangeStrategies.empty().build();
 		assertEquals(Optional.empty(), strategies.messageReaders().get().findFirst());
 		assertEquals(Optional.empty(), strategies.messageWriters().get().findFirst());
 	}
@@ -56,7 +56,7 @@ public class WebClientStrategiesTests {
 		HttpMessageReader<?> messageReader = new DummyMessageReader();
 		HttpMessageWriter<?> messageWriter = new DummyMessageWriter();
 
-		WebClientStrategies strategies = WebClientStrategies.of(
+		ExchangeStrategies strategies = ExchangeStrategies.of(
 				() -> Stream.of(messageReader),
 				() -> Stream.of(messageWriter));
 
@@ -74,7 +74,7 @@ public class WebClientStrategiesTests {
 		applicationContext.registerSingleton("messageReader", DummyMessageReader.class);
 		applicationContext.refresh();
 
-		WebClientStrategies strategies = WebClientStrategies.of(applicationContext);
+		ExchangeStrategies strategies = ExchangeStrategies.of(applicationContext);
 		assertTrue(strategies.messageReaders().get()
 				.allMatch(r -> r instanceof DummyMessageReader));
 		assertTrue(strategies.messageWriters().get()

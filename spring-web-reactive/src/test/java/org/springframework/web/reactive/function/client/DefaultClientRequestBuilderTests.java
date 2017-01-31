@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public class DefaultClientRequestBuilderTests {
 				.build();
 
 		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");
-		WebClientStrategies strategies = mock(WebClientStrategies.class);
+		ExchangeStrategies strategies = mock(ExchangeStrategies.class);
 
 		result.writeTo(request, strategies).block();
 
@@ -110,7 +110,7 @@ public class DefaultClientRequestBuilderTests {
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 		messageWriters.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 
-		WebClientStrategies strategies = mock(WebClientStrategies.class);
+		ExchangeStrategies strategies = mock(ExchangeStrategies.class);
 		when(strategies.messageWriters()).thenReturn(messageWriters::stream);
 
 		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");

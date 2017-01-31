@@ -36,19 +36,20 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
 import org.springframework.web.reactive.function.BodyExtractors;
+import org.springframework.web.reactive.function.client.ExchangeFunction;
+import org.springframework.web.reactive.function.client.ExchangeFunctions;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientOperations;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze
  */
 public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
-	private WebClientOperations operations;
+	private WebClient webClient;
 
 
 	@Before
@@ -58,15 +59,15 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 
 		super.setup();
 
-		WebClient client = WebClient.create(new ReactorClientHttpConnector());
+		ExchangeFunction exchange = ExchangeFunctions.create(new ReactorClientHttpConnector());
 		UriBuilderFactory factory = new DefaultUriBuilderFactory("http://localhost:" + this.port);
-		this.operations = WebClientOperations.builder(client).uriBuilderFactory(factory).build();
+		this.webClient = WebClient.builder(exchange).uriBuilderFactory(factory).build();
 	}
 
 
 	@Test
 	public void writeAndFlushWith() throws Exception {
-		Mono<String> result = this.operations.get()
+		Mono<String> result = this.webClient.get()
 				.uri("/write-and-flush")
 				.exchange()
 				.flatMap(response -> response.body(BodyExtractors.toFlux(String.class)))
@@ -81,7 +82,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 
 	@Test  // SPR-14991
 	public void writeAndAutoFlushOnComplete() {
-		Mono<String> result = this.operations.get()
+		Mono<String> result = this.webClient.get()
 				.uri("/write-and-complete")
 				.exchange()
 				.flatMap(response -> response.bodyToFlux(String.class))
@@ -95,7 +96,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 
 	@Test  // SPR-14992
 	public void writeAndAutoFlushBeforeComplete() {
-		Flux<String> result = this.operations.get()
+		Flux<String> result = this.webClient.get()
 				.uri("/write-and-never-complete")
 				.exchange()
 				.flatMap(response -> response.bodyToFlux(String.class));

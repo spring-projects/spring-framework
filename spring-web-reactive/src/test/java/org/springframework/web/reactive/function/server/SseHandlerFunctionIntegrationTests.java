@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,9 @@ import reactor.test.StepVerifier;
 
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.web.reactive.function.client.ExchangeFunction;
+import org.springframework.web.reactive.function.client.ExchangeFunctions;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientOperations;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
 
@@ -44,15 +45,16 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  */
 public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
-	private WebClientOperations operations;
+	private WebClient webClient;
 
 
 	@Before
 	public void setup() throws Exception {
 		super.setup();
-		WebClient client = WebClient.create(new ReactorClientHttpConnector());
+		ExchangeFunction exchangeFunction =
+				ExchangeFunctions.create(new ReactorClientHttpConnector());
 		UriBuilderFactory factory = new DefaultUriBuilderFactory("http://localhost:" + this.port);
-		this.operations = WebClientOperations.builder(client).uriBuilderFactory(factory).build();
+		this.webClient = WebClient.builder(exchangeFunction).uriBuilderFactory(factory).build();
 	}
 
 	@Override
@@ -65,7 +67,7 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 
 	@Test
 	public void sseAsString() throws Exception {
-		Flux<String> result = this.operations.get()
+		Flux<String> result = this.webClient.get()
 				.uri("/string")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
@@ -79,7 +81,7 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 	}
 	@Test
 	public void sseAsPerson() throws Exception {
-		Flux<Person> result = this.operations.get()
+		Flux<Person> result = this.webClient.get()
 				.uri("/person")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
@@ -94,7 +96,7 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 
 	@Test
 	public void sseAsEvent() throws Exception {
-		Flux<ServerSentEvent<String>> result = this.operations.get()
+		Flux<ServerSentEvent<String>> result = this.webClient.get()
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
