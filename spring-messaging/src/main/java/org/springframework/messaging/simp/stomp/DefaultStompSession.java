@@ -18,7 +18,7 @@ package org.springframework.messaging.simp.stomp;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -79,7 +79,8 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private final StompHeaders connectHeaders;
 
-	private final SettableListenableFuture<StompSession> sessionFuture = new SettableListenableFuture<StompSession>();
+	private final SettableListenableFuture<StompSession> sessionFuture =
+			new SettableListenableFuture<StompSession>();
 
 	private MessageConverter converter = new SimpleMessageConverter();
 
@@ -96,11 +97,13 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private final AtomicInteger subscriptionIndex = new AtomicInteger();
 
-	private final Map<String, DefaultSubscription> subscriptions = new ConcurrentHashMap<String, DefaultSubscription>(4);
+	private final Map<String, DefaultSubscription> subscriptions =
+			new ConcurrentHashMap<String, DefaultSubscription>(4);
 
 	private final AtomicInteger receiptIndex = new AtomicInteger();
 
-	private final Map<String, ReceiptHandler> receiptHandlers = new ConcurrentHashMap<String, ReceiptHandler>(4);
+	private final Map<String, ReceiptHandler> receiptHandlers =
+			new ConcurrentHashMap<String, ReceiptHandler>(4);
 
 	/* Whether the client is willfully closing the connection */
 	private volatile boolean closing = false;
@@ -112,8 +115,8 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	 * @param connectHeaders headers for the STOMP CONNECT frame
 	 */
 	public DefaultStompSession(StompSessionHandler sessionHandler, StompHeaders connectHeaders) {
-		Assert.notNull(sessionHandler, "'sessionHandler' is required.");
-		Assert.notNull(connectHeaders, "'connectHeaders' is required.");
+		Assert.notNull(sessionHandler, "StompSessionHandler must not be null");
+		Assert.notNull(connectHeaders, "StompHeaders must not be null");
 		this.sessionId = idGenerator.generateId().toString();
 		this.sessionHandler = sessionHandler;
 		this.connectHeaders = connectHeaders;
@@ -145,7 +148,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	 * @param messageConverter the message converter to use
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
-		Assert.notNull(messageConverter, "'messageConverter' must not be null");
+		Assert.notNull(messageConverter, "MessageConverter must not be null");
 		this.converter = messageConverter;
 	}
 
@@ -213,7 +216,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	@Override
 	public Receiptable send(StompHeaders stompHeaders, Object payload) {
-		Assert.hasText(stompHeaders.getDestination(), "'destination' header is required");
+		Assert.hasText(stompHeaders.getDestination(), "Destination header is required");
 
 		String receiptId = checkOrAddReceipt(stompHeaders);
 		Receiptable receiptable = new ReceiptHandler(receiptId);
@@ -292,8 +295,8 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	@Override
 	public Subscription subscribe(StompHeaders stompHeaders, StompFrameHandler handler) {
 		String destination = stompHeaders.getDestination();
-		Assert.hasText(destination, "'destination' is required");
-		Assert.notNull(handler, "'handler' is required");
+		Assert.hasText(destination, "Destination header is required");
+		Assert.notNull(handler, "StompFrameHandler must not be null");
 
 		String subscriptionId = stompHeaders.getId();
 		if (!StringUtils.hasText(subscriptionId)) {
@@ -397,7 +400,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 				}
 				else if (logger.isDebugEnabled()) {
 					logger.debug("No handler for: " + accessor.getDetailedLogMessage(message.getPayload()) +
-							". Perhaps just unscubscribed?");
+							". Perhaps just unsubscribed?");
 				}
 			}
 			else {
@@ -464,7 +467,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	@Override
 	public void handleFailure(Throwable ex) {
 		try {
-			this.sessionFuture.setException(ex); // no-op if already set
+			this.sessionFuture.setException(ex);  // no-op if already set
 			this.sessionHandler.handleTransportError(this, ex);
 		}
 		catch (Throwable ex2) {
@@ -477,7 +480,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	@Override
 	public void afterConnectionClosed() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Connection closed session id=" + this.sessionId);
+			logger.debug("Connection closed in session id=" + this.sessionId);
 		}
 		if (!this.closing) {
 			resetConnection();
@@ -493,7 +496,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 				conn.close();
 			}
 			catch (Throwable ex) {
-				// Ignore
+				// ignore
 			}
 		}
 	}
@@ -519,7 +522,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		}
 
 		private void initReceiptHandling() {
-			Assert.notNull(getTaskScheduler(), "To track receipts a TaskScheduler must be configured");
+			Assert.notNull(getTaskScheduler(), "To track receipts, a TaskScheduler must be configured");
 			DefaultStompSession.this.receiptHandlers.put(this.receiptId, this);
 			Date startTime = new Date(System.currentTimeMillis() + getReceiptTimeLimit());
 			this.future = getTaskScheduler().schedule(new Runnable() {
@@ -546,10 +549,11 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		}
 
 		private void addTask(Runnable task, boolean successTask) {
-			Assert.notNull(this.receiptId, "To track receipts, set autoReceiptEnabled=true or add 'receiptId' header");
+			Assert.notNull(this.receiptId,
+					"To track receipts, set autoReceiptEnabled=true or add 'receiptId' header");
 			synchronized (this) {
 				if (this.result != null && this.result == successTask) {
-					invoke(Arrays.asList(task));
+					invoke(Collections.singletonList(task));
 				}
 				else {
 					if (successTask) {
@@ -568,7 +572,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 					runnable.run();
 				}
 				catch (Throwable ex) {
-					// Ignore
+					// ignore
 				}
 			}
 		}
@@ -607,12 +611,11 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 		public DefaultSubscription(String id, String destination, String receiptId, StompFrameHandler handler) {
 			super(receiptId);
-			Assert.notNull(destination, "'destination' is required");
-			Assert.notNull(handler, "'handler' handler is required");
+			Assert.notNull(destination, "Destination must not be null");
+			Assert.notNull(handler, "StompFrameHandler must not be null");
 			this.id = id;
 			this.destination = destination;
 			this.handler = handler;
-
 			DefaultStompSession.this.subscriptions.put(id, this);
 		}
 
