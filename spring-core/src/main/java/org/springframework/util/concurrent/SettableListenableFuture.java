@@ -27,13 +27,14 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * A {@link org.springframework.util.concurrent.ListenableFuture ListenableFuture}
- * whose value can be set via {@link #set(Object)} or
- * {@link #setException(Throwable)}. It may also be cancelled.
+ * whose value can be set via {@link #set(T)} or {@link #setException(Throwable)}.
+ * It may also be cancelled.
  *
  * <p>Inspired by {@code com.google.common.util.concurrent.SettableFuture}.
  *
  * @author Mattias Severson
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.1
  */
 public class SettableListenableFuture<T> implements ListenableFuture<T> {
@@ -92,8 +93,8 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 
 	@Override
 	public boolean cancel(boolean mayInterruptIfRunning) {
-		this.settableTask.setCancelled();
-		boolean cancelled = this.listenableFuture.cancel(mayInterruptIfRunning);
+		boolean cancelled = this.settableTask.setCancelled();
+		this.listenableFuture.cancel(mayInterruptIfRunning);
 		if (cancelled && mayInterruptIfRunning) {
 			interruptTask();
 		}
@@ -102,12 +103,12 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 
 	@Override
 	public boolean isCancelled() {
-		return this.listenableFuture.isCancelled();
+		return this.settableTask.isCancelled();
 	}
 
 	@Override
 	public boolean isDone() {
-		return this.listenableFuture.isDone();
+		return this.settableTask.isDone();
 	}
 
 	/**
@@ -152,26 +153,28 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 
 		private static final Object NO_VALUE = new Object();
 
+		private static final Object CANCELLED = new Object();
+
 		private final AtomicReference<Object> value = new AtomicReference<>(NO_VALUE);
 
-		private volatile boolean cancelled = false;
-
 		public boolean setValue(T value) {
-			if (this.cancelled) {
-				return false;
-			}
 			return this.value.compareAndSet(NO_VALUE, value);
 		}
 
 		public boolean setException(Throwable exception) {
-			if (this.cancelled) {
-				return false;
-			}
 			return this.value.compareAndSet(NO_VALUE, exception);
 		}
 
-		public void setCancelled() {
-			this.cancelled = true;
+		public boolean setCancelled() {
+			return this.value.compareAndSet(NO_VALUE, CANCELLED);
+		}
+
+		public boolean isCancelled() {
+			return (this.value.get() == CANCELLED);
+		}
+
+		public boolean isDone() {
+			return (this.value.get() != NO_VALUE);
 		}
 
 		@SuppressWarnings("unchecked")
