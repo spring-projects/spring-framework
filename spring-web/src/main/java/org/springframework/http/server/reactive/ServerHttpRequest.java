@@ -16,6 +16,9 @@
 
 package org.springframework.http.server.reactive;
 
+import java.net.InetSocketAddress;
+import java.util.Optional;
+
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -52,6 +55,12 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 	 * Return a read-only map of cookies sent by the client.
 	 */
 	MultiValueMap<String, HttpCookie> getCookies();
+
+	/**
+	 * Returns the remote address where this request is connected to.
+	 * @return remote address if available
+	 */
+	Optional<InetSocketAddress> getRemoteAddress();
 
 
 	/**

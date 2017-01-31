@@ -17,9 +17,11 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.util.Optional;
 
 import io.undertow.connector.ByteBufferPool;
 import io.undertow.connector.PooledByteBuffer;
@@ -109,6 +111,11 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 			cookies.add(name, httpCookie);
 		}
 		return cookies;
+	}
+
+	@Override
+	public Optional<InetSocketAddress> getRemoteAddress() {
+		return Optional.ofNullable(this.exchange.getSourceAddress());
 	}
 
 	@Override

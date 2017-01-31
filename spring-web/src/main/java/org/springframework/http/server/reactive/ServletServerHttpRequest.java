@@ -17,11 +17,13 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Map;
+import java.util.Optional;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
@@ -173,6 +175,12 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			}
 		}
 		return httpCookies;
+	}
+
+	@Override
+	public Optional<InetSocketAddress> getRemoteAddress() {
+		return Optional.of(new InetSocketAddress(
+				this.request.getRemoteHost(), this.request.getRemotePort()));
 	}
 
 	@Override

@@ -19,6 +19,7 @@ package org.springframework.http.server.reactive;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 import io.netty.handler.codec.http.cookie.Cookie;
 import reactor.core.publisher.Flux;
@@ -57,7 +58,8 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	private static URI initUri(HttpServerRequest channel) {
 		Assert.notNull(channel, "'channel' must not be null");
 		InetSocketAddress address = channel.remoteAddress();
-		return (address == null ? URI.create(channel.uri()) : getBaseUrl(address).resolve(channel.uri()));
+		String requestUri = channel.uri();
+		return (address != null ? getBaseUrl(address).resolve(requestUri) : URI.create(requestUri));
 	}
 
 	private static URI getBaseUrl(InetSocketAddress address) {
@@ -98,6 +100,11 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 			}
 		}
 		return cookies;
+	}
+
+	@Override
+	public Optional<InetSocketAddress> getRemoteAddress() {
+		return Optional.ofNullable(this.request.remoteAddress());
 	}
 
 	@Override

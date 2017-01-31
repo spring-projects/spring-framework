@@ -16,10 +16,13 @@
 
 package org.springframework.http.server.reactive;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.Map;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.channel.Channel;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
@@ -54,10 +57,11 @@ public class RxNettyHttpHandlerAdapter extends HttpHandlerAdapterSupport
 	public Observable<Void> handle(HttpServerRequest<ByteBuf> nativeRequest,
 			HttpServerResponse<ByteBuf> nativeResponse) {
 
-		ByteBufAllocator allocator = nativeResponse.unsafeNettyChannel().alloc();
-		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(allocator);
+		Channel channel = nativeResponse.unsafeNettyChannel();
+		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(channel.alloc());
+		InetSocketAddress remoteAddress = (InetSocketAddress) channel.remoteAddress();
 
-		RxNettyServerHttpRequest request = new RxNettyServerHttpRequest(nativeRequest, bufferFactory);
+		RxNettyServerHttpRequest request = new RxNettyServerHttpRequest(nativeRequest, bufferFactory, remoteAddress);
 		RxNettyServerHttpResponse response = new RxNettyServerHttpResponse(nativeResponse, bufferFactory);
 
 		Publisher<Void> result = getHttpHandler().handle(request, response)

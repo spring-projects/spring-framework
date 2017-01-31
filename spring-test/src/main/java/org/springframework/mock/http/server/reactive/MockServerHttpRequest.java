@@ -15,12 +15,14 @@
  */
 package org.springframework.mock.http.server.reactive;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -57,17 +59,21 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final MultiValueMap<String, HttpCookie> cookies;
 
+	private final InetSocketAddress remoteAddress;
+
 	private final Flux<DataBuffer> body;
 
 
 	private MockServerHttpRequest(HttpMethod httpMethod, URI uri, String contextPath,
 			HttpHeaders headers, MultiValueMap<String, HttpCookie> cookies,
+			InetSocketAddress remoteAddress,
 			Publisher<? extends DataBuffer> body) {
 
 		super(uri, headers);
 		this.httpMethod = httpMethod;
 		this.contextPath = (contextPath != null ? contextPath : "");
 		this.cookies = cookies;
+		this.remoteAddress = remoteAddress;
 		this.body = Flux.from(body);
 	}
 
@@ -80,6 +86,11 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	public String getContextPath() {
 		return this.contextPath;
+	}
+
+	@Override
+	public Optional<InetSocketAddress> getRemoteAddress() {
+		return Optional.ofNullable(this.remoteAddress);
 	}
 
 	@Override
@@ -197,6 +208,11 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		 * Set the contextPath to return.
 		 */
 		B contextPath(String contextPath);
+
+		/**
+		 * Set the remote address to return.
+		 */
+		B remoteAddress(InetSocketAddress remoteAddress);
 
 		/**
 		 * Add one or more cookies.
@@ -318,6 +334,8 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 		private final MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
 
+		private InetSocketAddress remoteAddress;
+
 
 		public DefaultBodyBuilder(HttpMethod method, URI url) {
 			this.method = method;
@@ -327,6 +345,12 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		public BodyBuilder contextPath(String contextPath) {
 			this.contextPath = contextPath;
+			return this;
+		}
+
+		@Override
+		public BodyBuilder remoteAddress(InetSocketAddress remoteAddress) {
+			this.remoteAddress = remoteAddress;
 			return this;
 		}
 
@@ -395,7 +419,7 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		public MockServerHttpRequest body(Publisher<? extends DataBuffer> body) {
 			return new MockServerHttpRequest(this.method, this.url, this.contextPath,
-					this.headers, this.cookies, body);
+					this.headers, this.cookies, this.remoteAddress, body);
 		}
 
 		@Override

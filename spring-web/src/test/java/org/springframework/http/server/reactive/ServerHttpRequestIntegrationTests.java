@@ -48,10 +48,11 @@ public class ServerHttpRequestIntegrationTests extends AbstractHttpHandlerIntegr
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			URI uri = request.getURI();
-			assertNotNull("Request URI host must not be null", uri.getHost());
-			assertNotEquals("Request URI port must not be undefined", -1, uri.getPort());
-			assertEquals("Request URI path is not valid", "/foo", uri.getPath());
-			assertEquals("Request URI query is not valid", "param=bar", uri.getQuery());
+			assertNotNull(uri.getHost());
+			assertNotEquals(-1, uri.getPort());
+			assertNotNull(request.getRemoteAddress());
+			assertEquals("/foo", uri.getPath());
+			assertEquals("param=bar", uri.getQuery());
 			return Mono.empty();
 		}
 	}
