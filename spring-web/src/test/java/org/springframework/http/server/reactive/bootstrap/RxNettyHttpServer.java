@@ -37,8 +37,7 @@ public class RxNettyHttpServer extends AbstractHttpServer {
 	@Override
 	protected void initServer() throws Exception {
 		this.rxNettyHandler = createHttpHandlerAdapter();
-		this.rxNettyServer = io.reactivex.netty.protocol.http.server.HttpServer
-				.newServer(new InetSocketAddress(getHost(), getPort()));
+		this.rxNettyServer = io.reactivex.netty.protocol.http.server.HttpServer.newServer(getPort());
 	}
 
 	@NotNull
@@ -52,6 +51,7 @@ public class RxNettyHttpServer extends AbstractHttpServer {
 	@Override
 	protected void startInternal() {
 		this.rxNettyServer.start(this.rxNettyHandler);
+		setPort(this.rxNettyServer.getServerPort());
 	}
 
 	@Override
@@ -60,8 +60,7 @@ public class RxNettyHttpServer extends AbstractHttpServer {
 	}
 
 	@Override
-	protected void reset() {
-		super.reset();
+	protected void resetInternal() {
 		this.rxNettyServer = null;
 		this.rxNettyHandler = null;
 	}

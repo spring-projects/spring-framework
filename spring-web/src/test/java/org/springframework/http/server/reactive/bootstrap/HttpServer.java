@@ -29,6 +29,8 @@ public interface HttpServer extends InitializingBean, Lifecycle {
 
 	void setPort(int port);
 
+	int getPort();
+
 	void setHandler(HttpHandler handler);
 
 }

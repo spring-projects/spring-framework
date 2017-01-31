@@ -29,7 +29,7 @@ public abstract class AbstractHttpServer implements HttpServer {
 
 	private String host = "0.0.0.0";
 
-	private int port = -1;
+	private int port = 0;
 
 	private HttpHandler httpHandler;
 
@@ -40,6 +40,7 @@ public abstract class AbstractHttpServer implements HttpServer {
 	private final Object lifecycleMonitor = new Object();
 
 
+	@Override
 	public void setHost(String host) {
 		this.host = host;
 	}
@@ -48,14 +49,17 @@ public abstract class AbstractHttpServer implements HttpServer {
 		return host;
 	}
 
+	@Override
 	public void setPort(int port) {
 		this.port = port;
 	}
 
+	@Override
 	public int getPort() {
 		return this.port;
 	}
 
+	@Override
 	public void setHandler(HttpHandler handler) {
 		this.httpHandler = handler;
 	}
@@ -138,13 +142,16 @@ public abstract class AbstractHttpServer implements HttpServer {
 		}
 	}
 
-	protected void reset() {
+	protected abstract void stopInternal() throws Exception;
+
+	private void reset() {
 		this.host = "0.0.0.0";
-		this.port = -1;
+		this.port = 0;
 		this.httpHandler = null;
 		this.handlerMap = null;
+		resetInternal();
 	}
 
-	protected abstract void stopInternal() throws Exception;
+	protected abstract void resetInternal();
 
 }

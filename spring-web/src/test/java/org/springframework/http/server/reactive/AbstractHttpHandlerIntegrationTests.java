@@ -18,6 +18,8 @@ package org.springframework.http.server.reactive;
 
 import java.io.File;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -29,10 +31,11 @@ import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
 import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
 import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
-import org.springframework.util.SocketUtils;
 
 @RunWith(Parameterized.class)
 public abstract class AbstractHttpHandlerIntegrationTests {
+
+	protected Log logger = LogFactory.getLog(getClass());
 
 	protected int port;
 
@@ -55,16 +58,18 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 
 	@Before
 	public void setup() throws Exception {
-		this.port = SocketUtils.findAvailableTcpPort();
-		this.server.setPort(this.port);
 		this.server.setHandler(createHttpHandler());
 		this.server.afterPropertiesSet();
 		this.server.start();
+
+		// Set dynamically chosen port
+		this.port = this.server.getPort();
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		this.server.stop();
+		this.port = 0;
 	}
 
 

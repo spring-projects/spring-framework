@@ -49,7 +49,6 @@ public class ReactorHttpServer extends AbstractHttpServer implements Loopback {
 				new ReactorHttpHandlerAdapter(getHttpHandler());
 	}
 
-
 	@Override
 	public Object connectedInput() {
 		return this.reactorServer;
@@ -63,6 +62,7 @@ public class ReactorHttpServer extends AbstractHttpServer implements Loopback {
 	@Override
 	protected void startInternal() {
 		NettyContext nettyContext = this.reactorServer.newHandler(this.reactorHandler).block();
+		setPort(nettyContext.address().getPort());
 		this.nettyContext.set(nettyContext);
 	}
 
@@ -72,8 +72,7 @@ public class ReactorHttpServer extends AbstractHttpServer implements Loopback {
 	}
 
 	@Override
-	protected void reset() {
-		super.reset();
+	protected void resetInternal() {
 		this.reactorServer = null;
 		this.reactorHandler = null;
 		this.nettyContext.set(null);

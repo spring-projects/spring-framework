@@ -44,7 +44,6 @@ import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
 import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
 import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
-import org.springframework.util.SocketUtils;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.socket.client.JettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
@@ -135,11 +134,12 @@ public abstract class AbstractWebSocketIntegrationTests {
 
 		assumeFalse(this.client instanceof UndertowWebSocketClient && this.server instanceof RxNettyHttpServer);
 
-		this.port = SocketUtils.findAvailableTcpPort();
-		this.server.setPort(this.port);
 		this.server.setHandler(createHttpHandler());
 		this.server.afterPropertiesSet();
 		this.server.start();
+
+		// Set dynamically chosen port
+		this.port = this.server.getPort();
 
 		if (this.client instanceof Lifecycle) {
 			((Lifecycle) this.client).start();

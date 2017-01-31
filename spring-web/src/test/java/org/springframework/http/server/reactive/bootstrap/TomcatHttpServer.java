@@ -77,6 +77,7 @@ public class TomcatHttpServer extends AbstractHttpServer {
 	@Override
 	protected void startInternal() throws LifecycleException {
 		this.tomcatServer.start();
+		setPort(this.tomcatServer.getConnector().getLocalPort());
 	}
 
 	@Override
@@ -86,7 +87,7 @@ public class TomcatHttpServer extends AbstractHttpServer {
 	}
 
 	@Override
-	protected void reset() {
+	protected void resetInternal() {
 		this.tomcatServer = null;
 	}
 

@@ -16,6 +16,8 @@
 
 package org.springframework.http.server.reactive.bootstrap;
 
+import java.net.InetSocketAddress;
+
 import io.undertow.Undertow;
 
 import org.springframework.http.server.reactive.UndertowHttpHandlerAdapter;
@@ -44,6 +46,8 @@ public class UndertowHttpServer extends AbstractHttpServer {
 	@Override
 	protected void startInternal() {
 		this.server.start();
+		Undertow.ListenerInfo info = this.server.getListenerInfo().get(0);
+		setPort(((InetSocketAddress) info.getAddress()).getPort());
 	}
 
 	@Override
@@ -52,8 +56,7 @@ public class UndertowHttpServer extends AbstractHttpServer {
 	}
 
 	@Override
-	protected void reset() {
-		super.reset();
+	protected void resetInternal() {
 		this.server = null;
 	}
 

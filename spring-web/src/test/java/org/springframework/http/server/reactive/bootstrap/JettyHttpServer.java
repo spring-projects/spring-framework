@@ -60,6 +60,7 @@ public class JettyHttpServer extends AbstractHttpServer {
 	@Override
 	protected void startInternal() throws Exception {
 		this.jettyServer.start();
+		setPort(((ServerConnector) this.jettyServer.getConnectors()[0]).getLocalPort());
 	}
 
 	@Override
@@ -84,8 +85,7 @@ public class JettyHttpServer extends AbstractHttpServer {
 	}
 
 	@Override
-	protected void reset() {
-		super.reset();
+	protected void resetInternal() {
 		try {
 			if (this.jettyServer.isRunning()) {
 				this.jettyServer.setStopTimeout(5000);

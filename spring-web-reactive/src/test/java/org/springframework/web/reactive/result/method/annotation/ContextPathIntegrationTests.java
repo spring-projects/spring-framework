@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
-import org.springframework.util.SocketUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
@@ -61,7 +60,6 @@ public class ContextPathIntegrationTests {
 		HttpHandler webApp2Handler = DispatcherHandler.toHttpHandler(context2);
 
 		this.server = new ReactorHttpServer();
-		this.server.setPort(SocketUtils.findAvailableTcpPort());
 
 		this.server.registerHttpHandler("/webApp1", webApp1Handler);
 		this.server.registerHttpHandler("/webApp2", webApp2Handler);
