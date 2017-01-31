@@ -291,8 +291,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	@Override
 	public Subscription subscribe(StompHeaders stompHeaders, StompFrameHandler handler) {
-		String destination = stompHeaders.getDestination();
-		Assert.hasText(destination, "Destination header is required");
+		Assert.hasText(stompHeaders.getDestination(), "Destination header is required");
 		Assert.notNull(handler, "StompFrameHandler must not be null");
 
 		String subscriptionId = stompHeaders.getId();
@@ -300,8 +299,8 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			subscriptionId = String.valueOf(DefaultStompSession.this.subscriptionIndex.getAndIncrement());
 			stompHeaders.setId(subscriptionId);
 		}
-		String receiptId = checkOrAddReceipt(stompHeaders);
-		Subscription subscription = new DefaultSubscription(subscriptionId, destination, receiptId, handler);
+		checkOrAddReceipt(stompHeaders);
+		Subscription subscription = new DefaultSubscription(stompHeaders, handler);
 
 		StompHeaderAccessor accessor = createHeaderAccessor(StompCommand.SUBSCRIBE);
 		accessor.addNativeHeaders(stompHeaders);
@@ -333,8 +332,11 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		return receiptable;
 	}
 
-	private void unsubscribe(String id) {
+	private void unsubscribe(String id, StompHeaders stompHeaders) {
 		StompHeaderAccessor accessor = createHeaderAccessor(StompCommand.UNSUBSCRIBE);
+		if (stompHeaders != null) {
+			accessor.addNativeHeaders(stompHeaders);
+		}
 		accessor.setSubscriptionId(id);
 		Message<byte[]> message = createMessage(accessor, EMPTY_PAYLOAD);
 		execute(message);
@@ -600,29 +602,27 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private class DefaultSubscription extends ReceiptHandler implements Subscription {
 
-		private final String id;
-
-		private final String destination;
+		private final StompHeaders headers;
 
 		private final StompFrameHandler handler;
 
-		public DefaultSubscription(String id, String destination, String receiptId, StompFrameHandler handler) {
-			super(receiptId);
-			Assert.notNull(destination, "Destination must not be null");
+		public DefaultSubscription(StompHeaders headers, StompFrameHandler handler) {
+			super(headers.getReceipt());
+			Assert.notNull(headers.getDestination(), "Destination must not be null");
 			Assert.notNull(handler, "StompFrameHandler must not be null");
-			this.id = id;
-			this.destination = destination;
+			this.headers = headers;
 			this.handler = handler;
-			DefaultStompSession.this.subscriptions.put(id, this);
+			DefaultStompSession.this.subscriptions.put(headers.getId(), this);
 		}
 
 		@Override
 		public String getSubscriptionId() {
-			return this.id;
+			return this.headers.getId();
 		}
 
-		public String getDestination() {
-			return this.destination;
+		@Override
+		public StompHeaders getSubscriptionHeaders() {
+			return this.headers;
 		}
 
 		public StompFrameHandler getHandler() {
@@ -631,13 +631,20 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 		@Override
 		public void unsubscribe() {
-			DefaultStompSession.this.subscriptions.remove(getSubscriptionId());
-			DefaultStompSession.this.unsubscribe(getSubscriptionId());
+			unsubscribe(null);
+		}
+
+		@Override
+		public void unsubscribe(StompHeaders stompHeaders) {
+			String id = this.headers.getId();
+			DefaultStompSession.this.subscriptions.remove(id);
+			DefaultStompSession.this.unsubscribe(id, stompHeaders);
 		}
 
 		@Override
 		public String toString() {
-			return "Subscription [id=" + getSubscriptionId() + ", destination='" + getDestination() +
+			return "Subscription [id=" + getSubscriptionId() +
+					", destination='" + this.headers.getDestination() +
 					"', receiptId='" + getReceiptId() + "', handler=" + getHandler() + "]";
 		}
 	}
