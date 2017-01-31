@@ -86,12 +86,23 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 		return this.cookies;
 	}
 
+	@Override
+	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
+		Assert.notNull(action, "Action must not be null");
+		this.commitActions.add(action);
+	}
+
+	@Override
+	public boolean isCommitted() {
+		return this.state.get() != State.NEW;
+	}
+
 	/**
 	 * A variant of {@link #doCommit(Supplier)} for a request without body.
 	 * @return a completion publisher
 	 */
 	protected Mono<Void> doCommit() {
-		return (this.state.get() == State.NEW ? doCommit(null) : Mono.empty());
+		return doCommit(null);
 	}
 
 	/**
@@ -102,14 +113,14 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 	 */
 	protected Mono<Void> doCommit(Supplier<? extends Mono<Void>> writeAction) {
 
-		if (!this.state.compareAndSet(AbstractClientHttpRequest.State.NEW, AbstractClientHttpRequest.State.COMMITTING)) {
+		if (!this.state.compareAndSet(State.NEW, State.COMMITTING)) {
 			return Mono.empty();
 		}
 
 		this.commitActions.add(() -> {
 			applyHeaders();
 			applyCookies();
-			this.state.set(AbstractClientHttpRequest.State.COMMITTED);
+			this.state.set(State.COMMITTED);
 			return Mono.empty();
 		});
 
@@ -121,12 +132,6 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 				.map(Supplier::get).collect(Collectors.toList());
 
 		return Flux.concat(actions).next();
-	}
-
-	@Override
-	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
-		Assert.notNull(action, "Action must not be null");
-		this.commitActions.add(action);
 	}
 
 	/**

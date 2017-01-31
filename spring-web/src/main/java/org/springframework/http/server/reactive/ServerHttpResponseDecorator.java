@@ -95,6 +95,11 @@ public class ServerHttpResponseDecorator implements ServerHttpResponse {
 	}
 
 	@Override
+	public boolean isCommitted() {
+		return getDelegate().isCommitted();
+	}
+
+	@Override
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 		return getDelegate().writeWith(body);
 	}

@@ -27,8 +27,8 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 /**
  * A "reactive" HTTP output message that accepts output as a {@link Publisher}.
  *
- * <p>Typically implemented by an HTTP request on the client-side or a response
- * on the server-side.
+ * <p>Typically implemented by an HTTP request on the client-side or an
+ * HTTP response on the server-side.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
@@ -37,30 +37,35 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 public interface ReactiveHttpOutputMessage extends HttpMessage {
 
 	/**
-	 * Return a {@link DataBufferFactory} that can be used for creating the body.
+	 * Return a {@link DataBufferFactory} that can be used to create the body.
 	 * @return a buffer factory
 	 * @see #writeWith(Publisher)
 	 */
 	DataBufferFactory bufferFactory();
 
 	/**
-	 * Register an action to be applied just before the message is committed.
-	 * @param action the action
+	 * Register an action to apply just before the HttpOutputMessage is committed.
+	 * @param action the action to apply
 	 */
 	void beforeCommit(Supplier<? extends Mono<Void>> action);
 
 	/**
-	 * Use the given {@link Publisher} to write the body of the message to the underlying
-	 * HTTP layer.
+	 * Whether the HttpOutputMessage is committed.
+	 */
+	boolean isCommitted();
+
+	/**
+	 * Use the given {@link Publisher} to write the body of the message to the
+	 * underlying HTTP layer.
 	 * @param body the body content publisher
 	 * @return a {@link Mono} that indicates completion or error
 	 */
 	Mono<Void> writeWith(Publisher<? extends DataBuffer> body);
 
 	/**
-	 * Use the given {@link Publisher} of {@code Publishers} to write the body of the
-	 * message to the underlying HTTP layer, flushing after each
-	 * {@code Publisher<DataBuffer>}.
+	 * Use the given {@link Publisher} of {@code Publishers} to write the body
+	 * of the HttpOutputMessage to the underlying HTTP layer, flushing after
+	 * each {@code Publisher<DataBuffer>}.
 	 * @param body the body content publisher
 	 * @return a {@link Mono} that indicates completion or error
 	 */

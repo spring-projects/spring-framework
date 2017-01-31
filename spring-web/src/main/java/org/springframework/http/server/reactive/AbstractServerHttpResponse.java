@@ -54,7 +54,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 * response during which time pre-commit actions can still make changes to
 	 * the response status and headers.
 	 */
-	private enum State {NEW, COMMITTING, COMMITTED};
+	private enum State {NEW, COMMITTING, COMMITTED}
 
 
 	private final Log logger = LogFactory.getLog(getClass());
@@ -138,6 +138,11 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
+	public boolean isCommitted() {
+		return this.state.get() != State.NEW;
+	}
+
+	@Override
 	public final Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 		return new ChannelSendOperator<>(body,
 				writePublisher -> doCommit(() -> writeWithInternal(writePublisher)));
@@ -151,7 +156,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public Mono<Void> setComplete() {
-		return doCommit();
+		return doCommit(null);
 	}
 
 	/**
@@ -159,7 +164,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 * @return a completion publisher
 	 */
 	protected Mono<Void> doCommit() {
-		return (this.state.get() == State.NEW ? doCommit(null) : Mono.empty());
+		return doCommit(null);
 	}
 
 	/**
