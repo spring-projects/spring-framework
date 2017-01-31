@@ -41,7 +41,7 @@ public class JettyWebSocketTestServer implements WebSocketTestServer {
 
 	private Server jettyServer;
 
-	private int port = -1;
+	private int port;
 
 	private ServletContextHandler contextHandler;
 
