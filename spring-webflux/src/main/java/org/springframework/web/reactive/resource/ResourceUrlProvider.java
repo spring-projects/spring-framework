@@ -43,7 +43,7 @@ import org.springframework.web.server.support.HttpRequestPathHelper;
  * A central component to use to obtain the public URL path that clients should
  * use to access a static resource.
  *
- * <p>This class is aware of Spring MVC handler mappings used to serve static
+ * <p>This class is aware of Spring WebFlux handler mappings used to serve static
  * resources and uses the {@code ResourceResolver} chains of the configured
  * {@code ResourceHttpRequestHandler}s to make its decisions.
  *

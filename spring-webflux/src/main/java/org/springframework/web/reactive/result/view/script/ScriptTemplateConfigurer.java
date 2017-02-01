@@ -20,8 +20,8 @@ import java.nio.charset.Charset;
 import javax.script.ScriptEngine;
 
 /**
- * An implementation of Spring MVC's {@link ScriptTemplateConfig} for creating
- * a {@code ScriptEngine} for use in a web application.
+ * An implementation of the Spring WebFlux {@link ScriptTemplateConfig} for
+ * creating a {@code ScriptEngine} for use in a web application.
  *
  * <pre class="code">
  * // Add the following to an &#64;Configuration class
