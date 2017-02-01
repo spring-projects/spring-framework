@@ -24,13 +24,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.web.reactive.function.client.ExchangeFunction;
-import org.springframework.web.reactive.function.client.ExchangeFunctions;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.DefaultUriBuilderFactory;
-import org.springframework.web.util.UriBuilderFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -51,10 +46,7 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 	@Before
 	public void setup() throws Exception {
 		super.setup();
-		ExchangeFunction exchangeFunction =
-				ExchangeFunctions.create(new ReactorClientHttpConnector());
-		UriBuilderFactory factory = new DefaultUriBuilderFactory("http://localhost:" + this.port);
-		this.webClient = WebClient.builder(exchangeFunction).uriBuilderFactory(factory).build();
+		this.webClient = WebClient.create("http://localhost:" + this.port);
 	}
 
 	@Override

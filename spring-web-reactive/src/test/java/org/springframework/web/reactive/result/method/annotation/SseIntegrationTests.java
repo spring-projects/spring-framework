@@ -27,7 +27,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ResolvableType;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
@@ -35,12 +34,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.config.EnableWebReactive;
-import org.springframework.web.reactive.function.client.ExchangeFunction;
-import org.springframework.web.reactive.function.client.ExchangeFunctions;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
-import org.springframework.web.util.DefaultUriBuilderFactory;
-import org.springframework.web.util.UriBuilderFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -63,9 +58,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	@Before
 	public void setup() throws Exception {
 		super.setup();
-		ExchangeFunction exchangeFunction = ExchangeFunctions.create(new ReactorClientHttpConnector());
-		UriBuilderFactory factory = new DefaultUriBuilderFactory("http://localhost:" + this.port + "/sse");
-		this.webClient = WebClient.builder(exchangeFunction).uriBuilderFactory(factory).build();
+		this.webClient = WebClient.create("http://localhost:" + this.port + "/sse");
 	}
 
 

@@ -30,6 +30,7 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
 
 /**
@@ -117,39 +118,35 @@ public interface WebClient {
 	// Static, factory methods
 
 	/**
-	 * Create {@code WebClient} that uses the given {@link ClientHttpConnector}.
-	 * @param connector the underlying connector to use
+	 * Shortcut for:
+	 * <pre class="code">
+	 * WebClient client = builder(baseUrl).build();
+	 * </pre>
+	 * @param baseUrl the base URI for all requests
 	 */
-	static WebClient create(ClientHttpConnector connector) {
-		return create(ExchangeFunctions.create(connector));
-
+	static WebClient create(String baseUrl) {
+		return new DefaultWebClientBuilder(baseUrl).build();
 	}
 
 	/**
-	 * Create {@code WebClient} that uses the given {@link ClientHttpConnector} and
-	 * {@link ExchangeStrategies}.
-	 * @param connector the underlying connector to use
-	 * @param strategies the strategies to use
+	 * Obtain a {@code WebClient} builder with a base URI to be used as the
+	 * base for expanding URI templates during exchanges. The given String
+	 * is used to create an instance of {@link DefaultUriBuilderFactory} whose
+	 * {@link DefaultUriBuilderFactory#DefaultUriBuilderFactory(String)
+	 * constructor} provides more details on how the base URI is applied.
+	 * @param baseUrl the base URI for all requests
 	 */
-	static WebClient create(ClientHttpConnector connector, ExchangeStrategies strategies) {
-		return create(ExchangeFunctions.create(connector, strategies));
+	static WebClient.Builder builder(String baseUrl) {
+		return new DefaultWebClientBuilder(baseUrl);
 	}
 
 	/**
-	 * Create {@code WebClient} that wraps the given {@link ExchangeFunction}.
-	 * @param exchangeFunction the underlying exchange function to use
+	 * Obtain a {@code WebClient} builder with the {@link UriBuilderFactory}
+	 * to use for expanding URI templates during exchanges.
+	 * @param uriBuilderFactory the factory to use
 	 */
-	static WebClient create(ExchangeFunction exchangeFunction) {
-		return builder(exchangeFunction).build();
-	}
-
-	/**
-	 * Create {@code WebClient} with a builder for additional
-	 * configuration options.
-	 * @param exchangeFunction the underlying exchange function to use
-	 */
-	static WebClient.Builder builder(ExchangeFunction exchangeFunction) {
-		return new DefaultWebClientBuilder(exchangeFunction);
+	static WebClient.Builder builder(UriBuilderFactory uriBuilderFactory) {
+		return new DefaultWebClientBuilder(uriBuilderFactory);
 	}
 
 
@@ -159,11 +156,22 @@ public interface WebClient {
 	interface Builder {
 
 		/**
-		 * Configure a {@code UriBuilderFactory} for use with this client for
-		 * example to define a common "base" URI.
-		 * @param uriBuilderFactory the URI builder factory
+		 * Configure the {@link ClientHttpConnector} to use.
+		 * <p>By default an instance of
+		 * {@link org.springframework.http.client.reactive.ReactorClientHttpConnector
+		 * ReactorClientHttpConnector} is created if this is not set. However a
+		 * shared instance may be passed instead, e.g. for use with multiple
+		 * {@code WebClient}'s targeting different base URIs.
+		 * @param connector the connector to use
 		 */
-		Builder uriBuilderFactory(UriBuilderFactory uriBuilderFactory);
+		Builder clientConnector(ClientHttpConnector connector);
+
+		/**
+		 * Configure the {@link ExchangeStrategies} to use.
+		 * <p>By default {@link ExchangeStrategies#withDefaults()} is used.
+		 * @param strategies the strategies to use
+		 */
+		Builder exchangeStrategies(ExchangeStrategies strategies);
 
 		/**
 		 * Builder the {@link WebClient} instance.
@@ -187,14 +195,14 @@ public interface WebClient {
 		 * Specify the URI for the request using a URI template and URI variables.
 		 * If a {@link UriBuilderFactory} was configured for the client (e.g.
 		 * with a base URI) it will be used to expand the URI template.
-		 * @see Builder#uriBuilderFactory(UriBuilderFactory)
+		 * @see #builder(String)
 		 */
 		HeaderSpec uri(String uri, Object... uriVariables);
 
 		/**
 		 * Build the URI for the request using the {@link UriBuilderFactory}
 		 * configured for this client.
-		 * @see Builder#uriBuilderFactory(UriBuilderFactory)
+		 * @see #builder(String)
 		 */
 		HeaderSpec uri(Function<UriBuilderFactory, URI> uriFunction);
 

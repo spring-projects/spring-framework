@@ -16,7 +16,10 @@
 
 package org.springframework.web.reactive.function.client;
 
+import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.util.Assert;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
 
 /**
@@ -27,26 +30,41 @@ import org.springframework.web.util.UriBuilderFactory;
  */
 class DefaultWebClientBuilder implements WebClient.Builder {
 
-	private final ExchangeFunction exchangeFunction;
-
 	private UriBuilderFactory uriBuilderFactory;
 
+	private ClientHttpConnector connector;
 
-	public DefaultWebClientBuilder(ExchangeFunction exchangeFunction) {
-		Assert.notNull(exchangeFunction, "'exchangeFunction' must not be null");
-		this.exchangeFunction = exchangeFunction;
+	private ExchangeStrategies exchangeStrategies = ExchangeStrategies.withDefaults();
+
+
+	public DefaultWebClientBuilder(String baseUrl) {
+		this(new DefaultUriBuilderFactory(baseUrl));
+	}
+
+	public DefaultWebClientBuilder(UriBuilderFactory uriBuilderFactory) {
+		Assert.notNull(uriBuilderFactory, "UriBuilderFactory is required.");
+		this.uriBuilderFactory = uriBuilderFactory;
 	}
 
 
 	@Override
-	public WebClient.Builder uriBuilderFactory(UriBuilderFactory uriBuilderFactory) {
-		this.uriBuilderFactory = uriBuilderFactory;
+	public WebClient.Builder clientConnector(ClientHttpConnector connector) {
+		this.connector = connector;
+		return this;
+	}
+
+	@Override
+	public WebClient.Builder exchangeStrategies(ExchangeStrategies strategies) {
+		Assert.notNull(strategies, "ExchangeStrategies is required.");
+		this.exchangeStrategies = strategies;
 		return this;
 	}
 
 	@Override
 	public WebClient build() {
-		return new DefaultWebClient(this.exchangeFunction, this.uriBuilderFactory);
+		ClientHttpConnector connector = this.connector != null ? this.connector : new ReactorClientHttpConnector();
+		ExchangeFunction exchangeFunction = ExchangeFunctions.create(connector, this.exchangeStrategies);
+		return new DefaultWebClient(exchangeFunction, this.uriBuilderFactory);
 	}
 
 }

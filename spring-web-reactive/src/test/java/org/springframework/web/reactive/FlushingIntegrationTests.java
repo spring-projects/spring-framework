@@ -58,10 +58,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 		Assume.assumeFalse(this.server instanceof RxNettyHttpServer);
 
 		super.setup();
-
-		ExchangeFunction exchange = ExchangeFunctions.create(new ReactorClientHttpConnector());
-		UriBuilderFactory factory = new DefaultUriBuilderFactory("http://localhost:" + this.port);
-		this.webClient = WebClient.builder(exchange).uriBuilderFactory(factory).build();
+		this.webClient = WebClient.create("http://localhost:" + this.port);
 	}
 
 

@@ -33,10 +33,7 @@ import reactor.test.StepVerifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.Pojo;
-import org.springframework.web.util.DefaultUriBuilderFactory;
-import org.springframework.web.util.UriBuilderFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -58,13 +55,8 @@ public class WebClientIntegrationTests {
 	@Before
 	public void setup() {
 		this.server = new MockWebServer();
-
-		ExchangeFunction exchangeFunction = ExchangeFunctions.create(new ReactorClientHttpConnector());
-		UriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory(this.server.url("/").toString());
-
-		this.webClient = WebClient.builder(exchangeFunction)
-				.uriBuilderFactory(uriBuilderFactory)
-				.build();
+		String baseUrl = this.server.url("/").toString();
+		this.webClient = WebClient.create(baseUrl);
 	}
 
 	@After
