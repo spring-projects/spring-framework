@@ -811,8 +811,8 @@ project("spring-web") {
 	}
 }
 
-project("spring-web-reactive") {
-	description = "Spring Web Reactive"
+project("spring-webflux") {
+	description = "Spring WebFlux"
 
 	dependencies {
 		compile(project(":spring-core"))

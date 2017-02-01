@@ -1,5 +1,5 @@
 [[web-reactive]]
-= Reactive Web Applications
+= WebFlux framework
 
 This section provides basic information on the reactive programming
 support for Web applications in Spring Framework 5.
@@ -53,16 +53,16 @@ by Sebastien Deleuze.
 
 
 [[web-reactive-feature-overview]]
-== Spring Web Reactive Module
+== Spring WebFlux Module
 
-Spring Framework 5 includes a new `spring-web-reactive` module. The module contains support
+Spring Framework 5 includes a new `spring-webflux` module. The module contains support
 for reactive HTTP and WebSocket clients as well as for reactive server web applications
 including REST, HTML browser, and WebSocket style interactions.
 
 [[web-reactive-server]]
 === Server Side
 
-On the server-side the new reactive module supports 2 distinct programming models:
+On the server-side WebFlux supports 2 distinct programming models:
 
 * Annotation-based with `@Controller` and the other annotations supported also with Spring MVC
 * Functional, Java 8 lambda style routing and handling
@@ -70,12 +70,12 @@ On the server-side the new reactive module supports 2 distinct programming model
 Both programming models are executed on the same reactive foundation that adapts
 non-blocking HTTP runtimes to the Reactive Streams API. The diagram
 below shows the server-side stack including traditional, Servlet-based
-Spring MVC on the left from the `spring-web-mvc` module and also the
-reactive stack on the right from the `spring-web-reactive` module.
+Spring MVC on the left from the `spring-webmvc` module and also the
+reactive stack on the right from the `spring-webflux` module.
 
-image::images/web-reactive-overview.png[width=720]
+image::images/webflux-overview.png[width=720]
 
-The new reactive stack can run on Servlet containers with support for the
+WebFlux can run on Servlet containers with support for the
 Servlet 3.1 Non-Blocking IO API as well as on other async runtimes such as
 Netty and Undertow. Each runtime is adapted to a reactive
 `ServerHttpRequest` and `ServerHttpResponse` exposing the body of the
@@ -88,8 +88,8 @@ as a `Flux<Object>`, and so is HTML view rendering and Server-Sent Events.
 ==== Annotation-based Programming Model
 
 The same `@Controller` programming model and the same annotations used in Spring MVC
-are also supported on the reactive side. The main difference is that the framework
-contracts underneath -- i.e. `HandlerMapping`, `HandlerAdapter`, are
+are also supported in WebFlux. The main difference is that the underlying core,
+framework contracts -- i.e. `HandlerMapping`, `HandlerAdapter`, are
 non-blocking and operate on the reactive `ServerHttpRequest` and `ServerHttpResponse`
 rather than on the `HttpServletRequest` and `HttpServletResponse`.
 Below is an example with a reactive controller:
@@ -157,7 +157,7 @@ https://spring.io/blog/2016/09/22/new-in-spring-5-functional-web-framework[M3 re
 [[web-reactive-client]]
 === Client Side
 
-Spring Framework 5 includes a functional, reactive `WebClient` that offers a fully
+WebFlux includes a functional, reactive `WebClient` that offers a fully
 non-blocking and reactive alternative to the `RestTemplate`. It exposes network
 input and output as a reactive `ClientHttpRequest` and `ClientHttpRespones` where
 the body of the request and response is a `Flux<DataBuffer>` rather than an
@@ -169,14 +169,11 @@ implementation to plug in a specific HTTP client such as Reactor Netty:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-WebClient client = WebClient.create(new ReactorClientHttpConnector());
+WebClient client = WebClient.create("http://example.com");
 
-ClientRequest<Void> request = ClientRequest
-		.GET("http://example.com/accounts/{id}", 1L)
+Mono<Account> account = client.get()
+		.url("/accounts/{id}", 1L)
 		.accept(APPLICATION_JSON)
-		.build();
-
-Mono<Account> account = client
 		.exchange(request)
 		.then(response -> response.bodyToMono(Account.class));
 ----
@@ -224,8 +221,8 @@ when the method returns; implies a synchronous, non-blocking controller method.
 [[web-reactive-websocket-support]]
 === Reactive WebSocket Support
 
-The Spring Framework 5 `spring-web-reactive` module includes reactive WebSocket
-client and server support. Both client and server are supported on the Java WebSocket API
+WebFlux includes reactive WebSocket client and server support.
+Both client and server are supported on the Java WebSocket API
 (JSR-356), Jetty, Undertow, Reactor Netty, and RxNetty.
 
 On the server side, declare a `WebSocketHandlerAdapter` and then simply add
@@ -291,7 +288,7 @@ it's very easy to try it out. See the next section on "Manual Bootstrapping".
 
 This section outlines the steps to get up and running manually.
 
-For dependencies start with `spring-web-reactive` and `spring-context`.
+For dependencies start with `spring-webflux` and `spring-context`.
 Then add `jackson-databind` and `io.netty:netty-buffer`
 (temporarily see https://jira.spring.io/browse/SPR-14528[SPR-14528]) for JSON support.
 Lastly add the dependencies for one of the supported runtimes:
@@ -379,4 +376,4 @@ You will find code examples useful to build reactive Web application in the foll
 * https://github.com/thymeleaf/thymeleafsandbox-biglist-reactive[Reactive Thymeleaf Sandbox]
 * https://github.com/mix-it/mixit/[Mix-it 2017 website]: Kotlin + Reactive + Functional web and bean registration API application
 * https://github.com/simonbasle/reactor-by-example[Reactor by example]: code snippets coming from this https://www.infoq.com/articles/reactor-by-example[InfoQ article]
-* https://github.com/spring-projects/spring-framework/tree/master/spring-web-reactive/src/test/java/org/springframework/web/reactive/result/method/annotation[Spring integration tests]: various features tested with Reactor https://projectreactor.io/docs/test/release/api/index.html?reactor/test/StepVerifier.html[`StepVerifier`]
+* https://github.com/spring-projects/spring-framework/tree/master/spring-webflux/src/test/java/org/springframework/web/reactive/result/method/annotation[Spring integration tests]: various features tested with Reactor https://projectreactor.io/docs/test/release/api/index.html?reactor/test/StepVerifier.html[`StepVerifier`]
