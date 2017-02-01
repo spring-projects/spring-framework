@@ -32,6 +32,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -50,10 +52,22 @@ class DefaultWebClient implements WebClient {
 
 	private final UriBuilderFactory uriBuilderFactory;
 
+	private final HttpHeaders defaultHeaders;
 
-	DefaultWebClient(ExchangeFunction exchangeFunction, UriBuilderFactory factory) {
+	private final MultiValueMap<String, String> defaultCookies;
+
+
+	DefaultWebClient(ExchangeFunction exchangeFunction, UriBuilderFactory factory,
+			HttpHeaders defaultHeaders, MultiValueMap<String, String> defaultCookies) {
+
 		this.exchangeFunction = exchangeFunction;
 		this.uriBuilderFactory = (factory != null ? factory : new DefaultUriBuilderFactory());
+
+		this.defaultHeaders = defaultHeaders != null ?
+				HttpHeaders.readOnlyHttpHeaders(defaultHeaders) : null;
+
+		this.defaultCookies = defaultCookies != null ?
+				CollectionUtils.unmodifiableMultiValueMap(defaultCookies) : null;
 	}
 
 
@@ -110,7 +124,8 @@ class DefaultWebClient implements WebClient {
 	@Override
 	public WebClient filter(ExchangeFilterFunction filterFunction) {
 		ExchangeFunction filteredExchangeFunction = this.exchangeFunction.filter(filterFunction);
-		return new DefaultWebClient(filteredExchangeFunction, this.uriBuilderFactory);
+		return new DefaultWebClient(filteredExchangeFunction,
+				this.uriBuilderFactory, this.defaultHeaders, this.defaultCookies);
 	}
 
 
@@ -124,11 +139,6 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public HeaderSpec uri(URI uri) {
-			return new DefaultHeaderSpec(ClientRequest.method(this.httpMethod, uri));
-		}
-
-		@Override
 		public HeaderSpec uri(String uriTemplate, Object... uriVariables) {
 			return uri(getUriBuilderFactory().expand(uriTemplate, uriVariables));
 		}
@@ -137,24 +147,48 @@ class DefaultWebClient implements WebClient {
 		public HeaderSpec uri(Function<UriBuilderFactory, URI> uriFunction) {
 			return uri(uriFunction.apply(getUriBuilderFactory()));
 		}
+
+		@Override
+		public HeaderSpec uri(URI uri) {
+			return new DefaultHeaderSpec(this.httpMethod, uri);
+		}
 	}
 
 	private class DefaultHeaderSpec implements HeaderSpec {
 
-		private final ClientRequest.Builder requestBuilder;
+		private final HttpMethod httpMethod;
 
-		private final HttpHeaders headers = new HttpHeaders();
+		private final URI uri;
+
+		private HttpHeaders headers;
+
+		private MultiValueMap<String, String> cookies;
 
 
-		DefaultHeaderSpec(ClientRequest.Builder requestBuilder) {
-			this.requestBuilder = requestBuilder;
+		DefaultHeaderSpec(HttpMethod httpMethod, URI uri) {
+			this.httpMethod = httpMethod;
+			this.uri = uri;
 		}
 
+
+		private HttpHeaders getHeaders() {
+			if (this.headers == null) {
+				this.headers = new HttpHeaders();
+			}
+			return this.headers;
+		}
+
+		private MultiValueMap<String, String> getCookies() {
+			if (this.cookies == null) {
+				this.cookies = new LinkedMultiValueMap<>(4);
+			}
+			return this.cookies;
+		}
 
 		@Override
 		public DefaultHeaderSpec header(String headerName, String... headerValues) {
 			for (String headerValue : headerValues) {
-				this.headers.add(headerName, headerValue);
+				getHeaders().add(headerName, headerValue);
 			}
 			return this;
 		}
@@ -162,44 +196,46 @@ class DefaultWebClient implements WebClient {
 		@Override
 		public DefaultHeaderSpec headers(HttpHeaders headers) {
 			if (headers != null) {
-				this.headers.putAll(headers);
+				getHeaders().putAll(headers);
 			}
 			return this;
 		}
 
 		@Override
 		public DefaultHeaderSpec accept(MediaType... acceptableMediaTypes) {
-			this.headers.setAccept(Arrays.asList(acceptableMediaTypes));
+			getHeaders().setAccept(Arrays.asList(acceptableMediaTypes));
 			return this;
 		}
 
 		@Override
 		public DefaultHeaderSpec acceptCharset(Charset... acceptableCharsets) {
-			this.headers.setAcceptCharset(Arrays.asList(acceptableCharsets));
+			getHeaders().setAcceptCharset(Arrays.asList(acceptableCharsets));
 			return this;
 		}
 
 		@Override
 		public DefaultHeaderSpec contentType(MediaType contentType) {
-			this.headers.setContentType(contentType);
+			getHeaders().setContentType(contentType);
 			return this;
 		}
 
 		@Override
 		public DefaultHeaderSpec contentLength(long contentLength) {
-			this.headers.setContentLength(contentLength);
+			getHeaders().setContentLength(contentLength);
 			return this;
 		}
 
 		@Override
 		public DefaultHeaderSpec cookie(String name, String value) {
-			this.requestBuilder.cookie(name, value);
+			getCookies().add(name, value);
 			return this;
 		}
 
 		@Override
 		public DefaultHeaderSpec cookies(MultiValueMap<String, String> cookies) {
-			this.requestBuilder.cookies(cookies);
+			if (cookies != null) {
+				getCookies().putAll(cookies);
+			}
 			return this;
 		}
 
@@ -207,32 +243,76 @@ class DefaultWebClient implements WebClient {
 		public DefaultHeaderSpec ifModifiedSince(ZonedDateTime ifModifiedSince) {
 			ZonedDateTime gmt = ifModifiedSince.withZoneSameInstant(ZoneId.of("GMT"));
 			String headerValue = DateTimeFormatter.RFC_1123_DATE_TIME.format(gmt);
-			this.headers.set(HttpHeaders.IF_MODIFIED_SINCE, headerValue);
+			getHeaders().set(HttpHeaders.IF_MODIFIED_SINCE, headerValue);
 			return this;
 		}
 
 		@Override
 		public DefaultHeaderSpec ifNoneMatch(String... ifNoneMatches) {
-			this.headers.setIfNoneMatch(Arrays.asList(ifNoneMatches));
+			getHeaders().setIfNoneMatch(Arrays.asList(ifNoneMatches));
 			return this;
 		}
 
 		@Override
 		public Mono<ClientResponse> exchange() {
-			ClientRequest<Void> request = this.requestBuilder.headers(this.headers).build();
+			ClientRequest<Void> request = initRequestBuilder().build();
 			return getExchangeFunction().exchange(request);
 		}
 
 		@Override
 		public <T> Mono<ClientResponse> exchange(BodyInserter<T, ? super ClientHttpRequest> inserter) {
-			ClientRequest<T> request = this.requestBuilder.headers(this.headers).body(inserter);
+			ClientRequest<T> request = initRequestBuilder().body(inserter);
 			return getExchangeFunction().exchange(request);
 		}
 
 		@Override
 		public <T, S extends Publisher<T>> Mono<ClientResponse> exchange(S publisher, Class<T> elementClass) {
-			ClientRequest<S> request = this.requestBuilder.headers(this.headers).body(publisher, elementClass);
+			ClientRequest<S> request = initRequestBuilder().headers(this.headers).body(publisher, elementClass);
 			return getExchangeFunction().exchange(request);
+		}
+
+		private ClientRequest.Builder initRequestBuilder() {
+			return ClientRequest.method(this.httpMethod, this.uri).headers(initHeaders()).cookies(initCookies());
+		}
+
+		private HttpHeaders initHeaders() {
+			if (CollectionUtils.isEmpty(defaultHeaders) && CollectionUtils.isEmpty(this.headers)) {
+				return null;
+			}
+			else if (CollectionUtils.isEmpty(defaultHeaders)) {
+				return this.headers;
+			}
+			else if (CollectionUtils.isEmpty(this.headers)) {
+				return defaultHeaders;
+			}
+			else {
+				HttpHeaders result = new HttpHeaders();
+				result.putAll(this.headers);
+				defaultHeaders.forEach((name, values) -> {
+					if (!this.headers.containsKey(name)) {
+						values.forEach(value -> result.add(name, value));
+					}
+				});
+				return result;
+			}
+		}
+
+		private MultiValueMap<String, String> initCookies() {
+			if (CollectionUtils.isEmpty(defaultCookies) && CollectionUtils.isEmpty(this.cookies)) {
+				return null;
+			}
+			else if (CollectionUtils.isEmpty(defaultCookies)) {
+				return this.cookies;
+			}
+			else if (CollectionUtils.isEmpty(this.cookies)) {
+				return defaultCookies;
+			}
+			else {
+				MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
+				result.putAll(this.cookies);
+				defaultCookies.forEach(result::putIfAbsent);
+				return result;
+			}
 		}
 	}
 

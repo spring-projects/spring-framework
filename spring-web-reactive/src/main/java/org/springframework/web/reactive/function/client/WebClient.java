@@ -174,6 +174,28 @@ public interface WebClient {
 		Builder exchangeStrategies(ExchangeStrategies strategies);
 
 		/**
+		 * Configure directly an {@link ExchangeFunction} instead of separately
+		 * providing a {@link ClientHttpConnector} and/or
+		 * {@link ExchangeStrategies}.
+		 * @param exchangeFunction the exchange function to use
+		 */
+		Builder exchangeFunction(ExchangeFunction exchangeFunction);
+
+		/**
+		 * Add the given header to all requests that haven't added it.
+		 * @param headerName the header name
+		 * @param headerValues the header values
+		 */
+		Builder defaultHeader(String headerName, String... headerValues);
+
+		/**
+		 * Add the given header to all requests that haven't added it.
+		 * @param cookieName the cookie name
+		 * @param cookieValues the cookie values
+		 */
+		Builder defaultCookie(String cookieName, String... cookieValues);
+
+		/**
 		 * Builder the {@link WebClient} instance.
 		 */
 		WebClient build();

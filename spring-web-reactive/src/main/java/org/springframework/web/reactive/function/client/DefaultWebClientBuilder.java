@@ -16,9 +16,14 @@
 
 package org.springframework.web.reactive.function.client;
 
+import java.util.Arrays;
+
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
 
@@ -35,6 +40,12 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 	private ClientHttpConnector connector;
 
 	private ExchangeStrategies exchangeStrategies = ExchangeStrategies.withDefaults();
+
+	private ExchangeFunction exchangeFunction;
+
+	private HttpHeaders defaultHeaders;
+
+	private MultiValueMap<String, String> defaultCookies;
 
 
 	public DefaultWebClientBuilder(String baseUrl) {
@@ -61,10 +72,48 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
+	public WebClient.Builder exchangeFunction(ExchangeFunction exchangeFunction) {
+		this.exchangeFunction = exchangeFunction;
+		return this;
+	}
+
+	@Override
+	public WebClient.Builder defaultHeader(String headerName, String... headerValues) {
+		if (this.defaultHeaders == null) {
+			this.defaultHeaders = new HttpHeaders();
+		}
+		for (String headerValue : headerValues) {
+			this.defaultHeaders.add(headerName, headerValue);
+		}
+		return this;
+	}
+
+	@Override
+	public WebClient.Builder defaultCookie(String cookieName, String... cookieValues) {
+		if (this.defaultCookies == null) {
+			this.defaultCookies = new LinkedMultiValueMap<>(4);
+		}
+		this.defaultCookies.addAll(cookieName, Arrays.asList(cookieValues));
+		return this;
+	}
+
+	@Override
 	public WebClient build() {
-		ClientHttpConnector connector = this.connector != null ? this.connector : new ReactorClientHttpConnector();
-		ExchangeFunction exchangeFunction = ExchangeFunctions.create(connector, this.exchangeStrategies);
-		return new DefaultWebClient(exchangeFunction, this.uriBuilderFactory);
+		return new DefaultWebClient(initExchangeFunction(),
+				this.uriBuilderFactory, this.defaultHeaders, this.defaultCookies);
+	}
+
+	private ExchangeFunction initExchangeFunction() {
+		if (this.exchangeFunction != null) {
+			return this.exchangeFunction;
+		}
+		else if (this.connector != null) {
+			return ExchangeFunctions.create(this.connector, this.exchangeStrategies);
+		}
+
+		else {
+			return ExchangeFunctions.create(new ReactorClientHttpConnector(), this.exchangeStrategies);
+		}
 	}
 
 }
