@@ -37,6 +37,3 @@ fun <T : Any> ClientResponse.bodyToFlux(type: KClass<T>) : Flux<T> = bodyToFlux(
  * @since 5.0
  */
 inline fun <reified T : Any> ClientResponse.bodyToFlux() = bodyToFlux(T::class.java)
-
-
-
