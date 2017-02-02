@@ -120,12 +120,29 @@ public interface WebClient {
 	/**
 	 * Shortcut for:
 	 * <pre class="code">
+	 * WebClient client = builder().build();
+	 * </pre>
+	 */
+	static WebClient create() {
+		return new DefaultWebClientBuilder().build();
+	}
+
+	/**
+	 * Shortcut for:
+	 * <pre class="code">
 	 * WebClient client = builder(baseUrl).build();
 	 * </pre>
 	 * @param baseUrl the base URI for all requests
 	 */
 	static WebClient create(String baseUrl) {
 		return new DefaultWebClientBuilder(baseUrl).build();
+	}
+
+	/**
+	 * Obtain a {@code WebClient} builder.
+	 */
+	static WebClient.Builder builder() {
+		return new DefaultWebClientBuilder();
 	}
 
 	/**

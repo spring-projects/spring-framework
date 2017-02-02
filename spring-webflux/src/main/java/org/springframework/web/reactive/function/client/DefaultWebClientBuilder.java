@@ -48,6 +48,10 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 	private MultiValueMap<String, String> defaultCookies;
 
 
+	public DefaultWebClientBuilder() {
+		this(new DefaultUriBuilderFactory());
+	}
+
 	public DefaultWebClientBuilder(String baseUrl) {
 		this(new DefaultUriBuilderFactory(baseUrl));
 	}
