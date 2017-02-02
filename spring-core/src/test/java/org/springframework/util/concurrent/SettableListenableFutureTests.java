@@ -32,7 +32,6 @@ import static org.mockito.Mockito.*;
  * @author Mattias Severson
  * @author Juergen Hoeller
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
 public class SettableListenableFutureTests {
 
 	private final SettableListenableFuture<String> settableListenableFuture = new SettableListenableFuture<>();
@@ -266,20 +265,20 @@ public class SettableListenableFutureTests {
 
 	@Test
 	public void cancelWithMayInterruptIfRunningTrueCallsOverriddenMethod() {
-		InterruptableSettableListenableFuture tested = new InterruptableSettableListenableFuture();
-		assertTrue(tested.cancel(true));
-		assertTrue(tested.calledInterruptTask());
-		assertTrue(tested.isCancelled());
-		assertTrue(tested.isDone());
+		InterruptibleSettableListenableFuture interruptibleFuture = new InterruptibleSettableListenableFuture();
+		assertTrue(interruptibleFuture.cancel(true));
+		assertTrue(interruptibleFuture.calledInterruptTask());
+		assertTrue(interruptibleFuture.isCancelled());
+		assertTrue(interruptibleFuture.isDone());
 	}
 
 	@Test
 	public void cancelWithMayInterruptIfRunningFalseDoesNotCallOverriddenMethod() {
-		InterruptableSettableListenableFuture tested = new InterruptableSettableListenableFuture();
-		assertTrue(tested.cancel(false));
-		assertFalse(tested.calledInterruptTask());
-		assertTrue(tested.isCancelled());
-		assertTrue(tested.isDone());
+		InterruptibleSettableListenableFuture interruptibleFuture = new InterruptibleSettableListenableFuture();
+		assertTrue(interruptibleFuture.cancel(false));
+		assertFalse(interruptibleFuture.calledInterruptTask());
+		assertTrue(interruptibleFuture.isCancelled());
+		assertTrue(interruptibleFuture.isDone());
 	}
 
 	@Test
@@ -350,6 +349,7 @@ public class SettableListenableFutureTests {
 	}
 
 	@Test
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void cancelDoesNotNotifyCallbacksOnSet() {
 		ListenableFutureCallback callback = mock(ListenableFutureCallback.class);
 		settableListenableFuture.addCallback(callback);
@@ -366,6 +366,7 @@ public class SettableListenableFutureTests {
 	}
 
 	@Test
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void cancelDoesNotNotifyCallbacksOnSetException() {
 		ListenableFutureCallback callback = mock(ListenableFutureCallback.class);
 		settableListenableFuture.addCallback(callback);
@@ -382,7 +383,7 @@ public class SettableListenableFutureTests {
 	}
 
 
-	private static class InterruptableSettableListenableFuture extends SettableListenableFuture<String> {
+	private static class InterruptibleSettableListenableFuture extends SettableListenableFuture<String> {
 
 		private boolean interrupted = false;
 
