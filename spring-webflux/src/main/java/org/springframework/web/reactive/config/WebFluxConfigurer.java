@@ -50,7 +50,7 @@ public interface WebFluxConfigurer {
 	 * Configure how the content type requested for the response is resolved.
 	 * <p>The given builder will create a composite of multiple
 	 * {@link RequestedContentTypeResolver}s, each defining a way to resolve
-	 * the the requested content type (accept HTTP header, path extension,
+	 * the requested content type (accept HTTP header, path extension,
 	 * parameter, etc).
 	 * @param builder factory that creates a {@link CompositeContentTypeResolver}
 	 */
