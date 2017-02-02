@@ -31,6 +31,7 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
+import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
 /**
@@ -113,6 +114,7 @@ public interface WebClient {
 	/**
 	 * Create a new {@code WebClient} with no default, shared preferences across
 	 * requests such as base URI, default headers, and others.
+	 * @see #create(String)
 	 */
 	static WebClient create() {
 		return new DefaultWebClientBuilder().build();
@@ -123,32 +125,47 @@ public interface WebClient {
 	 * example to avoid repeating the same host, port, base path, or even
 	 * query parameters with every request.
 	 *
-	 * <p>Given the following initialization:
+	 * <p>For example given this initialization:
 	 * <pre class="code">
 	 * WebClient client = WebClient.create("http://abc.com/v1");
 	 * </pre>
 	 *
-	 * <p>A base URI is applied when using a URI template:
+	 * <p>The base URI is applied to exchanges with a URI template:
 	 * <pre class="code">
-	 *
 	 * // GET http://abc.com/v1/accounts/43
-	 *
 	 * Mono&#060;Account&#062; result = client.get()
 	 *         .uri("/accounts/{id}", 43)
 	 *         .exchange()
-	 *         .then(response -> response.bodyToMono(String.class));
+	 *         .then(response -> response.bodyToMono(Account.class));
 	 * </pre>
 	 *
-	 * <p>It is also applied when using a {@link UriBuilderFactory}:
+	 * <p>The base URI is also applied to exchanges with a {@code UriBuilder}:
 	 * <pre class="code">
-
 	 * // GET http://abc.com/v1/accounts?q=12
-	 *
-	 * Mono&#060;Account&#062; result = client.get()
-	 *         .uri(factory -> factory.uriString("/accounts").queryParam("q", "12").build())
+	 * Flux&#060;Account&#062; result = client.get()
+	 *         .uri(builder -> builder.path("/accounts").queryParam("q", "12").build())
 	 *         .exchange()
-	 *         .then(response -> response.bodyToMono(String.class));
+	 *         .then(response -> response.bodyToFlux(Account.class));
 	 * </pre>
+	 *
+	 * <p>The base URI can be overridden with an absolute URI:
+	 * <pre class="code">
+	 * // GET http://xyz.com/path
+	 * Mono&#060;Account&#062; result = client.get()
+	 *         .uri("http://xyz.com/path")
+	 *         .exchange()
+	 *         .then(response -> response.bodyToMono(Account.class));
+	 * </pre>
+	 *
+	 * <p>The base URI can be partially overridden with a {@code UriBuilder}:
+	 * <pre class="code">
+	 * // GET http://abc.com/v2/accounts?q=12
+	 * Flux&#060;Account&#062; result = client.get()
+	 *         .uri(builder -> builder.replacePath("/v2/accounts").queryParam("q", "12").build())
+	 *         .exchange()
+	 *         .then(response -> response.bodyToFlux(Account.class));
+	 * </pre>
+	 *
 	 *
 	 * @param baseUrl the base URI for all requests
 	 */
@@ -284,7 +301,7 @@ public interface WebClient {
 		 * Build the URI for the request using the {@link UriBuilderFactory}
 		 * configured for this client.
 		 */
-		HeaderSpec uri(Function<UriBuilderFactory, URI> uriFunction);
+		HeaderSpec uri(Function<UriBuilder, URI> uriFunction);
 
 	}
 

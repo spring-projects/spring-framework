@@ -41,40 +41,48 @@ public class DefaultUriBuilderFactoryTests {
 
 	@Test
 	public void baseUri() throws Exception {
-		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://foo.com/bar?id=123");
-		URI uri = factory.uriString("/baz").port(8080).build();
-		assertEquals("http://foo.com:8080/bar/baz?id=123", uri.toString());
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://foo.com/v1?id=123");
+		URI uri = factory.uriString("/bar").port(8080).build();
+		assertEquals("http://foo.com:8080/v1/bar?id=123", uri.toString());
+	}
+
+	@Test
+	public void baseUriWithFullOverride() throws Exception {
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://foo.com/v1?id=123");
+		URI uri = factory.uriString("http://example.com/1/2").build();
+		assertEquals("Use of host should case baseUri to be completely ignored",
+				"http://example.com/1/2", uri.toString());
 	}
 
 	@Test
 	public void baseUriWithPathOverride() throws Exception {
-		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://foo.com/bar");
-		URI uri = factory.uriString("").replacePath("/baz").build();
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://foo.com/v1");
+		URI uri = factory.builder().replacePath("/baz").build();
 		assertEquals("http://foo.com/baz", uri.toString());
 	}
 
 	@Test
 	public void defaultUriVars() throws Exception {
-		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://{host}/bar");
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://{host}/v1");
 		factory.setDefaultUriVariables(singletonMap("host", "foo.com"));
 		URI uri = factory.uriString("/{id}").build(singletonMap("id", "123"));
-		assertEquals("http://foo.com/bar/123", uri.toString());
+		assertEquals("http://foo.com/v1/123", uri.toString());
 	}
 
 	@Test
 	public void defaultUriVarsWithOverride() throws Exception {
-		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://{host}/bar");
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://{host}/v1");
 		factory.setDefaultUriVariables(singletonMap("host", "spring.io"));
-		URI uri = factory.uriString("/baz").build(singletonMap("host", "docs.spring.io"));
-		assertEquals("http://docs.spring.io/bar/baz", uri.toString());
+		URI uri = factory.uriString("/bar").build(singletonMap("host", "docs.spring.io"));
+		assertEquals("http://docs.spring.io/v1/bar", uri.toString());
 	}
 
 	@Test
 	public void defaultUriVarsWithEmptyVarArg() throws Exception {
-		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://{host}/bar");
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://{host}/v1");
 		factory.setDefaultUriVariables(singletonMap("host", "foo.com"));
-		URI uri = factory.uriString("/baz").build();
-		assertEquals("Expected delegation to build(Map) method", "http://foo.com/bar/baz", uri.toString());
+		URI uri = factory.uriString("/bar").build();
+		assertEquals("Expected delegation to build(Map) method", "http://foo.com/v1/bar", uri.toString());
 	}
 
 	@Test

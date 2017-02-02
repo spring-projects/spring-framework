@@ -65,6 +65,26 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
+	public void uriBuilder() throws Exception {
+		WebClient client = builder().build();
+		client.get().uri(builder -> builder.path("/path").queryParam("q", "12").build()).exchange();
+
+		ClientRequest<?> request = verifyExchange();
+		assertEquals("/base/path?q=12", request.url().toString());
+		verifyNoMoreInteractions(this.exchangeFunction);
+	}
+
+	@Test
+	public void uriBuilderWithPathOverride() throws Exception {
+		WebClient client = builder().build();
+		client.get().uri(builder -> builder.replacePath("/path").build()).exchange();
+
+		ClientRequest<?> request = verifyExchange();
+		assertEquals("/path", request.url().toString());
+		verifyNoMoreInteractions(this.exchangeFunction);
+	}
+
+	@Test
 	public void requestHeaderAndCookie() throws Exception {
 		WebClient client = builder().build();
 		client.get().uri("/path").accept(MediaType.APPLICATION_JSON).cookie("id", "123").exchange();

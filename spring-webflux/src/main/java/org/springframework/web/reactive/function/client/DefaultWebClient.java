@@ -38,6 +38,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
 
@@ -150,8 +151,8 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public HeaderSpec uri(Function<UriBuilderFactory, URI> uriFunction) {
-			return uri(uriFunction.apply(getUriBuilderFactory()));
+		public HeaderSpec uri(Function<UriBuilder, URI> uriFunction) {
+			return uri(uriFunction.apply(getUriBuilderFactory().builder()));
 		}
 
 		@Override
