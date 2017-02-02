@@ -40,7 +40,7 @@ public interface AsyncWebRequestInterceptor extends WebRequestInterceptor{
 
 	/**
 	 * Called instead of {@code postHandle} and {@code afterCompletion}, when the
-	 * the handler started handling the request concurrently.
+	 * handler started handling the request concurrently.
 	 *
 	 * @param request the current request
 	 */
