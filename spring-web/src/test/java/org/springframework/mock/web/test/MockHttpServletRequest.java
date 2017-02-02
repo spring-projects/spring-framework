@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.text.ParseException;
@@ -123,6 +124,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private static final ServletInputStream EMPTY_SERVLET_INPUT_STREAM =
 			new DelegatingServletInputStream(StreamUtils.emptyInput());
+
+	private static final BufferedReader EMPTY_BUFFERED_READER =
+			new BufferedReader(new StringReader(""));
 
 	/**
 	 * Date formats as specified in the HTTP RFC
@@ -617,11 +621,12 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		if (this.content != null) {
 			InputStream sourceStream = new ByteArrayInputStream(this.content);
 			Reader sourceReader = (this.characterEncoding != null) ?
-					new InputStreamReader(sourceStream, this.characterEncoding) : new InputStreamReader(sourceStream);
+					new InputStreamReader(sourceStream, this.characterEncoding) :
+					new InputStreamReader(sourceStream);
 			return new BufferedReader(sourceReader);
 		}
 		else {
-			return null;
+			return EMPTY_BUFFERED_READER;
 		}
 	}
 
@@ -900,7 +905,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			this.headers.put(name, header);
 		}
 		if (value instanceof Collection) {
-			header.addValues((Collection) value);
+			header.addValues((Collection<?>) value);
 		}
 		else if (value.getClass().isArray()) {
 			header.addValueArray(value);
