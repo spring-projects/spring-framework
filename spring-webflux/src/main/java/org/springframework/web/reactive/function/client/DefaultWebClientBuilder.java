@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.function.client;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -35,7 +36,15 @@ import org.springframework.web.util.UriBuilderFactory;
  */
 class DefaultWebClientBuilder implements WebClient.Builder {
 
+	private String baseUrl;
+
+	private Map<String, ?> defaultUriVariables;
+
 	private UriBuilderFactory uriBuilderFactory;
+
+	private HttpHeaders defaultHeaders;
+
+	private MultiValueMap<String, String> defaultCookies;
 
 	private ClientHttpConnector connector;
 
@@ -43,41 +52,22 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 
 	private ExchangeFunction exchangeFunction;
 
-	private HttpHeaders defaultHeaders;
 
-	private MultiValueMap<String, String> defaultCookies;
-
-
-	public DefaultWebClientBuilder() {
-		this(new DefaultUriBuilderFactory());
+	@Override
+	public WebClient.Builder baseUrl(String baseUrl) {
+		this.baseUrl = baseUrl;
+		return this;
 	}
 
-	public DefaultWebClientBuilder(String baseUrl) {
-		this(new DefaultUriBuilderFactory(baseUrl));
+	@Override
+	public WebClient.Builder defaultUriVariables(Map<String, ?> defaultUriVariables) {
+		this.defaultUriVariables = defaultUriVariables;
+		return this;
 	}
 
-	public DefaultWebClientBuilder(UriBuilderFactory uriBuilderFactory) {
-		Assert.notNull(uriBuilderFactory, "UriBuilderFactory is required.");
+	@Override
+	public WebClient.Builder uriBuilderFactory(UriBuilderFactory uriBuilderFactory) {
 		this.uriBuilderFactory = uriBuilderFactory;
-	}
-
-
-	@Override
-	public WebClient.Builder clientConnector(ClientHttpConnector connector) {
-		this.connector = connector;
-		return this;
-	}
-
-	@Override
-	public WebClient.Builder exchangeStrategies(ExchangeStrategies strategies) {
-		Assert.notNull(strategies, "ExchangeStrategies is required.");
-		this.exchangeStrategies = strategies;
-		return this;
-	}
-
-	@Override
-	public WebClient.Builder exchangeFunction(ExchangeFunction exchangeFunction) {
-		this.exchangeFunction = exchangeFunction;
 		return this;
 	}
 
@@ -102,9 +92,39 @@ class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
+	public WebClient.Builder clientConnector(ClientHttpConnector connector) {
+		this.connector = connector;
+		return this;
+	}
+
+	@Override
+	public WebClient.Builder exchangeStrategies(ExchangeStrategies strategies) {
+		Assert.notNull(strategies, "ExchangeStrategies is required.");
+		this.exchangeStrategies = strategies;
+		return this;
+	}
+
+	@Override
+	public WebClient.Builder exchangeFunction(ExchangeFunction exchangeFunction) {
+		this.exchangeFunction = exchangeFunction;
+		return this;
+	}
+
+	@Override
 	public WebClient build() {
-		return new DefaultWebClient(initExchangeFunction(),
-				this.uriBuilderFactory, this.defaultHeaders, this.defaultCookies);
+		return new DefaultWebClient(initExchangeFunction(), initUriBuilderFactory(),
+				this.defaultHeaders, this.defaultCookies);
+	}
+
+	private UriBuilderFactory initUriBuilderFactory() {
+		if (this.uriBuilderFactory != null) {
+			return this.uriBuilderFactory;
+		}
+		DefaultUriBuilderFactory factory = this.baseUrl != null ?
+				new DefaultUriBuilderFactory(this.baseUrl) : new DefaultUriBuilderFactory();
+
+		factory.setDefaultUriVariables(this.defaultUriVariables);
+		return factory;
 	}
 
 	private ExchangeFunction initExchangeFunction() {

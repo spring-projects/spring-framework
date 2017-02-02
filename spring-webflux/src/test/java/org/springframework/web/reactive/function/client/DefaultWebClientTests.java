@@ -99,7 +99,7 @@ public class DefaultWebClientTests {
 
 
 	private WebClient.Builder builder() {
-		return WebClient.builder("/base").exchangeFunction(this.exchangeFunction);
+		return WebClient.builder().baseUrl("/base").exchangeFunction(this.exchangeFunction);
 	}
 
 	private ClientRequest<?> verifyExchange() {
