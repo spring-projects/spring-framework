@@ -57,7 +57,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.config.EnableWebReactive;
+import org.springframework.web.reactive.config.EnableWebFlux;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -380,7 +380,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 
 
 	@Configuration
-	@EnableWebReactive
+	@EnableWebFlux
 	@ComponentScan(resourcePattern = "**/RequestMappingMessageConversionIntegrationTests$*.class")
 	@SuppressWarnings({"unused", "WeakerAccess"})
 	static class WebConfig {

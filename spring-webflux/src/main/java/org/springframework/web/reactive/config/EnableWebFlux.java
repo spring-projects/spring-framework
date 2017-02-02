@@ -26,11 +26,11 @@ import org.springframework.context.annotation.Import;
 
 /**
  * Adding this annotation to an {@code @Configuration} class imports the Spring Web
- * Reactive configuration from {@link WebReactiveConfigurationSupport}, e.g.:
+ * Reactive configuration from {@link WebFluxConfigurationSupport}, e.g.:
  *
  * <pre class="code">
  * &#064;Configuration
- * &#064;EnableWebReactive
+ * &#064;EnableWebFlux
  * &#064;ComponentScan(basePackageClasses = MyConfiguration.class)
  * public class MyConfiguration {
  *
@@ -38,13 +38,13 @@ import org.springframework.context.annotation.Import;
  * </pre>
  *
  * <p>To customize the imported configuration implement
- * {@link WebReactiveConfigurer} and override individual methods as shown below:
+ * {@link WebFluxConfigurer} and override individual methods as shown below:
  *
  * <pre class="code">
  * &#064;Configuration
- * &#064;EnableWebReactive
+ * &#064;EnableWebFlux
  * &#064;ComponentScan(basePackageClasses = MyConfiguration.class)
- * public class MyConfiguration implements WebReactiveConfigurer {
+ * public class MyConfiguration implements WebFluxConfigurer {
  *
  * 	   &#064;Override
  * 	   public void addFormatters(FormatterRegistry formatterRegistry) {
@@ -60,26 +60,26 @@ import org.springframework.context.annotation.Import;
  * </pre>
  *
  * <p><strong>Note:</strong> only one {@code @Configuration} class may have the
- * {@code @EnableWebReactive} annotation to import the Spring Web Reactive
+ * {@code @EnableWebFlux} annotation to import the Spring Web Reactive
  * configuration. There can however be multiple {@code @Configuration} classes
- * implementing {@code WebReactiveConfigurer} in order to customize the provided
+ * implementing {@code WebFluxConfigurer} in order to customize the provided
  * configuration.
  *
- * <p>If {@link WebReactiveConfigurer} does not expose some more advanced setting
- * that needs to be configured consider removing the {@code @EnableWebReactive}
- * annotation and extending directly from {@link WebReactiveConfigurationSupport}
- * or {@link DelegatingWebReactiveConfiguration} if you still want to allow
- * {@link WebReactiveConfigurer} instances to customize the configuration.
+ * <p>If {@link WebFluxConfigurer} does not expose some more advanced setting
+ * that needs to be configured consider removing the {@code @EnableWebFlux}
+ * annotation and extending directly from {@link WebFluxConfigurationSupport}
+ * or {@link DelegatingWebFluxConfiguration} if you still want to allow
+ * {@link WebFluxConfigurer} instances to customize the configuration.
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev
  * @since 5.0
- * @see WebReactiveConfigurer
- * @see WebReactiveConfigurationSupport
+ * @see WebFluxConfigurer
+ * @see WebFluxConfigurationSupport
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import(DelegatingWebReactiveConfiguration.class)
-public @interface EnableWebReactive {
+@Import(DelegatingWebFluxConfiguration.class)
+public @interface EnableWebFlux {
 }

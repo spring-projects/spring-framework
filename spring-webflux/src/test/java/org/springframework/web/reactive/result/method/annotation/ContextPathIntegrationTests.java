@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
-import org.springframework.web.reactive.config.EnableWebReactive;
+import org.springframework.web.reactive.config.EnableWebFlux;
 
 import static org.junit.Assert.assertEquals;
 
@@ -92,7 +92,7 @@ public class ContextPathIntegrationTests {
 	}
 
 
-	@EnableWebReactive
+	@EnableWebFlux
 	@Configuration
 	static class WebApp1Config {
 
@@ -102,7 +102,7 @@ public class ContextPathIntegrationTests {
 		}
 	}
 
-	@EnableWebReactive
+	@EnableWebFlux
 	@Configuration
 	static class WebApp2Config {
 

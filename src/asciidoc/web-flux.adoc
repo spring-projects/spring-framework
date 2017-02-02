@@ -303,7 +303,7 @@ For the **annotation-based programming model** bootstrap with:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-ApplicationContext context = new AnnotationConfigApplicationContext(DelegatingWebReactiveConfiguration.class);  // (1)
+ApplicationContext context = new AnnotationConfigApplicationContext(DelegatingWebFluxConfiguration.class);  // (1)
 HttpHandler handler = DispatcherHandler.toHttpHandler(context);  // (2)
 ----
 

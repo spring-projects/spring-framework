@@ -78,10 +78,10 @@ import static org.springframework.http.MediaType.IMAGE_PNG;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 /**
- * Unit tests for {@link WebReactiveConfigurationSupport}.
+ * Unit tests for {@link WebFluxConfigurationSupport}.
  * @author Rossen Stoyanchev
  */
-public class WebReactiveConfigurationSupportTests {
+public class WebFluxConfigurationSupportTests {
 
 	private MockServerHttpRequest request;
 
@@ -94,7 +94,7 @@ public class WebReactiveConfigurationSupportTests {
 
 	@Test
 	public void requestMappingHandlerMapping() throws Exception {
-		ApplicationContext context = loadConfig(WebReactiveConfig.class);
+		ApplicationContext context = loadConfig(WebFluxConfig.class);
 
 		String name = "requestMappingHandlerMapping";
 		RequestMappingHandlerMapping mapping = context.getBean(name, RequestMappingHandlerMapping.class);
@@ -106,7 +106,7 @@ public class WebReactiveConfigurationSupportTests {
 		assertTrue(mapping.useTrailingSlashMatch());
 		assertTrue(mapping.useRegisteredSuffixPatternMatch());
 
-		name = "webReactiveContentTypeResolver";
+		name = "webFluxContentTypeResolver";
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
 		assertSame(resolver, mapping.getContentTypeResolver());
 
@@ -132,7 +132,7 @@ public class WebReactiveConfigurationSupportTests {
 
 	@Test
 	public void requestMappingHandlerAdapter() throws Exception {
-		ApplicationContext context = loadConfig(WebReactiveConfig.class);
+		ApplicationContext context = loadConfig(WebFluxConfig.class);
 
 		String name = "requestMappingHandlerAdapter";
 		RequestMappingHandlerAdapter adapter = context.getBean(name, RequestMappingHandlerAdapter.class);
@@ -154,11 +154,11 @@ public class WebReactiveConfigurationSupportTests {
 		WebExchangeDataBinder binder = new WebExchangeDataBinder(new Object());
 		bindingInitializer.initBinder(binder);
 
-		name = "webReactiveConversionService";
+		name = "webFluxConversionService";
 		ConversionService service = context.getBean(name, ConversionService.class);
 		assertSame(service, binder.getConversionService());
 
-		name = "webReactiveValidator";
+		name = "webFluxValidator";
 		Validator validator = context.getBean(name, Validator.class);
 		assertSame(validator, binder.getValidator());
 	}
@@ -180,7 +180,7 @@ public class WebReactiveConfigurationSupportTests {
 
 	@Test
 	public void responseEntityResultHandler() throws Exception {
-		ApplicationContext context = loadConfig(WebReactiveConfig.class);
+		ApplicationContext context = loadConfig(WebFluxConfig.class);
 
 		String name = "responseEntityResultHandler";
 		ResponseEntityResultHandler handler = context.getBean(name, ResponseEntityResultHandler.class);
@@ -199,14 +199,14 @@ public class WebReactiveConfigurationSupportTests {
 		assertHasMessageWriter(writers, TestBean.class, APPLICATION_JSON);
 		assertHasMessageWriter(writers, TestBean.class, MediaType.parseMediaType("text/event-stream"));
 
-		name = "webReactiveContentTypeResolver";
+		name = "webFluxContentTypeResolver";
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
 		assertSame(resolver, handler.getContentTypeResolver());
 	}
 
 	@Test
 	public void responseBodyResultHandler() throws Exception {
-		ApplicationContext context = loadConfig(WebReactiveConfig.class);
+		ApplicationContext context = loadConfig(WebFluxConfig.class);
 
 		String name = "responseBodyResultHandler";
 		ResponseBodyResultHandler handler = context.getBean(name, ResponseBodyResultHandler.class);
@@ -225,7 +225,7 @@ public class WebReactiveConfigurationSupportTests {
 		assertHasMessageWriter(writers, TestBean.class, APPLICATION_JSON);
 		assertHasMessageWriter(writers, TestBean.class, null);
 
-		name = "webReactiveContentTypeResolver";
+		name = "webFluxContentTypeResolver";
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
 		assertSame(resolver, handler.getContentTypeResolver());
 	}
@@ -298,12 +298,12 @@ public class WebReactiveConfigurationSupportTests {
 		return context;
 	}
 
-	@EnableWebReactive
-	static class WebReactiveConfig {
+	@EnableWebFlux
+	static class WebFluxConfig {
 	}
 
 	@Configuration
-	static class CustomPatchMatchConfig extends WebReactiveConfigurationSupport {
+	static class CustomPatchMatchConfig extends WebFluxConfigurationSupport {
 
 		@Override
 		public void configurePathMatching(PathMatchConfigurer configurer) {
@@ -313,7 +313,7 @@ public class WebReactiveConfigurationSupportTests {
 	}
 
 	@Configuration
-	static class CustomMessageConverterConfig extends WebReactiveConfigurationSupport {
+	static class CustomMessageConverterConfig extends WebFluxConfigurationSupport {
 
 		@Override
 		protected void configureMessageReaders(List<HttpMessageReader<?>> messageReaders) {
@@ -338,7 +338,7 @@ public class WebReactiveConfigurationSupportTests {
 
 	@Configuration
 	@SuppressWarnings("unused")
-	static class CustomViewResolverConfig extends WebReactiveConfigurationSupport {
+	static class CustomViewResolverConfig extends WebFluxConfigurationSupport {
 
 		@Override
 		protected void configureViewResolvers(ViewResolverRegistry registry) {
@@ -354,7 +354,7 @@ public class WebReactiveConfigurationSupportTests {
 	}
 
 	@Configuration
-	static class CustomResourceHandlingConfig extends WebReactiveConfigurationSupport {
+	static class CustomResourceHandlingConfig extends WebFluxConfigurationSupport {
 
 		@Override
 		protected void addResourceHandlers(ResourceHandlerRegistry registry) {

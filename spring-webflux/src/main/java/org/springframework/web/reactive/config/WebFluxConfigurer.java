@@ -33,9 +33,9 @@ import org.springframework.web.reactive.result.method.HandlerMethodArgumentResol
 
 /**
  * Defines callback methods to customize the configuration for Web Reactive
- * applications enabled via {@code @EnableWebReactive}.
+ * applications enabled via {@code @EnableWebFlux}.
  *
- * <p>{@code @EnableWebReactive}-annotated configuration classes may implement
+ * <p>{@code @EnableWebFlux}-annotated configuration classes may implement
  * this interface to be called back and given a chance to customize the
  * default configuration. Consider implementing this interface and
  * overriding the relevant methods for your needs.
@@ -44,7 +44,7 @@ import org.springframework.web.reactive.result.method.HandlerMethodArgumentResol
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public interface WebReactiveConfigurer {
+public interface WebFluxConfigurer {
 
 	/**
 	 * Configure how the content type requested for the response is resolved.
@@ -92,7 +92,7 @@ public interface WebReactiveConfigurer {
 	 * Configure the message readers to use for decoding the request body where
 	 * {@code @RequestBody} and {@code HttpEntity} controller method arguments
 	 * are used. If none are specified, default ones are added based on
-	 * {@link WebReactiveConfigurationSupport#addDefaultHttpMessageReaders}.
+	 * {@link WebFluxConfigurationSupport#addDefaultHttpMessageReaders}.
 	 * <p>See {@link #extendMessageReaders(List)} for adding readers
 	 * in addition to the default ones.
 	 * @param readers an empty list to add message readers to
@@ -136,7 +136,7 @@ public interface WebReactiveConfigurer {
 	 * Configure the message writers to use to encode the response body based on
 	 * the return values of {@code @ResponseBody}, and {@code ResponseEntity}
 	 * controller methods. If none are specified, default ones are added based on
-	 * {@link WebReactiveConfigurationSupport#addDefaultHttpMessageWriters(List)}.
+	 * {@link WebFluxConfigurationSupport#addDefaultHttpMessageWriters(List)}.
 	 * <p>See {@link #extendMessageWriters(List)} for adding writers
 	 * in addition to the default ones.
 	 * @param writers a empty list to add message writers to
