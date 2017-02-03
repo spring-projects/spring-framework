@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.http.codec.json;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +31,7 @@ import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.reactivestreams.Publisher;
+import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -55,13 +55,6 @@ import org.springframework.util.MimeType;
  * @see Jackson2JsonDecoder
  */
 public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Encoder<Object> {
-
-	private static final ByteBuffer START_ARRAY_BUFFER = ByteBuffer.wrap(new byte[]{'['});
-
-	private static final ByteBuffer SEPARATOR_BUFFER = ByteBuffer.wrap(new byte[]{','});
-
-	private static final ByteBuffer END_ARRAY_BUFFER = ByteBuffer.wrap(new byte[]{']'});
-
 
 	private final PrettyPrinter ssePrettyPrinter;
 
@@ -100,17 +93,15 @@ public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Encode
 		if (inputStream instanceof Mono) {
 			return Flux.from(inputStream).map(value -> encodeValue(value, bufferFactory, elementType, hints));
 		}
-
-		Mono<DataBuffer> startArray = Mono.just(bufferFactory.wrap(START_ARRAY_BUFFER));
-		Mono<DataBuffer> endArray = Mono.just(bufferFactory.wrap(END_ARRAY_BUFFER));
-
-		Flux<DataBuffer> array = Flux.from(inputStream)
-				.concatMap(value -> {
-					DataBuffer arraySeparator = bufferFactory.wrap(SEPARATOR_BUFFER);
-					return Flux.just(encodeValue(value, bufferFactory, elementType, hints), arraySeparator);
-				});
-
-		return Flux.concat(startArray, array.skipLast(1), endArray);
+		else if (APPLICATION_STREAM_JSON.isCompatibleWith(mimeType)) {
+			return Flux.from(inputStream).map(value -> {
+				DataBuffer buffer = encodeValue(value, bufferFactory, elementType, hints);
+				buffer.write(new byte[]{'\n'});
+				return buffer;
+			});
+		}
+		ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, elementType);
+		return Flux.from(inputStream).collectList().map(list -> encodeValue(list, bufferFactory, listType, hints)).flux();
 	}
 
 	private DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory,
@@ -131,7 +122,7 @@ public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Encode
 			writer = this.mapper.writer();
 		}
 
-		if (javaType != null && javaType.isContainerType()) {
+		if (javaType != null && (javaType.isContainerType()) ) {
 			writer = writer.forType(javaType);
 		}
 
