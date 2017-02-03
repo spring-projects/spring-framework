@@ -138,6 +138,18 @@ public class MediaType extends MimeType implements Serializable {
 	public final static String APPLICATION_RSS_XML_VALUE = "application/rss+xml";
 
 	/**
+	 * Public constant media type for {@code application/stream+json}.
+	 * @since 5.0
+	 */
+	public final static MediaType APPLICATION_STREAM_JSON;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_STREAM_JSON}.
+	 * @since 5.0
+	 */
+	public final static String APPLICATION_STREAM_JSON_VALUE = "application/stream+json";
+
+	/**
 	 * Public constant media type for {@code application/xhtml+xml}.
 	 */
 	public final static MediaType APPLICATION_XHTML_XML;
@@ -292,6 +304,7 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_PROBLEM_JSON = valueOf(APPLICATION_PROBLEM_JSON_VALUE);
 		APPLICATION_PROBLEM_XML = valueOf(APPLICATION_PROBLEM_XML_VALUE);
 		APPLICATION_RSS_XML = valueOf(APPLICATION_RSS_XML_VALUE);
+		APPLICATION_STREAM_JSON = valueOf(APPLICATION_STREAM_JSON_VALUE);
 		APPLICATION_XHTML_XML = valueOf(APPLICATION_XHTML_XML_VALUE);
 		APPLICATION_XML = valueOf(APPLICATION_XML_VALUE);
 		IMAGE_GIF = valueOf(IMAGE_GIF_VALUE);
