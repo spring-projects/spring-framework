@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.CaffeineSpec;
 
+import com.github.benmanes.caffeine.cache.Ticker;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.util.Assert;
@@ -63,6 +64,8 @@ public class CaffeineCacheManager implements CacheManager {
 	private CacheLoader<Object, Object> cacheLoader;
 
 	private boolean allowNullValues = true;
+
+	private Ticker ticker;
 
 
 	/**
@@ -189,6 +192,17 @@ public class CaffeineCacheManager implements CacheManager {
 	}
 
 	/**
+	 * Specify which caffeine ticker to use. This is useful for tests where you maybe
+	 * want to use a FakeTicker to advance the time programmatically
+	 * @see com.github.benmanes.caffeine.cache.Caffeine#ticker(Ticker)
+	 */
+	public void setTicker(Ticker ticker) {
+		Assert.notNull(ticker, "Ticker must not be null");
+		this.ticker = ticker;
+		refreshKnownCaches();
+	}
+
+	/**
 	 * Create a new CaffeineCache instance for the specified cache name.
 	 * @param name the name of the cache
 	 * @return the Spring CaffeineCache adapter (or a decorator thereof)
@@ -203,6 +217,10 @@ public class CaffeineCacheManager implements CacheManager {
 	 * @return the native Caffeine Cache instance
 	 */
 	protected com.github.benmanes.caffeine.cache.Cache<Object, Object> createNativeCaffeineCache(String name) {
+		if (ticker != null) {
+			this.cacheBuilder.ticker(ticker);
+		}
+
 		if (this.cacheLoader != null) {
 			return this.cacheBuilder.build(this.cacheLoader);
 		}

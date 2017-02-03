@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,14 @@ package org.springframework.cache.caffeine;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.CaffeineSpec;
+import com.github.benmanes.caffeine.cache.Ticker;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -199,9 +201,42 @@ public class CaffeineCacheManagerTests {
 		assertNull(cache1.get("foo"));
 	}
 
+	@Test
+	public void setTicker() {
+		CaffeineCacheManager cm = new CaffeineCacheManager("c1");
+		FakeTicker ticker = new FakeTicker();
+		cm.setTicker(ticker);
+
+		Caffeine<Object, Object> caffeine = Caffeine.newBuilder()
+				.expireAfterWrite(1, TimeUnit.MINUTES);
+		cm.setCaffeine(caffeine);
+
+		Cache cache = cm.getCache("c1");
+		cache.put("key1", "value1");
+		assertEquals("value1", cache.get("key1").get());
+
+		ticker.advance(30, TimeUnit.SECONDS);
+		assertEquals("value1", cache.get("key1").get());
+
+		ticker.advance(31, TimeUnit.SECONDS);
+		assertNull(cache.get("key1"));
+	}
+
 	@SuppressWarnings("unchecked")
 	private CacheLoader<Object, Object> mockCacheLoader() {
 		return mock(CacheLoader.class);
 	}
 
+
+	static class FakeTicker implements Ticker {
+		private long nanos;
+
+		public void advance(long time, TimeUnit timeUnit) {
+			nanos += timeUnit.toNanos(time);
+		}
+
+		public long read() {
+			return this.nanos;
+		}
+	}
 }
