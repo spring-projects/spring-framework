@@ -30,23 +30,23 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuild
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 
 /**
- * A subclass of {@code WebReactiveConfigurationSupport} that detects and delegates
- * to all beans of type {@link WebReactiveConfigurer} allowing them to customize the
- * configuration provided by {@code WebReactiveConfigurationSupport}. This is the
- * class actually imported by {@link EnableWebReactive @EnableWebReactive}.
+ * A subclass of {@code WebFluxConfigurationSupport} that detects and delegates
+ * to all beans of type {@link WebFluxConfigurer} allowing them to customize the
+ * configuration provided by {@code WebFluxConfigurationSupport}. This is the
+ * class actually imported by {@link EnableWebFlux @EnableWebFlux}.
  *
  * @author Brian Clozel
  * @since 5.0
  */
 @Configuration
-public class DelegatingWebReactiveConfiguration extends WebReactiveConfigurationSupport {
+public class DelegatingWebFluxConfiguration extends WebFluxConfigurationSupport {
 
-	private final WebReactiveConfigurerComposite configurers = new WebReactiveConfigurerComposite();
+	private final WebFluxConfigurerComposite configurers = new WebFluxConfigurerComposite();
 
 	@Autowired(required = false)
-	public void setConfigurers(List<WebReactiveConfigurer> configurers) {
+	public void setConfigurers(List<WebFluxConfigurer> configurers) {
 		if (!CollectionUtils.isEmpty(configurers)) {
-			this.configurers.addWebReactiveConfigurers(configurers);
+			this.configurers.addWebFluxConfigurers(configurers);
 		}
 	}
 

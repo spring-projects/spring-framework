@@ -167,6 +167,11 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		return new DefaultUriBuilder(uriTemplate);
 	}
 
+	@Override
+	public UriBuilder builder() {
+		return new DefaultUriBuilder("");
+	}
+
 
 	/**
 	 * {@link DefaultUriBuilderFactory} specific implementation of UriBuilder.
@@ -182,9 +187,11 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 		private UriComponentsBuilder initUriComponentsBuilder(String uriTemplate) {
 
-			UriComponentsBuilder result = baseUri.cloneBuilder();
-			UriComponents child = UriComponentsBuilder.fromUriString(uriTemplate).build();
-			result.uriComponents(child);
+			UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(uriTemplate);
+			UriComponents uriComponents = uriComponentsBuilder.build();
+
+			UriComponentsBuilder result = (uriComponents.getHost() == null ?
+					baseUri.cloneBuilder().uriComponents(uriComponents) : uriComponentsBuilder);
 
 			if (shouldParsePath()) {
 				UriComponents uric = result.build();

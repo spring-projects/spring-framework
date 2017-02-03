@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.jdbc.datasource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -111,6 +112,8 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 	private DataSource dataSource;
 
+	private boolean enforceReadOnly = false;
+
 
 	/**
 	 * Create a new DataSourceTransactionManager instance.
@@ -166,6 +169,38 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	 */
 	public DataSource getDataSource() {
 		return this.dataSource;
+	}
+
+	/**
+	 * Specify whether to enforce the read-only nature of a transaction
+	 * (as indicated by {@link TransactionDefinition#isReadOnly()}
+	 * through an explicit statement on the transactional connection:
+	 * "SET TRANSACTION READ ONLY" as understood by Oracle, MySQL and Postgres.
+	 * <p>The exact treatment, including any SQL statement executed on the connection,
+	 * can be customized through through {@link #prepareTransactionalConnection}.
+	 * <p>This mode of read-only handling goes beyond the {@link Connection#setReadOnly}
+	 * hint that Spring applies by default. In contrast to that standard JDBC hint,
+	 * "SET TRANSACTION READ ONLY" enforces an isolation-level-like connection mode
+	 * where data manipulation statements are strictly disallowed. Also, on Oracle,
+	 * this read-only mode provides read consistency for the entire transaction.
+	 * <p>Note that older Oracle JDBC drivers (9i, 10g) used to enforce this read-only
+	 * mode even for {@code Connection.setReadOnly(true}. However, with recent drivers,
+	 * this strong enforcement needs to be applied explicitly, e.g. through this flag.
+	 * @since 4.3.7
+	 * @see #prepareTransactionalConnection
+	 */
+	public void setEnforceReadOnly(boolean enforceReadOnly) {
+		this.enforceReadOnly = enforceReadOnly;
+	}
+
+	/**
+	 * Return whether to enforce the read-only nature of a transaction
+	 * through an explicit statement on the transactional connection.
+	 * @since 4.3.7
+	 * @see #setEnforceReadOnly
+	 */
+	public boolean isEnforceReadOnly() {
+		return this.enforceReadOnly;
 	}
 
 	@Override
@@ -231,6 +266,8 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 				}
 				con.setAutoCommit(false);
 			}
+
+			prepareTransactionalConnection(con, definition);
 			txObject.getConnectionHolder().setTransactionActive(true);
 
 			int timeout = determineTimeout(definition);
@@ -238,7 +275,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 				txObject.getConnectionHolder().setTimeoutInSeconds(timeout);
 			}
 
-			// Bind the session holder to the thread.
+			// Bind the connection holder to the thread.
 			if (txObject.isNewConnectionHolder()) {
 				TransactionSynchronizationManager.bindResource(getDataSource(), txObject.getConnectionHolder());
 			}
@@ -257,15 +294,12 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	protected Object doSuspend(Object transaction) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
 		txObject.setConnectionHolder(null);
-		ConnectionHolder conHolder = (ConnectionHolder)
-				TransactionSynchronizationManager.unbindResource(this.dataSource);
-		return conHolder;
+		return TransactionSynchronizationManager.unbindResource(this.dataSource);
 	}
 
 	@Override
 	protected void doResume(Object transaction, Object suspendedResources) {
-		ConnectionHolder conHolder = (ConnectionHolder) suspendedResources;
-		TransactionSynchronizationManager.bindResource(this.dataSource, conHolder);
+		TransactionSynchronizationManager.bindResource(this.dataSource, suspendedResources);
 	}
 
 	@Override
@@ -337,6 +371,35 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		}
 
 		txObject.getConnectionHolder().clear();
+	}
+
+
+	/**
+	 * Prepare the transactional {@code Connection} right after transaction begin.
+	 * <p>The default implementation executes a "SET TRANSACTION READ ONLY" statement
+	 * if the {@link #setEnforceReadOnly "enforceReadOnly"} flag is set to {@code true}
+	 * and the transaction definition indicates a read-only transaction.
+	 * <p>The "SET TRANSACTION READ ONLY" is understood by Oracle, MySQL and Postgres
+	 * and may work with other databases as well. If you'd like to adapt this treatment,
+	 * override this method accordingly.
+	 * @param con the transactional JDBC Connection
+	 * @param definition the current transaction definition
+	 * @throws SQLException if thrown by JDBC API
+	 * @since 4.3.7
+	 * @see #setEnforceReadOnly
+	 */
+	protected void prepareTransactionalConnection(Connection con, TransactionDefinition definition)
+			throws SQLException {
+
+		if (isEnforceReadOnly() && definition.isReadOnly()) {
+			Statement stmt = con.createStatement();
+			try {
+				stmt.executeUpdate("SET TRANSACTION READ ONLY");
+			}
+			finally {
+				stmt.close();
+			}
+		}
 	}
 
 

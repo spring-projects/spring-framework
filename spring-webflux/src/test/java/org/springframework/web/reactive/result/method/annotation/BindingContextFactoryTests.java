@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
-import org.springframework.web.reactive.config.WebReactiveConfigurationSupport;
+import org.springframework.web.reactive.config.WebFluxConfigurationSupport;
 import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -58,7 +58,7 @@ public class BindingContextFactoryTests {
 
 	@Before
 	public void setUp() throws Exception {
-		WebReactiveConfigurationSupport configurationSupport = new WebReactiveConfigurationSupport();
+		WebFluxConfigurationSupport configurationSupport = new WebFluxConfigurationSupport();
 		configurationSupport.setApplicationContext(new StaticApplicationContext());
 		RequestMappingHandlerAdapter adapter = configurationSupport.requestMappingHandlerAdapter();
 		adapter.afterPropertiesSet();

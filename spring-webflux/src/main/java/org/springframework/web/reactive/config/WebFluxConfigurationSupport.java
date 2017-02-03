@@ -90,16 +90,16 @@ import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class WebReactiveConfigurationSupport implements ApplicationContextAware {
+public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	private static final boolean jackson2Present =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					WebReactiveConfigurationSupport.class.getClassLoader()) &&
+					WebFluxConfigurationSupport.class.getClassLoader()) &&
 			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-					WebReactiveConfigurationSupport.class.getClassLoader());
+					WebFluxConfigurationSupport.class.getClassLoader());
 
 	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder", WebReactiveConfigurationSupport.class.getClassLoader());
+			ClassUtils.isPresent("javax.xml.bind.Binder", WebFluxConfigurationSupport.class.getClassLoader());
 
 
 	private Map<String, CorsConfiguration> corsConfigurations;
@@ -138,7 +138,7 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 	public RequestMappingHandlerMapping requestMappingHandlerMapping() {
 		RequestMappingHandlerMapping mapping = createRequestMappingHandlerMapping();
 		mapping.setOrder(0);
-		mapping.setContentTypeResolver(webReactiveContentTypeResolver());
+		mapping.setContentTypeResolver(webFluxContentTypeResolver());
 		mapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
@@ -169,7 +169,7 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 	}
 
 	@Bean
-	public CompositeContentTypeResolver webReactiveContentTypeResolver() {
+	public CompositeContentTypeResolver webFluxContentTypeResolver() {
 		RequestedContentTypeResolverBuilder builder = new RequestedContentTypeResolverBuilder();
 		builder.mediaTypes(getDefaultMediaTypeMappings());
 		configureContentTypeResolver(builder);
@@ -240,7 +240,7 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 	@Bean
 	public HandlerMapping resourceHandlerMapping() {
 		ResourceHandlerRegistry registry =
-				new ResourceHandlerRegistry(this.applicationContext, webReactiveContentTypeResolver());
+				new ResourceHandlerRegistry(this.applicationContext, webFluxContentTypeResolver());
 		addResourceHandlers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
@@ -271,7 +271,7 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 		RequestMappingHandlerAdapter adapter = createRequestMappingHandlerAdapter();
 		adapter.setMessageReaders(getMessageReaders());
 		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
-		adapter.setReactiveAdapterRegistry(webReactiveAdapterRegistry());
+		adapter.setReactiveAdapterRegistry(webFluxAdapterRegistry());
 
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 		addArgumentResolvers(resolvers);
@@ -357,14 +357,14 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 	 */
 	protected ConfigurableWebBindingInitializer getConfigurableWebBindingInitializer() {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
-		initializer.setConversionService(webReactiveConversionService());
-		initializer.setValidator(webReactiveValidator());
+		initializer.setConversionService(webFluxConversionService());
+		initializer.setValidator(webFluxValidator());
 		initializer.setMessageCodesResolver(getMessageCodesResolver());
 		return initializer;
 	}
 
 	@Bean
-	public FormattingConversionService webReactiveConversionService() {
+	public FormattingConversionService webFluxConversionService() {
 		FormattingConversionService service = new DefaultFormattingConversionService();
 		addFormatters(service);
 		return service;
@@ -380,7 +380,7 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 	 * Return a {@link ReactiveAdapterRegistry} to adapting reactive types.
 	 */
 	@Bean
-	public ReactiveAdapterRegistry webReactiveAdapterRegistry() {
+	public ReactiveAdapterRegistry webFluxAdapterRegistry() {
 		return new ReactiveAdapterRegistry();
 	}
 
@@ -393,7 +393,7 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 	 * implementation is not available, a "no-op" {@link Validator} is returned.
 	 */
 	@Bean
-	public Validator webReactiveValidator() {
+	public Validator webFluxValidator() {
 		Validator validator = getValidator();
 		if (validator == null) {
 			if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
@@ -439,13 +439,13 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 	@Bean
 	public ResponseEntityResultHandler responseEntityResultHandler() {
 		return new ResponseEntityResultHandler(
-				getMessageWriters(), webReactiveContentTypeResolver(), webReactiveAdapterRegistry());
+				getMessageWriters(), webFluxContentTypeResolver(), webFluxAdapterRegistry());
 	}
 
 	@Bean
 	public ResponseBodyResultHandler responseBodyResultHandler() {
 		return new ResponseBodyResultHandler(
-				getMessageWriters(), webReactiveContentTypeResolver(), webReactiveAdapterRegistry());
+				getMessageWriters(), webFluxContentTypeResolver(), webFluxAdapterRegistry());
 	}
 
 	/**
@@ -512,7 +512,7 @@ public class WebReactiveConfigurationSupport implements ApplicationContextAware 
 		configureViewResolvers(registry);
 		List<ViewResolver> resolvers = registry.getViewResolvers();
 		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(
-				resolvers, webReactiveContentTypeResolver(), webReactiveAdapterRegistry());
+				resolvers, webFluxContentTypeResolver(), webFluxAdapterRegistry());
 		handler.setDefaultViews(registry.getDefaultViews());
 		handler.setOrder(registry.getOrder());
 		return handler;

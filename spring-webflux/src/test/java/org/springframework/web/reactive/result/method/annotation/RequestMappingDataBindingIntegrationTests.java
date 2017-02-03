@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.config.EnableWebReactive;
+import org.springframework.web.reactive.config.EnableWebFlux;
 
 import static org.junit.Assert.assertEquals;
 
@@ -83,7 +83,7 @@ public class RequestMappingDataBindingIntegrationTests extends AbstractRequestMa
 
 
 	@Configuration
-	@EnableWebReactive
+	@EnableWebFlux
 	@ComponentScan(resourcePattern = "**/RequestMappingDataBindingIntegrationTests*.class")
 	@SuppressWarnings({"unused", "WeakerAccess"})
 	static class WebConfig {

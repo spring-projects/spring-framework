@@ -30,14 +30,18 @@ package org.springframework.web.util;
 public interface UriBuilderFactory extends UriTemplateHandler {
 
 	/**
-	 * Return a builder that is initialized with the given URI string which may
-	 * be a URI template and represent full URI or just a path.
-	 * <p>Depending on the factory implementation and configuration, the builder
-	 * may merge the given URI string with a base URI and apply other operations.
-	 * Refer to the specific factory implementation for details.
-	 * @param uriTemplate the URI template to create the builder with
+	 * Return a builder initialized with the given URI string.
+	 * <p>Concrete implementations may apply further initializations such as
+	 * combining with a pre-configured base URI.
+	 * @param uriTemplate the URI template to initialize the builder with
 	 * @return the UriBuilder
 	 */
 	UriBuilder uriString(String uriTemplate);
+
+	/**
+	 * Return a builder to prepare a new URI.
+	 * @return the UriBuilder
+	 */
+	UriBuilder builder();
 
 }

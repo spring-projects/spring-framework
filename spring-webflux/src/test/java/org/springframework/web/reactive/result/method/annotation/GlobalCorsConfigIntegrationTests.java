@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.config.CorsRegistry;
-import org.springframework.web.reactive.config.WebReactiveConfigurationSupport;
+import org.springframework.web.reactive.config.WebFluxConfigurationSupport;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -137,7 +137,7 @@ public class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingInte
 	@Configuration
 	@ComponentScan(resourcePattern = "**/GlobalCorsConfigIntegrationTests*.class")
 	@SuppressWarnings({"unused", "WeakerAccess"})
-	static class WebConfig extends WebReactiveConfigurationSupport {
+	static class WebConfig extends WebFluxConfigurationSupport {
 
 		@Override
 		protected void addCorsMappings(CorsRegistry registry) {

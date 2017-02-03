@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ public class ServletRequestMethodArgumentResolverTests {
 
 	private MockHttpServletRequest servletRequest;
 
+
 	@Before
 	public void setUp() throws Exception {
 		method = getClass().getMethod("supportedParams", ServletRequest.class, MultipartRequest.class,
@@ -69,6 +70,7 @@ public class ServletRequestMethodArgumentResolverTests {
 		servletRequest = new MockHttpServletRequest("GET", "");
 		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
 	}
+
 
 	@Test
 	public void servletRequest() throws Exception {

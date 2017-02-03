@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,7 +154,7 @@ public abstract class DataSourceUtils {
 				}
 				con.setReadOnly(true);
 			}
-			catch (SQLException ex) {
+			catch (SQLException | RuntimeException ex) {
 				Throwable exToCheck = ex;
 				while (exToCheck != null) {
 					if (exToCheck.getClass().getSimpleName().contains("Timeout")) {
@@ -164,18 +164,6 @@ public abstract class DataSourceUtils {
 					exToCheck = exToCheck.getCause();
 				}
 				// "read-only not supported" SQLException -> ignore, it's just a hint anyway
-				logger.debug("Could not set JDBC Connection read-only", ex);
-			}
-			catch (RuntimeException ex) {
-				Throwable exToCheck = ex;
-				while (exToCheck != null) {
-					if (exToCheck.getClass().getSimpleName().contains("Timeout")) {
-						// Assume it's a connection timeout that would otherwise get lost: e.g. from Hibernate
-						throw ex;
-					}
-					exToCheck = exToCheck.getCause();
-				}
-				// "read-only not supported" UnsupportedOperationException -> ignore, it's just a hint anyway
 				logger.debug("Could not set JDBC Connection read-only", ex);
 			}
 		}

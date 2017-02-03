@@ -33,7 +33,7 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.DispatcherHandler;
-import org.springframework.web.reactive.config.EnableWebReactive;
+import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
@@ -181,7 +181,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	}
 
 	@Configuration
-	@EnableWebReactive
+	@EnableWebFlux
 	@SuppressWarnings("unused")
 	static class TestConfiguration {
 

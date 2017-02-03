@@ -41,7 +41,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.reactive.config.WebReactiveConfigurationSupport;
+import org.springframework.web.reactive.config.WebFluxConfigurationSupport;
 import org.springframework.web.reactive.function.server.support.HandlerFunctionAdapter;
 import org.springframework.web.reactive.function.server.support.ServerResponseResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolver;
@@ -105,7 +105,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 	
 
 	@Configuration
-	static class TestConfiguration extends WebReactiveConfigurationSupport {
+	static class TestConfiguration extends WebFluxConfigurationSupport {
 
 		@Bean
 		public PersonHandler personHandler() {

@@ -22,6 +22,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +38,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
 
@@ -144,8 +146,13 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public HeaderSpec uri(Function<UriBuilderFactory, URI> uriFunction) {
-			return uri(uriFunction.apply(getUriBuilderFactory()));
+		public HeaderSpec uri(String uriTemplate, Map<String, ?> uriVariables) {
+			return uri(getUriBuilderFactory().expand(uriTemplate, uriVariables));
+		}
+
+		@Override
+		public HeaderSpec uri(Function<UriBuilder, URI> uriFunction) {
+			return uri(uriFunction.apply(getUriBuilderFactory().builder()));
 		}
 
 		@Override

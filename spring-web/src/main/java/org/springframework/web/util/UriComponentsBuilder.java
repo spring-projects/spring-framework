@@ -239,8 +239,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * be parsed unambiguously. Such values should be substituted for URI
 	 * variables to enable correct parsing:
 	 * <pre class="code">
-	 * String uriString = &quot;/hotels/42?filter={value}&quot;;
-	 * UriComponentsBuilder.fromUriString(uriString).buildAndExpand(&quot;hot&amp;cold&quot;);
+	 * String urlString = &quot;https://example.com/hotels/42?filter={value}&quot;;
+	 * UriComponentsBuilder.fromHttpUrl(urlString).buildAndExpand(&quot;hot&amp;cold&quot;);
 	 * </pre>
 	 * @param httpUrl the source URI
 	 * @return the URI components of the URI
