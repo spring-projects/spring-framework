@@ -82,7 +82,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		StepVerifier.create(result)
 				.expectNext("foo 0")
 				.expectNext("foo 1")
-				.expectComplete()
+				.thenCancel()
 				.verify(Duration.ofSeconds(5L));
 	}
 	@Test
@@ -96,7 +96,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		StepVerifier.create(result)
 				.expectNext(new Person("foo 0"))
 				.expectNext(new Person("foo 1"))
-				.expectComplete()
+				.thenCancel()
 				.verify(Duration.ofSeconds(5L));
 	}
 
@@ -124,7 +124,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 					assertFalse(event.event().isPresent());
 					assertFalse(event.retry().isPresent());
 				})
-				.expectComplete()
+				.thenCancel()
 				.verify(Duration.ofSeconds(5L));
 	}
 
@@ -152,7 +152,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 					assertFalse(event.event().isPresent());
 					assertFalse(event.retry().isPresent());
 				})
-				.expectComplete()
+				.thenCancel()
 				.verify(Duration.ofSeconds(5L));
 	}
 
@@ -162,12 +162,12 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 		@RequestMapping("/sse/string")
 		Flux<String> string() {
-			return Flux.interval(Duration.ofMillis(100)).map(l -> "foo " + l).take(2);
+			return Flux.interval(Duration.ofMillis(100)).map(l -> "foo " + l);
 		}
 
 		@RequestMapping("/sse/person")
 		Flux<Person> person() {
-			return Flux.interval(Duration.ofMillis(100)).map(l -> new Person("foo " + l)).take(2);
+			return Flux.interval(Duration.ofMillis(100)).map(l -> new Person("foo " + l));
 		}
 
 		@RequestMapping("/sse/event")
@@ -175,7 +175,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 			return Flux.interval(Duration.ofMillis(100)).map(l -> ServerSentEvent.builder("foo")
 					.id(Long.toString(l))
 					.comment("bar")
-					.build()).take(2);
+					.build());
 		}
 
 	}
