@@ -19,7 +19,6 @@ package org.springframework.http.server.reactive;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 
@@ -65,23 +64,10 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 	private static URI initUri(HttpServerExchange exchange) {
 		Assert.notNull(exchange, "HttpServerExchange is required.");
-		String requestURI = exchange.getRequestURI();
+		String requestURL = exchange.getRequestURL();
 		String query = exchange.getQueryString();
-		String requestUriAndQuery = StringUtils.isEmpty(query) ? requestURI : requestURI + "?" + query;
-		return (exchange.isHostIncludedInRequestURI()) ?
-				URI.create(requestUriAndQuery) : getBaseUri(exchange).resolve(requestUriAndQuery);
-	}
-
-	private static URI getBaseUri(HttpServerExchange exchange) {
-		try {
-			String scheme = exchange.getRequestScheme();
-			String host = exchange.getHostName();
-			int port = exchange.getHostPort();
-			return new URI(scheme, null, host, port, null, null, null);
-		}
-		catch (URISyntaxException ex) {
-			throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
-		}
+		String requestUriAndQuery = StringUtils.isEmpty(query) ? requestURL : requestURL + "?" + query;
+		return URI.create(requestUriAndQuery);
 	}
 
 	private static HttpHeaders initHeaders(HttpServerExchange exchange) {
