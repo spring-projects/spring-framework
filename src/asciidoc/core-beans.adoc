@@ -5861,6 +5861,54 @@ metadata is provided per-instance rather than per-class.
 
 
 
+[[beans-scanning-index]]
+=== Generating a index of candidate components
+Rather than scanning the classpath to find components, it is also possible to generate an
+index at compilation time. When the `ApplicationContext` detects such index it will
+automatically use it rather than scanning the classpath. This can reduce the time required
+to refresh the `ApplicationContext` as scanning large applications can take a significant
+amount of time.
+
+To generate the index, simply add an additional dependency to each module that contains
+components that are target for component scan directives:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-indexer</artifactId>
+			<version>{spring-version}</version>
+			<optional>true</optional>
+		</dependency>
+	</dependencies>
+----
+
+Or, using Gradle:
+
+[source,groovy,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	dependencies {
+		compileOnly("org.springframework:spring-context-indexed:{spring-version}")
+	}
+----
+
+That process will generate a `META-INF/spring.components` file that is going to be
+included in the jar.
+
+[TIP]
+====
+The index is enabled automatically when a `META-INF/spring.components` is found on the
+classpath. If an index is partially available for some libraries (or use cases) but
+couldn't be built for the whole application, you can fallback to a regular classpath
+arrangement (i.e. as no index was present at all) by setting `spring.index.ignore` to
+`true`, either as a system property or in a `spring.properties` file at the root of the
+classpath.
+====
+
+
 
 [[beans-standard-annotations]]
 == Using JSR 330 Standard Annotations
