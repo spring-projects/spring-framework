@@ -62,7 +62,8 @@ public class JCacheErrorHandlerTests {
 
 	@Before
 	public void setup() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
+		AnnotationConfigApplicationContext context =
+				new AnnotationConfigApplicationContext(Config.class);
 		this.cache = context.getBean("mockCache", Cache.class);
 		this.errorCache = context.getBean("mockErrorCache", Cache.class);
 		this.errorHandler = context.getBean(CacheErrorHandler.class);
@@ -71,17 +72,19 @@ public class JCacheErrorHandlerTests {
 
 	@Test
 	public void getFail() {
-		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on get");
+		UnsupportedOperationException exception =
+				new UnsupportedOperationException("Test exception on get");
 		Object key = SimpleKeyGenerator.generateKey(0L);
-		willThrow(exception).given(cache).get(key);
+		willThrow(exception).given(this.cache).get(key);
 
 		this.simpleService.get(0L);
-		verify(errorHandler).handleCacheGetError(exception, cache, key);
+		verify(this.errorHandler).handleCacheGetError(exception, this.cache, key);
 	}
 
 	@Test
 	public void getPutNewElementFail() {
-		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on put");
+		UnsupportedOperationException exception =
+				new UnsupportedOperationException("Test exception on put");
 		Object key = SimpleKeyGenerator.generateKey(0L);
 		given(this.cache.get(key)).willReturn(null);
 		willThrow(exception).given(this.cache).put(key, 0L);
@@ -92,7 +95,8 @@ public class JCacheErrorHandlerTests {
 
 	@Test
 	public void getFailPutExceptionFail() {
-		UnsupportedOperationException exceptionOnPut = new UnsupportedOperationException("Test exception on put");
+		UnsupportedOperationException exceptionOnPut =
+				new UnsupportedOperationException("Test exception on put");
 		Object key = SimpleKeyGenerator.generateKey(0L);
 		given(this.cache.get(key)).willReturn(null);
 		willThrow(exceptionOnPut).given(this.errorCache).put(key,
@@ -110,31 +114,34 @@ public class JCacheErrorHandlerTests {
 
 	@Test
 	public void putFail() {
-		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on put");
+		UnsupportedOperationException exception =
+				new UnsupportedOperationException("Test exception on put");
 		Object key = SimpleKeyGenerator.generateKey(0L);
-		willThrow(exception).given(cache).put(key, 234L);
+		willThrow(exception).given(this.cache).put(key, 234L);
 
 		this.simpleService.put(0L, 234L);
-		verify(errorHandler).handleCachePutError(exception, cache, key, 234L);
+		verify(this.errorHandler).handleCachePutError(exception, this.cache, key, 234L);
 	}
 
 	@Test
 	public void evictFail() {
-		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on evict");
+		UnsupportedOperationException exception =
+				new UnsupportedOperationException("Test exception on evict");
 		Object key = SimpleKeyGenerator.generateKey(0L);
-		willThrow(exception).given(cache).evict(key);
+		willThrow(exception).given(this.cache).evict(key);
 
 		this.simpleService.evict(0L);
-		verify(errorHandler).handleCacheEvictError(exception, cache, key);
+		verify(this.errorHandler).handleCacheEvictError(exception, this.cache, key);
 	}
 
 	@Test
 	public void clearFail() {
-		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on evict");
-		willThrow(exception).given(cache).clear();
+		UnsupportedOperationException exception =
+				new UnsupportedOperationException("Test exception on evict");
+		willThrow(exception).given(this.cache).clear();
 
 		this.simpleService.clear();
-		verify(errorHandler).handleCacheClearError(exception, cache);
+		verify(this.errorHandler).handleCacheClearError(exception, this.cache);
 	}
 
 
@@ -187,7 +194,7 @@ public class JCacheErrorHandlerTests {
 
 		@CacheResult
 		public Object get(long id) {
-			return counter.getAndIncrement();
+			return this.counter.getAndIncrement();
 		}
 
 		@CacheResult(exceptionCacheName = "error")
