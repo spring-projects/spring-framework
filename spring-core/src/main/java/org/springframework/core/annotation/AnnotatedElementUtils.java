@@ -947,9 +947,10 @@ public class AnnotatedElementUtils {
 
 		// Search in annotations
 		for (Annotation annotation : annotations) {
-			if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
-				if (annotation.annotationType() == annotationType ||
-						annotation.annotationType().getName().equals(annotationName) ||
+			Class<? extends Annotation> currentAnnotationType = annotation.annotationType();
+			if (!AnnotationUtils.isInJavaLangAnnotationPackage(currentAnnotationType.getName())) {
+				if (currentAnnotationType == annotationType ||
+						currentAnnotationType.getName().equals(annotationName) ||
 						processor.alwaysProcesses()) {
 					T result = processor.process(element, annotation, metaDepth);
 					if (result != null) {
@@ -962,7 +963,7 @@ public class AnnotatedElementUtils {
 					}
 				}
 				// Repeatable annotations in container?
-				else if (annotation.annotationType() == containerType) {
+				else if (currentAnnotationType == containerType) {
 					for (Annotation contained : getRawAnnotationsFromContainer(element, annotation)) {
 						T result = processor.process(element, contained, metaDepth);
 						if (result != null) {
@@ -977,8 +978,9 @@ public class AnnotatedElementUtils {
 
 		// Recursively search in meta-annotations
 		for (Annotation annotation : annotations) {
-			if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
-				T result = searchWithGetSemantics(annotation.annotationType(), annotationType,
+			Class<? extends Annotation> currentAnnotationType = annotation.annotationType();
+			if (!AnnotationUtils.isInJavaLangAnnotationPackage(currentAnnotationType.getName())) {
+				T result = searchWithGetSemantics(currentAnnotationType, annotationType,
 						annotationName, containerType, processor, visited, metaDepth + 1);
 				if (result != null) {
 					processor.postProcess(element, annotation, result);
@@ -1077,9 +1079,10 @@ public class AnnotatedElementUtils {
 
 				// Search in local annotations
 				for (Annotation annotation : annotations) {
-					if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
-						if (annotation.annotationType() == annotationType
-								|| annotation.annotationType().getName().equals(annotationName)
+					Class<? extends Annotation> currentAnnotationType = annotation.annotationType();
+					if (!AnnotationUtils.isInJavaLangAnnotationPackage(currentAnnotationType.getName())) {
+						if (currentAnnotationType == annotationType
+								|| currentAnnotationType.getName().equals(annotationName)
 								|| processor.alwaysProcesses()) {
 
 							T result = processor.process(element, annotation, metaDepth);
@@ -1093,7 +1096,7 @@ public class AnnotatedElementUtils {
 							}
 						}
 						// Repeatable annotations in container?
-						else if (annotation.annotationType() == containerType) {
+						else if (currentAnnotationType == containerType) {
 							for (Annotation contained : getRawAnnotationsFromContainer(element, annotation)) {
 								T result = processor.process(element, contained, metaDepth);
 								if (result != null) {
@@ -1108,11 +1111,12 @@ public class AnnotatedElementUtils {
 
 				// Search in meta annotations on local annotations
 				for (Annotation annotation : annotations) {
-					if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
-						T result = searchWithFindSemantics(annotation.annotationType(), annotationType, annotationName,
+					Class<? extends Annotation> currentAnnotationType = annotation.annotationType();
+					if (!AnnotationUtils.isInJavaLangAnnotationPackage(currentAnnotationType.getName())) {
+						T result = searchWithFindSemantics(currentAnnotationType, annotationType, annotationName,
 								containerType, processor, visited, metaDepth + 1);
 						if (result != null) {
-							processor.postProcess(annotation.annotationType(), annotation, result);
+							processor.postProcess(currentAnnotationType, annotation, result);
 							if (processor.aggregates() && metaDepth == 0) {
 								aggregatedResults.add(result);
 							}
