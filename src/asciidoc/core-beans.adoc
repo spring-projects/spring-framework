@@ -370,7 +370,7 @@ delegates, e.g. with `XmlBeanDefinitionReader` for XML files:
 [subs="verbatim,quotes"]
 ----
 	GenericApplicationContext context = new GenericApplicationContext();
-	new XmlBeanDefinitionReader(ctx).loadBeanDefinitions("services.xml", "daos.xml");
+	new XmlBeanDefinitionReader(context).loadBeanDefinitions("services.xml", "daos.xml");
     context.refresh();
 ----
 
@@ -380,7 +380,7 @@ Or with `GroovyBeanDefinitionReader` for Groovy files:
 [subs="verbatim,quotes"]
 ----
 	GenericApplicationContext context = new GenericApplicationContext();
-	new GroovyBeanDefinitionReader(ctx).loadBeanDefinitions("services.groovy", "daos.groovy");
+	new GroovyBeanDefinitionReader(context).loadBeanDefinitions("services.groovy", "daos.groovy");
     context.refresh();
 ----
 
