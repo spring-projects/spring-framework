@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,12 +69,6 @@ public class Ternary extends SpelNodeImpl {
 			String leftDescriptor = this.children[1].exitTypeDescriptor;
 			String rightDescriptor = this.children[2].exitTypeDescriptor;
 			if (leftDescriptor.equals(rightDescriptor)) {
-				this.exitTypeDescriptor = leftDescriptor;
-			}
-			else if (leftDescriptor.equals("Ljava/lang/Object") && !CodeFlow.isPrimitive(rightDescriptor)) {
-				this.exitTypeDescriptor = rightDescriptor;
-			}
-			else if (rightDescriptor.equals("Ljava/lang/Object") && !CodeFlow.isPrimitive(leftDescriptor)) {
 				this.exitTypeDescriptor = leftDescriptor;
 			}
 			else {

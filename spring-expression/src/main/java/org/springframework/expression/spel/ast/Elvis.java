@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ public class Elvis extends SpelNodeImpl {
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		TypedValue value = this.children[0].getValueInternal(state);
+		// If this check is changed, the generateCode method will need changing too
 		if (!StringUtils.isEmpty(value.getValue())) {
 			return value;
 		}
@@ -77,11 +78,17 @@ public class Elvis extends SpelNodeImpl {
 		// exit type descriptor can be null if both components are literal expressions
 		computeExitTypeDescriptor();
 		this.children[0].generateCode(mv, cf);
+		CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor().charAt(0));
 		Label elseTarget = new Label();
 		Label endOfIf = new Label();
 		mv.visitInsn(DUP);
 		mv.visitJumpInsn(IFNULL, elseTarget);
-		mv.visitJumpInsn(GOTO, endOfIf);
+		// Also check if empty string, as per the code in the interpreted version
+		mv.visitInsn(DUP);
+		mv.visitLdcInsn("");
+		mv.visitInsn(SWAP);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "equals", "(Ljava/lang/Object;)Z",false);
+		mv.visitJumpInsn(IFEQ, endOfIf); // If not empty, drop through to elseTarget
 		mv.visitLabel(elseTarget);
 		mv.visitInsn(POP);
 		this.children[1].generateCode(mv, cf);
@@ -98,12 +105,6 @@ public class Elvis extends SpelNodeImpl {
 			String conditionDescriptor = this.children[0].exitTypeDescriptor;
 			String ifNullValueDescriptor = this.children[1].exitTypeDescriptor;
 			if (conditionDescriptor.equals(ifNullValueDescriptor)) {
-				this.exitTypeDescriptor = conditionDescriptor;
-			}
-			else if (conditionDescriptor.equals("Ljava/lang/Object") && !CodeFlow.isPrimitive(ifNullValueDescriptor)) {
-				this.exitTypeDescriptor = ifNullValueDescriptor;
-			}
-			else if (ifNullValueDescriptor.equals("Ljava/lang/Object") && !CodeFlow.isPrimitive(conditionDescriptor)) {
 				this.exitTypeDescriptor = conditionDescriptor;
 			}
 			else {
