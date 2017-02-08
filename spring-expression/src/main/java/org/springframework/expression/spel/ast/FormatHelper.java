@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,23 +62,7 @@ public class FormatHelper {
 		if (clazz == null) {
 			return "null";
 		}
-		if (clazz.isArray()) {
-			StringBuilder sb = new StringBuilder();
-			int dims = 1;
-			Class<?> baseClass = clazz.getComponentType();
-			while (baseClass.isArray()) {
-				baseClass = baseClass.getComponentType();
-				dims++;
-			}
-			sb.append(baseClass.getName());
-			for (int i = 0; i < dims; i++) {
-				sb.append("[]");
-			}
-			return sb.toString();
-		}
-		else {
-			return clazz.getName();
-		}
+		return clazz.getTypeName();
 	}
 
 }
