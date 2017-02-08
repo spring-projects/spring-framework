@@ -19,11 +19,12 @@ package org.springframework.web.cors;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
-import org.springframework.web.util.ParsingPathMatcher;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -40,7 +41,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 
 	private final Map<String, CorsConfiguration> corsConfigurations = new LinkedHashMap<>();
 
-	private PathMatcher pathMatcher = new ParsingPathMatcher();
+	private PathMatcher pathMatcher = new AntPathMatcher();
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 

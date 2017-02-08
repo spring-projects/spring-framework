@@ -20,17 +20,18 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.CacheControl;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.WebContentGenerator;
-import org.springframework.web.util.ParsingPathMatcher;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -52,7 +53,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
-	private PathMatcher pathMatcher = new ParsingPathMatcher();
+	private PathMatcher pathMatcher = new AntPathMatcher();
 
 	private Map<String, Integer> cacheMappings = new HashMap<>();
 

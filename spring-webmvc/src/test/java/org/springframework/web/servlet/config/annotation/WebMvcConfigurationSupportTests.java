@@ -18,6 +18,7 @@ package org.springframework.web.servlet.config.annotation;
 
 import java.util.List;
 import java.util.Locale;
+
 import javax.servlet.http.HttpServletRequest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -83,7 +84,6 @@ import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInter
 import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.ViewResolverComposite;
-import org.springframework.web.util.ParsingPathMatcher;
 import org.springframework.web.util.UrlPathHelper;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
@@ -321,7 +321,7 @@ public class WebMvcConfigurationSupportTests {
 
 		assertNotNull(urlPathHelper);
 		assertNotNull(pathMatcher);
-		assertEquals(ParsingPathMatcher.class, pathMatcher.getClass());
+		assertEquals(AntPathMatcher.class, pathMatcher.getClass());
 	}
 
 	private ApplicationContext initContext(Class<?>... configClasses) {
