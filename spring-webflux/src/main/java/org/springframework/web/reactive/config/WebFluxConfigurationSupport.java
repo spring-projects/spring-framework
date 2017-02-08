@@ -151,9 +151,6 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		if (configurer.isUseTrailingSlashMatch() != null) {
 			mapping.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
 		}
-		if (configurer.getPathMatcher() != null) {
-			mapping.setPathMatcher(configurer.getPathMatcher());
-		}
 		if (configurer.getPathHelper() != null) {
 			mapping.setPathHelper(configurer.getPathHelper());
 		}
@@ -246,9 +243,6 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
 		if (handlerMapping != null) {
 			PathMatchConfigurer pathMatchConfigurer = getPathMatchConfigurer();
-			if (pathMatchConfigurer.getPathMatcher() != null) {
-				handlerMapping.setPathMatcher(pathMatchConfigurer.getPathMatcher());
-			}
 			if (pathMatchConfigurer.getPathHelper() != null) {
 				handlerMapping.setPathHelper(pathMatchConfigurer.getPathHelper());
 			}

@@ -105,6 +105,7 @@ public class PathMatchConfigurer {
 		return this.pathHelper;
 	}
 
+	//TODO: remove
 	protected PathMatcher getPathMatcher() {
 		return this.pathMatcher;
 	}

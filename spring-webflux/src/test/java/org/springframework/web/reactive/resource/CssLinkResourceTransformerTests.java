@@ -39,6 +39,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.util.patterns.PathPatternParser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -58,7 +59,8 @@ public class CssLinkResourceTransformerTests {
 		ResourceWebHandler resourceHandler = new ResourceWebHandler();
 
 		ResourceUrlProvider resourceUrlProvider = new ResourceUrlProvider();
-		resourceUrlProvider.setHandlerMap(Collections.singletonMap("/static/**", resourceHandler));
+		PathPatternParser parser = new PathPatternParser();
+		resourceUrlProvider.setHandlerMap(Collections.singletonMap(parser.parse("/static/**"), resourceHandler));
 
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));

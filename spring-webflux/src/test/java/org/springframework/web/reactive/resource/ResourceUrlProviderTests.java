@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
+import org.springframework.web.util.patterns.PathPattern;
+import org.springframework.web.util.patterns.PathPatternParser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -55,7 +57,7 @@ public class ResourceUrlProviderTests {
 
 	private final ResourceWebHandler handler = new ResourceWebHandler();
 
-	private final Map<String, ResourceWebHandler> handlerMap = new HashMap<>();
+	private final Map<PathPattern, ResourceWebHandler> handlerMap = new HashMap<>();
 
 	private final ResourceUrlProvider urlProvider = new ResourceUrlProvider();
 
@@ -66,7 +68,8 @@ public class ResourceUrlProviderTests {
 		this.locations.add(new ClassPathResource("testalternatepath/", getClass()));
 		this.handler.setLocations(locations);
 		this.handler.afterPropertiesSet();
-		this.handlerMap.put("/resources/**", this.handler);
+		PathPattern staticResources = new PathPatternParser().parse("/resources/**");
+		this.handlerMap.put(staticResources, this.handler);
 		this.urlProvider.setHandlerMap(this.handlerMap);
 	}
 
@@ -122,7 +125,8 @@ public class ResourceUrlProviderTests {
 		resolvers.add(new PathResourceResolver());
 		otherHandler.setResourceResolvers(resolvers);
 
-		this.handlerMap.put("/resources/*.css", otherHandler);
+		PathPattern staticResources = new PathPatternParser().parse("/resources/*.css");
+		this.handlerMap.put(staticResources, otherHandler);
 		this.urlProvider.setHandlerMap(this.handlerMap);
 
 		String url = this.urlProvider.getForLookupPath("/resources/foo.css").blockMillis(5000);
@@ -137,7 +141,8 @@ public class ResourceUrlProviderTests {
 		context.refresh();
 
 		ResourceUrlProvider urlProviderBean = context.getBean(ResourceUrlProvider.class);
-		assertThat(urlProviderBean.getHandlerMap(), Matchers.hasKey("/resources/**"));
+		assertThat(urlProviderBean.getHandlerMap(),
+				Matchers.hasKey(new PathPatternParser().parse("/resources/**")));
 		assertFalse(urlProviderBean.isAutodetect());
 	}
 

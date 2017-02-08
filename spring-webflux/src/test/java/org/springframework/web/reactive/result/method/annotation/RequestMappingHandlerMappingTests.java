@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.stream.Collectors;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,12 +45,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.reactive.accept.MappingContentTypeResolver;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
+import org.springframework.web.util.patterns.PathPattern;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -71,12 +77,14 @@ public class RequestMappingHandlerMappingTests {
 
 	@Test
 	public void useRegisteredSuffixPatternMatch() {
-		assertTrue(this.handlerMapping.useSuffixPatternMatch());
-		assertTrue(this.handlerMapping.useRegisteredSuffixPatternMatch());
+		assertFalse(this.handlerMapping.useSuffixPatternMatch());
+		assertFalse(this.handlerMapping.useRegisteredSuffixPatternMatch());
 
 		MappingContentTypeResolver contentTypeResolver = mock(MappingContentTypeResolver.class);
 		when(contentTypeResolver.getKeys()).thenReturn(Collections.singleton("json"));
 
+		this.handlerMapping.setUseSuffixPatternMatch(true);
+		this.handlerMapping.setUseRegisteredSuffixPatternMatch(true);
 		this.handlerMapping.setContentTypeResolver(contentTypeResolver);
 		this.handlerMapping.afterPropertiesSet();
 
@@ -111,15 +119,8 @@ public class RequestMappingHandlerMappingTests {
 
 	@Test
 	public void useSuffixPatternMatch() {
-		assertTrue(this.handlerMapping.useSuffixPatternMatch());
-		assertTrue(this.handlerMapping.useRegisteredSuffixPatternMatch());
-
-		this.handlerMapping.setUseSuffixPatternMatch(false);
 		assertFalse(this.handlerMapping.useSuffixPatternMatch());
-
-		this.handlerMapping.setUseRegisteredSuffixPatternMatch(false);
-		assertFalse("'false' registeredSuffixPatternMatch shouldn't impact suffixPatternMatch",
-				this.handlerMapping.useSuffixPatternMatch());
+		assertFalse(this.handlerMapping.useRegisteredSuffixPatternMatch());
 
 		this.handlerMapping.setUseRegisteredSuffixPatternMatch(true);
 		assertTrue("'true' registeredSuffixPatternMatch should enable suffixPatternMatch",
@@ -197,9 +198,10 @@ public class RequestMappingHandlerMappingTests {
 
 		assertNotNull(info);
 
-		Set<String> paths = info.getPatternsCondition().getPatterns();
-		assertEquals(1, paths.size());
-		assertEquals(path, paths.iterator().next());
+		Set<String> paths = info.getPatternsCondition().getPatterns()
+				.stream().map(p -> p.getPatternString()).collect(Collectors.toSet());
+		assertEquals(2, paths.size());
+		assertThat(paths, Matchers.containsInAnyOrder(path, path + "/"));
 
 		Set<RequestMethod> methods = info.getMethodsCondition().getMethods();
 		assertEquals(1, methods.size());

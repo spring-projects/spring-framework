@@ -25,9 +25,11 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.util.patterns.PathPattern;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link UrlBasedCorsConfigurationSource}.
@@ -60,7 +62,7 @@ public class UrlBasedCorsConfigurationSourceTests {
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void unmodifiableConfigurationsMap() {
-		this.configSource.getCorsConfigurations().put("/**", new CorsConfiguration());
+		this.configSource.getCorsConfigurations().put(mock(PathPattern.class), new CorsConfiguration());
 	}
 
 	private ServerWebExchange createExchange(HttpMethod httpMethod, String url) {

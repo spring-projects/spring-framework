@@ -102,9 +102,9 @@ public class WebFluxConfigurationSupportTests {
 
 		assertEquals(0, mapping.getOrder());
 
-		assertTrue(mapping.useSuffixPatternMatch());
+		assertFalse(mapping.useSuffixPatternMatch());
+		assertFalse(mapping.useRegisteredSuffixPatternMatch());
 		assertTrue(mapping.useTrailingSlashMatch());
-		assertTrue(mapping.useRegisteredSuffixPatternMatch());
 
 		name = "webFluxContentTypeResolver";
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
@@ -262,7 +262,6 @@ public class WebFluxConfigurationSupportTests {
 		assertEquals(Ordered.LOWEST_PRECEDENCE - 1, handlerMapping.getOrder());
 
 		assertNotNull(handlerMapping.getPathHelper());
-		assertNotNull(handlerMapping.getPathMatcher());
 
 		SimpleUrlHandlerMapping urlHandlerMapping = (SimpleUrlHandlerMapping) handlerMapping;
 		WebHandler webHandler = (WebHandler) urlHandlerMapping.getUrlMap().get("/images/**");

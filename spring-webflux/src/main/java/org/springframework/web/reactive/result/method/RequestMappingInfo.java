@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.method;
 
 import java.util.Set;
 
-import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.accept.MappingContentTypeResolver;
@@ -472,7 +471,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			RequestedContentTypeResolver contentTypeResolver = this.options.getContentTypeResolver();
 
 			PatternsRequestCondition patternsCondition = new PatternsRequestCondition(
-					this.paths, this.options.getPathHelper(), this.options.getPathMatcher(),
+					this.paths, this.options.getPathHelper(),
 					this.options.useSuffixPatternMatch(), this.options.useTrailingSlashMatch(),
 					this.options.getFileExtensions());
 
@@ -497,11 +496,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		private HttpRequestPathHelper pathHelper;
 
-		private PathMatcher pathMatcher;
-
 		private boolean trailingSlashMatch = true;
 
-		private boolean suffixPatternMatch = true;
+		private boolean suffixPatternMatch = false;
 
 		private boolean registeredSuffixPatternMatch = false;
 
@@ -517,18 +514,6 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		public HttpRequestPathHelper getPathHelper() {
 			return this.pathHelper;
-		}
-
-		/**
-		 * Set a custom PathMatcher to use for the PatternsRequestCondition.
-		 * <p>By default this is not set.
-		 */
-		public void setPathMatcher(PathMatcher pathMatcher) {
-			this.pathMatcher = pathMatcher;
-		}
-
-		public PathMatcher getPathMatcher() {
-			return this.pathMatcher;
 		}
 
 		/**
