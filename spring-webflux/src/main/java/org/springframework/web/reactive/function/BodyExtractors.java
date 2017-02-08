@@ -102,7 +102,7 @@ public abstract class BodyExtractors {
 	 * Return a {@code BodyExtractor} that reads form data into a {@link MultiValueMap}.
 	 * @return a {@code BodyExtractor} that reads form data
 	 */
-	public static BodyExtractor<Mono<MultiValueMap<String, String>>, ServerHttpRequest> toFormData() {
+	public static BodyExtractor<Mono<MultiValueMap<String, String>>, ReactiveHttpInputMessage> toFormData() {
 		return (serverRequest, context) -> {
 					HttpMessageReader<MultiValueMap<String, String>> messageReader = formMessageReader(context);
 					return messageReader.readMono(FORM_TYPE, serverRequest, context.hints());
