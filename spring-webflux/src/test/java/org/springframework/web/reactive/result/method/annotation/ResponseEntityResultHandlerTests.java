@@ -62,7 +62,6 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.ResponseEntity.notFound;
@@ -156,7 +155,7 @@ public class ResponseEntityResultHandlerTests {
 
 		assertEquals(HttpStatus.NO_CONTENT, this.response.getStatusCode());
 		assertEquals(0, this.response.getHeaders().size());
-		assertNull(this.response.getBody());
+		assertResponseBodyIsEmpty();
 	}
 
 	@Test
@@ -170,7 +169,7 @@ public class ResponseEntityResultHandlerTests {
 		assertEquals(HttpStatus.CREATED, this.response.getStatusCode());
 		assertEquals(1, this.response.getHeaders().size());
 		assertEquals(location, this.response.getHeaders().getLocation());
-		assertNull(this.response.getBody());
+		assertResponseBodyIsEmpty();
 	}
 
 	@Test
@@ -180,7 +179,7 @@ public class ResponseEntityResultHandlerTests {
 		HandlerResult result = handlerResult(returnValue, returnType);
 		this.resultHandler.handleResult(createExchange(), result).block(Duration.ofSeconds(5));
 		assertEquals(HttpStatus.NOT_FOUND, this.response.getStatusCode());
-		assertNull(this.response.getBody());
+		assertResponseBodyIsEmpty();
 	}
 
 	@Test
@@ -311,7 +310,7 @@ public class ResponseEntityResultHandlerTests {
 		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
 
 		assertEquals(HttpStatus.NOT_FOUND, this.response.getStatusCode());
-		assertNull(this.response.getBody());
+		assertResponseBodyIsEmpty();
 	}
 
 
@@ -348,13 +347,19 @@ public class ResponseEntityResultHandlerTests {
 				.verify();
 	}
 
-	private void assertConditionalResponse(HttpStatus status, String body, String etag, Instant lastModified) throws Exception {
+	private void assertResponseBodyIsEmpty() {
+		StepVerifier.create(this.response.getBody()).expectComplete().verify();
+	}
+
+	private void assertConditionalResponse(HttpStatus status, String body, String etag, Instant lastModified)
+			throws Exception {
+
 		assertEquals(status, this.response.getStatusCode());
 		if (body != null) {
 			assertResponseBody(body);
 		}
 		else {
-			assertNull(this.response.getBody());
+			assertResponseBodyIsEmpty();
 		}
 		if (etag != null) {
 			assertEquals(1, this.response.getHeaders().get(HttpHeaders.ETAG).size());

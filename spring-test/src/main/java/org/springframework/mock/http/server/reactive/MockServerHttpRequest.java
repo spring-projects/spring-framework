@@ -220,12 +220,24 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		B cookie(String path, HttpCookie... cookie);
 
 		/**
+		 * Add the given cookies.
+		 * @param cookies the cookies.
+		 */
+		B cookies(MultiValueMap<String, HttpCookie> cookies);
+
+		/**
 		 * Add the given, single header value under the given name.
 		 * @param headerName  the header name
 		 * @param headerValues the header value(s)
 		 * @see HttpHeaders#add(String, String)
 		 */
 		B header(String headerName, String... headerValues);
+
+		/**
+		 * Add the given header values.
+		 * @param headers the header values
+		 */
+		B headers(MultiValueMap<String, String> headers);
 
 		/**
 		 * Set the list of acceptable {@linkplain MediaType media types}, as
@@ -361,10 +373,22 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
+		public BodyBuilder cookies(MultiValueMap<String, HttpCookie> cookies) {
+			this.cookies.putAll(cookies);
+			return this;
+		}
+
+		@Override
 		public BodyBuilder header(String headerName, String... headerValues) {
 			for (String headerValue : headerValues) {
 				this.headers.add(headerName, headerValue);
 			}
+			return this;
+		}
+
+		@Override
+		public BodyBuilder headers(MultiValueMap<String, String> headers) {
+			this.headers.putAll(headers);
 			return this;
 		}
 

@@ -37,7 +37,6 @@ import org.springframework.web.server.session.MockWebSessionManager;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 /**
  * @author Arjen Poutsma
@@ -150,7 +149,7 @@ TODO: enable when ServerEntityResponse is reintroduced
 		assertEquals(EnumSet.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS),
 				mockResponse.getHeaders().getAllow());
 
-		assertNull(mockResponse.getBody());
+		StepVerifier.create(mockResponse.getBody()).expectComplete().verify();
 	}
 
 }

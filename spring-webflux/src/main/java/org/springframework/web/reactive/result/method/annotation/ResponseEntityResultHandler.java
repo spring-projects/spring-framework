@@ -146,16 +146,14 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 						.forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
 			}
 			if(httpEntity.getBody() == null) {
-				exchange.getResponse().setComplete();
-				return Mono.empty();
+				return exchange.getResponse().setComplete();
 			}
 
 			String etag = entityHeaders.getETag();
 			Instant lastModified = Instant.ofEpochMilli(entityHeaders.getLastModified());
 			HttpMethod httpMethod = exchange.getRequest().getMethod();
 			if (SAFE_METHODS.contains(httpMethod) && exchange.checkNotModified(etag, lastModified)) {
-				exchange.getResponse().setComplete();
-				return Mono.empty();
+				return exchange.getResponse().setComplete();
 			}
 
 			return writeBody(httpEntity.getBody(), bodyType, exchange);

@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -89,7 +90,7 @@ public class DefaultClientRequestBuilderTests {
 
 		assertEquals("MyValue", request.getHeaders().getFirst("MyKey"));
 		assertEquals("bar", request.getCookies().getFirst("foo").getValue());
-		assertNull(request.getBody());
+		StepVerifier.create(request.getBody()).expectComplete().verify();
 	}
 
 	@Test

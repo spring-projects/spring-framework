@@ -36,7 +36,6 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.web.server.ServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -245,8 +244,7 @@ public class DefaultServerResponseBuilderTests {
 
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
 		assertEquals("MyValue", response.getHeaders().getFirst("MyKey"));
-		assertNull(response.getBody());
-
+		StepVerifier.create(response.getBody()).expectComplete().verify();
 	}
 
 	@Test
@@ -261,7 +259,7 @@ public class DefaultServerResponseBuilderTests {
 
 		result.then(res -> res.writeTo(exchange, strategies)).block();
 
-		assertNull(response.getBody());
+		StepVerifier.create(response.getBody()).expectComplete().verify();
 	}
 
 /*

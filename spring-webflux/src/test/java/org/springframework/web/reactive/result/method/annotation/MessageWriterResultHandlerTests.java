@@ -123,7 +123,8 @@ public class MessageWriterResultHandlerTests {
 		this.resultHandler.writeBody(body, returnType(type), this.exchange).block(Duration.ofSeconds(5));
 
 		assertNull(this.response.getHeaders().get("Content-Type"));
-		assertNull(this.response.getBody());
+		StepVerifier.create(this.response.getBody())
+				.expectErrorMatches(ex -> ex.getMessage().startsWith("The body is not set.")).verify();
 	}
 
 	@Test  // SPR-13135

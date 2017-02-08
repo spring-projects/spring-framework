@@ -125,7 +125,10 @@ public class ResourceWebHandlerTests {
 		assertEquals(headers.getLastModified() / 1000, resourceLastModifiedDate("test/foo.css") / 1000);
 		assertEquals("bytes", headers.getFirst("Accept-Ranges"));
 		assertEquals(1, headers.get("Accept-Ranges").size());
-		assertNull(this.response.getBody());
+
+		StepVerifier.create(this.response.getBody())
+				.expectErrorMatches(ex -> ex.getMessage().startsWith("The body is not set."))
+				.verify();
 	}
 
 	@Test

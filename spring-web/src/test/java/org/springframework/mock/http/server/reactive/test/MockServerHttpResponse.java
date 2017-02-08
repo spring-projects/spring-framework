@@ -18,6 +18,7 @@ package org.springframework.mock.http.server.reactive.test;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -38,24 +39,37 @@ import org.springframework.util.Assert;
  */
 public class MockServerHttpResponse extends AbstractServerHttpResponse {
 
-	private Flux<DataBuffer> body;
+	private Flux<DataBuffer> body = Flux.error(
+			new IllegalStateException("The body is not set. " +
+					"Did handling complete with success? Is a custom \"writeHandler\" configured?"));
+
+	private Function<Flux<DataBuffer>, Mono<Void>> writeHandler = initDefaultWriteHandler();
 
 
 	public MockServerHttpResponse() {
 		super(new DefaultDataBufferFactory());
 	}
 
+	private Function<Flux<DataBuffer>, Mono<Void>> initDefaultWriteHandler() {
+		return body -> {
+			this.body = body.cache();
+			return this.body.then();
+		};
+	}
+
 
 	/**
-	 * Return the output Publisher used to write to the response.
+	 * Return the request body, or an error stream if the body was never set
+	 * or when {@link #setWriteHandler} is configured.
 	 */
 	public Flux<DataBuffer> getBody() {
 		return this.body;
 	}
 
 	/**
-	 * Return the response body aggregated and converted to a String using the
-	 * charset of the Content-Type response or otherwise as "UTF-8".
+	 * Shortcut method that delegates to {@link #getBody()} and then aggregates
+	 * the data buffers and converts to a String using the charset of the
+	 * Content-Type header or falling back on "UTF-8" by default.
 	 */
 	public Mono<String> getBodyAsString() {
 		Charset charset = getCharset();
@@ -84,15 +98,19 @@ public class MockServerHttpResponse extends AbstractServerHttpResponse {
 		return (charset != null ? charset : StandardCharsets.UTF_8);
 	}
 
-	@Override
-	protected Mono<Void> writeWithInternal(Publisher<? extends DataBuffer> body) {
-		this.body = Flux.from(body);
-		return Mono.empty();
-	}
-
-	@Override
-	protected Mono<Void> writeAndFlushWithInternal(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		return writeWithInternal(Flux.from(body).flatMap(Flux::from));
+	/**
+	 * Configure a custom handler for writing the request body.
+	 *
+	 * <p>The default write handler consumes and caches the request body so it
+	 * may be accessed subsequently, e.g. in test assertions. Use this property
+	 * when the request body is an infinite stream.
+	 *
+	 * @param writeHandler the write handler to use returning {@code Mono<Void>}
+	 * when the body has been "written" (i.e. consumed).
+	 */
+	public void setWriteHandler(Function<Flux<DataBuffer>, Mono<Void>> writeHandler) {
+		Assert.notNull(writeHandler, "'writeHandler' is required");
+		this.writeHandler = writeHandler;
 	}
 
 	@Override
@@ -105,6 +123,21 @@ public class MockServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	protected void applyCookies() {
+	}
+
+	@Override
+	protected Mono<Void> writeWithInternal(Publisher<? extends DataBuffer> body) {
+		return this.writeHandler.apply(Flux.from(body));
+	}
+
+	@Override
+	protected Mono<Void> writeAndFlushWithInternal(Publisher<? extends Publisher<? extends DataBuffer>> body) {
+		return this.writeHandler.apply(Flux.from(body).concatMap(Flux::from));
+	}
+
+	@Override
+	public Mono<Void> setComplete() {
+		return doCommit(() -> Mono.defer(() -> this.writeHandler.apply(Flux.empty())));
 	}
 
 }
