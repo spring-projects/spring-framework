@@ -208,8 +208,6 @@ public class ViewResolutionResultHandler extends AbstractHandlerResultHandler
 				.otherwiseIfEmpty(exchange.isNotModified() ? Mono.empty() : NO_VALUE_MONO)
 				.then(returnValue -> {
 
-					updateResponseStatus(result.getReturnTypeSource(), exchange);
-
 					Mono<List<View>> viewsMono;
 					Model model = result.getModel();
 

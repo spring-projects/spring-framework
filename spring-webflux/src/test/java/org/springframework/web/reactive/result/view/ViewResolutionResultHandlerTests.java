@@ -41,7 +41,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
@@ -49,7 +48,6 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.ui.ConcurrentModel;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
@@ -131,23 +129,19 @@ public class ViewResolutionResultHandlerTests {
 
 		returnType = forClass(View.class);
 		returnValue = new TestView("account");
-		ServerWebExchange exchange = testHandle("/path", returnType, returnValue, "account: {id=123}");
-		assertEquals(HttpStatus.NO_CONTENT, exchange.getResponse().getStatusCode());
+		testHandle("/path", returnType, returnValue, "account: {id=123}");
 
 		returnType = forClassWithGenerics(Mono.class, View.class);
 		returnValue = Mono.just(new TestView("account"));
-		exchange = testHandle("/path", returnType, returnValue, "account: {id=123}");
-		assertEquals(HttpStatus.SEE_OTHER, exchange.getResponse().getStatusCode());
+		testHandle("/path", returnType, returnValue, "account: {id=123}");
 
 		returnType = forClass(String.class);
 		returnValue = "account";
-		exchange = testHandle("/path", returnType, returnValue, "account: {id=123}", resolver);
-		assertEquals(HttpStatus.CREATED, exchange.getResponse().getStatusCode());
+		testHandle("/path", returnType, returnValue, "account: {id=123}", resolver);
 
 		returnType = forClassWithGenerics(Mono.class, String.class);
 		returnValue = Mono.just("account");
-		exchange = testHandle("/path", returnType, returnValue, "account: {id=123}", resolver);
-		assertEquals(HttpStatus.PARTIAL_CONTENT, exchange.getResponse().getStatusCode());
+		testHandle("/path", returnType, returnValue, "account: {id=123}", resolver);
 
 		returnType = forClass(Model.class);
 		returnValue = new ConcurrentModel().addAttribute("name", "Joe");
@@ -438,38 +432,61 @@ public class ViewResolutionResultHandlerTests {
 	@SuppressWarnings("unused")
 	private static class TestController {
 
-		@ResponseStatus(code = HttpStatus.CREATED)
-		String string() { return null; }
+		String string() {
+			return null;
+		}
 
-		@ResponseStatus(HttpStatus.NO_CONTENT)
-		View view() { return null; }
+		View view() {
+			return null;
+		}
 
-		@ResponseStatus(HttpStatus.PARTIAL_CONTENT)
-		Mono<String> monoString() { return null; }
+		Mono<String> monoString() {
+			return null;
+		}
 
-		@ResponseStatus(code = HttpStatus.SEE_OTHER)
-		Mono<View> monoView() { return null; }
+		Mono<View> monoView() {
+			return null;
+		}
 
-		Mono<Void> monoVoid() { return null; }
+		Mono<Void> monoVoid() {
+			return null;
+		}
 
-		void voidMethod() {}
+		void voidMethod() {
+		}
 
-		Single<String> singleString() { return null; }
+		Single<String> singleString() {
+			return null;
+		}
 
-		Single<View> singleView() { return null; }
+		Single<View> singleView() {
+			return null;
+		}
 
-		Completable completable() { return null; }
+		Completable completable() {
+			return null;
+		}
 
-		Model model() { return null; }
+		Model model() {
+			return null;
+		}
 
-		Map map() { return null; }
+		Map map() {
+			return null;
+		}
 
-		TestBean testBean() { return null; }
+		TestBean testBean() {
+			return null;
+		}
 
-		Integer integer() { return null; }
+		Integer integer() {
+			return null;
+		}
 
 		@ModelAttribute("num")
-		Long longAttribute() { return null; }
+		Long longAttribute() {
+			return null;
+		}
 	}
 
 }

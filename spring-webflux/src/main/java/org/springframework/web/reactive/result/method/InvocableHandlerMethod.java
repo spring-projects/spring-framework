@@ -32,9 +32,12 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
@@ -54,6 +57,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private static final Object NO_ARG_VALUE = new Object();
 
+	private HttpStatus responseStatus;
+
 
 	private List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 
@@ -62,12 +67,23 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	public InvocableHandlerMethod(HandlerMethod handlerMethod) {
 		super(handlerMethod);
+		initResponseStatus();
 	}
 
 	public InvocableHandlerMethod(Object bean, Method method) {
 		super(bean, method);
+		initResponseStatus();
 	}
 
+	private void initResponseStatus() {
+		ResponseStatus annotation = getMethodAnnotation(ResponseStatus.class);
+		if (annotation == null) {
+			annotation = AnnotatedElementUtils.findMergedAnnotation(getBeanType(), ResponseStatus.class);
+		}
+		if (annotation != null) {
+			this.responseStatus = annotation.code();
+		}
+	}
 
 	/**
 	 * Configure the argument resolvers to use to use for resolving method
@@ -102,6 +118,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			try {
 				Object value = doInvoke(args);
 				HandlerResult result = new HandlerResult(this, value, getReturnType(), bindingContext);
+				if (this.responseStatus != null) {
+					exchange.getResponse().setStatusCode(this.responseStatus);
+				}
 				return Mono.just(result);
 			}
 			catch (InvocationTargetException ex) {
@@ -165,7 +184,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			return resolver.resolveArgument(parameter, bindingContext, exchange)
 					.defaultIfEmpty(NO_ARG_VALUE)
 					.doOnError(cause -> {
-						if(logger.isDebugEnabled()) {
+						if (logger.isDebugEnabled()) {
 							logger.debug(getDetailedErrorMessage("Failed to resolve", parameter), cause);
 						}
 					});

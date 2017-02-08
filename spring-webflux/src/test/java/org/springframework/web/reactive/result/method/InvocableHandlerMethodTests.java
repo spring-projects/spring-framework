@@ -24,8 +24,10 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.ResolvableMethod;
@@ -147,6 +149,15 @@ public class InvocableHandlerMethodTests {
 		}
 	}
 
+	@Test
+	public void invokeMethodWithResponseStatus() throws Exception {
+		InvocableHandlerMethod hm = handlerMethod("responseStatus");
+		Mono<HandlerResult> mono = hm.invoke(this.exchange, new BindingContext());
+
+		assertHandlerResultValue(mono, "created");
+		assertThat(this.exchange.getResponse().getStatusCode(), is(HttpStatus.CREATED));
+	}
+
 
 	private InvocableHandlerMethod handlerMethod(String name) throws Exception {
 		TestController controller = new TestController();
@@ -185,6 +196,11 @@ public class InvocableHandlerMethodTests {
 
 		public void exceptionMethod() {
 			throw new IllegalStateException("boo");
+		}
+
+		@ResponseStatus(HttpStatus.CREATED)
+		public String responseStatus() {
+			return "created";
 		}
 	}
 

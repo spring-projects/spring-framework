@@ -111,8 +111,7 @@ public abstract class AbstractMessageWriterResultHandler extends AbstractHandler
 		}
 
 		if (void.class == elementType.getRawClass() || Void.class == elementType.getRawClass()) {
-			return Mono.from((Publisher<Void>) publisher)
-					.doOnSubscribe(sub -> updateResponseStatus(bodyParameter, exchange));
+			return Mono.from((Publisher<Void>) publisher);
 		}
 
 		ServerHttpRequest request = exchange.getRequest();
@@ -121,12 +120,11 @@ public abstract class AbstractMessageWriterResultHandler extends AbstractHandler
 		if (bestMediaType != null) {
 			for (HttpMessageWriter<?> messageWriter : getMessageWriters()) {
 				if (messageWriter.canWrite(elementType, bestMediaType)) {
-					Mono<Void> bodyWriter = (messageWriter instanceof ServerHttpMessageWriter ?
+					return (messageWriter instanceof ServerHttpMessageWriter ?
 							((ServerHttpMessageWriter<?>) messageWriter).write((Publisher) publisher,
 									valueType, elementType, bestMediaType, request, response, Collections.emptyMap()) :
 							messageWriter.write((Publisher) publisher, elementType,
 									bestMediaType, response, Collections.emptyMap()));
-					return bodyWriter.doOnSubscribe(sub -> updateResponseStatus(bodyParameter, exchange));
 				}
 			}
 		}
