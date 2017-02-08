@@ -1066,6 +1066,7 @@ project("spring-test") {
 		optional(project(":spring-orm"))
 		optional(project(":spring-web"))
 		optional(project(":spring-webmvc"))
+		optional(project(":spring-webflux"))
 		optional(project(":spring-websocket"))
 		optional("junit:junit:${junitVersion}")
 		optional("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
@@ -1094,6 +1095,7 @@ project("spring-test") {
 		optional("com.jayway.jsonpath:json-path:2.2.0")
 		optional("org.reactivestreams:reactive-streams")
 		optional("io.projectreactor:reactor-core")
+		optional("io.projectreactor.addons:reactor-test")
 		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
 		testCompile("javax.mail:javax.mail-api:${javamailVersion}")
@@ -1118,6 +1120,7 @@ project("spring-test") {
 		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 		testCompile("javax.cache:cache-api:${cacheApiVersion}")
 		testCompile('de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1')
+		testCompile('io.projectreactor.ipc:reactor-netty')
 		testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-jul:${log4jVersion}")  // Java Util Logging for JUnit 5
 		testRuntime("org.ehcache:ehcache:${ehcache3Version}")
