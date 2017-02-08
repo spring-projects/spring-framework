@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util.patterns;
 
 import java.util.Comparator;
 
 /**
  * Basic PathPattern comparator.
- * 
+ *
  * @author Andy Clement
  */
 public class PathPatternComparator implements Comparator<PathPattern> {
@@ -28,8 +29,9 @@ public class PathPatternComparator implements Comparator<PathPattern> {
 	public int compare(PathPattern o1, PathPattern o2) {
 		// Nulls get sorted to the end
 		if (o1 == null) {
-			return (o2==null?0:+1);
-		} else if (o2 == null) {
+			return (o2 == null ? 0 : +1);
+		}
+		else if (o2 == null) {
 			return -1;
 		}
 		return o1.compareTo(o2);

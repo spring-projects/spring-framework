@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util.patterns;
 
 import org.springframework.web.util.patterns.PathPattern.MatchingContext;
@@ -20,13 +21,14 @@ import org.springframework.web.util.patterns.PathPattern.MatchingContext;
 /**
  * A path element representing wildcarding the rest of a path. In the pattern
  * '/foo/**' the /** is represented as a {@link WildcardTheRestPathElement}.
- * 
+ *
  * @author Andy Clement
+ * @since 5.0
  */
 class WildcardTheRestPathElement extends PathElement {
 
 	private char separator;
-	
+
 	WildcardTheRestPathElement(int pos, char separator) {
 		super(pos);
 		this.separator = separator;
@@ -36,14 +38,14 @@ class WildcardTheRestPathElement extends PathElement {
 	public boolean matches(int candidateIndex, MatchingContext matchingContext) {
 		// If there is more data, it must start with the separator
 		if (candidateIndex < matchingContext.candidateLength &&
-			matchingContext.candidate[candidateIndex] != separator) {
+				matchingContext.candidate[candidateIndex] != separator) {
 			return false;
 		}
 		return true;
 	}
 
 	public String toString() {
-		return "WildcardTheRest("+separator+"**)";
+		return "WildcardTheRest(" + separator + "**)";
 	}
 
 	@Override

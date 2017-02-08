@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util.patterns;
 
 /**
  * Used to represent a subsection of an array, useful when wanting to pass that subset of data
  * to another method (e.g. a java regex matcher) but not wanting to create a new string object to hold
  * all that data.
- * 
+ *
  * @author Andy Clement
+ * @since 5.0
  */
 class SubSequence implements CharSequence {
 
 	private char[] chars;
+
 	private int start, end;
 
 	SubSequence(char[] chars, int start, int end) {
@@ -47,9 +50,9 @@ class SubSequence implements CharSequence {
 	public CharSequence subSequence(int start, int end) {
 		return new SubSequence(chars, this.start + start, this.start + end);
 	}
-	
+
 	public String toString() {
-		return new String(chars,start,end-start);
+		return new String(chars, start, end - start);
 	}
 
 }

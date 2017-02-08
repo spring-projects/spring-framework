@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util;
 
 import java.util.Comparator;
@@ -26,16 +27,22 @@ import org.springframework.web.util.patterns.PatternComparatorConsideringPath;
 
 
 /**
- * 
+ * {@link PathMatcher} implementation for path patterns parsed
+ * as {@link PathPatternParser} and compiled as {@link PathPattern}s.
+ *
+ * <p>Once parsed, {@link PathPattern}s are tailored for fast matching
+ * and quick comparison.
+ *
  * @author Andy Clement
  * @since 5.0
+ * @see PathPattern
  */
 public class ParsingPathMatcher implements PathMatcher {
 
-	Map<String,PathPattern> cache = new HashMap<>();
-	
+	Map<String, PathPattern> cache = new HashMap<>();
+
 	PathPatternParser parser;
-	
+
 	public ParsingPathMatcher() {
 		parser = new PathPatternParser();
 	}
@@ -74,27 +81,28 @@ public class ParsingPathMatcher implements PathMatcher {
 	public Comparator<String> getPatternComparator(String path) {
 		return new PathPatternStringComparatorConsideringPath(path);
 	}
-	
+
 	class PathPatternStringComparatorConsideringPath implements Comparator<String> {
-		
+
 		PatternComparatorConsideringPath ppcp;
-		
+
 		public PathPatternStringComparatorConsideringPath(String path) {
 			ppcp = new PatternComparatorConsideringPath(path);
 		}
-		
+
 		@Override
 		public int compare(String o1, String o2) {
 			if (o1 == null) {
-				return (o2==null?0:+1);
-			} else if (o2 == null) {
+				return (o2 == null ? 0 : +1);
+			}
+			else if (o2 == null) {
 				return -1;
 			}
 			PathPattern p1 = getPathPattern(o1);
 			PathPattern p2 = getPathPattern(o2);
-			return ppcp.compare(p1,p2);
+			return ppcp.compare(p1, p2);
 		}
-		
+
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util.patterns;
 
 import org.springframework.web.util.patterns.PathPattern.MatchingContext;
@@ -20,8 +21,9 @@ import org.springframework.web.util.patterns.PathPattern.MatchingContext;
 /**
  * A wildcard path element. In the pattern '/foo/&ast;/goo' the * is
  * represented by a WildcardPathElement.
- * 
+ *
  * @author Andy Clement
+ * @since 5.0
  */
 class WildcardPathElement extends PathElement {
 
@@ -39,7 +41,8 @@ class WildcardPathElement extends PathElement {
 		int nextPos = matchingContext.scanAhead(candidateIndex);
 		if (next == null) {
 			return (nextPos == matchingContext.candidateLength);
-		} else {
+		}
+		else {
 			if (matchingContext.isMatchStartMatching && nextPos == matchingContext.candidateLength) {
 				return true; // no more data but matches up to this point
 			}
@@ -60,7 +63,7 @@ class WildcardPathElement extends PathElement {
 	public int getWildcardCount() {
 		return 1;
 	}
-	
+
 	@Override
 	public int getScore() {
 		return WILDCARD_WEIGHT;

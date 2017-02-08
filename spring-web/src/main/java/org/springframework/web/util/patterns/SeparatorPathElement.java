@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util.patterns;
 
 import org.springframework.web.util.patterns.PathPattern.MatchingContext;
@@ -21,8 +22,9 @@ import org.springframework.web.util.patterns.PathPattern.MatchingContext;
  * A separator path element. In the pattern '/foo/bar' the two occurrences
  * of '/' will be represented by a SeparatorPathElement (if the default
  * separator of '/' is being used).
- * 
+ *
  * @author Andy Clement
+ * @since 5.0
  */
 class SeparatorPathElement extends PathElement {
 
@@ -44,13 +46,14 @@ class SeparatorPathElement extends PathElement {
 			if (matchingContext.candidate[candidateIndex] == separator) {
 				// Skip further separators in the path (they are all 'matched'
 				// by a single SeparatorPathElement)
-				while ((candidateIndex+1)<matchingContext.candidateLength &&
-						matchingContext.candidate[candidateIndex+1] == separator) {
+				while ((candidateIndex + 1) < matchingContext.candidateLength &&
+						matchingContext.candidate[candidateIndex + 1] == separator) {
 					candidateIndex++;
 				}
 				if (next == null) {
 					matched = ((candidateIndex + 1) == matchingContext.candidateLength);
-				} else {
+				}
+				else {
 					candidateIndex++;
 					if (matchingContext.isMatchStartMatching && candidateIndex == matchingContext.candidateLength) {
 						return true; // no more data but matches up to this point
@@ -61,7 +64,7 @@ class SeparatorPathElement extends PathElement {
 		}
 		return matched;
 	}
-	
+
 	public String toString() {
 		return "Separator(" + separator + ")";
 	}

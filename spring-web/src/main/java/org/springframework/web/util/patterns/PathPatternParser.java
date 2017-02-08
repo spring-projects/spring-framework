@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util.patterns;
 
 import java.util.ArrayList;
@@ -21,9 +22,10 @@ import java.util.regex.PatternSyntaxException;
 
 /**
  * Parser for URI template patterns. It breaks the path pattern into a number of
- * path elements in a linked list.
- * 
+ * {@link PathElement}s in a linked list.
+ *
  * @author Andy Clement
+ * @since 5.0
  */
 public class PathPatternParser {
 
@@ -85,7 +87,7 @@ public class PathPatternParser {
 	/**
 	 * Create a PatternParser that will use the specified separator instead of
 	 * the default.
-	 * 
+	 *
 	 * @param separator the path separator to look for when parsing.
 	 */
 	public PathPatternParser(char separator) {
@@ -101,7 +103,7 @@ public class PathPatternParser {
 	 * path elements around separator boundaries and verifying the structure at each
 	 * stage. Produces a PathPattern object that can be used for fast matching
 	 * against paths.
-	 * 
+	 *
 	 * @param pathPattern the input path pattern, e.g. /foo/{bar}
 	 * @return a PathPattern for quickly matching paths against the specified path pattern
 	 */
@@ -128,32 +130,37 @@ public class PathPatternParser {
 					pushPathElement(createPathElement());
 				}
 				// Skip over multiple separators
-				while ((pos+1) < pathPatternLength && pathPatternData[pos+1] == separator) {
+				while ((pos + 1) < pathPatternLength && pathPatternData[pos + 1] == separator) {
 					pos++;
 				}
 				if (peekDoubleWildcard()) {
-					pushPathElement(new WildcardTheRestPathElement(pos,separator));
-					pos+=2;
-				} else {
+					pushPathElement(new WildcardTheRestPathElement(pos, separator));
+					pos += 2;
+				}
+				else {
 					pushPathElement(new SeparatorPathElement(pos, separator));
 				}
-			} else {
+			}
+			else {
 				if (pathElementStart == -1) {
 					pathElementStart = pos;
 				}
 				if (ch == '?') {
 					singleCharWildcardCount++;
-				} else if (ch == '{') {
+				}
+				else if (ch == '{') {
 					if (insideVariableCapture) {
 						throw new PatternParseException(pos, pathPatternData, PatternMessage.ILLEGAL_NESTED_CAPTURE);
-					// If we enforced that adjacent captures weren't allowed, this would do it (this would be an error: /foo/{bar}{boo}/)
+						// If we enforced that adjacent captures weren't allowed,
+						// // this would do it (this would be an error: /foo/{bar}{boo}/)
 //					} else if (pos > 0 && pathPatternData[pos - 1] == '}') {
 //						throw new PatternParseException(pos, pathPatternData,
 //								PatternMessage.CANNOT_HAVE_ADJACENT_CAPTURES);
 					}
 					insideVariableCapture = true;
 					variableCaptureStart = pos;
-				} else if (ch == '}') {
+				}
+				else if (ch == '}') {
 					if (!insideVariableCapture) {
 						throw new PatternParseException(pos, pathPatternData, PatternMessage.MISSING_OPEN_CAPTURE);
 					}
@@ -163,13 +170,15 @@ public class PathPatternParser {
 								PatternMessage.NO_MORE_DATA_EXPECTED_AFTER_CAPTURE_THE_REST);
 					}
 					variableCaptureCount++;
-				} else if (ch == ':') {
+				}
+				else if (ch == ':') {
 					if (insideVariableCapture) {
 						skipCaptureRegex();
 						insideVariableCapture = false;
 						variableCaptureCount++;
 					}
-				} else if (ch == '*') {
+				}
+				else if (ch == '*') {
 					if (insideVariableCapture) {
 						if (variableCaptureStart == pos - 1) {
 							isCaptureTheRestVariable = true;
@@ -185,7 +194,8 @@ public class PathPatternParser {
 								PatternMessage.ILLEGAL_CHARACTER_AT_START_OF_CAPTURE_DESCRIPTOR,
 								Character.toString(ch));
 
-					} else if ((pos > (variableCaptureStart + 1 + (isCaptureTheRestVariable ? 1 : 0))
+					}
+					else if ((pos > (variableCaptureStart + 1 + (isCaptureTheRestVariable ? 1 : 0))
 							&& !Character.isJavaIdentifierPart(ch))) {
 						throw new PatternParseException(pos, pathPatternData,
 								PatternMessage.ILLEGAL_CHARACTER_IN_CAPTURE_DESCRIPTOR, Character.toString(ch));
@@ -219,10 +229,11 @@ public class PathPatternParser {
 				pos++;
 				previousBackslash = true;
 				continue;
-			} 
+			}
 			if (ch == '{' && !previousBackslash) {
 				curlyBracketDepth++;
-			} else if (ch == '}' && !previousBackslash) {
+			}
+			else if (ch == '}' && !previousBackslash) {
 				if (curlyBracketDepth == 0) {
 					if (regexStart == pos) {
 						throw new PatternParseException(regexStart, pathPatternData,
@@ -236,7 +247,7 @@ public class PathPatternParser {
 				throw new PatternParseException(pos, pathPatternData, PatternMessage.MISSING_CLOSE_CAPTURE);
 			}
 			pos++;
-			previousBackslash=false;
+			previousBackslash = false;
 		}
 		throw new PatternParseException(pos - 1, pathPatternData, PatternMessage.MISSING_CLOSE_CAPTURE);
 	}
@@ -265,25 +276,30 @@ public class PathPatternParser {
 			if (currentPE == null) {
 				headPE = newPathElement;
 				currentPE = newPathElement;
-			} else if (currentPE instanceof SeparatorPathElement) {
+			}
+			else if (currentPE instanceof SeparatorPathElement) {
 				PathElement peBeforeSeparator = currentPE.prev;
 				if (peBeforeSeparator == null) {
 					// /{*foobar} is at the start
 					headPE = newPathElement;
 					newPathElement.prev = peBeforeSeparator;
-				} else {
+				}
+				else {
 					peBeforeSeparator.next = newPathElement;
 					newPathElement.prev = peBeforeSeparator;
 				}
 				currentPE = newPathElement;
-			} else {
-				throw new IllegalStateException("Expected SeparatorPathElement but was "+currentPE);
 			}
-		} else {
+			else {
+				throw new IllegalStateException("Expected SeparatorPathElement but was " + currentPE);
+			}
+		}
+		else {
 			if (headPE == null) {
 				headPE = newPathElement;
 				currentPE = newPathElement;
-			} else {
+			}
+			else {
 				currentPE.next = newPathElement;
 				newPathElement.prev = currentPE;
 				currentPE = newPathElement;
@@ -305,39 +321,51 @@ public class PathPatternParser {
 		System.arraycopy(pathPatternData, pathElementStart, pathElementText, 0, pos - pathElementStart);
 		PathElement newPE = null;
 		if (variableCaptureCount > 0) {
-			if (variableCaptureCount == 1 && pathElementStart == variableCaptureStart && pathPatternData[pos - 1] == '}') {
+			if (variableCaptureCount == 1
+					&& pathElementStart == variableCaptureStart && pathPatternData[pos - 1] == '}') {
 				if (isCaptureTheRestVariable) {
 					// It is {*....}
 					newPE = new CaptureTheRestPathElement(pathElementStart, pathElementText, separator);
-				} else {
+				}
+				else {
 					// It is a full capture of this element (possibly with constraint), for example: /foo/{abc}/
 					try {
 						newPE = new CaptureVariablePathElement(pathElementStart, pathElementText, caseSensitive);
-					} catch (PatternSyntaxException pse) {
-						throw new PatternParseException(pse, findRegexStart(pathPatternData,pathElementStart)+pse.getIndex(), pathPatternData, PatternMessage.JDK_PATTERN_SYNTAX_EXCEPTION);
+					}
+					catch (PatternSyntaxException pse) {
+						throw new PatternParseException(pse, findRegexStart(pathPatternData, pathElementStart)
+								+ pse.getIndex(), pathPatternData, PatternMessage.JDK_PATTERN_SYNTAX_EXCEPTION);
 					}
 					recordCapturedVariable(pathElementStart, ((CaptureVariablePathElement) newPE).getVariableName());
 				}
-			} else {
+			}
+			else {
 				if (isCaptureTheRestVariable) {
-					throw new PatternParseException(pathElementStart, pathPatternData, PatternMessage.CAPTURE_ALL_IS_STANDALONE_CONSTRUCT);
+					throw new PatternParseException(pathElementStart, pathPatternData,
+							PatternMessage.CAPTURE_ALL_IS_STANDALONE_CONSTRUCT);
 				}
-				RegexPathElement newRegexSection = new RegexPathElement(pathElementStart, pathElementText, caseSensitive, pathPatternData);
+				RegexPathElement newRegexSection = new RegexPathElement(pathElementStart, pathElementText,
+						caseSensitive, pathPatternData);
 				for (String variableName : newRegexSection.getVariableNames()) {
 					recordCapturedVariable(pathElementStart, variableName);
 				}
 				newPE = newRegexSection;
 			}
-		} else {
+		}
+		else {
 			if (wildcard) {
 				if (pos - 1 == pathElementStart) {
 					newPE = new WildcardPathElement(pathElementStart);
-				} else {
+				}
+				else {
 					newPE = new RegexPathElement(pathElementStart, pathElementText, caseSensitive, pathPatternData);
 				}
-			} else if (singleCharWildcardCount!=0) {
-				newPE = new SingleCharWildcardedPathElement(pathElementStart, pathElementText, singleCharWildcardCount, caseSensitive);
-			} else {
+			}
+			else if (singleCharWildcardCount != 0) {
+				newPE = new SingleCharWildcardedPathElement(pathElementStart, pathElementText,
+						singleCharWildcardCount, caseSensitive);
+			}
+			else {
 				newPE = new LiteralPathElement(pathElementStart, pathElementText, caseSensitive);
 			}
 		}
@@ -349,11 +377,12 @@ public class PathPatternParser {
 	 * Assumes there is a constraint pattern.
 	 * @param data a complete path expression, e.g. /aaa/bbb/{ccc:...}
 	 * @param offset the start of the capture pattern of interest 
-	 * @return the index of the character after the ':' within the pattern expression relative to the start of the whole expression
+	 * @return the index of the character after the ':' within
+	 * the pattern expression relative to the start of the whole expression
 	 */
 	private int findRegexStart(char[] data, int offset) {
 		int pos = offset;
-		while (pos<data.length) {
+		while (pos < data.length) {
 			if (data[pos] == ':') {
 				return pos + 1;
 			}
@@ -383,7 +412,8 @@ public class PathPatternParser {
 			capturedVariableNames = new ArrayList<>();
 		}
 		if (capturedVariableNames.contains(variableName)) {
-			throw new PatternParseException(pos, this.pathPatternData, PatternMessage.ILLEGAL_DOUBLE_CAPTURE, variableName);
+			throw new PatternParseException(pos, this.pathPatternData,
+					PatternMessage.ILLEGAL_DOUBLE_CAPTURE, variableName);
 		}
 		capturedVariableNames.add(variableName);
 	}

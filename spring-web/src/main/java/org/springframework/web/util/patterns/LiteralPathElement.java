@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util.patterns;
 
 import org.springframework.web.util.patterns.PathPattern.MatchingContext;
@@ -20,15 +21,15 @@ import org.springframework.web.util.patterns.PathPattern.MatchingContext;
 /**
  * A literal path element. In the pattern '/foo/bar/goo' there are three
  * literal path elements 'foo', 'bar' and 'goo'.
- * 
+ *
  * @author Andy Clement
  */
 class LiteralPathElement extends PathElement {
 
 	private char[] text;
-	
+
 	private int len;
-	
+
 	private boolean caseSensitive;
 
 	public LiteralPathElement(int pos, char[] literalText, boolean caseSensitive) {
@@ -37,7 +38,8 @@ class LiteralPathElement extends PathElement {
 		this.caseSensitive = caseSensitive;
 		if (caseSensitive) {
 			this.text = literalText;
-		} else {
+		}
+		else {
 			// Force all the text lower case to make matching faster
 			this.text = new char[literalText.length];
 			for (int i = 0; i < len; i++) {
@@ -57,7 +59,8 @@ class LiteralPathElement extends PathElement {
 					return false;
 				}
 			}
-		} else {
+		}
+		else {
 			for (int i = 0; i < len; i++) {
 				// TODO revisit performance if doing a lot of case insensitive matching
 				if (Character.toLowerCase(matchingContext.candidate[candidateIndex++]) != text[i]) {
@@ -67,7 +70,8 @@ class LiteralPathElement extends PathElement {
 		}
 		if (next == null) {
 			return candidateIndex == matchingContext.candidateLength;
-		} else {
+		}
+		else {
 			if (matchingContext.isMatchStartMatching && candidateIndex == matchingContext.candidateLength) {
 				return true; // no more data but everything matched so far
 			}

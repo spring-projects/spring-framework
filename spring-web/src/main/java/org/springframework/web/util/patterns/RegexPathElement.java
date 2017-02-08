@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util.patterns;
 
 import java.util.LinkedList;
@@ -26,8 +27,9 @@ import org.springframework.web.util.patterns.PathPattern.MatchingContext;
  * A regex path element. Used to represent any complicated element of the path.
  * For example in '<tt>/foo/&ast;_&ast;/&ast;_{foobar}</tt>' both <tt>*_*</tt> and <tt>*_{foobar}</tt>
  * are {@link RegexPathElement} path elements. Derived from the general {@link AntPathMatcher} approach.
- * 
+ *
  * @author Andy Clement
+ * @since 5.0
  */
 class RegexPathElement extends PathElement {
 
@@ -63,10 +65,12 @@ class RegexPathElement extends PathElement {
 			String match = matcher.group();
 			if ("?".equals(match)) {
 				patternBuilder.append('.');
-			} else if ("*".equals(match)) {
+			}
+			else if ("*".equals(match)) {
 				patternBuilder.append(".*");
 				wildcardCount++;
-			} else if (match.startsWith("{") && match.endsWith("}")) {
+			}
+			else if (match.startsWith("{") && match.endsWith("}")) {
 				int colonIdx = match.indexOf(':');
 				if (colonIdx == -1) {
 					patternBuilder.append(DEFAULT_VARIABLE_PATTERN);
@@ -76,7 +80,8 @@ class RegexPathElement extends PathElement {
 								variableName);
 					}
 					this.variableNames.add(variableName);
-				} else {
+				}
+				else {
 					String variablePattern = match.substring(colonIdx + 1, match.length() - 1);
 					patternBuilder.append('(');
 					patternBuilder.append(variablePattern);
@@ -94,7 +99,8 @@ class RegexPathElement extends PathElement {
 		patternBuilder.append(quote(text, end, text.length()));
 		if (caseSensitive) {
 			pattern = java.util.regex.Pattern.compile(patternBuilder.toString());
-		} else {
+		}
+		else {
 			pattern = java.util.regex.Pattern.compile(patternBuilder.toString(),
 					java.util.regex.Pattern.CASE_INSENSITIVE);
 		}
@@ -120,7 +126,8 @@ class RegexPathElement extends PathElement {
 			if (next == null) {
 				// No more pattern, is there more data?
 				matches = (p == matchingContext.candidateLength);
-			} else {
+			}
+			else {
 				if (matchingContext.isMatchStartMatching && p == matchingContext.candidateLength) {
 					return true; // no more data but matches up to this point
 				}
@@ -165,10 +172,10 @@ class RegexPathElement extends PathElement {
 	public int getWildcardCount() {
 		return wildcardCount;
 	}
-	
+
 	@Override
 	public int getScore() {
-		return getCaptureCount()*CAPTURE_VARIABLE_WEIGHT + getWildcardCount()*WILDCARD_WEIGHT;
+		return getCaptureCount() * CAPTURE_VARIABLE_WEIGHT + getWildcardCount() * WILDCARD_WEIGHT;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util.patterns;
 
 import java.util.Comparator;
@@ -20,13 +21,14 @@ import java.util.Comparator;
 /**
  * Similar to {@link PathPatternComparator} but this takes account of a specified path and
  * sorts anything that exactly matches it to be first.
- * 
+ *
  * @author Andy Clement
+ * @since 5.0
  */
 public class PatternComparatorConsideringPath implements Comparator<PathPattern> {
 
 	private String path;
-	
+
 	public PatternComparatorConsideringPath(String path) {
 		this.path = path;
 	}
@@ -35,13 +37,15 @@ public class PatternComparatorConsideringPath implements Comparator<PathPattern>
 	public int compare(PathPattern o1, PathPattern o2) {
 		// Nulls get sorted to the end
 		if (o1 == null) {
-			return (o2==null?0:+1);
-		} else if (o2 == null) {
+			return (o2 == null ? 0 : +1);
+		}
+		else if (o2 == null) {
 			return -1;
 		}
 		if (o1.getPatternString().equals(path)) {
-			return (o2.getPatternString().equals(path))?0:-1;
-		} else if (o2.getPatternString().equals(path)) {
+			return (o2.getPatternString().equals(path)) ? 0 : -1;
+		}
+		else if (o2.getPatternString().equals(path)) {
 			return +1;
 		}
 		return o1.compareTo(o2);

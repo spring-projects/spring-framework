@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util.patterns;
 
 import java.text.MessageFormat;
 
 /**
  * The messages that can be included in a {@link PatternParseException} when there is a parse failure.
- * 
+ *
  * @author Andy Clement
+ * @since 5.0
  */
 public enum PatternMessage {
-	
+
 	// @formatter:off
 	MISSING_CLOSE_CAPTURE("Expected close capture character after variable name '}'"),
-	MISSING_OPEN_CAPTURE("Missing preceeding open capture character before variable name'{'"), 
+	MISSING_OPEN_CAPTURE("Missing preceeding open capture character before variable name'{'"),
 	ILLEGAL_NESTED_CAPTURE("Not allowed to nest variable captures"),
 	CANNOT_HAVE_ADJACENT_CAPTURES("Adjacent captures are not allowed"),
 	ILLEGAL_CHARACTER_AT_START_OF_CAPTURE_DESCRIPTOR("Character ''{0}'' is not allowed at start of captured variable name"),

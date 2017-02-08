@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util.patterns;
 
 import org.springframework.web.util.patterns.PathPattern.MatchingContext;
@@ -20,13 +21,13 @@ import org.springframework.web.util.patterns.PathPattern.MatchingContext;
 /**
  * A path element representing capturing the rest of a path. In the pattern
  * '/foo/{*foobar}' the /{*foobar} is represented as a {@link CaptureTheRestPathElement}.
- * 
+ *
  * @author Andy Clement
  */
 class CaptureTheRestPathElement extends PathElement {
 
 	private String variableName;
-	
+
 	private char separator;
 
 	/**
@@ -45,14 +46,14 @@ class CaptureTheRestPathElement extends PathElement {
 		// No need to handle 'match start' checking as this captures everything
 		// anyway and cannot be followed by anything else
 		// assert next == null
-		
+
 		// If there is more data, it must start with the separator
-		if (candidateIndex<matchingContext.candidateLength &&
-			matchingContext.candidate[candidateIndex] != separator) {
+		if (candidateIndex < matchingContext.candidateLength &&
+				matchingContext.candidate[candidateIndex] != separator) {
 			return false;
 		}
-		while ((candidateIndex+1)<matchingContext.candidateLength &&
-				matchingContext.candidate[candidateIndex+1] == separator) {
+		while ((candidateIndex + 1) < matchingContext.candidateLength &&
+				matchingContext.candidate[candidateIndex + 1] == separator) {
 			candidateIndex++;
 		}
 		if (matchingContext.extractingVariables) {

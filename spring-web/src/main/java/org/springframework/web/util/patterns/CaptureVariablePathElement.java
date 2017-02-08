@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util.patterns;
 
 import java.util.regex.Matcher;
@@ -22,15 +23,15 @@ import org.springframework.web.util.patterns.PathPattern.MatchingContext;
 /**
  * A path element representing capturing a piece of the path as a variable. In the pattern
  * '/foo/{bar}/goo' the {bar} is represented as a {@link CaptureVariablePathElement}.
- * 
+ *
  * @author Andy Clement
  */
 class CaptureVariablePathElement extends PathElement {
 
 	private String variableName;
-	
+
 	private java.util.regex.Pattern constraintPattern;
-	
+
 	/**
 	 * @param pos the position in the pattern of this capture element
 	 * @param captureDescriptor is of the form {AAAAA[:pattern]}
@@ -47,12 +48,14 @@ class CaptureVariablePathElement extends PathElement {
 		if (colon == -1) {
 			// no constraint
 			variableName = new String(captureDescriptor, 1, captureDescriptor.length - 2);
-		} else {
+		}
+		else {
 			variableName = new String(captureDescriptor, 1, colon - 1);
 			if (caseSensitive) {
 				constraintPattern = java.util.regex.Pattern
 						.compile(new String(captureDescriptor, colon + 1, captureDescriptor.length - colon - 2));
-			} else {
+			}
+			else {
 				constraintPattern = java.util.regex.Pattern.compile(
 						new String(captureDescriptor, colon + 1, captureDescriptor.length - colon - 2),
 						java.util.regex.Pattern.CASE_INSENSITIVE);
@@ -69,7 +72,7 @@ class CaptureVariablePathElement extends PathElement {
 			candidateCapture = new SubSequence(matchingContext.candidate, candidateIndex, nextPos);
 			Matcher m = constraintPattern.matcher(candidateCapture);
 			if (m.groupCount() != 0) {
-				throw new IllegalArgumentException("No capture groups allowed in the constraint regex: "+constraintPattern.pattern());
+				throw new IllegalArgumentException("No capture groups allowed in the constraint regex: " + constraintPattern.pattern());
 			}
 			if (!m.matches()) {
 				return false;
@@ -78,10 +81,12 @@ class CaptureVariablePathElement extends PathElement {
 		boolean match = false;
 		if (next == null) {
 			match = (nextPos == matchingContext.candidateLength);
-		} else {
+		}
+		else {
 			if (matchingContext.isMatchStartMatching && nextPos == matchingContext.candidateLength) {
 				match = true; // no more data but matches up to this point
-			} else {
+			}
+			else {
 				match = next.matches(nextPos, matchingContext);
 			}
 		}
@@ -90,7 +95,7 @@ class CaptureVariablePathElement extends PathElement {
 		}
 		return match;
 	}
-	
+
 	public String getVariableName() {
 		return this.variableName;
 	}
@@ -98,7 +103,7 @@ class CaptureVariablePathElement extends PathElement {
 	public String toString() {
 		return "CaptureVariable({" + variableName + (constraintPattern == null ? "" : ":" + constraintPattern.pattern()) + "})";
 	}
-	
+
 	@Override
 	public int getNormalizedLength() {
 		return 1;
@@ -113,7 +118,7 @@ class CaptureVariablePathElement extends PathElement {
 	public int getCaptureCount() {
 		return 1;
 	}
-	
+
 	@Override
 	public int getScore() {
 		return CAPTURE_VARIABLE_WEIGHT;

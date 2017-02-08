@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util.patterns;
 
 /**
  * Exception that is thrown when there is a problem with the pattern being parsed.
- * 
+ *
  * @author Andy Clement
+ * @since 5.0
  */
 public class PatternParseException extends RuntimeException {
 
@@ -41,7 +43,7 @@ public class PatternParseException extends RuntimeException {
 	}
 
 	public PatternParseException(Throwable cause, int pos, char[] patternText, PatternMessage message, Object... inserts) {
-		super(message.formatMessage(inserts),cause);
+		super(message.formatMessage(inserts), cause);
 		this.pos = pos;
 		this.patternText = patternText;
 		this.message = message;
