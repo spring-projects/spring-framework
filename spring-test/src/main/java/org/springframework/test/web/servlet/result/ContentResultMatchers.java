@@ -127,7 +127,7 @@ public class ContentResultMatchers {
 	 * Assert the response body content with a Hamcrest {@link Matcher}.
 	 * <pre class="code">
 	 * mockMvc.perform(get("/path"))
-	 *   .andExpect(content(containsString("text")));
+	 *   .andExpect(content().string(containsString("text")));
 	 * </pre>
 	 */
 	public ResultMatcher string(final Matcher<? super String> matcher) {
