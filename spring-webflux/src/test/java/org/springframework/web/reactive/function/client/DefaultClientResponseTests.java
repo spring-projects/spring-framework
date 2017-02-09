@@ -39,11 +39,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.web.reactive.function.BodyExtractors.toMono;
@@ -95,6 +99,18 @@ public class DefaultClientResponseTests {
 		assertEquals(Optional.of(contentType), headers.contentType());
 		assertEquals(httpHeaders, headers.asHttpHeaders());
 	}
+
+	@Test
+	public void cookies() throws Exception {
+		ResponseCookie cookie = ResponseCookie.from("foo", "bar").build();
+		MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
+		cookies.add("foo", cookie);
+
+		when(mockResponse.getCookies()).thenReturn(cookies);
+
+		assertSame(cookies, defaultClientResponse.cookies());
+	}
+
 
 	@Test
 	public void body() throws Exception {

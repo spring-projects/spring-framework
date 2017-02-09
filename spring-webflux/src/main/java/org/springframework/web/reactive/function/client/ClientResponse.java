@@ -26,7 +26,9 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.reactive.ClientHttpResponse;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 
 /**
@@ -50,6 +52,11 @@ public interface ClientResponse {
 	 * Return the headers of this response.
 	 */
 	Headers headers();
+
+	/**
+	 * Return cookies of this response.
+	 */
+	MultiValueMap<String, ResponseCookie> cookies();
 
 	/**
 	 * Extract the body with the given {@code BodyExtractor}. Unlike {@link #bodyToMono(Class)} and
