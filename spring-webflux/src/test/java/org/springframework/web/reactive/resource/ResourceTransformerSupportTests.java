@@ -30,7 +30,6 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.util.patterns.PathPatternParser;
 
 import static org.junit.Assert.assertEquals;
 
@@ -70,8 +69,7 @@ public class ResourceTransformerSupportTests {
 		handler.setLocations(Collections.singletonList(new ClassPathResource("test/", getClass())));
 		handler.setResourceResolvers(resolvers);
 		ResourceUrlProvider urlProvider = new ResourceUrlProvider();
-		PathPatternParser parser = new PathPatternParser();
-		urlProvider.setHandlerMap(Collections.singletonMap(parser.parse("/resources/**"), handler));
+		urlProvider.setHandlerMap(Collections.singletonMap("/resources/**", handler));
 		return urlProvider;
 	}
 

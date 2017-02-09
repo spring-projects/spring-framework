@@ -133,8 +133,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		SortedSet<PathPattern> matches = getMatchingPatterns(lookupPath);
 
 		if(!matches.isEmpty()) {
-			PathPatternRegistry registry = new PathPatternRegistry();
-			registry.addAll(matches);
+			PathPatternRegistry registry = new PathPatternRegistry(matches);
 			return new PatternsRequestCondition(registry, this.pathHelper);
 		}
 		return null;

@@ -93,7 +93,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	private final MultiValueMap<PathPattern, T> mappingLookup = new LinkedMultiValueMap<>();
 
 	private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-	
+
 	private final MappingRegistry mappingRegistry = new MappingRegistry();
 
 
@@ -129,10 +129,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	public void registerMapping(T mapping, Object handler, Method method) {
 		this.readWriteLock.writeLock().lock();
 		try {
-			Set<PathPattern> patterns = getMappingPathPatterns(mapping);
-			getPatternRegistry().addAll(patterns);
-			patterns.forEach(pathPattern -> {
-				this.mappingLookup.add(pathPattern, mapping);
+			getMappingPathPatterns(mapping).forEach(pattern -> {
+				getPatternRegistry().register(pattern).forEach(
+						pathPattern -> this.mappingLookup.add(pathPattern, mapping)
+				);
 			});
 			this.mappingRegistry.register(mapping, handler, method);
 		}
@@ -149,8 +149,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	public void unregisterMapping(T mapping) {
 		this.readWriteLock.writeLock().lock();
 		try {
-			getMappingPathPatterns(mapping)
-					.forEach(pathPattern -> getPatternRegistry().remove(pathPattern));
+			getMappingPathPatterns(mapping).forEach(pattern -> {
+				getPatternRegistry().unregister(pattern).forEach(
+						pathPattern -> this.mappingLookup.remove(pathPattern, mapping)
+				);
+			});
 			this.mappingRegistry.unregister(mapping);
 		}
 		finally {
@@ -420,7 +423,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	/**
 	 * Extract and return the URL paths contained in a mapping.
 	 */
-	protected abstract Set<PathPattern> getMappingPathPatterns(T mapping);
+	protected abstract Set<String> getMappingPathPatterns(T mapping);
 
 	/**
 	 * Check if a mapping matches the current request and return a (potentially

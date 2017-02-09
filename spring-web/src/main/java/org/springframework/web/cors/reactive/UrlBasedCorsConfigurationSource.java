@@ -18,6 +18,7 @@ package org.springframework.web.cors.reactive;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
@@ -71,12 +72,14 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	/**
 	 * Set CORS configuration based on URL patterns.
 	 */
-	public void setCorsConfigurations(Map<PathPattern, CorsConfiguration> corsConfigurations) {
+	public void setCorsConfigurations(Map<String, CorsConfiguration> corsConfigurations) {
 		this.patternRegistry.clear();
 		this.corsConfigurations.clear();
 		if (corsConfigurations != null) {
-			this.patternRegistry.addAll(corsConfigurations.keySet());
-			this.corsConfigurations.putAll(corsConfigurations);
+			corsConfigurations.forEach((pattern, config) -> {
+				List<PathPattern> registered = this.patternRegistry.register(pattern);
+				registered.forEach(p -> this.corsConfigurations.put(p, config));
+			});
 		}
 	}
 

@@ -17,7 +17,6 @@
 package org.springframework.web.util.patterns;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -61,6 +60,11 @@ public class PathPatternRegistry {
 	public PathPatternRegistry() {
 		this.pathPatternParser = new PathPatternParser();
 		this.patterns = new HashSet<>();
+	}
+
+	public PathPatternRegistry(Set<PathPattern> patterns) {
+		this();
+		this.patterns.addAll(patterns);
 	}
 
 	/**
@@ -151,30 +155,6 @@ public class PathPatternRegistry {
 	}
 
 	/**
-	 * Add a {@link PathPattern} instance to this registry
-	 * @return true if this registry did not already contain the specified {@code PathPattern}
-	 */
-	public boolean add(PathPattern pathPattern) {
-		return this.patterns.add(pathPattern);
-	}
-
-	/**
-	 * Add all {@link PathPattern}s instance to this registry
-	 * @return true if this registry did not already contain at least one of the given {@code PathPattern}s
-	 */
-	public boolean addAll(Collection<PathPattern> pathPatterns) {
-		return this.patterns.addAll(pathPatterns);
-	}
-
-	/**
-	 * Remove the given {@link PathPattern} from this registry
-	 * @return true if this registry contained the given {@code PathPattern}
-	 */
-	public boolean remove(PathPattern pathPattern) {
-		return this.patterns.remove(pathPattern);
-	}
-
-	/**
 	 * Remove all {@link PathPattern}s from this registry
 	 */
 	public void clear() {
@@ -197,25 +177,7 @@ public class PathPatternRegistry {
 	 * @return the list of {@link PathPattern} that were registered as a result
 	 */
 	public List<PathPattern> register(String rawPattern) {
-		String fixedPattern = prependLeadingSlash(rawPattern);
-		List<PathPattern> newPatterns = new ArrayList<>();
-		PathPattern pattern = this.pathPatternParser.parse(fixedPattern);
-		newPatterns.add(pattern);
-		if (StringUtils.hasLength(fixedPattern) && !pattern.isCatchAll()) {
-			if (this.useSuffixPatternMatch) {
-				if (this.fileExtensions != null && !this.fileExtensions.isEmpty()) {
-					for (String extension : this.fileExtensions) {
-						newPatterns.add(this.pathPatternParser.parse(fixedPattern + extension));
-					}
-				}
-				else {
-					newPatterns.add(this.pathPatternParser.parse(fixedPattern + ".*"));
-				}
-			}
-			if (this.useTrailingSlashMatch && !fixedPattern.endsWith("/")) {
-				newPatterns.add(this.pathPatternParser.parse(fixedPattern + "/"));
-			}
-		}
+		List<PathPattern> newPatterns = generatePathPatterns(rawPattern);
 		this.patterns.addAll(newPatterns);
 		return newPatterns;
 	}
@@ -228,6 +190,44 @@ public class PathPatternRegistry {
 			return pattern;
 		}
 	}
+
+	private List<PathPattern> generatePathPatterns(String rawPattern) {
+		String fixedPattern = prependLeadingSlash(rawPattern);
+		List<PathPattern> patterns = new ArrayList<>();
+		PathPattern pattern = this.pathPatternParser.parse(fixedPattern);
+		patterns.add(pattern);
+		if (StringUtils.hasLength(fixedPattern) && !pattern.isCatchAll()) {
+			if (this.useSuffixPatternMatch) {
+				if (this.fileExtensions != null && !this.fileExtensions.isEmpty()) {
+					for (String extension : this.fileExtensions) {
+						patterns.add(this.pathPatternParser.parse(fixedPattern + extension));
+					}
+				}
+				else {
+					patterns.add(this.pathPatternParser.parse(fixedPattern + ".*"));
+				}
+			}
+			if (this.useTrailingSlashMatch && !fixedPattern.endsWith("/")) {
+				patterns.add(this.pathPatternParser.parse(fixedPattern + "/"));
+			}
+		}
+		return patterns;
+	}
+
+	/**
+	 * Parse the given {@code rawPattern} and removes it to this registry,
+	 * as well as pattern variants, depending on the given options and
+	 * the nature of the input pattern.
+	 *
+	 * @param rawPattern raw path pattern to parse and unregister
+	 * @return the list of {@link PathPattern} that were unregistered as a result
+	 */
+	public List<PathPattern> unregister(String rawPattern) {
+		List<PathPattern> unregisteredPatterns = generatePathPatterns(rawPattern);
+		this.patterns.removeAll(unregisteredPatterns);
+		return unregisteredPatterns;
+	}
+
 
 	/**
 	 * Combine the patterns contained in the current registry

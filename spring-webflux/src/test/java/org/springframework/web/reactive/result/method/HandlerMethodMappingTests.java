@@ -18,7 +18,9 @@ package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -39,6 +41,7 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 import org.springframework.web.util.patterns.PathPattern;
+import org.springframework.web.util.patterns.PathPatternComparator;
 import org.springframework.web.util.patterns.PathPatternParser;
 import org.springframework.web.util.patterns.PatternComparatorConsideringPath;
 
@@ -54,7 +57,7 @@ public class HandlerMethodMappingTests {
 
 	private PathPatternParser patternParser = new PathPatternParser();
 
-	private AbstractHandlerMethodMapping<PathPattern> mapping;
+	private AbstractHandlerMethodMapping<String> mapping;
 
 	private MyHandler handler;
 
@@ -74,14 +77,14 @@ public class HandlerMethodMappingTests {
 
 	@Test(expected = IllegalStateException.class)
 	public void registerDuplicates() {
-		this.mapping.registerMapping(this.patternParser.parse("/foo"), this.handler, this.method1);
-		this.mapping.registerMapping(this.patternParser.parse("/foo"), this.handler, this.method2);
+		this.mapping.registerMapping("/foo", this.handler, this.method1);
+		this.mapping.registerMapping("/foo", this.handler, this.method2);
 	}
 
 	@Test
 	public void directMatch() throws Exception {
-		String key = "foo";
-		this.mapping.registerMapping(this.patternParser.parse(key), this.handler, this.method1);
+		String key = "/foo";
+		this.mapping.registerMapping(key, this.handler, this.method1);
 		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, key));
 
 		assertEquals(this.method1, ((HandlerMethod) result.block()).getMethod());
@@ -89,8 +92,8 @@ public class HandlerMethodMappingTests {
 
 	@Test
 	public void patternMatch() throws Exception {
-		this.mapping.registerMapping(this.patternParser.parse("/fo*"), this.handler, this.method1);
-		this.mapping.registerMapping(this.patternParser.parse("/f*"), this.handler, this.method2);
+		this.mapping.registerMapping("/fo*", this.handler, this.method1);
+		this.mapping.registerMapping("/f*", this.handler, this.method2);
 
 		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, "/foo"));
 		assertEquals(this.method1, ((HandlerMethod) result.block()).getMethod());
@@ -98,8 +101,8 @@ public class HandlerMethodMappingTests {
 
 	@Test
 	public void ambiguousMatch() throws Exception {
-		this.mapping.registerMapping(this.patternParser.parse("/f?o"), this.handler, this.method1);
-		this.mapping.registerMapping(this.patternParser.parse("/fo?"), this.handler, this.method2);
+		this.mapping.registerMapping("/f?o", this.handler, this.method1);
+		this.mapping.registerMapping("/fo?", this.handler, this.method2);
 		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, "/foo"));
 
 		StepVerifier.create(result).expectError(IllegalStateException.class).verify();
@@ -107,8 +110,8 @@ public class HandlerMethodMappingTests {
 
 	@Test
 	public void registerMapping() throws Exception {
-		PathPattern key1 = this.patternParser.parse("/foo");
-		PathPattern key2 = this.patternParser.parse("/foo*");
+		String key1 = "/foo";
+		String key2 = "/foo*";
 		this.mapping.registerMapping(key1, this.handler, this.method1);
 		this.mapping.registerMapping(key2, this.handler, this.method2);
 
@@ -118,8 +121,8 @@ public class HandlerMethodMappingTests {
 
 	@Test
 	public void registerMappingWithSameMethodAndTwoHandlerInstances() throws Exception {
-		PathPattern key1 = this.patternParser.parse("/foo");
-		PathPattern key2 = this.patternParser.parse("/bar");
+		String key1 = "/foo";
+		String key2 = "/bar";
 		MyHandler handler1 = new MyHandler();
 		MyHandler handler2 = new MyHandler();
 		this.mapping.registerMapping(key1, handler1, this.method1);
@@ -131,13 +134,13 @@ public class HandlerMethodMappingTests {
 
 	@Test
 	public void unregisterMapping() throws Exception {
-		String key = "foo";
-		this.mapping.registerMapping(this.patternParser.parse(key), this.handler, this.method1);
+		String key = "/foo";
+		this.mapping.registerMapping(key, this.handler, this.method1);
 		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, key));
 
 		assertNotNull(result.block());
 
-		this.mapping.unregisterMapping(this.patternParser.parse(key));
+		this.mapping.unregisterMapping(key);
 		result = this.mapping.getHandler(createExchange(HttpMethod.GET, key));
 
 		assertNull(result.block());
@@ -152,7 +155,7 @@ public class HandlerMethodMappingTests {
 	}
 
 
-	private static class MyHandlerMethodMapping extends AbstractHandlerMethodMapping<PathPattern> {
+	private static class MyHandlerMethodMapping extends AbstractHandlerMethodMapping<String> {
 
 		private PathPatternParser patternParser = new PathPatternParser();
 
@@ -162,28 +165,34 @@ public class HandlerMethodMappingTests {
 		}
 
 		@Override
-		protected PathPattern getMappingForMethod(Method method, Class<?> handlerType) {
+		protected String getMappingForMethod(Method method, Class<?> handlerType) {
 			String methodName = method.getName();
-			return methodName.startsWith("handler") ? this.patternParser.parse(methodName) : null;
+			return methodName.startsWith("handler") ? methodName : null;
 		}
 
 		@Override
-		protected SortedSet<PathPattern> getMappingPathPatterns(PathPattern key) {
-			TreeSet<PathPattern> patterns = new TreeSet<>();
-			patterns.add(key);
-			return patterns;
+		protected Set<String> getMappingPathPatterns(String key) {
+			return Collections.singleton(key);
 		}
 
 		@Override
-		protected PathPattern getMatchingMapping(PathPattern pattern, ServerWebExchange exchange) {
+		protected String getMatchingMapping(String pattern, ServerWebExchange exchange) {
 			String lookupPath = exchange.getRequest().getURI().getPath();
-			return (pattern.matches(lookupPath) ? pattern : null);
+			PathPattern pathPattern = this.patternParser.parse(pattern);
+			return (pathPattern.matches(lookupPath) ? pattern : null);
 		}
 
 		@Override
-		protected Comparator<PathPattern> getMappingComparator(ServerWebExchange exchange) {
+		protected Comparator<String> getMappingComparator(ServerWebExchange exchange) {
 			String lookupPath = exchange.getRequest().getURI().getPath();
-			return new PatternComparatorConsideringPath(lookupPath);
+			PatternComparatorConsideringPath comparator = new PatternComparatorConsideringPath(lookupPath);
+			return new Comparator<String>() {
+				@Override
+				public int compare(String o1, String o2) {
+
+					return comparator.compare(patternParser.parse(o1), patternParser.parse(o2));
+				}
+			};
 		}
 
 	}

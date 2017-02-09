@@ -84,12 +84,16 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * from the Spring {@code ApplicationContext}. However if this property is
 	 * used, the auto-detection is turned off.
 	 */
-	public void setHandlerMap(Map<PathPattern, ResourceWebHandler> handlerMap) {
+	public void setHandlerMap(Map<String, ResourceWebHandler> handlerMap) {
 		if (handlerMap != null) {
 			this.patternRegistry.clear();
-			this.patternRegistry.addAll(handlerMap.keySet());
 			this.handlerMap.clear();
-			this.handlerMap.putAll(handlerMap);
+
+			handlerMap.forEach((pattern, handler) -> {
+				this.patternRegistry
+						.register(pattern)
+						.forEach(pathPattern -> this.handlerMap.put(pathPattern, handler));
+			});
 			this.autodetect = false;
 		}
 	}
@@ -143,7 +147,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 								"locations=" + resourceHandler.getLocations() + ", " +
 								"resolvers=" + resourceHandler.getResourceResolvers());
 					}
-					this.patternRegistry.add(pattern);
+					this.patternRegistry.register(pattern.getPatternString());
 					this.handlerMap.put(pattern, resourceHandler);
 				}
 			}
@@ -179,11 +183,11 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	private int getEndPathIndex(String lookupPath) {
 		int suffixIndex = lookupPath.length();
 		int queryIndex = lookupPath.indexOf("?");
-		if(queryIndex > 0) {
+		if (queryIndex > 0) {
 			suffixIndex = queryIndex;
 		}
 		int hashIndex = lookupPath.indexOf("#");
-		if(hashIndex > 0) {
+		if (hashIndex > 0) {
 			suffixIndex = Math.min(suffixIndex, hashIndex);
 		}
 		return suffixIndex;

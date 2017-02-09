@@ -146,8 +146,8 @@ public class PathPatternRegistryTests {
 		PathPattern fooTwo = this.registry.parsePattern("/f?o");
 		assertThat(fooOne.compareTo(fooTwo), is(0));
 
-		this.registry.add(fooOne);
-		this.registry.add(fooTwo);
+		this.registry.register("/fo?");
+		this.registry.register("/f?o");
 		Set<PathPattern> matches = this.registry.findMatches("/foo");
 		assertThat(getPatternList(matches), Matchers.contains("/f?o", "/fo?"));
 	}

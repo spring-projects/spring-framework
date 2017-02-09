@@ -34,7 +34,6 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.util.patterns.PathPatternParser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -58,8 +57,7 @@ public class AppCacheManifestTransformerTests {
 		ClassPathResource allowedLocation = new ClassPathResource("test/", getClass());
 		ResourceWebHandler resourceHandler = new ResourceWebHandler();
 		ResourceUrlProvider resourceUrlProvider = new ResourceUrlProvider();
-		PathPatternParser parser = new PathPatternParser();
-		resourceUrlProvider.setHandlerMap(Collections.singletonMap(parser.parse("/static/**"), resourceHandler));
+		resourceUrlProvider.setHandlerMap(Collections.singletonMap("/static/**", resourceHandler));
 
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));

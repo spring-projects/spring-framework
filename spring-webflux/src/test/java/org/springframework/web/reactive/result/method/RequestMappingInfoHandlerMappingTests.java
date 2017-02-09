@@ -24,9 +24,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -98,11 +96,10 @@ public class RequestMappingInfoHandlerMappingTests {
 	public void getMappingPathPatterns() throws Exception {
 		String[] patterns = {"/foo/*", "/foo", "/bar/*", "/bar"};
 		RequestMappingInfo info = paths(patterns).build();
-		Set<PathPattern> actual = this.handlerMapping.getMappingPathPatterns(info);
+		Set<String> actual = this.handlerMapping.getMappingPathPatterns(info);
 
-		assertThat(actual.stream().map(PathPattern::getPatternString).collect(Collectors.toList()),
-				Matchers.containsInAnyOrder(new String[]{"/foo/*", "/foo", "/bar/*", "/bar",
-						"/foo/*/", "/foo/", "/bar/*/", "/bar/"}));
+		assertThat(actual, Matchers.containsInAnyOrder("/foo/*", "/foo", "/bar/*", "/bar",
+				"/foo/*/", "/foo/", "/bar/*/", "/bar/"));
 	}
 
 	@Test
@@ -192,7 +189,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 		assertError(mono, UnsupportedMediaTypeStatusException.class,
 				ex -> assertEquals("Request failure [status: 415, " +
-						"reason: \"Invalid mime type \"bogus\": does not contain '/'\"]",
+								"reason: \"Invalid mime type \"bogus\": does not contain '/'\"]",
 						ex.getMessage()));
 	}
 
@@ -238,7 +235,8 @@ public class RequestMappingInfoHandlerMappingTests {
 				exchange.getAttributes().get(name));
 	}
 
-	@Test @SuppressWarnings("unchecked")
+	@Test
+	@SuppressWarnings("unchecked")
 	public void handleMatchUriTemplateVariables() throws Exception {
 		String lookupPath = "/1/2";
 		this.request = MockServerHttpRequest.get(lookupPath).build();
@@ -370,7 +368,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> void assertError(Mono<Object> mono, final Class<T> exceptionClass, final Consumer<T> consumer)  {
+	private <T> void assertError(Mono<Object> mono, final Class<T> exceptionClass, final Consumer<T> consumer) {
 
 		StepVerifier.create(mono)
 				.consumeErrorWith(error -> {
@@ -469,11 +467,11 @@ public class RequestMappingInfoHandlerMappingTests {
 		public void foo() {
 		}
 
-		@GetMapping(path = "/foo", params="p")
+		@GetMapping(path = "/foo", params = "p")
 		public void fooParam() {
 		}
 
-		@RequestMapping(path = "/ba*", method = { GET, HEAD })
+		@RequestMapping(path = "/ba*", method = {GET, HEAD})
 		public void bar() {
 		}
 
@@ -481,31 +479,31 @@ public class RequestMappingInfoHandlerMappingTests {
 		public void empty() {
 		}
 
-		@PutMapping(path = "/person/{id}", consumes="application/xml")
+		@PutMapping(path = "/person/{id}", consumes = "application/xml")
 		public void consumes(@RequestBody String text) {
 		}
 
-		@RequestMapping(path = "/persons", produces="application/xml")
+		@RequestMapping(path = "/persons", produces = "application/xml")
 		public String produces() {
 			return "";
 		}
 
-		@RequestMapping(path = "/params", params="foo=bar")
+		@RequestMapping(path = "/params", params = "foo=bar")
 		public String param() {
 			return "";
 		}
 
-		@RequestMapping(path = "/params", params="bar=baz")
+		@RequestMapping(path = "/params", params = "bar=baz")
 		public String param2() {
 			return "";
 		}
 
-		@RequestMapping(path = "/content", produces="application/xml")
+		@RequestMapping(path = "/content", produces = "application/xml")
 		public String xmlContent() {
 			return "";
 		}
 
-		@RequestMapping(path = "/content", produces="!application/xml")
+		@RequestMapping(path = "/content", produces = "!application/xml")
 		public String nonXmlContent() {
 			return "";
 		}

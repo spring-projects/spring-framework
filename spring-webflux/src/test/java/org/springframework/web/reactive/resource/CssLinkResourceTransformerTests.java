@@ -59,8 +59,7 @@ public class CssLinkResourceTransformerTests {
 		ResourceWebHandler resourceHandler = new ResourceWebHandler();
 
 		ResourceUrlProvider resourceUrlProvider = new ResourceUrlProvider();
-		PathPatternParser parser = new PathPatternParser();
-		resourceUrlProvider.setHandlerMap(Collections.singletonMap(parser.parse("/static/**"), resourceHandler));
+		resourceUrlProvider.setHandlerMap(Collections.singletonMap("/static/**", resourceHandler));
 
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
