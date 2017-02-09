@@ -4,7 +4,7 @@ buildscript {
 		maven { url "https://repo.spring.io/plugins-snapshot" }
 	}
 	dependencies {
-		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
+		classpath("io.spring.gradle:propdeps-plugin:0.0.8")
 		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.3")
 		classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.0-beta-38")
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
@@ -1250,9 +1250,20 @@ configure(rootProject) {
 	apply plugin: "org.asciidoctor.convert"
 	apply plugin: "docbook-reference"
 	apply plugin: "groovy"
+	apply plugin: "io.spring.dependency-management"
 
 	// apply plugin: "detect-split-packages"
 	apply from: "${gradleScriptDir}/jdiff.gradle"
+
+	dependencyManagement {
+		imports {
+			mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
+		}
+		resolutionStrategy {
+			cacheChangingModulesFor 0, 'seconds'
+		}
+		applyMavenExclusions = false
+	}
 
 	asciidoctor {
 		sourceDir project.file('src/asciidoc')
