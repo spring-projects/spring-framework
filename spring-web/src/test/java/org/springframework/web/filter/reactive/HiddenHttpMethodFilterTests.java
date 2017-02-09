@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.filter.reactive;
 
+import java.util.Optional;
+
+import org.hamcrest.Matchers;
 import org.junit.Test;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -24,14 +31,13 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
-import java.util.Optional;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /**
+ * Tests for {@link HiddenHttpMethodFilter}
+ *
  * @author Greg Turnquist
  */
 public class HiddenHttpMethodFilterTests {
@@ -48,8 +54,22 @@ public class HiddenHttpMethodFilterTests {
 		};
 
 		StepVerifier.create(filter.filter(mockExchange, filterChain))
-			.expectComplete()
-			.verify();
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void filterWithInvalidParameter() {
+		ServerWebExchange mockExchange = createExchange(Optional.of("INVALID"));
+
+		WebFilterChain filterChain = exchange -> Mono.empty();
+
+		StepVerifier.create(filter.filter(mockExchange, filterChain))
+				.consumeErrorWith(error -> {
+					assertThat(error, Matchers.instanceOf(IllegalArgumentException.class));
+					assertEquals(error.getMessage(), "HttpMethod 'INVALID' is not supported");
+				})
+				.verify();
 	}
 
 	@Test
@@ -62,8 +82,22 @@ public class HiddenHttpMethodFilterTests {
 		};
 
 		StepVerifier.create(filter.filter(mockExchange, filterChain))
-			.expectComplete()
-			.verify();
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void filterWithEmptyStringParameter() {
+		ServerWebExchange mockExchange = createExchange(Optional.of(""));
+
+		WebFilterChain filterChain = exchange -> {
+			assertEquals("Invalid method", HttpMethod.POST, exchange.getRequest().getMethod());
+			return Mono.empty();
+		};
+
+		StepVerifier.create(filter.filter(mockExchange, filterChain))
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
@@ -78,15 +112,15 @@ public class HiddenHttpMethodFilterTests {
 		filter.setMethodParam("_foo");
 
 		StepVerifier.create(filter.filter(mockExchange, filterChain))
-			.expectComplete()
-			.verify();
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
 	public void filterWithoutPost() {
 		ServerWebExchange mockExchange = createExchange(Optional.of("DELETE")).mutate()
-			.request(builder -> builder.method(HttpMethod.PUT))
-			.build();
+				.request(builder -> builder.method(HttpMethod.PUT))
+				.build();
 
 		WebFilterChain filterChain = exchange -> {
 			assertEquals("Invalid method", HttpMethod.PUT, exchange.getRequest().getMethod());
@@ -94,8 +128,8 @@ public class HiddenHttpMethodFilterTests {
 		};
 
 		StepVerifier.create(filter.filter(mockExchange, filterChain))
-			.expectComplete()
-			.verify();
+				.expectComplete()
+				.verify();
 	}
 
 	private ServerWebExchange createExchange(Optional<String> optionalMethod) {
@@ -104,12 +138,12 @@ public class HiddenHttpMethodFilterTests {
 
 	private ServerWebExchange createExchange(String methodName, Optional<String> optionalBody) {
 		MockServerHttpRequest.BodyBuilder builder = MockServerHttpRequest
-			.post("/hotels")
-			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
+				.post("/hotels")
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
 
 		MockServerHttpRequest request = optionalBody
-			.map(method -> builder.body(methodName + "=" + method))
-			.orElse(builder.build());
+				.map(method -> builder.body(methodName + "=" + method))
+				.orElse(builder.build());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 
