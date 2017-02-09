@@ -64,6 +64,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.support.HttpRequestPathHelper;
 import org.springframework.web.util.patterns.PathPattern;
+import org.springframework.web.util.patterns.PathPatternRegistry;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
@@ -545,10 +546,12 @@ public class RequestMappingInfoHandlerMappingTests {
 		protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
 			RequestMapping annot = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
 			if (annot != null) {
+				PathPatternRegistry pathPatternRegistry = new PathPatternRegistry();
+				pathPatternRegistry.setUseSuffixPatternMatch(true);
+				pathPatternRegistry.setUseTrailingSlashMatch(true);
 				BuilderConfiguration options = new BuilderConfiguration();
 				options.setPathHelper(getPathHelper());
-				options.setSuffixPatternMatch(true);
-				options.setTrailingSlashMatch(true);
+				options.setPathPatternRegistry(pathPatternRegistry);
 				return paths(annot.value()).methods(annot.method())
 						.params(annot.params()).headers(annot.headers())
 						.consumes(annot.consumes()).produces(annot.produces())

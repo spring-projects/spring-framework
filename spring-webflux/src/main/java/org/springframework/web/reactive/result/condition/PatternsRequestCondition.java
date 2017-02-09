@@ -18,15 +18,11 @@ package org.springframework.web.reactive.result.condition;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.springframework.util.PathMatcher;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.support.HttpRequestPathHelper;
 import org.springframework.web.util.patterns.PathPattern;
@@ -37,6 +33,7 @@ import org.springframework.web.util.patterns.PathPatternRegistry;
  * against a set of URL path patterns.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public final class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
@@ -51,7 +48,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * @param patterns 0 or more URL patterns; if 0 the condition will match to every request.
 	 */
 	public PatternsRequestCondition(String... patterns) {
-		this(patterns, null, false, false, null);
+		this(patterns, null, null);
 	}
 
 	/**
@@ -59,43 +56,20 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * Each pattern that is not empty and does not start with "/" is pre-pended with "/".
 	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
 	 * @param pathHelper to determine the lookup path for a request
-	 * @param useSuffixPatternMatch whether to enable matching by suffix (".*")
-	 * @param useTrailingSlashMatch whether to match irrespective of a trailing slash
-	 * @param extensions file extensions to consider for path matching
+	 * @param pathPatternRegistry the pattern registry in which we'll register the given paths
 	 */
 	public PatternsRequestCondition(String[] patterns, HttpRequestPathHelper pathHelper,
-			boolean useSuffixPatternMatch, boolean useTrailingSlashMatch, Set<String> extensions) {
-
-		this(createPatternSet(patterns, useSuffixPatternMatch, useTrailingSlashMatch, extensions),
+			PathPatternRegistry pathPatternRegistry) {
+		this(createPatternSet(patterns, pathPatternRegistry),
 				(pathHelper != null ? pathHelper : new HttpRequestPathHelper()));
 	}
 
-	private static PathPatternRegistry createPatternSet(String[] patterns,boolean useSuffixPatternMatch,
-			boolean useTrailingSlashMatch, Set<String> extensions) {
-		Set<String> fixedFileExtensions = (extensions != null) ? extensions.stream()
-				.map(ext -> (ext.charAt(0) != '.') ? "." + ext : ext)
-				.collect(Collectors.toSet()) : Collections.emptySet();
-		PathPatternRegistry patternSet = new PathPatternRegistry();
-		patternSet.setUseSuffixPatternMatch(useSuffixPatternMatch);
-		patternSet.setUseTrailingSlashMatch(useTrailingSlashMatch);
-		patternSet.setFileExtensions(extensions);
+	private static PathPatternRegistry createPatternSet(String[] patterns, PathPatternRegistry pathPatternRegistry) {
+		PathPatternRegistry patternSet = pathPatternRegistry != null ? pathPatternRegistry : new PathPatternRegistry();
 		if(patterns != null) {
-			Arrays.asList(patterns).stream()
-					.map(prependLeadingSlash())
-					.forEach(p -> patternSet.register(p));
+			Arrays.asList(patterns).stream().forEach(p -> patternSet.register(p));
 		}
 		return patternSet;
-	}
-
-	private static Function<String, String> prependLeadingSlash() {
-		return pattern -> {
-			if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
-				return "/" + pattern;
-			}
-			else {
-				return pattern;
-			}
-		};
 	}
 
 	private PatternsRequestCondition(PathPatternRegistry patternRegistry, HttpRequestPathHelper pathHelper) {

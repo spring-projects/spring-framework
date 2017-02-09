@@ -111,11 +111,14 @@ public class PathPatternRegistry {
 	 * <p>The default value is an empty {@code Set}
 	 */
 	public void setFileExtensions(Set<String> fileExtensions) {
-		this.fileExtensions = fileExtensions;
+		Set<String> fixedFileExtensions = (fileExtensions != null) ? fileExtensions.stream()
+				.map(ext -> (ext.charAt(0) != '.') ? "." + ext : ext)
+				.collect(Collectors.toSet()) : Collections.emptySet();
+		this.fileExtensions = fixedFileExtensions;
 	}
 
 	/**
-	 * Return a (read-only) set of all patterns, sorted according to their specificity.
+	 * Return a (read-only) set of all patterns for matching (including generated pattern variants).
 	 */
 	public Set<PathPattern> getPatterns() {
 		return Collections.unmodifiableSet(this.patterns);
@@ -194,26 +197,36 @@ public class PathPatternRegistry {
 	 * @return the list of {@link PathPattern} that were registered as a result
 	 */
 	public List<PathPattern> register(String rawPattern) {
+		String fixedPattern = prependLeadingSlash(rawPattern);
 		List<PathPattern> newPatterns = new ArrayList<>();
-		PathPattern pattern = this.pathPatternParser.parse(rawPattern);
+		PathPattern pattern = this.pathPatternParser.parse(fixedPattern);
 		newPatterns.add(pattern);
-		if (StringUtils.hasLength(rawPattern) && !pattern.isCatchAll()) {
+		if (StringUtils.hasLength(fixedPattern) && !pattern.isCatchAll()) {
 			if (this.useSuffixPatternMatch) {
 				if (this.fileExtensions != null && !this.fileExtensions.isEmpty()) {
 					for (String extension : this.fileExtensions) {
-						newPatterns.add(this.pathPatternParser.parse(rawPattern + "." + extension));
+						newPatterns.add(this.pathPatternParser.parse(fixedPattern + extension));
 					}
 				}
 				else {
-					newPatterns.add(this.pathPatternParser.parse(rawPattern + ".*"));
+					newPatterns.add(this.pathPatternParser.parse(fixedPattern + ".*"));
 				}
 			}
-			if (this.useTrailingSlashMatch && !rawPattern.endsWith("/")) {
-				newPatterns.add(this.pathPatternParser.parse(rawPattern + "/"));
+			if (this.useTrailingSlashMatch && !fixedPattern.endsWith("/")) {
+				newPatterns.add(this.pathPatternParser.parse(fixedPattern + "/"));
 			}
 		}
 		this.patterns.addAll(newPatterns);
 		return newPatterns;
+	}
+
+	private String prependLeadingSlash(String pattern) {
+		if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
+			return "/" + pattern;
+		}
+		else {
+			return pattern;
+		}
 	}
 
 	/**

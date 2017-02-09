@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -30,6 +29,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.util.patterns.PathPattern;
+import org.springframework.web.util.patterns.PathPatternRegistry;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -119,7 +119,8 @@ public class PatternsRequestConditionTests {
 		assertNotNull(match);
 		assertEquals("/{foo}", match.getPatterns().iterator().next().getPatternString());
 
-		condition = new PatternsRequestCondition(new String[] {"/foo"}, null, true, false, null);
+		condition = new PatternsRequestCondition(new String[] {"/foo"}, null,
+				createPatternRegistry(true, false, null));
 		match = condition.getMatchingCondition(exchange);
 
 		assertNotNull(match);
@@ -132,7 +133,8 @@ public class PatternsRequestConditionTests {
 	public void matchSuffixPatternUsingFileExtensions() throws Exception {
 		String[] patterns = new String[] {"/jobs/{jobName}"};
 		Set<String> extensions = Collections.singleton("json");
-		PatternsRequestCondition condition = new PatternsRequestCondition(patterns, null, true, false, extensions);
+		PatternsRequestCondition condition = new PatternsRequestCondition(patterns, null,
+				createPatternRegistry(true, false, extensions));
 
 		ServerWebExchange exchange = createExchange("/jobs/my.job");
 		PatternsRequestCondition match = condition.getMatchingCondition(exchange);
@@ -152,10 +154,12 @@ public class PatternsRequestConditionTests {
 	@Test
 	public void matchSuffixPatternUsingFileExtensions2() throws Exception {
 		PatternsRequestCondition condition1 = new PatternsRequestCondition(
-				new String[] {"/prefix"}, null, true, false, Collections.singleton("json"));
+				new String[] {"/prefix"}, null,
+				createPatternRegistry(true, false, Collections.singleton("json")));
 
 		PatternsRequestCondition condition2 = new PatternsRequestCondition(
-				new String[] {"/suffix"}, null, true, false, null);
+				new String[] {"/suffix"}, null,
+				createPatternRegistry(true, false, null));
 
 		PatternsRequestCondition combined = condition1.combine(condition2);
 
@@ -174,14 +178,16 @@ public class PatternsRequestConditionTests {
 
 		assertNull("Should not match by default", match);
 
-		condition = new PatternsRequestCondition(new String[] {"/foo"}, null, false, true, null);
+		condition = new PatternsRequestCondition(new String[] {"/foo"}, null,
+				createPatternRegistry(false, true, null));
 		match = condition.getMatchingCondition(exchange);
 
 		assertNotNull(match);
 		assertEquals("Trailing slash should be insensitive to useSuffixPatternMatch settings (SPR-6164, SPR-5636)",
 				"/foo/", match.getPatterns().iterator().next().getPatternString());
 
-		condition = new PatternsRequestCondition(new String[] {"/foo"}, null, true, true, null);
+		condition = new PatternsRequestCondition(new String[] {"/foo"}, null,
+				createPatternRegistry(true, true, null));
 		match = condition.getMatchingCondition(exchange);
 
 		assertNotNull(match);
@@ -230,6 +236,15 @@ public class PatternsRequestConditionTests {
 	private ServerWebExchange createExchange(String path) throws URISyntaxException {
 		ServerHttpRequest request = MockServerHttpRequest.get(path).build();
 		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
+	}
+
+	private PathPatternRegistry createPatternRegistry(boolean useSuffixPatternMatch, boolean useTrailingSlashMatch,
+			Set<String> extensions) {
+		PathPatternRegistry registry = new PathPatternRegistry();
+		registry.setUseSuffixPatternMatch(useSuffixPatternMatch);
+		registry.setUseTrailingSlashMatch(useTrailingSlashMatch);
+		registry.setFileExtensions(extensions);
+		return registry;
 	}
 
 }

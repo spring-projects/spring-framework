@@ -22,10 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.stream.Collectors;
 
 import org.hamcrest.Matchers;
@@ -43,19 +40,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.StaticWebApplicationContext;
-import org.springframework.web.reactive.accept.MappingContentTypeResolver;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
-import org.springframework.web.util.patterns.PathPattern;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link RequestMappingHandlerMapping}.
@@ -72,59 +62,6 @@ public class RequestMappingHandlerMappingTests {
 	@Before
 	public void setUp() throws Exception {
 		this.handlerMapping.setApplicationContext(wac);
-	}
-
-
-	@Test
-	public void useRegisteredSuffixPatternMatch() {
-		assertFalse(this.handlerMapping.useSuffixPatternMatch());
-		assertFalse(this.handlerMapping.useRegisteredSuffixPatternMatch());
-
-		MappingContentTypeResolver contentTypeResolver = mock(MappingContentTypeResolver.class);
-		when(contentTypeResolver.getKeys()).thenReturn(Collections.singleton("json"));
-
-		this.handlerMapping.setUseSuffixPatternMatch(true);
-		this.handlerMapping.setUseRegisteredSuffixPatternMatch(true);
-		this.handlerMapping.setContentTypeResolver(contentTypeResolver);
-		this.handlerMapping.afterPropertiesSet();
-
-		assertTrue(this.handlerMapping.useSuffixPatternMatch());
-		assertTrue(this.handlerMapping.useRegisteredSuffixPatternMatch());
-		assertEquals(Collections.singleton("json"), this.handlerMapping.getFileExtensions());
-	}
-
-	@Test
-	public void useRegisteredSuffixPatternMatchInitialization() {
-		MappingContentTypeResolver contentTypeResolver = mock(MappingContentTypeResolver.class);
-		when(contentTypeResolver.getKeys()).thenReturn(Collections.singleton("json"));
-
-		final Set<String> actualExtensions = new HashSet<>();
-		RequestMappingHandlerMapping localHandlerMapping = new RequestMappingHandlerMapping() {
-			@Override
-			protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
-				actualExtensions.addAll(getFileExtensions());
-				return super.getMappingForMethod(method, handlerType);
-			}
-		};
-		this.wac.registerSingleton("testController", ComposedAnnotationController.class);
-		this.wac.refresh();
-
-		localHandlerMapping.setContentTypeResolver(contentTypeResolver);
-		localHandlerMapping.setUseRegisteredSuffixPatternMatch(true);
-		localHandlerMapping.setApplicationContext(this.wac);
-		localHandlerMapping.afterPropertiesSet();
-
-		assertEquals(Collections.singleton("json"), actualExtensions);
-	}
-
-	@Test
-	public void useSuffixPatternMatch() {
-		assertFalse(this.handlerMapping.useSuffixPatternMatch());
-		assertFalse(this.handlerMapping.useRegisteredSuffixPatternMatch());
-
-		this.handlerMapping.setUseRegisteredSuffixPatternMatch(true);
-		assertTrue("'true' registeredSuffixPatternMatch should enable suffixPatternMatch",
-				this.handlerMapping.useSuffixPatternMatch());
 	}
 
 	@Test

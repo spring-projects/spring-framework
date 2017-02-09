@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import java.util.Set;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -48,52 +47,11 @@ import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerM
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping
 		implements EmbeddedValueResolverAware {
 
-	private boolean useSuffixPatternMatch = false;
-
-	private boolean useRegisteredSuffixPatternMatch = false;
-
-	private boolean useTrailingSlashMatch = true;
-
 	private RequestedContentTypeResolver contentTypeResolver = new RequestedContentTypeResolverBuilder().build();
 
 	private StringValueResolver embeddedValueResolver;
 
 	private RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
-
-
-	/**
-	 * Whether to use suffix pattern matching. If enabled a method mapped to
-	 * "/path" also matches to "/path.*".
-	 * <p>The default value is {@code true}.
-	 * <p><strong>Note:</strong> when using suffix pattern matching it's usually
-	 * preferable to be explicit about what is and isn't an extension so rather
-	 * than setting this property consider using
-	 * {@link #setUseRegisteredSuffixPatternMatch} instead.
-	 */
-	public void setUseSuffixPatternMatch(boolean useSuffixPatternMatch) {
-		this.useSuffixPatternMatch = useSuffixPatternMatch;
-	}
-
-	/**
-	 * Whether suffix pattern matching should work only against path extensions
-	 * explicitly registered with the configured {@link RequestedContentTypeResolver}. This
-	 * is generally recommended to reduce ambiguity and to avoid issues such as
-	 * when a "." appears in the path for other reasons.
-	 * <p>By default this is set to "true".
-	 */
-	public void setUseRegisteredSuffixPatternMatch(boolean useRegisteredSuffixPatternMatch) {
-		this.useRegisteredSuffixPatternMatch = useRegisteredSuffixPatternMatch;
-		this.useSuffixPatternMatch = (useRegisteredSuffixPatternMatch || this.useSuffixPatternMatch);
-	}
-
-	/**
-	 * Whether to match to URLs irrespective of the presence of a trailing slash.
-	 * If enabled a method mapped to "/users" also matches to "/users/".
-	 * <p>The default value is {@code true}.
-	 */
-	public void setUseTrailingSlashMatch(boolean useTrailingSlashMatch) {
-		this.useTrailingSlashMatch = useTrailingSlashMatch;
-	}
 
 	/**
 	 * Set the {@link RequestedContentTypeResolver} to use to determine requested media types.
@@ -113,34 +71,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	public void afterPropertiesSet() {
 		this.config = new RequestMappingInfo.BuilderConfiguration();
 		this.config.setPathHelper(getPathHelper());
-		this.config.setSuffixPatternMatch(this.useSuffixPatternMatch);
-		this.config.setTrailingSlashMatch(this.useTrailingSlashMatch);
-		this.config.setRegisteredSuffixPatternMatch(this.useRegisteredSuffixPatternMatch);
 		this.config.setContentTypeResolver(getContentTypeResolver());
 
 		super.afterPropertiesSet();
-	}
-
-
-	/**
-	 * Whether to use suffix pattern matching.
-	 */
-	public boolean useSuffixPatternMatch() {
-		return this.useSuffixPatternMatch;
-	}
-
-	/**
-	 * Whether to use registered suffixes for pattern matching.
-	 */
-	public boolean useRegisteredSuffixPatternMatch() {
-		return this.useRegisteredSuffixPatternMatch;
-	}
-
-	/**
-	 * Whether to match to URLs irrespective of the presence of a trailing slash.
-	 */
-	public boolean useTrailingSlashMatch() {
-		return this.useTrailingSlashMatch;
 	}
 
 	/**
@@ -150,14 +83,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return this.contentTypeResolver;
 	}
 
-	/**
-	 * Return the file extensions to use for suffix pattern matching.
-	 */
-	public Set<String> getFileExtensions() {
-		return this.config.getFileExtensions();
-	}
-
-
+	
 	/**
 	 * {@inheritDoc}
 	 * Expects a handler to have a type-level @{@link Controller} annotation.

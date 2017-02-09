@@ -28,12 +28,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 /**
  * Tests for {@link PathPatternRegistry}
+ * 
  * @author Brian Clozel
  */
 public class PathPatternRegistryTests {
@@ -49,6 +51,21 @@ public class PathPatternRegistryTests {
 	}
 
 	@Test
+	public void shouldFixFileExtensions() {
+		Set<String> fileExtensions = new HashSet<>();
+		fileExtensions.add("json");
+		fileExtensions.add("xml");
+		this.registry.setFileExtensions(fileExtensions);
+		assertThat(this.registry.getFileExtensions(), contains(".json", ".xml"));
+	}
+
+	@Test
+	public void shouldPrependPatternsWithSlash() {
+		this.registry.register("foo/bar");
+		assertThat(getPatternList(this.registry.getPatterns()), Matchers.containsInAnyOrder("/foo/bar"));
+	}
+
+	@Test
 	public void shouldNotRegisterInvalidPatterns() {
 		this.thrown.expect(PatternParseException.class);
 		this.thrown.expectMessage(Matchers.containsString("Expected close capture character after variable name"));
@@ -58,58 +75,59 @@ public class PathPatternRegistryTests {
 	@Test
 	public void shouldNotRegisterPatternVariants() {
 		List<PathPattern> patterns = this.registry.register("/foo/{bar}");
-		assertPathPatternListContains(patterns, "/foo/{bar}");
+		assertThat(getPatternList(patterns), Matchers.containsInAnyOrder("/foo/{bar}"));
 	}
 
 	@Test
 	public void shouldRegisterTrailingSlashVariants() {
 		this.registry.setUseTrailingSlashMatch(true);
 		List<PathPattern> patterns = this.registry.register("/foo/{bar}");
-		assertPathPatternListContains(patterns, "/foo/{bar}", "/foo/{bar}/");
+		assertThat(getPatternList(patterns), Matchers.containsInAnyOrder("/foo/{bar}", "/foo/{bar}/"));
 	}
 
 	@Test
 	public void shouldRegisterSuffixVariants() {
 		this.registry.setUseSuffixPatternMatch(true);
 		List<PathPattern> patterns = this.registry.register("/foo/{bar}");
-		assertPathPatternListContains(patterns, "/foo/{bar}", "/foo/{bar}.*");
+		assertThat(getPatternList(patterns), Matchers.containsInAnyOrder("/foo/{bar}", "/foo/{bar}.*"));
 	}
 
 	@Test
 	public void shouldRegisterExtensionsVariants() {
 		Set<String> fileExtensions = new HashSet<>();
-		fileExtensions.add("json");
-		fileExtensions.add("xml");
+		fileExtensions.add(".json");
+		fileExtensions.add(".xml");
 		this.registry.setUseSuffixPatternMatch(true);
 		this.registry.setFileExtensions(fileExtensions);
 		List<PathPattern> patterns = this.registry.register("/foo/{bar}");
-		assertPathPatternListContains(patterns, "/foo/{bar}", "/foo/{bar}.xml", "/foo/{bar}.json");
+		assertThat(getPatternList(patterns),
+				Matchers.containsInAnyOrder("/foo/{bar}", "/foo/{bar}.xml", "/foo/{bar}.json"));
 	}
 
 	@Test
 	public void shouldRegisterAllVariants() {
 		Set<String> fileExtensions = new HashSet<>();
-		fileExtensions.add("json");
-		fileExtensions.add("xml");
+		fileExtensions.add(".json");
+		fileExtensions.add(".xml");
 		this.registry.setUseSuffixPatternMatch(true);
 		this.registry.setUseTrailingSlashMatch(true);
 		this.registry.setFileExtensions(fileExtensions);
 		List<PathPattern> patterns = this.registry.register("/foo/{bar}");
-		assertPathPatternListContains(patterns, "/foo/{bar}",
-				"/foo/{bar}.xml", "/foo/{bar}.json", "/foo/{bar}/");
+		assertThat(getPatternList(patterns), Matchers.containsInAnyOrder("/foo/{bar}",
+				"/foo/{bar}.xml", "/foo/{bar}.json", "/foo/{bar}/"));
 	}
 
 	@Test
 	public void combineEmptyRegistries() {
 		PathPatternRegistry result = this.registry.combine(new PathPatternRegistry());
-		assertPathPatternListContains(result.getPatterns(), "");
+		assertThat(getPatternList(result.getPatterns()), Matchers.containsInAnyOrder(""));
 	}
 
 	@Test
 	public void combineWithEmptyRegistry() {
 		this.registry.register("/foo");
 		PathPatternRegistry result = this.registry.combine(new PathPatternRegistry());
-		assertPathPatternListContains(result.getPatterns(), "/foo");
+		assertThat(getPatternList(result.getPatterns()), Matchers.containsInAnyOrder("/foo"));
 	}
 
 	@Test
@@ -119,7 +137,7 @@ public class PathPatternRegistryTests {
 		other.register("/bar");
 		other.register("/baz");
 		PathPatternRegistry result = this.registry.combine(other);
-		assertPathPatternListContains(result.getPatterns(), "/foo/bar", "/foo/baz");
+		assertThat(getPatternList(result.getPatterns()), Matchers.containsInAnyOrder("/foo/bar", "/foo/baz"));
 	}
 
 	@Test
@@ -131,7 +149,7 @@ public class PathPatternRegistryTests {
 		this.registry.add(fooOne);
 		this.registry.add(fooTwo);
 		Set<PathPattern> matches = this.registry.findMatches("/foo");
-		assertPathPatternListContains(matches, "/f?o", "/fo?");
+		assertThat(getPatternList(matches), Matchers.contains("/f?o", "/fo?"));
 	}
 
 	@Test
@@ -146,15 +164,14 @@ public class PathPatternRegistryTests {
 		this.registry.register("/foo/bar/baz");
 		this.registry.register("/foo/bar/{baz}");
 		Set<PathPattern> matches = this.registry.findMatches("/foo/bar/baz");
-		assertPathPatternListContains(matches, "/foo/bar/baz", "/foo/bar/{baz}",
-				"/foo/{*baz}");
+		assertThat(getPatternList(matches), Matchers.contains("/foo/bar/baz", "/foo/bar/{baz}",
+				"/foo/{*baz}"));
 	}
 
 
-	private void assertPathPatternListContains(Collection<PathPattern> parsedPatterns, String... pathPatterns) {
-		List<String> patternList = parsedPatterns.
-				stream().map(pattern -> pattern.getPatternString()).collect(Collectors.toList());
-		assertThat(patternList, Matchers.contains(pathPatterns));
+	private List<String> getPatternList(Collection<PathPattern> parsedPatterns) {
+		return parsedPatterns.stream().map(pattern -> pattern.getPatternString()).collect(Collectors.toList());
+
 	}
 
 }
