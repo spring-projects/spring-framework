@@ -1229,7 +1229,7 @@ public class ResolvableType implements Serializable {
 	public static ResolvableType forMethodParameter(MethodParameter methodParameter, ResolvableType implementationType) {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
 		implementationType = (implementationType != null ? implementationType :
-				forType(methodParameter.getContainingClass()));
+			forType(methodParameter.getContainingClass()));
 		ResolvableType owner = implementationType.as(methodParameter.getDeclaringClass());
 		return forType(null, new MethodParameterTypeProvider(methodParameter), owner.asVariableResolver()).
 				getNested(methodParameter.getNestingLevel(), methodParameter.typeIndexesPerLevel);
@@ -1347,11 +1347,10 @@ public class ResolvableType implements Serializable {
 
 		// Check the cache - we may have a ResolvableType which has been resolved before...
 		ResolvableType key = new ResolvableType(type, typeProvider, variableResolver);
-		ResolvableType resolvableType = cache.get(key);
-		if (resolvableType == null) {
-			resolvableType = new ResolvableType(type, typeProvider, variableResolver, key.hash);
-			cache.put(resolvableType, resolvableType);
-		}
+		ResolvableType resolvableType = cache.getOrDefault(key, new ResolvableType(type, typeProvider, variableResolver, key.hash));
+
+		cache.put(resolvableType, resolvableType);
+
 		return resolvableType;
 	}
 

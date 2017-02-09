@@ -213,10 +213,8 @@ public abstract class ClassUtils {
 	public static Class<?> forName(String name, ClassLoader classLoader) throws ClassNotFoundException, LinkageError {
 		Assert.notNull(name, "Name must not be null");
 
-		Class<?> clazz = resolvePrimitiveClassName(name);
-		if (clazz == null) {
-			clazz = commonClassCache.get(name);
-		}
+		Class<?> clazz = primitiveTypeNameMap.getOrDefault(name, commonClassCache.get(name));
+		
 		if (clazz != null) {
 			return clazz;
 		}
