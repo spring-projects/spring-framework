@@ -143,6 +143,9 @@ public abstract class BodyInserters {
 	 * @return a {@code BodyInserter} that writes a {@code ServerSentEvent} publisher
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 	 */
+	// Note that the returned BodyInserter is parameterized to ServerHttpResponse, not
+	// ReactiveHttpOutputMessage like other methods, since sending SSEs only typically happens on
+	// the server-side
 	public static <T, S extends Publisher<ServerSentEvent<T>>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(
 			S eventsPublisher) {
 
@@ -165,6 +168,9 @@ public abstract class BodyInserters {
 	 * Server-Sent Events
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 	 */
+	// Note that the returned BodyInserter is parameterized to ServerHttpResponse, not
+	// ReactiveHttpOutputMessage like other methods, since sending SSEs only typically happens on
+	// the server-side
 	public static <T, S extends Publisher<T>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(S eventsPublisher,
 			Class<T> eventClass) {
 
@@ -183,6 +189,9 @@ public abstract class BodyInserters {
 	 * Server-Sent Events
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 	 */
+	// Note that the returned BodyInserter is parameterized to ServerHttpResponse, not
+	// ReactiveHttpOutputMessage like other methods, since sending SSEs only typically happens on
+	// the server-side
 	public static <T, S extends Publisher<T>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(S eventsPublisher,
 			ResolvableType eventType) {
 

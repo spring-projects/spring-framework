@@ -207,7 +207,7 @@ public class BodyExtractorsTests {
 
 	@Test
 	public void toFormData() throws Exception {
-		BodyExtractor<Mono<MultiValueMap<String, String>>, ReactiveHttpInputMessage> extractor = BodyExtractors.toFormData();
+		BodyExtractor<Mono<MultiValueMap<String, String>>, ServerHttpRequest> extractor = BodyExtractors.toFormData();
 
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DefaultDataBuffer dataBuffer =
