@@ -81,7 +81,6 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
-import org.springframework.web.util.patterns.PathPatternRegistry;
 
 /**
  * The main class for Spring Web Reactive configuration.
@@ -137,23 +136,28 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping() {
-		CompositeContentTypeResolver contentTypeResolver = webFluxContentTypeResolver();
 		RequestMappingHandlerMapping mapping = createRequestMappingHandlerMapping();
 		mapping.setOrder(0);
-		mapping.setContentTypeResolver(contentTypeResolver);
+		mapping.setContentTypeResolver(webFluxContentTypeResolver());
 		mapping.setCorsConfigurations(getCorsConfigurations());
-		PathPatternRegistry pathPatternRegistry = new PathPatternRegistry();
-		mapping.setPatternRegistry(pathPatternRegistry);
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
-		pathPatternRegistry.setUseSuffixPatternMatch(configurer.isUseSuffixPatternMatch());
-		pathPatternRegistry.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
-		if (configurer.isUseRegisteredSuffixPatternMatch() && contentTypeResolver != null) {
-			pathPatternRegistry.setFileExtensions(contentTypeResolver.getKeys());
+		if (configurer.isUseSuffixPatternMatch() != null) {
+			mapping.setUseSuffixPatternMatch(configurer.isUseSuffixPatternMatch());
+		}
+		if (configurer.isUseRegisteredSuffixPatternMatch() != null) {
+			mapping.setUseRegisteredSuffixPatternMatch(configurer.isUseRegisteredSuffixPatternMatch());
+		}
+		if (configurer.isUseTrailingSlashMatch() != null) {
+			mapping.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
+		}
+		if (configurer.getPathMatcher() != null) {
+			mapping.setPathMatcher(configurer.getPathMatcher());
 		}
 		if (configurer.getPathHelper() != null) {
 			mapping.setPathHelper(configurer.getPathHelper());
 		}
+
 		return mapping;
 	}
 
@@ -242,6 +246,9 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
 		if (handlerMapping != null) {
 			PathMatchConfigurer pathMatchConfigurer = getPathMatchConfigurer();
+			if (pathMatchConfigurer.getPathMatcher() != null) {
+				handlerMapping.setPathMatcher(pathMatchConfigurer.getPathMatcher());
+			}
 			if (pathMatchConfigurer.getPathHelper() != null) {
 				handlerMapping.setPathHelper(pathMatchConfigurer.getPathHelper());
 			}

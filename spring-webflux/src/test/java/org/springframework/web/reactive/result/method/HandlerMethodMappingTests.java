@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,8 @@ import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,16 +33,14 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
-import org.springframework.web.util.patterns.PathPattern;
-import org.springframework.web.util.patterns.PathPatternComparator;
-import org.springframework.web.util.patterns.PathPatternParser;
-import org.springframework.web.util.patterns.PatternComparatorConsideringPath;
+import org.springframework.web.util.ParsingPathMatcher;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -54,8 +51,6 @@ import static org.junit.Assert.assertNull;
  * @author Rossen Stoyanchev
  */
 public class HandlerMethodMappingTests {
-
-	private PathPatternParser patternParser = new PathPatternParser();
 
 	private AbstractHandlerMethodMapping<String> mapping;
 
@@ -77,13 +72,13 @@ public class HandlerMethodMappingTests {
 
 	@Test(expected = IllegalStateException.class)
 	public void registerDuplicates() {
-		this.mapping.registerMapping("/foo", this.handler, this.method1);
-		this.mapping.registerMapping("/foo", this.handler, this.method2);
+		this.mapping.registerMapping("foo", this.handler, this.method1);
+		this.mapping.registerMapping("foo", this.handler, this.method2);
 	}
 
 	@Test
 	public void directMatch() throws Exception {
-		String key = "/foo";
+		String key = "foo";
 		this.mapping.registerMapping(key, this.handler, this.method1);
 		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, key));
 
@@ -115,26 +110,32 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping(key1, this.handler, this.method1);
 		this.mapping.registerMapping(key2, this.handler, this.method2);
 
-		HandlerMethod match = this.mapping.getMappingRegistry().getMappings().get(key1);
-		assertNotNull(match);
+		List directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
+
+		assertNotNull(directUrlMatches);
+		assertEquals(1, directUrlMatches.size());
+		assertEquals(key1, directUrlMatches.get(0));
 	}
 
 	@Test
 	public void registerMappingWithSameMethodAndTwoHandlerInstances() throws Exception {
-		String key1 = "/foo";
-		String key2 = "/bar";
+		String key1 = "foo";
+		String key2 = "bar";
 		MyHandler handler1 = new MyHandler();
 		MyHandler handler2 = new MyHandler();
 		this.mapping.registerMapping(key1, handler1, this.method1);
 		this.mapping.registerMapping(key2, handler2, this.method1);
 
-		HandlerMethod match = this.mapping.getMappingRegistry().getMappings().get(key1);
-		assertNotNull(match);
+		List directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
+
+		assertNotNull(directUrlMatches);
+		assertEquals(1, directUrlMatches.size());
+		assertEquals(key1, directUrlMatches.get(0));
 	}
 
 	@Test
 	public void unregisterMapping() throws Exception {
-		String key = "/foo";
+		String key = "foo";
 		this.mapping.registerMapping(key, this.handler, this.method1);
 		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, key));
 
@@ -144,7 +145,7 @@ public class HandlerMethodMappingTests {
 		result = this.mapping.getHandler(createExchange(HttpMethod.GET, key));
 
 		assertNull(result.block());
-		assertNull(this.mapping.getMappingRegistry().getMappings().get(key));
+		assertNull(this.mapping.getMappingRegistry().getMappingsByUrl(key));
 	}
 
 
@@ -157,7 +158,7 @@ public class HandlerMethodMappingTests {
 
 	private static class MyHandlerMethodMapping extends AbstractHandlerMethodMapping<String> {
 
-		private PathPatternParser patternParser = new PathPatternParser();
+		private PathMatcher pathMatcher = new ParsingPathMatcher();
 
 		@Override
 		protected boolean isHandler(Class<?> beanType) {
@@ -172,27 +173,19 @@ public class HandlerMethodMappingTests {
 
 		@Override
 		protected Set<String> getMappingPathPatterns(String key) {
-			return Collections.singleton(key);
+			return (this.pathMatcher.isPattern(key) ? Collections.emptySet() : Collections.singleton(key));
 		}
 
 		@Override
 		protected String getMatchingMapping(String pattern, ServerWebExchange exchange) {
 			String lookupPath = exchange.getRequest().getURI().getPath();
-			PathPattern pathPattern = this.patternParser.parse(pattern);
-			return (pathPattern.matches(lookupPath) ? pattern : null);
+			return (this.pathMatcher.match(pattern, lookupPath) ? pattern : null);
 		}
 
 		@Override
 		protected Comparator<String> getMappingComparator(ServerWebExchange exchange) {
 			String lookupPath = exchange.getRequest().getURI().getPath();
-			PatternComparatorConsideringPath comparator = new PatternComparatorConsideringPath(lookupPath);
-			return new Comparator<String>() {
-				@Override
-				public int compare(String o1, String o2) {
-
-					return comparator.compare(patternParser.parse(o1), patternParser.parse(o2));
-				}
-			};
+			return this.pathMatcher.getPatternComparator(lookupPath);
 		}
 
 	}

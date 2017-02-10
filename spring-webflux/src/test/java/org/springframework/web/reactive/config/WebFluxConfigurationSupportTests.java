@@ -19,10 +19,8 @@ package org.springframework.web.reactive.config;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
-
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.hamcrest.Matchers;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,7 +51,6 @@ import org.springframework.validation.Validator;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
-import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
@@ -73,7 +70,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
@@ -106,9 +102,9 @@ public class WebFluxConfigurationSupportTests {
 
 		assertEquals(0, mapping.getOrder());
 
-		assertFalse(mapping.getPatternRegistry().useSuffixPatternMatch());
-		assertThat(mapping.getPatternRegistry().getFileExtensions(), Matchers.empty());
-		assertTrue(mapping.getPatternRegistry().useTrailingSlashMatch());
+		assertTrue(mapping.useSuffixPatternMatch());
+		assertTrue(mapping.useTrailingSlashMatch());
+		assertTrue(mapping.useRegisteredSuffixPatternMatch());
 
 		name = "webFluxContentTypeResolver";
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
@@ -130,9 +126,8 @@ public class WebFluxConfigurationSupportTests {
 		RequestMappingHandlerMapping mapping = context.getBean(name, RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
 
-		assertFalse(mapping.getPatternRegistry().useTrailingSlashMatch());
-		assertTrue(mapping.getPatternRegistry().useSuffixPatternMatch());
-		assertThat(mapping.getPatternRegistry().getFileExtensions(), Matchers.contains(".json", ".xml"));
+		assertFalse(mapping.useSuffixPatternMatch());
+		assertFalse(mapping.useTrailingSlashMatch());
 	}
 
 	@Test
@@ -267,6 +262,7 @@ public class WebFluxConfigurationSupportTests {
 		assertEquals(Ordered.LOWEST_PRECEDENCE - 1, handlerMapping.getOrder());
 
 		assertNotNull(handlerMapping.getPathHelper());
+		assertNotNull(handlerMapping.getPathMatcher());
 
 		SimpleUrlHandlerMapping urlHandlerMapping = (SimpleUrlHandlerMapping) handlerMapping;
 		WebHandler webHandler = (WebHandler) urlHandlerMapping.getUrlMap().get("/images/**");
@@ -311,15 +307,8 @@ public class WebFluxConfigurationSupportTests {
 
 		@Override
 		public void configurePathMatching(PathMatchConfigurer configurer) {
+			configurer.setUseSuffixPatternMatch(false);
 			configurer.setUseTrailingSlashMatch(false);
-			configurer.setUseSuffixPatternMatch(true);
-			configurer.setUseRegisteredSuffixPatternMatch(true);
-		}
-
-		@Override
-		protected void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
-			builder.mediaType("json", MediaType.APPLICATION_JSON);
-			builder.mediaType("xml", MediaType.APPLICATION_XML);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.reactive.result.method;
 
 import java.util.Set;
 
+import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.accept.MappingContentTypeResolver;
@@ -32,7 +33,6 @@ import org.springframework.web.reactive.result.condition.RequestConditionHolder;
 import org.springframework.web.reactive.result.condition.RequestMethodsRequestCondition;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.support.HttpRequestPathHelper;
-import org.springframework.web.util.patterns.PathPatternRegistry;
 
 /**
  * Encapsulates the following request mapping conditions:
@@ -471,15 +471,10 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		public RequestMappingInfo build() {
 			RequestedContentTypeResolver contentTypeResolver = this.options.getContentTypeResolver();
 
-			PathPatternRegistry pathPatternRegistry = this.options.getPathPatternRegistry();
-			PathPatternRegistry conditionRegistry = new PathPatternRegistry();
-			conditionRegistry.setUseTrailingSlashMatch(pathPatternRegistry.useTrailingSlashMatch());
-			conditionRegistry.setUseSuffixPatternMatch(pathPatternRegistry.useSuffixPatternMatch());
-			conditionRegistry.setFileExtensions(pathPatternRegistry.getFileExtensions());
-
-			
 			PatternsRequestCondition patternsCondition = new PatternsRequestCondition(
-					this.paths, this.options.getPathHelper(), conditionRegistry);
+					this.paths, this.options.getPathHelper(), this.options.getPathMatcher(),
+					this.options.useSuffixPatternMatch(), this.options.useTrailingSlashMatch(),
+					this.options.getFileExtensions());
 
 			return new RequestMappingInfo(this.mappingName, patternsCondition,
 					new RequestMethodsRequestCondition(methods),
@@ -502,7 +497,11 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		private HttpRequestPathHelper pathHelper;
 
-		private PathPatternRegistry pathPatternRegistry;
+		private PathMatcher pathMatcher;
+
+		private boolean trailingSlashMatch = true;
+
+		private boolean suffixPatternMatch = true;
 
 		private boolean registeredSuffixPatternMatch = false;
 
@@ -520,22 +519,41 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			return this.pathHelper;
 		}
 
-		public PathPatternRegistry getPathPatternRegistry() {
-			if(this.pathPatternRegistry == null) {
-				this.pathPatternRegistry = new PathPatternRegistry();
-				this.pathPatternRegistry.setUseTrailingSlashMatch(true);
-			}
-			if(this.registeredSuffixPatternMatch) {
-				RequestedContentTypeResolver resolver = getContentTypeResolver();
-				if (resolver != null && resolver instanceof MappingContentTypeResolver) {
-					if (resolver instanceof MappingContentTypeResolver) {
-						Set<String> fileExtensions = ((MappingContentTypeResolver) resolver).getKeys();
-						this.pathPatternRegistry.setFileExtensions(fileExtensions);
-					}
+		/**
+		 * Set a custom PathMatcher to use for the PatternsRequestCondition.
+		 * <p>By default this is not set.
+		 */
+		public void setPathMatcher(PathMatcher pathMatcher) {
+			this.pathMatcher = pathMatcher;
+		}
 
-				}
-			}
-			return this.pathPatternRegistry;
+		public PathMatcher getPathMatcher() {
+			return this.pathMatcher;
+		}
+
+		/**
+		 * Whether to apply trailing slash matching in PatternsRequestCondition.
+		 * <p>By default this is set to 'true'.
+		 */
+		public void setTrailingSlashMatch(boolean trailingSlashMatch) {
+			this.trailingSlashMatch = trailingSlashMatch;
+		}
+
+		public boolean useTrailingSlashMatch() {
+			return this.trailingSlashMatch;
+		}
+
+		/**
+		 * Whether to apply suffix pattern matching in PatternsRequestCondition.
+		 * <p>By default this is set to 'true'.
+		 * @see #setRegisteredSuffixPatternMatch(boolean)
+		 */
+		public void setSuffixPatternMatch(boolean suffixPatternMatch) {
+			this.suffixPatternMatch = suffixPatternMatch;
+		}
+
+		public boolean useSuffixPatternMatch() {
+			return this.suffixPatternMatch;
 		}
 
 		/**
@@ -547,6 +565,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 */
 		public void setRegisteredSuffixPatternMatch(boolean registeredSuffixPatternMatch) {
 			this.registeredSuffixPatternMatch = registeredSuffixPatternMatch;
+			this.suffixPatternMatch = (registeredSuffixPatternMatch || this.suffixPatternMatch);
 		}
 
 		public boolean useRegisteredSuffixPatternMatch() {
@@ -554,12 +573,18 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		}
 
 		/**
-		 * Set the PathPatternRegistry to use for parsing and matching path patterns
-		 * <p>By default, a new instance of {@link PathPatternRegistry} with
-		 * {@link PathPatternRegistry#setUseTrailingSlashMatch(boolean)} set to {@code true}
+		 * Return the file extensions to use for suffix pattern matching. If
+		 * {@code registeredSuffixPatternMatch=true}, the extensions are obtained
+		 * from the configured {@code contentTypeResolver}.
 		 */
-		public void setPathPatternRegistry(PathPatternRegistry pathPatternRegistry) {
-			this.pathPatternRegistry = pathPatternRegistry;
+		public Set<String> getFileExtensions() {
+			RequestedContentTypeResolver resolver = getContentTypeResolver();
+			if (useRegisteredSuffixPatternMatch() && resolver != null) {
+				if (resolver instanceof MappingContentTypeResolver) {
+					return ((MappingContentTypeResolver) resolver).getKeys();
+				}
+			}
+			return null;
 		}
 
 		/**
