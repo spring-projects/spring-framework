@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -37,7 +36,7 @@ public class ExchangeFilterFunctionsTests {
 
 	@Test
 	public void andThen() throws Exception {
-		ClientRequest<Void> request = ClientRequest.method(GET, URI.create("http://example.com")).build();
+		ClientRequest request = ClientRequest.method(GET, URI.create("http://example.com")).build();
 		ClientResponse response = mock(ClientResponse.class);
 		ExchangeFunction exchange = r -> Mono.just(response);
 
@@ -67,7 +66,7 @@ public class ExchangeFilterFunctionsTests {
 
 	@Test
 	public void apply() throws Exception {
-		ClientRequest<Void> request = ClientRequest.method(GET, URI.create("http://example.com")).build();
+		ClientRequest request = ClientRequest.method(GET, URI.create("http://example.com")).build();
 		ClientResponse response = mock(ClientResponse.class);
 		ExchangeFunction exchange = r -> Mono.just(response);
 
@@ -86,7 +85,7 @@ public class ExchangeFilterFunctionsTests {
 
 	@Test
 	public void basicAuthentication() throws Exception {
-		ClientRequest<Void> request = ClientRequest.method(GET, URI.create("http://example.com")).build();
+		ClientRequest request = ClientRequest.method(GET, URI.create("http://example.com")).build();
 		ClientResponse response = mock(ClientResponse.class);
 
 		ExchangeFunction exchange = r -> {

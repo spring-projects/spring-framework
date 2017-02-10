@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.function.client;
 
 import java.util.Collections;
@@ -42,7 +43,7 @@ public class DefaultWebClientTests {
 	private ExchangeFunction exchangeFunction;
 
 	@Captor
-	private ArgumentCaptor<ClientRequest<?>> captor;
+	private ArgumentCaptor<ClientRequest> captor;
 
 
 	@Before
@@ -58,7 +59,7 @@ public class DefaultWebClientTests {
 		WebClient client = builder().build();
 		client.get().uri("/path").exchange();
 
-		ClientRequest<?> request = verifyExchange();
+		ClientRequest request = verifyExchange();
 		assertEquals("/base/path", request.url().toString());
 		assertEquals(new HttpHeaders(), request.headers());
 		assertEquals(Collections.emptyMap(), request.cookies());
@@ -69,7 +70,7 @@ public class DefaultWebClientTests {
 		WebClient client = builder().build();
 		client.get().uri(builder -> builder.path("/path").queryParam("q", "12").build()).exchange();
 
-		ClientRequest<?> request = verifyExchange();
+		ClientRequest request = verifyExchange();
 		assertEquals("/base/path?q=12", request.url().toString());
 		verifyNoMoreInteractions(this.exchangeFunction);
 	}
@@ -79,7 +80,7 @@ public class DefaultWebClientTests {
 		WebClient client = builder().build();
 		client.get().uri(builder -> builder.replacePath("/path").build()).exchange();
 
-		ClientRequest<?> request = verifyExchange();
+		ClientRequest request = verifyExchange();
 		assertEquals("/path", request.url().toString());
 		verifyNoMoreInteractions(this.exchangeFunction);
 	}
@@ -89,7 +90,7 @@ public class DefaultWebClientTests {
 		WebClient client = builder().build();
 		client.get().uri("/path").accept(MediaType.APPLICATION_JSON).cookie("id", "123").exchange();
 
-		ClientRequest<?> request = verifyExchange();
+		ClientRequest request = verifyExchange();
 		assertEquals("application/json", request.headers().getFirst("Accept"));
 		assertEquals("123", request.cookies().getFirst("id"));
 		verifyNoMoreInteractions(this.exchangeFunction);
@@ -100,7 +101,7 @@ public class DefaultWebClientTests {
 		WebClient client = builder().defaultHeader("Accept", "application/json").defaultCookie("id", "123").build();
 		client.get().uri("/path").exchange();
 
-		ClientRequest<?> request = verifyExchange();
+		ClientRequest request = verifyExchange();
 		assertEquals("application/json", request.headers().getFirst("Accept"));
 		assertEquals("123", request.cookies().getFirst("id"));
 		verifyNoMoreInteractions(this.exchangeFunction);
@@ -111,7 +112,7 @@ public class DefaultWebClientTests {
 		WebClient client = builder().defaultHeader("Accept", "application/json").defaultCookie("id", "123").build();
 		client.get().uri("/path").header("Accept", "application/xml").cookie("id", "456").exchange();
 
-		ClientRequest<?> request = verifyExchange();
+		ClientRequest request = verifyExchange();
 		assertEquals("application/xml", request.headers().getFirst("Accept"));
 		assertEquals("456", request.cookies().getFirst("id"));
 		verifyNoMoreInteractions(this.exchangeFunction);
@@ -122,8 +123,8 @@ public class DefaultWebClientTests {
 		return WebClient.builder().baseUrl("/base").exchangeFunction(this.exchangeFunction);
 	}
 
-	private ClientRequest<?> verifyExchange() {
-		ClientRequest<?> request = this.captor.getValue();
+	private ClientRequest verifyExchange() {
+		ClientRequest request = this.captor.getValue();
 		Mockito.verify(this.exchangeFunction).exchange(request);
 		verifyNoMoreInteractions(this.exchangeFunction);
 		return request;

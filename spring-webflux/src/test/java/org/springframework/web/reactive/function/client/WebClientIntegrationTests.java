@@ -252,7 +252,7 @@ public class WebClientIntegrationTests {
 
 		WebClient filteredClient = this.webClient.filter(
 				(request, next) -> {
-					ClientRequest<?> filteredRequest = ClientRequest.from(request).header("foo", "bar").build();
+					ClientRequest filteredRequest = ClientRequest.from(request).header("foo", "bar").build();
 					return next.exchange(filteredRequest);
 				});
 
@@ -278,7 +278,7 @@ public class WebClientIntegrationTests {
 
 		WebClient filteredClient = this.webClient.filter(
 				(request, next) -> {
-					ClientRequest<?> filteredRequest = ClientRequest.from(request).header("foo", "bar").build();
+					ClientRequest filteredRequest = ClientRequest.from(request).header("foo", "bar").build();
 					return next.exchange(filteredRequest);
 				});
 

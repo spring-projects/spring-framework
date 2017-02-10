@@ -36,12 +36,11 @@ import org.springframework.web.reactive.function.BodyInserter;
  * <p>Note that applications are more likely to perform requests through
  * {@link WebClient} rather than using this directly.
  *
- * @param <T> the type of the body that this request contains
  * @author Brian Clozel
  * @author Arjen Poutsma
  * @since 5.0
  */
-public interface ClientRequest<T> {
+public interface ClientRequest {
 
 	/**
 	 * Return the HTTP method.
@@ -66,7 +65,7 @@ public interface ClientRequest<T> {
 	/**
 	 * Return the body inserter of this request.
 	 */
-	BodyInserter<T, ? super ClientHttpRequest> inserter();
+	BodyInserter<?, ? super ClientHttpRequest> body();
 
 	/**
 	 * Writes this request to the given {@link ClientHttpRequest}.
@@ -86,11 +85,12 @@ public interface ClientRequest<T> {
 	 * @param other the request to copy the method, URI, headers, and cookies from
 	 * @return the created builder
 	 */
-	static Builder from(ClientRequest<?> other) {
+	static Builder from(ClientRequest other) {
 		Assert.notNull(other, "'other' must not be null");
 		return new DefaultClientRequestBuilder(other.method(), other.url())
 				.headers(other.headers())
-				.cookies(other.cookies());
+				.cookies(other.cookies())
+				.body(other.body());
 	}
 
 	/**
@@ -143,28 +143,27 @@ public interface ClientRequest<T> {
 		Builder cookies(MultiValueMap<String, String> cookies);
 
 		/**
-		 * Builds the request entity with no body.
-		 * @return the request entity
-		 */
-		ClientRequest<Void> build();
-
-		/**
-		 * Set the body of the request to the given {@code BodyInserter} and return it.
+		 * Set the body of the request to the given {@code BodyInserter}.
 		 * @param inserter the {@code BodyInserter} that writes to the request
-		 * @param <T> the type contained in the body
-		 * @return the built request
+		 * @return this builder
 		 */
-		<T> ClientRequest<T> body(BodyInserter<T, ? super ClientHttpRequest> inserter);
+		Builder body(BodyInserter<?, ? super ClientHttpRequest> inserter);
 
 		/**
 		 * Set the body of the request to the given {@code Publisher} and return it.
 		 * @param publisher the {@code Publisher} to write to the request
 		 * @param elementClass the class of elements contained in the publisher
-		 * @param <T> the type of the elements contained in the publisher
-		 * @param <S> the type of the {@code Publisher}
+		 * @param <S> the type of the elements contained in the publisher
+		 * @param <P> the type of the {@code Publisher}
 		 * @return the built request
 		 */
-		<T, S extends Publisher<T>> ClientRequest<S> body(S publisher, Class<T> elementClass);
+		<S, P extends Publisher<S>> Builder body(P publisher, Class<S> elementClass);
+
+		/**
+		 * Builds the request entity with no body.
+		 * @return the request entity
+		 */
+		ClientRequest build();
 
 	}
 

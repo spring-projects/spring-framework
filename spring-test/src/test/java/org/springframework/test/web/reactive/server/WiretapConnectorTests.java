@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
@@ -54,7 +55,7 @@ public class WiretapConnectorTests {
 		wiretapConnector.addListener(infoRef::set);
 
 		ExchangeFunction exchangeFn = ExchangeFunctions.create(wiretapConnector);
-		ClientRequest<Void> clientRequest = ClientRequest.method(HttpMethod.GET, URI.create("/test")).build();
+		ClientRequest clientRequest = ClientRequest.method(HttpMethod.GET, URI.create("/test")).build();
 		exchangeFn.exchange(clientRequest).blockMillis(0);
 
 		WiretapConnector.Info info = infoRef.get();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public interface ExchangeFilterFunction {
 	 * @param next the next exchange function in the chain
 	 * @return the filtered response
 	 */
-	Mono<ClientResponse> filter(ClientRequest<?> request, ExchangeFunction next);
+	Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction next);
 
 	/**
 	 * Return a composed filter function that first applies this filter, and then applies the
@@ -74,8 +74,8 @@ public interface ExchangeFilterFunction {
 	 * @param requestProcessor the request processor
 	 * @return the filter adaptation of the request processor
 	 */
-	static ExchangeFilterFunction ofRequestProcessor(Function<ClientRequest<?>,
-			Mono<ClientRequest<?>>> requestProcessor) {
+	static ExchangeFilterFunction ofRequestProcessor(Function<ClientRequest,
+			Mono<ClientRequest>> requestProcessor) {
 
 		Assert.notNull(requestProcessor, "'requestProcessor' must not be null");
 		return (request, next) -> requestProcessor.apply(request).then(next::exchange);

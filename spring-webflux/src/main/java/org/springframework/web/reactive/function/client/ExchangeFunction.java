@@ -45,7 +45,7 @@ public interface ExchangeFunction {
 	 * @param request the request to exchange
 	 * @return the delayed response
 	 */
-	Mono<ClientResponse> exchange(ClientRequest<?> request);
+	Mono<ClientResponse> exchange(ClientRequest request);
 
 	/**
 	 * Filters this exchange function with the given {@code ExchangeFilterFunction}, resulting in a

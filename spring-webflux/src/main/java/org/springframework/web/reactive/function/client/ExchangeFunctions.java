@@ -72,7 +72,7 @@ public abstract class ExchangeFunctions {
 		}
 
 		@Override
-		public Mono<ClientResponse> exchange(ClientRequest<?> request) {
+		public Mono<ClientResponse> exchange(ClientRequest request) {
 			Assert.notNull(request, "'request' must not be null");
 
 			return this.connector
