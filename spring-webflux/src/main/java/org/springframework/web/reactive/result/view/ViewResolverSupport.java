@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public abstract class ViewResolverSupport implements ApplicationContextAware, Or
 	 * Default is "text/html;charset=UTF-8".
 	 */
 	public void setSupportedMediaTypes(List<MediaType> supportedMediaTypes) {
-		Assert.notEmpty(supportedMediaTypes, "'supportedMediaTypes' is required.");
+		Assert.notEmpty(supportedMediaTypes, "MediaType List must not be empty");
 		this.mediaTypes.clear();
 		if (supportedMediaTypes != null) {
 			this.mediaTypes.addAll(supportedMediaTypes);
@@ -77,7 +77,7 @@ public abstract class ViewResolverSupport implements ApplicationContextAware, Or
 	 * Default is {@linkplain StandardCharsets#UTF_8 UTF 8}.
 	 */
 	public void setDefaultCharset(Charset defaultCharset) {
-		Assert.notNull(defaultCharset, "'defaultCharset' must not be null");
+		Assert.notNull(defaultCharset, "Default Charset must not be null");
 		this.defaultCharset = defaultCharset;
 	}
 

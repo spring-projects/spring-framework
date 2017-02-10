@@ -85,8 +85,8 @@ public abstract class BodyInserters {
 	 * @param <P> the type of the {@code Publisher}
 	 * @return a {@code BodyInserter} that writes a {@code Publisher}
 	 */
-	public static <T, P extends Publisher<T>> BodyInserter<P, ReactiveHttpOutputMessage> fromPublisher(P publisher,
-			Class<T> elementClass) {
+	public static <T, P extends Publisher<T>> BodyInserter<P, ReactiveHttpOutputMessage> fromPublisher(
+			P publisher, Class<T> elementClass) {
 
 		Assert.notNull(publisher, "'publisher' must not be null");
 		Assert.notNull(elementClass, "'elementClass' must not be null");
@@ -101,8 +101,8 @@ public abstract class BodyInserters {
 	 * @param <P> the type of the {@code Publisher}
 	 * @return a {@code BodyInserter} that writes a {@code Publisher}
 	 */
-	public static <T, P extends Publisher<T>> BodyInserter<P, ReactiveHttpOutputMessage> fromPublisher(P publisher,
-			ResolvableType elementType) {
+	public static <T, P extends Publisher<T>> BodyInserter<P, ReactiveHttpOutputMessage> fromPublisher(
+			P publisher, ResolvableType elementType) {
 
 		Assert.notNull(publisher, "'publisher' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
@@ -111,9 +111,8 @@ public abstract class BodyInserters {
 
 	/**
 	 * Return a {@code BodyInserter} that writes the given {@code Resource}.
-	 * If the resource can be resolved to a {@linkplain Resource#getFile() file}, it will be copied
-	 * using
-	 * <a href="https://en.wikipedia.org/wiki/Zero-copy">zero-copy</a>
+	 * <p>If the resource can be resolved to a {@linkplain Resource#getFile() file}, it will
+	 * be copied using <a href="https://en.wikipedia.org/wiki/Zero-copy">zero-copy</a>.
 	 * @param resource the resource to write to the output message
 	 * @param <T> the type of the {@code Resource}
 	 * @return a {@code BodyInserter} that writes a {@code Publisher}
@@ -133,7 +132,7 @@ public abstract class BodyInserters {
 				.findFirst()
 				.map(BodyInserters::<Resource>cast)
 				.orElseThrow(() -> new IllegalStateException(
-						"Could not find HttpMessageWriter that supports Resources."));
+						"Could not find HttpMessageWriter that supports Resource objects"));
 	}
 
 	/**
@@ -212,9 +211,10 @@ public abstract class BodyInserters {
 	 * @param formData the form data to write to the output message
 	 * @return a {@code BodyInserter} that writes form data
 	 */
-	public static BodyInserter<MultiValueMap<String, String>, ClientHttpRequest> fromFormData(MultiValueMap<String, String> formData) {
-		Assert.notNull(formData, "'formData' must not be null");
+	public static BodyInserter<MultiValueMap<String, String>, ClientHttpRequest> fromFormData(
+			MultiValueMap<String, String> formData) {
 
+		Assert.notNull(formData, "'formData' must not be null");
 		return (outputMessage, context) -> {
 			HttpMessageWriter<MultiValueMap<String, String>> messageWriter =
 					findMessageWriter(context, FORM_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
@@ -223,9 +223,8 @@ public abstract class BodyInserters {
 		};
 	}
 
-	private static <T> HttpMessageWriter<T> findMessageWriter(BodyInserter.Context context,
-			ResolvableType type,
-			MediaType mediaType) {
+	private static <T> HttpMessageWriter<T> findMessageWriter(
+			BodyInserter.Context context, ResolvableType type, MediaType mediaType) {
 
 		return context.messageWriters().get()
 				.filter(messageWriter -> messageWriter.canWrite(type, mediaType))
@@ -238,24 +237,24 @@ public abstract class BodyInserters {
 
 
 	/**
-	 * Return a {@code BodyInserter} that writes the given {@code Publisher<DataBuffer>} to the
-	 * body.
+	 * Return a {@code BodyInserter} that writes the given {@code Publisher<DataBuffer>} to the body.
 	 * @param publisher the data buffer publisher to write
 	 * @param <T> the type of the publisher
 	 * @return a {@code BodyInserter} that writes directly to the body
 	 * @see ReactiveHttpOutputMessage#writeWith(Publisher)
 	 */
-	public static <T extends Publisher<DataBuffer>> BodyInserter<T, ReactiveHttpOutputMessage> fromDataBuffers(T publisher) {
-		Assert.notNull(publisher, "'publisher' must not be null");
+	public static <T extends Publisher<DataBuffer>> BodyInserter<T, ReactiveHttpOutputMessage> fromDataBuffers(
+			T publisher) {
 
+		Assert.notNull(publisher, "'publisher' must not be null");
 		return (outputMessage, context) -> outputMessage.writeWith(publisher);
 	}
 
 
-	private static <T, P extends Publisher<?>, M extends ReactiveHttpOutputMessage> BodyInserter<T, M> bodyInserterFor(P body, ResolvableType bodyType) {
+	private static <T, P extends Publisher<?>, M extends ReactiveHttpOutputMessage> BodyInserter<T, M> bodyInserterFor(
+			P body, ResolvableType bodyType) {
 
 		return (m, context) -> {
-
 			MediaType contentType = m.getHeaders().getContentType();
 			Supplier<Stream<HttpMessageWriter<?>>> messageWriters = context.messageWriters();
 			return messageWriters.get()
@@ -279,6 +278,5 @@ public abstract class BodyInserters {
 	private static <T> HttpMessageWriter<T> cast(HttpMessageWriter<?> messageWriter) {
 		return (HttpMessageWriter<T>) messageWriter;
 	}
-
 
 }

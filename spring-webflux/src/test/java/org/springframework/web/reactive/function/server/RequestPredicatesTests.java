@@ -81,7 +81,6 @@ public class RequestPredicatesTests {
 		predicate = RequestPredicates.OPTIONS("/p*");
 		request = MockServerRequest.builder().method(HttpMethod.OPTIONS).uri(uri).build();
 		assertTrue(predicate.test(request));
-
 	}
 
 	@Test
@@ -100,10 +99,8 @@ public class RequestPredicatesTests {
 		String name = "MyHeader";
 		String value = "MyValue";
 		RequestPredicate predicate =
-				RequestPredicates.headers(headers -> {
-					return headers.header(name).equals(
-							Collections.singletonList(value));
-				});
+				RequestPredicates.headers(
+						headers -> headers.header(name).equals(Collections.singletonList(value)));
 		MockServerRequest request = MockServerRequest.builder().header(name, value).build();
 		assertTrue(predicate.test(request));
 
@@ -115,8 +112,7 @@ public class RequestPredicatesTests {
 	public void contentType() throws Exception {
 		MediaType json = MediaType.APPLICATION_JSON;
 		RequestPredicate predicate = RequestPredicates.contentType(json);
-		MockServerRequest
-				request = MockServerRequest.builder().header("Content-Type", json.toString()).build();
+		MockServerRequest request = MockServerRequest.builder().header("Content-Type", json.toString()).build();
 		assertTrue(predicate.test(request));
 
 		request = MockServerRequest.builder().build();

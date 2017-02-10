@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,12 +41,11 @@ public interface RouterFunction<T extends ServerResponse> {
 
 	/**
 	 * Return a composed routing function that first invokes this function,
-	 * and then invokes the {@code other} function (of the same type {@code T}) if this route had
-	 * {@linkplain Mono#empty() no result}.
-	 *
+	 * and then invokes the {@code other} function (of the same type {@code T})
+	 * if this route had {@linkplain Mono#empty() no result}.
 	 * @param other the function of type {@code T} to apply when this function has no result
-	 * @return a composed function that first routes with this function and then the {@code other} function if this
-	 * function has no result
+	 * @return a composed function that first routes with this function and then the
+	 * {@code other} function if this function has no result
 	 */
 	default RouterFunction<T> andSame(RouterFunction<T> other) {
 		return request -> this.route(request).otherwiseIfEmpty(other.route(request));
@@ -56,10 +55,9 @@ public interface RouterFunction<T extends ServerResponse> {
 	 * Return a composed routing function that first invokes this function,
 	 * and then invokes the {@code other} function (of a different type) if this route had
 	 * {@linkplain Optional#empty() no result}.
-	 *
 	 * @param other the function to apply when this function has no result
-	 * @return a composed function that first routes with this function and then the {@code other} function if this
-	 * function has no result
+	 * @return a composed function that first routes with this function and then the
+	 * {@code other} function if this function has no result
 	 */
 	default RouterFunction<?> and(RouterFunction<?> other) {
 		return request -> this.route(request)
@@ -72,24 +70,24 @@ public interface RouterFunction<T extends ServerResponse> {
 	 * and then routes to the given handler function if the given request predicate applies. This
 	 * method is a convenient combination of {@link #and(RouterFunction)} and
 	 * {@link RouterFunctions#route(RequestPredicate, HandlerFunction)}.
+	 * @param <S> the handler function type
 	 * @param predicate the predicate to test
 	 * @param handlerFunction the handler function to route to
-	 * @param <S> the handler function type
 	 * @return a composed function that first routes with this function and then the function
 	 * created from {@code predicate} and {@code handlerFunction} if this
 	 * function has no result
 	 */
 	default <S extends ServerResponse> RouterFunction<?> andRoute(RequestPredicate predicate,
 			HandlerFunction<S> handlerFunction) {
+
 		return and(RouterFunctions.route(predicate, handlerFunction));
 	}
 
 	/**
 	 * Filter all {@linkplain HandlerFunction handler functions} routed by this function with the given
 	 * {@linkplain HandlerFilterFunction filter function}.
-	 *
+	 * @param <S> the filter return type
 	 * @param filterFunction the filter to apply
-	 * @param <S>            the filter return type
 	 * @return the filtered routing function
 	 */
 	default <S extends ServerResponse> RouterFunction<S> filter(HandlerFilterFunction<T, S> filterFunction) {

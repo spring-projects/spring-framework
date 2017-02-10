@@ -41,7 +41,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public abstract class AbstractView implements View, ApplicationContextAware {
 
-	/** Well-known name for the RequestDataValueProcessor in the bean factory. */
+	/** Well-known name for the RequestDataValueProcessor in the bean factory */
 	public static final String REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME = "requestDataValueProcessor";
 
 
@@ -68,7 +68,7 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 	 * Default is "text/html;charset=UTF-8".
 	 */
 	public void setSupportedMediaTypes(List<MediaType> supportedMediaTypes) {
-		Assert.notEmpty(supportedMediaTypes, "'supportedMediaTypes' is required.");
+		Assert.notEmpty(supportedMediaTypes, "MediaType List must not be empty");
 		this.mediaTypes.clear();
 		if (supportedMediaTypes != null) {
 			this.mediaTypes.addAll(supportedMediaTypes);
@@ -122,7 +122,7 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 	}
 
 	public ApplicationContext getApplicationContext() {
-		return applicationContext;
+		return this.applicationContext;
 	}
 
 	/**
