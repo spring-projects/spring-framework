@@ -81,10 +81,10 @@ configure(allprojects) { project ->
 	ext.quartzVersion          = "2.2.3"
 	ext.reactorVersion         = "Aluminium-BUILD-SNAPSHOT"
 	ext.romeVersion            = "1.7.1"
-	ext.rxjavaVersion          = '1.2.5'
+	ext.rxjavaVersion          = '1.2.6'
 	ext.rxjavaAdapterVersion   = '1.2.1'
-	ext.rxjava2Version         = '2.0.4'
-	ext.rxnettyVersion         = '0.5.2-rc.5'
+	ext.rxjava2Version         = '2.0.5'
+	ext.rxnettyVersion         = '0.5.2'
 	ext.servletVersion         = "3.1.0"
 	ext.slf4jVersion           = "1.7.22"
 	ext.snakeyamlVersion       = "1.17"
@@ -92,8 +92,8 @@ configure(allprojects) { project ->
 	ext.testngVersion          = "6.10"
 	ext.tiles3Version          = "3.0.7"
 	ext.tomcatVersion          = "8.5.11"
-	ext.tyrusVersion           = "1.13"
-	ext.undertowVersion        = "1.4.8.Final"
+	ext.tyrusVersion           = "1.13.1"
+	ext.undertowVersion        = "1.4.10.Final"
 	ext.websocketVersion       = "1.1"
 	ext.woodstoxVersion        = "5.0.3"
 	ext.xmlunitVersion         = "2.3.0"
