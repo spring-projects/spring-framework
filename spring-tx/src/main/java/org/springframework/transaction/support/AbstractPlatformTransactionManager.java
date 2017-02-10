@@ -934,6 +934,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	private void triggerAfterCompletion(DefaultTransactionStatus status, int completionStatus) {
 		if (status.isNewSynchronization()) {
 			List<TransactionSynchronization> synchronizations = TransactionSynchronizationManager.getSynchronizations();
+			TransactionSynchronizationManager.clearSynchronization();
 			if (!status.hasTransaction() || status.isNewTransaction()) {
 				if (status.isDebug()) {
 					logger.trace("Triggering afterCompletion synchronization");
