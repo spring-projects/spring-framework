@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.expression.spel.ast;
 import java.util.List;
 
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.util.ClassUtils;
 
 /**
  * Utility methods (formatters, etc) used during parsing and evaluation.
@@ -28,10 +29,10 @@ import org.springframework.core.convert.TypeDescriptor;
 public class FormatHelper {
 
 	/**
-	 * Produce a nice string for a given method name with specified arguments.
+	 * Produce a readable representation for a given method name with specified arguments.
 	 * @param name the name of the method
 	 * @param argumentTypes the types of the arguments to the method
-	 * @return nicely formatted string, eg. foo(String,int)
+	 * @return a nicely formatted representation, e.g. {@code foo(String,int)}
 	 */
 	public static String formatMethodForMessage(String name, List<TypeDescriptor> argumentTypes) {
 		StringBuilder sb = new StringBuilder(name);
@@ -53,32 +54,14 @@ public class FormatHelper {
 	}
 
 	/**
-	 * Produce a nice string for a given class object.
-	 * For example, a string array will have the formatted name "java.lang.String[]".
-	 * @param clazz The class whose name is to be formatted
-	 * @return a formatted string suitable for message inclusion
+	 * Determine a readable name for a given Class object.
+	 * <p>A String array will have the formatted name "java.lang.String[]".
+	 * @param clazz the Class whose name is to be formatted
+	 * @return a formatted String suitable for message inclusion
+	 * @see ClassUtils#getQualifiedName(Class)
 	 */
 	public static String formatClassNameForMessage(Class<?> clazz) {
-		if (clazz == null) {
-			return "null";
-		}
-		if (clazz.isArray()) {
-			StringBuilder sb = new StringBuilder();
-			int dims = 1;
-			Class<?> baseClass = clazz.getComponentType();
-			while (baseClass.isArray()) {
-				baseClass = baseClass.getComponentType();
-				dims++;
-			}
-			sb.append(baseClass.getName());
-			for (int i = 0; i < dims; i++) {
-				sb.append("[]");
-			}
-			return sb.toString();
-		}
-		else {
-			return clazz.getName();
-		}
+		return (clazz != null ? ClassUtils.getQualifiedName(clazz) : "null");
 	}
 
 }
