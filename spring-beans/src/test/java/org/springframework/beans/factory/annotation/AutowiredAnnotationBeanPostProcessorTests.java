@@ -1077,15 +1077,29 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testObjectFactoryInjection() {
+	public void testObjectFactoryFieldInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectFactoryInjectionBean.class));
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectFactoryFieldInjectionBean.class));
 		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
 
-		ObjectFactoryInjectionBean bean = (ObjectFactoryInjectionBean) bf.getBean("annotatedBean");
+		ObjectFactoryFieldInjectionBean bean = (ObjectFactoryFieldInjectionBean) bf.getBean("annotatedBean");
+		assertSame(bf.getBean("testBean"), bean.getTestBean());
+		bf.destroySingletons();
+	}
+
+	@Test
+	public void testObjectFactoryConstructorInjection() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectFactoryConstructorInjectionBean.class));
+		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
+
+		ObjectFactoryConstructorInjectionBean bean = (ObjectFactoryConstructorInjectionBean) bf.getBean("annotatedBean");
 		assertSame(bf.getBean("testBean"), bean.getTestBean());
 		bf.destroySingletons();
 	}
@@ -1096,14 +1110,14 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		RootBeanDefinition annotatedBeanDefinition = new RootBeanDefinition(ObjectFactoryInjectionBean.class);
+		RootBeanDefinition annotatedBeanDefinition = new RootBeanDefinition(ObjectFactoryFieldInjectionBean.class);
 		annotatedBeanDefinition.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		bf.registerBeanDefinition("annotatedBean", annotatedBeanDefinition);
 		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
 
-		ObjectFactoryInjectionBean bean = (ObjectFactoryInjectionBean) bf.getBean("annotatedBean");
+		ObjectFactoryFieldInjectionBean bean = (ObjectFactoryFieldInjectionBean) bf.getBean("annotatedBean");
 		assertSame(bf.getBean("testBean"), bean.getTestBean());
-		ObjectFactoryInjectionBean anotherBean = (ObjectFactoryInjectionBean) bf.getBean("annotatedBean");
+		ObjectFactoryFieldInjectionBean anotherBean = (ObjectFactoryFieldInjectionBean) bf.getBean("annotatedBean");
 		assertNotSame(anotherBean, bean);
 		assertSame(bf.getBean("testBean"), anotherBean.getTestBean());
 	}
@@ -1153,13 +1167,13 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectFactoryInjectionBean.class));
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectFactoryFieldInjectionBean.class));
 		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
 		bf.setSerializationId("test");
 
-		ObjectFactoryInjectionBean bean = (ObjectFactoryInjectionBean) bf.getBean("annotatedBean");
+		ObjectFactoryFieldInjectionBean bean = (ObjectFactoryFieldInjectionBean) bf.getBean("annotatedBean");
 		assertSame(bf.getBean("testBean"), bean.getTestBean());
-		bean = (ObjectFactoryInjectionBean) SerializationTestUtils.serializeAndDeserialize(bean);
+		bean = (ObjectFactoryFieldInjectionBean) SerializationTestUtils.serializeAndDeserialize(bean);
 		assertSame(bf.getBean("testBean"), bean.getTestBean());
 		bf.destroySingletons();
 	}
@@ -2832,10 +2846,25 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 
 	@SuppressWarnings("serial")
-	public static class ObjectFactoryInjectionBean implements Serializable {
+	public static class ObjectFactoryFieldInjectionBean implements Serializable {
 
 		@Autowired
 		private ObjectFactory<TestBean> testBeanFactory;
+
+		public TestBean getTestBean() {
+			return this.testBeanFactory.getObject();
+		}
+	}
+
+
+	@SuppressWarnings("serial")
+	public static class ObjectFactoryConstructorInjectionBean implements Serializable {
+
+		private final ObjectFactory<TestBean> testBeanFactory;
+
+		public ObjectFactoryConstructorInjectionBean(ObjectFactory<TestBean> testBeanFactory) {
+			this.testBeanFactory = testBeanFactory;
+		}
 
 		public TestBean getTestBean() {
 			return this.testBeanFactory.getObject();
