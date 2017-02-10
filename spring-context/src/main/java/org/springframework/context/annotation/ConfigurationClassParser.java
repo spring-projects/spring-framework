@@ -419,13 +419,21 @@ class ConfigurationClassParser {
 			}
 			catch (IllegalArgumentException ex) {
 				// from resolveRequiredPlaceholders
-				if (!ignoreResourceNotFound) {
+				if (ignoreResourceNotFound) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failed to process property source from [" + location + "]", ex);
+					}
+				} else {
 					throw ex;
 				}
 			}
 			catch (FileNotFoundException ex) {
 				// from ResourcePropertySource constructor
-				if (!ignoreResourceNotFound) {
+				if (ignoreResourceNotFound) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failed to process property source from [" + location + "]", ex);
+					}
+				} else {
 					throw ex;
 				}
 			}
