@@ -45,6 +45,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -57,19 +58,19 @@ import static org.mockito.BDDMockito.*;
  */
 public class DataSourceTransactionManagerTests  {
 
-	private Connection con;
-
 	private DataSource ds;
+
+	private Connection con;
 
 	private DataSourceTransactionManager tm;
 
 
 	@Before
 	public void setUp() throws Exception {
-		con = mock(Connection.class);
 		ds = mock(DataSource.class);
-		tm = new DataSourceTransactionManager(ds);
+		con = mock(Connection.class);
 		given(ds.getConnection()).willReturn(con);
+		tm = new DataSourceTransactionManager(ds);
 	}
 
 	@After
@@ -455,13 +456,16 @@ public class DataSourceTransactionManagerTests  {
 		final TestTransactionSynchronization synch =
 				new TestTransactionSynchronization(ds, TransactionSynchronization.STATUS_COMMITTED) {
 					@Override
-					public void afterCompletion(int status) {
-						super.afterCompletion(status);
+					protected void doAfterCompletion(int status) {
+						super.doAfterCompletion(status);
 						tt.execute(new TransactionCallbackWithoutResult() {
 							@Override
-							protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+							protected void doInTransactionWithoutResult(TransactionStatus status) {
 							}
 						});
+						TransactionSynchronizationManager.registerSynchronization(
+								new TransactionSynchronizationAdapter() {
+								});
 					}
 				};
 
@@ -477,8 +481,48 @@ public class DataSourceTransactionManagerTests  {
 		assertTrue(synch.beforeCompletionCalled);
 		assertTrue(synch.afterCommitCalled);
 		assertTrue(synch.afterCompletionCalled);
+		assertTrue(synch.afterCompletionException instanceof IllegalStateException);
 		verify(con, times(2)).commit();
 		verify(con, times(2)).close();
+	}
+
+	@Test
+	public void testParticipatingTransactionWithDifferentConnectionObtainedFromSynch() throws Exception {
+		DataSource ds2 = mock(DataSource.class);
+		final Connection con2 = mock(Connection.class);
+		given(ds2.getConnection()).willReturn(con2);
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		final TransactionTemplate tt = new TransactionTemplate(tm);
+
+		final TestTransactionSynchronization synch =
+				new TestTransactionSynchronization(ds, TransactionSynchronization.STATUS_COMMITTED) {
+					@Override
+					protected void doAfterCompletion(int status) {
+						super.doAfterCompletion(status);
+						Connection con = DataSourceUtils.getConnection(ds2);
+						DataSourceUtils.releaseConnection(con, ds2);
+					}
+				};
+
+		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+				TransactionSynchronizationManager.registerSynchronization(synch);
+			}
+		});
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue(synch.beforeCommitCalled);
+		assertTrue(synch.beforeCompletionCalled);
+		assertTrue(synch.afterCommitCalled);
+		assertTrue(synch.afterCompletionCalled);
+		assertNull(synch.afterCompletionException);
+		verify(con).commit();
+		verify(con).close();
+		verify(con2).close();
 	}
 
 	@Test
@@ -1447,6 +1491,8 @@ public class DataSourceTransactionManagerTests  {
 
 		public boolean afterCompletionCalled;
 
+		public Throwable afterCompletionException;
+
 		public TestTransactionSynchronization(DataSource dataSource, int status) {
 			this.dataSource = dataSource;
 			this.status = status;
@@ -1490,6 +1536,15 @@ public class DataSourceTransactionManagerTests  {
 
 		@Override
 		public void afterCompletion(int status) {
+			try {
+				doAfterCompletion(status);
+			}
+			catch (Throwable ex) {
+				this.afterCompletionException = ex;
+			}
+		}
+
+		protected void doAfterCompletion(int status) {
 			assertFalse(this.afterCompletionCalled);
 			this.afterCompletionCalled = true;
 			assertTrue(status == this.status);
