@@ -104,7 +104,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	/**
 	 * Set the PathMatcher implementation to use for matching URL paths
 	 * against registered URL patterns. Default is AntPathMatcher.
-	 * @see org.springframework.util.AntPathMatcher
+	 * @see org.springframework.web.util.ParsingPathMatcher
 	 */
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		Assert.notNull(pathMatcher, "PathMatcher must not be null");

@@ -20,12 +20,12 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.support.HttpRequestPathHelper;
+import org.springframework.web.util.ParsingPathMatcher;
 
 /**
  * Provide a per reactive request {@link CorsConfiguration} instance based on a
@@ -41,15 +41,15 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 
 	private final Map<String, CorsConfiguration> corsConfigurations = new LinkedHashMap<>();
 
-	private PathMatcher pathMatcher = new AntPathMatcher();
+	private PathMatcher pathMatcher = new ParsingPathMatcher();
 
 	private HttpRequestPathHelper pathHelper = new HttpRequestPathHelper();
 
 
 	/**
 	 * Set the PathMatcher implementation to use for matching URL paths
-	 * against registered URL patterns. Default is AntPathMatcher.
-	 * @see AntPathMatcher
+	 * against registered URL patterns. Default is ParsingPathMatcher.
+	 * @see ParsingPathMatcher
 	 */
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		Assert.notNull(pathMatcher, "PathMatcher must not be null");

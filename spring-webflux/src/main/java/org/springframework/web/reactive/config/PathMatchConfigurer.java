@@ -82,7 +82,7 @@ public class PathMatchConfigurer {
 
 	/**
 	 * Set the PathMatcher for matching URL paths against registered URL patterns.
-	 * <p>Default is {@link org.springframework.util.AntPathMatcher AntPathMatcher}.
+	 * <p>Default is {@link org.springframework.web.util.ParsingPathMatcher ParsingPathMatcher}.
 	 */
 	public PathMatchConfigurer setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
