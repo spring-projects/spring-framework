@@ -15,6 +15,9 @@
  */
 package org.springframework.test.web.reactive.server;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.http.CacheControl;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -23,7 +26,7 @@ import org.springframework.http.MediaType;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 
 /**
- * Provides methods for asserting specific, commonly used response headers.
+ * Assertions on specific, commonly used response headers.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

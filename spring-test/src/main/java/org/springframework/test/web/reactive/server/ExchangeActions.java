@@ -17,9 +17,13 @@ package org.springframework.test.web.reactive.server;
 
 import java.nio.ByteBuffer;
 import java.time.Duration;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
@@ -27,8 +31,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.test.util.AssertionErrors;
 import org.springframework.web.reactive.function.client.ClientResponse;
 
+import static org.springframework.web.reactive.function.BodyExtractors.toMono;
+
 /**
- * An API to apply assertion and other actions against a performed exchange.
+ * Entry point for applying assertions and actions on a performed exchange.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -69,39 +75,49 @@ public final class ExchangeActions {
 	}
 
 	/**
-	 * Assert options for any response header specified by name.
-	 * @return options for asserting headers
+	 * Assert value(s) of the specified header name.
+	 * @param headerName the header name
+	 * @return options for asserting the header value(s)
 	 */
-	public StringMultiValueMapEntryAssertions assertHeader(String headerName) {
+	public ResponseHeaderAssertions assertHeader(String headerName) {
 		HttpHeaders headers = getResponse().headers().asHttpHeaders();
-		return new StringMultiValueMapEntryAssertions(this, headerName, headers, "Response header");
+		List<String> values = headers.getOrDefault(headerName, Collections.emptyList());
+		return new ResponseHeaderAssertions(this, headerName, values);
 	}
 
 	/**
-	 * Assert the response is empty.
+	 * Assert the response does not have any content.
 	 */
-	public void assertNoContent() {
-		Flux<?> body = getResponse().bodyToFlux(ByteBuffer.class);
-		StepVerifier.create(body).expectComplete().verify(getResponseTimeout());
+	public ExchangeActions assertBodyIsEmpty() {
+		Flux<?> body = this.exchangeInfo.getResponse().bodyToFlux(ByteBuffer.class);
+		StepVerifier.create(body).expectComplete().verify(this.exchangeInfo.getResponseTimeout());
+		return this;
 	}
 
 	/**
 	 * Assert the content of the response.
-	 * @param entityType the type of entity to decode the response as
-	 * @param <T> the type of entity
 	 * @return further options for asserting response entities
 	 */
-	public <T> ResponseContentAssertions<T> assertEntity(Class<T> entityType) {
-		return new ResponseContentAssertions<T>(this.exchangeInfo, ResolvableType.forClass(entityType));
+	public <T> ResponseEntityAssertions<T> assertEntity(Class<T> entityType) {
+		return assertEntity(ResolvableType.forClass(entityType));
 	}
 
 	/**
-	 * Variant of {@link #assertEntity(Class)} with a {@link ResolvableType}.
-	 * @param entityType the type of entity to decode the response as
+	 * Assert the content of the response.
 	 * @return further options for asserting response entities
 	 */
-	public <T> ResponseContentAssertions<T> assertEntity(ResolvableType entityType) {
-		return new ResponseContentAssertions<T>(this.exchangeInfo, entityType);
+	public <T> ResponseEntityAssertions<T> assertEntity(ResolvableType entityType) {
+		return new ResponseEntityAssertions<T>(this, this.exchangeInfo, entityType);
+	}
+
+	/**
+	 * Assert the response decoded as a Map of the given key and value types.
+	 */
+	public <K, V> MapAssertions<K, V> assertBodyAsMap(Class<K> keyType, Class<V> valueType) {
+		ResolvableType type = ResolvableType.forClassWithGenerics(Map.class, keyType, valueType);
+		Mono<Map<K, V>> mono = this.exchangeInfo.getResponse().body(toMono(type));
+		Map<K, V> map = mono.block(this.exchangeInfo.getResponseTimeout());
+		return new MapAssertions<>(this, map, "Response body map");
 	}
 
 	/**
@@ -130,6 +146,13 @@ public final class ExchangeActions {
 	public ExchangeActions andDo(Consumer<ExchangeInfo> consumer) {
 		consumer.accept(this.exchangeInfo);
 		return this;
+	}
+
+	/**
+	 * Return {@link ExchangeInfo} for direct access to request and response.
+	 */
+	public ExchangeInfo andReturn() {
+		return this.exchangeInfo;
 	}
 
 }

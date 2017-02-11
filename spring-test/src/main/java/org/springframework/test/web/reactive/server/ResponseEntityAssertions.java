@@ -15,91 +15,59 @@
  */
 package org.springframework.test.web.reactive.server;
 
-import java.util.function.Consumer;
+import java.util.List;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.test.util.AssertionErrors;
 
-import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
 import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
 /**
- * Provides methods for asserting the response body as a single entity.
+ * Assertions on the response body decoded as a single entity.
+ *
+ * @param <T> the response entity type
  *
  * @author Rossen Stoyanchev
- * @since 5.0
+ * @sine 5.0
  */
-public class ResponseEntityAssertions<T> {
+public class ResponseEntityAssertions<T> extends ObjectAssertions<T, ResponseEntityAssertions<T>> {
 
 	private final ExchangeInfo exchangeInfo;
 
 	private final ResolvableType entityType;
 
-	private T entity;
 
-
-	ResponseEntityAssertions(ExchangeInfo info, ResolvableType entityType) {
+	ResponseEntityAssertions(ExchangeActions actions, ExchangeInfo info, ResolvableType entityType) {
+		super(actions, () -> initEntity(info, entityType), "Response body");
 		this.exchangeInfo = info;
 		this.entityType = entityType;
 	}
 
-
-	protected ExchangeInfo getExchangeInfo() {
-		return this.exchangeInfo;
-	}
-
-	protected ResolvableType getEntityType() {
-		return this.entityType;
-	}
-
-	private T resolveEntity() {
-		if (this.entity == null) {
-			Mono<T> mono = this.exchangeInfo.getResponse().body(toMono(entityType));
-			this.entity = mono.block(this.exchangeInfo.getResponseTimeout());
-		}
-		return this.entity;
+	private static <T> T initEntity(ExchangeInfo exchangeInfo, ResolvableType entityType) {
+		Mono<T> mono = exchangeInfo.getResponse().body(toMono(entityType));
+		return mono.block(exchangeInfo.getResponseTimeout());
 	}
 
 
 	/**
-	 * Assert the response entity is equal to the given expected entity.
+	 * Assert the response decoded as a Collection of entities of the given type.
 	 */
-	public ResponseEntityAssertions<T> isEqualTo(T expected) {
-		assertEquals("Response body", expected, resolveEntity());
-		return this;
+	public ListAssertions<T> list() {
+		Flux<T> flux = this.exchangeInfo.getResponse().body(toFlux(this.entityType));
+		List<T> list = flux.collectList().block(this.exchangeInfo.getResponseTimeout());
+		return new ListAssertions<T>(getExchangeActions(), list, "Response entity collection");
 	}
 
 	/**
-	 * Assert the response entity is not equal to the given expected entity.
+	 * Assert the response content using a {@link StepVerifier}.
 	 */
-	public ResponseEntityAssertions<T> isNotEqualTo(T expected) {
-		assertEquals("Response body", expected, resolveEntity());
-		return this;
-	}
-
-	/**
-	 * Apply custom assertions on the response entity with the help of
-	 * {@link AssertionErrors} or an assertion library such as AssertJ.
-	 * <p>Consider using statically imported methods for creating the assertion
-	 * consumer to improve readability of tests.
-	 * @param assertionConsumer consumer that will apply assertions.
-	 */
-	public ResponseEntityAssertions<T> andAssert(Consumer<T> assertionConsumer) {
-		assertionConsumer.accept(resolveEntity());
-		return this;
-	}
-
-	/**
-	 * Apply custom actions on the response entity collection.
-	 * <p>Consider using statically imported methods for creating the assertion
-	 * consumer to improve readability of tests.
-	 * @param consumer consumer that will apply the custom action
-	 */
-	public ResponseEntityAssertions<T> andDo(Consumer<T> consumer) {
-		consumer.accept(resolveEntity());
-		return this;
+	public StepVerifier.FirstStep<T> stepVerifier() {
+		Flux<T> flux = this.exchangeInfo.getResponse().body(toFlux(this.entityType));
+		return StepVerifier.create(flux);
 	}
 
 }

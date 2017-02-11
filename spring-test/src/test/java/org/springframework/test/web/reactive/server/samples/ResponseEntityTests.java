@@ -70,7 +70,7 @@ public class ResponseEntityTests {
 				.exchange()
 				.assertStatus().isOk()
 				.assertHeaders().contentType(MediaType.APPLICATION_JSON_UTF8)
-				.assertEntity(Person.class).collection()
+				.assertEntity(Person.class).list()
 				.hasSize(3)
 				.contains(new Person("Jane"), new Person("Jason"), new Person("John"));
 	}
@@ -94,8 +94,8 @@ public class ResponseEntityTests {
 		this.client.post().uri("/persons")
 				.exchange(Mono.just(new Person("John")), Person.class)
 				.assertStatus().isCreated()
-				.assertHeader("location").isEqualTo("/persons/John")
-				.assertNoContent();
+				.assertHeader("location").isEqualTo("/persons/John").and()
+				.assertBodyIsEmpty();
 	}
 
 
