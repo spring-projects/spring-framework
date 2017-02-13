@@ -9,21 +9,33 @@ import reactor.core.publisher.Mono
  * Provide a routing DSL for [RouterFunctions] and [RouterFunction] in order to be able to
  * write idiomatic Kotlin code as below:
  *
- * * ```kotlin
- * fun route(request: ServerRequest) = route(request) {
- * 		accept(TEXT_HTML).apply {
- * 			(GET("/user/") or GET("/users/")) { findAllView() }
- * 			GET("/user/{login}", ::findViewById)
+ * ```kotlin
+ * import org.springframework.web.reactive.function.server.RequestPredicates.*
+ * ...
+ *
+ * @Controller
+ * class FooController : RouterFunction<ServerResponse> {
+ *
+ * 		override fun route(req: ServerRequest) = route(req) {
+ * 			html().apply {
+ * 				(GET("/user/") or GET("/users/")) { findAllView() }
+ * 				GET("/user/{login}", this@FooController::findViewById)
+ * 			}
+ * 			json().apply {
+ * 				(GET("/api/user/") or GET("/api/users/")) { findAll() }
+ * 				POST("/api/user/", this@FooController::create)
+ * 			}
  * 		}
- * 		accept(APPLICATION_JSON).apply {
- * 			(GET("/api/user/") or GET("/api/users/")) { findAll() }
- * 			POST("/api/user/", ::create)
- * 			POST("/api/user/{login}", ::findOne)
- * 		}
+ *
+ * 		fun findAllView() = ...
+ * 		fun findViewById(req: ServerRequest) = ...
+ * 		fun findAll() = ...
+ * 		fun create(req: ServerRequest) =
  * 	}
  * ```
  *
  * @since 5.0
+ * @see <a href="https://youtrack.jetbrains.com/issue/KT-15667">Kotlin issue about supporting ::foo for member functions</a>
  * @author Sebastien Deleuze
  * @author Yevhenii Melnyk
  */
@@ -46,7 +58,7 @@ class RouterDsl {
 	}
 
 	fun GET(pattern: String, f: (ServerRequest) -> Mono<ServerResponse>) {
-		routes += RouterFunctions.route(RequestPredicates.GET(pattern), HandlerFunction { f(it) } )
+		routes += RouterFunctions.route(RequestPredicates.GET(pattern), HandlerFunction { f(it) })
 	}
 
 	fun HEAD(pattern: String, f: (ServerRequest) -> Mono<ServerResponse>) {
@@ -81,7 +93,7 @@ class RouterDsl {
 		routes += RouterFunctions.route(RequestPredicates.contentType(mediaType), HandlerFunction { f(it) })
 	}
 
-	fun headers(headerPredicate: (ServerRequest.Headers)->Boolean, f: (ServerRequest) -> Mono<ServerResponse>) {
+	fun headers(headerPredicate: (ServerRequest.Headers) -> Boolean, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.headers(headerPredicate), HandlerFunction { f(it) })
 	}
 
@@ -93,14 +105,37 @@ class RouterDsl {
 		routes += RouterFunctions.route(RequestPredicates.path(pattern), HandlerFunction { f(it) })
 	}
 
+	fun pathExtension(extension: String, f: (ServerRequest) -> Mono<ServerResponse>) {
+		routes += RouterFunctions.route(RequestPredicates.pathExtension(extension), HandlerFunction { f(it) })
+	}
+
+	fun pathExtension(predicate: (String) -> Boolean, f: (ServerRequest) -> Mono<ServerResponse>) {
+		routes += RouterFunctions.route(RequestPredicates.pathExtension(predicate), HandlerFunction { f(it) })
+	}
+
+	fun queryParam(name: String, predicate: (String) -> Boolean, f: (ServerRequest) -> Mono<ServerResponse>) {
+		routes += RouterFunctions.route(RequestPredicates.queryParam(name, predicate), HandlerFunction { f(it) })
+	}
+
+	fun json(f: (ServerRequest) -> Mono<ServerResponse>) {
+		routes += RouterFunctions.route(RequestPredicates.json(), HandlerFunction { f(it) })
+	}
+
+	fun html(f: (ServerRequest) -> Mono<ServerResponse>) {
+		routes += RouterFunctions.route(RequestPredicates.html(), HandlerFunction { f(it) })
+	}
+
+	fun xml(f: (ServerRequest) -> Mono<ServerResponse>) {
+		routes += RouterFunctions.route(RequestPredicates.xml(), HandlerFunction { f(it) })
+	}
+
 	fun resources(path: String, location: Resource) {
-		routes +=  RouterFunctions.resources(path, location)
+		routes += RouterFunctions.resources(path, location)
 	}
 
 	fun resources(lookupFunction: (ServerRequest) -> Mono<Resource>) {
-		routes +=  RouterFunctions.resources(lookupFunction)
+		routes += RouterFunctions.resources(lookupFunction)
 	}
-
 
 	@Suppress("UNCHECKED_CAST")
 	fun router(): RouterFunction<ServerResponse> {

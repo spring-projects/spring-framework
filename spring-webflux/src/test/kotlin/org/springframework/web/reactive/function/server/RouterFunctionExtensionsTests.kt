@@ -97,9 +97,12 @@ class RouterFunctionExtensionsTests {
 		override fun route(req: ServerRequest) = route(req) {
 			(GET("/foo/") or GET("/foos/")) { handle(req) }
 			accept(APPLICATION_JSON).apply {
-				POST("/api/foo/", ::handle)
-				PUT("/api/foo/", ::handle)
+				POST("/api/foo/", this@FooController::handleFromClass)
+				PUT("/api/foo/") { handleFromClass(req) }
 				DELETE("/api/foo/", ::handle)
+			}
+			html().apply {
+				GET("/page", this@FooController::handleFromClass)
 			}
 			accept(APPLICATION_ATOM_XML, ::handle)
 			contentType(APPLICATION_OCTET_STREAM) { handle(req) }
@@ -120,8 +123,10 @@ class RouterFunctionExtensionsTests {
 			}
 			path("/baz") { handle(req) }
 		}
+
+		fun handleFromClass(req: ServerRequest) = ok().build()
 	}
 }
 
-private fun handle(req: ServerRequest) = ok().build()
+fun handle(req: ServerRequest) = ok().build()
 
