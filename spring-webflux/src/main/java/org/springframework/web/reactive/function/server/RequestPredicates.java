@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import reactor.core.publisher.Flux;
@@ -32,11 +33,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
-import org.springframework.util.PathMatcher;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.WebSession;
-import org.springframework.web.util.ParsingPathMatcher;
 import org.springframework.web.util.UriUtils;
+import org.springframework.web.util.patterns.PathPattern;
+import org.springframework.web.util.patterns.PathPatternParser;
 
 /**
  * Implementations of {@link RequestPredicate} that implement various useful request matching operations, such as
@@ -47,7 +48,7 @@ import org.springframework.web.util.UriUtils;
  */
 public abstract class RequestPredicates {
 
-	private static final PathMatcher DEFAULT_PATH_MATCHER = new ParsingPathMatcher();
+	private static final PathPatternParser DEFAULT_PATTERN_PARSER = new PathPatternParser();
 
 	/**
 	 * Returns a {@code RequestPredicate} that always matches.
@@ -75,21 +76,22 @@ public abstract class RequestPredicates {
 	 * @return a predicate that tests against the given path pattern
 	 */
 	public static RequestPredicate path(String pattern) {
-		return path(pattern, DEFAULT_PATH_MATCHER);
+		Assert.notNull(pattern, "'pattern' must not be null");
+		return new PathPatternPredicate(DEFAULT_PATTERN_PARSER.parse(pattern));
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that tests against the given path pattern using the given matcher.
+	 * Return a function that creates new path-matching {@code RequestPredicates} from pattern
+	 * Strings using the given {@link PathPatternParser}. This method can be used to specify a
+	 * non-default, customized {@code PathPatternParser} when resolving path patterns.
 	 *
-	 * @param pattern     the pattern to match to
-	 * @param pathMatcher the path matcher to use
-	 * @return a predicate that tests against the given path pattern
+	 * @param patternParser the parser used to parse patterns given to the returned function
+	 * @return a function that resolves patterns Strings into path-matching
+	 * {@code RequestPredicate}s
 	 */
-	public static RequestPredicate path(String pattern, PathMatcher pathMatcher) {
-		Assert.notNull(pattern, "'pattern' must not be null");
-		Assert.notNull(pathMatcher, "'pathMatcher' must not be null");
-
-		return new PathMatchingPredicate(pattern, pathMatcher);
+	public static Function<String, RequestPredicate> pathPredicates(PathPatternParser patternParser) {
+		Assert.notNull(patternParser, "'patternParser' must not be null");
+		return pattern -> new PathPatternPredicate(patternParser.parse(pattern));
 	}
 
 	/**
@@ -324,26 +326,22 @@ public abstract class RequestPredicates {
 		}
 	}
 
-	private static class PathMatchingPredicate implements RequestPredicate {
+	private static class PathPatternPredicate implements RequestPredicate {
 
-		private final String pattern;
+		private final PathPattern pattern;
 
-		private final PathMatcher pathMatcher;
-
-		public PathMatchingPredicate(String pattern, PathMatcher pathMatcher) {
+		public PathPatternPredicate(PathPattern pattern) {
 			Assert.notNull(pattern, "'pattern' must not be null");
-			Assert.notNull(pathMatcher, "'pathMatcher' must not be null");
 			this.pattern = pattern;
-			this.pathMatcher = pathMatcher;
 		}
 
 		@Override
 		public boolean test(ServerRequest request) {
 			String path = request.path();
-			if (this.pathMatcher.match(this.pattern, path)) {
+			if (this.pattern.matches(path)) {
 				if (request instanceof DefaultServerRequest) {
 					DefaultServerRequest defaultRequest = (DefaultServerRequest) request;
-					Map<String, String> uriTemplateVariables = this.pathMatcher.extractUriTemplateVariables(this.pattern, path);
+					Map<String, String> uriTemplateVariables = this.pattern.matchAndExtract(path);
 					defaultRequest.exchange().getAttributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
 				}
 				return true;
@@ -356,7 +354,7 @@ public abstract class RequestPredicates {
 		@Override
 		public ServerRequest subRequest(ServerRequest request) {
 			String requestPath = request.path();
-			String subPath = this.pathMatcher.extractPathWithinPattern(this.pattern, requestPath);
+			String subPath = this.pattern.extractPathWithinPattern(requestPath);
 			return new SubPathServerRequestWrapper(request, subPath);
 		}
 	}

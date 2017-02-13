@@ -18,11 +18,13 @@ package org.springframework.web.reactive.function.server;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.function.Function;
 
 import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.web.util.patterns.PathPatternParser;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -92,6 +94,18 @@ public class RequestPredicatesTests {
 
 		request = MockServerRequest.builder().build();
 		assertFalse(predicate.test(request));
+	}
+
+	@Test
+	public void pathPredicates() throws Exception {
+		PathPatternParser parser = new PathPatternParser();
+		parser.setCaseSensitive(false);
+		Function<String, RequestPredicate> pathPredicates = RequestPredicates.pathPredicates(parser);
+
+		URI uri = URI.create("http://localhost/path");
+		RequestPredicate predicate = pathPredicates.apply("/P*");
+		MockServerRequest request = MockServerRequest.builder().uri(uri).build();
+		assertTrue(predicate.test(request));
 	}
 
 	@Test

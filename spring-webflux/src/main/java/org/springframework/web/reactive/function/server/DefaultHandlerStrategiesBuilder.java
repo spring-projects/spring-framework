@@ -112,6 +112,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 		applicationContext.getBeansOfType(HttpMessageReader.class).values().forEach(this::messageReader);
 		applicationContext.getBeansOfType(HttpMessageWriter.class).values().forEach(this::messageWriter);
 		applicationContext.getBeansOfType(ViewResolver.class).values().forEach(this::viewResolver);
+		localeResolver(DEFAULT_LOCALE_RESOLVER);
 	}
 
 	@Override
