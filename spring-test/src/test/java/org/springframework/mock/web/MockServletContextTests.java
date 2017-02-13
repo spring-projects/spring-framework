@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,16 +97,24 @@ public class MockServletContextTests {
 	@Test
 	public void servletVersion() {
 		assertEquals(3, sc.getMajorVersion());
-		assertEquals(0, sc.getMinorVersion());
-		sc.setMinorVersion(1);
 		assertEquals(1, sc.getMinorVersion());
+		assertEquals(3, sc.getEffectiveMajorVersion());
+		assertEquals(1, sc.getEffectiveMinorVersion());
+
+		sc.setMajorVersion(4);
+		sc.setMinorVersion(0);
+		sc.setEffectiveMajorVersion(4);
+		sc.setEffectiveMinorVersion(0);
+		assertEquals(4, sc.getMajorVersion());
+		assertEquals(0, sc.getMinorVersion());
+		assertEquals(4, sc.getEffectiveMajorVersion());
+		assertEquals(0, sc.getEffectiveMinorVersion());
 	}
 
 	@Test
 	public void registerAndUnregisterNamedDispatcher() throws Exception {
 		final String name = "test-servlet";
 		final String url = "/test";
-
 		assertNull(sc.getNamedDispatcher(name));
 
 		sc.registerNamedDispatcher(name, new MockRequestDispatcher(url));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
-import java.lang.reflect.Method;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -38,6 +37,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class ServletResponseMethodArgumentResolver implements HandlerMethodArgumentResolver {
@@ -64,28 +64,36 @@ public class ServletResponseMethodArgumentResolver implements HandlerMethodArgum
 			mavContainer.setRequestHandled(true);
 		}
 
-		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 		Class<?> paramType = parameter.getParameterType();
 
+		// ServletResponse, HttpServletResponse
 		if (ServletResponse.class.isAssignableFrom(paramType)) {
-			Object nativeResponse = webRequest.getNativeResponse(paramType);
-			if (nativeResponse == null) {
-				throw new IllegalStateException(
-						"Current response is not of type [" + paramType.getName() + "]: " + response);
-			}
-			return nativeResponse;
+			return resolveNativeResponse(webRequest, paramType);
 		}
-		else if (OutputStream.class.isAssignableFrom(paramType)) {
+
+		// ServletResponse required for all further argument types
+		return resolveArgument(paramType, resolveNativeResponse(webRequest, ServletResponse.class));
+	}
+
+	private <T> T resolveNativeResponse(NativeWebRequest webRequest, Class<T> requiredType) {
+		T nativeResponse = webRequest.getNativeResponse(requiredType);
+		if (nativeResponse == null) {
+			throw new IllegalStateException(
+					"Current response is not of type [" + requiredType.getName() + "]: " + webRequest);
+		}
+		return nativeResponse;
+	}
+
+	private Object resolveArgument(Class<?> paramType, ServletResponse response) throws IOException {
+		if (OutputStream.class.isAssignableFrom(paramType)) {
 			return response.getOutputStream();
 		}
 		else if (Writer.class.isAssignableFrom(paramType)) {
 			return response.getWriter();
 		}
-		else {
-			// should not happen
-			Method method = parameter.getMethod();
-			throw new UnsupportedOperationException("Unknown parameter type: " + paramType + " in method: " + method);
-		}
+
+		// Should never happen...
+		throw new UnsupportedOperationException("Unknown parameter type: " + paramType);
 	}
 
 }

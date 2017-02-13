@@ -476,11 +476,9 @@ abstract way, which enables you to create a wide variety of controllers.
 
 Spring 2.5 introduced an annotation-based programming model for MVC controllers that
 uses annotations such as `@RequestMapping`, `@RequestParam`, `@ModelAttribute`, and so
-on. This annotation support is available for both Servlet MVC and Portlet MVC.
-Controllers implemented in this style do not have to extend specific base classes or
+on. Controllers implemented in this style do not have to extend specific base classes or
 implement specific interfaces. Furthermore, they do not usually have direct dependencies
-on Servlet or Portlet APIs, although you can easily configure access to Servlet or
-Portlet facilities.
+on Servlet APIs, although you can easily configure access to Servlet facilities if needed.
 
 [TIP]
 ====
@@ -1293,8 +1291,13 @@ neither.
 ==== Supported method argument types
 The following are the supported method arguments:
 
+* `org.springframework.web.context.request.WebRequest` or
+  `org.springframework.web.context.request.NativeWebRequest`. Allows for generic
+  request parameter access as well as request/session attribute access, without ties
+  to the native Servlet API.
 * Request or response objects (Servlet API). Choose any specific request or response
-  type, for example `ServletRequest` or `HttpServletRequest`.
+  type, for example `ServletRequest` or `HttpServletRequest` or Spring's
+  `MultipartRequest`/`MultipartHttpServletRequest`.
 * Session object (Servlet API) of type `HttpSession`. An argument of this type enforces
   the presence of a corresponding session. As a consequence, such an argument is never
   `null`.
@@ -1306,21 +1309,21 @@ setting the ``RequestMappingHandlerAdapter``'s "synchronizeOnSession" flag to "t
 multiple requests are allowed to access a session concurrently.
 ====
 
-* `org.springframework.web.context.request.WebRequest` or
-  `org.springframework.web.context.request.NativeWebRequest`. Allows for generic
-  request parameter access as well as request/session attribute access, without ties
-  to the native Servlet/Portlet API.
+* `java.servlet.http.PushBuilder` for the associated Servlet 4.0 push builder API,
+  allowing for programmatic HTTP/2 resource pushes.
+* `java.security.Principal` (or a specific `Principal` implementation class if known),
+  containing the currently authenticated user.
+* `org.springframework.http.HttpMethod` for the HTTP request method, represented as
+  Spring's `HttpMethod` enum.
 * `java.util.Locale` for the current request locale, determined by the most specific
   locale resolver available, in effect, the configured `LocaleResolver` /
   `LocaleContextResolver` in an MVC environment.
-* `java.util.TimeZone` (Java 6+) / `java.time.ZoneId` (on Java 8) for the time zone
+* `java.util.TimeZone` (Java 6+) / `java.time.ZoneId` (Java 8+) for the time zone
   associated with the current request, as determined by a `LocaleContextResolver`.
 * `java.io.InputStream` / `java.io.Reader` for access to the request's content.
   This value is the raw InputStream/Reader as exposed by the Servlet API.
 * `java.io.OutputStream` / `java.io.Writer` for generating the response's content.
   This value is the raw OutputStream/Writer as exposed by the Servlet API.
-* `org.springframework.http.HttpMethod` for the HTTP request method.
-* `java.security.Principal` containing the currently authenticated user.
 * `@PathVariable` annotated parameters for access to URI template variables. See
   <<mvc-ann-requestmapping-uri-templates>>.
 * `@MatrixVariable` annotated parameters for access to name-value pairs located in
@@ -2000,9 +2003,6 @@ The following code sample demonstrates how to get the value of the `JSESSIONID` 
 Type conversion is applied automatically if the target method parameter type is not
 `String`. See <<mvc-ann-typeconversion>>.
 
-This annotation is supported for annotated handler methods in Servlet and Portlet
-environments.
-
 
 [[mvc-ann-requestheader]]
 ==== Mapping request header attributes with the @RequestHeader annotation
@@ -2049,9 +2049,6 @@ array/collection of strings or other types known to the type conversion system. 
 example a method parameter annotated with `@RequestHeader("Accept")` may be of type
 `String` but also `String[]` or `List<String>`.
 ====
-
-This annotation is supported for annotated handler methods in Servlet and Portlet
-environments.
 
 
 [[mvc-ann-typeconversion]]
@@ -3968,11 +3965,10 @@ the exception types listed as method arguments are used.
 
 Much like standard controller methods annotated with a `@RequestMapping` annotation, the
 method arguments and return values of `@ExceptionHandler` methods can be flexible. For
-example, the `HttpServletRequest` can be accessed in Servlet environments and the
-`PortletRequest` in Portlet environments. The return type can be a `String`, which is
-interpreted as a view name, a `ModelAndView` object, a `ResponseEntity`, or you can also
-add the `@ResponseBody` to have the method return value converted with message
-converters and written to the response stream.
+example, the `HttpServletRequest` can be accessed in Servlet environments. The return
+type can be a `String`, which is interpreted as a view name, a `ModelAndView` object,
+a `ResponseEntity`, or you can also add the `@ResponseBody` to have the method return
+value converted with message converters and written to the response stream.
 
 
 
