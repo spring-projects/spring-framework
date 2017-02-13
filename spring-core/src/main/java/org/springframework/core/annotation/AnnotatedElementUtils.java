@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,7 +172,7 @@ public class AnnotatedElementUtils {
 	 */
 	public static Set<String> getMetaAnnotationTypes(AnnotatedElement element, String annotationName) {
 		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.hasLength(annotationName, "annotationName must not be null or empty");
+		Assert.hasLength(annotationName, "'annotationName' must not be null or empty");
 
 		return getMetaAnnotationTypes(element, AnnotationUtils.getAnnotation(element, annotationName));
 	}
@@ -232,7 +232,7 @@ public class AnnotatedElementUtils {
 	 */
 	public static boolean hasMetaAnnotationTypes(AnnotatedElement element, String annotationName) {
 		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.hasLength(annotationName, "annotationName must not be null or empty");
+		Assert.hasLength(annotationName, "'annotationName' must not be null or empty");
 
 		return hasMetaAnnotationTypes(element, null, annotationName);
 	}
@@ -290,7 +290,7 @@ public class AnnotatedElementUtils {
 	 */
 	public static boolean isAnnotated(AnnotatedElement element, String annotationName) {
 		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.hasLength(annotationName, "annotationName must not be null or empty");
+		Assert.hasLength(annotationName, "'annotationName' must not be null or empty");
 
 		return Boolean.TRUE.equals(searchWithGetSemantics(element, null, annotationName, alwaysTrueAnnotationProcessor));
 	}
@@ -373,7 +373,7 @@ public class AnnotatedElementUtils {
 	public static AnnotationAttributes getMergedAnnotationAttributes(AnnotatedElement element,
 			String annotationName, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
-		Assert.hasLength(annotationName, "annotationName must not be null or empty");
+		Assert.hasLength(annotationName, "'annotationName' must not be null or empty");
 		AnnotationAttributes attributes = searchWithGetSemantics(element, null, annotationName,
 				new MergedAnnotationAttributesProcessor(classValuesAsString, nestedAnnotationsAsMap));
 		AnnotationUtils.postProcessAnnotationAttributes(element, attributes, classValuesAsString, nestedAnnotationsAsMap);
