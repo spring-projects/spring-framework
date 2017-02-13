@@ -30,6 +30,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.AbstractJackson2Codec;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 
 /**
@@ -44,6 +46,11 @@ public interface EntityResponse<T> extends ServerResponse {
 	 * Return the entity that makes up this response.
 	 */
 	T entity();
+
+	/**
+	 * Return the {@code BodyInserter} that writes the entity to the output stream.
+	 */
+	BodyInserter<T, ? super ServerHttpResponse> inserter();
 
 	// Static builder methods
 
