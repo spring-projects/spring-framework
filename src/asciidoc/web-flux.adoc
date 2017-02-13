@@ -258,7 +258,20 @@ WebSocketClient client = new ReactorNettyWebSocketClient();
 client.execute("ws://localhost:8080/echo"), session -> {... }).blockMillis(5000);
 ----
 
+[[web-reactive-tests]]
+=== Testing
 
+The `spring-test` module includes a `WebTestClient` that can be used to test
+WebFlux server endpoints with or without a running server.
+
+Tests without a running server are comparable to `MockMvc` from Spring MVC
+where mock request and response are used instead of connecting over the network
+using a socket. The `WebTestClient` however can also perform tests against a
+running server.
+
+For more see
+https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/reactive/server/samples[sample tests]
+in the framework.
 
 
 
