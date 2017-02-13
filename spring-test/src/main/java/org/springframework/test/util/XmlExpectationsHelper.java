@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.diff.DefaultNodeMatcher;
 import org.xmlunit.diff.Diff;
+import org.xmlunit.diff.ElementSelectors;
 
 import static org.hamcrest.MatcherAssert.*;
 
@@ -58,7 +60,7 @@ public class XmlExpectationsHelper {
 
 	/**
 	 * Parse the content as {@link DOMSource} and apply a {@link Matcher}.
-	 * @see <a href="http://code.google.com/p/xml-matchers/">xml-matchers</a>
+	 * @see <a href="https://github.com/davidehringer/xml-matchers">xml-matchers</a>
 	 */
 	public void assertSource(String content, Matcher<? super Source> matcher) throws Exception {
 		Document document = parseXmlString(content);
@@ -70,7 +72,7 @@ public class XmlExpectationsHelper {
 	 * two are "similar" -- i.e. they contain the same elements and attributes
 	 * regardless of order.
 	 * <p>Use of this method assumes the
-	 * <a href="http://xmlunit.sourceforge.net/">XMLUnit<a/> library is available.
+	 * <a href="https://github.com/xmlunit/xmlunit">XMLUnit<a/> library is available.
 	 * @param expected the expected XML content
 	 * @param actual the actual XML content
 	 * @see org.springframework.test.web.servlet.result.MockMvcResultMatchers#xpath(String, Object...)
@@ -78,6 +80,7 @@ public class XmlExpectationsHelper {
 	 */
 	public void assertXmlEqual(String expected, String actual) throws Exception {
 		Diff diffSimilar = DiffBuilder.compare(expected).withTest(actual)
+				.withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText))
 				.ignoreWhitespace().ignoreComments()
 				.checkForSimilar()
 				.build();
