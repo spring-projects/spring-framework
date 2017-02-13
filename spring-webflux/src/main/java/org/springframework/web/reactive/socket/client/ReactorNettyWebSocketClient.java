@@ -22,11 +22,11 @@ import io.netty.buffer.ByteBufAllocator;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.client.HttpClient;
 import reactor.ipc.netty.http.client.HttpClientOptions;
-import reactor.ipc.netty.http.client.HttpClientRequest;
 import reactor.ipc.netty.http.client.HttpClientResponse;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketSession;
@@ -76,10 +76,11 @@ public class ReactorNettyWebSocketClient extends WebSocketClientSupport implemen
 	public Mono<Void> execute(URI url, HttpHeaders headers, WebSocketHandler handler) {
 
 		String[] protocols = beforeHandshake(url, headers, handler);
-		// TODO: https://github.com/reactor/reactor-netty/issues/20
 
 		return getHttpClient()
-				.get(url.toString(), request -> addHeaders(request, headers).sendWebsocket())
+				.ws(url.toString(),
+						nettyHeaders -> setNettyHeaders(headers, nettyHeaders),
+						StringUtils.arrayToCommaDelimitedString(protocols))
 				.then(response -> {
 					HandshakeInfo info = afterHandshake(url, toHttpHeaders(response));
 					ByteBufAllocator allocator = response.channel().alloc();
@@ -91,9 +92,8 @@ public class ReactorNettyWebSocketClient extends WebSocketClientSupport implemen
 				});
 	}
 
-	private HttpClientRequest addHeaders(HttpClientRequest request, HttpHeaders headers) {
-		headers.keySet().stream().forEach(key -> request.requestHeaders().set(key, headers.get(key)));
-		return request;
+	private void setNettyHeaders(HttpHeaders headers, io.netty.handler.codec.http.HttpHeaders nettyHeaders) {
+		headers.keySet().stream().forEach(key -> nettyHeaders.set(key, headers.get(key)));
 	}
 
 	private HttpHeaders toHttpHeaders(HttpClientResponse response) {
