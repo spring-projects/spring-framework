@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.reactivestreams.Publisher;
+import static org.springframework.core.codec.AbstractEncoder.FLUSHING_STRATEGY_HINT;
+import static org.springframework.core.codec.AbstractEncoder.FlushingStrategy.AFTER_EACH_ELEMENT;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -102,7 +104,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
 		Flux<DataBuffer> body = this.encoder.encode(inputStream, bufferFactory, elementType, mediaType, hints);
-		return outputMessage.writeWith(body);
+		return (hints.get(FLUSHING_STRATEGY_HINT) == AFTER_EACH_ELEMENT ?
+				outputMessage.writeAndFlushWith(body.map(Flux::just)) : outputMessage.writeWith(body));
 	}
 
 	/**

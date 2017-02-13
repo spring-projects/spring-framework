@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.time.Duration;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -42,7 +41,6 @@ import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON_VALUE;
 /**
  * @author Sebastien Deleuze
  */
-@Ignore
 public class JsonStreamingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private AnnotationConfigApplicationContext wac;
@@ -78,7 +76,8 @@ public class JsonStreamingIntegrationTests extends AbstractHttpHandlerIntegratio
 		StepVerifier.create(result)
 				.expectNext(new Person("foo 0"))
 				.expectNext(new Person("foo 1"))
-				.verifyComplete();
+				.thenCancel()
+				.verify();
 	}
 
 	@RestController
@@ -87,7 +86,7 @@ public class JsonStreamingIntegrationTests extends AbstractHttpHandlerIntegratio
 
 		@RequestMapping(value = "/stream", produces = APPLICATION_STREAM_JSON_VALUE)
 		Flux<Person> person() {
-			return Flux.interval(Duration.ofMillis(100)).map(l -> new Person("foo " + l)).take(2);
+			return Flux.interval(Duration.ofMillis(100)).map(l -> new Person("foo " + l));
 		}
 
 	}
