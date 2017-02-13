@@ -22,7 +22,7 @@ import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
- * Assertions on a collection of values.
+ * Assertions on a List of values.
  *
  * @param <E> the type of element values in the collection
  *
@@ -38,7 +38,7 @@ public class ListAssertions<E> extends ObjectAssertions<List<E>, ListAssertions<
 
 
 	/**
-	 * Assert the size of the collection.
+	 * Assert the size of the list.
 	 */
 	public ListAssertions<E> hasSize(int size) {
 		assertEquals(getErrorPrefix() + " count", size, getValue().size());
@@ -46,7 +46,7 @@ public class ListAssertions<E> extends ObjectAssertions<List<E>, ListAssertions<
 	}
 
 	/**
-	 * Assert that the collection contains all of the given values.
+	 * Assert that the list contains all of the given values.
 	 */
 	@SuppressWarnings("unchecked")
 	public ListAssertions<E> contains(E... entities) {
@@ -58,7 +58,7 @@ public class ListAssertions<E> extends ObjectAssertions<List<E>, ListAssertions<
 	}
 
 	/**
-	 * Assert the collection does not contain any of the given values.
+	 * Assert the list does not contain any of the given values.
 	 */
 	@SuppressWarnings("unchecked")
 	public ListAssertions<E> doesNotContain(E... entities) {

@@ -15,10 +15,12 @@
  */
 package org.springframework.test.web.reactive.server;
 
+import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.springframework.test.util.AssertionErrors;
+import org.springframework.web.reactive.function.client.ClientResponse;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 
@@ -111,6 +113,14 @@ public class ObjectAssertions<V, S extends ObjectAssertions<V, S>> {
 
 	protected ExchangeActions getExchangeActions() {
 		return this.exchangeActions;
+	}
+
+	protected ClientResponse getResponse() {
+		return this.exchangeActions.andReturn().getResponse();
+	}
+
+	protected Duration getTimeout() {
+		return this.exchangeActions.andReturn().getResponseTimeout();
 	}
 
 	protected String getErrorPrefix() {

@@ -33,9 +33,9 @@ public class ResponseStatusAssertions {
 	private final HttpStatus httpStatus;
 
 
-	ResponseStatusAssertions(ExchangeActions actions, ExchangeInfo info) {
+	ResponseStatusAssertions(ExchangeActions actions) {
 		this.exchangeActions = actions;
-		this.httpStatus = info.getResponse().statusCode();
+		this.httpStatus = actions.andReturn().getResponse().statusCode();
 	}
 
 

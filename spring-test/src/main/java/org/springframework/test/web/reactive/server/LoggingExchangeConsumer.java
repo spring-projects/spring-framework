@@ -38,12 +38,9 @@ public class LoggingExchangeConsumer {
 
 	private final ExchangeActions exchangeActions;
 
-	private final ExchangeInfo exchangeInfo;
 
-
-	public LoggingExchangeConsumer(ExchangeActions exchangeActions, ExchangeInfo exchangeInfo) {
+	public LoggingExchangeConsumer(ExchangeActions exchangeActions) {
 		this.exchangeActions = exchangeActions;
-		this.exchangeInfo = exchangeInfo;
 	}
 
 
@@ -51,7 +48,7 @@ public class LoggingExchangeConsumer {
 	 * Log with {@link System#out}.
 	 */
 	public ExchangeActions toConsole() {
-		System.out.println(this.exchangeInfo.toString());
+		System.out.println(getOutput());
 		return this.exchangeActions;
 	}
 
@@ -67,7 +64,7 @@ public class LoggingExchangeConsumer {
 	 */
 	public ExchangeActions toWriter(Writer writer) {
 		try {
-			writer.write(this.exchangeInfo.toString());
+			writer.write(getOutput());
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException("Failed to print exchange info", ex);
@@ -98,9 +95,13 @@ public class LoggingExchangeConsumer {
 
 	private ExchangeActions doLog(Predicate<Log> logLevelPredicate, BiConsumer<Log, String> logAction) {
 		if (logLevelPredicate.test(logger)) {
-			logAction.accept(logger, this.exchangeInfo.toString());
+			logAction.accept(logger, getOutput());
 		}
 		return this.exchangeActions;
+	}
+
+	private String getOutput() {
+		return this.exchangeActions.andReturn().toString();
 	}
 
 }

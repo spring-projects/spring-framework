@@ -95,7 +95,7 @@ public class ResponseEntityTests {
 				.exchange(Mono.just(new Person("John")), Person.class)
 				.assertStatus().isCreated()
 				.assertHeader("location").isEqualTo("/persons/John").and()
-				.assertBodyIsEmpty();
+				.assertBody().isEmpty();
 	}
 
 

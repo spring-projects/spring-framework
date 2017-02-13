@@ -36,29 +36,27 @@ import static org.springframework.web.reactive.function.BodyExtractors.toMono;
  */
 public class ResponseEntityAssertions<T> extends ObjectAssertions<T, ResponseEntityAssertions<T>> {
 
-	private final ExchangeInfo exchangeInfo;
-
 	private final ResolvableType entityType;
 
 
-	ResponseEntityAssertions(ExchangeActions actions, ExchangeInfo info, ResolvableType entityType) {
-		super(actions, () -> initEntity(info, entityType), "Response body");
-		this.exchangeInfo = info;
+	ResponseEntityAssertions(ExchangeActions actions, ResolvableType entityType) {
+		super(actions, () -> initEntity(actions, entityType), "Response body");
 		this.entityType = entityType;
 	}
 
-	private static <T> T initEntity(ExchangeInfo exchangeInfo, ResolvableType entityType) {
-		Mono<T> mono = exchangeInfo.getResponse().body(toMono(entityType));
-		return mono.block(exchangeInfo.getResponseTimeout());
+	private static <T> T initEntity(ExchangeActions exchangeActions, ResolvableType entityType) {
+		ExchangeInfo info = exchangeActions.andReturn();
+		Mono<T> mono = info.getResponse().body(toMono(entityType));
+		return mono.block(info.getResponseTimeout());
 	}
 
 
 	/**
-	 * Assert the response decoded as a Collection of entities of the given type.
+	 * Assert the response decoded as a List of entities of the given type.
 	 */
 	public ListAssertions<T> list() {
-		Flux<T> flux = this.exchangeInfo.getResponse().body(toFlux(this.entityType));
-		List<T> list = flux.collectList().block(this.exchangeInfo.getResponseTimeout());
+		Flux<T> flux = getResponse().body(toFlux(this.entityType));
+		List<T> list = flux.collectList().block(getTimeout());
 		return new ListAssertions<T>(getExchangeActions(), list, "Response entity collection");
 	}
 
@@ -66,7 +64,7 @@ public class ResponseEntityAssertions<T> extends ObjectAssertions<T, ResponseEnt
 	 * Assert the response content using a {@link StepVerifier}.
 	 */
 	public StepVerifier.FirstStep<T> stepVerifier() {
-		Flux<T> flux = this.exchangeInfo.getResponse().body(toFlux(this.entityType));
+		Flux<T> flux = getResponse().body(toFlux(this.entityType));
 		return StepVerifier.create(flux);
 	}
 

@@ -15,23 +15,15 @@
  */
 package org.springframework.test.web.reactive.server;
 
-import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
-
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.util.AssertionErrors;
 import org.springframework.web.reactive.function.client.ClientResponse;
-
-import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
 /**
  * Entry point for applying assertions and actions on a performed exchange.
@@ -49,21 +41,12 @@ public final class ExchangeActions {
 	}
 
 
-	private ClientResponse getResponse() {
-		return this.exchangeInfo.getResponse();
-	}
-
-	private Duration getResponseTimeout() {
-		return this.exchangeInfo.getResponseTimeout();
-	}
-
-
 	/**
 	 * Assert the status of the response.
 	 * @return further options for asserting the status of the response
 	 */
 	public ResponseStatusAssertions assertStatus() {
-		return new ResponseStatusAssertions(this, this.exchangeInfo);
+		return new ResponseStatusAssertions(this);
 	}
 
 	/**
@@ -71,7 +54,8 @@ public final class ExchangeActions {
 	 * @return further options for asserting headers
 	 */
 	public ResponseHeadersAssertions assertHeaders() {
-		return new ResponseHeadersAssertions(this, getResponse().headers().asHttpHeaders());
+		HttpHeaders headers = this.exchangeInfo.getResponse().headers().asHttpHeaders();
+		return new ResponseHeadersAssertions(this, headers);
 	}
 
 	/**
@@ -80,7 +64,7 @@ public final class ExchangeActions {
 	 * @return options for asserting the header value(s)
 	 */
 	public ResponseHeaderAssertions assertHeader(String headerName) {
-		HttpHeaders headers = getResponse().headers().asHttpHeaders();
+		HttpHeaders headers = this.exchangeInfo.getResponse().headers().asHttpHeaders();
 		List<String> values = headers.getOrDefault(headerName, Collections.emptyList());
 		return new ResponseHeaderAssertions(this, headerName, values);
 	}
@@ -88,10 +72,8 @@ public final class ExchangeActions {
 	/**
 	 * Assert the response does not have any content.
 	 */
-	public ExchangeActions assertBodyIsEmpty() {
-		Flux<?> body = this.exchangeInfo.getResponse().bodyToFlux(ByteBuffer.class);
-		StepVerifier.create(body).expectComplete().verify(this.exchangeInfo.getResponseTimeout());
-		return this;
+	public ResponseBodyAssertions assertBody() {
+		return new ResponseBodyAssertions(this);
 	}
 
 	/**
@@ -107,24 +89,14 @@ public final class ExchangeActions {
 	 * @return further options for asserting response entities
 	 */
 	public <T> ResponseEntityAssertions<T> assertEntity(ResolvableType entityType) {
-		return new ResponseEntityAssertions<T>(this, this.exchangeInfo, entityType);
-	}
-
-	/**
-	 * Assert the response decoded as a Map of the given key and value types.
-	 */
-	public <K, V> MapAssertions<K, V> assertBodyAsMap(Class<K> keyType, Class<V> valueType) {
-		ResolvableType type = ResolvableType.forClassWithGenerics(Map.class, keyType, valueType);
-		Mono<Map<K, V>> mono = this.exchangeInfo.getResponse().body(toMono(type));
-		Map<K, V> map = mono.block(this.exchangeInfo.getResponseTimeout());
-		return new MapAssertions<>(this, map, "Response body map");
+		return new ResponseEntityAssertions<T>(this, entityType);
 	}
 
 	/**
 	 * Log debug information about the exchange.
 	 */
 	public LoggingExchangeConsumer log() {
-		return new LoggingExchangeConsumer(this, this.exchangeInfo);
+		return new LoggingExchangeConsumer(this);
 	}
 
 	/**
