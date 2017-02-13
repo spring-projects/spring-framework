@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono
  * Provide a routing DSL for [RouterFunctions] and [RouterFunction] in order to be able to
  * write idiomatic Kotlin code as below:
  *
- * * ```kotlin
+ * ```kotlin
  * fun route(request: ServerRequest) = route(request) {
  * 		accept(TEXT_HTML).apply {
  * 			(GET("/user/") or GET("/users/")) { findAllView() }
@@ -46,7 +46,7 @@ class RouterDsl {
 	}
 
 	fun GET(pattern: String, f: (ServerRequest) -> Mono<ServerResponse>) {
-		routes += RouterFunctions.route(RequestPredicates.GET(pattern), HandlerFunction { f(it) } )
+		routes += RouterFunctions.route(RequestPredicates.GET(pattern), HandlerFunction { f(it) })
 	}
 
 	fun HEAD(pattern: String, f: (ServerRequest) -> Mono<ServerResponse>) {
@@ -81,7 +81,7 @@ class RouterDsl {
 		routes += RouterFunctions.route(RequestPredicates.contentType(mediaType), HandlerFunction { f(it) })
 	}
 
-	fun headers(headerPredicate: (ServerRequest.Headers)->Boolean, f: (ServerRequest) -> Mono<ServerResponse>) {
+	fun headers(headerPredicate: (ServerRequest.Headers) -> Boolean, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.headers(headerPredicate), HandlerFunction { f(it) })
 	}
 
@@ -94,13 +94,12 @@ class RouterDsl {
 	}
 
 	fun resources(path: String, location: Resource) {
-		routes +=  RouterFunctions.resources(path, location)
+		routes += RouterFunctions.resources(path, location)
 	}
 
 	fun resources(lookupFunction: (ServerRequest) -> Mono<Resource>) {
-		routes +=  RouterFunctions.resources(lookupFunction)
+		routes += RouterFunctions.resources(lookupFunction)
 	}
-
 
 	@Suppress("UNCHECKED_CAST")
 	fun router(): RouterFunction<ServerResponse> {
@@ -119,5 +118,27 @@ class RouterDsl {
 		}
 		return allRoutes
 	}
+
+}
+
+/**
+ * Abstract subclass of [RouterFunction] for Kotlin [RouterDsl]
+ * Request mappings can be written in the body of the controller
+ *
+ * ```kotlin
+ * class SampleController : KotlinRouterFunction({
+ *     GET("/super") { req ->
+ *         ServerResponse.ok().body(fromObject("super!!!"))
+ *     }
+ * })
+ * ```
+ *
+ * @since 5.0
+ * @author Sebastien Deleuze
+ * @author Yevhenii Melnyk
+ */
+abstract class KotlinRouterFunction(val routes: RouterDsl.() -> Unit) : RouterFunction<ServerResponse> {
+
+	override fun route(request: ServerRequest): Mono<HandlerFunction<ServerResponse>> = route(request, routes)
 
 }
