@@ -69,7 +69,7 @@ import org.springframework.beans.factory.FactoryBeanNotInitializedException;
  * &lt;/bean>
  *
  * &lt;bean id="javaVersion" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
- *   &lt;property name="targetObject" value="sysProps"/>
+ *   &lt;property name="targetObject" ref="sysProps"/>
  *   &lt;property name="targetMethod" value="getProperty"/>
  *   &lt;property name="arguments" value="java.version"/>
  * &lt;/bean></pre>
