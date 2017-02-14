@@ -77,7 +77,7 @@ public abstract class RequestPredicates {
 	 */
 	public static RequestPredicate path(String pattern) {
 		Assert.notNull(pattern, "'pattern' must not be null");
-		return new PathPatternPredicate(DEFAULT_PATTERN_PARSER.parse(pattern));
+		return pathPredicates(DEFAULT_PATTERN_PARSER).apply(pattern);
 	}
 
 	/**
@@ -91,7 +91,11 @@ public abstract class RequestPredicates {
 	 */
 	public static Function<String, RequestPredicate> pathPredicates(PathPatternParser patternParser) {
 		Assert.notNull(patternParser, "'patternParser' must not be null");
-		return pattern -> new PathPatternPredicate(patternParser.parse(pattern));
+		return pattern -> {
+			synchronized (patternParser) {
+				return new PathPatternPredicate(patternParser.parse(pattern));
+			}
+		};
 	}
 
 	/**
