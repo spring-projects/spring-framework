@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,12 @@ import static org.springframework.web.reactive.function.BodyInserters.fromObject
 public class RouterFunctionTests {
 
 	@Test
-	public void andSame() throws Exception {
+	public void and() throws Exception {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction1 = request -> Mono.empty();
 		RouterFunction<ServerResponse> routerFunction2 = request -> Mono.just(handlerFunction);
 
-		RouterFunction<ServerResponse> result = routerFunction1.andSame(routerFunction2);
+		RouterFunction<ServerResponse> result = routerFunction1.and(routerFunction2);
 		assertNotNull(result);
 
 		MockServerRequest request = MockServerRequest.builder().build();
@@ -48,14 +48,14 @@ public class RouterFunctionTests {
 	}
 
 	@Test
-	public void and() throws Exception {
+	public void andOther() throws Exception {
 		HandlerFunction<ServerResponse> handlerFunction =
 				request -> ServerResponse.ok().body(fromObject("42"));
 		RouterFunction<?> routerFunction1 = request -> Mono.empty();
 		RouterFunction<ServerResponse> routerFunction2 =
 				request -> Mono.just(handlerFunction);
 
-		RouterFunction<?> result = routerFunction1.and(routerFunction2);
+		RouterFunction<?> result = routerFunction1.andOther(routerFunction2);
 		assertNotNull(result);
 
 		MockServerRequest request = MockServerRequest.builder().build();
@@ -69,10 +69,10 @@ public class RouterFunctionTests {
 
 	@Test
 	public void andRoute() throws Exception {
-		RouterFunction<?> routerFunction1 = request -> Mono.empty();
+		RouterFunction<ServerResponse> routerFunction1 = request -> Mono.empty();
 		RequestPredicate requestPredicate = request -> true;
 
-		RouterFunction<?> result = routerFunction1.andRoute(requestPredicate, this::handlerMethod);
+		RouterFunction<ServerResponse> result = routerFunction1.andRoute(requestPredicate, this::handlerMethod);
 		assertNotNull(result);
 
 		MockServerRequest request = MockServerRequest.builder().build();
@@ -88,32 +88,30 @@ public class RouterFunctionTests {
 		return ServerResponse.ok().body(fromObject("42"));
 	}
 
-	/*
-	TODO: enable when ServerEntityResponse is reintroduced
-
 	@Test
 	public void filter() throws Exception {
-		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().body(fromObject("42"));
-		RouterFunction<ServerResponse> routerFunction = request -> Mono.just(handlerFunction);
+		Mono<String> stringMono = Mono.just("42");
+		HandlerFunction<EntityResponse<Mono<String>>> handlerFunction = request -> EntityResponse.fromPublisher(stringMono, String.class).build();
+		RouterFunction<EntityResponse<Mono<String>>> routerFunction = request -> Mono.just(handlerFunction);
 
-		HandlerFilterFunction<String, Integer> filterFunction =
+		HandlerFilterFunction<EntityResponse<Mono<String>>, EntityResponse<Mono<Integer>>> filterFunction =
 				(request, next) -> next.handle(request).then(
 						response -> {
-							Flux<Integer> body = Flux.from(response.body())
+							Mono<Integer> intMono = response.entity()
 									.map(Integer::parseInt);
-							return ServerResponse.ok().body(body, Integer.class);
+							return EntityResponse.fromPublisher(intMono, Integer.class).build();
 						});
-		RouterFunction<Integer> result = routerFunction.filter(filterFunction);
+		RouterFunction<EntityResponse<Mono<Integer>>> result = routerFunction.filter(filterFunction);
 		assertNotNull(result);
 
 		MockServerRequest request = MockServerRequest.builder().build();
-		Mono<? extends ServerResponse<Integer>> responseMono =
+		Mono<EntityResponse<Mono<Integer>>> responseMono =
 				result.route(request).then(hf -> hf.handle(request));
 
 		StepVerifier.create(responseMono)
 				.consumeNextWith(
 						serverResponse -> {
-							StepVerifier.create(serverResponse.body())
+							StepVerifier.create(serverResponse.entity())
 									.expectNext(42)
 									.expectComplete()
 									.verify();
@@ -121,6 +119,5 @@ public class RouterFunctionTests {
 				.expectComplete()
 				.verify();
 	}
-	 */
 
 }

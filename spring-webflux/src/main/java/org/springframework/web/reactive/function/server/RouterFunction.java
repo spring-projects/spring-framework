@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.util.Optional;
-
 import reactor.core.publisher.Mono;
 
 /**
@@ -33,7 +31,7 @@ public interface RouterFunction<T extends ServerResponse> {
 
 	/**
 	 * Return the {@linkplain HandlerFunction handler function} that matches the given request.
-	 * @param request the request to route to
+	 * @param request the request to route
 	 * @return an {@code Mono} describing the {@code HandlerFunction} that matches this request,
 	 * or an empty {@code Mono} if there is no match
 	 */
@@ -41,25 +39,27 @@ public interface RouterFunction<T extends ServerResponse> {
 
 	/**
 	 * Return a composed routing function that first invokes this function,
-	 * and then invokes the {@code other} function (of the same type {@code T})
+	 * and then invokes the {@code other} function (of the same response type {@code T})
 	 * if this route had {@linkplain Mono#empty() no result}.
 	 * @param other the function of type {@code T} to apply when this function has no result
 	 * @return a composed function that first routes with this function and then the
 	 * {@code other} function if this function has no result
+	 * @see #andOther(RouterFunction)
 	 */
-	default RouterFunction<T> andSame(RouterFunction<T> other) {
+	default RouterFunction<T> and(RouterFunction<T> other) {
 		return request -> this.route(request).otherwiseIfEmpty(other.route(request));
 	}
 
 	/**
 	 * Return a composed routing function that first invokes this function,
-	 * and then invokes the {@code other} function (of a different type) if this route had
-	 * {@linkplain Optional#empty() no result}.
+	 * and then invokes the {@code other} function (of a different response type) if this route had
+	 * {@linkplain Mono#empty() no result}.
 	 * @param other the function to apply when this function has no result
 	 * @return a composed function that first routes with this function and then the
 	 * {@code other} function if this function has no result
+	 * @see #and(RouterFunction)
 	 */
-	default RouterFunction<?> and(RouterFunction<?> other) {
+	default RouterFunction<?> andOther(RouterFunction<?> other) {
 		return request -> this.route(request)
 				.map(RouterFunctions::cast)
 				.otherwiseIfEmpty(other.route(request).map(RouterFunctions::cast));
@@ -70,16 +70,13 @@ public interface RouterFunction<T extends ServerResponse> {
 	 * and then routes to the given handler function if the given request predicate applies. This
 	 * method is a convenient combination of {@link #and(RouterFunction)} and
 	 * {@link RouterFunctions#route(RequestPredicate, HandlerFunction)}.
-	 * @param <S> the handler function type
 	 * @param predicate the predicate to test
 	 * @param handlerFunction the handler function to route to
 	 * @return a composed function that first routes with this function and then the function
 	 * created from {@code predicate} and {@code handlerFunction} if this
 	 * function has no result
 	 */
-	default <S extends ServerResponse> RouterFunction<?> andRoute(RequestPredicate predicate,
-			HandlerFunction<S> handlerFunction) {
-
+	default RouterFunction<T> andRoute(RequestPredicate predicate, HandlerFunction<T> handlerFunction) {
 		return and(RouterFunctions.route(predicate, handlerFunction));
 	}
 
