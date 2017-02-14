@@ -22,7 +22,6 @@ package org.springframework.transaction.chained;
  * @author Michael Hunger
  * @author Oliver Gierke
  * @see SpringTransactionSynchronizationManager
- * @since 1.6
  */
 interface SynchronizationManager {
 

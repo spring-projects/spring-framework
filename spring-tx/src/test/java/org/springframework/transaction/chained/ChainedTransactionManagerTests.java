@@ -37,7 +37,6 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  *
  * @author Michael Hunger
  * @author Oliver Gierke
- * @since 1.6
  */
 public class ChainedTransactionManagerTests {
 
@@ -153,14 +152,17 @@ public class ChainedTransactionManagerTests {
 
 		private boolean synchronizationActive;
 
+		@Override
 		public void initSynchronization() {
 			synchronizationActive = true;
 		}
 
+		@Override
 		public boolean isSynchronizationActive() {
 			return synchronizationActive;
 		}
 
+		@Override
 		public void clearSynchronization() {
 			synchronizationActive = false;
 		}
@@ -201,14 +203,17 @@ public class ChainedTransactionManagerTests {
 			return name + (isCommitted() ? " (committed) " : " (not committed)");
 		}
 
+		@Override
 		public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
 			return new TestTransactionStatus(definition);
 		}
 
+		@Override
 		public void commit(TransactionStatus status) throws TransactionException {
 			commitTime = System.currentTimeMillis();
 		}
 
+		@Override
 		public void rollback(TransactionStatus status) throws TransactionException {
 			rollbackTime = System.currentTimeMillis();
 		}
@@ -230,38 +235,47 @@ public class ChainedTransactionManagerTests {
 			public TestTransactionStatus(TransactionDefinition definition) {
 			}
 
+			@Override
 			public boolean isNewTransaction() {
 				return false;
 			}
 
+			@Override
 			public boolean hasSavepoint() {
 				return false;
 			}
 
+			@Override
 			public void setRollbackOnly() {
 
 			}
 
+			@Override
 			public boolean isRollbackOnly() {
 				return false;
 			}
 
+			@Override
 			public void flush() {
 
 			}
 
+			@Override
 			public boolean isCompleted() {
 				return false;
 			}
 
+			@Override
 			public Object createSavepoint() throws TransactionException {
 				return null;
 			}
 
+			@Override
 			public void rollbackToSavepoint(Object savepoint) throws TransactionException {
 
 			}
 
+			@Override
 			public void releaseSavepoint(Object savepoint) throws TransactionException {
 
 			}
@@ -288,6 +302,7 @@ public class ChainedTransactionManagerTests {
 
 		}
 
+		@Override
 		public void describeTo(Description description) {
 			description.appendText("that a " + (commitCheck ? "committed" : "rolled-back") + " TransactionManager");
 		}

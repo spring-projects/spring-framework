@@ -31,7 +31,6 @@ import org.springframework.util.Assert;
  *
  * @author Michael Hunger
  * @author Oliver Gierke
- * @since 1.6
  */
 class MultiTransactionStatus implements TransactionStatus {
 
@@ -82,52 +81,34 @@ class MultiTransactionStatus implements TransactionStatus {
 		transactionManager.rollback(getTransactionStatus(transactionManager));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.transaction.TransactionStatus#isRollbackOnly()
-	 */
+	@Override
 	public boolean isRollbackOnly() {
 		return getMainTransactionStatus().isRollbackOnly();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.transaction.TransactionStatus#isCompleted()
-	 */
+	@Override
 	public boolean isCompleted() {
 		return getMainTransactionStatus().isCompleted();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.transaction.TransactionStatus#isNewTransaction()
-	 */
+	@Override
 	public boolean isNewTransaction() {
 		return getMainTransactionStatus().isNewTransaction();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.transaction.TransactionStatus#hasSavepoint()
-	 */
+	@Override
 	public boolean hasSavepoint() {
 		return getMainTransactionStatus().hasSavepoint();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.transaction.TransactionStatus#setRollbackOnly()
-	 */
+	@Override
 	public void setRollbackOnly() {
 		for (TransactionStatus ts : transactionStatuses.values()) {
 			ts.setRollbackOnly();
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.transaction.SavepointManager#createSavepoint()
-	 */
+	@Override
 	public Object createSavepoint() throws TransactionException {
 
 		SavePoints savePoints = new SavePoints();
@@ -138,27 +119,18 @@ class MultiTransactionStatus implements TransactionStatus {
 		return savePoints;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.transaction.SavepointManager#rollbackToSavepoint(java.lang.Object)
-	 */
+	@Override
 	public void rollbackToSavepoint(Object savepoint) throws TransactionException {
 		SavePoints savePoints = (SavePoints) savepoint;
 		savePoints.rollback();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.transaction.SavepointManager#releaseSavepoint(java.lang.Object)
-	 */
+	@Override
 	public void releaseSavepoint(Object savepoint) throws TransactionException {
 		((SavePoints) savepoint).release();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.transaction.TransactionStatus#flush()
-	 */
+	@Override
 	public void flush() {
 		for (TransactionStatus transactionStatus : transactionStatuses.values()) {
 			transactionStatus.flush();

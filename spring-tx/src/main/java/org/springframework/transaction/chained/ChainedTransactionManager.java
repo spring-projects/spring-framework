@@ -45,7 +45,6 @@ import org.springframework.util.Assert;
  *
  * @author Michael Hunger
  * @author Oliver Gierke
- * @since 1.6
  */
 public class ChainedTransactionManager implements PlatformTransactionManager {
 
@@ -81,10 +80,7 @@ public class ChainedTransactionManager implements PlatformTransactionManager {
 		this.transactionManagers = asList(transactionManagers);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.transaction.PlatformTransactionManager#getTransaction(org.springframework.transaction.TransactionDefinition)
-	 */
+	@Override
 	public MultiTransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
 
 		MultiTransactionStatus mts = new MultiTransactionStatus(transactionManagers.get(0));
@@ -124,10 +120,7 @@ public class ChainedTransactionManager implements PlatformTransactionManager {
 		return mts;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.transaction.PlatformTransactionManager#commit(org.springframework.transaction.TransactionStatus)
-	 */
+	@Override
 	public void commit(TransactionStatus status) throws TransactionException {
 
 		MultiTransactionStatus multiTransactionStatus = (MultiTransactionStatus) status;
@@ -172,10 +165,7 @@ public class ChainedTransactionManager implements PlatformTransactionManager {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.transaction.PlatformTransactionManager#rollback(org.springframework.transaction.TransactionStatus)
-	 */
+	@Override
 	public void rollback(TransactionStatus status) throws TransactionException {
 
 		Exception rollbackException = null;
