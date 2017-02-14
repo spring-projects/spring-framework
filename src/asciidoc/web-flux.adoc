@@ -218,6 +218,24 @@ The response body can be one of the following:
 * `void` -- specific to the annotation-based programming model, request handling completes
 when the method returns; implies a synchronous, non-blocking controller method.
 
+When using stream types like `Flux` or `Observable`, the media type specified in the
+request/response or at mapping/routing level is used to determine how the data should be serialized
+and flushed. For example a REST endpoint that returns a `Flux<User>` will be serialized by
+default as following:
+
+* `application/json`: a `Flux<User>` is handled as an asynchronous collection and
+  serialized as a JSON array with an explicit flush when the `complete` event is emitted.
+* `application/stream+json`: a `Flux<User>` will be handled as a stream of `User` elements
+  serialized as individual JSON object separated by new lines and explicitly flushed after
+  each element. The `WebClient` supports JSON stream decoding so this is a good use case
+  for server to server use case.
+* `text/event-stream`: a `Flux<User>` or `Flux<ServerSentEvent<User>>` will be handled as
+  a stream of `User` or  `ServerSentEvent` elements serialized as individual SSE elements
+  using by default JSON for data encoding and explicit flush after each element. This
+  is well suited for exposing a stream to browser clients. `WebClient` supports
+  reading SSE streams as well.
+
+
 [[web-reactive-websocket-support]]
 === Reactive WebSocket Support
 
@@ -293,8 +311,9 @@ See the
 https://github.com/bclozel/spring-boot-web-reactive#spring-boot-web-reactive-starter[starter]
 page for more details and instruction
 
-There is no Spring Boot Starter for the functional programming model yet but
-it's very easy to try it out. See the next section on "Manual Bootstrapping".
+This starter also supports the functional web API and will detect automatically `RouterFunction`
+beans. Your Spring Boot WebFlux application should use the `RouterFunction` *or* the
+`RequestMapping` approach, it is currently not possible to mix them in the same application.
 
 [[web-reactive-getting-started-manual]]
 === Manual Bootstrapping
