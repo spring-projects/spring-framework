@@ -15,15 +15,11 @@
  */
 package org.springframework.test.web.reactive.server;
 
-import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
-import org.springframework.test.util.AssertionErrors;
-import org.springframework.web.reactive.function.client.ClientResponse;
 
 /**
  * Entry point for applying assertions and actions on a performed exchange.
@@ -70,26 +66,19 @@ public final class ExchangeActions {
 	}
 
 	/**
-	 * Assert the response does not have any content.
+	 * Assertions on the body of the response decoded as one or more response
+	 * entities of the given type.
+	 * @return options for asserting response entities
+	 */
+	public <T> ResponseEntityAssertions<T> assertEntity(Class<T> entityType) {
+		return new ResponseEntityAssertions<T>(this, ResolvableType.forClass(entityType));
+	}
+
+	/**
+	 * Assertions on the body of the response.
 	 */
 	public ResponseBodyAssertions assertBody() {
 		return new ResponseBodyAssertions(this);
-	}
-
-	/**
-	 * Assert the content of the response.
-	 * @return further options for asserting response entities
-	 */
-	public <T> ResponseEntityAssertions<T> assertEntity(Class<T> entityType) {
-		return assertEntity(ResolvableType.forClass(entityType));
-	}
-
-	/**
-	 * Assert the content of the response.
-	 * @return further options for asserting response entities
-	 */
-	public <T> ResponseEntityAssertions<T> assertEntity(ResolvableType entityType) {
-		return new ResponseEntityAssertions<T>(this, entityType);
 	}
 
 	/**
@@ -97,27 +86,6 @@ public final class ExchangeActions {
 	 */
 	public LoggingExchangeConsumer log() {
 		return new LoggingExchangeConsumer(this);
-	}
-
-	/**
-	 * Apply custom assertions on the performed exchange with the help of
-	 * {@link AssertionErrors} or an assertion library such as AssertJ.
-	 * <p>Consider using statically imported methods to improve readability
-	 * @param consumer consumer that will apply assertions.
-	 */
-	public ExchangeActions andAssert(Consumer<ExchangeInfo> consumer) {
-		consumer.accept(this.exchangeInfo);
-		return this;
-	}
-
-	/**
-	 * Apply custom actions on the performed exchange.
-	 * <p>Consider using statically imported methods to improve readability
-	 * @param consumer consumer that will apply the custom action
-	 */
-	public ExchangeActions andDo(Consumer<ExchangeInfo> consumer) {
-		consumer.accept(this.exchangeInfo);
-		return this;
 	}
 
 	/**

@@ -15,6 +15,8 @@
  */
 package org.springframework.test.web.reactive.server;
 
+import java.util.function.Consumer;
+
 import org.springframework.http.HttpStatus;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
@@ -90,6 +92,16 @@ public class ResponseStatusAssertions {
 	}
 
 	/**
+	 * Custom assertions on the response status with a {@link Consumer}.
+	 * <p>Consider using statically imported methods to improve readability
+	 * @param consumer consumer that will apply the custom action
+	 */
+	public ExchangeActions consume(Consumer<HttpStatus> consumer) {
+		consumer.accept(this.httpStatus);
+		return this.exchangeActions;
+	}
+
+	/**
 	 * Assert the response error message.
 	 */
 	public ExchangeActions reason(String reason) {
@@ -101,119 +113,119 @@ public class ResponseStatusAssertions {
 	 * Assert the response status code is {@code HttpStatus.CONTINUE} (100).
 	 */
 	public ExchangeActions isContinue() {
-		return doMatch(HttpStatus.CONTINUE);
+		return assertStatusIsEqualTo(HttpStatus.CONTINUE);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.SWITCHING_PROTOCOLS} (101).
 	 */
 	public ExchangeActions isSwitchingProtocols() {
-		return doMatch(HttpStatus.SWITCHING_PROTOCOLS);
+		return assertStatusIsEqualTo(HttpStatus.SWITCHING_PROTOCOLS);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.PROCESSING} (102).
 	 */
 	public ExchangeActions isProcessing() {
-		return doMatch(HttpStatus.PROCESSING);
+		return assertStatusIsEqualTo(HttpStatus.PROCESSING);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.CHECKPOINT} (103).
 	 */
 	public ExchangeActions isCheckpoint() {
-		return doMatch(HttpStatus.valueOf(103));
+		return assertStatusIsEqualTo(HttpStatus.valueOf(103));
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.OK} (200).
 	 */
 	public ExchangeActions isOk() {
-		return doMatch(HttpStatus.OK);
+		return assertStatusIsEqualTo(HttpStatus.OK);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.CREATED} (201).
 	 */
 	public ExchangeActions isCreated() {
-		return doMatch(HttpStatus.CREATED);
+		return assertStatusIsEqualTo(HttpStatus.CREATED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.ACCEPTED} (202).
 	 */
 	public ExchangeActions isAccepted() {
-		return doMatch(HttpStatus.ACCEPTED);
+		return assertStatusIsEqualTo(HttpStatus.ACCEPTED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.NON_AUTHORITATIVE_INFORMATION} (203).
 	 */
 	public ExchangeActions isNonAuthoritativeInformation() {
-		return doMatch(HttpStatus.NON_AUTHORITATIVE_INFORMATION);
+		return assertStatusIsEqualTo(HttpStatus.NON_AUTHORITATIVE_INFORMATION);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.NO_CONTENT} (204).
 	 */
 	public ExchangeActions isNoContent() {
-		return doMatch(HttpStatus.NO_CONTENT);
+		return assertStatusIsEqualTo(HttpStatus.NO_CONTENT);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.RESET_CONTENT} (205).
 	 */
 	public ExchangeActions isResetContent() {
-		return doMatch(HttpStatus.RESET_CONTENT);
+		return assertStatusIsEqualTo(HttpStatus.RESET_CONTENT);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.PARTIAL_CONTENT} (206).
 	 */
 	public ExchangeActions isPartialContent() {
-		return doMatch(HttpStatus.PARTIAL_CONTENT);
+		return assertStatusIsEqualTo(HttpStatus.PARTIAL_CONTENT);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.MULTI_STATUS} (207).
 	 */
 	public ExchangeActions isMultiStatus() {
-		return doMatch(HttpStatus.MULTI_STATUS);
+		return assertStatusIsEqualTo(HttpStatus.MULTI_STATUS);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.ALREADY_REPORTED} (208).
 	 */
 	public ExchangeActions isAlreadyReported() {
-		return doMatch(HttpStatus.ALREADY_REPORTED);
+		return assertStatusIsEqualTo(HttpStatus.ALREADY_REPORTED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.IM_USED} (226).
 	 */
 	public ExchangeActions isImUsed() {
-		return doMatch(HttpStatus.IM_USED);
+		return assertStatusIsEqualTo(HttpStatus.IM_USED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.MULTIPLE_CHOICES} (300).
 	 */
 	public ExchangeActions isMultipleChoices() {
-		return doMatch(HttpStatus.MULTIPLE_CHOICES);
+		return assertStatusIsEqualTo(HttpStatus.MULTIPLE_CHOICES);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.MOVED_PERMANENTLY} (301).
 	 */
 	public ExchangeActions isMovedPermanently() {
-		return doMatch(HttpStatus.MOVED_PERMANENTLY);
+		return assertStatusIsEqualTo(HttpStatus.MOVED_PERMANENTLY);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.FOUND} (302).
 	 */
 	public ExchangeActions isFound() {
-		return doMatch(HttpStatus.FOUND);
+		return assertStatusIsEqualTo(HttpStatus.FOUND);
 	}
 
 	/**
@@ -223,21 +235,21 @@ public class ResponseStatusAssertions {
 	 */
 	@Deprecated
 	public ExchangeActions isMovedTemporarily() {
-		return doMatch(HttpStatus.MOVED_TEMPORARILY);
+		return assertStatusIsEqualTo(HttpStatus.MOVED_TEMPORARILY);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.SEE_OTHER} (303).
 	 */
 	public ExchangeActions isSeeOther() {
-		return doMatch(HttpStatus.SEE_OTHER);
+		return assertStatusIsEqualTo(HttpStatus.SEE_OTHER);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.NOT_MODIFIED} (304).
 	 */
 	public ExchangeActions isNotModified() {
-		return doMatch(HttpStatus.NOT_MODIFIED);
+		return assertStatusIsEqualTo(HttpStatus.NOT_MODIFIED);
 	}
 
 	/**
@@ -246,112 +258,112 @@ public class ResponseStatusAssertions {
 	 */
 	@Deprecated
 	public ExchangeActions isUseProxy() {
-		return doMatch(HttpStatus.USE_PROXY);
+		return assertStatusIsEqualTo(HttpStatus.USE_PROXY);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.TEMPORARY_REDIRECT} (307).
 	 */
 	public ExchangeActions isTemporaryRedirect() {
-		return doMatch(HttpStatus.TEMPORARY_REDIRECT);
+		return assertStatusIsEqualTo(HttpStatus.TEMPORARY_REDIRECT);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.PERMANENT_REDIRECT} (308).
 	 */
 	public ExchangeActions isPermanentRedirect() {
-		return doMatch(HttpStatus.valueOf(308));
+		return assertStatusIsEqualTo(HttpStatus.valueOf(308));
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.BAD_REQUEST} (400).
 	 */
 	public ExchangeActions isBadRequest() {
-		return doMatch(HttpStatus.BAD_REQUEST);
+		return assertStatusIsEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.UNAUTHORIZED} (401).
 	 */
 	public ExchangeActions isUnauthorized() {
-		return doMatch(HttpStatus.UNAUTHORIZED);
+		return assertStatusIsEqualTo(HttpStatus.UNAUTHORIZED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.PAYMENT_REQUIRED} (402).
 	 */
 	public ExchangeActions isPaymentRequired() {
-		return doMatch(HttpStatus.PAYMENT_REQUIRED);
+		return assertStatusIsEqualTo(HttpStatus.PAYMENT_REQUIRED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.FORBIDDEN} (403).
 	 */
 	public ExchangeActions isForbidden() {
-		return doMatch(HttpStatus.FORBIDDEN);
+		return assertStatusIsEqualTo(HttpStatus.FORBIDDEN);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.NOT_FOUND} (404).
 	 */
 	public ExchangeActions isNotFound() {
-		return doMatch(HttpStatus.NOT_FOUND);
+		return assertStatusIsEqualTo(HttpStatus.NOT_FOUND);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.METHOD_NOT_ALLOWED} (405).
 	 */
 	public ExchangeActions isMethodNotAllowed() {
-		return doMatch(HttpStatus.METHOD_NOT_ALLOWED);
+		return assertStatusIsEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.NOT_ACCEPTABLE} (406).
 	 */
 	public ExchangeActions isNotAcceptable() {
-		return doMatch(HttpStatus.NOT_ACCEPTABLE);
+		return assertStatusIsEqualTo(HttpStatus.NOT_ACCEPTABLE);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.PROXY_AUTHENTICATION_REQUIRED} (407).
 	 */
 	public ExchangeActions isProxyAuthenticationRequired() {
-		return doMatch(HttpStatus.PROXY_AUTHENTICATION_REQUIRED);
+		return assertStatusIsEqualTo(HttpStatus.PROXY_AUTHENTICATION_REQUIRED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.REQUEST_TIMEOUT} (408).
 	 */
 	public ExchangeActions isRequestTimeout() {
-		return doMatch(HttpStatus.REQUEST_TIMEOUT);
+		return assertStatusIsEqualTo(HttpStatus.REQUEST_TIMEOUT);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.CONFLICT} (409).
 	 */
 	public ExchangeActions isConflict() {
-		return doMatch(HttpStatus.CONFLICT);
+		return assertStatusIsEqualTo(HttpStatus.CONFLICT);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.GONE} (410).
 	 */
 	public ExchangeActions isGone() {
-		return doMatch(HttpStatus.GONE);
+		return assertStatusIsEqualTo(HttpStatus.GONE);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.LENGTH_REQUIRED} (411).
 	 */
 	public ExchangeActions isLengthRequired() {
-		return doMatch(HttpStatus.LENGTH_REQUIRED);
+		return assertStatusIsEqualTo(HttpStatus.LENGTH_REQUIRED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.PRECONDITION_FAILED} (412).
 	 */
 	public ExchangeActions isPreconditionFailed() {
-		return doMatch(HttpStatus.PRECONDITION_FAILED);
+		return assertStatusIsEqualTo(HttpStatus.PRECONDITION_FAILED);
 	}
 
 	/**
@@ -359,7 +371,7 @@ public class ResponseStatusAssertions {
 	 * @since 4.1
 	 */
 	public ExchangeActions isPayloadTooLarge() {
-		return doMatch(HttpStatus.PAYLOAD_TOO_LARGE);
+		return assertStatusIsEqualTo(HttpStatus.PAYLOAD_TOO_LARGE);
 	}
 
 	/**
@@ -369,7 +381,7 @@ public class ResponseStatusAssertions {
 	 */
 	@Deprecated
 	public ExchangeActions isRequestEntityTooLarge() {
-		return doMatch(HttpStatus.REQUEST_ENTITY_TOO_LARGE);
+		return assertStatusIsEqualTo(HttpStatus.REQUEST_ENTITY_TOO_LARGE);
 	}
 
 	/**
@@ -377,7 +389,7 @@ public class ResponseStatusAssertions {
 	 * @since 4.1
 	 */
 	public ExchangeActions isUriTooLong() {
-		return doMatch(HttpStatus.URI_TOO_LONG);
+		return assertStatusIsEqualTo(HttpStatus.URI_TOO_LONG);
 	}
 
 	/**
@@ -387,35 +399,35 @@ public class ResponseStatusAssertions {
 	 */
 	@Deprecated
 	public ExchangeActions isRequestUriTooLong() {
-		return doMatch(HttpStatus.REQUEST_URI_TOO_LONG);
+		return assertStatusIsEqualTo(HttpStatus.REQUEST_URI_TOO_LONG);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.UNSUPPORTED_MEDIA_TYPE} (415).
 	 */
 	public ExchangeActions isUnsupportedMediaType() {
-		return doMatch(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+		return assertStatusIsEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE} (416).
 	 */
 	public ExchangeActions isRequestedRangeNotSatisfiable() {
-		return doMatch(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
+		return assertStatusIsEqualTo(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.EXPECTATION_FAILED} (417).
 	 */
 	public ExchangeActions isExpectationFailed() {
-		return doMatch(HttpStatus.EXPECTATION_FAILED);
+		return assertStatusIsEqualTo(HttpStatus.EXPECTATION_FAILED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.I_AM_A_TEAPOT} (418).
 	 */
 	public ExchangeActions isIAmATeapot() {
-		return doMatch(HttpStatus.valueOf(418));
+		return assertStatusIsEqualTo(HttpStatus.valueOf(418));
 	}
 
 	/**
@@ -424,7 +436,7 @@ public class ResponseStatusAssertions {
 	 */
 	@Deprecated
 	public ExchangeActions isInsufficientSpaceOnResource() {
-		return doMatch(HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE);
+		return assertStatusIsEqualTo(HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE);
 	}
 
 	/**
@@ -433,7 +445,7 @@ public class ResponseStatusAssertions {
 	 */
 	@Deprecated
 	public ExchangeActions isMethodFailure() {
-		return doMatch(HttpStatus.METHOD_FAILURE);
+		return assertStatusIsEqualTo(HttpStatus.METHOD_FAILURE);
 	}
 
 	/**
@@ -442,56 +454,56 @@ public class ResponseStatusAssertions {
 	 */
 	@Deprecated
 	public ExchangeActions isDestinationLocked() {
-		return doMatch(HttpStatus.DESTINATION_LOCKED);
+		return assertStatusIsEqualTo(HttpStatus.DESTINATION_LOCKED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.UNPROCESSABLE_ENTITY} (422).
 	 */
 	public ExchangeActions isUnprocessableEntity() {
-		return doMatch(HttpStatus.UNPROCESSABLE_ENTITY);
+		return assertStatusIsEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.LOCKED} (423).
 	 */
 	public ExchangeActions isLocked() {
-		return doMatch(HttpStatus.LOCKED);
+		return assertStatusIsEqualTo(HttpStatus.LOCKED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.FAILED_DEPENDENCY} (424).
 	 */
 	public ExchangeActions isFailedDependency() {
-		return doMatch(HttpStatus.FAILED_DEPENDENCY);
+		return assertStatusIsEqualTo(HttpStatus.FAILED_DEPENDENCY);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.UPGRADE_REQUIRED} (426).
 	 */
 	public ExchangeActions isUpgradeRequired() {
-		return doMatch(HttpStatus.UPGRADE_REQUIRED);
+		return assertStatusIsEqualTo(HttpStatus.UPGRADE_REQUIRED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.PRECONDITION_REQUIRED} (428).
 	 */
 	public ExchangeActions isPreconditionRequired() {
-		return doMatch(HttpStatus.valueOf(428));
+		return assertStatusIsEqualTo(HttpStatus.valueOf(428));
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.TOO_MANY_REQUESTS} (429).
 	 */
 	public ExchangeActions isTooManyRequests() {
-		return doMatch(HttpStatus.valueOf(429));
+		return assertStatusIsEqualTo(HttpStatus.valueOf(429));
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.REQUEST_HEADER_FIELDS_TOO_LARGE} (431).
 	 */
 	public ExchangeActions isRequestHeaderFieldsTooLarge() {
-		return doMatch(HttpStatus.valueOf(431));
+		return assertStatusIsEqualTo(HttpStatus.valueOf(431));
 	}
 
 	/**
@@ -499,94 +511,94 @@ public class ResponseStatusAssertions {
 	 * @since 4.3
 	 */
 	public ExchangeActions isUnavailableForLegalReasons() {
-		return doMatch(HttpStatus.valueOf(451));
+		return assertStatusIsEqualTo(HttpStatus.valueOf(451));
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.INTERNAL_SERVER_ERROR} (500).
 	 */
 	public ExchangeActions isInternalServerError() {
-		return doMatch(HttpStatus.INTERNAL_SERVER_ERROR);
+		return assertStatusIsEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.NOT_IMPLEMENTED} (501).
 	 */
 	public ExchangeActions isNotImplemented() {
-		return doMatch(HttpStatus.NOT_IMPLEMENTED);
+		return assertStatusIsEqualTo(HttpStatus.NOT_IMPLEMENTED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.BAD_GATEWAY} (502).
 	 */
 	public ExchangeActions isBadGateway() {
-		return doMatch(HttpStatus.BAD_GATEWAY);
+		return assertStatusIsEqualTo(HttpStatus.BAD_GATEWAY);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.SERVICE_UNAVAILABLE} (503).
 	 */
 	public ExchangeActions isServiceUnavailable() {
-		return doMatch(HttpStatus.SERVICE_UNAVAILABLE);
+		return assertStatusIsEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.GATEWAY_TIMEOUT} (504).
 	 */
 	public ExchangeActions isGatewayTimeout() {
-		return doMatch(HttpStatus.GATEWAY_TIMEOUT);
+		return assertStatusIsEqualTo(HttpStatus.GATEWAY_TIMEOUT);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.HTTP_VERSION_NOT_SUPPORTED} (505).
 	 */
 	public ExchangeActions isHttpVersionNotSupported() {
-		return doMatch(HttpStatus.HTTP_VERSION_NOT_SUPPORTED);
+		return assertStatusIsEqualTo(HttpStatus.HTTP_VERSION_NOT_SUPPORTED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.VARIANT_ALSO_NEGOTIATES} (506).
 	 */
 	public ExchangeActions isVariantAlsoNegotiates() {
-		return doMatch(HttpStatus.VARIANT_ALSO_NEGOTIATES);
+		return assertStatusIsEqualTo(HttpStatus.VARIANT_ALSO_NEGOTIATES);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.INSUFFICIENT_STORAGE} (507).
 	 */
 	public ExchangeActions isInsufficientStorage() {
-		return doMatch(HttpStatus.INSUFFICIENT_STORAGE);
+		return assertStatusIsEqualTo(HttpStatus.INSUFFICIENT_STORAGE);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.LOOP_DETECTED} (508).
 	 */
 	public ExchangeActions isLoopDetected() {
-		return doMatch(HttpStatus.LOOP_DETECTED);
+		return assertStatusIsEqualTo(HttpStatus.LOOP_DETECTED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.BANDWIDTH_LIMIT_EXCEEDED} (509).
 	 */
 	public ExchangeActions isBandwidthLimitExceeded() {
-		return doMatch(HttpStatus.valueOf(509));
+		return assertStatusIsEqualTo(HttpStatus.valueOf(509));
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.NOT_EXTENDED} (510).
 	 */
 	public ExchangeActions isNotExtended() {
-		return doMatch(HttpStatus.NOT_EXTENDED);
+		return assertStatusIsEqualTo(HttpStatus.NOT_EXTENDED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.NETWORK_AUTHENTICATION_REQUIRED} (511).
 	 */
 	public ExchangeActions isNetworkAuthenticationRequired() {
-		return doMatch(HttpStatus.valueOf(511));
+		return assertStatusIsEqualTo(HttpStatus.valueOf(511));
 	}
 
-	private ExchangeActions doMatch(final HttpStatus status) {
+	private ExchangeActions assertStatusIsEqualTo(final HttpStatus status) {
 		assertEquals("Status", status, this.httpStatus);
 		return this.exchangeActions;
 	}

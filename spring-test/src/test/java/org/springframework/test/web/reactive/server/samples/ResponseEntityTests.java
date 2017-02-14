@@ -16,6 +16,8 @@
 package org.springframework.test.web.reactive.server.samples;
 
 import java.net.URI;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -35,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.hamcrest.CoreMatchers.endsWith;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 
@@ -65,7 +68,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void entityCollection() throws Exception {
+	public void entityList() throws Exception {
 		this.client.get().uri("/persons")
 				.exchange()
 				.assertStatus().isOk()
@@ -73,6 +76,14 @@ public class ResponseEntityTests {
 				.assertEntity(Person.class).list()
 				.hasSize(3)
 				.contains(new Person("Jane"), new Person("Jason"), new Person("John"));
+	}
+
+	@Test
+	public void entityMap() throws Exception {
+		this.client.get().uri("/persons?map=true")
+				.exchange()
+				.assertStatus().isOk()
+				.assertEntity(Person.class).map().hasSize(3).containsKeys("Jane", "Jason", "John");
 	}
 
 	@Test
@@ -90,12 +101,20 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void saveEntity() throws Exception {
+	public void postEntity() throws Exception {
 		this.client.post().uri("/persons")
 				.exchange(Mono.just(new Person("John")), Person.class)
 				.assertStatus().isCreated()
 				.assertHeader("location").isEqualTo("/persons/John").and()
 				.assertBody().isEmpty();
+	}
+
+	@Test
+	public void entityConsumer() throws Exception {
+		this.client.get().uri("/persons/John")
+				.exchange()
+				.assertStatus().isOk()
+				.assertEntity(Person.class).consume(p -> assertEquals(new Person("John"), p));
 	}
 
 
@@ -111,6 +130,15 @@ public class ResponseEntityTests {
 		@GetMapping
 		Flux<Person> getPersons() {
 			return Flux.just(new Person("Jane"), new Person("Jason"), new Person("John"));
+		}
+
+		@GetMapping(params = "map")
+		Map<String, Person> getPersonsAsMap() {
+			Map<String, Person> map = new LinkedHashMap<>();
+			map.put("Jane", new Person("Jane"));
+			map.put("Jason", new Person("Jason"));
+			map.put("John", new Person("John"));
+			return map;
 		}
 
 		@GetMapping(produces = "text/event-stream")

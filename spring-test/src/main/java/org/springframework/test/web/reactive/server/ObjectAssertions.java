@@ -19,7 +19,6 @@ import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.springframework.test.util.AssertionErrors;
 import org.springframework.web.reactive.function.client.ClientResponse;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
@@ -72,27 +71,15 @@ public class ObjectAssertions<V, S extends ObjectAssertions<V, S>> {
 	}
 
 	/**
-	 * Apply custom assertions on the Object value with the help of
-	 * {@link AssertionErrors} or an assertion library such as AssertJ.
-	 * <p>Consider using statically imported methods for creating the assertion
-	 * consumer to improve readability of tests.
-	 * @param assertionConsumer consumer that will apply assertions.
-	 */
-	public <T extends S> T andAssert(Consumer<V> assertionConsumer) {
-		assertionConsumer.accept(getValue());
-		return self();
-	}
-
-	/**
-	 * Apply custom actions on the Object value.
-	 * <p>Consider using statically imported methods for creating the assertion
-	 * consumer to improve readability of tests.
+	 * Custom assertions on the Object value with a {@link Consumer}.
+	 * <p>Consider using statically imported methods to improve readability
 	 * @param consumer consumer that will apply the custom action
 	 */
-	public <T extends S> T andDo(Consumer<V> consumer) {
-		consumer.accept(getValue());
-		return self();
+	public ExchangeActions consume(Consumer<V> consumer) {
+		consumer.accept(this.getValue());
+		return this.exchangeActions;
 	}
+
 
 	/**
 	 * Continue with more assertions or actions on the response.

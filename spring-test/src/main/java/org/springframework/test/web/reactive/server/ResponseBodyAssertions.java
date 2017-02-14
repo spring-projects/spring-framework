@@ -29,6 +29,7 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
 /**
+ * Assertions on the body of the response.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -53,12 +54,12 @@ public class ResponseBodyAssertions {
 	}
 
 	/**
-	 * Assert the response decoded as a Map of the given key and value types.
+	 * Assert the response decoded as a Map of String key-value pairs.
 	 */
-	public <K, V> MapAssertions<K, V> asMap(Class<K> keyType, Class<V> valueType) {
-		ResolvableType type = ResolvableType.forClassWithGenerics(Map.class, keyType, valueType);
-		Mono<Map<K, V>> mono = getResponse().body(toMono(type));
-		Map<K, V> map = mono.block(getTimeout());
+	public MapAssertions<String, String> asMap() {
+		ResolvableType type = ResolvableType.forClassWithGenerics(Map.class, String.class, String.class);
+		Mono<Map<String, String>> mono = getResponse().body(toMono(type));
+		Map<String, String> map = mono.block(getTimeout());
 		return new MapAssertions<>(this.exchangeActions, map, "Response body map");
 	}
 

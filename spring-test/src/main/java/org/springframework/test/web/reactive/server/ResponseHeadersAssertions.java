@@ -15,8 +15,7 @@
  */
 package org.springframework.test.web.reactive.server;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.function.Consumer;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.ContentDisposition;
@@ -77,6 +76,16 @@ public class ResponseHeadersAssertions {
 	public ExchangeActions lastModified(int lastModified) {
 		long actual = this.headers.getLastModified();
 		assertEquals("Response header Last-Modified", lastModified, actual);
+		return this.exchangeActions;
+	}
+
+	/**
+	 * Custom assertions on the response headers with a {@link Consumer}.
+	 * <p>Consider using statically imported methods to improve readability
+	 * @param consumer consumer that will apply the custom action
+	 */
+	public ExchangeActions consume(Consumer<HttpHeaders> consumer) {
+		consumer.accept(this.headers);
 		return this.exchangeActions;
 	}
 

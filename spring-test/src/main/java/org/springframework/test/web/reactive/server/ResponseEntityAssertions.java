@@ -16,6 +16,7 @@
 package org.springframework.test.web.reactive.server;
 
 import java.util.List;
+import java.util.Map;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -32,7 +33,7 @@ import static org.springframework.web.reactive.function.BodyExtractors.toMono;
  * @param <T> the response entity type
  *
  * @author Rossen Stoyanchev
- * @sine 5.0
+ * @since 5.0
  */
 public class ResponseEntityAssertions<T> extends ObjectAssertions<T, ResponseEntityAssertions<T>> {
 
@@ -58,6 +59,17 @@ public class ResponseEntityAssertions<T> extends ObjectAssertions<T, ResponseEnt
 		Flux<T> flux = getResponse().body(toFlux(this.entityType));
 		List<T> list = flux.collectList().block(getTimeout());
 		return new ListAssertions<T>(getExchangeActions(), list, "Response entity collection");
+	}
+
+	/**
+	 * Assert the response decoded as a Map of entities with String keys.
+	 */
+	public MapAssertions<String, T> map() {
+		ResolvableType keyType = ResolvableType.forClass(String.class);
+		ResolvableType type = ResolvableType.forClassWithGenerics(Map.class, keyType, this.entityType);
+		Mono<Map<String, T>> mono = getResponse().body(toMono(type));
+		Map<String, T> map = mono.block(getTimeout());
+		return new MapAssertions<>(getExchangeActions(), map, "Response entity map");
 	}
 
 	/**
