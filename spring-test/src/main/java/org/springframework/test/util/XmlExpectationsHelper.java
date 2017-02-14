@@ -79,14 +79,39 @@ public class XmlExpectationsHelper {
 	 * @see org.springframework.test.web.servlet.result.MockMvcResultMatchers#xpath(String, Map, Object...)
 	 */
 	public void assertXmlEqual(String expected, String actual) throws Exception {
-		Diff diffSimilar = DiffBuilder.compare(expected).withTest(actual)
-				.withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText))
-				.ignoreWhitespace().ignoreComments()
-				.checkForSimilar()
-				.build();
-		if (diffSimilar.hasDifferences()) {
-			AssertionErrors.fail("Body content " + diffSimilar.toString());
+		XmlUnitDiff diff = new XmlUnitDiff(expected, actual);
+		if (diff.hasDifferences()) {
+			AssertionErrors.fail("Body content " + diff.toString());
 		}
+	}
+
+
+	/**
+	 * Inner class to prevent hard dependency on XML Unit.
+	 */
+	private static class XmlUnitDiff {
+
+		private final Diff diff;
+
+
+		XmlUnitDiff(String expected, String actual) {
+			this.diff = DiffBuilder.compare(expected).withTest(actual)
+					.withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText))
+					.ignoreWhitespace().ignoreComments()
+					.checkForSimilar()
+					.build();
+		}
+
+
+		public boolean hasDifferences() {
+			return diff.hasDifferences();
+		}
+
+		@Override
+		public String toString() {
+			return diff.toString();
+		}
+
 	}
 
 }
