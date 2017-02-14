@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
  * (but not necessarily) determined through some thread-bound transaction context.
  *
  * @author Juergen Hoeller
+ * @author Kazuki Shimizu
  * @since 2.0.1
  * @see #setTargetDataSources
  * @see #setDefaultTargetDataSource
@@ -64,6 +65,32 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	 */
 	public void setTargetDataSources(Map<Object, Object> targetDataSources) {
 		this.targetDataSources = targetDataSources;
+	}
+
+	/**
+	 * Add a target {@link DataSource}.
+	 * @param lookupKey a lookup key
+	 * @param dataSource a target data source
+	 * @since 4.3.7
+	 */
+	public void addTargetDataSource(Object lookupKey, DataSource dataSource) {
+		if (this.targetDataSources == null) {
+			this.targetDataSources = new HashMap<>();
+		}
+		this.targetDataSources.put(lookupKey, dataSource);
+	}
+
+	/**
+	 * Add a target data source name (to be resolved via a {@link #setDataSourceLookup DataSourceLookup}).
+	 * @param lookupKey a lookup key
+	 * @param dataSourceName a target data source name
+	 * @since 4.3.7
+	 */
+	public void addTargetDataSourceName(Object lookupKey, String dataSourceName) {
+		if (this.targetDataSources == null) {
+			this.targetDataSources = new HashMap<>();
+		}
+		this.targetDataSources.put(lookupKey, dataSourceName);
 	}
 
 	/**
