@@ -146,9 +146,14 @@ public class RequestPredicatesTests {
 
 	@Test
 	public void pathExtension() throws Exception {
-		URI uri = URI.create("http://localhost/file.txt");
 		RequestPredicate predicate = RequestPredicates.pathExtension("txt");
+
+		URI uri = URI.create("http://localhost/file.txt");
 		MockServerRequest request = MockServerRequest.builder().uri(uri).build();
+		assertTrue(predicate.test(request));
+
+		uri = URI.create("http://localhost/FILE.TXT");
+		request = MockServerRequest.builder().uri(uri).build();
 		assertTrue(predicate.test(request));
 
 		predicate = RequestPredicates.pathExtension("bar");
@@ -170,70 +175,5 @@ public class RequestPredicatesTests {
 		assertFalse(predicate.test(request));
 	}
 
-	@Test
-	public void json() throws Exception {
-		RequestPredicate predicate = RequestPredicates.json();
-		MockServerRequest request = MockServerRequest.builder().header("Accept", MediaType.APPLICATION_JSON.toString()).build();
-		assertTrue(predicate.test(request));
-
-		request = MockServerRequest.builder().header("Accept", MediaType.TEXT_HTML.toString()).build();
-		assertFalse(predicate.test(request));
-
-		URI uri = URI.create("http://localhost/file.json");
-		request = MockServerRequest.builder().uri(uri).build();
-		assertTrue(predicate.test(request));
-
-		uri = URI.create("http://localhost/file.html");
-		request = MockServerRequest.builder().uri(uri).build();
-		assertFalse(predicate.test(request));
-
-		request = MockServerRequest.builder().build();
-		assertFalse(predicate.test(request));
-	}
-
-	@Test
-	public void html() throws Exception {
-		RequestPredicate predicate = RequestPredicates.html();
-		MockServerRequest request = MockServerRequest.builder().header("Accept", MediaType.TEXT_HTML.toString()).build();
-		assertTrue(predicate.test(request));
-
-		request = MockServerRequest.builder().header("Accept", MediaType.APPLICATION_JSON.toString()).build();
-		assertFalse(predicate.test(request));
-
-		URI uri = URI.create("http://localhost/file.html");
-		request = MockServerRequest.builder().uri(uri).build();
-		assertTrue(predicate.test(request));
-
-		uri = URI.create("http://localhost/file.json");
-		request = MockServerRequest.builder().uri(uri).build();
-		assertFalse(predicate.test(request));
-
-		request = MockServerRequest.builder().build();
-		assertFalse(predicate.test(request));
-	}
-
-	@Test
-	public void xml() throws Exception {
-		RequestPredicate predicate = RequestPredicates.xml();
-		MockServerRequest request = MockServerRequest.builder().header("Accept", MediaType.TEXT_XML.toString()).build();
-		assertTrue(predicate.test(request));
-
-		request = MockServerRequest.builder().header("Accept", MediaType.APPLICATION_XML.toString()).build();
-		assertTrue(predicate.test(request));
-
-		request = MockServerRequest.builder().header("Accept", MediaType.TEXT_HTML.toString()).build();
-		assertFalse(predicate.test(request));
-
-		URI uri = URI.create("http://localhost/file.xml");
-		request = MockServerRequest.builder().uri(uri).build();
-		assertTrue(predicate.test(request));
-
-		uri = URI.create("http://localhost/file.json");
-		request = MockServerRequest.builder().uri(uri).build();
-		assertFalse(predicate.test(request));
-
-		request = MockServerRequest.builder().build();
-		assertFalse(predicate.test(request));
-	}
 
 }

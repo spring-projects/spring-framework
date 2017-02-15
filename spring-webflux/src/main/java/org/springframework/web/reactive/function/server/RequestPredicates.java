@@ -233,7 +233,7 @@ public abstract class RequestPredicates {
 
 	/**
 	 * Return a {@code RequestPredicate} that matches if the request's path has the given extension.
-	 * @param extension the path extension to match against
+	 * @param extension the path extension to match against, ignoring case
 	 * @return a predicate that matches if the request's path has the given file extension
 	 */
 	public static RequestPredicate pathExtension(String extension) {
@@ -272,48 +272,6 @@ public abstract class RequestPredicates {
 		};
 	}
 
-	/**
-	 * Return a {@code RequestPredicate} that matches JSON requests. The returned predicate
-	 * matches if the request has {@code application/json} in the {@code Accept} header, or if the
-	 * request path has a {@code .json} file extension.
-	 *
-	 * @return a predicate that matches JSON
-	 * @see #accept(MediaType...)
-	 * @see #pathExtension(String)
-	 */
-	public static RequestPredicate json() {
-		return accept(MediaType.APPLICATION_JSON)
-				.or(pathExtension("json"));
-	}
-
-	/**
-	 * Return a {@code RequestPredicate} that matches HTML requests. The returned predicate
-	 * matches if the request has {@code text/html} in the {@code Accept} header, or if the request
-	 * path has a {@code .html} file extension.
-	 *
-	 * @return a predicate that matches HTML requests
-	 * @see #accept(MediaType...)
-	 * @see #pathExtension(String)
-	 */
-	public static RequestPredicate html() {
-		return accept(MediaType.TEXT_HTML)
-				.or(pathExtension("html"));
-	}
-
-	/**
-	 * Return a {@code RequestPredicate} that matches XML requests. The returned predicate
-	 * matches if the request has {@code text/xml} or {@code application/xml} in the {@code Accept}
-	 * header, or if the request path has a {@code .xml} file extension.
-	 *
-	 * @return a predicate that matches XML requests
-	 * @see #accept(MediaType...)
-	 * @see #pathExtension(String)
-	 */
-	public static RequestPredicate xml() {
-		return accept(MediaType.TEXT_XML)
-				.or(accept(MediaType.APPLICATION_XML))
-				.or(pathExtension("xml"));
-	}
 
 	private static class HttpMethodPredicate implements RequestPredicate {
 
