@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,13 @@ import java.util.Comparator;
  */
 public class ComparableComparator<T extends Comparable<T>> implements Comparator<T> {
 
+	/**
+	 * A shared instance of this default comparator
+	 * @see Comparators#comparable()
+	 */
 	@SuppressWarnings("rawtypes")
 	public static final ComparableComparator INSTANCE = new ComparableComparator();
+
 
 	@Override
 	public int compare(T o1, T o2) {

@@ -21,12 +21,12 @@ import java.util.Map;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
-import org.springframework.util.comparator.ComparableComparator;
+import org.springframework.util.comparator.Comparators;
 
 /**
- * A {@link Comparator} that converts values before they are compared. The specified
- * {@link Converter} will be used to convert each value before it passed to the underlying
- * {@code Comparator}.
+ * A {@link Comparator} that converts values before they are compared.
+ * The specified {@link Converter} will be used to convert each value
+ * before it passed to the underlying {@code Comparator}.
  *
  * @author Phillip Webb
  * @since 3.2
@@ -44,9 +44,8 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 	 * Create a new {@link ConvertingComparator} instance.
 	 * @param converter the converter
 	 */
-	@SuppressWarnings("unchecked")
 	public ConvertingComparator(Converter<S, T> converter) {
-		this(ComparableComparator.INSTANCE, converter);
+		this(Comparators.comparable(), converter);
 	}
 
 	/**
@@ -62,7 +61,7 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 	}
 
 	/**
-	 * Create a new {@link ComparableComparator} instance.
+	 * Create a new {@code ConvertingComparator} instance.
 	 * @param comparator the underlying comparator
 	 * @param conversionService the conversion service
 	 * @param targetType the target type
