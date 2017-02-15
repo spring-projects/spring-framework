@@ -258,9 +258,8 @@ public class JsonPathResultMatchers {
 				MatcherAssert.assertThat(reason, content, StringStartsWith.startsWith(this.prefix));
 				return content.substring(this.prefix.length());
 			}
-			catch (StringIndexOutOfBoundsException oobe) {
-				throw new AssertionError(
-						"JSON prefix \"" + this.prefix + "\" not found, exception: " + oobe.getMessage());
+			catch (StringIndexOutOfBoundsException ex) {
+				throw new AssertionError("JSON prefix \"" + this.prefix + "\" not found", ex);
 			}
 		}
 		else {

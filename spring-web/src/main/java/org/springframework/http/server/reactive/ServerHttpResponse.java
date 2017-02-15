@@ -16,7 +16,7 @@
 
 package org.springframework.http.server.reactive;
 
-import reactor.core.publisher.Mono;
+import java.util.function.Function;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ReactiveHttpOutputMessage;
@@ -45,20 +45,27 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	 */
 	HttpStatus getStatusCode();
 
-		/**
-		 * Return a mutable map with the cookies to send to the server.
-		 */
+	/**
+	 * Return a mutable map with the cookies to send to the server.
+	 */
 	MultiValueMap<String, ResponseCookie> getCookies();
 
 	/**
-	 * Indicate that request handling is complete, allowing for any cleanup or
-	 * end-of-processing tasks to be performed such as applying header changes
-	 * made via {@link #getHeaders()} to the underlying server response (if not
-	 * applied already).
-	 * <p>This method should be automatically invoked at the end of request
-	 * processing so typically applications should not have to invoke it.
-	 * If invoked multiple times it should have no side effects.
+	 * A mechanism for URL rewriting that applications and libraries such as
+	 * HTML template libraries to use consistently for all URLs emitted by
+	 * the application. Doing so enables the registration of URL encoders via
+	 * {@link #registerUrlEncoder} that can insert an id for authentication,
+	 * a nonce for CSRF protection, a version for a static resource, etc.
+	 * @param url the URL to encode
+	 * @return the encoded URL or the same
 	 */
-	Mono<Void> setComplete();
+	String encodeUrl(String url);
+
+	/**
+	 * Register a URL rewriting function for use with {@link #encodeUrl}.
+	 * The function must return an encoded URL or the same URL.
+	 * @param encoder a URL encoding function to use
+	 */
+	void registerUrlEncoder(Function<String, String> encoder);
 
 }

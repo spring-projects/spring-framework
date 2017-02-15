@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,15 +136,15 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 
 	/**
 	 * A public method exposing the knowledge of the path extension strategy to
-	 * resolve file extensions to a MediaType in this case for a given
+	 * resolve file extensions to a {@link MediaType} in this case for a given
 	 * {@link Resource}. The method first looks up any explicitly registered
 	 * file extensions first and then falls back on JAF if available.
 	 * @param resource the resource to look up
-	 * @return the MediaType for the extension or {@code null}.
+	 * @return the MediaType for the extension, or {@code null} if none found
 	 * @since 4.3
 	 */
 	public MediaType getMediaTypeForResource(Resource resource) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "Resource must not be null");
 		MediaType mediaType = null;
 		String filename = resource.getFilename();
 		String extension = StringUtils.getFilenameExtension(filename);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,15 @@ import java.util.List;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
-import org.springframework.util.Assert;
-
 /**
  * {@link CommandLinePropertySource} implementation backed by a JOpt {@link OptionSet}.
  *
  * <h2>Typical usage</h2>
+ *
  * Configure and execute an {@code OptionParser} against the {@code String[]} of arguments
  * supplied to the {@code main} method, and create a {@link JOptCommandLinePropertySource}
  * using the resulting {@code OptionSet} object:
+ *
  * <pre class="code">
  * public static void main(String[] args) {
  *     OptionParser parser = new OptionParser();
@@ -44,7 +44,7 @@ import org.springframework.util.Assert;
  *
  * See {@link CommandLinePropertySource} for complete general usage examples.
  *
- * <p>Requires JOpt version 4.3 or higher. Tested against JOpt up until 4.6.
+ * <p>Requires JOpt Simple version 4.3 or higher. Tested against JOpt up until 5.0.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -98,10 +98,10 @@ public class JOptCommandLinePropertySource extends CommandLinePropertySource<Opt
 		List<?> argValues = this.source.valuesOf(name);
 		List<String> stringArgValues = new ArrayList<>();
 		for (Object argValue : argValues) {
-			stringArgValues.add(argValue instanceof String ? (String) argValue : argValue.toString());
+			stringArgValues.add(argValue.toString());
 		}
 		if (stringArgValues.isEmpty()) {
-			return (this.source.has(name) ? Collections.<String>emptyList() : null);
+			return (this.source.has(name) ? Collections.emptyList() : null);
 		}
 		return Collections.unmodifiableList(stringArgValues);
 	}
@@ -111,10 +111,9 @@ public class JOptCommandLinePropertySource extends CommandLinePropertySource<Opt
 		List<?> argValues = this.source.nonOptionArguments();
 		List<String> stringArgValues = new ArrayList<>();
 		for (Object argValue : argValues) {
-			Assert.isInstanceOf(String.class, argValue, "Argument values must be of type String");
-			stringArgValues.add((String) argValue);
+			stringArgValues.add(argValue.toString());
 		}
-		return (stringArgValues.isEmpty() ? Collections.<String>emptyList() :
+		return (stringArgValues.isEmpty() ? Collections.emptyList() :
 				Collections.unmodifiableList(stringArgValues));
 	}
 

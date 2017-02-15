@@ -19,6 +19,7 @@ package org.springframework.http.codec.json;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import io.netty.buffer.ByteBuf;
@@ -96,7 +97,7 @@ class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 
 	@Override
 	public Flux<DataBuffer> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Object... hints) {
+			MimeType mimeType, Map<String, Object> hints) {
 
 		return Flux.from(inputStream)
 				.flatMap(new Function<DataBuffer, Publisher<? extends DataBuffer>>() {
@@ -117,6 +118,7 @@ class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 					this.writerIndex = this.input.writerIndex();
 				}
 				else {
+					this.index = this.index - this.input.readerIndex();
 					this.input = Unpooled.copiedBuffer(this.input,
 							Unpooled.copiedBuffer(buffer.asByteBuffer()));
 					DataBufferUtils.release(buffer);
@@ -210,9 +212,6 @@ class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 					}
 				}
 
-				if (this.input.readableBytes() == 0) {
-					this.index = 0;
-				}
 				return Flux.fromIterable(chunks);
 			}
 

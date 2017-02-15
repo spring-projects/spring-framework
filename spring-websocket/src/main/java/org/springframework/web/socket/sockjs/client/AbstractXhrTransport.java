@@ -55,7 +55,7 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 	}
 
 
-	protected Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private boolean xhrStreamingDisabled;
 
@@ -71,11 +71,9 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 	 * An {@code XhrTransport} can support both the "xhr_streaming" and "xhr"
 	 * SockJS server transports. From a client perspective there is no
 	 * implementation difference.
-	 *
 	 * <p>Typically an {@code XhrTransport} is used as "XHR streaming" first and
 	 * then, if that fails, as "XHR". In some cases however it may be helpful to
 	 * suppress XHR streaming so that only XHR is attempted.
-	 *
 	 * <p>By default this property is set to {@code false} which means both
 	 * "XHR streaming" and "XHR" apply.
 	 */

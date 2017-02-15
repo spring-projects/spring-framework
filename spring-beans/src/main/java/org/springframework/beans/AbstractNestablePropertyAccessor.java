@@ -266,198 +266,212 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void setPropertyValue(PropertyTokenHolder tokens, PropertyValue pv) throws BeansException {
-		String propertyName = tokens.canonicalName;
-		String actualName = tokens.actualName;
-
 		if (tokens.keys != null) {
-			// Apply indexes and map keys: fetch value for all keys but the last one.
-			PropertyTokenHolder getterTokens = new PropertyTokenHolder();
-			getterTokens.canonicalName = tokens.canonicalName;
-			getterTokens.actualName = tokens.actualName;
-			getterTokens.keys = new String[tokens.keys.length - 1];
-			System.arraycopy(tokens.keys, 0, getterTokens.keys, 0, tokens.keys.length - 1);
-			Object propValue;
+			processKeyedProperty(tokens, pv);
+		}
+		else {
+			processLocalProperty(tokens, pv);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void processKeyedProperty(PropertyTokenHolder tokens, PropertyValue pv) {
+		Object propValue = getPropertyHoldingValue(tokens);
+		String lastKey = tokens.keys[tokens.keys.length - 1];
+
+		if (propValue.getClass().isArray()) {
+			PropertyHandler ph = getLocalPropertyHandler(tokens.actualName);
+			Class<?> requiredType = propValue.getClass().getComponentType();
+			int arrayIndex = Integer.parseInt(lastKey);
+			Object oldValue = null;
 			try {
-				propValue = getPropertyValue(getterTokens);
-			}
-			catch (NotReadablePropertyException ex) {
-				throw new NotWritablePropertyException(getRootClass(), this.nestedPath + propertyName,
-						"Cannot access indexed value in property referenced " +
-						"in indexed property path '" + propertyName + "'", ex);
-			}
-			// Set value for last key.
-			String key = tokens.keys[tokens.keys.length - 1];
-			if (propValue == null) {
-				// null map value case
-				if (isAutoGrowNestedPaths()) {
-					// TODO: cleanup, this is pretty hacky
-					int lastKeyIndex = tokens.canonicalName.lastIndexOf('[');
-					getterTokens.canonicalName = tokens.canonicalName.substring(0, lastKeyIndex);
-					propValue = setDefaultValue(getterTokens);
+				if (isExtractOldValueForEditor() && arrayIndex < Array.getLength(propValue)) {
+					oldValue = Array.get(propValue, arrayIndex);
 				}
-				else {
-					throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + propertyName,
-							"Cannot access indexed value in property referenced " +
-							"in indexed property path '" + propertyName + "': returned null");
-				}
-			}
-			if (propValue.getClass().isArray()) {
-				PropertyHandler ph = getLocalPropertyHandler(actualName);
-				Class<?> requiredType = propValue.getClass().getComponentType();
-				int arrayIndex = Integer.parseInt(key);
-				Object oldValue = null;
-				try {
-					if (isExtractOldValueForEditor() && arrayIndex < Array.getLength(propValue)) {
-						oldValue = Array.get(propValue, arrayIndex);
-					}
-					Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(),
-							requiredType, ph.nested(tokens.keys.length));
-					int length = Array.getLength(propValue);
-					if (arrayIndex >= length && arrayIndex < this.autoGrowCollectionLimit) {
-						Class<?> componentType = propValue.getClass().getComponentType();
-						Object newArray = Array.newInstance(componentType, arrayIndex + 1);
-						System.arraycopy(propValue, 0, newArray, 0, length);
-						setPropertyValue(actualName, newArray);
-						propValue = getPropertyValue(actualName);
-					}
-					Array.set(propValue, arrayIndex, convertedValue);
-				}
-				catch (IndexOutOfBoundsException ex) {
-					throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
-							"Invalid array index in property path '" + propertyName + "'", ex);
-				}
-			}
-			else if (propValue instanceof List) {
-				PropertyHandler ph = getPropertyHandler(actualName);
-				Class<?> requiredType = ph.getCollectionType(tokens.keys.length);
-				List<Object> list = (List<Object>) propValue;
-				int index = Integer.parseInt(key);
-				Object oldValue = null;
-				if (isExtractOldValueForEditor() && index < list.size()) {
-					oldValue = list.get(index);
-				}
-				Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(),
+				Object convertedValue = convertIfNecessary(tokens.canonicalName, oldValue, pv.getValue(),
 						requiredType, ph.nested(tokens.keys.length));
-				int size = list.size();
-				if (index >= size && index < this.autoGrowCollectionLimit) {
-					for (int i = size; i < index; i++) {
-						try {
-							list.add(null);
-						}
-						catch (NullPointerException ex) {
-							throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
-									"Cannot set element with index " + index + " in List of size " +
-									size + ", accessed using property path '" + propertyName +
-									"': List does not support filling up gaps with null elements");
-						}
-					}
-					list.add(convertedValue);
+				int length = Array.getLength(propValue);
+				if (arrayIndex >= length && arrayIndex < this.autoGrowCollectionLimit) {
+					Class<?> componentType = propValue.getClass().getComponentType();
+					Object newArray = Array.newInstance(componentType, arrayIndex + 1);
+					System.arraycopy(propValue, 0, newArray, 0, length);
+					setPropertyValue(tokens.actualName, newArray);
+					propValue = getPropertyValue(tokens.actualName);
 				}
-				else {
-					try {
-						list.set(index, convertedValue);
-					}
-					catch (IndexOutOfBoundsException ex) {
-						throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
-								"Invalid list index in property path '" + propertyName + "'", ex);
-					}
-				}
+				Array.set(propValue, arrayIndex, convertedValue);
 			}
-			else if (propValue instanceof Map) {
-				PropertyHandler ph = getLocalPropertyHandler(actualName);
-				Class<?> mapKeyType = ph.getMapKeyType(tokens.keys.length);
-				Class<?> mapValueType = ph.getMapValueType(tokens.keys.length);
-				Map<Object, Object> map = (Map<Object, Object>) propValue;
-				// IMPORTANT: Do not pass full property name in here - property editors
-				// must not kick in for map keys but rather only for map values.
-				TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(mapKeyType);
-				Object convertedMapKey = convertIfNecessary(null, null, key, mapKeyType, typeDescriptor);
-				Object oldValue = null;
-				if (isExtractOldValueForEditor()) {
-					oldValue = map.get(convertedMapKey);
-				}
-				// Pass full property name and old value in here, since we want full
-				// conversion ability for map values.
-				Object convertedMapValue = convertIfNecessary(propertyName, oldValue, pv.getValue(),
-						mapValueType, ph.nested(tokens.keys.length));
-				map.put(convertedMapKey, convertedMapValue);
-			}
-			else {
-				throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
-						"Property referenced in indexed property path '" + propertyName +
-						"' is neither an array nor a List nor a Map; returned value was [" + propValue + "]");
+			catch (IndexOutOfBoundsException ex) {
+				throw new InvalidPropertyException(getRootClass(), this.nestedPath + tokens.canonicalName,
+						"Invalid array index in property path '" + tokens.canonicalName + "'", ex);
 			}
 		}
 
-		else {
-			PropertyHandler ph = getLocalPropertyHandler(actualName);
-			if (ph == null || !ph.isWritable()) {
-				if (pv.isOptional()) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Ignoring optional value for property '" + actualName +
-								"' - property not found on bean class [" + getRootClass().getName() + "]");
+		else if (propValue instanceof List) {
+			PropertyHandler ph = getPropertyHandler(tokens.actualName);
+			Class<?> requiredType = ph.getCollectionType(tokens.keys.length);
+			List<Object> list = (List<Object>) propValue;
+			int index = Integer.parseInt(lastKey);
+			Object oldValue = null;
+			if (isExtractOldValueForEditor() && index < list.size()) {
+				oldValue = list.get(index);
+			}
+			Object convertedValue = convertIfNecessary(tokens.canonicalName, oldValue, pv.getValue(),
+					requiredType, ph.nested(tokens.keys.length));
+			int size = list.size();
+			if (index >= size && index < this.autoGrowCollectionLimit) {
+				for (int i = size; i < index; i++) {
+					try {
+						list.add(null);
 					}
-					return;
+					catch (NullPointerException ex) {
+						throw new InvalidPropertyException(getRootClass(), this.nestedPath + tokens.canonicalName,
+								"Cannot set element with index " + index + " in List of size " +
+								size + ", accessed using property path '" + tokens.canonicalName +
+								"': List does not support filling up gaps with null elements");
+					}
 				}
-				else {
-					throw createNotWritablePropertyException(propertyName);
+				list.add(convertedValue);
+			}
+			else {
+				try {
+					list.set(index, convertedValue);
+				}
+				catch (IndexOutOfBoundsException ex) {
+					throw new InvalidPropertyException(getRootClass(), this.nestedPath + tokens.canonicalName,
+							"Invalid list index in property path '" + tokens.canonicalName + "'", ex);
 				}
 			}
+		}
+
+		else if (propValue instanceof Map) {
+			PropertyHandler ph = getLocalPropertyHandler(tokens.actualName);
+			Class<?> mapKeyType = ph.getMapKeyType(tokens.keys.length);
+			Class<?> mapValueType = ph.getMapValueType(tokens.keys.length);
+			Map<Object, Object> map = (Map<Object, Object>) propValue;
+			// IMPORTANT: Do not pass full property name in here - property editors
+			// must not kick in for map keys but rather only for map values.
+			TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(mapKeyType);
+			Object convertedMapKey = convertIfNecessary(null, null, lastKey, mapKeyType, typeDescriptor);
 			Object oldValue = null;
-			try {
-				Object originalValue = pv.getValue();
-				Object valueToApply = originalValue;
-				if (!Boolean.FALSE.equals(pv.conversionNecessary)) {
-					if (pv.isConverted()) {
-						valueToApply = pv.getConvertedValue();
-					}
-					else {
-						if (isExtractOldValueForEditor() && ph.isReadable()) {
-							try {
-								oldValue = ph.getValue();
+			if (isExtractOldValueForEditor()) {
+				oldValue = map.get(convertedMapKey);
+			}
+			// Pass full property name and old value in here, since we want full
+			// conversion ability for map values.
+			Object convertedMapValue = convertIfNecessary(tokens.canonicalName, oldValue, pv.getValue(),
+					mapValueType, ph.nested(tokens.keys.length));
+			map.put(convertedMapKey, convertedMapValue);
+		}
+
+		else {
+			throw new InvalidPropertyException(getRootClass(), this.nestedPath + tokens.canonicalName,
+					"Property referenced in indexed property path '" + tokens.canonicalName +
+					"' is neither an array nor a List nor a Map; returned value was [" + propValue + "]");
+		}
+	}
+
+	private Object getPropertyHoldingValue(PropertyTokenHolder tokens) {
+		// Apply indexes and map keys: fetch value for all keys but the last one.
+		PropertyTokenHolder getterTokens = new PropertyTokenHolder();
+		getterTokens.canonicalName = tokens.canonicalName;
+		getterTokens.actualName = tokens.actualName;
+		getterTokens.keys = new String[tokens.keys.length - 1];
+		System.arraycopy(tokens.keys, 0, getterTokens.keys, 0, tokens.keys.length - 1);
+
+		Object propValue;
+		try {
+			propValue = getPropertyValue(getterTokens);
+		}
+		catch (NotReadablePropertyException ex) {
+			throw new NotWritablePropertyException(getRootClass(), this.nestedPath + tokens.canonicalName,
+					"Cannot access indexed value in property referenced " +
+					"in indexed property path '" + tokens.canonicalName + "'", ex);
+		}
+
+		if (propValue == null) {
+			// null map value case
+			if (isAutoGrowNestedPaths()) {
+				int lastKeyIndex = tokens.canonicalName.lastIndexOf('[');
+				getterTokens.canonicalName = tokens.canonicalName.substring(0, lastKeyIndex);
+				propValue = setDefaultValue(getterTokens);
+			}
+			else {
+				throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + tokens.canonicalName,
+						"Cannot access indexed value in property referenced " +
+						"in indexed property path '" + tokens.canonicalName + "': returned null");
+			}
+		}
+		return propValue;
+	}
+
+	private void processLocalProperty(PropertyTokenHolder tokens, PropertyValue pv) {
+		PropertyHandler ph = getLocalPropertyHandler(tokens.actualName);
+		if (ph == null || !ph.isWritable()) {
+			if (pv.isOptional()) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Ignoring optional value for property '" + tokens.actualName +
+							"' - property not found on bean class [" + getRootClass().getName() + "]");
+				}
+				return;
+			}
+			else {
+				throw createNotWritablePropertyException(tokens.canonicalName);
+			}
+		}
+
+		Object oldValue = null;
+		try {
+			Object originalValue = pv.getValue();
+			Object valueToApply = originalValue;
+			if (!Boolean.FALSE.equals(pv.conversionNecessary)) {
+				if (pv.isConverted()) {
+					valueToApply = pv.getConvertedValue();
+				}
+				else {
+					if (isExtractOldValueForEditor() && ph.isReadable()) {
+						try {
+							oldValue = ph.getValue();
+						}
+						catch (Exception ex) {
+							if (ex instanceof PrivilegedActionException) {
+								ex = ((PrivilegedActionException) ex).getException();
 							}
-							catch (Exception ex) {
-								if (ex instanceof PrivilegedActionException) {
-									ex = ((PrivilegedActionException) ex).getException();
-								}
-								if (logger.isDebugEnabled()) {
-									logger.debug("Could not read previous value of property '" +
-											this.nestedPath + propertyName + "'", ex);
-								}
+							if (logger.isDebugEnabled()) {
+								logger.debug("Could not read previous value of property '" +
+										this.nestedPath + tokens.canonicalName + "'", ex);
 							}
 						}
-						valueToApply = convertForProperty(
-								propertyName, oldValue, originalValue, ph.toTypeDescriptor());
 					}
-					pv.getOriginalPropertyValue().conversionNecessary = (valueToApply != originalValue);
+					valueToApply = convertForProperty(
+							tokens.canonicalName, oldValue, originalValue, ph.toTypeDescriptor());
 				}
-				ph.setValue(this.wrappedObject, valueToApply);
+				pv.getOriginalPropertyValue().conversionNecessary = (valueToApply != originalValue);
 			}
-			catch (TypeMismatchException ex) {
-				throw ex;
+			ph.setValue(this.wrappedObject, valueToApply);
+		}
+		catch (TypeMismatchException ex) {
+			throw ex;
+		}
+		catch (InvocationTargetException ex) {
+			PropertyChangeEvent propertyChangeEvent = new PropertyChangeEvent(
+					this.rootObject, this.nestedPath + tokens.canonicalName, oldValue, pv.getValue());
+			if (ex.getTargetException() instanceof ClassCastException) {
+				throw new TypeMismatchException(propertyChangeEvent, ph.getPropertyType(), ex.getTargetException());
 			}
-			catch (InvocationTargetException ex) {
-				PropertyChangeEvent propertyChangeEvent =
-						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
-				if (ex.getTargetException() instanceof ClassCastException) {
-					throw new TypeMismatchException(propertyChangeEvent, ph.getPropertyType(), ex.getTargetException());
+			else {
+				Throwable cause = ex.getTargetException();
+				if (cause instanceof UndeclaredThrowableException) {
+					// May happen e.g. with Groovy-generated methods
+					cause = cause.getCause();
 				}
-				else {
-					Throwable cause = ex.getTargetException();
-					if (cause instanceof UndeclaredThrowableException) {
-						// May happen e.g. with Groovy-generated methods
-						cause = cause.getCause();
-					}
-					throw new MethodInvocationException(propertyChangeEvent, cause);
-				}
+				throw new MethodInvocationException(propertyChangeEvent, cause);
 			}
-			catch (Exception ex) {
-				PropertyChangeEvent pce =
-						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
-				throw new MethodInvocationException(pce, ex);
-			}
+		}
+		catch (Exception ex) {
+			PropertyChangeEvent pce = new PropertyChangeEvent(
+					this.rootObject, this.nestedPath + tokens.canonicalName, oldValue, pv.getValue());
+			throw new MethodInvocationException(pce, ex);
 		}
 	}
 
@@ -572,7 +586,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 					new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
 			throw new ConversionNotSupportedException(pce, requiredType, ex);
 		}
-		catch (Throwable ex) {
+		catch (IllegalArgumentException ex) {
 			PropertyChangeEvent pce =
 					new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
 			throw new TypeMismatchException(pce, requiredType, ex);
@@ -958,9 +972,6 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	}
 
 
-	/**
-	 * Handle a given property.
-	 */
 	protected abstract static class PropertyHandler {
 
 		private final Class<?> propertyType;

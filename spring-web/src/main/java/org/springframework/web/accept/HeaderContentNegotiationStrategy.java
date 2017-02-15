@@ -45,7 +45,7 @@ public class HeaderContentNegotiationStrategy implements ContentNegotiationStrat
 
 		String[] headerValueArray = request.getHeaderValues(HttpHeaders.ACCEPT);
 		if (headerValueArray == null) {
-			return Collections.<MediaType>emptyList();
+			return Collections.emptyList();
 		}
 
 		List<String> headerValues = Arrays.asList(headerValueArray);

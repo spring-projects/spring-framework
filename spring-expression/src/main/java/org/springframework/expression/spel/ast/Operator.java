@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import java.math.BigInteger;
 
 import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
+import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.CodeFlow;
-import org.springframework.expression.spel.ExpressionState;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.ObjectUtils;
@@ -51,7 +51,7 @@ public abstract class Operator extends SpelNodeImpl {
 	protected String rightActualDescriptor;
 
 
-	public Operator(String payload,int pos,SpelNodeImpl... operands) {
+	public Operator(String payload, int pos, SpelNodeImpl... operands) {
 		super(pos, operands);
 		this.operatorName = payload;
 	}
@@ -84,6 +84,7 @@ public abstract class Operator extends SpelNodeImpl {
 		return sb.toString();
 	}
 
+
 	protected boolean isCompilableOperatorUsingNumerics() {
 		SpelNodeImpl left = getLeftOperand();
 		SpelNodeImpl right= getRightOperand();
@@ -94,8 +95,8 @@ public abstract class Operator extends SpelNodeImpl {
 		// Supported operand types for equals (at the moment)
 		String leftDesc = left.exitTypeDescriptor;
 		String rightDesc = right.exitTypeDescriptor;
-		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(leftDesc, rightDesc,
-				this.leftActualDescriptor, this.rightActualDescriptor);
+		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(
+				leftDesc, rightDesc, this.leftActualDescriptor, this.rightActualDescriptor);
 		return (dc.areNumbers && dc.areCompatible);
 	}
 
@@ -109,11 +110,13 @@ public abstract class Operator extends SpelNodeImpl {
 		
 		boolean unboxLeft = !CodeFlow.isPrimitive(leftDesc);
 		boolean unboxRight = !CodeFlow.isPrimitive(rightDesc);
-		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(leftDesc, rightDesc,
-				this.leftActualDescriptor, this.rightActualDescriptor);
-		char targetType = dc.compatibleType;//CodeFlow.toPrimitiveTargetDesc(leftDesc);
+		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(
+				leftDesc, rightDesc, this.leftActualDescriptor, this.rightActualDescriptor);
+		char targetType = dc.compatibleType;  // CodeFlow.toPrimitiveTargetDesc(leftDesc);
 		
+		cf.enterCompilationScope();
 		getLeftOperand().generateCode(mv, cf);
+		cf.exitCompilationScope();
 		if (unboxLeft) {
 			CodeFlow.insertUnboxInsns(mv, targetType, leftDesc);
 		}
@@ -128,23 +131,23 @@ public abstract class Operator extends SpelNodeImpl {
 		// assert: SpelCompiler.boxingCompatible(leftDesc, rightDesc)
 		Label elseTarget = new Label();
 		Label endOfIf = new Label();
-		if (targetType=='D') {
+		if (targetType == 'D') {
 			mv.visitInsn(DCMPG);
 			mv.visitJumpInsn(compInstruction1, elseTarget);
 		}
-		else if (targetType=='F') {
+		else if (targetType == 'F') {
 			mv.visitInsn(FCMPG);		
 			mv.visitJumpInsn(compInstruction1, elseTarget);
 		}
-		else if (targetType=='J') {
+		else if (targetType == 'J') {
 			mv.visitInsn(LCMP);		
 			mv.visitJumpInsn(compInstruction1, elseTarget);
 		}
-		else if (targetType=='I') {
+		else if (targetType == 'I') {
 			mv.visitJumpInsn(compInstruction2, elseTarget);
 		}
 		else {
-			throw new IllegalStateException("Unexpected descriptor "+leftDesc);
+			throw new IllegalStateException("Unexpected descriptor " + leftDesc);
 		}
 
 		// Other numbers are not yet supported (isCompilable will not have returned true)
@@ -156,7 +159,17 @@ public abstract class Operator extends SpelNodeImpl {
 		cf.pushDescriptor("Z");
 	}
 
-	protected boolean equalityCheck(ExpressionState state, Object left, Object right) {
+
+	/**
+	 * Perform an equality check for the given operand values.
+	 * <p>This method is not just used for reflective comparisons in subclasses
+	 * but also from compiled expression code, which is why it needs to be
+	 * declared as {@code public static} here.
+	 * @param context the current evaluation context
+	 * @param left the left-hand operand value
+	 * @param right the right-hand operand value
+	 */
+	public static boolean equalityCheck(EvaluationContext context, Object left, Object right) {
 		if (left instanceof Number && right instanceof Number) {
 			Number leftNumber = (Number) left;
 			Number rightNumber = (Number) right;
@@ -206,7 +219,7 @@ public abstract class Operator extends SpelNodeImpl {
 		if (left instanceof Comparable && right instanceof Comparable) {
 			Class<?> ancestor = ClassUtils.determineCommonAncestor(left.getClass(), right.getClass());
 			if (ancestor != null && Comparable.class.isAssignableFrom(ancestor)) {
-				return (state.getTypeComparator().compare(left, right) == 0);
+				return (context.getTypeComparator().compare(left, right) == 0);
 			}
 		}
 
@@ -215,8 +228,8 @@ public abstract class Operator extends SpelNodeImpl {
 	
 
 	/**
-	 * A descriptor comparison encapsulates the result of comparing descriptor for two operands and
-	 * describes at what level they are compatible.
+	 * A descriptor comparison encapsulates the result of comparing descriptor
+	 * for two operands and describes at what level they are compatible.
 	 */
 	protected static class DescriptorComparison {
 
@@ -224,12 +237,12 @@ public abstract class Operator extends SpelNodeImpl {
 
 		static DescriptorComparison INCOMPATIBLE_NUMBERS = new DescriptorComparison(true, false, ' ');
 
-		final boolean areNumbers; // Were the two compared descriptor both for numbers?
+		final boolean areNumbers;  // Were the two compared descriptor both for numbers?
 
-		final boolean areCompatible; // If they were numbers, were they compatible?
+		final boolean areCompatible;  // If they were numbers, were they compatible?
 
-		final char compatibleType; // When compatible, what is the descriptor of the common type
-		
+		final char compatibleType;  // When compatible, what is the descriptor of the common type
+
 		private DescriptorComparison(boolean areNumbers, boolean areCompatible, char compatibleType) {
 			this.areNumbers = areNumbers;
 			this.areCompatible = areCompatible;
@@ -237,12 +250,13 @@ public abstract class Operator extends SpelNodeImpl {
 		}
 		
 		/**
-		 * Returns an object that indicates whether the input descriptors are compatible. A declared descriptor
-		 * is what could statically be determined (e.g. from looking at the return value of a property accessor
-		 * method) whilst an actual descriptor is the type of an actual object that was returned, which may differ.
-		 * For generic types with unbound type variables the declared descriptor discovered may be 'Object' but
-		 * from the actual descriptor it is possible to observe that the objects are really numeric values (e.g.
-		 * ints).
+		 * Return an object that indicates whether the input descriptors are compatible.
+		 * <p>A declared descriptor is what could statically be determined (e.g. from looking
+		 * at the return value of a property accessor method) whilst an actual descriptor
+		 * is the type of an actual object that was returned, which may differ.
+		 * <p>For generic types with unbound type variables, the declared descriptor
+		 * discovered may be 'Object' but from the actual descriptor it is possible to
+		 * observe that the objects are really numeric values (e.g. ints).
 		 * @param leftDeclaredDescriptor the statically determinable left descriptor
 		 * @param rightDeclaredDescriptor the statically determinable right descriptor
 		 * @param leftActualDescriptor the dynamic/runtime left object descriptor

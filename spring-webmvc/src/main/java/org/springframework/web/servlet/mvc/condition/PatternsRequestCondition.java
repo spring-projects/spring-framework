@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.AntPathMatcher;
@@ -119,7 +120,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 
 
 	private static List<String> asList(String... patterns) {
-		return (patterns != null ? Arrays.asList(patterns) : Collections.<String>emptyList());
+		return (patterns != null ? Arrays.asList(patterns) : Collections.emptyList());
 	}
 
 	private static Set<String> prependLeadingSlash(Collection<String> patterns) {

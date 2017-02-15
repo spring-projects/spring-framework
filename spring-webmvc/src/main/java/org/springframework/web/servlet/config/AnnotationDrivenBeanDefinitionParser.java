@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.web.servlet.config;
 import java.util.List;
 import java.util.Properties;
 
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
+import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.FactoryBean;
@@ -43,11 +45,13 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.cbor.MappingJackson2CborHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
@@ -170,6 +174,12 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final boolean jackson2XmlPresent =
 			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+
+	private static final boolean jackson2SmilePresent =
+			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+
+	private static final boolean jackson2CborPresent =
+			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
 	private static final boolean gsonPresent =
 			ClassUtils.isPresent("com.google.gson.Gson", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
@@ -423,13 +433,19 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		Properties props = new Properties();
 		if (romePresent) {
 			props.put("atom", MediaType.APPLICATION_ATOM_XML_VALUE);
-			props.put("rss", "application/rss+xml");
+			props.put("rss", MediaType.APPLICATION_RSS_XML_VALUE);
 		}
 		if (jaxb2Present || jackson2XmlPresent) {
 			props.put("xml", MediaType.APPLICATION_XML_VALUE);
 		}
 		if (jackson2Present || gsonPresent) {
 			props.put("json", MediaType.APPLICATION_JSON_VALUE);
+		}
+		if (jackson2SmilePresent) {
+			props.put("smile", "application/x-jackson-smile");
+		}
+		if (jackson2CborPresent) {
+			props.put("cbor", "application/cbor");
 		}
 		return props;
 	}
@@ -572,6 +588,21 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			}
 			else if (gsonPresent) {
 				messageConverters.add(createConverterDefinition(GsonHttpMessageConverter.class, source));
+			}
+
+			if (jackson2SmilePresent) {
+				RootBeanDefinition jacksonConverterDef = createConverterDefinition(MappingJackson2SmileHttpMessageConverter.class, source);
+				GenericBeanDefinition jacksonFactoryDef = createObjectMapperFactoryDefinition(source);
+				jacksonFactoryDef.getPropertyValues().add("factory", new SmileFactory());
+				jacksonConverterDef.getConstructorArgumentValues().addIndexedArgumentValue(0, jacksonFactoryDef);
+				messageConverters.add(jacksonConverterDef);
+			}
+			if (jackson2CborPresent) {
+				RootBeanDefinition jacksonConverterDef = createConverterDefinition(MappingJackson2CborHttpMessageConverter.class, source);
+				GenericBeanDefinition jacksonFactoryDef = createObjectMapperFactoryDefinition(source);
+				jacksonFactoryDef.getPropertyValues().add("factory", new CBORFactory());
+				jacksonConverterDef.getConstructorArgumentValues().addIndexedArgumentValue(0, jacksonFactoryDef);
+				messageConverters.add(jacksonConverterDef);
 			}
 		}
 		return messageConverters;

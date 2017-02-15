@@ -23,10 +23,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 import org.springframework.util.Assert;
 
@@ -192,6 +194,15 @@ public class PathResource extends AbstractResource implements WritableResource {
 			// Do exception translation for cases where conversion is not possible.
 			throw new FileNotFoundException(this.path + " cannot be resolved to " + "absolute file path");
 		}
+	}
+
+	/**
+	 * This implementation opens a InputStream for the underlying file.
+	 * @see java.nio.file.spi.FileSystemProvider#newInputStream(Path, OpenOption...)
+	 */
+	@Override
+	public ReadableByteChannel readableChannel() throws IOException {
+		return Files.newByteChannel(this.path, StandardOpenOption.READ);
 	}
 
 	/**

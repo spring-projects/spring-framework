@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Savepoint;
+import java.sql.Statement;
 import javax.sql.DataSource;
 
 import org.junit.After;
@@ -44,6 +45,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -56,19 +58,19 @@ import static org.mockito.BDDMockito.*;
  */
 public class DataSourceTransactionManagerTests  {
 
-	private Connection con;
-
 	private DataSource ds;
+
+	private Connection con;
 
 	private DataSourceTransactionManager tm;
 
 
 	@Before
 	public void setUp() throws Exception {
+		ds = mock(DataSource.class);
 		con = mock(Connection.class);
-		ds	= mock(DataSource.class);
-		tm = new DataSourceTransactionManager(ds);
 		given(ds.getConnection()).willReturn(con);
+		tm = new DataSourceTransactionManager(ds);
 	}
 
 	@After
@@ -111,8 +113,8 @@ public class DataSourceTransactionManagerTests  {
 	}
 
 	private void doTestTransactionCommitRestoringAutoCommit(
-			boolean autoCommit, boolean lazyConnection, final boolean createStatement)
-			throws Exception {
+			boolean autoCommit, boolean lazyConnection, final boolean createStatement) throws Exception {
+
 		if (lazyConnection) {
 			given(con.getAutoCommit()).willReturn(autoCommit);
 			given(con.getTransactionIsolation()).willReturn(Connection.TRANSACTION_READ_COMMITTED);
@@ -198,10 +200,10 @@ public class DataSourceTransactionManagerTests  {
 
 	private void doTestTransactionRollbackRestoringAutoCommit(
 			boolean autoCommit, boolean lazyConnection, final boolean createStatement) throws Exception {
+
 		if (lazyConnection) {
 			given(con.getAutoCommit()).willReturn(autoCommit);
-			given(con.getTransactionIsolation()).willReturn(
-					Connection.TRANSACTION_READ_COMMITTED);
+			given(con.getTransactionIsolation()).willReturn(Connection.TRANSACTION_READ_COMMITTED);
 		}
 
 		if (!lazyConnection || createStatement) {
@@ -454,13 +456,16 @@ public class DataSourceTransactionManagerTests  {
 		final TestTransactionSynchronization synch =
 				new TestTransactionSynchronization(ds, TransactionSynchronization.STATUS_COMMITTED) {
 					@Override
-					public void afterCompletion(int status) {
-						super.afterCompletion(status);
+					protected void doAfterCompletion(int status) {
+						super.doAfterCompletion(status);
 						tt.execute(new TransactionCallbackWithoutResult() {
 							@Override
-							protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+							protected void doInTransactionWithoutResult(TransactionStatus status) {
 							}
 						});
+						TransactionSynchronizationManager.registerSynchronization(
+								new TransactionSynchronizationAdapter() {
+								});
 					}
 				};
 
@@ -476,8 +481,48 @@ public class DataSourceTransactionManagerTests  {
 		assertTrue(synch.beforeCompletionCalled);
 		assertTrue(synch.afterCommitCalled);
 		assertTrue(synch.afterCompletionCalled);
+		assertTrue(synch.afterCompletionException instanceof IllegalStateException);
 		verify(con, times(2)).commit();
 		verify(con, times(2)).close();
+	}
+
+	@Test
+	public void testParticipatingTransactionWithDifferentConnectionObtainedFromSynch() throws Exception {
+		DataSource ds2 = mock(DataSource.class);
+		final Connection con2 = mock(Connection.class);
+		given(ds2.getConnection()).willReturn(con2);
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		final TransactionTemplate tt = new TransactionTemplate(tm);
+
+		final TestTransactionSynchronization synch =
+				new TestTransactionSynchronization(ds, TransactionSynchronization.STATUS_COMMITTED) {
+					@Override
+					protected void doAfterCompletion(int status) {
+						super.doAfterCompletion(status);
+						Connection con = DataSourceUtils.getConnection(ds2);
+						DataSourceUtils.releaseConnection(con, ds2);
+					}
+				};
+
+		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+				TransactionSynchronizationManager.registerSynchronization(synch);
+			}
+		});
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue(synch.beforeCommitCalled);
+		assertTrue(synch.beforeCompletionCalled);
+		assertTrue(synch.afterCommitCalled);
+		assertTrue(synch.afterCompletionCalled);
+		assertNull(synch.afterCompletionException);
+		verify(con).commit();
+		verify(con).close();
+		verify(con2).close();
 	}
 
 	@Test
@@ -833,6 +878,37 @@ public class DataSourceTransactionManagerTests  {
 		ordered.verify(con).setAutoCommit(true);
 		ordered.verify(con).setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 		verify(con).close();
+	}
+
+	@Test
+	public void testTransactionWithEnforceReadOnly() throws Exception {
+		tm.setEnforceReadOnly(true);
+
+		given(con.getAutoCommit()).willReturn(true);
+		Statement stmt = mock(Statement.class);
+		given(con.createStatement()).willReturn(stmt);
+
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		tt.setReadOnly(true);
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				assertTrue(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
+				// something transactional
+			}
+		});
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		InOrder ordered = inOrder(con, stmt);
+		ordered.verify(con).setAutoCommit(false);
+		ordered.verify(stmt).executeUpdate("SET TRANSACTION READ ONLY");
+		ordered.verify(stmt).close();
+		ordered.verify(con).commit();
+		ordered.verify(con).setAutoCommit(true);
+		ordered.verify(con).close();
 	}
 
 	@Test
@@ -1415,6 +1491,8 @@ public class DataSourceTransactionManagerTests  {
 
 		public boolean afterCompletionCalled;
 
+		public Throwable afterCompletionException;
+
 		public TestTransactionSynchronization(DataSource dataSource, int status) {
 			this.dataSource = dataSource;
 			this.status = status;
@@ -1458,6 +1536,15 @@ public class DataSourceTransactionManagerTests  {
 
 		@Override
 		public void afterCompletion(int status) {
+			try {
+				doAfterCompletion(status);
+			}
+			catch (Throwable ex) {
+				this.afterCompletionException = ex;
+			}
+		}
+
+		protected void doAfterCompletion(int status) {
 			assertFalse(this.afterCompletionCalled);
 			this.afterCompletionCalled = true;
 			assertTrue(status == this.status);

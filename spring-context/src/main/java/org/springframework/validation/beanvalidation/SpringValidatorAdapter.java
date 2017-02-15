@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.validation.beanvalidation;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -254,7 +255,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	protected Object getRejectedValue(String field, ConstraintViolation<Object> violation, BindingResult bindingResult) {
 		Object invalidValue = violation.getInvalidValue();
 		if (!"".equals(field) && (invalidValue == violation.getLeafBean() ||
-				(field.contains(".") && !field.contains("[]")))) {
+				(!field.contains("[]") && (field.contains("[") || field.contains("."))))) {
 			// Possibly a bean constraint with property path: retrieve the actual property value.
 			// However, explicitly avoid this for "address[]" style paths that we can't handle.
 			invalidValue = bindingResult.getRawFieldValue(field);
@@ -310,7 +311,8 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	 * Wrapper for a String attribute which can be resolved via a {@code MessageSource},
 	 * falling back to the original attribute as a default value otherwise.
 	 */
-	private static class ResolvableAttribute implements MessageSourceResolvable {
+	@SuppressWarnings("serial")
+	private static class ResolvableAttribute implements MessageSourceResolvable, Serializable {
 
 		private final String resolvableString;
 

@@ -29,7 +29,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -41,6 +40,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
@@ -121,6 +121,10 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
 		Type paramType = getHttpEntityType(parameter);
+		if (paramType == null) {
+			throw new IllegalArgumentException("HttpEntity parameter '" + parameter.getParameterName() +
+					"' in method " + parameter.getMethod() + " is not parameterized");
+		}
 
 		Object body = readWithMessageConverters(webRequest, parameter, paramType);
 		if (RequestEntity.class == parameter.getParameterType()) {
@@ -146,8 +150,9 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		else if (parameterType instanceof Class) {
 			return Object.class;
 		}
-		throw new IllegalArgumentException("HttpEntity parameter '" + parameter.getParameterName() +
-				"' in method " + parameter.getMethod() + " is not parameterized");
+		else {
+			return null;
+		}
 	}
 
 	@Override
@@ -182,15 +187,15 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		}
 
 		if (responseEntity instanceof ResponseEntity) {
-			outputMessage.getServletResponse().setStatus(((ResponseEntity<?>) responseEntity).getStatusCodeValue());
-			HttpMethod method = inputMessage.getMethod();
-			boolean isGetOrHead = (HttpMethod.GET == method || HttpMethod.HEAD == method);
-			if (isGetOrHead && isResourceNotModified(inputMessage, outputMessage)) {
-				outputMessage.setStatusCode(HttpStatus.NOT_MODIFIED);
-				// Ensure headers are flushed, no body should be written.
-				outputMessage.flush();
-				// Skip call to converters, as they may update the body.
-				return;
+			int returnStatus = ((ResponseEntity<?>) responseEntity).getStatusCodeValue();
+			outputMessage.getServletResponse().setStatus(returnStatus);
+			if (returnStatus == 200) {
+				if (isResourceNotModified(inputMessage, outputMessage)) {
+					// Ensure headers are flushed, no body should be written.
+					outputMessage.flush();
+					// Skip call to converters, as they may update the body.
+					return;
+				}
 			}
 		}
 
@@ -223,51 +228,17 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	}
 
 	private boolean isResourceNotModified(ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage) {
-		List<String> ifNoneMatch = inputMessage.getHeaders().getIfNoneMatch();
-		long ifModifiedSince = inputMessage.getHeaders().getIfModifiedSince();
-		String eTag = addEtagPadding(outputMessage.getHeaders().getETag());
-		long lastModified = outputMessage.getHeaders().getLastModified();
-		boolean notModified = false;
+		ServletWebRequest servletWebRequest =
+				new ServletWebRequest(inputMessage.getServletRequest(), outputMessage.getServletResponse());
+		HttpHeaders responseHeaders = outputMessage.getHeaders();
+		String etag = responseHeaders.getETag();
+		long lastModifiedTimestamp = responseHeaders.getLastModified();
+		if (inputMessage.getMethod() == HttpMethod.GET || inputMessage.getMethod() == HttpMethod.HEAD) {
+			responseHeaders.remove(HttpHeaders.ETAG);
+			responseHeaders.remove(HttpHeaders.LAST_MODIFIED);
+		}
 
-		if (!ifNoneMatch.isEmpty() && (inputMessage.getHeaders().containsKey(HttpHeaders.IF_UNMODIFIED_SINCE)
-				|| inputMessage.getHeaders().containsKey(HttpHeaders.IF_MATCH))) {
-			// invalid conditional request, do not process
-		}
-		else if (lastModified != -1 && StringUtils.hasLength(eTag)) {
-			notModified = isETagNotModified(ifNoneMatch, eTag) && isTimeStampNotModified(ifModifiedSince, lastModified);
-		}
-		else if (lastModified != -1) {
-			notModified = isTimeStampNotModified(ifModifiedSince, lastModified);
-		}
-		else if (StringUtils.hasLength(eTag)) {
-			notModified = isETagNotModified(ifNoneMatch, eTag);
-		}
-		return notModified;
-	}
-
-	private boolean isETagNotModified(List<String> ifNoneMatch, String etag) {
-		if (StringUtils.hasLength(etag)) {
-			for (String clientETag : ifNoneMatch) {
-				// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
-				if (StringUtils.hasLength(clientETag) &&
-						(clientETag.replaceFirst("^W/", "").equals(etag.replaceFirst("^W/", "")))) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	private boolean isTimeStampNotModified(long ifModifiedSince, long lastModifiedTimestamp) {
-		return (ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000));
-	}
-
-	private String addEtagPadding(String etag) {
-		if (StringUtils.hasLength(etag) &&
-				(!(etag.startsWith("\"") || etag.startsWith("W/\"")) || !etag.endsWith("\"")) ) {
-			etag = "\"" + etag + "\"";
-		}
-		return etag;
+		return servletWebRequest.checkNotModified(etag, lastModifiedTimestamp);
 	}
 
 	@Override
@@ -277,6 +248,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		}
 		else {
 			Type type = getHttpEntityType(returnType);
+			type = (type != null ? type : Object.class);
 			return ResolvableType.forMethodParameter(returnType, type).resolve(Object.class);
 		}
 	}

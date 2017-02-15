@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ import org.springframework.context.Lifecycle;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.Phased;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.util.Assert;
 
 /**
  * Default implementation of the {@link LifecycleProcessor} strategy.
@@ -70,7 +69,10 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		Assert.isInstanceOf(ConfigurableListableBeanFactory.class, beanFactory);
+		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
+			throw new IllegalArgumentException(
+					"DefaultLifecycleProcessor requires a ConfigurableListableBeanFactory: " + beanFactory);
+		}
 		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
 	}
 
@@ -142,7 +144,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 				group.add(entry.getKey(), bean);
 			}
 		}
-		if (phases.size() > 0) {
+		if (!phases.isEmpty()) {
 			List<Integer> keys = new ArrayList<>(phases.keySet());
 			Collections.sort(keys);
 			for (Integer key : keys) {
@@ -195,7 +197,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 			group.add(entry.getKey(), bean);
 		}
-		if (phases.size() > 0) {
+		if (!phases.isEmpty()) {
 			List<Integer> keys = new ArrayList<>(phases.keySet());
 			Collections.sort(keys, Collections.reverseOrder());
 			for (Integer key : keys) {

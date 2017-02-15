@@ -35,17 +35,17 @@ import org.springframework.util.xml.DomUtils;
 
 /**
  * BeanDefinitionParser implementation for the '{@code <lang:groovy/>}',
- * '{@code <lang:jruby/>}' and '{@code <lang:bsh/>}' tags.
+ * '{@code <lang:std/>}' and '{@code <lang:bsh/>}' tags.
  * Allows for objects written using dynamic languages to be easily exposed with
  * the {@link org.springframework.beans.factory.BeanFactory}.
  *
- * <p>The script for each object can be specified either as a reference to the Resource
- * containing it (using the '{@code script-source}' attribute) or inline in the XML configuration
- * itself (using the '{@code inline-script}' attribute.
+ * <p>The script for each object can be specified either as a reference to the
+ * resource containing it (using the '{@code script-source}' attribute) or inline
+ * in the XML configuration itself (using the '{@code inline-script}' attribute.
  *
- * <p>By default, dynamic objects created with these tags are <strong>not</strong> refreshable.
- * To enable refreshing, specify the refresh check delay for each object (in milliseconds) using the
- * '{@code refresh-check-delay}' attribute.
+ * <p>By default, dynamic objects created with these tags are <strong>not</strong>
+ * refreshable. To enable refreshing, specify the refresh check delay for each
+ * object (in milliseconds) using the '{@code refresh-check-delay}' attribute.
  *
  * @author Rob Harrop
  * @author Rod Johnson
@@ -170,14 +170,13 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		// Attach any refresh metadata.
 		String refreshCheckDelay = element.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
 		if (StringUtils.hasText(refreshCheckDelay)) {
-			bd.setAttribute(ScriptFactoryPostProcessor.REFRESH_CHECK_DELAY_ATTRIBUTE, new Long(refreshCheckDelay));
+			bd.setAttribute(ScriptFactoryPostProcessor.REFRESH_CHECK_DELAY_ATTRIBUTE, Long.valueOf(refreshCheckDelay));
 		}
 
 		// Attach any proxy target class metadata.
 		String proxyTargetClass = element.getAttribute(PROXY_TARGET_CLASS_ATTRIBUTE);
 		if (StringUtils.hasText(proxyTargetClass)) {
-			Boolean flag = new Boolean(proxyTargetClass);
-			bd.setAttribute(ScriptFactoryPostProcessor.PROXY_TARGET_CLASS_ATTRIBUTE, flag);
+			bd.setAttribute(ScriptFactoryPostProcessor.PROXY_TARGET_CLASS_ATTRIBUTE, Boolean.valueOf(proxyTargetClass));
 		}
 
 		// Add constructor arguments.

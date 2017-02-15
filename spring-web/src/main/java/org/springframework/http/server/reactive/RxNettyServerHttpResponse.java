@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,11 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import io.reactivex.netty.protocol.http.server.ResponseContentWriter;
 import org.reactivestreams.Publisher;
-import reactor.adapter.RxJava1Adapter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import rx.Observable;
+import rx.RxReactiveStreams;
+import rx.functions.Func1;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
@@ -40,6 +41,7 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
@@ -48,10 +50,13 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
 	private static final ByteBuf FLUSH_SIGNAL = Unpooled.buffer(0, 0);
 
+	// 8 Kb flush threshold to avoid blocking RxNetty when the send buffer has reached the high watermark
+	private static final long FLUSH_THRESHOLD = 8192;
+
 	public RxNettyServerHttpResponse(HttpServerResponse<ByteBuf> response,
 			NettyDataBufferFactory dataBufferFactory) {
 		super(dataBufferFactory);
-		Assert.notNull("'response', response must not be null.");
+		Assert.notNull(response, "'response' must not be null.");
 
 		this.response = response;
 	}
@@ -63,7 +68,7 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
 
 	@Override
-	protected void writeStatusCode() {
+	protected void applyStatusCode() {
 		HttpStatus statusCode = this.getStatusCode();
 		if (statusCode != null) {
 			this.response.setStatus(HttpResponseStatus.valueOf(statusCode.value()));
@@ -71,27 +76,27 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	@Override
-	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> body) {
-		Observable<ByteBuf> content = RxJava1Adapter.publisherToObservable(body)
+	protected Mono<Void> writeWithInternal(Publisher<? extends DataBuffer> body) {
+		Observable<ByteBuf> content = RxReactiveStreams.toObservable(body)
 				.map(NettyDataBufferFactory::toByteBuf);
-		return RxJava1Adapter.observableToFlux(this.response.write(content))
+		return Flux.from(RxReactiveStreams.toPublisher(this.response.write(content, new FlushSelector(FLUSH_THRESHOLD))))
 				.then();
 	}
 
 	@Override
 	protected Mono<Void> writeAndFlushWithInternal(
-			Publisher<Publisher<DataBuffer>> body) {
+			Publisher<? extends Publisher<? extends DataBuffer>> body) {
 		Flux<ByteBuf> bodyWithFlushSignals = Flux.from(body).
 				flatMap(publisher -> Flux.from(publisher).
 						map(NettyDataBufferFactory::toByteBuf).
 						concatWith(Mono.just(FLUSH_SIGNAL)));
-		Observable<ByteBuf> content = RxJava1Adapter.publisherToObservable(bodyWithFlushSignals);
+		Observable<ByteBuf> content = RxReactiveStreams.toObservable(bodyWithFlushSignals);
 		ResponseContentWriter<ByteBuf> writer = this.response.write(content, bb -> bb == FLUSH_SIGNAL);
-		return RxJava1Adapter.observableToFlux(writer).then();
+		return Flux.from(RxReactiveStreams.toPublisher(writer)).then();
 	}
 
 	@Override
-	protected void writeHeaders() {
+	protected void applyHeaders() {
 		for (String name : getHeaders().keySet()) {
 			for (String value : getHeaders().get(name)) {
 				this.response.addHeader(name, value);
@@ -100,7 +105,7 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	@Override
-	protected void writeCookies() {
+	protected void applyCookies() {
 		for (String name : getCookies().keySet()) {
 			for (ResponseCookie httpCookie : getCookies().get(name)) {
 				Cookie cookie = new DefaultCookie(name, httpCookie.getValue());
@@ -116,6 +121,26 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 		}
 	}
 
+	private class FlushSelector implements Func1<ByteBuf, Boolean> {
+
+		private final long flushEvery;
+		private long count;
+
+		public FlushSelector(long flushEvery) {
+			this.flushEvery = flushEvery;
+		}
+
+		@Override
+		public Boolean call(ByteBuf byteBuf) {
+			this.count += byteBuf.readableBytes();
+			if (this.count >= this.flushEvery) {
+				this.count = 0;
+				return true;
+			}
+			return false;
+		}
+	}
+
 
 	/*
 	While the underlying implementation of {@link ZeroCopyHttpOutputMessage} seems to
@@ -124,7 +149,7 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
 	We should revisit this code once
 	https://github.com/ReactiveX/RxNetty/issues/194 has been fixed.
-	
+
 
 	@Override
 	public Mono<Void> writeWith(File file, long position, long count) {

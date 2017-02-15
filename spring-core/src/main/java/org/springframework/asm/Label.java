@@ -364,9 +364,8 @@ public class Label {
      *         small to store the offset. In such a case the corresponding jump
      *         instruction is replaced with a pseudo instruction (using unused
      *         opcodes) using an unsigned two bytes offset. These pseudo
-     *         instructions will need to be replaced with true instructions with
-     *         wider offsets (4 bytes instead of 2). This is done in
-     *         {@link MethodWriter#resizeInstructions}.
+     *         instructions will be replaced with standard bytecode instructions
+     *         with wider offsets (4 bytes instead of 2), in ClassReader.
      * @throws IllegalArgumentException
      *             if this label has already been resolved, or if it has not
      *             been created by the given code writer.

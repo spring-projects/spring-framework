@@ -336,14 +336,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					if (metadata != null) {
 						metadata.clear(pvs);
 					}
-					try {
-						metadata = buildResourceMetadata(clazz);
-						this.injectionMetadataCache.put(cacheKey, metadata);
-					}
-					catch (NoClassDefFoundError err) {
-						throw new IllegalStateException("Failed to introspect bean class [" + clazz.getName() +
-								"] for resource metadata: could not find class that it depends on", err);
-					}
+					metadata = buildResourceMetadata(clazz);
+					this.injectionMetadataCache.put(cacheKey, metadata);
 				}
 			}
 		}

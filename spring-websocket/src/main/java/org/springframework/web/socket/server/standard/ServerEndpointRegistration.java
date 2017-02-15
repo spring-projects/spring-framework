@@ -48,7 +48,7 @@ import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
  * override methods for customizing the handshake process.
  *
  * @author Rossen Stoyanchev
- * @since 4.0
+ * @since 5.0
  * @see ServerEndpointExporter
  */
 public class ServerEndpointRegistration extends ServerEndpointConfig.Configurator
@@ -107,8 +107,7 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 
 	@Override
 	public Class<? extends Endpoint> getEndpointClass() {
-		return (this.endpoint != null) ?
-				this.endpoint.getClass() : ((Class<? extends Endpoint>) this.endpointProvider.getHandlerType());
+		return (this.endpoint != null ? this.endpoint.getClass() : this.endpointProvider.getHandlerType());
 	}
 
 	public Endpoint getEndpoint() {

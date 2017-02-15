@@ -641,7 +641,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			else {
 				// Generate default id...
 				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
-						ObjectUtils.getDisplayString(getServletContext().getContextPath()) + "/" + getServletName());
+						ObjectUtils.getDisplayString(getServletContext().getContextPath()) + '/' + getServletName());
 			}
 		}
 

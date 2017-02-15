@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.socket.sockjs.client;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.http.HttpHeaders;
@@ -30,7 +31,6 @@ import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.transport.TransportType;
-
 
 /**
  * An extension of {@link AbstractClientSockJsSession} for use with HTTP
@@ -58,7 +58,7 @@ public class XhrClientSockJsSession extends AbstractClientSockJsSession {
 			XhrTransport transport, SettableListenableFuture<WebSocketSession> connectFuture) {
 
 		super(request, handler, connectFuture);
-		Assert.notNull(transport, "'restTemplate' is required");
+		Assert.notNull(transport, "'transport' is required");
 		this.transport = transport;
 		this.headers = request.getHttpRequestHeaders();
 		this.sendHeaders = new HttpHeaders();
@@ -111,7 +111,7 @@ public class XhrClientSockJsSession extends AbstractClientSockJsSession {
 
 	@Override
 	public List<WebSocketExtension> getExtensions() {
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -121,7 +121,7 @@ public class XhrClientSockJsSession extends AbstractClientSockJsSession {
 
 	@Override
 	protected void disconnect(CloseStatus status) {
-		// Nothing to do, XHR transports check if session is disconnected
+		// Nothing to do: XHR transports check if session is disconnected.
 	}
 
 }

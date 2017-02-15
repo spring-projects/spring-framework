@@ -73,7 +73,7 @@ public abstract class TypeConverterSupport extends PropertyEditorRegistrySupport
 		catch (IllegalStateException ex) {
 			throw new ConversionNotSupportedException(value, requiredType, ex);
 		}
-		catch (Throwable ex) {
+		catch (IllegalArgumentException ex) {
 			throw new TypeMismatchException(value, requiredType, ex);
 		}
 	}

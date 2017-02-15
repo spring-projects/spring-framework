@@ -69,7 +69,9 @@ public @interface CacheEvict {
 	 * following meta-data:
 	 * <ul>
 	 * <li>{@code #result} for a reference to the result of the method invocation, which
-	 * can only be used if {@link #beforeInvocation()} is {@code false}.</li>
+	 * can only be used if {@link #beforeInvocation()} is {@code false}. For supported
+	 * wrappers such as {@code Optional}, {@code #result} refers to the actual object,
+	 * not the wrapper</li>
 	 * <li>{@code #root.method}, {@code #root.target}, and {@code #root.caches} for
 	 * references to the {@link java.lang.reflect.Method method}, target object, and
 	 * affected cache(s) respectively.</li>

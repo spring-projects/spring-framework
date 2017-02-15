@@ -16,58 +16,48 @@
 
 package org.springframework.http.server.reactive.bootstrap;
 
-import io.undertow.Undertow;
-import io.undertow.server.HttpHandler;
+import java.net.InetSocketAddress;
 
-import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import io.undertow.Undertow;
+
 import org.springframework.http.server.reactive.UndertowHttpHandlerAdapter;
-import org.springframework.util.Assert;
 
 /**
  * @author Marek Hawrylczak
  */
-public class UndertowHttpServer extends HttpServerSupport implements HttpServer {
+public class UndertowHttpServer extends AbstractHttpServer {
 
 	private Undertow server;
 
-	private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
-
-	private boolean running;
-
-	public void setDataBufferFactory(DataBufferFactory dataBufferFactory) {
-		this.dataBufferFactory = dataBufferFactory;
-	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(getHttpHandler());
-		HttpHandler handler =
-				new UndertowHttpHandlerAdapter(getHttpHandler(), dataBufferFactory);
+	protected void initServer() throws Exception {
 		this.server = Undertow.builder().addHttpListener(getPort(), getHost())
-				.setHandler(handler).build();
+				.setHandler(initHttpHandlerAdapter())
+				.build();
+	}
+
+	private UndertowHttpHandlerAdapter initHttpHandlerAdapter() {
+		return getHttpHandlerMap() != null ?
+				new UndertowHttpHandlerAdapter(getHttpHandlerMap()) :
+				new UndertowHttpHandlerAdapter(getHttpHandler());
 	}
 
 	@Override
-	public void start() {
-		if (!this.running) {
-			this.server.start();
-			this.running = true;
-		}
-
+	protected void startInternal() {
+		this.server.start();
+		Undertow.ListenerInfo info = this.server.getListenerInfo().get(0);
+		setPort(((InetSocketAddress) info.getAddress()).getPort());
 	}
 
 	@Override
-	public void stop() {
-		if (this.running) {
-			this.server.stop();
-			this.running = false;
-		}
+	protected void stopInternal() {
+		this.server.stop();
 	}
 
 	@Override
-	public boolean isRunning() {
-		return this.running;
+	protected void resetInternal() {
+		this.server = null;
 	}
 
 }

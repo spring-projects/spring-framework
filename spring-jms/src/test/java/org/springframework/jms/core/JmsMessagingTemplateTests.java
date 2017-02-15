@@ -353,10 +353,10 @@ public class JmsMessagingTemplateTests {
 		Destination destination = new Destination() {};
 		Message<String> request = createTextMessage();
 		javax.jms.Message replyJmsMessage = createJmsTextMessage();
-		given(jmsTemplate.sendAndReceive(eq(destination), anyObject())).willReturn(replyJmsMessage);
+		given(jmsTemplate.sendAndReceive(eq(destination), any())).willReturn(replyJmsMessage);
 
 		Message<?> actual = messagingTemplate.sendAndReceive(destination, request);
-		verify(jmsTemplate, times(1)).sendAndReceive(eq(destination), anyObject());
+		verify(jmsTemplate, times(1)).sendAndReceive(eq(destination), any());
 		assertTextMessage(actual);
 	}
 
@@ -364,10 +364,10 @@ public class JmsMessagingTemplateTests {
 	public void sendAndReceiveName() {
 		Message<String> request = createTextMessage();
 		javax.jms.Message replyJmsMessage = createJmsTextMessage();
-		given(jmsTemplate.sendAndReceive(eq("myQueue"), anyObject())).willReturn(replyJmsMessage);
+		given(jmsTemplate.sendAndReceive(eq("myQueue"), any())).willReturn(replyJmsMessage);
 
 		Message<?> actual = messagingTemplate.sendAndReceive("myQueue", request);
-		verify(jmsTemplate, times(1)).sendAndReceive(eq("myQueue"), anyObject());
+		verify(jmsTemplate, times(1)).sendAndReceive(eq("myQueue"), any());
 		assertTextMessage(actual);
 	}
 
@@ -377,10 +377,10 @@ public class JmsMessagingTemplateTests {
 		messagingTemplate.setDefaultDestination(destination);
 		Message<String> request = createTextMessage();
 		javax.jms.Message replyJmsMessage = createJmsTextMessage();
-		given(jmsTemplate.sendAndReceive(eq(destination), anyObject())).willReturn(replyJmsMessage);
+		given(jmsTemplate.sendAndReceive(eq(destination), any())).willReturn(replyJmsMessage);
 
 		Message<?> actual = messagingTemplate.sendAndReceive(request);
-		verify(jmsTemplate, times(1)).sendAndReceive(eq(destination), anyObject());
+		verify(jmsTemplate, times(1)).sendAndReceive(eq(destination), any());
 		assertTextMessage(actual);
 	}
 
@@ -389,10 +389,10 @@ public class JmsMessagingTemplateTests {
 		messagingTemplate.setDefaultDestinationName("myQueue");
 		Message<String> request = createTextMessage();
 		javax.jms.Message replyJmsMessage = createJmsTextMessage();
-		given(jmsTemplate.sendAndReceive(eq("myQueue"), anyObject())).willReturn(replyJmsMessage);
+		given(jmsTemplate.sendAndReceive(eq("myQueue"), any())).willReturn(replyJmsMessage);
 
 		Message<?> actual = messagingTemplate.sendAndReceive(request);
-		verify(jmsTemplate, times(1)).sendAndReceive(eq("myQueue"), anyObject());
+		verify(jmsTemplate, times(1)).sendAndReceive(eq("myQueue"), any());
 		assertTextMessage(actual);
 	}
 
@@ -408,20 +408,20 @@ public class JmsMessagingTemplateTests {
 	public void convertSendAndReceivePayload() throws JMSException {
 		Destination destination = new Destination() {};
 		javax.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
-		given(jmsTemplate.sendAndReceive(eq(destination), anyObject())).willReturn(replyJmsMessage);
+		given(jmsTemplate.sendAndReceive(eq(destination), any())).willReturn(replyJmsMessage);
 
 		String reply = messagingTemplate.convertSendAndReceive(destination, "my Payload", String.class);
-		verify(jmsTemplate, times(1)).sendAndReceive(eq(destination), anyObject());
+		verify(jmsTemplate, times(1)).sendAndReceive(eq(destination), any());
 		assertEquals("My reply", reply);
 	}
 
 	@Test
 	public void convertSendAndReceivePayloadName() throws JMSException {
 		javax.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
-		given(jmsTemplate.sendAndReceive(eq("myQueue"), anyObject())).willReturn(replyJmsMessage);
+		given(jmsTemplate.sendAndReceive(eq("myQueue"), any())).willReturn(replyJmsMessage);
 
 		String reply = messagingTemplate.convertSendAndReceive("myQueue", "my Payload", String.class);
-		verify(jmsTemplate, times(1)).sendAndReceive(eq("myQueue"), anyObject());
+		verify(jmsTemplate, times(1)).sendAndReceive(eq("myQueue"), any());
 		assertEquals("My reply", reply);
 	}
 
@@ -430,10 +430,10 @@ public class JmsMessagingTemplateTests {
 		Destination destination = new Destination() {};
 		messagingTemplate.setDefaultDestination(destination);
 		javax.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
-		given(jmsTemplate.sendAndReceive(eq(destination), anyObject())).willReturn(replyJmsMessage);
+		given(jmsTemplate.sendAndReceive(eq(destination), any())).willReturn(replyJmsMessage);
 
 		String reply = messagingTemplate.convertSendAndReceive("my Payload", String.class);
-		verify(jmsTemplate, times(1)).sendAndReceive(eq(destination), anyObject());
+		verify(jmsTemplate, times(1)).sendAndReceive(eq(destination), any());
 		assertEquals("My reply", reply);
 	}
 
@@ -441,10 +441,10 @@ public class JmsMessagingTemplateTests {
 	public void convertSendAndReceiveDefaultDestinationName() throws JMSException {
 		messagingTemplate.setDefaultDestinationName("myQueue");
 		javax.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
-		given(jmsTemplate.sendAndReceive(eq("myQueue"), anyObject())).willReturn(replyJmsMessage);
+		given(jmsTemplate.sendAndReceive(eq("myQueue"), any())).willReturn(replyJmsMessage);
 
 		String reply = messagingTemplate.convertSendAndReceive("my Payload", String.class);
-		verify(jmsTemplate, times(1)).sendAndReceive(eq("myQueue"), anyObject());
+		verify(jmsTemplate, times(1)).sendAndReceive(eq("myQueue"), any());
 		assertEquals("My reply", reply);
 	}
 
@@ -459,7 +459,7 @@ public class JmsMessagingTemplateTests {
 		Message<String> message = createTextMessage();
 		MessageConverter messageConverter = mock(MessageConverter.class);
 		willThrow(org.springframework.jms.support.converter.MessageConversionException.class)
-				.given(messageConverter).toMessage(eq(message), anyObject());
+				.given(messageConverter).toMessage(eq(message), any());
 		messagingTemplate.setJmsMessageConverter(messageConverter);
 		invokeMessageCreator("myQueue");
 
@@ -491,7 +491,7 @@ public class JmsMessagingTemplateTests {
 	@Test
 	public void convertDestinationResolutionExceptionOnSend() {
 		Destination destination = new Destination() {};
-		willThrow(DestinationResolutionException.class).given(jmsTemplate).send(eq(destination), anyObject());
+		willThrow(DestinationResolutionException.class).given(jmsTemplate).send(eq(destination), any());
 
 		thrown.expect(org.springframework.messaging.core.DestinationResolutionException.class);
 		messagingTemplate.send(destination, createTextMessage());
@@ -510,7 +510,7 @@ public class JmsMessagingTemplateTests {
 	public void convertMessageFormatException() throws JMSException {
 		Message<String> message = createTextMessage();
 		MessageConverter messageConverter = mock(MessageConverter.class);
-		willThrow(MessageFormatException.class).given(messageConverter).toMessage(eq(message), anyObject());
+		willThrow(MessageFormatException.class).given(messageConverter).toMessage(eq(message), any());
 		messagingTemplate.setJmsMessageConverter(messageConverter);
 		invokeMessageCreator("myQueue");
 
@@ -522,7 +522,7 @@ public class JmsMessagingTemplateTests {
 	public void convertMessageNotWritableException() throws JMSException {
 		Message<String> message = createTextMessage();
 		MessageConverter messageConverter = mock(MessageConverter.class);
-		willThrow(MessageNotWriteableException.class).given(messageConverter).toMessage(eq(message), anyObject());
+		willThrow(MessageNotWriteableException.class).given(messageConverter).toMessage(eq(message), any());
 		messagingTemplate.setJmsMessageConverter(messageConverter);
 		invokeMessageCreator("myQueue");
 
@@ -532,7 +532,7 @@ public class JmsMessagingTemplateTests {
 
 	@Test
 	public void convertInvalidDestinationExceptionOnSendAndReceiveWithName() {
-		willThrow(InvalidDestinationException.class).given(jmsTemplate).sendAndReceive(eq("unknownQueue"), anyObject());
+		willThrow(InvalidDestinationException.class).given(jmsTemplate).sendAndReceive(eq("unknownQueue"), any());
 
 		thrown.expect(org.springframework.messaging.core.DestinationResolutionException.class);
 		messagingTemplate.sendAndReceive("unknownQueue", createTextMessage());
@@ -541,7 +541,7 @@ public class JmsMessagingTemplateTests {
 	@Test
 	public void convertInvalidDestinationExceptionOnSendAndReceive() {
 		Destination destination = new Destination() {};
-		willThrow(InvalidDestinationException.class).given(jmsTemplate).sendAndReceive(eq(destination), anyObject());
+		willThrow(InvalidDestinationException.class).given(jmsTemplate).sendAndReceive(eq(destination), any());
 
 		thrown.expect(org.springframework.messaging.core.DestinationResolutionException.class);
 		messagingTemplate.sendAndReceive(destination, createTextMessage());
@@ -555,7 +555,7 @@ public class JmsMessagingTemplateTests {
 				messageCreator.createMessage(null);
 				return null;
 			}
-		}).given(jmsTemplate).send(eq("myQueue"), anyObject());
+		}).given(jmsTemplate).send(eq("myQueue"), any());
 	}
 
 

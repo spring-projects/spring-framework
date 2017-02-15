@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,19 @@ package org.springframework.transaction.interceptor;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 /**
- * Transaction attribute that takes the EJB approach to rolling
- * back on runtime, but not checked, exceptions.
+ * Spring's common transaction attribute implementation.
+ * Rolls back on runtime, but not checked, exceptions by default.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 16.03.2003
  */
 @SuppressWarnings("serial")
 public class DefaultTransactionAttribute extends DefaultTransactionDefinition implements TransactionAttribute {
 
 	private String qualifier;
+
+	private String descriptor;
 
 
 	/**
@@ -74,6 +77,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	 * Associate a qualifier value with this transaction attribute.
 	 * <p>This may be used for choosing a corresponding transaction manager
 	 * to process this specific transaction.
+	 * @since 3.0
 	 */
 	public void setQualifier(String qualifier) {
 		this.qualifier = qualifier;
@@ -81,6 +85,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 
 	/**
 	 * Return a qualifier value associated with this transaction attribute.
+	 * @since 3.0
 	 */
 	@Override
 	public String getQualifier() {
@@ -88,9 +93,36 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	}
 
 	/**
-	 * The default behavior is as with EJB: rollback on unchecked exception.
-	 * Additionally attempt to rollback on Error.
-	 * <p>This is consistent with TransactionTemplate's default behavior.
+	 * Set a descriptor for this transaction attribute,
+	 * e.g. indicating where the attribute is applying.
+	 * @since 4.3.4
+	 */
+	public void setDescriptor(String descriptor) {
+		this.descriptor = descriptor;
+	}
+
+	/**
+	 * Return a descriptor for this transaction attribute,
+	 * or {@code null} if none.
+	 * @since 4.3.4
+	 */
+	public String getDescriptor() {
+		return this.descriptor;
+	}
+
+	/**
+	 * The default behavior is as with EJB: rollback on unchecked exception
+	 * ({@link RuntimeException}), assuming an unexpected outcome outside of any
+	 * business rules. Additionally, we also attempt to rollback on {@link Error} which
+	 * is clearly an unexpected outcome as well. By contrast, a checked exception is
+	 * considered a business exception and therefore a regular expected outcome of the
+	 * transactional business method, i.e. a kind of alternative return value which
+	 * still allows for regular completion of resource operations.
+	 * <p>This is largely consistent with TransactionTemplate's default behavior,
+	 * except that TransactionTemplate also rolls back on undeclared checked exceptions
+	 * (a corner case). For declarative transactions, we expect checked exceptions to be
+	 * intentionally declared as business exceptions, leading to a commit by default.
+	 * @see org.springframework.transaction.support.TransactionTemplate#execute
 	 */
 	@Override
 	public boolean rollbackOn(Throwable ex) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,8 +129,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	private int queryTimeout = -1;
 
 	/**
-	 * If this variable is set to true then all results checking will be bypassed for any
-	 * callable statement processing.  This can be used to avoid a bug in some older Oracle
+	 * If this variable is set to true, then all results checking will be bypassed for any
+	 * callable statement processing. This can be used to avoid a bug in some older Oracle
 	 * JDBC drivers like 10.1.0.2.
 	 */
 	private boolean skipResultsProcessing = false;
@@ -1177,7 +1177,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 					else {
 						if (!this.skipUndeclaredResults) {
 							String rsName = RETURN_RESULT_SET_PREFIX + (rsIndex + 1);
-							SqlReturnResultSet undeclaredRsParam = new SqlReturnResultSet(rsName, new ColumnMapRowMapper());
+							SqlReturnResultSet undeclaredRsParam = new SqlReturnResultSet(rsName, getColumnMapRowMapper());
 							if (logger.isDebugEnabled()) {
 								logger.debug("Added default SqlReturnResultSet parameter named '" + rsName + "'");
 							}
@@ -1242,7 +1242,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 						}
 						else {
 							String rsName = outParam.getName();
-							SqlReturnResultSet rsParam = new SqlReturnResultSet(rsName, new ColumnMapRowMapper());
+							SqlReturnResultSet rsParam = new SqlReturnResultSet(rsName, getColumnMapRowMapper());
 							returnedResults.putAll(processResultSet((ResultSet) out, rsParam));
 							if (logger.isDebugEnabled()) {
 								logger.debug("Added default SqlReturnResultSet parameter named '" + rsName + "'");
@@ -1451,7 +1451,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 
 		@Override
-		@SuppressWarnings("rawtypes")
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
@@ -1464,12 +1463,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				return System.identityHashCode(proxy);
 			}
 			else if (method.getName().equals("unwrap")) {
-				if (((Class) args[0]).isInstance(proxy)) {
+				if (((Class<?>) args[0]).isInstance(proxy)) {
 					return proxy;
 				}
 			}
 			else if (method.getName().equals("isWrapperFor")) {
-				if (((Class) args[0]).isInstance(proxy)) {
+				if (((Class<?>) args[0]).isInstance(proxy)) {
 					return true;
 				}
 			}

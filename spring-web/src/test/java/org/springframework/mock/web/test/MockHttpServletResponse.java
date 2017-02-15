@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import org.springframework.web.util.WebUtils;
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletResponse} interface.
  *
- * <p>As of Spring Framework 5.0, this set of mocks is designed on a Servlet 3.1 baseline.
+ * <p>As of Spring Framework 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -215,6 +215,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return (int) this.contentLength;
 	}
 
+	@Override
 	public void setContentLengthLong(long contentLength) {
 		this.contentLength = contentLength;
 		doAddHeaderValue(CONTENT_LENGTH_HEADER, contentLength, true);

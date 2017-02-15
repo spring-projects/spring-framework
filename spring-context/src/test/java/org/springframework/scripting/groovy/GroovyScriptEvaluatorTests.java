@@ -19,6 +19,7 @@ package org.springframework.scripting.groovy;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -56,6 +57,26 @@ public class GroovyScriptEvaluatorTests {
 		arguments.put("b", 2);
 		Object result = evaluator.evaluate(new StaticScriptSource("return a * b"), arguments);
 		assertEquals(6, result);
+	}
+
+	@Test
+	public void testGroovyScriptWithCompilerConfiguration() {
+		GroovyScriptEvaluator evaluator = new GroovyScriptEvaluator();
+		MyBytecodeProcessor processor = new MyBytecodeProcessor();
+		evaluator.getCompilerConfiguration().setBytecodePostprocessor(processor);
+		Object result = evaluator.evaluate(new StaticScriptSource("return 3 * 2"));
+		assertEquals(6, result);
+		assertTrue(processor.processed.contains("Script1"));
+	}
+
+	@Test
+	public void testGroovyScriptWithImportCustomizer() {
+		GroovyScriptEvaluator evaluator = new GroovyScriptEvaluator();
+		ImportCustomizer importCustomizer = new ImportCustomizer();
+		importCustomizer.addStarImports("org.springframework.util");
+		evaluator.setCompilationCustomizers(importCustomizer);
+		Object result = evaluator.evaluate(new StaticScriptSource("return ResourceUtils.CLASSPATH_URL_PREFIX"));
+		assertEquals("classpath:", result);
 	}
 
 	@Test

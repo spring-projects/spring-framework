@@ -40,15 +40,15 @@ import org.springframework.util.concurrent.SuccessCallback;
 
 
 /**
- * {@link ClientHttpRequest} implementation that uses Apache HttpComponents HttpClient to
- * execute requests.
+ * {@link ClientHttpRequest} implementation based on
+ * Apache HttpComponents HttpAsyncClient.
  *
- * <p>Created via the {@link org.springframework.http.client.HttpComponentsClientHttpRequestFactory}.
+ * <p>Created via the {@link HttpComponentsClientHttpRequestFactory}.
  *
  * @author Oleg Kalnichevski
  * @author Arjen Poutsma
  * @since 4.0
- * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory#createRequest
+ * @see HttpComponentsClientHttpRequestFactory#createRequest
  */
 final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest {
 
@@ -59,10 +59,10 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 	private final HttpContext httpContext;
 
 
-	HttpComponentsAsyncClientHttpRequest(HttpAsyncClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext) {
-		this.httpClient = httpClient;
-		this.httpRequest = httpRequest;
-		this.httpContext = httpContext;
+	HttpComponentsAsyncClientHttpRequest(HttpAsyncClient client, HttpUriRequest request, HttpContext context) {
+		this.httpClient = client;
+		this.httpRequest = request;
+		this.httpContext = context;
 	}
 
 
@@ -92,17 +92,22 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
 
-		final HttpResponseFutureCallback callback = new HttpResponseFutureCallback();
-		final Future<HttpResponse> futureResponse =
-				this.httpClient.execute(this.httpRequest, this.httpContext, callback);
+		HttpResponseFutureCallback callback = new HttpResponseFutureCallback(this.httpRequest);
+		Future<HttpResponse> futureResponse = this.httpClient.execute(this.httpRequest, this.httpContext, callback);
 		return new ClientHttpResponseFuture(futureResponse, callback);
 	}
 
 
 	private static class HttpResponseFutureCallback implements FutureCallback<HttpResponse> {
 
+		private final HttpUriRequest request;
+
 		private final ListenableFutureCallbackRegistry<ClientHttpResponse> callbacks =
 				new ListenableFutureCallbackRegistry<>();
+
+		public HttpResponseFutureCallback(HttpUriRequest request) {
+			this.request = request;
+		}
 
 		public void addCallback(ListenableFutureCallback<? super ClientHttpResponse> callback) {
 			this.callbacks.addCallback(callback);
@@ -128,6 +133,7 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 
 		@Override
 		public void cancelled() {
+			this.request.abort();
 		}
 	}
 
@@ -137,8 +143,8 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 
 		private final HttpResponseFutureCallback callback;
 
-		public ClientHttpResponseFuture(Future<HttpResponse> futureResponse, HttpResponseFutureCallback callback) {
-			super(futureResponse);
+		public ClientHttpResponseFuture(Future<HttpResponse> response, HttpResponseFutureCallback callback) {
+			super(response);
 			this.callback = callback;
 		}
 
@@ -158,6 +164,5 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 			this.callback.addFailureCallback(failureCallback);
 		}
 	}
-
 
 }

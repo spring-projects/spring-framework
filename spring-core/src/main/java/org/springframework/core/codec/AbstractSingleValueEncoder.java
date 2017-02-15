@@ -16,6 +16,8 @@
 
 package org.springframework.core.codec;
 
+import java.util.Map;
+
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
@@ -41,18 +43,11 @@ public abstract class AbstractSingleValueEncoder<T> extends AbstractEncoder<T> {
 
 	@Override
 	public final Flux<DataBuffer> encode(Publisher<? extends T> inputStream, DataBufferFactory bufferFactory,
-			ResolvableType elementType, MimeType mimeType, Object... hints) {
+			ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
 
 		return Flux.from(inputStream).
 				take(1).
-				concatMap(t -> {
-					try {
-						return encode(t, bufferFactory, elementType, mimeType);
-					}
-					catch (Exception ex) {
-						return Flux.error(ex);
-					}
-				});
+				concatMap(t -> encode(t, bufferFactory, elementType, mimeType, hints));
 	}
 
 	/**
@@ -63,9 +58,8 @@ public abstract class AbstractSingleValueEncoder<T> extends AbstractEncoder<T> {
 	 * @param mimeType the mime type to process
 	 * @param hints Additional information about how to do decode, optional
 	 * @return the output stream
-	 * @throws Exception in case of errors
 	 */
 	protected abstract Flux<DataBuffer> encode(T t, DataBufferFactory dataBufferFactory,
-			ResolvableType type, MimeType mimeType, Object... hints) throws Exception;
+			ResolvableType type, MimeType mimeType, Map<String, Object> hints);
 
 }

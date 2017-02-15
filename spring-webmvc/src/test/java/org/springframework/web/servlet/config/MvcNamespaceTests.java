@@ -882,7 +882,7 @@ public class MvcNamespaceTests {
 			assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
 			assertNull(config.getExposedHeaders());
 			assertTrue(config.getAllowCredentials());
-			assertEquals(new Long(1600), config.getMaxAge());
+			assertEquals(new Long(1800), config.getMaxAge());
 		}
 	}
 
@@ -912,7 +912,7 @@ public class MvcNamespaceTests {
 			assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
 			assertNull(config.getExposedHeaders());
 			assertTrue(config.getAllowCredentials());
-			assertEquals(new Long(1600), config.getMaxAge());
+			assertEquals(new Long(1800), config.getMaxAge());
 		}
 	}
 
@@ -933,17 +933,20 @@ public class MvcNamespaceTests {
 	public @interface IsoDate {
 	}
 
+
 	@NumberFormat(style = NumberFormat.Style.PERCENT)
 	@Target({ElementType.PARAMETER})
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface PercentNumber {
 	}
 
+
 	@Validated(MyGroup.class)
 	@Target({ElementType.PARAMETER})
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface MyValid {
 	}
+
 
 	@Controller
 	public static class TestController {
@@ -955,12 +958,15 @@ public class MvcNamespaceTests {
 		private boolean recordedValidationError;
 
 		@RequestMapping
-		public void testBind(@RequestParam @IsoDate Date date, @RequestParam(required = false) @PercentNumber Double percent, @MyValid TestBean bean, BindingResult result) {
+		public void testBind(@RequestParam @IsoDate Date date,
+				@RequestParam(required = false) @PercentNumber Double percent,
+				@MyValid TestBean bean, BindingResult result) {
 			this.date = date;
 			this.percent = percent;
 			this.recordedValidationError = (result.getErrorCount() == 1);
 		}
 	}
+
 
 	public static class TestValidator implements Validator {
 
@@ -977,9 +983,11 @@ public class MvcNamespaceTests {
 		}
 	}
 
+
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface MyGroup {
 	}
+
 
 	private static class TestBean {
 
@@ -996,6 +1004,7 @@ public class MvcNamespaceTests {
 			this.field = field;
 		}
 	}
+
 
 	private static class TestMockServletContext extends MockServletContext {
 
@@ -1015,11 +1024,14 @@ public class MvcNamespaceTests {
 		}
 	}
 
+
 	public static class TestCallableProcessingInterceptor extends CallableProcessingInterceptorAdapter {
 	}
 
+
 	public static class TestDeferredResultProcessingInterceptor extends DeferredResultProcessingInterceptorAdapter {
 	}
+
 
 	public static class TestPathMatcher implements PathMatcher {
 
@@ -1059,8 +1071,10 @@ public class MvcNamespaceTests {
 		}
 	}
 
+
 	public static class TestPathHelper extends UrlPathHelper {
 	}
+
 
 	public static class TestCacheManager implements CacheManager {
 

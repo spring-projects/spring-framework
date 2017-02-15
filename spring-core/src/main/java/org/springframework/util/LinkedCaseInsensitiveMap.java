@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 
 package org.springframework.util;
 
+import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * {@link LinkedHashMap} variant that stores String keys in a case-insensitive
@@ -34,9 +37,11 @@ import java.util.Map;
  * @since 3.0
  */
 @SuppressWarnings("serial")
-public class LinkedCaseInsensitiveMap<V> extends LinkedHashMap<String, V> {
+public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable, Cloneable {
 
-	private Map<String, String> caseInsensitiveKeys;
+	private final LinkedHashMap<String, V> targetMap;
+
+	private final HashMap<String, String> caseInsensitiveKeys;
 
 	private final Locale locale;
 
@@ -46,7 +51,7 @@ public class LinkedCaseInsensitiveMap<V> extends LinkedHashMap<String, V> {
 	 * @see java.lang.String#toLowerCase()
 	 */
 	public LinkedCaseInsensitiveMap() {
-		this(null);
+		this((Locale) null);
 	}
 
 	/**
@@ -56,9 +61,7 @@ public class LinkedCaseInsensitiveMap<V> extends LinkedHashMap<String, V> {
 	 * @see java.lang.String#toLowerCase(java.util.Locale)
 	 */
 	public LinkedCaseInsensitiveMap(Locale locale) {
-		super();
-		this.caseInsensitiveKeys = new HashMap<>();
-		this.locale = (locale != null ? locale : Locale.getDefault());
+		this(16, locale);
 	}
 
 	/**
@@ -81,19 +84,84 @@ public class LinkedCaseInsensitiveMap<V> extends LinkedHashMap<String, V> {
 	 * @see java.lang.String#toLowerCase(java.util.Locale)
 	 */
 	public LinkedCaseInsensitiveMap(int initialCapacity, Locale locale) {
-		super(initialCapacity);
+		this.targetMap = new LinkedHashMap<String, V>(initialCapacity) {
+			@Override
+			public boolean containsKey(Object key) {
+				return LinkedCaseInsensitiveMap.this.containsKey(key);
+			}
+			@Override
+			protected boolean removeEldestEntry(Map.Entry<String, V> eldest) {
+				boolean doRemove = LinkedCaseInsensitiveMap.this.removeEldestEntry(eldest);
+				if (doRemove) {
+					caseInsensitiveKeys.remove(convertKey(eldest.getKey()));
+				}
+				return doRemove;
+			}
+		};
 		this.caseInsensitiveKeys = new HashMap<>(initialCapacity);
 		this.locale = (locale != null ? locale : Locale.getDefault());
 	}
 
+	/**
+	 * Copy constructor.
+	 */
+	@SuppressWarnings("unchecked")
+	private LinkedCaseInsensitiveMap(LinkedCaseInsensitiveMap<V> other) {
+		this.targetMap = (LinkedHashMap<String, V>) other.targetMap.clone();
+		this.caseInsensitiveKeys = (HashMap<String, String>) other.caseInsensitiveKeys.clone();
+		this.locale = other.locale;
+	}
+
+
+	@Override
+	public int size() {
+		return this.targetMap.size();
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return this.targetMap.isEmpty();
+	}
+
+	@Override
+	public boolean containsKey(Object key) {
+		return (key instanceof String && this.caseInsensitiveKeys.containsKey(convertKey((String) key)));
+	}
+
+	@Override
+	public boolean containsValue(Object value) {
+		return this.targetMap.containsValue(value);
+	}
+
+	@Override
+	public V get(Object key) {
+		if (key instanceof String) {
+			String caseInsensitiveKey = this.caseInsensitiveKeys.get(convertKey((String) key));
+			if (caseInsensitiveKey != null) {
+				return this.targetMap.get(caseInsensitiveKey);
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public V getOrDefault(Object key, V defaultValue) {
+		if (key instanceof String) {
+			String caseInsensitiveKey = this.caseInsensitiveKeys.get(convertKey((String) key));
+			if (caseInsensitiveKey != null) {
+				return this.targetMap.get(caseInsensitiveKey);
+			}
+		}
+		return defaultValue;
+	}
 
 	@Override
 	public V put(String key, V value) {
 		String oldKey = this.caseInsensitiveKeys.put(convertKey(key), key);
 		if (oldKey != null && !oldKey.equals(key)) {
-			super.remove(oldKey);
+			this.targetMap.remove(oldKey);
 		}
-		return super.put(key, value);
+		return this.targetMap.put(key, value);
 	}
 
 	@Override
@@ -107,39 +175,11 @@ public class LinkedCaseInsensitiveMap<V> extends LinkedHashMap<String, V> {
 	}
 
 	@Override
-	public boolean containsKey(Object key) {
-		return (key instanceof String && this.caseInsensitiveKeys.containsKey(convertKey((String) key)));
-	}
-
-	@Override
-	public V get(Object key) {
-		if (key instanceof String) {
-			String caseInsensitiveKey = this.caseInsensitiveKeys.get(convertKey((String) key));
-			if (caseInsensitiveKey != null) {
-				return super.get(caseInsensitiveKey);
-			}
-		}
-		return null;
-	}
-
-	// Overridden to avoid LinkedHashMap's own hash computation in its getOrDefault impl
-	@Override
-	public V getOrDefault(Object key, V defaultValue) {
-		if (key instanceof String) {
-			String caseInsensitiveKey = this.caseInsensitiveKeys.get(convertKey((String) key));
-			if (caseInsensitiveKey != null) {
-				return super.get(caseInsensitiveKey);
-			}
-		}
-		return defaultValue;
-	}
-
-	@Override
 	public V remove(Object key) {
 		if (key instanceof String) {
 			String caseInsensitiveKey = this.caseInsensitiveKeys.remove(convertKey((String) key));
 			if (caseInsensitiveKey != null) {
-				return super.remove(caseInsensitiveKey);
+				return this.targetMap.remove(caseInsensitiveKey);
 			}
 		}
 		return null;
@@ -148,15 +188,42 @@ public class LinkedCaseInsensitiveMap<V> extends LinkedHashMap<String, V> {
 	@Override
 	public void clear() {
 		this.caseInsensitiveKeys.clear();
-		super.clear();
+		this.targetMap.clear();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public Object clone() {
-		LinkedCaseInsensitiveMap<V> copy = (LinkedCaseInsensitiveMap<V>) super.clone();
-		copy.caseInsensitiveKeys = new HashMap<>(this.caseInsensitiveKeys);
-		return copy;
+	public Set<String> keySet() {
+		return this.targetMap.keySet();
+	}
+
+	@Override
+	public Collection<V> values() {
+		return this.targetMap.values();
+	}
+
+	@Override
+	public Set<Entry<String, V>> entrySet() {
+		return this.targetMap.entrySet();
+	}
+
+	@Override
+	public LinkedCaseInsensitiveMap<V> clone() {
+		return new LinkedCaseInsensitiveMap<>(this);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return this.targetMap.equals(obj);
+	}
+
+	@Override
+	public int hashCode() {
+		return this.targetMap.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return this.targetMap.toString();
 	}
 
 
@@ -170,6 +237,16 @@ public class LinkedCaseInsensitiveMap<V> extends LinkedHashMap<String, V> {
 	 */
 	protected String convertKey(String key) {
 		return key.toLowerCase(this.locale);
+	}
+
+	/**
+	 * Determine whether this map should remove the given eldest entry.
+	 * @param eldest the candidate entry
+	 * @return {@code true} for removing it, {@code false} for keeping it
+	 * @see LinkedHashMap#removeEldestEntry
+	 */
+	protected boolean removeEldestEntry(Map.Entry<String, V> eldest) {
+		return false;
 	}
 
 }

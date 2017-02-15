@@ -56,8 +56,8 @@ public abstract class HttpRange {
 	public ResourceRegion toResourceRegion(Resource resource) {
 		// Don't try to determine contentLength on InputStreamResource - cannot be read afterwards...
 		// Note: custom InputStreamResource subclasses could provide a pre-calculated content length!
-		Assert.isTrue(InputStreamResource.class != resource.getClass(),
-				"Can't convert an InputStreamResource to a ResourceRegion");
+		Assert.isTrue(resource.getClass() != InputStreamResource.class,
+				"Cannot convert an InputStreamResource to a ResourceRegion");
 		try {
 			long contentLength = resource.contentLength();
 			Assert.isTrue(contentLength > 0, "Resource content length should be > 0");
@@ -132,7 +132,7 @@ public abstract class HttpRange {
 		}
 		ranges = ranges.substring(BYTE_RANGE_PREFIX.length());
 
-		String[] tokens = ranges.split(",\\s*");
+		String[] tokens = StringUtils.tokenizeToStringArray(ranges, ",");
 		List<HttpRange> result = new ArrayList<>(tokens.length);
 		for (String token : tokens) {
 			result.add(parseRange(token));
@@ -163,12 +163,12 @@ public abstract class HttpRange {
 	}
 
 	/**
-	 * Convert each {@code HttpRange} into a {@code ResourceRegion},
-	 * selecting the appropriate segment of the given {@code Resource}
-	 * using the HTTP Range information.
+	 * Convert each {@code HttpRange} into a {@code ResourceRegion}, selecting the
+	 * appropriate segment of the given {@code Resource} using HTTP Range information.
 	 * @param ranges the list of ranges
 	 * @param resource the resource to select the regions from
 	 * @return the list of regions for the given resource
+	 * @since 4.3
 	 */
 	public static List<ResourceRegion> toResourceRegions(List<HttpRange> ranges, Resource resource) {
 		if (CollectionUtils.isEmpty(ranges)) {

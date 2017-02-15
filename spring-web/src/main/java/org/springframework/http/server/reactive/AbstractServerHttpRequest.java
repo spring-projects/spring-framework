@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,34 +39,35 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	private static final Pattern QUERY_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
 
 
-	private URI uri;
+	private final URI uri;
+
+	private final HttpHeaders headers;
 
 	private MultiValueMap<String, String> queryParams;
-
-	private HttpHeaders headers;
 
 	private MultiValueMap<String, HttpCookie> cookies;
 
 
+	/**
+	 * Constructor with the URI and headers for the request.
+	 * @param uri the URI for the request
+	 * @param headers the headers for the request
+	 */
+	public AbstractServerHttpRequest(URI uri, HttpHeaders headers) {
+		this.uri = uri;
+		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
+	}
+
+
 	@Override
 	public URI getURI() {
-		if (this.uri == null) {
-			try {
-				this.uri = initUri();
-			}
-			catch (URISyntaxException ex) {
-				throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
-			}
-		}
 		return this.uri;
 	}
 
-	/**
-	 * Initialize a URI that represents the request. Invoked lazily on the first
-	 * call to {@link #getURI()} and then cached.
-	 * @throws URISyntaxException
-	 */
-	protected abstract URI initUri() throws URISyntaxException;
+	@Override
+	public HttpHeaders getHeaders() {
+		return this.headers;
+	}
 
 	@Override
 	public MultiValueMap<String, String> getQueryParams() {
@@ -75,6 +77,13 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		return this.queryParams;
 	}
 
+	/**
+	 * A method for parsing of the query into name-value pairs. The return
+	 * value is turned into an immutable map and cached.
+	 * <p>Note that this method is invoked lazily on first access to
+	 * {@link #getQueryParams()}. The invocation is not synchronized but the
+	 * parsing is thread-safe nevertheless.
+	 */
 	protected MultiValueMap<String, String> initQueryParams() {
 		MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 		String query = getURI().getRawQuery();
@@ -85,25 +94,15 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 				String eq = matcher.group(2);
 				String value = matcher.group(3);
 				value = (value != null ? value : (StringUtils.hasLength(eq) ? "" : null));
-				queryParams.add(name, value);
+				queryParams.add(decodeQueryParam(name), decodeQueryParam(value));
 			}
 		}
 		return queryParams;
 	}
 
-	@Override
-	public HttpHeaders getHeaders() {
-		if (this.headers == null) {
-			this.headers = HttpHeaders.readOnlyHttpHeaders(initHeaders());
-		}
-		return this.headers;
+	private String decodeQueryParam(String value) {
+		return StringUtils.uriDecode(value, StandardCharsets.UTF_8);
 	}
-
-	/**
-	 * Initialize the headers from the underlying request. Invoked lazily on the
-	 * first call to {@link #getHeaders()} and then cached.
-	 */
-	protected abstract HttpHeaders initHeaders();
 
 	@Override
 	public MultiValueMap<String, HttpCookie> getCookies() {
@@ -114,8 +113,13 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	}
 
 	/**
-	 * Initialize the cookies from the underlying request. Invoked lazily on the
-	 * first access to cookies via {@link #getHeaders()} and then cached.
+	 * Obtain the cookies from the underlying "native" request and adapt those to
+	 * an {@link HttpCookie} map. The return value is turned into an immutable
+	 * map and cached.
+	 * <p>Note that this method is invoked lazily on access to
+	 * {@link #getCookies()}. Sub-classes should synchronize cookie
+	 * initialization if the underlying "native" request does not provide
+	 * thread-safe access to cookie data.
 	 */
 	protected abstract MultiValueMap<String, HttpCookie> initCookies();
 

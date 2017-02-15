@@ -18,6 +18,7 @@ package org.springframework.core.codec;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -49,7 +50,7 @@ public abstract class AbstractDecoder<T> implements Decoder<T> {
 	}
 
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
+	public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
 		if (mimeType == null) {
 			return true;
 		}
@@ -58,7 +59,7 @@ public abstract class AbstractDecoder<T> implements Decoder<T> {
 
 	@Override
 	public Mono<T> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Object... hints) {
+			MimeType mimeType, Map<String, Object> hints) {
 
 		throw new UnsupportedOperationException();
 	}

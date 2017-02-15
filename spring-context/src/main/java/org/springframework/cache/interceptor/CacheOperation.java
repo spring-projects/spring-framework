@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,19 +145,19 @@ public abstract class CacheOperation implements BasicOperation {
 		private String condition = "";
 
 		public void setName(String name) {
-			Assert.hasText(name);
+			Assert.hasText(name, "Name must not be empty");
 			this.name = name;
 		}
 
 		public void setCacheName(String cacheName) {
-			Assert.hasText(cacheName);
+			Assert.hasText(cacheName, "Cache name must not be empty");
 			this.cacheNames = Collections.singleton(cacheName);
 		}
 
 		public void setCacheNames(String... cacheNames) {
 			this.cacheNames = new LinkedHashSet<>(cacheNames.length);
 			for (String cacheName : cacheNames) {
-				Assert.hasText(cacheName, "Cache name must be non-null if specified");
+				Assert.hasText(cacheName, "Cache name must be non-empty if specified");
 				this.cacheNames.add(cacheName);
 			}
 		}
@@ -167,7 +167,7 @@ public abstract class CacheOperation implements BasicOperation {
 		}
 
 		public void setKey(String key) {
-			Assert.notNull(key);
+			Assert.notNull(key, "Key must not be null");
 			this.key = key;
 		}
 
@@ -188,22 +188,22 @@ public abstract class CacheOperation implements BasicOperation {
 		}
 
 		public void setKeyGenerator(String keyGenerator) {
-			Assert.notNull(keyGenerator);
+			Assert.notNull(keyGenerator, "KeyGenerator name must not be null");
 			this.keyGenerator = keyGenerator;
 		}
 
 		public void setCacheManager(String cacheManager) {
-			Assert.notNull(cacheManager);
+			Assert.notNull(cacheManager, "CacheManager name must not be null");
 			this.cacheManager = cacheManager;
 		}
 
 		public void setCacheResolver(String cacheResolver) {
-			Assert.notNull(this.cacheManager);
+			Assert.notNull(cacheResolver, "CacheResolver name must not be null");
 			this.cacheResolver = cacheResolver;
 		}
 
 		public void setCondition(String condition) {
-			Assert.notNull(condition);
+			Assert.notNull(condition, "Condition must not be null");
 			this.condition = condition;
 		}
 

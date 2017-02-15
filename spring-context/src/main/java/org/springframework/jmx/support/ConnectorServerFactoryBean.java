@@ -49,7 +49,6 @@ import org.springframework.util.CollectionUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2
- * @see    FactoryBean
  * @see JMXConnectorServer
  * @see MBeanServer
  */

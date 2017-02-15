@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,7 +303,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			Collection constructorArgs = null;
 			if (!ObjectUtils.isEmpty(args)) {
 				int index = args.length;
-				Object lastArg = args[index-1];
+				Object lastArg = args[index - 1];
 				if (lastArg instanceof Closure) {
 					callable = (Closure) lastArg;
 					index--;
@@ -456,14 +456,14 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * @return the bean definition wrapper
 	 */
 	private GroovyBeanDefinitionWrapper invokeBeanDefiningMethod(String beanName, Object[] args) {
-		boolean hasClosureArgument = args[args.length - 1] instanceof Closure;
+		boolean hasClosureArgument = (args[args.length - 1] instanceof Closure);
 		if (args[0] instanceof Class) {
-			Class<?> beanClass = (args[0] instanceof Class ? (Class) args[0] : args[0].getClass());
+			Class<?> beanClass = (Class<?>) args[0];
 			if (args.length >= 1) {
 				if (hasClosureArgument) {
-					if (args.length-1 != 1) {
+					if (args.length - 1 != 1) {
 						this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(
-								beanName, beanClass, resolveConstructorArguments(args,1,args.length-1));
+								beanName, beanClass, resolveConstructorArguments(args, 1, args.length - 1));
 					}
 					else {
 						this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, beanClass);
@@ -471,7 +471,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 				}
 				else  {
 					this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(
-							beanName, beanClass, resolveConstructorArguments(args,1,args.length));
+							beanName, beanClass, resolveConstructorArguments(args, 1, args.length));
 				}
 
 			}
@@ -483,7 +483,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		else if (args[0] instanceof Map) {
 			// named constructor arguments
 			if (args.length > 1 && args[1] instanceof Class) {
-				List constructorArgs = resolveConstructorArguments(args, 2, hasClosureArgument ? args.length-1 :  args.length);
+				List constructorArgs = resolveConstructorArguments(args, 2, hasClosureArgument ? args.length - 1 : args.length);
 				this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, (Class)args[1], constructorArgs);
 				Map namedArgs = (Map)args[0];
 				for (Object o : namedArgs.keySet()) {
@@ -519,12 +519,12 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			this.currentBeanDefinition.getBeanDefinition().setAbstract(true);
 		}
 		else {
-			List constructorArgs = resolveConstructorArguments(args, 0, hasClosureArgument ? args.length-1 : args.length);
+			List constructorArgs = resolveConstructorArguments(args, 0, hasClosureArgument ? args.length - 1 : args.length);
 			currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, null, constructorArgs);
 		}
 
 		if (hasClosureArgument) {
-			Closure callable = (Closure)args[args.length-1];
+			Closure callable = (Closure) args[args.length - 1];
 			callable.setDelegate(this);
 			callable.setResolveStrategy(Closure.DELEGATE_FIRST);
 			callable.call(new Object[]{currentBeanDefinition});

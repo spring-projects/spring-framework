@@ -18,16 +18,17 @@ package org.springframework.core.codec;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -48,9 +49,12 @@ public class ByteBufferEncoderTests extends AbstractDataBufferAllocatingTestCase
 
 	@Test
 	public void canEncode() {
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteBuffer.class), MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Integer.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteBuffer.class), MimeTypeUtils.APPLICATION_JSON));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteBuffer.class),
+				MimeTypeUtils.TEXT_PLAIN));
+		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Integer.class),
+				MimeTypeUtils.TEXT_PLAIN));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteBuffer.class),
+				MimeTypeUtils.APPLICATION_JSON));
 	}
 
 	@Test
@@ -62,18 +66,20 @@ public class ByteBufferEncoderTests extends AbstractDataBufferAllocatingTestCase
 
 		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory,
 				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
-				null);
-		TestSubscriber
-				.subscribe(output)
-				.assertValuesWith(b -> {
+				null, Collections.emptyMap());
+		StepVerifier.create(output)
+				.consumeNextWith(b -> {
 					byte[] buf = new byte[3];
 					b.read(buf);
 					assertArrayEquals(fooBytes, buf);
-				}, b -> {
+				})
+				.consumeNextWith(b -> {
 					byte[] buf = new byte[3];
 					b.read(buf);
 					assertArrayEquals(barBytes, buf);
-				});
+				})
+				.expectComplete()
+				.verify();
 	}
 
 }

@@ -68,6 +68,12 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 		return new NettyDataBuffer(byteBuf, this);
 	}
 
+	@Override
+	public DataBuffer wrap(byte[] bytes) {
+		ByteBuf byteBuf = Unpooled.wrappedBuffer(bytes);
+		return new NettyDataBuffer(byteBuf, this);
+	}
+
 	/**
 	 * Wrap the given Netty {@link ByteBuf} in a {@code NettyDataBuffer}.
 	 * @param byteBuf the Netty byte buffer to wrap

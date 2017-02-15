@@ -171,7 +171,7 @@ Java EE Servlet configuration in a Servlet 3.0+ environment:
 
 		@Override
 		public void onStartup(ServletContext container) {
-			ServletRegistration.Dynamic registration = container.addServlet("dispatcher", new DispatcherServlet());
+			ServletRegistration.Dynamic registration = container.addServlet("example", new DispatcherServlet());
 			registration.setLoadOnStartup(1);
 			registration.addMapping("/example/*");
 		}
@@ -476,11 +476,9 @@ abstract way, which enables you to create a wide variety of controllers.
 
 Spring 2.5 introduced an annotation-based programming model for MVC controllers that
 uses annotations such as `@RequestMapping`, `@RequestParam`, `@ModelAttribute`, and so
-on. This annotation support is available for both Servlet MVC and Portlet MVC.
-Controllers implemented in this style do not have to extend specific base classes or
+on. Controllers implemented in this style do not have to extend specific base classes or
 implement specific interfaces. Furthermore, they do not usually have direct dependencies
-on Servlet or Portlet APIs, although you can easily configure access to Servlet or
-Portlet facilities.
+on Servlet APIs, although you can easily configure access to Servlet facilities if needed.
 
 [TIP]
 ====
@@ -565,7 +563,7 @@ snippet:
 You use the `@RequestMapping` annotation to map URLs such as `/appointments` onto an
 entire class or a particular handler method. Typically the class-level annotation maps a
 specific request path (or path pattern) onto a form controller, with additional
-method-level annotations narrowing the primary mapping for a specific HTTP method
+method-level annotations narrowing the primary mapping for a specific HTTP
 request method ("GET", "POST", etc.) or an HTTP request parameter condition.
 
 The following example from the __Petcare__ sample shows a controller in a Spring MVC
@@ -793,7 +791,7 @@ to the value of a URI template variable:
 	}
 ----
 
-The URI Template " `/owners/{ownerId}`" specifies the variable name `ownerId`. When the
+The URI Template ++"/owners/{ownerId}"++ specifies the variable name `ownerId`. When the
 controller handles this request, the value of `ownerId` is set to the value found in the
 appropriate part of the URI. For example, when a request comes in for `/owners/fred`,
 the value of `ownerId` is `fred`.
@@ -1293,8 +1291,13 @@ neither.
 ==== Supported method argument types
 The following are the supported method arguments:
 
+* `org.springframework.web.context.request.WebRequest` or
+  `org.springframework.web.context.request.NativeWebRequest`. Allows for generic
+  request parameter access as well as request/session attribute access, without ties
+  to the native Servlet API.
 * Request or response objects (Servlet API). Choose any specific request or response
-  type, for example `ServletRequest` or `HttpServletRequest`.
+  type, for example `ServletRequest` or `HttpServletRequest` or Spring's
+  `MultipartRequest`/`MultipartHttpServletRequest`.
 * Session object (Servlet API) of type `HttpSession`. An argument of this type enforces
   the presence of a corresponding session. As a consequence, such an argument is never
   `null`.
@@ -1306,21 +1309,21 @@ setting the ``RequestMappingHandlerAdapter``'s "synchronizeOnSession" flag to "t
 multiple requests are allowed to access a session concurrently.
 ====
 
-* `org.springframework.web.context.request.WebRequest` or
-  `org.springframework.web.context.request.NativeWebRequest`. Allows for generic
-  request parameter access as well as request/session attribute access, without ties
-  to the native Servlet/Portlet API.
+* `java.servlet.http.PushBuilder` for the associated Servlet 4.0 push builder API,
+  allowing for programmatic HTTP/2 resource pushes.
+* `java.security.Principal` (or a specific `Principal` implementation class if known),
+  containing the currently authenticated user.
+* `org.springframework.http.HttpMethod` for the HTTP request method, represented as
+  Spring's `HttpMethod` enum.
 * `java.util.Locale` for the current request locale, determined by the most specific
   locale resolver available, in effect, the configured `LocaleResolver` /
   `LocaleContextResolver` in an MVC environment.
-* `java.util.TimeZone` (Java 6+) / `java.time.ZoneId` (on Java 8) for the time zone
+* `java.util.TimeZone` (Java 6+) / `java.time.ZoneId` (Java 8+) for the time zone
   associated with the current request, as determined by a `LocaleContextResolver`.
 * `java.io.InputStream` / `java.io.Reader` for access to the request's content.
   This value is the raw InputStream/Reader as exposed by the Servlet API.
 * `java.io.OutputStream` / `java.io.Writer` for generating the response's content.
   This value is the raw OutputStream/Writer as exposed by the Servlet API.
-* `org.springframework.http.HttpMethod` for the HTTP request method.
-* `java.security.Principal` containing the currently authenticated user.
 * `@PathVariable` annotated parameters for access to URI template variables. See
   <<mvc-ann-requestmapping-uri-templates>>.
 * `@MatrixVariable` annotated parameters for access to name-value pairs located in
@@ -1483,7 +1486,7 @@ The following code snippet shows the usage:
 
 Parameters using this annotation are required by default, but you can specify that a
 parameter is optional by setting ``@RequestParam``'s `required` attribute to `false`
-(e.g., `@RequestParam(path="id", required=false)`).
+(e.g., `@RequestParam(name="id", required=false)`).
 
 Type conversion is applied automatically if the target method parameter type is not
 `String`. See <<mvc-ann-typeconversion>>.
@@ -2000,9 +2003,6 @@ The following code sample demonstrates how to get the value of the `JSESSIONID` 
 Type conversion is applied automatically if the target method parameter type is not
 `String`. See <<mvc-ann-typeconversion>>.
 
-This annotation is supported for annotated handler methods in Servlet and Portlet
-environments.
-
 
 [[mvc-ann-requestheader]]
 ==== Mapping request header attributes with the @RequestHeader annotation
@@ -2049,9 +2049,6 @@ array/collection of strings or other types known to the type conversion system. 
 example a method parameter annotated with `@RequestHeader("Accept")` may be of type
 `String` but also `String[]` or `List<String>`.
 ====
-
-This annotation is supported for annotated handler methods in Servlet and Portlet
-environments.
 
 
 [[mvc-ann-typeconversion]]
@@ -3518,7 +3515,7 @@ maximum age. Find below an example of defining a `CookieLocaleResolver`.
 | The name of the cookie
 
 | cookieMaxAge
-| Integer.MAX_INT
+| Servlet container default
 | The maximum time a cookie will stay persistent on the client. If -1 is specified, the
   cookie will not be persisted; it will only be available until the client shuts down
   their browser.
@@ -3968,11 +3965,10 @@ the exception types listed as method arguments are used.
 
 Much like standard controller methods annotated with a `@RequestMapping` annotation, the
 method arguments and return values of `@ExceptionHandler` methods can be flexible. For
-example, the `HttpServletRequest` can be accessed in Servlet environments and the
-`PortletRequest` in Portlet environments. The return type can be a `String`, which is
-interpreted as a view name, a `ModelAndView` object, a `ResponseEntity`, or you can also
-add the `@ResponseBody` to have the method return value converted with message
-converters and written to the response stream.
+example, the `HttpServletRequest` can be accessed in Servlet environments. The return
+type can be a `String`, which is interpreted as a view name, a `ModelAndView` object,
+a `ResponseEntity`, or you can also add the `@ResponseBody` to have the method return
+value converted with message converters and written to the response stream.
 
 
 
@@ -4017,6 +4013,9 @@ corresponding status codes:
 | `MethodArgumentNotValidException`
 | 400 (Bad Request)
 
+| `MissingPathVariableException`
+| 500 (Internal Server Error)
+
 | `MissingServletRequestParameterException`
 | 400 (Bad Request)
 
@@ -4031,12 +4030,6 @@ corresponding status codes:
 
 | `TypeMismatchException`
 | 400 (Bad Request)
-
-| `MissingPathVariableException`
-| 500 (Internal Server Error)
-
-| `NoHandlerFoundException`
-| 404 (Not Found)
 |===
 
 The `DefaultHandlerExceptionResolver` works transparently by setting the status of the
@@ -4053,6 +4046,29 @@ If you prefer to write error content via `@ExceptionHandler` methods you can ext
 Spring MVC exceptions and return `ResponseEntity`. That allows you to customize the
 response and write error content with message converters. See the
 `ResponseEntityExceptionHandler` javadocs for more details.
+
+
+
+[[mvc-ann-rest-exceptions]]
+=== REST Controller Exception Handling
+
+An `@RestController` may use `@ExceptionHandler` methods that return a
+`ResponseEntity` to provide both a response status and error details in the body
+of the response. Such methods may also be added to `@ControllerAdvice`
+classes for exception handling across a subset or all controllers.
+
+A common requirement is to include error details in the body of the response.
+Spring does not automatically do this (although Spring Boot does) because the
+representation of error details in the response body is application specific.
+
+Applications that wish to implement a global exception handling strategy with
+error details in the response body should consider extending the abstract base
+class `ResponseEntityExceptionHandler` which provides handling for the exceptions
+that Spring MVC raises and provides hooks to customize the response body as
+well as to handle other exceptions. Simply declare the extension class as a
+Spring bean and annotate it with `@ControllerAdvice`. For more details see
+See `ResponseEntityExceptionHandler`.
+
 
 
 
@@ -4831,6 +4847,12 @@ is present on the classpath.
 .. `MappingJackson2XmlHttpMessageConverter` converts to/from XML -- added if
 https://github.com/FasterXML/jackson-dataformat-xml[Jackson 2 XML extension] is present
 on the classpath.
+.. `MappingJackson2SmileHttpMessageConverter` converts to/from Smile (binary JSON) -- added if
+https://github.com/FasterXML/jackson-dataformats-binary/tree/master/smile[Jackson 2 Smile extension]
+is present on the classpath.
+.. `MappingJackson2CborHttpMessageConverter` converts to/from CBOR -- added if
+https://github.com/FasterXML/jackson-dataformats-binary/tree/master/cbor[Jackson 2 CBOR extension]
+is present on the classpath.
 .. `AtomFeedHttpMessageConverter` converts Atom feeds -- added if Rome is present on the
 classpath.
 .. `RssChannelHttpMessageConverter` converts RSS feeds -- added if Rome is present on

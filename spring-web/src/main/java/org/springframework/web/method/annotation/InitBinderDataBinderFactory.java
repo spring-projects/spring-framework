@@ -39,12 +39,15 @@ public class InitBinderDataBinderFactory extends DefaultDataBinderFactory {
 
 	private final List<InvocableHandlerMethod> binderMethods;
 
+
 	/**
 	 * Create a new instance.
 	 * @param binderMethods {@code @InitBinder} methods, or {@code null}
 	 * @param initializer for global data binder intialization
 	 */
-	public InitBinderDataBinderFactory(List<InvocableHandlerMethod> binderMethods, WebBindingInitializer initializer) {
+	public InitBinderDataBinderFactory(List<InvocableHandlerMethod> binderMethods,
+			WebBindingInitializer initializer) {
+
 		super(initializer);
 		this.binderMethods = (binderMethods != null) ? binderMethods : new ArrayList<>();
 	}
@@ -61,20 +64,20 @@ public class InitBinderDataBinderFactory extends DefaultDataBinderFactory {
 			if (isBinderMethodApplicable(binderMethod, binder)) {
 				Object returnValue = binderMethod.invokeForRequest(request, null, binder);
 				if (returnValue != null) {
-					throw new IllegalStateException("@InitBinder methods should return void: " + binderMethod);
+					throw new IllegalStateException(
+							"@InitBinder methods should return void: " + binderMethod);
 				}
 			}
 		}
 	}
 
 	/**
-	 * Return {@code true} if the given {@code @InitBinder} method should be
-	 * invoked to initialize the given WebDataBinder.
-	 * <p>The default implementation checks if target object name is included
-	 * in the attribute names specified in the {@code @InitBinder} annotation.
+	 * Whether the given {@code @InitBinder} method should be used to initialize
+	 * the given WebDataBinder instance. By default we check the attributes
+	 * names of the annotation, if present.
 	 */
-	protected boolean isBinderMethodApplicable(HandlerMethod initBinderMethod, WebDataBinder binder) {
-		InitBinder annot = initBinderMethod.getMethodAnnotation(InitBinder.class);
+	protected boolean isBinderMethodApplicable(HandlerMethod binderMethod, WebDataBinder binder) {
+		InitBinder annot = binderMethod.getMethodAnnotation(InitBinder.class);
 		Collection<String> names = Arrays.asList(annot.value());
 		return (names.size() == 0 || names.contains(binder.getObjectName()));
 	}

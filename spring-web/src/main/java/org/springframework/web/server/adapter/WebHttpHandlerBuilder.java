@@ -17,8 +17,13 @@ package org.springframework.web.server.adapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -28,6 +33,7 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
 import org.springframework.web.server.handler.FilteringWebHandler;
+import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 /**
@@ -52,6 +58,13 @@ import org.springframework.web.server.session.WebSessionManager;
  */
 public class WebHttpHandlerBuilder {
 
+	/** Well-known name for the target WebHandler in the bean factory. */
+	public static final String WEB_HANDLER_BEAN_NAME = "webHandler";
+
+	/** Well-known name for the WebSessionManager in the bean factory. */
+	public static final String WEB_SESSION_MANAGER_BEAN_NAME = "webSessionManager";
+
+
 	private final WebHandler targetHandler;
 
 	private final List<WebFilter> filters = new ArrayList<>();
@@ -66,7 +79,7 @@ public class WebHttpHandlerBuilder {
 	 * See factory method {@link #webHandler(WebHandler)}.
 	 */
 	private WebHttpHandlerBuilder(WebHandler targetHandler) {
-		Assert.notNull(targetHandler, "'targetHandler' must not be null");
+		Assert.notNull(targetHandler, "WebHandler must not be null");
 		this.targetHandler = targetHandler;
 	}
 
@@ -74,9 +87,58 @@ public class WebHttpHandlerBuilder {
 	/**
 	 * Factory method to create a new builder instance.
 	 * @param webHandler the target handler for the request
+	 * @return the prepared builder
 	 */
 	public static WebHttpHandlerBuilder webHandler(WebHandler webHandler) {
 		return new WebHttpHandlerBuilder(webHandler);
+	}
+
+	/**
+	 * Factory method to create a new builder instance by detecting beans in an
+	 * {@link ApplicationContext}. The following are detected:
+	 * <ul>
+	 *	<li>{@link WebHandler} [1] -- looked up by the name
+	 *	{@link #WEB_HANDLER_BEAN_NAME}.
+	 *	<li>{@link WebFilter} [0..N] -- detected by type and ordered,
+	 *	see {@link AnnotationAwareOrderComparator}.
+	 *	<li>{@link WebExceptionHandler} [0..N] -- detected by type and
+	 *	ordered.
+	 *	<li>{@link WebSessionManager} [0..1] -- looked up by the name
+	 *	{@link #WEB_SESSION_MANAGER_BEAN_NAME}.
+	 * </ul>
+	 * @param context the application context to use for the lookup
+	 * @return the prepared builder
+	 */
+	public static WebHttpHandlerBuilder applicationContext(ApplicationContext context) {
+
+		// Target WebHandler
+
+		WebHttpHandlerBuilder builder = new WebHttpHandlerBuilder(
+				context.getBean(WEB_HANDLER_BEAN_NAME, WebHandler.class));
+
+		// WebFilter...
+
+		AutowiredFiltersContainer filtersContainer = new AutowiredFiltersContainer();
+		context.getAutowireCapableBeanFactory().autowireBean(filtersContainer);
+		builder.filters(filtersContainer.getFilters());
+
+		// WebExceptionHandler...
+
+		AutowiredExceptionHandlersContainer handlersContainer = new AutowiredExceptionHandlersContainer();
+		context.getAutowireCapableBeanFactory().autowireBean(handlersContainer);
+		builder.exceptionHandlers(handlersContainer.getExceptionHandlers());
+
+		// WebSessionManager
+
+		try {
+			builder.sessionManager(
+					context.getBean(WEB_SESSION_MANAGER_BEAN_NAME, WebSessionManager.class));
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// Fall back on default
+		}
+
+		return builder;
 	}
 
 
@@ -85,8 +147,16 @@ public class WebHttpHandlerBuilder {
 	 * @param filters the filters to add
 	 */
 	public WebHttpHandlerBuilder filters(WebFilter... filters) {
+		return filters(Arrays.asList(filters));
+	}
+
+	/**
+	 * Add the given filters to use for processing requests.
+	 * @param filters the filters to add
+	 */
+	public WebHttpHandlerBuilder filters(Collection<? extends WebFilter> filters) {
 		if (!ObjectUtils.isEmpty(filters)) {
-			this.filters.addAll(Arrays.asList(filters));
+			this.filters.addAll(filters);
 		}
 		return this;
 	}
@@ -96,16 +166,24 @@ public class WebHttpHandlerBuilder {
 	 * @param exceptionHandlers the exception handlers
 	 */
 	public WebHttpHandlerBuilder exceptionHandlers(WebExceptionHandler... exceptionHandlers) {
+		return exceptionHandlers(Arrays.asList(exceptionHandlers));
+	}
+
+	/**
+	 * Add the given exception handler to apply at the end of request processing.
+	 * @param exceptionHandlers the exception handlers
+	 */
+	public WebHttpHandlerBuilder exceptionHandlers(List<WebExceptionHandler> exceptionHandlers) {
 		if (!ObjectUtils.isEmpty(exceptionHandlers)) {
-			this.exceptionHandlers.addAll(Arrays.asList(exceptionHandlers));
+			this.exceptionHandlers.addAll(exceptionHandlers);
 		}
 		return this;
 	}
 
 	/**
 	 * Configure the {@link WebSessionManager} to set on the
-	 * {@link ServerWebExchange WebServerExchange}
-	 * created for each HTTP request.
+	 * {@link ServerWebExchange WebServerExchange}.
+	 * <p>By default {@link DefaultWebSessionManager} is used.
 	 * @param sessionManager the session manager
 	 * @see HttpWebHandlerAdapter#setSessionManager(WebSessionManager)
 	 */
@@ -123,15 +201,43 @@ public class WebHttpHandlerBuilder {
 			WebFilter[] array = new WebFilter[this.filters.size()];
 			webHandler = new FilteringWebHandler(webHandler, this.filters.toArray(array));
 		}
-		if (!this.exceptionHandlers.isEmpty()) {
-			WebExceptionHandler[] array = new WebExceptionHandler[this.exceptionHandlers.size()];
-			webHandler = new ExceptionHandlingWebHandler(webHandler,  this.exceptionHandlers.toArray(array));
-		}
+		WebExceptionHandler[] array = new WebExceptionHandler[this.exceptionHandlers.size()];
+		webHandler = new ExceptionHandlingWebHandler(webHandler,  this.exceptionHandlers.toArray(array));
+		// TODO: protected method for further decoration
 		HttpWebHandlerAdapter httpHandler = new HttpWebHandlerAdapter(webHandler);
 		if (this.sessionManager != null) {
 			httpHandler.setSessionManager(this.sessionManager);
 		}
 		return httpHandler;
+	}
+
+
+	private static class AutowiredFiltersContainer {
+
+		private List<WebFilter> filters;
+
+		@Autowired(required = false)
+		public void setFilters(List<WebFilter> filters) {
+			this.filters = filters;
+		}
+
+		public List<WebFilter> getFilters() {
+			return this.filters;
+		}
+	}
+
+	private static class AutowiredExceptionHandlersContainer {
+
+		private List<WebExceptionHandler> exceptionHandlers;
+
+		@Autowired(required = false)
+		public void setExceptionHandlers(List<WebExceptionHandler> exceptionHandlers) {
+			this.exceptionHandlers = exceptionHandlers;
+		}
+
+		public List<WebExceptionHandler> getExceptionHandlers() {
+			return this.exceptionHandlers;
+		}
 	}
 
 }

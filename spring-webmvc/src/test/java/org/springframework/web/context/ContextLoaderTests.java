@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -228,34 +228,6 @@ public class ContextLoaderTests {
 		catch (ApplicationContextException ex) {
 			assertTrue(ex.getMessage().contains("not assignable"));
 		}
-	}
-
-	@Test
-	public void testContextLoaderWithDefaultContextAndParent() throws Exception {
-		MockServletContext sc = new MockServletContext("");
-		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
-				"/org/springframework/web/context/WEB-INF/applicationContext.xml "
-						+ "/org/springframework/web/context/WEB-INF/context-addition.xml");
-		sc.addInitParameter(ContextLoader.LOCATOR_FACTORY_SELECTOR_PARAM,
-				"classpath:org/springframework/web/context/ref1.xml");
-		sc.addInitParameter(ContextLoader.LOCATOR_FACTORY_KEY_PARAM, "a.qualified.name.of.some.sort");
-		ServletContextListener listener = new ContextLoaderListener();
-		ServletContextEvent event = new ServletContextEvent(sc);
-		listener.contextInitialized(event);
-		WebApplicationContext context = (WebApplicationContext) sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
-		assertTrue("Correct WebApplicationContext exposed in ServletContext",
-				context instanceof XmlWebApplicationContext);
-		LifecycleBean lb = (LifecycleBean) context.getBean("lifecycle");
-		assertTrue("Has father", context.containsBean("father"));
-		assertTrue("Has rod", context.containsBean("rod"));
-		assertTrue("Has kerry", context.containsBean("kerry"));
-		assertTrue("Not destroyed", !lb.isDestroyed());
-		assertTrue(context.containsBean("beans1.bean1"));
-		assertTrue(context.isTypeMatch("beans1.bean1", org.springframework.beans.factory.access.TestBean.class));
-		assertTrue(context.containsBean("beans1.bean2"));
-		assertTrue(context.isTypeMatch("beans1.bean2", org.springframework.beans.factory.access.TestBean.class));
-		listener.contextDestroyed(event);
-		assertTrue("Destroyed", lb.isDestroyed());
 	}
 
 	@Test

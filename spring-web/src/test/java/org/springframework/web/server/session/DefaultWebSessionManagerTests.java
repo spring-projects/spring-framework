@@ -15,7 +15,6 @@
  */
 package org.springframework.web.server.session;
 
-import java.net.URI;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -27,9 +26,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.MockServerHttpRequest;
-import org.springframework.http.server.reactive.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -46,18 +44,20 @@ import static org.junit.Assert.assertSame;
  */
 public class DefaultWebSessionManagerTests {
 
-	private final DefaultWebSessionManager manager = new DefaultWebSessionManager();
+	private DefaultWebSessionManager manager;
 
-	private final TestWebSessionIdResolver idResolver = new TestWebSessionIdResolver();
+	private TestWebSessionIdResolver idResolver;
 
-	private DefaultServerWebExchange exchange;
+	private ServerWebExchange exchange;
 
 
 	@Before
 	public void setUp() throws Exception {
+		this.manager = new DefaultWebSessionManager();
+		this.idResolver = new TestWebSessionIdResolver();
 		this.manager.setSessionIdResolver(this.idResolver);
 
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
+		MockServerHttpRequest request = MockServerHttpRequest.get("/path").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(request, response, this.manager);
 	}

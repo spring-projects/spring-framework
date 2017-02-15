@@ -132,7 +132,7 @@ public abstract class TestPropertySourceUtils {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Processing inlined properties for TestPropertySource attributes %s", attrs));
 			}
-			properties.addAll(0, Arrays.<String>asList(attrs.getProperties()));
+			properties.addAll(0, Arrays.asList(attrs.getProperties()));
 			if (!attrs.isInheritProperties()) {
 				break;
 			}
@@ -284,7 +284,7 @@ public abstract class TestPropertySourceUtils {
 			catch (Exception ex) {
 				throw new IllegalStateException("Failed to load test environment property from [" + pair + "]", ex);
 			}
-			Assert.state(props.size() == 1, "Failed to load exactly one test environment property from [" + pair + "]");
+			Assert.state(props.size() == 1, () -> "Failed to load exactly one test environment property from [" + pair + "]");
 			for (String name : props.stringPropertyNames()) {
 				map.put(name, props.getProperty(name));
 			}

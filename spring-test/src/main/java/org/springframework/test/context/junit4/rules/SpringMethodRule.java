@@ -17,6 +17,9 @@
 package org.springframework.test.context.junit4.rules;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -136,20 +139,21 @@ public class SpringMethodRule implements MethodRule {
 	 */
 	@Override
 	public Statement apply(Statement base, FrameworkMethod frameworkMethod, Object testInstance) {
+		Method testMethod = frameworkMethod.getMethod();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Applying SpringMethodRule to test method [" + frameworkMethod.getMethod() + "]");
+			logger.debug("Applying SpringMethodRule to test method [" + testMethod + "]");
 		}
 		Class<?> testClass = testInstance.getClass();
 		validateSpringClassRuleConfiguration(testClass);
 		TestContextManager testContextManager = SpringClassRule.getTestContextManager(testClass);
 
 		Statement statement = base;
-		statement = withBeforeTestMethodCallbacks(statement, frameworkMethod, testInstance, testContextManager);
-		statement = withAfterTestMethodCallbacks(statement, frameworkMethod, testInstance, testContextManager);
+		statement = withBeforeTestMethodCallbacks(statement, testMethod, testInstance, testContextManager);
+		statement = withAfterTestMethodCallbacks(statement, testMethod, testInstance, testContextManager);
 		statement = withTestInstancePreparation(statement, testInstance, testContextManager);
-		statement = withPotentialRepeat(statement, frameworkMethod, testInstance);
-		statement = withPotentialTimeout(statement, frameworkMethod, testInstance);
-		statement = withProfileValueCheck(statement, frameworkMethod, testInstance);
+		statement = withPotentialRepeat(statement, testMethod, testInstance);
+		statement = withPotentialTimeout(statement, testMethod, testInstance);
+		statement = withProfileValueCheck(statement, testMethod, testInstance);
 		return statement;
 	}
 
@@ -157,32 +161,32 @@ public class SpringMethodRule implements MethodRule {
 	 * Wrap the supplied {@link Statement} with a {@code RunBeforeTestMethodCallbacks} statement.
 	 * @see RunBeforeTestMethodCallbacks
 	 */
-	private Statement withBeforeTestMethodCallbacks(Statement statement, FrameworkMethod frameworkMethod,
+	private Statement withBeforeTestMethodCallbacks(Statement next, Method testMethod,
 			Object testInstance, TestContextManager testContextManager) {
 
 		return new RunBeforeTestMethodCallbacks(
-				statement, testInstance, frameworkMethod.getMethod(), testContextManager);
+				next, testInstance, testMethod, testContextManager);
 	}
 
 	/**
 	 * Wrap the supplied {@link Statement} with a {@code RunAfterTestMethodCallbacks} statement.
 	 * @see RunAfterTestMethodCallbacks
 	 */
-	private Statement withAfterTestMethodCallbacks(Statement statement, FrameworkMethod frameworkMethod,
+	private Statement withAfterTestMethodCallbacks(Statement next, Method testMethod,
 			Object testInstance, TestContextManager testContextManager) {
 
 		return new RunAfterTestMethodCallbacks(
-				statement, testInstance, frameworkMethod.getMethod(), testContextManager);
+				next, testInstance, testMethod, testContextManager);
 	}
 
 	/**
 	 * Wrap the supplied {@link Statement} with a {@code RunPrepareTestInstanceCallbacks} statement.
 	 * @see RunPrepareTestInstanceCallbacks
 	 */
-	private Statement withTestInstancePreparation(Statement statement, Object testInstance,
+	private Statement withTestInstancePreparation(Statement next, Object testInstance,
 			TestContextManager testContextManager) {
 
-		return new RunPrepareTestInstanceCallbacks(statement, testInstance, testContextManager);
+		return new RunPrepareTestInstanceCallbacks(next, testInstance, testContextManager);
 	}
 
 	/**
@@ -191,8 +195,8 @@ public class SpringMethodRule implements MethodRule {
 	 * annotation.
 	 * @see SpringRepeat
 	 */
-	private Statement withPotentialRepeat(Statement next, FrameworkMethod frameworkMethod, Object testInstance) {
-		return new SpringRepeat(next, frameworkMethod.getMethod());
+	private Statement withPotentialRepeat(Statement next, Method testMethod, Object testInstance) {
+		return new SpringRepeat(next, testMethod);
 	}
 
 	/**
@@ -201,16 +205,16 @@ public class SpringMethodRule implements MethodRule {
 	 * annotation.
 	 * @see SpringFailOnTimeout
 	 */
-	private Statement withPotentialTimeout(Statement next, FrameworkMethod frameworkMethod, Object testInstance) {
-		return new SpringFailOnTimeout(next, frameworkMethod.getMethod());
+	private Statement withPotentialTimeout(Statement next, Method testMethod, Object testInstance) {
+		return new SpringFailOnTimeout(next, testMethod);
 	}
 
 	/**
 	 * Wrap the supplied {@link Statement} with a {@code ProfileValueChecker} statement.
 	 * @see ProfileValueChecker
 	 */
-	private Statement withProfileValueCheck(Statement statement, FrameworkMethod frameworkMethod, Object testInstance) {
-		return new ProfileValueChecker(statement, testInstance.getClass(), frameworkMethod.getMethod());
+	private Statement withProfileValueCheck(Statement next, Method testMethod, Object testInstance) {
+		return new ProfileValueChecker(next, testInstance.getClass(), testMethod);
 	}
 
 
@@ -220,11 +224,10 @@ public class SpringMethodRule implements MethodRule {
 	 * that is annotated with {@code @ClassRule}.
 	 */
 	private static SpringClassRule validateSpringClassRuleConfiguration(Class<?> testClass) {
-		Field ruleField = findSpringClassRuleField(testClass);
-
-		Assert.state(ruleField != null, () -> String.format(
-				"Failed to find 'public static final SpringClassRule' field in test class [%s]. " +
-				"Consult the javadoc for SpringClassRule for details.", testClass.getName()));
+		Field ruleField = findSpringClassRuleField(testClass).orElseThrow(() -> 
+				new IllegalStateException(String.format(
+					"Failed to find 'public static final SpringClassRule' field in test class [%s]. " +
+					"Consult the javadoc for SpringClassRule for details.", testClass.getName())));
 
 		Assert.state(ruleField.isAnnotationPresent(ClassRule.class), () -> String.format(
 				"SpringClassRule field [%s] must be annotated with JUnit's @ClassRule annotation. " +
@@ -233,13 +236,11 @@ public class SpringMethodRule implements MethodRule {
 		return (SpringClassRule) ReflectionUtils.getField(ruleField, null);
 	}
 
-	private static Field findSpringClassRuleField(Class<?> testClass) {
-		for (Field field : testClass.getFields()) {
-			if (ReflectionUtils.isPublicStaticFinal(field) && SpringClassRule.class.isAssignableFrom(field.getType())) {
-				return field;
-			}
-		}
-		return null;
+	private static Optional<Field> findSpringClassRuleField(Class<?> testClass) {
+		return Arrays.stream(testClass.getFields())
+				.filter(ReflectionUtils::isPublicStaticFinal)
+				.filter(field -> SpringClassRule.class.isAssignableFrom(field.getType()))
+				.findFirst();
 	}
 
 }

@@ -47,7 +47,7 @@ public class InterceptingAsyncClientHttpRequestFactory implements AsyncClientHtt
 			List<AsyncClientHttpRequestInterceptor> interceptors) {
 
 		this.delegate = delegate;
-		this.interceptors = (interceptors != null ? interceptors : Collections.<AsyncClientHttpRequestInterceptor>emptyList());
+		this.interceptors = (interceptors != null ? interceptors : Collections.emptyList());
 	}
 
 

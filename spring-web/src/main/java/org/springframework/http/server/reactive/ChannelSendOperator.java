@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.util.function.Function;
@@ -21,7 +22,6 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.MonoSource;
-import reactor.core.publisher.OperatorAdapter;
 import reactor.core.publisher.Operators;
 
 import org.springframework.util.Assert;
@@ -43,18 +43,19 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 	private final Function<Publisher<T>, Publisher<Void>> writeFunction;
 
 
-	public ChannelSendOperator(Publisher<? extends T> source,
-			Function<Publisher<T>, Publisher<Void>> writeFunction) {
+	public ChannelSendOperator(Publisher<? extends T> source, Function<Publisher<T>, Publisher<Void>> writeFunction) {
 		super(source);
 		this.writeFunction = writeFunction;
 	}
 
+
 	@Override
 	public void subscribe(Subscriber<? super Void> s) {
-		source.subscribe(new WriteWithBarrier(s));
+		this.source.subscribe(new WriteWithBarrier(s));
 	}
 
-	private class WriteWithBarrier extends OperatorAdapter<T, Void> implements Publisher<T> {
+
+	private class WriteWithBarrier extends Operators.SubscriberAdapter<T, Void> implements Publisher<T> {
 
 		/**
 		 * We've at at least one emission, we've called the write function, the write
@@ -78,17 +79,14 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 		/** The actual writeSubscriber vs the downstream completion subscriber */
 		private Subscriber<? super T> writeSubscriber;
 
-
 		public WriteWithBarrier(Subscriber<? super Void> subscriber) {
 			super(subscriber);
 		}
 
-
 		@Override
 		protected void doOnSubscribe(Subscription subscription) {
 			super.doOnSubscribe(subscription);
-			super.upstream()
-			     .request(1); // bypass doRequest
+			super.upstream().request(1);  // bypass doRequest
 		}
 
 		@Override
@@ -157,7 +155,7 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 		@Override
 		public void subscribe(Subscriber<? super T> writeSubscriber) {
 			synchronized (this) {
-				Assert.isNull(this.writeSubscriber, "Only one writeSubscriber supported.");
+				Assert.isNull(this.writeSubscriber, "Only one writeSubscriber supported");
 				this.writeSubscriber = writeSubscriber;
 
 				if (this.error != null || this.completed) {
@@ -210,6 +208,7 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 			}
 		}
 	}
+
 
 	private class DownstreamBridge implements Subscriber<Void> {
 

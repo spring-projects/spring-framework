@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,6 +144,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * Set whether the request payload (body) should be included in the log message.
 	 * <p>Should be configured using an {@code <init-param>} for parameter name
 	 * "includePayload" in the filter definition in {@code web.xml}.
+	 * @since 3.0
 	 */
 	public void setIncludePayload(boolean includePayload) {
 		this.includePayload = includePayload;
@@ -151,14 +152,16 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	/**
 	 * Return whether the request payload (body) should be included in the log message.
+	 * @since 3.0
 	 */
 	protected boolean isIncludePayload() {
 		return this.includePayload;
 	}
 
 	/**
-	 * Sets the maximum length of the payload body to be included in the log message.
+	 * Set the maximum length of the payload body to be included in the log message.
 	 * Default is 50 characters.
+	 * @since 3.0
 	 */
 	public void setMaxPayloadLength(int maxPayloadLength) {
 		Assert.isTrue(maxPayloadLength >= 0, "'maxPayloadLength' should be larger than or equal to 0");
@@ -167,6 +170,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	/**
 	 * Return the maximum length of the payload body to be included in the log message.
+	 * @since 3.0
 	 */
 	protected int getMaxPayloadLength() {
 		return this.maxPayloadLength;
@@ -229,7 +233,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		HttpServletRequest requestToUse = request;
 
 		if (isIncludePayload() && isFirstRequest && !(request instanceof ContentCachingRequestWrapper)) {
-			requestToUse = new ContentCachingRequestWrapper(request);
+			requestToUse = new ContentCachingRequestWrapper(request, getMaxPayloadLength());
 		}
 
 		boolean shouldLog = shouldLog(requestToUse);

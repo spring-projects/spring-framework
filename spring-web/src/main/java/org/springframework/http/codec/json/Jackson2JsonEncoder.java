@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,24 +18,29 @@ package org.springframework.http.codec.json;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.core.PrettyPrinter;
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationConfig;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.reactivestreams.Publisher;
+import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
@@ -51,28 +56,25 @@ import org.springframework.util.MimeType;
  */
 public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Encoder<Object> {
 
-	private static final ByteBuffer START_ARRAY_BUFFER = ByteBuffer.wrap(new byte[]{'['});
-
-	private static final ByteBuffer SEPARATOR_BUFFER = ByteBuffer.wrap(new byte[]{','});
-
-	private static final ByteBuffer END_ARRAY_BUFFER = ByteBuffer.wrap(new byte[]{']'});
+	private final PrettyPrinter ssePrettyPrinter;
 
 
 	public Jackson2JsonEncoder() {
-		super(Jackson2ObjectMapperBuilder.json().build());
+		this(Jackson2ObjectMapperBuilder.json().build());
 	}
 
 	public Jackson2JsonEncoder(ObjectMapper mapper) {
 		super(mapper);
+		DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
+		prettyPrinter.indentObjectsWith(new DefaultIndenter("  ", "\ndata:"));
+		this.ssePrettyPrinter = prettyPrinter;
 	}
 
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType, Object... hints) {
-		if (mimeType == null) {
-			return true;
-		}
-		return JSON_MIME_TYPES.stream().anyMatch(m -> m.isCompatibleWith(mimeType));
+	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
+		return this.mapper.canSerialize(elementType.getRawClass()) &&
+				(mimeType == null || JSON_MIME_TYPES.stream().anyMatch(m -> m.isCompatibleWith(mimeType)));
 	}
 
 	@Override
@@ -82,47 +84,39 @@ public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Encode
 
 	@Override
 	public Flux<DataBuffer> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory,
-			ResolvableType elementType, MimeType mimeType, Object... hints) {
+			ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
 
 		Assert.notNull(inputStream, "'inputStream' must not be null");
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
 
 		if (inputStream instanceof Mono) {
-			return Flux.from(inputStream).map(value -> encodeValue(value, bufferFactory, elementType));
+			return Flux.from(inputStream).map(value -> encodeValue(value, bufferFactory, elementType, hints));
 		}
-
-		Mono<DataBuffer> startArray = Mono.just(bufferFactory.wrap(START_ARRAY_BUFFER));
-		Mono<DataBuffer> endArray = Mono.just(bufferFactory.wrap(END_ARRAY_BUFFER));
-
-		Flux<DataBuffer> array = Flux.from(inputStream)
-				.flatMap(value -> {
-					DataBuffer arraySeparator = bufferFactory.wrap(SEPARATOR_BUFFER);
-					return Flux.just(encodeValue(value, bufferFactory, elementType), arraySeparator);
-				});
-
-		return Flux.concat(startArray, array.skipLast(1), endArray);
+		else if (APPLICATION_STREAM_JSON.isCompatibleWith(mimeType)) {
+			return Flux.from(inputStream).map(value -> {
+				DataBuffer buffer = encodeValue(value, bufferFactory, elementType, hints);
+				buffer.write(new byte[]{'\n'});
+				return buffer;
+			});
+		}
+		ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, elementType);
+		return Flux.from(inputStream).collectList().map(list -> encodeValue(list, bufferFactory, listType, hints)).flux();
 	}
 
-	private DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory, ResolvableType type) {
+	private DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory,
+			ResolvableType type, Map<String, Object> hints) {
+
 		TypeFactory typeFactory = this.mapper.getTypeFactory();
 		JavaType javaType = typeFactory.constructType(type.getType());
-		MethodParameter returnType =
-				(type.getSource() instanceof MethodParameter ? (MethodParameter) type.getSource() : null);
-
 		if (type.isInstance(value)) {
 			javaType = getJavaType(type.getType(), null);
 		}
 
 		ObjectWriter writer;
-		JsonView jsonView = (returnType != null ? returnType.getMethodAnnotation(JsonView.class) : null);
+		Class<?> jsonView = (Class<?>)hints.get(AbstractJackson2Codec.JSON_VIEW_HINT);
 		if (jsonView != null) {
-			Class<?>[] classes = jsonView.value();
-			if (classes.length != 1) {
-				throw new IllegalArgumentException("@JsonView only supported for response body advice " +
-						"with exactly 1 class argument: " + returnType);
-			}
-			writer = this.mapper.writerWithView(classes[0]);
+			writer = this.mapper.writerWithView(jsonView);
 		}
 		else {
 			writer = this.mapper.writer();
@@ -130,6 +124,12 @@ public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Encode
 
 		if (javaType != null && javaType.isContainerType()) {
 			writer = writer.forType(javaType);
+		}
+
+		Boolean sse = (Boolean)hints.get(ServerSentEventHttpMessageWriter.SSE_CONTENT_HINT);
+		SerializationConfig config = writer.getConfig();
+		if (Boolean.TRUE.equals(sse) && config.isEnabled(SerializationFeature.INDENT_OUTPUT)) {
+			writer = writer.with(this.ssePrettyPrinter);
 		}
 
 		DataBuffer buffer = bufferFactory.allocateBuffer();

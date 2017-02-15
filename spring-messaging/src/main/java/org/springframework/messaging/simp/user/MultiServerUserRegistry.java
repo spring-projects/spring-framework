@@ -77,7 +77,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		catch (UnknownHostException ex) {
 			host = "unknown";
 		}
-		return host + "-" + UUID.randomUUID();
+		return host + '-' + UUID.randomUUID();
 	}
 
 
@@ -133,6 +133,16 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 		result.addAll(this.localRegistry.getUsers());
 		return result;
+	}
+
+	@Override
+	public int getUserCount() {
+		int userCount = 0;
+		for (UserRegistrySnapshot registry : this.remoteRegistries.values()) {
+			userCount += registry.getUserMap().size();
+		}
+		userCount += this.localRegistry.getUserCount();
+		return userCount;
 	}
 
 	@Override

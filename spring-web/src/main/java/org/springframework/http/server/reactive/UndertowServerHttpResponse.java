@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,13 @@ import io.undertow.server.handlers.Cookie;
 import io.undertow.server.handlers.CookieImpl;
 import io.undertow.util.HttpString;
 import org.reactivestreams.Processor;
-import org.xnio.ChannelListener;
+import org.reactivestreams.Publisher;
 import org.xnio.channels.StreamSinkChannel;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
@@ -58,7 +59,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 
 	public UndertowServerHttpResponse(HttpServerExchange exchange, DataBufferFactory bufferFactory) {
 		super(bufferFactory);
-		Assert.notNull(exchange, "'exchange' is required.");
+		Assert.notNull(exchange, "HttpServerExchange is required");
 		this.exchange = exchange;
 	}
 
@@ -67,8 +68,9 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 		return this.exchange;
 	}
 
+
 	@Override
-	protected void writeStatusCode() {
+	protected void applyStatusCode() {
 		HttpStatus statusCode = this.getStatusCode();
 		if (statusCode != null) {
 			getUndertowExchange().setStatusCode(statusCode.value());
@@ -77,8 +79,8 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 
 	@Override
 	public Mono<Void> writeWith(File file, long position, long count) {
-		writeHeaders();
-		writeCookies();
+		applyHeaders();
+		applyCookies();
 		try {
 			StreamSinkChannel responseChannel = getUndertowExchange().getResponseChannel();
 			@SuppressWarnings("resource")
@@ -98,7 +100,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 	}
 
 	@Override
-	protected void writeHeaders() {
+	protected void applyHeaders() {
 		for (Map.Entry<String, List<String>> entry : getHeaders().entrySet()) {
 			HttpString headerName = HttpString.tryFromString(entry.getKey());
 			this.exchange.getResponseHeaders().addAll(headerName, entry.getValue());
@@ -106,7 +108,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 	}
 
 	@Override
-	protected void writeCookies() {
+	protected void applyCookies() {
 		for (String name : getCookies().keySet()) {
 			for (ResponseCookie httpCookie : getCookies().get(name)) {
 				Cookie cookie = new CookieImpl(name, httpCookie.getValue());
@@ -123,7 +125,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 	}
 
 	@Override
-	protected AbstractResponseBodyFlushProcessor createBodyFlushProcessor() {
+	protected Processor<? super Publisher<? extends DataBuffer>, Void> createBodyFlushProcessor() {
 		return new ResponseBodyFlushProcessor();
 	}
 
@@ -137,24 +139,25 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 	}
 
 
-	private static class ResponseBodyProcessor extends AbstractResponseBodyProcessor {
+	private static class ResponseBodyProcessor extends AbstractListenerWriteProcessor<DataBuffer> {
 
-		private final ChannelListener<StreamSinkChannel> listener = new WriteListener();
-
-		private final StreamSinkChannel responseChannel;
+		private final StreamSinkChannel channel;
 
 		private volatile ByteBuffer byteBuffer;
 
-
-		public ResponseBodyProcessor(StreamSinkChannel responseChannel) {
-			Assert.notNull(responseChannel, "'responseChannel' must not be null");
-			this.responseChannel = responseChannel;
+		public ResponseBodyProcessor(StreamSinkChannel channel) {
+			Assert.notNull(channel, "StreamSinkChannel must not be null");
+			this.channel = channel;
 		}
 
-
 		public void registerListener() {
-			this.responseChannel.getWriteSetter().set(this.listener);
-			this.responseChannel.resumeWrites();
+			this.channel.getWriteSetter().set(c -> onWritePossible());
+			this.channel.resumeWrites();
+		}
+
+		@Override
+		protected boolean isWritePossible() {
+			return false;
 		}
 
 		@Override
@@ -178,7 +181,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 			int written;
 			int totalWritten = 0;
 			do {
-				written = this.responseChannel.write(byteBuffer);
+				written = this.channel.write(byteBuffer);
 				totalWritten += written;
 			}
 			while (byteBuffer.hasRemaining() && written > 0);
@@ -186,30 +189,33 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 		}
 
 		@Override
-		protected void receiveBuffer(DataBuffer dataBuffer) {
-			super.receiveBuffer(dataBuffer);
+		protected void receiveData(DataBuffer dataBuffer) {
+			super.receiveData(dataBuffer);
 			this.byteBuffer = dataBuffer.asByteBuffer();
 		}
 
 		@Override
-		protected void releaseBuffer() {
-			super.releaseBuffer();
+		protected void releaseData() {
+			if (logger.isTraceEnabled()) {
+				logger.trace("releaseData: " + this.currentData);
+			}
+			DataBufferUtils.release(this.currentData);
+			this.currentData = null;
+
 			this.byteBuffer = null;
 		}
 
-		private class WriteListener implements ChannelListener<StreamSinkChannel> {
-
-			@Override
-			public void handleEvent(StreamSinkChannel channel) {
-				onWritePossible();
-			}
+		@Override
+		protected boolean isDataEmpty(DataBuffer dataBuffer) {
+			return (dataBuffer.readableByteCount() == 0);
 		}
 	}
 
-	private class ResponseBodyFlushProcessor extends AbstractResponseBodyFlushProcessor {
+
+	private class ResponseBodyFlushProcessor extends AbstractListenerWriteFlushProcessor<DataBuffer> {
 
 		@Override
-		protected Processor<DataBuffer, Void> createBodyProcessor() {
+		protected Processor<? super DataBuffer, Void> createWriteProcessor() {
 			return UndertowServerHttpResponse.this.createBodyProcessor();
 		}
 

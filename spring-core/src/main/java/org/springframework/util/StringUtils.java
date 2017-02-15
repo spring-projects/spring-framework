@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.util;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -50,6 +52,7 @@ import java.util.TimeZone;
  * @author Rick Evans
  * @author Arjen Poutsma
  * @author Sam Brannen
+ * @author Brian Clozel
  * @since 16 April 2001
  */
 public abstract class StringUtils {
@@ -515,15 +518,22 @@ public abstract class StringUtils {
 		if (str == null || str.length() == 0) {
 			return str;
 		}
-		StringBuilder sb = new StringBuilder(str.length());
-		if (capitalize) {
-			sb.append(Character.toUpperCase(str.charAt(0)));
-		}
 		else {
-			sb.append(Character.toLowerCase(str.charAt(0)));
+			char baseChar = str.charAt(0);
+			char updatedChar;
+			if (capitalize) {
+				updatedChar = Character.toUpperCase(baseChar);
+			}
+			else {
+				updatedChar = Character.toLowerCase(baseChar);
+			}
+			if (baseChar == updatedChar) {
+				return str;
+			}
+			char[] chars = str.toCharArray();
+			chars[0] = updatedChar;
+			return new String(chars, 0, chars.length);
 		}
-		sb.append(str.substring(1));
-		return sb.toString();
 	}
 
 	/**
@@ -683,6 +693,59 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * Decode the given encoded URI component value. Based on the following rules:
+	 * <ul>
+	 * <li>Alphanumeric characters {@code "a"} through {@code "z"}, {@code "A"} through {@code "Z"},
+	 * and {@code "0"} through {@code "9"} stay the same.</li>
+	 * <li>Special characters {@code "-"}, {@code "_"}, {@code "."}, and {@code "*"} stay the same.</li>
+	 * <li>A sequence "{@code %<i>xy</i>}" is interpreted as a hexadecimal representation of the character.</li>
+	 * </ul>
+	 * @param source the encoded String (may be {@code null})
+	 * @param charset the character set
+	 * @return the decoded value
+	 * @throws IllegalArgumentException when the given source contains invalid encoded sequences
+	 * @since 5.0
+	 * @see java.net.URLDecoder#decode(String, String)
+	 */
+	public static String uriDecode(String source, Charset charset) {
+		if (source == null) {
+			return null;
+		}
+		int length = source.length();
+		if (length == 0) {
+			return source;
+		}
+		Assert.notNull(charset, "Charset must not be null");
+
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(length);
+		boolean changed = false;
+		for (int i = 0; i < length; i++) {
+			int ch = source.charAt(i);
+			if (ch == '%') {
+				if (i + 2 < length) {
+					char hex1 = source.charAt(i + 1);
+					char hex2 = source.charAt(i + 2);
+					int u = Character.digit(hex1, 16);
+					int l = Character.digit(hex2, 16);
+					if (u == -1 || l == -1) {
+						throw new IllegalArgumentException("Invalid encoded sequence \"" + source.substring(i) + "\"");
+					}
+					bos.write((char) ((u << 4) + l));
+					i += 2;
+					changed = true;
+				}
+				else {
+					throw new IllegalArgumentException("Invalid encoded sequence \"" + source.substring(i) + "\"");
+				}
+			}
+			else {
+				bos.write(ch);
+			}
+		}
+		return (changed ? new String(bos.toByteArray(), charset) : source);
+	}
+
+	/**
 	 * Parse the given {@code localeString} value into a {@link Locale}.
 	 * <p>This is the inverse operation of {@link Locale#toString Locale's toString}.
 	 * @param localeString the locale {@code String}, following {@code Locale's}
@@ -714,7 +777,7 @@ public abstract class StringUtils {
 	private static void validateLocalePart(String localePart) {
 		for (int i = 0; i < localePart.length(); i++) {
 			char ch = localePart.charAt(i);
-			if (ch != '_' && ch != ' ' && !Character.isLetterOrDigit(ch)) {
+			if (ch != ' ' && ch != '_' && ch != '#' && !Character.isLetterOrDigit(ch)) {
 				throw new IllegalArgumentException(
 						"Locale part \"" + localePart + "\" contains invalid characters");
 			}

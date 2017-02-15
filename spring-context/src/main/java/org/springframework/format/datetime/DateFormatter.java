@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import org.springframework.format.Formatter;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.util.StringUtils;
 
@@ -43,13 +42,15 @@ import org.springframework.util.StringUtils;
  */
 public class DateFormatter implements Formatter<Date> {
 
+	private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+
 	private static final Map<ISO, String> ISO_PATTERNS;
 
 	static {
 		Map<ISO, String> formats = new HashMap<>(4);
 		formats.put(ISO.DATE, "yyyy-MM-dd");
-		formats.put(ISO.TIME, "HH:mm:ss.SSSZ");
-		formats.put(ISO.DATE_TIME, "yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+		formats.put(ISO.TIME, "HH:mm:ss.SSSXXX");
+		formats.put(ISO.DATE_TIME, "yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 		ISO_PATTERNS = Collections.unmodifiableMap(formats);
 	}
 
@@ -176,7 +177,7 @@ public class DateFormatter implements Formatter<Date> {
 				throw new IllegalStateException("Unsupported ISO format " + this.iso);
 			}
 			SimpleDateFormat format = new SimpleDateFormat(pattern);
-			format.setTimeZone(TimeZone.getTimeZone("UTC"));
+			format.setTimeZone(UTC);
 			return format;
 		}
 		if (StringUtils.hasLength(this.stylePattern)) {
@@ -191,7 +192,7 @@ public class DateFormatter implements Formatter<Date> {
 			if (timeStyle != -1) {
 				return DateFormat.getTimeInstance(timeStyle, locale);
 			}
-			throw new IllegalStateException("Unsupported style pattern '"+ this.stylePattern+ "'");
+			throw new IllegalStateException("Unsupported style pattern '" + this.stylePattern + "'");
 
 		}
 		return DateFormat.getDateInstance(this.style, locale);

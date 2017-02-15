@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ package org.springframework.web.servlet.view.feed;
 import com.rometools.rome.feed.rss.Channel;
 import com.rometools.rome.feed.rss.Description;
 import com.rometools.rome.feed.rss.Item;
-import org.junit.Before;
+
 import org.junit.Test;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.xmlunit.matchers.CompareMatcher;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,12 +41,8 @@ import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
  */
 public class RssFeedViewTests {
 
-	private AbstractRssFeedView view;
+	private final AbstractRssFeedView view = new MyRssFeedView();
 
-	@Before
-	public void createView() throws Exception {
-		view = new MyRssFeedView();
-	}
 
 	@Test
 	public void render() throws Exception {
@@ -70,7 +66,7 @@ public class RssFeedViewTests {
 	private static class MyRssFeedView extends AbstractRssFeedView {
 
 		@Override
-		protected void buildFeedMetadata(Map model, Channel channel, HttpServletRequest request) {
+		protected void buildFeedMetadata(Map<String, Object> model, Channel channel, HttpServletRequest request) {
 			channel.setTitle("Test Feed");
 			channel.setDescription("Test feed description");
 			channel.setLink("http://example.com");

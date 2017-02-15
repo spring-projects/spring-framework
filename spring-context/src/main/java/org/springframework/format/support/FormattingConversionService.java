@@ -17,7 +17,6 @@
 package org.springframework.format.support;
 
 import java.lang.annotation.Annotation;
-import java.text.ParseException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -25,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.DecoratingProxy;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -52,11 +52,9 @@ public class FormattingConversionService extends GenericConversionService
 
 	private StringValueResolver embeddedValueResolver;
 
-	private final Map<AnnotationConverterKey, GenericConverter> cachedPrinters =
-			new ConcurrentHashMap<>(64);
+	private final Map<AnnotationConverterKey, GenericConverter> cachedPrinters = new ConcurrentHashMap<>(64);
 
-	private final Map<AnnotationConverterKey, GenericConverter> cachedParsers =
-			new ConcurrentHashMap<>(64);
+	private final Map<AnnotationConverterKey, GenericConverter> cachedParsers = new ConcurrentHashMap<>(64);
 
 
 	@Override
@@ -98,9 +96,13 @@ public class FormattingConversionService extends GenericConversionService
 
 	static Class<?> getFieldType(Formatter<?> formatter) {
 		Class<?> fieldType = GenericTypeResolver.resolveTypeArgument(formatter.getClass(), Formatter.class);
+		if (fieldType == null && formatter instanceof DecoratingProxy) {
+			fieldType = GenericTypeResolver.resolveTypeArgument(
+					((DecoratingProxy) formatter).getDecoratedClass(), Formatter.class);
+		}
 		if (fieldType == null) {
-			throw new IllegalArgumentException("Unable to extract parameterized field type argument from Formatter [" +
-					formatter.getClass().getName() + "]; does the formatter parameterize the <T> generic type?");
+			throw new IllegalArgumentException("Unable to extract the parameterized field type from Formatter [" +
+					formatter.getClass().getName() + "]; does the class parameterize the <T> generic type?");
 		}
 		return fieldType;
 	}
@@ -193,11 +195,14 @@ public class FormattingConversionService extends GenericConversionService
 			try {
 				result = this.parser.parse(text, LocaleContextHolder.getLocale());
 			}
-			catch (ParseException ex) {
+			catch (IllegalArgumentException ex) {
+				throw ex;
+			}
+			catch (Throwable ex) {
 				throw new IllegalArgumentException("Parse attempt failed for value [" + text + "]", ex);
 			}
 			if (result == null) {
-				throw new IllegalStateException("Parsers are not allowed to return null");
+				throw new IllegalStateException("Parsers are not allowed to return null: " + this.parser);
 			}
 			TypeDescriptor resultType = TypeDescriptor.valueOf(result.getClass());
 			if (!resultType.isAssignableTo(targetType)) {
@@ -224,6 +229,7 @@ public class FormattingConversionService extends GenericConversionService
 
 		public AnnotationPrinterConverter(Class<? extends Annotation> annotationType,
 				AnnotationFormatterFactory<?> annotationFormatterFactory, Class<?> fieldType) {
+
 			this.annotationType = annotationType;
 			this.annotationFormatterFactory = annotationFormatterFactory;
 			this.fieldType = fieldType;
@@ -277,6 +283,7 @@ public class FormattingConversionService extends GenericConversionService
 
 		public AnnotationParserConverter(Class<? extends Annotation> annotationType,
 				AnnotationFormatterFactory<?> annotationFormatterFactory, Class<?> fieldType) {
+
 			this.annotationType = annotationType;
 			this.annotationFormatterFactory = annotationFormatterFactory;
 			this.fieldType = fieldType;
@@ -343,16 +350,13 @@ public class FormattingConversionService extends GenericConversionService
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof AnnotationConverterKey)) {
-				return false;
-			}
 			AnnotationConverterKey otherKey = (AnnotationConverterKey) other;
-			return (this.annotation.equals(otherKey.annotation) && this.fieldType.equals(otherKey.fieldType));
+			return (this.fieldType == otherKey.fieldType && this.annotation.equals(otherKey.annotation));
 		}
 
 		@Override
 		public int hashCode() {
-			return (this.annotation.hashCode() + 29 * this.fieldType.hashCode());
+			return (this.fieldType.hashCode() * 29 + this.annotation.hashCode());
 		}
 	}
 

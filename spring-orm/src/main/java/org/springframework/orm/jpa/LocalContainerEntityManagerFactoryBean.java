@@ -67,10 +67,9 @@ import org.springframework.util.ClassUtils;
  * plus the {@link EntityManagerFactoryInfo} interface which exposes additional
  * metadata as assembled by this FactoryBean.
  *
- * <p><b>NOTE: Spring's JPA support requires JPA 2.0 or higher, as of Spring 4.0.</b>
- * JPA 1.0 based applications are still supported; however, a JPA 2.0/2.1 compliant
- * persistence provider is needed at runtime. Spring's persistence unit bootstrapping
- * automatically detects JPA 2.0 vs 2.1 through checking the JPA API on the classpath.
+ * <p><b>NOTE: Spring's JPA support requires JPA 2.1 or higher, as of Spring 5.0.</b>
+ * JPA 1.0/2.0 based applications are still supported; however, a JPA 2.1 compliant
+ * persistence provider is needed at runtime.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -144,6 +143,19 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	}
 
 	/**
+	 * Set a persistence unit root location for the default persistence unit.
+	 * <p>Default is "classpath:", that is, the root of the current classpath
+	 * (nearest root directory). To be overridden if unit-specific resolution
+	 * does not work and the classpath root is not appropriate either.
+	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @since 4.3.3
+	 * @see DefaultPersistenceUnitManager#setDefaultPersistenceUnitRootLocation
+	 */
+	public void setPersistenceUnitRootLocation(String defaultPersistenceUnitRootLocation) {
+		this.internalPersistenceUnitManager.setDefaultPersistenceUnitRootLocation(defaultPersistenceUnitRootLocation);
+	}
+
+	/**
 	 * Set whether to use Spring-based scanning for entity classes in the classpath
 	 * instead of using JPA's standard scanning of jar files with {@code persistence.xml}
 	 * markers in them. In case of Spring-based scanning, no {@code persistence.xml}
@@ -202,6 +214,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * Specify the JPA 2.0 shared cache mode for this persistence unit,
 	 * overriding a value in {@code persistence.xml} if set.
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @since 4.0
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getSharedCacheMode()
 	 * @see #setPersistenceUnitManager
 	 */
@@ -213,6 +226,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * Specify the JPA 2.0 validation mode for this persistence unit,
 	 * overriding a value in {@code persistence.xml} if set.
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @since 4.0
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getValidationMode()
 	 * @see #setPersistenceUnitManager
 	 */

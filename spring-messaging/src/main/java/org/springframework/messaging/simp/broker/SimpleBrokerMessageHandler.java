@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.broker;
 
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -174,7 +175,9 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * @since 4.2
 	 */
 	public void setHeartbeatValue(long[] heartbeat) {
-		Assert.notNull(heartbeat);
+		if (heartbeat == null || heartbeat.length != 2 || heartbeat[0] < 0 || heartbeat[1] < 0) {
+			throw new IllegalArgumentException("Invalid heart-beat: " + Arrays.toString(heartbeat));
+		}
 		this.heartbeatValue = heartbeat;
 	}
 
@@ -275,7 +278,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
 			logMessage(message);
-			handleDisconnect(sessionId, user);
+			handleDisconnect(sessionId, user, message);
 		}
 		else if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
 			logMessage(message);
@@ -310,12 +313,15 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 	}
 
-	private void handleDisconnect(String sessionId, Principal user) {
+	private void handleDisconnect(String sessionId, Principal user, Message<?> origMessage) {
 		this.sessions.remove(sessionId);
 		this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
 		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.DISCONNECT_ACK);
 		accessor.setSessionId(sessionId);
 		accessor.setUser(user);
+		if (origMessage != null) {
+			accessor.setHeader(SimpMessageHeaderAccessor.DISCONNECT_MESSAGE_HEADER, origMessage);
+		}
 		initHeaders(accessor);
 		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 		getClientOutboundChannel().send(message);
@@ -432,7 +438,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			long now = System.currentTimeMillis();
 			for (SessionInfo info : sessions.values()) {
 				if (info.getReadInterval() > 0 && (now - info.getLastReadTime()) > info.getReadInterval()) {
-					handleDisconnect(info.getSessiondId(), info.getUser());
+					handleDisconnect(info.getSessiondId(), info.getUser(), null);
 				}
 				if (info.getWriteInterval() > 0 && (now - info.getLastWriteTime()) > info.getWriteInterval()) {
 					SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.HEARTBEAT);

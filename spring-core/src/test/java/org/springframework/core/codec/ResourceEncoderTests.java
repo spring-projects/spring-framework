@@ -17,10 +17,12 @@
 package org.springframework.core.codec;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
@@ -28,7 +30,6 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.assertTrue;
@@ -42,14 +43,14 @@ public class ResourceEncoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void canEncode() throws Exception {
-		assertTrue(this.encoder.canEncode(
-				ResolvableType.forClass(InputStreamResource.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(
-				ResolvableType.forClass(ByteArrayResource.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(
-				ResolvableType.forClass(Resource.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(
-				ResolvableType.forClass(InputStreamResource.class), MimeTypeUtils.APPLICATION_JSON));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(InputStreamResource.class),
+				MimeTypeUtils.TEXT_PLAIN));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteArrayResource.class),
+				MimeTypeUtils.TEXT_PLAIN));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(Resource.class),
+				MimeTypeUtils.TEXT_PLAIN));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(InputStreamResource.class),
+				MimeTypeUtils.APPLICATION_JSON));
 	}
 
 	@Test
@@ -61,14 +62,12 @@ public class ResourceEncoderTests extends AbstractDataBufferAllocatingTestCase {
 
 		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory,
 				ResolvableType.forClass(Resource.class),
-						null);
+				null, Collections.emptyMap());
 
-		TestSubscriber
-				.subscribe(output)
-				.assertNoError()
-				.assertComplete()
-				.assertValuesWith(stringConsumer(s));
-
+		StepVerifier.create(output)
+				.consumeNextWith(stringConsumer(s))
+				.expectComplete()
+				.verify();
 	}
 
 }

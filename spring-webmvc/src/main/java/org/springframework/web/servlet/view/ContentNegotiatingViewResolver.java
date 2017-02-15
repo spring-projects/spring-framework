@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,7 +214,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	@Override
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
-		Assert.isInstanceOf(ServletRequestAttributes.class, attrs);
+		Assert.state(attrs instanceof ServletRequestAttributes, "No current ServletRequestAttributes");
 		List<MediaType> requestedMediaTypes = getMediaTypes(((ServletRequestAttributes) attrs).getRequest());
 		if (requestedMediaTypes != null) {
 			List<View> candidateViews = getCandidateViews(viewName, locale, requestedMediaTypes);
@@ -303,7 +303,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 			for (MediaType requestedMediaType : requestedMediaTypes) {
 				List<String> extensions = this.contentNegotiationManager.resolveFileExtensions(requestedMediaType);
 				for (String extension : extensions) {
-					String viewNameWithExtension = viewName + "." + extension;
+					String viewNameWithExtension = viewName + '.' + extension;
 					view = viewResolver.resolveViewName(viewNameWithExtension, locale);
 					if (view != null) {
 						candidateViews.add(view);

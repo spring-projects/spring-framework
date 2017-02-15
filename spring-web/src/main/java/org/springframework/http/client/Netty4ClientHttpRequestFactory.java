@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLException;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelConfig;
@@ -32,6 +33,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 
 import org.springframework.beans.factory.DisposableBean;
@@ -40,14 +42,19 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
 /**
- * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that
- * uses <a href="http://netty.io/">Netty 4</a> to create requests.
+ * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation
+ * that uses <a href="http://netty.io/">Netty 4</a> to create requests.
  *
- * <p>Allows to use a pre-configured {@link EventLoopGroup} instance - useful for sharing
- * across multiple clients.
+ * <p>Allows to use a pre-configured {@link EventLoopGroup} instance: useful for
+ * sharing across multiple clients.
+ *
+ * <p>Note that this implementation consistently closes the HTTP connection on each
+ * request.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
+ * @author Mark Paluch
  * @since 4.1.2
  */
 public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
@@ -112,7 +119,7 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	/**
 	 * Set the SSL context. When configured it is used to create and insert an
 	 * {@link io.netty.handler.ssl.SslHandler} in the channel pipeline.
-	 * <p>By default this is not set.
+	 * <p>A default client SslContext is configured if none has been provided.
 	 */
 	public void setSslContext(SslContext sslContext) {
 		this.sslContext = sslContext;
@@ -136,45 +143,21 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 		this.readTimeout = readTimeout;
 	}
 
-	private Bootstrap getBootstrap() {
-		if (this.bootstrap == null) {
-			Bootstrap bootstrap = new Bootstrap();
-			bootstrap.group(this.eventLoopGroup).channel(NioSocketChannel.class)
-					.handler(new ChannelInitializer<SocketChannel>() {
-						@Override
-						protected void initChannel(SocketChannel channel) throws Exception {
-							configureChannel(channel.config());
-							ChannelPipeline pipeline = channel.pipeline();
-							if (sslContext != null) {
-								pipeline.addLast(sslContext.newHandler(channel.alloc()));
-							}
-							pipeline.addLast(new HttpClientCodec());
-							pipeline.addLast(new HttpObjectAggregator(maxResponseSize));
-							if (readTimeout > 0) {
-								pipeline.addLast(new ReadTimeoutHandler(readTimeout,
-										TimeUnit.MILLISECONDS));
-							}
-						}
-					});
-			this.bootstrap = bootstrap;
-		}
-		return this.bootstrap;
-	}
-
-	/**
-	 * Template method for changing properties on the given {@link SocketChannelConfig}.
-	 * <p>The default implementation sets the connect timeout based on the set property.
-	 * @param config the channel configuration
-	 */
-	protected void configureChannel(SocketChannelConfig config) {
-		if (this.connectTimeout >= 0) {
-			config.setConnectTimeoutMillis(this.connectTimeout);
-		}
-	}
 
 	@Override
 	public void afterPropertiesSet() {
-		getBootstrap();
+		if (this.sslContext == null) {
+			this.sslContext = getDefaultClientSslContext();
+		}
+	}
+
+	private SslContext getDefaultClientSslContext() {
+		try {
+			return SslContextBuilder.forClient().build();
+		}
+		catch (SSLException ex) {
+			throw new IllegalStateException("Could not create default client SslContext", ex);
+		}
 	}
 
 
@@ -189,7 +172,54 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	}
 
 	private Netty4ClientHttpRequest createRequestInternal(URI uri, HttpMethod httpMethod) {
-		return new Netty4ClientHttpRequest(getBootstrap(), uri, httpMethod);
+		return new Netty4ClientHttpRequest(getBootstrap(uri), uri, httpMethod);
+	}
+
+	private Bootstrap getBootstrap(URI uri) {
+		boolean isSecure = (uri.getPort() == 443 || "https".equalsIgnoreCase(uri.getScheme()));
+		if (isSecure) {
+			return buildBootstrap(uri, true);
+		}
+		else {
+			if (this.bootstrap == null) {
+				this.bootstrap = buildBootstrap(uri, false);
+			}
+			return this.bootstrap;
+		}
+	}
+
+	private Bootstrap buildBootstrap(URI uri, boolean isSecure) {
+		Bootstrap bootstrap = new Bootstrap();
+		bootstrap.group(this.eventLoopGroup).channel(NioSocketChannel.class)
+				.handler(new ChannelInitializer<SocketChannel>() {
+					@Override
+					protected void initChannel(SocketChannel channel) throws Exception {
+						configureChannel(channel.config());
+						ChannelPipeline pipeline = channel.pipeline();
+						if (isSecure) {
+							Assert.notNull(sslContext, "sslContext should not be null");
+							pipeline.addLast(sslContext.newHandler(channel.alloc(), uri.getHost(), uri.getPort()));
+						}
+						pipeline.addLast(new HttpClientCodec());
+						pipeline.addLast(new HttpObjectAggregator(maxResponseSize));
+						if (readTimeout > 0) {
+							pipeline.addLast(new ReadTimeoutHandler(readTimeout,
+									TimeUnit.MILLISECONDS));
+						}
+					}
+				});
+		return bootstrap;
+	}
+
+	/**
+	 * Template method for changing properties on the given {@link SocketChannelConfig}.
+	 * <p>The default implementation sets the connect timeout based on the set property.
+	 * @param config the channel configuration
+	 */
+	protected void configureChannel(SocketChannelConfig config) {
+		if (this.connectTimeout >= 0) {
+			config.setConnectTimeoutMillis(this.connectTimeout);
+		}
 	}
 
 

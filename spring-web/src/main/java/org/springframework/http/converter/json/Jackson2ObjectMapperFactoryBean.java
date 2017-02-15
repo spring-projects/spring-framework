@@ -25,6 +25,7 @@ import java.util.TimeZone;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -161,6 +162,15 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	 */
 	public void setCreateXmlMapper(boolean createXmlMapper) {
 		this.builder.createXmlMapper(createXmlMapper);
+	}
+
+	/**
+	 * Define the {@link JsonFactory} to be used to create the {@link ObjectMapper}
+	 * instance.
+	 * @since 5.0
+	 */
+	public void setFactory(JsonFactory factory) {
+		this.builder.factory(factory);
 	}
 
 	/**

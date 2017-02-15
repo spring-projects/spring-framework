@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -374,13 +374,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				prepareSynchronization(status, definition);
 				return status;
 			}
-			catch (RuntimeException ex) {
+			catch (RuntimeException | Error ex) {
 				resume(null, suspendedResources);
 				throw ex;
-			}
-			catch (Error err) {
-				resume(null, suspendedResources);
-				throw err;
 			}
 		}
 		else {
@@ -430,13 +426,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				prepareSynchronization(status, definition);
 				return status;
 			}
-			catch (RuntimeException beginEx) {
+			catch (RuntimeException | Error beginEx) {
 				resumeAfterBeginException(transaction, suspendedResources, beginEx);
 				throw beginEx;
-			}
-			catch (Error beginErr) {
-				resumeAfterBeginException(transaction, suspendedResources, beginErr);
-				throw beginErr;
 			}
 		}
 
@@ -589,15 +581,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				return new SuspendedResourcesHolder(
 						suspendedResources, suspendedSynchronizations, name, readOnly, isolationLevel, wasActive);
 			}
-			catch (RuntimeException ex) {
+			catch (RuntimeException | Error ex) {
 				// doSuspend failed - original transaction is still active...
 				doResumeSynchronization(suspendedSynchronizations);
 				throw ex;
-			}
-			catch (Error err) {
-				// doSuspend failed - original transaction is still active...
-				doResumeSynchronization(suspendedSynchronizations);
-				throw err;
 			}
 		}
 		else if (transaction != null) {
@@ -650,13 +637,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		try {
 			resume(transaction, suspendedResources);
 		}
-		catch (RuntimeException resumeEx) {
+		catch (RuntimeException | Error resumeEx) {
 			logger.error(exMessage, beginEx);
 			throw resumeEx;
-		}
-		catch (Error resumeErr) {
-			logger.error(exMessage, beginEx);
-			throw resumeErr;
 		}
 	}
 
@@ -782,19 +765,12 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				}
 				throw ex;
 			}
-			catch (RuntimeException ex) {
+			catch (RuntimeException | Error ex) {
 				if (!beforeCompletionInvoked) {
 					triggerBeforeCompletion(status);
 				}
 				doRollbackOnCommitException(status, ex);
 				throw ex;
-			}
-			catch (Error err) {
-				if (!beforeCompletionInvoked) {
-					triggerBeforeCompletion(status);
-				}
-				doRollbackOnCommitException(status, err);
-				throw err;
 			}
 
 			// Trigger afterCommit callbacks, with an exception thrown there
@@ -869,13 +845,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 					logger.debug("Should roll back transaction but cannot - no transaction available");
 				}
 			}
-			catch (RuntimeException ex) {
+			catch (RuntimeException | Error ex) {
 				triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN);
 				throw ex;
-			}
-			catch (Error err) {
-				triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN);
-				throw err;
 			}
 			triggerAfterCompletion(status, TransactionSynchronization.STATUS_ROLLED_BACK);
 		}
@@ -906,15 +878,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				doSetRollbackOnly(status);
 			}
 		}
-		catch (RuntimeException rbex) {
+		catch (RuntimeException | Error rbex) {
 			logger.error("Commit exception overridden by rollback exception", ex);
 			triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN);
 			throw rbex;
-		}
-		catch (Error rberr) {
-			logger.error("Commit exception overridden by rollback exception", ex);
-			triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN);
-			throw rberr;
 		}
 		triggerAfterCompletion(status, TransactionSynchronization.STATUS_ROLLED_BACK);
 	}
@@ -967,6 +934,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	private void triggerAfterCompletion(DefaultTransactionStatus status, int completionStatus) {
 		if (status.isNewSynchronization()) {
 			List<TransactionSynchronization> synchronizations = TransactionSynchronizationManager.getSynchronizations();
+			TransactionSynchronizationManager.clearSynchronization();
 			if (!status.hasTransaction() || status.isNewTransaction()) {
 				if (status.isDebug()) {
 					logger.trace("Triggering afterCompletion synchronization");

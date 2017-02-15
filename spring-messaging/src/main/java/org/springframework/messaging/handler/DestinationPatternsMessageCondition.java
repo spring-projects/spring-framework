@@ -73,7 +73,7 @@ public class DestinationPatternsMessageCondition extends AbstractMessageConditio
 
 
 	private static List<String> asList(String... patterns) {
-		return (patterns != null ? Arrays.asList(patterns) : Collections.<String>emptyList());
+		return (patterns != null ? Arrays.asList(patterns) : Collections.emptyList());
 	}
 
 	private static Set<String> prependLeadingSlash(Collection<String> patterns, PathMatcher pathMatcher) {

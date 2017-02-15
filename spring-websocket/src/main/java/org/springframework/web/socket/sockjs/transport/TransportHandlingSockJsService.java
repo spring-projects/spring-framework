@@ -291,6 +291,11 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 						return;
 					}
 				}
+				if (!transportHandler.checkSessionType(session)) {
+					logger.debug("Session type does not match the transport type for the request.");
+					response.setStatusCode(HttpStatus.NOT_FOUND);
+					return;
+				}
 			}
 
 			if (transportType.sendsNoCacheInstruction()) {
@@ -303,7 +308,10 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 				}
 			}
 
+
 			transportHandler.handleRequest(request, response, handler, session);
+
+
 			chain.applyAfterHandshake(request, response, null);
 		}
 		catch (SockJsException ex) {

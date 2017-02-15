@@ -25,9 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
@@ -123,8 +120,6 @@ public class MessageHeaderAccessor {
 			new MimeType("text", "*"), new MimeType("application", "*+json"), new MimeType("application", "*+xml")
 	};
 
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final MutableMessageHeaders headers;
 
@@ -567,7 +562,7 @@ public class MessageHeaderAccessor {
 	 * of the given {@code Message}, or {@code null} if that's not available or if
 	 * its type does not match the required type.
 	 * <p>This is for cases where the existence of an accessor is strongly expected
-	 * (to be followed up with an assertion) or will created if not provided.
+	 * (followed up with an assertion) or where an accessor will be created otherwise.
 	 * @return an accessor instance of the specified type, or {@code null} if none
 	 * @since 4.1
 	 */

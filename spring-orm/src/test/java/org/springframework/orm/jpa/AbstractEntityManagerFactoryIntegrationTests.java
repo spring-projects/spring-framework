@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,8 +124,8 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests {
 	public static void closeContext() {
 		if (applicationContext != null) {
 			applicationContext.close();
+			applicationContext = null;
 		}
-		applicationContext = null;
 	}
 
 
@@ -164,9 +164,9 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests {
 		this.transactionStatus = this.transactionManager.getTransaction(this.transactionDefinition);
 	}
 
-	protected void deleteFromTables(String... names) {
-		for (String name : names) {
-			this.jdbcTemplate.update("DELETE FROM " + name);
+	protected void deleteFromTables(String... tableNames) {
+		for (String tableName : tableNames) {
+			this.jdbcTemplate.update("DELETE FROM " + tableName);
 		}
 		this.zappedTables = true;
 	}

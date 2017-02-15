@@ -16,65 +16,66 @@
 
 package org.springframework.http.server.reactive.bootstrap;
 
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.jetbrains.annotations.NotNull;
 import reactor.core.Loopback;
+import reactor.ipc.netty.NettyContext;
 
 import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
-import org.springframework.util.Assert;
 
 /**
  * @author Stephane Maldini
  */
-public class ReactorHttpServer extends HttpServerSupport implements HttpServer, Loopback {
+public class ReactorHttpServer extends AbstractHttpServer implements Loopback {
 
 	private ReactorHttpHandlerAdapter reactorHandler;
 
-	private reactor.ipc.netty.http.HttpServer reactorServer;
+	private reactor.ipc.netty.http.server.HttpServer reactorServer;
 
-	private boolean running;
+	private AtomicReference<NettyContext> nettyContext = new AtomicReference<>();
 
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
-
-		Assert.notNull(getHttpHandler());
-		this.reactorHandler = new ReactorHttpHandlerAdapter(getHttpHandler());
-		this.reactorServer = reactor.ipc.netty.http.HttpServer.create(getHost(), getPort());
+	protected void initServer() throws Exception {
+		this.reactorHandler = createHttpHandlerAdapter();
+		this.reactorServer = reactor.ipc.netty.http.server.HttpServer.create(getHost(), getPort());
 	}
 
-
-	@Override
-	public boolean isRunning() {
-		return this.running;
+	@NotNull
+	private ReactorHttpHandlerAdapter createHttpHandlerAdapter() {
+		return getHttpHandlerMap() != null ?
+				new ReactorHttpHandlerAdapter(getHttpHandlerMap()) :
+				new ReactorHttpHandlerAdapter(getHttpHandler());
 	}
 
 	@Override
 	public Object connectedInput() {
-		return reactorServer;
+		return this.reactorServer;
 	}
 
 	@Override
 	public Object connectedOutput() {
-		return reactorServer;
+		return this.reactorServer;
 	}
 
 	@Override
-	public void start() {
-		if (!this.running) {
-			try {
-				this.reactorServer.startAndAwait(reactorHandler);
-				this.running = true;
-			}
-			catch (InterruptedException ex) {
-				throw new IllegalStateException(ex);
-			}
-		}
+	protected void startInternal() {
+		NettyContext nettyContext = this.reactorServer.newHandler(this.reactorHandler).block();
+		setPort(nettyContext.address().getPort());
+		this.nettyContext.set(nettyContext);
 	}
 
 	@Override
-	public void stop() {
-		if (this.running) {
-			this.reactorServer.shutdown();
-			this.running = false;
-		}
+	protected void stopInternal() {
+		this.nettyContext.get().dispose();
 	}
+
+	@Override
+	protected void resetInternal() {
+		this.reactorServer = null;
+		this.reactorHandler = null;
+		this.nettyContext.set(null);
+	}
+
 }

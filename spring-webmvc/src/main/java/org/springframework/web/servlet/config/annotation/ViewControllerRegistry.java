@@ -49,6 +49,9 @@ public class ViewControllerRegistry {
 	/**
 	 * Map a view controller to the given URL path (or pattern) in order to render
 	 * a response with a pre-configured status code and view.
+	 * <p>Patterns like {@code "/admin/**"} or {@code "/articles/{articlename:\\w+}"}
+	 * are allowed. See {@link org.springframework.util.AntPathMatcher} for more details on the
+	 * syntax.
 	 */
 	public ViewControllerRegistration addViewController(String urlPath) {
 		ViewControllerRegistration registration = new ViewControllerRegistration(urlPath);

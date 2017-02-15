@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -48,15 +49,15 @@ public class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType, Object... hints) {
+	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
 		Class<?> clazz = elementType.getRawClass();
-		return (super.canEncode(elementType, mimeType, hints) && CharSequence.class.isAssignableFrom(clazz));
+		return (super.canEncode(elementType, mimeType) && CharSequence.class.isAssignableFrom(clazz));
 	}
 
 	@Override
 	public Flux<DataBuffer> encode(Publisher<? extends CharSequence> inputStream,
 			DataBufferFactory bufferFactory, ResolvableType elementType,
-			MimeType mimeType, Object... hints) {
+			MimeType mimeType, Map<String, Object> hints) {
 
 		Charset charset;
 		if (mimeType != null && mimeType.getCharset() != null) {

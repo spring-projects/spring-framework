@@ -17,6 +17,7 @@
 package org.springframework.core.codec;
 
 import java.util.List;
+import java.util.Map;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -41,11 +42,10 @@ public interface Decoder<T> {
 	 * Whether the decoder supports the given target element type and the MIME
 	 * type of the source stream.
 	 * @param elementType the target element type for the output stream
-	 * @param mimeType the mime type associated with the stream to decode
-	 * @param hints additional information about how to do decode, optional
+	 * @param mimeType the mime type associated with the stream to decode, can be {@code null} if not specified.
 	 * @return {@code true} if supported, {@code false} otherwise
 	 */
-	boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints);
+	boolean canDecode(ResolvableType elementType, MimeType mimeType);
 
 	/**
 	 * Decode a {@link DataBuffer} input stream into a Flux of {@code T}.
@@ -54,11 +54,11 @@ public interface Decoder<T> {
 	 * this type must have been previously passed to the {@link #canDecode}
 	 * method and it must have returned {@code true}.
 	 * @param mimeType the MIME type associated with the input stream, optional
-	 * @param hints additional information about how to do decode, optional
+	 * @param hints additional information about how to do encode
 	 * @return the output stream with decoded elements
 	 */
 	Flux<T> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Object... hints);
+			MimeType mimeType, Map<String, Object> hints);
 
 	/**
 	 * Decode a {@link DataBuffer} input stream into a Mono of {@code T}.
@@ -67,11 +67,11 @@ public interface Decoder<T> {
 	 * this type must have been previously passed to the {@link #canDecode}
 	 * method and it must have returned {@code true}.
 	 * @param mimeType the MIME type associated with the input stream, optional
-	 * @param hints additional information about how to do decode, optional
+	 * @param hints additional information about how to do encode
 	 * @return the output stream with the decoded element
 	 */
 	Mono<T> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Object... hints);
+			MimeType mimeType, Map<String, Object> hints);
 
 	/**
 	 * Return the list of MIME types this decoder supports.

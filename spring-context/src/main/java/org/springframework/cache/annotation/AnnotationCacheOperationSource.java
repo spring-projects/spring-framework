@@ -43,8 +43,7 @@ import org.springframework.util.Assert;
  * @since 3.1
  */
 @SuppressWarnings("serial")
-public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperationSource
-		implements Serializable {
+public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperationSource implements Serializable {
 
 	private final boolean publicMethodsOnly;
 
@@ -177,6 +176,7 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 		return this.annotationParsers.hashCode();
 	}
 
+
 	/**
 	 * Callback interface providing {@link CacheOperation} instance(s) based on
 	 * a given {@link CacheAnnotationParser}.
@@ -185,10 +185,9 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 	protected interface CacheOperationProvider {
 
 		/**
-		 * Returns the {@link CacheOperation} instance(s) provided by the specified parser.
-		 *
+		 * Return the {@link CacheOperation} instance(s) provided by the specified parser.
 		 * @param parser the parser to use
-		 * @return the cache operations or {@code null} if none is found
+		 * @return the cache operations, or {@code null} if none found
 		 */
 		Collection<CacheOperation> getCacheOperations(CacheAnnotationParser parser);
 	}

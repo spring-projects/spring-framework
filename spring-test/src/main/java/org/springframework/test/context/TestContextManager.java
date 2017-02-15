@@ -16,6 +16,7 @@
 
 package org.springframework.test.context;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -92,6 +94,13 @@ public class TestContextManager {
 
 	private final TestContext testContext;
 
+	private final ThreadLocal<TestContext> testContextHolder = new ThreadLocal<TestContext>() {
+
+		protected TestContext initialValue() {
+			return copyTestContext(TestContextManager.this.testContext);
+		}
+	};
+
 	private final List<TestExecutionListener> testExecutionListeners = new ArrayList<>();
 
 
@@ -131,7 +140,7 @@ public class TestContextManager {
 	 * Get the {@link TestContext} managed by this {@code TestContextManager}.
 	 */
 	public final TestContext getTestContext() {
-		return this.testContext;
+		return this.testContextHolder.get();
 	}
 
 	/**
@@ -482,6 +491,9 @@ public class TestContextManager {
 				}
 			}
 		}
+
+		this.testContextHolder.remove();
+
 		if (afterTestClassException != null) {
 			ReflectionUtils.rethrowException(afterTestClassException);
 		}
@@ -527,6 +539,33 @@ public class TestContextManager {
 						"TestExecutionListener [%s] for test method [%s] and test instance [%s]",
 						callbackName, testExecutionListener, testMethod, testInstance), ex);
 		}
+	}
+
+
+	/**
+	 * Attempt to create a copy of the supplied {@code TestContext} using its
+	 * <em>copy constructor</em>.
+	 */
+	private static TestContext copyTestContext(TestContext testContext) {
+		Constructor<? extends TestContext> constructor = ClassUtils.getConstructorIfAvailable(testContext.getClass(),
+			testContext.getClass());
+
+		if (constructor != null) {
+			try {
+				ReflectionUtils.makeAccessible(constructor);
+				return constructor.newInstance(testContext);
+			}
+			catch (Exception ex) {
+				if (logger.isInfoEnabled()) {
+					logger.info(String.format("Failed to invoke copy constructor for [%s]; " +
+							"concurrent test execution is therefore likely not supported.",
+							testContext), ex);
+				}
+			}
+		}
+
+		// fallback to original instance
+		return testContext;
 	}
 
 }

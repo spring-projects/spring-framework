@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.core.io.support;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -168,17 +169,17 @@ public abstract class PropertiesLoaderSupport {
 	protected void loadProperties(Properties props) throws IOException {
 		if (this.locations != null) {
 			for (Resource location : this.locations) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Loading properties file from " + location);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Loading properties file from " + location);
 				}
 				try {
 					PropertiesLoaderUtils.fillProperties(
 							props, new EncodedResource(location, this.fileEncoding), this.propertiesPersister);
 				}
-				catch (IOException ex) {
+				catch (FileNotFoundException ex) {
 					if (this.ignoreResourceNotFound) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Could not load properties from " + location + ": " + ex.getMessage());
+						if (logger.isInfoEnabled()) {
+							logger.info("Properties resource not found: " + ex.getMessage());
 						}
 					}
 					else {

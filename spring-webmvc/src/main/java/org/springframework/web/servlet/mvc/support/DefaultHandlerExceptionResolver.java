@@ -44,6 +44,7 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.ModelAndView;
@@ -152,6 +153,10 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			}
 			else if (ex instanceof NoHandlerFoundException) {
 				return handleNoHandlerFoundException((NoHandlerFoundException) ex, request, response, handler);
+			}
+			else if (ex instanceof AsyncRequestTimeoutException) {
+				return handleAsyncRequestTimeoutException(
+						(AsyncRequestTimeoutException) ex, request, response, handler);
 			}
 		}
 		catch (Exception handlerException) {
@@ -449,6 +454,30 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 		return new ModelAndView();
 	}
 
+	/**
+	 * Handle the case where an async request timed out.
+	 * <p>The default implementation sends an HTTP 503 error.
+	 * @param ex the {@link AsyncRequestTimeoutException }to be handled
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the executed handler, or {@code null} if none chosen
+	 * at the time of the exception (for example, if multipart resolution failed)
+	 * @return an empty ModelAndView indicating the exception was handled
+	 * @throws IOException potentially thrown from response.sendError()
+	 * @since 4.2.8
+	 */
+	protected ModelAndView handleAsyncRequestTimeoutException(AsyncRequestTimeoutException ex,
+			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+
+		if (!response.isCommitted()) {
+			response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+		}
+		else if (logger.isErrorEnabled()) {
+			logger.error("Async timeout for " + request.getMethod() + " [" + request.getRequestURI() + "]");
+		}
+		return new ModelAndView();
+	}
+
 
 	/**
 	 * Invoked to send a server error. Sets the status to 500 and also sets the
@@ -456,6 +485,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 */
 	protected void sendServerError(Exception ex, HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
+
 
 		request.setAttribute("javax.servlet.error.exception", ex);
 		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

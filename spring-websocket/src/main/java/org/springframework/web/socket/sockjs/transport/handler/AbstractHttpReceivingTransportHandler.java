@@ -38,6 +38,10 @@ import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJ
  */
 public abstract class AbstractHttpReceivingTransportHandler extends AbstractTransportHandler {
 
+	@Override
+	public boolean checkSessionType(SockJsSession session) {
+		return (session instanceof AbstractHttpSockJsSession);
+	}
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
@@ -94,6 +98,7 @@ public abstract class AbstractHttpReceivingTransportHandler extends AbstractTran
 			throw new SockJsException("Failed to send error: " + error, sessionId, ex);
 		}
 	}
+
 
 	protected abstract String[] readMessages(ServerHttpRequest request) throws IOException;
 

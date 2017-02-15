@@ -50,7 +50,7 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 
 	private List<Pattern> includePatterns;
 
-	private AspectJAdvisorFactory aspectJAdvisorFactory = new ReflectiveAspectJAdvisorFactory();
+	private AspectJAdvisorFactory aspectJAdvisorFactory;
 
 	private BeanFactoryAspectJAdvisorsBuilder aspectJAdvisorsBuilder;
 
@@ -74,6 +74,9 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 	@Override
 	protected void initBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		super.initBeanFactory(beanFactory);
+		if (this.aspectJAdvisorFactory == null) {
+			this.aspectJAdvisorFactory = new ReflectiveAspectJAdvisorFactory(beanFactory);
+		}
 		this.aspectJAdvisorsBuilder =
 				new BeanFactoryAspectJAdvisorsBuilderAdapter(beanFactory, this.aspectJAdvisorFactory);
 	}
@@ -130,6 +133,7 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 
 		public BeanFactoryAspectJAdvisorsBuilderAdapter(
 				ListableBeanFactory beanFactory, AspectJAdvisorFactory advisorFactory) {
+
 			super(beanFactory, advisorFactory);
 		}
 

@@ -40,6 +40,8 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.context.index.CandidateComponentsIndex;
+import org.springframework.context.index.CandidateComponentsIndexLoader;
 import org.springframework.context.weaving.LoadTimeWeaverAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -76,6 +78,7 @@ import org.springframework.util.ResourceUtils;
  * <p><b>NOTE: Spring's JPA support requires JPA 2.1 or higher, as of Spring 5.0.</b>
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 2.0
  * @see #setPersistenceXmlLocations
  * @see #setDataSourceLookup
@@ -108,7 +111,7 @@ public class DefaultPersistenceUnitManager
 	public final static String ORIGINAL_DEFAULT_PERSISTENCE_UNIT_NAME = "default";
 
 
-	private static final Set<TypeFilter> entityTypeFilters;
+	private static final Set<AnnotationTypeFilter> entityTypeFilters;
 
 	static {
 		entityTypeFilters = new LinkedHashSet<>(4);
@@ -146,6 +149,8 @@ public class DefaultPersistenceUnitManager
 	private LoadTimeWeaver loadTimeWeaver;
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+
+	private CandidateComponentsIndex componentsIndex;
 
 	private final Set<String> persistenceUnitInfoNames = new HashSet<>();
 
@@ -252,6 +257,7 @@ public class DefaultPersistenceUnitManager
 	/**
 	 * Specify the JPA 2.0 shared cache mode for all of this manager's persistence
 	 * units, overriding any value in {@code persistence.xml} if set.
+	 * @since 4.0
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getSharedCacheMode()
 	 */
 	public void setSharedCacheMode(SharedCacheMode sharedCacheMode) {
@@ -261,6 +267,7 @@ public class DefaultPersistenceUnitManager
 	/**
 	 * Specify the JPA 2.0 validation mode for all of this manager's persistence
 	 * units, overriding any value in {@code persistence.xml} if set.
+	 * @since 4.0
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getValidationMode()
 	 */
 	public void setValidationMode(ValidationMode validationMode) {
@@ -404,6 +411,7 @@ public class DefaultPersistenceUnitManager
 	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
+		this.componentsIndex = CandidateComponentsIndexLoader.loadIndex(resourceLoader.getClassLoader());
 	}
 
 
@@ -508,33 +516,11 @@ public class DefaultPersistenceUnitManager
 
 		if (this.packagesToScan != null) {
 			for (String pkg : this.packagesToScan) {
-				try {
-					String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
-							ClassUtils.convertClassNameToResourcePath(pkg) + CLASS_RESOURCE_PATTERN;
-					Resource[] resources = this.resourcePatternResolver.getResources(pattern);
-					MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
-					for (Resource resource : resources) {
-						if (resource.isReadable()) {
-							MetadataReader reader = readerFactory.getMetadataReader(resource);
-							String className = reader.getClassMetadata().getClassName();
-							if (matchesFilter(reader, readerFactory)) {
-								scannedUnit.addManagedClassName(className);
-								if (scannedUnit.getPersistenceUnitRootUrl() == null) {
-									URL url = resource.getURL();
-									if (ResourceUtils.isJarURL(url)) {
-										scannedUnit.setPersistenceUnitRootUrl(ResourceUtils.extractJarFileURL(url));
-									}
-								}
-							}
-							else if (className.endsWith(PACKAGE_INFO_SUFFIX)) {
-								scannedUnit.addManagedPackage(
-										className.substring(0, className.length() - PACKAGE_INFO_SUFFIX.length()));
-							}
-						}
-					}
+				if (this.componentsIndex != null) {
+					addPackageFromIndex(scannedUnit, pkg);
 				}
-				catch (IOException ex) {
-					throw new PersistenceException("Failed to scan classpath for unlisted entity classes", ex);
+				else {
+					scanPackage(scannedUnit, pkg);
 				}
 			}
 		}
@@ -563,6 +549,48 @@ public class DefaultPersistenceUnitManager
 		return scannedUnit;
 	}
 
+	private void addPackageFromIndex(SpringPersistenceUnitInfo scannedUnit, String pkg) {
+		Set<String> candidates = new HashSet<>();
+		for (AnnotationTypeFilter filter : entityTypeFilters) {
+			candidates.addAll(this.componentsIndex
+					.getCandidateTypes(pkg, filter.getAnnotationType().getName()));
+		}
+		candidates.forEach(scannedUnit::addManagedClassName);
+		Set<String> managedPackages = this.componentsIndex.getCandidateTypes(pkg, "package-info");
+		managedPackages.forEach(scannedUnit::addManagedPackage);
+	}
+
+	private void scanPackage(SpringPersistenceUnitInfo scannedUnit, String pkg) {
+		try {
+			String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
+					ClassUtils.convertClassNameToResourcePath(pkg) + CLASS_RESOURCE_PATTERN;
+			Resource[] resources = this.resourcePatternResolver.getResources(pattern);
+			MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
+			for (Resource resource : resources) {
+				if (resource.isReadable()) {
+					MetadataReader reader = readerFactory.getMetadataReader(resource);
+					String className = reader.getClassMetadata().getClassName();
+					if (matchesFilter(reader, readerFactory)) {
+						scannedUnit.addManagedClassName(className);
+						if (scannedUnit.getPersistenceUnitRootUrl() == null) {
+							URL url = resource.getURL();
+							if (ResourceUtils.isJarURL(url)) {
+								scannedUnit.setPersistenceUnitRootUrl(ResourceUtils.extractJarFileURL(url));
+							}
+						}
+					}
+					else if (className.endsWith(PACKAGE_INFO_SUFFIX)) {
+						scannedUnit.addManagedPackage(
+								className.substring(0, className.length() - PACKAGE_INFO_SUFFIX.length()));
+					}
+				}
+			}
+		}
+		catch (IOException ex) {
+			throw new PersistenceException("Failed to scan classpath for unlisted entity classes", ex);
+		}
+	}
+
 	/**
 	 * Check whether any of the configured entity type filters matches
 	 * the current class descriptor contained in the metadata reader.
@@ -587,8 +615,8 @@ public class DefaultPersistenceUnitManager
 			return null;
 		}
 		try {
-			Resource res = this.resourcePatternResolver.getResource(this.defaultPersistenceUnitRootLocation);
-			return res.getURL();
+			URL url = this.resourcePatternResolver.getResource(this.defaultPersistenceUnitRootLocation).getURL();
+			return (ResourceUtils.isJarURL(url) ? ResourceUtils.extractJarFileURL(url) : url);
 		}
 		catch (IOException ex) {
 			throw new PersistenceException("Unable to resolve persistence unit root URL", ex);

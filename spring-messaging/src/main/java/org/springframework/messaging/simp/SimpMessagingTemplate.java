@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,10 +58,10 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 	/**
 	 * Create a new {@link SimpMessagingTemplate} instance.
-	 * @param messageChannel the message channel (must not be {@code null})
+	 * @param messageChannel the message channel (never {@code null})
 	 */
 	public SimpMessagingTemplate(MessageChannel messageChannel) {
-		Assert.notNull(messageChannel, "'messageChannel' must not be null");
+		Assert.notNull(messageChannel, "MessageChannel must not be null");
 		this.messageChannel = messageChannel;
 	}
 
@@ -79,8 +79,8 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 * @see org.springframework.messaging.simp.user.UserDestinationMessageHandler
 	 */
 	public void setUserDestinationPrefix(String prefix) {
-		Assert.hasText(prefix, "'destinationPrefix' must not be empty");
-		this.destinationPrefix = prefix.endsWith("/") ? prefix : prefix + "/";
+		Assert.hasText(prefix, "User destination prefix must not be empty");
+		this.destinationPrefix = (prefix.endsWith("/") ? prefix : prefix + "/");
 
 	}
 
@@ -135,7 +135,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 */
 	@Override
 	public void send(Message<?> message) {
-		Assert.notNull(message, "'message' is required");
+		Assert.notNull(message, "Message is required");
 		String destination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
 		if (destination != null) {
 			sendInternal(message);
@@ -178,7 +178,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 	private void sendInternal(Message<?> message) {
 		String destination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
-		Assert.notNull(destination);
+		Assert.notNull(destination, "Destination header required");
 
 		long timeout = this.sendTimeout;
 		boolean sent = (timeout >= 0 ? this.messageChannel.send(message, timeout) : this.messageChannel.send(message));

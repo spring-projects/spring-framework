@@ -59,7 +59,7 @@ public class OperatorInstanceof extends Operator {
 		Object leftValue = left.getValue();
 		Object rightValue = right.getValue();
 		BooleanTypedValue result = null;
-		if (rightValue == null || !(rightValue instanceof Class<?>)) {
+		if (rightValue == null || !(rightValue instanceof Class)) {
 			throw new SpelEvaluationException(getRightOperand().getStartPosition(),
 					SpelMessage.INSTANCEOF_OPERATOR_NEEDS_CLASS_OPERAND,
 					(rightValue == null ? "null" : rightValue.getClass().getName()));

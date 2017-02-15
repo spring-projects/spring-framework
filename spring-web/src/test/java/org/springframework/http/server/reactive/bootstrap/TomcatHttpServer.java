@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,77 +22,73 @@ import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
+import org.springframework.http.server.reactive.TomcatHttpHandlerAdapter;
+import org.springframework.util.Assert;
 
 /**
  * @author Rossen Stoyanchev
  */
-public class TomcatHttpServer extends HttpServerSupport implements HttpServer, InitializingBean {
+public class TomcatHttpServer extends AbstractHttpServer {
+
+	private final String baseDir;
+
+	private final Class<?> wsListener;
 
 	private Tomcat tomcatServer;
 
-	private boolean running;
-
-	private String baseDir;
-
-
-	public TomcatHttpServer() {
-	}
 
 	public TomcatHttpServer(String baseDir) {
+		this(baseDir, null);
+	}
+
+	public TomcatHttpServer(String baseDir, Class<?> wsListener) {
+		Assert.notNull(baseDir, "Base dir must not be null");
 		this.baseDir = baseDir;
+		this.wsListener = wsListener;
 	}
 
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
+	protected void initServer() throws Exception {
 		this.tomcatServer = new Tomcat();
-		if (this.baseDir != null) {
-			this.tomcatServer.setBaseDir(baseDir);
-		}
+		this.tomcatServer.setBaseDir(baseDir);
 		this.tomcatServer.setHostname(getHost());
 		this.tomcatServer.setPort(getPort());
 
-		ServletHttpHandlerAdapter servlet = new ServletHttpHandlerAdapter(getHttpHandler());
+		ServletHttpHandlerAdapter servlet = initServletAdapter();
 
 		File base = new File(System.getProperty("java.io.tmpdir"));
 		Context rootContext = tomcatServer.addContext("", base.getAbsolutePath());
 		Tomcat.addServlet(rootContext, "httpHandlerServlet", servlet);
-		rootContext.addServletMapping("/", "httpHandlerServlet");
-	}
-
-
-	@Override
-	public void start() {
-		if (!this.running) {
-			try {
-				this.running = true;
-				this.tomcatServer.start();
-			}
-			catch (LifecycleException ex) {
-				throw new IllegalStateException(ex);
-			}
+		rootContext.addServletMappingDecoded("/", "httpHandlerServlet");
+		if (wsListener != null) {
+			rootContext.addApplicationListener(wsListener.getName());
 		}
 	}
 
+	private ServletHttpHandlerAdapter initServletAdapter() {
+		return getHttpHandlerMap() != null ?
+				new TomcatHttpHandlerAdapter(getHttpHandlerMap()) :
+				new TomcatHttpHandlerAdapter(getHttpHandler());
+	}
+
+
 	@Override
-	public void stop() {
-		if (this.running) {
-			try {
-				this.running = false;
-				this.tomcatServer.stop();
-				this.tomcatServer.destroy();
-			}
-			catch (LifecycleException ex) {
-				throw new IllegalStateException(ex);
-			}
-		}
+	protected void startInternal() throws LifecycleException {
+		this.tomcatServer.start();
+		setPort(this.tomcatServer.getConnector().getLocalPort());
 	}
 
 	@Override
-	public boolean isRunning() {
-		return this.running;
+	protected void stopInternal() throws Exception {
+		this.tomcatServer.stop();
+		this.tomcatServer.destroy();
+	}
+
+	@Override
+	protected void resetInternal() {
+		this.tomcatServer = null;
 	}
 
 }

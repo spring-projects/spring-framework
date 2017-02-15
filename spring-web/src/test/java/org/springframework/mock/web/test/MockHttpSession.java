@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,7 @@ import org.springframework.util.Assert;
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpSession} interface.
  *
- * <p>As of Spring 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
- *
- * <p>Used for testing the web framework; also useful for testing application
- * controllers.
+ * <p>As of Spring 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -72,7 +69,6 @@ public class MockHttpSession implements HttpSession {
 
 	/**
 	 * Create a new MockHttpSession with a default {@link MockServletContext}.
-	 *
 	 * @see MockServletContext
 	 */
 	public MockHttpSession() {
@@ -81,7 +77,6 @@ public class MockHttpSession implements HttpSession {
 
 	/**
 	 * Create a new MockHttpSession.
-	 *
 	 * @param servletContext the ServletContext that the session runs in
 	 */
 	public MockHttpSession(ServletContext servletContext) {
@@ -90,7 +85,6 @@ public class MockHttpSession implements HttpSession {
 
 	/**
 	 * Create a new MockHttpSession.
-	 *
 	 * @param servletContext the ServletContext that the session runs in
 	 * @param id a unique identifier for this session
 	 */
@@ -98,6 +92,7 @@ public class MockHttpSession implements HttpSession {
 		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
 		this.id = (id != null ? id : Integer.toString(nextId++));
 	}
+
 
 	@Override
 	public long getCreationTime() {
@@ -111,8 +106,8 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	/**
-	 * As of Servlet 3.1 the id of a session can be changed.
-	 * @return the new session id.
+	 * As of Servlet 3.1, the id of a session can be changed.
+	 * @return the new session id
 	 * @since 4.0.3
 	 */
 	public String changeSessionId() {
@@ -227,7 +222,6 @@ public class MockHttpSession implements HttpSession {
 
 	/**
 	 * Invalidates this session then unbinds any objects bound to it.
-	 *
 	 * @throws IllegalStateException if this method is called on an already invalidated session
 	 */
 	@Override
@@ -244,13 +238,10 @@ public class MockHttpSession implements HttpSession {
 	/**
 	 * Convenience method for asserting that this session has not been
 	 * {@linkplain #invalidate() invalidated}.
-	 *
 	 * @throws IllegalStateException if this session has been invalidated
 	 */
 	private void assertIsValid() {
-		if (isInvalid()) {
-			throw new IllegalStateException("The session has already been invalidated");
-		}
+		Assert.state(!isInvalid(), "The session has already been invalidated");
 	}
 
 	public void setNew(boolean value) {
@@ -266,7 +257,6 @@ public class MockHttpSession implements HttpSession {
 	/**
 	 * Serialize the attributes of this session into an object that can be
 	 * turned into a byte array with standard Java serialization.
-	 *
 	 * @return a representation of this session's serialized state
 	 */
 	public Serializable serializeState() {
@@ -293,7 +283,6 @@ public class MockHttpSession implements HttpSession {
 	/**
 	 * Deserialize the attributes of this session from a state object created by
 	 * {@link #serializeState()}.
-	 *
 	 * @param state a representation of this session's serialized state
 	 */
 	@SuppressWarnings("unchecked")

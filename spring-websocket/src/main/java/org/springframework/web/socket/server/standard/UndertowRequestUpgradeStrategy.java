@@ -66,7 +66,7 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 
 		StringBuffer requestUrl = servletRequest.getRequestURL();
 		String path = servletRequest.getRequestURI();  // shouldn't matter
-		Map<String, String> pathParams = Collections.<String, String>emptyMap();
+		Map<String, String> pathParams = Collections.emptyMap();
 
 		ServerEndpointRegistration endpointConfig = new ServerEndpointRegistration(path, endpoint);
 		endpointConfig.setSubprotocols(Collections.singletonList(selectedProtocol));

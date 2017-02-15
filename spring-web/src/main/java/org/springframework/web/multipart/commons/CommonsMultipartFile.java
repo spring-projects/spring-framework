@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,8 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 
 	private final long size;
 
+	private boolean preserveFilename = false;
+
 
 	/**
 	 * Create an instance wrapping the given FileItem.
@@ -66,6 +68,21 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		return this.fileItem;
 	}
 
+	/**
+	 * Set whether to preserve the filename as sent by the client, not stripping off
+	 * path information in {@link CommonsMultipartFile#getOriginalFilename()}.
+	 * <p>Default is "false", stripping off path information that may prefix the
+	 * actual filename e.g. from Opera. Switch this to "true" for preserving the
+	 * client-specified filename as-is, including potential path separators.
+	 * @since 4.3.5
+	 * @see #getOriginalFilename()
+	 * @see CommonsMultipartResolver#setPreserveFilename(boolean)
+	 */
+	public void setPreserveFilename(boolean preserveFilename) {
+		this.preserveFilename = preserveFilename;
+	}
+
+
 	@Override
 	public String getName() {
 		return this.fileItem.getFieldName();
@@ -77,6 +94,10 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		if (filename == null) {
 			// Should never happen.
 			return "";
+		}
+		if (this.preserveFilename) {
+			// Do not try to strip off a path...
+			return filename;
 		}
 
 		// Check for Unix-style path

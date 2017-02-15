@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,8 @@ import org.springframework.util.StringUtils;
  * <li>"0 0 * * * *" = the top of every hour of every day.</li>
  * <li>"*&#47;10 * * * * *" = every ten seconds.</li>
  * <li>"0 0 8-10 * * *" = 8, 9 and 10 o'clock of every day.</li>
- * <li>"0 0/30 8-10 * * *" = 8:00, 8:30, 9:00, 9:30 and 10 o'clock every day.</li>
+ * <li>"0 0 6,19 * * *" = 6:00 AM and 7:00 PM every day.</li>
+ * <li>"0 0/30 8-10 * * *" = 8:00, 8:30, 9:00, 9:30, 10:00 and 10:30 every day.</li>
  * <li>"0 0 9-17 * * MON-FRI" = on the hour nine-to-five weekdays</li>
  * <li>"0 0 0 25 12 ?" = every Christmas Day at midnight</li>
  * </ul>
@@ -115,7 +116,7 @@ public class CronSequenceGenerator {
 		/*
 		The plan:
 
-		1 Round up to the next whole second
+		1 Start with whole second (rounding up if necessary)
 
 		2 If seconds match move on, otherwise find the next match:
 		2.1 If next match is in the next minute then roll forwards
@@ -127,8 +128,6 @@ public class CronSequenceGenerator {
 		4 If hour matches move on, otherwise find the next match
 		4.1 If next match is in the next day then roll forwards,
 		4.2 Reset the minutes and seconds and go to 2
-
-		...
 		*/
 
 		Calendar calendar = new GregorianCalendar();
@@ -427,7 +426,7 @@ public class CronSequenceGenerator {
 
 	@Override
 	public String toString() {
-		return (getClass().getSimpleName() + ": " + this.expression);
+		return getClass().getSimpleName() + ": " + this.expression;
 	}
 
 }

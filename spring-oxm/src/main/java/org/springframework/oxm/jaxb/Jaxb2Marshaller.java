@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,8 +100,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.StaxUtils;
 
 /**
- * Implementation of the {@code GenericMarshaller} interface for JAXB 2.1/2.2,
- * as included in JDK 6 update 4+ and Java 7/8.
+ * Implementation of the {@code GenericMarshaller} interface for JAXB 2.2.
  *
  * <p>The typical usage will be to set either the "contextPath" or the "classesToBeBound"
  * property on this bean, possibly customize the marshaller and unmarshaller by setting
@@ -544,7 +543,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		}
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("deprecation")  // on JDK 9
 	private Schema loadSchema(Resource[] resources, String schemaLanguage) throws IOException, SAXException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Setting validation schema to " +
@@ -589,7 +588,6 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 							supportsInternal(classArgument, false));
 				}
 				else if (typeArgument instanceof GenericArrayType) {
-					// Only on JDK 6 - see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5041784
 					GenericArrayType arrayType = (GenericArrayType) typeArgument;
 					return (Byte.TYPE == arrayType.getGenericComponentType());
 				}
@@ -774,9 +772,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		}
 		catch (NullPointerException ex) {
 			if (!isSupportDtd()) {
-				throw new UnmarshallingFailureException("NPE while unmarshalling. " +
-						"This can happen on JDK 1.6 due to the presence of DTD " +
-						"declarations, which are disabled.", ex);
+				throw new UnmarshallingFailureException("NPE while unmarshalling: " +
+						"This can happen due to the presence of DTD declarations which are disabled.", ex);
 			}
 			throw ex;
 		}
@@ -805,7 +802,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		}
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("deprecation")  // on JDK 9
 	private Source processSource(Source source) {
 		if (StaxUtils.isStaxSource(source) || source instanceof DOMSource) {
 			return source;

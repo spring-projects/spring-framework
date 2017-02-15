@@ -16,16 +16,19 @@
 
 package org.springframework.beans.factory.support;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.core.ResolvableType;
 import org.springframework.util.Assert;
 
 /**
@@ -49,21 +52,27 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
-	boolean allowCaching = true;
-
 	private BeanDefinitionHolder decoratedDefinition;
 
-	private volatile Class<?> targetType;
+	private AnnotatedElement qualifiedElement;
+
+	boolean allowCaching = true;
 
 	boolean isFactoryMethodUnique = false;
 
+	volatile ResolvableType targetType;
+
+	/** Package-visible field for caching the determined Class of a given bean definition */
+	volatile Class<?> resolvedTargetType;
+
+	/** Package-visible field for caching the return type of a generically typed factory method */
+	volatile ResolvableType factoryMethodReturnType;
+
+	/** Common lock for the four constructor fields below */
 	final Object constructorArgumentLock = new Object();
 
 	/** Package-visible field for caching the resolved constructor or factory method */
 	Executable resolvedConstructorOrFactoryMethod;
-
-	/** Package-visible field for caching the return type of a generically typed factory method */
-	volatile Class<?> resolvedFactoryMethodReturnType;
 
 	/** Package-visible field that marks the constructor arguments as resolved */
 	boolean constructorArgumentsResolved = false;
@@ -74,6 +83,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/** Package-visible field for caching partly prepared constructor arguments */
 	Object[] preparedConstructorArguments;
 
+	/** Common lock for the two post-processing fields below */
 	final Object postProcessingLock = new Object();
 
 	/** Package-visible field that indicates MergedBeanDefinitionPostProcessor having been applied */
@@ -93,10 +103,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * Create a new RootBeanDefinition, to be configured through its bean
 	 * properties and configuration methods.
 	 * @see #setBeanClass
-	 * @see #setBeanClassName
 	 * @see #setScope
-	 * @see #setAutowireMode
-	 * @see #setDependencyCheck
 	 * @see #setConstructorArgumentValues
 	 * @see #setPropertyValues
 	 */
@@ -107,10 +114,43 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/**
 	 * Create a new RootBeanDefinition for a singleton.
 	 * @param beanClass the class of the bean to instantiate
+	 * @see #setBeanClass
 	 */
 	public RootBeanDefinition(Class<?> beanClass) {
 		super();
 		setBeanClass(beanClass);
+	}
+
+	/**
+	 * Create a new RootBeanDefinition for a singleton bean, constructing each instance
+	 * through calling the given supplier (possibly a lambda or method reference).
+	 * @param beanClass the class of the bean to instantiate
+	 * @param instanceSupplier the supplier to construct a bean instance,
+	 * as an alternative to a declaratively specified factory method
+	 * @since 5.0
+	 * @see #setInstanceSupplier
+	 */
+	public <T> RootBeanDefinition(Class<T> beanClass, Supplier<T> instanceSupplier) {
+		super();
+		setBeanClass(beanClass);
+		setInstanceSupplier(instanceSupplier);
+	}
+
+	/**
+	 * Create a new RootBeanDefinition for a scoped bean, constructing each instance
+	 * through calling the given supplier (possibly a lambda or method reference).
+	 * @param beanClass the class of the bean to instantiate
+	 * @param scope the name of the corresponding scope
+	 * @param instanceSupplier the supplier to construct a bean instance,
+	 * as an alternative to a declaratively specified factory method
+	 * @since 5.0
+	 * @see #setInstanceSupplier
+	 */
+	public <T> RootBeanDefinition(Class<T> beanClass, String scope, Supplier<T> instanceSupplier) {
+		super();
+		setBeanClass(beanClass);
+		setScope(scope);
+		setInstanceSupplier(instanceSupplier);
 	}
 
 	/**
@@ -172,10 +212,11 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public RootBeanDefinition(RootBeanDefinition original) {
 		super(original);
-		this.allowCaching = original.allowCaching;
 		this.decoratedDefinition = original.decoratedDefinition;
-		this.targetType = original.targetType;
+		this.qualifiedElement = original.qualifiedElement;
+		this.allowCaching = original.allowCaching;
 		this.isFactoryMethodUnique = original.isFactoryMethodUnique;
+		this.targetType = original.targetType;
 	}
 
 	/**
@@ -215,18 +256,51 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
+	 * Specify the {@link AnnotatedElement} defining qualifiers,
+	 * to be used instead of the target class or factory method.
+	 * @since 4.3.3
+	 * @see #setTargetType(ResolvableType)
+	 * @see #getResolvedFactoryMethod()
+	 */
+	public void setQualifiedElement(AnnotatedElement qualifiedElement) {
+		this.qualifiedElement = qualifiedElement;
+	}
+
+	/**
+	 * Return the {@link AnnotatedElement} defining qualifiers, if any.
+	 * Otherwise, the factory method and target class will be checked.
+	 * @since 4.3.3
+	 */
+	public AnnotatedElement getQualifiedElement() {
+		return this.qualifiedElement;
+	}
+
+	/**
+	 * Specify a generics-containing target type of this bean definition, if known in advance.
+	 * @since 4.3.3
+	 */
+	public void setTargetType(ResolvableType targetType) {
+		this.targetType = targetType;
+	}
+
+	/**
 	 * Specify the target type of this bean definition, if known in advance.
+	 * @since 3.2.2
 	 */
 	public void setTargetType(Class<?> targetType) {
-		this.targetType = targetType;
+		this.targetType = (targetType != null ? ResolvableType.forClass(targetType) : null);
 	}
 
 	/**
 	 * Return the target type of this bean definition, if known
 	 * (either specified in advance or resolved on first instantiation).
+	 * @since 3.2.2
 	 */
 	public Class<?> getTargetType() {
-		return this.targetType;
+		if (this.resolvedTargetType != null) {
+			return this.resolvedTargetType;
+		}
+		return (this.targetType != null ? this.targetType.resolve() : null);
 	}
 
 	/**

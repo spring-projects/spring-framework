@@ -74,15 +74,14 @@ present in the framework.
 1. Preserve existing formatting; i.e. do not reformat code for its own sake
 1. Search the codebase using `git grep` and other tools to discover common
     naming conventions, etc.
-1. Latin-1 (ISO-8859-1) encoding for Java sources; use `native2ascii` to convert
-    if necessary
+1. UTF-8 encoding for Java sources
 
 
 ### Add Apache license header to all new classes
 
 ```java
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,18 +102,18 @@ package ...;
 ### Update Apache license header in modified files as necessary
 
 Always check the date range in the license header. For example, if you've
-modified a file in 2015 whose header still reads:
+modified a file in 2017 whose header still reads:
 
 ```java
 /*
  * Copyright 2002-2011 the original author or authors.
 ```
 
-Then be sure to update it to 2015 accordingly:
+Then be sure to update it to 2017 accordingly:
 
 ```java
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
 ```
 
 ### Use @since tags for newly-added public API types and methods
@@ -126,7 +125,7 @@ For example:
  * ...
  *
  * @author First Last
- * @since 4.2.3
+ * @since 5.0
  * @see ...
  */
 ```
@@ -295,7 +294,7 @@ Note that you can always force push (`git push -f`) reworked / rebased commits
 against the branch used to submit your pull request. In other words, you do not
 need to issue a new pull request when asked to make changes.
 
-[help documentation]: http://help.github.com/send-pull-requests
+[help documentation]: https://help.github.com/categories/collaborating-on-projects-using-issues-and-pull-requests/
 [JIRA issue tracker]: https://jira.spring.io/browse/SPR
 [Contributor License Agreement]: https://cla.pivotal.io/sign/spring
 [fork-and-edit]: https://github.com/blog/844-forking-with-the-edit-button

@@ -209,7 +209,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 	/**
-	 * Set whether the lookup occurs in a J2EE container, i.e. if the prefix
+	 * Set whether the lookup occurs in a Java EE container, i.e. if the prefix
 	 * "java:comp/env/" needs to be added if the JNDI name doesn't already
 	 * contain it. PersistenceAnnotationBeanPostProcessor's default is "true".
 	 * @see org.springframework.jndi.JndiLocatorSupport#setResourceRef
@@ -389,14 +389,8 @@ public class PersistenceAnnotationBeanPostProcessor
 					if (metadata != null) {
 						metadata.clear(pvs);
 					}
-					try {
-						metadata = buildPersistenceMetadata(clazz);
-						this.injectionMetadataCache.put(cacheKey, metadata);
-					}
-					catch (NoClassDefFoundError err) {
-						throw new IllegalStateException("Failed to introspect bean class [" + clazz.getName() +
-								"] for persistence metadata: could not find class that it depends on", err);
-					}
+					metadata = buildPersistenceMetadata(clazz);
+					this.injectionMetadataCache.put(cacheKey, metadata);
 				}
 			}
 		}

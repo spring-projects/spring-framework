@@ -38,6 +38,13 @@ import org.springframework.util.MimeType;
  */
 public class AbstractJackson2Codec {
 
+	/**
+	 * Hint key to use with a {@link Class} value specifying the JSON View to use to serialize
+	 * or deserialize an object.
+	 * @see <a href="http://wiki.fasterxml.com/JacksonJsonViews">Jackson JSON Views</a>
+	 */
+	public static final String JSON_VIEW_HINT = AbstractJackson2Codec.class.getName() + ".jsonView";
+
 	protected static final List<MimeType> JSON_MIME_TYPES = Arrays.asList(
 				new MimeType("application", "json", StandardCharsets.UTF_8),
 				new MimeType("application", "*+json", StandardCharsets.UTF_8));

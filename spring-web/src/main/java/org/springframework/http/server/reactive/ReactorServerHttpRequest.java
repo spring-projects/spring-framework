@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package org.springframework.http.server.reactive;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 import io.netty.handler.codec.http.cookie.Cookie;
 import reactor.core.publisher.Flux;
-import reactor.ipc.netty.http.HttpChannel;
+import reactor.ipc.netty.http.server.HttpServerRequest;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
@@ -33,54 +35,66 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Adapt {@link ServerHttpRequest} to the Reactor Net {@link HttpChannel}.
+ * Adapt {@link ServerHttpRequest} to the Reactor {@link HttpServerRequest}.
  *
  * @author Stephane Maldini
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
-	private final HttpChannel channel;
+	private final HttpServerRequest request;
 
-	private final NettyDataBufferFactory dataBufferFactory;
+	private final NettyDataBufferFactory bufferFactory;
 
-	public ReactorServerHttpRequest(HttpChannel request,
-			NettyDataBufferFactory dataBufferFactory) {
-		Assert.notNull("'request' must not be null");
-		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
-		this.channel = request;
-		this.dataBufferFactory = dataBufferFactory;
+
+	public ReactorServerHttpRequest(HttpServerRequest request, NettyDataBufferFactory bufferFactory) {
+		super(initUri(request), initHeaders(request));
+		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
+		this.request = request;
+		this.bufferFactory = bufferFactory;
+	}
+
+	private static URI initUri(HttpServerRequest channel) {
+		Assert.notNull(channel, "'channel' must not be null");
+		InetSocketAddress address = channel.remoteAddress();
+		String requestUri = channel.uri();
+		return (address != null ? getBaseUrl(address).resolve(requestUri) : URI.create(requestUri));
+	}
+
+	private static URI getBaseUrl(InetSocketAddress address) {
+		try {
+			return new URI(null, null, address.getHostString(), address.getPort(), null, null, null);
+		}
+		catch (URISyntaxException ex) {
+			// Should not happen...
+			throw new IllegalStateException(ex);
+		}
+	}
+
+	private static HttpHeaders initHeaders(HttpServerRequest channel) {
+		HttpHeaders headers = new HttpHeaders();
+		for (String name : channel.requestHeaders().names()) {
+			headers.put(name, channel.requestHeaders().getAll(name));
+		}
+		return headers;
 	}
 
 
-	public HttpChannel getReactorChannel() {
-		return this.channel;
+	public HttpServerRequest getReactorRequest() {
+		return this.request;
 	}
 
 	@Override
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.channel.method().name());
-	}
-
-	@Override
-	protected URI initUri() throws URISyntaxException {
-		return new URI(this.channel.uri());
-	}
-
-	@Override
-	protected HttpHeaders initHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		for (String name : this.channel.headers().names()) {
-			headers.put(name, this.channel.headers().getAll(name));
-		}
-		return headers;
+		return HttpMethod.valueOf(this.request.method().name());
 	}
 
 	@Override
 	protected MultiValueMap<String, HttpCookie> initCookies() {
 		MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
-		for (CharSequence name : this.channel.cookies().keySet()) {
-			for (Cookie cookie : this.channel.cookies().get(name)) {
+		for (CharSequence name : this.request.cookies().keySet()) {
+			for (Cookie cookie : this.request.cookies().get(name)) {
 				HttpCookie httpCookie = new HttpCookie(name.toString(), cookie.value());
 				cookies.add(name.toString(), httpCookie);
 			}
@@ -89,8 +103,13 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
+	public Optional<InetSocketAddress> getRemoteAddress() {
+		return Optional.ofNullable(this.request.remoteAddress());
+	}
+
+	@Override
 	public Flux<DataBuffer> getBody() {
-		return this.channel.receive().retain().map(this.dataBufferFactory::wrap);
+		return this.request.receive().retain().map(this.bufferFactory::wrap);
 	}
 
 }

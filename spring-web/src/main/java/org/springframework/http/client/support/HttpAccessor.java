@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,33 +33,39 @@ import org.springframework.util.Assert;
  * and other HTTP accessing gateway helpers, defining common properties
  * such as the {@link ClientHttpRequestFactory} to operate on.
  *
- * <p>Not intended to be used directly. See {@link org.springframework.web.client.RestTemplate}.
+ * <p>Not intended to be used directly.
+ * See {@link org.springframework.web.client.RestTemplate}.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
  * @see org.springframework.web.client.RestTemplate
  */
 public abstract class HttpAccessor {
 
-	/**
-	 * Logger available to subclasses.
-	 */
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private ClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
 
 
 	/**
-	 * Set the request factory that this accessor uses for obtaining
-	 * {@link ClientHttpRequest HttpRequests}.
+	 * Set the request factory that this accessor uses for obtaining client request handles.
+	 * <p>The default is a {@link SimpleClientHttpRequestFactory} based on the JDK's own
+	 * HTTP libraries ({@link java.net.HttpURLConnection}).
+	 * <p><b>Note that the standard JDK HTTP library does not support the HTTP PATCH method.
+	 * Configure the Apache HttpComponents or OkHttp request factory to enable PATCH.</b>
+	 * @see #createRequest(URI, HttpMethod)
+	 * @see org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory
+	 * @see org.springframework.http.client.OkHttp3ClientHttpRequestFactory
 	 */
 	public void setRequestFactory(ClientHttpRequestFactory requestFactory) {
-		Assert.notNull(requestFactory, "'requestFactory' must not be null");
+		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null");
 		this.requestFactory = requestFactory;
 	}
 
 	/**
-	 * Return the request factory that this accessor uses for obtaining {@link ClientHttpRequest HttpRequests}.
+	 * Return the request factory that this accessor uses for obtaining client request handles.
 	 */
 	public ClientHttpRequestFactory getRequestFactory() {
 		return this.requestFactory;
@@ -69,9 +75,11 @@ public abstract class HttpAccessor {
 	/**
 	 * Create a new {@link ClientHttpRequest} via this template's {@link ClientHttpRequestFactory}.
 	 * @param url the URL to connect to
-	 * @param method the HTTP method to exectute (GET, POST, etc.)
+	 * @param method the HTTP method to execute (GET, POST, etc)
 	 * @return the created request
 	 * @throws IOException in case of I/O errors
+	 * @see #getRequestFactory()
+	 * @see ClientHttpRequestFactory#createRequest(URI, HttpMethod)
 	 */
 	protected ClientHttpRequest createRequest(URI url, HttpMethod method) throws IOException {
 		ClientHttpRequest request = getRequestFactory().createRequest(url, method);

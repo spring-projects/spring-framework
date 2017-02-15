@@ -100,6 +100,8 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 	private AsyncTaskExecutor bootstrapExecutor;
 
+	private boolean metadataSourcesAccessed = false;
+
 	private MetadataSources metadataSources;
 
 	private ResourcePatternResolver resourcePatternResolver;
@@ -340,6 +342,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 */
 	public void setMetadataSources(MetadataSources metadataSources) {
 		Assert.notNull(metadataSources, "MetadataSources must not be null");
+		this.metadataSourcesAccessed = true;
 		this.metadataSources = metadataSources;
 	}
 
@@ -352,6 +355,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * @see LocalSessionFactoryBuilder#LocalSessionFactoryBuilder(DataSource, ResourceLoader, MetadataSources)
 	 */
 	public MetadataSources getMetadataSources() {
+		this.metadataSourcesAccessed = true;
 		if (this.metadataSources == null) {
 			BootstrapServiceRegistryBuilder builder = new BootstrapServiceRegistryBuilder();
 			if (this.resourcePatternResolver != null) {
@@ -386,6 +390,11 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 	@Override
 	public void afterPropertiesSet() throws IOException {
+		if (this.metadataSources != null && !this.metadataSourcesAccessed) {
+			// Repeated initialization with no user-customized MetadataSources -> clear it.
+			this.metadataSources = null;
+		}
+
 		LocalSessionFactoryBuilder sfb = new LocalSessionFactoryBuilder(
 				this.dataSource, getResourceLoader(), getMetadataSources());
 

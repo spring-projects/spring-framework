@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.Cookie;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.util.StreamUtils;
 
@@ -54,11 +55,24 @@ public class MockHttpServletRequestTests {
 
 	private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
 
-	private MockHttpServletRequest request = new MockHttpServletRequest();
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
+
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
 
 
 	@Test
-	public void content() throws IOException {
+	public void protocolAndScheme() {
+		assertEquals(MockHttpServletRequest.DEFAULT_PROTOCOL, request.getProtocol());
+		assertEquals(MockHttpServletRequest.DEFAULT_SCHEME, request.getScheme());
+		request.setProtocol("HTTP/2.0");
+		request.setScheme("https");
+		assertEquals("HTTP/2.0", request.getProtocol());
+		assertEquals("https", request.getScheme());
+	}
+
+	@Test
+	public void setContentAndGetInputStream() throws IOException {
 		byte[] bytes = "body".getBytes(Charset.defaultCharset());
 		request.setContent(bytes);
 		assertEquals(bytes.length, request.getContentLength());
@@ -67,10 +81,38 @@ public class MockHttpServletRequestTests {
 	}
 
 	@Test
+	public void setContentAndGetContentAsByteArray() throws IOException {
+		byte[] bytes = "request body".getBytes();
+		request.setContent(bytes);
+		assertEquals(bytes.length, request.getContentLength());
+		assertNotNull(request.getContentAsByteArray());
+		assertEquals(bytes, request.getContentAsByteArray());
+	}
+
+	@Test
+	public void getContentAsStringWithoutSettingCharacterEncoding() throws IOException {
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage("Cannot get content as a String for a null character encoding");
+		request.getContentAsString();
+	}
+
+	@Test
+	public void setContentAndGetContentAsStringWithExplicitCharacterEncoding() throws IOException {
+		String palindrome = "ablE was I ere I saw Elba";
+		byte[] bytes = palindrome.getBytes("UTF-16");
+		request.setCharacterEncoding("UTF-16");
+		request.setContent(bytes);
+		assertEquals(bytes.length, request.getContentLength());
+		assertNotNull(request.getContentAsString());
+		assertEquals(palindrome, request.getContentAsString());
+	}
+
+	@Test
 	public void noContent() throws IOException {
 		assertEquals(-1, request.getContentLength());
 		assertNotNull(request.getInputStream());
 		assertEquals(-1, request.getInputStream().read());
+		assertNull(request.getContentAsByteArray());
 	}
 
 	@Test

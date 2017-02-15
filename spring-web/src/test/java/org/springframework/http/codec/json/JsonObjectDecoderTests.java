@@ -17,13 +17,14 @@
 package org.springframework.http.codec.json;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.tests.TestSubscriber;
 
 /**
  * @author Sebastien Deleuze
@@ -31,15 +32,16 @@ import org.springframework.tests.TestSubscriber;
 public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
-	public void decodeSingleChunkToJsonObject()  {
+	public void decodeSingleChunkToJsonObject() throws Exception {
 		JsonObjectDecoder decoder = new JsonObjectDecoder();
 		Flux<DataBuffer> source =
 				Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
 		Flux<String> output =
-				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
-		TestSubscriber
-				.subscribe(output)
-				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}");
+				decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
+		StepVerifier.create(output)
+				.expectNext("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}")
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
@@ -48,37 +50,75 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 		Flux<DataBuffer> source = Flux.just(stringBuffer("{\"foo\": \"foofoo\""),
 				stringBuffer(", \"bar\": \"barbar\"}"));
 		Flux<String> output =
-				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
-		TestSubscriber
-				.subscribe(output)
-				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}");
+				decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
+		StepVerifier.create(output)
+				.expectNext("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}")
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
 	public void decodeSingleChunkToArray() throws InterruptedException {
 		JsonObjectDecoder decoder = new JsonObjectDecoder();
+
 		Flux<DataBuffer> source = Flux.just(stringBuffer(
 				"[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
 		Flux<String> output =
-				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
-		TestSubscriber
-				.subscribe(output)
-				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
-							  "{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}");
+				decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
+		StepVerifier.create(output)
+				.expectNext("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}")
+				.expectNext("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}")
+				.expectComplete()
+				.verify();
+
+		source = Flux.just(stringBuffer("[{\"foo\": \"bar\"},{\"foo\": \"baz\"}]"));
+		output = decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
+		StepVerifier.create(output)
+				.expectNext("{\"foo\": \"bar\"}")
+				.expectNext("{\"foo\": \"baz\"}")
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
 	public void decodeMultipleChunksToArray() throws InterruptedException {
 		JsonObjectDecoder decoder = new JsonObjectDecoder();
+
 		Flux<DataBuffer> source =
 				Flux.just(stringBuffer("[{\"foo\": \"foofoo\", \"bar\""), stringBuffer(
 						": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
 		Flux<String> output =
-				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
-		TestSubscriber
-				.subscribe(output)
-				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
-							  "{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}");
+				decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
+		StepVerifier.create(output)
+				.expectNext("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}")
+				.expectNext("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}")
+				.expectComplete()
+				.verify();
+
+		source = Flux.just(
+				stringBuffer("[{\"foo\": \""),
+				stringBuffer("bar\"},{\"fo"),
+				stringBuffer("o\": \"baz\"}"),
+				stringBuffer("]"));
+		output = decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
+		StepVerifier.create(output)
+				.expectNext("{\"foo\": \"bar\"}")
+				.expectNext("{\"foo\": \"baz\"}")
+				.expectComplete()
+				.verify();
+
+		// SPR-15013
+		source = Flux.just(stringBuffer("["), stringBuffer("{\"id\":1,\"name\":\"Robert\"}"),
+						stringBuffer(","), stringBuffer("{\"id\":2,\"name\":\"Raide\"}"),
+						stringBuffer(","), stringBuffer("{\"id\":3,\"name\":\"Ford\"}"),
+						stringBuffer("]"));
+		output = decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
+		StepVerifier.create(output)
+				.expectNext("{\"id\":1,\"name\":\"Robert\"}")
+				.expectNext("{\"id\":2,\"name\":\"Raide\"}")
+				.expectNext("{\"id\":3,\"name\":\"Ford\"}")
+				.expectComplete()
+				.verify();
 	}
 
 

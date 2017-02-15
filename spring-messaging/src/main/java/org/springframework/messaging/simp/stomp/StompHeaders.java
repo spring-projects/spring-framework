@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,9 +223,14 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Applies to the CONNECT and CONNECTED frames.
 	 */
 	public void setHeartbeat(long[] heartbeat) {
-		Assert.notNull(heartbeat);
+		if (heartbeat == null || heartbeat.length != 2) {
+			throw new IllegalArgumentException("Heart-beat array must be of length 2, not " +
+					(heartbeat != null ? heartbeat.length : "null"));
+		}
 		String value = heartbeat[0] + "," + heartbeat[1];
-		Assert.isTrue(heartbeat[0] >= 0 && heartbeat[1] >= 0, "Heart-beat values cannot be negative: "  + value);
+		if (heartbeat[0] < 0 || heartbeat[1] < 0) {
+			throw new IllegalArgumentException("Heart-beat values cannot be negative: " + value);
+		}
 		set(HEARTBEAT, value);
 	}
 
@@ -234,10 +239,10 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 */
 	public long[] getHeartbeat() {
 		String rawValue = getFirst(HEARTBEAT);
-		if (!StringUtils.hasText(rawValue)) {
+		String[] rawValues = StringUtils.split(rawValue, ",");
+		if (rawValues == null) {
 			return null;
 		}
-		String[] rawValues = StringUtils.commaDelimitedListToStringArray(rawValue);
 		return new long[] {Long.valueOf(rawValues[0]), Long.valueOf(rawValues[1])};
 	}
 
@@ -392,12 +397,14 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 */
 	@Override
 	public void add(String headerName, String headerValue) {
-		List<String> headerValues = headers.get(headerName);
-		if (headerValues == null) {
-			headerValues = new LinkedList<>();
-			this.headers.put(headerName, headerValues);
-		}
+		List<String> headerValues = headers.computeIfAbsent(headerName, k -> new LinkedList<>());
 		headerValues.add(headerValue);
+	}
+
+	@Override
+	public void addAll(String headerName, List<String> headerValues) {
+		List<String> currentValues = headers.computeIfAbsent(headerName, k -> new LinkedList<>());
+		currentValues.addAll(headerValues);
 	}
 
 	/**
@@ -497,14 +504,8 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 
 	@Override
 	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof StompHeaders)) {
-			return false;
-		}
-		StompHeaders otherHeaders = (StompHeaders) other;
-		return this.headers.equals(otherHeaders.headers);
+		return (this == other || (other instanceof StompHeaders &&
+				this.headers.equals(((StompHeaders) other).headers)));
 	}
 
 	@Override
