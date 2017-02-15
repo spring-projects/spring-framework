@@ -31,7 +31,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
  * A generic implementation of the {@link TableMetaDataProvider} that should provide
@@ -74,13 +73,10 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	/** Collection of TableParameterMetaData objects */
 	private List<TableParameterMetaData> tableParameterMetaData = new ArrayList<>();
 
-	/** NativeJdbcExtractor that can be used to retrieve the native connection */
-	private NativeJdbcExtractor nativeJdbcExtractor;
-
 
 	/**
-	 * Constructor used to initialize with provided database meta data.
-	 * @param databaseMetaData meta data to be used
+	 * Constructor used to initialize with provided database metadata.
+	 * @param databaseMetaData metadata to be used
 	 */
 	protected GenericTableMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
 		this.userName = databaseMetaData.getUserName();
@@ -140,15 +136,6 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	@Override
 	public boolean isGeneratedKeysColumnNameArraySupported() {
 		return this.generatedKeysColumnNameArraySupported;
-	}
-
-	@Override
-	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
-		this.nativeJdbcExtractor = nativeJdbcExtractor;
-	}
-
-	protected NativeJdbcExtractor getNativeJdbcExtractor() {
-		return this.nativeJdbcExtractor;
 	}
 
 
@@ -308,7 +295,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 	/**
-	 * Method supporting the metedata processing for a table.
+	 * Method supporting the metadata processing for a table.
 	 */
 	private void locateTableAndProcessMetaData(
 			DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String tableName) {

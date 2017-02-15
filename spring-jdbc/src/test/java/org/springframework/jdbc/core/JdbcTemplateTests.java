@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,6 @@ import org.springframework.jdbc.core.support.AbstractInterruptibleBatchPreparedS
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
-import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
-import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractorAdapter;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import static org.hamcrest.Matchers.*;
@@ -296,19 +294,6 @@ public class JdbcTemplateTests {
 	}
 
 	@Test
-	public void testConnectionCallback() throws Exception {
-		this.template.setNativeJdbcExtractor(new PlainNativeJdbcExtractor());
-		String result = this.template.execute(new ConnectionCallback<String>() {
-			@Override
-			public String doInConnection(Connection con) {
-				assertSame(JdbcTemplateTests.this.connection, con);
-				return "test";
-			}
-		});
-		assertEquals("test", result);
-	}
-
-	@Test
 	public void testConnectionCallbackWithStatementSettings() throws Exception {
 		String result = this.template.execute(new ConnectionCallback<String>() {
 			@Override
@@ -317,7 +302,6 @@ public class JdbcTemplateTests {
 				ps.setFetchSize(10);
 				ps.setMaxRows(20);
 				ps.close();
-				assertSame(JdbcTemplateTests.this.connection, new PlainNativeJdbcExtractor().getNativeConnection(con));
 				return "test";
 			}
 		});
@@ -1097,105 +1081,6 @@ public class JdbcTemplateTests {
 	}
 
 	@Test
-	public void testNativeJdbcExtractorInvoked() throws Exception {
-
-		final Statement statement2 = mock(Statement.class);
-		given(statement2.executeQuery(anyString())).willReturn(this.resultSet);
-
-		final PreparedStatement preparedStatement2 = mock(PreparedStatement.class);
-		given(preparedStatement2.executeQuery()).willReturn(this.resultSet);
-
-		final ResultSet returnResultSet = mock(ResultSet.class);
-		given(returnResultSet.next()).willReturn(false);
-
-		final CallableStatement callableStatement = mock(CallableStatement.class);
-		final CallableStatement callableStatement2 = mock(CallableStatement.class);
-		given(callableStatement2.execute()).willReturn(true);
-		given(callableStatement2.getUpdateCount()).willReturn(-1);
-		given(callableStatement2.getResultSet()).willReturn(returnResultSet);
-		given(callableStatement2.getUpdateCount()).willReturn(-1);
-
-		given(this.connection.createStatement()).willReturn(this.statement);
-
-		this.template.setNativeJdbcExtractor(new NativeJdbcExtractor() {
-			@Override
-			public boolean isNativeConnectionNecessaryForNativeStatements() {
-				return false;
-			}
-			@Override
-			public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
-				return false;
-			}
-			@Override
-			public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
-				return false;
-			}
-			@Override
-			public Connection getNativeConnection(Connection con) {
-				return con;
-			}
-			@Override
-			public Connection getNativeConnectionFromStatement(Statement stmt) throws SQLException {
-				return stmt.getConnection();
-			}
-			@Override
-			public Statement getNativeStatement(Statement stmt) {
-				assertTrue(stmt == JdbcTemplateTests.this.statement);
-				return statement2;
-			}
-			@Override
-			public PreparedStatement getNativePreparedStatement(PreparedStatement ps) {
-				assertTrue(ps == JdbcTemplateTests.this.preparedStatement);
-				return preparedStatement2;
-			}
-			@Override
-			public CallableStatement getNativeCallableStatement(CallableStatement cs) {
-				assertTrue(cs == callableStatement);
-				return callableStatement2;
-			}
-			@Override
-			public ResultSet getNativeResultSet(ResultSet rs) {
-				return rs;
-			}
-		});
-
-		this.template.query("my query", new ResultSetExtractor<Object>() {
-			@Override
-			public Object extractData(ResultSet rs2) {
-				assertEquals(JdbcTemplateTests.this.resultSet, rs2);
-				return null;
-			}
-		});
-
-		this.template.query(new PreparedStatementCreator() {
-			@Override
-			public PreparedStatement createPreparedStatement(Connection conn) {
-				return JdbcTemplateTests.this.preparedStatement;
-			}
-		}, new ResultSetExtractor<Object>() {
-			@Override
-			public Object extractData(ResultSet rs2) {
-				assertEquals(JdbcTemplateTests.this.resultSet, rs2);
-				return null;
-			}
-		});
-
-		this.template.call(new CallableStatementCreator() {
-			@Override
-			public CallableStatement createCallableStatement(Connection con) {
-				return callableStatement;
-			}
-		}, new ArrayList<>());
-
-		verify(this.resultSet, times(2)).close();
-		verify(this.statement).close();
-		verify(this.preparedStatement).close();
-		verify(returnResultSet).close();
-		verify(callableStatement).close();
-		verify(this.connection, atLeastOnce()).close();
-	}
-
-	@Test
 	public void testStaticResultSetClosed() throws Exception {
 		ResultSet resultSet2 = mock(ResultSet.class);
 		reset(this.preparedStatement);
@@ -1311,16 +1196,8 @@ public class JdbcTemplateTests {
 		given(this.connection.getMetaData()).willReturn(databaseMetaData);
 	}
 
-	private static class PlainNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
-		@Override
-		protected Connection doGetNativeConnection(Connection connection) throws SQLException {
-			return connection;
-		}
-	}
-
-
-	private static interface JdbcTemplateCallback {
+	private interface JdbcTemplateCallback {
 
 		void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch);
 	}
@@ -1329,6 +1206,7 @@ public class JdbcTemplateTests {
 	private static class Dispatcher implements PreparedStatementCreator, SqlProvider {
 
 		private int id;
+
 		private String sql;
 
 		public Dispatcher(int id, String sql) {
@@ -1348,4 +1226,5 @@ public class JdbcTemplateTests {
 			return this.sql;
 		}
 	}
+
 }

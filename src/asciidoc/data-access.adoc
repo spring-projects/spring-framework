@@ -3222,29 +3222,6 @@ pattern. JTA does not support custom isolation levels!
 
 
 
-[[jdbc-NativeJdbcExtractor]]
-==== NativeJdbcExtractor
-Sometimes you need to access vendor specific JDBC methods that differ from the standard
-JDBC API. This can be problematic if you are running in an application server or with a
-`DataSource` that wraps the `Connection`, `Statement` and `ResultSet` objects with its
-own wrapper objects. To gain access to the native objects you can configure your
-`JdbcTemplate` with a `NativeJdbcExtractor`.
-
-The `NativeJdbcExtractor` comes in a variety of flavors to match your execution
-environment:
-
-* SimpleNativeJdbcExtractor
-* C3P0NativeJdbcExtractor
-* JBossNativeJdbcExtractor
-* WebLogicNativeJdbcExtractor
-* WebSphereNativeJdbcExtractor
-
-Usually the `SimpleNativeJdbcExtractor` is sufficient for unwrapping a `Connection`
-object in most environments. See the javadocs for more details.
-
-
-
-
 [[jdbc-advanced-jdbc]]
 === JDBC batch operations
 Most JDBC drivers provide improved performance if you batch multiple calls to the same

@@ -31,7 +31,6 @@ import org.mockito.InOrder;
 
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.UncategorizedSQLException;
-import org.springframework.jdbc.support.nativejdbc.SimpleNativeJdbcExtractor;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.transaction.CannotCreateTransactionException;
@@ -142,7 +141,6 @@ public class DataSourceTransactionManagerTests  {
 				try {
 					if (createStatement) {
 						tCon.createStatement();
-						assertEquals(con, new SimpleNativeJdbcExtractor().getNativeConnection(tCon));
 					}
 				}
 				catch (SQLException ex) {
@@ -993,7 +991,6 @@ public class DataSourceTransactionManagerTests  {
 				TransactionAwareDataSourceProxy dsProxy = new TransactionAwareDataSourceProxy(ds);
 				try {
 					assertEquals(con, ((ConnectionProxy) dsProxy.getConnection()).getTargetConnection());
-					assertEquals(con, new SimpleNativeJdbcExtractor().getNativeConnection(dsProxy.getConnection()));
 					// should be ignored
 					dsProxy.getConnection().close();
 				}
@@ -1027,7 +1024,6 @@ public class DataSourceTransactionManagerTests  {
 				final TransactionAwareDataSourceProxy dsProxy = new TransactionAwareDataSourceProxy(ds);
 				try {
 					assertEquals(con, ((ConnectionProxy) dsProxy.getConnection()).getTargetConnection());
-					assertEquals(con, new SimpleNativeJdbcExtractor().getNativeConnection(dsProxy.getConnection()));
 					// should be ignored
 					dsProxy.getConnection().close();
 				}
@@ -1042,7 +1038,6 @@ public class DataSourceTransactionManagerTests  {
 						assertEquals(con, DataSourceUtils.getConnection(ds));
 						try {
 							assertEquals(con, ((ConnectionProxy) dsProxy.getConnection()).getTargetConnection());
-							assertEquals(con, new SimpleNativeJdbcExtractor().getNativeConnection(dsProxy.getConnection()));
 							// should be ignored
 							dsProxy.getConnection().close();
 						}
@@ -1088,7 +1083,6 @@ public class DataSourceTransactionManagerTests  {
 				dsProxy.setReobtainTransactionalConnections(true);
 				try {
 					assertEquals(con, ((ConnectionProxy) dsProxy.getConnection()).getTargetConnection());
-					assertEquals(con, new SimpleNativeJdbcExtractor().getNativeConnection(dsProxy.getConnection()));
 					// should be ignored
 					dsProxy.getConnection().close();
 				}
@@ -1103,7 +1097,6 @@ public class DataSourceTransactionManagerTests  {
 						assertEquals(con, DataSourceUtils.getConnection(ds));
 						try {
 							assertEquals(con, ((ConnectionProxy) dsProxy.getConnection()).getTargetConnection());
-							assertEquals(con, new SimpleNativeJdbcExtractor().getNativeConnection(dsProxy.getConnection()));
 							// should be ignored
 							dsProxy.getConnection().close();
 						}
