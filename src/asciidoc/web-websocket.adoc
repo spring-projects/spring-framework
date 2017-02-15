@@ -1354,7 +1354,7 @@ the declared method argument type as necessary.
 * `java.security.Principal` method arguments reflecting the user logged in at
 the time of the WebSocket HTTP handshake.
 
-The return value from an `@MessageMapping` method is converted with a
+A return value from an `@MessageMapping` method will be converted with a
 `org.springframework.messaging.converter.MessageConverter` and used as the body
 of a new message that is then sent, by default, to the `"brokerChannel"` with
 the same destination as the client message but using the prefix `"/topic"` by
@@ -1362,8 +1362,12 @@ default. An `@SendTo` message level annotation can be used to specify any
 other destination instead. It can also be set a class-level to share a common
 destination.
 
-An `@SubscribeMapping` annotation can also be used to map subscription requests
-to `@Controller` methods. It is supported on the method level, but can also be
+A response message may also be provided asynchronously via a `ListenableFuture`
+or `CompletableFuture`/`CompletionStage` return type signature, analogous to
+deferred results in an MVC handler method.
+
+A `@SubscribeMapping` annotation can be used to map subscription requests to
+`@Controller` methods. It is supported on the method level, but can also be
 combined with a type level `@MessageMapping` annotation that expresses shared
 mappings across all message handling methods within the same controller.
 

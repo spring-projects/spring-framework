@@ -1436,8 +1436,8 @@ The following are the supported return types:
   asynchronously in a thread managed by Spring MVC.
 * A `DeferredResult<?>` can be returned when the application wants to produce the return
   value from a thread of its own choosing.
-* A `ListenableFuture<?>` can be returned when the application wants to produce the return
-  value from a thread of its own choosing.
+* A `ListenableFuture<?>` or `CompletableFuture<?>`/`CompletionStage<?>` can be returned
+  when the application wants to produce the value from a thread pool submission.
 * A `ResponseBodyEmitter` can be returned to write multiple objects to the response
   asynchronously; also supported as the body within a `ResponseEntity`.
 * An `SseEmitter` can be returned to write Server-Sent Events to the response
