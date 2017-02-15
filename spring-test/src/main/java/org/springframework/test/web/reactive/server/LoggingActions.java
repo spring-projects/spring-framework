@@ -26,82 +26,85 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Provides options for logging information about the performed exchange.
+ * Provides options for logging diagnostic information about the exchange.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see ResponseAssertions#log()
  */
-public class LoggingExchangeConsumer {
+public class LoggingActions<T> {
 
-	private static Log logger = LogFactory.getLog(LoggingExchangeConsumer.class);
+	private static Log logger = LogFactory.getLog(LoggingActions.class);
+
+	private final ResponseAssertions<T> resultAssertions;
+
+	private final ExchangeResult<T> exchange;
 
 
-	private final ExchangeActions exchangeActions;
-
-
-	public LoggingExchangeConsumer(ExchangeActions exchangeActions) {
-		this.exchangeActions = exchangeActions;
+	public LoggingActions(ExchangeResult<T> exchange, ResponseAssertions<T> resultAssertions) {
+		this.resultAssertions = resultAssertions;
+		this.exchange = exchange;
 	}
 
 
 	/**
 	 * Log with {@link System#out}.
 	 */
-	public ExchangeActions toConsole() {
-		System.out.println(getOutput());
-		return this.exchangeActions;
+	public ResponseAssertions<T> toConsole() {
+		return toOutputStream(System.out);
 	}
 
 	/**
 	 * Log with a given {@link OutputStream}.
 	 */
-	public ExchangeActions toOutputStream(OutputStream stream) {
+	public ResponseAssertions<T> toOutputStream(OutputStream stream) {
 		return toWriter(new PrintWriter(stream, true));
 	}
 
 	/**
 	 * Log with a given {@link Writer}.
 	 */
-	public ExchangeActions toWriter(Writer writer) {
+	public ResponseAssertions<T> toWriter(Writer writer) {
 		try {
 			writer.write(getOutput());
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException("Failed to print exchange info", ex);
 		}
-		return this.exchangeActions;
+		return this.resultAssertions;
 	}
 
 	/**
 	 * Log if TRACE level logging is enabled.
 	 */
-	public ExchangeActions ifTraceEnabled() {
+	public ResponseAssertions<T> ifTraceEnabled() {
 		return doLog(Log::isTraceEnabled, Log::trace);
 	}
 
 	/**
 	 * Log if DEBUG level logging is enabled.
 	 */
-	public ExchangeActions ifDebugEnabled() {
+	public ResponseAssertions<T> ifDebugEnabled() {
 		return doLog(Log::isDebugEnabled, Log::debug);
 	}
 
 	/**
 	 * Log if INFO level logging is enabled.
 	 */
-	public ExchangeActions ifInfoEnabled() {
+	public ResponseAssertions<T> ifInfoEnabled() {
 		return doLog(Log::isInfoEnabled, Log::info);
 	}
 
-	private ExchangeActions doLog(Predicate<Log> logLevelPredicate, BiConsumer<Log, String> logAction) {
-		if (logLevelPredicate.test(logger)) {
-			logAction.accept(logger, getOutput());
+
+	private ResponseAssertions<T> doLog(Predicate<Log> predicate, BiConsumer<Log, String> consumer) {
+		if (predicate.test(logger)) {
+			consumer.accept(logger, getOutput());
 		}
-		return this.exchangeActions;
+		return this.resultAssertions;
 	}
 
 	private String getOutput() {
-		return this.exchangeActions.andReturn().toString();
+		return this.resultAssertions.toString();
 	}
 
 }

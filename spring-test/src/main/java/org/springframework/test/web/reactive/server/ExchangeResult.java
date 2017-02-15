@@ -16,21 +16,28 @@
 package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
-import java.time.Duration;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.reactive.function.client.ClientResponse;
 
 /**
- * Contains information about a performed exchange.
+ * Container for request and response details including the decoded response
+ * body from an exchange performed through {@link WebTestClient}.
+ *
+ * <p>Use {@link #assertThat()} to access built-in assertions on the response,
+ * or apply other assertions directly to the data contained in this class.
+ * The built-in assertions provide an option for logging diagnostic information
+ * about the exchange. The same can also be obtained using the
+ * {@link #toString()} method of this class.
+ *
+ * @param <T> the type of the decoded response body
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ExchangeInfo {
+public class ExchangeResult<T> {
 
 	private final HttpMethod method;
 
@@ -38,33 +45,44 @@ public class ExchangeInfo {
 
 	private final HttpHeaders requestHeaders;
 
-	private final ClientResponse response;
+	private final HttpStatus status;
 
-	private final Duration responseTimeout;
+	private final HttpHeaders responseHeaders;
+
+	private final T responseBody;
 
 
-	public ExchangeInfo(HttpMethod httpMethod, URI uri, HttpHeaders requestHeaders,
-			ClientResponse response, Duration responseTimeout) {
+	public ExchangeResult(HttpMethod method, URI url, HttpHeaders requestHeaders,
+			HttpStatus status, HttpHeaders responseHeaders, T responseBody) {
 
-		this.method = httpMethod;
-		this.url = uri;
+		this.method = method;
+		this.url = url;
 		this.requestHeaders = requestHeaders;
-		this.response = response;
-		this.responseTimeout = responseTimeout;
+		this.status = status;
+		this.responseHeaders = responseHeaders;
+		this.responseBody = responseBody;
 	}
 
 
 	/**
-	 * Return the HTTP method of the exchange.
+	 * Provides access to built-in assertions on the response.
 	 */
-	public HttpMethod getHttpMethod() {
+	public ResponseAssertions<T> assertThat() {
+		return new ResponseAssertions<T>(this);
+	}
+
+
+	/**
+	 * Return the request method of the exchange.
+	 */
+	public HttpMethod getRequestMethod() {
 		return this.method;
 	}
 
 	/**
-	 * Return the URI of the exchange.
+	 * Return the URL of the exchange.
 	 */
-	public URI getUrl() {
+	public URI getRequestUrl() {
 		return this.url;
 	}
 
@@ -76,30 +94,37 @@ public class ExchangeInfo {
 	}
 
 	/**
-	 * Return the {@link ClientResponse} for the exchange.
+	 * Return the response status.
 	 */
-	public ClientResponse getResponse() {
-		return this.response;
+	public HttpStatus getResponseStatus() {
+		return this.status;
 	}
 
 	/**
-	 * Return the configured timeout for blocking on response data.
+	 * Return the response headers.
 	 */
-	public Duration getResponseTimeout() {
-		return this.responseTimeout;
+	public HttpHeaders getResponseHeaders() {
+		return this.responseHeaders;
+	}
+
+	/**
+	 * Return the decoded response body.
+	 */
+	public T getResponseBody() {
+		return this.responseBody;
 	}
 
 
 	@Override
 	public String toString() {
-		HttpStatus status = getResponse().statusCode();
+		HttpStatus status = this.status;
 		return "\n\n" +
-				formatValue("Request", getHttpMethod() + " " + getUrl()) +
+				formatValue("Request", this.method + " " + getRequestUrl()) +
 				formatValue("Status", status + " " + status.getReasonPhrase()) +
 				formatHeading("Response Headers") +
-				formatHeaders(getResponse().headers().asHttpHeaders()) +
+				formatHeaders(this.responseHeaders) +
 				formatHeading("Request Headers") +
-				formatHeaders(getRequestHeaders());
+				formatHeaders(this.requestHeaders);
 	}
 
 	private String formatHeading(String heading) {

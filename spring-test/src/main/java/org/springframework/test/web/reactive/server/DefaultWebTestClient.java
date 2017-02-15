@@ -19,6 +19,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,12 +28,16 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.test.util.AssertionErrors;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
@@ -40,6 +45,10 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
+
+import static org.springframework.web.reactive.function.BodyExtractors.toDataBuffers;
+import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
+import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
 /**
  * Default implementation of {@link WebTestClient}.
@@ -231,35 +240,91 @@ class DefaultWebTestClient implements WebTestClient {
 			return this;
 		}
 
-
 		@Override
-		public ExchangeActions exchange() {
-			return getExchangeActions(this.headerSpec.exchange());
-		}
-
-		@Override
-		public <T> ExchangeActions exchange(BodyInserter<T, ? super ClientHttpRequest> inserter) {
-			return getExchangeActions(this.headerSpec.exchange(inserter));
+		public ResponseSpec exchange() {
+			return new DefaultResponseSpec(this.requestId, this.headerSpec.exchange());
 		}
 
 		@Override
-		public <T, S extends Publisher<T>> ExchangeActions exchange(S publisher, Class<T> elementClass) {
-			return getExchangeActions(this.headerSpec.exchange(publisher, elementClass));
+		public <T> ResponseSpec exchange(BodyInserter<T, ? super ClientHttpRequest> inserter) {
+			return new DefaultResponseSpec(this.requestId, this.headerSpec.exchange(inserter));
 		}
 
-		private ExchangeActions getExchangeActions(Mono<ClientResponse> responseMono) {
-			ClientResponse response = responseMono.block(getTimeout());
-			ExchangeInfo info = getExchangeInfo(response);
-			return new ExchangeActions(info);
+		@Override
+		public <T, S extends Publisher<T>> ResponseSpec exchange(S publisher, Class<T> elementClass) {
+			return new DefaultResponseSpec(this.requestId, this.headerSpec.exchange(publisher, elementClass));
+		}
+	}
+
+	private class DefaultResponseSpec implements ResponseSpec {
+
+		private final String requestId;
+
+		private final Mono<ClientResponse> responseMono;
+
+
+		public DefaultResponseSpec(String requestId, Mono<ClientResponse> responseMono) {
+			this.requestId = requestId;
+			this.responseMono = responseMono;
 		}
 
-		private ExchangeInfo getExchangeInfo(ClientResponse clientResponse) {
-			WiretapConnector.Info wiretapInfo = connectorListener.retrieveRequest(this.requestId);
+
+		@Override
+		public <T> ExchangeResult<T> decodeEntity(Class<T> entityClass) {
+			return decodeEntity(ResolvableType.forClass(entityClass));
+		}
+
+		@Override
+		public <T> ExchangeResult<List<T>> decodeAndCollect(Class<T> elementClass) {
+			return decodeAndCollect(ResolvableType.forClass(elementClass));
+		}
+
+		@Override
+		public <T> ExchangeResult<Flux<T>> decodeFlux(Class<T> elementClass) {
+			return decodeFlux(ResolvableType.forClass(elementClass));
+		}
+
+		@Override
+		public <T> ExchangeResult<T> decodeEntity(ResolvableType elementType) {
+			return this.responseMono.then(response -> {
+				Mono<T> entityMono = response.body(toMono(elementType));
+				return entityMono.map(entity -> createTestExchange(entity, response));
+			}).block(getTimeout());
+		}
+
+		@Override
+		public <T> ExchangeResult<List<T>> decodeAndCollect(ResolvableType elementType) {
+			return this.responseMono.then(response -> {
+				Flux<T> entityFlux = response.body(toFlux(elementType));
+				return entityFlux.collectList().map(list -> createTestExchange(list, response));
+			}).block(getTimeout());
+		}
+
+		@Override
+		public <T> ExchangeResult<Flux<T>> decodeFlux(ResolvableType elementType) {
+			return this.responseMono.map(response -> {
+				Flux<T> entityFlux = response.body(toFlux(elementType));
+				return createTestExchange(entityFlux, response);
+			}).block(getTimeout());
+		}
+
+		@Override
+		public ExchangeResult<Void> expectNoBody() {
+			return this.responseMono.map(response -> {
+				DataBuffer buffer = response.body(toDataBuffers()).blockFirst(getTimeout());
+				AssertionErrors.assertTrue("Expected empty body", buffer == null);
+				ExchangeResult<Void> exchange = createTestExchange(null, response);
+				return exchange;
+			}).block(getTimeout());
+		}
+
+		private <T> ExchangeResult<T> createTestExchange(T body, ClientResponse response) {
+			WiretapConnector.Info wiretapInfo = connectorListener.retrieveRequest(requestId);
 			ClientHttpRequest request = wiretapInfo.getRequest();
-			return new ExchangeInfo(request.getMethod(), request.getURI(), request.getHeaders(),
-					clientResponse, getTimeout());
+			return new ExchangeResult<T>(
+					request.getMethod(), request.getURI(), request.getHeaders(),
+					response.statusCode(), response.headers().asHttpHeaders(), body);
 		}
-
 	}
 
 
@@ -287,7 +352,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 		public WiretapConnector.Info retrieveRequest(String requestId) {
 			WiretapConnector.Info info = this.exchanges.remove(requestId);
-			Assert.notNull(info, "No match for \"request-id\"=" + requestId);
+			Assert.notNull(info, "No match for request-id=" + requestId);
 			return info;
 		}
 	}

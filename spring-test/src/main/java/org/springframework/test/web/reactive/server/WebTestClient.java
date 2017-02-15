@@ -25,8 +25,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.ResolvableType;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -330,12 +332,13 @@ public interface WebTestClient {
 
 
 	/**
-	 * Contract for specifying the URI for a request.
+	 * Specification for providing the URI of a request.
 	 */
 	interface UriSpec {
 
 		/**
 		 * Specify the URI using an absolute, fully constructed {@link URI}.
+		 * @return spec to add headers or perform the exchange
 		 */
 		HeaderSpec uri(URI uri);
 
@@ -343,6 +346,7 @@ public interface WebTestClient {
 		 * Specify the URI for the request using a URI template and URI variables.
 		 * If a {@link UriBuilderFactory} was configured for the client (e.g.
 		 * with a base URI) it will be used to expand the URI template.
+		 * @return spec to add headers or perform the exchange
 		 */
 		HeaderSpec uri(String uri, Object... uriVariables);
 
@@ -350,19 +354,21 @@ public interface WebTestClient {
 		 * Specify the URI for the request using a URI template and URI variables.
 		 * If a {@link UriBuilderFactory} was configured for the client (e.g.
 		 * with a base URI) it will be used to expand the URI template.
+		 * @return spec to add headers or perform the exchange
 		 */
 		HeaderSpec uri(String uri, Map<String, ?> uriVariables);
 
 		/**
 		 * Build the URI for the request with a {@link UriBuilder} obtained
 		 * through the {@link UriBuilderFactory} configured for this client.
+		 * @return spec to add headers or perform the exchange
 		 */
 		HeaderSpec uri(Function<UriBuilder, URI> uriFunction);
 
 	}
 
 	/**
-	 * Contract for specifying request headers leading up to the exchange.
+	 * Specification for adding request headers and performing an exchange.
 	 */
 	interface HeaderSpec {
 
@@ -370,7 +376,7 @@ public interface WebTestClient {
 		 * Set the list of acceptable {@linkplain MediaType media types}, as
 		 * specified by the {@code Accept} header.
 		 * @param acceptableMediaTypes the acceptable media types
-		 * @return this builder
+		 * @return the same instance
 		 */
 		HeaderSpec accept(MediaType... acceptableMediaTypes);
 
@@ -378,7 +384,7 @@ public interface WebTestClient {
 		 * Set the list of acceptable {@linkplain Charset charsets}, as specified
 		 * by the {@code Accept-Charset} header.
 		 * @param acceptableCharsets the acceptable charsets
-		 * @return this builder
+		 * @return the same instance
 		 */
 		HeaderSpec acceptCharset(Charset... acceptableCharsets);
 
@@ -386,7 +392,7 @@ public interface WebTestClient {
 		 * Set the length of the body in bytes, as specified by the
 		 * {@code Content-Length} header.
 		 * @param contentLength the content length
-		 * @return this builder
+		 * @return the same instance
 		 * @see HttpHeaders#setContentLength(long)
 		 */
 		HeaderSpec contentLength(long contentLength);
@@ -395,7 +401,7 @@ public interface WebTestClient {
 		 * Set the {@linkplain MediaType media type} of the body, as specified
 		 * by the {@code Content-Type} header.
 		 * @param contentType the content type
-		 * @return this builder
+		 * @return the same instance
 		 * @see HttpHeaders#setContentType(MediaType)
 		 */
 		HeaderSpec contentType(MediaType contentType);
@@ -404,7 +410,7 @@ public interface WebTestClient {
 		 * Add a cookie with the given name and value.
 		 * @param name the cookie name
 		 * @param value the cookie value
-		 * @return this builder
+		 * @return the same instance
 		 */
 		HeaderSpec cookie(String name, String value);
 
@@ -412,7 +418,7 @@ public interface WebTestClient {
 		 * Copy the given cookies into the entity's cookies map.
 		 *
 		 * @param cookies the existing cookies to copy from
-		 * @return this builder
+		 * @return the same instance
 		 */
 		HeaderSpec cookies(MultiValueMap<String, String> cookies);
 
@@ -421,14 +427,14 @@ public interface WebTestClient {
 		 * <p>The date should be specified as the number of milliseconds since
 		 * January 1, 1970 GMT.
 		 * @param ifModifiedSince the new value of the header
-		 * @return this builder
+		 * @return the same instance
 		 */
 		HeaderSpec ifModifiedSince(ZonedDateTime ifModifiedSince);
 
 		/**
 		 * Set the values of the {@code If-None-Match} header.
 		 * @param ifNoneMatches the new value of the header
-		 * @return this builder
+		 * @return the same instance
 		 */
 		HeaderSpec ifNoneMatch(String... ifNoneMatches);
 
@@ -436,42 +442,112 @@ public interface WebTestClient {
 		 * Add the given, single header value under the given name.
 		 * @param headerName  the header name
 		 * @param headerValues the header value(s)
-		 * @return this builder
+		 * @return the same instance
 		 */
 		HeaderSpec header(String headerName, String... headerValues);
 
 		/**
 		 * Copy the given headers into the entity's headers map.
 		 * @param headers the existing headers to copy from
-		 * @return this builder
+		 * @return the same instance
 		 */
 		HeaderSpec headers(HttpHeaders headers);
 
 		/**
-		 * Perform the request without a request body.
-		 * @return options for asserting the response with
+		 * Perform the exchange without a request body.
+		 * @return spec for decoding the response
 		 */
-		ExchangeActions exchange();
+		ResponseSpec exchange();
 
 		/**
-		 * Set the body of the request to the given {@code BodyInserter} and
-		 * perform the request.
-		 * @param inserter the {@code BodyInserter} that writes to the request
-		 * @param <T> the type contained in the body
-		 * @return options for asserting the response with
+		 * Perform the exchange with the body for the request populated using
+		 * a {@link BodyInserter}.
+		 * @param inserter the inserter
+		 * @param <T> the body type, or the the element type (for a stream)
+		 * @return spec for decoding the response
+		 * @see org.springframework.web.reactive.function.BodyInserters
 		 */
-		<T> ExchangeActions exchange(BodyInserter<T, ? super ClientHttpRequest> inserter);
+		<T> ResponseSpec exchange(BodyInserter<T, ? super ClientHttpRequest> inserter);
 
 		/**
-		 * Set the body of the request to the given {@code Publisher} and
-		 * perform the request.
-		 * @param publisher the {@code Publisher} to write to the request
+		 * Perform the exchange and use the given {@code Publisher} for the
+		 * request body.
+		 * @param publisher the request body data
 		 * @param elementClass the class of elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
 		 * @param <S> the type of the {@code Publisher}
-		 * @return options for asserting the response with
+		 * @return spec for decoding the response
 		 */
-		<T, S extends Publisher<T>> ExchangeActions exchange(S publisher, Class<T> elementClass);
+		<T, S extends Publisher<T>> ResponseSpec exchange(S publisher, Class<T> elementClass);
+	}
+
+	/**
+	 * Specification for decoding the response of an exchange.
+	 */
+	interface ResponseSpec {
+
+		/**
+		 * Decode the response as a single entity of the given type.
+		 * @param entityClass the entity type
+		 * @param <T> the type of entity
+		 * @return container for the result of the exchange
+		 */
+		<T> ExchangeResult<T> decodeEntity(Class<T> entityClass);
+
+		/**
+		 * Alternative to {@link #decodeEntity(Class)} useful for entity
+		 * types with generics.
+		 * @param entityType the type of entity
+		 * @param <T> the type of entity
+		 * @return container for the result of the exchange
+		 * @see ResolvableType#forClassWithGenerics(Class, Class[])
+		 */
+		<T> ExchangeResult<T> decodeEntity(ResolvableType entityType);
+
+		/**
+		 * Decode the response as a finite stream of the given element type and
+		 * collect the items into a list.
+		 * @param elementClass the list element type
+		 * @param <T> the type of list elements
+		 * @return container for the result of the exchange
+		 */
+		<T> ExchangeResult<List<T>> decodeAndCollect(Class<T> elementClass);
+
+		/**
+		 * Alternative to {@link #decodeAndCollect(Class)} useful for element
+		 * types with generics.
+		 * @param elementType the list element type
+		 * @param <T> the type of list elements
+		 * @return container for the result of the exchange
+		 * @see ResolvableType#forClassWithGenerics(Class, Class[])
+		 */
+		<T> ExchangeResult<List<T>> decodeAndCollect(ResolvableType elementType);
+
+		/**
+		 * Turn the response stream of byte buffers into a stream of Objects of
+		 * the given type.
+		 * @param elementClass the stream element type
+		 * @param <T> the type of stream elements
+		 * @return container for the result of the exchange
+		 */
+		<T> ExchangeResult<Flux<T>> decodeFlux(Class<T> elementClass);
+
+		/**
+		 * Alternative to {@link #decodeFlux(Class)} useful for element types
+		 * with generics.
+		 * @param elementType the stream element type
+		 * @param <T> the type of stream elements
+		 * @return container for the result of the exchange
+		 * @see ResolvableType#forClassWithGenerics(Class, Class[])
+		 */
+		<T> ExchangeResult<Flux<T>> decodeFlux(ResolvableType elementType);
+
+		/**
+		 * Consume the response and verify there is no content.
+		 * @return container for the result of the exchange
+		 */
+		ExchangeResult<Void> expectNoBody();
+
 	}
 
 }

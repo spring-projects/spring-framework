@@ -49,8 +49,10 @@ public class RouterFunctionTests {
 	public void test() throws Exception {
 		this.testClient.get().uri("/test")
 				.exchange()
-				.assertStatus().isOk()
-				.assertEntity(String .class).isEqualTo("It works!");
+				.decodeEntity(String.class)
+				.assertThat()
+				.status().isOk()
+				.bodyEquals("It works!");
 	}
 
 }

@@ -16,6 +16,7 @@
 package org.springframework.test.web.reactive.server.samples;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -25,9 +26,12 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.reactive.server.ExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,7 +41,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.hamcrest.CoreMatchers.endsWith;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 
@@ -62,37 +65,54 @@ public class ResponseEntityTests {
 	public void entity() throws Exception {
 		this.client.get().uri("/persons/John")
 				.exchange()
-				.assertStatus().isOk()
-				.assertHeaders().contentType(MediaType.APPLICATION_JSON_UTF8)
-				.assertEntity(Person.class).isEqualTo(new Person("John"));
+				.decodeEntity(Person.class)
+				.assertThat()
+				.status().isOk()
+				.header().contentTypeEquals(MediaType.APPLICATION_JSON_UTF8)
+				.bodyEquals(new Person("John"));
 	}
 
 	@Test
 	public void entityList() throws Exception {
 		this.client.get().uri("/persons")
 				.exchange()
-				.assertStatus().isOk()
-				.assertHeaders().contentType(MediaType.APPLICATION_JSON_UTF8)
-				.assertEntity(Person.class).list()
-				.hasSize(3)
-				.contains(new Person("Jane"), new Person("Jason"), new Person("John"));
+				.decodeAndCollect(Person.class)
+				.assertThat()
+				.status().isOk()
+				.header().contentTypeEquals(MediaType.APPLICATION_JSON_UTF8)
+				.bodyEquals(Arrays.asList(new Person("Jane"), new Person("Jason"), new Person("John")));
 	}
 
 	@Test
 	public void entityMap() throws Exception {
+
+		Map<String, Person> map = new LinkedHashMap<>();
+		map.put("Jane", new Person("Jane"));
+		map.put("Jason", new Person("Jason"));
+		map.put("John", new Person("John"));
+
 		this.client.get().uri("/persons?map=true")
 				.exchange()
-				.assertStatus().isOk()
-				.assertEntity(Person.class).map().hasSize(3).containsKeys("Jane", "Jason", "John");
+				.decodeEntity(ResolvableType.forClassWithGenerics(Map.class, String.class, Person.class))
+				.assertThat()
+				.status().isOk()
+				.bodyEquals(map);
 	}
 
 	@Test
 	public void entityStream() throws Exception {
-		this.client.get().uri("/persons").accept(TEXT_EVENT_STREAM)
+
+		ExchangeResult<Flux<Person>> result = this.client.get()
+				.uri("/persons")
+				.accept(TEXT_EVENT_STREAM)
 				.exchange()
-				.assertStatus().isOk()
-				.assertHeaders().contentType(TEXT_EVENT_STREAM)
-				.assertEntity(Person.class).stepVerifier()
+				.decodeFlux(Person.class);
+
+		result.assertThat()
+				.status().isOk()
+				.header().contentTypeEquals(TEXT_EVENT_STREAM);
+
+		StepVerifier.create(result.getResponseBody())
 				.expectNext(new Person("N0"), new Person("N1"), new Person("N2"))
 				.expectNextCount(4)
 				.consumeNextWith(person -> assertThat(person.getName(), endsWith("7")))
@@ -104,17 +124,10 @@ public class ResponseEntityTests {
 	public void postEntity() throws Exception {
 		this.client.post().uri("/persons")
 				.exchange(Mono.just(new Person("John")), Person.class)
-				.assertStatus().isCreated()
-				.assertHeader("location").isEqualTo("/persons/John").and()
-				.assertBody().isEmpty();
-	}
-
-	@Test
-	public void entityConsumer() throws Exception {
-		this.client.get().uri("/persons/John")
-				.exchange()
-				.assertStatus().isOk()
-				.assertEntity(Person.class).consume(p -> assertEquals(new Person("John"), p));
+				.expectNoBody()
+				.assertThat()
+				.status().isCreated()
+				.header().valueEquals("location", "/persons/John");
 	}
 
 

@@ -18,6 +18,7 @@ package org.springframework.test.web.reactive.server.samples;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,14 +44,18 @@ public class ErrorTests {
 	public void notFound() throws Exception {
 		this.client.get().uri("/invalid")
 				.exchange()
-				.assertStatus().isNotFound();
+				.expectNoBody()
+				.assertThat()
+				.status().isNotFound();
 	}
 
 	@Test
 	public void serverException() throws Exception {
 		this.client.get().uri("/server-error")
 				.exchange()
-				.assertStatus().isInternalServerError();
+				.expectNoBody()
+				.assertThat()
+				.status().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 

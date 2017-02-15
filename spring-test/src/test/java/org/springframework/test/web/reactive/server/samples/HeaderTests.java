@@ -15,8 +15,6 @@
  */
 package org.springframework.test.web.reactive.server.samples;
 
-import java.util.Arrays;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,8 +24,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * Tests with custom headers.
@@ -53,17 +49,20 @@ public class HeaderTests {
 	public void requestResponseHeaderPair() throws Exception {
 		this.client.get().uri("/request-response-pair").header("h1", "in")
 				.exchange()
-				.assertStatus().isOk()
-				.assertHeader("h1").isEqualTo("in-out");
+				.expectNoBody()
+				.assertThat()
+				.status().isOk()
+				.header().valueEquals("h1", "in-out");
 	}
 
 	@Test
-	public void headerConsumer() throws Exception {
+	public void headerMultivalue() throws Exception {
 		this.client.get().uri("/multivalue")
 				.exchange()
-				.assertStatus().isOk()
-				.assertHeader("h1").consume(value -> assertEquals("v1", value))
-				.assertHeader("h1").values().consume(values -> assertEquals(Arrays.asList("v1", "v2", "v3"), values));
+				.expectNoBody()
+				.assertThat()
+				.status().isOk()
+				.header().valueEquals("h1", "v1", "v2", "v3");
 	}
 
 

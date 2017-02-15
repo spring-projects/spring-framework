@@ -43,8 +43,10 @@ public class ControllerTests {
 	public void test() throws Exception {
 		this.client.get().uri("/test")
 				.exchange()
-				.assertStatus().isOk()
-				.assertEntity(String .class).isEqualTo("It works!");
+				.decodeEntity(String.class)
+				.assertThat()
+				.status().isOk()
+				.bodyEquals("It works!");
 	}
 
 
