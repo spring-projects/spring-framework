@@ -45,6 +45,7 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.SQLWarningException;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.core.support.AbstractInterruptibleBatchPreparedStatementSetter;
+import org.springframework.jdbc.datasource.ConnectionProxy;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
@@ -65,16 +66,23 @@ import static org.springframework.tests.Matchers.*;
  */
 public class JdbcTemplateTests {
 
+	private Connection connection;
+
+	private DataSource dataSource;
+
+	private PreparedStatement preparedStatement;
+
+	private Statement statement;
+
+	private ResultSet resultSet;
+
+	private JdbcTemplate template;
+
+	private CallableStatement callableStatement;
+
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private Connection connection;
-	private DataSource dataSource;
-	private PreparedStatement preparedStatement;
-	private Statement statement;
-	private ResultSet resultSet;
-	private JdbcTemplate template;
-	private CallableStatement callableStatement;
 
 	@Before
 	public void setup() throws Exception {
@@ -95,6 +103,7 @@ public class JdbcTemplateTests {
 		given(this.connection.prepareCall(anyString())).willReturn(this.callableStatement);
 		given(this.callableStatement.getResultSet()).willReturn(this.resultSet);
 	}
+
 
 	@Test
 	public void testBeanProperties() throws Exception {
@@ -141,10 +150,9 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testStringsWithStaticSql() throws Exception {
-		doTestStrings(false, null, null, null, null, new JdbcTemplateCallback() {
+		doTestStrings(null, null, null, null, new JdbcTemplateCallback() {
 			@Override
-			public void doInJdbcTemplate(JdbcTemplate template, String sql,
-					RowCallbackHandler rch) {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, rch);
 			}
 		});
@@ -152,10 +160,9 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testStringsWithStaticSqlAndFetchSizeAndMaxRows() throws Exception {
-		doTestStrings(false, 10, 20, 30, null, new JdbcTemplateCallback() {
+		doTestStrings(10, 20, 30, null, new JdbcTemplateCallback() {
 			@Override
-			public void doInJdbcTemplate(JdbcTemplate template, String sql,
-					RowCallbackHandler rch) {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, rch);
 			}
 		});
@@ -163,10 +170,9 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testStringsWithEmptyPreparedStatementSetter() throws Exception {
-		doTestStrings(true, null, null, null, null, new JdbcTemplateCallback() {
+		doTestStrings(null, null, null, null, new JdbcTemplateCallback() {
 			@Override
-			public void doInJdbcTemplate(JdbcTemplate template, String sql,
-					RowCallbackHandler rch) {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, (PreparedStatementSetter) null, rch);
 			}
 		});
@@ -175,10 +181,9 @@ public class JdbcTemplateTests {
 	@Test
 	public void testStringsWithPreparedStatementSetter() throws Exception {
 		final Integer argument = 99;
-		doTestStrings(true, null, null, null, argument, new JdbcTemplateCallback() {
+		doTestStrings(null, null, null, argument, new JdbcTemplateCallback() {
 			@Override
-			public void doInJdbcTemplate(JdbcTemplate template, String sql,
-					RowCallbackHandler rch) {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, new PreparedStatementSetter() {
 					@Override
 					public void setValues(PreparedStatement ps) throws SQLException {
@@ -191,10 +196,9 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testStringsWithEmptyPreparedStatementArgs() throws Exception {
-		doTestStrings(true, null, null, null, null, new JdbcTemplateCallback() {
+		doTestStrings(null, null, null, null, new JdbcTemplateCallback() {
 			@Override
-			public void doInJdbcTemplate(JdbcTemplate template, String sql,
-					RowCallbackHandler rch) {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, (Object[]) null, rch);
 			}
 		});
@@ -203,20 +207,16 @@ public class JdbcTemplateTests {
 	@Test
 	public void testStringsWithPreparedStatementArgs() throws Exception {
 		final Integer argument = 99;
-		doTestStrings(true, null, null, null, argument, new JdbcTemplateCallback() {
+		doTestStrings(null, null, null, argument, new JdbcTemplateCallback() {
 			@Override
-			public void doInJdbcTemplate(JdbcTemplate template, String sql,
-					RowCallbackHandler rch) {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, new Object[] { argument }, rch);
 			}
 		});
 	}
 
-	private void doTestStrings(
-			boolean usePreparedStatement,
-			Integer fetchSize, Integer maxRows, Integer queryTimeout, Object argument,
-			JdbcTemplateCallback jdbcTemplateCallback)
-			throws Exception {
+	private void doTestStrings(Integer fetchSize, Integer maxRows, Integer queryTimeout,
+			Object argument, JdbcTemplateCallback jdbcTemplateCallback) throws Exception {
 
 		String sql = "SELECT FORENAME FROM CUSTMR";
 		String[] results = { "rod", "gary", " portia" };
@@ -291,6 +291,19 @@ public class JdbcTemplateTests {
 
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
+	}
+
+	@Test
+	public void testConnectionCallback() throws Exception {
+		String result = this.template.execute(new ConnectionCallback<String>() {
+			@Override
+			public String doInConnection(Connection con) {
+				assertTrue(con instanceof ConnectionProxy);
+				assertSame(JdbcTemplateTests.this.connection, ((ConnectionProxy) con).getTargetConnection());
+				return "test";
+			}
+		});
+		assertEquals("test", result);
 	}
 
 	@Test
@@ -724,7 +737,6 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testBatchUpdateWithListOfObjectArrays() throws Exception {
-
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final List<Object[]> ids = new ArrayList<>();
 		ids.add(new Object[] {100});
@@ -835,13 +847,15 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitializedViaBeanProperty()
-			throws Exception {
+			throws SQLException {
+
 		doTestCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(true);
 	}
 
 	@Test
 	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitializedInAfterPropertiesSet()
-			throws Exception {
+			throws SQLException {
+
 		doTestCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(false);
 	}
 
@@ -851,6 +865,7 @@ public class JdbcTemplateTests {
 	 */
 	private void doTestCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(boolean beanProperty)
 			throws SQLException {
+
 		SQLException sqlException = new SQLException("foo", "07xxx");
 		this.dataSource = mock(DataSource.class);
 		given(this.dataSource.getConnection()).willThrow(sqlException);

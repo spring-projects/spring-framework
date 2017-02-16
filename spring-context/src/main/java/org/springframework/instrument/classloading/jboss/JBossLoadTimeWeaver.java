@@ -85,7 +85,7 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 			if (this.addTransformer == null) {
 				throw new IllegalArgumentException(
 						"Could not find 'addTransformer' method on JBoss DelegatingClassFileTransformer: " +
-								this.delegatingTransformer.getClass().getName());
+						this.delegatingTransformer.getClass().getName());
 			}
 			this.addTransformer.setAccessible(true);
 		}
