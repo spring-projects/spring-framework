@@ -55,12 +55,12 @@ import reactor.core.publisher.Mono
  * @author Sebastien Deleuze
  * @author Yevhenii Melnyk
  */
-fun RouterFunction<*>.route(request: ServerRequest, configure: RouterDsl.() -> Unit) =
-		RouterDsl().apply(configure).invoke(request)
+fun RouterFunction<*>.route(request: ServerRequest, configure: Routes.() -> Unit) =
+		Routes().apply(configure).invoke(request)
 
-class RouterDsl {
+class Routes {
 
-	val children = mutableListOf<RouterDsl>()
+	val children = mutableListOf<Routes>()
 	val routes = mutableListOf<RouterFunction<ServerResponse>>()
 
 	infix fun RequestPredicate.and(other: RequestPredicate): RequestPredicate = this.and(other)
@@ -69,8 +69,8 @@ class RouterDsl {
 
 	operator fun RequestPredicate.not(): RequestPredicate = this.negate()
 
-	fun RequestPredicate.route(routes: RouterDsl.() -> Unit) =
-			RouterFunctions.nest(this, RouterDsl().apply(routes).router())
+	fun RequestPredicate.route(routes: Routes.() -> Unit) =
+			RouterFunctions.nest(this, Routes().apply(routes).router())
 
 	operator fun RequestPredicate.invoke(f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(this, HandlerFunction { f(it) })
