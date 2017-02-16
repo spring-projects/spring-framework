@@ -44,6 +44,37 @@ public class AssertTests {
 
 
 	@Test
+	public void stateWithMessage() {
+		Assert.state(true, "enigma");
+	}
+
+	@Test
+	public void stateWithFalseExpressionAndMessage() {
+		thrown.expect(IllegalStateException.class);
+		thrown.expectMessage("enigma");
+		Assert.state(false, "enigma");
+	}
+
+	@Test
+	public void stateWithMessageSupplier() {
+		Assert.state(true, () -> "enigma");
+	}
+
+	@Test
+	public void stateWithFalseExpressionAndMessageSupplier() {
+		thrown.expect(IllegalStateException.class);
+		thrown.expectMessage("enigma");
+		Assert.state(false, () -> "enigma");
+	}
+
+	@Test
+	public void stateWithFalseExpressionAndNullMessageSupplier() {
+		thrown.expect(IllegalStateException.class);
+		thrown.expectMessage(equalTo(null));
+		Assert.state(false, (Supplier<String>) null);
+	}
+
+	@Test
 	public void isTrueWithMessage() {
 		Assert.isTrue(true, "enigma");
 	}
@@ -635,25 +666,6 @@ public class AssertTests {
 		thrown.expect(IllegalStateException.class);
 		thrown.expectMessage("enigma");
 		Assert.state(false, "enigma");
-	}
-
-	@Test
-	public void stateWithMessageSupplier() {
-		Assert.state(true, () -> "enigma");
-	}
-
-	@Test
-	public void stateWithFalseExpressionAndMessageSupplier() {
-		thrown.expect(IllegalStateException.class);
-		thrown.expectMessage("enigma");
-		Assert.state(false, () -> "enigma");
-	}
-
-	@Test
-	public void stateWithFalseExpressionAndNullMessageSupplier() {
-		thrown.expect(IllegalStateException.class);
-		thrown.expectMessage(equalTo(null));
-		Assert.state(false, (Supplier<String>) null);
 	}
 
 }
