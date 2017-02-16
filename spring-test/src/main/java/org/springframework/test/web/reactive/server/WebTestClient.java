@@ -136,7 +136,7 @@ public interface WebTestClient {
 	 * {@link org.springframework.web.reactive.config.EnableWebFlux @EnableWebFlux}
 	 * but can also be further customized through the returned spec.
 	 * @param controllers the controllers to test
-	 * @return spec for controller configuration and test client builder
+	 * @return spec for setting up controller configuration
 	 */
 	static ControllerSpec bindToController(Object... controllers) {
 		return new DefaultControllerSpec(controllers);
@@ -150,9 +150,9 @@ public interface WebTestClient {
 	 * @return the {@link WebTestClient} builder
 	 * @see org.springframework.web.reactive.config.EnableWebFlux
 	 */
-	static WebClientSpec bindToApplicationContext(ApplicationContext applicationContext) {
+	static Builder bindToApplicationContext(ApplicationContext applicationContext) {
 		HttpHandler httpHandler = WebHttpHandlerBuilder.applicationContext(applicationContext).build();
-		return new DefaultWebClientSpec(httpHandler);
+		return new DefaultWebTestClientBuilder(httpHandler);
 	}
 
 	/**
@@ -160,17 +160,17 @@ public interface WebTestClient {
 	 * @param routerFunction the RouterFunction to test
 	 * @return the {@link WebTestClient} builder
 	 */
-	static WebClientSpec bindToRouterFunction(RouterFunction<?> routerFunction) {
+	static Builder bindToRouterFunction(RouterFunction<?> routerFunction) {
 		HttpWebHandlerAdapter httpHandler = RouterFunctions.toHttpHandler(routerFunction);
-		return new DefaultWebClientSpec(httpHandler);
+		return new DefaultWebTestClientBuilder(httpHandler);
 	}
 
 	/**
 	 * Complete end-to-end integration tests with actual requests to a running server.
 	 * @return the {@link WebTestClient} builder
 	 */
-	static WebClientSpec bindToServer() {
-		return new DefaultWebClientSpec();
+	static Builder bindToServer() {
+		return new DefaultWebTestClientBuilder();
 	}
 
 
@@ -229,12 +229,12 @@ public interface WebTestClient {
 		ControllerSpec viewResolvers(Consumer<ViewResolverRegistry> consumer);
 
 		/**
-		 * Proceed to configure the {@link WebClient} to test with.
+		 * Proceed to configure and build the test client.
 		 */
-		WebClientSpec webClientSpec();
+		Builder configureClient();
 
 		/**
-		 * Shortcut to build the {@link WebTestClient}.
+		 * Shortcut to build the test client.
 		 */
 		WebTestClient build();
 
@@ -244,76 +244,41 @@ public interface WebTestClient {
 	 * Steps for customizing the {@link WebClient} used to test with
 	 * internally delegating to a {@link WebClient.Builder}.
 	 */
-	interface WebClientSpec {
+	interface Builder {
 
 		/**
 		 * Configure a base URI as described in
 		 * {@link org.springframework.web.reactive.function.client.WebClient#create(String)
 		 * WebClient.create(String)}.
-		 * @see #defaultUriVariables(Map)
-		 * @see #uriBuilderFactory(UriBuilderFactory)
 		 */
-		WebClientSpec baseUrl(String baseUrl);
+		Builder baseUrl(String baseUrl);
 
 		/**
-		 * Configure default URI variable values that will be used when expanding
-		 * URI templates using a {@link Map}.
-		 * @param defaultUriVariables the default values to use
-		 * @see #baseUrl(String)
-		 * @see #uriBuilderFactory(UriBuilderFactory)
+		 * Provide a pre-configured {@link UriBuilderFactory} instance as an
+		 * alternative to and effectively overriding {@link #baseUrl(String)}.
 		 */
-		WebClientSpec defaultUriVariables(Map<String, ?> defaultUriVariables);
-
-		/**
-		 * Provide a pre-configured {@link UriBuilderFactory} instance. This is
-		 * an alternative to and effectively overrides the following:
-		 * <ul>
-		 * <li>{@link #baseUrl(String)}
-		 * <li>{@link #defaultUriVariables(Map)}.
-		 * </ul>
-		 * @param uriBuilderFactory the URI builder factory to use
-		 * @see #baseUrl(String)
-		 * @see #defaultUriVariables(Map)
-		 */
-		WebClientSpec uriBuilderFactory(UriBuilderFactory uriBuilderFactory);
+		Builder uriBuilderFactory(UriBuilderFactory uriBuilderFactory);
 
 		/**
 		 * Add the given header to all requests that haven't added it.
 		 * @param headerName the header name
 		 * @param headerValues the header values
 		 */
-		WebClientSpec defaultHeader(String headerName, String... headerValues);
+		Builder defaultHeader(String headerName, String... headerValues);
 
 		/**
 		 * Add the given header to all requests that haven't added it.
 		 * @param cookieName the cookie name
 		 * @param cookieValues the cookie values
 		 */
-		WebClientSpec defaultCookie(String cookieName, String... cookieValues);
+		Builder defaultCookie(String cookieName, String... cookieValues);
 
 		/**
 		 * Configure the {@link ExchangeStrategies} to use.
 		 * <p>By default {@link ExchangeStrategies#withDefaults()} is used.
 		 * @param strategies the strategies to use
 		 */
-		WebClientSpec exchangeStrategies(ExchangeStrategies strategies);
-
-		/**
-		 * Proceed to building the {@link WebTestClient}.
-		 */
-		Builder builder();
-
-		/**
-		 * Shortcut to build the {@link WebTestClient}.
-		 */
-		WebTestClient build();
-
-	}
-
-	/**
-	 * Build steps to create a {@link WebTestClient}.
-	 */
-	interface Builder {
+		Builder exchangeStrategies(ExchangeStrategies strategies);
 
 		/**
 		 * Max amount of time to wait for responses.

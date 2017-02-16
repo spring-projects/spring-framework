@@ -18,7 +18,11 @@ package org.springframework.test.web.reactive.server;
 import java.time.Duration;
 
 import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriBuilderFactory;
 
 /**
  * Default implementation of {@link WebTestClient.Builder}.
@@ -28,18 +32,55 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
-	private final WebClient.Builder webClientBuilder;
+	private final WebClient.Builder webClientBuilder = WebClient.builder();
 
 	private final ClientHttpConnector connector;
 
 	private Duration responseTimeout;
 
 
-	public DefaultWebTestClientBuilder(WebClient.Builder builder, ClientHttpConnector connector) {
-		this.webClientBuilder = builder;
+	public DefaultWebTestClientBuilder() {
+		this(new ReactorClientHttpConnector());
+	}
+
+	public DefaultWebTestClientBuilder(HttpHandler httpHandler) {
+		this(new HttpHandlerConnector(httpHandler));
+	}
+
+	public DefaultWebTestClientBuilder(ClientHttpConnector connector) {
 		this.connector = connector;
 	}
 
+
+	@Override
+	public WebTestClient.Builder baseUrl(String baseUrl) {
+		this.webClientBuilder.baseUrl(baseUrl);
+		return this;
+	}
+
+	@Override
+	public WebTestClient.Builder uriBuilderFactory(UriBuilderFactory uriBuilderFactory) {
+		this.webClientBuilder.uriBuilderFactory(uriBuilderFactory);
+		return this;
+	}
+
+	@Override
+	public WebTestClient.Builder defaultHeader(String headerName, String... headerValues) {
+		this.webClientBuilder.defaultHeader(headerName, headerValues);
+		return this;
+	}
+
+	@Override
+	public WebTestClient.Builder defaultCookie(String cookieName, String... cookieValues) {
+		this.webClientBuilder.defaultCookie(cookieName, cookieValues);
+		return this;
+	}
+
+	@Override
+	public WebTestClient.Builder exchangeStrategies(ExchangeStrategies strategies) {
+		this.webClientBuilder.exchangeStrategies(strategies);
+		return this;
+	}
 
 	@Override
 	public WebTestClient.Builder responseTimeout(Duration timeout) {

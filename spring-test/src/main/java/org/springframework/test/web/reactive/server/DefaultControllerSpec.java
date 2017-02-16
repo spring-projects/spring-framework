@@ -102,7 +102,7 @@ class DefaultControllerSpec implements WebTestClient.ControllerSpec {
 	}
 
 	@Override
-	public WebTestClient.WebClientSpec webClientSpec() {
+	public WebTestClient.Builder configureClient() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		this.controllers.forEach(controller -> registerBean(context, controller));
 		context.register(DelegatingWebFluxConfiguration.class);
@@ -118,7 +118,7 @@ class DefaultControllerSpec implements WebTestClient.ControllerSpec {
 
 	@Override
 	public WebTestClient build() {
-		return webClientSpec().build();
+		return configureClient().build();
 	}
 
 

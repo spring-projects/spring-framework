@@ -40,7 +40,7 @@ public class HeaderTests {
 	public void setUp() throws Exception {
 		this.client = WebTestClient
 				.bindToController(new TestController())
-				.webClientSpec().baseUrl("/header")
+				.configureClient().baseUrl("/header")
 				.build();
 	}
 
