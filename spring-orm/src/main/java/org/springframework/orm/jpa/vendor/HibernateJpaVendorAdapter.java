@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ import org.hibernate.dialect.DerbyDialect;
 import org.hibernate.dialect.H2Dialect;
 import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.dialect.InformixDialect;
-import org.hibernate.dialect.MySQLDialect;
+import org.hibernate.dialect.MySQL5Dialect;
 import org.hibernate.dialect.Oracle9iDialect;
 import org.hibernate.dialect.PostgreSQLDialect;
-import org.hibernate.dialect.SQLServerDialect;
+import org.hibernate.dialect.SQLServer2008Dialect;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate
@@ -193,10 +193,10 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 			case H2: return H2Dialect.class;
 			case HSQL: return HSQLDialect.class;
 			case INFORMIX: return InformixDialect.class;
-			case MYSQL: return MySQLDialect.class;
+			case MYSQL: return MySQL5Dialect.class;
 			case ORACLE: return Oracle9iDialect.class;
 			case POSTGRESQL: return PostgreSQLDialect.class;  // PostgreSQLDialect deprecated in 4.x
-			case SQL_SERVER: return SQLServerDialect.class;
+			case SQL_SERVER: return SQLServer2008Dialect.class;
 			case SYBASE: return org.hibernate.dialect.SybaseDialect.class;  // SybaseDialect deprecated in 3.6 but not 4.x
 			default: return null;
 		}
