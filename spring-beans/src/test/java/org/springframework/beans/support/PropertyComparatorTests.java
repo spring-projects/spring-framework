@@ -53,7 +53,7 @@ public class PropertyComparatorTests {
 	}
 
 	@Test
-	public void testCompoundComparator() {
+	public void testChainedComparators() {
 		Comparator<Dog> c = new PropertyComparator<>("lastName", false, true);
 
 		Dog dog1 = new Dog();
@@ -74,9 +74,10 @@ public class PropertyComparatorTests {
 	}
 
 	@Test
-	public void testCompoundComparatorInvert() {
+	public void testChainedComparatorsReversed() {
 		Comparator<Dog> c = (new PropertyComparator<Dog>("lastName", false, true)).
 				thenComparing(new PropertyComparator<>("firstName", false, true));
+
 		Dog dog1 = new Dog();
 		dog1.setFirstName("macy");
 		dog1.setLastName("grayspots");
@@ -91,7 +92,6 @@ public class PropertyComparatorTests {
 	}
 
 
-	@SuppressWarnings("unused")
 	private static class Dog implements Comparable<Object> {
 
 		private String nickName;

@@ -117,7 +117,9 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 			con = (Connection) con.unwrap(oracleConClass);
 		}
 		catch (ClassNotFoundException | SQLException ex) {
-			logger.warn("Unable to include synonyms in table metadata lookup - no Oracle Connection: " + ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Unable to include synonyms in table metadata lookup - no Oracle Connection: " + ex);
+			}
 			super.initializeWithTableColumnMetaData(databaseMetaData, catalogName, schemaName, tableName);
 			return;
 		}
