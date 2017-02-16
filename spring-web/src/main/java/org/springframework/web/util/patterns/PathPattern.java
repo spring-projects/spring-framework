@@ -232,7 +232,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		while (separatorCount > 0 && pos < len) {
 			if (path.charAt(pos++) == separator) {
 				// Skip any adjacent separators
-				while (path.charAt(pos) == separator) {
+				while (pos < len && path.charAt(pos) == separator) {
 					pos++;
 				}
 				separatorCount--;
@@ -240,7 +240,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		}
 		int end = len;
 		// Trim trailing separators
-		while (path.charAt(end - 1) == separator) {
+		while (end > 0 && path.charAt(end - 1) == separator) {
 			end--;
 		}
 		// Check if multiple separators embedded in the resulting path, if so trim them out.

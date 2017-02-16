@@ -468,6 +468,14 @@ public class PathPatternMatcherTests {
 	}
 
 	@Test
+	public void extractPathWithinPattern_spr15259() { 
+		checkExtractPathWithinPattern("/**","/","");
+		checkExtractPathWithinPattern("/**","//","");
+		checkExtractPathWithinPattern("/**","","");
+		checkExtractPathWithinPattern("/**","/foobar","foobar");
+	}
+	
+	@Test
 	public void extractPathWithinPattern() throws Exception {
 		checkExtractPathWithinPattern("/welcome*/", "/welcome/", "welcome");
 		checkExtractPathWithinPattern("/docs/commit.html", "/docs/commit.html", "");
