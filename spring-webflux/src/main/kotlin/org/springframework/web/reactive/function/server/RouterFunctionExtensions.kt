@@ -60,7 +60,6 @@ fun RouterFunction<*>.route(request: ServerRequest, configure: Routes.() -> Unit
 
 class Routes {
 
-	val children = mutableListOf<Routes>()
 	val routes = mutableListOf<RouterFunction<ServerResponse>>()
 
 	infix fun RequestPredicate.and(other: RequestPredicate): RequestPredicate = this.and(other)
@@ -69,8 +68,9 @@ class Routes {
 
 	operator fun RequestPredicate.not(): RequestPredicate = this.negate()
 
-	fun RequestPredicate.route(routes: Routes.() -> Unit) =
-			RouterFunctions.nest(this, Routes().apply(routes).router())
+	fun RequestPredicate.route(r: Routes.() -> Unit) {
+		routes += RouterFunctions.nest(this, Routes().apply(r).router())
+	}
 
 	operator fun RequestPredicate.invoke(f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(this, HandlerFunction { f(it) })
@@ -145,20 +145,11 @@ class Routes {
 	}
 
 	fun router(): RouterFunction<ServerResponse> {
-		return routes().reduce(RouterFunction<ServerResponse>::and)
+		return routes.reduce(RouterFunction<ServerResponse>::and)
 	}
 
 	operator fun invoke(request: ServerRequest): Mono<HandlerFunction<ServerResponse>> {
 		return router().route(request)
-	}
-
-	private fun routes(): List<RouterFunction<ServerResponse>> {
-		val allRoutes = mutableListOf<RouterFunction<ServerResponse>>()
-		allRoutes += routes
-		for (child in children) {
-			allRoutes += child.routes()
-		}
-		return allRoutes
 	}
 
 }
