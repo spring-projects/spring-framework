@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  * Exposes routing functionality, such as to
  * {@linkplain #route(RequestPredicate, HandlerFunction) create} a {@code RouterFunction} given a
  * {@code RequestPredicate} and {@code HandlerFunction}, and to do further
- * {@linkplain #subroute(RequestPredicate, RouterFunction) subrouting} on an existing routing
+ * {@linkplain #nest(RequestPredicate, RouterFunction) subrouting} on an existing routing
  * function.
  *
  * <p>Additionally, this class can {@linkplain #toHttpHandler(RouterFunction) transform} a
@@ -69,9 +69,17 @@ public abstract class RouterFunctions {
 
 	/**
 	 * Route to the given handler function if the given request predicate applies.
+	 * <p>For instance, the following example routes GET requests for "/user" to the
+	 * {@code listUsers} method in {@code userController}:
+	 * <pre class="code">
+	 * RouterFunction&lt;ServerResponse&gt; route =
+	 *   RouterFunctions.route(RequestPredicates.GET("/user"),
+	 *     userController::listUsers);
+	 * </pre>
+	 *
 	 * @param predicate the predicate to test
-	 * @param handlerFunction the handler function to route to
-	 * @param <T> the type of the handler function
+	 * @param handlerFunction the handler function to route to if the predicate applies
+	 * @param <T> the type of response returned by the handler function
 	 * @return a router function that routes to {@code handlerFunction} if
 	 * {@code predicate} evaluates to {@code true}
 	 * @see RequestPredicates
@@ -86,15 +94,29 @@ public abstract class RouterFunctions {
 	}
 
 	/**
-	 * Route to the given router function if the given request predicate applies.
+	 * Route to the given router function if the given request predicate applies. This method can be
+	 * used to create <strong>nested routes</strong>, where a group of routes share a common path
+	 * (prefix), header, or other request predicate.
+	 * <p>For instance, the following example first creates a composed route that resolves to
+	 * {@code listUsers} for a GET, and {@code createUser} for a POST. This composed route then gets
+	 * nested with a "/user" path predicate, so that GET requests for "/user" will list users,
+	 * and POST request for "/user" will create a new user.
+	 * <pre class="code">
+	 * RouterFunction&lt;ServerResponse&gt; userRoutes =
+	 *   RouterFunctions.route(RequestPredicates.method(HttpMethod.GET), this::listUsers)
+	 *     .andRoute(RequestPredicates.method(HttpMethod.POST), this::createUser);
+	 *
+	 * RouterFunction&lt;ServerResponse&gt; nestedRoute =
+	 *   RouterFunctions.nest(RequestPredicates.path("/user"),userRoutes);
+	 * </pre>
 	 * @param predicate the predicate to test
-	 * @param routerFunction the router function to route to
-	 * @param <T> the type of the handler function
+	 * @param routerFunction the nested router function to delegate to if the predicate applies
+	 * @param <T> the type of response returned by the handler function
 	 * @return a router function that routes to {@code routerFunction} if
 	 * {@code predicate} evaluates to {@code true}
 	 * @see RequestPredicates
 	 */
-	public static <T extends ServerResponse> RouterFunction<T> subroute(RequestPredicate predicate,
+	public static <T extends ServerResponse> RouterFunction<T> nest(RequestPredicate predicate,
 			RouterFunction<T> routerFunction) {
 
 		Assert.notNull(predicate, "'predicate' must not be null");
