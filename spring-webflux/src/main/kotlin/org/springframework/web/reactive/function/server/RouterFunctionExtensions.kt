@@ -69,6 +69,9 @@ class RouterDsl {
 
 	operator fun RequestPredicate.not(): RequestPredicate = this.negate()
 
+	fun RequestPredicate.route(routes: RouterDsl.() -> Unit) =
+			RouterFunctions.nest(this, RouterDsl().apply(routes).router())
+
 	operator fun RequestPredicate.invoke(f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(this, HandlerFunction { f(it) })
 	}
