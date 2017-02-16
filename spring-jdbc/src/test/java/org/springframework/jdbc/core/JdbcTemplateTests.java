@@ -67,16 +67,23 @@ import static org.springframework.tests.Matchers.*;
  */
 public class JdbcTemplateTests {
 
+	private Connection connection;
+
+	private DataSource dataSource;
+
+	private PreparedStatement preparedStatement;
+
+	private Statement statement;
+
+	private ResultSet resultSet;
+
+	private JdbcTemplate template;
+
+	private CallableStatement callableStatement;
+
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private Connection connection;
-	private DataSource dataSource;
-	private PreparedStatement preparedStatement;
-	private Statement statement;
-	private ResultSet resultSet;
-	private JdbcTemplate template;
-	private CallableStatement callableStatement;
 
 	@Before
 	public void setup() throws Exception {
@@ -97,6 +104,7 @@ public class JdbcTemplateTests {
 		given(this.connection.prepareCall(anyString())).willReturn(this.callableStatement);
 		given(this.callableStatement.getResultSet()).willReturn(this.resultSet);
 	}
+
 
 	@Test
 	public void testBeanProperties() throws Exception {
