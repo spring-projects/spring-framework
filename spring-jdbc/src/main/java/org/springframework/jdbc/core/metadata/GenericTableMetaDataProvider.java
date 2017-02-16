@@ -79,8 +79,8 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 
 	/**
-	 * Constructor used to initialize with provided database meta data.
-	 * @param databaseMetaData meta data to be used
+	 * Constructor used to initialize with provided database metadata.
+	 * @param databaseMetaData metadata to be used
 	 */
 	protected GenericTableMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
 		this.userName = databaseMetaData.getUserName();
@@ -308,7 +308,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 	/**
-	 * Method supporting the metedata processing for a table.
+	 * Method supporting the metadata processing for a table.
 	 */
 	private void locateTableAndProcessMetaData(
 			DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String tableName) {

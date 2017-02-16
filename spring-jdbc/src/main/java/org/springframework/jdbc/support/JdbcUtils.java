@@ -422,7 +422,7 @@ public abstract class JdbcUtils {
 
 	/**
 	 * Extract a common name for the database in use even if various drivers/platforms provide varying names.
-	 * @param source the name as provided in database metedata
+	 * @param source the name as provided in database metadata
 	 * @return the common name to be used
 	 */
 	public static String commonDatabaseName(String source) {

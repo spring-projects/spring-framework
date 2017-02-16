@@ -78,7 +78,7 @@ class JBossMCAdapter implements JBossClassLoaderAdapter {
 			this.translatorClass = classLoader.loadClass(TRANSLATOR_NAME);
 			this.addTranslator = this.target.getClass().getMethod("addTranslator", this.translatorClass);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new IllegalStateException(
 					"Could not initialize JBoss LoadTimeWeaver because the JBoss 6 API classes are not available", ex);
 		}
@@ -92,7 +92,7 @@ class JBossMCAdapter implements JBossClassLoaderAdapter {
 		try {
 			this.addTranslator.invoke(this.target, adapterInstance);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new IllegalStateException("Could not add transformer on JBoss 6 ClassLoader " + this.classLoader, ex);
 		}
 	}

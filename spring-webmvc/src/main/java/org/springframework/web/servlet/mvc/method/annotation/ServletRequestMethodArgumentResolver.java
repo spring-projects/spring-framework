@@ -47,10 +47,10 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * <li>{@link Principal}
  * <li>{@link InputStream}
  * <li>{@link Reader}
- * <li>{@link HttpMethod} (as of Spring 4.0)</li>
+ * <li>{@link HttpMethod} (as of Spring 4.0)
  * <li>{@link Locale}
  * <li>{@link TimeZone} (as of Spring 4.0)
- * <li>{@link java.time.ZoneId} (as of Spring 4.0 and Java 8)</li>
+ * <li>{@link java.time.ZoneId} (as of Spring 4.0 and Java 8)
  * </ul>
  *
  * @author Arjen Poutsma

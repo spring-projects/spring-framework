@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@ import java.sql.Connection;
  * native JDBC Connection such as Oracle's OracleConnection. Spring's
  * {@link org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractorAdapter}
  * automatically detects such proxies before delegating to the actual
- * unwrapping for a specific connection pool.
+ * unwrapping for a specific connection pool. Alternatively, all such
+ * connections also support JDBC 4.0's {@link Connection#unwrap}.
  *
  * @author Juergen Hoeller
  * @since 1.1

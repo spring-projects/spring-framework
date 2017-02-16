@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,22 +43,32 @@ class JBossModulesAdapter implements JBossClassLoaderAdapter {
 	private final Object delegatingTransformer;
 
 
-	public JBossModulesAdapter(ClassLoader loader) {
-		this.classLoader = loader;
+	public JBossModulesAdapter(ClassLoader classLoader) {
+		this.classLoader = classLoader;
 		try {
-			Field transformer = ReflectionUtils.findField(loader.getClass(), "transformer");
+			Field transformer = ReflectionUtils.findField(classLoader.getClass(), "transformer");
+			if (transformer == null) {
+				throw new IllegalArgumentException("Could not find 'transformer' field on JBoss ClassLoader: " +
+						classLoader.getClass().getName());
+			}
 			transformer.setAccessible(true);
-			this.delegatingTransformer = transformer.get(loader);
+			this.delegatingTransformer = transformer.get(classLoader);
 			if (!this.delegatingTransformer.getClass().getName().equals(DELEGATING_TRANSFORMER_CLASS_NAME)) {
-				throw new IllegalStateException("Transformer not of the expected type DelegatingClassFileTransformer: " +
+				throw new IllegalStateException(
+						"Transformer not of the expected type DelegatingClassFileTransformer: " +
 						this.delegatingTransformer.getClass().getName());
 			}
 			this.addTransformer = ReflectionUtils.findMethod(this.delegatingTransformer.getClass(),
 					"addTransformer", ClassFileTransformer.class);
+			if (this.addTransformer == null) {
+				throw new IllegalArgumentException(
+						"Could not find 'addTransformer' method on JBoss DelegatingClassFileTransformer: " +
+						this.delegatingTransformer.getClass().getName());
+			}
 			this.addTransformer.setAccessible(true);
 		}
-		catch (Exception ex) {
-			throw new IllegalStateException("Could not initialize JBoss 7 LoadTimeWeaver", ex);
+		catch (Throwable ex) {
+			throw new IllegalStateException("Could not initialize JBoss LoadTimeWeaver", ex);
 		}
 	}
 
@@ -67,7 +77,7 @@ class JBossModulesAdapter implements JBossClassLoaderAdapter {
 		try {
 			this.addTransformer.invoke(this.delegatingTransformer, transformer);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new IllegalStateException("Could not add transformer on JBoss 7 ClassLoader " + this.classLoader, ex);
 		}
 	}

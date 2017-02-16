@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,10 +143,9 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testStringsWithStaticSql() throws Exception {
-		doTestStrings(false, null, null, null, null, new JdbcTemplateCallback() {
+		doTestStrings(null, null, null, null, new JdbcTemplateCallback() {
 			@Override
-			public void doInJdbcTemplate(JdbcTemplate template, String sql,
-					RowCallbackHandler rch) {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, rch);
 			}
 		});
@@ -154,10 +153,9 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testStringsWithStaticSqlAndFetchSizeAndMaxRows() throws Exception {
-		doTestStrings(false, 10, 20, 30, null, new JdbcTemplateCallback() {
+		doTestStrings(10, 20, 30, null, new JdbcTemplateCallback() {
 			@Override
-			public void doInJdbcTemplate(JdbcTemplate template, String sql,
-					RowCallbackHandler rch) {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, rch);
 			}
 		});
@@ -165,10 +163,9 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testStringsWithEmptyPreparedStatementSetter() throws Exception {
-		doTestStrings(true, null, null, null, null, new JdbcTemplateCallback() {
+		doTestStrings(null, null, null, null, new JdbcTemplateCallback() {
 			@Override
-			public void doInJdbcTemplate(JdbcTemplate template, String sql,
-					RowCallbackHandler rch) {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, (PreparedStatementSetter) null, rch);
 			}
 		});
@@ -177,10 +174,9 @@ public class JdbcTemplateTests {
 	@Test
 	public void testStringsWithPreparedStatementSetter() throws Exception {
 		final Integer argument = 99;
-		doTestStrings(true, null, null, null, argument, new JdbcTemplateCallback() {
+		doTestStrings(null, null, null, argument, new JdbcTemplateCallback() {
 			@Override
-			public void doInJdbcTemplate(JdbcTemplate template, String sql,
-					RowCallbackHandler rch) {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, new PreparedStatementSetter() {
 					@Override
 					public void setValues(PreparedStatement ps) throws SQLException {
@@ -193,10 +189,9 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testStringsWithEmptyPreparedStatementArgs() throws Exception {
-		doTestStrings(true, null, null, null, null, new JdbcTemplateCallback() {
+		doTestStrings(null, null, null, null, new JdbcTemplateCallback() {
 			@Override
-			public void doInJdbcTemplate(JdbcTemplate template, String sql,
-					RowCallbackHandler rch) {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, (Object[]) null, rch);
 			}
 		});
@@ -205,26 +200,22 @@ public class JdbcTemplateTests {
 	@Test
 	public void testStringsWithPreparedStatementArgs() throws Exception {
 		final Integer argument = 99;
-		doTestStrings(true, null, null, null, argument, new JdbcTemplateCallback() {
+		doTestStrings(null, null, null, argument, new JdbcTemplateCallback() {
 			@Override
-			public void doInJdbcTemplate(JdbcTemplate template, String sql,
-					RowCallbackHandler rch) {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, new Object[] { argument }, rch);
 			}
 		});
 	}
 
-	private void doTestStrings(
-			boolean usePreparedStatement,
-			Integer fetchSize, Integer maxRows, Integer queryTimeout, Object argument,
-			JdbcTemplateCallback jdbcTemplateCallback)
-			throws Exception {
+	private void doTestStrings(Integer fetchSize, Integer maxRows, Integer queryTimeout,
+			Object argument, JdbcTemplateCallback jdbcTemplateCallback) throws Exception {
 
 		String sql = "SELECT FORENAME FROM CUSTMR";
 		String[] results = { "rod", "gary", " portia" };
 
 		class StringHandler implements RowCallbackHandler {
-			private List<String> list = new LinkedList<String>();
+			private List<String> list = new LinkedList<>();
 			@Override
 			public void processRow(ResultSet rs) throws SQLException {
 				this.list.add(rs.getString(1));
@@ -740,9 +731,8 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testBatchUpdateWithListOfObjectArrays() throws Exception {
-
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
-		final List<Object[]> ids = new ArrayList<Object[]>();
+		final List<Object[]> ids = new ArrayList<>();
 		ids.add(new Object[] {100});
 		ids.add(new Object[] {200});
 		final int[] rowsAffected = new int[] { 1, 2 };
@@ -768,7 +758,7 @@ public class JdbcTemplateTests {
 	@Test
 	public void testBatchUpdateWithListOfObjectArraysPlusTypeInfo() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
-		final List<Object[]> ids = new ArrayList<Object[]>();
+		final List<Object[]> ids = new ArrayList<>();
 		ids.add(new Object[] {100});
 		ids.add(new Object[] {200});
 		final int[] sqlTypes = new int[] {Types.NUMERIC};
@@ -851,13 +841,15 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitializedViaBeanProperty()
-			throws Exception {
+			throws SQLException {
+
 		doTestCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(true);
 	}
 
 	@Test
 	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitializedInAfterPropertiesSet()
-			throws Exception {
+			throws SQLException {
+
 		doTestCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(false);
 	}
 
@@ -867,6 +859,7 @@ public class JdbcTemplateTests {
 	 */
 	private void doTestCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(boolean beanProperty)
 			throws SQLException {
+
 		SQLException sqlException = new SQLException("foo", "07xxx");
 		this.dataSource = mock(DataSource.class);
 		given(this.dataSource.getConnection()).willThrow(sqlException);
@@ -1098,7 +1091,6 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testNativeJdbcExtractorInvoked() throws Exception {
-
 		final Statement statement2 = mock(Statement.class);
 		given(statement2.executeQuery(anyString())).willReturn(this.resultSet);
 
@@ -1246,7 +1238,7 @@ public class JdbcTemplateTests {
 		given(this.callableStatement.execute()).willReturn(true);
 		given(this.callableStatement.getUpdateCount()).willReturn(-1);
 
-		List<SqlParameter> params = new ArrayList<SqlParameter>();
+		List<SqlParameter> params = new ArrayList<>();
 		params.add(new SqlReturnResultSet("", new RowCallbackHandler() {
 			@Override
 			public void processRow(ResultSet rs) {
@@ -1286,7 +1278,7 @@ public class JdbcTemplateTests {
 		assertTrue("now it should have been set to case insensitive",
 				this.template.isResultsMapCaseInsensitive());
 
-		List<SqlParameter> params = new ArrayList<SqlParameter>();
+		List<SqlParameter> params = new ArrayList<>();
 		params.add(new SqlOutParameter("a", 12));
 
 		Map<String, Object> out = this.template.call(new CallableStatementCreator() {
@@ -1311,6 +1303,7 @@ public class JdbcTemplateTests {
 		given(this.connection.getMetaData()).willReturn(databaseMetaData);
 	}
 
+
 	private static class PlainNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 		@Override
@@ -1320,7 +1313,7 @@ public class JdbcTemplateTests {
 	}
 
 
-	private static interface JdbcTemplateCallback {
+	private interface JdbcTemplateCallback {
 
 		void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch);
 	}
@@ -1329,6 +1322,7 @@ public class JdbcTemplateTests {
 	private static class Dispatcher implements PreparedStatementCreator, SqlProvider {
 
 		private int id;
+
 		private String sql;
 
 		public Dispatcher(int id, String sql) {
@@ -1348,4 +1342,5 @@ public class JdbcTemplateTests {
 			return this.sql;
 		}
 	}
+
 }

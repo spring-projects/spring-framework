@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class JdbcBeanDefinitionReader {
 
 	/**
 	 * Set the JdbcTemplate to be used by this bean factory.
-	 * Contains settings for DataSource, SQLExceptionTranslator, NativeJdbcExtractor, etc.
+	 * Contains settings for DataSource, SQLExceptionTranslator, etc.
 	 */
 	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
 		Assert.notNull(jdbcTemplate, "JdbcTemplate must not be null");
