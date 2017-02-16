@@ -1440,7 +1440,7 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	/**
-	 * Ges the local name for the supplied {@link Node}.
+	 * Get the local name for the supplied {@link Node}.
 	 * <p>The default implementation calls {@link Node#getLocalName}.
 	 * Subclasses may override the default implementation to provide a
 	 * different mechanism for getting the local name.
