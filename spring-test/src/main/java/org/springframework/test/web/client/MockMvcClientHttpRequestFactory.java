@@ -62,7 +62,7 @@ public class MockMvcClientHttpRequestFactory implements ClientHttpRequestFactory
 			@Override
 			public ClientHttpResponse executeInternal() throws IOException {
 				try {
-					MockHttpServletRequestBuilder requestBuilder = request(httpMethod, uri.toString());
+					MockHttpServletRequestBuilder requestBuilder = request(httpMethod, uri);
 					requestBuilder.content(getBodyAsBytes());
 					requestBuilder.headers(getHeaders());
 					MvcResult mvcResult = MockMvcClientHttpRequestFactory.this.mockMvc.perform(requestBuilder).andReturn();
