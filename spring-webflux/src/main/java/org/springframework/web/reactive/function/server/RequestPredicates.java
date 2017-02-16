@@ -70,7 +70,7 @@ public abstract class RequestPredicates {
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that tests against the given path pattern.
+	 * Return a {@code RequestPredicate} that tests the request path against the given path pattern.
 	 *
 	 * @param pattern the pattern to match to
 	 * @return a predicate that tests against the given path pattern
@@ -254,6 +254,23 @@ public abstract class RequestPredicates {
 			String pathExtension = UriUtils.extractFileExtension(request.path());
 			return extensionPredicate.test(pathExtension);
 		};
+	}
+
+	/**
+	 * Return a {@code RequestPredicate} that tests the beginning of the request path against the
+	 * given path pattern. This predicate is effectively identical to a
+	 * {@linkplain #path(String) standard path predicate} with path {@code pathPrefixPattern + "/**"}.
+	 * @param pathPrefixPattern the pattern to match against the start of the request path
+	 * @return a predicate that matches if the given predicate matches against the beginning of
+	 * the request's path
+	 */
+	public static RequestPredicate pathPrefix(String pathPrefixPattern) {
+		Assert.notNull(pathPrefixPattern, "'pathPrefixPattern' must not be null");
+
+		if (!pathPrefixPattern.endsWith("/**")) {
+			pathPrefixPattern += "/**";
+		}
+		return path(pathPrefixPattern);
 	}
 
 	/**
