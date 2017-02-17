@@ -19,6 +19,8 @@ package org.springframework.web.reactive.function.server;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
@@ -51,6 +53,8 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  * @since 5.0
  */
 public abstract class RouterFunctions {
+
+	private static final Log logger = LogFactory.getLog(RouterFunctions.class);
 
 	/**
 	 * Name of the {@link ServerWebExchange} attribute that contains the {@link ServerRequest}.
@@ -90,7 +94,18 @@ public abstract class RouterFunctions {
 		Assert.notNull(predicate, "'predicate' must not be null");
 		Assert.notNull(handlerFunction, "'handlerFunction' must not be null");
 
-		return request -> predicate.test(request) ? Mono.just(handlerFunction) : Mono.empty();
+		return request -> {
+			if (predicate.test(request)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("Predicate \"%s\" matches against \"%s\"",
+							predicate, request));
+				}
+				return Mono.just(handlerFunction);
+			}
+			else {
+				return Mono.empty();
+			}
+		};
 	}
 
 	/**
@@ -124,7 +139,11 @@ public abstract class RouterFunctions {
 
 		return request -> {
 			if (predicate.test(request)) {
-				ServerRequest subRequest = predicate.subRequest(request);
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("Nested predicate \"%s\" matches against \"%s\"",
+							predicate, request));
+				}
+				ServerRequest subRequest = predicate.nestRequest(request);
 				return routerFunction.route(subRequest);
 			}
 			else {

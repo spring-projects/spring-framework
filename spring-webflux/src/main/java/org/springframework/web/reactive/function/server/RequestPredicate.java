@@ -57,8 +57,13 @@ public interface RequestPredicate {
 			}
 
 			@Override
-			public ServerRequest subRequest(ServerRequest request) {
-				return other.subRequest(RequestPredicate.this.subRequest(request));
+			public ServerRequest nestRequest(ServerRequest request) {
+				return other.nestRequest(RequestPredicate.this.nestRequest(request));
+			}
+
+			@Override
+			public String toString() {
+				return String.format("(%s && %s)", RequestPredicate.this, other);
 			}
 		};
 	}
@@ -76,16 +81,47 @@ public interface RequestPredicate {
 	 * Returns a composed request predicate that tests against both this predicate OR the {@code other} predicate.
 	 * When evaluating the composed predicate, if this predicate is {@code true}, then the {@code other} predicate
 	 * is not evaluated.
-
 	 * @param other a predicate that will be logically-ORed with this predicate
 	 * @return a predicate composed of this predicate OR the {@code other} predicate
 	 */
 	default RequestPredicate or(RequestPredicate other) {
 		Assert.notNull(other, "'other' must not be null");
-		return (t) -> test(t) || other.test(t);
+		return new RequestPredicate() {
+			@Override
+			public boolean test(ServerRequest t) {
+				return RequestPredicate.this.test(t) || other.test(t);
+			}
+
+			@Override
+			public ServerRequest nestRequest(ServerRequest request) {
+				if (RequestPredicate.this.test(request)) {
+					return RequestPredicate.this.nestRequest(request);
+				}
+				else if (other.test(request)) {
+					return other.nestRequest(request);
+				}
+				else {
+					throw new IllegalStateException("Neither " + RequestPredicate.this.toString() +
+							" nor " + other + "matches");
+				}
+			}
+
+			@Override
+			public String toString() {
+				return String.format("(%s || %s)", RequestPredicate.this, other);
+			}
+		};
 	}
 
-	default ServerRequest subRequest(ServerRequest request) {
+	/**
+	 * Transforms the given request into a request used for a nested route. For instance, a
+	 * path-based predicate can return a {@code ServerRequest} with a nested path.
+	 * <p>Default implementation returns the given path.
+	 * @param request the request to be nested
+	 * @return the nested request
+	 * @see RouterFunctions#nest(RequestPredicate, RouterFunction)
+	 */
+	default ServerRequest nestRequest(ServerRequest request) {
 		return request;
 	}
 }

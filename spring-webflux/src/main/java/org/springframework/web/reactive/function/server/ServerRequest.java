@@ -114,6 +114,12 @@ public interface ServerRequest {
 	<T> Optional<T> attribute(String name);
 
 	/**
+	 * Return a mutable map of request attributes.
+	 * @return the request attributes
+	 */
+	Map<String, Object> attributes();
+
+	/**
 	 * Return the first query parameter with the given name, if present.
 	 * @param name the parameter name
 	 * @return the parameter value

@@ -26,6 +26,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -33,6 +35,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriUtils;
@@ -47,6 +50,8 @@ import org.springframework.web.util.patterns.PathPatternParser;
  * @since 5.0
  */
 public abstract class RequestPredicates {
+
+	private static final Log logger = LogFactory.getLog(RequestPredicates.class);
 
 	private static final PathPatternParser DEFAULT_PATTERN_PARSER = new PathPatternParser();
 
@@ -119,11 +124,21 @@ public abstract class RequestPredicates {
 	public static RequestPredicate contentType(MediaType... mediaTypes) {
 		Assert.notEmpty(mediaTypes, "'mediaTypes' must not be empty");
 		Set<MediaType> mediaTypeSet = new HashSet<>(Arrays.asList(mediaTypes));
-		return headers(headers -> {
-			MediaType contentType = headers.contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
-			return mediaTypeSet.stream()
-					.anyMatch(mediaType -> mediaType.includes(contentType));
+		return headers(new Predicate<ServerRequest.Headers>() {
+			@Override
+			public boolean test(ServerRequest.Headers headers) {
+				MediaType contentType =
+						headers.contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
+				boolean match = mediaTypeSet.stream()
+						.anyMatch(mediaType -> mediaType.includes(contentType));
+				traceMatch("Content-Type", mediaTypeSet, contentType, match);
+				return match;
+			}
 
+			@Override
+			public String toString() {
+				return String.format("Content-Type: %s", mediaTypeSet);
+			}
 		});
 	}
 
@@ -138,12 +153,23 @@ public abstract class RequestPredicates {
 	public static RequestPredicate accept(MediaType... mediaTypes) {
 		Assert.notEmpty(mediaTypes, "'mediaTypes' must not be empty");
 		Set<MediaType> mediaTypeSet = new HashSet<>(Arrays.asList(mediaTypes));
-		return headers(headers -> {
-			List<MediaType> acceptedMediaTypes = headers.accept();
-			MediaType.sortBySpecificityAndQuality(acceptedMediaTypes);
-			return acceptedMediaTypes.stream()
-					.anyMatch(acceptedMediaType -> mediaTypeSet.stream()
-							.anyMatch(acceptedMediaType::isCompatibleWith));
+		return headers(new Predicate<ServerRequest.Headers>() {
+			@Override
+			public boolean test(ServerRequest.Headers headers) {
+				List<MediaType> acceptedMediaTypes = headers.accept();
+				MediaType.sortBySpecificityAndQuality(acceptedMediaTypes);
+				boolean match = acceptedMediaTypes.stream()
+						.anyMatch(acceptedMediaType -> mediaTypeSet.stream()
+								.anyMatch(acceptedMediaType::isCompatibleWith));
+				traceMatch("Accept", mediaTypeSet, acceptedMediaTypes, match);
+				return match;
+			}
+
+			@Override
+			public String toString() {
+				return String.format("Accept: %s", mediaTypeSet);
+			}
+
 		});
 	}
 
@@ -238,7 +264,11 @@ public abstract class RequestPredicates {
 	 */
 	public static RequestPredicate pathExtension(String extension) {
 		Assert.notNull(extension, "'extension' must not be null");
-		return pathExtension(extension::equalsIgnoreCase);
+		return pathExtension(pathExtension -> {
+			boolean match = extension.equalsIgnoreCase(pathExtension);
+			traceMatch("Extension", extension, pathExtension, match);
+			return match;
+		});
 	}
 
 	/**
@@ -289,6 +319,14 @@ public abstract class RequestPredicates {
 		};
 	}
 
+	private static void traceMatch(String prefix, Object desired, Object actual, boolean match) {
+		if (logger.isTraceEnabled()) {
+			String message = String.format("%s \"%s\" %s against value \"%s\"",
+					prefix, desired, match ? "matches" : "does not match", actual);
+			logger.trace(message);
+		}
+	}
+
 
 	private static class HttpMethodPredicate implements RequestPredicate {
 
@@ -301,7 +339,14 @@ public abstract class RequestPredicates {
 
 		@Override
 		public boolean test(ServerRequest request) {
-			return this.httpMethod == request.method();
+			boolean match = this.httpMethod == request.method();
+			traceMatch("Method", this.httpMethod, request.method(), match);
+			return match;
+		}
+
+		@Override
+		public String toString() {
+			return this.httpMethod.toString();
 		}
 	}
 
@@ -317,12 +362,11 @@ public abstract class RequestPredicates {
 		@Override
 		public boolean test(ServerRequest request) {
 			String path = request.path();
-			if (this.pattern.matches(path)) {
-				if (request instanceof DefaultServerRequest) {
-					DefaultServerRequest defaultRequest = (DefaultServerRequest) request;
-					Map<String, String> uriTemplateVariables = this.pattern.matchAndExtract(path);
-					defaultRequest.exchange().getAttributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
-				}
+			boolean match = this.pattern.matches(path);
+			traceMatch("Pattern", this.pattern.getPatternString(), path, match);
+			if (match) {
+				Map<String, String> uriTemplateVariables = this.pattern.matchAndExtract(path);
+				request.attributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
 				return true;
 			}
 			else {
@@ -331,10 +375,18 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
-		public ServerRequest subRequest(ServerRequest request) {
+		public ServerRequest nestRequest(ServerRequest request) {
 			String requestPath = request.path();
 			String subPath = this.pattern.extractPathWithinPattern(requestPath);
+			if (!subPath.startsWith("/")) {
+				subPath = "/" + subPath;
+			}
 			return new SubPathServerRequestWrapper(request, subPath);
+		}
+
+		@Override
+		public String toString() {
+			return this.pattern.getPatternString();
 		}
 	}
 
@@ -350,6 +402,11 @@ public abstract class RequestPredicates {
 		@Override
 		public boolean test(ServerRequest request) {
 			return this.headersPredicate.test(request.headers());
+		}
+
+		@Override
+		public String toString() {
+			return this.headersPredicate.toString();
 		}
 	}
 
@@ -410,6 +467,11 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public Map<String, Object> attributes() {
+			return this.request.attributes();
+		}
+
+		@Override
 		public Optional<String> queryParam(String name) {
 			return this.request.queryParam(name);
 		}
@@ -433,5 +495,11 @@ public abstract class RequestPredicates {
 		public Mono<WebSession> session() {
 			return this.request.session();
 		}
+
+		@Override
+		public String toString() {
+			return String.format("%s %s", method(), path());
+		}
+
 	}
 }

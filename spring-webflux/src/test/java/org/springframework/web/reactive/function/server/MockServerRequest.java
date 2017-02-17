@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.concurrent.ConcurrentHashMap;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -128,6 +129,11 @@ public class MockServerRequest implements ServerRequest {
 	}
 
 	@Override
+	public Map<String, Object> attributes() {
+		return this.attributes;
+	}
+
+	@Override
 	public List<String> queryParams(String name) {
 		return Collections.unmodifiableList(this.queryParams.get(name));
 	}
@@ -182,7 +188,7 @@ public class MockServerRequest implements ServerRequest {
 
 		private Object body;
 
-		private Map<String, Object> attributes = new LinkedHashMap<>();
+		private Map<String, Object> attributes = new ConcurrentHashMap<>();
 
 		private MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 
