@@ -1370,6 +1370,122 @@ public class DataSourceTransactionManagerTests  {
 	}
 
 	@Test
+	public void testExistingTransactionWithPropagationNestedAndRequiredRollback() throws Exception {
+		DatabaseMetaData md = mock(DatabaseMetaData.class);
+		Savepoint sp = mock(Savepoint.class);
+
+		given(md.supportsSavepoints()).willReturn(true);
+		given(con.getMetaData()).willReturn(md);
+		given(con.setSavepoint("SAVEPOINT_1")).willReturn(sp);
+
+		final TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+				assertTrue("Is new transaction", status.isNewTransaction());
+				assertTrue("Isn't nested transaction", !status.hasSavepoint());
+				try {
+					tt.execute(new TransactionCallbackWithoutResult() {
+						@Override
+						protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+							assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+							assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
+							assertTrue("Isn't new transaction", !status.isNewTransaction());
+							assertTrue("Is nested transaction", status.hasSavepoint());
+							TransactionTemplate ntt = new TransactionTemplate(tm);
+							ntt.execute(new TransactionCallbackWithoutResult() {
+								@Override
+								protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+									assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+									assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
+									assertTrue("Isn't new transaction", !status.isNewTransaction());
+									assertTrue("Is regular transaction", !status.hasSavepoint());
+									throw new IllegalStateException();
+								}
+							});
+						}
+					});
+					fail("Should have thrown IllegalStateException");
+				}
+				catch (IllegalStateException ex) {
+					// expected
+				}
+				assertTrue("Is new transaction", status.isNewTransaction());
+				assertTrue("Isn't nested transaction", !status.hasSavepoint());
+			}
+		});
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		verify(con).rollback(sp);
+		verify(con).releaseSavepoint(sp);
+		verify(con).commit();
+		verify(con).isReadOnly();
+		verify(con).close();
+	}
+
+	@Test
+	public void testExistingTransactionWithPropagationNestedAndRequiredRollbackOnly() throws Exception {
+		DatabaseMetaData md = mock(DatabaseMetaData.class);
+		Savepoint sp = mock(Savepoint.class);
+
+		given(md.supportsSavepoints()).willReturn(true);
+		given(con.getMetaData()).willReturn(md);
+		given(con.setSavepoint("SAVEPOINT_1")).willReturn(sp);
+
+		final TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+				assertTrue("Is new transaction", status.isNewTransaction());
+				assertTrue("Isn't nested transaction", !status.hasSavepoint());
+				try {
+					tt.execute(new TransactionCallbackWithoutResult() {
+						@Override
+						protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+							assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+							assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
+							assertTrue("Isn't new transaction", !status.isNewTransaction());
+							assertTrue("Is nested transaction", status.hasSavepoint());
+							TransactionTemplate ntt = new TransactionTemplate(tm);
+							ntt.execute(new TransactionCallbackWithoutResult() {
+								@Override
+								protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+									assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+									assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
+									assertTrue("Isn't new transaction", !status.isNewTransaction());
+									assertTrue("Is regular transaction", !status.hasSavepoint());
+									status.setRollbackOnly();
+								}
+							});
+						}
+					});
+					fail("Should have thrown UnexpectedRollbackException");
+				}
+				catch (UnexpectedRollbackException ex) {
+					// expected
+				}
+				assertTrue("Is new transaction", status.isNewTransaction());
+				assertTrue("Isn't nested transaction", !status.hasSavepoint());
+			}
+		});
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		verify(con).rollback(sp);
+		verify(con).releaseSavepoint(sp);
+		verify(con).commit();
+		verify(con).isReadOnly();
+		verify(con).close();
+	}
+
+	@Test
 	public void testExistingTransactionWithManualSavepoint() throws Exception {
 		DatabaseMetaData md = mock(DatabaseMetaData.class);
 		Savepoint sp = mock(Savepoint.class);
