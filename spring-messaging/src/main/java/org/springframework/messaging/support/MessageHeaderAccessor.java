@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,19 +136,15 @@ public class MessageHeaderAccessor {
 	 * A constructor to create new headers.
 	 */
 	public MessageHeaderAccessor() {
-		this.headers = new MutableMessageHeaders();
+		this(null);
 	}
 
 	/**
 	 * A constructor accepting the headers of an existing message to copy.
+	 * @param message a message to copy the headers from, or {@code null} if none
 	 */
 	public MessageHeaderAccessor(Message<?> message) {
-		if (message != null) {
-			this.headers = new MutableMessageHeaders(message.getHeaders());
-		}
-		else {
-			this.headers = new MutableMessageHeaders();
-		}
+		this.headers = new MutableMessageHeaders(message != null ? message.getHeaders() : null);
 	}
 
 
@@ -193,7 +189,6 @@ public class MessageHeaderAccessor {
 	 * @since 4.1
 	 */
 	public void setImmutable() {
-		this.headers.setIdAndTimestamp();
 		this.headers.setImmutable();
 	}
 
@@ -583,7 +578,7 @@ public class MessageHeaderAccessor {
 
 		if (messageHeaders instanceof MutableMessageHeaders) {
 			MutableMessageHeaders mutableHeaders = (MutableMessageHeaders) messageHeaders;
-			MessageHeaderAccessor headerAccessor = mutableHeaders.getMessageHeaderAccessor();
+			MessageHeaderAccessor headerAccessor = mutableHeaders.getAccessor();
 			if (requiredType.isAssignableFrom(headerAccessor.getClass()))  {
 				return (T) headerAccessor;
 			}
@@ -603,7 +598,7 @@ public class MessageHeaderAccessor {
 	public static MessageHeaderAccessor getMutableAccessor(Message<?> message) {
 		if (message.getHeaders() instanceof MutableMessageHeaders) {
 			MutableMessageHeaders mutableHeaders = (MutableMessageHeaders) message.getHeaders();
-			MessageHeaderAccessor accessor = mutableHeaders.getMessageHeaderAccessor();
+			MessageHeaderAccessor accessor = mutableHeaders.getAccessor();
 			if (accessor != null) {
 				return (accessor.isMutable() ? accessor : accessor.createAccessor(message));
 			}
@@ -615,38 +610,23 @@ public class MessageHeaderAccessor {
 	@SuppressWarnings("serial")
 	private class MutableMessageHeaders extends MessageHeaders {
 
-		private boolean immutable;
-
-		public MutableMessageHeaders() {
-			this(null);
-		}
+		private boolean mutable = true;
 
 		public MutableMessageHeaders(Map<String, Object> headers) {
 			super(headers, MessageHeaders.ID_VALUE_NONE, -1L);
 		}
 
-		public MessageHeaderAccessor getMessageHeaderAccessor() {
-			return MessageHeaderAccessor.this;
-		}
-
 		@Override
 		public Map<String, Object> getRawHeaders() {
-			Assert.state(!this.immutable, "Already immutable");
+			Assert.state(this.mutable, "Already immutable");
 			return super.getRawHeaders();
 		}
 
 		public void setImmutable() {
-			this.immutable = true;
-		}
-
-		public boolean isMutable() {
-			return !this.immutable;
-		}
-
-		public void setIdAndTimestamp() {
-			if (!isMutable()) {
+			if (!this.mutable) {
 				return;
 			}
+
 			if (getId() == null) {
 				IdGenerator idGenerator = (MessageHeaderAccessor.this.idGenerator != null ?
 						MessageHeaderAccessor.this.idGenerator : MessageHeaders.getIdGenerator());
@@ -655,11 +635,27 @@ public class MessageHeaderAccessor {
 					getRawHeaders().put(ID, id);
 				}
 			}
+
 			if (getTimestamp() == null) {
 				if (MessageHeaderAccessor.this.enableTimestamp) {
 					getRawHeaders().put(TIMESTAMP, System.currentTimeMillis());
 				}
 			}
+
+			this.mutable = false;
+		}
+
+		public boolean isMutable() {
+			return this.mutable;
+		}
+
+		public MessageHeaderAccessor getAccessor() {
+			return MessageHeaderAccessor.this;
+		}
+
+		protected Object writeReplace() {
+			// Serialize as regular MessageHeaders (without MessageHeaderAccessor reference)
+			return new MessageHeaders(this);
 		}
 	}
 
