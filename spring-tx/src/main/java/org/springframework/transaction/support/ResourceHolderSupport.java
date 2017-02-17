@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import org.springframework.transaction.TransactionTimedOutException;
 /**
  * Convenient base class for resource holders.
  *
- * <p>Features rollback-only support for nested transactions.
- * Can expire after a certain number of seconds or milliseconds,
- * to determine transactional timeouts.
+ * <p>Features rollback-only support for participating transactions.
+ * Can expire after a certain number of seconds or milliseconds
+ * in order to determine a transactional timeout.
  *
  * @author Juergen Hoeller
  * @since 02.02.2004

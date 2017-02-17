@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,19 +31,18 @@ import org.springframework.transaction.TransactionUsageException;
 import org.springframework.transaction.support.SmartTransactionObject;
 
 /**
- * Convenient base class for JDBC-aware transaction objects.
- * Can contain a {@link ConnectionHolder}, and implements the
- * {@link org.springframework.transaction.SavepointManager}
- * interface based on that ConnectionHolder.
+ * Convenient base class for JDBC-aware transaction objects. Can contain a
+ * {@link ConnectionHolder} with a JDBC {@code Connection}, and implements the
+ * {@link SavepointManager} interface based on that {@code ConnectionHolder}.
  *
- * <p>Allows for programmatic management of JDBC 3.0
- * {@link java.sql.Savepoint Savepoints}. Spring's
- * {@link org.springframework.transaction.support.DefaultTransactionStatus}
- * will automatically delegate to this, as it autodetects transaction
- * objects that implement the SavepointManager interface.
+ * <p>Allows for programmatic management of JDBC {@link java.sql.Savepoint Savepoints}.
+ * Spring's {@link org.springframework.transaction.support.DefaultTransactionStatus}
+ * automatically delegates to this, as it autodetects transaction objects which
+ * implement the {@link SavepointManager} interface.
  *
  * @author Juergen Hoeller
  * @since 1.1
+ * @see DataSourceTransactionManager
  */
 public abstract class JdbcTransactionObjectSupport implements SavepointManager, SmartTransactionObject {
 
@@ -151,7 +150,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 		}
 		if (!hasConnectionHolder()) {
 			throw new TransactionUsageException(
-					"Cannot create nested transaction if not exposing a JDBC transaction");
+					"Cannot create nested transaction when not exposing a JDBC transaction");
 		}
 		return getConnectionHolder();
 	}
