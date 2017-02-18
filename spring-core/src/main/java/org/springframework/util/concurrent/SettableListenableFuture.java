@@ -24,9 +24,8 @@ import java.util.concurrent.TimeoutException;
 import org.springframework.util.Assert;
 
 /**
- * A {@link org.springframework.util.concurrent.ListenableFuture ListenableFuture}
- * whose value can be set via {@link #set(T)} or {@link #setException(Throwable)}.
- * It may also be cancelled.
+ * A {@link ListenableFuture} whose value can be set via {@link #set(Object)}
+ * or {@link #setException(Throwable)}. It may also get cancelled.
  *
  * <p>Inspired by {@code com.google.common.util.concurrent.SettableFuture}.
  *
