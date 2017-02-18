@@ -105,8 +105,7 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 
 	@Override
 	protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers) throws IOException {
-		final SettableListenableFuture<ClientHttpResponse> responseFuture =
-				new SettableListenableFuture<>();
+		final SettableListenableFuture<ClientHttpResponse> responseFuture = new SettableListenableFuture<>();
 
 		ChannelFutureListener connectionListener = new ChannelFutureListener() {
 			@Override
@@ -141,8 +140,7 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
 			nettyRequest.headers().add(entry.getKey(), entry.getValue());
 		}
-		if (!nettyRequest.headers().contains(HttpHeaders.CONTENT_LENGTH)
-				&& this.body.buffer().readableBytes() > 0) {
+		if (!nettyRequest.headers().contains(HttpHeaders.CONTENT_LENGTH) && this.body.buffer().readableBytes() > 0) {
 			nettyRequest.headers().set(HttpHeaders.CONTENT_LENGTH, this.body.buffer().readableBytes());
 		}
 
