@@ -80,7 +80,8 @@ class CaptureVariablePathElement extends PathElement {
 		}
 		boolean match = false;
 		if (next == null) {
-			match = (nextPos == matchingContext.candidateLength);
+			// Needs to be at least one character #SPR15264
+			match = (nextPos == matchingContext.candidateLength && nextPos > candidateIndex);
 		}
 		else {
 			if (matchingContext.isMatchStartMatching && nextPos == matchingContext.candidateLength) {

@@ -508,6 +508,31 @@ public class PathPatternMatcherTests {
 	}
 
 	@Test
+	public void extractUriTemplateVariables_spr15264() {
+		PathPattern pp = new PathPatternParser().parse("/{foo}");
+		assertTrue(pp.matches("/abc"));
+		assertFalse(pp.matches("/"));
+		assertFalse(pp.matches("//"));
+		checkCapture("/{foo}", "/abc", "foo", "abc");
+		
+		pp = new PathPatternParser().parse("/{foo}/{bar}");
+		assertTrue(pp.matches("/abc/def"));
+		assertFalse(pp.matches("//def"));
+		assertFalse(pp.matches("//"));
+		
+		pp = parse("/{foo}/boo");
+		assertTrue(pp.matches("/abc/boo"));
+		assertTrue(pp.matches("/a/boo"));
+		assertFalse(pp.matches("//boo"));
+
+		checkCapture("/{word:[a-z]*}", "/abc", "word", "abc");
+		pp = parse("/{word:[a-z]*}");
+		assertFalse(pp.matches("/1"));
+		assertTrue(pp.matches("/a"));
+		assertFalse(pp.matches("/"));
+	}
+	
+	@Test
 	public void extractUriTemplateVariables() throws Exception {
 		checkCapture("/hotels/{hotel}", "/hotels/1", "hotel", "1");
 		checkCapture("/h?tels/{hotel}", "/hotels/1", "hotel", "1");
