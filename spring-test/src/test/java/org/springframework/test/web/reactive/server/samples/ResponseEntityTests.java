@@ -18,6 +18,7 @@ package org.springframework.test.web.reactive.server.samples;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -28,7 +29,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.reactive.server.ExchangeResult;
@@ -65,22 +65,22 @@ public class ResponseEntityTests {
 	public void entity() throws Exception {
 		this.client.get().uri("/persons/John")
 				.exchange()
-				.decodeEntity(Person.class)
-				.assertThat()
-				.status().isOk()
-				.header().contentTypeEquals(MediaType.APPLICATION_JSON_UTF8)
-				.bodyEquals(new Person("John"));
+				.expectStatus().isOk()
+				.expectHeader().contentTypeEquals(MediaType.APPLICATION_JSON_UTF8)
+				.expectBody(Person.class).value().isEqualTo(new Person("John"));
 	}
 
 	@Test
 	public void entityList() throws Exception {
+
+		List<Person> expected = Arrays.asList(
+				new Person("Jane"), new Person("Jason"), new Person("John"));
+
 		this.client.get().uri("/persons")
 				.exchange()
-				.decodeAndCollect(Person.class)
-				.assertThat()
-				.status().isOk()
-				.header().contentTypeEquals(MediaType.APPLICATION_JSON_UTF8)
-				.bodyEquals(Arrays.asList(new Person("Jane"), new Person("Jason"), new Person("John")));
+				.expectStatus().isOk()
+				.expectHeader().contentTypeEquals(MediaType.APPLICATION_JSON_UTF8)
+				.expectBody(Person.class).list().isEqualTo(expected);
 	}
 
 	@Test
@@ -93,10 +93,9 @@ public class ResponseEntityTests {
 
 		this.client.get().uri("/persons?map=true")
 				.exchange()
-				.decodeEntity(ResolvableType.forClassWithGenerics(Map.class, String.class, Person.class))
-				.assertThat()
-				.status().isOk()
-				.bodyEquals(map);
+				.expectStatus().isOk()
+				.expectBody()
+				.map(String.class, Person.class).isEqualTo(map);
 	}
 
 	@Test
@@ -106,11 +105,10 @@ public class ResponseEntityTests {
 				.uri("/persons")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
-				.decodeFlux(Person.class);
-
-		result.assertThat()
-				.status().isOk()
-				.header().contentTypeEquals(TEXT_EVENT_STREAM);
+				.expectStatus().isOk()
+				.expectHeader().contentTypeEquals(TEXT_EVENT_STREAM)
+				.expectBody(Person.class)
+				.returnResult();
 
 		StepVerifier.create(result.getResponseBody())
 				.expectNext(new Person("N0"), new Person("N1"), new Person("N2"))
@@ -124,10 +122,9 @@ public class ResponseEntityTests {
 	public void postEntity() throws Exception {
 		this.client.post().uri("/persons")
 				.exchange(Mono.just(new Person("John")), Person.class)
-				.expectNoBody()
-				.assertThat()
-				.status().isCreated()
-				.header().valueEquals("location", "/persons/John");
+				.expectStatus().isCreated()
+				.expectHeader().valueEquals("location", "/persons/John")
+				.expectBody().isEmpty();
 	}
 
 

@@ -29,6 +29,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -447,72 +448,191 @@ public interface WebTestClient {
 	}
 
 	/**
-	 * Specification for decoding the response of an exchange.
+	 * Specification for expectations on the response.
 	 */
 	interface ResponseSpec {
 
 		/**
-		 * Decode the response as a single entity of the given type.
-		 * @param entityClass the entity type
-		 * @param <T> the type of entity
-		 * @return container for the result of the exchange
+		 * Assertions on the response status.
 		 */
-		<T> ExchangeResult<T> decodeEntity(Class<T> entityClass);
+		StatusAssertions expectStatus();
 
 		/**
-		 * Alternative to {@link #decodeEntity(Class)} useful for entity
-		 * types with generics.
-		 * @param entityType the type of entity
-		 * @param <T> the type of entity
-		 * @return container for the result of the exchange
-		 * @see ResolvableType#forClassWithGenerics(Class, Class[])
+		 * Assertions on the response headers.
 		 */
-		<T> ExchangeResult<T> decodeEntity(ResolvableType entityType);
+		HeaderAssertions expectHeader();
 
 		/**
-		 * Decode the response as a finite stream of the given element type and
-		 * collect the items into a list.
-		 * @param elementClass the list element type
-		 * @param <T> the type of list elements
-		 * @return container for the result of the exchange
+		 * Assertions on the response body.
 		 */
-		<T> ExchangeResult<List<T>> decodeAndCollect(Class<T> elementClass);
+		BodySpec expectBody();
 
 		/**
-		 * Alternative to {@link #decodeAndCollect(Class)} useful for element
-		 * types with generics.
-		 * @param elementType the list element type
-		 * @param <T> the type of list elements
-		 * @return container for the result of the exchange
-		 * @see ResolvableType#forClassWithGenerics(Class, Class[])
+		 * Assertions on the response body where the body is to be decoded to
+		 * one or more elements of the given type.
 		 */
-		<T> ExchangeResult<List<T>> decodeAndCollect(ResolvableType elementType);
+		ElementBodySpec expectBody(Class<?> elementType);
 
 		/**
-		 * Turn the response stream of byte buffers into a stream of Objects of
-		 * the given type.
-		 * @param elementClass the stream element type
-		 * @param <T> the type of stream elements
-		 * @return container for the result of the exchange
+		 * Alternative to {@link #expectBody(Class)} for generic types.
 		 */
-		<T> ExchangeResult<Flux<T>> decodeFlux(Class<T> elementClass);
+		ElementBodySpec expectBody(ResolvableType elementType);
 
 		/**
-		 * Alternative to {@link #decodeFlux(Class)} useful for element types
-		 * with generics.
-		 * @param elementType the stream element type
-		 * @param <T> the type of stream elements
-		 * @return container for the result of the exchange
-		 * @see ResolvableType#forClassWithGenerics(Class, Class[])
+		 * Consume the result of the exchange and continue with expectations.
 		 */
-		<T> ExchangeResult<Flux<T>> decodeFlux(ResolvableType elementType);
+		ResponseSpec consumeWith(Consumer<ExchangeResult<Flux<DataBuffer>>> consumer);
 
 		/**
-		 * Consume the response and verify there is no content.
+		 * Return a container for the result of the exchange with the body
+		 * not yet decoded nor consumed.
+		 */
+		ExchangeResult<Flux<DataBuffer>> returnResult();
+	}
+
+	/**
+	 * Specification for expectations on the body of the response.
+	 */
+	interface BodySpec {
+
+		/**
+		 * Consume the body and verify it is empty.
 		 * @return container for the result of the exchange
 		 */
-		ExchangeResult<Void> expectNoBody();
+		ExchangeResult<Void> isEmpty();
 
+		/**
+		 * Decode the response body as a Map with the given key and value type.
+		 */
+		MapBodySpec map(Class<?> keyType, Class<?> valueType);
+
+		/**
+		 * Alternative to {@link #map(Class, Class)} for generic types.
+		 */
+		MapBodySpec map(ResolvableType keyType, ResolvableType valueType);
+
+	}
+
+	/**
+	 * Specification for expectations on the body of the response decoded as a map.
+	 */
+	interface MapBodySpec {
+
+		/**
+		 * Assert the decoded body is equal to the given list of elements.
+		 */
+		<K, V> ExchangeResult<Map<K, V>> isEqualTo(Map<K, V> expected);
+
+		/**
+		 * Assert the decoded map has the given size.
+		 * @param size the expected size
+		 */
+		MapBodySpec hasSize(int size);
+
+		/**
+		 * Assert the decoded map contains the given key value pair.
+		 * @param key the key to check
+		 * @param value the value to check
+		 */
+		MapBodySpec contains(Object key, Object value);
+
+		/**
+		 * Assert the decoded map contains the given keys.
+		 * @param keys the keys to check
+		 */
+		MapBodySpec containsKeys(Object... keys);
+
+		/**
+		 * Assert the decoded map contains the given values.
+		 * @param values the keys to check
+		 */
+		MapBodySpec containsValues(Object... values);
+
+		/**
+		 * Return a container for the result of the exchange.
+		 */
+		<K, V> ExchangeResult<Map<K, V>> returnResult();
+	}
+
+	/**
+	 * Specification for expectations on the body of the response to be decoded
+	 * as one or more elements of a specific type.
+	 */
+	interface ElementBodySpec {
+
+		/**
+		 * Decode the response as a single element.
+		 */
+		SingleValueBodySpec value();
+
+		/**
+		 * Decode the response as a Flux of objects and collect it to a list.
+		 */
+		ListBodySpec list();
+
+		/**
+		 * Decode the response as a Flux of objects consuming only the specified
+		 * number of elements.
+		 */
+		ListBodySpec list(int elementCount);
+
+		/**
+		 * Decode the response as a Flux of objects and return a container for
+		 * the result where the response body not yet consumed.
+		 */
+		<T> ExchangeResult<Flux<T>> returnResult();
+	}
+
+	/**
+	 * Specification for expectations on the body of the response decoded as a
+	 * single element of a specific type.
+	 */
+	interface SingleValueBodySpec {
+
+		/**
+		 * Assert the decoded body is equal to the given value.
+		 */
+		<T> ExchangeResult<T> isEqualTo(Object expected);
+
+		/**
+		 * Return a container for the result of the exchange.
+		 */
+		<T> ExchangeResult<T> returnResult();
+	}
+
+	/**
+	 * Specification for expectations on the body of the response decoded as a
+	 * list of elements of a specific type.
+	 */
+	interface ListBodySpec {
+
+		/**
+		 * Assert the decoded body is equal to the given list of elements.
+		 */
+		<T> ExchangeResult<List<T>> isEqualTo(List<T> expected);
+
+		/**
+		 * Assert the decoded list of values is of the given size.
+		 * @param size the expected size
+		 */
+		ListBodySpec hasSize(int size);
+
+		/**
+		 * Assert the decoded list of values contains the given elements.
+		 * @param elements the elements to check
+		 */
+		ListBodySpec contains(Object... elements);
+
+		/**
+		 * Assert the decoded list of values does not contain the given elements.
+		 * @param elements the elements to check
+		 */
+		ListBodySpec doesNotContain(Object... elements);
+
+		/**
+		 * Return a container for the result of the exchange.
+		 */
+		<T> ExchangeResult<List<T>> returnResult();
 	}
 
 }

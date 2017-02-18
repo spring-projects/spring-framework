@@ -44,18 +44,16 @@ public class ErrorTests {
 	public void notFound() throws Exception {
 		this.client.get().uri("/invalid")
 				.exchange()
-				.expectNoBody()
-				.assertThat()
-				.status().isNotFound();
+				.expectStatus().isNotFound()
+				.expectBody().isEmpty();
 	}
 
 	@Test
 	public void serverException() throws Exception {
 		this.client.get().uri("/server-error")
 				.exchange()
-				.expectNoBody()
-				.assertThat()
-				.status().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+				.expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+				.expectBody().isEmpty();
 	}
 
 

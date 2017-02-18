@@ -49,20 +49,16 @@ public class HeaderTests {
 	public void requestResponseHeaderPair() throws Exception {
 		this.client.get().uri("/request-response-pair").header("h1", "in")
 				.exchange()
-				.expectNoBody()
-				.assertThat()
-				.status().isOk()
-				.header().valueEquals("h1", "in-out");
+				.expectStatus().isOk()
+				.expectHeader().valueEquals("h1", "in-out");
 	}
 
 	@Test
 	public void headerMultivalue() throws Exception {
 		this.client.get().uri("/multivalue")
 				.exchange()
-				.expectNoBody()
-				.assertThat()
-				.status().isOk()
-				.header().valueEquals("h1", "v1", "v2", "v3");
+				.expectStatus().isOk()
+				.expectHeader().valueEquals("h1", "v1", "v2", "v3");
 	}
 
 

@@ -24,6 +24,7 @@ import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
@@ -79,19 +80,33 @@ class WiretapConnector implements ClientHttpConnector {
 
 	public static class Info {
 
-		private final ClientHttpRequest request;
+		private final HttpMethod method;
+
+		private final URI url;
+
+		private final HttpHeaders requestHeaders;
 
 		private final ClientHttpResponse response;
 
 
 		public Info(ClientHttpRequest request, ClientHttpResponse response) {
-			this.request = request;
+			this.method = request.getMethod();
+			this.url = request.getURI();
+			this.requestHeaders = request.getHeaders();
 			this.response = response;
 		}
 
 
-		public ClientHttpRequest getRequest() {
-			return this.request;
+		public HttpMethod getMethod() {
+			return this.method;
+		}
+
+		public URI getUrl() {
+			return this.url;
+		}
+
+		public HttpHeaders getRequestHeaders() {
+			return this.requestHeaders;
 		}
 
 		public ClientHttpResponse getResponse() {

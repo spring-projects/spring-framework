@@ -18,21 +18,21 @@ package org.springframework.test.web.reactive.server;
 import java.net.URI;
 import java.util.stream.Collectors;
 
+import reactor.core.publisher.Flux;
+
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.client.ClientResponse;
+
+import static org.springframework.web.reactive.function.BodyExtractors.toDataBuffers;
 
 /**
- * Container for request and response details including the decoded response
- * body from an exchange performed through {@link WebTestClient}.
+ * Container for request and response details from an exchange performed
+ * through {@link WebTestClient}.
  *
- * <p>Use {@link #assertThat()} to access built-in assertions on the response,
- * or apply other assertions directly to the data contained in this class.
- * The built-in assertions provide an option for logging diagnostic information
- * about the exchange. The same can also be obtained using the
- * {@link #toString()} method of this class.
- *
- * @param <T> the type of the decoded response body
+ * @param <T> the type of the response body
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -52,8 +52,11 @@ public class ExchangeResult<T> {
 	private final T responseBody;
 
 
-	public ExchangeResult(HttpMethod method, URI url, HttpHeaders requestHeaders,
-			HttpStatus status, HttpHeaders responseHeaders, T responseBody) {
+	/**
+	 * Package private constructor.
+	 */
+	ExchangeResult(HttpMethod method, URI url, HttpHeaders requestHeaders, HttpStatus status,
+			HttpHeaders responseHeaders, T responseBody) {
 
 		this.method = method;
 		this.url = url;
@@ -65,24 +68,16 @@ public class ExchangeResult<T> {
 
 
 	/**
-	 * Provides access to built-in assertions on the response.
-	 */
-	public ResponseAssertions<T> assertThat() {
-		return new ResponseAssertions<T>(this);
-	}
-
-
-	/**
 	 * Return the request method of the exchange.
 	 */
-	public HttpMethod getRequestMethod() {
+	public HttpMethod getMethod() {
 		return this.method;
 	}
 
 	/**
 	 * Return the URL of the exchange.
 	 */
-	public URI getRequestUrl() {
+	public URI getUrl() {
 		return this.url;
 	}
 
@@ -96,7 +91,7 @@ public class ExchangeResult<T> {
 	/**
 	 * Return the response status.
 	 */
-	public HttpStatus getResponseStatus() {
+	public HttpStatus getStatus() {
 		return this.status;
 	}
 
@@ -115,11 +110,32 @@ public class ExchangeResult<T> {
 	}
 
 
+	/**
+	 * Create an instance from a ClientResponse (body not yet consumed).
+	 */
+	static ExchangeResult<Flux<DataBuffer>> fromResponse(HttpMethod method, URI url,
+			HttpHeaders requestHeaders, ClientResponse response) {
+
+		HttpStatus status = response.statusCode();
+		HttpHeaders responseHeaders = response.headers().asHttpHeaders();
+		Flux<DataBuffer> body = response.body(toDataBuffers());
+		return new ExchangeResult<>(method, url, requestHeaders, status, responseHeaders, body);
+	}
+
+	/**
+	 * Re-create the result with a generic type matching the decoded body.
+	 */
+	static <T> ExchangeResult<T> withDecodedBody(ExchangeResult<?> result, T body) {
+		return new ExchangeResult<>(result.getMethod(), result.getUrl(), result.getRequestHeaders(),
+				result.getStatus(), result.getResponseHeaders(), body);
+	}
+
+
 	@Override
 	public String toString() {
 		HttpStatus status = this.status;
 		return "\n\n" +
-				formatValue("Request", this.method + " " + getRequestUrl()) +
+				formatValue("Request", this.method + " " + getUrl()) +
 				formatValue("Status", status + " " + status.getReasonPhrase()) +
 				formatHeading("Response Headers") +
 				formatHeaders(this.responseHeaders) +

@@ -33,6 +33,7 @@ import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunctions;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 
@@ -60,7 +61,8 @@ public class WiretapConnectorTests {
 
 		WiretapConnector.Info info = infoRef.get();
 		assertNotNull(info);
-		assertSame(request, info.getRequest());
+		assertEquals(HttpMethod.GET, info.getMethod());
+		assertEquals("/test", info.getUrl().toString());
 		assertSame(response, info.getResponse());
 	}
 
