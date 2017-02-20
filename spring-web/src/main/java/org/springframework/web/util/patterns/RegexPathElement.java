@@ -125,7 +125,9 @@ class RegexPathElement extends PathElement {
 		if (matches) {
 			if (next == null) {
 				// No more pattern, is there more data?
-				matches = (p == matchingContext.candidateLength);
+				// If pattern is capturing variables there must be some actual data to bind to them
+				matches = (p == matchingContext.candidateLength && 
+						   ((this.variableNames.size() == 0) ? true : p > candidateIndex));
 			}
 			else {
 				if (matchingContext.isMatchStartMatching && p == matchingContext.candidateLength) {
