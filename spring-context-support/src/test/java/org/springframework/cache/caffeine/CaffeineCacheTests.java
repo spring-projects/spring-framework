@@ -20,7 +20,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.cache.AbstractCacheTests;
 import org.springframework.cache.AbstractValueAdaptingCacheTests;
 import org.springframework.cache.Cache;
 

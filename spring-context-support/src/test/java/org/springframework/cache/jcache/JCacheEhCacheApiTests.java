@@ -25,7 +25,6 @@ import javax.cache.spi.CachingProvider;
 import org.junit.After;
 import org.junit.Before;
 
-import org.springframework.cache.AbstractCacheTests;
 import org.springframework.cache.AbstractValueAdaptingCacheTests;
 
 /**
@@ -70,7 +69,8 @@ public class JCacheEhCacheApiTests extends AbstractValueAdaptingCacheTests<JCach
 		return getCache(true);
 	}
 
-	@Override protected JCacheCache getCache(boolean allowNull) {
+	@Override
+	protected JCacheCache getCache(boolean allowNull) {
 		return allowNull ? this.cache : this.cacheNoNull;
 	}
 

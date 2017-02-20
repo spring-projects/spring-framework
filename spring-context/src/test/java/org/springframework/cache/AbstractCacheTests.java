@@ -26,8 +26,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import org.springframework.cache.support.AbstractValueAdaptingCache;
-
 import static org.hamcrest.core.Is.*;
 import static org.junit.Assert.*;
 

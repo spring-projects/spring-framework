@@ -62,7 +62,8 @@ public class ConcurrentMapCacheTests
 		return getCache(true);
 	}
 
-	@Override protected ConcurrentMapCache getCache(boolean allowNull) {
+	@Override
+	protected ConcurrentMapCache getCache(boolean allowNull) {
 		return allowNull ? this.cache : this.cacheNoNull;
 	}
 
