@@ -47,7 +47,8 @@ public interface RouterFunction<T extends ServerResponse> {
 	 * @see #andOther(RouterFunction)
 	 */
 	default RouterFunction<T> and(RouterFunction<T> other) {
-		return request -> this.route(request).otherwiseIfEmpty(other.route(request));
+		return request -> this.route(request)
+				.otherwiseIfEmpty(Mono.defer(() -> other.route(request)));
 	}
 
 	/**
@@ -62,7 +63,8 @@ public interface RouterFunction<T extends ServerResponse> {
 	default RouterFunction<?> andOther(RouterFunction<?> other) {
 		return request -> this.route(request)
 				.map(RouterFunctions::cast)
-				.otherwiseIfEmpty(other.route(request).map(RouterFunctions::cast));
+				.otherwiseIfEmpty(
+						Mono.defer(() -> other.route(request).map(RouterFunctions::cast)));
 	}
 
 	/**
