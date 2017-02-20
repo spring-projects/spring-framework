@@ -261,7 +261,7 @@ class DefaultWebTestClient implements WebTestClient {
 	}
 
 	/**
-	 * ExchangeResult that contains the live {@link ClientResponse}.
+	 * The {@code ExchangeResult} with live, undecoded {@link ClientResponse}.
 	 */
 	private class UndecodedExchangeResult extends ExchangeResult {
 

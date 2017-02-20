@@ -16,13 +16,14 @@
 package org.springframework.test.web.reactive.server;
 
 /**
- * {@code ExchangeResult} variant with the response body fully extracted to a
- * representation of type {@code <T>}.
+ * {@code ExchangeResult} sub-class that exposes the response body fully
+ * extracted to a representation of type {@code <T>}.
  *
  * @param <T> the response body type
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see FluxExchangeResult
  */
 public class EntityExchangeResult<T> extends ExchangeResult {
 

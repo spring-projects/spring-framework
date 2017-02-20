@@ -26,6 +26,7 @@ import org.springframework.core.ResolvableType;
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see EntityExchangeResult
  */
 public class FluxExchangeResult<T> extends ExchangeResult {
 

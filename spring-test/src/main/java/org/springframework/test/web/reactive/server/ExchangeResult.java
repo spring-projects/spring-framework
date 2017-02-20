@@ -22,22 +22,27 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
 
 /**
- * Container for the result of an exchange through the {@link WebTestClient}.
+ * Simple container for request and response details from an exchange performed
+ * through the {@link WebTestClient}.
  *
- * <p>This type only exposes the status and response headers that are available
- * when the {@link ClientResponse} is first received and before the response
- * body has been consumed.
+ * <p>An {@code ExchangeResult} only exposes the status and the headers from
+ * the response which is all that's available when a {@link ClientResponse} is
+ * first created.
  *
- * <p>The sub-classes {@link EntityExchangeResult} and {@link FluxExchangeResult}
- * expose further information about the response body and are returned only
- * after the test client has been used to decode and consume the response.
+ * <p>Sub-types {@link EntityExchangeResult} and {@link FluxExchangeResult}
+ * further expose the response body either as a fully extracted representation
+ * or as a {@code Flux} of representations to be consumed.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see EntityExchangeResult
+ * @see FluxExchangeResult
  */
 public class ExchangeResult {
 
@@ -51,21 +56,31 @@ public class ExchangeResult {
 
 	private final HttpHeaders responseHeaders;
 
+	private final MultiValueMap<String, ResponseCookie> responseCookies;
 
-	ExchangeResult(ClientHttpRequest request, ClientResponse response) {
+
+	/**
+	 * Constructor used when a {@code ClientResponse} is first created.
+	 */
+	protected ExchangeResult(ClientHttpRequest request, ClientResponse response) {
 		this.method = request.getMethod();
 		this.url = request.getURI();
 		this.requestHeaders = request.getHeaders();
 		this.status = response.statusCode();
 		this.responseHeaders = response.headers().asHttpHeaders();
+		this.responseCookies = response.cookies();
 	}
 
-	ExchangeResult(ExchangeResult result) {
-		this.method = result.getMethod();
-		this.url = result.getUrl();
-		this.requestHeaders = result.getRequestHeaders();
-		this.status = result.getStatus();
-		this.responseHeaders = result.getResponseHeaders();
+	/**
+	 * Copy constructor used when the body is decoded or consumed.
+	 */
+	protected ExchangeResult(ExchangeResult other) {
+		this.method = other.getMethod();
+		this.url = other.getUrl();
+		this.requestHeaders = other.getRequestHeaders();
+		this.status = other.getStatus();
+		this.responseHeaders = other.getResponseHeaders();
+		this.responseCookies = other.getResponseCookies();
 	}
 
 
@@ -102,6 +117,13 @@ public class ExchangeResult {
 	 */
 	public HttpHeaders getResponseHeaders() {
 		return this.responseHeaders;
+	}
+
+	/**
+	 * Return response cookies received from the server.
+	 */
+	public MultiValueMap<String, ResponseCookie> getResponseCookies() {
+		return this.responseCookies;
 	}
 
 
