@@ -41,22 +41,23 @@ public class ServletResponseMethodArgumentResolverTests {
 
 	private ServletResponseMethodArgumentResolver resolver;
 
-	private Method method;
-
 	private ModelAndViewContainer mavContainer;
-
-	private ServletWebRequest webRequest;
 
 	private MockHttpServletResponse servletResponse;
 
+	private ServletWebRequest webRequest;
+
+	private Method method;
+
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		resolver = new ServletResponseMethodArgumentResolver();
-		method = getClass().getMethod("supportedParams", ServletResponse.class, OutputStream.class, Writer.class);
-		servletResponse = new MockHttpServletResponse();
 		mavContainer = new ModelAndViewContainer();
+		servletResponse = new MockHttpServletResponse();
 		webRequest = new ServletWebRequest(new MockHttpServletRequest(), servletResponse);
+
+		method = getClass().getMethod("supportedParams", ServletResponse.class, OutputStream.class, Writer.class);
 	}
 
 
