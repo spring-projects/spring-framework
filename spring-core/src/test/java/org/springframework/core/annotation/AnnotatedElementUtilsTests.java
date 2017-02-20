@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -202,6 +202,15 @@ public class AnnotatedElementUtilsTests {
 		assertNotNull("Annotation attributes map for @Transactional on TxFromMultipleComposedAnnotations", attributes);
 		assertEquals("value for TxFromMultipleComposedAnnotations.", asList("TxInheritedComposed", "TxComposed"),
 				attributes.get("value"));
+	}
+
+	@Test
+	@Ignore("To be validated by ")
+	public void getAllMergedAnnotationsOnClassWithInterface() throws NoSuchMethodException {
+		Method m = TransactionalServiceImpl.class.getMethod("doIt");
+		Set<Transactional> allMergedAnnotations =
+				getAllMergedAnnotations(m, Transactional.class);
+		assertEquals(1, allMergedAnnotations.size());
 	}
 
 	@Test
@@ -1270,6 +1279,19 @@ public class AnnotatedElementUtilsTests {
 
 	@Resource(name = "x")
 	static class ResourceHolder {
+	}
+
+	interface TransactionalService {
+
+		@Transactional
+		void doIt();
+	}
+
+	class TransactionalServiceImpl implements TransactionalService {
+
+		@Override
+		public void doIt() {
+		}
 	}
 
 }
