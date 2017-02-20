@@ -121,7 +121,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 	private Object resolveArgument(Class<?> paramType, HttpServletRequest request) throws IOException {
 		if (HttpSession.class.isAssignableFrom(paramType)) {
 			HttpSession session = request.getSession();
-			if (!paramType.isInstance(session)) {
+			if (session != null && !paramType.isInstance(session)) {
 				throw new IllegalStateException(
 						"Current session is not of type [" + paramType.getName() + "]: " + session);
 			}
@@ -129,7 +129,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 		}
 		else if (getPushBuilderMethod != null && getPushBuilderMethod.getReturnType().isAssignableFrom(paramType)) {
 			Object pushBuilder = ReflectionUtils.invokeMethod(getPushBuilderMethod, request);
-			if (!paramType.isInstance(pushBuilder)) {
+			if (pushBuilder != null && !paramType.isInstance(pushBuilder)) {
 				throw new IllegalStateException(
 						"Current push builder is not of type [" + paramType.getName() + "]: " + pushBuilder);
 			}
@@ -137,7 +137,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 		}
 		else if (InputStream.class.isAssignableFrom(paramType)) {
 			InputStream inputStream = request.getInputStream();
-			if (!paramType.isInstance(inputStream)) {
+			if (inputStream != null && !paramType.isInstance(inputStream)) {
 				throw new IllegalStateException(
 						"Request input stream is not of type [" + paramType.getName() + "]: " + inputStream);
 			}
@@ -145,7 +145,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 		}
 		else if (Reader.class.isAssignableFrom(paramType)) {
 			Reader reader = request.getReader();
-			if (!paramType.isInstance(reader)) {
+			if (reader != null && !paramType.isInstance(reader)) {
 				throw new IllegalStateException(
 						"Request body reader is not of type [" + paramType.getName() + "]: " + reader);
 			}
@@ -153,7 +153,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 		}
 		else if (Principal.class.isAssignableFrom(paramType)) {
 			Principal userPrincipal = request.getUserPrincipal();
-			if (!paramType.isInstance(userPrincipal)) {
+			if (userPrincipal != null && !paramType.isInstance(userPrincipal)) {
 				throw new IllegalStateException(
 						"Current user principal is not of type [" + paramType.getName() + "]: " + userPrincipal);
 			}

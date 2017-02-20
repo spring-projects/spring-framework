@@ -62,7 +62,7 @@ public class ServletRequestMethodArgumentResolverTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		method = getClass().getMethod("supportedParams", ServletRequest.class, MultipartRequest.class,
 				HttpSession.class, Principal.class, Locale.class, InputStream.class, Reader.class,
 				WebRequest.class, TimeZone.class, ZoneId.class, HttpMethod.class);
@@ -110,6 +110,15 @@ public class ServletRequestMethodArgumentResolverTests {
 
 		Object result = resolver.resolveArgument(principalParameter, null, webRequest, null);
 		assertSame("Invalid result", principal, result);
+	}
+
+	@Test
+	public void principalAsNull() throws Exception {
+		MethodParameter principalParameter = new MethodParameter(method, 3);
+		assertTrue("Principal not supported", resolver.supportsParameter(principalParameter));
+
+		Object result = resolver.resolveArgument(principalParameter, null, webRequest, null);
+		assertNull("Invalid result", result);
 	}
 
 	@Test
