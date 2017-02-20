@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.cache.AbstractCacheTests;
+import org.springframework.cache.AbstractValueAdaptingCacheTests;
 import org.springframework.core.serializer.support.SerializationDelegate;
 
 import static org.junit.Assert.*;
@@ -35,23 +35,35 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  */
-public class ConcurrentMapCacheTests extends AbstractCacheTests<ConcurrentMapCache> {
+public class ConcurrentMapCacheTests
+		extends AbstractValueAdaptingCacheTests<ConcurrentMapCache> {
 
 	protected ConcurrentMap<Object, Object> nativeCache;
 
 	protected ConcurrentMapCache cache;
+
+	protected ConcurrentMap<Object, Object> nativeCacheNoNull;
+
+	protected ConcurrentMapCache cacheNoNull;
 
 
 	@Before
 	public void setUp() throws Exception {
 		this.nativeCache = new ConcurrentHashMap<>();
 		this.cache = new ConcurrentMapCache(CACHE_NAME, this.nativeCache, true);
+		this.nativeCacheNoNull = new ConcurrentHashMap<>();
+		this.cacheNoNull = new ConcurrentMapCache(CACHE_NAME_NO_NULL,
+				this.nativeCacheNoNull, false);
 		this.cache.clear();
 	}
 
 	@Override
 	protected ConcurrentMapCache getCache() {
-		return this.cache;
+		return getCache(true);
+	}
+
+	@Override protected ConcurrentMapCache getCache(boolean allowNull) {
+		return allowNull ? this.cache : this.cacheNoNull;
 	}
 
 	@Override
