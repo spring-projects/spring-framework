@@ -18,6 +18,7 @@ package org.springframework.web.reactive.function.server;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriUtils;
@@ -157,7 +157,12 @@ public abstract class RequestPredicates {
 			@Override
 			public boolean test(ServerRequest.Headers headers) {
 				List<MediaType> acceptedMediaTypes = headers.accept();
-				MediaType.sortBySpecificityAndQuality(acceptedMediaTypes);
+				if (acceptedMediaTypes.isEmpty()) {
+					acceptedMediaTypes = Collections.singletonList(MediaType.ALL);
+				}
+				else {
+					MediaType.sortBySpecificityAndQuality(acceptedMediaTypes);
+				}
 				boolean match = acceptedMediaTypes.stream()
 						.anyMatch(acceptedMediaType -> mediaTypeSet.stream()
 								.anyMatch(acceptedMediaType::isCompatibleWith));

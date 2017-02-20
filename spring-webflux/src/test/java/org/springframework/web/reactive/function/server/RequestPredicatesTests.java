@@ -140,7 +140,7 @@ public class RequestPredicatesTests {
 		MockServerRequest request = MockServerRequest.builder().header("Accept", json.toString()).build();
 		assertTrue(predicate.test(request));
 
-		request = MockServerRequest.builder().build();
+		request = MockServerRequest.builder().header("Accept", MediaType.TEXT_XML_VALUE).build();
 		assertFalse(predicate.test(request));
 	}
 
