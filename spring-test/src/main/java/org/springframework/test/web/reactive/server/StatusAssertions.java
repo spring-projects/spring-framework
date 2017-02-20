@@ -44,172 +44,167 @@ public class StatusAssertions {
 	 * Assert the response status as an {@link HttpStatus}.
 	 */
 	public WebTestClient.ResponseSpec isEqualTo(HttpStatus status) {
-		assertEquals("Response status", status, getStatus());
-		return this.responseSpec;
+		return isEqualTo(status.value());
 	}
 
 	/**
 	 * Assert the response status as an integer.
 	 */
 	public WebTestClient.ResponseSpec isEqualTo(int status) {
-		assertEquals("Response status", status, getStatus().value());
-		return this.responseSpec;
+		return this.exchangeResult.assertWithDiagnosticsAndReturn(() -> {
+			assertEquals("Status", status, this.exchangeResult.getStatus().value());
+			return this.responseSpec;
+		});
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.OK} (200).
 	 */
 	public WebTestClient.ResponseSpec isOk() {
-		assertEquals("Status", HttpStatus.OK, getStatus());
-		return this.responseSpec;
+		return assertStatusAndReturn(HttpStatus.OK);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.CREATED} (201).
 	 */
 	public WebTestClient.ResponseSpec isCreated() {
-		assertEquals("Status", HttpStatus.CREATED, getStatus());
-		return this.responseSpec;
+		HttpStatus expected = HttpStatus.CREATED;
+		return assertStatusAndReturn(expected);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.ACCEPTED} (202).
 	 */
 	public WebTestClient.ResponseSpec isAccepted() {
-		assertEquals("Status", HttpStatus.ACCEPTED, getStatus());
-		return this.responseSpec;
+		return assertStatusAndReturn(HttpStatus.ACCEPTED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.NO_CONTENT} (204).
 	 */
 	public WebTestClient.ResponseSpec isNoContent() {
-		assertEquals("Status", HttpStatus.NO_CONTENT, getStatus());
-		return this.responseSpec;
+		return assertStatusAndReturn(HttpStatus.NO_CONTENT);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.FOUND} (302).
 	 */
 	public WebTestClient.ResponseSpec isFound() {
-		assertEquals("Status", HttpStatus.FOUND, getStatus());
-		return this.responseSpec;
+		return assertStatusAndReturn(HttpStatus.FOUND);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.SEE_OTHER} (303).
 	 */
 	public WebTestClient.ResponseSpec isSeeOther() {
-		assertEquals("Status", HttpStatus.SEE_OTHER, getStatus());
-		return this.responseSpec;
+		return assertStatusAndReturn(HttpStatus.SEE_OTHER);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.NOT_MODIFIED} (304).
 	 */
 	public WebTestClient.ResponseSpec isNotModified() {
-		assertEquals("Status", HttpStatus.NOT_MODIFIED, getStatus());
-		return this.responseSpec;
+		return assertStatusAndReturn(HttpStatus.NOT_MODIFIED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.TEMPORARY_REDIRECT} (307).
 	 */
 	public WebTestClient.ResponseSpec isTemporaryRedirect() {
-		assertEquals("Status", HttpStatus.TEMPORARY_REDIRECT, getStatus());
-		return this.responseSpec;
+		return assertStatusAndReturn(HttpStatus.TEMPORARY_REDIRECT);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.PERMANENT_REDIRECT} (308).
 	 */
 	public WebTestClient.ResponseSpec isPermanentRedirect() {
-		assertEquals("Status", HttpStatus.PERMANENT_REDIRECT, getStatus());
-		return this.responseSpec;
+		return assertStatusAndReturn(HttpStatus.PERMANENT_REDIRECT);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.BAD_REQUEST} (400).
 	 */
 	public WebTestClient.ResponseSpec isBadRequest() {
-		assertEquals("Status", HttpStatus.BAD_REQUEST, getStatus());
-		return this.responseSpec;
+		return assertStatusAndReturn(HttpStatus.BAD_REQUEST);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.UNAUTHORIZED} (401).
 	 */
 	public WebTestClient.ResponseSpec isUnauthorized() {
-		assertEquals("Status", HttpStatus.UNAUTHORIZED, getStatus());
-		return this.responseSpec;
+		return assertStatusAndReturn(HttpStatus.UNAUTHORIZED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.NOT_FOUND} (404).
 	 */
 	public WebTestClient.ResponseSpec isNotFound() {
-		assertEquals("Status", HttpStatus.NOT_FOUND, getStatus());
-		return this.responseSpec;
+		return assertStatusAndReturn(HttpStatus.NOT_FOUND);
 	}
 
 	/**
 	 * Assert the response error message.
 	 */
 	public WebTestClient.ResponseSpec reasonEquals(String reason) {
-		assertEquals("Response status reason", reason, getStatus().getReasonPhrase());
-		return this.responseSpec;
+		return this.exchangeResult.assertWithDiagnosticsAndReturn(() -> {
+			HttpStatus status = this.exchangeResult.getStatus();
+			assertEquals("Response status reason", reason, status.getReasonPhrase());
+			return this.responseSpec;
+		});
 	}
 
 	/**
 	 * Assert the response status code is in the 1xx range.
 	 */
 	public WebTestClient.ResponseSpec is1xxInformational() {
-		String message = "Range for response status value " + getStatus();
-		assertEquals(message, HttpStatus.Series.INFORMATIONAL, getStatus().series());
-		return this.responseSpec;
+		return assertSeriesAndReturn(HttpStatus.Series.INFORMATIONAL);
 	}
 
 	/**
 	 * Assert the response status code is in the 2xx range.
 	 */
 	public WebTestClient.ResponseSpec is2xxSuccessful() {
-		String message = "Range for response status value " + getStatus();
-		assertEquals(message, HttpStatus.Series.SUCCESSFUL, getStatus().series());
-		return this.responseSpec;
+		return assertSeriesAndReturn(HttpStatus.Series.SUCCESSFUL);
 	}
 
 	/**
 	 * Assert the response status code is in the 3xx range.
 	 */
 	public WebTestClient.ResponseSpec is3xxRedirection() {
-		String message = "Range for response status value " + getStatus();
-		assertEquals(message, HttpStatus.Series.REDIRECTION, getStatus().series());
-		return this.responseSpec;
+		return assertSeriesAndReturn(HttpStatus.Series.REDIRECTION);
 	}
 
 	/**
 	 * Assert the response status code is in the 4xx range.
 	 */
 	public WebTestClient.ResponseSpec is4xxClientError() {
-		String message = "Range for response status value " + getStatus();
-		assertEquals(message, HttpStatus.Series.CLIENT_ERROR, getStatus().series());
-		return this.responseSpec;
+		return assertSeriesAndReturn(HttpStatus.Series.CLIENT_ERROR);
 	}
 
 	/**
 	 * Assert the response status code is in the 5xx range.
 	 */
 	public WebTestClient.ResponseSpec is5xxServerError() {
-		String message = "Range for response status value " + getStatus();
-		assertEquals(message, HttpStatus.Series.SERVER_ERROR, getStatus().series());
-		return this.responseSpec;
+		HttpStatus.Series expected = HttpStatus.Series.SERVER_ERROR;
+		return assertSeriesAndReturn(expected);
 	}
-
 
 	// Private methods
 
-	private HttpStatus getStatus() {
-		return this.exchangeResult.getStatus();
+	private WebTestClient.ResponseSpec assertStatusAndReturn(HttpStatus expected) {
+		return this.exchangeResult.assertWithDiagnosticsAndReturn(() -> {
+			assertEquals("Status", expected, this.exchangeResult.getStatus());
+			return this.responseSpec;
+		});
+	}
+
+	private WebTestClient.ResponseSpec assertSeriesAndReturn(HttpStatus.Series expected) {
+		return this.exchangeResult.assertWithDiagnosticsAndReturn(() -> {
+			HttpStatus status = this.exchangeResult.getStatus();
+			String message = "Range for response status value " + status;
+			assertEquals(message, expected, status.series());
+			return this.responseSpec;
+		});
 	}
 
 }

@@ -29,8 +29,8 @@ public class EntityExchangeResult<T> extends ExchangeResult {
 	private final T body;
 
 
-	EntityExchangeResult(ExchangeResult exchange, T body) {
-		super(exchange);
+	EntityExchangeResult(ExchangeResult result, T body) {
+		super(result);
 		this.body = body;
 	}
 

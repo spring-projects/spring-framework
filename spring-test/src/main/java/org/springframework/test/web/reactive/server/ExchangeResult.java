@@ -16,6 +16,7 @@
 package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
@@ -59,12 +60,12 @@ public class ExchangeResult {
 		this.responseHeaders = response.headers().asHttpHeaders();
 	}
 
-	ExchangeResult(ExchangeResult exchange) {
-		this.method = exchange.getMethod();
-		this.url = exchange.getUrl();
-		this.requestHeaders = exchange.getRequestHeaders();
-		this.status = exchange.getStatus();
-		this.responseHeaders = exchange.getResponseHeaders();
+	ExchangeResult(ExchangeResult result) {
+		this.method = result.getMethod();
+		this.url = result.getUrl();
+		this.requestHeaders = result.getRequestHeaders();
+		this.status = result.getStatus();
+		this.responseHeaders = result.getResponseHeaders();
 	}
 
 
@@ -104,16 +105,50 @@ public class ExchangeResult {
 	}
 
 
+	/**
+	 * Execute the given Runnable in the context of "this" instance and decorate
+	 * any {@link AssertionError}s raised with request and response details.
+	 */
+	public void assertWithDiagnostics(Runnable assertion) {
+		try {
+			assertion.run();
+		}
+		catch (AssertionError ex) {
+			throw new AssertionError("Assertion failed on the following exchange:" + this, ex);
+		}
+	}
+
+	/**
+	 * Variant of {@link #assertWithDiagnostics(Runnable)} that passes through
+	 * a return value from the assertion code.
+	 */
+	public <T> T assertWithDiagnosticsAndReturn(Supplier<T> assertion) {
+		try {
+			return assertion.get();
+		}
+		catch (AssertionError ex) {
+			throw new AssertionError("Assertion failed on the following exchange:" + this, ex);
+		}
+	}
+
+
 	@Override
 	public String toString() {
-		HttpStatus status = this.status;
 		return "\n\n" +
 				formatValue("Request", this.method + " " + getUrl()) +
-				formatValue("Status", status + " " + status.getReasonPhrase()) +
+				formatValue("Status", this.status + " " + getStatusReason()) +
 				formatHeading("Response Headers") + formatHeaders(this.responseHeaders) +
 				formatHeading("Request Headers") + formatHeaders(this.requestHeaders) +
 				"\n" +
 				formatValue("Response Body", formatResponseBody());
+	}
+
+	private String getStatusReason() {
+		String reason = "";
+		if (this.status != null && this.status.getReasonPhrase() != null) {
+			reason = this.status.getReasonPhrase();
+		}
+		return reason;
 	}
 
 	private String formatHeading(String heading) {

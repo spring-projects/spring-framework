@@ -34,8 +34,8 @@ public class FluxExchangeResult<T> extends ExchangeResult {
 	private final ResolvableType elementType;
 
 
-	FluxExchangeResult(ExchangeResult exchange, Flux<T> body, ResolvableType elementType) {
-		super(exchange);
+	FluxExchangeResult(ExchangeResult result, Flux<T> body, ResolvableType elementType) {
+		super(result);
 		this.body = body;
 		this.elementType = elementType;
 	}
