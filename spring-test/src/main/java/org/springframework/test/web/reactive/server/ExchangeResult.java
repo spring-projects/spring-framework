@@ -167,12 +167,12 @@ public class ExchangeResult {
 	public String toString() {
 		return "\n" +
 				"> " + getMethod() + " " + getUrl() + "\n" +
-				"> " + formatHeaders(getRequestHeaders()) + "\n" +
+				"> " + formatHeaders("> ", getRequestHeaders()) + "\n" +
 				"\n" +
 				formatContent(getRequestHeaders().getContentType(), getRequestContent()) + "\n" +
 				"\n" +
-				"> " + getStatus() + " " + getStatusReason() + "\n" +
-				"> " + formatHeaders(getResponseHeaders()) + "\n" +
+				"< " + getStatus() + " " + getStatusReason() + "\n" +
+				"< " + formatHeaders("< ", getResponseHeaders()) + "\n" +
 				"\n" +
 				formatContent(getResponseHeaders().getContentType(), getResponseContent()) + "\n\n";
 	}
@@ -185,10 +185,10 @@ public class ExchangeResult {
 		return reason;
 	}
 
-	private String formatHeaders(HttpHeaders headers) {
+	private String formatHeaders(String linePrefix, HttpHeaders headers) {
 		return headers.entrySet().stream()
 				.map(entry -> entry.getKey() + ": " + entry.getValue())
-				.collect(Collectors.joining("\n> "));
+				.collect(Collectors.joining("\n" + linePrefix));
 	}
 
 	private String formatContent(MediaType contentType, MonoProcessor<byte[]> body) {
