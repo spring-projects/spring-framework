@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.cache.AbstractValueAdaptingCacheTests;
+import org.springframework.cache.AbstractCacheTests;
 import org.springframework.core.serializer.support.SerializationDelegate;
 
 import static org.junit.Assert.*;
@@ -35,35 +35,23 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  */
-public class ConcurrentMapCacheTests
-		extends AbstractValueAdaptingCacheTests<ConcurrentMapCache> {
+public class ConcurrentMapCacheTests extends AbstractCacheTests<ConcurrentMapCache> {
 
 	protected ConcurrentMap<Object, Object> nativeCache;
 
 	protected ConcurrentMapCache cache;
 
-	protected ConcurrentMap<Object, Object> nativeCacheNoNull;
-
-	protected ConcurrentMapCache cacheNoNull;
-
 
 	@Before
 	public void setUp() throws Exception {
-		this.nativeCache = new ConcurrentHashMap<Object, Object>();
-		this.cache = new ConcurrentMapCache(CACHE_NAME, this.nativeCache, true);
-		this.nativeCacheNoNull = new ConcurrentHashMap<Object, Object>();
-		this.cacheNoNull = new ConcurrentMapCache(CACHE_NAME_NO_NULL,
-				this.nativeCacheNoNull, false);
-		this.cache.clear();
+		nativeCache = new ConcurrentHashMap<Object, Object>();
+		cache = new ConcurrentMapCache(CACHE_NAME, nativeCache, true);
+		cache.clear();
 	}
 
 	@Override
 	protected ConcurrentMapCache getCache() {
-		return getCache(true);
-	}
-
-	@Override protected ConcurrentMapCache getCache(boolean allowNull) {
-		return allowNull ? this.cache : this.cacheNoNull;
+		return this.cache;
 	}
 
 	@Override
@@ -96,9 +84,9 @@ public class ConcurrentMapCacheTests
 	public void testNonSerializableContent() {
 		ConcurrentMapCache serializeCache = createCacheWithStoreByValue();
 
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("Failed to serialize");
-		this.thrown.expectMessage(this.cache.getClass().getName());
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("Failed to serialize");
+		thrown.expectMessage(this.cache.getClass().getName());
 		serializeCache.put(createRandomKey(), this.cache);
 	}
 
@@ -108,15 +96,15 @@ public class ConcurrentMapCacheTests
 
 		String key = createRandomKey();
 		this.nativeCache.put(key, "Some garbage");
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("Failed to deserialize");
-		this.thrown.expectMessage("Some garbage");
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("Failed to deserialize");
+		thrown.expectMessage("Some garbage");
 		serializeCache.get(key);
 	}
 
 
 	private ConcurrentMapCache createCacheWithStoreByValue() {
-		return new ConcurrentMapCache(CACHE_NAME, this.nativeCache, true,
+		return new ConcurrentMapCache(CACHE_NAME, nativeCache, true,
 				new SerializationDelegate(ConcurrentMapCacheTests.class.getClassLoader()));
 	}
 

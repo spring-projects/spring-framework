@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.cache.AbstractValueAdaptingCacheTests;
+import org.springframework.cache.AbstractCacheTests;
 import org.springframework.cache.Cache;
 
 import static org.junit.Assert.*;
@@ -29,31 +29,21 @@ import static org.junit.Assert.*;
  * @author Ben Manes
  * @author Stephane Nicoll
  */
-public class CaffeineCacheTests extends AbstractValueAdaptingCacheTests<CaffeineCache> {
+public class CaffeineCacheTests extends AbstractCacheTests<CaffeineCache> {
 
 	private com.github.benmanes.caffeine.cache.Cache<Object, Object> nativeCache;
 
 	private CaffeineCache cache;
 
-	private CaffeineCache cacheNoNull;
-
 	@Before
 	public void setUp() {
 		nativeCache = Caffeine.newBuilder().build();
 		cache = new CaffeineCache(CACHE_NAME, nativeCache);
-		com.github.benmanes.caffeine.cache.Cache<Object, Object> nativeCacheNoNull
-				= Caffeine.newBuilder().build();
-		cacheNoNull =  new CaffeineCache(CACHE_NAME_NO_NULL, nativeCacheNoNull, false);
 	}
 
 	@Override
 	protected CaffeineCache getCache() {
-		return getCache(true);
-	}
-
-	@Override
-	protected CaffeineCache getCache(boolean allowNull) {
-		return allowNull ? this.cache : this.cacheNoNull;
+		return cache;
 	}
 
 	@Override

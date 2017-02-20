@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,13 +95,8 @@ public abstract class AbstractValueAdaptingCache implements Cache {
 	 * @return the value to store
 	 */
 	protected Object toStoreValue(Object userValue) {
-		if (userValue == null) {
-			if (this.allowNullValues) {
-				return NullValue.INSTANCE;
-			}
-			throw new IllegalArgumentException(
-					String.format("Cache '%s' is configured to not allow null " +
-							"values but null was provided", getName()));
+		if (this.allowNullValues && userValue == null) {
+			return NullValue.INSTANCE;
 		}
 		return userValue;
 	}

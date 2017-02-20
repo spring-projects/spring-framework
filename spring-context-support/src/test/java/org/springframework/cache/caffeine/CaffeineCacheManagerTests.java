@@ -102,7 +102,14 @@ public class CaffeineCacheManagerTests {
 		assertEquals("value1", cache1x.get("key1").get());
 		cache1x.put("key2", 2);
 		assertEquals(2, cache1x.get("key2").get());
-		
+		try {
+			cache1x.put("key3", null);
+			fail("Should have thrown NullPointerException");
+		}
+		catch (NullPointerException ex) {
+			// expected
+		}
+
 		cm.setAllowNullValues(true);
 		Cache cache1y = cm.getCache("c1");
 

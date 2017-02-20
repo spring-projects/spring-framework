@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@ import javax.cache.spi.CachingProvider;
 import org.junit.After;
 import org.junit.Before;
 
-import org.springframework.cache.AbstractValueAdaptingCacheTests;
+import org.springframework.cache.AbstractCacheTests;
 
 /**
  * @author Stephane Nicoll
  */
-public class JCacheEhCacheApiTests extends AbstractValueAdaptingCacheTests<JCacheCache> {
+public class JCacheEhCacheApiTests extends AbstractCacheTests<JCacheCache> {
 
 	private CacheManager cacheManager;
 
@@ -38,19 +38,13 @@ public class JCacheEhCacheApiTests extends AbstractValueAdaptingCacheTests<JCach
 
 	private JCacheCache cache;
 
-	private JCacheCache cacheNoNull;
-
 
 	@Before
 	public void setup() {
 		this.cacheManager = getCachingProvider().getCacheManager();
 		this.cacheManager.createCache(CACHE_NAME, new MutableConfiguration<>());
-		this.cacheManager.createCache(CACHE_NAME_NO_NULL, new MutableConfiguration<>());
 		this.nativeCache = this.cacheManager.getCache(CACHE_NAME);
 		this.cache = new JCacheCache(this.nativeCache);
-		Cache<Object, Object> nativeCacheNoNull =
-				this.cacheManager.getCache(CACHE_NAME_NO_NULL);
-		this.cacheNoNull = new JCacheCache(nativeCacheNoNull, false);
 	}
 
 	protected CachingProvider getCachingProvider() {
@@ -64,14 +58,10 @@ public class JCacheEhCacheApiTests extends AbstractValueAdaptingCacheTests<JCach
 		}
 	}
 
-	@Override
-	protected JCacheCache getCache() {
-		return getCache(true);
-	}
 
 	@Override
-	protected JCacheCache getCache(boolean allowNull) {
-		return allowNull ? this.cache : this.cacheNoNull;
+	protected JCacheCache getCache() {
+		return this.cache;
 	}
 
 	@Override
