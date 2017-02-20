@@ -50,25 +50,27 @@ import static org.junit.Assert.*;
  */
 public class ServletRequestMethodArgumentResolverTests {
 
-	private final ServletRequestMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
-
-	private Method method;
+	private ServletRequestMethodArgumentResolver resolver;
 
 	private ModelAndViewContainer mavContainer;
 
+	private MockHttpServletRequest servletRequest;
+
 	private ServletWebRequest webRequest;
 
-	private MockHttpServletRequest servletRequest;
+	private Method method;
 
 
 	@Before
-	public void setUp() throws Exception {
-		method = getClass().getMethod("supportedParams", ServletRequest.class, MultipartRequest.class,
-				HttpSession.class, Principal.class, Locale.class, InputStream.class, Reader.class,
-				WebRequest.class, TimeZone.class, ZoneId.class, HttpMethod.class);
+	public void setup() throws Exception {
+		resolver = new ServletRequestMethodArgumentResolver();
 		mavContainer = new ModelAndViewContainer();
 		servletRequest = new MockHttpServletRequest("GET", "");
 		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
+
+		method = getClass().getMethod("supportedParams", ServletRequest.class, MultipartRequest.class,
+				HttpSession.class, Principal.class, Locale.class, InputStream.class, Reader.class,
+				WebRequest.class, TimeZone.class, ZoneId.class, HttpMethod.class);
 	}
 
 
@@ -110,6 +112,15 @@ public class ServletRequestMethodArgumentResolverTests {
 
 		Object result = resolver.resolveArgument(principalParameter, null, webRequest, null);
 		assertSame("Invalid result", principal, result);
+	}
+
+	@Test
+	public void principalAsNull() throws Exception {
+		MethodParameter principalParameter = new MethodParameter(method, 3);
+		assertTrue("Principal not supported", resolver.supportsParameter(principalParameter));
+
+		Object result = resolver.resolveArgument(principalParameter, null, webRequest, null);
+		assertNull("Invalid result", result);
 	}
 
 	@Test
