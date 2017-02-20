@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.http.server.reactive;
+package org.springframework.http.client.reactive;
 
-import java.util.function.Function;
+import java.net.URI;
 import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
@@ -23,95 +23,85 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Wraps another {@link ServerHttpResponse} and delegates all methods to it.
+ * Wraps another {@link ClientHttpRequest} and delegates all methods to it.
  * Sub-classes can override specific methods selectively.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ServerHttpResponseDecorator implements ServerHttpResponse {
+public class ClientHttpRequestDecorator implements ClientHttpRequest {
+	
+	private final ClientHttpRequest delegate;
 
-	private final ServerHttpResponse delegate;
 
-
-	public ServerHttpResponseDecorator(ServerHttpResponse delegate) {
-		Assert.notNull(delegate, "ServerHttpResponse delegate is required.");
+	public ClientHttpRequestDecorator(ClientHttpRequest delegate) {
+		Assert.notNull(delegate, "ClientHttpRequest delegate is required.");
 		this.delegate = delegate;
 	}
 
 
-	public ServerHttpResponse getDelegate() {
+	public ClientHttpRequest getDelegate() {
 		return this.delegate;
 	}
 
 
-	// ServerHttpResponse delegation methods...
+	// ClientHttpRequest delegation methods...
 
 	@Override
-	public boolean setStatusCode(HttpStatus status) {
-		return getDelegate().setStatusCode(status);
+	public HttpMethod getMethod() {
+		return this.delegate.getMethod();
 	}
 
 	@Override
-	public HttpStatus getStatusCode() {
-		return getDelegate().getStatusCode();
+	public URI getURI() {
+		return this.delegate.getURI();
 	}
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return getDelegate().getHeaders();
+		return this.delegate.getHeaders();
 	}
 
 	@Override
-	public MultiValueMap<String, ResponseCookie> getCookies() {
-		return getDelegate().getCookies();
-	}
-
-	@Override
-	public String encodeUrl(String url) {
-		return getDelegate().encodeUrl(url);
-	}
-
-	@Override
-	public void registerUrlEncoder(Function<String, String> encoder) {
-		getDelegate().registerUrlEncoder(encoder);
+	public MultiValueMap<String, HttpCookie> getCookies() {
+		return this.delegate.getCookies();
 	}
 
 	@Override
 	public DataBufferFactory bufferFactory() {
-		return getDelegate().bufferFactory();
+		return this.delegate.bufferFactory();
 	}
 
 	@Override
 	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
-		getDelegate().beforeCommit(action);
+		this.delegate.beforeCommit(action);
 	}
 
 	@Override
 	public boolean isCommitted() {
-		return getDelegate().isCommitted();
+		return this.delegate.isCommitted();
 	}
 
 	@Override
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-		return getDelegate().writeWith(body);
+		return this.delegate.writeWith(body);
 	}
 
 	@Override
 	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		return getDelegate().writeAndFlushWith(body);
+		return this.delegate.writeAndFlushWith(body);
 	}
 
 	@Override
 	public Mono<Void> setComplete() {
-		return getDelegate().setComplete();
+		return this.delegate.setComplete();
 	}
 
 
