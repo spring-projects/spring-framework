@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -37,12 +36,8 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static java.util.Arrays.*;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link RequestMappingInfo}.
@@ -57,9 +52,10 @@ public class RequestMappingInfoTests {
 	// TODO: CORS pre-flight (see @Ignored)
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.request = MockServerHttpRequest.get("/foo").build();
 	}
+
 
 	@Test
 	public void createEmpty() {
@@ -345,7 +341,7 @@ public class RequestMappingInfoTests {
 		assertNull("Pre-flight should match the ACCESS_CONTROL_REQUEST_METHOD", match);
 	}
 
-	@NotNull
+
 	private DefaultServerWebExchange createExchange() {
 		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}

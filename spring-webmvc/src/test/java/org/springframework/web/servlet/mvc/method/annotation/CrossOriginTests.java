@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class CrossOriginTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		Properties props = new Properties();
 		props.setProperty("myOrigin", "http://example.com");
@@ -88,6 +88,7 @@ public class CrossOriginTests {
 		this.request.setMethod("GET");
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain.com/");
 	}
+
 
 	@Test
 	public void noAnnotationWithoutOrigin() throws Exception {
@@ -287,6 +288,7 @@ public class CrossOriginTests {
 		request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
 		assertNull(this.handlerMapping.getHandler(request));
 	}
+
 
 	private CorsConfiguration getCorsConfiguration(HandlerExecutionChain chain, boolean isPreFlightRequest) {
 		if (isPreFlightRequest) {

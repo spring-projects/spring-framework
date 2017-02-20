@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,10 +38,7 @@ import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentR
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link InitBinderBindingContext}.
@@ -58,7 +54,7 @@ public class InitBinderBindingContextTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.request = MockServerHttpRequest.get("/").build();
 	}
 
@@ -125,14 +121,12 @@ public class InitBinderBindingContextTests {
 		assertEquals("requestParam-22", dataBinder.getDisallowedFields()[0]);
 	}
 
-	@NotNull
+
 	private DefaultServerWebExchange createExchange() {
 		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}
 
-	private BindingContext createBindingContext(String methodName, Class<?>... parameterTypes)
-			throws Exception {
-
+	private BindingContext createBindingContext(String methodName, Class<?>... parameterTypes) throws Exception {
 		Object handler = new InitBinderHandler();
 		Method method = handler.getClass().getMethod(methodName, parameterTypes);
 
@@ -140,8 +134,7 @@ public class InitBinderBindingContextTests {
 		handlerMethod.setArgumentResolvers(new ArrayList<>(this.argumentResolvers));
 		handlerMethod.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 
-		return new InitBinderBindingContext(
-				this.bindingInitializer, Collections.singletonList(handlerMethod));
+		return new InitBinderBindingContext(this.bindingInitializer, Collections.singletonList(handlerMethod));
 	}
 
 

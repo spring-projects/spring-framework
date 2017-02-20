@@ -60,7 +60,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void shutdown() throws Exception {
 		this.server.shutdown();
 	}
 

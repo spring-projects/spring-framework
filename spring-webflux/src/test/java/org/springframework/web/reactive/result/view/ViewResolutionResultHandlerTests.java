@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
@@ -57,13 +58,11 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.springframework.core.ResolvableType.forClass;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
-import static org.springframework.core.io.buffer.support.DataBufferTestUtils.dumpString;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static java.nio.charset.StandardCharsets.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.core.ResolvableType.*;
+import static org.springframework.http.MediaType.*;
 
 /**
  * Unit tests for {@link ViewResolutionResultHandler}.
@@ -77,7 +76,7 @@ public class ViewResolutionResultHandlerTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.request = MockServerHttpRequest.get("/path").build();
 	}
 
@@ -288,6 +287,7 @@ public class ViewResolutionResultHandlerTests {
 				"}");
 	}
 
+
 	private ServerWebExchange createExchange() {
 		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}
@@ -336,7 +336,7 @@ public class ViewResolutionResultHandlerTests {
 	private void assertResponseBody(ServerWebExchange exchange, String responseBody) {
 		MockServerHttpResponse response = (MockServerHttpResponse) exchange.getResponse();
 		StepVerifier.create(response.getBody())
-				.consumeNextWith(buf -> assertEquals(responseBody, dumpString(buf, UTF_8)))
+				.consumeNextWith(buf -> assertEquals(responseBody, DataBufferTestUtils.dumpString(buf, UTF_8)))
 				.expectComplete()
 				.verify();
 	}

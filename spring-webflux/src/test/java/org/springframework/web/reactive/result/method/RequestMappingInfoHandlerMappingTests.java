@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.ResolvableMethod;
-import org.springframework.web.reactive.result.method.RequestMappingInfo.BuilderConfiguration;
+import org.springframework.web.reactive.result.method.RequestMappingInfo.*;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -60,19 +60,14 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.support.HttpRequestPathHelper;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
-import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
-import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static org.springframework.web.reactive.result.method.RequestMappingInfo.*;
 
 /**
  * Unit tests for {@link RequestMappingInfoHandlerMapping}.
+ *
  * @author Rossen Stoyanchev
  */
 public class RequestMappingInfoHandlerMappingTests {
@@ -83,7 +78,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.handlerMapping = new TestRequestMappingInfoHandlerMapping();
 		this.handlerMapping.registerHandler(new TestController());
 	}
@@ -157,7 +152,7 @@ public class RequestMappingInfoHandlerMappingTests {
 				ex -> assertEquals(new HashSet<>(Arrays.asList("GET", "HEAD")), ex.getSupportedMethods()));
 	}
 
-	@Test // SPR-9603
+	@Test  // SPR-9603
 	public void getHandlerRequestMethodMatchFalsePositive() throws Exception {
 		this.request = MockServerHttpRequest.get("/users").accept(MediaType.APPLICATION_XML).build();
 		this.handlerMapping.registerHandler(new UserController());
@@ -168,7 +163,7 @@ public class RequestMappingInfoHandlerMappingTests {
 				.verify();
 	}
 
-	@Test // SPR-8462
+	@Test  // SPR-8462
 	public void getHandlerMediaTypeNotSupported() throws Exception {
 		testHttpMediaTypeNotSupportedException("/person/1");
 		testHttpMediaTypeNotSupportedException("/person/1/");
@@ -186,14 +181,14 @@ public class RequestMappingInfoHandlerMappingTests {
 						ex.getMessage()));
 	}
 
-	@Test // SPR-8462
+	@Test  // SPR-8462
 	public void getHandlerTestMediaTypeNotAcceptable() throws Exception {
 		testMediaTypeNotAcceptable("/persons");
 		testMediaTypeNotAcceptable("/persons/");
 		testMediaTypeNotAcceptable("/persons.json");
 	}
 
-	@Test // SPR-12854
+	@Test  // SPR-12854
 	public void getHandlerTestRequestParamMismatch() throws Exception {
 		this.request = MockServerHttpRequest.get("/params").build();
 		Mono<Object> mono = this.handlerMapping.getHandler(createExchange());
@@ -228,7 +223,8 @@ public class RequestMappingInfoHandlerMappingTests {
 				exchange.getAttributes().get(name));
 	}
 
-	@Test @SuppressWarnings("unchecked")
+	@Test
+	@SuppressWarnings("unchecked")
 	public void handleMatchUriTemplateVariables() throws Exception {
 		String lookupPath = "/1/2";
 		this.request = MockServerHttpRequest.get(lookupPath).build();
@@ -245,7 +241,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertEquals("2", uriVariables.get("path2"));
 	}
 
-	@Test // SPR-9098
+	@Test  // SPR-9098
 	public void handleMatchUriTemplateVariablesDecode() throws Exception {
 		RequestMappingInfo key = paths("/{group}/{identifier}").build();
 		this.request = MockServerHttpRequest.method(HttpMethod.GET, URI.create("/group/a%2Fb")).build();
@@ -352,12 +348,10 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	private ServerWebExchange createExchange() {
 		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
-
 	}
 
 	@SuppressWarnings("unchecked")
 	private <T> void assertError(Mono<Object> mono, final Class<T> exceptionClass, final Consumer<T> consumer)  {
-
 		StepVerifier.create(mono)
 				.consumeErrorWith(error -> {
 					assertEquals(exceptionClass, error.getClass());
@@ -366,7 +360,6 @@ public class RequestMappingInfoHandlerMappingTests {
 				})
 				.verify();
 	}
-
 
 	private void testHttpMediaTypeNotSupportedException(String url) throws Exception {
 		this.request = MockServerHttpRequest.put(url).contentType(MediaType.APPLICATION_JSON).build();
@@ -504,6 +497,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		}
 	}
 
+
 	@SuppressWarnings("unused")
 	@Controller
 	private static class UserController {
@@ -516,6 +510,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		public void saveUser() {
 		}
 	}
+
 
 	private static class TestRequestMappingInfoHandlerMapping extends RequestMappingInfoHandlerMapping {
 

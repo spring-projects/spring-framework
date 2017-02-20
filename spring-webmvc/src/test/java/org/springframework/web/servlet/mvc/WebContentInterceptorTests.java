@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,16 @@
 
 package org.springframework.web.servlet.mvc;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
-
 import java.util.Properties;
 
 import org.hamcrest.Matchers;
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.web.servlet.support.WebContentGenerator;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Rick Evans
@@ -35,17 +33,9 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  */
 public class WebContentInterceptorTests {
 
-	private MockHttpServletRequest request;
+	private MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
 
-	private MockHttpServletResponse response;
-
-
-	@Before
-	public void setUp() throws Exception {
-		request = new MockHttpServletRequest();
-		request.setMethod(WebContentGenerator.METHOD_GET);
-		response = new MockHttpServletResponse();
-	}
+	private MockHttpServletResponse response = new MockHttpServletResponse();
 
 
 	@Test
@@ -68,14 +58,14 @@ public class WebContentInterceptorTests {
 		interceptor.setCacheSeconds(10);
 		interceptor.setCacheMappings(mappings);
 
-//		request.setRequestURI("http://localhost:7070/example/adminhandle.vm");
+		// request.setRequestURI("http://localhost:7070/example/adminhandle.vm");
 		request.setRequestURI("example/adminhandle.vm");
 		interceptor.preHandle(request, response, null);
 
 		Iterable<String> cacheControlHeaders = response.getHeaders("Cache-Control");
 		assertThat(cacheControlHeaders, Matchers.emptyIterable());
 
-//		request.setRequestURI("http://localhost:7070/example/bingo.html");
+		// request.setRequestURI("http://localhost:7070/example/bingo.html");
 		request.setRequestURI("example/bingo.html");
 		interceptor.preHandle(request, response, null);
 
@@ -148,7 +138,7 @@ public class WebContentInterceptorTests {
 		mappings.setProperty("*/*.cache.html", "10"); // was **/*.cache.html
 		interceptor.setCacheMappings(mappings);
 
-//		request.setRequestURI("http://example.org/foo/page.html");
+		// request.setRequestURI("http://example.org/foo/page.html");
 		request.setRequestURI("foo/page.html");
 		interceptor.preHandle(request, response, null);
 
@@ -159,9 +149,9 @@ public class WebContentInterceptorTests {
 		Iterable<String> pragmaHeaders = response.getHeaders("Pragma");
 		assertThat(pragmaHeaders, Matchers.contains("no-cache"));
 
+		// request.setRequestURI("http://example.org/page.cache.html");
+		request = new MockHttpServletRequest("GET", "foo/page.cache.html");
 		response = new MockHttpServletResponse();
-//		request.setRequestURI("http://example.org/page.cache.html");
-		request.setRequestURI("foo/page.cache.html");
 		interceptor.preHandle(request, response, null);
 
 		expiresHeaders = response.getHeaders("Expires");

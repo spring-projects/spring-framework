@@ -40,8 +40,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link CssLinkResourceTransformer}.
@@ -53,7 +52,7 @@ public class CssLinkResourceTransformerTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		ClassPathResource allowedLocation = new ClassPathResource("test/", getClass());
 		ResourceWebHandler resourceHandler = new ResourceWebHandler();
 

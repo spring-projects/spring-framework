@@ -47,11 +47,7 @@ import org.springframework.web.reactive.resource.WebJarsResourceResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ResourceHandlerRegistry}.
@@ -70,7 +66,7 @@ public class ResourceHandlerRegistryTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		this.registry = new ResourceHandlerRegistry(new GenericApplicationContext());
 		this.registration = this.registry.addResourceHandler("/resources/**");
 		this.registration.addResourceLocations("classpath:org/springframework/web/reactive/config/");
@@ -104,8 +100,7 @@ public class ResourceHandlerRegistryTests {
 
 	@Test
 	public void cacheControl() {
-		assertThat(getHandler("/resources/**").getCacheControl(),
-				Matchers.nullValue());
+		assertThat(getHandler("/resources/**").getCacheControl(), Matchers.nullValue());
 
 		this.registration.setCacheControl(CacheControl.noCache().cachePrivate());
 		assertThat(getHandler("/resources/**").getCacheControl().getHeaderValue(),
@@ -220,6 +215,7 @@ public class ResourceHandlerRegistryTests {
 		assertThat(transformers.get(1), Matchers.sameInstance(appCacheTransformer));
 		assertThat(transformers.get(2), Matchers.sameInstance(cssLinkTransformer));
 	}
+
 
 	private ResourceWebHandler getHandler(String pathPattern) {
 		SimpleUrlHandlerMapping mapping = (SimpleUrlHandlerMapping) this.registry.getHandlerMapping();

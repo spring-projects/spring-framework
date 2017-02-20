@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,10 +36,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * "checkNotModified" unit tests for {@link DefaultServerWebExchange}.
@@ -74,7 +70,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 
 
 	@Before
-	public void setUp() throws URISyntaxException {
+	public void setup() throws URISyntaxException {
 		this.currentDate = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 		this.dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
 		this.dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -319,12 +315,11 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 		assertEquals(-1, response.getHeaders().getLastModified());
 	}
 
-	@NotNull
+
 	private MockServerHttpRequest.BaseBuilder<?> request() {
 		return MockServerHttpRequest.get("http://example.org");
 	}
 
-	@NotNull
 	private DefaultServerWebExchange createExchange() {
 		return new DefaultServerWebExchange(this.request, this.response);
 	}

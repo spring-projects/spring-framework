@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -66,16 +65,8 @@ import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewRes
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
-import static org.springframework.http.MediaType.APPLICATION_XML;
-import static org.springframework.http.MediaType.IMAGE_PNG;
-import static org.springframework.http.MediaType.TEXT_PLAIN;
+import static org.junit.Assert.*;
+import static org.springframework.http.MediaType.*;
 
 /**
  * Unit tests for {@link WebFluxConfigurationSupport}.
@@ -87,7 +78,7 @@ public class WebFluxConfigurationSupportTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.request = MockServerHttpRequest.get("/").build();
 	}
 
@@ -269,11 +260,10 @@ public class WebFluxConfigurationSupportTests {
 		assertNotNull(webHandler);
 	}
 
-	@NotNull
+
 	private DefaultServerWebExchange createExchange() {
 		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}
-
 
 	private void assertHasMessageReader(List<HttpMessageReader<?>> readers, Class<?> clazz, MediaType mediaType) {
 		ResolvableType type = ResolvableType.forClass(clazz);
@@ -298,9 +288,11 @@ public class WebFluxConfigurationSupportTests {
 		return context;
 	}
 
+
 	@EnableWebFlux
 	static class WebFluxConfig {
 	}
+
 
 	@Configuration
 	static class CustomPatchMatchConfig extends WebFluxConfigurationSupport {
@@ -311,6 +303,7 @@ public class WebFluxConfigurationSupportTests {
 			configurer.setUseTrailingSlashMatch(false);
 		}
 	}
+
 
 	@Configuration
 	static class CustomMessageConverterConfig extends WebFluxConfigurationSupport {
@@ -336,6 +329,7 @@ public class WebFluxConfigurationSupportTests {
 		}
 	}
 
+
 	@Configuration
 	@SuppressWarnings("unused")
 	static class CustomViewResolverConfig extends WebFluxConfigurationSupport {
@@ -350,8 +344,8 @@ public class WebFluxConfigurationSupportTests {
 		public FreeMarkerConfigurer freeMarkerConfig() {
 			return new FreeMarkerConfigurer();
 		}
-
 	}
+
 
 	@Configuration
 	static class CustomResourceHandlingConfig extends WebFluxConfigurationSupport {
@@ -366,4 +360,5 @@ public class WebFluxConfigurationSupportTests {
 	@XmlRootElement
 	static class TestBean {
 	}
+
 }

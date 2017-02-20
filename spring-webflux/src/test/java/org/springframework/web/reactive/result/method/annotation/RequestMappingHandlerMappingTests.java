@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,13 +43,8 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.reactive.accept.MappingContentTypeResolver;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link RequestMappingHandlerMapping}.
@@ -64,7 +59,7 @@ public class RequestMappingHandlerMappingTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() {
 		this.handlerMapping.setApplicationContext(wac);
 	}
 
@@ -181,6 +176,7 @@ public class RequestMappingHandlerMappingTests {
 		assertComposedAnnotationMapping(RequestMethod.PATCH);
 	}
 
+
 	private RequestMappingInfo assertComposedAnnotationMapping(RequestMethod requestMethod) throws Exception {
 		String methodName = requestMethod.name().toLowerCase();
 		String path = "/" + methodName;
@@ -240,8 +236,8 @@ public class RequestMappingHandlerMappingTests {
 		@PatchMapping("/patch")
 		public void patch() {
 		}
-
 	}
+
 
 	@RequestMapping(method = RequestMethod.POST,
 			produces = MediaType.APPLICATION_JSON_VALUE,

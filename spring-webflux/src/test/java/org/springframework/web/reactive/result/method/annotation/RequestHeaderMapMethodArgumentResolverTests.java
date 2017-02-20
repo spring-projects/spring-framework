@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -34,12 +33,9 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link RequestHeaderMapMethodArgumentResolver}.
@@ -50,25 +46,24 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 
 	private RequestHeaderMapMethodArgumentResolver resolver;
 
+	private ServerHttpRequest request;
+
 	private MethodParameter paramMap;
 	private MethodParameter paramMultiValueMap;
 	private MethodParameter paramHttpHeaders;
 	private MethodParameter paramUnsupported;
 
-	private ServerHttpRequest request;
-
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		resolver = new RequestHeaderMapMethodArgumentResolver();
+		request = MockServerHttpRequest.get("/").build();
 
 		Method method = getClass().getMethod("params", Map.class, MultiValueMap.class, HttpHeaders.class, Map.class);
 		paramMap = new SynthesizingMethodParameter(method, 0);
 		paramMultiValueMap = new SynthesizingMethodParameter(method, 1);
 		paramHttpHeaders = new SynthesizingMethodParameter(method, 2);
 		paramUnsupported = new SynthesizingMethodParameter(method, 3);
-
-		this.request = MockServerHttpRequest.get("/").build();
 	}
 
 
@@ -85,9 +80,9 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		String name = "foo";
 		String value = "bar";
 		Map<String, String> expected = Collections.singletonMap(name, value);
-		this.request = MockServerHttpRequest.get("/").header(name, value).build();
+		request = MockServerHttpRequest.get("/").header(name, value).build();
 
-		Mono<Object> mono = this.resolver.resolveArgument(paramMap, null, createExchange());
+		Mono<Object> mono = resolver.resolveArgument(paramMap, null, createExchange());
 		Object result = mono.block();
 
 		assertTrue(result instanceof Map);
@@ -99,13 +94,13 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		String name = "foo";
 		String value1 = "bar";
 		String value2 = "baz";
-		this.request = MockServerHttpRequest.get("/").header(name, value1, value2).build();
+		request = MockServerHttpRequest.get("/").header(name, value1, value2).build();
 
 		MultiValueMap<String, String> expected = new LinkedMultiValueMap<>(1);
 		expected.add(name, value1);
 		expected.add(name, value2);
 
-		Mono<Object> mono = this.resolver.resolveArgument(paramMultiValueMap, null, createExchange());
+		Mono<Object> mono = resolver.resolveArgument(paramMultiValueMap, null, createExchange());
 		Object result = mono.block();
 
 		assertTrue(result instanceof MultiValueMap);
@@ -117,22 +112,22 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		String name = "foo";
 		String value1 = "bar";
 		String value2 = "baz";
-		this.request = MockServerHttpRequest.get("/").header(name, value1, value2).build();
+		request = MockServerHttpRequest.get("/").header(name, value1, value2).build();
 
 		HttpHeaders expected = new HttpHeaders();
 		expected.add(name, value1);
 		expected.add(name, value2);
 
-		Mono<Object> mono = this.resolver.resolveArgument(paramHttpHeaders, null, createExchange());
+		Mono<Object> mono = resolver.resolveArgument(paramHttpHeaders, null, createExchange());
 		Object result = mono.block();
 
 		assertTrue(result instanceof HttpHeaders);
 		assertEquals("Invalid result", expected, result);
 	}
 
-	@NotNull
+
 	private DefaultServerWebExchange createExchange() {
-		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
+		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,11 +66,19 @@ import static org.mockito.BDDMockito.*;
  */
 public class RequestResponseBodyMethodProcessorMockTests {
 
-	private RequestResponseBodyMethodProcessor processor;
-
 	private HttpMessageConverter<String> stringMessageConverter;
 
 	private HttpMessageConverter<Resource> resourceMessageConverter;
+
+	private RequestResponseBodyMethodProcessor processor;
+
+	private ModelAndViewContainer mavContainer;
+
+	private MockHttpServletRequest servletRequest;
+
+	private MockHttpServletResponse servletResponse;
+
+	private NativeWebRequest webRequest;
 
 	private MethodParameter paramRequestBodyString;
 	private MethodParameter paramInt;
@@ -82,18 +90,10 @@ public class RequestResponseBodyMethodProcessorMockTests {
 	private MethodParameter returnTypeStringProduces;
 	private MethodParameter returnTypeResource;
 
-	private ModelAndViewContainer mavContainer;
 
-	private NativeWebRequest webRequest;
-
-	private MockHttpServletRequest servletRequest;
-
-	private MockHttpServletResponse servletResponse;
-
-
-	@SuppressWarnings("unchecked")
 	@Before
-	public void setUp() throws Exception {
+	@SuppressWarnings("unchecked")
+	public void setup() throws Exception {
 		stringMessageConverter = mock(HttpMessageConverter.class);
 		given(stringMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 
@@ -101,6 +101,12 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		given(resourceMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.ALL));
 
 		processor = new RequestResponseBodyMethodProcessor(Arrays.asList(stringMessageConverter, resourceMessageConverter));
+
+		mavContainer = new ModelAndViewContainer();
+		servletRequest = new MockHttpServletRequest();
+		servletRequest.setMethod("POST");
+		servletResponse = new MockHttpServletResponse();
+		webRequest = new ServletWebRequest(servletRequest, servletResponse);
 
 		Method methodHandle1 = getClass().getMethod("handle1", String.class, Integer.TYPE);
 		paramRequestBodyString = new MethodParameter(methodHandle1, 0);
@@ -112,13 +118,6 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		returnTypeInt = new MethodParameter(getClass().getMethod("handle5"), -1);
 		returnTypeStringProduces = new MethodParameter(getClass().getMethod("handle6"), -1);
 		returnTypeResource = new MethodParameter(getClass().getMethod("handle7"), -1);
-
-		mavContainer = new ModelAndViewContainer();
-
-		servletRequest = new MockHttpServletRequest();
-		servletRequest.setMethod("POST");
-		servletResponse = new MockHttpServletResponse();
-		webRequest = new ServletWebRequest(servletRequest, servletResponse);
 	}
 
 	@Test

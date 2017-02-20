@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.cors.reactive;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,13 +27,8 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS;
-import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
-import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS;
-import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD;
+import static org.junit.Assert.*;
+import static org.springframework.http.HttpHeaders.*;
 
 /**
  * {@link DefaultCorsProcessor} tests with simple or pre-flight CORS request.
@@ -329,6 +323,7 @@ public class DefaultCorsProcessorTests {
 		assertEquals(HttpStatus.FORBIDDEN, this.response.getStatusCode());
 	}
 
+
 	private MockServerHttpRequest.BaseBuilder<?> actualRequest() {
 		return corsRequest(HttpMethod.GET);
 	}
@@ -343,7 +338,6 @@ public class DefaultCorsProcessorTests {
 				.header(HttpHeaders.ORIGIN, "http://domain2.com");
 	}
 
-	@NotNull
 	private DefaultServerWebExchange createExchange() {
 		return new DefaultServerWebExchange(this.request, this.response);
 	}

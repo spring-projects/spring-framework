@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,12 +65,17 @@ import static org.mockito.BDDMockito.*;
  */
 public class RequestPartMethodArgumentResolverTests {
 
-	private RequestPartMethodArgumentResolver resolver;
-
 	private HttpMessageConverter<SimpleBean> messageConverter;
 
+	private RequestPartMethodArgumentResolver resolver;
+
 	private MultipartFile multipartFile1;
+
 	private MultipartFile multipartFile2;
+
+	private MockMultipartHttpServletRequest multipartRequest;
+
+	private NativeWebRequest webRequest;
 
 	private MethodParameter paramRequestPart;
 	private MethodParameter paramNamedRequestPart;
@@ -90,16 +95,26 @@ public class RequestPartMethodArgumentResolverTests {
 	private MethodParameter optionalPartList;
 	private MethodParameter optionalRequestPart;
 
-	private NativeWebRequest webRequest;
 
-	private MockMultipartHttpServletRequest multipartRequest;
-
-
-	@SuppressWarnings("unchecked")
 	@Before
-	public void setUp() throws Exception {
-		Method method = ReflectionUtils.findMethod(getClass(), "handle", (Class<?>[]) null);
+	@SuppressWarnings("unchecked")
+	public void setup() throws Exception {
+		messageConverter = mock(HttpMessageConverter.class);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 
+		resolver = new RequestPartMethodArgumentResolver(Collections.<HttpMessageConverter<?>>singletonList(messageConverter));
+		reset(messageConverter);
+
+		byte[] content = "doesn't matter as long as not empty".getBytes(StandardCharsets.UTF_8);
+		multipartFile1 = new MockMultipartFile("requestPart", "", "text/plain", content);
+		multipartFile2 = new MockMultipartFile("requestPart", "", "text/plain", content);
+		multipartRequest = new MockMultipartHttpServletRequest();
+		multipartRequest.addFile(multipartFile1);
+		multipartRequest.addFile(multipartFile2);
+		multipartRequest.addFile(new MockMultipartFile("otherPart", "", "text/plain", content));
+		webRequest = new ServletWebRequest(multipartRequest, new MockHttpServletResponse());
+
+		Method method = ReflectionUtils.findMethod(getClass(), "handle", (Class<?>[]) null);
 		paramRequestPart = new SynthesizingMethodParameter(method, 0);
 		paramRequestPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
 		paramNamedRequestPart = new SynthesizingMethodParameter(method, 1);
@@ -124,22 +139,6 @@ public class RequestPartMethodArgumentResolverTests {
 		optionalPartList = new SynthesizingMethodParameter(method, 15);
 		optionalPartList.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
 		optionalRequestPart = new SynthesizingMethodParameter(method, 16);
-
-		messageConverter = mock(HttpMessageConverter.class);
-		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-
-		resolver = new RequestPartMethodArgumentResolver(Collections.<HttpMessageConverter<?>>singletonList(messageConverter));
-		reset(messageConverter);
-
-		byte[] content = "doesn't matter as long as not empty".getBytes(StandardCharsets.UTF_8);
-
-		multipartFile1 = new MockMultipartFile("requestPart", "", "text/plain", content);
-		multipartFile2 = new MockMultipartFile("requestPart", "", "text/plain", content);
-		multipartRequest = new MockMultipartHttpServletRequest();
-		multipartRequest.addFile(multipartFile1);
-		multipartRequest.addFile(multipartFile2);
-		multipartRequest.addFile(new MockMultipartFile("otherPart", "", "text/plain", content));
-		webRequest = new ServletWebRequest(multipartRequest, new MockHttpServletResponse());
 	}
 
 

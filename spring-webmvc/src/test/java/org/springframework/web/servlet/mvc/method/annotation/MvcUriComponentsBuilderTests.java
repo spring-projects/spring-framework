@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,6 @@
  */
 
 package org.springframework.web.servlet.mvc.method.annotation;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -58,6 +54,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
+
 /**
  * Unit tests for {@link org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder}.
  *
@@ -73,12 +73,12 @@ public class MvcUriComponentsBuilderTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(this.request));
 	}
 
 	@After
-	public void tearDown() {
+	public void reset() {
 		RequestContextHolder.resetRequestAttributes();
 	}
 
@@ -372,14 +372,15 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
+
 	@RequestMapping("/people")
 	interface PersonController {
-
 	}
+
 
 	private class PersonControllerImpl implements PersonController {
-
 	}
+
 
 	@RequestMapping("/people/{id}/addresses")
 	private static class PersonsAddressesController {
@@ -390,10 +391,11 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
-	@RequestMapping({ "/persons", "/people" })
-	private class InvalidController {
 
+	@RequestMapping({"/persons", "/people"})
+	private class InvalidController {
 	}
+
 
 	private class UnmappedController {
 
@@ -401,6 +403,7 @@ public class MvcUriComponentsBuilderTests {
 		public void unmappedMethod() {
 		}
 	}
+
 
 	@RequestMapping("/something")
 	static class ControllerWithMethods {
@@ -439,10 +442,12 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
-	@RequestMapping("/extended") @SuppressWarnings("WeakerAccess")
-	static class ExtendedController extends ControllerWithMethods {
 
+	@RequestMapping("/extended")
+	@SuppressWarnings("WeakerAccess")
+	static class ExtendedController extends ControllerWithMethods {
 	}
+
 
 	@RequestMapping("/user/{userId}/contacts")
 	private static class UserContactController {
@@ -453,10 +458,12 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
+
 	static abstract class AbstractCrudController<T, ID> {
 
 		abstract T get(ID id);
 	}
+
 
 	private static class PersonCrudController extends AbstractCrudController<Person, Long> {
 
@@ -466,6 +473,7 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
+
 	@Controller
 	private static class MetaAnnotationController {
 
@@ -473,11 +481,11 @@ public class MvcUriComponentsBuilderTests {
 		public void handle() {
 		}
 
-		@PostJson(path="/input")
+		@PostJson(path = "/input")
 		public void handleInput() {
 		}
-
 	}
+
 
 	@RequestMapping(method = RequestMethod.POST,
 			produces = MediaType.APPLICATION_JSON_VALUE,
@@ -486,8 +494,10 @@ public class MvcUriComponentsBuilderTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
 	private @interface PostJson {
+
 		String[] path() default {};
 	}
+
 
 	@EnableWebMvc
 	static class WebConfig extends WebMvcConfigurerAdapter {

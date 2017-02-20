@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -34,22 +33,15 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ResponseBodyResultHandler}.When adding a test also
@@ -66,40 +58,19 @@ public class ResponseBodyResultHandlerTests {
 
 	private ResponseBodyResultHandler resultHandler;
 
-	private MockServerHttpResponse response;
-
-	private ServerWebExchange exchange;
-
 
 	@Before
-	public void setUp() throws Exception {
-		this.resultHandler = createHandler();
-		initExchange();
-	}
-
-	private void initExchange() {
-		ServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		this.response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(request, this.response);
-	}
-
-
-	private ResponseBodyResultHandler createHandler(HttpMessageWriter<?>... writers) {
-		List<HttpMessageWriter<?>> writerList;
-		if (ObjectUtils.isEmpty(writers)) {
-			writerList = new ArrayList<>();
-			writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
-			writerList.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
-			writerList.add(new ResourceHttpMessageWriter());
-			writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
-			writerList.add(new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder()));
-		}
-		else {
-			writerList = Arrays.asList(writers);
-		}
+	public void setup() throws Exception {
+		List<HttpMessageWriter<?>> writerList = new ArrayList<>(5);
+		writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
+		writerList.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
+		writerList.add(new ResourceHttpMessageWriter());
+		writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
+		writerList.add(new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder()));
 		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder().build();
-		return new ResponseBodyResultHandler(writerList, resolver);
+		this.resultHandler = new ResponseBodyResultHandler(writerList, resolver);
 	}
+
 
 	@Test
 	public void supports() throws NoSuchMethodException {
@@ -133,7 +104,8 @@ public class ResponseBodyResultHandlerTests {
 	}
 
 
-	@RestController @SuppressWarnings("unused")
+	@RestController
+	@SuppressWarnings("unused")
 	private static class TestRestController {
 
 		public Mono<Void> handleToMonoVoid() { return null;}
@@ -163,7 +135,9 @@ public class ResponseBodyResultHandlerTests {
 		}
 	}
 
-	@Controller @SuppressWarnings("unused")
+
+	@Controller
+	@SuppressWarnings("unused")
 	private static class TestController {
 
 		@ResponseBody
@@ -174,7 +148,6 @@ public class ResponseBodyResultHandlerTests {
 		public String doWork() {
 			return null;
 		}
-
 	}
 
 }

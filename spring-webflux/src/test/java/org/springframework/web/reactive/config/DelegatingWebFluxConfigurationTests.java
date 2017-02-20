@@ -68,7 +68,7 @@ public class DelegatingWebFluxConfigurationTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		MockitoAnnotations.initMocks(this);
 		delegatingConfig = new DelegatingWebFluxConfiguration();
 		delegatingConfig.setApplicationContext(new StaticApplicationContext());
