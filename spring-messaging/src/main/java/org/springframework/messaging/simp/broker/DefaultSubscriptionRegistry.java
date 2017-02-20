@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -361,8 +361,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	private static class SessionSubscriptionRegistry {
 
 		// sessionId -> SessionSubscriptionInfo
-		private final ConcurrentMap<String, SessionSubscriptionInfo> sessions =
-				new ConcurrentHashMap<>();
+		private final ConcurrentMap<String, SessionSubscriptionInfo> sessions = new ConcurrentHashMap<>();
 
 		public SessionSubscriptionInfo getSubscriptions(String sessionId) {
 			return this.sessions.get(sessionId);
@@ -406,11 +405,10 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		private final String sessionId;
 
 		// destination -> subscriptions
-		private final Map<String, Set<Subscription>> destinationLookup =
-				new ConcurrentHashMap<>(4);
+		private final Map<String, Set<Subscription>> destinationLookup = new ConcurrentHashMap<>(4);
 
 		public SessionSubscriptionInfo(String sessionId) {
-			Assert.notNull(sessionId, "sessionId must not be null");
+			Assert.notNull(sessionId, "'sessionId' must not be null");
 			this.sessionId = sessionId;
 		}
 
