@@ -408,6 +408,7 @@ class DefaultWebTestClient implements WebTestClient {
 			});
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public <T> EntityExchangeResult<T> returnResult() {
 			return new EntityExchangeResult<>(this.result, (T) this.result.getResponseBody());
