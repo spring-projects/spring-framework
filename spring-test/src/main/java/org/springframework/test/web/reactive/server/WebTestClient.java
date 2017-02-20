@@ -448,7 +448,7 @@ public interface WebTestClient {
 	}
 
 	/**
-	 * Specification for expectations on the response.
+	 * Specification for processing the response and applying expectations.
 	 */
 	interface ResponseSpec {
 
@@ -458,40 +458,123 @@ public interface WebTestClient {
 		StatusAssertions expectStatus();
 
 		/**
-		 * Assertions on the response headers.
+		 * Assertions on the headers of the response.
 		 */
 		HeaderAssertions expectHeader();
 
 		/**
-		 * Assertions on the response body.
+		 * Assertions on the body of the response extracted to one or more
+		 * elements of the given type.
+		 */
+		TypeBodySpec expectBody(Class<?> elementType);
+
+		/**
+		 * Variant of {@link #expectBody(Class)} for use with generic types.
+		 */
+		TypeBodySpec expectBody(ResolvableType elementType);
+
+		/**
+		 * Access to additional assertions on the response body --
+		 * isEmpty, map, and others.
 		 */
 		BodySpec expectBody();
 
 		/**
-		 * Assertions on the response body where the body is to be decoded to
-		 * one or more elements of the given type.
-		 */
-		ElementBodySpec expectBody(Class<?> elementType);
-
-		/**
-		 * Alternative to {@link #expectBody(Class)} for generic types.
-		 */
-		ElementBodySpec expectBody(ResolvableType elementType);
-
-		/**
-		 * Consume the result of the exchange and continue with expectations.
+		 * Consume the {@link ExchangeResult} and continue with expectations.
+		 * The {@code ExchangeResult} is parameterized with data buffers since
+		 * the body is not yet consumed nor decoded at this level.
 		 */
 		ResponseSpec consumeWith(Consumer<ExchangeResult<Flux<DataBuffer>>> consumer);
 
 		/**
-		 * Return a container for the result of the exchange with the body
-		 * not yet decoded nor consumed.
+		 * Return a container for the result of the exchange. The returned
+		 * {@code ExchangeResult} is parameterized with data buffers since
+		 * the body is not yet consumed nor decoded at this level.
 		 */
 		ExchangeResult<Flux<DataBuffer>> returnResult();
 	}
 
 	/**
-	 * Specification for expectations on the body of the response.
+	 * Specification for extracting entities from the response body.
+	 */
+	interface TypeBodySpec {
+
+		/**
+		 * Extract a single value from the response.
+		 */
+		SingleValueBodySpec value();
+
+		/**
+		 * Extract a list of values from the response.
+		 */
+		ListBodySpec list();
+
+		/**
+		 * Extract a list of values consuming the first N elements.
+		 */
+		ListBodySpec list(int elementCount);
+
+		/**
+		 * Return a container for the result of the exchange parameterized with
+		 * the {@code Flux} of decoded objects (not yet consumed).
+		 */
+		<T> ExchangeResult<Flux<T>> returnResult();
+	}
+
+	/**
+	 * Specification to assert a single value extracted from the response body.
+	 */
+	interface SingleValueBodySpec {
+
+		/**
+		 * Assert the extracted body is equal to the given value.
+		 */
+		<T> ExchangeResult<T> isEqualTo(Object expected);
+
+		/**
+		 * Return a container for the result of the exchange parameterized with
+		 * the extracted response entity.
+		 */
+		<T> ExchangeResult<T> returnResult();
+	}
+
+	/**
+	 * Specification to assert a list of values extracted from the response.
+	 */
+	interface ListBodySpec {
+
+		/**
+		 * Assert the extracted body is equal to the given list.
+		 */
+		<T> ExchangeResult<List<T>> isEqualTo(List<T> expected);
+
+		/**
+		 * Assert the extracted list of values is of the given size.
+		 * @param size the expected size
+		 */
+		ListBodySpec hasSize(int size);
+
+		/**
+		 * Assert the extracted list of values contains the given elements.
+		 * @param elements the elements to check
+		 */
+		ListBodySpec contains(Object... elements);
+
+		/**
+		 * Assert the extracted list of values doesn't contain the given elements.
+		 * @param elements the elements to check
+		 */
+		ListBodySpec doesNotContain(Object... elements);
+
+		/**
+		 * Return a container for the result of the exchange parameterized with
+		 * the extracted list of response entities.
+		 */
+		<T> ExchangeResult<List<T>> returnResult();
+	}
+
+	/**
+	 * Specification to apply additional assertions on the response body.
 	 */
 	interface BodySpec {
 
@@ -502,48 +585,48 @@ public interface WebTestClient {
 		ExchangeResult<Void> isEmpty();
 
 		/**
-		 * Decode the response body as a Map with the given key and value type.
+		 * Extract the response body as a Map with the given key and value type.
 		 */
 		MapBodySpec map(Class<?> keyType, Class<?> valueType);
 
 		/**
-		 * Alternative to {@link #map(Class, Class)} for generic types.
+		 * Variant of {@link #map(Class, Class)} for use with generic types.
 		 */
 		MapBodySpec map(ResolvableType keyType, ResolvableType valueType);
 
 	}
 
 	/**
-	 * Specification for expectations on the body of the response decoded as a map.
+	 * Specification to assert response the body extracted as a map.
 	 */
 	interface MapBodySpec {
 
 		/**
-		 * Assert the decoded body is equal to the given list of elements.
+		 * Assert the extracted map is equal to the given list of elements.
 		 */
 		<K, V> ExchangeResult<Map<K, V>> isEqualTo(Map<K, V> expected);
 
 		/**
-		 * Assert the decoded map has the given size.
+		 * Assert the extracted map has the given size.
 		 * @param size the expected size
 		 */
 		MapBodySpec hasSize(int size);
 
 		/**
-		 * Assert the decoded map contains the given key value pair.
+		 * Assert the extracted map contains the given key value pair.
 		 * @param key the key to check
 		 * @param value the value to check
 		 */
 		MapBodySpec contains(Object key, Object value);
 
 		/**
-		 * Assert the decoded map contains the given keys.
+		 * Assert the extracted map contains the given keys.
 		 * @param keys the keys to check
 		 */
 		MapBodySpec containsKeys(Object... keys);
 
 		/**
-		 * Assert the decoded map contains the given values.
+		 * Assert the extracted map contains the given values.
 		 * @param values the keys to check
 		 */
 		MapBodySpec containsValues(Object... values);
@@ -552,87 +635,6 @@ public interface WebTestClient {
 		 * Return a container for the result of the exchange.
 		 */
 		<K, V> ExchangeResult<Map<K, V>> returnResult();
-	}
-
-	/**
-	 * Specification for expectations on the body of the response to be decoded
-	 * as one or more elements of a specific type.
-	 */
-	interface ElementBodySpec {
-
-		/**
-		 * Decode the response as a single element.
-		 */
-		SingleValueBodySpec value();
-
-		/**
-		 * Decode the response as a Flux of objects and collect it to a list.
-		 */
-		ListBodySpec list();
-
-		/**
-		 * Decode the response as a Flux of objects consuming only the specified
-		 * number of elements.
-		 */
-		ListBodySpec list(int elementCount);
-
-		/**
-		 * Decode the response as a Flux of objects and return a container for
-		 * the result where the response body not yet consumed.
-		 */
-		<T> ExchangeResult<Flux<T>> returnResult();
-	}
-
-	/**
-	 * Specification for expectations on the body of the response decoded as a
-	 * single element of a specific type.
-	 */
-	interface SingleValueBodySpec {
-
-		/**
-		 * Assert the decoded body is equal to the given value.
-		 */
-		<T> ExchangeResult<T> isEqualTo(Object expected);
-
-		/**
-		 * Return a container for the result of the exchange.
-		 */
-		<T> ExchangeResult<T> returnResult();
-	}
-
-	/**
-	 * Specification for expectations on the body of the response decoded as a
-	 * list of elements of a specific type.
-	 */
-	interface ListBodySpec {
-
-		/**
-		 * Assert the decoded body is equal to the given list of elements.
-		 */
-		<T> ExchangeResult<List<T>> isEqualTo(List<T> expected);
-
-		/**
-		 * Assert the decoded list of values is of the given size.
-		 * @param size the expected size
-		 */
-		ListBodySpec hasSize(int size);
-
-		/**
-		 * Assert the decoded list of values contains the given elements.
-		 * @param elements the elements to check
-		 */
-		ListBodySpec contains(Object... elements);
-
-		/**
-		 * Assert the decoded list of values does not contain the given elements.
-		 * @param elements the elements to check
-		 */
-		ListBodySpec doesNotContain(Object... elements);
-
-		/**
-		 * Return a container for the result of the exchange.
-		 */
-		<T> ExchangeResult<List<T>> returnResult();
 	}
 
 }

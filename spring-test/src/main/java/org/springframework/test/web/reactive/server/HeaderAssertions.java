@@ -29,33 +29,42 @@ import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
- * Provides methods for HTTP header assertions.
+ * Assertions on headers of the response.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
- * @see ResponseAssertions#header()
+ * @see WebTestClient.ResponseSpec#expectHeader()
  */
 public class HeaderAssertions {
 
-	private final HttpHeaders headers;
+	private final ExchangeResult<?> exchangeResult;
 
 	private final WebTestClient.ResponseSpec responseSpec;
 
 
-	public HeaderAssertions(HttpHeaders headers, WebTestClient.ResponseSpec responseSpec) {
-		this.headers = headers;
+	HeaderAssertions(ExchangeResult<?> exchangeResult, WebTestClient.ResponseSpec responseSpec) {
+		this.exchangeResult = exchangeResult;
 		this.responseSpec = responseSpec;
 	}
 
 
+	/**
+	 * Expect a header with the given name to match the specified values.
+	 */
 	public WebTestClient.ResponseSpec valueEquals(String headerName, String... values) {
-		List<String> actual = this.headers.get(headerName);
+		List<String> actual = getHeaders().get(headerName);
 		assertEquals("Response header [" + headerName + "]", Arrays.asList(values), actual);
 		return this.responseSpec;
 	}
 
+	/**
+	 * Expect a header with the given name whose first value matches the
+	 * provided regex pattern.
+	 * @param headerName the header name
+	 * @param pattern String pattern to pass to {@link Pattern#compile(String)}
+	 */
 	public WebTestClient.ResponseSpec valueMatches(String headerName, String pattern) {
-		List<String> values = this.headers.get(headerName);
+		List<String> values = getHeaders().get(headerName);
 		String value = CollectionUtils.isEmpty(values) ? "" : values.get(0);
 		boolean match = Pattern.compile(pattern).matcher(value).matches();
 		String message = "Response header " + headerName + "=\'" + value + "\' does not match " + pattern;
@@ -63,40 +72,65 @@ public class HeaderAssertions {
 		return this.responseSpec;
 	}
 
-	public WebTestClient.ResponseSpec cacheControlEquals(CacheControl cacheControl) {
-		String actual = this.headers.getCacheControl();
+	/**
+	 * Expect a "Cache-Control" header with the given value.
+	 */
+	public WebTestClient.ResponseSpec cacheControl(CacheControl cacheControl) {
+		String actual = getHeaders().getCacheControl();
 		assertEquals("Response header Cache-Control", cacheControl.getHeaderValue(), actual);
 		return this.responseSpec;
 	}
 
-	public WebTestClient.ResponseSpec contentDispositionEquals(ContentDisposition contentDisposition) {
-		ContentDisposition actual = this.headers.getContentDisposition();
+	/**
+	 * Expect a "Content-Disposition" header with the given value.
+	 */
+	public WebTestClient.ResponseSpec contentDisposition(ContentDisposition contentDisposition) {
+		ContentDisposition actual = getHeaders().getContentDisposition();
 		assertEquals("Response header Content-Disposition", contentDisposition, actual);
 		return this.responseSpec;
 	}
 
-	public WebTestClient.ResponseSpec contentLengthEquals(long contentLength) {
-		long actual = this.headers.getContentLength();
+	/**
+	 * Expect a "Content-Length" header with the given value.
+	 */
+	public WebTestClient.ResponseSpec contentLength(long contentLength) {
+		long actual = getHeaders().getContentLength();
 		assertEquals("Response header Content-Length", contentLength, actual);
 		return this.responseSpec;
 	}
 
-	public WebTestClient.ResponseSpec contentTypeEquals(MediaType mediaType) {
-		MediaType actual = this.headers.getContentType();
+	/**
+	 * Expect a "Content-Type" header with the given value.
+	 */
+	public WebTestClient.ResponseSpec contentType(MediaType mediaType) {
+		MediaType actual = getHeaders().getContentType();
 		assertEquals("Response header Content-Type", mediaType, actual);
 		return this.responseSpec;
 	}
 
-	public WebTestClient.ResponseSpec expiresEquals(int expires) {
-		long actual = this.headers.getExpires();
+	/**
+	 * Expect an "Expires" header with the given value.
+	 */
+	public WebTestClient.ResponseSpec expires(int expires) {
+		long actual = getHeaders().getExpires();
 		assertEquals("Response header Expires", expires, actual);
 		return this.responseSpec;
 	}
 
-	public WebTestClient.ResponseSpec lastModifiedEquals(int lastModified) {
-		long actual = this.headers.getLastModified();
+	/**
+	 * Expect a "Last-Modified" header with the given value.
+	 */
+	public WebTestClient.ResponseSpec lastModified(int lastModified) {
+		long actual = getHeaders().getLastModified();
 		assertEquals("Response header Last-Modified", lastModified, actual);
 		return this.responseSpec;
+	}
+
+
+	// Private methods
+
+	private HttpHeaders getHeaders() {
+		return this.exchangeResult.getResponseHeaders();
 	}
 
 }

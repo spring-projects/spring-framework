@@ -66,7 +66,7 @@ public class ResponseEntityTests {
 		this.client.get().uri("/persons/John")
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentTypeEquals(MediaType.APPLICATION_JSON_UTF8)
+				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
 				.expectBody(Person.class).value().isEqualTo(new Person("John"));
 	}
 
@@ -79,7 +79,7 @@ public class ResponseEntityTests {
 		this.client.get().uri("/persons")
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentTypeEquals(MediaType.APPLICATION_JSON_UTF8)
+				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
 				.expectBody(Person.class).list().isEqualTo(expected);
 	}
 
@@ -106,7 +106,7 @@ public class ResponseEntityTests {
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentTypeEquals(TEXT_EVENT_STREAM)
+				.expectHeader().contentType(TEXT_EVENT_STREAM)
 				.expectBody(Person.class)
 				.returnResult();
 

@@ -17,7 +17,6 @@
 package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -35,35 +34,32 @@ import org.springframework.web.reactive.function.client.ExchangeFunctions;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
 
 /**
- * Unit tests for {@link WiretapConnector}.
+ * Unit tests for {@link WebTestClientConnector}.
  *
  * @author Rossen Stoyanchev
  */
-public class WiretapConnectorTests {
+public class WebTestClientConnectorTests {
 
 	@Test
-	public void listener() throws Exception {
+	public void captureAndClaim() throws Exception {
 
 		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, "/test");
 		ClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
 		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request).then(Mono.just(response));
 
-		AtomicReference<WiretapConnector.Info> infoRef = new AtomicReference<>();
-		WiretapConnector wiretapConnector = new WiretapConnector(connector);
-		wiretapConnector.addListener(infoRef::set);
+		ClientRequest clientRequest = ClientRequest.method(HttpMethod.GET, URI.create("/test"))
+				.header(WebTestClientConnector.REQUEST_ID_HEADER_NAME, "1").build();
 
-		ExchangeFunction exchangeFn = ExchangeFunctions.create(wiretapConnector);
-		ClientRequest clientRequest = ClientRequest.method(HttpMethod.GET, URI.create("/test")).build();
-		exchangeFn.exchange(clientRequest).blockMillis(0);
+		WebTestClientConnector webTestClientConnector = new WebTestClientConnector(connector);
+		ExchangeFunction function = ExchangeFunctions.create(webTestClientConnector);
+		function.exchange(clientRequest).blockMillis(0);
 
-		WiretapConnector.Info info = infoRef.get();
-		assertNotNull(info);
-		assertEquals(HttpMethod.GET, info.getMethod());
-		assertEquals("/test", info.getUrl().toString());
-		assertSame(response, info.getResponse());
+		ClientHttpRequest actual = webTestClientConnector.claimRequest("1");
+		assertNotNull(actual);
+		assertEquals(HttpMethod.GET, actual.getMethod());
+		assertEquals("/test", actual.getURI().toString());
 	}
 
 }

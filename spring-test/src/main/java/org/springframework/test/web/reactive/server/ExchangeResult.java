@@ -24,6 +24,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 
 import static org.springframework.web.reactive.function.BodyExtractors.toDataBuffers;
@@ -111,19 +112,16 @@ public class ExchangeResult<T> {
 
 
 	/**
-	 * Create an instance from a ClientResponse (body not yet consumed).
+	 * Create from ClientHttpRequest and ClientResponse (body not yet consumed).
 	 */
-	static ExchangeResult<Flux<DataBuffer>> fromResponse(HttpMethod method, URI url,
-			HttpHeaders requestHeaders, ClientResponse response) {
-
-		HttpStatus status = response.statusCode();
-		HttpHeaders responseHeaders = response.headers().asHttpHeaders();
-		Flux<DataBuffer> body = response.body(toDataBuffers());
-		return new ExchangeResult<>(method, url, requestHeaders, status, responseHeaders, body);
+	static ExchangeResult<Flux<DataBuffer>> create(ClientHttpRequest request, ClientResponse response) {
+		return new ExchangeResult<>(request.getMethod(), request.getURI(), request.getHeaders(),
+				response.statusCode(), response.headers().asHttpHeaders(),
+				response.body(toDataBuffers()));
 	}
 
 	/**
-	 * Re-create the result with a generic type matching the decoded body.
+	 * Re-create with decoded body (possibly still not consumed).
 	 */
 	static <T> ExchangeResult<T> withDecodedBody(ExchangeResult<?> result, T body) {
 		return new ExchangeResult<>(result.getMethod(), result.getUrl(), result.getRequestHeaders(),
