@@ -25,11 +25,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -464,7 +462,7 @@ public interface WebTestClient {
 
 		/**
 		 * Assertions on the body of the response extracted to one or more
-		 * elements of the given type.
+		 * representations of the given type.
 		 */
 		TypeBodySpec expectBody(Class<?> elementType);
 
@@ -474,24 +472,23 @@ public interface WebTestClient {
 		TypeBodySpec expectBody(ResolvableType elementType);
 
 		/**
-		 * Access to additional assertions on the response body --
-		 * isEmpty, map, and others.
+		 * Other assertions on the response body -- isEmpty, map, etc.
 		 */
 		BodySpec expectBody();
 
 		/**
-		 * Consume the {@link ExchangeResult} and continue with expectations.
-		 * The {@code ExchangeResult} is parameterized with data buffers since
-		 * the body is not yet consumed nor decoded at this level.
+		 * Consume request and response details of the exchange. Only status
+		 * response headers are available at this stage before one of the
+		 * {@code expectBody} methods is used.
 		 */
-		ResponseSpec consumeWith(Consumer<ExchangeResult<Flux<DataBuffer>>> consumer);
+		ResponseSpec consumeWith(Consumer<ExchangeResult> consumer);
 
 		/**
-		 * Return a container for the result of the exchange. The returned
-		 * {@code ExchangeResult} is parameterized with data buffers since
-		 * the body is not yet consumed nor decoded at this level.
+		 * Return the request and response details of the exchange. Only status
+		 * and response headers are available at this stage before one of the
+		 * {@code expectBody} methods is used.
 		 */
-		ExchangeResult<Flux<DataBuffer>> returnResult();
+		ExchangeResult returnResult();
 	}
 
 	/**
@@ -500,25 +497,26 @@ public interface WebTestClient {
 	interface TypeBodySpec {
 
 		/**
-		 * Extract a single value from the response.
+		 * Extract a single representations from the response.
 		 */
 		SingleValueBodySpec value();
 
 		/**
-		 * Extract a list of values from the response.
+		 * Extract a list of representations from the response.
 		 */
 		ListBodySpec list();
 
 		/**
-		 * Extract a list of values consuming the first N elements.
+		 * Extract a list of representations consuming the first N elements.
 		 */
 		ListBodySpec list(int elementCount);
 
 		/**
-		 * Return a container for the result of the exchange parameterized with
-		 * the {@code Flux} of decoded objects (not yet consumed).
+		 * Return request and response details from the exchange including the
+		 * response body as a {@code Flux<T>} and available for example for use
+		 * with a {@code StepVerifier} from Project Reactor.
 		 */
-		<T> ExchangeResult<Flux<T>> returnResult();
+		<T> FluxExchangeResult<T> returnResult();
 	}
 
 	/**
@@ -529,13 +527,13 @@ public interface WebTestClient {
 		/**
 		 * Assert the extracted body is equal to the given value.
 		 */
-		<T> ExchangeResult<T> isEqualTo(Object expected);
+		<T> EntityExchangeResult<T> isEqualTo(T expected);
 
 		/**
-		 * Return a container for the result of the exchange parameterized with
-		 * the extracted response entity.
+		 * Return request and response details from the exchange including the
+		 * extracted response body.
 		 */
-		<T> ExchangeResult<T> returnResult();
+		<T> EntityExchangeResult<T> returnResult();
 	}
 
 	/**
@@ -546,7 +544,7 @@ public interface WebTestClient {
 		/**
 		 * Assert the extracted body is equal to the given list.
 		 */
-		<T> ExchangeResult<List<T>> isEqualTo(List<T> expected);
+		<T> EntityExchangeResult<List<T>> isEqualTo(List<T> expected);
 
 		/**
 		 * Assert the extracted list of values is of the given size.
@@ -567,10 +565,10 @@ public interface WebTestClient {
 		ListBodySpec doesNotContain(Object... elements);
 
 		/**
-		 * Return a container for the result of the exchange parameterized with
-		 * the extracted list of response entities.
+		 * Return request and response details from the exchange including the
+		 * extracted response body.
 		 */
-		<T> ExchangeResult<List<T>> returnResult();
+		<T> EntityExchangeResult<List<T>> returnResult();
 	}
 
 	/**
@@ -580,9 +578,9 @@ public interface WebTestClient {
 
 		/**
 		 * Consume the body and verify it is empty.
-		 * @return container for the result of the exchange
+		 * @return request and response details from the exchange
 		 */
-		ExchangeResult<Void> isEmpty();
+		EntityExchangeResult<Void> isEmpty();
 
 		/**
 		 * Extract the response body as a Map with the given key and value type.
@@ -604,7 +602,7 @@ public interface WebTestClient {
 		/**
 		 * Assert the extracted map is equal to the given list of elements.
 		 */
-		<K, V> ExchangeResult<Map<K, V>> isEqualTo(Map<K, V> expected);
+		<K, V> EntityExchangeResult<Map<K, V>> isEqualTo(Map<K, V> expected);
 
 		/**
 		 * Assert the extracted map has the given size.
@@ -632,9 +630,10 @@ public interface WebTestClient {
 		MapBodySpec containsValues(Object... values);
 
 		/**
-		 * Return a container for the result of the exchange.
+		 * Return request and response details from the exchange including the
+		 * extracted response body.
 		 */
-		<K, V> ExchangeResult<Map<K, V>> returnResult();
+		<K, V> EntityExchangeResult<Map<K, V>> returnResult();
 	}
 
 }

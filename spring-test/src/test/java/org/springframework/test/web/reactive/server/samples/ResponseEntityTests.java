@@ -31,7 +31,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.web.reactive.server.ExchangeResult;
+import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -101,7 +101,7 @@ public class ResponseEntityTests {
 	@Test
 	public void entityStream() throws Exception {
 
-		ExchangeResult<Flux<Person>> result = this.client.get()
+		FluxExchangeResult<Person> result = this.client.get()
 				.uri("/persons")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()

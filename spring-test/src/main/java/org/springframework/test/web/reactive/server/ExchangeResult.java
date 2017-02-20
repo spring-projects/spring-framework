@@ -18,27 +18,27 @@ package org.springframework.test.web.reactive.server;
 import java.net.URI;
 import java.util.stream.Collectors;
 
-import reactor.core.publisher.Flux;
-
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 
-import static org.springframework.web.reactive.function.BodyExtractors.toDataBuffers;
-
 /**
- * Container for request and response details from an exchange performed
- * through {@link WebTestClient}.
+ * Container for the result of an exchange through the {@link WebTestClient}.
  *
- * @param <T> the type of the response body
+ * <p>This type only exposes the status and response headers that are available
+ * when the {@link ClientResponse} is first received and before the response
+ * body has been consumed.
+ *
+ * <p>The sub-classes {@link EntityExchangeResult} and {@link FluxExchangeResult}
+ * expose further information about the response body and are returned only
+ * after the test client has been used to decode and consume the response.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ExchangeResult<T> {
+public class ExchangeResult {
 
 	private final HttpMethod method;
 
@@ -50,82 +50,57 @@ public class ExchangeResult<T> {
 
 	private final HttpHeaders responseHeaders;
 
-	private final T responseBody;
 
+	ExchangeResult(ClientHttpRequest request, ClientResponse response) {
+		this.method = request.getMethod();
+		this.url = request.getURI();
+		this.requestHeaders = request.getHeaders();
+		this.status = response.statusCode();
+		this.responseHeaders = response.headers().asHttpHeaders();
+	}
 
-	/**
-	 * Package private constructor.
-	 */
-	ExchangeResult(HttpMethod method, URI url, HttpHeaders requestHeaders, HttpStatus status,
-			HttpHeaders responseHeaders, T responseBody) {
-
-		this.method = method;
-		this.url = url;
-		this.requestHeaders = requestHeaders;
-		this.status = status;
-		this.responseHeaders = responseHeaders;
-		this.responseBody = responseBody;
+	ExchangeResult(ExchangeResult exchange) {
+		this.method = exchange.getMethod();
+		this.url = exchange.getUrl();
+		this.requestHeaders = exchange.getRequestHeaders();
+		this.status = exchange.getStatus();
+		this.responseHeaders = exchange.getResponseHeaders();
 	}
 
 
 	/**
-	 * Return the request method of the exchange.
+	 * Return the method of the request.
 	 */
 	public HttpMethod getMethod() {
 		return this.method;
 	}
 
 	/**
-	 * Return the URL of the exchange.
+	 * Return the request headers that were sent to the server.
 	 */
 	public URI getUrl() {
 		return this.url;
 	}
 
 	/**
-	 * Return the request headers of the exchange.
+	 * Return the request headers sent to the server.
 	 */
 	public HttpHeaders getRequestHeaders() {
 		return this.requestHeaders;
 	}
 
 	/**
-	 * Return the response status.
+	 * Return the status of the executed request.
 	 */
 	public HttpStatus getStatus() {
 		return this.status;
 	}
 
 	/**
-	 * Return the response headers.
+	 * Return the response headers received from the server.
 	 */
 	public HttpHeaders getResponseHeaders() {
 		return this.responseHeaders;
-	}
-
-	/**
-	 * Return the decoded response body.
-	 */
-	public T getResponseBody() {
-		return this.responseBody;
-	}
-
-
-	/**
-	 * Create from ClientHttpRequest and ClientResponse (body not yet consumed).
-	 */
-	static ExchangeResult<Flux<DataBuffer>> create(ClientHttpRequest request, ClientResponse response) {
-		return new ExchangeResult<>(request.getMethod(), request.getURI(), request.getHeaders(),
-				response.statusCode(), response.headers().asHttpHeaders(),
-				response.body(toDataBuffers()));
-	}
-
-	/**
-	 * Re-create with decoded body (possibly still not consumed).
-	 */
-	static <T> ExchangeResult<T> withDecodedBody(ExchangeResult<?> result, T body) {
-		return new ExchangeResult<>(result.getMethod(), result.getUrl(), result.getRequestHeaders(),
-				result.getStatus(), result.getResponseHeaders(), body);
 	}
 
 
@@ -135,10 +110,10 @@ public class ExchangeResult<T> {
 		return "\n\n" +
 				formatValue("Request", this.method + " " + getUrl()) +
 				formatValue("Status", status + " " + status.getReasonPhrase()) +
-				formatHeading("Response Headers") +
-				formatHeaders(this.responseHeaders) +
-				formatHeading("Request Headers") +
-				formatHeaders(this.requestHeaders);
+				formatHeading("Response Headers") + formatHeaders(this.responseHeaders) +
+				formatHeading("Request Headers") + formatHeaders(this.requestHeaders) +
+				"\n" +
+				formatValue("Response Body", formatResponseBody());
 	}
 
 	private String formatHeading(String heading) {
@@ -153,6 +128,10 @@ public class ExchangeResult<T> {
 		return headers.entrySet().stream()
 				.map(entry -> formatValue(entry.getKey(), entry.getValue()))
 				.collect(Collectors.joining());
+	}
+
+	protected String formatResponseBody() {
+		return "Not read yet";
 	}
 
 }

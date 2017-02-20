@@ -37,14 +37,14 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
  */
 public class HeaderAssertions {
 
-	private final ExchangeResult<?> exchangeResult;
+	private final ExchangeResult exchangeResult;
 
 	private final WebTestClient.ResponseSpec responseSpec;
 
 
-	HeaderAssertions(ExchangeResult<?> exchangeResult, WebTestClient.ResponseSpec responseSpec) {
-		this.exchangeResult = exchangeResult;
-		this.responseSpec = responseSpec;
+	HeaderAssertions(ExchangeResult result, WebTestClient.ResponseSpec spec) {
+		this.exchangeResult = result;
+		this.responseSpec = spec;
 	}
 
 
