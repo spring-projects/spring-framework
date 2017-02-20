@@ -36,7 +36,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /**
- * Unit tests for {@link WebTestClientConnector}.
+ * Unit tests for {@link WiretapConnector}.
  *
  * @author Rossen Stoyanchev
  */
@@ -50,16 +50,16 @@ public class WebTestClientConnectorTests {
 		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request).then(Mono.just(response));
 
 		ClientRequest clientRequest = ClientRequest.method(HttpMethod.GET, URI.create("/test"))
-				.header(WebTestClientConnector.REQUEST_ID_HEADER_NAME, "1").build();
+				.header(WiretapConnector.REQUEST_ID_HEADER_NAME, "1").build();
 
-		WebTestClientConnector webTestClientConnector = new WebTestClientConnector(connector);
-		ExchangeFunction function = ExchangeFunctions.create(webTestClientConnector);
+		WiretapConnector wiretapConnector = new WiretapConnector(connector);
+		ExchangeFunction function = ExchangeFunctions.create(wiretapConnector);
 		function.exchange(clientRequest).blockMillis(0);
 
-		ClientHttpRequest actual = webTestClientConnector.claimRequest("1");
+		ExchangeResult actual = wiretapConnector.claimRequest("1");
 		assertNotNull(actual);
 		assertEquals(HttpMethod.GET, actual.getMethod());
-		assertEquals("/test", actual.getURI().toString());
+		assertEquals("/test", actual.getUrl().toString());
 	}
 
 }

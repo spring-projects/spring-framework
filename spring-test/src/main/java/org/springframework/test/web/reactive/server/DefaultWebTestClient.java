@@ -61,7 +61,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 	private final WebClient webClient;
 
-	private final WebTestClientConnector webTestClientConnector;
+	private final WiretapConnector wiretapConnector;
 
 	private final Duration timeout;
 
@@ -71,15 +71,15 @@ class DefaultWebTestClient implements WebTestClient {
 	DefaultWebTestClient(WebClient.Builder webClientBuilder, ClientHttpConnector connector, Duration timeout) {
 		Assert.notNull(webClientBuilder, "WebClient.Builder is required");
 
-		this.webTestClientConnector = new WebTestClientConnector(connector);
-		this.webClient = webClientBuilder.clientConnector(this.webTestClientConnector).build();
+		this.wiretapConnector = new WiretapConnector(connector);
+		this.webClient = webClientBuilder.clientConnector(this.wiretapConnector).build();
 		this.timeout = (timeout != null ? timeout : Duration.ofSeconds(5));
 	}
 
 	private DefaultWebTestClient(DefaultWebTestClient webTestClient, ExchangeFilterFunction filter) {
 		this.webClient = webTestClient.webClient.filter(filter);
 		this.timeout = webTestClient.timeout;
-		this.webTestClientConnector = webTestClient.webTestClientConnector;
+		this.wiretapConnector = webTestClient.wiretapConnector;
 	}
 
 
@@ -174,7 +174,7 @@ class DefaultWebTestClient implements WebTestClient {
 		DefaultHeaderSpec(WebClient.HeaderSpec spec) {
 			this.headerSpec = spec;
 			this.requestId = String.valueOf(requestIndex.incrementAndGet());
-			this.headerSpec.header(WebTestClientConnector.REQUEST_ID_HEADER_NAME, this.requestId);
+			this.headerSpec.header(WiretapConnector.REQUEST_ID_HEADER_NAME, this.requestId);
 		}
 
 
@@ -254,9 +254,9 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		private DefaultResponseSpec toResponseSpec(Mono<ClientResponse> mono) {
-			ClientResponse response = mono.block(getTimeout());
-			ClientHttpRequest httpRequest = webTestClientConnector.claimRequest(this.requestId);
-			return new DefaultResponseSpec(httpRequest, response);
+			ClientResponse clientResponse = mono.block(getTimeout());
+			ExchangeResult exchangeResult = wiretapConnector.claimRequest(this.requestId);
+			return new DefaultResponseSpec(exchangeResult, clientResponse);
 		}
 	}
 
@@ -268,8 +268,8 @@ class DefaultWebTestClient implements WebTestClient {
 		private final ClientResponse response;
 
 
-		public UndecodedExchangeResult(ClientHttpRequest httpRequest, ClientResponse response) {
-			super(httpRequest, response);
+		public UndecodedExchangeResult(ExchangeResult result, ClientResponse response) {
+			super(result);
 			this.response = response;
 		}
 
@@ -290,7 +290,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 		public <T> FluxExchangeResult<T> decodeBody(ResolvableType elementType) {
 			Flux<T> body = this.response.body(toFlux(elementType));
-			return new FluxExchangeResult<>(this, body, elementType);
+			return new FluxExchangeResult<>(this, body);
 		}
 
 		@SuppressWarnings("unchecked")
@@ -313,8 +313,8 @@ class DefaultWebTestClient implements WebTestClient {
 		private final UndecodedExchangeResult result;
 
 
-		public DefaultResponseSpec(ClientHttpRequest httpRequest, ClientResponse response) {
-			this.result = new UndecodedExchangeResult(httpRequest, response);
+		public DefaultResponseSpec(ExchangeResult result, ClientResponse response) {
+			this.result = new UndecodedExchangeResult(result, response);
 		}
 
 		@Override

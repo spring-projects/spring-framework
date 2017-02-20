@@ -43,9 +43,4 @@ public class EntityExchangeResult<T> extends ExchangeResult {
 		return this.body;
 	}
 
-	@Override
-	protected String formatResponseBody() {
-		return this.body.toString();
-	}
-
 }

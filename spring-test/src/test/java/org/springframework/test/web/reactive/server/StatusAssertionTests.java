@@ -23,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.client.reactive.MockClientHttpRequest;
+import org.springframework.mock.http.client.reactive.MockClientHttpResponse;
 import org.springframework.web.reactive.function.client.ClientResponse;
 
 import static org.junit.Assert.fail;
@@ -162,17 +163,14 @@ public class StatusAssertionTests {
 
 	private StatusAssertions statusAssertions(HttpStatus status) {
 
-		ClientResponse.Headers headers = mock(ClientResponse.Headers.class);
-		when(headers.asHttpHeaders()).thenReturn(new HttpHeaders());
-
-		ClientResponse response = mock(ClientResponse.class);
-		when(response.statusCode()).thenReturn(status);
-		when(response.headers()).thenReturn(headers);
-
 		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("/"));
-		ExchangeResult result = new ExchangeResult(request, response);
+		MockClientHttpResponse response = new MockClientHttpResponse(status);
 
-		return new StatusAssertions(result, mock(WebTestClient.ResponseSpec.class));
+		WiretapClientHttpRequest wiretapRequest = new WiretapClientHttpRequest(request);
+		WiretapClientHttpResponse wiretapResponse = new WiretapClientHttpResponse(response);
+
+		ExchangeResult exchangeResult = new ExchangeResult(wiretapRequest, wiretapResponse);
+		return new StatusAssertions(exchangeResult, mock(WebTestClient.ResponseSpec.class));
 	}
 
 }

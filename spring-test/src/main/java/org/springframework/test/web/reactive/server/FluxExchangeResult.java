@@ -17,8 +17,6 @@ package org.springframework.test.web.reactive.server;
 
 import reactor.core.publisher.Flux;
 
-import org.springframework.core.ResolvableType;
-
 /**
  * {@code ExchangeResult} variant with the response body as a {@code Flux<T>}.
  *
@@ -32,13 +30,10 @@ public class FluxExchangeResult<T> extends ExchangeResult {
 
 	private final Flux<T> body;
 
-	private final ResolvableType elementType;
 
-
-	FluxExchangeResult(ExchangeResult result, Flux<T> body, ResolvableType elementType) {
+	FluxExchangeResult(ExchangeResult result, Flux<T> body) {
 		super(result);
 		this.body = body;
-		this.elementType = elementType;
 	}
 
 
@@ -47,11 +42,6 @@ public class FluxExchangeResult<T> extends ExchangeResult {
 	 */
 	public Flux<T> getResponseBody() {
 		return this.body;
-	}
-
-	@Override
-	protected String formatResponseBody() {
-		return "Flux<" + this.elementType.toString() + ">";
 	}
 
 }

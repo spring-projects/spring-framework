@@ -31,24 +31,24 @@ import org.springframework.util.Assert;
 
 /**
  * Decorate any other {@link ClientHttpConnector} with the purpose of
- * intercepting, capturing, and exposing {@code ClientHttpRequest}s reflecting
- * the exact and complete details sent to the server.
+ * intercepting, capturing, and exposing actual request and response content
+ * transmitted to and received from the server.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  * @see HttpHandlerConnector
  */
-class WebTestClientConnector implements ClientHttpConnector {
+class WiretapConnector implements ClientHttpConnector {
 
 	public static final String REQUEST_ID_HEADER_NAME = "request-id";
 
 
 	private final ClientHttpConnector delegate;
 
-	private final Map<String, ClientHttpRequest> capturedRequests = new ConcurrentHashMap<>();
+	private final Map<String, ExchangeResult> capturedExchanges = new ConcurrentHashMap<>();
 
 
-	public WebTestClientConnector(ClientHttpConnector delegate) {
+	public WiretapConnector(ClientHttpConnector delegate) {
 		this.delegate = delegate;
 	}
 
@@ -57,29 +57,32 @@ class WebTestClientConnector implements ClientHttpConnector {
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
 			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
-		AtomicReference<ClientHttpRequest> requestRef = new AtomicReference<>();
+		AtomicReference<WiretapClientHttpRequest> requestRef = new AtomicReference<>();
 
 		return this.delegate
 				.connect(method, uri, request -> {
-					requestRef.set(request);
-					return requestCallback.apply(request);
+					WiretapClientHttpRequest wrapped = new WiretapClientHttpRequest(request);
+					requestRef.set(wrapped);
+					return requestCallback.apply(wrapped);
 				})
-				.doOnNext(response ->  {
-					ClientHttpRequest request = requestRef.get();
-					String id = request.getHeaders().getFirst(REQUEST_ID_HEADER_NAME);
-					if (id != null) {
-						this.capturedRequests.put(id, request);
-					}
+				.map(response ->  {
+					WiretapClientHttpRequest request = requestRef.get();
+					String requestId = request.getHeaders().getFirst(REQUEST_ID_HEADER_NAME);
+					Assert.notNull(requestId, "No request-id header");
+					WiretapClientHttpResponse wrapped = new WiretapClientHttpResponse(response);
+					ExchangeResult result = new ExchangeResult(request, wrapped);
+					this.capturedExchanges.put(requestId, result);
+					return wrapped;
 				});
 	}
 
 	/**
 	 * Retrieve the request with the given "request-id" header.
 	 */
-	public ClientHttpRequest claimRequest(String requestId) {
-		ClientHttpRequest request = this.capturedRequests.get(requestId);
-		Assert.notNull(request, "No matching request [" + requestId + "]. Did connect return a response yet?");
-		return request;
+	public ExchangeResult claimRequest(String requestId) {
+		ExchangeResult result = this.capturedExchanges.get(requestId);
+		Assert.notNull(result, "No match for request with id [" + requestId + "]");
+		return result;
 	}
 
 }

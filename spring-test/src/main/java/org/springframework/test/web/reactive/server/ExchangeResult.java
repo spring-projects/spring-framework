@@ -16,71 +16,66 @@
 package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
-import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.client.ClientResponse;
 
 /**
  * Simple container for request and response details from an exchange performed
  * through the {@link WebTestClient}.
  *
- * <p>An {@code ExchangeResult} only exposes the status and the headers from
- * the response which is all that's available when a {@link ClientResponse} is
- * first created.
+ * <p>When an {@code ExchangeResult} is first created it has only the status and
+ * headers of the response available. When the response body is extracted, the
+ * {@code ExchangeResult} is re-created as either {@link EntityExchangeResult}
+ * or {@link FluxExchangeResult} that further expose extracted entities.
  *
- * <p>Sub-types {@link EntityExchangeResult} and {@link FluxExchangeResult}
- * further expose the response body either as a fully extracted representation
- * or as a {@code Flux} of representations to be consumed.
+ * <p>Raw request and response content may also be accessed once complete via
+ * {@link #getRequestContent()} or {@link #getResponseContent()}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ *
  * @see EntityExchangeResult
  * @see FluxExchangeResult
  */
 public class ExchangeResult {
 
-	private final HttpMethod method;
+	private static final List<MediaType> PRINTABLE_MEDIA_TYPES = Arrays.asList(
+			MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.parseMediaType("text/*"),
+			MediaType.APPLICATION_FORM_URLENCODED);
 
-	private final URI url;
 
-	private final HttpHeaders requestHeaders;
+	private final WiretapClientHttpRequest request;
 
-	private final HttpStatus status;
-
-	private final HttpHeaders responseHeaders;
-
-	private final MultiValueMap<String, ResponseCookie> responseCookies;
+	private final WiretapClientHttpResponse response;
 
 
 	/**
-	 * Constructor used when a {@code ClientResponse} is first created.
+	 * Constructor used when the {@code ClientHttpResponse} becomes available.
 	 */
-	protected ExchangeResult(ClientHttpRequest request, ClientResponse response) {
-		this.method = request.getMethod();
-		this.url = request.getURI();
-		this.requestHeaders = request.getHeaders();
-		this.status = response.statusCode();
-		this.responseHeaders = response.headers().asHttpHeaders();
-		this.responseCookies = response.cookies();
+	protected ExchangeResult(WiretapClientHttpRequest request, WiretapClientHttpResponse response) {
+		this.request = request;
+		this.response = response;
 	}
 
 	/**
 	 * Copy constructor used when the body is decoded or consumed.
 	 */
 	protected ExchangeResult(ExchangeResult other) {
-		this.method = other.getMethod();
-		this.url = other.getUrl();
-		this.requestHeaders = other.getRequestHeaders();
-		this.status = other.getStatus();
-		this.responseHeaders = other.getResponseHeaders();
-		this.responseCookies = other.getResponseCookies();
+		this.request = other.request;
+		this.response = other.response;
 	}
 
 
@@ -88,42 +83,56 @@ public class ExchangeResult {
 	 * Return the method of the request.
 	 */
 	public HttpMethod getMethod() {
-		return this.method;
+		return this.request.getMethod();
 	}
 
 	/**
 	 * Return the request headers that were sent to the server.
 	 */
 	public URI getUrl() {
-		return this.url;
+		return this.request.getURI();
 	}
 
 	/**
 	 * Return the request headers sent to the server.
 	 */
 	public HttpHeaders getRequestHeaders() {
-		return this.requestHeaders;
+		return this.request.getHeaders();
+	}
+
+	/**
+	 * Return a "promise" for the raw request body content once completed.
+	 */
+	public MonoProcessor<byte[]> getRequestContent() {
+		return this.request.getBodyContent();
 	}
 
 	/**
 	 * Return the status of the executed request.
 	 */
 	public HttpStatus getStatus() {
-		return this.status;
+		return this.response.getStatusCode();
 	}
 
 	/**
 	 * Return the response headers received from the server.
 	 */
 	public HttpHeaders getResponseHeaders() {
-		return this.responseHeaders;
+		return this.response.getHeaders();
 	}
 
 	/**
 	 * Return response cookies received from the server.
 	 */
 	public MultiValueMap<String, ResponseCookie> getResponseCookies() {
-		return this.responseCookies;
+		return this.getResponseCookies();
+	}
+
+	/**
+	 * Return a "promise" for the raw response body content once completed.
+	 */
+	public MonoProcessor<byte[]> getResponseContent() {
+		return this.response.getBodyContent();
 	}
 
 
@@ -156,39 +165,60 @@ public class ExchangeResult {
 
 	@Override
 	public String toString() {
-		return "\n\n" +
-				formatValue("Request", this.method + " " + getUrl()) +
-				formatValue("Status", this.status + " " + getStatusReason()) +
-				formatHeading("Response Headers") + formatHeaders(this.responseHeaders) +
-				formatHeading("Request Headers") + formatHeaders(this.requestHeaders) +
+		return "\n" +
+				"> " + getMethod() + " " + getUrl() + "\n" +
+				"> " + formatHeaders(getRequestHeaders()) + "\n" +
 				"\n" +
-				formatValue("Response Body", formatResponseBody());
+				formatContent(getRequestHeaders().getContentType(), getRequestContent()) + "\n" +
+				"\n" +
+				"> " + getStatus() + " " + getStatusReason() + "\n" +
+				"> " + formatHeaders(getResponseHeaders()) + "\n" +
+				"\n" +
+				formatContent(getResponseHeaders().getContentType(), getResponseContent()) + "\n\n";
 	}
 
 	private String getStatusReason() {
 		String reason = "";
-		if (this.status != null && this.status.getReasonPhrase() != null) {
-			reason = this.status.getReasonPhrase();
+		if (getStatus() != null && getStatus().getReasonPhrase() != null) {
+			reason = getStatus().getReasonPhrase();
 		}
 		return reason;
 	}
 
-	private String formatHeading(String heading) {
-		return "\n" + String.format("%s", heading) + "\n";
-	}
-
-	private String formatValue(String label, Object value) {
-		return String.format("%18s: %s", label, value) + "\n";
-	}
-
 	private String formatHeaders(HttpHeaders headers) {
 		return headers.entrySet().stream()
-				.map(entry -> formatValue(entry.getKey(), entry.getValue()))
-				.collect(Collectors.joining());
+				.map(entry -> entry.getKey() + ": " + entry.getValue())
+				.collect(Collectors.joining("\n> "));
 	}
 
-	protected String formatResponseBody() {
-		return "Not read yet";
+	private String formatContent(MediaType contentType, MonoProcessor<byte[]> body) {
+		if (body.isSuccess()) {
+			byte[] bytes = body.blockMillis(0);
+			if (bytes.length == 0) {
+				return "No content";
+			}
+
+			if (contentType == null) {
+				return "Unknown content type (" + bytes.length + " bytes)";
+			}
+
+			Charset charset = contentType.getCharset();
+			if (charset != null) {
+				return new String(bytes, charset);
+			}
+
+			if (PRINTABLE_MEDIA_TYPES.stream().anyMatch(contentType::isCompatibleWith)) {
+				return new String(bytes, StandardCharsets.UTF_8);
+			}
+
+			return "Unknown charset (" + bytes.length + " bytes)";
+		}
+		else if (body.isError()) {
+			return "I/O failure: " + body.getError().getMessage();
+		}
+		else {
+			return "Content not available yet";
+		}
 	}
 
 }
