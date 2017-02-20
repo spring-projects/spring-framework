@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,7 @@ import org.springframework.web.reactive.config.WebFluxConfigurationSupport;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.springframework.http.RequestEntity.get;
-
+import static org.junit.Assert.*;
 
 /**
  * {@code @RequestMapping} integration tests with view resolution scenarios.
@@ -50,7 +47,6 @@ import static org.springframework.http.RequestEntity.get;
  * @author Rossen Stoyanchev
  */
 public class RequestMappingViewResolutionIntegrationTests extends AbstractRequestMappingIntegrationTests {
-
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
@@ -70,7 +66,7 @@ public class RequestMappingViewResolutionIntegrationTests extends AbstractReques
 	@Test
 	public void etagCheckWithNotModifiedResponse() throws Exception {
 		URI uri = new URI("http://localhost:" + this.port + "/html");
-		RequestEntity<Void> request = get(uri).ifNoneMatch("\"deadb33f8badf00d\"").build();
+		RequestEntity<Void> request = RequestEntity.get(uri).ifNoneMatch("\"deadb33f8badf00d\"").build();
 		ResponseEntity<String> response = getRestTemplate().exchange(request, String.class);
 
 		assertEquals(HttpStatus.NOT_MODIFIED, response.getStatusCode());
@@ -95,8 +91,8 @@ public class RequestMappingViewResolutionIntegrationTests extends AbstractReques
 			configurer.setTemplateLoaderPath("classpath*:org/springframework/web/reactive/view/freemarker/");
 			return configurer;
 		}
-
 	}
+
 
 	@Controller
 	@SuppressWarnings("unused")
@@ -112,7 +108,6 @@ public class RequestMappingViewResolutionIntegrationTests extends AbstractReques
 			model.addAttribute("hello", "Hello: " + name.orElse("<no name>") + "!");
 			return "test";
 		}
-
 	}
 
 }

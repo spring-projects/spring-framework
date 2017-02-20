@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.*;
 
 /**
  * Integration tests with {@code @RequestMapping} handler methods.
@@ -53,6 +51,7 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 		wac.refresh();
 		return wac;
 	}
+
 
 	@Test
 	public void handleWithParam() throws Exception {
@@ -86,6 +85,7 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 	static class WebConfig {
 	}
 
+
 	@RestController
 	@SuppressWarnings("unused")
 	private static class TestRestController {
@@ -104,8 +104,8 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 		public Publisher<Foo> objectStreamResponseBody() {
 			return Flux.just(new Foo("bar"));
 		}
-
 	}
+
 
 	private static class Foo {
 

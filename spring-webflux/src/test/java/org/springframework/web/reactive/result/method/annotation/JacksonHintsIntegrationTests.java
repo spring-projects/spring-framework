@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -36,6 +35,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Sebastien Deleuze
  */
@@ -48,6 +49,7 @@ public class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrat
 		wac.refresh();
 		return wac;
 	}
+
 
 	@Test
 	public void jsonViewResponse() throws Exception {
@@ -97,6 +99,7 @@ public class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrat
 	@SuppressWarnings({"unused", "WeakerAccess"})
 	static class WebConfig {
 	}
+
 
 	@RestController
 	@SuppressWarnings("unused")

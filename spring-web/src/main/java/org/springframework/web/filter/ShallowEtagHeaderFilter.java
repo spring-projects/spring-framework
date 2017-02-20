@@ -19,7 +19,6 @@ package org.springframework.web.filter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -72,8 +71,8 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	 * Set whether the ETag value written to the response should be weak, as per RFC 7232.
 	 * <p>Should be configured using an {@code <init-param>} for parameter name
 	 * "writeWeakETag" in the filter definition in {@code web.xml}.
-	 * @see  <a href="https://tools.ietf.org/html/rfc7232#section-2.3">RFC 7232 section 2.3</a>
 	 * @since 4.3
+	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-2.3">RFC 7232 section 2.3</a>
 	 */
 	public void setWriteWeakETag(boolean writeWeakETag) {
 		this.writeWeakETag = writeWeakETag;
@@ -89,8 +88,8 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 
 	/**
-	 * The default value is "false" so that the filter may delay the generation of
-	 * an ETag until the last asynchronously dispatched thread.
+	 * The default value is {@code false} so that the filter may delay the generation
+	 * of an ETag until the last asynchronously dispatched thread.
 	 */
 	@Override
 	protected boolean shouldNotFilterAsyncDispatch() {
