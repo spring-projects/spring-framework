@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,8 +223,8 @@ abstract class AbstractStaxHandler implements ContentHandler, LexicalHandler {
 	protected boolean isNamespaceDeclaration(QName qName) {
 		String prefix = qName.getPrefix();
 		String localPart = qName.getLocalPart();
-		return (XMLConstants.XMLNS_ATTRIBUTE.equals(localPart) && prefix.length() == 0) ||
-				(XMLConstants.XMLNS_ATTRIBUTE.equals(prefix) && localPart.length() != 0);
+		return (XMLConstants.XMLNS_ATTRIBUTE.equals(localPart) && prefix.isEmpty()) ||
+				(XMLConstants.XMLNS_ATTRIBUTE.equals(prefix) && !localPart.isEmpty());
 	}
 
 

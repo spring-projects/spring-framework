@@ -243,7 +243,7 @@ public abstract class MimeTypeUtils {
 
 		int index = mimeType.indexOf(';');
 		String fullType = (index >= 0 ? mimeType.substring(0, index) : mimeType).trim();
-		if (fullType.length() == 0) {
+		if (fullType.isEmpty()) {
 			throw new InvalidMimeTypeException(mimeType, "'mimeType' must not be empty");
 		}
 

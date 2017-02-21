@@ -143,7 +143,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 */
 	private NamedValueInfo updateNamedValueInfo(MethodParameter parameter, NamedValueInfo info) {
 		String name = info.name;
-		if (info.name.length() == 0) {
+		if (info.name.isEmpty()) {
 			name = parameter.getParameterName();
 			if (name == null) {
 				throw new IllegalArgumentException("Name for argument type [" + parameter.getParameterType().getName() +

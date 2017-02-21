@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ final class StringToEnumConverterFactory implements ConverterFactory<String, Enu
 
 		@Override
 		public T convert(String source) {
-			if (source.length() == 0) {
+			if (source.isEmpty()) {
 				// It's an empty enum identifier: reset the enum value to null.
 				return null;
 			}
