@@ -36,8 +36,7 @@ import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -104,6 +103,7 @@ public class ExchangeStrategiesTests {
 		}
 	}
 
+
 	private static class DummyMessageReader implements HttpMessageReader<Object> {
 
 		@Override
@@ -128,5 +128,5 @@ public class ExchangeStrategiesTests {
 			return Mono.empty();
 		}
 	}
-}
 
+}

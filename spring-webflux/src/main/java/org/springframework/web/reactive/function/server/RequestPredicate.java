@@ -32,19 +32,16 @@ import org.springframework.util.Assert;
 public interface RequestPredicate {
 
 	/**
-	 * Evaluates this predicate on the given request.
-	 *
-	 *
+	 * Evaluate this predicate on the given request.
 	 * @param request the request to match against
 	 * @return {@code true} if the request matches the predicate; {@code false} otherwise
 	 */
 	boolean test(ServerRequest request);
 
 	/**
-	 * Returns a composed request predicate that tests against both this predicate AND the {@code other} predicate.
-	 * When evaluating the composed predicate, if this predicate is {@code false}, then the {@code other}
-	 * predicate is not evaluated.
-	 *
+	 * Return a composed request predicate that tests against both this predicate AND
+	 * the {@code other} predicate. When evaluating the composed predicate, if this
+	 * predicate is {@code false}, then the {@code other} predicate is not evaluated.
 	 * @param other a predicate that will be logically-ANDed with this predicate
 	 * @return a predicate composed of this predicate AND the {@code other} predicate
 	 */
@@ -55,12 +52,10 @@ public interface RequestPredicate {
 			public boolean test(ServerRequest t) {
 				return RequestPredicate.this.test(t) && other.test(t);
 			}
-
 			@Override
 			public ServerRequest nestRequest(ServerRequest request) {
 				return other.nestRequest(RequestPredicate.this.nestRequest(request));
 			}
-
 			@Override
 			public String toString() {
 				return String.format("(%s && %s)", RequestPredicate.this, other);
@@ -70,7 +65,6 @@ public interface RequestPredicate {
 
 	/**
 	 * Return a predicate that represents the logical negation of this predicate.
-	 *
 	 * @return a predicate that represents the logical negation of this predicate
 	 */
 	default RequestPredicate negate() {
@@ -78,9 +72,9 @@ public interface RequestPredicate {
 	}
 
 	/**
-	 * Returns a composed request predicate that tests against both this predicate OR the {@code other} predicate.
-	 * When evaluating the composed predicate, if this predicate is {@code true}, then the {@code other} predicate
-	 * is not evaluated.
+	 * Return a composed request predicate that tests against both this predicate OR
+	 * the {@code other} predicate. When evaluating the composed predicate, if this
+	 * predicate is {@code true}, then the {@code other} predicate is not evaluated.
 	 * @param other a predicate that will be logically-ORed with this predicate
 	 * @return a predicate composed of this predicate OR the {@code other} predicate
 	 */
@@ -91,7 +85,6 @@ public interface RequestPredicate {
 			public boolean test(ServerRequest t) {
 				return RequestPredicate.this.test(t) || other.test(t);
 			}
-
 			@Override
 			public ServerRequest nestRequest(ServerRequest request) {
 				if (RequestPredicate.this.test(request)) {
@@ -105,7 +98,6 @@ public interface RequestPredicate {
 							" nor " + other + "matches");
 				}
 			}
-
 			@Override
 			public String toString() {
 				return String.format("(%s || %s)", RequestPredicate.this, other);
@@ -114,9 +106,9 @@ public interface RequestPredicate {
 	}
 
 	/**
-	 * Transforms the given request into a request used for a nested route. For instance, a
-	 * path-based predicate can return a {@code ServerRequest} with a nested path.
-	 * <p>Default implementation returns the given path.
+	 * Transform the given request into a request used for a nested route. For instance,
+	 * a path-based predicate can return a {@code ServerRequest} with a nested path.
+	 * <p>The default implementation returns the given path.
 	 * @param request the request to be nested
 	 * @return the nested request
 	 * @see RouterFunctions#nest(RequestPredicate, RouterFunction)
@@ -124,4 +116,5 @@ public interface RequestPredicate {
 	default ServerRequest nestRequest(ServerRequest request) {
 		return request;
 	}
+
 }

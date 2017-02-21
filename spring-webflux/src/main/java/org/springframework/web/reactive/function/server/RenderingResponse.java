@@ -43,11 +43,11 @@ public interface RenderingResponse extends ServerResponse {
 	 */
 	Map<String, Object> model();
 
+
 	// Builder
 
 	/**
 	 * Create a builder with the given template name.
-	 *
 	 * @param name the name of the template to render
 	 * @return the created builder
 	 */
@@ -55,6 +55,7 @@ public interface RenderingResponse extends ServerResponse {
 		Assert.notNull(name, "'name' must not be null");
 		return new DefaultRenderingResponseBuilder(name);
 	}
+
 
 	/**
 	 * Defines a builder for {@code RenderingResponse}.
@@ -80,15 +81,15 @@ public interface RenderingResponse extends ServerResponse {
 		Builder modelAttribute(String name, Object value);
 
 		/**
-		 * Copy all attributes in the supplied array into the model, using attribute
-		 * name generation for each element.
+		 * Copy all attributes in the supplied array into the model,
+		 * using attribute name generation for each element.
 		 * @see #modelAttribute(Object)
 		 */
 		Builder modelAttributes(Object... attributes);
 
 		/**
-		 * Copy all attributes in the supplied {@code Collection} into the model, using attribute
-		 * name generation for each element.
+		 * Copy all attributes in the supplied {@code Collection} into the model,
+		 * using attribute name generation for each element.
 		 * @see #modelAttribute(Object)
 		 */
 		Builder modelAttributes(Collection<?> attributes);
@@ -125,12 +126,9 @@ public interface RenderingResponse extends ServerResponse {
 
 		/**
 		 * Build the response.
-		 *
 		 * @return the built response
 		 */
 		Mono<RenderingResponse> build();
-
 	}
-
 
 }

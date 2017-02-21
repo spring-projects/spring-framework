@@ -49,11 +49,9 @@ public abstract class ExchangeFunctions {
 	 * @param strategies the strategies to use
 	 * @return the created function
 	 */
-	public static ExchangeFunction create(ClientHttpConnector connector,
-			ExchangeStrategies strategies) {
+	public static ExchangeFunction create(ClientHttpConnector connector, ExchangeStrategies strategies) {
 		Assert.notNull(connector, "'connector' must not be null");
 		Assert.notNull(strategies, "'strategies' must not be null");
-
 		return new DefaultExchangeFunction(connector, strategies);
 	}
 
@@ -64,9 +62,7 @@ public abstract class ExchangeFunctions {
 
 		private final ExchangeStrategies strategies;
 
-		public DefaultExchangeFunction(
-				ClientHttpConnector connector,
-				ExchangeStrategies strategies) {
+		public DefaultExchangeFunction(ClientHttpConnector connector, ExchangeStrategies strategies) {
 			this.connector = connector;
 			this.strategies = strategies;
 		}
@@ -74,7 +70,6 @@ public abstract class ExchangeFunctions {
 		@Override
 		public Mono<ClientResponse> exchange(ClientRequest request) {
 			Assert.notNull(request, "'request' must not be null");
-
 			return this.connector
 					.connect(request.method(), request.url(),
 							clientHttpRequest -> request.writeTo(clientHttpRequest, this.strategies))

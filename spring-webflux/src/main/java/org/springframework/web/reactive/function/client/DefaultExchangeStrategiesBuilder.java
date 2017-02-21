@@ -130,6 +130,7 @@ class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Builder {
 		return new DefaultExchangeStrategies(this.messageReaders, this.messageWriters);
 	}
 
+
 	private static class DefaultExchangeStrategies implements ExchangeStrategies {
 
 		private final List<HttpMessageReader<?>> messageReaders;
@@ -137,8 +138,8 @@ class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Builder {
 		private final List<HttpMessageWriter<?>> messageWriters;
 
 		public DefaultExchangeStrategies(
-				List<HttpMessageReader<?>> messageReaders,
-				List<HttpMessageWriter<?>> messageWriters) {
+				List<HttpMessageReader<?>> messageReaders, List<HttpMessageWriter<?>> messageWriters) {
+
 			this.messageReaders = unmodifiableCopy(messageReaders);
 			this.messageWriters = unmodifiableCopy(messageWriters);
 		}
@@ -156,7 +157,6 @@ class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Builder {
 		public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
 			return this.messageWriters::stream;
 		}
-
 	}
 
 }

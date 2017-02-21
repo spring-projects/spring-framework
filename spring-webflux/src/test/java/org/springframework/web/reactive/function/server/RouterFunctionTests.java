@@ -20,8 +20,8 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.junit.Assert.assertNotNull;
-import static org.springframework.web.reactive.function.BodyInserters.fromObject;
+import static org.junit.Assert.*;
+import static org.springframework.web.reactive.function.BodyInserters.*;
 
 /**
  * @author Arjen Poutsma
@@ -84,10 +84,6 @@ public class RouterFunctionTests {
 				.verify();
 	}
 
-	private Mono<ServerResponse> handlerMethod(ServerRequest request) {
-		return ServerResponse.ok().body(fromObject("42"));
-	}
-
 	@Test
 	public void filter() throws Exception {
 		Mono<String> stringMono = Mono.just("42");
@@ -118,6 +114,11 @@ public class RouterFunctionTests {
 						})
 				.expectComplete()
 				.verify();
+	}
+
+
+	private Mono<ServerResponse> handlerMethod(ServerRequest request) {
+		return ServerResponse.ok().body(fromObject("42"));
 	}
 
 }

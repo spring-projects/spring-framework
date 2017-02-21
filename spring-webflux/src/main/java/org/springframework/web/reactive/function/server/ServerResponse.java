@@ -39,8 +39,9 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Represents a typed, server-side HTTP response, as returned by a
- * {@linkplain HandlerFunction handler function} or {@linkplain HandlerFilterFunction filter function}.
+ * Represents a typed server-side HTTP response, as returned
+ * by a {@linkplain HandlerFunction handler function} or
+ * {@linkplain HandlerFilterFunction filter function}.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
@@ -61,19 +62,18 @@ public interface ServerResponse {
 	HttpHeaders headers();
 
 	/**
-	 * Writes this response to the given web exchange.
-	 *
+	 * Write this response to the given web exchange.
 	 * @param exchange the web exchange to write to
 	 * @param strategies the strategies to use when writing
 	 * @return {@code Mono<Void>} to indicate when writing is complete
 	 */
 	Mono<Void> writeTo(ServerWebExchange exchange, HandlerStrategies strategies);
 
+
 	// Static builder methods
 
 	/**
 	 * Create a builder with the status code and headers of the given response.
-	 *
 	 * @param other the response to copy the status and headers from
 	 * @return the created builder
 	 */
@@ -85,7 +85,6 @@ public interface ServerResponse {
 
 	/**
 	 * Create a builder with the given status.
-	 *
 	 * @param status the response status
 	 * @return the created builder
 	 */
@@ -96,7 +95,6 @@ public interface ServerResponse {
 
 	/**
 	 * Create a builder with the status set to {@linkplain HttpStatus#OK OK}.
-	 *
 	 * @return the created builder
 	 */
 	static BodyBuilder ok() {
@@ -106,7 +104,6 @@ public interface ServerResponse {
 	/**
 	 * Create a new builder with a {@linkplain HttpStatus#CREATED CREATED} status
 	 * and a location header set to the given URI.
-	 *
 	 * @param location the location URI
 	 * @return the created builder
 	 */
@@ -117,7 +114,6 @@ public interface ServerResponse {
 
 	/**
 	 * Create a builder with an {@linkplain HttpStatus#ACCEPTED ACCEPTED} status.
-	 *
 	 * @return the created builder
 	 */
 	static BodyBuilder accepted() {
@@ -126,7 +122,6 @@ public interface ServerResponse {
 
 	/**
 	 * Create a builder with a {@linkplain HttpStatus#NO_CONTENT NO_CONTENT} status.
-	 *
 	 * @return the created builder
 	 */
 	static HeadersBuilder<?> noContent() {
@@ -135,7 +130,6 @@ public interface ServerResponse {
 
 	/**
 	 * Create a builder with a {@linkplain HttpStatus#BAD_REQUEST BAD_REQUEST} status.
-	 *
 	 * @return the created builder
 	 */
 	static BodyBuilder badRequest() {
@@ -154,7 +148,6 @@ public interface ServerResponse {
 	/**
 	 * Create a builder with an
 	 * {@linkplain HttpStatus#UNPROCESSABLE_ENTITY UNPROCESSABLE_ENTITY} status.
-	 *
 	 * @return the created builder
 	 */
 	static BodyBuilder unprocessableEntity() {
@@ -164,14 +157,12 @@ public interface ServerResponse {
 
 	/**
 	 * Defines a builder that adds headers to the response.
-	 *
 	 * @param <B> the builder subclass
 	 */
 	interface HeadersBuilder<B extends HeadersBuilder<B>> {
 
 		/**
 		 * Add the given header value(s) under the given name.
-		 *
 		 * @param headerName   the header name
 		 * @param headerValues the header value(s)
 		 * @return this builder
@@ -181,7 +172,6 @@ public interface ServerResponse {
 
 		/**
 		 * Copy the given headers into the entity's headers map.
-		 *
 		 * @param headers the existing HttpHeaders to copy from
 		 * @return this builder
 		 * @see HttpHeaders#add(String, String)
@@ -201,7 +191,6 @@ public interface ServerResponse {
 		/**
 		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified
 		 * by the {@code Allow} header.
-		 *
 		 * @param allowedMethods the allowed methods
 		 * @return this builder
 		 * @see HttpHeaders#setAllow(Set)
@@ -210,7 +199,6 @@ public interface ServerResponse {
 
 		/**
 		 * Set the entity tag of the body, as specified by the {@code ETag} header.
-		 *
 		 * @param eTag the new entity tag
 		 * @return this builder
 		 * @see HttpHeaders#setETag(String)
@@ -222,7 +210,6 @@ public interface ServerResponse {
 		 * {@code Last-Modified} header.
 		 * <p>The date should be specified as the number of milliseconds since
 		 * January 1, 1970 GMT.
-		 *
 		 * @param lastModified the last modified date
 		 * @return this builder
 		 * @see HttpHeaders#setLastModified(long)
@@ -231,7 +218,6 @@ public interface ServerResponse {
 
 		/**
 		 * Set the location of a resource, as specified by the {@code Location} header.
-		 *
 		 * @param location the location
 		 * @return this builder
 		 * @see HttpHeaders#setLocation(URI)
@@ -243,7 +229,6 @@ public interface ServerResponse {
 		 * {@code Cache-Control} header.
 		 * <p>A {@code CacheControl} instance can be built like
 		 * {@code CacheControl.maxAge(3600).cachePublic().noTransform()}.
-		 *
 		 * @param cacheControl a builder for cache-related HTTP response headers
 		 * @return this builder
 		 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2">RFC-7234 Section 5.2</a>
@@ -256,7 +241,6 @@ public interface ServerResponse {
 		 * subject to content negotiation and variances based on the value of the
 		 * given request headers. The configured request header names are added only
 		 * if not already present in the response "Vary" header.
-		 *
 		 * @param requestHeaders request header names
 		 * @return this builder
 		 */
@@ -264,7 +248,6 @@ public interface ServerResponse {
 
 		/**
 		 * Build the response entity with no body.
-		 *
 		 * @return the built response
 		 */
 		Mono<ServerResponse> build();
@@ -272,7 +255,6 @@ public interface ServerResponse {
 		/**
 		 * Build the response entity with no body.
 		 * The response will be committed when the given {@code voidPublisher} completes.
-		 *
 		 * @param voidPublisher publisher publisher to indicate when the response should be committed
 		 * @return the built response
 		 */
@@ -280,12 +262,10 @@ public interface ServerResponse {
 
 		/**
 		 * Build the response entity with a custom writer function.
-		 *
 		 * @param writeFunction the function used to write to the {@link ServerWebExchange}
 		 * @return the built response
 		 */
-		Mono<ServerResponse> build(BiFunction<ServerWebExchange, HandlerStrategies,
-				Mono<Void>> writeFunction);
+		Mono<ServerResponse> build(BiFunction<ServerWebExchange, HandlerStrategies, Mono<Void>> writeFunction);
 	}
 
 
@@ -313,16 +293,16 @@ public interface ServerResponse {
 		BodyBuilder contentType(MediaType contentType);
 
 		/**
-		 * Add a serialization hint like {@link AbstractJackson2Codec#JSON_VIEW_HINT} to
-		 * customize how the body will be serialized.
+		 * Add a serialization hint like {@link AbstractJackson2Codec#JSON_VIEW_HINT}
+		 * to customize how the body will be serialized.
 		 * @param key the hint key
 		 * @param value the hint value
 		 */
 		BodyBuilder hint(String key, Object value);
 
 		/**
-		 * Set the body of the response to the given {@code Publisher} and return it. This
-		 * convenience method combines {@link #body(BodyInserter)} and
+		 * Set the body of the response to the given {@code Publisher} and return it.
+		 * This convenience method combines {@link #body(BodyInserter)} and
 		 * {@link BodyInserters#fromPublisher(Publisher, Class)}.
 		 * @param publisher the {@code Publisher} to write to the response
 		 * @param elementClass the class of elements contained in the publisher

@@ -53,24 +53,23 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
 	private final BodyInserter<T, ? super ServerHttpResponse> inserter;
 
-	private final HttpHeaders headers = new HttpHeaders();
+	private HttpStatus status = HttpStatus.OK;
 
-	private HttpStatus statusCode = HttpStatus.OK;
+	private final HttpHeaders headers = new HttpHeaders();
 
 	private final Map<String, Object> hints = new HashMap<>();
 
 
-
-	public DefaultEntityResponseBuilder(T entity,
-			BodyInserter<T, ? super ServerHttpResponse> inserter) {
+	public DefaultEntityResponseBuilder(T entity, BodyInserter<T, ? super ServerHttpResponse> inserter) {
 		this.entity = entity;
 		this.inserter = inserter;
 	}
 
+
 	@Override
 	public EntityResponse.Builder<T> status(HttpStatus status) {
 		Assert.notNull(status, "'status' must not be null");
-		this.statusCode = status;
+		this.status = status;
 		return this;
 	}
 
@@ -165,9 +164,10 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
 	@Override
 	public Mono<EntityResponse<T>> build() {
-		return Mono.just(new DefaultEntityResponse<T>(this.statusCode, this.headers, this.entity,
+		return Mono.just(new DefaultEntityResponse<T>(this.status, this.headers, this.entity,
 				this.inserter, this.hints));
 	}
+
 
 	private final static class DefaultEntityResponse<T>
 			extends DefaultServerResponseBuilder.AbstractServerResponse
@@ -180,10 +180,9 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 		private final Map<String, Object> hints;
 
 
-		public DefaultEntityResponse(HttpStatus statusCode,
-				HttpHeaders headers, T entity,
-				BodyInserter<T, ? super ServerHttpResponse> inserter,
-				Map<String, Object> hints) {
+		public DefaultEntityResponse(HttpStatus statusCode, HttpHeaders headers, T entity,
+				BodyInserter<T, ? super ServerHttpResponse> inserter, Map<String, Object> hints) {
+
 			super(statusCode, headers);
 			this.entity = entity;
 			this.inserter = inserter;
@@ -210,7 +209,6 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 				public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
 					return strategies.messageWriters();
 				}
-
 				@Override
 				public Map<String, Object> hints() {
 					return hints;
@@ -218,4 +216,5 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 			});
 		}
 	}
+
 }

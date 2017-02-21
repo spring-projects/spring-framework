@@ -81,7 +81,6 @@ public interface ClientRequest {
 
 	/**
 	 * Create a builder with the method, URI, headers, and cookies of the given request.
-	 *
 	 * @param other the request to copy the method, URI, headers, and cookies from
 	 * @return the created builder
 	 */
@@ -120,7 +119,6 @@ public interface ClientRequest {
 
 		/**
 		 * Copy the given headers into the entity's headers map.
-		 *
 		 * @param headers the existing HttpHeaders to copy from
 		 * @return this builder
 		 */
@@ -136,7 +134,6 @@ public interface ClientRequest {
 
 		/**
 		 * Copy the given cookies into the entity's cookies map.
-		 *
 		 * @param cookies the existing cookies to copy from
 		 * @return this builder
 		 */
@@ -164,7 +161,6 @@ public interface ClientRequest {
 		 * @return the request entity
 		 */
 		ClientRequest build();
-
 	}
 
 }

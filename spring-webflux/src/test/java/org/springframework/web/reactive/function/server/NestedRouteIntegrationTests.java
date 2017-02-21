@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.function.server;
 
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -25,25 +24,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.web.reactive.function.BodyInserters.fromObject;
-import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
-import static org.springframework.web.reactive.function.server.RequestPredicates.pathPrefix;
-import static org.springframework.web.reactive.function.server.RouterFunctions.nest;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.junit.Assert.*;
+import static org.springframework.web.reactive.function.BodyInserters.*;
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
+import static org.springframework.web.reactive.function.server.RouterFunctions.*;
 
 /**
  * @author Arjen Poutsma
  */
-public class NestedRouteIntegrationTests
-		extends AbstractRouterFunctionIntegrationTests {
+public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
-	private RestTemplate restTemplate;
+	private final RestTemplate restTemplate = new RestTemplate();
 
-	@Before
-	public void createRestTemplate() {
-		this.restTemplate = new RestTemplate();
-	}
 
 	@Override
 	protected RouterFunction<?> routerFunction() {
@@ -73,6 +65,7 @@ public class NestedRouteIntegrationTests
 		assertEquals("baz", result.getBody());
 	}
 
+
 	private static class NestedHandler {
 
 		public Mono<ServerResponse> bar(ServerRequest request) {
@@ -82,7 +75,6 @@ public class NestedRouteIntegrationTests
 		public Mono<ServerResponse> baz(ServerRequest request) {
 			return ServerResponse.ok().body(fromObject("baz"));
 		}
-
 	}
 
 }

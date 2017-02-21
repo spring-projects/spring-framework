@@ -37,8 +37,8 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 /**
  * <strong>Central entry point to Spring's functional web framework.</strong>
  * Exposes routing functionality, such as to
- * {@linkplain #route(RequestPredicate, HandlerFunction) create} a {@code RouterFunction} given a
- * {@code RequestPredicate} and {@code HandlerFunction}, and to do further
+ * {@linkplain #route(RequestPredicate, HandlerFunction) create} a {@code RouterFunction}
+ * given a {@code RequestPredicate} and {@code HandlerFunction}, and to do further
  * {@linkplain #nest(RequestPredicate, RouterFunction) subrouting} on an existing routing
  * function.
  *
@@ -77,10 +77,8 @@ public abstract class RouterFunctions {
 	 * {@code listUsers} method in {@code userController}:
 	 * <pre class="code">
 	 * RouterFunction&lt;ServerResponse&gt; route =
-	 *   RouterFunctions.route(RequestPredicates.GET("/user"),
-	 *     userController::listUsers);
+	 *     RouterFunctions.route(RequestPredicates.GET("/user"), userController::listUsers);
 	 * </pre>
-	 *
 	 * @param predicate the predicate to test
 	 * @param handlerFunction the handler function to route to if the predicate applies
 	 * @param <T> the type of response returned by the handler function
@@ -166,7 +164,6 @@ public abstract class RouterFunctions {
 	public static RouterFunction<ServerResponse> resources(String pattern, Resource location) {
 		Assert.hasLength(pattern, "'pattern' must not be empty");
 		Assert.notNull(location, "'location' must not be null");
-
 		return resources(new PathResourceLookupFunction(pattern, location));
 	}
 
@@ -179,7 +176,6 @@ public abstract class RouterFunctions {
 	 */
 	public static RouterFunction<ServerResponse> resources(Function<ServerRequest, Mono<Resource>> lookupFunction) {
 		Assert.notNull(lookupFunction, "'lookupFunction' must not be null");
-
 		return request -> lookupFunction.apply(request).map(ResourceHandlerFunction::new);
 	}
 
@@ -270,13 +266,10 @@ public abstract class RouterFunctions {
 		Assert.notNull(routerFunction, "RouterFunction must not be null");
 		Assert.notNull(strategies, "HandlerStrategies must not be null");
 
-		return new HandlerMapping() {
-			@Override
-			public Mono<Object> getHandler(ServerWebExchange exchange) {
-				ServerRequest request = new DefaultServerRequest(exchange, strategies);
-				addAttributes(exchange, request);
-				return routerFunction.route(request).map(handlerFunction -> (Object)handlerFunction);
-			}
+		return exchange -> {
+			ServerRequest request = new DefaultServerRequest(exchange, strategies);
+			addAttributes(exchange, request);
+			return routerFunction.route(request).map(handlerFunction -> (Object)handlerFunction);
 		};
 	}
 

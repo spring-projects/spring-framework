@@ -26,8 +26,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.util.patterns.PathPatternParser;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -190,6 +189,5 @@ public class RequestPredicatesTests {
 		predicate = RequestPredicates.queryParam("foo", s -> s.equals("baz"));
 		assertFalse(predicate.test(request));
 	}
-
 
 }

@@ -80,6 +80,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 	private Function<ServerRequest, Optional<Locale>> localeResolver;
 
+
 	public void defaultConfiguration() {
 		messageReader(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		messageReader(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
@@ -149,6 +150,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 				this.viewResolvers, localeResolver);
 	}
 
+
 	private static class DefaultHandlerStrategies implements HandlerStrategies {
 
 		private final List<HttpMessageReader<?>> messageReaders;
@@ -159,12 +161,12 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 		private final Function<ServerRequest, Optional<Locale>> localeResolver;
 
-
 		public DefaultHandlerStrategies(
 				List<HttpMessageReader<?>> messageReaders,
 				List<HttpMessageWriter<?>> messageWriters,
 				List<ViewResolver> viewResolvers,
 				Function<ServerRequest, Optional<Locale>> localeResolver) {
+
 			this.messageReaders = unmodifiableCopy(messageReaders);
 			this.messageWriters = unmodifiableCopy(messageWriters);
 			this.viewResolvers = unmodifiableCopy(viewResolvers);

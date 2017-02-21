@@ -110,7 +110,6 @@ public interface ClientResponse {
 		/**
 		 * Return the header value(s), if any, for the header of the given name.
 		 * <p>Return an empty list if no header values are found.
-		 *
 		 * @param headerName the header name
 		 */
 		List<String> header(String headerName);

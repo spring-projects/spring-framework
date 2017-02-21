@@ -48,9 +48,8 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+import static java.nio.charset.StandardCharsets.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -122,7 +121,7 @@ public class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	public void eTag() throws Exception {
+	public void etag() throws Exception {
 		String body = "foo";
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).eTag("foo").build();
 		StepVerifier.create(result)

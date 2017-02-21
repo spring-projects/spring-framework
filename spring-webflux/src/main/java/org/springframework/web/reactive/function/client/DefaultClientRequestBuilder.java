@@ -61,6 +61,7 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 		this.url = url;
 	}
 
+
 	@Override
 	public ClientRequest.Builder header(String headerName, String... headerValues) {
 		for (String headerValue : headerValues) {
@@ -113,6 +114,7 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 				this.inserter);
 	}
 
+
 	private static class BodyInserterRequest implements ClientRequest {
 
 		private final HttpMethod method;
@@ -126,8 +128,8 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 		private final BodyInserter<?, ? super ClientHttpRequest> inserter;
 
 		public BodyInserterRequest(HttpMethod method, URI url, HttpHeaders headers,
-				MultiValueMap<String, String> cookies,
-				BodyInserter<?, ? super ClientHttpRequest> inserter) {
+				MultiValueMap<String, String> cookies, BodyInserter<?, ? super ClientHttpRequest> inserter) {
+
 			this.method = method;
 			this.url = url;
 			this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
@@ -169,6 +171,7 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 						.forEach(entry -> requestHeaders
 								.put(entry.getKey(), entry.getValue()));
 			}
+
 			MultiValueMap<String, HttpCookie> requestCookies = request.getCookies();
 			if (!this.cookies.isEmpty()) {
 				this.cookies.entrySet().forEach(entry -> {
@@ -185,7 +188,6 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 				public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
 					return strategies.messageWriters();
 				}
-
 				@Override
 				public Map<String, Object> hints() {
 					return Collections.emptyMap();
@@ -193,4 +195,5 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 			});
 		}
 	}
+
 }

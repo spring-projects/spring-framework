@@ -32,11 +32,10 @@ import org.springframework.util.Assert;
 public interface ExchangeFilterFunction {
 
 	/**
-	 * Apply this filter to the given request and exchange function. The given
-	 * {@linkplain ExchangeFunction exchange function} represents the next entity in the
-	 * chain, and can be {@linkplain ExchangeFunction#exchange(ClientRequest) invoked} in order
-	 * to proceed to the exchange, or not invoked to block the chain.
-	 *
+	 * Apply this filter to the given request and exchange function.
+	 * <p>The given {@linkplain ExchangeFunction exchange function} represents the next entity
+	 * in the chain, and can be {@linkplain ExchangeFunction#exchange(ClientRequest) invoked}
+	 * in order to proceed to the exchange, or not invoked to block the chain.
 	 * @param request the request
 	 * @param next the next exchange function in the chain
 	 * @return the filtered response

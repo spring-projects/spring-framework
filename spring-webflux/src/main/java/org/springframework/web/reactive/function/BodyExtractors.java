@@ -112,18 +112,6 @@ public abstract class BodyExtractors {
 				};
 	}
 
-	private static HttpMessageReader<MultiValueMap<String, String>> formMessageReader(BodyExtractor.Context context) {
-		return context.messageReaders().get()
-				.filter(messageReader -> messageReader
-						.canRead(FORM_TYPE, MediaType.APPLICATION_FORM_URLENCODED))
-				.findFirst()
-				.map(BodyExtractors::<MultiValueMap<String, String>>cast)
-				.orElseThrow(() -> new IllegalStateException(
-						"Could not find HttpMessageReader that supports " +
-								MediaType.APPLICATION_FORM_URLENCODED_VALUE));
-	}
-
-
 	/**
 	 * Return a {@code BodyExtractor} that returns the body of the message as a {@link Flux} of
 	 * {@link DataBuffer}s.
@@ -136,12 +124,10 @@ public abstract class BodyExtractors {
 		return (inputMessage, context) -> inputMessage.getBody();
 	}
 
+
 	private static <T, S extends Publisher<T>> S readWithMessageReaders(
-			ReactiveHttpInputMessage inputMessage,
-			BodyExtractor.Context context,
-			ResolvableType elementType,
-			Function<HttpMessageReader<T>, S> readerFunction,
-			Function<Throwable, S> unsupportedError) {
+			ReactiveHttpInputMessage inputMessage, BodyExtractor.Context context, ResolvableType elementType,
+			Function<HttpMessageReader<T>, S> readerFunction, Function<Throwable, S> unsupportedError) {
 
 		MediaType contentType = contentType(inputMessage);
 		Supplier<Stream<HttpMessageReader<?>>> messageReaders = context.messageReaders();
@@ -158,6 +144,17 @@ public abstract class BodyExtractors {
 							new UnsupportedMediaTypeException(contentType, supportedMediaTypes);
 					return unsupportedError.apply(error);
 				});
+	}
+
+	private static HttpMessageReader<MultiValueMap<String, String>> formMessageReader(BodyExtractor.Context context) {
+		return context.messageReaders().get()
+				.filter(messageReader -> messageReader
+						.canRead(FORM_TYPE, MediaType.APPLICATION_FORM_URLENCODED))
+				.findFirst()
+				.map(BodyExtractors::<MultiValueMap<String, String>>cast)
+				.orElseThrow(() -> new IllegalStateException(
+						"Could not find HttpMessageReader that supports " +
+								MediaType.APPLICATION_FORM_URLENCODED_VALUE));
 	}
 
 	private static MediaType contentType(HttpMessage message) {

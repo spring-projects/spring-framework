@@ -52,10 +52,9 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.WebSession;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.web.reactive.function.BodyExtractors.toMono;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.web.reactive.function.BodyExtractors.*;
 
 /**
  * @author Arjen Poutsma
@@ -72,6 +71,7 @@ public class DefaultServerRequestTests {
 
 	private DefaultServerRequest defaultRequest;
 
+
 	@Before
 	public void createMocks() {
 		mockRequest = mock(ServerHttpRequest.class);
@@ -84,6 +84,7 @@ public class DefaultServerRequestTests {
 
 		defaultRequest = new DefaultServerRequest(mockExchange, mockHandlerStrategies);
 	}
+
 
 	@Test
 	public void method() throws Exception {

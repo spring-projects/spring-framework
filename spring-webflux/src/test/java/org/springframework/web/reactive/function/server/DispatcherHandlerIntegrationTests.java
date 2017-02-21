@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -50,26 +49,22 @@ import org.springframework.web.reactive.function.server.support.ServerResponseRe
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.web.reactive.function.BodyInserters.fromObject;
-import static org.springframework.web.reactive.function.BodyInserters.fromPublisher;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.junit.Assert.*;
+import static org.springframework.web.reactive.function.BodyInserters.*;
+import static org.springframework.web.reactive.function.server.RouterFunctions.*;
 
 /**
  * Tests the use of {@link HandlerFunction} and {@link RouterFunction} in a
  * {@link DispatcherHandler}.
+ *
  * @author Arjen Poutsma
  */
 public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
-	
+
+	private final RestTemplate restTemplate = new RestTemplate();
+
 	private AnnotationConfigApplicationContext wac;
 
-	private RestTemplate restTemplate;
-
-	@Before
-	public void createRestTemplate() {
-		this.restTemplate = new RestTemplate();
-	}
 
 	@Override
 	protected HttpHandler createHttpHandler() {
@@ -83,6 +78,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		return WebHttpHandlerBuilder.webHandler(webHandler).build();
 	}
 	
+
 	@Test
 	public void mono() throws Exception {
 		ResponseEntity<Person> result =
@@ -160,6 +156,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		}
 	}
 	
+
 	private static class PersonHandler {
 
 		public Mono<ServerResponse> mono(ServerRequest request) {
@@ -220,11 +217,8 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 
 		@Override
 		public String toString() {
-			return "Person{" +
-					"name='" + this.name + '\'' +
-					'}';
+			return "Person{" + "name='" + this.name + '\'' + '}';
 		}
 	}
-	
 	
 }

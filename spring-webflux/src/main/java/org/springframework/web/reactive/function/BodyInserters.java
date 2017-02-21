@@ -45,14 +45,14 @@ import org.springframework.util.MultiValueMap;
  */
 public abstract class BodyInserters {
 
-	private static final ResolvableType RESOURCE_TYPE = ResolvableType.forClass(Resource.class);
+	private static final ResolvableType RESOURCE_TYPE =
+			ResolvableType.forClass(Resource.class);
 
 	private static final ResolvableType SERVER_SIDE_EVENT_TYPE =
 			ResolvableType.forClass(ServerSentEvent.class);
 
 	private static final ResolvableType FORM_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
-
 
 	private static final BodyInserter<Void, ReactiveHttpOutputMessage> EMPTY =
 					(response, context) -> response.setComplete();
@@ -223,19 +223,6 @@ public abstract class BodyInserters {
 		};
 	}
 
-	private static <T> HttpMessageWriter<T> findMessageWriter(
-			BodyInserter.Context context, ResolvableType type, MediaType mediaType) {
-
-		return context.messageWriters().get()
-				.filter(messageWriter -> messageWriter.canWrite(type, mediaType))
-				.findFirst()
-				.map(BodyInserters::<T>cast)
-				.orElseThrow(() -> new IllegalStateException(
-						"Could not find HttpMessageWriter that supports " + mediaType));
-	}
-
-
-
 	/**
 	 * Return a {@code BodyInserter} that writes the given {@code Publisher<DataBuffer>} to the body.
 	 * @param publisher the data buffer publisher to write
@@ -272,6 +259,17 @@ public abstract class BodyInserters {
 						return Mono.error(error);
 					});
 		};
+	}
+
+	private static <T> HttpMessageWriter<T> findMessageWriter(
+			BodyInserter.Context context, ResolvableType type, MediaType mediaType) {
+
+		return context.messageWriters().get()
+				.filter(messageWriter -> messageWriter.canWrite(type, mediaType))
+				.findFirst()
+				.map(BodyInserters::<T>cast)
+				.orElseThrow(() -> new IllegalStateException(
+						"Could not find HttpMessageWriter that supports " + mediaType));
 	}
 
 	@SuppressWarnings("unchecked")

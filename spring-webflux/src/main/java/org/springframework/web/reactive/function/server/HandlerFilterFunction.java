@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +37,11 @@ public interface HandlerFilterFunction<T extends ServerResponse, R extends Serve
 
 	/**
 	 * Apply this filter to the given handler function. The given
-	 * {@linkplain HandlerFunction handler function} represents the next entity in the
-	 * chain, and can be {@linkplain HandlerFunction#handle(ServerRequest) invoked} in order
-	 * to proceed to this entity, or not invoked to block the chain.
-	 *
+	 * {@linkplain HandlerFunction handler function} represents the next entity in the chain,
+	 * and can be {@linkplain HandlerFunction#handle(ServerRequest) invoked} in order to
+	 * proceed to this entity, or not invoked to block the chain.
 	 * @param request the request
-	 * @param next    the next handler or filter function in the chain
+	 * @param next the next handler or filter function in the chain
 	 * @return the filtered response
 	 * @see ServerRequestWrapper
 	 */
@@ -58,8 +57,7 @@ public interface HandlerFilterFunction<T extends ServerResponse, R extends Serve
 	default HandlerFilterFunction<T, R> andThen(HandlerFilterFunction<T, T> after) {
 		Assert.notNull(after, "'after' must not be null");
 		return (request, next) -> {
-			HandlerFunction<T> nextHandler =
-					handlerRequest -> after.filter(handlerRequest, next);
+			HandlerFunction<T> nextHandler = handlerRequest -> after.filter(handlerRequest, next);
 			return filter(request, nextHandler);
 		};
 	}
@@ -80,8 +78,8 @@ public interface HandlerFilterFunction<T extends ServerResponse, R extends Serve
 	 * @param requestProcessor the request processor
 	 * @return the filter adaptation of the request processor
 	 */
-	static HandlerFilterFunction<?, ?> ofRequestProcessor(Function<ServerRequest,
-				Mono<ServerRequest>> requestProcessor) {
+	static HandlerFilterFunction<?, ?> ofRequestProcessor(
+			Function<ServerRequest, Mono<ServerRequest>> requestProcessor) {
 
 		Assert.notNull(requestProcessor, "'requestProcessor' must not be null");
 		return (request, next) -> requestProcessor.apply(request).then(next::handle);
@@ -93,8 +91,8 @@ public interface HandlerFilterFunction<T extends ServerResponse, R extends Serve
 	 * @param responseProcessor the response processor
 	 * @return the filter adaptation of the request processor
 	 */
-	static <T extends ServerResponse, R extends ServerResponse> HandlerFilterFunction<T, R> ofResponseProcessor(Function<T,
-			R> responseProcessor) {
+	static <T extends ServerResponse, R extends ServerResponse> HandlerFilterFunction<T, R> ofResponseProcessor(
+			Function<T, R> responseProcessor) {
 
 		Assert.notNull(responseProcessor, "'responseProcessor' must not be null");
 		return (request, next) -> next.handle(request).map(responseProcessor);

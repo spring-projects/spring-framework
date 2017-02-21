@@ -40,16 +40,17 @@ import org.springframework.web.reactive.function.BodyInserters;
  */
 class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 
-
 	private static final Set<HttpMethod> SUPPORTED_METHODS =
 			EnumSet.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS);
 
 
 	private final Resource resource;
 
+
 	public ResourceHandlerFunction(Resource resource) {
 		this.resource = resource;
 	}
+
 
 	@Override
 	public Mono<ServerResponse> handle(ServerRequest request) {
@@ -71,6 +72,7 @@ class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 						.body(BodyInserters.empty());
 		}
 	}
+
 
 	private static class HeadMethodResource implements Resource {
 
@@ -133,8 +135,6 @@ class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 		public String getDescription() {
 			return this.delegate.getDescription();
 		}
-
 	}
-
 
 }

@@ -170,13 +170,11 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 			BiFunction<ServerWebExchange, HandlerStrategies, Mono<Void>> writeFunction) {
 
 		Assert.notNull(writeFunction, "'writeFunction' must not be null");
-		return Mono.just(new WriterFunctionServerResponse(this.statusCode, this.headers,
-				writeFunction));
+		return Mono.just(new WriterFunctionServerResponse(this.statusCode, this.headers, writeFunction));
 	}
 
 	@Override
-	public <T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher,
-			Class<T> elementClass) {
+	public <T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher, Class<T> elementClass) {
 		Assert.notNull(publisher, "'publisher' must not be null");
 		Assert.notNull(elementClass, "'elementClass' must not be null");
 
@@ -191,9 +189,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	@Override
 	public <T> Mono<ServerResponse> body(BodyInserter<T, ? super ServerHttpResponse> inserter) {
 		Assert.notNull(inserter, "'inserter' must not be null");
-		return Mono
-				.just(new BodyInserterServerResponse<>(this.statusCode, this.headers, inserter,
-						this.hints));
+		return Mono.just(new BodyInserterServerResponse<>(this.statusCode, this.headers, inserter, this.hints));
 	}
 
 	@Override
@@ -219,6 +215,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				.build()
 				.map(renderingResponse -> renderingResponse);
 	}
+
 
 	static abstract class AbstractServerResponse implements ServerResponse {
 
@@ -260,13 +257,14 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 	}
 
+
 	private static final class WriterFunctionServerResponse extends AbstractServerResponse {
 
 		private final BiFunction<ServerWebExchange, HandlerStrategies, Mono<Void>> writeFunction;
 
-		public WriterFunctionServerResponse(HttpStatus statusCode,
-				HttpHeaders headers,
+		public WriterFunctionServerResponse(HttpStatus statusCode, HttpHeaders headers,
 				BiFunction<ServerWebExchange, HandlerStrategies, Mono<Void>> writeFunction) {
+
 			super(statusCode, headers);
 			this.writeFunction = writeFunction;
 		}
@@ -277,7 +275,6 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 			return this.writeFunction.apply(exchange, strategies);
 		}
 	}
-
 
 
 	private static final class BodyInserterServerResponse<T> extends AbstractServerResponse {

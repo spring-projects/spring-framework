@@ -43,8 +43,8 @@ import org.springframework.web.util.patterns.PathPattern;
 import org.springframework.web.util.patterns.PathPatternParser;
 
 /**
- * Implementations of {@link RequestPredicate} that implement various useful request matching operations, such as
- * matching based on path, HTTP method, etc.
+ * Implementations of {@link RequestPredicate} that implement various useful
+ * request matching operations, such as matching based on path, HTTP method, etc.
  *
  * @author Arjen Poutsma
  * @since 5.0
@@ -55,18 +55,18 @@ public abstract class RequestPredicates {
 
 	private static final PathPatternParser DEFAULT_PATTERN_PARSER = new PathPatternParser();
 
+
 	/**
-	 * Returns a {@code RequestPredicate} that always matches.
-	 *
+	 * Return a {@code RequestPredicate} that always matches.
 	 * @return a predicate that always matches
 	 */
 	public static RequestPredicate all() {
 		return request -> true;
 	}
 
+
 	/**
 	 * Return a {@code RequestPredicate} that tests against the given HTTP method.
-	 *
 	 * @param httpMethod the HTTP method to match to
 	 * @return a predicate that tests against the given HTTP method
 	 */
@@ -76,7 +76,6 @@ public abstract class RequestPredicates {
 
 	/**
 	 * Return a {@code RequestPredicate} that tests the request path against the given path pattern.
-	 *
 	 * @param pattern the pattern to match to
 	 * @return a predicate that tests against the given path pattern
 	 */
@@ -89,7 +88,6 @@ public abstract class RequestPredicates {
 	 * Return a function that creates new path-matching {@code RequestPredicates} from pattern
 	 * Strings using the given {@link PathPatternParser}. This method can be used to specify a
 	 * non-default, customized {@code PathPatternParser} when resolving path patterns.
-	 *
 	 * @param patternParser the parser used to parse patterns given to the returned function
 	 * @return a function that resolves patterns Strings into path-matching
 	 * {@code RequestPredicate}s
@@ -105,7 +103,6 @@ public abstract class RequestPredicates {
 
 	/**
 	 * Return a {@code RequestPredicate} that tests the request's headers against the given headers predicate.
-	 *
 	 * @param headersPredicate a predicate that tests against the request headers
 	 * @return a predicate that tests against the given header predicate
 	 */
@@ -115,15 +112,15 @@ public abstract class RequestPredicates {
 
 	/**
 	 * Return a {@code RequestPredicate} that tests if the request's
-	 * {@linkplain ServerRequest.Headers#contentType() content type} is {@linkplain MediaType#includes(MediaType) included}
-	 * by any of the given media types.
-	 *
+	 * {@linkplain ServerRequest.Headers#contentType() content type} is
+	 * {@linkplain MediaType#includes(MediaType) included} by any of the given media types.
 	 * @param mediaTypes the media types to match the request's content type against
 	 * @return a predicate that tests the request's content type against the given media types
 	 */
 	public static RequestPredicate contentType(MediaType... mediaTypes) {
 		Assert.notEmpty(mediaTypes, "'mediaTypes' must not be empty");
 		Set<MediaType> mediaTypeSet = new HashSet<>(Arrays.asList(mediaTypes));
+
 		return headers(new Predicate<ServerRequest.Headers>() {
 			@Override
 			public boolean test(ServerRequest.Headers headers) {
@@ -146,13 +143,13 @@ public abstract class RequestPredicates {
 	 * Return a {@code RequestPredicate} that tests if the request's
 	 * {@linkplain ServerRequest.Headers#accept() accept} header is
 	 * {@linkplain MediaType#isCompatibleWith(MediaType) compatible} with any of the given media types.
-	 *
 	 * @param mediaTypes the media types to match the request's accept header against
 	 * @return a predicate that tests the request's accept header against the given media types
 	 */
 	public static RequestPredicate accept(MediaType... mediaTypes) {
 		Assert.notEmpty(mediaTypes, "'mediaTypes' must not be empty");
 		Set<MediaType> mediaTypeSet = new HashSet<>(Arrays.asList(mediaTypes));
+
 		return headers(new Predicate<ServerRequest.Headers>() {
 			@Override
 			public boolean test(ServerRequest.Headers headers) {
@@ -169,94 +166,85 @@ public abstract class RequestPredicates {
 				traceMatch("Accept", mediaTypeSet, acceptedMediaTypes, match);
 				return match;
 			}
-
 			@Override
 			public String toString() {
 				return String.format("Accept: %s", mediaTypeSet);
 			}
-
 		});
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code GET} and the given
-	 * {@code pattern} matches against the request path.
-	 *
+	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code GET}
+	 * and the given {@code pattern} matches against the request path.
 	 * @param pattern the path pattern to match against
-	 * @return a predicate that matches if the request method is GET and if the given pattern matches against the
-	 * request path
+	 * @return a predicate that matches if the request method is GET and if the given pattern
+	 * matches against the request path
 	 */
 	public static RequestPredicate GET(String pattern) {
 		return method(HttpMethod.GET).and(path(pattern));
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code HEAD} and the given
-	 * {@code pattern} matches against the request path.
-	 *
+	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code HEAD}
+	 * and the given {@code pattern} matches against the request path.
 	 * @param pattern the path pattern to match against
-	 * @return a predicate that matches if the request method is HEAD and if the given pattern matches against the
-	 * request path
+	 * @return a predicate that matches if the request method is HEAD and if the given pattern
+	 * matches against the request path
 	 */
 	public static RequestPredicate HEAD(String pattern) {
 		return method(HttpMethod.HEAD).and(path(pattern));
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code POST} and the given
-	 * {@code pattern} matches against the request path.
-	 *
+	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code POST}
+	 * and the given {@code pattern} matches against the request path.
 	 * @param pattern the path pattern to match against
-	 * @return a predicate that matches if the request method is POST and if the given pattern matches against the
-	 * request path
+	 * @return a predicate that matches if the request method is POST and if the given pattern
+	 * matches against the request path
 	 */
 	public static RequestPredicate POST(String pattern) {
 		return method(HttpMethod.POST).and(path(pattern));
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code PUT} and the given
-	 * {@code pattern} matches against the request path.
-	 *
+	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code PUT}
+	 * and the given {@code pattern} matches against the request path.
 	 * @param pattern the path pattern to match against
-	 * @return a predicate that matches if the request method is PUT and if the given pattern matches against the
-	 * request path
+	 * @return a predicate that matches if the request method is PUT and if the given pattern
+	 * matches against the request path
 	 */
 	public static RequestPredicate PUT(String pattern) {
 		return method(HttpMethod.PUT).and(path(pattern));
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code PATCH} and the given
-	 * {@code pattern} matches against the request path.
-	 *
+	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code PATCH}
+	 * and the given {@code pattern} matches against the request path.
 	 * @param pattern the path pattern to match against
-	 * @return a predicate that matches if the request method is PATCH and if the given pattern matches against the
-	 * request path
+	 * @return a predicate that matches if the request method is PATCH and if the given pattern
+	 * matches against the request path
 	 */
 	public static RequestPredicate PATCH(String pattern) {
 		return method(HttpMethod.PATCH).and(path(pattern));
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code DELETE} and the given
-	 * {@code pattern} matches against the request path.
-	 *
+	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code DELETE}
+	 * and the given {@code pattern} matches against the request path.
 	 * @param pattern the path pattern to match against
-	 * @return a predicate that matches if the request method is DELETE and if the given pattern matches against the
-	 * request path
+	 * @return a predicate that matches if the request method is DELETE and if the given pattern
+	 * matches against the request path
 	 */
 	public static RequestPredicate DELETE(String pattern) {
 		return method(HttpMethod.DELETE).and(path(pattern));
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code OPTIONS} and the given
-	 * {@code pattern} matches against the request path.
-	 *
+	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code OPTIONS}
+	 * and the given {@code pattern} matches against the request path.
 	 * @param pattern the path pattern to match against
-	 * @return a predicate that matches if the request method is OPTIONS and if the given pattern matches against the
-	 * request path
+	 * @return a predicate that matches if the request method is OPTIONS and if the given pattern
+	 * matches against the request path
 	 */
 	public static RequestPredicate OPTIONS(String pattern) {
 		return method(HttpMethod.OPTIONS).and(path(pattern));
@@ -301,7 +289,6 @@ public abstract class RequestPredicates {
 	 */
 	public static RequestPredicate pathPrefix(String pathPrefixPattern) {
 		Assert.notNull(pathPrefixPattern, "'pathPrefixPattern' must not be null");
-
 		if (!pathPrefixPattern.endsWith("/**")) {
 			pathPrefixPattern += "/**";
 		}
@@ -313,8 +300,7 @@ public abstract class RequestPredicates {
 	 * against the given predicate.
 	 * @param name the name of the query parameter to test against
 	 * @param predicate predicate to test against the query parameter value
-	 * @return a predicate that matches the given predicate against the query parameter of the given
-	 * name
+	 * @return a predicate that matches the given predicate against the query parameter of the given name
 	 * @see ServerRequest#queryParam(String)
 	 */
 	public static RequestPredicate queryParam(String name, Predicate<String> predicate) {
@@ -323,6 +309,7 @@ public abstract class RequestPredicates {
 			return s.filter(predicate).isPresent();
 		};
 	}
+
 
 	private static void traceMatch(String prefix, Object desired, Object actual, boolean match) {
 		if (logger.isTraceEnabled()) {
@@ -354,6 +341,7 @@ public abstract class RequestPredicates {
 			return this.httpMethod.toString();
 		}
 	}
+
 
 	private static class PathPatternPredicate implements RequestPredicate {
 
@@ -398,6 +386,7 @@ public abstract class RequestPredicates {
 		}
 	}
 
+
 	private static class HeadersPredicate implements RequestPredicate {
 
 		private final Predicate<ServerRequest.Headers> headersPredicate;
@@ -417,6 +406,7 @@ public abstract class RequestPredicates {
 			return this.headersPredicate.toString();
 		}
 	}
+
 
 	private static class SubPathServerRequestWrapper implements ServerRequest {
 
@@ -506,8 +496,8 @@ public abstract class RequestPredicates {
 
 		@Override
 		public String toString() {
-			return String.format("%s %s", method(), path());
+			return method() + " " +  path();
 		}
-
 	}
+
 }

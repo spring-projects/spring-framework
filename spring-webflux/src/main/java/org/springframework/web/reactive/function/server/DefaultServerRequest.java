@@ -162,6 +162,7 @@ class DefaultServerRequest implements ServerRequest {
 		return String.format("%s %s", method(), path());
 	}
 
+
 	private class DefaultHeaders implements Headers {
 
 		private HttpHeaders delegate() {
