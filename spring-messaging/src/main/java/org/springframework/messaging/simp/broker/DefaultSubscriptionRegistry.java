@@ -498,6 +498,23 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		}
 
 		@Override
+		public boolean equals(Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (other == null || getClass() != other.getClass()) {
+				return false;
+			}
+			return getId().equals(((Subscription) other).getId());
+
+		}
+
+		@Override
+		public int hashCode() {
+			return getId().hashCode();
+		}
+
+		@Override
 		public String toString() {
 			return "subscription(id=" + this.id + ")";
 		}
