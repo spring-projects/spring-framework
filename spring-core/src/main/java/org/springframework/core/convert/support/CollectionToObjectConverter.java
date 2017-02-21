@@ -57,7 +57,7 @@ final class CollectionToObjectConverter implements ConditionalGenericConverter {
 			return source;
 		}
 		Collection<?> sourceCollection = (Collection<?>) source;
-		if (sourceCollection.size() == 0) {
+		if (sourceCollection.isEmpty()) {
 			return null;
 		}
 		Object firstElement = sourceCollection.iterator().next();
