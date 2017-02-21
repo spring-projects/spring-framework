@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ public abstract class AbstractSubscriptionRegistry implements SubscriptionRegist
 	private static MultiValueMap<String, String> EMPTY_MAP =
 			CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<String, String>(0));
 
-
 	protected final Log logger = LogFactory.getLog(getClass());
 
 
@@ -55,19 +54,25 @@ public abstract class AbstractSubscriptionRegistry implements SubscriptionRegist
 
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		if (sessionId == null) {
-			logger.error("No sessionId in  " + message);
+			if (logger.isErrorEnabled()) {
+				logger.error("No sessionId in  " + message);
+			}
 			return;
 		}
 
 		String subscriptionId = SimpMessageHeaderAccessor.getSubscriptionId(headers);
 		if (subscriptionId == null) {
-			logger.error("No subscriptionId in " + message);
+			if (logger.isErrorEnabled()) {
+				logger.error("No subscriptionId in " + message);
+			}
 			return;
 		}
 
 		String destination = SimpMessageHeaderAccessor.getDestination(headers);
 		if (destination == null) {
-			logger.error("No destination in " + message);
+			if (logger.isErrorEnabled()) {
+				logger.error("No destination in " + message);
+			}
 			return;
 		}
 
@@ -85,13 +90,17 @@ public abstract class AbstractSubscriptionRegistry implements SubscriptionRegist
 
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		if (sessionId == null) {
-			logger.error("No sessionId in " + message);
+			if (logger.isErrorEnabled()) {
+				logger.error("No sessionId in " + message);
+			}
 			return;
 		}
 
 		String subscriptionId = SimpMessageHeaderAccessor.getSubscriptionId(headers);
 		if (subscriptionId == null) {
-			logger.error("No subscriptionId " + message);
+			if (logger.isErrorEnabled()) {
+				logger.error("No subscriptionId " + message);
+			}
 			return;
 		}
 
@@ -109,7 +118,9 @@ public abstract class AbstractSubscriptionRegistry implements SubscriptionRegist
 
 		String destination = SimpMessageHeaderAccessor.getDestination(headers);
 		if (destination == null) {
-			logger.error("No destination in " + message);
+			if (logger.isErrorEnabled()) {
+				logger.error("No destination in " + message);
+			}
 			return EMPTY_MAP;
 		}
 
@@ -117,14 +128,13 @@ public abstract class AbstractSubscriptionRegistry implements SubscriptionRegist
 	}
 
 
-	protected abstract void addSubscriptionInternal(String sessionId, String subscriptionId,
+	protected abstract void addSubscriptionInternal(
+			String sessionId, String subscriptionId, String destination, Message<?> message);
+
+	protected abstract void removeSubscriptionInternal(
+			String sessionId, String subscriptionId, Message<?> message);
+
+	protected abstract MultiValueMap<String, String> findSubscriptionsInternal(
 			String destination, Message<?> message);
-
-	protected abstract void removeSubscriptionInternal(String sessionId, String subscriptionId, Message<?> message);
-
-	@Override
-	public abstract void unregisterAllSubscriptions(String sessionId);
-
-	protected abstract MultiValueMap<String, String> findSubscriptionsInternal(String destination, Message<?> message);
 
 }
