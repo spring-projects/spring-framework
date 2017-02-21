@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
@@ -429,6 +430,9 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public ListBodySpec hasSize(int size) {
+			List<?> actual = this.result.getResponseBody();
+			String message = "Response body does not contain " + size + " elements";
+			this.result.assertWithDiagnostics(() -> assertEquals(message, size, actual.size()));
 			return this;
 		}
 
