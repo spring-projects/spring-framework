@@ -43,8 +43,7 @@ public class ParsingPathMatcher implements PathMatcher {
 	private final ConcurrentMap<String, PathPattern> cache =
 			new ConcurrentHashMap<>(64);
 
-	private static final ThreadLocal<PathPatternParser> PARSER
-			= ThreadLocal.withInitial(() -> new PathPatternParser());
+	private final PathPatternParser parser = new PathPatternParser();
 
 	@Override
 	public boolean match(String pattern, String path) {
@@ -113,7 +112,7 @@ public class ParsingPathMatcher implements PathMatcher {
 	private PathPattern getPathPattern(String pattern) {
 		PathPattern pathPattern = this.cache.get(pattern);
 		if (pathPattern == null) {
-			pathPattern = PARSER.get().parse(pattern);
+			pathPattern = this.parser.parse(pattern);
 			this.cache.put(pattern, pathPattern);
 		}
 		return pathPattern;

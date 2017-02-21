@@ -63,9 +63,9 @@ public class PathPatternParser {
 	 * @param pathPattern the input path pattern, e.g. /foo/{bar}
 	 * @return a PathPattern for quickly matching paths against the specified path pattern
 	 */
-	public PathPattern parse(String pattern) {
+	public PathPattern parse(String pathPattern) {
 		InternalPathPatternParser ippp = new InternalPathPatternParser(separator, caseSensitive);
-		return ippp.parse(pattern);
+		return ippp.parse(pathPattern);
 	}
 
 }
