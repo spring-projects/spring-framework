@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 
 	private Expression parseTemplate(String expressionString, ParserContext context)
 			throws ParseException {
-		if (expressionString.length() == 0) {
+		if (expressionString.isEmpty()) {
 			return new LiteralExpression("");
 		}
 		Expression[] expressions = parseExpressions(expressionString, context);
@@ -145,7 +145,7 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 						suffixIndex);
 				expr = expr.trim();
 
-				if (expr.length() == 0) {
+				if (expr.isEmpty()) {
 					throw new ParseException(expressionString, prefixIndex,
 							"No expression defined within delimiter '" + prefix + suffix
 									+ "' at character " + prefixIndex);

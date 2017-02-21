@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,10 +150,10 @@ public abstract class PropertyMatches {
 	 * @return the distance value
 	 */
 	private static int calculateStringDistance(String s1, String s2) {
-		if (s1.length() == 0) {
+		if (s1.isEmpty()) {
 			return s2.length();
 		}
-		if (s2.length() == 0) {
+		if (s2.isEmpty()) {
 			return s1.length();
 		}
 		int d[][] = new int[s1.length() + 1][s2.length() + 1];
