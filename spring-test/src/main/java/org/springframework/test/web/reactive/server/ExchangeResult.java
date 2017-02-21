@@ -20,7 +20,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import reactor.core.publisher.MonoProcessor;
@@ -33,16 +32,17 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Simple container for request and response details from an exchange performed
+ * Provides access to request and response details from an exchange performed
  * through the {@link WebTestClient}.
  *
- * <p>When an {@code ExchangeResult} is first created it has only the status and
- * headers of the response available. When the response body is extracted, the
- * {@code ExchangeResult} is re-created as either {@link EntityExchangeResult}
- * or {@link FluxExchangeResult} that further expose extracted entities.
+ * <p>When an {@code ExchangeResult} is first created it has the status and the
+ * headers of the response ready. Later when the response body is extracted,
+ * the {@code ExchangeResult} is re-created as {@link EntityExchangeResult} or
+ * {@link FluxExchangeResult} also exposing the extracted entities.
  *
- * <p>Raw request and response content may also be accessed once complete via
- * {@link #getRequestContent()} or {@link #getResponseContent()}.
+ * <p>Serialized request and response content may also be accessed through the
+ * methods {@link #getRequestContent()} and {@link #getResponseContent()} after
+ * that content has been fully read or written.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -137,25 +137,13 @@ public class ExchangeResult {
 
 
 	/**
-	 * Execute the given Runnable in the context of "this" instance and decorate
-	 * any {@link AssertionError}s raised with request and response details.
+	 * Execute the given Runnable, catch any {@link AssertionError}, decorate
+	 * with {@code AssertionError} containing diagnostic information about the
+	 * request and response, and then re-throw.
 	 */
 	public void assertWithDiagnostics(Runnable assertion) {
 		try {
 			assertion.run();
-		}
-		catch (AssertionError ex) {
-			throw new AssertionError("Assertion failed on the following exchange:" + this, ex);
-		}
-	}
-
-	/**
-	 * Variant of {@link #assertWithDiagnostics(Runnable)} that passes through
-	 * a return value from the assertion code.
-	 */
-	public <T> T assertWithDiagnosticsAndReturn(Supplier<T> assertion) {
-		try {
-			return assertion.get();
 		}
 		catch (AssertionError ex) {
 			throw new AssertionError("Assertion failed on the following exchange:" + this, ex);
@@ -167,14 +155,14 @@ public class ExchangeResult {
 	public String toString() {
 		return "\n" +
 				"> " + getMethod() + " " + getUrl() + "\n" +
-				"> " + formatHeaders("> ", getRequestHeaders()) + "\n" +
+				"> " + formatHeaders(getRequestHeaders(), "\n> ") + "\n" +
 				"\n" +
-				formatContent(getRequestHeaders().getContentType(), getRequestContent()) + "\n" +
+				formatBody(getRequestHeaders().getContentType(), getRequestContent()) + "\n" +
 				"\n" +
 				"< " + getStatus() + " " + getStatusReason() + "\n" +
-				"< " + formatHeaders("< ", getResponseHeaders()) + "\n" +
+				"< " + formatHeaders(getResponseHeaders(), "\n< ") + "\n" +
 				"\n" +
-				formatContent(getResponseHeaders().getContentType(), getResponseContent()) + "\n\n";
+				formatBody(getResponseHeaders().getContentType(), getResponseContent()) + "\n\n";
 	}
 
 	private String getStatusReason() {
@@ -185,13 +173,13 @@ public class ExchangeResult {
 		return reason;
 	}
 
-	private String formatHeaders(String linePrefix, HttpHeaders headers) {
+	private String formatHeaders(HttpHeaders headers, String delimiter) {
 		return headers.entrySet().stream()
 				.map(entry -> entry.getKey() + ": " + entry.getValue())
-				.collect(Collectors.joining("\n" + linePrefix));
+				.collect(Collectors.joining(delimiter));
 	}
 
-	private String formatContent(MediaType contentType, MonoProcessor<byte[]> body) {
+	private String formatBody(MediaType contentType, MonoProcessor<byte[]> body) {
 		if (body.isSuccess()) {
 			byte[] bytes = body.blockMillis(0);
 			if (bytes.length == 0) {

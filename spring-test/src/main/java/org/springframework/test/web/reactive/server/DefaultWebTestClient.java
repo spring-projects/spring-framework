@@ -300,10 +300,8 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		public EntityExchangeResult<Void> consumeEmpty() {
-			assertWithDiagnostics(() -> {
-				DataBuffer buffer = this.response.body(toDataBuffers()).blockFirst(getTimeout());
-				assertTrue("Expected empty body", buffer == null);
-			});
+			DataBuffer buffer = this.response.body(toDataBuffers()).blockFirst(getTimeout());
+			assertWithDiagnostics(() -> assertTrue("Expected empty body", buffer == null));
 			return new EntityExchangeResult<>(this, null);
 		}
 	}
@@ -344,10 +342,8 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public ResponseSpec consumeWith(Consumer<ExchangeResult> consumer) {
-			return this.result.assertWithDiagnosticsAndReturn(() -> {
-				consumer.accept(this.result);
-				return this;
-			});
+			this.result.assertWithDiagnostics(() -> consumer.accept(this.result));
+			return this;
 		}
 
 		@Override
@@ -402,10 +398,9 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public <T> EntityExchangeResult<T> isEqualTo(T expected) {
-			return this.result.assertWithDiagnosticsAndReturn(() -> {
-				assertEquals("Response body", expected, this.result.getResponseBody());
-				return returnResult();
-			});
+			Object actual = this.result.getResponseBody();
+			this.result.assertWithDiagnostics(() -> assertEquals("Response body", expected, actual));
+			return returnResult();
 		}
 
 		@SuppressWarnings("unchecked")
@@ -427,10 +422,9 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public <T> EntityExchangeResult<List<T>> isEqualTo(List<T> expected) {
-			return this.result.assertWithDiagnosticsAndReturn(() -> {
-				assertEquals("Response body", expected, this.result.getResponseBody());
-				return returnResult();
-			});
+			List<?> actual = this.result.getResponseBody();
+			this.result.assertWithDiagnostics(() -> assertEquals("Response body", expected, actual));
+			return returnResult();
 		}
 
 		@Override
@@ -440,21 +434,19 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public ListBodySpec contains(Object... elements) {
-			this.result.assertWithDiagnostics(() -> {
-				List<Object> elementList = Arrays.asList(elements);
-				String message = "Response body does not contain " + elementList;
-				assertTrue(message, this.result.getResponseBody().containsAll(elementList));
-			});
+			List<?> expected = Arrays.asList(elements);
+			List<?> actual = this.result.getResponseBody();
+			String message = "Response body does not contain " + expected;
+			this.result.assertWithDiagnostics(() -> assertTrue(message, actual.containsAll(expected)));
 			return this;
 		}
 
 		@Override
 		public ListBodySpec doesNotContain(Object... elements) {
-			this.result.assertWithDiagnostics(() -> {
-				List<Object> elementList = Arrays.asList(elements);
-				String message = "Response body should have contained " + elementList;
-				assertTrue(message, !this.result.getResponseBody().containsAll(Arrays.asList(elements)));
-			});
+			List<?> expected = Arrays.asList(elements);
+			List<?> actual = this.result.getResponseBody();
+			String message = "Response body should have contained " + expected;
+			this.result.assertWithDiagnostics(() -> assertTrue(message, !actual.containsAll(expected)));
 			return this;
 		}
 
@@ -507,43 +499,38 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public <K, V> EntityExchangeResult<Map<K, V>> isEqualTo(Map<K, V> expected) {
-			return this.result.assertWithDiagnosticsAndReturn(() -> {
-				assertEquals("Response body map", expected, getBody());
-				return returnResult();
-			});
+			String message = "Response body map";
+			this.result.assertWithDiagnostics(() -> assertEquals(message, expected, getBody()));
+			return returnResult();
 		}
 
 		@Override
 		public MapBodySpec hasSize(int size) {
-			return this.result.assertWithDiagnosticsAndReturn(() -> {
-				assertEquals("Response body map size", size, getBody().size());
-				return this;
-			});
+			String message = "Response body map size";
+			this.result.assertWithDiagnostics(() -> assertEquals(message, size, getBody().size()));
+			return this;
 		}
 
 		@Override
 		public MapBodySpec contains(Object key, Object value) {
-			return this.result.assertWithDiagnosticsAndReturn(() -> {
-				assertEquals("Response body map value for key " + key, value, getBody().get(key));
-				return this;
-			});
+			String message = "Response body map value for key " + key;
+			this.result.assertWithDiagnostics(() -> assertEquals(message, value, getBody().get(key)));
+			return this;
 		}
 
 		@Override
 		public MapBodySpec containsKeys(Object... keys) {
-			return this.result.assertWithDiagnosticsAndReturn(() -> {
-				List<?> missing = Arrays.stream(keys).filter(k -> !getBody().containsKey(k)).collect(toList());
-				assertTrue("Response body map does not contain keys " + missing, missing.isEmpty());
-				return this;
-			});
+			List<?> missing = Arrays.stream(keys).filter(k -> !getBody().containsKey(k)).collect(toList());
+			String message = "Response body map does not contain keys " + missing;
+			this.result.assertWithDiagnostics(() -> assertTrue(message, missing.isEmpty()));
+			return this;
 		}
 
 		@Override
 		public MapBodySpec containsValues(Object... values) {
-			this.result.assertWithDiagnostics(() -> {
-				List<?> missing = Arrays.stream(values).filter(v -> !getBody().containsValue(v)).collect(toList());
-				assertTrue("Response body map does not contain values " + missing, missing.isEmpty());
-			});
+			List<?> missing = Arrays.stream(values).filter(v -> !getBody().containsValue(v)).collect(toList());
+			String message = "Response body map does not contain values " + missing;
+			this.result.assertWithDiagnostics(() -> assertTrue(message, missing.isEmpty()));
 			return this;
 		}
 

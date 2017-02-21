@@ -30,12 +30,13 @@ import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.util.Assert;
 
 /**
- * Decorate any other {@link ClientHttpConnector} with the purpose of
- * intercepting, capturing, and exposing actual request and response content
+ * Decorate another {@link ClientHttpConnector} with the purpose of
+ * intercepting, capturing, and exposing actual request and response data
  * transmitted to and received from the server.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ *
  * @see HttpHandlerConnector
  */
 class WiretapConnector implements ClientHttpConnector {
@@ -45,7 +46,7 @@ class WiretapConnector implements ClientHttpConnector {
 
 	private final ClientHttpConnector delegate;
 
-	private final Map<String, ExchangeResult> capturedExchanges = new ConcurrentHashMap<>();
+	private final Map<String, ExchangeResult> exchanges = new ConcurrentHashMap<>();
 
 
 	public WiretapConnector(ClientHttpConnector delegate) {
@@ -66,21 +67,21 @@ class WiretapConnector implements ClientHttpConnector {
 					return requestCallback.apply(wrapped);
 				})
 				.map(response ->  {
-					WiretapClientHttpRequest request = requestRef.get();
-					String requestId = request.getHeaders().getFirst(REQUEST_ID_HEADER_NAME);
+					WiretapClientHttpRequest wrappedRequest = requestRef.get();
+					String requestId = wrappedRequest.getHeaders().getFirst(REQUEST_ID_HEADER_NAME);
 					Assert.notNull(requestId, "No request-id header");
-					WiretapClientHttpResponse wrapped = new WiretapClientHttpResponse(response);
-					ExchangeResult result = new ExchangeResult(request, wrapped);
-					this.capturedExchanges.put(requestId, result);
-					return wrapped;
+					WiretapClientHttpResponse wrappedResponse = new WiretapClientHttpResponse(response);
+					ExchangeResult result = new ExchangeResult(wrappedRequest, wrappedResponse);
+					this.exchanges.put(requestId, result);
+					return wrappedResponse;
 				});
 	}
 
 	/**
-	 * Retrieve the request with the given "request-id" header.
+	 * Retrieve the {@code ExchangeResult} for the given "request-id" header value.
 	 */
 	public ExchangeResult claimRequest(String requestId) {
-		ExchangeResult result = this.capturedExchanges.get(requestId);
+		ExchangeResult result = this.exchanges.get(requestId);
 		Assert.notNull(result, "No match for request with id [" + requestId + "]");
 		return result;
 	}

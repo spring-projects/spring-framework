@@ -25,7 +25,8 @@ import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.client.reactive.ClientHttpResponseDecorator;
 
 /**
- * Client HTTP response decorator that saves the content read from the server.
+ * Client HTTP response decorator that interceptrs and saves the content read
+ * from the server.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -47,7 +48,7 @@ class WiretapClientHttpResponse extends ClientHttpResponseDecorator {
 
 
 	/**
-	 * Return a "promise" for the response body content.
+	 * Return a "promise" with the response body content read from the server.
 	 */
 	public MonoProcessor<byte[]> getBodyContent() {
 		return this.body;
@@ -58,11 +59,11 @@ class WiretapClientHttpResponse extends ClientHttpResponseDecorator {
 		return super.getBody()
 				.doOnNext(buffer::write)
 				.doOnError(body::onError)
-				.doOnCancel(this::handleCompleteSignal)
-				.doOnComplete(this::handleCompleteSignal);
+				.doOnCancel(this::handleOnComplete)
+				.doOnComplete(this::handleOnComplete);
 	}
 
-	private void handleCompleteSignal() {
+	private void handleOnComplete() {
 		if (!this.body.isTerminated()) {
 			byte[] bytes = new byte[this.buffer.readableByteCount()];
 			this.buffer.read(bytes);

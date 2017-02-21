@@ -27,7 +27,8 @@ import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpRequestDecorator;
 
 /**
- * Client HTTP request decorator that saves the content written to the server.
+ * Client HTTP request decorator that intercepts and saves content written to
+ * the server.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -49,7 +50,7 @@ class WiretapClientHttpRequest extends ClientHttpRequestDecorator {
 
 
 	/**
-	 * Return a "promise" for the request body content.
+	 * Return a "promise" with the request body content written to the server.
 	 */
 	public MonoProcessor<byte[]> getBodyContent() {
 		return this.body;
@@ -60,39 +61,39 @@ class WiretapClientHttpRequest extends ClientHttpRequestDecorator {
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> publisher) {
 		return super.writeWith(
 				Flux.from(publisher)
-						.doOnNext(this::handleBuffer)
-						.doOnError(this::handleErrorSignal)
-						.doOnCancel(this::handleCompleteSignal)
-						.doOnComplete(this::handleCompleteSignal));
+						.doOnNext(this::handleOnNext)
+						.doOnError(this::handleError)
+						.doOnCancel(this::handleOnComplete)
+						.doOnComplete(this::handleOnComplete));
 	}
 
 	@Override
 	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> publisher) {
 		return super.writeAndFlushWith(
 				Flux.from(publisher)
-						.map(p -> Flux.from(p).doOnNext(this::handleBuffer).doOnError(this::handleErrorSignal))
-						.doOnError(this::handleErrorSignal)
-						.doOnCancel(this::handleCompleteSignal)
-						.doOnComplete(this::handleCompleteSignal));
+						.map(p -> Flux.from(p).doOnNext(this::handleOnNext).doOnError(this::handleError))
+						.doOnError(this::handleError)
+						.doOnCancel(this::handleOnComplete)
+						.doOnComplete(this::handleOnComplete));
 	}
 
 	@Override
 	public Mono<Void> setComplete() {
-		handleCompleteSignal();
+		handleOnComplete();
 		return super.setComplete();
 	}
 
-	private void handleBuffer(DataBuffer buffer) {
+	private void handleOnNext(DataBuffer buffer) {
 		this.buffer.write(buffer);
 	}
 
-	private void handleErrorSignal(Throwable ex) {
+	private void handleError(Throwable ex) {
 		if (!this.body.isTerminated()) {
 			this.body.onError(ex);
 		}
 	}
 
-	private void handleCompleteSignal() {
+	private void handleOnComplete() {
 		if (!this.body.isTerminated()) {
 			byte[] bytes = new byte[this.buffer.readableByteCount()];
 			this.buffer.read(bytes);

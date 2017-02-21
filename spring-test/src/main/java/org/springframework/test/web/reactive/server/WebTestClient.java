@@ -512,9 +512,10 @@ public interface WebTestClient {
 		ListBodySpec list(int elementCount);
 
 		/**
-		 * Return request and response details from the exchange including the
-		 * response body as a {@code Flux<T>} and available for example for use
-		 * with a {@code StepVerifier} from Project Reactor.
+		 * Return request and response details for the exchange incluidng the
+		 * response body decoded as {@code Flux<T>} where {@code <T>} is the
+		 * expected element type. The returned {@code Flux} may for example be
+		 * verified with the Reactor {@code StepVerifier}.
 		 */
 		<T> FluxExchangeResult<T> returnResult();
 	}
@@ -530,7 +531,7 @@ public interface WebTestClient {
 		<T> EntityExchangeResult<T> isEqualTo(T expected);
 
 		/**
-		 * Return request and response details from the exchange including the
+		 * Return request and response details for the exchange including the
 		 * extracted response body.
 		 */
 		<T> EntityExchangeResult<T> returnResult();
@@ -565,7 +566,7 @@ public interface WebTestClient {
 		ListBodySpec doesNotContain(Object... elements);
 
 		/**
-		 * Return request and response details from the exchange including the
+		 * Return request and response details for the exchange including the
 		 * extracted response body.
 		 */
 		<T> EntityExchangeResult<List<T>> returnResult();
@@ -630,7 +631,7 @@ public interface WebTestClient {
 		MapBodySpec containsValues(Object... values);
 
 		/**
-		 * Return request and response details from the exchange including the
+		 * Return request and response details for the exchange including the
 		 * extracted response body.
 		 */
 		<K, V> EntityExchangeResult<Map<K, V>> returnResult();

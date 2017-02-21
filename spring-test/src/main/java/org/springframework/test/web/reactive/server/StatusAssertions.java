@@ -51,10 +51,9 @@ public class StatusAssertions {
 	 * Assert the response status as an integer.
 	 */
 	public WebTestClient.ResponseSpec isEqualTo(int status) {
-		return this.exchangeResult.assertWithDiagnosticsAndReturn(() -> {
-			assertEquals("Status", status, this.exchangeResult.getStatus().value());
-			return this.responseSpec;
-		});
+		int actual = this.exchangeResult.getStatus().value();
+		this.exchangeResult.assertWithDiagnostics(() -> assertEquals("Status", status, actual));
+		return this.responseSpec;
 	}
 
 	/**
@@ -146,11 +145,10 @@ public class StatusAssertions {
 	 * Assert the response error message.
 	 */
 	public WebTestClient.ResponseSpec reasonEquals(String reason) {
-		return this.exchangeResult.assertWithDiagnosticsAndReturn(() -> {
-			HttpStatus status = this.exchangeResult.getStatus();
-			assertEquals("Response status reason", reason, status.getReasonPhrase());
-			return this.responseSpec;
-		});
+		String actual = this.exchangeResult.getStatus().getReasonPhrase();
+		String message = "Response status reason";
+		this.exchangeResult.assertWithDiagnostics(() -> assertEquals(message, reason, actual));
+		return this.responseSpec;
 	}
 
 	/**
@@ -192,19 +190,16 @@ public class StatusAssertions {
 	// Private methods
 
 	private WebTestClient.ResponseSpec assertStatusAndReturn(HttpStatus expected) {
-		return this.exchangeResult.assertWithDiagnosticsAndReturn(() -> {
-			assertEquals("Status", expected, this.exchangeResult.getStatus());
-			return this.responseSpec;
-		});
+		HttpStatus actual = this.exchangeResult.getStatus();
+		this.exchangeResult.assertWithDiagnostics(() -> assertEquals("Status", expected, actual));
+		return this.responseSpec;
 	}
 
 	private WebTestClient.ResponseSpec assertSeriesAndReturn(HttpStatus.Series expected) {
-		return this.exchangeResult.assertWithDiagnosticsAndReturn(() -> {
-			HttpStatus status = this.exchangeResult.getStatus();
-			String message = "Range for response status value " + status;
-			assertEquals(message, expected, status.series());
-			return this.responseSpec;
-		});
+		HttpStatus status = this.exchangeResult.getStatus();
+		String message = "Range for response status value " + status;
+		this.exchangeResult.assertWithDiagnostics(() -> assertEquals(message, expected, status.series()));
+		return this.responseSpec;
 	}
 
 }

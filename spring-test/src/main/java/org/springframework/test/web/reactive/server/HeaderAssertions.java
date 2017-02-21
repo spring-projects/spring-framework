@@ -60,13 +60,12 @@ public class HeaderAssertions {
 	 * @param pattern String pattern to pass to {@link Pattern#compile(String)}
 	 */
 	public WebTestClient.ResponseSpec valueMatches(String name, String pattern) {
-		return this.exchangeResult.assertWithDiagnosticsAndReturn(() -> {
-			String value = getHeaders().getFirst(name);
-			assertTrue(getMessage(name) + " not found", value != null);
-			boolean match = Pattern.compile(pattern).matcher(value).matches();
-			assertTrue(getMessage(name) + "=\'" + value + "\' does not match \'" + pattern + "\'", match);
-			return this.responseSpec;
-		});
+		String value = getHeaders().getFirst(name);
+		assertTrue(getMessage(name) + " not found", value != null);
+		boolean match = Pattern.compile(pattern).matcher(value).matches();
+		String message = getMessage(name) + "=\'" + value + "\' does not match \'" + pattern + "\'";
+		this.exchangeResult.assertWithDiagnostics(() -> assertTrue(message, match));
+		return this.responseSpec;
 	}
 
 	/**
@@ -123,10 +122,8 @@ public class HeaderAssertions {
 	}
 
 	private WebTestClient.ResponseSpec assertHeader(String name, Object expected, Object actual) {
-		return this.exchangeResult.assertWithDiagnosticsAndReturn(() -> {
-			assertEquals(getMessage(name), expected, actual);
-			return this.responseSpec;
-		});
+		this.exchangeResult.assertWithDiagnostics(() -> assertEquals(getMessage(name), expected, actual));
+		return this.responseSpec;
 	}
 
 }
