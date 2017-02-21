@@ -386,6 +386,9 @@ public abstract class RequestPredicates {
 			if (!subPath.startsWith("/")) {
 				subPath = "/" + subPath;
 			}
+			if (requestPath.endsWith("/") && !subPath.endsWith("/")) {
+				subPath += "/";
+			}
 			return new SubPathServerRequestWrapper(request, subPath);
 		}
 
