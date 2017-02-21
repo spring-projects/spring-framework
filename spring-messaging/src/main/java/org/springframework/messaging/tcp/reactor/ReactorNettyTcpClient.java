@@ -240,7 +240,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 			TcpConnection<P> connection = new ReactorNettyTcpConnection<>(inbound, outbound,  codec, completion);
 			scheduler.schedule(() -> connectionHandler.afterConnected(connection));
 
-			inbound.context().addDecoder(new StompMessageDecoder<>(codec));
+			inbound.context().addHandler(new StompMessageDecoder<>(codec));
 
 			inbound.receiveObject()
 					.cast(Message.class)
