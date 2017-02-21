@@ -26,10 +26,10 @@ import org.springframework.web.reactive.function.server.support.ServerRequestWra
 /**
  * Represents a function that filters a {@linkplain HandlerFunction handler function}.
  *
- * @param <T> the type of the {@linkplain HandlerFunction handler function} to filter
- * @param <R> the type of the response of the function
  * @author Arjen Poutsma
  * @since 5.0
+ * @param <T> the type of the {@linkplain HandlerFunction handler function} to filter
+ * @param <R> the type of the response of the function
  * @see RouterFunction#filter(HandlerFilterFunction)
  */
 @FunctionalInterface

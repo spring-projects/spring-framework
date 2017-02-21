@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Return the configured origins to allow, possibly {@code null}.
+	 * Return the configured origins to allow, or {@code null} if none.
 	 * @see #addAllowedOrigin(String)
 	 * @see #setAllowedOrigins(List)
 	 */
@@ -155,7 +155,7 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Return the allowed HTTP methods, possibly {@code null} in which case
+	 * Return the allowed HTTP methods, or {@code null} in which case
 	 * only {@code "GET"} and {@code "HEAD"} allowed.
 	 * @see #addAllowedMethod(HttpMethod)
 	 * @see #addAllowedMethod(String)
@@ -208,7 +208,7 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Return the allowed actual request headers, possibly {@code null}.
+	 * Return the allowed actual request headers, or {@code null} if none.
 	 * @see #addAllowedHeader(String)
 	 * @see #setAllowedHeaders(List)
 	 */
@@ -242,7 +242,7 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Return the configured response headers to expose, possibly {@code null}.
+	 * Return the configured response headers to expose, or {@code null} if none.
 	 * @see #addExposedHeader(String)
 	 * @see #setExposedHeaders(List)
 	 */
@@ -273,7 +273,7 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Return the configured {@code allowCredentials} flag, possibly {@code null}.
+	 * Return the configured {@code allowCredentials} flag, or {@code null} if none.
 	 * @see #setAllowCredentials(Boolean)
 	 */
 	public Boolean getAllowCredentials() {
@@ -290,7 +290,7 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Return the configured {@code maxAge} value, possibly {@code null}.
+	 * Return the configured {@code maxAge} value, or {@code null} if none.
 	 * @see #setMaxAge(Long)
 	 */
 	public Long getMaxAge() {
@@ -378,7 +378,7 @@ public class CorsConfiguration {
 	/**
 	 * Check the origin of the request against the configured allowed origins.
 	 * @param requestOrigin the origin to check
-	 * @return the origin to use for the response, possibly {@code null} which
+	 * @return the origin to use for the response, or {@code null} which
 	 * means the request origin is not allowed
 	 */
 	public String checkOrigin(String requestOrigin) {

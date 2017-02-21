@@ -28,11 +28,10 @@ import org.springframework.http.codec.HttpMessageWriter;
 /**
  * A combination of functions that can populate a {@link ReactiveHttpOutputMessage} body.
  *
- * @param <T> the type of data to insert
- * @param <M> the type of {@link ReactiveHttpOutputMessage} this inserter can be applied to
- *
  * @author Arjen Poutsma
  * @since 5.0
+ * @param <T> the type of data to insert
+ * @param <M> the type of {@link ReactiveHttpOutputMessage} this inserter can be applied to
  * @see BodyInserters
  */
 @FunctionalInterface

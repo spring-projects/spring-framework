@@ -136,8 +136,8 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 
 	@Override
-	protected void addSubscriptionInternal(String sessionId, String subsId, String destination,
-			Message<?> message) {
+	protected void addSubscriptionInternal(
+			String sessionId, String subsId, String destination, Message<?> message) {
 
 		Expression expression = null;
 		MessageHeaders headers = message.getHeaders();
@@ -478,13 +478,14 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	}
 
 
-	private static class Subscription {
+	private static final class Subscription {
 
 		private final String id;
 
 		private final Expression selectorExpression;
 
 		public Subscription(String id, Expression selector) {
+			Assert.notNull(id, "Subscription id must not be null");
 			this.id = id;
 			this.selectorExpression = selector;
 		}
@@ -499,19 +500,12 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		@Override
 		public boolean equals(Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (other == null || getClass() != other.getClass()) {
-				return false;
-			}
-			return getId().equals(((Subscription) other).getId());
-
+			return (this == other || (other instanceof Subscription && this.id.equals(((Subscription) other).id)));
 		}
 
 		@Override
 		public int hashCode() {
-			return getId().hashCode();
+			return this.id.hashCode();
 		}
 
 		@Override

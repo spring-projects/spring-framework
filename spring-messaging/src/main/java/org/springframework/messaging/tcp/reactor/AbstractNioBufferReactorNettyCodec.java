@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.tcp.reactor;
 
 import java.nio.ByteBuffer;
@@ -41,12 +42,13 @@ public abstract class AbstractNioBufferReactorNettyCodec<P> implements ReactorNe
 		return messages;
 	}
 
-	protected abstract List<Message<P>> decodeInternal(ByteBuffer nioBuffer);
-
 	@Override
 	public void encode(Message<P> message, ByteBuf outputBuffer) {
 		outputBuffer.writeBytes(encodeInternal(message));
 	}
+
+
+	protected abstract List<Message<P>> decodeInternal(ByteBuffer nioBuffer);
 
 	protected abstract ByteBuffer encodeInternal(Message<P> message);
 
