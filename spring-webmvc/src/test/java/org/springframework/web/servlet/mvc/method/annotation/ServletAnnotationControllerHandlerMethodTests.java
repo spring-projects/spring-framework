@@ -109,9 +109,11 @@ import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -1551,6 +1553,32 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		request.setSession(session);
 		request.addParameter("name", "Jeff");
 		response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+
+		assertEquals(302, response.getStatus());
+		assertEquals("/messages/1?name=value", response.getRedirectedUrl());
+		assertEquals("yay!", RequestContextUtils.getOutputFlashMap(request).get("successMessage"));
+
+		// GET after POST
+		request = new MockHttpServletRequest("GET", "/messages/1");
+		request.setQueryString("name=value");
+		request.setSession(session);
+		response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+
+		assertEquals(200, response.getStatus());
+		assertEquals("Got: yay!", response.getContentAsString());
+		assertTrue(RequestContextUtils.getOutputFlashMap(request).isEmpty());
+	}
+
+	@Test // SPR-15176
+	public void flashAttributesWithResponseEntity() throws Exception {
+		initServletWithControllers(RedirectAttributesController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/messages-response-entity");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		HttpSession session = request.getSession();
+
 		getServlet().service(request, response);
 
 		assertEquals(302, response.getStatus());
@@ -3215,21 +3243,26 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			dataBinder.setRequiredFields("name");
 		}
 
-		@RequestMapping(value = "/messages/{id}", method = RequestMethod.GET)
+		@GetMapping("/messages/{id}")
 		public void message(ModelMap model, Writer writer) throws IOException {
 			writer.write("Got: " + model.get("successMessage"));
 		}
 
-		@RequestMapping(value = "/messages", method = RequestMethod.POST)
-		public String sendMessage(TestBean testBean, BindingResult result, RedirectAttributes redirectAttrs) {
+		@PostMapping("/messages")
+		public String sendMessage(TestBean testBean, BindingResult result, RedirectAttributes attributes) {
 			if (result.hasErrors()) {
 				return "messages/new";
 			}
-			else {
-				redirectAttrs.addAttribute("id", "1").addAttribute("name", "value")
-						.addFlashAttribute("successMessage", "yay!");
-				return "redirect:/messages/{id}";
-			}
+			attributes.addAttribute("id", "1").addAttribute("name", "value");
+			attributes.addFlashAttribute("successMessage", "yay!");
+			return "redirect:/messages/{id}";
+		}
+
+		@PostMapping("/messages-response-entity")
+		public ResponseEntity<Void> sendMessage(RedirectAttributes attributes) {
+			attributes.addFlashAttribute("successMessage", "yay!");
+			URI location = URI.create("/messages/1?name=value");
+			return ResponseEntity.status(HttpStatus.FOUND).location(location).build();
 		}
 	}
 
