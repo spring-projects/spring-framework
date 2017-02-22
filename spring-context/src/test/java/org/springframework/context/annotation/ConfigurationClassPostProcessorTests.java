@@ -66,17 +66,16 @@ import static org.junit.Assert.*;
  */
 public class ConfigurationClassPostProcessorTests {
 
-	private DefaultListableBeanFactory beanFactory;
+	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
 
 	@Before
-	public void setUp() {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+	public void setup() {
 		QualifierAnnotationAutowireCandidateResolver acr = new QualifierAnnotationAutowireCandidateResolver();
-		acr.setBeanFactory(bf);
-		bf.setAutowireCandidateResolver(acr);
-		this.beanFactory = bf;
+		acr.setBeanFactory(this.beanFactory);
+		this.beanFactory.setAutowireCandidateResolver(acr);
 	}
+
 
 	/**
 	 * Enhanced {@link Configuration} classes are only necessary for respecting
@@ -949,7 +948,6 @@ public class ConfigurationClassPostProcessorTests {
 			};
 		}
 	}
-
 
 	@Configuration
 	public static class RawRepositoryConfiguration {

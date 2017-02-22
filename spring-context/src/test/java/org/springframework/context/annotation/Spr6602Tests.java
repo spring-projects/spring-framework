@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  */
 public class Spr6602Tests {
+
 	@Test
 	public void testXmlBehavior() throws Exception {
 		doAssertions(new ClassPathXmlApplicationContext("Spr6602Tests-context.xml", Spr6602Tests.class));
@@ -59,8 +60,10 @@ public class Spr6602Tests {
 		assertThat(bar3, is(not(bar4)));
 	}
 
+
 	@Configuration
 	public static class FooConfig {
+
 		@Bean
 		public Foo foo() throws Exception {
 			return new Foo(barFactory().getObject());
@@ -72,7 +75,9 @@ public class Spr6602Tests {
 		}
 	}
 
+
 	public static class Foo {
+
 		final Bar bar;
 
 		public Foo(Bar bar) {
@@ -80,8 +85,10 @@ public class Spr6602Tests {
 		}
 	}
 
+
 	public static class Bar {
 	}
+
 
 	public static class BarFactory implements FactoryBean<Bar> {
 
