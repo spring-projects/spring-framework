@@ -27,6 +27,7 @@ import org.springframework.jdbc.support.KeyHolder;
  * as it can easily be mocked or stubbed.
  *
  * @author Thomas Risberg
+ * @author Steven Jardine
  * @since 2.5
  */
 public interface SimpleJdbcInsertOperations {
@@ -58,6 +59,13 @@ public interface SimpleJdbcInsertOperations {
 	 * @return the instance of this SimpleJdbcInsert
 	 */
 	SimpleJdbcInsertOperations usingColumns(String... columnNames);
+
+	/**
+	 * Specify the column names that the insert statement should be limited to use.
+	 * @param columnNames one or more column names
+	 * @return the instance of this SimpleJdbcInsert
+	 */
+	SimpleJdbcInsertOperations excludingColumns(String... excludedColumnNames);
 
 	/**
 	 * Specify the names of any columns that have auto generated keys.

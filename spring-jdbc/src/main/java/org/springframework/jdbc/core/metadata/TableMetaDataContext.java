@@ -39,6 +39,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Steven Jardine
  * @since 2.5
  */
 public class TableMetaDataContext {
@@ -190,9 +191,10 @@ public class TableMetaDataContext {
 	 * @param declaredColumns any columns that are declared
 	 * @param generatedKeyNames name of generated keys
 	 */
-	public void processMetaData(DataSource dataSource, List<String> declaredColumns, String[] generatedKeyNames) {
+	public void processMetaData(DataSource dataSource, List<String> declaredColumns, List<String> excludedColumns, 
+			String[] generatedKeyNames) {
 		this.metaDataProvider = TableMetaDataProviderFactory.createMetaDataProvider(dataSource, this);
-		this.tableColumns = reconcileColumnsToUse(declaredColumns, generatedKeyNames);
+		this.tableColumns = reconcileColumnsToUse(declaredColumns, excludedColumns, generatedKeyNames);
 	}
 
 	/**
@@ -200,7 +202,8 @@ public class TableMetaDataContext {
 	 * @param declaredColumns declared column names
 	 * @param generatedKeyNames names of generated key columns
 	 */
-	protected List<String> reconcileColumnsToUse(List<String> declaredColumns, String[] generatedKeyNames) {
+	protected List<String> reconcileColumnsToUse(List<String> declaredColumns, List<String> excludedColumns,
+			String[] generatedKeyNames) {
 		if (generatedKeyNames.length > 0) {
 			this.generatedKeyColumnsUsed = true;
 		}
@@ -211,9 +214,14 @@ public class TableMetaDataContext {
 		for (String key : generatedKeyNames) {
 			keys.add(key.toUpperCase());
 		}
+		Set<String> exclusions = new LinkedHashSet<>(excludedColumns.size());
+		for (String exclusion : excludedColumns) {
+			exclusions.add(exclusion.toUpperCase());
+		}
 		List<String> columns = new ArrayList<>();
 		for (TableParameterMetaData meta : metaDataProvider.getTableParameterMetaData()) {
-			if (!keys.contains(meta.getParameterName().toUpperCase())) {
+			String parameterName = meta.getParameterName().toUpperCase();
+			if (!keys.contains(parameterName) && !exclusions.contains(parameterName)) {
 				columns.add(meta.getParameterName());
 			}
 		}

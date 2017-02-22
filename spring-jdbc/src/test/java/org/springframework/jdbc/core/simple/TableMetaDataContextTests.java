@@ -98,7 +98,7 @@ public class TableMetaDataContextTests  {
 		map.registerSqlType("version", Types.NUMERIC);
 
 		context.setTableName(TABLE);
-		context.processMetaData(dataSource, new ArrayList<>(), new String[] {});
+		context.processMetaData(dataSource, new ArrayList<>(), new ArrayList<>(), new String[] {});
 
 		List<Object> values = context.matchInParameterValuesWithInsertColumns(map);
 
@@ -142,7 +142,7 @@ public class TableMetaDataContextTests  {
 		MapSqlParameterSource map = new MapSqlParameterSource();
 		String[] keyCols = new String[] { "id" };
 		context.setTableName(TABLE);
-		context.processMetaData(dataSource, new ArrayList<>(), keyCols);
+		context.processMetaData(dataSource, new ArrayList<>(), new ArrayList<>(), keyCols);
 		List<Object> values = context.matchInParameterValuesWithInsertColumns(map);
 		String insertString = context.createInsertString(keyCols);
 

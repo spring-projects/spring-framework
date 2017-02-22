@@ -56,6 +56,7 @@ import org.springframework.util.Assert;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Steven Jardine
  * @since 2.5
  */
 public abstract class AbstractJdbcInsert {
@@ -71,6 +72,9 @@ public abstract class AbstractJdbcInsert {
 
 	/** List of columns objects to be used in insert statement */
 	private final List<String> declaredColumns = new ArrayList<>();
+
+	/** List of columns objects to be excluded in insert statement */
+	private final List<String> excludedColumns = new ArrayList<>();
 
 	/** The names of the columns holding the generated key */
 	private String[] generatedKeyNames = new String[0];
@@ -179,6 +183,22 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
+	 * Set the names of the columns to be excluded.
+	 */
+	public void setExcludedColumnNames(List<String> excludedColumnNames) {
+		checkIfConfigurationModificationIsAllowed();
+		this.excludedColumns.clear();
+		this.excludedColumns.addAll(excludedColumnNames);
+	}
+
+	/**
+	 * Get the names of the columns excluded.
+	 */
+	public List<String> getExcludedColumnNames() {
+		return Collections.unmodifiableList(this.excludedColumns);
+	}
+
+	/**
 	 * Specify the name of a single generated key column.
 	 */
 	public void setGeneratedKeyName(String generatedKeyName) {
@@ -269,7 +289,8 @@ public abstract class AbstractJdbcInsert {
 	 */
 	protected void compileInternal() {
 		this.tableMetaDataContext.processMetaData(
-				getJdbcTemplate().getDataSource(), getColumnNames(), getGeneratedKeyNames());
+				getJdbcTemplate().getDataSource(), getColumnNames(), getExcludedColumnNames(),
+				getGeneratedKeyNames());
 		this.insertString = this.tableMetaDataContext.createInsertString(getGeneratedKeyNames());
 		this.insertTypes = this.tableMetaDataContext.createInsertTypes();
 		if (logger.isDebugEnabled()) {

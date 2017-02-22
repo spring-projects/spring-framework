@@ -42,6 +42,7 @@ import org.springframework.jdbc.support.KeyHolder;
  * to provide the ability to chain multiple ones together in a "fluent" interface style.
  *
  * @author Thomas Risberg
+ * @author Steven Jardine
  * @since 2.5
  * @see java.sql.DatabaseMetaData
  * @see org.springframework.jdbc.core.JdbcTemplate
@@ -89,6 +90,12 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	@Override
 	public SimpleJdbcInsert usingColumns(String... columnNames) {
 		setColumnNames(Arrays.asList(columnNames));
+		return this;
+	}
+
+	@Override
+	public SimpleJdbcInsert excludingColumns(String... excludedColumnNames) {
+		setExcludedColumnNames(Arrays.asList(excludedColumnNames));
 		return this;
 	}
 
