@@ -216,7 +216,7 @@ public class Spr15275Tests {
 		public Class<?> getObjectType() {
 			return FooInterface.class;
 		}
-	};
+	}
 
 
 	protected interface FooInterface {
