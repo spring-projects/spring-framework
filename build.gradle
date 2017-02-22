@@ -83,7 +83,7 @@ configure(allprojects) { project ->
 	ext.romeVersion            = "1.7.1"
 	ext.rxjavaVersion          = '1.2.6'
 	ext.rxjavaAdapterVersion   = '1.2.1'
-	ext.rxjava2Version         = '2.0.5'
+	ext.rxjava2Version         = '2.0.6'
 	ext.rxnettyVersion         = '0.5.2'
 	ext.servletVersion         = "3.1.0"
 	ext.slf4jVersion           = "1.7.23"
@@ -1077,8 +1077,8 @@ project("spring-test") {
 		optional("org.hamcrest:hamcrest-core:${hamcrestVersion}")
 		optional("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		optional("net.sourceforge.htmlunit:htmlunit:2.24")
-		optional("org.seleniumhq.selenium:htmlunit-driver:2.23.2")
-		optional("org.seleniumhq.selenium:selenium-java:3.0.1") {
+		optional("org.seleniumhq.selenium:htmlunit-driver:2.24")
+		optional("org.seleniumhq.selenium:selenium-java:3.1.0") {
 			exclude group: "io.netty", module: "netty"
 		}
 		optional("org.skyscreamer:jsonassert:1.4.0")
