@@ -373,7 +373,7 @@ public abstract class StringUtils {
 	 * @param sub string to search for. Return 0 if this is {@code null}.
 	 */
 	public static int countOccurrencesOf(String str, String sub) {
-		if (str == null || sub == null || str.length() == 0 || sub.length() == 0) {
+		if (!hasLength(str) || !hasLength(sub)) {
 			return 0;
 		}
 		int count = 0;
@@ -515,7 +515,7 @@ public abstract class StringUtils {
 	}
 
 	private static String changeFirstCharacterCase(String str, boolean capitalize) {
-		if (str == null || str.length() == 0) {
+		if (!hasLength(str)) {
 			return str;
 		}
 		else {
