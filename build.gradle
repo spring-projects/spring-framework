@@ -79,7 +79,7 @@ configure(allprojects) { project ->
 	ext.poiVersion             = "3.15"
 	ext.protobufVersion        = "3.1.0"
 	ext.quartzVersion          = "2.2.3"
-	ext.reactorVersion         = "Aluminium-BUILD-SNAPSHOT"
+	ext.reactorVersion         = "Aluminium-SR1"
 	ext.romeVersion            = "1.7.1"
 	ext.rxjavaVersion          = '1.2.6'
 	ext.rxjavaAdapterVersion   = '1.2.1'
