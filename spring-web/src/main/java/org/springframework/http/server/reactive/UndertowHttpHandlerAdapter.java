@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
 public class UndertowHttpHandlerAdapter extends HttpHandlerAdapterSupport
 		implements io.undertow.server.HttpHandler {
 
-	private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory(false);
+	private DataBufferFactory bufferFactory = new DefaultDataBufferFactory(false);
 
 
 	public UndertowHttpHandlerAdapter(HttpHandler httpHandler) {
@@ -49,41 +49,59 @@ public class UndertowHttpHandlerAdapter extends HttpHandlerAdapterSupport
 	}
 
 
-	public void setDataBufferFactory(DataBufferFactory dataBufferFactory) {
-		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
-		this.dataBufferFactory = dataBufferFactory;
+	public void setDataBufferFactory(DataBufferFactory bufferFactory) {
+		Assert.notNull(bufferFactory, "DataBufferFactory must not be null");
+		this.bufferFactory = bufferFactory;
+	}
+
+	public DataBufferFactory getDataBufferFactory() {
+		return this.bufferFactory;
 	}
 
 
 	@Override
 	public void handleRequest(HttpServerExchange exchange) throws Exception {
 
-		ServerHttpRequest request = new UndertowServerHttpRequest(exchange, this.dataBufferFactory);
-		ServerHttpResponse response = new UndertowServerHttpResponse(exchange, this.dataBufferFactory);
+		ServerHttpRequest request = new UndertowServerHttpRequest(exchange, getDataBufferFactory());
+		ServerHttpResponse response = new UndertowServerHttpResponse(exchange, getDataBufferFactory());
 
-		getHttpHandler().handle(request, response).subscribe(new Subscriber<Void>() {
-			@Override
-			public void onSubscribe(Subscription subscription) {
-				subscription.request(Long.MAX_VALUE);
-			}
-			@Override
-			public void onNext(Void aVoid) {
-				// no op
-			}
-			@Override
-			public void onError(Throwable ex) {
-				logger.error("Could not complete request", ex);
-				if (!exchange.isResponseStarted() && exchange.getStatusCode() <= 500) {
-					exchange.setStatusCode(500);
-				}
-				exchange.endExchange();
-			}
-			@Override
-			public void onComplete() {
-				logger.debug("Successfully completed request");
-				exchange.endExchange();
-			}
-		});
+		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(exchange);
+		getHttpHandler().handle(request, response).subscribe(resultSubscriber);
 	}
 
+
+	private class HandlerResultSubscriber implements Subscriber<Void> {
+
+		private final HttpServerExchange exchange;
+
+
+		public HandlerResultSubscriber(HttpServerExchange exchange) {
+			this.exchange = exchange;
+		}
+
+		@Override
+		public void onSubscribe(Subscription subscription) {
+			subscription.request(Long.MAX_VALUE);
+		}
+
+		@Override
+		public void onNext(Void aVoid) {
+			// no op
+		}
+
+		@Override
+		public void onError(Throwable ex) {
+			logger.error("Could not complete request", ex);
+			if (!this.exchange.isResponseStarted() && this.exchange.getStatusCode() < 500) {
+				this.exchange.setStatusCode(500);
+			}
+			this.exchange.endExchange();
+		}
+
+		@Override
+		public void onComplete() {
+			logger.debug("Successfully completed request");
+			this.exchange.endExchange();
+		}
+	}
 }

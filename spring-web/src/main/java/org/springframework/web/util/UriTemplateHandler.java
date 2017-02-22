@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,14 @@ import java.net.URI;
 import java.util.Map;
 
 /**
- * Strategy for expanding a URI template with full control over the URI template
- * syntax and the encoding of variables. Also a convenient central point for
- * pre-processing all URI templates for example to insert a common base path.
+ * Strategy for expanding a URI template.
  *
  * <p>Supported as a property on the {@code RestTemplate} as well as the
- * {@code AsyncRestTemplate}. The {@link DefaultUriTemplateHandler} is built
- * on Spring's URI template support via {@link UriComponentsBuilder}. An
- * alternative implementation may be used to plug external URI template libraries.
+ * {@code AsyncRestTemplate}.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
- * @see org.springframework.web.client.RestTemplate#setUriTemplateHandler
+ * @see DefaultUriBuilderFactory
  */
 public interface UriTemplateHandler {
 

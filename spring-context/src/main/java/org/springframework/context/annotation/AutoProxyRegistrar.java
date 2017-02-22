@@ -60,6 +60,9 @@ public class AutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 		Set<String> annoTypes = importingClassMetadata.getAnnotationTypes();
 		for (String annoType : annoTypes) {
 			AnnotationAttributes candidate = AnnotationConfigUtils.attributesFor(importingClassMetadata, annoType);
+			if (candidate == null) {
+				continue;
+			}
 			Object mode = candidate.get("mode");
 			Object proxyTargetClass = candidate.get("proxyTargetClass");
 			if (mode != null && proxyTargetClass != null && AdviceMode.class == mode.getClass() &&

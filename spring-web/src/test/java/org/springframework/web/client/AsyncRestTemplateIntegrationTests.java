@@ -18,7 +18,6 @@ package org.springframework.web.client;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -44,19 +43,25 @@ import org.springframework.http.client.AsyncClientHttpRequestExecution;
 import org.springframework.http.client.AsyncClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory;
-import org.springframework.http.client.support.HttpRequestWrapper;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  */
-public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCase {
+public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTestCase {
 
 	private final AsyncRestTemplate template = new AsyncRestTemplate(
 			new HttpComponentsAsyncClientHttpRequestFactory());
@@ -119,14 +124,12 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 		assertNull("Invalid content", entity.getBody());
 	}
 
-
 	@Test
 	public void getNoContentTypeHeader() throws Exception {
 		Future<ResponseEntity<byte[]>> futureEntity = template.getForEntity(baseUrl + "/get/nocontenttype", byte[].class);
 		ResponseEntity<byte[]> responseEntity = futureEntity.get();
 		assertArrayEquals("Invalid content", helloWorld.getBytes("UTF-8"), responseEntity.getBody());
 	}
-
 
 	@Test
 	public void getNoContent() throws Exception {
@@ -590,7 +593,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	public void getAndInterceptResponse() throws Exception {
 		RequestInterceptor interceptor = new RequestInterceptor();
 		template.setInterceptors(Collections.singletonList(interceptor));
-		ListenableFuture<ResponseEntity<String>> future = template.getForEntity("/get", String.class);
+		ListenableFuture<ResponseEntity<String>> future = template.getForEntity(baseUrl + "/get", String.class);
 
 		interceptor.latch.await(5, TimeUnit.SECONDS);
 		assertNotNull(interceptor.response);
@@ -603,7 +606,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	public void getAndInterceptError() throws Exception {
 		RequestInterceptor interceptor = new RequestInterceptor();
 		template.setInterceptors(Collections.singletonList(interceptor));
-		template.getForEntity("/status/notfound", String.class);
+		template.getForEntity(baseUrl + "/status/notfound", String.class);
 
 		interceptor.latch.await(5, TimeUnit.SECONDS);
 		assertNotNull(interceptor.response);
@@ -628,18 +631,6 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 		@Override
 		public ListenableFuture<ClientHttpResponse> intercept(HttpRequest request, byte[] body,
 				AsyncClientHttpRequestExecution execution) throws IOException {
-
-			request = new HttpRequestWrapper(request) {
-				@Override
-				public URI getURI() {
-					try {
-						return new URI(baseUrl + super.getURI().toString());
-					}
-					catch (URISyntaxException ex) {
-						throw new IllegalStateException(ex);
-					}
-				}
-			};
 
 			ListenableFuture<ClientHttpResponse> future = execution.executeAsync(request, body);
 			future.addCallback(

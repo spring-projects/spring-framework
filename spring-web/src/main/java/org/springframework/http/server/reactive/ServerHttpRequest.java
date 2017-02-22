@@ -16,7 +16,11 @@
 
 package org.springframework.http.server.reactive;
 
+import java.net.InetSocketAddress;
+import java.util.Optional;
+
 import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.util.MultiValueMap;
@@ -51,5 +55,53 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 	 * Return a read-only map of cookies sent by the client.
 	 */
 	MultiValueMap<String, HttpCookie> getCookies();
+
+	/**
+	 * Returns the remote address where this request is connected to.
+	 * @return remote address if available
+	 */
+	Optional<InetSocketAddress> getRemoteAddress();
+
+
+	/**
+	 * Return a builder to mutate properties of this request by wrapping it
+	 * with {@link ServerHttpRequestDecorator} and returning either mutated
+	 * values or delegating back to this instance.
+	 */
+	default ServerHttpRequest.Builder mutate() {
+		return new DefaultServerHttpRequestBuilder(this);
+	}
+
+
+	/**
+	 * Builder for mutating an existing {@link ServerHttpRequest}.
+	 */
+	interface Builder {
+
+		/**
+		 * Set the HTTP method to return.
+		 */
+		Builder method(HttpMethod httpMethod);
+
+		/**
+		 * Set the request URI to return.
+		 */
+		Builder path(String path);
+
+		/**
+		 * Set the contextPath to return.
+		 */
+		Builder contextPath(String contextPath);
+
+		/**
+		 * Set or override the specified header.
+		 */
+		Builder header(String key, String value);
+
+		/**
+		 * Build a {@link ServerHttpRequest} decorator with the mutated properties.
+		 */
+		ServerHttpRequest build();
+	}
 
 }

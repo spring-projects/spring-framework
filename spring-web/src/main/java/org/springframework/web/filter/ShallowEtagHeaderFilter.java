@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @author Juergen Hoeller
  * @since 3.0
  */
@@ -70,8 +71,8 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	 * Set whether the ETag value written to the response should be weak, as per RFC 7232.
 	 * <p>Should be configured using an {@code <init-param>} for parameter name
 	 * "writeWeakETag" in the filter definition in {@code web.xml}.
-	 * @see  <a href="https://tools.ietf.org/html/rfc7232#section-2.3">RFC 7232 section 2.3</a>
 	 * @since 4.3
+	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-2.3">RFC 7232 section 2.3</a>
 	 */
 	public void setWriteWeakETag(boolean writeWeakETag) {
 		this.writeWeakETag = writeWeakETag;
@@ -87,8 +88,8 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 
 	/**
-	 * The default value is "false" so that the filter may delay the generation of
-	 * an ETag until the last asynchronously dispatched thread.
+	 * The default value is {@code false} so that the filter may delay the generation
+	 * of an ETag until the last asynchronously dispatched thread.
 	 */
 	@Override
 	protected boolean shouldNotFilterAsyncDispatch() {
@@ -168,8 +169,8 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 			int responseStatusCode, InputStream inputStream) {
 
 		String method = request.getMethod();
-		if (responseStatusCode >= 200 && responseStatusCode < 300 &&
-				(HttpMethod.GET.matches(method) || HttpMethod.HEAD.matches(method))) {
+		if (responseStatusCode >= 200 && responseStatusCode < 300
+				&& HttpMethod.GET.matches(method)) {
 
 			String cacheControl = response.getHeader(HEADER_CACHE_CONTROL);
 			if (cacheControl == null || !cacheControl.contains(DIRECTIVE_NO_STORE)) {

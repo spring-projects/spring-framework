@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -315,7 +315,7 @@ public class PropertySourcesPropertyResolverTests {
 		}
 		catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(), containsString(
-					"Could not resolve placeholder 'bogus' in string value \"${p1}:${p2}:${bogus}\""));
+					"Could not resolve placeholder 'bogus' in value \"${p1}:${p2}:${bogus}\""));
 		}
 		assertThat(pr.getProperty("p6"), equalTo("v1:v2:def"));
 		try {
@@ -347,7 +347,7 @@ public class PropertySourcesPropertyResolverTests {
 		}
 		catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(), containsString(
-					"Could not resolve placeholder 'bogus' in string value \"${p1}:${p2}:${bogus}\""));
+					"Could not resolve placeholder 'bogus' in value \"${p1}:${p2}:${bogus}\""));
 		}
 
 		// relax the treatment of unresolvable nested placeholders
@@ -363,15 +363,8 @@ public class PropertySourcesPropertyResolverTests {
 		}
 		catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(), containsString(
-					"Could not resolve placeholder 'bogus' in string value \"${p1}:${p2}:${bogus}\""));
+					"Could not resolve placeholder 'bogus' in value \"${p1}:${p2}:${bogus}\""));
 		}
-	}
-
-
-	interface SomeType {
-	}
-
-	static class SpecificType implements SomeType {
 	}
 
 }

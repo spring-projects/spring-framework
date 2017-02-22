@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -83,6 +84,8 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	private String engineName;
 
+	private Locale locale;
+
 	private Boolean sharedEngine;
 
 	private String[] scripts;
@@ -122,8 +125,16 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	 * See {@link ScriptTemplateConfigurer#setEngine(ScriptEngine)} documentation.
 	 */
 	public void setEngine(ScriptEngine engine) {
-		Assert.isInstanceOf(Invocable.class, engine);
+		Assert.isInstanceOf(Invocable.class, engine, "ScriptEngine must implement Invocable");
 		this.engine = engine;
+	}
+
+	/**
+	 * Set the {@link Locale} to pass to the render function.
+	 * @since 5.0
+	 */
+	public void setLocale(Locale locale) {
+		this.locale = locale;
 	}
 
 	/**
@@ -345,14 +356,23 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			Invocable invocable = (Invocable) engine;
 			String url = getUrl();
 			String template = getTemplate(url);
+			Function<String, String> templateLoader = path -> {
+				try {
+					return getTemplate(path);
+				}
+				catch (IOException ex) {
+					throw new IllegalStateException(ex);
+				}
+			};
+			RenderingContext context = new RenderingContext(this.getApplicationContext(), this.locale, templateLoader, url);
 
 			Object html;
 			if (this.renderObject != null) {
 				Object thiz = engine.eval(this.renderObject);
-				html = invocable.invokeMethod(thiz, this.renderFunction, template, model, url);
+				html = invocable.invokeMethod(thiz, this.renderFunction, template, model, context);
 			}
 			else {
-				html = invocable.invokeFunction(this.renderFunction, template, model, url);
+				html = invocable.invokeFunction(this.renderFunction, template, model, context);
 			}
 
 			response.getWriter().write(String.valueOf(html));

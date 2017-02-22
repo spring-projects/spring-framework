@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,14 +33,16 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.test.web.servlet.MockMvcBuilder;
 
 /**
- * An abstract implementation of {@link org.springframework.test.web.servlet.MockMvcBuilder}
- * with common methods for configuring filters, default request properties, global
- * expectations and global result actions.
- * <p>
- * Sub-classes can use different strategies to prepare a WebApplicationContext to
- * pass to the DispatcherServlet.
+ * Abstract implementation of {@link MockMvcBuilder} with common methods for
+ * configuring filters, default request properties, global expectations and
+ * global result actions.
+ *
+ * <p>Sub-classes can use different strategies to prepare the Spring
+ * {@code WebApplicationContext} that will be passed to the
+ * {@code DispatcherServlet}.
  *
  * @author Rossen Stoyanchev
  * @author Stephane Nicoll
@@ -64,7 +66,6 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 
 	public final <T extends B> T addFilters(Filter... filters) {
 		Assert.notNull(filters, "filters cannot be null");
-
 		for (Filter f : filters) {
 			Assert.notNull(f, "filters cannot contain null values");
 			this.filters.add(f);
@@ -73,14 +74,11 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 	}
 
 	public final <T extends B> T addFilter(Filter filter, String... urlPatterns) {
-
 		Assert.notNull(filter, "filter cannot be null");
 		Assert.notNull(urlPatterns, "urlPatterns cannot be null");
-
 		if (urlPatterns.length > 0) {
 			filter = new PatternMappingFilterProxy(filter, urlPatterns);
 		}
-
 		this.filters.add(filter);
 		return self();
 	}
@@ -153,9 +151,9 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 	}
 
 	/**
-	 * A method to obtain the WebApplicationContext to be passed to the DispatcherServlet.
-	 * Invoked from {@link #build()} before the
-	 * {@link org.springframework.test.web.servlet.MockMvc} instance is created.
+	 * A method to obtain the {@code WebApplicationContext} to be passed to the
+	 * {@code DispatcherServlet}. Invoked from {@link #build()} before the
+	 * {@link MockMvc} instance is created.
 	 */
 	protected abstract WebApplicationContext initWebAppContext();
 

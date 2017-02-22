@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ public abstract class Conventions {
 			pluralize = true;
 		}
 		else if (Collection.class.isAssignableFrom(parameter.getParameterType())) {
-			valueClass = GenericCollectionTypeResolver.getCollectionParameterType(parameter);
+			valueClass = ResolvableType.forMethodParameter(parameter).asCollection().resolveGeneric();
 			if (valueClass == null) {
 				throw new IllegalArgumentException(
 						"Cannot generate variable name for non-typed Collection parameter type");
@@ -180,7 +180,7 @@ public abstract class Conventions {
 			pluralize = true;
 		}
 		else if (Collection.class.isAssignableFrom(resolvedType)) {
-			valueClass = GenericCollectionTypeResolver.getCollectionReturnType(method);
+			valueClass = ResolvableType.forMethodReturnType(method).asCollection().resolveGeneric();
 			if (valueClass == null) {
 				if (!(value instanceof Collection)) {
 					throw new IllegalArgumentException(
@@ -281,7 +281,7 @@ public abstract class Conventions {
 
 	/**
 	 * Retrieves the {@code Class} of an element in the {@code Collection}.
-	 * The exact element for which the {@code Class} is retreived will depend
+	 * The exact element for which the {@code Class} is retrieved will depend
 	 * on the concrete {@code Collection} implementation.
 	 */
 	private static <E> E peekAhead(Collection<E> collection) {

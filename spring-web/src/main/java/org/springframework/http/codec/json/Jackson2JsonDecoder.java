@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -119,7 +118,7 @@ public class Jackson2JsonDecoder extends AbstractJackson2Codec implements Decode
 						return value;
 					}
 					catch (IOException ex) {
-						return Flux.error(new CodecException("Error while reading the data", ex));
+						throw new CodecException("Error while reading the data", ex);
 					}
 				});
 	}

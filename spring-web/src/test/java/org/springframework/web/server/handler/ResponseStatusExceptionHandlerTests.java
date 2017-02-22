@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,13 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ResponseStatusExceptionHandler}.
@@ -44,37 +40,36 @@ public class ResponseStatusExceptionHandlerTests {
 
 	private ResponseStatusExceptionHandler handler;
 
-	private MockServerHttpResponse response;
+	private MockServerHttpRequest request;
 
-	private ServerWebExchange exchange;
+	private MockServerHttpResponse response;
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.handler = new ResponseStatusExceptionHandler();
+		this.request = MockServerHttpRequest.get("/").build();
 		this.response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(
-				new MockServerHttpRequest(HttpMethod.GET, "/path"), this.response,
-				new MockWebSessionManager());
 	}
 
 
 	@Test
 	public void handleException() throws Exception {
 		Throwable ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, "");
-		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
-
+		this.handler.handle(createExchange(), ex).block(Duration.ofSeconds(5));
 		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatusCode());
 	}
 
 	@Test
 	public void unresolvedException() throws Exception {
 		Throwable expected = new IllegalStateException();
-		Mono<Void> mono = this.handler.handle(this.exchange, expected);
+		Mono<Void> mono = this.handler.handle(createExchange(), expected);
+		StepVerifier.create(mono).consumeErrorWith(actual -> assertSame(expected, actual)).verify();
+	}
 
-		StepVerifier.create(mono)
-				.consumeErrorWith(actual -> assertSame(expected, actual))
-				.verify();
+
+	private DefaultServerWebExchange createExchange() {
+		return new DefaultServerWebExchange(this.request, this.response);
 	}
 
 }

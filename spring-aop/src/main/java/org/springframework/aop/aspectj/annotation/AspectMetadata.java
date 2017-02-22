@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,8 @@ import org.springframework.aop.support.ComposablePointcut;
  * Metadata for an AspectJ aspect class, with an additional Spring AOP pointcut
  * for the per clause.
  *
- * <p>Uses AspectJ 5 AJType reflection API, so is only supported on Java 5.
- * Enables us to work with different AspectJ instantiation models such as
- * "singleton", "pertarget" and "perthis".
+ * <p>Uses AspectJ 5 AJType reflection API, enabling us to work with different
+ * AspectJ instantiation models such as "singleton", "pertarget" and "perthis".
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -102,20 +101,22 @@ public class AspectMetadata implements Serializable {
 		this.ajType = ajType;
 
 		switch (this.ajType.getPerClause().getKind()) {
-			case SINGLETON :
+			case SINGLETON:
 				this.perClausePointcut = Pointcut.TRUE;
 				return;
-			case PERTARGET : case PERTHIS :
+			case PERTARGET:
+			case PERTHIS:
 				AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
-				ajexp.setLocation("@Aspect annotation on " + aspectClass.getName());
+				ajexp.setLocation(aspectClass.getName());
 				ajexp.setExpression(findPerClause(aspectClass));
+				ajexp.setPointcutDeclarationScope(aspectClass);
 				this.perClausePointcut = ajexp;
 				return;
-			case PERTYPEWITHIN :
+			case PERTYPEWITHIN:
 				// Works with a type pattern
 				this.perClausePointcut = new ComposablePointcut(new TypePatternClassFilter(findPerClause(aspectClass)));
 				return;
-			default :
+			default:
 				throw new AopConfigException(
 						"PerClause " + ajType.getPerClause().getKind() + " not supported by Spring AOP for " + aspectClass);
 		}
@@ -125,8 +126,6 @@ public class AspectMetadata implements Serializable {
 	 * Extract contents from String of form {@code pertarget(contents)}.
 	 */
 	private String findPerClause(Class<?> aspectClass) {
-		// TODO when AspectJ provides this, we can remove this hack. Hence we don't
-		// bother to make it elegant. Or efficient. Or robust :-)
 		String str = aspectClass.getAnnotation(Aspect.class).value();
 		str = str.substring(str.indexOf("(") + 1);
 		str = str.substring(0, str.length() - 1);

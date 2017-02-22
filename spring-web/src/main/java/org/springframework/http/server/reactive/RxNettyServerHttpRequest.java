@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.http.server.reactive;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
+import java.util.Optional;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.cookie.Cookie;
@@ -36,7 +36,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 
 /**
  * Adapt {@link ServerHttpRequest} to the RxNetty {@link HttpServerRequest}.
@@ -51,38 +50,33 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final NettyDataBufferFactory dataBufferFactory;
 
+	private final InetSocketAddress remoteAddress;
+
 
 	public RxNettyServerHttpRequest(HttpServerRequest<ByteBuf> request,
-			NettyDataBufferFactory dataBufferFactory) {
+			NettyDataBufferFactory dataBufferFactory, InetSocketAddress remoteAddress) {
 
-		super(initUri(request), initHeaders(request));
+		super(initUri(request, remoteAddress), initHeaders(request));
 
 		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
 		this.request = request;
 		this.dataBufferFactory = dataBufferFactory;
+		this.remoteAddress = remoteAddress;
 	}
 
-	private static URI initUri(HttpServerRequest<ByteBuf> request) {
-		Assert.notNull("'request', request must not be null");
+	private static URI initUri(HttpServerRequest<ByteBuf> request, InetSocketAddress remoteAddress) {
+		Assert.notNull(request, "'request' must not be null");
+		String requestUri = request.getUri();
+		return remoteAddress != null ? getBaseUrl(remoteAddress).resolve(requestUri) : URI.create(requestUri);
+	}
+
+	private static URI getBaseUrl(InetSocketAddress address) {
 		try {
-			URI uri = new URI(request.getUri());
-			InetSocketAddress remoteAddress = null;
-			if (!StringUtils.isEmpty(request.getHostHeader())) {
-				HttpHeaders headers = new HttpHeaders();
-				headers.add("Host", request.getHostHeader());
-				remoteAddress = headers.getHost();
-			}
-			return new URI(
-					uri.getScheme(),
-					uri.getUserInfo(),
-					(remoteAddress != null ? remoteAddress.getHostString() : null),
-					(remoteAddress != null ? remoteAddress.getPort() : -1),
-					uri.getPath(),
-					uri.getQuery(),
-					uri.getFragment());
+			return new URI(null, null, address.getHostString(), address.getPort(), null, null, null);
 		}
 		catch (URISyntaxException ex) {
-			throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
+			// Should not happen...
+			throw new IllegalStateException(ex);
 		}
 	}
 
@@ -114,6 +108,11 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 			}
 		}
 		return cookies;
+	}
+
+	@Override
+	public Optional<InetSocketAddress> getRemoteAddress() {
+		return Optional.ofNullable(this.remoteAddress);
 	}
 
 	@Override

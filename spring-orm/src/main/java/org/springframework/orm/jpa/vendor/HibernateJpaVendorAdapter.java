@@ -78,11 +78,16 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 * JDBC Connection.
 	 * <p>See {@link HibernateJpaDialect#setPrepareConnection(boolean)} for details.
 	 * This is just a convenience flag passed through to {@code HibernateJpaDialect}.
-	 * <p>On Hibernate 5.2, this flag remains {@code true} by default like against
+	 * <p>On Hibernate 5.1/5.2, this flag remains {@code true} by default like against
 	 * previous Hibernate versions. The vendor adapter manually enforces Hibernate's
 	 * new connection handling mode {@code DELAYED_ACQUISITION_AND_HOLD} in that case
 	 * unless a user-specified connection handling mode property indicates otherwise;
 	 * switch this flag to {@code false} to avoid that interference.
+	 * <p><b>NOTE: Per the explanation above, you may have to turn this flag off
+	 * when using Hibernate in a JTA environment, e.g. on WebLogic.</b> Alternatively,
+	 * set Hibernate 5.2's "hibernate.connection.handling_mode" property to
+	 * "DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION" or even
+	 * "DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT" in such a scenario.
 	 * @since 4.3.1
 	 * @see #getJpaPropertyMap()
 	 * @see HibernateJpaDialect#beginTransaction

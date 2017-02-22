@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,11 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
-import org.springframework.context.index.metadata.ItemMetadata;
-import org.springframework.context.index.metadata.CandidateComponentsMetadata;
-
 /**
  * Used by {@link CandidateComponentsIndexer} to collect {@link CandidateComponentsMetadata}.
  *
  * @author Stephane Nicoll
+ * @since 5.0
  */
 class MetadataCollector {
 
@@ -41,21 +39,24 @@ class MetadataCollector {
 
 	private final CandidateComponentsMetadata previousMetadata;
 
-	private final TypeUtils typeUtils;
+	private final TypeHelper typeHelper;
 
 	private final Set<String> processedSourceTypes = new HashSet<String>();
 
+
 	/**
-	 * Creates a new {@code MetadataProcessor} instance.
+	 * Create a new {@code MetadataProcessor} instance.
 	 * @param processingEnvironment The processing environment of the build
 	 * @param previousMetadata Any previous metadata or {@code null}
 	 */
 	public MetadataCollector(ProcessingEnvironment processingEnvironment,
 			CandidateComponentsMetadata previousMetadata) {
+
 		this.processingEnvironment = processingEnvironment;
 		this.previousMetadata = previousMetadata;
-		this.typeUtils = new TypeUtils(processingEnvironment);
+		this.typeHelper = new TypeHelper(processingEnvironment);
 	}
+
 
 	public void processing(RoundEnvironment roundEnv) {
 		for (Element element : roundEnv.getRootElements()) {
@@ -65,7 +66,7 @@ class MetadataCollector {
 
 	private void markAsProcessed(Element element) {
 		if (element instanceof TypeElement) {
-			this.processedSourceTypes.add(this.typeUtils.getType(element));
+			this.processedSourceTypes.add(this.typeHelper.getType(element));
 		}
 	}
 

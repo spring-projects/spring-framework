@@ -53,8 +53,14 @@ public class RedirectAttributesMethodArgumentResolver implements HandlerMethodAr
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
-		DataBinder dataBinder = binderFactory.createBinder(webRequest, null, null);
-		ModelMap redirectAttributes  = new RedirectAttributesModelMap(dataBinder);
+		ModelMap redirectAttributes;
+		if(binderFactory != null) {
+			DataBinder dataBinder = binderFactory.createBinder(webRequest, null, null);
+			redirectAttributes  = new RedirectAttributesModelMap(dataBinder);
+		}
+		else {
+			redirectAttributes  = new RedirectAttributesModelMap();
+		}
 		mavContainer.setRedirectModel(redirectAttributes);
 		return redirectAttributes;
 	}

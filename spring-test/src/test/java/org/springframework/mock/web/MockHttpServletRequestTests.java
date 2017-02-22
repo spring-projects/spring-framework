@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.Cookie;
 
 import org.junit.Rule;
@@ -61,6 +60,16 @@ public class MockHttpServletRequestTests {
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 
+
+	@Test
+	public void protocolAndScheme() {
+		assertEquals(MockHttpServletRequest.DEFAULT_PROTOCOL, request.getProtocol());
+		assertEquals(MockHttpServletRequest.DEFAULT_SCHEME, request.getScheme());
+		request.setProtocol("HTTP/2.0");
+		request.setScheme("https");
+		assertEquals("HTTP/2.0", request.getProtocol());
+		assertEquals("https", request.getScheme());
+	}
 
 	@Test
 	public void setContentAndGetInputStream() throws IOException {

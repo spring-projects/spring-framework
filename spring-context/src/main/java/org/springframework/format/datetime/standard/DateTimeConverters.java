@@ -22,7 +22,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
-import java.time.chrono.ChronoZonedDateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -141,8 +140,7 @@ final class DateTimeConverters {
 
 		@Override
 		public Instant convert(ZonedDateTime source) {
-			// Explicit cast to interface necessary in order to call Java 8 default method from -source 1.6
-			return ((ChronoZonedDateTime) source).toInstant();
+			return source.toInstant();
 		}
 	}
 
@@ -241,8 +239,7 @@ final class DateTimeConverters {
 
 		@Override
 		public Instant convert(Calendar source) {
-			// Explicit cast to interface necessary in order to call Java 8 default method from -source 1.6
-			return ((ChronoZonedDateTime) calendarToZonedDateTime(source)).toInstant();
+			return calendarToZonedDateTime(source).toInstant();
 		}
 	}
 

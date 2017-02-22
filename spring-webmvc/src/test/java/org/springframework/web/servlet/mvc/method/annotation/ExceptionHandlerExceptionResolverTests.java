@@ -42,7 +42,10 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ModelMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
+import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.util.NestedServletException;
 
 import static org.junit.Assert.*;
@@ -53,6 +56,7 @@ import static org.junit.Assert.*;
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
  * @author Kazuki Shimizu
+ * @author Brian Clozel
  * @since 3.1
  */
 @SuppressWarnings("unused")
@@ -82,6 +86,7 @@ public class ExceptionHandlerExceptionResolverTests {
 		this.resolver = new ExceptionHandlerExceptionResolver();
 		this.resolver.setWarnLogCategory(this.resolver.getClass().getName());
 		this.request = new MockHttpServletRequest("GET", "/");
+		this.request.setAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
 		this.response = new MockHttpServletResponse();
 	}
 
@@ -190,6 +195,20 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertNotNull(mav);
 		assertEquals(1, mav.getModelMap().size());
 		assertEquals("IllegalArgumentException", mav.getModelMap().get("exceptionClassName"));
+	}
+
+	@Test  // SPR-14651
+	public void resolveRedirectAttributesAtArgument() throws Exception {
+		IllegalArgumentException ex = new IllegalArgumentException();
+		HandlerMethod handlerMethod = new HandlerMethod(new RedirectAttributesController(), "handle");
+		this.resolver.afterPropertiesSet();
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertNotNull(mav);
+		assertEquals("redirect:/", mav.getViewName());
+		FlashMap flashMap = (FlashMap) this.request.getAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE);
+		assertNotNull("output FlashMap should exist", flashMap);
+		assertEquals("IllegalArgumentException", flashMap.get("exceptionClassName"));
 	}
 
 	@Test
@@ -361,6 +380,18 @@ public class ExceptionHandlerExceptionResolverTests {
 		@ExceptionHandler
 		public void handleException(Exception ex, Model model) {
 			model.addAttribute("exceptionClassName", ClassUtils.getShortName(ex.getClass()));
+		}
+	}
+
+	@Controller
+	static class RedirectAttributesController {
+
+		public void handle() {}
+
+		@ExceptionHandler
+		public String handleException(Exception ex, RedirectAttributes redirectAttributes) {
+			redirectAttributes.addFlashAttribute("exceptionClassName", ClassUtils.getShortName(ex.getClass()));
+			return "redirect:/";
 		}
 	}
 

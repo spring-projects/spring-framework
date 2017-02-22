@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
 
+import com.gargoylesoftware.htmlunit.FormEncodingType;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.auth.UsernamePasswordCredentials;
 
@@ -149,6 +150,18 @@ public class HtmlUnitRequestBuilderTests {
 		assertThat(actualRequest.getContentType(), equalTo(contentType));
 		assertThat(actualRequest.getHeader("Content-Type"), equalTo(contentType));
 	}
+
+	@Test // SPR-14916
+	public void buildRequestContentTypeWithFormSubmission() {
+		webRequest.setEncodingType(FormEncodingType.URL_ENCODED);
+
+		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
+
+		assertThat(actualRequest.getContentType(), equalTo("application/x-www-form-urlencoded"));
+		assertThat(actualRequest.getHeader("Content-Type"),
+				equalTo("application/x-www-form-urlencoded;charset=ISO-8859-1"));
+	}
+
 
 	@Test
 	public void buildRequestContextPathUsesFirstSegmentByDefault() {

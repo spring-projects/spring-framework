@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ public class CandidateComponentsIndexLoaderTests {
 
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
+
 
 	@Test
 	public void validateIndexIsDisabledByDefault() {
@@ -101,7 +102,7 @@ public class CandidateComponentsIndexLoaderTests {
 	@Test
 	public void loadIndexWithException() throws IOException {
 		final IOException cause = new IOException("test exception");
-		this.thrown.expect(IllegalArgumentException.class);
+		this.thrown.expect(IllegalStateException.class);
 		this.thrown.expectMessage("Unable to load indexes");
 		this.thrown.expectCause(is(cause));
 		CandidateComponentsIndexLoader.loadIndex(new CandidateComponentsTestClassLoader(

@@ -25,7 +25,6 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -64,12 +63,10 @@ public class UrlBasedCorsConfigurationSourceTests {
 		this.configSource.getCorsConfigurations().put("/**", new CorsConfiguration());
 	}
 
-
 	private ServerWebExchange createExchange(HttpMethod httpMethod, String url) {
-		ServerHttpRequest request = new MockServerHttpRequest(httpMethod, url);
+		ServerHttpRequest request = MockServerHttpRequest.method(httpMethod, url).build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		MockWebSessionManager sessionManager = new MockWebSessionManager();
-		return new DefaultServerWebExchange(request, response, sessionManager);
+		return new DefaultServerWebExchange(request, response);
 	}
 
 }

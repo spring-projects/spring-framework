@@ -88,7 +88,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	private boolean primitivesDefaultedForNullValue = false;
 
 	/** ConversionService for binding JDBC values to bean properties */
-	private ConversionService conversionService = new DefaultConversionService();
+	private ConversionService conversionService = DefaultConversionService.getSharedInstance();
 
 	/** Map of the fields we provide mapping for */
 	private Map<String, PropertyDescriptor> mappedFields;

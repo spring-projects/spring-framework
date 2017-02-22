@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -357,9 +357,14 @@ import org.springframework.stereotype.Component;
  * <h2>Constraints when authoring {@code @Configuration} classes</h2>
  *
  * <ul>
- * <li>&#064;Configuration classes must be non-final
- * <li>&#064;Configuration classes must be non-local (may not be declared within a method)
- * <li>Any nested configuration classes must be {@code static}.
+ * <li>Configuration classes must be provided as classes (i.e. not as instances returned
+ * from factory methods), allowing for runtime enhancements through a generated subclass.
+ * <li>Configuration classes must be non-final.
+ * <li>Configuration classes must be non-local (i.e. may not be declared within a method).
+ * <li>Any nested configuration classes must be declared as {@code static}.
+ * <li>{@code @Bean} methods may not in turn create further configuration classes
+ * (any such instances will be treated as regular beans, with their configuration
+ * annotations remaining undetected).
  * </ul>
  *
  * @author Rod Johnson

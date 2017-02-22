@@ -109,6 +109,13 @@ public class ServerSentEvent<T> {
         return Optional.ofNullable(this.comment);
     }
 
+    @Override
+    public String toString() {
+        return "ServerSentEvent [id = '" + id + '\'' + ", event='" + event + '\'' +
+                ", data=" + data + ", retry=" + retry + ", comment='" + comment + '\'' +
+                ']';
+    }
+
     /**
      * A mutable builder for a {@code SseEvent}.
      *
@@ -167,6 +174,7 @@ public class ServerSentEvent<T> {
          * @return the built event
          */
         ServerSentEvent<T> build();
+
     }
 
     private static class BuilderImpl<T> implements Builder<T> {

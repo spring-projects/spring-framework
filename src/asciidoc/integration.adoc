@@ -1003,21 +1003,21 @@ RestTemplate has an asynchronous counter-part: see <<rest-async-resttemplate>>.
 
 | HEAD
 | {api-spring-framework}/web/client/RestTemplate.html#headForHeaders(String,%20Object...)[headForHeaders(String
-  url, String... urlVariables)]
+  url, String... uriVariables)]
 
 | OPTIONS
 | {api-spring-framework}/web/client/RestTemplate.html#optionsForAllow(String,%20Object...)[optionsForAllow(String
-  url, String... urlVariables)]
+  url, String... uriVariables)]
 
 | POST
 | {api-spring-framework}/web/client/RestTemplate.html#postForLocation(String,%20Object,%20Object...)[postForLocation(String
-  url, Object request, String... urlVariables)]
+  url, Object request, String... uriVariables)]
   {api-spring-framework}/web/client/RestTemplate.html#postForObject(java.lang.String,%20java.lang.Object,%20java.lang.Class,%20java.lang.String...)[postForObject(String
   url, Object request, Class<T> responseType, String... uriVariables)]
 
 | PUT
 | {api-spring-framework}/web/client/RestTemplate.html#put(String,%20Object,%20Object...)[put(String
-  url, Object request, String...urlVariables)]
+  url, Object request, String...uriVariables)]
 
 | PATCH and others
 | {api-spring-framework}/web/client/RestTemplate.html#exchange(java.lang.String,%20org.springframework.http.HttpMethod,%20org.springframework.http.HttpEntity,%20java.lang.Class,%20java.lang.Object...)[exchange]
@@ -1052,8 +1052,8 @@ template are `ByteArrayHttpMessageConverter`, `StringHttpMessageConverter`,
 defaults using the `messageConverters()` bean property as would be required if using the
 `MarshallingHttpMessageConverter` or `MappingJackson2HttpMessageConverter`.
 
-Each method takes URI template arguments in two forms, either as a `String` variable
-length argument or a `Map<String,String>`. For example,
+Each method takes URI template arguments in two forms, either as a `String`
+variable-length argument or a `Map<String,String>`. For example,
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1062,7 +1062,7 @@ length argument or a `Map<String,String>`. For example,
 			"http://example.com/hotels/{hotel}/bookings/{booking}", String.class,"42", "21");
 ----
 
-using variable length arguments and
+using variable-length arguments and
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1135,9 +1135,9 @@ method is invoked.
 [subs="verbatim,quotes"]
 ----
 	public <T> T execute(String url, HttpMethod method, RequestCallback requestCallback,
-			ResponseExtractor<T> responseExtractor, String... urlVariables)
+			ResponseExtractor<T> responseExtractor, String... uriVariables)
 
-	// also has an overload with urlVariables as a Map<String, String>.
+	// also has an overload with uriVariables as a Map<String, String>.
 ----
 
 The `RequestCallback` interface is defined as
@@ -1162,7 +1162,7 @@ other method arguments.
 For each of the main HTTP methods, the `RestTemplate` provides variants that either take
 a String URI or `java.net.URI` as the first argument.
 
-The String URI variants accept template arguments as a String variable length argument
+The String URI variants accept template arguments as a String variable-length argument
 or as a `Map<String,String>`. They also assume the URL String is not encoded and needs
 to be encoded. For example the following:
 
@@ -1641,58 +1641,8 @@ lookups simply provides consistent and more explicit EJB access configuration.
 
 
 
-[[ejb-implementation]]
-=== Using Spring's EJB implementation support classes
-
-
-
-[[ejb-implementation-ejb3]]
-==== EJB 3 injection interceptor
-For EJB 3 Session Beans and Message-Driven Beans, Spring provides a convenient
-interceptor that resolves Spring's `@Autowired` annotation in the EJB component
-class: `org.springframework.ejb.interceptor.SpringBeanAutowiringInterceptor`. This
-interceptor can be applied through an `@Interceptors` annotation in the EJB component
-class, or through an `interceptor-binding` XML element in the EJB deployment descriptor.
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@Stateless
-	@Interceptors(SpringBeanAutowiringInterceptor.class)
-	public class MyFacadeEJB implements MyFacadeLocal {
-
-		// automatically injected with a matching Spring bean
-		@Autowired
-		private MyComponent myComp;
-
-		// for business method, delegate to POJO service impl.
-		public String myFacadeMethod(...) {
-			return myComp.myMethod(...);
-		}
-
-		...
-
-	}
-----
-
-`SpringBeanAutowiringInterceptor` by default obtains target beans from a
-`ContextSingletonBeanFactoryLocator`, with the context defined in a bean definition file
-named `beanRefContext.xml`. By default, a single context definition is expected, which
-is obtained by type rather than by name. However, if you need to choose between multiple
-context definitions, a specific locator key is required. The locator key (i.e. the name
-of the context definition in `beanRefContext.xml`) can be explicitly specified either
-through overriding the `getBeanFactoryLocatorKey` method in a custom
-`SpringBeanAutowiringInterceptor` subclass.
-
-Alternatively, consider overriding `SpringBeanAutowiringInterceptor`'s `getBeanFactory`
-method, e.g. obtaining a shared `ApplicationContext` from a custom holder class.
-
-
-
-
 [[jms]]
 == JMS (Java Message Service)
-
 
 
 
@@ -2099,7 +2049,7 @@ details of how it is represented as a JMS message.
 The sandbox currently includes a `MapMessageConverter` which uses reflection to convert
 between a JavaBean and a `MapMessage`. Other popular implementation choices you might
 implement yourself are Converters that use an existing XML marshalling package, such as
-JAXB, Castor, XMLBeans, or XStream, to create a `TextMessage` representing the object.
+JAXB, Castor or XStream, to create a `TextMessage` representing the object.
 
 To accommodate the setting of a message's properties, headers, and body that can not be
 generically encapsulated inside a converter class, the `MessagePostProcessor` interface

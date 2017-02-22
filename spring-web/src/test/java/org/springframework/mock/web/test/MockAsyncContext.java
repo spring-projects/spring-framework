@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class MockAsyncContext implements AsyncContext {
 
 
 	public void addDispatchHandler(Runnable handler) {
-		Assert.notNull(handler);
+		Assert.notNull(handler, "Dispatch handler must not be null");
 		this.dispatchHandlers.add(handler);
 	}
 
@@ -77,7 +77,7 @@ public class MockAsyncContext implements AsyncContext {
 
 	@Override
 	public boolean hasOriginalRequestAndResponse() {
-		return (this.request instanceof MockHttpServletRequest) && (this.response instanceof MockHttpServletResponse);
+		return (this.request instanceof MockHttpServletRequest && this.response instanceof MockHttpServletResponse);
 	}
 
 	@Override
@@ -112,8 +112,8 @@ public class MockAsyncContext implements AsyncContext {
 			try {
 				listener.onComplete(new AsyncEvent(this, this.request, this.response));
 			}
-			catch (IOException e) {
-				throw new IllegalStateException("AsyncListener failure", e);
+			catch (IOException ex) {
+				throw new IllegalStateException("AsyncListener failure", ex);
 			}
 		}
 	}

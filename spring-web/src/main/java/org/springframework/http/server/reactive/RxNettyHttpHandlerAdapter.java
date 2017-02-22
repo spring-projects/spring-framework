@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,23 @@
 
 package org.springframework.http.server.reactive;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.Map;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.channel.Channel;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import io.reactivex.netty.protocol.http.server.RequestHandler;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import rx.Observable;
 import rx.RxReactiveStreams;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
-import org.springframework.util.Assert;
 
 /**
  * Adapt {@link HttpHandler} to the RxNetty {@link RequestHandler}.
@@ -57,10 +57,11 @@ public class RxNettyHttpHandlerAdapter extends HttpHandlerAdapterSupport
 	public Observable<Void> handle(HttpServerRequest<ByteBuf> nativeRequest,
 			HttpServerResponse<ByteBuf> nativeResponse) {
 
-		ByteBufAllocator allocator = nativeResponse.unsafeNettyChannel().alloc();
-		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(allocator);
+		Channel channel = nativeResponse.unsafeNettyChannel();
+		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(channel.alloc());
+		InetSocketAddress remoteAddress = (InetSocketAddress) channel.remoteAddress();
 
-		RxNettyServerHttpRequest request = new RxNettyServerHttpRequest(nativeRequest, bufferFactory);
+		RxNettyServerHttpRequest request = new RxNettyServerHttpRequest(nativeRequest, bufferFactory, remoteAddress);
 		RxNettyServerHttpResponse response = new RxNettyServerHttpResponse(nativeResponse, bufferFactory);
 
 		Publisher<Void> result = getHttpHandler().handle(request, response)

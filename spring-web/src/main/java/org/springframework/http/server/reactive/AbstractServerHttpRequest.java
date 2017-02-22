@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.http.server.reactive;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -79,7 +80,6 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	/**
 	 * A method for parsing of the query into name-value pairs. The return
 	 * value is turned into an immutable map and cached.
-	 *
 	 * <p>Note that this method is invoked lazily on first access to
 	 * {@link #getQueryParams()}. The invocation is not synchronized but the
 	 * parsing is thread-safe nevertheless.
@@ -94,10 +94,14 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 				String eq = matcher.group(2);
 				String value = matcher.group(3);
 				value = (value != null ? value : (StringUtils.hasLength(eq) ? "" : null));
-				queryParams.add(name, value);
+				queryParams.add(decodeQueryParam(name), decodeQueryParam(value));
 			}
 		}
 		return queryParams;
+	}
+
+	private String decodeQueryParam(String value) {
+		return StringUtils.uriDecode(value, StandardCharsets.UTF_8);
 	}
 
 	@Override

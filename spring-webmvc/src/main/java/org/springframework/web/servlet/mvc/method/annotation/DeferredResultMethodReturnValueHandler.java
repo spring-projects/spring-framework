@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,10 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 		}
 
 		DeferredResultAdapter adapter = getAdapterFor(returnValue.getClass());
-		Assert.notNull(adapter);
+		if (adapter == null) {
+			throw new IllegalStateException(
+					"Could not find DeferredResultAdapter for return value type: " + returnValue.getClass());
+		}
 		DeferredResult<?> result = adapter.adaptToDeferredResult(returnValue);
 		WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(result, mavContainer);
 	}
@@ -105,7 +108,7 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 
 		@Override
 		public DeferredResult<?> adaptToDeferredResult(Object returnValue) {
-			Assert.isInstanceOf(DeferredResult.class, returnValue);
+			Assert.isInstanceOf(DeferredResult.class, returnValue, "DeferredResult expected");
 			return (DeferredResult<?>) returnValue;
 		}
 	}
@@ -118,7 +121,7 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 
 		@Override
 		public DeferredResult<?> adaptToDeferredResult(Object returnValue) {
-			Assert.isInstanceOf(ListenableFuture.class, returnValue);
+			Assert.isInstanceOf(ListenableFuture.class, returnValue, "ListenableFuture expected");
 			final DeferredResult<Object> result = new DeferredResult<>();
 			((ListenableFuture<?>) returnValue).addCallback(new ListenableFutureCallback<Object>() {
 				@Override
@@ -142,7 +145,7 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 
 		@Override
 		public DeferredResult<?> adaptToDeferredResult(Object returnValue) {
-			Assert.isInstanceOf(CompletionStage.class, returnValue);
+			Assert.isInstanceOf(CompletionStage.class, returnValue, "CompletionStage expected");
 			final DeferredResult<Object> result = new DeferredResult<>();
 			@SuppressWarnings("unchecked")
 			CompletionStage<?> future = (CompletionStage<?>) returnValue;

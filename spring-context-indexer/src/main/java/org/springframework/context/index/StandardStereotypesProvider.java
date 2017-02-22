@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,17 @@ import javax.lang.model.element.ElementKind;
  * {@code javax.*} annotation placed on a class or interface.
  *
  * @author Stephane Nicoll
+ * @since 5.0
  */
 class StandardStereotypesProvider implements StereotypesProvider {
 
-	private final TypeUtils typeUtils;
+	private final TypeHelper typeHelper;
 
-	StandardStereotypesProvider(TypeUtils typeUtils) {
-		this.typeUtils = typeUtils;
+
+	StandardStereotypesProvider(TypeHelper typeHelper) {
+		this.typeHelper = typeHelper;
 	}
+
 
 	@Override
 	public Set<String> getStereotypes(Element element) {
@@ -43,8 +46,8 @@ class StandardStereotypesProvider implements StereotypesProvider {
 		if (kind != ElementKind.CLASS && kind != ElementKind.INTERFACE) {
 			return stereotypes;
 		}
-		for (AnnotationMirror annotation : this.typeUtils.getAllAnnotationMirrors(element)) {
-			String type = this.typeUtils.getType(annotation);
+		for (AnnotationMirror annotation : this.typeHelper.getAllAnnotationMirrors(element)) {
+			String type = this.typeHelper.getType(annotation);
 			if (type.startsWith("javax.")) {
 				stereotypes.add(type);
 			}

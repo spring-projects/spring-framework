@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -433,7 +433,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		Properties props = new Properties();
 		if (romePresent) {
 			props.put("atom", MediaType.APPLICATION_ATOM_XML_VALUE);
-			props.put("rss", "application/rss+xml");
+			props.put("rss", MediaType.APPLICATION_RSS_XML_VALUE);
 		}
 		if (jaxb2Present || jackson2XmlPresent) {
 			props.put("xml", MediaType.APPLICATION_XML_VALUE);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -480,28 +480,7 @@ public abstract class ClassUtils {
 	 */
 	public static String getQualifiedName(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
-		if (clazz.isArray()) {
-			return getQualifiedNameForArray(clazz);
-		}
-		else {
-			return clazz.getName();
-		}
-	}
-
-	/**
-	 * Build a nice qualified name for an array:
-	 * component type class name + "[]".
-	 * @param clazz the array class
-	 * @return a qualified name for the array class
-	 */
-	private static String getQualifiedNameForArray(Class<?> clazz) {
-		StringBuilder result = new StringBuilder();
-		while (clazz.isArray()) {
-			clazz = clazz.getComponentType();
-			result.append(ARRAY_SUFFIX);
-		}
-		result.insert(0, clazz.getName());
-		return result.toString();
+		return clazz.getTypeName();
 	}
 
 	/**
@@ -552,11 +531,8 @@ public abstract class ClassUtils {
 			}
 			return result.toString();
 		}
-		else if (clazz.isArray()) {
-			return getQualifiedNameForArray(clazz);
-		}
 		else {
-			return clazz.getName();
+			return clazz.getTypeName();
 		}
 	}
 
@@ -567,8 +543,7 @@ public abstract class ClassUtils {
 	 */
 	public static boolean matchesTypeName(Class<?> clazz, String typeName) {
 		return (typeName != null &&
-				(typeName.equals(clazz.getName()) || typeName.equals(clazz.getSimpleName()) ||
-				(clazz.isArray() && typeName.equals(getQualifiedNameForArray(clazz)))));
+				(typeName.equals(clazz.getTypeName()) || typeName.equals(clazz.getSimpleName())));
 	}
 
 

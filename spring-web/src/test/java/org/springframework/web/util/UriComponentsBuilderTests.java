@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,6 +187,14 @@ public class UriComponentsBuilderTests {
 
 		assertEquals("q=1USD=?EUR", result.getQuery());
 		assertEquals("1USD=?EUR", result.getQueryParams().getFirst("q"));
+	}
+
+	@Test // SPR-14828
+	public void fromUriStringQueryParamEncodedAndContainingPlus() throws Exception {
+		String httpUrl = "http://localhost:8080/test/print?value=%EA%B0%80+%EB%82%98";
+		URI uri = UriComponentsBuilder.fromHttpUrl(httpUrl).build(true).toUri();
+
+		assertEquals(httpUrl, uri.toString());
 	}
 
 	@Test // SPR-10779

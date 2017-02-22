@@ -106,6 +106,19 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 				.expectNext("{\"foo\": \"baz\"}")
 				.expectComplete()
 				.verify();
+
+		// SPR-15013
+		source = Flux.just(stringBuffer("["), stringBuffer("{\"id\":1,\"name\":\"Robert\"}"),
+						stringBuffer(","), stringBuffer("{\"id\":2,\"name\":\"Raide\"}"),
+						stringBuffer(","), stringBuffer("{\"id\":3,\"name\":\"Ford\"}"),
+						stringBuffer("]"));
+		output = decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
+		StepVerifier.create(output)
+				.expectNext("{\"id\":1,\"name\":\"Robert\"}")
+				.expectNext("{\"id\":2,\"name\":\"Raide\"}")
+				.expectNext("{\"id\":3,\"name\":\"Ford\"}")
+				.expectComplete()
+				.verify();
 	}
 
 

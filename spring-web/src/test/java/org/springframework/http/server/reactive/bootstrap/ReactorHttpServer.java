@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2011-2016 Pivotal Software Inc, All Rights Reserved.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,69 +16,64 @@
 
 package org.springframework.http.server.reactive.bootstrap;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import reactor.core.Loopback;
+import reactor.ipc.netty.NettyContext;
 
 import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
-import org.springframework.util.Assert;
 
 /**
  * @author Stephane Maldini
  */
-public class ReactorHttpServer extends HttpServerSupport implements HttpServer, Loopback {
+public class ReactorHttpServer extends AbstractHttpServer implements Loopback {
 
 	private ReactorHttpHandlerAdapter reactorHandler;
 
-	private reactor.ipc.netty.http.HttpServer reactorServer;
+	private reactor.ipc.netty.http.server.HttpServer reactorServer;
 
-	private boolean running;
+	private AtomicReference<NettyContext> nettyContext = new AtomicReference<>();
 
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
-		if (getHttpHandlerMap() != null) {
-			this.reactorHandler = new ReactorHttpHandlerAdapter(getHttpHandlerMap());
-		}
-		else {
-			Assert.notNull(getHttpHandler());
-			this.reactorHandler = new ReactorHttpHandlerAdapter(getHttpHandler());
-		}
-		this.reactorServer = reactor.ipc.netty.http.HttpServer.create(getHost(), getPort());
+	protected void initServer() throws Exception {
+		this.reactorHandler = createHttpHandlerAdapter();
+		this.reactorServer = reactor.ipc.netty.http.server.HttpServer.create(getHost(), getPort());
 	}
 
-
-	@Override
-	public boolean isRunning() {
-		return this.running;
+	private ReactorHttpHandlerAdapter createHttpHandlerAdapter() {
+		return (getHttpHandlerMap() != null ?
+				new ReactorHttpHandlerAdapter(getHttpHandlerMap()) :
+				new ReactorHttpHandlerAdapter(getHttpHandler()));
 	}
 
 	@Override
 	public Object connectedInput() {
-		return reactorServer;
+		return this.reactorServer;
 	}
 
 	@Override
 	public Object connectedOutput() {
-		return reactorServer;
+		return this.reactorServer;
 	}
 
 	@Override
-	public void start() {
-		if (!this.running) {
-			try {
-				this.reactorServer.startAndAwait(reactorHandler);
-				this.running = true;
-			}
-			catch (InterruptedException ex) {
-				throw new IllegalStateException(ex);
-			}
-		}
+	protected void startInternal() {
+		NettyContext nettyContext = this.reactorServer.newHandler(this.reactorHandler).block();
+		setPort(nettyContext.address().getPort());
+		this.nettyContext.set(nettyContext);
 	}
 
 	@Override
-	public void stop() {
-		if (this.running) {
-			this.reactorServer.shutdown();
-			this.running = false;
-		}
+	protected void stopInternal() {
+		this.nettyContext.get().dispose();
 	}
+
+	@Override
+	protected void resetInternal() {
+		this.reactorServer = null;
+		this.reactorHandler = null;
+		this.nettyContext.set(null);
+	}
+
 }

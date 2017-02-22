@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,11 +42,11 @@ public interface MessageSource {
 	 * @param code the code to lookup up, such as 'calculator.noRateSet'. Users of
 	 * this class are encouraged to base message names on the relevant fully
 	 * qualified class name, thus avoiding conflict and ensuring maximum clarity.
-	 * @param args array of arguments that will be filled in for params within
+	 * @param args an array of arguments that will be filled in for params within
 	 * the message (params look like "{0}", "{1,date}", "{2,time}" within a message),
 	 * or {@code null} if none.
-	 * @param defaultMessage String to return if the lookup fails
-	 * @param locale the Locale in which to do the lookup
+	 * @param defaultMessage a default message to return if the lookup fails
+	 * @param locale the locale in which to do the lookup
 	 * @return the resolved message if the lookup was successful;
 	 * otherwise the default message passed as a parameter
 	 * @see java.text.MessageFormat
@@ -56,10 +56,10 @@ public interface MessageSource {
 	/**
 	 * Try to resolve the message. Treat as an error if the message can't be found.
 	 * @param code the code to lookup up, such as 'calculator.noRateSet'
-	 * @param args Array of arguments that will be filled in for params within
+	 * @param args an array of arguments that will be filled in for params within
 	 * the message (params look like "{0}", "{1,date}", "{2,time}" within a message),
 	 * or {@code null} if none.
-	 * @param locale the Locale in which to do the lookup
+	 * @param locale the locale in which to do the lookup
 	 * @return the resolved message
 	 * @throws NoSuchMessageException if the message wasn't found
 	 * @see java.text.MessageFormat
@@ -71,9 +71,9 @@ public interface MessageSource {
 	 * {@code MessageSourceResolvable} argument that was passed in.
 	 * <p>NOTE: We must throw a {@code NoSuchMessageException} on this method
 	 * since at the time of calling this method we aren't able to determine if the
-	 * {@code defaultMessage} property of the resolvable is null or not.
-	 * @param resolvable value object storing attributes required to properly resolve a message
-	 * @param locale the Locale in which to do the lookup
+	 * {@code defaultMessage} property of the resolvable is {@code null} or not.
+	 * @param resolvable the value object storing attributes required to resolve a message
+	 * @param locale the locale in which to do the lookup
 	 * @return the resolved message
 	 * @throws NoSuchMessageException if the message wasn't found
 	 * @see java.text.MessageFormat

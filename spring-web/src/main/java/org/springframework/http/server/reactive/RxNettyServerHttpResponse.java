@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import rx.Observable;
 import rx.RxReactiveStreams;
+import rx.functions.Func1;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
@@ -40,6 +41,7 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
@@ -48,10 +50,13 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
 	private static final ByteBuf FLUSH_SIGNAL = Unpooled.buffer(0, 0);
 
+	// 8 Kb flush threshold to avoid blocking RxNetty when the send buffer has reached the high watermark
+	private static final long FLUSH_THRESHOLD = 8192;
+
 	public RxNettyServerHttpResponse(HttpServerResponse<ByteBuf> response,
 			NettyDataBufferFactory dataBufferFactory) {
 		super(dataBufferFactory);
-		Assert.notNull("'response', response must not be null.");
+		Assert.notNull(response, "'response' must not be null.");
 
 		this.response = response;
 	}
@@ -71,16 +76,16 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	@Override
-	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> body) {
+	protected Mono<Void> writeWithInternal(Publisher<? extends DataBuffer> body) {
 		Observable<ByteBuf> content = RxReactiveStreams.toObservable(body)
 				.map(NettyDataBufferFactory::toByteBuf);
-		return Flux.from(RxReactiveStreams.toPublisher(this.response.write(content)))
+		return Flux.from(RxReactiveStreams.toPublisher(this.response.write(content, new FlushSelector(FLUSH_THRESHOLD))))
 				.then();
 	}
 
 	@Override
 	protected Mono<Void> writeAndFlushWithInternal(
-			Publisher<Publisher<DataBuffer>> body) {
+			Publisher<? extends Publisher<? extends DataBuffer>> body) {
 		Flux<ByteBuf> bodyWithFlushSignals = Flux.from(body).
 				flatMap(publisher -> Flux.from(publisher).
 						map(NettyDataBufferFactory::toByteBuf).
@@ -113,6 +118,26 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
 				this.response.addCookie(cookie);
 			}
+		}
+	}
+
+	private class FlushSelector implements Func1<ByteBuf, Boolean> {
+
+		private final long flushEvery;
+		private long count;
+
+		public FlushSelector(long flushEvery) {
+			this.flushEvery = flushEvery;
+		}
+
+		@Override
+		public Boolean call(ByteBuf byteBuf) {
+			this.count += byteBuf.readableBytes();
+			if (this.count >= this.flushEvery) {
+				this.count = 0;
+				return true;
+			}
+			return false;
 		}
 	}
 

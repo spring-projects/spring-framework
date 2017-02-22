@@ -15,15 +15,9 @@
  */
 package org.springframework.web.servlet.resource;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
@@ -33,7 +27,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@code ResourceUrlEncodingFilter}.
@@ -64,12 +58,9 @@ public class ResourceUrlEncodingFilterTests {
 		request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.resourceUrlProvider);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		this.filter.doFilterInternal(request, response, new FilterChain() {
-			@Override
-			public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
-				String result = ((HttpServletResponse)response).encodeURL("/resources/bar.css");
-				assertEquals("/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", result);
-			}
+		this.filter.doFilter(request, response, (req, res) -> {
+			String result = ((HttpServletResponse) res).encodeURL("/resources/bar.css");
+			assertEquals("/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", result);
 		});
 	}
 
@@ -80,12 +71,9 @@ public class ResourceUrlEncodingFilterTests {
 		request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.resourceUrlProvider);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		this.filter.doFilterInternal(request, response, new FilterChain() {
-			@Override
-			public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
-				String result = ((HttpServletResponse)response).encodeURL("/context/resources/bar.css");
-				assertEquals("/context/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", result);
-			}
+		this.filter.doFilter(request, response, (req, res) -> {
+			String result = ((HttpServletResponse) res).encodeURL("/context/resources/bar.css");
+			assertEquals("/context/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", result);
 		});
 	}
 
@@ -97,8 +85,8 @@ public class ResourceUrlEncodingFilterTests {
 		request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.resourceUrlProvider);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		this.filter.doFilterInternal(request, response, (request1, response1) -> {
-			String result = ((HttpServletResponse) response1).encodeURL("/context/resources/bar.css");
+		this.filter.doFilter(request, response, (req, res) -> {
+			String result = ((HttpServletResponse) res).encodeURL("/context/resources/bar.css");
 			assertEquals("/context/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", result);
 		});
 	}
@@ -110,8 +98,8 @@ public class ResourceUrlEncodingFilterTests {
 		request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.resourceUrlProvider);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		this.filter.doFilterInternal(request, response, (request1, response1) -> {
-			String result = ((HttpServletResponse) response1).encodeURL("/context/resources/bar.css");
+		this.filter.doFilter(request, response, (req, res) -> {
+			String result = ((HttpServletResponse) res).encodeURL("/context/resources/bar.css");
 			assertEquals("/context/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", result);
 		});
 	}
@@ -124,12 +112,9 @@ public class ResourceUrlEncodingFilterTests {
 		request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.resourceUrlProvider);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		this.filter.doFilterInternal(request, response, new FilterChain() {
-			@Override
-			public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
-				String result = ((HttpServletResponse)response).encodeURL("?foo=1");
-				assertEquals("?foo=1", result);
-			}
+		this.filter.doFilter(request, response, (req, res) -> {
+			String result = ((HttpServletResponse) res).encodeURL("?foo=1");
+			assertEquals("?foo=1", result);
 		});
 	}
 
@@ -141,12 +126,9 @@ public class ResourceUrlEncodingFilterTests {
 		request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.resourceUrlProvider);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		this.filter.doFilterInternal(request, response, new FilterChain() {
-			@Override
-			public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
-				String result = ((HttpServletResponse)response).encodeURL("/resources/bar.css?foo=bar&url=http://example.org");
-				assertEquals("/resources/bar-11e16cf79faee7ac698c805cf28248d2.css?foo=bar&url=http://example.org", result);
-			}
+		this.filter.doFilter(request, response, (req, res) -> {
+			String result = ((HttpServletResponse) res).encodeURL("/resources/bar.css?foo=bar&url=http://example.org");
+			assertEquals("/resources/bar-11e16cf79faee7ac698c805cf28248d2.css?foo=bar&url=http://example.org", result);
 		});
 	}
 
@@ -159,12 +141,9 @@ public class ResourceUrlEncodingFilterTests {
 		request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.resourceUrlProvider);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		this.filter.doFilterInternal(request, response, new FilterChain() {
-			@Override
-			public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
-				String result = ((HttpServletResponse)response).encodeURL("index?key=value");
-				assertEquals("index?key=value", result);
-			}
+		this.filter.doFilter(request, response, (req, res) -> {
+			String result = ((HttpServletResponse) res).encodeURL("index?key=value");
+			assertEquals("index?key=value", result);
 		});
 	}
 

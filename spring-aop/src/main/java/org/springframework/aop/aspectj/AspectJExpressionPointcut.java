@@ -28,7 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.aspectj.weaver.BCException;
 import org.aspectj.weaver.patterns.NamePattern;
 import org.aspectj.weaver.reflect.ReflectionWorld.ReflectionWorldException;
 import org.aspectj.weaver.reflect.ShadowMatchImpl;
@@ -188,11 +187,22 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			throw new IllegalStateException("Must set property 'expression' before attempting to match");
 		}
 		if (this.pointcutExpression == null) {
-			this.pointcutClassLoader = (this.beanFactory instanceof ConfigurableBeanFactory ?
-					((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader() :
-					ClassUtils.getDefaultClassLoader());
+			this.pointcutClassLoader = determinePointcutClassLoader();
 			this.pointcutExpression = buildPointcutExpression(this.pointcutClassLoader);
 		}
+	}
+
+	/**
+	 * Determine the ClassLoader to use for pointcut evaluation.
+	 */
+	private ClassLoader determinePointcutClassLoader() {
+		if (this.beanFactory instanceof ConfigurableBeanFactory) {
+			return ((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader();
+		}
+		if (this.pointcutDeclarationScope != null) {
+			return this.pointcutDeclarationScope.getClassLoader();
+		}
+		return ClassUtils.getDefaultClassLoader();
 	}
 
 	/**
@@ -212,10 +222,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	/**
 	 * Initialize the underlying AspectJ pointcut parser.
 	 */
-	private PointcutParser initializePointcutParser(ClassLoader cl) {
+	private PointcutParser initializePointcutParser(ClassLoader classLoader) {
 		PointcutParser parser = PointcutParser
 				.getPointcutParserSupportingSpecifiedPrimitivesAndUsingSpecifiedClassLoaderForResolution(
-						SUPPORTED_PRIMITIVES, cl);
+						SUPPORTED_PRIMITIVES, classLoader);
 		parser.registerPointcutDesignatorHandler(new BeanPointcutDesignatorHandler());
 		return parser;
 	}
@@ -259,7 +269,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 				}
 			}
 		}
-		catch (BCException ex) {
+		catch (Throwable ex) {
 			logger.debug("PointcutExpression matching rejected target class", ex);
 		}
 		return false;
@@ -327,7 +337,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 		catch (IllegalStateException ex) {
 			// No current invocation...
-			// TODO: Should we really proceed here?
 			if (logger.isDebugEnabled()) {
 				logger.debug("Could not access current invocation - matching with limited context: " + ex);
 			}
@@ -414,39 +423,46 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 				shadowMatch = this.shadowMatchCache.get(targetMethod);
 				if (shadowMatch == null) {
 					try {
-						shadowMatch = this.pointcutExpression.matchesMethodExecution(methodToMatch);
-					}
-					catch (ReflectionWorldException ex) {
-						// Failed to introspect target method, probably because it has been loaded
-						// in a special ClassLoader. Let's try the declaring ClassLoader instead...
-						try {
-							fallbackExpression = getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
-							if (fallbackExpression != null) {
-								shadowMatch = fallbackExpression.matchesMethodExecution(methodToMatch);
-							}
-						}
-						catch (ReflectionWorldException ex2) {
-							fallbackExpression = null;
-						}
-					}
-					if (shadowMatch == null && targetMethod != originalMethod) {
-						methodToMatch = originalMethod;
 						try {
 							shadowMatch = this.pointcutExpression.matchesMethodExecution(methodToMatch);
 						}
-						catch (ReflectionWorldException ex3) {
-							// Could neither introspect the target class nor the proxy class ->
-							// let's try the original method's declaring class before we give up...
+						catch (ReflectionWorldException ex) {
+							// Failed to introspect target method, probably because it has been loaded
+							// in a special ClassLoader. Let's try the declaring ClassLoader instead...
 							try {
 								fallbackExpression = getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
 								if (fallbackExpression != null) {
 									shadowMatch = fallbackExpression.matchesMethodExecution(methodToMatch);
 								}
 							}
-							catch (ReflectionWorldException ex4) {
+							catch (ReflectionWorldException ex2) {
 								fallbackExpression = null;
 							}
 						}
+						if (shadowMatch == null && targetMethod != originalMethod) {
+							methodToMatch = originalMethod;
+							try {
+								shadowMatch = this.pointcutExpression.matchesMethodExecution(methodToMatch);
+							}
+							catch (ReflectionWorldException ex3) {
+								// Could neither introspect the target class nor the proxy class ->
+								// let's try the original method's declaring class before we give up...
+								try {
+									fallbackExpression = getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
+									if (fallbackExpression != null) {
+										shadowMatch = fallbackExpression.matchesMethodExecution(methodToMatch);
+									}
+								}
+								catch (ReflectionWorldException ex4) {
+									fallbackExpression = null;
+								}
+							}
+						}
+					}
+					catch (Throwable ex) {
+						// Possibly AspectJ 1.8.10 encountering an invalid signature
+						logger.debug("PointcutExpression matching rejected target method", ex);
+						fallbackExpression = null;
 					}
 					if (shadowMatch == null) {
 						shadowMatch = new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO, null, null, null);
@@ -603,7 +619,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 
 		private boolean matchesBean(String advisedBeanName) {
-			return BeanFactoryAnnotationUtils.isQualifierMatch(this.expressionPattern::matches, advisedBeanName, beanFactory);
+			return BeanFactoryAnnotationUtils.isQualifierMatch(
+					this.expressionPattern::matches, advisedBeanName, beanFactory);
 		}
 	}
 

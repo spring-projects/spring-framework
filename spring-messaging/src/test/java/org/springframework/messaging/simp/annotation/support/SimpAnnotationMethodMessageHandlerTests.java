@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -270,7 +270,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		this.messageHandler.handleMessage(message);
 
 		controller.future.run();
-		assertTrue(controller.exceptionCatched);
+		assertTrue(controller.exceptionCaught);
 	}
 
 	@Test
@@ -338,7 +338,6 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		}
 		return MessageBuilder.withPayload(new byte[0]).setHeaders(accessor).build();
 	}
-
 
 
 	private static class TestSimpAnnotationMethodMessageHandler extends SimpAnnotationMethodMessageHandler {
@@ -434,6 +433,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		}
 	}
 
+
 	@Controller
 	@MessageMapping("pre")
 	private static class DotPathSeparatorController {
@@ -447,12 +447,14 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		}
 	}
 
+
 	@Controller
 	@MessageMapping("listenable-future")
 	private static class ListenableFutureController {
 
 		private ListenableFutureTask<String> future;
-		private boolean exceptionCatched = false;
+
+		private boolean exceptionCaught = false;
 
 		@MessageMapping("success")
 		public ListenableFutureTask<String> handleListenableFuture() {
@@ -470,10 +472,10 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 		@MessageExceptionHandler(IllegalStateException.class)
 		public void handleValidationException() {
-			this.exceptionCatched = true;
+			this.exceptionCaught = true;
 		}
-
 	}
+
 
 	@Controller
 	private static class CompletableFutureController {
@@ -492,14 +494,14 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		public void handleValidationException() {
 			this.exceptionCaught = true;
 		}
-
 	}
+
 
 	private static class StringTestValidator implements Validator {
 
 		private final String invalidValue;
 
-		private StringTestValidator(String invalidValue) {
+		public StringTestValidator(String invalidValue) {
 			this.invalidValue = invalidValue;
 		}
 

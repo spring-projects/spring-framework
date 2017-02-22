@@ -65,7 +65,7 @@ public class EncoderHttpMessageWriterTests {
 
 		EncoderHttpMessageWriter<ByteBuffer> writer = createWriter(new ByteBufferEncoder());
 		writer.write(source, ResolvableType.forClass(ByteBuffer.class),
-				MediaType.APPLICATION_OCTET_STREAM, this.response, Collections.emptyMap());
+				MediaType.APPLICATION_OCTET_STREAM, this.response, Collections.emptyMap()).blockMillis(5000);
 
 		assertThat(this.response.getHeaders().getContentType(), is(MediaType.APPLICATION_OCTET_STREAM));
 		StepVerifier.create(this.response.getBodyAsString())

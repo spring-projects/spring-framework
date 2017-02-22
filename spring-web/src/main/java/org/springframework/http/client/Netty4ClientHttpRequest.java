@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.springframework.util.concurrent.SettableListenableFuture;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 4.1.2
  */
 class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements ClientHttpRequest {
@@ -104,8 +105,7 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 
 	@Override
 	protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers) throws IOException {
-		final SettableListenableFuture<ClientHttpResponse> responseFuture =
-				new SettableListenableFuture<>();
+		final SettableListenableFuture<ClientHttpResponse> responseFuture = new SettableListenableFuture<>();
 
 		ChannelFutureListener connectionListener = new ChannelFutureListener() {
 			@Override
@@ -130,14 +130,18 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 		io.netty.handler.codec.http.HttpMethod nettyMethod =
 				io.netty.handler.codec.http.HttpMethod.valueOf(this.method.name());
 
+		String authority = this.uri.getRawAuthority();
+		String path = this.uri.toString().substring(this.uri.toString().indexOf(authority) + authority.length());
 		FullHttpRequest nettyRequest = new DefaultFullHttpRequest(
-				HttpVersion.HTTP_1_1, nettyMethod, this.uri.toString(), this.body.buffer());
+				HttpVersion.HTTP_1_1, nettyMethod, path, this.body.buffer());
 
 		nettyRequest.headers().set(HttpHeaders.HOST, this.uri.getHost());
 		nettyRequest.headers().set(HttpHeaders.CONNECTION, "close");
-
 		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
 			nettyRequest.headers().add(entry.getKey(), entry.getValue());
+		}
+		if (!nettyRequest.headers().contains(HttpHeaders.CONTENT_LENGTH) && this.body.buffer().readableBytes() > 0) {
+			nettyRequest.headers().set(HttpHeaders.CONTENT_LENGTH, this.body.buffer().readableBytes());
 		}
 
 		return nettyRequest;

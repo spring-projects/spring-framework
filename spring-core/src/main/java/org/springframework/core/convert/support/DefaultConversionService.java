@@ -23,15 +23,14 @@ import java.util.UUID;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.ConverterRegistry;
-import org.springframework.util.ClassUtils;
 
 /**
- * A specialization of {@link GenericConversionService} configured by default with
- * converters appropriate for most environments.
+ * A specialization of {@link GenericConversionService} configured by default
+ * with converters appropriate for most environments.
  *
  * <p>Designed for direct instantiation but also exposes the static
- * {@link #addDefaultConverters(ConverterRegistry)} utility method for ad hoc use against any
- * {@code ConverterRegistry} instance.
+ * {@link #addDefaultConverters(ConverterRegistry)} utility method for ad-hoc
+ * use against any {@code ConverterRegistry} instance.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -40,9 +39,30 @@ import org.springframework.util.ClassUtils;
  */
 public class DefaultConversionService extends GenericConversionService {
 
-	/** Java 8's java.time package available? */
-	private static final boolean jsr310Available =
-			ClassUtils.isPresent("java.time.ZoneId", DefaultConversionService.class.getClassLoader());
+	private static volatile DefaultConversionService sharedInstance;
+
+
+	/**
+	 * Return a shared default {@code ConversionService} instance,
+	 * lazily building it once needed.
+	 * <p><b>NOTE:</b> We highly recommend constructing individual
+	 * {@code ConversionService} instances for customization purposes.
+	 * This accessor is only meant as a fallback for code paths which
+	 * need simple type coercion but cannot access a longer-lived
+	 * {@code ConversionService} instance any other way.
+	 * @return the shared {@code ConversionService} instance (never {@code null})
+	 * @since 4.3.5
+	 */
+	public static ConversionService getSharedInstance() {
+		if (sharedInstance == null) {
+			synchronized (DefaultConversionService.class) {
+				if (sharedInstance == null) {
+					sharedInstance = new DefaultConversionService();
+				}
+			}
+		}
+		return sharedInstance;
+	}
 
 
 	/**
@@ -67,9 +87,9 @@ public class DefaultConversionService extends GenericConversionService {
 		addCollectionConverters(converterRegistry);
 
 		converterRegistry.addConverter(new ByteBufferConverter((ConversionService) converterRegistry));
-		if (jsr310Available) {
-			Jsr310ConverterRegistrar.registerJsr310Converters(converterRegistry);
-		}
+		converterRegistry.addConverter(new StringToTimeZoneConverter());
+		converterRegistry.addConverter(new ZoneIdToTimeZoneConverter());
+		converterRegistry.addConverter(new ZonedDateTimeToCalendarConverter());
 
 		converterRegistry.addConverter(new ObjectToObjectConverter());
 		converterRegistry.addConverter(new IdToEntityConverter((ConversionService) converterRegistry));
@@ -147,19 +167,6 @@ public class DefaultConversionService extends GenericConversionService {
 
 		converterRegistry.addConverter(new StringToUUIDConverter());
 		converterRegistry.addConverter(UUID.class, String.class, new ObjectToStringConverter());
-	}
-
-
-	/**
-	 * Inner class to avoid a hard-coded dependency on Java 8's {@code java.time} package.
-	 */
-	private static final class Jsr310ConverterRegistrar {
-
-		public static void registerJsr310Converters(ConverterRegistry converterRegistry) {
-			converterRegistry.addConverter(new StringToTimeZoneConverter());
-			converterRegistry.addConverter(new ZoneIdToTimeZoneConverter());
-			converterRegistry.addConverter(new ZonedDateTimeToCalendarConverter());
-		}
 	}
 
 }

@@ -48,7 +48,7 @@ import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
  * override methods for customizing the handshake process.
  *
  * @author Rossen Stoyanchev
- * @since 4.0
+ * @since 5.0
  * @see ServerEndpointExporter
  */
 public class ServerEndpointRegistration extends ServerEndpointConfig.Configurator

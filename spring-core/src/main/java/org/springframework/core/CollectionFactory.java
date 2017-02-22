@@ -54,9 +54,9 @@ import org.springframework.util.ReflectionUtils;
  */
 public abstract class CollectionFactory {
 
-	private static final Set<Class<?>> approximableCollectionTypes = new HashSet<>(11);
+	private static final Set<Class<?>> approximableCollectionTypes = new HashSet<>();
 
-	private static final Set<Class<?>> approximableMapTypes = new HashSet<>(7);
+	private static final Set<Class<?>> approximableMapTypes = new HashSet<>();
 
 
 	static {

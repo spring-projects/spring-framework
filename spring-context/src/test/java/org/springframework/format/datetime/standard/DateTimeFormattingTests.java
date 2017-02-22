@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -312,6 +312,15 @@ public class DateTimeFormattingTests {
 	@Test
 	public void testBindISOTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("isoTime", "12:00:00");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("12:00:00", binder.getBindingResult().getFieldValue("isoTime"));
+	}
+
+	@Test
+	public void testBindISOTimeWithZone() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoTime", "12:00:00.000-05:00");
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
@@ -320,6 +329,15 @@ public class DateTimeFormattingTests {
 
 	@Test
 	public void testBindISODateTime() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("isoDateTime", "2009-10-31T12:00:00");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("2009-10-31T12:00:00", binder.getBindingResult().getFieldValue("isoDateTime"));
+	}
+
+	@Test
+	public void testBindISODateTimeWithZone() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoDateTime", "2009-10-31T12:00:00.000Z");
 		binder.bind(propertyValues);
@@ -337,6 +355,7 @@ public class DateTimeFormattingTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testBindInstantFromJavaUtilDate() throws Exception {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("instant", new Date(109, 9, 31, 12, 0));
@@ -386,29 +405,29 @@ public class DateTimeFormattingTests {
 
 		private LocalDate localDate;
 
-		@DateTimeFormat(style="M-")
+		@DateTimeFormat(style = "M-")
 		private LocalDate localDateAnnotated;
 
 		private LocalTime localTime;
 
-		@DateTimeFormat(style="-M")
+		@DateTimeFormat(style = "-M")
 		private LocalTime localTimeAnnotated;
 
 		private LocalDateTime localDateTime;
 
-		@DateTimeFormat(style="MM")
+		@DateTimeFormat(style = "MM")
 		private LocalDateTime localDateTimeAnnotated;
 
-		@DateTimeFormat(pattern="M/d/yy h:mm a")
+		@DateTimeFormat(pattern = "M/d/yy h:mm a")
 		private LocalDateTime dateTimeAnnotatedPattern;
 
-		@DateTimeFormat(iso=ISO.DATE)
+		@DateTimeFormat(iso = ISO.DATE)
 		private LocalDate isoDate;
 
-		@DateTimeFormat(iso=ISO.TIME)
+		@DateTimeFormat(iso = ISO.TIME)
 		private LocalTime isoTime;
 
-		@DateTimeFormat(iso=ISO.DATE_TIME)
+		@DateTimeFormat(iso = ISO.DATE_TIME)
 		private LocalDateTime isoDateTime;
 
 		private Instant instant;

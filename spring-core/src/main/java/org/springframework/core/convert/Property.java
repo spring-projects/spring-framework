@@ -47,8 +47,7 @@ import org.springframework.util.StringUtils;
  */
 public final class Property {
 
-	private static Map<Property, Annotation[]> annotationCache =
-			new ConcurrentReferenceHashMap<>();
+	private static Map<Property, Annotation[]> annotationCache = new ConcurrentReferenceHashMap<>();
 
 	private final Class<?> objectType;
 
@@ -72,7 +71,7 @@ public final class Property {
 		this.readMethod = readMethod;
 		this.writeMethod = writeMethod;
 		this.methodParameter = resolveMethodParameter();
-		this.name = (name == null ? resolveName() : name);
+		this.name = (name != null ? name : resolveName());
 	}
 
 

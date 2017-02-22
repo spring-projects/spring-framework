@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Test;
+import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -66,13 +67,7 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null, Collections.emptyMap());
 
 		StepVerifier.create(output)
-				.consumeNextWith(stringConsumer("["))
-				.consumeNextWith(stringConsumer("{\"foo\":\"foo\",\"bar\":\"bar\"}"))
-				.consumeNextWith(stringConsumer(","))
-				.consumeNextWith(stringConsumer("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"))
-				.consumeNextWith(stringConsumer(","))
-				.consumeNextWith(stringConsumer("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"))
-				.consumeNextWith(stringConsumer("]"))
+				.consumeNextWith(stringConsumer("[{\"foo\":\"foo\",\"bar\":\"bar\"},{\"foo\":\"foofoo\",\"bar\":\"barbar\"},{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}]"))
 				.expectComplete()
 				.verify();
 	}
@@ -84,11 +79,25 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null, Collections.emptyMap());
 
 		StepVerifier.create(output)
-				.consumeNextWith(stringConsumer("["))
-				.consumeNextWith(stringConsumer("{\"type\":\"foo\"}"))
-				.consumeNextWith(stringConsumer(","))
-				.consumeNextWith(stringConsumer("{\"type\":\"bar\"}"))
-				.consumeNextWith(stringConsumer("]"))
+				.consumeNextWith(stringConsumer("[{\"type\":\"foo\"},{\"type\":\"bar\"}]"))
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void encodeAsStream() throws Exception {
+		Flux<Pojo> source = Flux.just(
+				new Pojo("foo", "bar"),
+				new Pojo("foofoo", "barbar"),
+				new Pojo("foofoofoo", "barbarbar")
+		);
+		ResolvableType type = ResolvableType.forClass(Pojo.class);
+		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, APPLICATION_STREAM_JSON, Collections.emptyMap());
+
+		StepVerifier.create(output)
+				.consumeNextWith(stringConsumer("{\"foo\":\"foo\",\"bar\":\"bar\"}\n"))
+				.consumeNextWith(stringConsumer("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n"))
+				.consumeNextWith(stringConsumer("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n"))
 				.expectComplete()
 				.verify();
 	}

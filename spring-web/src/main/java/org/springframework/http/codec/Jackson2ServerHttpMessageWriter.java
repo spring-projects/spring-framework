@@ -21,19 +21,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import org.reactivestreams.Publisher;
+import static org.springframework.core.codec.AbstractEncoder.FLUSHING_STRATEGY_HINT;
+import static org.springframework.core.codec.AbstractEncoder.FlushingStrategy.AFTER_EACH_ELEMENT;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.AbstractEncoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.http.MediaType;
+import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.json.AbstractJackson2Codec;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
- * {@link ServerHttpMessageWriter} that resolves those annotation or request based Jackson 2 hints:
- * <ul>
- *   <li>{@code @JsonView} annotated handler method</li>
- * </ul>
+ * Jackson {@link ServerHttpMessageWriter} that resolves {@code @JsonView} annotated handler
+ * method and deals with {@link AbstractEncoder#FLUSHING_STRATEGY_HINT}.
  *
  * @author Sebastien Deleuze
  * @since 5.0
@@ -72,4 +77,27 @@ public class Jackson2ServerHttpMessageWriter extends AbstractServerHttpMessageWr
 		return hints;
 	}
 
+	@Override
+	public Mono<Void> write(Publisher<?> inputStream, ResolvableType elementType, MediaType mediaType,
+			ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
+
+		if ((mediaType != null) && mediaType.isCompatibleWith(MediaType.APPLICATION_STREAM_JSON)) {
+			Map<String, Object> hintsWithFlush =  new HashMap<>(hints);
+			hintsWithFlush.put(FLUSHING_STRATEGY_HINT, AFTER_EACH_ELEMENT);
+			return super.write(inputStream, elementType, mediaType, outputMessage, hintsWithFlush);
+		}
+		return super.write(inputStream, elementType, mediaType, outputMessage, hints);
+	}
+
+	@Override
+	public Mono<Void> write(Publisher<?> inputStream, ResolvableType streamType, ResolvableType elementType,
+			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response, Map<String, Object> hints) {
+
+		if ((mediaType != null) && mediaType.isCompatibleWith(MediaType.APPLICATION_STREAM_JSON)) {
+			Map<String, Object> hintsWithFlush =  new HashMap<>(hints);
+			hintsWithFlush.put(FLUSHING_STRATEGY_HINT, AFTER_EACH_ELEMENT);
+			return super.write(inputStream, streamType, elementType, mediaType, request, response, hintsWithFlush);
+		}
+		return super.write(inputStream, streamType, elementType, mediaType, request, response, hints);
+	}
 }

@@ -1354,7 +1354,7 @@ the declared method argument type as necessary.
 * `java.security.Principal` method arguments reflecting the user logged in at
 the time of the WebSocket HTTP handshake.
 
-The return value from an `@MessageMapping` method is converted with a
+A return value from an `@MessageMapping` method will be converted with a
 `org.springframework.messaging.converter.MessageConverter` and used as the body
 of a new message that is then sent, by default, to the `"brokerChannel"` with
 the same destination as the client message but using the prefix `"/topic"` by
@@ -1362,8 +1362,12 @@ default. An `@SendTo` message level annotation can be used to specify any
 other destination instead. It can also be set a class-level to share a common
 destination.
 
-An `@SubscribeMapping` annotation can also be used to map subscription requests
-to `@Controller` methods. It is supported on the method level, but can also be
+A response message may also be provided asynchronously via a `ListenableFuture`
+or `CompletableFuture`/`CompletionStage` return type signature, analogous to
+deferred results in an MVC handler method.
+
+A `@SubscribeMapping` annotation can be used to map subscription requests to
+`@Controller` methods. It is supported on the method level, but can also be
 combined with a type level `@MessageMapping` annotation that expresses shared
 mappings across all message handling methods within the same controller.
 
@@ -1647,35 +1651,127 @@ If the application prefix is set to "/app" then the foo method is effectively ma
 [[websocket-stomp-authentication]]
 === Authentication
 
-In a WebSocket-style application it is often useful to know who sent a message.
-Therefore some form of authentication is needed to establish the user identity
-and associate it with the current session.
+Every STOMP over WebSocket messaging session begins with an HTTP request --
+that can be a request to upgrade to WebSockets (i.e. a WebSocket handshake)
+or in the case of SockJS fallbacks a series of SockJS HTTP transport requests.
 
-Existing Web applications already use HTTP based authentication.
-For example Spring Security can secure the HTTP URLs of the application as usual.
-Since a WebSocket session begins with an HTTP handshake, that means URLs mapped
-to STOMP/WebSocket are already automatically protected and require authentication.
-Moreover the page that opens the WebSocket connection is itself likely protected
-and so by the time of the actual handshake, the user should have been authenticated.
+Web applications already have authentication and authorization in place to
+secure HTTP requests. Typically a user is authenticated via Spring Security
+using some mechanism such as a login page, HTTP basic authentication, or other.
+The security context for the authenticated user is saved in the HTTP session
+and is associated with subsequent requests in the same cookie-based session.
 
-When a WebSocket handshake is made and a new WebSocket session is created,
-Spring's WebSocket support automatically propagates the `java.security.Principal`
-from the HTTP request to the WebSocket session. After that every message flowing
-through the application on that WebSocket session is enriched with
-the user information. It's present in the message as a header.
-Controller methods can access the current user by adding a method argument of
-type `javax.security.Principal`.
+Therefore for a WebSocket handshake, or for SockJS HTTP transport requests,
+typically there will already be an authenticated user accessible via
+`HttpServletRequest#getUserPrincipal()`. Spring automatically associates that user
+with a WebSocket or SockJS session created for them and subsequently with all
+STOMP messages transported over that session through a user header.
 
-Note that even though the STOMP `CONNECT` frame has "login" and "passcode" headers
-that can be used for authentication, Spring's STOMP WebSocket support ignores them
-and currently expects users to have been authenticated already via HTTP.
+In short there is nothing special a typical web application needs to do above
+and beyond what it already does for security. The user is authenticated at
+the HTTP request level with a security context maintained through a cookie-based
+HTTP session which is then associated with WebSocket or SockJS sessions created
+for that user and results in a user header stamped on every `Message` flowing
+through the application.
 
-In some cases it may be useful to assign an identity to a WebSocket session even
-when the user has not been formally authenticated. For example, a mobile app might
-assign some identity to anonymous users, perhaps based on geographical location.
-The do that currently, an application can sub-class `DefaultHandshakeHandler`
-and override the `determineUser` method. The custom handshake handler can then
-be plugged in (see examples in <<websocket-server-deployment>>).
+Note that the STOMP protocol does have a "login" and "passcode" headers
+on the `CONNECT` frame. Those were originally designed for and are still needed
+for example for STOMP over TCP. However for STOMP over WebSocket by default
+Spring ignores authorization headers at the STOMP protocol level and assumes
+the user is already authenticated at the HTTP transport level and expects that
+the WebSocket or SockJS session contain the authenticated user.
+
+[NOTE]
+====
+Spring Security provides
+https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#websocket[WebSocket sub-protocol authorization]
+that uses a `ChannelInterceptor` to authorize messages based on the user header in them.
+Also Spring Session provides a
+http://docs.spring.io/spring-session/docs/current/reference/html5/#websocket[WebSocket integration]
+that ensures the user HTTP session does not expire when the WebSocket session is still active.
+====
+
+
+
+[[websocket-stomp-authentication-token-based]]
+=== Token-based Authentication
+
+https://github.com/spring-projects/spring-security-oauth[Spring Security OAuth]
+provides support for token based security including JSON Web Token (JWT).
+This can be used as the authentication mechanism in Web applications
+including STOMP over WebSocket interactions just as described in the previous
+section, i.e. maintaining identity through a cookie-based session.
+
+At the same time cookie-based sessions are not always the best fit for example
+in applications that don't wish to maintain a server-side session at all or in
+mobile applications where it's common to use headers for authentication.
+
+The https://tools.ietf.org/html/rfc6455#section-10.5[WebSocket protocol RFC 6455]
+"doesn't prescribe any particular way that servers can authenticate clients during
+the WebSocket handshake." In practice however browser clients can only use standard
+authentication headers (i.e. basic HTTP authentication) or cookies and cannot for example
+provide custom headers. Likewise the SockJS JavaScript client does not provide
+a way to send HTTP headers with SockJS transport requests, see
+https://github.com/sockjs/sockjs-client/issues/196[sockjs-client issue 196].
+Instead it does allow sending query parameters that can be used to send a token
+but that has its own drawbacks, for example as the token may be inadvertently
+logged with the URL in server logs.
+
+[NOTE]
+====
+The above limitations are for browser-based clients and do not apply to the
+Spring Java-based STOMP client which does support sending headers with both
+WebSocket and SockJS requests.
+====
+
+Therefore applications that wish to avoid the use of cookies may not have any good
+alternatives for authentication at the HTTP protocol level. Instead of using cookies
+they may prefer to authenticate with headers at the STOMP messaging protocol level
+There are 2 simple steps to doing that:
+
+1. Use the STOMP client to pass authentication header(s) at connect time.
+2. Process the authentication header(s) with a `ChannelInterceptor`.
+
+Below is the example server-side configuration to register a custom authentication
+interceptor. Note that an interceptor only needs to authenticate and set
+the user header on the CONNECT `Message`. Spring will note and save the authenticated
+user and associate it with subsequent STOMP messages on the same session:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+  @Configuration
+  @EnableWebSocketMessageBroker
+  public class MyConfig extends AbstractWebSocketMessageBrokerConfigurer {
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+      registration.setInterceptors(new ChannelInterceptorAdapter() {
+
+          @Override
+          public Message<?> preSend(Message<?> message, MessageChannel channel) {
+
+              StompHeaderAccessor accessor =
+                  MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+
+              if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+                  Principal user = ... ; // access authentication header(s)
+                  accessor.setUser(user);
+              }
+
+              return message;
+          }
+      });
+    }
+  }
+----
+
+Also note that when using Spring Security's authorization for messages, at present
+you will need to ensure that the authentication `ChannelInterceptor` config is ordered
+ahead of Spring Security's. This is best done by declaring the custom interceptor in
+its own sub-class of `AbstractWebSocketMessageBrokerConfigurer` marked with
+`@Order(Ordered.HIGHEST_PRECEDENCE + 99)`.
+
 
 
 

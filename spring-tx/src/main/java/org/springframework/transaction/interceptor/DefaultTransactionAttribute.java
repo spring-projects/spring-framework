@@ -111,9 +111,18 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	}
 
 	/**
-	 * The default behavior is as with EJB: rollback on unchecked exception.
-	 * Additionally attempt to rollback on Error.
-	 * <p>This is consistent with TransactionTemplate's default behavior.
+	 * The default behavior is as with EJB: rollback on unchecked exception
+	 * ({@link RuntimeException}), assuming an unexpected outcome outside of any
+	 * business rules. Additionally, we also attempt to rollback on {@link Error} which
+	 * is clearly an unexpected outcome as well. By contrast, a checked exception is
+	 * considered a business exception and therefore a regular expected outcome of the
+	 * transactional business method, i.e. a kind of alternative return value which
+	 * still allows for regular completion of resource operations.
+	 * <p>This is largely consistent with TransactionTemplate's default behavior,
+	 * except that TransactionTemplate also rolls back on undeclared checked exceptions
+	 * (a corner case). For declarative transactions, we expect checked exceptions to be
+	 * intentionally declared as business exceptions, leading to a commit by default.
+	 * @see org.springframework.transaction.support.TransactionTemplate#execute
 	 */
 	@Override
 	public boolean rollbackOn(Throwable ex) {

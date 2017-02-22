@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -406,12 +406,14 @@ public abstract class CollectionUtils {
 
 		@Override
 		public void add(K key, V value) {
-			List<V> values = this.map.get(key);
-			if (values == null) {
-				values = new LinkedList<>();
-				this.map.put(key, values);
-			}
+			List<V> values = this.map.computeIfAbsent(key, k -> new LinkedList<>());
 			values.add(value);
+		}
+
+		@Override
+		public void addAll(K key, List<V> values) {
+			List<V> currentValues = this.map.computeIfAbsent(key, k -> new LinkedList<>());
+			currentValues.addAll(values);
 		}
 
 		@Override

@@ -20,6 +20,7 @@ import java.security.Principal;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import reactor.core.publisher.Mono;
 
@@ -76,10 +77,17 @@ public interface ServerWebExchange {
 	<T extends Principal> Mono<T> getPrincipal();
 
 	/**
-	 * Return the form data from the body of the request or an empty {@code Mono}
-	 * if the Content-Type is not "application/x-www-form-urlencoded".
+	 * Return the form data from the body of the request if the Content-Type is
+	 * {@code "application/x-www-form-urlencoded"} or an empty map.
 	 */
 	Mono<MultiValueMap<String, String>> getFormData();
+
+	/**
+	 * Return a combined map that represents both
+	 * {@link ServerHttpRequest#getQueryParams()} and {@link #getFormData()}
+	 * or an empty map.
+	 */
+	Mono<MultiValueMap<String, String>> getRequestParams();
 
 	/**
 	 * Returns {@code true} if the one of the {@code checkNotModified} methods
@@ -127,51 +135,62 @@ public interface ServerWebExchange {
 
 
 	/**
-	 * Return a builder to mutate properties of this exchange. The resulting
-	 * new exchange is an immutable {@link ServerWebExchangeDecorator decorator}
-	 * around the current exchange instance that returns mutated values, where
-	 * provided, or delegating to the decorated instance otherwise.
+	 * Return a builder to mutate properties of this exchange by wrapping it
+	 * with {@link ServerWebExchangeDecorator} and returning either mutated
+	 * values or delegating back to this instance.
 	 */
-	default MutativeBuilder mutate() {
-		return new DefaultServerWebExchangeMutativeBuilder(this);
+	default Builder mutate() {
+		return new DefaultServerWebExchangeBuilder(this);
 	}
 
 
 	/**
-	 * Builder for mutating properties of a {@link ServerWebExchange}.
+	 * Builder for mutating an existing {@link ServerWebExchange}.
+	 * Removes the need
 	 */
-	interface MutativeBuilder {
+	interface Builder {
 
 		/**
-		 * Set the request to use.
+		 * Configure a consumer to modify the current request using a builder.
+		 * <p>Effectively this:
+		 * <pre>
+		 * exchange.mutate().request(builder-> builder.method(HttpMethod.PUT));
+		 *
+		 * // vs...
+		 *
+		 * ServerHttpRequest request = exchange.getRequest().mutate()
+		 *     .method(HttpMethod.PUT)
+		 *     .build();
+		 *
+		 * exchange.mutate().request(request);
+		 * </pre>
+		 * @see ServerHttpRequest#mutate()
 		 */
-		MutativeBuilder setRequest(ServerHttpRequest request);
+		Builder request(Consumer<ServerHttpRequest.Builder> requestBuilderConsumer);
+
+		/**
+		 * Set the request to use especially when there is a need to override
+		 * {@link ServerHttpRequest} methods. To simply mutate request properties
+		 * see {@link #request(Consumer)} instead.
+		 * @see org.springframework.http.server.reactive.ServerHttpRequestDecorator
+		 */
+		Builder request(ServerHttpRequest request);
 
 		/**
 		 * Set the response to use.
+		 * @see org.springframework.http.server.reactive.ServerHttpResponseDecorator
 		 */
-		MutativeBuilder setResponse(ServerHttpResponse response);
+		Builder response(ServerHttpResponse response);
 
 		/**
-		 * Set the principal to use.
+		 * Set the {@code Mono<Principal>} to return for this exchange.
 		 */
-		MutativeBuilder setPrincipal(Mono<Principal> user);
+		Builder principal(Mono<Principal> principalMono);
 
 		/**
-		 * Set the session to use.
-		 */
-		MutativeBuilder setSession(Mono<WebSession> session);
-
-		/**
-		 * Set the form data.
-		 */
-		MutativeBuilder setFormData(Mono<MultiValueMap<String, String>> formData);
-
-		/**
-		 * Build an immutable wrapper that returning the mutated properties.
+		 * Build a {@link ServerWebExchange} decorator with the mutated properties.
 		 */
 		ServerWebExchange build();
-
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * <p>Mock implementation of the {@link javax.servlet.FilterChain} interface. Used
- * for testing the web framework; also useful for testing custom
- * {@link javax.servlet.Filter} implementations.
+ * Mock implementation of the {@link javax.servlet.FilterChain} interface.
  *
  * <p>A {@link MockFilterChain} can be configured with one or more filters and a
  * Servlet to invoke. The first time the chain is called, it invokes all filters

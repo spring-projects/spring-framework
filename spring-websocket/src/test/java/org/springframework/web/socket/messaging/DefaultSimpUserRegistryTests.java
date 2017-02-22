@@ -57,6 +57,7 @@ public class DefaultSimpUserRegistryTests {
 		SimpUser simpUser = registry.getUser("joe");
 		assertNotNull(simpUser);
 
+		assertEquals(1, registry.getUserCount());
 		assertEquals(1, simpUser.getSessions().size());
 		assertNotNull(simpUser.getSession("123"));
 	}
@@ -82,6 +83,7 @@ public class DefaultSimpUserRegistryTests {
 		SimpUser simpUser = registry.getUser("joe");
 		assertNotNull(simpUser);
 
+		assertEquals(1, registry.getUserCount());
 		assertEquals(3, simpUser.getSessions().size());
 		assertNotNull(simpUser.getSession("123"));
 		assertNotNull(simpUser.getSession("456"));

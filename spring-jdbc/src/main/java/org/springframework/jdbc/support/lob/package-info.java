@@ -1,8 +1,5 @@
 /**
- * Provides a stategy interface for Large OBject handling,
- * with implementations for various databases.
- *
- * <p>Can be used independently from jdbc.core and jdbc.object,
- * for example in custom JDBC access code.
+ * Provides a strategy interface for Large OBject handling,
+ * as well as a customizable default implementation.
  */
 package org.springframework.jdbc.support.lob;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.server.handler;
 
+package org.springframework.web.server.handler;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,7 +22,6 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
@@ -46,7 +45,6 @@ public class FilteringWebHandlerTests {
 
 	private static Log logger = LogFactory.getLog(FilteringWebHandlerTests.class);
 
-
 	private MockServerHttpRequest request;
 
 	private MockServerHttpResponse response;
@@ -54,9 +52,10 @@ public class FilteringWebHandlerTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.request = new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
+		this.request = MockServerHttpRequest.get("http://localhost").build();
 		this.response = new MockServerHttpResponse();
 	}
+
 
 	@Test
 	public void multipleFilters() throws Exception {
@@ -122,6 +121,7 @@ public class FilteringWebHandlerTests {
 		assertEquals("boo", savedException.getMessage());
 	}
 
+
 	private HttpHandler createHttpHandler(StubWebHandler webHandler, WebFilter... filters) {
 		return WebHttpHandlerBuilder.webHandler(webHandler).filters(filters).build();
 	}
@@ -146,6 +146,7 @@ public class FilteringWebHandlerTests {
 		}
 	}
 
+
 	private static class ShortcircuitingFilter extends TestFilter {
 
 		@Override
@@ -153,6 +154,7 @@ public class FilteringWebHandlerTests {
 			return Mono.empty();
 		}
 	}
+
 
 	private static class AsyncFilter extends TestFilter {
 
@@ -169,6 +171,7 @@ public class FilteringWebHandlerTests {
 		}
 	}
 
+
 	private static class ExceptionFilter implements WebFilter {
 
 		@Override
@@ -176,6 +179,7 @@ public class FilteringWebHandlerTests {
 			return Mono.error(new IllegalStateException("boo"));
 		}
 	}
+
 
 	private static class TestExceptionHandler implements WebExceptionHandler {
 
@@ -187,6 +191,7 @@ public class FilteringWebHandlerTests {
 			return Mono.error(ex);
 		}
 	}
+
 
 	private static class StubWebHandler implements WebHandler {
 

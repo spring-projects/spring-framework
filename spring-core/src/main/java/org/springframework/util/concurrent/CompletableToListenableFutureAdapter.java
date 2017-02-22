@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,18 @@
 package org.springframework.util.concurrent;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
 
 /**
- * Adapts a {@link CompletableFuture} into a {@link ListenableFuture}.
+ * Adapts a {@link CompletableFuture} or {@link CompletionStage} into a
+ * Spring {@link ListenableFuture}.
  *
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 4.2
  */
 public class CompletableToListenableFutureAdapter<T> implements ListenableFuture<T> {
@@ -35,6 +38,17 @@ public class CompletableToListenableFutureAdapter<T> implements ListenableFuture
 	private final ListenableFutureCallbackRegistry<T> callbacks = new ListenableFutureCallbackRegistry<>();
 
 
+	/**
+	 * Create a new adapter for the given {@link CompletionStage}.
+	 * @since 4.3.7
+	 */
+	public CompletableToListenableFutureAdapter(CompletionStage<T> completionStage) {
+		this(completionStage.toCompletableFuture());
+	}
+
+	/**
+	 * Create a new adapter for the given {@link CompletableFuture}.
+	 */
 	public CompletableToListenableFutureAdapter(CompletableFuture<T> completableFuture) {
 		this.completableFuture = completableFuture;
 		this.completableFuture.handle(new BiFunction<T, Throwable, Object>() {

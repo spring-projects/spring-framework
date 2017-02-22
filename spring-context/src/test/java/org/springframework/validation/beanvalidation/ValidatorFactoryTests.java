@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.env.Environment;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
@@ -255,6 +256,23 @@ public class ValidatorFactoryTests {
 		assertNull(rejected);
 	}
 
+	@Test
+	public void testListValidation() throws Exception {
+		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+		validator.afterPropertiesSet();
+
+		ListContainer listContainer = new ListContainer();
+		listContainer.addString("A");
+		listContainer.addString("X");
+
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(listContainer, "listContainer");
+		errors.initConversion(new DefaultConversionService());
+		validator.validate(listContainer, errors);
+
+		FieldError fieldError = errors.getFieldError("list[1]");
+		assertEquals("X", errors.getFieldValue("list[1]"));
+	}
+
 
 	@NameAddressValid
 	public static class ValidPerson {
@@ -421,6 +439,55 @@ public class ValidatorFactoryTests {
 				return false;
 			}
 			return true;
+		}
+	}
+
+
+	public static class ListContainer {
+
+		@NotXList
+		private List<String> list = new LinkedList<>();
+
+		public void addString(String value) {
+			list.add(value);
+		}
+
+		public List<String> getList() {
+			return list;
+		}
+	}
+
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	@Constraint(validatedBy = NotXListValidator.class)
+	public @interface NotXList {
+
+		String message() default "Should not be X";
+
+		Class<?>[] groups() default { };
+
+		Class<? extends Payload>[] payload() default {};
+	}
+
+
+	public static class NotXListValidator implements ConstraintValidator<NotXList, List<String>> {
+
+		@Override
+		public void initialize(NotXList constraintAnnotation) {
+		}
+
+		@Override
+		public boolean isValid(List<String> list, ConstraintValidatorContext context) {
+			context.disableDefaultConstraintViolation();
+			boolean valid = true;
+			for (int i = 0; i < list.size(); i++) {
+				if ("X".equals(list.get(i))) {
+					context.buildConstraintViolationWithTemplate(context.getDefaultConstraintMessageTemplate()).addBeanNode().inIterable().atIndex(i).addConstraintViolation();
+					valid = false;
+				}
+			}
+			return valid;
 		}
 	}
 

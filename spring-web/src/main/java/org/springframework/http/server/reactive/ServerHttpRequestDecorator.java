@@ -15,7 +15,9 @@
  */
 package org.springframework.http.server.reactive;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
+import java.util.Optional;
 
 import reactor.core.publisher.Flux;
 
@@ -39,7 +41,7 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 
 
 	public ServerHttpRequestDecorator(ServerHttpRequest delegate) {
-		Assert.notNull(delegate, "'delegate' is required.");
+		Assert.notNull(delegate, "ServerHttpRequest delegate is required.");
 		this.delegate = delegate;
 	}
 
@@ -74,6 +76,11 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 	@Override
 	public MultiValueMap<String, HttpCookie> getCookies() {
 		return getDelegate().getCookies();
+	}
+
+	@Override
+	public Optional<InetSocketAddress> getRemoteAddress() {
+		return getDelegate().getRemoteAddress();
 	}
 
 	@Override

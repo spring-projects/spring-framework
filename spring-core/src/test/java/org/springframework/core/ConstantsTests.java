@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package org.springframework.core;
 
-import org.junit.Test;
-
 import java.util.Locale;
 import java.util.Set;
+
+import org.junit.Test;
 
 import static org.junit.Assert.*;
 
@@ -45,7 +45,7 @@ public class ConstantsTests {
 			c.asNumber("bogus");
 			fail("Can't get bogus field");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 
 		assertTrue(c.asString("S1").equals(A.S1));
@@ -53,7 +53,7 @@ public class ConstantsTests {
 			c.asNumber("S1");
 			fail("Wrong type");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 	}
 
@@ -170,13 +170,13 @@ public class ConstantsTests {
 			c.toCode("bogus", "bogus");
 			fail("Should have thrown ConstantException");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 		try {
 			c.toCode("bogus", null);
 			fail("Should have thrown ConstantException");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 
 		assertEquals(c.toCodeForProperty(new Integer(1), "myProperty"), "MY_PROPERTY_NO");
@@ -185,7 +185,7 @@ public class ConstantsTests {
 			c.toCodeForProperty("bogus", "bogus");
 			fail("Should have thrown ConstantException");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 
 		assertEquals(c.toCodeForSuffix(new Integer(0), ""), "DOG");
@@ -206,13 +206,13 @@ public class ConstantsTests {
 			c.toCodeForSuffix("bogus", "bogus");
 			fail("Should have thrown ConstantException");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 		try {
 			c.toCodeForSuffix("bogus", null);
 			fail("Should have thrown ConstantException");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 	}
 

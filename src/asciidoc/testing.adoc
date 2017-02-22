@@ -3822,7 +3822,7 @@ IntelliJ) may not require any additional configuration. Just check the support f
 completion on static members.
 
 [[spring-mvc-test-server-setup-options]]
-===== Setup Options
+===== Setup Choices
 There are two main options for creating an instance of `MockMvc`.
 The first is to load Spring MVC configuration through the __TestContext
 framework__, which loads the Spring configuration and injects a `WebApplicationContext`
@@ -3927,6 +3927,48 @@ answer. However, using the "standaloneSetup" does imply the need for additional
 Alternatively, you may choose to write all tests with "webAppContextSetup" in order to
 always test against your actual Spring MVC configuration.
 
+[[spring-mvc-test-server-setup-steps]]
+===== Setup Features
+
+No matter which MockMvc builder you use all `MockMvcBuilder` implementations provide
+some common and very useful features. For example you can declare an `Accept` header
+for all requests and expect a status of 200 as well as a `Content-Type` header
+in all responses as follows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+// static import of MockMvcBuilders.standaloneSetup
+
+MockMVc mockMvc = standaloneSetup(new MusicController())
+		.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON))
+		.alwaysExpect(status().isOk())
+		.alwaysExpect(content().contentType("application/json;charset=UTF-8"))
+		.build();
+----
+
+In addition 3rd party frameworks (and applications) may pre-package setup
+instructions like the ones through a `MockMvcConfigurer`. The Spring Framework
+has one such built-in implementation that helps to save and re-use the HTTP
+session across requests. It can be used as follows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+// static import of SharedHttpSessionConfigurer.sharedHttpSession
+
+MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new TestController())
+        .apply(sharedHttpSession())
+        .build();
+
+// Use mockMvc to perform requests...
+----
+
+See `ConfigurableMockMvcBuilder` for a list of all MockMvc builder features
+or use the IDE to explore the available options.
+
+
+
 [[spring-mvc-test-server-performing-requests]]
 ===== Performing Requests
 It's easy to perform requests using any HTTP method:
@@ -3944,7 +3986,7 @@ request but rather you have to set it up:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	mockMvc.perform(fileUpload("/doc").file("a1", "ABC".getBytes("UTF-8")));
+	mockMvc.perform(multipart("/doc").file("a1", "ABC".getBytes("UTF-8")));
 ----
 
 You can specify query parameters in URI template style:

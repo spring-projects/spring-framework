@@ -28,6 +28,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.CodecException;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
@@ -65,6 +66,16 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 				.expectNext(new Pojo("foofoo", "barbar"))
 				.expectComplete()
 				.verify();
+	}
+
+	@Test
+	public void decodePojoWithError() throws Exception {
+		Flux<DataBuffer> source = Flux.just(stringBuffer("{\"foo\":}"));
+		ResolvableType elementType = ResolvableType.forClass(Pojo.class);
+		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, null,
+				Collections.emptyMap());
+
+		StepVerifier.create(flux).verifyError(CodecException.class);
 	}
 
 	@Test
