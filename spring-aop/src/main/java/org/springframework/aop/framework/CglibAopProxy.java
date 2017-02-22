@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,7 +214,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 					"Common causes of this problem include using a final class or a non-visible class",
 					ex);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			// TargetSource.getTarget() failed
 			throw new AopConfigException("Unexpected AOP exception", ex);
 		}
@@ -256,7 +256,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 * methods across ClassLoaders, and writes warnings to the log for each one found.
 	 */
 	private void doValidateClass(Class<?> proxySuperClass, ClassLoader proxyClassLoader) {
-		if (Object.class != proxySuperClass) {
+		if (proxySuperClass != Object.class) {
 			Method[] methods = proxySuperClass.getDeclaredMethods();
 			for (Method method : methods) {
 				int mod = method.getModifiers();
