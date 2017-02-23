@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.result;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,8 +62,8 @@ public class PrintingResultHandlerTests {
 
 	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
-	private final StubMvcResult mvcResult = new StubMvcResult(this.request, null, null,
-			null, null, null, this.response);
+	private final StubMvcResult mvcResult = new StubMvcResult(
+			this.request, null, null, null, null, null, this.response);
 
 
 	@Test
@@ -73,6 +74,7 @@ public class PrintingResultHandlerTests {
 		String palindrome = "ablE was I ere I saw Elba";
 		byte[] bytes = palindrome.getBytes("UTF-16");
 		this.request.setContent(bytes);
+		this.request.getSession().setAttribute("foo", "bar");
 
 		this.handler.handle(this.mvcResult);
 
@@ -87,6 +89,7 @@ public class PrintingResultHandlerTests {
 		assertValue("MockHttpServletRequest", "Parameters", params);
 		assertValue("MockHttpServletRequest", "Headers", headers);
 		assertValue("MockHttpServletRequest", "Body", palindrome);
+		assertValue("MockHttpServletRequest", "Session Attrs", Collections.singletonMap("foo", "bar"));
 	}
 
 	@Test
@@ -134,7 +137,9 @@ public class PrintingResultHandlerTests {
 		assertTrue(cookie1.contains("name = 'cookie', value = 'cookieValue'"));
 		assertTrue(cookie1.endsWith("]"));
 		assertTrue(cookie2.startsWith("[" + Cookie.class.getSimpleName()));
-		assertTrue(cookie2.contains("name = 'enigma', value = '42', comment = 'This is a comment', domain = '.example.com', maxAge = 1234, path = '/crumbs', secure = true, version = 0, httpOnly = true"));
+		assertTrue(cookie2.contains("name = 'enigma', value = '42', " +
+				"comment = 'This is a comment', domain = '.example.com', maxAge = 1234, " +
+				"path = '/crumbs', secure = true, version = 0, httpOnly = true"));
 		assertTrue(cookie2.endsWith("]"));
 	}
 
@@ -281,7 +286,7 @@ public class PrintingResultHandlerTests {
 
 	private static class TestPrintingResultHandler extends PrintingResultHandler {
 
-		public TestPrintingResultHandler() {
+		TestPrintingResultHandler() {
 			super(new TestResultValuePrinter());
 		}
 
