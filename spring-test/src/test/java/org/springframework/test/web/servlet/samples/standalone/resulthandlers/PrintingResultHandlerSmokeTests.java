@@ -56,7 +56,10 @@ public class PrintingResultHandlerSmokeTests {
 
 		standaloneSetup(new SimpleController())
 			.build()
-			.perform(get("/").content("Hello Request".getBytes()))
+			.perform(get("/")
+					.content("Hello Request".getBytes())
+					.sessionAttr("jsessionId", "1A530690283A13B04199A42E5D530454")
+					.sessionAttr("userId", "jdoe"))
 			.andDo(log())
 			.andDo(print())
 			.andDo(print(System.err))

@@ -108,7 +108,7 @@ public abstract class MockMvcResultHandlers {
 					if (value != null && value.getClass().isArray()) {
 						value = CollectionUtils.arrayToList(value);
 					}
-					writer.println(String.format("%17s = %s", label, value));
+					writer.println(String.format("%18s = %s", label, value));
 				}
 			});
 		}
