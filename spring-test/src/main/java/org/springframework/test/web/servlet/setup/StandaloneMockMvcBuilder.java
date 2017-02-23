@@ -197,8 +197,8 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	/**
 	 * Set a ContentNegotiationManager.
 	 */
-	protected StandaloneMockMvcBuilder setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
-		this.contentNegotiationManager = contentNegotiationManager;
+	public StandaloneMockMvcBuilder setContentNegotiationManager(ContentNegotiationManager manager) {
+		this.contentNegotiationManager = manager;
 		return this;
 	}
 
