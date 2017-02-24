@@ -679,12 +679,10 @@ public abstract class AnnotationUtils {
 		try {
 			Annotation[] anns = clazz.getDeclaredAnnotations();
 			for (Annotation ann : anns) {
-				if (ann.annotationType() == annotationType) {
+				if (ann.annotationType() == annotationType){
 					return (A) ann;
 				}
-			}
-			for (Annotation ann : anns) {
-				if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
+				else if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
 					A annotation = findAnnotation(ann.annotationType(), annotationType, visited);
 					if (annotation != null) {
 						return annotation;
@@ -692,10 +690,12 @@ public abstract class AnnotationUtils {
 				}
 			}
 		}
+
 		catch (Throwable ex) {
 			handleIntrospectionFailure(clazz, ex);
 			return null;
 		}
+
 
 		for (Class<?> ifc : clazz.getInterfaces()) {
 			A annotation = findAnnotation(ifc, annotationType, visited);
