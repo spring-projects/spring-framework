@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -471,7 +471,7 @@ public abstract class JdbcUtils {
 		StringBuilder result = new StringBuilder();
 		boolean nextIsUpper = false;
 		if (name != null && name.length() > 0) {
-			if (name.length() > 1 && name.substring(1,2).equals("_")) {
+			if (name.length() > 1 && name.substring(1, 2).equals("_")) {
 				result.append(name.substring(0, 1).toUpperCase());
 			}
 			else {
