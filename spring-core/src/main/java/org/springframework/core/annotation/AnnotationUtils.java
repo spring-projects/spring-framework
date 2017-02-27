@@ -803,10 +803,8 @@ public abstract class AnnotationUtils {
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		Assert.notNull(clazz, "Class must not be null");
 		try {
-			for (Annotation ann : clazz.getDeclaredAnnotations()) {
-				if (ann.annotationType() == annotationType) {
-					return true;
-				}
+			if (clazz.getDeclaredAnnotationsByType(annotationType).length > 0){
+				return true;
 			}
 		}
 		catch (Throwable ex) {
