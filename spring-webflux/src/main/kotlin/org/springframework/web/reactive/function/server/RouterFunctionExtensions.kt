@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.server
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
+import org.springframework.web.reactive.function.server.RequestPredicates.pathPrefix
 import reactor.core.publisher.Mono
 
 /**
@@ -26,18 +27,16 @@ import reactor.core.publisher.Mono
  * write idiomatic Kotlin code as below:
  *
  * ```kotlin
- * import org.springframework.web.reactive.function.server.RequestPredicates.*
- * ...
  *
  * @Controller
  * class FooController : RouterFunction<ServerResponse> {
  *
  * 		override fun route(req: ServerRequest) = route(req) {
- * 			html().apply {
+ * 			accept(TEXT_HTML).apply {
  * 				(GET("/user/") or GET("/users/")) { findAllView() }
  * 				GET("/user/{login}", this@FooController::findViewById)
  * 			}
- * 			json().apply {
+ * 			accept(APPLICATION_JSON).apply {
  * 				(GET("/api/user/") or GET("/api/users/")) { findAll() }
  * 				POST("/api/user/", this@FooController::create)
  * 			}
@@ -52,15 +51,26 @@ import reactor.core.publisher.Mono
  *
  * @since 5.0
  * @see <a href="https://youtrack.jetbrains.com/issue/KT-15667">Kotlin issue about supporting ::foo for member functions</a>
- * @author Sebastien Deleuze
+ * @author Sebastien De leuze
  * @author Yevhenii Melnyk
  */
-fun RouterFunction<*>.route(request: ServerRequest, configure: Routes.() -> Unit) =
-		Routes().apply(configure).invoke(request)
 
-class Routes {
+typealias Routes = RouterDsl.() -> Unit
+
+fun RouterFunction<*>.route(request: ServerRequest, configure: Routes) =
+		RouterDsl().apply(configure).invoke(request)
+
+class RouterDsl {
 
 	val routes = mutableListOf<RouterFunction<ServerResponse>>()
+
+	infix fun RequestPredicate.and(other: String): RequestPredicate = this.and(pathPrefix(other))
+
+	infix fun RequestPredicate.or(other: String): RequestPredicate = this.or(pathPrefix(other))
+
+	infix fun String.and(other: RequestPredicate): RequestPredicate = pathPrefix(this).and(other)
+
+	infix fun String.or(other: RequestPredicate): RequestPredicate = pathPrefix(this).or(other)
 
 	infix fun RequestPredicate.and(other: RequestPredicate): RequestPredicate = this.and(other)
 
@@ -68,8 +78,12 @@ class Routes {
 
 	operator fun RequestPredicate.not(): RequestPredicate = this.negate()
 
-	fun RequestPredicate.route(r: Routes.() -> Unit) {
-		routes += RouterFunctions.nest(this, Routes().apply(r).router())
+	fun RequestPredicate.route(r: Routes) {
+		routes += RouterFunctions.nest(this, RouterDsl().apply(r).router())
+	}
+
+	fun String.route(r: Routes) {
+		routes += RouterFunctions.nest(pathPrefix(this), RouterDsl().apply(r).router())
 	}
 
 	operator fun RequestPredicate.invoke(f: (ServerRequest) -> Mono<ServerResponse>) {
@@ -80,60 +94,96 @@ class Routes {
 		routes += RouterFunctions.route(RequestPredicates.GET(pattern), HandlerFunction { f(it) })
 	}
 
+	fun GET(pattern: String) = RequestPredicates.GET(pattern)
+
 	fun HEAD(pattern: String, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.HEAD(pattern), HandlerFunction { f(it) })
 	}
+
+	fun HEAD(pattern: String) = RequestPredicates.HEAD(pattern)
 
 	fun POST(pattern: String, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.POST(pattern), HandlerFunction { f(it) })
 	}
 
+	fun POST(pattern: String) = RequestPredicates.POST(pattern)
+
 	fun PUT(pattern: String, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.PUT(pattern), HandlerFunction { f(it) })
 	}
+
+	fun PUT(pattern: String) = RequestPredicates.PUT(pattern)
 
 	fun PATCH(pattern: String, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.PATCH(pattern), HandlerFunction { f(it) })
 	}
 
+	fun PATCH(pattern: String) = RequestPredicates.PATCH(pattern)
+
 	fun DELETE(pattern: String, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.DELETE(pattern), HandlerFunction { f(it) })
 	}
+
+	fun DELETE(pattern: String) = RequestPredicates.DELETE(pattern)
+
 
 	fun OPTIONS(pattern: String, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.OPTIONS(pattern), HandlerFunction { f(it) })
 	}
 
+	fun OPTIONS(pattern: String) = RequestPredicates.OPTIONS(pattern)
+
 	fun accept(mediaType: MediaType, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.accept(mediaType), HandlerFunction { f(it) })
 	}
+
+	fun accept(mediaType: MediaType) = RequestPredicates.accept(mediaType)
 
 	fun contentType(mediaType: MediaType, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.contentType(mediaType), HandlerFunction { f(it) })
 	}
 
+	fun contentType(mediaType: MediaType) = RequestPredicates.contentType(mediaType)
+
 	fun headers(headerPredicate: (ServerRequest.Headers) -> Boolean, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.headers(headerPredicate), HandlerFunction { f(it) })
 	}
+
+	fun headers(headerPredicate: (ServerRequest.Headers) -> Boolean) = RequestPredicates.headers(headerPredicate)
 
 	fun method(httpMethod: HttpMethod, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.method(httpMethod), HandlerFunction { f(it) })
 	}
 
+	fun method(httpMethod: HttpMethod) = RequestPredicates.method(httpMethod)
+
 	fun path(pattern: String, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.path(pattern), HandlerFunction { f(it) })
 	}
+
+	fun path(pattern: String) = RequestPredicates.path(pattern)
 
 	fun pathExtension(extension: String, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.pathExtension(extension), HandlerFunction { f(it) })
 	}
 
+	fun pathExtension(extension: String) = RequestPredicates.pathExtension(extension)
+
 	fun pathExtension(predicate: (String) -> Boolean, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.pathExtension(predicate), HandlerFunction { f(it) })
 	}
 
+	fun pathExtension(predicate: (String) -> Boolean) = RequestPredicates.pathExtension(predicate)
+
+
 	fun queryParam(name: String, predicate: (String) -> Boolean, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.queryParam(name, predicate), HandlerFunction { f(it) })
+	}
+
+	fun queryParam(name: String, predicate: (String) -> Boolean) = RequestPredicates.queryParam(name, predicate)
+
+	operator fun String.invoke(f: (ServerRequest) -> Mono<ServerResponse>) {
+		routes += RouterFunctions.route(RequestPredicates.path(this),  HandlerFunction { f(it) })
 	}
 
 	fun resources(path: String, location: Resource) {

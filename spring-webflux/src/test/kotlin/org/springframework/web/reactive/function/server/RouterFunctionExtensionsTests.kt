@@ -18,14 +18,10 @@ package org.springframework.web.reactive.function.server
 
 import org.junit.Test
 import org.springframework.core.io.ClassPathResource
-import org.springframework.http.HttpHeaders.ACCEPT
-import org.springframework.http.HttpHeaders.CONTENT_TYPE
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpMethod.PATCH
-import org.springframework.http.HttpMethod.POST
+import org.springframework.http.HttpHeaders.*
+import org.springframework.http.HttpMethod.*
 import org.springframework.http.MediaType.*
 import org.springframework.web.reactive.function.server.MockServerRequest.builder
-import org.springframework.web.reactive.function.server.RequestPredicates.*
 import org.springframework.web.reactive.function.server.ServerResponse.ok
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
@@ -112,14 +108,14 @@ class RouterFunctionExtensionsTests {
 
 		override fun route(req: ServerRequest) = route(req) {
 			(GET("/foo/") or GET("/foos/")) { handle(req) }
-			(pathPrefix("/api") and accept(APPLICATION_JSON)).route {
+			"/api".route {
 				POST("/foo/")  { handleFromClass(req) }
 				PUT("/foo/") { handleFromClass(req) }
-				DELETE("/foo/")  { handleFromClass(req) }
+				"/foo/"  { handleFromClass(req) }
 			}
 			accept(APPLICATION_ATOM_XML, ::handle)
 			contentType(APPLICATION_OCTET_STREAM) { handle(req) }
-			method(HttpMethod.PATCH) { handle(req) }
+			method(PATCH) { handle(req) }
 			headers({ it.accept().contains(APPLICATION_JSON) }).route {
 				GET("/api/foo/", ::handle)
 			}
@@ -142,4 +138,3 @@ class RouterFunctionExtensionsTests {
 }
 
 fun handle(req: ServerRequest) = ok().build()
-
