@@ -111,9 +111,10 @@ public abstract class MetaAnnotationUtils {
 
 		// Declared on a composed annotation (i.e., as a meta-annotation)?
 		for (Annotation composedAnnotation : clazz.getDeclaredAnnotations()) {
-			if (!AnnotationUtils.isInJavaLangAnnotationPackage(composedAnnotation) && visited.add(composedAnnotation)) {
+			Class<? extends Annotation> currentAnnotationType = composedAnnotation.annotationType();
+			if (!AnnotationUtils.isInJavaLangAnnotationPackage(currentAnnotationType.getName()) && visited.add(composedAnnotation)) {
 				AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(
-						composedAnnotation.annotationType(), visited, annotationType);
+						currentAnnotationType, visited, annotationType);
 				if (descriptor != null) {
 					return new AnnotationDescriptor<>(
 							clazz, descriptor.getDeclaringClass(), composedAnnotation, descriptor.getAnnotation());
@@ -199,9 +200,10 @@ public abstract class MetaAnnotationUtils {
 
 		// Declared on a composed annotation (i.e., as a meta-annotation)?
 		for (Annotation composedAnnotation : clazz.getDeclaredAnnotations()) {
-			if (!AnnotationUtils.isInJavaLangAnnotationPackage(composedAnnotation) && visited.add(composedAnnotation)) {
+			Class<? extends Annotation> currentAnnotationType = composedAnnotation.annotationType();
+			if (!AnnotationUtils.isInJavaLangAnnotationPackage(currentAnnotationType.getName()) && visited.add(composedAnnotation)) {
 				UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(
-						composedAnnotation.annotationType(), visited, annotationTypes);
+						currentAnnotationType, visited, annotationTypes);
 				if (descriptor != null) {
 					return new UntypedAnnotationDescriptor(clazz, descriptor.getDeclaringClass(), composedAnnotation,
 							descriptor.getAnnotation());

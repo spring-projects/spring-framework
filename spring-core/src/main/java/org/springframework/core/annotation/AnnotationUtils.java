@@ -495,8 +495,9 @@ public abstract class AnnotationUtils {
 				}
 			}
 			for (Annotation ann : anns) {
-				if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
-					A annotation = findAnnotation((AnnotatedElement) ann.annotationType(), annotationType, visited);
+				Class<? extends Annotation> currentAnnotationType = ann.annotationType();
+				if (!isInJavaLangAnnotationPackage(currentAnnotationType.getName()) && visited.add(ann)) {
+					A annotation = findAnnotation((AnnotatedElement) currentAnnotationType, annotationType, visited);
 					if (annotation != null) {
 						return annotation;
 					}
@@ -684,8 +685,9 @@ public abstract class AnnotationUtils {
 				}
 			}
 			for (Annotation ann : anns) {
-				if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
-					A annotation = findAnnotation(ann.annotationType(), annotationType, visited);
+				Class<? extends Annotation> currentAnnotationType = ann.annotationType();
+				if (!isInJavaLangAnnotationPackage(currentAnnotationType.getName()) && visited.add(ann)) {
+					A annotation = findAnnotation(currentAnnotationType, annotationType, visited);
 					if (annotation != null) {
 						return annotation;
 					}
@@ -1914,7 +1916,7 @@ public abstract class AnnotationUtils {
 						else if (ObjectUtils.nullSafeEquals(this.containerAnnotationType, currentAnnotationType)) {
 							this.result.addAll(getValue(element, ann));
 						}
-						else if (!isInJavaLangAnnotationPackage(ann)) {
+						else if (!isInJavaLangAnnotationPackage(currentAnnotationType.getName())) {
 							process(currentAnnotationType);
 						}
 					}
