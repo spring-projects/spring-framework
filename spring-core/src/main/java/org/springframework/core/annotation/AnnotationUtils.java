@@ -488,13 +488,14 @@ public abstract class AnnotationUtils {
 	private static <A extends Annotation> A findAnnotation(
 			AnnotatedElement annotatedElement, Class<A> annotationType, Set<Annotation> visited) {
 		try {
-			Annotation[] anns = annotatedElement.getDeclaredAnnotations();
-			for (Annotation ann : anns) {
-				if (ann.annotationType() == annotationType) {
-					return (A) ann;
-				}
+
+			Annotation an = annotatedElement.getDeclaredAnnotation(annotationType);
+
+			if (an != null){
+				return (A) an;
 			}
-			for (Annotation ann : anns) {
+
+			for (Annotation ann : annotatedElement.getDeclaredAnnotations()) {
 				if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
 					A annotation = findAnnotation((AnnotatedElement) ann.annotationType(), annotationType, visited);
 					if (annotation != null) {
@@ -674,15 +675,18 @@ public abstract class AnnotationUtils {
 	 * @param visited the set of annotations that have already been visited
 	 * @return the first matching annotation, or {@code null} if not found
 	 */
-	@SuppressWarnings("unchecked")
+		@SuppressWarnings("unchecked")
 	private static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType, Set<Annotation> visited) {
 		try {
-			Annotation[] anns = clazz.getDeclaredAnnotations();
-			for (Annotation ann : anns) {
-				if (ann.annotationType() == annotationType){
-					return (A) ann;
-				}
-				else if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
+
+			Annotation an = clazz.getDeclaredAnnotation(annotationType);
+
+			if (an != null){
+				return (A) an;
+			}
+
+			for (Annotation ann : clazz.getDeclaredAnnotations()) {
+				if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
 					A annotation = findAnnotation(ann.annotationType(), annotationType, visited);
 					if (annotation != null) {
 						return annotation;
@@ -690,12 +694,10 @@ public abstract class AnnotationUtils {
 				}
 			}
 		}
-
 		catch (Throwable ex) {
 			handleIntrospectionFailure(clazz, ex);
 			return null;
 		}
-
 
 		for (Class<?> ifc : clazz.getInterfaces()) {
 			A annotation = findAnnotation(ifc, annotationType, visited);
@@ -710,7 +712,6 @@ public abstract class AnnotationUtils {
 		}
 		return findAnnotation(superclass, annotationType, visited);
 	}
-
 	/**
 	 * Find the first {@link Class} in the inheritance hierarchy of the
 	 * specified {@code clazz} (including the specified {@code clazz} itself)
@@ -803,10 +804,8 @@ public abstract class AnnotationUtils {
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		Assert.notNull(clazz, "Class must not be null");
 		try {
-			for (Annotation ann : clazz.getDeclaredAnnotations()) {
-				if (ann.annotationType() == annotationType) {
-					return true;
-				}
+			if (clazz.getDeclaredAnnotation(annotationType) != null){
+				return true;
 			}
 		}
 		catch (Throwable ex) {
