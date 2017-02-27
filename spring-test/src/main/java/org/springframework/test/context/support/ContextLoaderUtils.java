@@ -16,26 +16,36 @@
 
 package org.springframework.test.context.support;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.SmartContextLoader;
+import org.springframework.test.util.MetaAnnotationUtils.AnnotationOnMethodDescriptor;
+import org.springframework.test.util.MetaAnnotationUtils.UntypedAnnotationOnMethodDescriptor;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
-import static org.springframework.core.annotation.AnnotationUtils.*;
-import static org.springframework.test.util.MetaAnnotationUtils.*;
+import static org.springframework.core.annotation.AnnotationUtils.getAnnotation;
+import static org.springframework.core.annotation.AnnotationUtils.isAnnotationDeclaredLocally;
+import static org.springframework.core.annotation.AnnotationUtils.synthesizeAnnotation;
+import static org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
+import static org.springframework.test.util.MetaAnnotationUtils.UntypedAnnotationDescriptor;
+import static org.springframework.test.util.MetaAnnotationUtils.findAnnotationDescriptor;
+import static org.springframework.test.util.MetaAnnotationUtils.findAnnotationDescriptorForTypes;
 
 /**
  * Utility methods for resolving {@link ContextConfigurationAttributes} from the
@@ -90,6 +100,7 @@ abstract class ContextLoaderUtils {
 	 * @since 3.2.2
 	 * @see #buildContextHierarchyMap(Class)
 	 * @see #resolveContextConfigurationAttributes(Class)
+     * @see #resolveContextHierarchyAttributes(Method)
 	 */
 	@SuppressWarnings("unchecked")
 	static List<List<ContextConfigurationAttributes>> resolveContextHierarchyAttributes(Class<?> testClass) {
@@ -123,7 +134,7 @@ abstract class ContextLoaderUtils {
 			List<ContextConfigurationAttributes> configAttributesList = new ArrayList<>();
 
 			if (contextConfigDeclaredLocally) {
-				ContextConfiguration contextConfiguration = AnnotationUtils.synthesizeAnnotation(
+				ContextConfiguration contextConfiguration = synthesizeAnnotation(
 						desc.getAnnotationAttributes(), ContextConfiguration.class, desc.getRootDeclaringClass());
 				convertContextConfigToConfigAttributesAndAddToList(
 						contextConfiguration, rootDeclaringClass, configAttributesList);
@@ -152,6 +163,114 @@ abstract class ContextLoaderUtils {
 	}
 
 	/**
+	 * Resolve the list of lists of {@linkplain ContextConfigurationAttributes context
+	 * configuration attributes} for the supplied {@linkplain Method testMethod} and its
+	 * supermethods, taking into account context hierarchies declared via
+	 * {@link ContextHierarchy @ContextHierarchy} and
+	 * {@link ContextConfiguration @ContextConfiguration}.
+	 * <p>The outer list represents a top-down ordering of context configuration
+	 * attributes, where each element in the list represents the context configuration
+	 * declared on a given test method in the methods hierarchy. Each nested list
+	 * contains the context configuration attributes declared either via a single
+	 * instance of {@code @ContextConfiguration} on the particular method or via
+	 * multiple instances of {@code @ContextConfiguration} declared within a
+	 * single {@code @ContextHierarchy} instance on the particular method.
+	 * Furthermore, each nested list maintains the order in which
+	 * {@code @ContextConfiguration} instances are declared.
+	 * <p>Note that the {@link ContextConfiguration#inheritLocations inheritLocations} and
+	 * {@link ContextConfiguration#inheritInitializers() inheritInitializers} flags of
+	 * {@link ContextConfiguration @ContextConfiguration} will <strong>not</strong>
+	 * be taken into consideration. If these flags need to be honored, that must be
+	 * handled manually when traversing the nested lists returned by this testMethod.
+	 * <p>Note that this method does not throw an exception when method in
+	 * hierarchy annotated with neither {@link ContextHierarchy @ContextHierarchy} nor
+	 * {@link ContextConfiguration @ContextConfiguration} unlikely
+	 * {@link #resolveContextHierarchyAttributes(Class)}.
+	 * @param testMethod the method for which to resolve the context hierarchy attributes (must not be {@code null})
+	 * @return the list of lists of configuration attributes for the specified class; never {@code null}
+	 * @throws IllegalArgumentException if the supplied method is {@code null}; or if neither {@code
+	 * @ContextConfiguration} nor {@code @ContextHierarchy} is <em>present</em> on the supplied class
+	 * @throws IllegalStateException if a test method or composed annotation in the method hierarchy declares both
+	 * {@code @ContextConfiguration} and {@code @ContextHierarchy} as top-level annotations.
+	 * @see #buildContextHierarchyMap(Class)
+	 * @see #resolveContextConfigurationAttributes(Class)
+	 * @see #resolveContextHierarchyAttributes(Class)
+	 * @since 5.0
+	 */
+	static List<List<ContextConfigurationAttributes>> resolveContextHierarchyAttributes(Method testMethod) {
+		Assert.notNull(testMethod, "Method must not be null");
+
+		List<List<ContextConfigurationAttributes>> hierarchyAttributes = new ArrayList<>();
+		Method superMethod = testMethod;
+
+		while (superMethod != null) {
+			hierarchyAttributes.add(buildContextAttributes(superMethod));
+			for (Class<?> ifc : superMethod.getDeclaringClass().getInterfaces()) {
+				hierarchyAttributes.addAll(
+						buildContextHierarchyForInterface(superMethod.getName(), superMethod.getParameterTypes(), ifc,
+								new ArrayList<>(), new HashSet<>()));
+			}
+			superMethod = ReflectionUtils.findMethod(superMethod.getDeclaringClass().getSuperclass(),
+					superMethod.getName(), superMethod.getParameterTypes());
+		}
+
+		Collections.reverse(hierarchyAttributes);
+		return hierarchyAttributes;
+	}
+
+	private static List<List<ContextConfigurationAttributes>> buildContextHierarchyForInterface(String name,
+			Class<?>[] parameterTypes, Class<?> interfaceType, List<List<ContextConfigurationAttributes>> attributes,
+			Set<Method> visited) {
+		Method found = ReflectionUtils.findMethod(interfaceType, name, parameterTypes);
+		if (found != null && visited.add(found)) {
+			List<ContextConfigurationAttributes> attr = buildContextAttributes(found);
+			if (!attr.isEmpty()) {
+				attributes.add(attr);
+			}
+		}
+		for (Class<?> ifc : interfaceType.getInterfaces()) {
+			buildContextHierarchyForInterface(name, parameterTypes, ifc, attributes, visited);
+		}
+		return attributes;
+	}
+
+	private static List<ContextConfigurationAttributes> buildContextAttributes(Method method) {
+		Class<ContextConfiguration> contextConfigType = ContextConfiguration.class;
+		Class<ContextHierarchy> contextHierarchyType = ContextHierarchy.class;
+
+		boolean contextConfigDeclaredLocally = getAnnotation(method, contextConfigType) != null;
+		boolean contextHierarchyDeclaredLocally = getAnnotation(method, contextHierarchyType) != null;
+
+		if (contextConfigDeclaredLocally && contextHierarchyDeclaredLocally) {
+			String msg = String.format("Method [%s] has been configured with both @ContextConfiguration " +
+					"and @ContextHierarchy. Only one of these annotations may be declared on a test class " +
+					"or composed annotation.", method.getName());
+			logger.error(msg);
+			throw new IllegalStateException(msg);
+		}
+
+		UntypedAnnotationOnMethodDescriptor desc = findAnnotationDescriptorForTypes(method, contextConfigType,
+				contextHierarchyType);
+
+		List<ContextConfigurationAttributes> configAttributesList = new ArrayList<>();
+		if (contextConfigDeclaredLocally) {
+			ContextConfiguration contextConfiguration = synthesizeAnnotation(desc.getAnnotationAttributes(),
+					ContextConfiguration.class, desc.getRootDeclaringClass());
+			convertContextConfigToConfigAttributesAndAddToList(contextConfiguration, method.getDeclaringClass(),
+					method, configAttributesList);
+
+		} else if (contextHierarchyDeclaredLocally) {
+			ContextHierarchy contextHierarchy = getAnnotation(method, contextHierarchyType);
+			for (ContextConfiguration contextConfiguration : contextHierarchy.value()) {
+				convertContextConfigToConfigAttributesAndAddToList(contextConfiguration,
+						method.getDeclaringClass(), method, configAttributesList);
+			}
+		}
+
+		return configAttributesList;
+	}
+
+	/**
 	 * Build a <em>context hierarchy map</em> for the supplied {@linkplain Class
 	 * test class} and its superclasses, taking into account context hierarchies
 	 * declared via {@link ContextHierarchy @ContextHierarchy} and
@@ -174,12 +293,73 @@ abstract class ContextLoaderUtils {
 	 * unique context configuration within the overall hierarchy.
 	 * @since 3.2.2
 	 * @see #resolveContextHierarchyAttributes(Class)
+	 * @see #buildContextHierarchyMap(Method)
 	 */
-	static Map<String, List<ContextConfigurationAttributes>> buildContextHierarchyMap(Class<?> testClass) {
+	static Map<String, List<ContextConfigurationAttributes>> buildContextHierarchyMap(final Class<?> testClass) {
+		Map<String, List<ContextConfigurationAttributes>> map = buildContextHierarchyMap(
+				() -> resolveContextHierarchyAttributes(testClass));
+
+		Set<List<ContextConfigurationAttributes>> set = new HashSet<>(map.values());
+		if (set.size() != map.size()) {
+			String msg = String.format("The @ContextConfiguration elements configured via @ContextHierarchy in "
+							+ "test class [%s] and its superclasses must define unique contexts per hierarchy level.",
+					testClass.getName());
+			logger.error(msg);
+			throw new IllegalStateException(msg);
+		}
+
+		return map;
+	}
+
+	/**
+	 * Build a <em>context hierarchy map</em> for the supplied {@linkplain Method
+	 * test testMethod} and its supermethods, taking into account context hierarchies
+	 * declared via {@link ContextHierarchy @ContextHierarchy} and
+	 * {@link ContextConfiguration @ContextConfiguration}.
+	 * <p>Each value in the map represents the consolidated list of {@linkplain
+	 * ContextConfigurationAttributes context configuration attributes} for a
+	 * given level in the context hierarchy (potentially across the test methods
+	 * hierarchy), keyed by the {@link ContextConfiguration#name() name} of the
+	 * context hierarchy level.
+	 * <p>If a given level in the context hierarchy does not have an explicit
+	 * name (i.e., configured via {@link ContextConfiguration#name}), a name will
+	 * be generated for that hierarchy level by appending the numerical level to
+	 * the {@link #GENERATED_CONTEXT_HIERARCHY_LEVEL_PREFIX}.
+	 *
+	 * @param testMethod the method for which to resolve the context hierarchy map (must not be {@code null})
+	 *
+	 * @return a map of context configuration attributes for the context hierarchy,
+	 * keyed by context hierarchy level name; never {@code null}
+	 *
+	 * @throws IllegalArgumentException if the lists of context configuration
+	 * attributes for each level in the {@code @ContextHierarchy} do not define
+	 * unique context configuration within the overall hierarchy.
+	 * @see #resolveContextHierarchyAttributes(Class)
+	 * @see #buildContextHierarchyMap(Class)
+	 * @since 5.0
+	 */
+	static Map<String, List<ContextConfigurationAttributes>> buildContextHierarchyMap(final Method testMethod) {
+		Map<String, List<ContextConfigurationAttributes>> map
+				= buildContextHierarchyMap(() -> resolveContextHierarchyAttributes(testMethod));
+
+		Set<List<ContextConfigurationAttributes>> set = new HashSet<>(map.values());
+		if (set.size() != map.size()) {
+			String msg = String.format("The @ContextConfiguration elements configured via @ContextHierarchy on "
+							+ "test method [%s] and its supermethods must define unique contexts per hierarchy level.",
+					testMethod.getName());
+			logger.error(msg);
+			throw new IllegalStateException(msg);
+		}
+
+		return map;
+	}
+
+	private static Map<String, List<ContextConfigurationAttributes>> buildContextHierarchyMap
+			(Supplier<List<List<ContextConfigurationAttributes>>> contextHierarchyResolver) {
 		final Map<String, List<ContextConfigurationAttributes>> map = new LinkedHashMap<>();
 		int hierarchyLevel = 1;
 
-		for (List<ContextConfigurationAttributes> configAttributesList : resolveContextHierarchyAttributes(testClass)) {
+		for (List<ContextConfigurationAttributes> configAttributesList : contextHierarchyResolver.get()) {
 			for (ContextConfigurationAttributes configAttributes : configAttributesList) {
 				String name = configAttributes.getName();
 
@@ -196,16 +376,6 @@ abstract class ContextLoaderUtils {
 
 				map.get(name).add(configAttributes);
 			}
-		}
-
-		// Check for uniqueness
-		Set<List<ContextConfigurationAttributes>> set = new HashSet<>(map.values());
-		if (set.size() != map.size()) {
-			String msg = String.format("The @ContextConfiguration elements configured via @ContextHierarchy in " +
-					"test class [%s] and its superclasses must define unique contexts per hierarchy level.",
-					testClass.getName());
-			logger.error(msg);
-			throw new IllegalStateException(msg);
 		}
 
 		return map;
@@ -242,7 +412,59 @@ abstract class ContextLoaderUtils {
 		while (descriptor != null) {
 			convertContextConfigToConfigAttributesAndAddToList(descriptor.synthesizeAnnotation(),
 					descriptor.getRootDeclaringClass(), attributesList);
-			descriptor = findAnnotationDescriptor(descriptor.getRootDeclaringClass().getSuperclass(), annotationType);
+			descriptor = findAnnotationDescriptor(
+					descriptor.getRootDeclaringClass().getSuperclass(), annotationType);
+		}
+
+		return attributesList;
+	}
+
+	/**
+	 * Resolve the list of {@linkplain ContextConfigurationAttributes context
+	 * configuration attributes} for the supplied {@linkplain Method test testMethod} and its
+	 * supermethods.
+	 * <p>Note that the {@link ContextConfiguration#inheritLocations inheritLocations} and
+	 * {@link ContextConfiguration#inheritInitializers() inheritInitializers} flags of
+	 * {@link ContextConfiguration @ContextConfiguration} will <strong>not</strong>
+	 * be taken into consideration. If these flags need to be honored, that must be
+	 * handled manually when traversing the list returned by this testMethod.
+	 *
+	 * @param testMethod the class for which to resolve the configuration attributes
+	 * (must not be {@code null})
+	 *
+	 * @return the list of configuration attributes for the specified class, ordered
+	 * <em>bottom-up</em> (i.e., as if we were traversing up the class hierarchy);
+	 * never {@code null}
+	 *
+	 * @throws IllegalArgumentException if the supplied method is {@code null} or if
+	 * {@code @ContextConfiguration} is not <em>present</em> on the supplied method
+	 * @see #resolveContextConfigurationAttributes(Class)
+	 * @since 5.0
+	 */
+	static List<ContextConfigurationAttributes> resolveContextConfigurationAttributes(Method testMethod) {
+		Assert.notNull(testMethod, "Method must not be null");
+
+		List<ContextConfigurationAttributes> attributesList = new ArrayList<>();
+		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
+
+		AnnotationOnMethodDescriptor<ContextConfiguration> descriptor = findAnnotationDescriptor(testMethod,
+				annotationType);
+		Assert.notNull(descriptor, () ->
+				String.format("Could not find an 'annotation declaring testMethod' for annotation type [%s] and testMethod [%s]",
+						annotationType.getName(), testMethod.getName()));
+
+		Method superMethod = ReflectionUtils.findMethod(testMethod.getDeclaringClass().getSuperclass(),
+				testMethod.getName(), testMethod.getParameterTypes());
+		while (descriptor != null) {
+			convertContextConfigToConfigAttributesAndAddToList(descriptor.synthesizeAnnotation(),
+					descriptor.getRootDeclaringClass(), descriptor.getDeclaringMethod(), attributesList);
+			if (superMethod == null) {
+				break;
+			}
+
+			descriptor = findAnnotationDescriptor(superMethod, annotationType);
+			superMethod = ReflectionUtils.findMethod(superMethod.getDeclaringClass().getSuperclass(),
+					superMethod.getName(), superMethod.getParameterTypes());
 		}
 
 		return attributesList;
@@ -262,6 +484,29 @@ abstract class ContextLoaderUtils {
 		}
 		ContextConfigurationAttributes attributes =
 				new ContextConfigurationAttributes(declaringClass, contextConfiguration);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Resolved context configuration attributes: " + attributes);
+		}
+		attributesList.add(attributes);
+	}
+
+	/**
+	 * Convenience method for creating a {@link ContextConfigurationAttributes}
+	 * instance from the supplied {@link ContextConfiguration} annotation,
+	 * declaring class and declaring method and then adding the attributes to the supplied list.
+	 */
+	private static void convertContextConfigToConfigAttributesAndAddToList(
+			ContextConfiguration contextConfiguration, Class<?> declaringClass, Method declaringMethod,
+			List<ContextConfigurationAttributes> attributesList) {
+		if (logger.isTraceEnabled()) {
+			logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring method [%s].",
+					contextConfiguration,
+					declaringMethod.getName()));
+		}
+		ContextConfigurationAttributes attributes = new ContextConfigurationAttributes(declaringClass,
+				declaringMethod, contextConfiguration.locations(), contextConfiguration.classes(),
+				contextConfiguration.inheritLocations(), contextConfiguration.initializers(),
+				contextConfiguration.inheritInitializers(), contextConfiguration.name(), contextConfiguration.loader());
 		if (logger.isTraceEnabled()) {
 			logger.trace("Resolved context configuration attributes: " + attributes);
 		}

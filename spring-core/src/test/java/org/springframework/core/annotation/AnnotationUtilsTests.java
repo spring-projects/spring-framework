@@ -407,6 +407,14 @@ public class AnnotationUtilsTests {
 		assertFalse(isAnnotationDeclaredLocally(Order.class, SubNonInheritedAnnotationInterface.class));
 		assertTrue(isAnnotationDeclaredLocally(Order.class, NonInheritedAnnotationClass.class));
 		assertFalse(isAnnotationDeclaredLocally(Order.class, SubNonInheritedAnnotationClass.class));
+
+		// inherited method-level annotation; note: @Transactional is inherited
+		assertTrue(isAnnotationDeclaredLocally(Transactional.class, InheritedAnnotationClass.class.getMethod("something")));
+		assertFalse(isAnnotationDeclaredLocally(Transactional.class, SubInheritedAnnotationClass.class.getMethod("something")));
+
+		// non-inherited method-level annotation; note: @Order is not inherited
+		assertTrue(isAnnotationDeclaredLocally(Order.class, NonInheritedAnnotationInterface.class.getMethod("something")));
+		assertFalse(isAnnotationDeclaredLocally(Order.class, SubNonInheritedAnnotationInterface.class.getMethod("something")));
 	}
 
 	@Test
@@ -1713,9 +1721,13 @@ public class AnnotationUtilsTests {
 
 	@Order
 	public interface NonInheritedAnnotationInterface {
+        @Order
+        void something();
 	}
 
 	public interface SubNonInheritedAnnotationInterface extends NonInheritedAnnotationInterface {
+        @Override
+        void something();
 	}
 
 	public interface SubSubNonInheritedAnnotationInterface extends SubNonInheritedAnnotationInterface {
@@ -1729,9 +1741,17 @@ public class AnnotationUtilsTests {
 
 	@Transactional
 	public static class InheritedAnnotationClass {
+		@Transactional
+		public void something() {
+			// for test purposes
+		}
 	}
 
 	public static class SubInheritedAnnotationClass extends InheritedAnnotationClass {
+		@Override
+		public void something() {
+			// for test purposes
+		}
 	}
 
 	@Order
