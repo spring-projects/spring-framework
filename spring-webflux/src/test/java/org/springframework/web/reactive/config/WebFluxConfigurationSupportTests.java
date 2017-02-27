@@ -19,11 +19,8 @@ package org.springframework.web.reactive.config;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
-
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.hamcrest.Matchers;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -53,7 +50,6 @@ import org.springframework.validation.Validator;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
-import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
@@ -69,17 +65,8 @@ import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewRes
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
-import static org.springframework.http.MediaType.APPLICATION_XML;
-import static org.springframework.http.MediaType.IMAGE_PNG;
-import static org.springframework.http.MediaType.TEXT_PLAIN;
+import static org.junit.Assert.*;
+import static org.springframework.http.MediaType.*;
 
 /**
  * Unit tests for {@link WebFluxConfigurationSupport}.
@@ -91,7 +78,7 @@ public class WebFluxConfigurationSupportTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.request = MockServerHttpRequest.get("/").build();
 	}
 
@@ -106,9 +93,9 @@ public class WebFluxConfigurationSupportTests {
 
 		assertEquals(0, mapping.getOrder());
 
-		assertFalse(mapping.getPatternRegistry().useSuffixPatternMatch());
-		assertThat(mapping.getPatternRegistry().getFileExtensions(), Matchers.empty());
-		assertTrue(mapping.getPatternRegistry().useTrailingSlashMatch());
+		assertTrue(mapping.useSuffixPatternMatch());
+		assertTrue(mapping.useTrailingSlashMatch());
+		assertTrue(mapping.useRegisteredSuffixPatternMatch());
 
 		name = "webFluxContentTypeResolver";
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
@@ -130,9 +117,8 @@ public class WebFluxConfigurationSupportTests {
 		RequestMappingHandlerMapping mapping = context.getBean(name, RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
 
-		assertFalse(mapping.getPatternRegistry().useTrailingSlashMatch());
-		assertTrue(mapping.getPatternRegistry().useSuffixPatternMatch());
-		assertThat(mapping.getPatternRegistry().getFileExtensions(), Matchers.contains(".json", ".xml"));
+		assertFalse(mapping.useSuffixPatternMatch());
+		assertFalse(mapping.useTrailingSlashMatch());
 	}
 
 	@Test
@@ -267,17 +253,17 @@ public class WebFluxConfigurationSupportTests {
 		assertEquals(Ordered.LOWEST_PRECEDENCE - 1, handlerMapping.getOrder());
 
 		assertNotNull(handlerMapping.getPathHelper());
+		assertNotNull(handlerMapping.getPathMatcher());
 
 		SimpleUrlHandlerMapping urlHandlerMapping = (SimpleUrlHandlerMapping) handlerMapping;
 		WebHandler webHandler = (WebHandler) urlHandlerMapping.getUrlMap().get("/images/**");
 		assertNotNull(webHandler);
 	}
 
-	@NotNull
+
 	private DefaultServerWebExchange createExchange() {
 		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}
-
 
 	private void assertHasMessageReader(List<HttpMessageReader<?>> readers, Class<?> clazz, MediaType mediaType) {
 		ResolvableType type = ResolvableType.forClass(clazz);
@@ -302,26 +288,22 @@ public class WebFluxConfigurationSupportTests {
 		return context;
 	}
 
+
 	@EnableWebFlux
 	static class WebFluxConfig {
 	}
+
 
 	@Configuration
 	static class CustomPatchMatchConfig extends WebFluxConfigurationSupport {
 
 		@Override
 		public void configurePathMatching(PathMatchConfigurer configurer) {
+			configurer.setUseSuffixPatternMatch(false);
 			configurer.setUseTrailingSlashMatch(false);
-			configurer.setUseSuffixPatternMatch(true);
-			configurer.setUseRegisteredSuffixPatternMatch(true);
-		}
-
-		@Override
-		protected void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
-			builder.mediaType("json", MediaType.APPLICATION_JSON);
-			builder.mediaType("xml", MediaType.APPLICATION_XML);
 		}
 	}
+
 
 	@Configuration
 	static class CustomMessageConverterConfig extends WebFluxConfigurationSupport {
@@ -347,6 +329,7 @@ public class WebFluxConfigurationSupportTests {
 		}
 	}
 
+
 	@Configuration
 	@SuppressWarnings("unused")
 	static class CustomViewResolverConfig extends WebFluxConfigurationSupport {
@@ -361,8 +344,8 @@ public class WebFluxConfigurationSupportTests {
 		public FreeMarkerConfigurer freeMarkerConfig() {
 			return new FreeMarkerConfigurer();
 		}
-
 	}
+
 
 	@Configuration
 	static class CustomResourceHandlingConfig extends WebFluxConfigurationSupport {
@@ -377,4 +360,5 @@ public class WebFluxConfigurationSupportTests {
 	@XmlRootElement
 	static class TestBean {
 	}
+
 }

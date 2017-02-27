@@ -34,15 +34,10 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.mock.http.client.reactive.test.MockClientHttpRequest;
 import org.springframework.web.reactive.function.BodyInserter;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpMethod.DELETE;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
+import static java.nio.charset.StandardCharsets.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.http.HttpMethod.*;
 
 /**
  * @author Arjen Poutsma
@@ -51,10 +46,10 @@ public class DefaultClientRequestBuilderTests {
 
 	@Test
 	public void from() throws Exception {
-		ClientRequest<Void> other = ClientRequest.method(GET, URI.create("http://example.com"))
+		ClientRequest other = ClientRequest.method(GET, URI.create("http://example.com"))
 				.header("foo", "bar")
 				.cookie("baz", "qux").build();
-		ClientRequest<Void> result = ClientRequest.from(other).build();
+		ClientRequest result = ClientRequest.from(other).build();
 		assertEquals(new URI("http://example.com"), result.url());
 		assertEquals(GET, result.method());
 		assertEquals("bar", result.headers().getFirst("foo"));
@@ -64,21 +59,21 @@ public class DefaultClientRequestBuilderTests {
 	@Test
 	public void method() throws Exception {
 		URI url = new URI("http://example.com");
-		ClientRequest<Void> result = ClientRequest.method(DELETE, url).build();
+		ClientRequest result = ClientRequest.method(DELETE, url).build();
 		assertEquals(url, result.url());
 		assertEquals(DELETE, result.method());
 	}
 
 	@Test
 	public void cookie() throws Exception {
-		ClientRequest<Void> result = ClientRequest.method(GET, URI.create("http://example.com"))
+		ClientRequest result = ClientRequest.method(GET, URI.create("http://example.com"))
 				.cookie("foo", "bar").build();
 		assertEquals("bar", result.cookies().getFirst("foo"));
 	}
 
 	@Test
 	public void build() throws Exception {
-		ClientRequest<Void> result = ClientRequest.method(GET, URI.create("http://example.com"))
+		ClientRequest result = ClientRequest.method(GET, URI.create("http://example.com"))
 				.header("MyKey", "MyValue")
 				.cookie("foo", "bar")
 				.build();
@@ -105,8 +100,8 @@ public class DefaultClientRequestBuilderTests {
 					return response.writeWith(Mono.just(buffer));
 				};
 
-		ClientRequest<String> result = ClientRequest.method(POST, URI.create("http://example.com"))
-				.body(inserter);
+		ClientRequest result = ClientRequest.method(POST, URI.create("http://example.com"))
+				.body(inserter).build();
 
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 		messageWriters.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,8 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link ServerWebExchangeArgumentResolver}.
@@ -45,21 +43,22 @@ import static org.mockito.Mockito.mock;
  */
 public class ServerWebExchangeArgumentResolverTests {
 
-	private ServerWebExchangeArgumentResolver resolver = new ServerWebExchangeArgumentResolver();
+	private final ResolvableMethod testMethod = ResolvableMethod.onClass(getClass()).name("handle");
+
+	private final ServerWebExchangeArgumentResolver resolver = new ServerWebExchangeArgumentResolver();
 
 	private ServerWebExchange exchange;
 
-	private ResolvableMethod testMethod = ResolvableMethod.onClass(getClass()).name("handle");
-
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		ServerHttpRequest request = MockServerHttpRequest.get("/path").build();
 		ServerHttpResponse response = new MockServerHttpResponse();
 
 		WebSessionManager sessionManager = new MockWebSessionManager(mock(WebSession.class));
 		this.exchange = new DefaultServerWebExchange(request, response, sessionManager);
 	}
+
 
 	@Test
 	public void supportsParameter() throws Exception {
@@ -77,6 +76,7 @@ public class ServerWebExchangeArgumentResolverTests {
 		testResolveArgument(parameter(ServerHttpResponse.class), this.exchange.getResponse());
 		testResolveArgument(parameter(HttpMethod.class), HttpMethod.GET);
 	}
+
 
 	private void testResolveArgument(MethodParameter parameter, Object expected) {
 		Mono<Object> mono = this.resolver.resolveArgument(parameter, new BindingContext(), this.exchange);

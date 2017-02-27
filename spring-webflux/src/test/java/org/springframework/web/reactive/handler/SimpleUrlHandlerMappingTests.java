@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,12 +55,11 @@ public class SimpleUrlHandlerMappingTests {
 		Object mainController = wac.getBean("mainController");
 		Object otherController = wac.getBean("otherController");
 
-		// TODO: direct matches have been removed, path within mapping is indeed ""
-		testUrl("/welcome.html", mainController, handlerMapping, "");
+		testUrl("/welcome.html", mainController, handlerMapping, "/welcome.html");
 		testUrl("/welcome.x", otherController, handlerMapping, "welcome.x");
 		testUrl("/welcome/", otherController, handlerMapping, "welcome");
-		testUrl("/show.html", mainController, handlerMapping, "");
-		testUrl("/bookseats.html", mainController, handlerMapping, "");
+		testUrl("/show.html", mainController, handlerMapping, "/show.html");
+		testUrl("/bookseats.html", mainController, handlerMapping, "/bookseats.html");
 	}
 
 	@Test
@@ -75,10 +74,10 @@ public class SimpleUrlHandlerMappingTests {
 		testUrl("welcome.html", null, handlerMapping, null);
 		testUrl("/pathmatchingAA.html", mainController, handlerMapping, "pathmatchingAA.html");
 		testUrl("/pathmatchingA.html", null, handlerMapping, null);
-		testUrl("/administrator/pathmatching.html", mainController, handlerMapping, "");
+		testUrl("/administrator/pathmatching.html", mainController, handlerMapping, "/administrator/pathmatching.html");
 		testUrl("/administrator/test/pathmatching.html", mainController, handlerMapping, "test/pathmatching.html");
 		testUrl("/administratort/pathmatching.html", null, handlerMapping, null);
-		testUrl("/administrator/another/bla.xml", mainController, handlerMapping, "");
+		testUrl("/administrator/another/bla.xml", mainController, handlerMapping, "/administrator/another/bla.xml");
 		testUrl("/administrator/another/bla.gif", null, handlerMapping, null);
 		testUrl("/administrator/test/testlastbit", mainController, handlerMapping, "test/testlastbit");
 		testUrl("/administrator/test/testla", null, handlerMapping, null);
@@ -90,7 +89,7 @@ public class SimpleUrlHandlerMappingTests {
 		testUrl("/XpathXXmatching.html", null, handlerMapping, null);
 		testUrl("/XXpathmatching.html", null, handlerMapping, null);
 		testUrl("/show12.html", mainController, handlerMapping, "show12.html");
-		testUrl("/show123.html", mainController, handlerMapping, "");
+		testUrl("/show123.html", mainController, handlerMapping, "/show123.html");
 		testUrl("/show1.html", mainController, handlerMapping, "show1.html");
 		testUrl("/reallyGood-test-is-this.jpeg", mainController, handlerMapping, "reallyGood-test-is-this.jpeg");
 		testUrl("/reallyGood-tst-is-this.jpeg", null, handlerMapping, null);

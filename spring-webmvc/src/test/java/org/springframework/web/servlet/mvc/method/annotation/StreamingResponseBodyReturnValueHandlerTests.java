@@ -62,7 +62,7 @@ public class StreamingResponseBodyReturnValueHandlerTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.handler = new StreamingResponseBodyReturnValueHandler();
 		this.mavContainer = new ModelAndViewContainer();
 

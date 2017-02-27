@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.jetbrains.annotations.NotNull;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -40,7 +39,6 @@ import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
-
 
 /**
  * Default implementation of {@link WebClient}.
@@ -64,21 +62,10 @@ class DefaultWebClient implements WebClient {
 
 		this.exchangeFunction = exchangeFunction;
 		this.uriBuilderFactory = (factory != null ? factory : new DefaultUriBuilderFactory());
-
-		this.defaultHeaders = defaultHeaders != null ?
-				HttpHeaders.readOnlyHttpHeaders(defaultHeaders) : null;
-
-		this.defaultCookies = defaultCookies != null ?
-				CollectionUtils.unmodifiableMultiValueMap(defaultCookies) : null;
-	}
-
-
-	private ExchangeFunction getExchangeFunction() {
-		return this.exchangeFunction;
-	}
-
-	private UriBuilderFactory getUriBuilderFactory() {
-		return this.uriBuilderFactory;
+		this.defaultHeaders = (defaultHeaders != null ?
+				HttpHeaders.readOnlyHttpHeaders(defaultHeaders) : null);
+		this.defaultCookies = (defaultCookies != null ?
+				CollectionUtils.unmodifiableMultiValueMap(defaultCookies) : null);
 	}
 
 
@@ -117,11 +104,9 @@ class DefaultWebClient implements WebClient {
 		return method(HttpMethod.OPTIONS);
 	}
 
-	@NotNull
 	private UriSpec method(HttpMethod httpMethod) {
 		return new DefaultUriSpec(httpMethod);
 	}
-
 
 	@Override
 	public WebClient filter(ExchangeFilterFunction filterFunction) {
@@ -142,17 +127,17 @@ class DefaultWebClient implements WebClient {
 
 		@Override
 		public HeaderSpec uri(String uriTemplate, Object... uriVariables) {
-			return uri(getUriBuilderFactory().expand(uriTemplate, uriVariables));
+			return uri(uriBuilderFactory.expand(uriTemplate, uriVariables));
 		}
 
 		@Override
 		public HeaderSpec uri(String uriTemplate, Map<String, ?> uriVariables) {
-			return uri(getUriBuilderFactory().expand(uriTemplate, uriVariables));
+			return uri(uriBuilderFactory.expand(uriTemplate, uriVariables));
 		}
 
 		@Override
 		public HeaderSpec uri(Function<UriBuilder, URI> uriFunction) {
-			return uri(uriFunction.apply(getUriBuilderFactory().builder()));
+			return uri(uriFunction.apply(uriBuilderFactory.builder()));
 		}
 
 		@Override
@@ -160,6 +145,7 @@ class DefaultWebClient implements WebClient {
 			return new DefaultHeaderSpec(this.httpMethod, uri);
 		}
 	}
+
 
 	private class DefaultHeaderSpec implements HeaderSpec {
 
@@ -171,12 +157,10 @@ class DefaultWebClient implements WebClient {
 
 		private MultiValueMap<String, String> cookies;
 
-
 		DefaultHeaderSpec(HttpMethod httpMethod, URI uri) {
 			this.httpMethod = httpMethod;
 			this.uri = uri;
 		}
-
 
 		private HttpHeaders getHeaders() {
 			if (this.headers == null) {
@@ -262,20 +246,20 @@ class DefaultWebClient implements WebClient {
 
 		@Override
 		public Mono<ClientResponse> exchange() {
-			ClientRequest<Void> request = initRequestBuilder().build();
-			return getExchangeFunction().exchange(request);
+			ClientRequest request = this.initRequestBuilder().build();
+			return exchangeFunction.exchange(request);
 		}
 
 		@Override
 		public <T> Mono<ClientResponse> exchange(BodyInserter<T, ? super ClientHttpRequest> inserter) {
-			ClientRequest<T> request = initRequestBuilder().body(inserter);
-			return getExchangeFunction().exchange(request);
+			ClientRequest request = this.initRequestBuilder().body(inserter).build();
+			return exchangeFunction.exchange(request);
 		}
 
 		@Override
 		public <T, S extends Publisher<T>> Mono<ClientResponse> exchange(S publisher, Class<T> elementClass) {
-			ClientRequest<S> request = initRequestBuilder().headers(this.headers).body(publisher, elementClass);
-			return getExchangeFunction().exchange(request);
+			ClientRequest request = initRequestBuilder().headers(this.headers).body(publisher, elementClass).build();
+			return exchangeFunction.exchange(request);
 		}
 
 		private ClientRequest.Builder initRequestBuilder() {

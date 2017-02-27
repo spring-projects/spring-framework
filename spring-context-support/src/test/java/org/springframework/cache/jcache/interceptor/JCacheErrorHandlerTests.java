@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,9 +49,6 @@ import static org.mockito.BDDMockito.*;
  */
 public class JCacheErrorHandlerTests {
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 	private Cache cache;
 
 	private Cache errorCache;
@@ -60,20 +57,23 @@ public class JCacheErrorHandlerTests {
 
 	private SimpleService simpleService;
 
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
+
+
 	@Before
 	public void setup() {
-		AnnotationConfigApplicationContext context =
-				new AnnotationConfigApplicationContext(Config.class);
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		this.cache = context.getBean("mockCache", Cache.class);
 		this.errorCache = context.getBean("mockErrorCache", Cache.class);
 		this.errorHandler = context.getBean(CacheErrorHandler.class);
 		this.simpleService = context.getBean(SimpleService.class);
 	}
 
+
 	@Test
 	public void getFail() {
-		UnsupportedOperationException exception =
-				new UnsupportedOperationException("Test exception on get");
+		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on get");
 		Object key = SimpleKeyGenerator.generateKey(0L);
 		willThrow(exception).given(this.cache).get(key);
 
@@ -83,8 +83,7 @@ public class JCacheErrorHandlerTests {
 
 	@Test
 	public void getPutNewElementFail() {
-		UnsupportedOperationException exception =
-				new UnsupportedOperationException("Test exception on put");
+		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on put");
 		Object key = SimpleKeyGenerator.generateKey(0L);
 		given(this.cache.get(key)).willReturn(null);
 		willThrow(exception).given(this.cache).put(key, 0L);
@@ -95,12 +94,10 @@ public class JCacheErrorHandlerTests {
 
 	@Test
 	public void getFailPutExceptionFail() {
-		UnsupportedOperationException exceptionOnPut =
-				new UnsupportedOperationException("Test exception on put");
+		UnsupportedOperationException exceptionOnPut = new UnsupportedOperationException("Test exception on put");
 		Object key = SimpleKeyGenerator.generateKey(0L);
 		given(this.cache.get(key)).willReturn(null);
-		willThrow(exceptionOnPut).given(this.errorCache).put(key,
-				SimpleService.TEST_EXCEPTION);
+		willThrow(exceptionOnPut).given(this.errorCache).put(key, SimpleService.TEST_EXCEPTION);
 
 		try {
 			this.simpleService.getFail(0L);
@@ -108,14 +105,13 @@ public class JCacheErrorHandlerTests {
 		catch (IllegalStateException ex) {
 			assertEquals("Test exception", ex.getMessage());
 		}
-		verify(this.errorHandler).handleCachePutError(exceptionOnPut,
-				this.errorCache, key, SimpleService.TEST_EXCEPTION);
+		verify(this.errorHandler).handleCachePutError(
+				exceptionOnPut, this.errorCache, key, SimpleService.TEST_EXCEPTION);
 	}
 
 	@Test
 	public void putFail() {
-		UnsupportedOperationException exception =
-				new UnsupportedOperationException("Test exception on put");
+		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on put");
 		Object key = SimpleKeyGenerator.generateKey(0L);
 		willThrow(exception).given(this.cache).put(key, 234L);
 
@@ -125,8 +121,7 @@ public class JCacheErrorHandlerTests {
 
 	@Test
 	public void evictFail() {
-		UnsupportedOperationException exception =
-				new UnsupportedOperationException("Test exception on evict");
+		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on evict");
 		Object key = SimpleKeyGenerator.generateKey(0L);
 		willThrow(exception).given(this.cache).evict(key);
 
@@ -136,8 +131,7 @@ public class JCacheErrorHandlerTests {
 
 	@Test
 	public void clearFail() {
-		UnsupportedOperationException exception =
-				new UnsupportedOperationException("Test exception on evict");
+		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on evict");
 		willThrow(exception).given(this.cache).clear();
 
 		this.simpleService.clear();
@@ -181,14 +175,13 @@ public class JCacheErrorHandlerTests {
 			given(cache.getName()).willReturn("error");
 			return cache;
 		}
-
 	}
+
 
 	@CacheDefaults(cacheName = "test")
 	public static class SimpleService {
 
-		private static final IllegalStateException TEST_EXCEPTION =
-				new IllegalStateException("Test exception");
+		private static final IllegalStateException TEST_EXCEPTION = new IllegalStateException("Test exception");
 
 		private AtomicLong counter = new AtomicLong();
 
@@ -214,4 +207,5 @@ public class JCacheErrorHandlerTests {
 		public void clear() {
 		}
 	}
+
 }

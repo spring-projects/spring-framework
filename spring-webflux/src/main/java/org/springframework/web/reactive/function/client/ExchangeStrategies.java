@@ -29,8 +29,8 @@ import org.springframework.util.Assert;
 /**
  * Defines the strategies for invoking {@link ExchangeFunction}s. An instance of
  * this class is immutable; instances are typically created through the mutable {@link Builder}:
- * either through {@link #builder()} to set up default strategies, or {@link #empty()} to start from
- * scratch. Alternatively, {@code ExchangeStrategies} instances can be created through
+ * either through {@link #builder()} to set up default strategies, or {@link #empty()} to start
+ * from scratch. Alternatively, {@code ExchangeStrategies} instances can be created through
  * {@link #of(Supplier, Supplier)}.
  *
  * @author Brian Clozel
@@ -70,8 +70,8 @@ public interface ExchangeStrategies {
 	 * Return a new {@code ExchangeStrategies} based on the given
 	 * {@linkplain ApplicationContext application context}.
 	 * The returned supplier will search for all {@link HttpMessageReader}, and
-	 * {@link HttpMessageWriter} instances in the given application context and return them for
-	 * {@link #messageReaders()}, and {@link #messageWriters()} respectively.
+	 * {@link HttpMessageWriter} instances in the given application context and return
+	 * them for {@link #messageReaders()}, and {@link #messageWriters()} respectively.
 	 * @param applicationContext the application context to base the strategies on
 	 * @return the new {@code ExchangeStrategies}
 	 */
@@ -83,8 +83,10 @@ public interface ExchangeStrategies {
 	 * Return a new {@code ExchangeStrategies} described by the given supplier functions.
 	 * All provided supplier function parameters can be {@code null} to indicate an empty
 	 * stream is to be returned.
-	 * @param messageReaders the supplier function for {@link HttpMessageReader} instances (can be {@code null})
-	 * @param messageWriters the supplier function for {@link HttpMessageWriter} instances (can be {@code null})
+	 * @param messageReaders the supplier function for {@link HttpMessageReader} instances
+	 * (can be {@code null})
+	 * @param messageWriters the supplier function for {@link HttpMessageWriter} instances
+	 * (can be {@code null})
 	 * @return the new {@code ExchangeStrategies}
 	 */
 	static ExchangeStrategies of(Supplier<Stream<HttpMessageReader<?>>> messageReaders,
@@ -156,8 +158,7 @@ public interface ExchangeStrategies {
 
 		/**
 		 * Add the given decoder to this builder. This is a convenient alternative to adding a
-		 * {@link org.springframework.http.codec.DecoderHttpMessageReader} that wraps the given
-		 * decoder.
+		 * {@link org.springframework.http.codec.DecoderHttpMessageReader} that wraps the given decoder.
 		 * @param decoder the decoder to add
 		 * @return this builder
 		 */
@@ -172,8 +173,7 @@ public interface ExchangeStrategies {
 
 		/**
 		 * Add the given encoder to this builder. This is a convenient alternative to adding a
-		 * {@link org.springframework.http.codec.EncoderHttpMessageWriter} that wraps the given
-		 * encoder.
+		 * {@link org.springframework.http.codec.EncoderHttpMessageWriter} that wraps the given encoder.
 		 * @param encoder the encoder to add
 		 * @return this builder
 		 */

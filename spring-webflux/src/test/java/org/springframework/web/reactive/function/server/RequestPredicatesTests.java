@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,15 @@ package org.springframework.web.reactive.function.server;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.function.Function;
 
 import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.web.util.patterns.PathPatternParser;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -81,7 +82,6 @@ public class RequestPredicatesTests {
 		predicate = RequestPredicates.OPTIONS("/p*");
 		request = MockServerRequest.builder().method(HttpMethod.OPTIONS).uri(uri).build();
 		assertTrue(predicate.test(request));
-
 	}
 
 	@Test
@@ -96,14 +96,24 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
+	public void pathPredicates() throws Exception {
+		PathPatternParser parser = new PathPatternParser();
+		parser.setCaseSensitive(false);
+		Function<String, RequestPredicate> pathPredicates = RequestPredicates.pathPredicates(parser);
+
+		URI uri = URI.create("http://localhost/path");
+		RequestPredicate predicate = pathPredicates.apply("/P*");
+		MockServerRequest request = MockServerRequest.builder().uri(uri).build();
+		assertTrue(predicate.test(request));
+	}
+
+	@Test
 	public void headers() throws Exception {
 		String name = "MyHeader";
 		String value = "MyValue";
 		RequestPredicate predicate =
-				RequestPredicates.headers(headers -> {
-					return headers.header(name).equals(
-							Collections.singletonList(value));
-				});
+				RequestPredicates.headers(
+						headers -> headers.header(name).equals(Collections.singletonList(value)));
 		MockServerRequest request = MockServerRequest.builder().header(name, value).build();
 		assertTrue(predicate.test(request));
 
@@ -115,8 +125,7 @@ public class RequestPredicatesTests {
 	public void contentType() throws Exception {
 		MediaType json = MediaType.APPLICATION_JSON;
 		RequestPredicate predicate = RequestPredicates.contentType(json);
-		MockServerRequest
-				request = MockServerRequest.builder().header("Content-Type", json.toString()).build();
+		MockServerRequest request = MockServerRequest.builder().header("Content-Type", json.toString()).build();
 		assertTrue(predicate.test(request));
 
 		request = MockServerRequest.builder().build();
@@ -130,7 +139,54 @@ public class RequestPredicatesTests {
 		MockServerRequest request = MockServerRequest.builder().header("Accept", json.toString()).build();
 		assertTrue(predicate.test(request));
 
-		request = MockServerRequest.builder().build();
+		request = MockServerRequest.builder().header("Accept", MediaType.TEXT_XML_VALUE).build();
+		assertFalse(predicate.test(request));
+	}
+
+	@Test
+	public void pathExtension() throws Exception {
+		RequestPredicate predicate = RequestPredicates.pathExtension("txt");
+
+		URI uri = URI.create("http://localhost/file.txt");
+		MockServerRequest request = MockServerRequest.builder().uri(uri).build();
+		assertTrue(predicate.test(request));
+
+		uri = URI.create("http://localhost/FILE.TXT");
+		request = MockServerRequest.builder().uri(uri).build();
+		assertTrue(predicate.test(request));
+
+		predicate = RequestPredicates.pathExtension("bar");
+		assertFalse(predicate.test(request));
+
+		uri = URI.create("http://localhost/file.foo");
+		request = MockServerRequest.builder().uri(uri).build();
+		assertFalse(predicate.test(request));
+	}
+
+	@Test
+	public void pathPrefix() throws Exception {
+		RequestPredicate predicate = RequestPredicates.pathPrefix("/foo");
+
+		URI uri = URI.create("http://localhost/foo/bar");
+		MockServerRequest request = MockServerRequest.builder().uri(uri).build();
+		assertTrue(predicate.test(request));
+
+		uri = URI.create("http://localhost/foo");
+		request = MockServerRequest.builder().uri(uri).build();
+		assertTrue(predicate.test(request));
+
+		uri = URI.create("http://localhost/bar");
+		request = MockServerRequest.builder().uri(uri).build();
+		assertFalse(predicate.test(request));
+	}
+
+	@Test
+	public void queryParam() throws Exception {
+		MockServerRequest request = MockServerRequest.builder().queryParam("foo", "bar").build();
+		RequestPredicate predicate = RequestPredicates.queryParam("foo", s -> s.equals("bar"));
+		assertTrue(predicate.test(request));
+
+		predicate = RequestPredicates.queryParam("foo", s -> s.equals("baz"));
 		assertFalse(predicate.test(request));
 	}
 

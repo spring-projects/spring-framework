@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,6 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConvertingComparator;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.comparator.CompoundComparator;
 import org.springframework.util.comparator.InstanceComparator;
 
 /**
@@ -73,8 +72,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	private static final Comparator<Method> METHOD_COMPARATOR;
 
 	static {
-		CompoundComparator<Method> comparator = new CompoundComparator<>();
-		comparator.addComparator(new ConvertingComparator<>(
+		Comparator<Method> adviceKindComparator = new ConvertingComparator<>(
 				new InstanceComparator<>(
 						Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class),
 				new Converter<Method, Annotation>() {
@@ -84,15 +82,15 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 								AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(method);
 						return (annotation != null ? annotation.getAnnotation() : null);
 					}
-				}));
-		comparator.addComparator(new ConvertingComparator<>(
+				});
+		Comparator<Method> methodNameComparator = new ConvertingComparator<>(
 				new Converter<Method, String>() {
 					@Override
 					public String convert(Method method) {
 						return method.getName();
 					}
-				}));
-		METHOD_COMPARATOR = comparator;
+				});
+		METHOD_COMPARATOR = adviceKindComparator.thenComparing(methodNameComparator);
 	}
 
 

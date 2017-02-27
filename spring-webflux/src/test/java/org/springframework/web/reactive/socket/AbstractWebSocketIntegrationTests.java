@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.socket;
 
 import java.io.File;
@@ -21,7 +22,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.tomcat.websocket.server.WsContextListener;
-import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -61,7 +61,7 @@ import org.springframework.web.reactive.socket.server.upgrade.RxNettyRequestUpgr
 import org.springframework.web.reactive.socket.server.upgrade.TomcatRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpgradeStrategy;
 
-import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.*;
 
 /**
  * Base class for WebSocket integration tests. Sub-classes must implement
@@ -123,7 +123,6 @@ public abstract class AbstractWebSocketIntegrationTests {
 
 	@Before
 	public void setup() throws Exception {
-
 		// TODO
 		// Caused by: java.io.IOException: Upgrade responses cannot have a transfer coding
 		// at org.xnio.http.HttpUpgrade$HttpUpgradeState.handleUpgrade(HttpUpgrade.java:490)
@@ -146,6 +145,15 @@ public abstract class AbstractWebSocketIntegrationTests {
 		}
 	}
 
+	@After
+	public void stop() throws Exception {
+		if (this.client instanceof Lifecycle) {
+			((Lifecycle) this.client).stop();
+		}
+		this.server.stop();
+	}
+
+
 	private HttpHandler createHttpHandler() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(DispatcherConfig.class, this.serverConfigClass);
@@ -154,15 +162,11 @@ public abstract class AbstractWebSocketIntegrationTests {
 		return DispatcherHandler.toHttpHandler(context);
 	}
 
-	protected abstract Class<?> getWebConfigClass();
-
-	@After
-	public void tearDown() throws Exception {
-		if (this.client instanceof Lifecycle) {
-			((Lifecycle) this.client).stop();
-		}
-		this.server.stop();
+	protected URI getUrl(String path) throws URISyntaxException {
+		return new URI("ws://localhost:" + this.port + path);
 	}
+
+	protected abstract Class<?> getWebConfigClass();
 
 
 	@Configuration
@@ -172,11 +176,6 @@ public abstract class AbstractWebSocketIntegrationTests {
 		public DispatcherHandler webHandler() {
 			return new DispatcherHandler();
 		}
-	}
-
-	@NotNull
-	protected URI getUrl(String path) throws URISyntaxException {
-		return new URI("ws://localhost:" + this.port + path);
 	}
 
 
@@ -193,8 +192,8 @@ public abstract class AbstractWebSocketIntegrationTests {
 		}
 
 		protected abstract RequestUpgradeStrategy getUpgradeStrategy();
-
 	}
+
 
 	@Configuration
 	static class ReactorNettyConfig extends AbstractHandlerAdapterConfig {
@@ -205,6 +204,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 		}
 	}
 
+
 	@Configuration
 	static class RxNettyConfig extends AbstractHandlerAdapterConfig {
 
@@ -213,6 +213,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 			return new RxNettyRequestUpgradeStrategy();
 		}
 	}
+
 
 	@Configuration
 	static class TomcatConfig extends AbstractHandlerAdapterConfig {
@@ -223,6 +224,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 		}
 	}
 
+
 	@Configuration
 	static class UndertowConfig extends AbstractHandlerAdapterConfig {
 
@@ -231,6 +233,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 			return new UndertowRequestUpgradeStrategy();
 		}
 	}
+
 
 	@Configuration
 	static class JettyConfig extends AbstractHandlerAdapterConfig {

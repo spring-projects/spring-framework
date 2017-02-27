@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Set;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.util.StringUtils;
 
 /**
  * A specialization of {@link ResponseBodyEmitter} for sending
@@ -234,7 +235,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 		@Override
 		public Set<DataWithMediaType> build() {
-			if ((this.sb == null || this.sb.length() == 0) && this.dataToSend.isEmpty()) {
+			if (!StringUtils.hasLength(this.sb) && this.dataToSend.isEmpty()) {
 				return Collections.emptySet();
 			}
 			append("\n");

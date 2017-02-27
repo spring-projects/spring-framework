@@ -28,10 +28,10 @@ import org.springframework.http.codec.HttpMessageWriter;
 /**
  * A combination of functions that can populate a {@link ReactiveHttpOutputMessage} body.
  *
- * @param <T> the type of data to insert
- * @param <M> the type of {@link ReactiveHttpOutputMessage} this inserter can be applied to
  * @author Arjen Poutsma
  * @since 5.0
+ * @param <T> the type of data to insert
+ * @param <M> the type of {@link ReactiveHttpOutputMessage} this inserter can be applied to
  * @see BodyInserters
  */
 @FunctionalInterface
@@ -45,14 +45,15 @@ public interface BodyInserter<T, M extends ReactiveHttpOutputMessage> {
 	 */
 	Mono<Void> insert(M outputMessage, Context context);
 
+
 	/**
 	 * Defines the context used during the insertion.
 	 */
 	interface Context {
 
 		/**
-		 * Supply a {@linkplain Stream stream} of {@link HttpMessageWriter}s to be used for response
-		 * body conversion.
+		 * Supply a {@linkplain Stream stream} of {@link HttpMessageWriter}s
+		 * to be used for response body conversion.
 		 * @return the stream of message writers
 		 */
 		Supplier<Stream<HttpMessageWriter<?>>> messageWriters();
@@ -61,8 +62,6 @@ public interface BodyInserter<T, M extends ReactiveHttpOutputMessage> {
 		 * Return the map of hints to use for response body conversion.
 		 */
 		Map<String, Object> hints();
-
 	}
-
 
 }

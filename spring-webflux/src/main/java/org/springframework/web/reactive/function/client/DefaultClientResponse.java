@@ -60,6 +60,7 @@ class DefaultClientResponse implements ClientResponse {
 		this.headers = new DefaultHeaders();
 	}
 
+
 	@Override
 	public HttpStatus statusCode() {
 		return this.response.getStatusCode();
@@ -99,6 +100,7 @@ class DefaultClientResponse implements ClientResponse {
 		return bodyToPublisher(BodyExtractors.toFlux(elementClass), Flux::error);
 	}
 
+
 	private <T extends Publisher<?>> T bodyToPublisher(
 			BodyExtractor<T, ? super ClientHttpResponse> extractor,
 			Function<WebClientException, T> errorFunction) {
@@ -114,6 +116,7 @@ class DefaultClientResponse implements ClientResponse {
 			return body(extractor);
 		}
 	}
+
 
 	private class DefaultHeaders implements Headers {
 

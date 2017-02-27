@@ -114,4 +114,10 @@ public class ServerHttpResponseDecorator implements ServerHttpResponse {
 		return getDelegate().setComplete();
 	}
 
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + " [delegate=" + getDelegate() + "]";
+	}
+
 }

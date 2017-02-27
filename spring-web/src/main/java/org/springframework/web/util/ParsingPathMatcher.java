@@ -17,8 +17,9 @@
 package org.springframework.web.util;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.util.PathMatcher;
 import org.springframework.web.util.patterns.PathPattern;
@@ -39,13 +40,10 @@ import org.springframework.web.util.patterns.PatternComparatorConsideringPath;
  */
 public class ParsingPathMatcher implements PathMatcher {
 
-	Map<String, PathPattern> cache = new HashMap<>();
+	private final ConcurrentMap<String, PathPattern> cache =
+			new ConcurrentHashMap<>(64);
 
-	PathPatternParser parser;
-
-	public ParsingPathMatcher() {
-		parser = new PathPatternParser();
-	}
+	private final PathPatternParser parser = new PathPatternParser();
 
 	@Override
 	public boolean match(String pattern, String path) {
@@ -84,10 +82,10 @@ public class ParsingPathMatcher implements PathMatcher {
 
 	class PathPatternStringComparatorConsideringPath implements Comparator<String> {
 
-		PatternComparatorConsideringPath ppcp;
+		private final PatternComparatorConsideringPath ppcp;
 
 		public PathPatternStringComparatorConsideringPath(String path) {
-			ppcp = new PatternComparatorConsideringPath(path);
+			this.ppcp = new PatternComparatorConsideringPath(path);
 		}
 
 		@Override
@@ -100,7 +98,7 @@ public class ParsingPathMatcher implements PathMatcher {
 			}
 			PathPattern p1 = getPathPattern(o1);
 			PathPattern p2 = getPathPattern(o2);
-			return ppcp.compare(p1, p2);
+			return this.ppcp.compare(p1, p2);
 		}
 
 	}
@@ -112,10 +110,10 @@ public class ParsingPathMatcher implements PathMatcher {
 	}
 
 	private PathPattern getPathPattern(String pattern) {
-		PathPattern pathPattern = cache.get(pattern);
+		PathPattern pathPattern = this.cache.get(pattern);
 		if (pathPattern == null) {
-			pathPattern = parser.parse(pattern);
-			cache.put(pattern, pathPattern);
+			pathPattern = this.parser.parse(pattern);
+			this.cache.put(pattern, pathPattern);
 		}
 		return pathPattern;
 	}

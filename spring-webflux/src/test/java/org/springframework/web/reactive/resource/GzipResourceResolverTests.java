@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,13 +42,12 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 /**
  * Unit tests for {@link GzipResourceResolver}.
+ *
  * @author Rossen Stoyanchev
  */
 public class GzipResourceResolverTests {
@@ -57,8 +55,6 @@ public class GzipResourceResolverTests {
 	private ResourceResolverChain resolver;
 
 	private List<Resource> locations;
-
-	private Cache cache;
 
 	private MockServerHttpRequest request;
 
@@ -80,9 +76,10 @@ public class GzipResourceResolverTests {
 		gzFile.deleteOnExit();
 	}
 
+
 	@Before
-	public void setUp() {
-		this.cache = new ConcurrentMapCache("resourceCache");
+	public void setup() {
+		Cache cache = new ConcurrentMapCache("resourceCache");
 
 		Map<String, VersionStrategy> versionStrategyMap = new HashMap<>();
 		versionStrategyMap.put("/**", new ContentVersionStrategy());
@@ -90,7 +87,7 @@ public class GzipResourceResolverTests {
 		versionResolver.setStrategyMap(versionStrategyMap);
 
 		List<ResourceResolver> resolvers = new ArrayList<>();
-		resolvers.add(new CachingResourceResolver(this.cache));
+		resolvers.add(new CachingResourceResolver(cache));
 		resolvers.add(new GzipResourceResolver());
 		resolvers.add(versionResolver);
 		resolvers.add(new PathResourceResolver());
@@ -160,7 +157,7 @@ public class GzipResourceResolverTests {
 				resolved instanceof HttpResource);
 	}
 
-	@Test // SPR-13149
+	@Test  // SPR-13149
 	public void resolveWithNullRequest() throws IOException {
 		String file = "js/foo.js";
 		Resource resolved = this.resolver.resolveResource(null, file, this.locations).blockMillis(5000);
@@ -173,8 +170,9 @@ public class GzipResourceResolverTests {
 				resolved instanceof HttpResource);
 	}
 
-	@NotNull
+
 	private DefaultServerWebExchange createExchange() {
 		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}
+
 }

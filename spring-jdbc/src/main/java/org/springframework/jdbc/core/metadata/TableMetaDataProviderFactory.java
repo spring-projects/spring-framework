@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.support.DatabaseMetaDataCallback;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
-import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
  * Factory used to create a {@link TableMetaDataProvider} implementation
@@ -42,24 +41,12 @@ public class TableMetaDataProviderFactory {
 
 
 	/**
-	 * Create a TableMetaDataProvider based on the database metedata
-	 * @param dataSource used to retrieve metedata
-	 * @param context the class that holds configuration and metedata
+	 * Create a TableMetaDataProvider based on the database metadata.
+	 * @param dataSource used to retrieve metadata
+	 * @param context the class that holds configuration and metadata
 	 * @return instance of the TableMetaDataProvider implementation to be used
 	 */
 	public static TableMetaDataProvider createMetaDataProvider(DataSource dataSource, TableMetaDataContext context) {
-		return createMetaDataProvider(dataSource, context, null);
-	}
-
-	/**
-	 * Create a TableMetaDataProvider based on the database metedata
-	 * @param dataSource used to retrieve metedata
-	 * @param context the class that holds configuration and metedata
-	 * @param nativeJdbcExtractor the NativeJdbcExtractor to be used
-	 * @return instance of the TableMetaDataProvider implementation to be used
-	 */
-	public static TableMetaDataProvider createMetaDataProvider(DataSource dataSource,
-				final TableMetaDataContext context, final NativeJdbcExtractor nativeJdbcExtractor) {
 		try {
 			return (TableMetaDataProvider) JdbcUtils.extractDatabaseMetaData(dataSource,
 					new DatabaseMetaDataCallback() {
@@ -84,9 +71,6 @@ public class TableMetaDataProviderFactory {
 							}
 							else {
 								provider = new GenericTableMetaDataProvider(databaseMetaData);
-							}
-							if (nativeJdbcExtractor != null) {
-								provider.setNativeJdbcExtractor(nativeJdbcExtractor);
 							}
 							if (logger.isDebugEnabled()) {
 								logger.debug("Using " + provider.getClass().getSimpleName());

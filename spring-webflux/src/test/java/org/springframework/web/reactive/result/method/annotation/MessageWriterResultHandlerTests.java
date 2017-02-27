@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public class MessageWriterResultHandlerTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.resultHandler = createResultHandler();
 		ServerHttpRequest request = MockServerHttpRequest.get("/path").build();
 		this.exchange = new DefaultServerWebExchange(request, this.response);
@@ -222,6 +222,7 @@ public class MessageWriterResultHandlerTests {
 		}
 	}
 
+
 	@JsonTypeName("foo")
 	private static class Foo extends ParentClass {
 
@@ -229,6 +230,7 @@ public class MessageWriterResultHandlerTests {
 			super(parentProperty);
 		}
 	}
+
 
 	@JsonTypeName("bar")
 	private static class Bar extends ParentClass {
@@ -238,11 +240,13 @@ public class MessageWriterResultHandlerTests {
 		}
 	}
 
+
 	private interface Identifiable extends Serializable {
 
 		@SuppressWarnings("unused")
 		Long getId();
 	}
+
 
 	@SuppressWarnings({ "serial" })
 	private static class SimpleBean implements Identifiable {
@@ -265,6 +269,7 @@ public class MessageWriterResultHandlerTests {
 			return name;
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	private static class TestController {
@@ -296,7 +301,6 @@ public class MessageWriterResultHandlerTests {
 		Identifiable identifiable() { return null; }
 
 		List<Identifiable> listIdentifiable() { return null; }
-
 	}
 
 }

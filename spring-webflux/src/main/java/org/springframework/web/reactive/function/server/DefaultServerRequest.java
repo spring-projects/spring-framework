@@ -128,6 +128,11 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
+	public Map<String, Object> attributes() {
+		return this.exchange.getAttributes();
+	}
+
+	@Override
 	public List<String> queryParams(String name) {
 		List<String> queryParams = request().getQueryParams().get(name);
 		return queryParams != null ? queryParams : Collections.emptyList();
@@ -150,6 +155,11 @@ class DefaultServerRequest implements ServerRequest {
 
 	ServerWebExchange exchange() {
 		return this.exchange;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s %s", method(), path());
 	}
 
 
@@ -204,6 +214,11 @@ class DefaultServerRequest implements ServerRequest {
 		@Override
 		public HttpHeaders asHttpHeaders() {
 			return HttpHeaders.readOnlyHttpHeaders(delegate());
+		}
+
+		@Override
+		public String toString() {
+			return delegate().toString();
 		}
 	}
 

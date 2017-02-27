@@ -46,7 +46,6 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcAccessor;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -103,9 +102,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	private static final String RETURN_UPDATE_COUNT_PREFIX = "#update-count-";
 
-
-	/** Custom NativeJdbcExtractor */
-	private NativeJdbcExtractor nativeJdbcExtractor;
 
 	/** If this variable is false, we will throw exceptions on SQL warnings */
 	private boolean ignoreWarnings = true;
@@ -181,23 +177,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		afterPropertiesSet();
 	}
 
-
-	/**
-	 * Set a NativeJdbcExtractor to extract native JDBC objects from wrapped handles.
-	 * Useful if native Statement and/or ResultSet handles are expected for casting
-	 * to database-specific implementation classes, but a connection pool that wraps
-	 * JDBC objects is used (note: <i>any</i> pool will return wrapped Connections).
-	 */
-	public void setNativeJdbcExtractor(NativeJdbcExtractor extractor) {
-		this.nativeJdbcExtractor = extractor;
-	}
-
-	/**
-	 * Return the current NativeJdbcExtractor implementation.
-	 */
-	public NativeJdbcExtractor getNativeJdbcExtractor() {
-		return this.nativeJdbcExtractor;
-	}
 
 	/**
 	 * Set whether or not we want to ignore SQLWarnings.
@@ -341,15 +320,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		try {
-			Connection conToUse = con;
-			if (this.nativeJdbcExtractor != null) {
-				// Extract native JDBC Connection, castable to OracleConnection or the like.
-				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
-			}
-			else {
-				// Create close-suppressing Connection proxy, also preparing returned Statements.
-				conToUse = createConnectionProxy(con);
-			}
+			// Create close-suppressing Connection proxy, also preparing returned Statements.
+			Connection conToUse = createConnectionProxy(con);
 			return action.doInConnection(conToUse);
 		}
 		catch (SQLException ex) {
@@ -394,18 +366,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		Statement stmt = null;
 		try {
-			Connection conToUse = con;
-			if (this.nativeJdbcExtractor != null &&
-					this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativeStatements()) {
-				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
-			}
-			stmt = conToUse.createStatement();
+			stmt = con.createStatement();
 			applyStatementSettings(stmt);
-			Statement stmtToUse = stmt;
-			if (this.nativeJdbcExtractor != null) {
-				stmtToUse = this.nativeJdbcExtractor.getNativeStatement(stmt);
-			}
-			T result = action.doInStatement(stmtToUse);
+			T result = action.doInStatement(stmt);
 			handleWarnings(stmt);
 			return result;
 		}
@@ -456,11 +419,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				ResultSet rs = null;
 				try {
 					rs = stmt.executeQuery(sql);
-					ResultSet rsToUse = rs;
-					if (nativeJdbcExtractor != null) {
-						rsToUse = nativeJdbcExtractor.getNativeResultSet(rs);
-					}
-					return rse.extractData(rsToUse);
+					return rse.extractData(rs);
 				}
 				finally {
 					JdbcUtils.closeResultSet(rs);
@@ -619,18 +578,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		PreparedStatement ps = null;
 		try {
-			Connection conToUse = con;
-			if (this.nativeJdbcExtractor != null &&
-					this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativePreparedStatements()) {
-				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
-			}
-			ps = psc.createPreparedStatement(conToUse);
+			ps = psc.createPreparedStatement(con);
 			applyStatementSettings(ps);
-			PreparedStatement psToUse = ps;
-			if (this.nativeJdbcExtractor != null) {
-				psToUse = this.nativeJdbcExtractor.getNativePreparedStatement(ps);
-			}
-			T result = action.doInPreparedStatement(psToUse);
+			T result = action.doInPreparedStatement(ps);
 			handleWarnings(ps);
 			return result;
 		}
@@ -690,11 +640,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 						pss.setValues(ps);
 					}
 					rs = ps.executeQuery();
-					ResultSet rsToUse = rs;
-					if (nativeJdbcExtractor != null) {
-						rsToUse = nativeJdbcExtractor.getNativeResultSet(rs);
-					}
-					return rse.extractData(rsToUse);
+					return rse.extractData(rs);
 				}
 				finally {
 					JdbcUtils.closeResultSet(rs);
@@ -1070,17 +1016,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		CallableStatement cs = null;
 		try {
-			Connection conToUse = con;
-			if (this.nativeJdbcExtractor != null) {
-				conToUse = this.nativeJdbcExtractor.getNativeConnection(con);
-			}
-			cs = csc.createCallableStatement(conToUse);
+			cs = csc.createCallableStatement(con);
 			applyStatementSettings(cs);
-			CallableStatement csToUse = cs;
-			if (this.nativeJdbcExtractor != null) {
-				csToUse = this.nativeJdbcExtractor.getNativeCallableStatement(cs);
-			}
-			T result = action.doInCallableStatement(csToUse);
+			T result = action.doInCallableStatement(cs);
 			handleWarnings(cs);
 			return result;
 		}
@@ -1274,22 +1212,18 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 		Map<String, Object> returnedResults = new HashMap<>();
 		try {
-			ResultSet rsToUse = rs;
-			if (this.nativeJdbcExtractor != null) {
-				rsToUse = this.nativeJdbcExtractor.getNativeResultSet(rs);
-			}
 			if (param.getRowMapper() != null) {
 				RowMapper rowMapper = param.getRowMapper();
-				Object result = (new RowMapperResultSetExtractor(rowMapper)).extractData(rsToUse);
+				Object result = (new RowMapperResultSetExtractor(rowMapper)).extractData(rs);
 				returnedResults.put(param.getName(), result);
 			}
 			else if (param.getRowCallbackHandler() != null) {
 				RowCallbackHandler rch = param.getRowCallbackHandler();
-				(new RowCallbackHandlerResultSetExtractor(rch)).extractData(rsToUse);
+				(new RowCallbackHandlerResultSetExtractor(rch)).extractData(rs);
 				returnedResults.put(param.getName(), "ResultSet returned from stored procedure was processed");
 			}
 			else if (param.getResultSetExtractor() != null) {
-				Object result = param.getResultSetExtractor().extractData(rsToUse);
+				Object result = param.getResultSetExtractor().extractData(rs);
 				returnedResults.put(param.getName(), result);
 			}
 		}

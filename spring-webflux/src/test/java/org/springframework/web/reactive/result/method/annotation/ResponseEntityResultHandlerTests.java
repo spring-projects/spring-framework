@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -60,12 +59,9 @@ import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
-import static org.springframework.http.ResponseEntity.notFound;
-import static org.springframework.http.ResponseEntity.ok;
+import static org.junit.Assert.*;
+import static org.springframework.core.ResolvableType.*;
+import static org.springframework.http.ResponseEntity.*;
 
 /**
  * Unit tests for {@link ResponseEntityResultHandler}. When adding a test also
@@ -86,7 +82,7 @@ public class ResponseEntityResultHandlerTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.resultHandler = createHandler();
 		initExchange();
 	}
@@ -325,7 +321,6 @@ public class ResponseEntityResultHandlerTests {
 		assertResponseBody("abc");
 	}
 
-	@NotNull
 	private DefaultServerWebExchange createExchange() {
 		return new DefaultServerWebExchange(this.request, this.response);
 	}

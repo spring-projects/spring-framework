@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@ package org.springframework.web.reactive.function.server;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -63,4 +62,5 @@ public class RequestPredicateTests {
 		assertTrue(predicate2.or(predicate1).test(request));
 		assertFalse(predicate2.or(predicate3).test(request));
 	}
+
 }

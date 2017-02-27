@@ -33,7 +33,6 @@ import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.comparator.CompoundComparator;
 
 /**
  * A sub-class of {@link MimeType} that adds support for quality parameters as defined
@@ -644,8 +643,8 @@ public class MediaType extends MimeType implements Serializable {
 	public static void sortBySpecificityAndQuality(List<MediaType> mediaTypes) {
 		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
 		if (mediaTypes.size() > 1) {
-			Collections.sort(mediaTypes, new CompoundComparator<>(
-					MediaType.SPECIFICITY_COMPARATOR, MediaType.QUALITY_VALUE_COMPARATOR));
+			Collections.sort(mediaTypes,
+					MediaType.SPECIFICITY_COMPARATOR.thenComparing(MediaType.QUALITY_VALUE_COMPARATOR));
 		}
 	}
 

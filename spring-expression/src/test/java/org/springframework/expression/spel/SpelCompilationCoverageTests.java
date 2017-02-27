@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -4787,30 +4787,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertIsCompiled(exp);
 	}
 
-	private void assertIsCompiled(Expression ex) {
-		try {
-			Field f = SpelExpression.class.getDeclaredField("compiledAst");
-			f.setAccessible(true);
-			Object object = f.get(ex);
-			assertNotNull(object);
-		} catch (Exception e) {
-			fail(e.toString());
-		}
-	}
- 
-	public static class Foo {
- 
-		public String bar() {
-			return "BAR";
-		}
- 
-		public String bar(String arg) {
-			return arg.toUpperCase();
-		}
- 
-	}
- 
-
 
 	// helper methods
 
@@ -4871,6 +4847,20 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 	}
 
+	private void assertIsCompiled(Expression expression) {
+		try {
+			Field field = SpelExpression.class.getDeclaredField("compiledAst");
+			field.setAccessible(true);
+			Object object = field.get(expression);
+			assertNotNull(object);
+		}
+		catch (Exception ex) {
+			fail(ex.toString());
+		}
+	}
+
+
+	// nested types
 
 	public interface Message<T> {
 
@@ -4987,7 +4977,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				try {
 					method = Payload2.class.getDeclaredMethod("getField", String.class);
 				}
-				catch (Exception e) {
+				catch (Exception ex) {
 				}
 			}
 			String descriptor = cf.lastDescriptor();
@@ -5842,6 +5832,18 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		public Map<String, String> getData() {
 			return data;
+		}
+	}
+
+
+	public static class Foo {
+
+		public String bar() {
+			return "BAR";
+		}
+
+		public String bar(String arg) {
+			return arg.toUpperCase();
 		}
 	}
 

@@ -693,20 +693,15 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			if (defStatus.isDebug()) {
 				logger.debug("Transactional code has requested rollback");
 			}
-			processRollback(defStatus);
+			processRollback(defStatus, false);
 			return;
 		}
+
 		if (!shouldCommitOnGlobalRollbackOnly() && defStatus.isGlobalRollbackOnly()) {
 			if (defStatus.isDebug()) {
 				logger.debug("Global transaction is marked as rollback-only but transactional code requested commit");
 			}
-			processRollback(defStatus);
-			// Throw UnexpectedRollbackException only at outermost transaction boundary
-			// or if explicitly asked to.
-			if (status.isNewTransaction() || isFailEarlyOnGlobalRollbackOnly()) {
-				throw new UnexpectedRollbackException(
-						"Transaction rolled back because it has been marked as rollback-only");
-			}
+			processRollback(defStatus, true);
 			return;
 		}
 
@@ -722,30 +717,35 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	private void processCommit(DefaultTransactionStatus status) throws TransactionException {
 		try {
 			boolean beforeCompletionInvoked = false;
+
 			try {
+				boolean unexpectedRollback = false;
 				prepareForCommit(status);
 				triggerBeforeCommit(status);
 				triggerBeforeCompletion(status);
 				beforeCompletionInvoked = true;
-				boolean globalRollbackOnly = false;
-				if (status.isNewTransaction() || isFailEarlyOnGlobalRollbackOnly()) {
-					globalRollbackOnly = status.isGlobalRollbackOnly();
-				}
+
 				if (status.hasSavepoint()) {
 					if (status.isDebug()) {
 						logger.debug("Releasing transaction savepoint");
 					}
+					unexpectedRollback = status.isGlobalRollbackOnly();
 					status.releaseHeldSavepoint();
 				}
 				else if (status.isNewTransaction()) {
 					if (status.isDebug()) {
 						logger.debug("Initiating transaction commit");
 					}
+					unexpectedRollback = status.isGlobalRollbackOnly();
 					doCommit(status);
 				}
+				else if (isFailEarlyOnGlobalRollbackOnly()) {
+					unexpectedRollback = status.isGlobalRollbackOnly();
+				}
+
 				// Throw UnexpectedRollbackException if we have a global rollback-only
 				// marker but still didn't get a corresponding exception from commit.
-				if (globalRollbackOnly) {
+				if (unexpectedRollback) {
 					throw new UnexpectedRollbackException(
 							"Transaction silently rolled back because it has been marked as rollback-only");
 				}
@@ -803,7 +803,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		}
 
 		DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
-		processRollback(defStatus);
+		processRollback(defStatus, false);
 	}
 
 	/**
@@ -812,10 +812,13 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @param status object representing the transaction
 	 * @throws TransactionException in case of rollback failure
 	 */
-	private void processRollback(DefaultTransactionStatus status) {
+	private void processRollback(DefaultTransactionStatus status, boolean unexpected) {
 		try {
+			boolean unexpectedRollback = unexpected;
+
 			try {
 				triggerBeforeCompletion(status);
+
 				if (status.hasSavepoint()) {
 					if (status.isDebug()) {
 						logger.debug("Rolling back transaction to savepoint");
@@ -828,28 +831,42 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 					}
 					doRollback(status);
 				}
-				else if (status.hasTransaction()) {
-					if (status.isLocalRollbackOnly() || isGlobalRollbackOnParticipationFailure()) {
-						if (status.isDebug()) {
-							logger.debug("Participating transaction failed - marking existing transaction as rollback-only");
+				else {
+					// Participating in larger transaction
+					if (status.hasTransaction()) {
+						if (status.isLocalRollbackOnly() || isGlobalRollbackOnParticipationFailure()) {
+							if (status.isDebug()) {
+								logger.debug("Participating transaction failed - marking existing transaction as rollback-only");
+							}
+							doSetRollbackOnly(status);
 						}
-						doSetRollbackOnly(status);
+						else {
+							if (status.isDebug()) {
+								logger.debug("Participating transaction failed - letting transaction originator decide on rollback");
+							}
+						}
 					}
 					else {
-						if (status.isDebug()) {
-							logger.debug("Participating transaction failed - letting transaction originator decide on rollback");
-						}
+						logger.debug("Should roll back transaction but cannot - no transaction available");
 					}
-				}
-				else {
-					logger.debug("Should roll back transaction but cannot - no transaction available");
+					// Unexpected rollback only matters here if we're asked to fail early
+					if (!isFailEarlyOnGlobalRollbackOnly()) {
+						unexpectedRollback = false;
+					}
 				}
 			}
 			catch (RuntimeException | Error ex) {
 				triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN);
 				throw ex;
 			}
+
 			triggerAfterCompletion(status, TransactionSynchronization.STATUS_ROLLED_BACK);
+
+			// Raise UnexpectedRollbackException if we had a global rollback-only marker
+			if (unexpectedRollback) {
+				throw new UnexpectedRollbackException(
+						"Transaction rolled back because it has been marked as rollback-only");
+			}
 		}
 		finally {
 			cleanupAfterCompletion(status);
@@ -934,6 +951,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	private void triggerAfterCompletion(DefaultTransactionStatus status, int completionStatus) {
 		if (status.isNewSynchronization()) {
 			List<TransactionSynchronization> synchronizations = TransactionSynchronizationManager.getSynchronizations();
+			TransactionSynchronizationManager.clearSynchronization();
 			if (!status.hasTransaction() || status.isNewTransaction()) {
 				if (status.isDebug()) {
 					logger.trace("Triggering afterCompletion synchronization");

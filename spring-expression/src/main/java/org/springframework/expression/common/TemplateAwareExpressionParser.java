@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,22 +40,20 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	 * Default ParserContext instance for non-template expressions.
 	 */
 	private static final ParserContext NON_TEMPLATE_PARSER_CONTEXT = new ParserContext() {
-
 		@Override
 		public String getExpressionPrefix() {
 			return null;
 		}
-
 		@Override
 		public String getExpressionSuffix() {
 			return null;
 		}
-
 		@Override
 		public boolean isTemplate() {
 			return false;
 		}
 	};
+
 
 	@Override
 	public Expression parseExpression(String expressionString) throws ParseException {
@@ -63,8 +61,7 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	}
 
 	@Override
-	public Expression parseExpression(String expressionString, ParserContext context)
-			throws ParseException {
+	public Expression parseExpression(String expressionString, ParserContext context) throws ParseException {
 		if (context == null) {
 			context = NON_TEMPLATE_PARSER_CONTEXT;
 		}
@@ -77,11 +74,12 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 		}
 	}
 
-	private Expression parseTemplate(String expressionString, ParserContext context)
-			throws ParseException {
-		if (expressionString.length() == 0) {
+
+	private Expression parseTemplate(String expressionString, ParserContext context) throws ParseException {
+		if (expressionString.isEmpty()) {
 			return new LiteralExpression("");
 		}
+
 		Expression[] expressions = parseExpressions(expressionString, context);
 		if (expressions.length == 1) {
 			return expressions[0];
@@ -109,8 +107,7 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	 * @return the parsed expressions
 	 * @throws ParseException when the expressions cannot be parsed
 	 */
-	private Expression[] parseExpressions(String expressionString, ParserContext context)
-			throws ParseException {
+	private Expression[] parseExpressions(String expressionString, ParserContext context) throws ParseException {
 		List<Expression> expressions = new LinkedList<>();
 		String prefix = context.getExpressionPrefix();
 		String suffix = context.getExpressionSuffix();
@@ -120,35 +117,29 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 			if (prefixIndex >= startIdx) {
 				// an inner expression was found - this is a composite
 				if (prefixIndex > startIdx) {
-					expressions.add(createLiteralExpression(context,
-							expressionString.substring(startIdx, prefixIndex)));
+					expressions.add(new LiteralExpression(expressionString.substring(startIdx, prefixIndex)));
 				}
 				int afterPrefixIndex = prefixIndex + prefix.length();
-				int suffixIndex = skipToCorrectEndSuffix(prefix, suffix,
-						expressionString, afterPrefixIndex);
-
+				int suffixIndex = skipToCorrectEndSuffix(suffix, expressionString, afterPrefixIndex);
 				if (suffixIndex == -1) {
 					throw new ParseException(expressionString, prefixIndex,
-							"No ending suffix '" + suffix
-									+ "' for expression starting at character "
-									+ prefixIndex + ": "
-									+ expressionString.substring(prefixIndex));
+							"No ending suffix '" + suffix + "' for expression starting at character " +
+							prefixIndex + ": " + expressionString.substring(prefixIndex));
 				}
 
 				if (suffixIndex == afterPrefixIndex) {
 					throw new ParseException(expressionString, prefixIndex,
-							"No expression defined within delimiter '" + prefix + suffix
-									+ "' at character " + prefixIndex);
+							"No expression defined within delimiter '" + prefix + suffix +
+							"' at character " + prefixIndex);
 				}
 
-				String expr = expressionString.substring(prefixIndex + prefix.length(),
-						suffixIndex);
+				String expr = expressionString.substring(prefixIndex + prefix.length(), suffixIndex);
 				expr = expr.trim();
 
-				if (expr.length() == 0) {
+				if (expr.isEmpty()) {
 					throw new ParseException(expressionString, prefixIndex,
-							"No expression defined within delimiter '" + prefix + suffix
-									+ "' at character " + prefixIndex);
+							"No expression defined within delimiter '" + prefix + suffix +
+							"' at character " + prefixIndex);
 				}
 
 				expressions.add(doParseExpression(expr, context));
@@ -156,16 +147,11 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 			}
 			else {
 				// no more ${expressions} found in string, add rest as static text
-				expressions.add(createLiteralExpression(context,
-						expressionString.substring(startIdx)));
+				expressions.add(new LiteralExpression(expressionString.substring(startIdx)));
 				startIdx = expressionString.length();
 			}
 		}
 		return expressions.toArray(new Expression[expressions.size()]);
-	}
-
-	private Expression createLiteralExpression(ParserContext context, String text) {
-		return new LiteralExpression(text);
 	}
 
 	/**
@@ -192,15 +178,15 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	/**
 	 * Copes with nesting, for example '${...${...}}' where the correct end for the first
 	 * ${ is the final }.
-	 * @param prefix the prefix
 	 * @param suffix the suffix
 	 * @param expressionString the expression string
 	 * @param afterPrefixIndex the most recently found prefix location for which the
-	 *        matching end suffix is being sought
+	 * matching end suffix is being sought
 	 * @return the position of the correct matching nextSuffix or -1 if none can be found
 	 */
-	private int skipToCorrectEndSuffix(String prefix, String suffix,
-			String expressionString, int afterPrefixIndex) throws ParseException {
+	private int skipToCorrectEndSuffix(String suffix, String expressionString, int afterPrefixIndex)
+			throws ParseException {
+
 		// Chew on the expression text - relying on the rules:
 		// brackets must be in pairs: () [] {}
 		// string literals are "..." or '...' and these may contain unmatched brackets
@@ -226,16 +212,15 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 				case ']':
 				case ')':
 					if (stack.isEmpty()) {
-						throw new ParseException(expressionString, pos, "Found closing '"
-								+ ch + "' at position " + pos + " without an opening '"
-								+ Bracket.theOpenBracketFor(ch) + "'");
+						throw new ParseException(expressionString, pos, "Found closing '" + ch +
+								"' at position " + pos + " without an opening '" +
+								Bracket.theOpenBracketFor(ch) + "'");
 					}
 					Bracket p = stack.pop();
 					if (!p.compatibleWithCloseBracket(ch)) {
-						throw new ParseException(expressionString, pos, "Found closing '"
-								+ ch + "' at position " + pos
-								+ " but most recent opening is '" + p.bracket
-								+ "' at position " + p.pos);
+						throw new ParseException(expressionString, pos, "Found closing '" + ch +
+								"' at position " + pos + " but most recent opening is '" + p.bracket +
+								"' at position " + p.pos);
 					}
 					break;
 				case '\'':
@@ -244,8 +229,7 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 					int endLiteral = expressionString.indexOf(ch, pos + 1);
 					if (endLiteral == -1) {
 						throw new ParseException(expressionString, pos,
-								"Found non terminating string literal starting at position "
-										+ pos);
+								"Found non terminating string literal starting at position " + pos);
 					}
 					pos = endLiteral;
 					break;
@@ -254,15 +238,25 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 		}
 		if (!stack.isEmpty()) {
 			Bracket p = stack.pop();
-			throw new ParseException(expressionString, p.pos, "Missing closing '"
-					+ Bracket.theCloseBracketFor(p.bracket) + "' for '" + p.bracket
-					+ "' at position " + p.pos);
+			throw new ParseException(expressionString, p.pos, "Missing closing '" +
+					Bracket.theCloseBracketFor(p.bracket) + "' for '" + p.bracket + "' at position " + p.pos);
 		}
 		if (!isSuffixHere(expressionString, pos, suffix)) {
 			return -1;
 		}
 		return pos;
 	}
+
+
+	/**
+	 * Actually parse the expression string and return an Expression object.
+	 * @param expressionString the raw expression string to parse
+	 * @param context a context for influencing this expression parsing routine (optional)
+	 * @return an evaluator for the parsed expression
+	 * @throws ParseException an exception occurred during parsing
+	 */
+	protected abstract Expression doParseExpression(String expressionString, ParserContext context)
+			throws ParseException;
 
 
 	/**
@@ -312,15 +306,5 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 			return ')';
 		}
 	}
-
-	/**
-	 * Actually parse the expression string and return an Expression object.
-	 * @param expressionString the raw expression string to parse
-	 * @param context a context for influencing this expression parsing routine (optional)
-	 * @return an evaluator for the parsed expression
-	 * @throws ParseException an exception occurred during parsing
-	 */
-	protected abstract Expression doParseExpression(String expressionString,
-			ParserContext context) throws ParseException;
 
 }

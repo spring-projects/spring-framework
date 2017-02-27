@@ -35,9 +35,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.springframework.web.reactive.function.BodyInserters.fromObject;
+import static org.junit.Assert.*;
+import static org.springframework.web.reactive.function.BodyInserters.*;
 
 /**
  * Integration tests using a {@link ExchangeFunction} through {@link WebClient}.
@@ -60,7 +59,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void shutdown() throws Exception {
 		this.server.shutdown();
 	}
 
@@ -252,7 +251,7 @@ public class WebClientIntegrationTests {
 
 		WebClient filteredClient = this.webClient.filter(
 				(request, next) -> {
-					ClientRequest<?> filteredRequest = ClientRequest.from(request).header("foo", "bar").build();
+					ClientRequest filteredRequest = ClientRequest.from(request).header("foo", "bar").build();
 					return next.exchange(filteredRequest);
 				});
 
@@ -269,7 +268,6 @@ public class WebClientIntegrationTests {
 		RecordedRequest recordedRequest = server.takeRequest();
 		Assert.assertEquals(1, server.getRequestCount());
 		Assert.assertEquals("bar", recordedRequest.getHeader("foo"));
-
 	}
 
 	@Test
@@ -278,7 +276,7 @@ public class WebClientIntegrationTests {
 
 		WebClient filteredClient = this.webClient.filter(
 				(request, next) -> {
-					ClientRequest<?> filteredRequest = ClientRequest.from(request).header("foo", "bar").build();
+					ClientRequest filteredRequest = ClientRequest.from(request).header("foo", "bar").build();
 					return next.exchange(filteredRequest);
 				});
 
@@ -295,7 +293,6 @@ public class WebClientIntegrationTests {
 		RecordedRequest recordedRequest = server.takeRequest();
 		Assert.assertEquals(1, server.getRequestCount());
 		Assert.assertEquals("bar", recordedRequest.getHeader("foo"));
-
 	}
 
 }

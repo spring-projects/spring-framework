@@ -45,10 +45,12 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 
 	private final Resource location;
 
+
 	public PathResourceLookupFunction(String pattern, Resource location) {
 		this.pattern = pattern;
 		this.location = location;
 	}
+
 
 	@Override
 	public Mono<Resource> apply(ServerRequest request) {
@@ -150,9 +152,7 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 				return false;
 			}
 		}
-
 		return true;
 	}
-
 
 }

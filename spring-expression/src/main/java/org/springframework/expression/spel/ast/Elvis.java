@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
 public class Elvis extends SpelNodeImpl {
 
 	public Elvis(int pos, SpelNodeImpl... args) {
-		super(pos,args);
+		super(pos, args);
 	}
 
 
@@ -88,7 +88,7 @@ public class Elvis extends SpelNodeImpl {
 		mv.visitLdcInsn("");
 		mv.visitInsn(SWAP);
 		mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "equals", "(Ljava/lang/Object;)Z",false);
-		mv.visitJumpInsn(IFEQ, endOfIf); // If not empty, drop through to elseTarget
+		mv.visitJumpInsn(IFEQ, endOfIf);  // if not empty, drop through to elseTarget
 		mv.visitLabel(elseTarget);
 		mv.visitInsn(POP);
 		this.children[1].generateCode(mv, cf);

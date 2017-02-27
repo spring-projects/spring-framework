@@ -30,6 +30,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.AbstractJackson2Codec;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 
 /**
@@ -45,11 +47,16 @@ public interface EntityResponse<T> extends ServerResponse {
 	 */
 	T entity();
 
+	/**
+	 * Return the {@code BodyInserter} that writes the entity to the output stream.
+	 */
+	BodyInserter<T, ? super ServerHttpResponse> inserter();
+
+
 	// Static builder methods
 
 	/**
 	 * Create a builder with the given object.
-	 *
 	 * @param t the object that represents the body of the response
 	 * @param <T> the type of the elements contained in the publisher
 	 * @return the created builder
@@ -60,7 +67,6 @@ public interface EntityResponse<T> extends ServerResponse {
 
 	/**
 	 * Create a builder with the given publisher.
-	 *
 	 * @param publisher the publisher that represents the body of the response
 	 * @param elementClass the class of elements contained in the publisher
 	 * @param <T> the type of the elements contained in the publisher
@@ -74,7 +80,6 @@ public interface EntityResponse<T> extends ServerResponse {
 
 	/**
 	 * Create a builder with the given publisher.
-	 *
 	 * @param publisher the publisher that represents the body of the response
 	 * @param elementType the type of elements contained in the publisher
 	 * @param <T> the type of the elements contained in the publisher
@@ -86,6 +91,7 @@ public interface EntityResponse<T> extends ServerResponse {
 				BodyInserters.fromPublisher(publisher, elementType));
 	}
 
+
 	/**
 	 * Defines a builder for {@code EntityResponse}.
 	 */
@@ -93,7 +99,6 @@ public interface EntityResponse<T> extends ServerResponse {
 
 		/**
 		 * Add the given header value(s) under the given name.
-		 *
 		 * @param headerName   the header name
 		 * @param headerValues the header value(s)
 		 * @return this builder
@@ -103,7 +108,6 @@ public interface EntityResponse<T> extends ServerResponse {
 
 		/**
 		 * Copy the given headers into the entity's headers map.
-		 *
 		 * @param headers the existing HttpHeaders to copy from
 		 * @return this builder
 		 * @see HttpHeaders#add(String, String)
@@ -120,7 +124,6 @@ public interface EntityResponse<T> extends ServerResponse {
 		/**
 		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified
 		 * by the {@code Allow} header.
-		 *
 		 * @param allowedMethods the allowed methods
 		 * @return this builder
 		 * @see HttpHeaders#setAllow(Set)
@@ -130,7 +133,6 @@ public interface EntityResponse<T> extends ServerResponse {
 		/**
 		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified
 		 * by the {@code Allow} header.
-		 *
 		 * @param allowedMethods the allowed methods
 		 * @return this builder
 		 * @see HttpHeaders#setAllow(Set)
@@ -139,7 +141,6 @@ public interface EntityResponse<T> extends ServerResponse {
 
 		/**
 		 * Set the entity tag of the body, as specified by the {@code ETag} header.
-		 *
 		 * @param eTag the new entity tag
 		 * @return this builder
 		 * @see HttpHeaders#setETag(String)
@@ -151,7 +152,6 @@ public interface EntityResponse<T> extends ServerResponse {
 		 * {@code Last-Modified} header.
 		 * <p>The date should be specified as the number of milliseconds since
 		 * January 1, 1970 GMT.
-		 *
 		 * @param lastModified the last modified date
 		 * @return this builder
 		 * @see HttpHeaders#setLastModified(long)
@@ -160,7 +160,6 @@ public interface EntityResponse<T> extends ServerResponse {
 
 		/**
 		 * Set the location of a resource, as specified by the {@code Location} header.
-		 *
 		 * @param location the location
 		 * @return this builder
 		 * @see HttpHeaders#setLocation(URI)
@@ -172,7 +171,6 @@ public interface EntityResponse<T> extends ServerResponse {
 		 * {@code Cache-Control} header.
 		 * <p>A {@code CacheControl} instance can be built like
 		 * {@code CacheControl.maxAge(3600).cachePublic().noTransform()}.
-		 *
 		 * @param cacheControl a builder for cache-related HTTP response headers
 		 * @return this builder
 		 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2">RFC-7234 Section 5.2</a>
@@ -185,7 +183,6 @@ public interface EntityResponse<T> extends ServerResponse {
 		 * subject to content negotiation and variances based on the value of the
 		 * given request headers. The configured request header names are added only
 		 * if not already present in the response "Vary" header.
-		 *
 		 * @param requestHeaders request header names
 		 * @return this builder
 		 */
@@ -194,7 +191,6 @@ public interface EntityResponse<T> extends ServerResponse {
 		/**
 		 * Set the length of the body in bytes, as specified by the
 		 * {@code Content-Length} header.
-		 *
 		 * @param contentLength the content length
 		 * @return this builder
 		 * @see HttpHeaders#setContentLength(long)
@@ -204,7 +200,6 @@ public interface EntityResponse<T> extends ServerResponse {
 		/**
 		 * Set the {@linkplain MediaType media type} of the body, as specified by the
 		 * {@code Content-Type} header.
-		 *
 		 * @param contentType the content type
 		 * @return this builder
 		 * @see HttpHeaders#setContentType(MediaType)
@@ -221,11 +216,9 @@ public interface EntityResponse<T> extends ServerResponse {
 
 		/**
 		 * Build the response.
-		 *
 		 * @return the built response
 		 */
 		Mono<EntityResponse<T>> build();
-
 	}
 
 }

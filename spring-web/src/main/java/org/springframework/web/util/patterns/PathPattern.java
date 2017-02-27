@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.util.PathMatcher;
+import static org.springframework.util.StringUtils.hasLength;
 
 /**
  * Represents a parsed path pattern. Includes a chain of path elements
@@ -132,9 +133,9 @@ public class PathPattern implements Comparable<PathPattern> {
 	 */
 	public boolean matches(String path) {
 		if (head == null) {
-			return (path == null) || (path.length() == 0);
+			return !hasLength(path);
 		}
-		else if (path == null || path.length() == 0) {
+		else if (!hasLength(path)) {
 			if (head instanceof WildcardTheRestPathElement || head instanceof CaptureTheRestPathElement) {
 				path = ""; // Will allow CaptureTheRest to bind the variable to empty
 			}
@@ -152,9 +153,9 @@ public class PathPattern implements Comparable<PathPattern> {
 	 */
 	public boolean matchStart(String path) {
 		if (head == null) {
-			return (path == null || path.length() == 0);
+			return !hasLength(path);
 		}
-		else if (path == null || path.length() == 0) {
+		else if (!hasLength(path)) {
 			return true;
 		}
 		MatchingContext matchingContext = new MatchingContext(path, false);
@@ -172,7 +173,7 @@ public class PathPattern implements Comparable<PathPattern> {
 			return matchingContext.getExtractedVariables();
 		}
 		else {
-			if (path == null || path.length() == 0) {
+			if (!hasLength(path)) {
 				return NO_VARIABLES_MAP;
 			}
 			else {
@@ -232,7 +233,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		while (separatorCount > 0 && pos < len) {
 			if (path.charAt(pos++) == separator) {
 				// Skip any adjacent separators
-				while (path.charAt(pos) == separator) {
+				while (pos < len && path.charAt(pos) == separator) {
 					pos++;
 				}
 				separatorCount--;
@@ -240,7 +241,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		}
 		int end = len;
 		// Trim trailing separators
-		while (path.charAt(end - 1) == separator) {
+		while (end > 0 && path.charAt(end - 1) == separator) {
 			end--;
 		}
 		// Check if multiple separators embedded in the resulting path, if so trim them out.
@@ -434,15 +435,15 @@ public class PathPattern implements Comparable<PathPattern> {
 	 */
 	public String combine(String pattern2string) {
 		// If one of them is empty the result is the other. If both empty the result is ""
-		if (patternString == null || patternString.length() == 0) {
-			if (pattern2string == null || pattern2string.length() == 0) {
+		if (!hasLength(patternString)) {
+			if (!hasLength(pattern2string)) {
 				return "";
 			}
 			else {
 				return pattern2string;
 			}
 		}
-		else if (pattern2string == null || pattern2string.length() == 0) {
+		else if (!hasLength(pattern2string)) {
 			return patternString;
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,6 @@ import org.springframework.util.ObjectUtils;
  * <p>If client code will call {@code close()} in the assumption of a pooled
  * Connection, like when using persistence tools, set "suppressClose" to "true".
  * This will return a close-suppressing proxy instead of the physical Connection.
- * Be aware that you will not be able to cast this to a native
- * {@code OracleConnection} or the like anymore; you need to use a
- * {@link org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor} then.
  *
  * <p>This is primarily intended for testing. For example, it enables easy testing
  * outside an application server, for code that expects to work on a DataSource.
@@ -53,10 +50,8 @@ import org.springframework.util.ObjectUtils;
  * @see #getConnection()
  * @see java.sql.Connection#close()
  * @see DataSourceUtils#releaseConnection
- * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor
  */
-public class SingleConnectionDataSource extends DriverManagerDataSource
-		implements SmartDataSource, DisposableBean {
+public class SingleConnectionDataSource extends DriverManagerDataSource implements SmartDataSource, DisposableBean {
 
 	/** Create a close-suppressing proxy? */
 	private boolean suppressClose;

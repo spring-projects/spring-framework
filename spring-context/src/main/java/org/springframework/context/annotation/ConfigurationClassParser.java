@@ -196,6 +196,20 @@ class ConfigurationClassParser {
 		processConfigurationClass(new ConfigurationClass(metadata, beanName));
 	}
 
+	/**
+	 * Validate each {@link ConfigurationClass} object.
+	 * @see ConfigurationClass#validate
+	 */
+	public void validate() {
+		for (ConfigurationClass configClass : this.configurationClasses.keySet()) {
+			configClass.validate(this.problemReporter);
+		}
+	}
+
+	public Set<ConfigurationClass> getConfigurationClasses() {
+		return this.configurationClasses.keySet();
+	}
+
 
 	protected void processConfigurationClass(ConfigurationClass configClass) throws IOException {
 		if (this.conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.PARSE_CONFIGURATION)) {
@@ -389,6 +403,7 @@ class ConfigurationClassParser {
 		return beanMethods;
 	}
 
+
 	/**
 	 * Process the given <code>@PropertySource</code> annotation metadata.
 	 * @param propertySource metadata for the <code>@PropertySource</code> annotation found
@@ -417,15 +432,14 @@ class ConfigurationClassParser {
 				Resource resource = this.resourceLoader.getResource(resolvedLocation);
 				addPropertySource(factory.createPropertySource(name, new EncodedResource(resource, encoding)));
 			}
-			catch (IllegalArgumentException ex) {
-				// from resolveRequiredPlaceholders
-				if (!ignoreResourceNotFound) {
-					throw ex;
+			catch (IllegalArgumentException | FileNotFoundException ex) {
+				// Placeholders not resolvable or resource not found when trying to open it
+				if (ignoreResourceNotFound) {
+					if (logger.isInfoEnabled()) {
+						logger.info("Properties location [" + location + "] not resolvable: " + ex.getMessage());
+					}
 				}
-			}
-			catch (FileNotFoundException ex) {
-				// from ResourcePropertySource constructor
-				if (!ignoreResourceNotFound) {
+				else {
 					throw ex;
 				}
 			}
@@ -464,6 +478,7 @@ class ConfigurationClassParser {
 		}
 		this.propertySourceNames.add(name);
 	}
+
 
 	/**
 	 * Returns {@code @Import} class, considering all meta-annotations.
@@ -597,30 +612,15 @@ class ConfigurationClassParser {
 		return false;
 	}
 
-
-	/**
-	 * Validate each {@link ConfigurationClass} object.
-	 * @see ConfigurationClass#validate
-	 */
-	public void validate() {
-		for (ConfigurationClass configClass : this.configurationClasses.keySet()) {
-			configClass.validate(this.problemReporter);
-		}
-	}
-
-	public Set<ConfigurationClass> getConfigurationClasses() {
-		return this.configurationClasses.keySet();
-	}
-
-
 	ImportRegistry getImportRegistry() {
 		return this.importStack;
 	}
 
+
 	/**
 	 * Factory method to obtain a {@link SourceClass} from a {@link ConfigurationClass}.
 	 */
-	public SourceClass asSourceClass(ConfigurationClass configurationClass) throws IOException {
+	private SourceClass asSourceClass(ConfigurationClass configurationClass) throws IOException {
 		AnnotationMetadata metadata = configurationClass.getMetadata();
 		if (metadata instanceof StandardAnnotationMetadata) {
 			return asSourceClass(((StandardAnnotationMetadata) metadata).getIntrospectedClass());
@@ -631,7 +631,7 @@ class ConfigurationClassParser {
 	/**
 	 * Factory method to obtain a {@link SourceClass} from a {@link Class}.
 	 */
-	public SourceClass asSourceClass(Class<?> classType) throws IOException {
+	SourceClass asSourceClass(Class<?> classType) throws IOException {
 		try {
 			// Sanity test that we can read annotations, if not fall back to ASM
 			classType.getAnnotations();
@@ -646,8 +646,8 @@ class ConfigurationClassParser {
 	/**
 	 * Factory method to obtain {@link SourceClass}s from class names.
 	 */
-	public Collection<SourceClass> asSourceClasses(String[] classNames) throws IOException {
-		List<SourceClass> annotatedClasses = new ArrayList<>();
+	private Collection<SourceClass> asSourceClasses(String[] classNames) throws IOException {
+		List<SourceClass> annotatedClasses = new ArrayList<>(classNames.length);
 		for (String className : classNames) {
 			annotatedClasses.add(asSourceClass(className));
 		}
@@ -657,7 +657,7 @@ class ConfigurationClassParser {
 	/**
 	 * Factory method to obtain a {@link SourceClass} from a class name.
 	 */
-	public SourceClass asSourceClass(String className) throws IOException {
+	SourceClass asSourceClass(String className) throws IOException {
 		if (className.startsWith("java")) {
 			// Never use ASM for core java types
 			try {

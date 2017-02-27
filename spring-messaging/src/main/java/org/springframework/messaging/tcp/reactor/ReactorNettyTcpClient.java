@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,6 +115,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	@Override
 	public ListenableFuture<Void> connect(final TcpConnectionHandler<P> handler) {
 		Assert.notNull(handler, "TcpConnectionHandler is required");
+
 		if (this.stopping) {
 			return handleShuttingDownConnectFailure(handler);
 		}
@@ -131,6 +132,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	public ListenableFuture<Void> connect(TcpConnectionHandler<P> handler, ReconnectStrategy strategy) {
 		Assert.notNull(handler, "TcpConnectionHandler is required");
 		Assert.notNull(strategy, "ReconnectStrategy is required");
+
 		if (this.stopping) {
 			return handleShuttingDownConnectFailure(handler);
 		}
@@ -189,7 +191,6 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 		ChannelGroupFuture close = this.channelGroup.close();
 		Mono<Void> completion = FutureMono.from(close)
 				.doAfterTerminate((x, e) -> {
-
 					// TODO: https://github.com/reactor/reactor-netty/issues/24
 					shutdownGlobalResources();
 
@@ -211,14 +212,14 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 		return new MonoToListenableFutureAdapter<>(completion);
 	}
 
-	private static void shutdownGlobalResources() {
+	private void shutdownGlobalResources() {
 		try {
 			Method method = TcpResources.class.getDeclaredMethod("_dispose");
 			ReflectionUtils.makeAccessible(method);
 			ReflectionUtils.invokeMethod(method, TcpResources.get());
 		}
 		catch (NoSuchMethodException ex) {
-			ex.printStackTrace();
+			// ignore
 		}
 	}
 
@@ -227,20 +228,18 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 
 		private final TcpConnectionHandler<P> connectionHandler;
 
-
 		ReactorNettyHandler(TcpConnectionHandler<P> handler) {
 			this.connectionHandler = handler;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
+		@SuppressWarnings("unchecked")
 		public Publisher<Void> apply(NettyInbound inbound, NettyOutbound outbound) {
-
 			DirectProcessor<Void> completion = DirectProcessor.create();
 			TcpConnection<P> connection = new ReactorNettyTcpConnection<>(inbound, outbound,  codec, completion);
 			scheduler.schedule(() -> connectionHandler.afterConnected(connection));
 
-			inbound.context().addDecoder(new StompMessageDecoder<>(codec));
+			inbound.context().addHandler(new StompMessageDecoder<>(codec));
 
 			inbound.receiveObject()
 					.cast(Message.class)
@@ -253,6 +252,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 			return completion;
 		}
 	}
+
 
 	private static class StompMessageDecoder<P> extends ByteToMessageDecoder {
 

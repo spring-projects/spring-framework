@@ -54,7 +54,7 @@ public class InvocableHandlerMethodTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.exchange = new DefaultServerWebExchange(
 				MockServerHttpRequest.get("http://localhost:8080/path").build(),
 				new MockServerHttpResponse(),

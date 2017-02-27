@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Map;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -42,10 +41,7 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link RequestHeaderMethodArgumentResolver}.
@@ -56,6 +52,10 @@ public class RequestHeaderMethodArgumentResolverTests {
 
 	private RequestHeaderMethodArgumentResolver resolver;
 
+	private ServerHttpRequest request;
+
+	private BindingContext bindingContext;
+
 	private MethodParameter paramNamedDefaultValueStringHeader;
 	private MethodParameter paramNamedValueStringArray;
 	private MethodParameter paramSystemProperty;
@@ -65,18 +65,19 @@ public class RequestHeaderMethodArgumentResolverTests {
 	private MethodParameter paramDate;
 	private MethodParameter paramInstant;
 
-	private ServerHttpRequest request;
-
-	private BindingContext bindingContext;
-
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
 		this.resolver = new RequestHeaderMethodArgumentResolver(context.getBeanFactory());
 
-		@SuppressWarnings("ConfusingArgumentToVarargsMethod")
+		this.request = MockServerHttpRequest.get("/").build();
+
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultFormattingConversionService());
+		this.bindingContext = new BindingContext(initializer);
+
 		Method method = ReflectionUtils.findMethod(getClass(), "params", (Class<?>[]) null);
 		this.paramNamedDefaultValueStringHeader = new SynthesizingMethodParameter(method, 0);
 		this.paramNamedValueStringArray = new SynthesizingMethodParameter(method, 1);
@@ -86,12 +87,6 @@ public class RequestHeaderMethodArgumentResolverTests {
 		this.paramNamedValueMap = new SynthesizingMethodParameter(method, 5);
 		this.paramDate = new SynthesizingMethodParameter(method, 6);
 		this.paramInstant = new SynthesizingMethodParameter(method, 7);
-
-		this.request = MockServerHttpRequest.get("/").build();
-
-		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
-		initializer.setConversionService(new DefaultFormattingConversionService());
-		this.bindingContext = new BindingContext(initializer);
 	}
 
 
@@ -227,9 +222,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 		assertEquals(Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(rfc1123val)), result);
 	}
 
-	@NotNull
+
 	private DefaultServerWebExchange createExchange() {
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
+		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}
 
 

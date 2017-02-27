@@ -49,9 +49,8 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.springframework.http.codec.json.AbstractJackson2Codec.JSON_VIEW_HINT;
+import static org.junit.Assert.*;
+import static org.springframework.http.codec.json.AbstractJackson2Codec.*;
 
 /**
  * @author Arjen Poutsma
@@ -62,6 +61,7 @@ public class BodyExtractorsTests {
 	private BodyExtractor.Context context;
 
 	private Map<String, Object> hints;
+
 
 	@Before
 	public void createContext() {
@@ -84,6 +84,7 @@ public class BodyExtractorsTests {
 		};
 		this.hints = new HashMap<String, Object>();
 	}
+
 
 	@Test
 	public void toMono() throws Exception {
@@ -232,7 +233,6 @@ public class BodyExtractorsTests {
 				})
 				.expectComplete()
 				.verify();
-
 	}
 
 	@Test
@@ -255,6 +255,7 @@ public class BodyExtractorsTests {
 
 
 	interface SafeToDeserialize {}
+
 
 	@SuppressWarnings("unused")
 	private static class User {

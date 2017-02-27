@@ -32,11 +32,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
-import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assume.assumeFalse;
 
 /**
  * Integration tests with server-side {@link WebSocketHandler}s.
@@ -71,10 +69,6 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 
 	@Test
 	public void subProtocol() throws Exception {
-
-		// TODO
-		// https://github.com/reactor/reactor-netty/issues/20
-		assumeFalse(client instanceof ReactorNettyWebSocketClient);
 
 		String protocol = "echo-v1";
 		AtomicReference<HandshakeInfo> infoRef = new AtomicReference<>();

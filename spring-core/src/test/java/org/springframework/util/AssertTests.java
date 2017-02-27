@@ -44,6 +44,37 @@ public class AssertTests {
 
 
 	@Test
+	public void stateWithMessage() {
+		Assert.state(true, "enigma");
+	}
+
+	@Test
+	public void stateWithFalseExpressionAndMessage() {
+		thrown.expect(IllegalStateException.class);
+		thrown.expectMessage("enigma");
+		Assert.state(false, "enigma");
+	}
+
+	@Test
+	public void stateWithMessageSupplier() {
+		Assert.state(true, () -> "enigma");
+	}
+
+	@Test
+	public void stateWithFalseExpressionAndMessageSupplier() {
+		thrown.expect(IllegalStateException.class);
+		thrown.expectMessage("enigma");
+		Assert.state(false, () -> "enigma");
+	}
+
+	@Test
+	public void stateWithFalseExpressionAndNullMessageSupplier() {
+		thrown.expect(IllegalStateException.class);
+		thrown.expectMessage(equalTo(null));
+		Assert.state(false, (Supplier<String>) null);
+	}
+
+	@Test
 	public void isTrueWithMessage() {
 		Assert.isTrue(true, "enigma");
 	}
@@ -498,6 +529,21 @@ public class AssertTests {
 	}
 
 	@Test
+	public void isInstanceOfWithTypeMismatchAndCustomMessageWithSeparator() {
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage(
+				"Custom message: Object of class [java.lang.Long] must be an instance of class java.lang.String");
+		Assert.isInstanceOf(String.class, 42L, "Custom message:");
+	}
+
+	@Test
+	public void isInstanceOfWithTypeMismatchAndCustomMessageWithSpace() {
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("Custom message for java.lang.Long");
+		Assert.isInstanceOf(String.class, 42L, "Custom message for ");
+	}
+
+	@Test
 	public void isInstanceOfWithMessageSupplier() {
 		Assert.isInstanceOf(String.class, "foo", () -> "enigma");
 	}
@@ -559,8 +605,22 @@ public class AssertTests {
 	@Test
 	public void isAssignableWithTypeMismatchAndCustomMessage() {
 		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("enigma: class java.lang.Integer");
-		Assert.isAssignable(String.class, Integer.class, "enigma");
+		thrown.expectMessage("Custom message: class java.lang.Integer");
+		Assert.isAssignable(String.class, Integer.class, "Custom message");
+	}
+
+	@Test
+	public void isAssignableWithTypeMismatchAndCustomMessageWithSeparator() {
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("Custom message: class java.lang.Integer is not assignable to class java.lang.String");
+		Assert.isAssignable(String.class, Integer.class, "Custom message:");
+	}
+
+	@Test
+	public void isAssignableWithTypeMismatchAndCustomMessageWithSpace() {
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("Custom message for class java.lang.Integer");
+		Assert.isAssignable(String.class, Integer.class, "Custom message for ");
 	}
 
 	@Test
@@ -606,25 +666,6 @@ public class AssertTests {
 		thrown.expect(IllegalStateException.class);
 		thrown.expectMessage("enigma");
 		Assert.state(false, "enigma");
-	}
-
-	@Test
-	public void stateWithMessageSupplier() {
-		Assert.state(true, () -> "enigma");
-	}
-
-	@Test
-	public void stateWithFalseExpressionAndMessageSupplier() {
-		thrown.expect(IllegalStateException.class);
-		thrown.expectMessage("enigma");
-		Assert.state(false, () -> "enigma");
-	}
-
-	@Test
-	public void stateWithFalseExpressionAndNullMessageSupplier() {
-		thrown.expect(IllegalStateException.class);
-		thrown.expectMessage(equalTo(null));
-		Assert.state(false, (Supplier<String>) null);
 	}
 
 }

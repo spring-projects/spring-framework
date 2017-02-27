@@ -115,6 +115,11 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
+	public Map<String, Object> attributes() {
+		return this.delegate.attributes();
+	}
+
+	@Override
 	public Optional<String> queryParam(String name) {
 		return this.delegate.queryParam(name);
 	}

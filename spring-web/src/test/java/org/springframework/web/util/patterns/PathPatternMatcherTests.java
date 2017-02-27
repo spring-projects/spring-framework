@@ -26,6 +26,7 @@ import java.util.Map;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.springframework.util.AntPathMatcher;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -468,6 +469,14 @@ public class PathPatternMatcherTests {
 	}
 
 	@Test
+	public void extractPathWithinPattern_spr15259() { 
+		checkExtractPathWithinPattern("/**","/","");
+		checkExtractPathWithinPattern("/**","//","");
+		checkExtractPathWithinPattern("/**","","");
+		checkExtractPathWithinPattern("/**","/foobar","foobar");
+	}
+	
+	@Test
 	public void extractPathWithinPattern() throws Exception {
 		checkExtractPathWithinPattern("/welcome*/", "/welcome/", "welcome");
 		checkExtractPathWithinPattern("/docs/commit.html", "/docs/commit.html", "");
@@ -499,6 +508,59 @@ public class PathPatternMatcherTests {
 		checkExtractPathWithinPattern("/", "//", "");
 	}
 
+	@Test
+	public void extractUriTemplateVariables_spr15264() {
+		PathPattern pp = new PathPatternParser().parse("/{foo}");
+		assertTrue(pp.matches("/abc"));
+		assertFalse(pp.matches("/"));
+		assertFalse(pp.matches("//"));
+		checkCapture("/{foo}", "/abc", "foo", "abc");
+		
+		pp = new PathPatternParser().parse("/{foo}/{bar}");
+		assertTrue(pp.matches("/abc/def"));
+		assertFalse(pp.matches("//def"));
+		assertFalse(pp.matches("//"));
+		
+		pp = parse("/{foo}/boo");
+		assertTrue(pp.matches("/abc/boo"));
+		assertTrue(pp.matches("/a/boo"));
+		assertFalse(pp.matches("//boo"));
+		
+		pp = parse("/{foo}*");
+		assertTrue(pp.matches("/abc"));
+		assertFalse(pp.matches("/"));
+
+		checkCapture("/{word:[a-z]*}", "/abc", "word", "abc");
+		pp = parse("/{word:[a-z]*}");
+		assertFalse(pp.matches("/1"));
+		assertTrue(pp.matches("/a"));
+		assertFalse(pp.matches("/"));
+		
+		// Two captures mean we use a RegexPathElement
+		pp = new PathPatternParser().parse("/{foo}{bar}");
+		assertTrue(pp.matches("/abcdef"));
+		assertFalse(pp.matches("/"));
+		assertFalse(pp.matches("//"));
+		checkCapture("/{foo:[a-z][a-z]}{bar:[a-z]}", "/abc", "foo", "ab", "bar", "c");
+		
+		// Only patterns not capturing variables cannot match against just /
+		pp = new PathPatternParser().parse("/****");
+		assertTrue(pp.matches("/abcdef"));
+		assertTrue(pp.matches("/"));
+		assertTrue(pp.matches("//"));
+		
+		// Confirming AntPathMatcher behaviour:
+		assertFalse(new AntPathMatcher().match("/{foo}", "/"));
+		assertTrue(new AntPathMatcher().match("/{foo}", "/a"));
+		assertTrue(new AntPathMatcher().match("/{foo}{bar}", "/a"));
+		assertFalse(new AntPathMatcher().match("/{foo}*", "/"));
+		assertTrue(new AntPathMatcher().match("/*", "/"));
+		assertFalse(new AntPathMatcher().match("/*{foo}", "/"));
+		Map<String, String> vars = new AntPathMatcher().extractUriTemplateVariables("/{foo}{bar}", "/a");
+		assertEquals("a",vars.get("foo"));
+		assertEquals("",vars.get("bar"));
+	}
+	
 	@Test
 	public void extractUriTemplateVariables() throws Exception {
 		checkCapture("/hotels/{hotel}", "/hotels/1", "hotel", "1");

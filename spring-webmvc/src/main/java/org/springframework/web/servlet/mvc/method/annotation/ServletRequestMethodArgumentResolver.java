@@ -16,8 +16,10 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.reflect.Method;
 import java.security.Principal;
 import java.time.ZoneId;
 import java.util.Locale;
@@ -28,6 +30,8 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
@@ -43,13 +47,14 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * <li>{@link ServletRequest}
  * <li>{@link MultipartRequest}
  * <li>{@link HttpSession}
+ * <li>{@link PushBuilder} (as of Spring 5.0 on Servlet 4.0)
  * <li>{@link Principal}
  * <li>{@link InputStream}
  * <li>{@link Reader}
- * <li>{@link HttpMethod} (as of Spring 4.0)</li>
+ * <li>{@link HttpMethod} (as of Spring 4.0)
  * <li>{@link Locale}
  * <li>{@link TimeZone} (as of Spring 4.0)
- * <li>{@link java.time.ZoneId} (as of Spring 4.0 and Java 8)</li>
+ * <li>{@link java.time.ZoneId} (as of Spring 4.0 and Java 8)
  * </ul>
  *
  * @author Arjen Poutsma
@@ -59,6 +64,10 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class ServletRequestMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
+	private static final Method getPushBuilderMethod =
+			ClassUtils.getMethodIfAvailable(HttpServletRequest.class, "getPushBuilder");
+
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
@@ -66,6 +75,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 				ServletRequest.class.isAssignableFrom(paramType) ||
 				MultipartRequest.class.isAssignableFrom(paramType) ||
 				HttpSession.class.isAssignableFrom(paramType) ||
+				(getPushBuilderMethod != null && getPushBuilderMethod.getReturnType().isAssignableFrom(paramType)) ||
 				Principal.class.isAssignableFrom(paramType) ||
 				InputStream.class.isAssignableFrom(paramType) ||
 				Reader.class.isAssignableFrom(paramType) ||
@@ -80,6 +90,8 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
 		Class<?> paramType = parameter.getParameterType();
+
+		// WebRequest / NativeWebRequest / ServletWebRequest
 		if (WebRequest.class.isAssignableFrom(paramType)) {
 			if (!paramType.isInstance(webRequest)) {
 				throw new IllegalStateException(
@@ -88,26 +100,44 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 			return webRequest;
 		}
 
-		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+		// ServletRequest / HttpServletRequest / MultipartRequest / MultipartHttpServletRequest
 		if (ServletRequest.class.isAssignableFrom(paramType) || MultipartRequest.class.isAssignableFrom(paramType)) {
-			Object nativeRequest = webRequest.getNativeRequest(paramType);
-			if (nativeRequest == null) {
-				throw new IllegalStateException(
-						"Current request is not of type [" + paramType.getName() + "]: " + request);
-			}
-			return nativeRequest;
+			return resolveNativeRequest(webRequest, paramType);
 		}
-		else if (HttpSession.class.isAssignableFrom(paramType)) {
+
+		// HttpServletRequest required for all further argument types
+		return resolveArgument(paramType, resolveNativeRequest(webRequest, HttpServletRequest.class));
+	}
+
+	private <T> T resolveNativeRequest(NativeWebRequest webRequest, Class<T> requiredType) {
+		T nativeRequest = webRequest.getNativeRequest(requiredType);
+		if (nativeRequest == null) {
+			throw new IllegalStateException(
+					"Current request is not of type [" + requiredType.getName() + "]: " + webRequest);
+		}
+		return nativeRequest;
+	}
+
+	private Object resolveArgument(Class<?> paramType, HttpServletRequest request) throws IOException {
+		if (HttpSession.class.isAssignableFrom(paramType)) {
 			HttpSession session = request.getSession();
-			if (!paramType.isInstance(session)) {
+			if (session != null && !paramType.isInstance(session)) {
 				throw new IllegalStateException(
 						"Current session is not of type [" + paramType.getName() + "]: " + session);
 			}
 			return session;
 		}
+		else if (getPushBuilderMethod != null && getPushBuilderMethod.getReturnType().isAssignableFrom(paramType)) {
+			Object pushBuilder = ReflectionUtils.invokeMethod(getPushBuilderMethod, request);
+			if (pushBuilder != null && !paramType.isInstance(pushBuilder)) {
+				throw new IllegalStateException(
+						"Current push builder is not of type [" + paramType.getName() + "]: " + pushBuilder);
+			}
+			return pushBuilder;
+		}
 		else if (InputStream.class.isAssignableFrom(paramType)) {
 			InputStream inputStream = request.getInputStream();
-			if (!paramType.isInstance(inputStream)) {
+			if (inputStream != null && !paramType.isInstance(inputStream)) {
 				throw new IllegalStateException(
 						"Request input stream is not of type [" + paramType.getName() + "]: " + inputStream);
 			}
@@ -115,7 +145,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 		}
 		else if (Reader.class.isAssignableFrom(paramType)) {
 			Reader reader = request.getReader();
-			if (!paramType.isInstance(reader)) {
+			if (reader != null && !paramType.isInstance(reader)) {
 				throw new IllegalStateException(
 						"Request body reader is not of type [" + paramType.getName() + "]: " + reader);
 			}
@@ -123,7 +153,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 		}
 		else if (Principal.class.isAssignableFrom(paramType)) {
 			Principal userPrincipal = request.getUserPrincipal();
-			if (!paramType.isInstance(userPrincipal)) {
+			if (userPrincipal != null && !paramType.isInstance(userPrincipal)) {
 				throw new IllegalStateException(
 						"Current user principal is not of type [" + paramType.getName() + "]: " + userPrincipal);
 			}
@@ -143,11 +173,9 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 			TimeZone timeZone = RequestContextUtils.getTimeZone(request);
 			return (timeZone != null ? timeZone.toZoneId() : ZoneId.systemDefault());
 		}
-		else {
-			// Should never happen...
-			throw new UnsupportedOperationException(
-					"Unknown parameter type [" + paramType.getName() + "] in " + parameter.getMethod());
-		}
+
+		// Should never happen...
+		throw new UnsupportedOperationException("Unknown parameter type: " + paramType.getName());
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,8 +105,7 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 
 	@Override
 	protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers) throws IOException {
-		final SettableListenableFuture<ClientHttpResponse> responseFuture =
-				new SettableListenableFuture<>();
+		final SettableListenableFuture<ClientHttpResponse> responseFuture = new SettableListenableFuture<>();
 
 		ChannelFutureListener connectionListener = new ChannelFutureListener() {
 			@Override
@@ -137,13 +136,12 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 				HttpVersion.HTTP_1_1, nettyMethod, path, this.body.buffer());
 
 		nettyRequest.headers().set(HttpHeaders.HOST, this.uri.getHost());
-		if (this.body.buffer().readableBytes() > 0) {
-			nettyRequest.headers().set(HttpHeaders.CONTENT_LENGTH, this.body.buffer().readableBytes());
-		}
 		nettyRequest.headers().set(HttpHeaders.CONNECTION, "close");
-
 		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
 			nettyRequest.headers().add(entry.getKey(), entry.getValue());
+		}
+		if (!nettyRequest.headers().contains(HttpHeaders.CONTENT_LENGTH) && this.body.buffer().readableBytes() > 0) {
+			nettyRequest.headers().set(HttpHeaders.CONTENT_LENGTH, this.body.buffer().readableBytes());
 		}
 
 		return nettyRequest;

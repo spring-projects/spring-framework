@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,8 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Arjen Poutsma
@@ -80,7 +77,7 @@ public class RouterFunctionsTests {
 	}
 
 	@Test
-	public void subrouteMatch() throws Exception {
+	public void nestMatch() throws Exception {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = request -> Mono.just(handlerFunction);
 
@@ -88,7 +85,7 @@ public class RouterFunctionsTests {
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(true);
 
-		RouterFunction<ServerResponse> result = RouterFunctions.subroute(requestPredicate, routerFunction);
+		RouterFunction<ServerResponse> result = RouterFunctions.nest(requestPredicate, routerFunction);
 		assertNotNull(result);
 
 		Mono<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
@@ -99,7 +96,7 @@ public class RouterFunctionsTests {
 	}
 
 	@Test
-	public void subrouteNoMatch() throws Exception {
+	public void nestNoMatch() throws Exception {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = request -> Mono.just(handlerFunction);
 
@@ -107,14 +104,13 @@ public class RouterFunctionsTests {
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
 
-		RouterFunction<ServerResponse> result = RouterFunctions.subroute(requestPredicate, routerFunction);
+		RouterFunction<ServerResponse> result = RouterFunctions.nest(requestPredicate, routerFunction);
 		assertNotNull(result);
 
 		Mono<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
 		StepVerifier.create(resultHandlerFunction)
 				.expectComplete()
 				.verify();
-
 	}
 
 	@Test
@@ -139,7 +135,6 @@ public class RouterFunctionsTests {
 
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
-
 
 		HttpHandler result = RouterFunctions.toHttpHandler(routerFunction, strategies);
 		assertNotNull(result);

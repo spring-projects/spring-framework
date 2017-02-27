@@ -46,16 +46,24 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 
 	private final String name;
 
+	private HttpStatus status = HttpStatus.OK;
+
 	private final HttpHeaders headers = new HttpHeaders();
 
 	private final Map<String, Object> model = new LinkedHashMap<String, Object>();
 
-	private HttpStatus status = HttpStatus.OK;
 
 	public DefaultRenderingResponseBuilder(String name) {
 		this.name = name;
 	}
 
+
+	@Override
+	public RenderingResponse.Builder status(HttpStatus status) {
+		Assert.notNull(status, "'status' must not be null");
+		this.status = status;
+		return this;
+	}
 
 	@Override
 	public RenderingResponse.Builder modelAttribute(Object attribute) {
@@ -114,18 +122,10 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 	}
 
 	@Override
-	public RenderingResponse.Builder status(HttpStatus status) {
-		Assert.notNull(status, "'status' must not be null");
-		this.status = status;
-		return this;
-	}
-
-
-	@Override
 	public Mono<RenderingResponse> build() {
-		return Mono.just(new DefaultRenderingResponse(this.status, this.headers, this.name,
-				this.model));
+		return Mono.just(new DefaultRenderingResponse(this.status, this.headers, this.name, this.model));
 	}
+
 
 	private final static class DefaultRenderingResponse
 			extends DefaultServerResponseBuilder.AbstractServerResponse
@@ -164,6 +164,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 			MediaType contentType = exchange.getResponse().getHeaders().getContentType();
 			Locale locale = resolveLocale(exchange, strategies);
 			Stream<ViewResolver> viewResolverStream = strategies.viewResolvers().get();
+
 			return Flux.fromStream(viewResolverStream)
 					.concatMap(viewResolver -> viewResolver.resolveViewName(this.name, locale))
 					.next()
@@ -184,6 +185,5 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 
 		}
 	}
-
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
@@ -46,7 +45,6 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
-import org.springframework.web.util.patterns.PathPattern;
 
 /**
  * Abstract base class for classes for which {@link RequestMappingInfo} defines
@@ -75,9 +73,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 */
 	@Override
 	protected Set<String> getMappingPathPatterns(RequestMappingInfo info) {
-		return info.getPatternsCondition().getPatterns().stream()
-				.map(p -> p.getPatternString())
-				.collect(Collectors.toSet());
+		return info.getPatternsCondition().getPatterns();
 	}
 
 	/**
@@ -109,22 +105,23 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	protected void handleMatch(RequestMappingInfo info, String lookupPath, ServerWebExchange exchange) {
 		super.handleMatch(info, lookupPath, exchange);
 
+		String bestPattern;
 		Map<String, String> uriVariables;
 		Map<String, String> decodedUriVariables;
 
-		SortedSet<PathPattern> patterns = info.getPatternsCondition().getMatchingPatterns(lookupPath);
+		Set<String> patterns = info.getPatternsCondition().getPatterns();
 		if (patterns.isEmpty()) {
+			bestPattern = lookupPath;
 			uriVariables = Collections.emptyMap();
 			decodedUriVariables = Collections.emptyMap();
-			exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE,
-					getPatternRegistry().parsePattern(lookupPath));
 		}
 		else {
-			PathPattern bestPattern = patterns.first();
-			uriVariables = bestPattern.matchAndExtract(lookupPath);
+			bestPattern = patterns.iterator().next();
+			uriVariables = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath);
 			decodedUriVariables = getPathHelper().decodePathVariables(exchange, uriVariables);
-			exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
 		}
+
+		exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
 		exchange.getAttributes().put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, decodedUriVariables);
 
 		Map<String, MultiValueMap<String, String>> matrixVars = extractMatrixVariables(exchange, uriVariables);

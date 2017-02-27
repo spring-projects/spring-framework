@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,11 +127,11 @@ public class PropertyPlaceholderHelper {
 	}
 
 	protected String parseStringValue(
-			String strVal, PlaceholderResolver placeholderResolver, Set<String> visitedPlaceholders) {
+			String value, PlaceholderResolver placeholderResolver, Set<String> visitedPlaceholders) {
 
-		StringBuilder result = new StringBuilder(strVal);
+		StringBuilder result = new StringBuilder(value);
 
-		int startIndex = strVal.indexOf(this.placeholderPrefix);
+		int startIndex = value.indexOf(this.placeholderPrefix);
 		while (startIndex != -1) {
 			int endIndex = findPlaceholderEndIndex(result, startIndex);
 			if (endIndex != -1) {
@@ -172,7 +172,7 @@ public class PropertyPlaceholderHelper {
 				}
 				else {
 					throw new IllegalArgumentException("Could not resolve placeholder '" +
-							placeholder + "'" + " in string value \"" + strVal + "\"");
+							placeholder + "'" + " in value \"" + value + "\"");
 				}
 				visitedPlaceholders.remove(originalPlaceholder);
 			}

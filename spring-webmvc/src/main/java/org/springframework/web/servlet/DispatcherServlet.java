@@ -1096,7 +1096,18 @@ public class DispatcherServlet extends FrameworkServlet {
 						"skipping re-resolution for undisturbed error rendering");
 			}
 			else {
-				return this.multipartResolver.resolveMultipart(request);
+				try {
+					return this.multipartResolver.resolveMultipart(request);
+				}
+				catch (MultipartException ex) {
+					if (request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE) != null) {
+						logger.debug("Multipart resolution failed for error dispatch", ex);
+						// Keep processing error dispatch with regular request handle below
+					}
+					else {
+						throw ex;
+					}
+				}
 			}
 		}
 		// If not returned before: return original request.

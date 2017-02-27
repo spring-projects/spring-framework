@@ -59,9 +59,9 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertArrayEquals;
-import static org.springframework.http.codec.json.AbstractJackson2Codec.JSON_VIEW_HINT;
+import static java.nio.charset.StandardCharsets.*;
+import static org.junit.Assert.*;
+import static org.springframework.http.codec.json.AbstractJackson2Codec.*;
 
 /**
  * @author Arjen Poutsma
@@ -72,6 +72,7 @@ public class BodyInsertersTests {
 	private BodyInserter.Context context;
 
 	private Map<String, Object> hints;
+
 
 	@Before
 	public void createContext() {
@@ -96,8 +97,9 @@ public class BodyInsertersTests {
 				return hints;
 			}
 		};
-		this.hints = new HashMap();
+		this.hints = new HashMap<>();
 	}
+
 
 	@Test
 	public void ofString() throws Exception {
@@ -255,6 +257,7 @@ public class BodyInsertersTests {
 
 	interface SafeToSerialize {}
 
+
 	private static class User {
 
 		@JsonView(SafeToSerialize.class)
@@ -286,6 +289,5 @@ public class BodyInsertersTests {
 			this.password = password;
 		}
 	}
-
 
 }

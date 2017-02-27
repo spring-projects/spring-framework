@@ -36,7 +36,10 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 1.2.2
+ * @deprecated as of Spring Framework 5.0, in favor of the standard JDK 8
+ * {@link Comparator#thenComparing(Comparator)}
  */
+@Deprecated
 @SuppressWarnings({"serial", "rawtypes"})
 public class CompoundComparator<T> implements Comparator<T>, Serializable {
 
@@ -165,10 +168,11 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 		return this.comparators.size();
 	}
 
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public int compare(T o1, T o2) {
-		Assert.state(this.comparators.size() > 0,
+		Assert.state(!this.comparators.isEmpty(),
 				"No sort definitions have been added to this CompoundComparator to compare");
 		for (InvertibleComparator comparator : this.comparators) {
 			int result = comparator.compare(o1, o2);
@@ -178,6 +182,7 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 		}
 		return 0;
 	}
+
 
 	@Override
 	@SuppressWarnings("unchecked")

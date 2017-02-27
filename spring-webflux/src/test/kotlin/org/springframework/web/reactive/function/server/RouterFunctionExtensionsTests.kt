@@ -1,15 +1,27 @@
+/*
+ * Copyright 2002-2017 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.web.reactive.function.server
 
 import org.junit.Test
 import org.springframework.core.io.ClassPathResource
-import org.springframework.http.HttpHeaders.ACCEPT
-import org.springframework.http.HttpHeaders.CONTENT_TYPE
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpMethod.PATCH
-import org.springframework.http.HttpMethod.POST
+import org.springframework.http.HttpHeaders.*
+import org.springframework.http.HttpMethod.*
 import org.springframework.http.MediaType.*
 import org.springframework.web.reactive.function.server.MockServerRequest.builder
-import org.springframework.web.reactive.function.server.RequestPredicates.*
 import org.springframework.web.reactive.function.server.ServerResponse.ok
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
@@ -96,15 +108,15 @@ class RouterFunctionExtensionsTests {
 
 		override fun route(req: ServerRequest) = route(req) {
 			(GET("/foo/") or GET("/foos/")) { handle(req) }
-			accept(APPLICATION_JSON).apply {
-				POST("/api/foo/", ::handle)
-				PUT("/api/foo/", ::handle)
-				DELETE("/api/foo/", ::handle)
+			"/api".route {
+				POST("/foo/")  { handleFromClass(req) }
+				PUT("/foo/") { handleFromClass(req) }
+				"/foo/"  { handleFromClass(req) }
 			}
 			accept(APPLICATION_ATOM_XML, ::handle)
 			contentType(APPLICATION_OCTET_STREAM) { handle(req) }
-			method(HttpMethod.PATCH) { handle(req) }
-			headers({ it.accept().contains(APPLICATION_JSON) }).apply {
+			method(PATCH) { handle(req) }
+			headers({ it.accept().contains(APPLICATION_JSON) }).route {
 				GET("/api/foo/", ::handle)
 			}
 			headers({ it.header("bar").isNotEmpty() }, ::handle)
@@ -120,8 +132,9 @@ class RouterFunctionExtensionsTests {
 			}
 			path("/baz") { handle(req) }
 		}
+
+		fun handleFromClass(req: ServerRequest) = ok().build()
 	}
 }
 
-private fun handle(req: ServerRequest) = ok().build()
-
+fun handle(req: ServerRequest) = ok().build()

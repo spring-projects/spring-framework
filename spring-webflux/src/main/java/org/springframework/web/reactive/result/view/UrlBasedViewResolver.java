@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.PatternMatchUtils;
-
 
 /**
  * A {@link ViewResolver} that allow direct resolution of symbolic view names
@@ -52,6 +51,7 @@ import org.springframework.util.PatternMatchUtils;
  *
  * <p>Note: This class does not support localized resolution, i.e. resolving
  * a symbolic view name to different resources depending on the current locale.
+ *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @since 5.0
@@ -75,7 +75,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 
 	private String[] viewNames;
 
-	private Function<String, RedirectView> redirectViewProvider = url -> new RedirectView(url);
+	private Function<String, RedirectView> redirectViewProvider = RedirectView::new;
 
 	private String requestContextAttribute;
 
@@ -194,6 +194,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 		if (!canHandle(viewName, locale)) {
 			return Mono.empty();
 		}
+
 		AbstractUrlBasedView urlBasedView;
 		if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
 			String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
@@ -202,6 +203,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 		else {
 			urlBasedView = createUrlBasedView(viewName);
 		}
+
 		View view = applyLifecycleMethods(viewName, urlBasedView);
 		try {
 			return (urlBasedView.checkResourceExists(locale) ? Mono.just(view) : Mono.empty());

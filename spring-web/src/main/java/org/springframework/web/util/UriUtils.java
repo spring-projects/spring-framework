@@ -218,7 +218,7 @@ public abstract class UriUtils {
 
 	/**
 	 * Decode the given encoded URI component.
-	 * <p>See {@link StringUtils#uriDecode(String, Charset) for the decoding rules.
+	 * <p>See {@link StringUtils#uriDecode(String, Charset)} for the decoding rules.
 	 * @param source the encoded String
 	 * @param encoding the encoding
 	 * @return the decoded value

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +35,8 @@ import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.forClass;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.junit.Assert.*;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * Unit tests for {@link ErrorsMethodArgumentResolver}.
@@ -60,7 +57,7 @@ public class ErrorsArgumentResolverTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.resolver = new ErrorsMethodArgumentResolver(new ReactiveAdapterRegistry());
 
 		MockServerHttpRequest request = MockServerHttpRequest.post("/path").build();
@@ -75,7 +72,6 @@ public class ErrorsArgumentResolverTests {
 
 	@Test
 	public void supports() throws Exception {
-
 		MethodParameter parameter = parameter(forClass(Errors.class));
 		assertTrue(this.resolver.supportsParameter(parameter));
 

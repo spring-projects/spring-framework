@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,14 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.util.Optional;
-
 import reactor.core.publisher.Mono;
 
 /**
  * Represents a function that routes to a {@linkplain HandlerFunction handler function}.
  *
- * @param <T> the type of the {@linkplain HandlerFunction handler function} to route to
  * @author Arjen Poutsma
  * @since 5.0
+ * @param <T> the type of the {@linkplain HandlerFunction handler function} to route to
  * @see RouterFunctions
  */
 @FunctionalInterface
@@ -33,7 +31,7 @@ public interface RouterFunction<T extends ServerResponse> {
 
 	/**
 	 * Return the {@linkplain HandlerFunction handler function} that matches the given request.
-	 * @param request the request to route to
+	 * @param request the request to route
 	 * @return an {@code Mono} describing the {@code HandlerFunction} that matches this request,
 	 * or an empty {@code Mono} if there is no match
 	 */
@@ -41,55 +39,69 @@ public interface RouterFunction<T extends ServerResponse> {
 
 	/**
 	 * Return a composed routing function that first invokes this function,
-	 * and then invokes the {@code other} function (of the same type {@code T}) if this route had
-	 * {@linkplain Mono#empty() no result}.
-	 *
+	 * and then invokes the {@code other} function (of the same response type {@code T})
+	 * if this route had {@linkplain Mono#empty() no result}.
 	 * @param other the function of type {@code T} to apply when this function has no result
-	 * @return a composed function that first routes with this function and then the {@code other} function if this
-	 * function has no result
+	 * @return a composed function that first routes with this function and then the
+	 * {@code other} function if this function has no result
+	 * @see #andOther(RouterFunction)
 	 */
-	default RouterFunction<T> andSame(RouterFunction<T> other) {
-		return request -> this.route(request).otherwiseIfEmpty(other.route(request));
+	default RouterFunction<T> and(RouterFunction<T> other) {
+		return request -> this.route(request)
+				.otherwiseIfEmpty(Mono.defer(() -> other.route(request)));
 	}
 
 	/**
 	 * Return a composed routing function that first invokes this function,
-	 * and then invokes the {@code other} function (of a different type) if this route had
-	 * {@linkplain Optional#empty() no result}.
-	 *
+	 * and then invokes the {@code other} function (of a different response type) if this route had
+	 * {@linkplain Mono#empty() no result}.
 	 * @param other the function to apply when this function has no result
-	 * @return a composed function that first routes with this function and then the {@code other} function if this
-	 * function has no result
+	 * @return a composed function that first routes with this function and then the
+	 * {@code other} function if this function has no result
+	 * @see #and(RouterFunction)
 	 */
-	default RouterFunction<?> and(RouterFunction<?> other) {
+	default RouterFunction<?> andOther(RouterFunction<?> other) {
 		return request -> this.route(request)
 				.map(RouterFunctions::cast)
-				.otherwiseIfEmpty(other.route(request).map(RouterFunctions::cast));
+				.otherwiseIfEmpty(
+						Mono.defer(() -> other.route(request).map(RouterFunctions::cast)));
 	}
 
 	/**
-	 * Return a composed routing function that first invokes this function,
-	 * and then routes to the given handler function if the given request predicate applies. This
-	 * method is a convenient combination of {@link #and(RouterFunction)} and
+	 * Return a composed routing function that routes to the given handler function if this
+	 * route does not match and the given request predicate applies. This method is a convenient
+	 * combination of {@link #and(RouterFunction)} and
 	 * {@link RouterFunctions#route(RequestPredicate, HandlerFunction)}.
-	 * @param predicate the predicate to test
-	 * @param handlerFunction the handler function to route to
-	 * @param <S> the handler function type
-	 * @return a composed function that first routes with this function and then the function
-	 * created from {@code predicate} and {@code handlerFunction} if this
-	 * function has no result
+	 * @param predicate the predicate to test if this route does not match
+	 * @param handlerFunction the handler function to route to if this route does not match and
+	 * the predicate applies
+	 * @return a composed function that route to {@code handlerFunction} if this route does not
+	 * match and if {@code predicate} applies
 	 */
-	default <S extends ServerResponse> RouterFunction<?> andRoute(RequestPredicate predicate,
-			HandlerFunction<S> handlerFunction) {
+	default RouterFunction<T> andRoute(RequestPredicate predicate, HandlerFunction<T> handlerFunction) {
 		return and(RouterFunctions.route(predicate, handlerFunction));
+	}
+
+	/**
+	 * Return a composed routing function that routes to the given router function if this
+	 * route does not match and the given request predicate applies. This method is a convenient
+	 * combination of {@link #and(RouterFunction)} and
+	 * {@link RouterFunctions#nest(RequestPredicate, RouterFunction)}.
+	 * @param predicate the predicate to test if this route does not match
+	 * @param routerFunction the router function to route to if this route does not match and
+	 * the predicate applies
+	 * @return a composed function that route to {@code routerFunction} if this route does not
+	 * match and if {@code predicate} applies
+	 */
+	default RouterFunction<T> andNest(RequestPredicate predicate, RouterFunction<T> routerFunction) {
+		return and(RouterFunctions.nest(predicate, routerFunction));
 	}
 
 	/**
 	 * Filter all {@linkplain HandlerFunction handler functions} routed by this function with the given
 	 * {@linkplain HandlerFilterFunction filter function}.
-	 *
+	 * @param <S> the filter return type
 	 * @param filterFunction the filter to apply
-	 * @param <S>            the filter return type
 	 * @return the filtered routing function
 	 */
 	default <S extends ServerResponse> RouterFunction<S> filter(HandlerFilterFunction<T, S> filterFunction) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.reactive.function.server;
 import java.net.URI;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,25 +30,19 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.web.reactive.function.BodyExtractors.toMono;
-import static org.springframework.web.reactive.function.BodyInserters.fromPublisher;
-import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
-import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.junit.Assert.*;
+import static org.springframework.web.reactive.function.BodyExtractors.*;
+import static org.springframework.web.reactive.function.BodyInserters.*;
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
+import static org.springframework.web.reactive.function.server.RouterFunctions.*;
 
 /**
  * @author Arjen Poutsma
  */
-public class PublisherHandlerFunctionIntegrationTests
-		extends AbstractRouterFunctionIntegrationTests {
+public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
-	private RestTemplate restTemplate;
+	private final RestTemplate restTemplate = new RestTemplate();
 
-	@Before
-	public void createRestTemplate() {
-		this.restTemplate = new RestTemplate();
-	}
 
 	@Override
 	protected RouterFunction<?> routerFunction() {
@@ -112,8 +105,8 @@ public class PublisherHandlerFunctionIntegrationTests
 			return ServerResponse.ok().body(
 					fromPublisher(Flux.just(person1, person2), Person.class));
 		}
-
 	}
+
 
 	private static class Person {
 
@@ -154,11 +147,8 @@ public class PublisherHandlerFunctionIntegrationTests
 
 		@Override
 		public String toString() {
-			return "Person{" +
-					"name='" + name + '\'' +
-					'}';
+			return "Person{" + "name='" + name + '\'' + '}';
 		}
 	}
-
 
 }

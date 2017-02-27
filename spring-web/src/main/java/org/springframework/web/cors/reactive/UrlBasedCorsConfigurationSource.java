@@ -18,16 +18,14 @@ package org.springframework.web.cors.reactive;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
 
 import org.springframework.util.Assert;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.support.HttpRequestPathHelper;
-import org.springframework.web.util.patterns.PathPattern;
-import org.springframework.web.util.patterns.PathPatternRegistry;
+import org.springframework.web.util.ParsingPathMatcher;
 
 /**
  * Provide a per reactive request {@link CorsConfiguration} instance based on a
@@ -37,17 +35,26 @@ import org.springframework.web.util.patterns.PathPatternRegistry;
  * as well as Ant-style path patterns (such as {@code "/admin/**"}).
  *
  * @author Sebastien Deleuze
- * @author Brian Clozel
  * @since 5.0
  */
 public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource {
 
-	private final PathPatternRegistry patternRegistry = new PathPatternRegistry();
+	private final Map<String, CorsConfiguration> corsConfigurations = new LinkedHashMap<>();
 
-	private final Map<PathPattern, CorsConfiguration> corsConfigurations = new LinkedHashMap<>();
+	private PathMatcher pathMatcher = new ParsingPathMatcher();
 
 	private HttpRequestPathHelper pathHelper = new HttpRequestPathHelper();
 
+
+	/**
+	 * Set the PathMatcher implementation to use for matching URL paths
+	 * against registered URL patterns. Default is ParsingPathMatcher.
+	 * @see ParsingPathMatcher
+	 */
+	public void setPathMatcher(PathMatcher pathMatcher) {
+		Assert.notNull(pathMatcher, "PathMatcher must not be null");
+		this.pathMatcher = pathMatcher;
+	}
 
 	/**
 	 * Set if context path and request URI should be URL-decoded. Both are returned
@@ -73,20 +80,16 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * Set CORS configuration based on URL patterns.
 	 */
 	public void setCorsConfigurations(Map<String, CorsConfiguration> corsConfigurations) {
-		this.patternRegistry.clear();
 		this.corsConfigurations.clear();
 		if (corsConfigurations != null) {
-			corsConfigurations.forEach((pattern, config) -> {
-				List<PathPattern> registered = this.patternRegistry.register(pattern);
-				registered.forEach(p -> this.corsConfigurations.put(p, config));
-			});
+			this.corsConfigurations.putAll(corsConfigurations);
 		}
 	}
 
 	/**
 	 * Get the CORS configuration.
 	 */
-	public Map<PathPattern, CorsConfiguration> getCorsConfigurations() {
+	public Map<String, CorsConfiguration> getCorsConfigurations() {
 		return Collections.unmodifiableMap(this.corsConfigurations);
 	}
 
@@ -94,18 +97,17 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * Register a {@link CorsConfiguration} for the specified path pattern.
 	 */
 	public void registerCorsConfiguration(String path, CorsConfiguration config) {
-		this.patternRegistry
-				.register(path)
-				.forEach(pattern -> this.corsConfigurations.put(pattern, config));
+		this.corsConfigurations.put(path, config);
 	}
 
 
 	@Override
 	public CorsConfiguration getCorsConfiguration(ServerWebExchange exchange) {
 		String lookupPath = this.pathHelper.getLookupPathForRequest(exchange);
-		SortedSet<PathPattern> matches = this.patternRegistry.findMatches(lookupPath);
-		if(!matches.isEmpty()) {
-			return this.corsConfigurations.get(matches.first());
+		for (Map.Entry<String, CorsConfiguration> entry : this.corsConfigurations.entrySet()) {
+			if (this.pathMatcher.match(entry.getKey(), lookupPath)) {
+				return entry.getValue();
+			}
 		}
 		return null;
 	}

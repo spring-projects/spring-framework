@@ -33,18 +33,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.servlet.FlashMap;
-import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.SmartView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.WebUtils;
@@ -305,18 +301,10 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 		String targetUrl = createTargetUrl(model, request);
 		targetUrl = updateTargetUrl(targetUrl, model, request, response);
 
-		FlashMap flashMap = RequestContextUtils.getOutputFlashMap(request);
-		if (!CollectionUtils.isEmpty(flashMap)) {
-			UriComponents uriComponents = UriComponentsBuilder.fromUriString(targetUrl).build();
-			flashMap.setTargetRequestPath(uriComponents.getPath());
-			flashMap.addTargetRequestParams(uriComponents.getQueryParams());
-			FlashMapManager flashMapManager = RequestContextUtils.getFlashMapManager(request);
-			if (flashMapManager == null) {
-				throw new IllegalStateException("FlashMapManager not found despite output FlashMap having been set");
-			}
-			flashMapManager.saveOutputFlashMap(flashMap, request, response);
-		}
+		// Save flash attributes
+		RequestContextUtils.saveOutputFlashMap(targetUrl, request, response);
 
+		// Redirect
 		sendRedirect(request, response, targetUrl, this.http10Compatible);
 	}
 

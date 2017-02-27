@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,38 +63,14 @@ import org.springframework.tests.sample.beans.TestBean;
 import static org.junit.Assert.*;
 
 /**
- * Miscellaneous system tests covering {@link Bean} naming, aliases, scoping and error
- * handling within {@link Configuration} class definitions.
+ * Miscellaneous system tests covering {@link Bean} naming, aliases, scoping and
+ * error handling within {@link Configuration} class definitions.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
 public class ConfigurationClassProcessingTests {
-
-	/**
-	 * Creates a new {@link BeanFactory}, populates it with a {@link BeanDefinition} for
-	 * each of the given {@link Configuration} <var>configClasses</var>, and then
-	 * post-processes the factory using JavaConfig's {@link ConfigurationClassPostProcessor}.
-	 * When complete, the factory is ready to service requests for any {@link Bean} methods
-	 * declared by <var>configClasses</var>.
-	 */
-	private DefaultListableBeanFactory initBeanFactory(Class<?>... configClasses) {
-		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-		for (Class<?> configClass : configClasses) {
-			String configBeanName = configClass.getName();
-			factory.registerBeanDefinition(configBeanName, new RootBeanDefinition(configClass));
-		}
-		ConfigurationClassPostProcessor ccpp = new ConfigurationClassPostProcessor();
-		ccpp.postProcessBeanDefinitionRegistry(factory);
-		ccpp.postProcessBeanFactory(factory);
-		RequiredAnnotationBeanPostProcessor rapp = new RequiredAnnotationBeanPostProcessor();
-		rapp.setBeanFactory(factory);
-		factory.addBeanPostProcessor(rapp);
-		factory.freezeConfiguration();
-		return factory;
-	}
-
 
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
@@ -264,6 +240,30 @@ public class ConfigurationClassProcessingTests {
 		SpousyTestBean listener = factory.getBean("listenerTestBean", SpousyTestBean.class);
 		assertTrue(listener.refreshed);
 		factory.close();
+	}
+
+
+	/**
+	 * Creates a new {@link BeanFactory}, populates it with a {@link BeanDefinition}
+	 * for each of the given {@link Configuration} {@code configClasses}, and then
+	 * post-processes the factory using JavaConfig's {@link ConfigurationClassPostProcessor}.
+	 * When complete, the factory is ready to service requests for any {@link Bean} methods
+	 * declared by {@code configClasses}.
+	 */
+	private DefaultListableBeanFactory initBeanFactory(Class<?>... configClasses) {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		for (Class<?> configClass : configClasses) {
+			String configBeanName = configClass.getName();
+			factory.registerBeanDefinition(configBeanName, new RootBeanDefinition(configClass));
+		}
+		ConfigurationClassPostProcessor ccpp = new ConfigurationClassPostProcessor();
+		ccpp.postProcessBeanDefinitionRegistry(factory);
+		ccpp.postProcessBeanFactory(factory);
+		RequiredAnnotationBeanPostProcessor rapp = new RequiredAnnotationBeanPostProcessor();
+		rapp.setBeanFactory(factory);
+		factory.addBeanPostProcessor(rapp);
+		factory.freezeConfiguration();
+		return factory;
 	}
 
 

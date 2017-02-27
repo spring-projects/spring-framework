@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -61,13 +60,13 @@ public class ResourceHandlerFunctionTests {
 
 		Mono<Void> result = responseMono.then(response -> {
 					assertEquals(HttpStatus.OK, response.statusCode());
-/*
-TODO: enable when ServerEntityResponse is reintroduced
+					/*
+					TODO: enable when ServerEntityResponse is reintroduced
 					StepVerifier.create(response.body())
 							.expectNext(this.resource)
 							.expectComplete()
 							.verify();
-*/
+					*/
 					return response.writeTo(exchange, HandlerStrategies.withDefaults());
 				});
 
@@ -132,12 +131,12 @@ TODO: enable when ServerEntityResponse is reintroduced
 			assertEquals(HttpStatus.OK, response.statusCode());
 			assertEquals(EnumSet.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS),
 					response.headers().getAllow());
-/*
-TODO: enable when ServerEntityResponse is reintroduced
+			/*
+			TODO: enable when ServerEntityResponse is reintroduced
 			StepVerifier.create(response.body())
 					.expectComplete()
 					.verify();
-*/
+			*/
 			return response.writeTo(exchange, HandlerStrategies.withDefaults());
 		});
 

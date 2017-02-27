@@ -37,6 +37,7 @@ import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.FormHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.Jackson2ServerHttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
@@ -79,6 +80,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 	private Function<ServerRequest, Optional<Locale>> localeResolver;
 
+
 	public void defaultConfiguration() {
 		messageReader(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		messageReader(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
@@ -97,7 +99,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 		if (jackson2Present) {
 			messageReader(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
 			Jackson2JsonEncoder jsonEncoder = new Jackson2JsonEncoder();
-			messageWriter(new EncoderHttpMessageWriter<>(jsonEncoder));
+			messageWriter(new Jackson2ServerHttpMessageWriter(jsonEncoder));
 			messageWriter(
 					new ServerSentEventHttpMessageWriter(Collections.singletonList(jsonEncoder)));
 		}
@@ -111,6 +113,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 		applicationContext.getBeansOfType(HttpMessageReader.class).values().forEach(this::messageReader);
 		applicationContext.getBeansOfType(HttpMessageWriter.class).values().forEach(this::messageWriter);
 		applicationContext.getBeansOfType(ViewResolver.class).values().forEach(this::viewResolver);
+		localeResolver(DEFAULT_LOCALE_RESOLVER);
 	}
 
 	@Override
@@ -147,6 +150,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 				this.viewResolvers, localeResolver);
 	}
 
+
 	private static class DefaultHandlerStrategies implements HandlerStrategies {
 
 		private final List<HttpMessageReader<?>> messageReaders;
@@ -157,12 +161,12 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 		private final Function<ServerRequest, Optional<Locale>> localeResolver;
 
-
 		public DefaultHandlerStrategies(
 				List<HttpMessageReader<?>> messageReaders,
 				List<HttpMessageWriter<?>> messageWriters,
 				List<ViewResolver> viewResolvers,
 				Function<ServerRequest, Optional<Locale>> localeResolver) {
+
 			this.messageReaders = unmodifiableCopy(messageReaders);
 			this.messageWriters = unmodifiableCopy(messageWriters);
 			this.viewResolvers = unmodifiableCopy(viewResolvers);

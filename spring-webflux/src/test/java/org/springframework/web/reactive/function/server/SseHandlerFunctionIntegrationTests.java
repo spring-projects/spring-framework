@@ -27,13 +27,12 @@ import reactor.test.StepVerifier;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
-import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
-import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
-import static org.springframework.web.reactive.function.BodyInserters.fromServerSentEvents;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.junit.Assert.*;
+import static org.springframework.core.ResolvableType.*;
+import static org.springframework.http.MediaType.*;
+import static org.springframework.web.reactive.function.BodyExtractors.*;
+import static org.springframework.web.reactive.function.BodyInserters.*;
+import static org.springframework.web.reactive.function.server.RouterFunctions.*;
 
 /**
  * @author Arjen Poutsma
@@ -43,12 +42,6 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 	private WebClient webClient;
 
 
-	@Before
-	public void setup() throws Exception {
-		super.setup();
-		this.webClient = WebClient.create("http://localhost:" + this.port);
-	}
-
 	@Override
 	protected RouterFunction<?> routerFunction() {
 		SseHandler sseHandler = new SseHandler();
@@ -56,6 +49,13 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 				.and(route(RequestPredicates.GET("/person"), sseHandler::person))
 				.and(route(RequestPredicates.GET("/event"), sseHandler::sse));
 	}
+
+	@Before
+	public void setup() throws Exception {
+		super.setup();
+		this.webClient = WebClient.create("http://localhost:" + this.port);
+	}
+
 
 	@Test
 	public void sseAsString() throws Exception {
@@ -71,6 +71,7 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 				.expectComplete()
 				.verify(Duration.ofSeconds(5L));
 	}
+
 	@Test
 	public void sseAsPerson() throws Exception {
 		Flux<Person> result = this.webClient.get()
@@ -114,6 +115,7 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 				.verify(Duration.ofSeconds(5L));
 	}
 
+
 	private static class SseHandler {
 
 		public Mono<ServerResponse> string(ServerRequest request) {
@@ -133,10 +135,10 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 							.id(Long.toString(l))
 							.comment("bar")
 							.build()).take(2);
-
 			return ServerResponse.ok().body(fromServerSentEvents(flux));
 		}
 	}
+
 
 	private static class Person {
 
@@ -177,9 +179,7 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 
 		@Override
 		public String toString() {
-			return "Person{" +
-					"name='" + name + '\'' +
-					'}';
+			return "Person{" + "name='" + name + '\'' + '}';
 		}
 	}
 

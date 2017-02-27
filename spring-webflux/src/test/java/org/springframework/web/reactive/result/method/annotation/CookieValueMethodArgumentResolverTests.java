@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -36,9 +35,7 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link CookieValueMethodArgumentResolver}.
@@ -51,20 +48,21 @@ public class CookieValueMethodArgumentResolverTests {
 
 	private ServerHttpRequest request;
 
+	private BindingContext bindingContext;
+
 	private MethodParameter cookieParameter;
 	private MethodParameter cookieStringParameter;
 	private MethodParameter stringParameter;
 
-	private BindingContext bindingContext = new BindingContext();
-
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
-		this.resolver = new CookieValueMethodArgumentResolver(context.getBeanFactory());
 
+		this.resolver = new CookieValueMethodArgumentResolver(context.getBeanFactory());
 		this.request = MockServerHttpRequest.get("/").build();
+		this.bindingContext = new BindingContext();
 
 		Method method = getClass().getMethod("params", HttpCookie.class, String.class, String.class);
 		this.cookieParameter = new SynthesizingMethodParameter(method, 0);
@@ -120,7 +118,7 @@ public class CookieValueMethodArgumentResolverTests {
 				.verify();
 	}
 
-	@NotNull
+
 	private DefaultServerWebExchange createExchange() {
 		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}

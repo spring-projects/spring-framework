@@ -35,16 +35,13 @@ import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
 /**
- * The main class for performing Web requests.
+ * The main entry point for initiating web requests on the client side.
  *
  * <pre class="code">
- *
  * // Initialize the client
- *
  * WebClient client = WebClient.create("http://abc.com");
  *
  * // Perform requests...
- *
  * Mono&#060;String&#062; result = client.get()
  *     .uri("/foo")
  *     .exchange()
@@ -124,12 +121,10 @@ public interface WebClient {
 	 * Configure a base URI for requests performed through the client for
 	 * example to avoid repeating the same host, port, base path, or even
 	 * query parameters with every request.
-	 *
 	 * <p>For example given this initialization:
 	 * <pre class="code">
 	 * WebClient client = WebClient.create("http://abc.com/v1");
 	 * </pre>
-	 *
 	 * <p>The base URI is applied to exchanges with a URI template:
 	 * <pre class="code">
 	 * // GET http://abc.com/v1/accounts/43
@@ -138,7 +133,6 @@ public interface WebClient {
 	 *         .exchange()
 	 *         .then(response -> response.bodyToMono(Account.class));
 	 * </pre>
-	 *
 	 * <p>The base URI is also applied to exchanges with a {@code UriBuilder}:
 	 * <pre class="code">
 	 * // GET http://abc.com/v1/accounts?q=12
@@ -147,7 +141,6 @@ public interface WebClient {
 	 *         .exchange()
 	 *         .then(response -> response.bodyToFlux(Account.class));
 	 * </pre>
-	 *
 	 * <p>The base URI can be overridden with an absolute URI:
 	 * <pre class="code">
 	 * // GET http://xyz.com/path
@@ -156,7 +149,6 @@ public interface WebClient {
 	 *         .exchange()
 	 *         .then(response -> response.bodyToMono(Account.class));
 	 * </pre>
-	 *
 	 * <p>The base URI can be partially overridden with a {@code UriBuilder}:
 	 * <pre class="code">
 	 * // GET http://abc.com/v2/accounts?q=12
@@ -165,8 +157,6 @@ public interface WebClient {
 	 *         .exchange()
 	 *         .then(response -> response.bodyToFlux(Account.class));
 	 * </pre>
-	 *
-	 *
 	 * @param baseUrl the base URI for all requests
 	 */
 	static WebClient create(String baseUrl) {
@@ -302,7 +292,6 @@ public interface WebClient {
 		 * configured for this client.
 		 */
 		HeaderSpec uri(Function<UriBuilder, URI> uriFunction);
-
 	}
 
 	/**
@@ -354,7 +343,6 @@ public interface WebClient {
 
 		/**
 		 * Copy the given cookies into the entity's cookies map.
-		 *
 		 * @param cookies the existing cookies to copy from
 		 * @return this builder
 		 */
@@ -416,7 +404,6 @@ public interface WebClient {
 		 * @return a {@code Mono} with the response
 		 */
 		<T, S extends Publisher<T>> Mono<ClientResponse> exchange(S publisher, Class<T> elementClass);
-
 	}
 
 }

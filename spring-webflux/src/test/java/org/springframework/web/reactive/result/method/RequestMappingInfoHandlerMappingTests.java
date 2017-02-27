@@ -26,9 +26,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import org.hamcrest.Matchers;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -53,7 +51,7 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.ResolvableMethod;
-import org.springframework.web.reactive.result.method.RequestMappingInfo.BuilderConfiguration;
+import org.springframework.web.reactive.result.method.RequestMappingInfo.*;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -61,22 +59,15 @@ import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.support.HttpRequestPathHelper;
-import org.springframework.web.util.patterns.PathPattern;
-import org.springframework.web.util.patterns.PathPatternRegistry;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
-import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
-import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static org.springframework.web.reactive.result.method.RequestMappingInfo.*;
 
 /**
  * Unit tests for {@link RequestMappingInfoHandlerMapping}.
+ *
  * @author Rossen Stoyanchev
  */
 public class RequestMappingInfoHandlerMappingTests {
@@ -85,8 +76,9 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	private ServerHttpRequest request;
 
+
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.handlerMapping = new TestRequestMappingInfoHandlerMapping();
 		this.handlerMapping.registerHandler(new TestController());
 	}
@@ -98,8 +90,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		RequestMappingInfo info = paths(patterns).build();
 		Set<String> actual = this.handlerMapping.getMappingPathPatterns(info);
 
-		assertThat(actual, Matchers.containsInAnyOrder("/foo/*", "/foo", "/bar/*", "/bar",
-				"/foo/*/", "/foo/", "/bar/*/", "/bar/"));
+		assertEquals(new HashSet<>(Arrays.asList(patterns)), actual);
 	}
 
 	@Test
@@ -127,9 +118,6 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
-	@Ignore
-	// TODO: for "" patterns, should we generate the "/" variant (and break SPR-8255)
-	// or handle matching in a different way? Here, setTrailingSlashMatch is set to false for tests
 	public void getHandlerEmptyPathMatch() throws Exception {
 		String[] patterns = new String[] {""};
 		Method expected = resolveMethod(new TestController(), patterns, null, null);
@@ -164,7 +152,7 @@ public class RequestMappingInfoHandlerMappingTests {
 				ex -> assertEquals(new HashSet<>(Arrays.asList("GET", "HEAD")), ex.getSupportedMethods()));
 	}
 
-	@Test // SPR-9603
+	@Test  // SPR-9603
 	public void getHandlerRequestMethodMatchFalsePositive() throws Exception {
 		this.request = MockServerHttpRequest.get("/users").accept(MediaType.APPLICATION_XML).build();
 		this.handlerMapping.registerHandler(new UserController());
@@ -175,7 +163,7 @@ public class RequestMappingInfoHandlerMappingTests {
 				.verify();
 	}
 
-	@Test // SPR-8462
+	@Test  // SPR-8462
 	public void getHandlerMediaTypeNotSupported() throws Exception {
 		testHttpMediaTypeNotSupportedException("/person/1");
 		testHttpMediaTypeNotSupportedException("/person/1/");
@@ -189,18 +177,18 @@ public class RequestMappingInfoHandlerMappingTests {
 
 		assertError(mono, UnsupportedMediaTypeStatusException.class,
 				ex -> assertEquals("Request failure [status: 415, " +
-								"reason: \"Invalid mime type \"bogus\": does not contain '/'\"]",
+						"reason: \"Invalid mime type \"bogus\": does not contain '/'\"]",
 						ex.getMessage()));
 	}
 
-	@Test // SPR-8462
+	@Test  // SPR-8462
 	public void getHandlerTestMediaTypeNotAcceptable() throws Exception {
 		testMediaTypeNotAcceptable("/persons");
 		testMediaTypeNotAcceptable("/persons/");
 		testMediaTypeNotAcceptable("/persons.json");
 	}
 
-	@Test // SPR-12854
+	@Test  // SPR-12854
 	public void getHandlerTestRequestParamMismatch() throws Exception {
 		this.request = MockServerHttpRequest.get("/params").build();
 		Mono<Object> mono = this.handlerMapping.getHandler(createExchange());
@@ -253,7 +241,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertEquals("2", uriVariables.get("path2"));
 	}
 
-	@Test // SPR-9098
+	@Test  // SPR-9098
 	public void handleMatchUriTemplateVariablesDecode() throws Exception {
 		RequestMappingInfo key = paths("/{group}/{identifier}").build();
 		this.request = MockServerHttpRequest.method(HttpMethod.GET, URI.create("/group/a%2Fb")).build();
@@ -282,9 +270,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		ServerWebExchange exchange = createExchange();
 		this.handlerMapping.handleMatch(key, "/1/2", exchange);
 
-		PathPattern pattern = (PathPattern) exchange.getAttributes()
-				.get(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
-		assertEquals("/{path1}/2", pattern.getPatternString());
+		assertEquals("/{path1}/2", exchange.getAttributes().get(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE));
 	}
 
 	@Test
@@ -295,9 +281,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 		this.handlerMapping.handleMatch(key, "/1/2", exchange);
 
-		PathPattern pattern = (PathPattern) exchange.getAttributes()
-				.get(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
-		assertEquals("/1/2", pattern.getPatternString());
+		assertEquals("/1/2", exchange.getAttributes().get(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE));
 	}
 
 	@Test
@@ -364,12 +348,10 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	private ServerWebExchange createExchange() {
 		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
-
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> void assertError(Mono<Object> mono, final Class<T> exceptionClass, final Consumer<T> consumer) {
-
+	private <T> void assertError(Mono<Object> mono, final Class<T> exceptionClass, final Consumer<T> consumer)  {
 		StepVerifier.create(mono)
 				.consumeErrorWith(error -> {
 					assertEquals(exceptionClass, error.getClass());
@@ -378,7 +360,6 @@ public class RequestMappingInfoHandlerMappingTests {
 				})
 				.verify();
 	}
-
 
 	private void testHttpMediaTypeNotSupportedException(String url) throws Exception {
 		this.request = MockServerHttpRequest.put(url).contentType(MediaType.APPLICATION_JSON).build();
@@ -467,11 +448,11 @@ public class RequestMappingInfoHandlerMappingTests {
 		public void foo() {
 		}
 
-		@GetMapping(path = "/foo", params = "p")
+		@GetMapping(path = "/foo", params="p")
 		public void fooParam() {
 		}
 
-		@RequestMapping(path = "/ba*", method = {GET, HEAD})
+		@RequestMapping(path = "/ba*", method = { GET, HEAD })
 		public void bar() {
 		}
 
@@ -479,31 +460,31 @@ public class RequestMappingInfoHandlerMappingTests {
 		public void empty() {
 		}
 
-		@PutMapping(path = "/person/{id}", consumes = "application/xml")
+		@PutMapping(path = "/person/{id}", consumes="application/xml")
 		public void consumes(@RequestBody String text) {
 		}
 
-		@RequestMapping(path = "/persons", produces = "application/xml")
+		@RequestMapping(path = "/persons", produces="application/xml")
 		public String produces() {
 			return "";
 		}
 
-		@RequestMapping(path = "/params", params = "foo=bar")
+		@RequestMapping(path = "/params", params="foo=bar")
 		public String param() {
 			return "";
 		}
 
-		@RequestMapping(path = "/params", params = "bar=baz")
+		@RequestMapping(path = "/params", params="bar=baz")
 		public String param2() {
 			return "";
 		}
 
-		@RequestMapping(path = "/content", produces = "application/xml")
+		@RequestMapping(path = "/content", produces="application/xml")
 		public String xmlContent() {
 			return "";
 		}
 
-		@RequestMapping(path = "/content", produces = "!application/xml")
+		@RequestMapping(path = "/content", produces="!application/xml")
 		public String nonXmlContent() {
 			return "";
 		}
@@ -515,6 +496,7 @@ public class RequestMappingInfoHandlerMappingTests {
 			return headers;
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	@Controller
@@ -528,6 +510,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		public void saveUser() {
 		}
 	}
+
 
 	private static class TestRequestMappingInfoHandlerMapping extends RequestMappingInfoHandlerMapping {
 
@@ -544,12 +527,11 @@ public class RequestMappingInfoHandlerMappingTests {
 		protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
 			RequestMapping annot = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
 			if (annot != null) {
-				PathPatternRegistry pathPatternRegistry = new PathPatternRegistry();
-				pathPatternRegistry.setUseSuffixPatternMatch(true);
-				pathPatternRegistry.setUseTrailingSlashMatch(true);
 				BuilderConfiguration options = new BuilderConfiguration();
 				options.setPathHelper(getPathHelper());
-				options.setPathPatternRegistry(pathPatternRegistry);
+				options.setPathMatcher(getPathMatcher());
+				options.setSuffixPatternMatch(true);
+				options.setTrailingSlashMatch(true);
 				return paths(annot.value()).methods(annot.method())
 						.params(annot.params()).headers(annot.headers())
 						.consumes(annot.consumes()).produces(annot.produces())

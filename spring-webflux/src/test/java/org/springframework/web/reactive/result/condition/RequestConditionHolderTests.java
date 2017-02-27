@@ -42,7 +42,7 @@ public class RequestConditionHolderTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		ServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(request, response);

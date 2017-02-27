@@ -114,18 +114,24 @@ public interface ServerRequest {
 	<T> Optional<T> attribute(String name);
 
 	/**
+	 * Return a mutable map of request attributes.
+	 * @return the request attributes
+	 */
+	Map<String, Object> attributes();
+
+	/**
 	 * Return the first query parameter with the given name, if present.
 	 * @param name the parameter name
 	 * @return the parameter value
 	 */
 	default Optional<String> queryParam(String name) {
 		List<String> queryParams = this.queryParams(name);
-		return !queryParams.isEmpty() ? Optional.of(queryParams.get(0)) : Optional.empty();
+		return (!queryParams.isEmpty() ? Optional.of(queryParams.get(0)) : Optional.empty());
 	}
 
 	/**
-	 * Return all query parameter with the given name. Returns an empty list if no values could
-	 * be found.
+	 * Return all query parameter with the given name.
+	 * <p>Returns an empty list if no values could be found.
 	 * @param name the parameter name
 	 * @return the parameter values
 	 */
@@ -143,8 +149,7 @@ public interface ServerRequest {
 			return pathVariables().get(name);
 		}
 		else {
-			throw new IllegalArgumentException(
-					"No path variable with name \"" + name + "\" available");
+			throw new IllegalArgumentException("No path variable with name \"" + name + "\" available");
 		}
 	}
 
@@ -217,7 +222,6 @@ public interface ServerRequest {
 		/**
 		 * Return the header value(s), if any, for the header of the given name.
 		 * <p>Return an empty list if no header values are found.
-		 *
 		 * @param headerName the header name
 		 */
 		List<String> header(String headerName);
@@ -226,7 +230,6 @@ public interface ServerRequest {
 		 * Return the headers as a {@link HttpHeaders} instance.
 		 */
 		HttpHeaders asHttpHeaders();
-
 	}
 
 }

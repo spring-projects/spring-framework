@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.concurrent.ConcurrentHashMap;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -65,10 +66,12 @@ public class MockServerRequest implements ServerRequest {
 
 	private final WebSession session;
 
+
 	private MockServerRequest(HttpMethod method, URI uri,
 			MockHeaders headers, Object body, Map<String, Object> attributes,
 			MultiValueMap<String, String> queryParams,
 			Map<String, String> pathVariables, WebSession session) {
+
 		this.method = method;
 		this.uri = uri;
 		this.headers = headers;
@@ -79,9 +82,6 @@ public class MockServerRequest implements ServerRequest {
 		this.session = session;
 	}
 
-	public static Builder builder() {
-		return new BuilderImpl();
-	}
 
 	@Override
 	public HttpMethod method() {
@@ -128,6 +128,11 @@ public class MockServerRequest implements ServerRequest {
 	}
 
 	@Override
+	public Map<String, Object> attributes() {
+		return this.attributes;
+	}
+
+	@Override
 	public List<String> queryParams(String name) {
 		return Collections.unmodifiableList(this.queryParams.get(name));
 	}
@@ -141,6 +146,12 @@ public class MockServerRequest implements ServerRequest {
 	public Mono<WebSession> session() {
 		return Mono.justOrEmpty(this.session);
 	}
+
+
+	public static Builder builder() {
+		return new BuilderImpl();
+	}
+
 
 	public interface Builder {
 
@@ -169,8 +180,8 @@ public class MockServerRequest implements ServerRequest {
 		MockServerRequest body(Object body);
 
 		MockServerRequest build();
-
 	}
+
 
 	private static class BuilderImpl implements Builder {
 
@@ -182,7 +193,7 @@ public class MockServerRequest implements ServerRequest {
 
 		private Object body;
 
-		private Map<String, Object> attributes = new LinkedHashMap<>();
+		private Map<String, Object> attributes = new ConcurrentHashMap<>();
 
 		private MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 
@@ -283,13 +294,12 @@ public class MockServerRequest implements ServerRequest {
 			return new MockServerRequest(this.method, this.uri, this.headers, null,
 					this.attributes, this.queryParams, this.pathVariables, this.session);
 		}
-
 	}
+
 
 	private static class MockHeaders implements Headers {
 
 		private final HttpHeaders headers;
-
 
 		public MockHeaders(HttpHeaders headers) {
 			this.headers = headers;

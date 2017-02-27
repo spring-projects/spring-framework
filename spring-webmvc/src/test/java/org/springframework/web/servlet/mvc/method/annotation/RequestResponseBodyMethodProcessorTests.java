@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,44 +82,41 @@ import static org.junit.Assert.*;
 @SuppressWarnings("unused")
 public class RequestResponseBodyMethodProcessorTests {
 
+	private ModelAndViewContainer container;
+
+	private MockHttpServletRequest servletRequest;
+
+	private MockHttpServletResponse servletResponse;
+
+	private NativeWebRequest request;
+
+	private ValidatingBinderFactory factory;
+
 	private MethodParameter paramGenericList;
 	private MethodParameter paramSimpleBean;
 	private MethodParameter paramMultiValueMap;
 	private MethodParameter paramString;
 	private MethodParameter returnTypeString;
 
-	private ModelAndViewContainer container;
-
-	private NativeWebRequest request;
-
-	private MockHttpServletRequest servletRequest;
-
-	private MockHttpServletResponse servletResponse;
-
-	private ValidatingBinderFactory factory;
-
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
+		container = new ModelAndViewContainer();
+		servletRequest = new MockHttpServletRequest();
+		servletRequest.setMethod("POST");
+		servletResponse = new MockHttpServletResponse();
+		request = new ServletWebRequest(servletRequest, servletResponse);
+		this.factory = new ValidatingBinderFactory();
 
-		Method method = getClass().getDeclaredMethod("handle", List.class, SimpleBean.class,
-				MultiValueMap.class, String.class);
-
+		Method method = getClass().getDeclaredMethod("handle",
+				List.class, SimpleBean.class, MultiValueMap.class, String.class);
 		paramGenericList = new MethodParameter(method, 0);
 		paramSimpleBean = new MethodParameter(method, 1);
 		paramMultiValueMap = new MethodParameter(method, 2);
 		paramString = new MethodParameter(method, 3);
 		returnTypeString = new MethodParameter(method, -1);
-
-		container = new ModelAndViewContainer();
-
-		servletRequest = new MockHttpServletRequest();
-		servletRequest.setMethod("POST");
-		servletResponse = new MockHttpServletResponse();
-		request = new ServletWebRequest(servletRequest, servletResponse);
-
-		this.factory = new ValidatingBinderFactory();
 	}
+
 
 	@Test
 	public void resolveArgumentParameterizedType() throws Exception {

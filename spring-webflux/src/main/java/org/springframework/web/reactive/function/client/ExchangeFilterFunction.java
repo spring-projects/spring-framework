@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,16 +32,15 @@ import org.springframework.util.Assert;
 public interface ExchangeFilterFunction {
 
 	/**
-	 * Apply this filter to the given request and exchange function. The given
-	 * {@linkplain ExchangeFunction exchange function} represents the next entity in the
-	 * chain, and can be {@linkplain ExchangeFunction#exchange(ClientRequest) invoked} in order
-	 * to proceed to the exchange, or not invoked to block the chain.
-	 *
+	 * Apply this filter to the given request and exchange function.
+	 * <p>The given {@linkplain ExchangeFunction exchange function} represents the next entity
+	 * in the chain, and can be {@linkplain ExchangeFunction#exchange(ClientRequest) invoked}
+	 * in order to proceed to the exchange, or not invoked to block the chain.
 	 * @param request the request
 	 * @param next the next exchange function in the chain
 	 * @return the filtered response
 	 */
-	Mono<ClientResponse> filter(ClientRequest<?> request, ExchangeFunction next);
+	Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction next);
 
 	/**
 	 * Return a composed filter function that first applies this filter, and then applies the
@@ -74,8 +73,8 @@ public interface ExchangeFilterFunction {
 	 * @param requestProcessor the request processor
 	 * @return the filter adaptation of the request processor
 	 */
-	static ExchangeFilterFunction ofRequestProcessor(Function<ClientRequest<?>,
-			Mono<ClientRequest<?>>> requestProcessor) {
+	static ExchangeFilterFunction ofRequestProcessor(Function<ClientRequest,
+			Mono<ClientRequest>> requestProcessor) {
 
 		Assert.notNull(requestProcessor, "'requestProcessor' must not be null");
 		return (request, next) -> requestProcessor.apply(request).then(next::exchange);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests that demonstrate running multiple applications under
@@ -46,8 +46,7 @@ public class ContextPathIntegrationTests {
 
 
 	@Before
-	public void setUp() throws Exception {
-
+	public void setup() throws Exception {
 		AnnotationConfigApplicationContext context1 = new AnnotationConfigApplicationContext();
 		context1.register(WebApp1Config.class);
 		context1.refresh();
@@ -69,14 +68,13 @@ public class ContextPathIntegrationTests {
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void shutdown() throws Exception {
 		this.server.stop();
 	}
 
 
 	@Test
 	public void basic() throws Exception {
-
 		RestTemplate restTemplate = new RestTemplate();
 		String actual;
 
@@ -102,6 +100,7 @@ public class ContextPathIntegrationTests {
 		}
 	}
 
+
 	@EnableWebFlux
 	@Configuration
 	static class WebApp2Config {
@@ -111,6 +110,7 @@ public class ContextPathIntegrationTests {
 			return new TestController();
 		}
 	}
+
 
 	@RestController
 	static class TestController {

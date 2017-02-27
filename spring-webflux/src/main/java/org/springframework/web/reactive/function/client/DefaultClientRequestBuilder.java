@@ -53,11 +53,14 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	private final MultiValueMap<String, String> cookies = new LinkedMultiValueMap<>();
 
+	private BodyInserter<?, ? super ClientHttpRequest> inserter = BodyInserters.empty();
+
 
 	public DefaultClientRequestBuilder(HttpMethod method, URI url) {
 		this.method = method;
 		this.url = url;
 	}
+
 
 	@Override
 	public ClientRequest.Builder header(String headerName, String... headerValues) {
@@ -90,23 +93,29 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 	}
 
 	@Override
-	public ClientRequest<Void> build() {
-		return body(BodyInserters.empty());
+	public <S, P extends Publisher<S>> ClientRequest.Builder body(P publisher,
+			Class<S> elementClass) {
+		Assert.notNull(publisher, "'publisher' must not be null");
+		Assert.notNull(elementClass, "'elementClass' must not be null");
+
+		this.inserter = BodyInserters.fromPublisher(publisher, elementClass);
+		return this;
 	}
 
 	@Override
-	public <T> ClientRequest<T> body(BodyInserter<T, ? super ClientHttpRequest> inserter) {
-		Assert.notNull(inserter, "'inserter' must not be null");
-		return new BodyInserterRequest<T>(this.method, this.url, this.headers, this.cookies,
-				inserter);
+	public ClientRequest.Builder body(BodyInserter<?, ? super ClientHttpRequest> inserter) {
+		this.inserter = inserter != null ? inserter : BodyInserters.empty();
+		return this;
 	}
 
 	@Override
-	public <T, S extends Publisher<T>> ClientRequest<S> body(S publisher, Class<T> elementClass) {
-		return body(BodyInserters.fromPublisher(publisher, elementClass));
+	public ClientRequest build() {
+		return new BodyInserterRequest(this.method, this.url, this.headers, this.cookies,
+				this.inserter);
 	}
 
-	private static class BodyInserterRequest<T> implements ClientRequest<T> {
+
+	private static class BodyInserterRequest implements ClientRequest {
 
 		private final HttpMethod method;
 
@@ -116,11 +125,11 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 		private final MultiValueMap<String, String> cookies;
 
-		private final BodyInserter<T, ? super ClientHttpRequest> inserter;
+		private final BodyInserter<?, ? super ClientHttpRequest> inserter;
 
 		public BodyInserterRequest(HttpMethod method, URI url, HttpHeaders headers,
-				MultiValueMap<String, String> cookies,
-				BodyInserter<T, ? super ClientHttpRequest> inserter) {
+				MultiValueMap<String, String> cookies, BodyInserter<?, ? super ClientHttpRequest> inserter) {
+
 			this.method = method;
 			this.url = url;
 			this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
@@ -149,7 +158,7 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 		}
 
 		@Override
-		public BodyInserter<T, ? super ClientHttpRequest> inserter() {
+		public BodyInserter<?, ? super ClientHttpRequest> body() {
 			return this.inserter;
 		}
 
@@ -162,6 +171,7 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 						.forEach(entry -> requestHeaders
 								.put(entry.getKey(), entry.getValue()));
 			}
+
 			MultiValueMap<String, HttpCookie> requestCookies = request.getCookies();
 			if (!this.cookies.isEmpty()) {
 				this.cookies.entrySet().forEach(entry -> {
@@ -178,7 +188,6 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 				public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
 					return strategies.messageWriters();
 				}
-
 				@Override
 				public Map<String, Object> hints() {
 					return Collections.emptyMap();
@@ -186,4 +195,5 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 			});
 		}
 	}
+
 }

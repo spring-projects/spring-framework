@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.resource;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -31,7 +31,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@code ResourceTransformerSupport}.
@@ -49,7 +49,7 @@ public class ResourceTransformerSupportTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
 		PathResourceResolver pathResolver = new PathResourceResolver();
@@ -62,7 +62,6 @@ public class ResourceTransformerSupportTests {
 
 		this.request = MockServerHttpRequest.get("").build();
 	}
-
 
 	private ResourceUrlProvider createResourceUrlProvider(List<ResourceResolver> resolvers) {
 		ResourceWebHandler handler = new ResourceWebHandler();
@@ -104,7 +103,7 @@ public class ResourceTransformerSupportTests {
 		assertEquals("../bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
 	}
 
-	@NotNull
+
 	private DefaultServerWebExchange createExchange() {
 		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -809,7 +809,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		public PatternVirtualFileVisitor(String rootPath, String subPattern, PathMatcher pathMatcher) {
 			this.subPattern = subPattern;
 			this.pathMatcher = pathMatcher;
-			this.rootPath = (rootPath.length() == 0 || rootPath.endsWith("/") ? rootPath : rootPath + "/");
+			this.rootPath = (rootPath.isEmpty() || rootPath.endsWith("/") ? rootPath : rootPath + "/");
 		}
 
 		@Override

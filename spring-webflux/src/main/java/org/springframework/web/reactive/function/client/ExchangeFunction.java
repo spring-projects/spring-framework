@@ -23,15 +23,15 @@ import org.springframework.util.Assert;
 /**
  * Represents a function that exchanges a {@linkplain ClientRequest request} for a (delayed)
  * {@linkplain ClientResponse}. Can be used as an alternative to {@link WebClient}.
+ *
  * <p>For example:
  * <pre class="code">
  * ExchangeFunction exchangeFunction = ExchangeFunctions.create(new ReactorClientHttpConnector());
- * ClientRequest&lt;Void&gt; request = ClientRequest.method(HttpMethod.GET,
- *   "http://example.com/resource").build();
+ * ClientRequest&lt;Void&gt; request = ClientRequest.method(HttpMethod.GET, "http://example.com/resource").build();
  *
  * Mono&lt;String&gt; result = exchangeFunction
- *   .exchange(request)
- *   .then(response -> response.bodyToMono(String.class));
+ *     .exchange(request)
+ *     .then(response -> response.bodyToMono(String.class));
  * </pre>
  *
  * @author Arjen Poutsma
@@ -45,7 +45,7 @@ public interface ExchangeFunction {
 	 * @param request the request to exchange
 	 * @return the delayed response
 	 */
-	Mono<ClientResponse> exchange(ClientRequest<?> request);
+	Mono<ClientResponse> exchange(ClientRequest request);
 
 	/**
 	 * Filters this exchange function with the given {@code ExchangeFilterFunction}, resulting in a
@@ -56,7 +56,6 @@ public interface ExchangeFunction {
 	 */
 	default ExchangeFunction filter(ExchangeFilterFunction filter) {
 		Assert.notNull(filter, "'filter' must not be null");
-
 		return filter.apply(this);
 	}
 

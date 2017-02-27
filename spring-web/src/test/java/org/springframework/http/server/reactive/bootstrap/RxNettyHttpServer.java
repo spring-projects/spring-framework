@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,9 @@
 
 package org.springframework.http.server.reactive.bootstrap;
 
-import java.net.InetSocketAddress;
-
 import io.netty.buffer.ByteBuf;
-import org.jetbrains.annotations.NotNull;
 
 import org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter;
-
 
 /**
  * @author Rossen Stoyanchev
@@ -40,11 +36,10 @@ public class RxNettyHttpServer extends AbstractHttpServer {
 		this.rxNettyServer = io.reactivex.netty.protocol.http.server.HttpServer.newServer(getPort());
 	}
 
-	@NotNull
 	private RxNettyHttpHandlerAdapter createHttpHandlerAdapter() {
-		return getHttpHandlerMap() != null ?
+		return (getHttpHandlerMap() != null ?
 				new RxNettyHttpHandlerAdapter(getHttpHandlerMap()) :
-				new RxNettyHttpHandlerAdapter(getHttpHandler());
+				new RxNettyHttpHandlerAdapter(getHttpHandler()));
 	}
 
 

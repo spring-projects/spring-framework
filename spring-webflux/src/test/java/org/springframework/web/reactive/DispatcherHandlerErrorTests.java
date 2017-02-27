@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.reactive;
 import java.time.Duration;
 import java.util.Collections;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -54,10 +53,8 @@ import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.junit.Assert.*;
+import static org.springframework.http.MediaType.*;
 
 
 /**
@@ -78,7 +75,7 @@ public class DispatcherHandlerErrorTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		AnnotationConfigApplicationContext appContext = new AnnotationConfigApplicationContext();
 		appContext.register(TestConfig.class);
 		appContext.refresh();
@@ -168,7 +165,7 @@ public class DispatcherHandlerErrorTests {
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exchange.getResponse().getStatusCode());
 	}
 
-	@NotNull
+
 	private ServerWebExchange createExchange() {
 		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}
@@ -201,6 +198,7 @@ public class DispatcherHandlerErrorTests {
 		}
 	}
 
+
 	@Controller
 	@SuppressWarnings("unused")
 	private static class TestController {
@@ -228,8 +226,10 @@ public class DispatcherHandlerErrorTests {
 		}
 	}
 
+
 	private static class Foo {
 	}
+
 
 	private static class ServerError500ExceptionHandler implements WebExceptionHandler {
 

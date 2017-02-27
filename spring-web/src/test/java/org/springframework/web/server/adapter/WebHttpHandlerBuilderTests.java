@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server.adapter;
 
 import java.nio.charset.StandardCharsets;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -36,16 +36,16 @@ import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebHandler;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link WebHttpHandlerBuilder}.
+ *
  * @author Rossen Stoyanchev
  */
 public class WebHttpHandlerBuilderTests {
 
-
-	@Test // SPR-15074
+	@Test  // SPR-15074
 	public void orderedWebFilterBeans() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(OrderedWebFilterBeanConfig.class);
@@ -60,7 +60,7 @@ public class WebHttpHandlerBuilderTests {
 		assertEquals("FilterB::FilterA", response.getBodyAsString().blockMillis(5000));
 	}
 
-	@Test // SPR-15074
+	@Test  // SPR-15074
 	public void orderedWebExceptionHandlerBeans() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(OrderedExceptionHandlerBeanConfig.class);
@@ -90,6 +90,7 @@ public class WebHttpHandlerBuilderTests {
 		assertEquals("handled", response.getBodyAsString().blockMillis(5000));
 	}
 
+
 	private static Mono<Void> writeToResponse(ServerWebExchange exchange, String value) {
 		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
 		DataBuffer buffer = new DefaultDataBufferFactory().wrap(bytes);
@@ -113,7 +114,6 @@ public class WebHttpHandlerBuilderTests {
 			return createFilter("FilterB");
 		}
 
-		@NotNull
 		private WebFilter createFilter(String name) {
 			return (exchange, chain) -> {
 				String value = exchange.getAttribute(ATTRIBUTE).map(v -> v + "::" + name).orElse(name);
@@ -130,6 +130,7 @@ public class WebHttpHandlerBuilderTests {
 			};
 		}
 	}
+
 
 	@Configuration
 	@SuppressWarnings("unused")
@@ -152,6 +153,7 @@ public class WebHttpHandlerBuilderTests {
 			return exchange -> Mono.error(new Exception());
 		}
 	}
+
 
 	@Configuration
 	@SuppressWarnings("unused")

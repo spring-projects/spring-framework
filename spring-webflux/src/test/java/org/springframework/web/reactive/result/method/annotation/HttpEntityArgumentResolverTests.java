@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +36,6 @@ import rx.Single;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.StringDecoder;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
@@ -53,12 +49,8 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.junit.Assert.*;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * Unit tests for {@link HttpEntityArgumentResolver}.When adding a test also
@@ -78,7 +70,7 @@ public class HttpEntityArgumentResolverTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.request = MockServerHttpRequest.post("/path").build();
 	}
 
@@ -342,12 +334,6 @@ public class HttpEntityArgumentResolverTests {
 
 		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
 		return (HttpEntity<T>) httpEntity;
-	}
-
-	private DataBuffer dataBuffer(String body) {
-		byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
-		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-		return new DefaultDataBufferFactory().wrap(byteBuffer);
 	}
 
 

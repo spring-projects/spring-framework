@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.CorsProcessor;
@@ -33,8 +34,7 @@ import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.support.HttpRequestPathHelper;
-import org.springframework.web.util.patterns.PathPattern;
-import org.springframework.web.util.patterns.PathPatternRegistry;
+import org.springframework.web.util.ParsingPathMatcher;
 
 /**
  * Abstract base class for {@link org.springframework.web.reactive.HandlerMapping}
@@ -53,11 +53,12 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 
 	private HttpRequestPathHelper pathHelper = new HttpRequestPathHelper();
 
+	private PathMatcher pathMatcher = new ParsingPathMatcher();
+
 	private final UrlBasedCorsConfigurationSource globalCorsConfigSource = new UrlBasedCorsConfigurationSource();
 
 	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
 
-	protected PathPatternRegistry patternRegistry = new PathPatternRegistry();
 
 	/**
 	 * Specify the order value for this HandlerMapping bean.
@@ -101,19 +102,22 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	}
 
 	/**
-	 * Return the {@link PathPatternRegistry} instance to use for parsing
-	 * and matching path patterns.
+	 * Set the PathMatcher implementation to use for matching URL paths
+	 * against registered URL patterns. Default is AntPathMatcher.
+	 * @see org.springframework.web.util.ParsingPathMatcher
 	 */
-	public PathPatternRegistry getPatternRegistry() {
-		return patternRegistry;
+	public void setPathMatcher(PathMatcher pathMatcher) {
+		Assert.notNull(pathMatcher, "PathMatcher must not be null");
+		this.pathMatcher = pathMatcher;
+		this.globalCorsConfigSource.setPathMatcher(pathMatcher);
 	}
 
 	/**
-	 * Set the {@link PathPatternRegistry} instance to use for parsing
-	 * and matching path patterns.
+	 * Return the PathMatcher implementation to use for matching URL paths
+	 * against registered URL patterns.
 	 */
-	public void setPatternRegistry(PathPatternRegistry patternRegistry) {
-		this.patternRegistry = patternRegistry;
+	public PathMatcher getPathMatcher() {
+		return this.pathMatcher;
 	}
 
 	/**
@@ -122,16 +126,13 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	 * configuration if any.
 	 */
 	public void setCorsConfigurations(Map<String, CorsConfiguration> corsConfigurations) {
-		for(String patternString : corsConfigurations.keySet()) {
-			this.globalCorsConfigSource
-					.registerCorsConfiguration(patternString, corsConfigurations.get(patternString));
-		}
+		this.globalCorsConfigSource.setCorsConfigurations(corsConfigurations);
 	}
 
 	/**
 	 * Return the "global" CORS configuration.
 	 */
-	public Map<PathPattern, CorsConfiguration> getCorsConfigurations() {
+	public Map<String, CorsConfiguration> getCorsConfigurations() {
 		return this.globalCorsConfigSource.getCorsConfigurations();
 	}
 

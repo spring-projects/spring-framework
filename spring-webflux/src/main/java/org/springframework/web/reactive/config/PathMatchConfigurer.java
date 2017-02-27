@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.config;
 
+import org.springframework.util.PathMatcher;
 import org.springframework.web.server.support.HttpRequestPathHelper;
 
 /**
@@ -26,22 +27,24 @@ import org.springframework.web.server.support.HttpRequestPathHelper;
  */
 public class PathMatchConfigurer {
 
-	private boolean suffixPatternMatch = false;
+	private Boolean suffixPatternMatch;
 
-	private boolean trailingSlashMatch = true;
+	private Boolean trailingSlashMatch;
 
-	private boolean registeredSuffixPatternMatch = false;
+	private Boolean registeredSuffixPatternMatch;
 
 	private HttpRequestPathHelper pathHelper;
+
+	private PathMatcher pathMatcher;
 
 
 	/**
 	 * Whether to use suffix pattern match (".*") when matching patterns to
 	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
-	 * <p>By default this is set to {@code false}.
+	 * <p>By default this is set to {@code true}.
 	 * @see #registeredSuffixPatternMatch
 	 */
-	public PathMatchConfigurer setUseSuffixPatternMatch(boolean suffixPatternMatch) {
+	public PathMatchConfigurer setUseSuffixPatternMatch(Boolean suffixPatternMatch) {
 		this.suffixPatternMatch = suffixPatternMatch;
 		return this;
 	}
@@ -51,7 +54,7 @@ public class PathMatchConfigurer {
 	 * If enabled a method mapped to "/users" also matches to "/users/".
 	 * <p>The default value is {@code true}.
 	 */
-	public PathMatchConfigurer setUseTrailingSlashMatch(boolean trailingSlashMatch) {
+	public PathMatchConfigurer setUseTrailingSlashMatch(Boolean trailingSlashMatch) {
 		this.trailingSlashMatch = trailingSlashMatch;
 		return this;
 	}
@@ -61,9 +64,9 @@ public class PathMatchConfigurer {
 	 * that are explicitly registered. This is generally recommended to reduce
 	 * ambiguity and to avoid issues such as when a "." (dot) appears in the path
 	 * for other reasons.
-	 * <p>By default this is set to "false".
+	 * <p>By default this is set to "true".
 	 */
-	public PathMatchConfigurer setUseRegisteredSuffixPatternMatch(boolean registeredSuffixPatternMatch) {
+	public PathMatchConfigurer setUseRegisteredSuffixPatternMatch(Boolean registeredSuffixPatternMatch) {
 		this.registeredSuffixPatternMatch = registeredSuffixPatternMatch;
 		return this;
 	}
@@ -77,20 +80,33 @@ public class PathMatchConfigurer {
 		return this;
 	}
 
-	protected boolean isUseSuffixPatternMatch() {
+	/**
+	 * Set the PathMatcher for matching URL paths against registered URL patterns.
+	 * <p>Default is {@link org.springframework.web.util.ParsingPathMatcher ParsingPathMatcher}.
+	 */
+	public PathMatchConfigurer setPathMatcher(PathMatcher pathMatcher) {
+		this.pathMatcher = pathMatcher;
+		return this;
+	}
+
+	protected Boolean isUseSuffixPatternMatch() {
 		return this.suffixPatternMatch;
 	}
 
-	protected boolean isUseTrailingSlashMatch() {
+	protected Boolean isUseTrailingSlashMatch() {
 		return this.trailingSlashMatch;
 	}
 
-	protected boolean isUseRegisteredSuffixPatternMatch() {
+	protected Boolean isUseRegisteredSuffixPatternMatch() {
 		return this.registeredSuffixPatternMatch;
 	}
 
 	protected HttpRequestPathHelper getPathHelper() {
 		return this.pathHelper;
+	}
+
+	protected PathMatcher getPathMatcher() {
+		return this.pathMatcher;
 	}
 
 }

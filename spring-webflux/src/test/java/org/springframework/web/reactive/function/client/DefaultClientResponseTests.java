@@ -46,11 +46,9 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.web.reactive.function.BodyExtractors.toMono;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.web.reactive.function.BodyExtractors.*;
 
 /**
  * @author Arjen Poutsma
@@ -68,9 +66,9 @@ public class DefaultClientResponseTests {
 	public void createMocks() {
 		mockResponse = mock(ClientHttpResponse.class);
 		mockExchangeStrategies = mock(ExchangeStrategies.class);
-
 		defaultClientResponse = new DefaultClientResponse(mockResponse, mockExchangeStrategies);
 	}
+
 
 	@Test
 	public void statusCode() throws Exception {
@@ -209,6 +207,5 @@ public class DefaultClientResponseTests {
 				.expectError(WebClientException.class)
 				.verify();
 	}
-
 
 }

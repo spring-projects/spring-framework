@@ -70,7 +70,7 @@ import org.springframework.util.StringUtils;
  * is {@link Locale#ENGLISH}. This value can be changed via {@link #addPreferredLocale}
  * or {@link #setPreferredLocales}.
  *
- * <p>As of Spring Framework 5.0, this set of mocks is designed on a Servlet 3.1 baseline.
+ * <p>As of Spring Framework 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -87,10 +87,46 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private static final String HTTPS = "https";
 
+	private static final String CONTENT_TYPE_HEADER = "Content-Type";
+
+	private static final String HOST_HEADER = "Host";
+
+	private static final String CHARSET_PREFIX = "charset=";
+
+	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
+
+	private static final ServletInputStream EMPTY_SERVLET_INPUT_STREAM =
+			new DelegatingServletInputStream(StreamUtils.emptyInput());
+
+	private static final BufferedReader EMPTY_BUFFERED_READER =
+			new BufferedReader(new StringReader(""));
+
 	/**
-	 * The default protocol: 'http'.
+	 * Date formats as specified in the HTTP RFC
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
 	 */
-	public static final String DEFAULT_PROTOCOL = HTTP;
+	private static final String[] DATE_FORMATS = new String[] {
+			"EEE, dd MMM yyyy HH:mm:ss zzz",
+			"EEE, dd-MMM-yy HH:mm:ss zzz",
+			"EEE MMM dd HH:mm:ss yyyy"
+	};
+
+
+	// ---------------------------------------------------------------------
+	// Public constants
+	// ---------------------------------------------------------------------
+
+	/**
+	 * The default protocol: 'HTTP/1.1'.
+	 * @since 4.3.7
+	 */
+	public static final String DEFAULT_PROTOCOL = "HTTP/1.1";
+
+	/**
+	 * The default scheme: 'http'.
+	 * @since 4.3.7
+	 */
+	public static final String DEFAULT_SCHEME = HTTP;
 
 	/**
 	 * The default server address: '127.0.0.1'.
@@ -117,30 +153,12 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 */
 	public static final String DEFAULT_REMOTE_HOST = "localhost";
 
-	private static final String CONTENT_TYPE_HEADER = "Content-Type";
 
-	private static final String HOST_HEADER = "Host";
+	// ---------------------------------------------------------------------
+	// Lifecycle properties
+	// ---------------------------------------------------------------------
 
-	private static final String CHARSET_PREFIX = "charset=";
-
-	private static final ServletInputStream EMPTY_SERVLET_INPUT_STREAM =
-			new DelegatingServletInputStream(StreamUtils.emptyInput());
-
-	private static final BufferedReader EMPTY_BUFFERED_READER =
-			new BufferedReader(new StringReader(""));
-
-	/**
-	 * Date formats as specified in the HTTP RFC
-	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
-	 */
-	private static final String[] DATE_FORMATS = new String[] {
-			"EEE, dd MMM yyyy HH:mm:ss zzz",
-			"EEE, dd-MMM-yy HH:mm:ss zzz",
-			"EEE MMM dd HH:mm:ss yyyy"
-	};
-
-	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
-
+	private final ServletContext servletContext;
 
 	private boolean active = true;
 
@@ -161,7 +179,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private String protocol = DEFAULT_PROTOCOL;
 
-	private String scheme = DEFAULT_PROTOCOL;
+	private String scheme = DEFAULT_SCHEME;
 
 	private String serverName = DEFAULT_SERVER_NAME;
 
@@ -175,8 +193,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private final List<Locale> locales = new LinkedList<>();
 
 	private boolean secure = false;
-
-	private final ServletContext servletContext;
 
 	private int remotePort = DEFAULT_SERVER_PORT;
 
@@ -1128,16 +1144,13 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	public StringBuffer getRequestURL() {
 		StringBuffer url = new StringBuffer(this.scheme).append("://").append(this.serverName);
-
-		if (this.serverPort > 0
-				&& ((HTTP.equalsIgnoreCase(this.scheme) && this.serverPort != 80) || (HTTPS.equalsIgnoreCase(this.scheme) && this.serverPort != 443))) {
+		if (this.serverPort > 0 && ((HTTP.equalsIgnoreCase(this.scheme) && this.serverPort != 80) ||
+				(HTTPS.equalsIgnoreCase(this.scheme) && this.serverPort != 443))) {
 			url.append(':').append(this.serverPort);
 		}
-
 		if (StringUtils.hasText(getRequestURI())) {
 			url.append(getRequestURI());
 		}
-
 		return url;
 	}
 

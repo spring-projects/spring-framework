@@ -60,7 +60,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 		validator.afterPropertiesSet();
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
@@ -71,7 +71,6 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 	@Test
 	public void supports() throws Exception {
-
 		ModelAttributeMethodArgumentResolver resolver =
 				new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry(), false);
 
@@ -90,7 +89,6 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 	@Test
 	public void supportsWithDefaultResolution() throws Exception {
-
 		ModelAttributeMethodArgumentResolver resolver =
 				new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry(), true);
 
@@ -191,6 +189,24 @@ public class ModelAttributeMethodArgumentResolverTests {
 		});
 	}
 
+	private void testBindFoo(ResolvableType type, Function<Object, Foo> valueExtractor) throws Exception {
+		Object value = createResolver()
+				.resolveArgument(parameter(type), this.bindContext, exchange("name=Robert&age=25"))
+				.blockMillis(0);
+
+		Foo foo = valueExtractor.apply(value);
+		assertEquals("Robert", foo.getName());
+
+		String key = "foo";
+		String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + key;
+
+		Map<String, Object> map = bindContext.getModel().asMap();
+		assertEquals(map.toString(), 2, map.size());
+		assertSame(foo, map.get(key));
+		assertNotNull(map.get(bindingResultKey));
+		assertTrue(map.get(bindingResultKey) instanceof BindingResult);
+	}
+
 	@Test
 	public void validationError() throws Exception {
 		testValidationError(forClass(Foo.class), resolvedArgumentMono -> resolvedArgumentMono);
@@ -218,25 +234,6 @@ public class ModelAttributeMethodArgumentResolverTests {
 					assertTrue(value instanceof Single);
 					return Mono.from(RxReactiveStreams.toPublisher((Single) value));
 				});
-	}
-
-
-	private void testBindFoo(ResolvableType type, Function<Object, Foo> valueExtractor) throws Exception {
-		Object value = createResolver()
-				.resolveArgument(parameter(type), this.bindContext, exchange("name=Robert&age=25"))
-				.blockMillis(0);
-
-		Foo foo = valueExtractor.apply(value);
-		assertEquals("Robert", foo.getName());
-
-		String key = "foo";
-		String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + key;
-
-		Map<String, Object> map = bindContext.getModel().asMap();
-		assertEquals(map.toString(), 2, map.size());
-		assertSame(foo, map.get(key));
-		assertNotNull(map.get(bindingResultKey));
-		assertTrue(map.get(bindingResultKey) instanceof BindingResult);
 	}
 
 	private void testValidationError(ResolvableType type, Function<Mono<?>, Mono<?>> valueMonoExtractor)

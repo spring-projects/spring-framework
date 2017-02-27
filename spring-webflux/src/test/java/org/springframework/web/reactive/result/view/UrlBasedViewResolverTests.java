@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,17 @@ package org.springframework.web.reactive.result.view;
 import java.util.Locale;
 import java.util.Map;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.server.ServerWebExchange;
 
-import reactor.test.StepVerifier;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link UrlBasedViewResolver}.
@@ -42,12 +42,13 @@ public class UrlBasedViewResolverTests {
 	private UrlBasedViewResolver resolver;
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.refresh();
 		resolver = new UrlBasedViewResolver();
 		resolver.setApplicationContext(context);
 	}
+
 
 	@Test
 	public void viewNames() throws Exception {
@@ -89,6 +90,7 @@ public class UrlBasedViewResolverTests {
 				})
 				.expectComplete();
 	}
+
 
 	private static class TestView extends AbstractUrlBasedView {
 

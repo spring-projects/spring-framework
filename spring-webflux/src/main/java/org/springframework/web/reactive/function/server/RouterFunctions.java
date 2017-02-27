@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.web.reactive.function.server;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
@@ -35,9 +37,9 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 /**
  * <strong>Central entry point to Spring's functional web framework.</strong>
  * Exposes routing functionality, such as to
- * {@linkplain #route(RequestPredicate, HandlerFunction) create} a {@code RouterFunction} given a
- * {@code RequestPredicate} and {@code HandlerFunction}, and to do further
- * {@linkplain #subroute(RequestPredicate, RouterFunction) subrouting} on an existing routing
+ * {@linkplain #route(RequestPredicate, HandlerFunction) create} a {@code RouterFunction}
+ * given a {@code RequestPredicate} and {@code HandlerFunction}, and to do further
+ * {@linkplain #nest(RequestPredicate, RouterFunction) subrouting} on an existing routing
  * function.
  *
  * <p>Additionally, this class can {@linkplain #toHttpHandler(RouterFunction) transform} a
@@ -51,6 +53,8 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  * @since 5.0
  */
 public abstract class RouterFunctions {
+
+	private static final Log logger = LogFactory.getLog(RouterFunctions.class);
 
 	/**
 	 * Name of the {@link ServerWebExchange} attribute that contains the {@link ServerRequest}.
@@ -69,9 +73,15 @@ public abstract class RouterFunctions {
 
 	/**
 	 * Route to the given handler function if the given request predicate applies.
+	 * <p>For instance, the following example routes GET requests for "/user" to the
+	 * {@code listUsers} method in {@code userController}:
+	 * <pre class="code">
+	 * RouterFunction&lt;ServerResponse&gt; route =
+	 *     RouterFunctions.route(RequestPredicates.GET("/user"), userController::listUsers);
+	 * </pre>
 	 * @param predicate the predicate to test
-	 * @param handlerFunction the handler function to route to
-	 * @param <T> the type of the handler function
+	 * @param handlerFunction the handler function to route to if the predicate applies
+	 * @param <T> the type of response returned by the handler function
 	 * @return a router function that routes to {@code handlerFunction} if
 	 * {@code predicate} evaluates to {@code true}
 	 * @see RequestPredicates
@@ -82,19 +92,44 @@ public abstract class RouterFunctions {
 		Assert.notNull(predicate, "'predicate' must not be null");
 		Assert.notNull(handlerFunction, "'handlerFunction' must not be null");
 
-		return request -> predicate.test(request) ? Mono.just(handlerFunction) : Mono.empty();
+		return request -> {
+			if (predicate.test(request)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("Predicate \"%s\" matches against \"%s\"",
+							predicate, request));
+				}
+				return Mono.just(handlerFunction);
+			}
+			else {
+				return Mono.empty();
+			}
+		};
 	}
 
 	/**
-	 * Route to the given router function if the given request predicate applies.
+	 * Route to the given router function if the given request predicate applies. This method can be
+	 * used to create <strong>nested routes</strong>, where a group of routes share a common path
+	 * (prefix), header, or other request predicate.
+	 * <p>For instance, the following example first creates a composed route that resolves to
+	 * {@code listUsers} for a GET, and {@code createUser} for a POST. This composed route then gets
+	 * nested with a "/user" path predicate, so that GET requests for "/user" will list users,
+	 * and POST request for "/user" will create a new user.
+	 * <pre class="code">
+	 * RouterFunction&lt;ServerResponse&gt; userRoutes =
+	 *   RouterFunctions.route(RequestPredicates.method(HttpMethod.GET), this::listUsers)
+	 *     .andRoute(RequestPredicates.method(HttpMethod.POST), this::createUser);
+	 *
+	 * RouterFunction&lt;ServerResponse&gt; nestedRoute =
+	 *   RouterFunctions.nest(RequestPredicates.path("/user"),userRoutes);
+	 * </pre>
 	 * @param predicate the predicate to test
-	 * @param routerFunction the router function to route to
-	 * @param <T> the type of the handler function
+	 * @param routerFunction the nested router function to delegate to if the predicate applies
+	 * @param <T> the type of response returned by the handler function
 	 * @return a router function that routes to {@code routerFunction} if
 	 * {@code predicate} evaluates to {@code true}
 	 * @see RequestPredicates
 	 */
-	public static <T extends ServerResponse> RouterFunction<T> subroute(RequestPredicate predicate,
+	public static <T extends ServerResponse> RouterFunction<T> nest(RequestPredicate predicate,
 			RouterFunction<T> routerFunction) {
 
 		Assert.notNull(predicate, "'predicate' must not be null");
@@ -102,7 +137,11 @@ public abstract class RouterFunctions {
 
 		return request -> {
 			if (predicate.test(request)) {
-				ServerRequest subRequest = predicate.subRequest(request);
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("Nested predicate \"%s\" matches against \"%s\"",
+							predicate, request));
+				}
+				ServerRequest subRequest = predicate.nestRequest(request);
 				return routerFunction.route(subRequest);
 			}
 			else {
@@ -125,7 +164,6 @@ public abstract class RouterFunctions {
 	public static RouterFunction<ServerResponse> resources(String pattern, Resource location) {
 		Assert.hasLength(pattern, "'pattern' must not be empty");
 		Assert.notNull(location, "'location' must not be null");
-
 		return resources(new PathResourceLookupFunction(pattern, location));
 	}
 
@@ -138,7 +176,6 @@ public abstract class RouterFunctions {
 	 */
 	public static RouterFunction<ServerResponse> resources(Function<ServerRequest, Mono<Resource>> lookupFunction) {
 		Assert.notNull(lookupFunction, "'lookupFunction' must not be null");
-
 		return request -> lookupFunction.apply(request).map(ResourceHandlerFunction::new);
 	}
 
@@ -229,13 +266,10 @@ public abstract class RouterFunctions {
 		Assert.notNull(routerFunction, "RouterFunction must not be null");
 		Assert.notNull(strategies, "HandlerStrategies must not be null");
 
-		return new HandlerMapping() {
-			@Override
-			public Mono<Object> getHandler(ServerWebExchange exchange) {
-				ServerRequest request = new DefaultServerRequest(exchange, strategies);
-				addAttributes(exchange, request);
-				return routerFunction.route(request).map(handlerFunction -> (Object)handlerFunction);
-			}
+		return exchange -> {
+			ServerRequest request = new DefaultServerRequest(exchange, strategies);
+			addAttributes(exchange, request);
+			return routerFunction.route(request).map(handlerFunction -> (Object)handlerFunction);
 		};
 	}
 

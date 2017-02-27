@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -59,12 +58,8 @@ import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.forClass;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.junit.Assert.*;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * Unit tests for {@link AbstractMessageReaderArgumentResolver}.
@@ -83,7 +78,7 @@ public class MessageReaderArgumentResolverTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.request = request().build();
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setValidator(new TestBeanValidator());
@@ -314,7 +309,6 @@ public class MessageReaderArgumentResolverTests {
 		return MockServerHttpRequest.post("/path");
 	}
 
-	@NotNull
 	private DefaultServerWebExchange exchange() {
 		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}
