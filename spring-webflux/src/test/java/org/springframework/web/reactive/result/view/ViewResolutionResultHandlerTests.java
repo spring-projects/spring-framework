@@ -65,7 +65,9 @@ import static org.springframework.core.ResolvableType.*;
 import static org.springframework.http.MediaType.*;
 
 /**
- * Unit tests for {@link ViewResolutionResultHandler}.
+ * ViewResolutionResultHandler relying on a canned {@link TestViewResolver}
+ * or a (Mockito) "mock".
+ *
  * @author Rossen Stoyanchev
  */
 public class ViewResolutionResultHandlerTests {

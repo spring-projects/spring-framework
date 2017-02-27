@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.view;
 
+import java.time.Duration;
 import java.util.Locale;
 import java.util.Map;
 
@@ -41,31 +42,32 @@ public class UrlBasedViewResolverTests {
 
 	private UrlBasedViewResolver resolver;
 
+
 	@Before
 	public void setup() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.refresh();
-		resolver = new UrlBasedViewResolver();
-		resolver.setApplicationContext(context);
+		this.resolver = new UrlBasedViewResolver();
+		this.resolver.setApplicationContext(context);
 	}
 
 
 	@Test
 	public void viewNames() throws Exception {
-		resolver.setViewClass(TestView.class);
-		resolver.setViewNames("my*");
+		this.resolver.setViewClass(TestView.class);
+		this.resolver.setViewNames("my*");
 
-		Mono<View> mono = resolver.resolveViewName("my-view", Locale.US);
+		Mono<View> mono = this.resolver.resolveViewName("my-view", Locale.US);
 		assertNotNull(mono.block());
 
-		mono = resolver.resolveViewName("not-my-view", Locale.US);
+		mono = this.resolver.resolveViewName("not-my-view", Locale.US);
 		assertNull(mono.block());
 	}
 
 	@Test
 	public void redirectView() throws Exception {
-		Mono<View> mono = resolver.resolveViewName("redirect:foo", Locale.US);
-		assertNotNull(mono.block());
+		Mono<View> mono = this.resolver.resolveViewName("redirect:foo", Locale.US);
+
 		StepVerifier.create(mono)
 				.consumeNextWith(view -> {
 					assertEquals(RedirectView.class, view.getClass());
@@ -73,14 +75,15 @@ public class UrlBasedViewResolverTests {
 					assertEquals(redirectView.getUrl(), "foo");
 					assertEquals(redirectView.getStatusCode(), HttpStatus.SEE_OTHER);
 				})
-				.expectComplete();
+				.expectComplete()
+				.verify(Duration.ZERO);
 	}
 
 	@Test
 	public void customizedRedirectView() throws Exception {
-		resolver.setRedirectViewProvider(url -> new RedirectView(url, HttpStatus.FOUND));
-		Mono<View> mono = resolver.resolveViewName("redirect:foo", Locale.US);
-		assertNotNull(mono.block());
+		this.resolver.setRedirectViewProvider(url -> new RedirectView(url, HttpStatus.FOUND));
+		Mono<View> mono = this.resolver.resolveViewName("redirect:foo", Locale.US);
+
 		StepVerifier.create(mono)
 				.consumeNextWith(view -> {
 					assertEquals(RedirectView.class, view.getClass());
@@ -88,7 +91,8 @@ public class UrlBasedViewResolverTests {
 					assertEquals(redirectView.getUrl(), "foo");
 					assertEquals(redirectView.getStatusCode(), HttpStatus.FOUND);
 				})
-				.expectComplete();
+				.expectComplete()
+				.verify(Duration.ZERO);
 	}
 
 
@@ -102,6 +106,7 @@ public class UrlBasedViewResolverTests {
 		@Override
 		protected Mono<Void> renderInternal(Map<String, Object> attributes, MediaType contentType,
 				ServerWebExchange exchange) {
+
 			return Mono.empty();
 		}
 	}

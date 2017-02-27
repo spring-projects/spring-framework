@@ -18,9 +18,7 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.Proxy;
 import java.net.URI;
-import java.net.URL;
 import java.util.Optional;
 
 import org.junit.Test;
@@ -41,8 +39,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.config.ViewResolverRegistry;
-import org.springframework.web.reactive.config.WebFluxConfigurationSupport;
+import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -102,12 +101,13 @@ public class RequestMappingViewResolutionIntegrationTests extends AbstractReques
 
 
 	@Configuration
+	@EnableWebFlux
 	@ComponentScan(resourcePattern = "**/RequestMappingViewResolutionIntegrationTests$*.class")
 	@SuppressWarnings({"unused", "WeakerAccess"})
-	static class WebConfig extends WebFluxConfigurationSupport {
+	static class WebConfig implements WebFluxConfigurer {
 
 		@Override
-		protected void configureViewResolvers(ViewResolverRegistry registry) {
+		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.freeMarker();
 		}
 
@@ -122,7 +122,7 @@ public class RequestMappingViewResolutionIntegrationTests extends AbstractReques
 
 
 	@Controller
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
 	private static class TestController {
 
 		@GetMapping("/html")
