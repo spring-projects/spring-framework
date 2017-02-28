@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
 import org.springframework.core.io.ByteArrayResource;
@@ -83,8 +82,8 @@ public class YamlPropertiesFactoryBeanTests {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
 		factory.setResources(new ByteArrayResource(
 				"foo: bar\nspam:\n  foo: baz\nfoo: bucket".getBytes()));
-		exception.expect(ParserException.class);
-		factory.getObject();
+		Properties properties = factory.getObject();
+		assertThat(properties.getProperty("foo"), equalTo("bucket"));
 	}
 
 	@Test

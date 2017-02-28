@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.junit.Test;
-import org.yaml.snakeyaml.parser.ParserException;
 
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.ByteArrayResource;
@@ -113,14 +112,23 @@ public class YamlMapFactoryBeanTests {
 		assertTrue(object instanceof LinkedHashMap);
 		@SuppressWarnings("unchecked")
 		Map<String, Object> sub = (Map<String, Object>) object;
-		assertTrue(sub.containsKey("key1.key2"));
+		assertEquals(1, sub.size());
 		assertEquals(Integer.valueOf(3), sub.get("key1.key2"));
 	}
 
-	@Test(expected = ParserException.class)
+	@Test
 	public void testDuplicateKey() throws Exception {
 		this.factory.setResources(new ByteArrayResource("mymap:\n  foo: bar\nmymap:\n  bar: foo".getBytes()));
-		this.factory.getObject().get("mymap");
+		Map<String, Object> map = this.factory.getObject();
+
+		assertEquals(1, map.size());
+		assertTrue(map.containsKey("mymap"));
+		Object object = map.get("mymap");
+		assertTrue(object instanceof LinkedHashMap);
+		@SuppressWarnings("unchecked")
+		Map<String, Object> sub = (Map<String, Object>) object;
+		assertEquals(1, sub.size());
+		assertEquals("foo", sub.get("bar"));
 	}
 
 }
