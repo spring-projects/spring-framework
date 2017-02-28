@@ -40,7 +40,7 @@ configure(allprojects) { project ->
 	ext.ejbVersion           = "3.0"
 	ext.fileuploadVersion    = "1.3.2"
 	ext.freemarkerVersion    = "2.3.23"
-	ext.groovyVersion        = "2.4.8"
+	ext.groovyVersion        = "2.4.9"
 	ext.gsonVersion          = "2.8.0"
 	ext.guavaVersion         = "20.0"
 	ext.hamcrestVersion      = "1.3"
