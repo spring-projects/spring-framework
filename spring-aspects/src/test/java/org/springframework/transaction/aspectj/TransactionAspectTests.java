@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,14 +185,15 @@ public class TransactionAspectTests {
 
 	/**
 	 * Note: resolution does not occur. Thus we can't make a class transactional if
-	 * it implements a transactionally annotated interface. This behaviour could only
+	 * it implements a transactionally annotated interface. This behavior could only
 	 * be changed in AbstractFallbackTransactionAttributeSource in Spring proper.
+	 * See SPR-14322.
 	 */
 	@Test
 	public void testDoesNotResolveTxAnnotationOnMethodFromClassImplementingAnnotatedInterface() throws Exception {
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
-		Method m = ImplementsAnnotatedInterface.class.getMethod("echo", Throwable.class);
-		TransactionAttribute ta = atas.getTransactionAttribute(m, ImplementsAnnotatedInterface.class);
+		Method method = ImplementsAnnotatedInterface.class.getMethod("echo", Throwable.class);
+		TransactionAttribute ta = atas.getTransactionAttribute(method, ImplementsAnnotatedInterface.class);
 		assertNull(ta);
 	}
 
