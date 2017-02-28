@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -488,15 +488,13 @@ public abstract class AnnotationUtils {
 	private static <A extends Annotation> A findAnnotation(
 			AnnotatedElement annotatedElement, Class<A> annotationType, Set<Annotation> visited) {
 		try {
-			Annotation[] anns = annotatedElement.getDeclaredAnnotations();
-			for (Annotation ann : anns) {
-				if (ann.annotationType() == annotationType) {
-					return (A) ann;
-				}
+			A annotation = annotatedElement.getDeclaredAnnotation(annotationType);
+			if (annotation != null) {
+				return annotation;
 			}
-			for (Annotation ann : anns) {
+			for (Annotation ann : annotatedElement.getDeclaredAnnotations()) {
 				if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
-					A annotation = findAnnotation((AnnotatedElement) ann.annotationType(), annotationType, visited);
+					annotation = findAnnotation((AnnotatedElement) ann.annotationType(), annotationType, visited);
 					if (annotation != null) {
 						return annotation;
 					}
@@ -677,15 +675,13 @@ public abstract class AnnotationUtils {
 	@SuppressWarnings("unchecked")
 	private static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType, Set<Annotation> visited) {
 		try {
-			Annotation[] anns = clazz.getDeclaredAnnotations();
-			for (Annotation ann : anns) {
-				if (ann.annotationType() == annotationType) {
-					return (A) ann;
-				}
+			A annotation = clazz.getDeclaredAnnotation(annotationType);
+			if (annotation != null) {
+				return annotation;
 			}
-			for (Annotation ann : anns) {
+			for (Annotation ann : clazz.getDeclaredAnnotations()) {
 				if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
-					A annotation = findAnnotation(ann.annotationType(), annotationType, visited);
+					annotation = findAnnotation(ann.annotationType(), annotationType, visited);
 					if (annotation != null) {
 						return annotation;
 					}
@@ -803,16 +799,12 @@ public abstract class AnnotationUtils {
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		Assert.notNull(clazz, "Class must not be null");
 		try {
-			for (Annotation ann : clazz.getDeclaredAnnotations()) {
-				if (ann.annotationType() == annotationType) {
-					return true;
-				}
-			}
+			return (clazz.getDeclaredAnnotation(annotationType) != null);
 		}
 		catch (Throwable ex) {
 			handleIntrospectionFailure(clazz, ex);
+			return false;
 		}
-		return false;
 	}
 
 	/**
