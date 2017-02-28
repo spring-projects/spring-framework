@@ -94,7 +94,7 @@ public interface ServerResponse {
 	}
 
 	/**
-	 * Create a builder with the status set to {@linkplain HttpStatus#OK OK}.
+	 * Create a builder with the status set to {@linkplain HttpStatus#OK 200 OK}.
 	 * @return the created builder
 	 */
 	static BodyBuilder ok() {
@@ -102,7 +102,7 @@ public interface ServerResponse {
 	}
 
 	/**
-	 * Create a new builder with a {@linkplain HttpStatus#CREATED CREATED} status
+	 * Create a new builder with a {@linkplain HttpStatus#CREATED 201 Created} status
 	 * and a location header set to the given URI.
 	 * @param location the location URI
 	 * @return the created builder
@@ -113,7 +113,7 @@ public interface ServerResponse {
 	}
 
 	/**
-	 * Create a builder with an {@linkplain HttpStatus#ACCEPTED ACCEPTED} status.
+	 * Create a builder with an {@linkplain HttpStatus#ACCEPTED 202 Accepted} status.
 	 * @return the created builder
 	 */
 	static BodyBuilder accepted() {
@@ -121,7 +121,7 @@ public interface ServerResponse {
 	}
 
 	/**
-	 * Create a builder with a {@linkplain HttpStatus#NO_CONTENT NO_CONTENT} status.
+	 * Create a builder with a {@linkplain HttpStatus#NO_CONTENT 204 No Content} status.
 	 * @return the created builder
 	 */
 	static HeadersBuilder<?> noContent() {
@@ -129,7 +129,29 @@ public interface ServerResponse {
 	}
 
 	/**
-	 * Create a builder with a {@linkplain HttpStatus#BAD_REQUEST BAD_REQUEST} status.
+	 * Create a builder with a {@linkplain HttpStatus#TEMPORARY_REDIRECT 307 Temporary Redirect}
+	 * status and a location header set to the given URI.
+	 * @param location the location URI
+	 * @return the created builder
+	 */
+	static BodyBuilder temporaryRedirect(URI location) {
+		BodyBuilder builder = status(HttpStatus.TEMPORARY_REDIRECT);
+		return builder.location(location);
+	}
+
+	/**
+	 * Create a builder with a {@linkplain HttpStatus#PERMANENT_REDIRECT 308 Permanent Redirect}
+	 * status and a location header set to the given URI.
+	 * @param location the location URI
+	 * @return the created builder
+	 */
+	static BodyBuilder permanentRedirect(URI location) {
+		BodyBuilder builder = status(HttpStatus.PERMANENT_REDIRECT);
+		return builder.location(location);
+	}
+
+	/**
+	 * Create a builder with a {@linkplain HttpStatus#BAD_REQUEST 400 Bad Request} status.
 	 * @return the created builder
 	 */
 	static BodyBuilder badRequest() {
@@ -137,7 +159,7 @@ public interface ServerResponse {
 	}
 
 	/**
-	 * Create a builder with a {@linkplain HttpStatus#NOT_FOUND NOT_FOUND} status.
+	 * Create a builder with a {@linkplain HttpStatus#NOT_FOUND 404 Not Found} status.
 	 *
 	 * @return the created builder
 	 */
@@ -147,7 +169,7 @@ public interface ServerResponse {
 
 	/**
 	 * Create a builder with an
-	 * {@linkplain HttpStatus#UNPROCESSABLE_ENTITY UNPROCESSABLE_ENTITY} status.
+	 * {@linkplain HttpStatus#UNPROCESSABLE_ENTITY 422 Unprocessable Entity} status.
 	 * @return the created builder
 	 */
 	static BodyBuilder unprocessableEntity() {

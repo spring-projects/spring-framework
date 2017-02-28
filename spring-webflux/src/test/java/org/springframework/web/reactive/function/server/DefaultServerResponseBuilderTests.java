@@ -35,8 +35,9 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Arjen Poutsma
@@ -102,6 +103,28 @@ public class DefaultServerResponseBuilderTests {
 				.expectComplete()
 				.verify();
 
+	}
+
+	@Test
+	public void temporaryRedirect() throws Exception {
+		URI location = URI.create("http://example.com");
+		Mono<ServerResponse> result = ServerResponse.temporaryRedirect(location).build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> HttpStatus.TEMPORARY_REDIRECT.equals(response.statusCode()) &&
+						location.equals(response.headers().getLocation()))
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void permanentRedirect() throws Exception {
+		URI location = URI.create("http://example.com");
+		Mono<ServerResponse> result = ServerResponse.permanentRedirect(location).build();
+		StepVerifier.create(result)
+				.expectNextMatches(response -> HttpStatus.PERMANENT_REDIRECT.equals(response.statusCode()) &&
+						location.equals(response.headers().getLocation()))
+				.expectComplete()
+				.verify();
 	}
 
 	@Test
