@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.cache.interceptor.CachePutOperation;
 import org.springframework.cache.interceptor.CacheableOperation;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -194,7 +193,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	 * @return the default config (never {@code null})
 	 */
 	DefaultCacheConfig getDefaultCacheConfig(Class<?> target) {
-		CacheConfig annotation = AnnotationUtils.getAnnotation(target, CacheConfig.class);
+		CacheConfig annotation = AnnotatedElementUtils.getMergedAnnotation(target, CacheConfig.class);
 		if (annotation != null) {
 			return new DefaultCacheConfig(annotation.cacheNames(), annotation.keyGenerator(),
 					annotation.cacheManager(), annotation.cacheResolver());
