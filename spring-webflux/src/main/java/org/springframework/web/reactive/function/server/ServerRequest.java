@@ -40,7 +40,7 @@ import org.springframework.web.server.WebSession;
 /**
  * Represents a server-side HTTP request, as handled by a {@code HandlerFunction}.
  * Access to headers and body is offered by {@link Headers} and
- * {@link #body(BodyExtractor)} respectively.
+ * {@link #body(BodyExtractor)}, respectively.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
@@ -154,8 +154,8 @@ public interface ServerRequest {
 	}
 
 	/**
-	 * Return all path variables.
-	 * @return the path variables
+	 * Return all path variables for the current request.
+	 * @return a {@code Map} from path variable name to associated value
 	 */
 	Map<String, String> pathVariables();
 

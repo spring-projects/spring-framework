@@ -78,7 +78,7 @@ public interface ServerResponse {
 	 * @return the created builder
 	 */
 	static BodyBuilder from(ServerResponse other) {
-		Assert.notNull(other, "'other' must not be null");
+		Assert.notNull(other, "Other ServerResponse must not be null");
 		DefaultServerResponseBuilder builder = new DefaultServerResponseBuilder(other.statusCode());
 		return builder.headers(other.headers());
 	}
@@ -362,7 +362,6 @@ public interface ServerResponse {
 		 * @return the built response
 		 */
 		Mono<ServerResponse> render(String name, Map<String, ?> model);
-
 	}
 
 }
