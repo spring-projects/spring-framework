@@ -126,32 +126,7 @@ public class PersonController {
 [[web-reactive-server-functional]]
 ==== Functional Programming Model
 
-The functional programming model uses Java 8 lambda style routing and request
-handling instead of annotations. The main API contracts are functional interfaces named
-`RouterFunction` and `HandlerFunction`. They are simple but powerful building blocks
-for creating web applications. Below is an example of functional request handling:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-PersonRepository repository = ...
-
-RouterFunctions
-	.route(GET("/person/{id}").and(accept(APPLICATION_JSON)), request -> {
-		int personId = Integer.valueOf(request.pathVariable("id"));
-		Mono<ServerResponse> notFound = ServerResponse.notFound().build();
-		return repository.findOne(personId)
-				.then(person -> ServerResponse.ok().body(Mono.just(person), Person.class))
-				.otherwiseIfEmpty(notFound);
-	})
-	.andRoute(GET("/person").and(accept(APPLICATION_JSON)), request ->
-			ServerResponse.ok().body(repository.findAll(), Person.class))
-	.andRoute(POST("/person").and(contentType(APPLICATION_JSON)), request ->
-			ServerResponse.ok().build(repository.save(request.bodyToMono(Person.class))));
-----
-
-For more on the functional programming model see the
-https://spring.io/blog/2016/09/22/new-in-spring-5-functional-web-framework[M3 release blog post].
+include::web-flux-functional.adoc[leveloffset=+1]
 
 
 [[web-reactive-client]]
@@ -159,7 +134,7 @@ https://spring.io/blog/2016/09/22/new-in-spring-5-functional-web-framework[M3 re
 
 WebFlux includes a functional, reactive `WebClient` that offers a fully
 non-blocking and reactive alternative to the `RestTemplate`. It exposes network
-input and output as a reactive `ClientHttpRequest` and `ClientHttpRespones` where
+input and output as a reactive `ClientHttpRequest` and `ClientHttpResponse` where
 the body of the request and response is a `Flux<DataBuffer>` rather than an
 `InputStream` and `OutputStream`. In addition it supports the same reactive JSON, XML,
 and SSE serialization mechanism as on the server side so you can work with typed objects.
