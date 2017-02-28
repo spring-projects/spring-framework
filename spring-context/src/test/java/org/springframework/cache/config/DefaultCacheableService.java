@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 
 /**
- * Simple cacheable service
+ * Simple cacheable service.
  *
  * @author Costin Leau
  * @author Phillip Webb
@@ -34,7 +34,9 @@ import org.springframework.cache.annotation.Caching;
 public class DefaultCacheableService implements CacheableService<Long> {
 
 	private final AtomicLong counter = new AtomicLong();
+
 	private final AtomicLong nullInvocations = new AtomicLong();
+
 
 	@Override
 	@Cacheable("testCache")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,11 +159,12 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 			Pointcut cpc = new AnnotationMatchingPointcut(asyncAnnotationType, true);
 			Pointcut mpc = AnnotationMatchingPointcut.forMethodAnnotation(asyncAnnotationType);
 			if (result == null) {
-				result = new ComposablePointcut(cpc).union(mpc);
+				result = new ComposablePointcut(cpc);
 			}
 			else {
-				result.union(cpc).union(mpc);
+				result.union(cpc);
 			}
+			result = result.union(mpc);
 		}
 		return result;
 	}
