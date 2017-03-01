@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
@@ -88,9 +89,9 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 
 	private ModelInitializer modelInitializer;
 
-	private final Map<Class<?>, Set<Method>> initBinderCache = new ConcurrentHashMap<>(64);
+	private final Map<Class<?>, Set<Method>> binderMethodCache = new ConcurrentHashMap<>(64);
 
-	private final Map<Class<?>, Set<Method>> modelAttributeCache = new ConcurrentHashMap<>(64);
+	private final Map<Class<?>, Set<Method>> attributeMethodCache = new ConcurrentHashMap<>(64);
 
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<>(64);
@@ -305,29 +306,33 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	public Mono<HandlerResult> handle(ServerWebExchange exchange, Object handler) {
 
 		HandlerMethod handlerMethod = (HandlerMethod) handler;
-		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
-		invocable.setArgumentResolvers(getArgumentResolvers());
 
 		BindingContext bindingContext = new InitBinderBindingContext(
-				getWebBindingInitializer(), getInitBinderMethods(handlerMethod));
+				getWebBindingInitializer(), getBinderMethods(handlerMethod));
 
 		Mono<Void> modelCompletion = this.modelInitializer.initModel(
 				bindingContext, getAttributeMethods(handlerMethod), exchange);
 
-		return modelCompletion.then(() ->
-				invocable.invoke(exchange, bindingContext)
-						.doOnNext(result -> result.setExceptionHandler(
-								ex -> handleException(ex, handlerMethod, bindingContext, exchange)))
-						.otherwise(ex -> handleException(
-								ex, handlerMethod, bindingContext, exchange)));
+		Function<Throwable, Mono<HandlerResult>> exceptionHandler =
+				ex -> handleException(ex, handlerMethod, bindingContext, exchange);
+
+		return modelCompletion.then(() -> {
+
+			InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
+			invocable.setArgumentResolvers(getArgumentResolvers());
+
+			return invocable.invoke(exchange, bindingContext)
+					.doOnNext(result -> result.setExceptionHandler(exceptionHandler))
+					.otherwise(exceptionHandler);
+		});
 	}
 
-	private List<SyncInvocableHandlerMethod> getInitBinderMethods(HandlerMethod handlerMethod) {
+	private List<SyncInvocableHandlerMethod> getBinderMethods(HandlerMethod handlerMethod) {
 
 		Class<?> handlerType = handlerMethod.getBeanType();
 
-		Set<Method> methods = this.initBinderCache.computeIfAbsent(handlerType, aClass ->
-				MethodIntrospector.selectMethods(handlerType, INIT_BINDER_METHODS));
+		Set<Method> methods = this.binderMethodCache.computeIfAbsent(handlerType, aClass ->
+				MethodIntrospector.selectMethods(handlerType, BINDER_METHODS));
 
 		return methods.stream()
 				.map(method -> {
@@ -343,8 +348,8 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 
 		Class<?> handlerType = handlerMethod.getBeanType();
 
-		Set<Method> methods = this.modelAttributeCache.computeIfAbsent(handlerType, aClass ->
-				MethodIntrospector.selectMethods(handlerType, MODEL_ATTRIBUTE_METHODS));
+		Set<Method> methods = this.attributeMethodCache.computeIfAbsent(handlerType, aClass ->
+				MethodIntrospector.selectMethods(handlerType, ATTRIBUTE_METHODS));
 
 		return methods.stream()
 				.map(method -> {
@@ -359,51 +364,43 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	private Mono<HandlerResult> handleException(Throwable ex, HandlerMethod handlerMethod,
 			BindingContext bindingContext, ServerWebExchange exchange) {
 
-		InvocableHandlerMethod invocable = findExceptionHandler(handlerMethod, ex);
-		if (invocable != null) {
+		ExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache
+				.computeIfAbsent(handlerMethod.getBeanType(), ExceptionHandlerMethodResolver::new);
+
+		Method method = resolver.resolveMethodByExceptionType(ex.getClass());
+
+		if (method != null) {
+			Object bean = handlerMethod.getBean();
+			InvocableHandlerMethod invocable = new InvocableHandlerMethod(bean, method);
+			invocable.setArgumentResolvers(getArgumentResolvers());
 			try {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Invoking @ExceptionHandler method: " + invocable.getMethod());
 				}
-				invocable.setArgumentResolvers(getArgumentResolvers());
 				bindingContext.getModel().asMap().clear();
 				return invocable.invoke(exchange, bindingContext, ex);
 			}
 			catch (Throwable invocationEx) {
 				if (logger.isWarnEnabled()) {
-					logger.warn("Failed to invoke @ExceptionHandler method: " + invocable.getMethod(),
-							invocationEx);
+					logger.warn("Failed to invoke: " + invocable.getMethod(), invocationEx);
 				}
 			}
 		}
-		return Mono.error(ex);
-	}
 
-	protected InvocableHandlerMethod findExceptionHandler(HandlerMethod handlerMethod, Throwable exception) {
-		if (handlerMethod == null) {
-			return null;
-		}
-		Class<?> handlerType = handlerMethod.getBeanType();
-		ExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(handlerType);
-		if (resolver == null) {
-			resolver = new ExceptionHandlerMethodResolver(handlerType);
-			this.exceptionHandlerCache.put(handlerType, resolver);
-		}
-		Method method = resolver.resolveMethodByExceptionType(exception.getClass());
-		return (method != null ? new InvocableHandlerMethod(handlerMethod.getBean(), method) : null);
+		return Mono.error(ex);
 	}
 
 
 	/**
 	 * MethodFilter that matches {@link InitBinder @InitBinder} methods.
 	 */
-	public static final ReflectionUtils.MethodFilter INIT_BINDER_METHODS = method ->
+	public static final ReflectionUtils.MethodFilter BINDER_METHODS = method ->
 			AnnotationUtils.findAnnotation(method, InitBinder.class) != null;
 
 	/**
 	 * MethodFilter that matches {@link ModelAttribute @ModelAttribute} methods.
 	 */
-	public static final ReflectionUtils.MethodFilter MODEL_ATTRIBUTE_METHODS = method ->
+	public static final ReflectionUtils.MethodFilter ATTRIBUTE_METHODS = method ->
 			(AnnotationUtils.findAnnotation(method, RequestMapping.class) == null) &&
 					(AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null);
 

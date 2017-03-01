@@ -48,8 +48,8 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter.INIT_BINDER_METHODS;
-import static org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter.MODEL_ATTRIBUTE_METHODS;
+import static org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter.BINDER_METHODS;
+import static org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter.ATTRIBUTE_METHODS;
 
 /**
  * Unit tests for {@link ModelInitializer}.
@@ -111,14 +111,14 @@ public class ModelInitializerTests {
 
 	private List<SyncInvocableHandlerMethod> getBinderMethods(Object controller) {
 		return MethodIntrospector
-				.selectMethods(controller.getClass(), INIT_BINDER_METHODS).stream()
+				.selectMethods(controller.getClass(), BINDER_METHODS).stream()
 				.map(method -> new SyncInvocableHandlerMethod(controller, method))
 				.collect(Collectors.toList());
 	}
 
 	private List<InvocableHandlerMethod> getAttributeMethods(Object controller) {
 		return MethodIntrospector
-				.selectMethods(controller.getClass(), MODEL_ATTRIBUTE_METHODS).stream()
+				.selectMethods(controller.getClass(), ATTRIBUTE_METHODS).stream()
 				.map(method -> {
 					InvocableHandlerMethod invocable = new InvocableHandlerMethod(controller, method);
 					invocable.setArgumentResolvers(Collections.singletonList(new ModelArgumentResolver()));
