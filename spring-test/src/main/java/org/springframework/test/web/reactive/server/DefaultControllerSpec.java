@@ -15,6 +15,7 @@
  */
 package org.springframework.test.web.reactive.server;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +45,8 @@ class DefaultControllerSpec implements WebTestClient.ControllerSpec {
 
 	private final List<Object> controllers;
 
+	private final List<Object> controllerAdvice = new ArrayList<>(8);
+
 	private final TestWebFluxConfigurer configurer = new TestWebFluxConfigurer();
 
 
@@ -52,6 +55,12 @@ class DefaultControllerSpec implements WebTestClient.ControllerSpec {
 		this.controllers = Arrays.asList(controllers);
 	}
 
+
+	@Override
+	public DefaultControllerSpec controllerAdvice(Object... controllerAdvice) {
+		this.controllerAdvice.addAll(Arrays.asList(controllerAdvice));
+		return this;
+	}
 
 	@Override
 	public DefaultControllerSpec contentTypeResolver(Consumer<RequestedContentTypeResolverBuilder> consumer) {
@@ -103,12 +112,17 @@ class DefaultControllerSpec implements WebTestClient.ControllerSpec {
 
 	@Override
 	public WebTestClient.Builder configureClient() {
+		return WebTestClient.bindToApplicationContext(createApplicationContext());
+	}
+
+	protected AnnotationConfigApplicationContext createApplicationContext() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		this.controllers.forEach(controller -> registerBean(context, controller));
+		this.controllerAdvice.forEach(advice -> registerBean(context, advice));
 		context.register(DelegatingWebFluxConfiguration.class);
 		context.registerBean(WebFluxConfigurer.class, () -> this.configurer);
 		context.refresh();
-		return WebTestClient.bindToApplicationContext(context);
+		return context;
 	}
 
 	@SuppressWarnings("unchecked")

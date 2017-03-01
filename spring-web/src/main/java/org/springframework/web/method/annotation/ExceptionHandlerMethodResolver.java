@@ -125,6 +125,17 @@ public class ExceptionHandlerMethodResolver {
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
 	public Method resolveMethod(Exception exception) {
+		return resolveMethod(exception);
+	}
+
+	/**
+	 * Find a {@link Method} to handle the given Throwable.
+	 * Use {@link ExceptionDepthComparator} if more than one match is found.
+	 * @param exception the exception
+	 * @return a Method to handle the exception, or {@code null} if none found
+	 * @since 5.0
+	 */
+	public Method resolveMethodByThrowable(Throwable exception) {
 		Method method = resolveMethodByExceptionType(exception.getClass());
 		if (method == null) {
 			Throwable cause = exception.getCause();

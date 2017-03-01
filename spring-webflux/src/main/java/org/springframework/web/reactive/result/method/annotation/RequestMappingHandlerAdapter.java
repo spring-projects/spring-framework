@@ -18,24 +18,26 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.core.MethodIntrospector;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteBufferDecoder;
@@ -43,11 +45,13 @@ import org.springframework.core.codec.DataBufferDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.WebBindingInitializer;
+import org.springframework.web.method.ControllerAdviceBean;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
 import org.springframework.web.reactive.BindingContext;
@@ -59,13 +63,15 @@ import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentR
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
 
+import static org.springframework.core.MethodIntrospector.selectMethods;
+
 /**
  * Supports the invocation of {@code @RequestMapping} methods.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactoryAware, InitializingBean {
+public class RequestMappingHandlerAdapter implements HandlerAdapter, ApplicationContextAware, InitializingBean {
 
 	private static final Log logger = LogFactory.getLog(RequestMappingHandlerAdapter.class);
 
@@ -84,10 +90,8 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 
 	private List<SyncHandlerMethodArgumentResolver> initBinderArgumentResolvers;
 
-	private ConfigurableBeanFactory beanFactory;
+	private ConfigurableApplicationContext applicationContext;
 
-
-	private ModelInitializer modelInitializer;
 
 	private final Map<Class<?>, Set<Method>> binderMethodCache = new ConcurrentHashMap<>(64);
 
@@ -95,6 +99,18 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<>(64);
+
+
+	private final Map<ControllerAdviceBean, Set<Method>> binderAdviceCache = new LinkedHashMap<>(64);
+
+	private final Map<ControllerAdviceBean, Set<Method>> attributeAdviceCache = new LinkedHashMap<>(64);
+
+	private final Map<ControllerAdviceBean, ExceptionHandlerMethodResolver> exceptionHandlerAdviceCache =
+			new LinkedHashMap<>(64);
+
+
+	private ModelInitializer modelInitializer;
+
 
 
 	public RequestMappingHandlerAdapter() {
@@ -204,25 +220,30 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 		return this.initBinderArgumentResolvers;
 	}
 
-
 	/**
-	 * A {@link ConfigurableBeanFactory} is expected for resolving expressions
-	 * in method argument default values.
+	 * A {@link ConfigurableApplicationContext} is expected for resolving
+	 * expressions in method argument default values as well as for
+	 * detecting {@code @ControllerAdvice} beans.
 	 */
 	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (beanFactory instanceof ConfigurableBeanFactory) {
-			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		if (applicationContext instanceof ConfigurableApplicationContext) {
+			this.applicationContext = (ConfigurableApplicationContext) applicationContext;
 		}
 	}
 
+	public ConfigurableApplicationContext getApplicationContext() {
+		return this.applicationContext;
+	}
+
 	public ConfigurableBeanFactory getBeanFactory() {
-		return this.beanFactory;
+		return this.applicationContext.getBeanFactory();
 	}
 
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
+		initControllerAdviceCache();
 		if (this.argumentResolvers == null) {
 			this.argumentResolvers = getDefaultArgumentResolvers();
 		}
@@ -230,6 +251,43 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 			this.initBinderArgumentResolvers = getDefaultInitBinderArgumentResolvers();
 		}
 		this.modelInitializer = new ModelInitializer(getReactiveAdapterRegistry());
+	}
+
+	private void initControllerAdviceCache() {
+		if (getApplicationContext() == null) {
+			return;
+		}
+		if (logger.isInfoEnabled()) {
+			logger.info("Looking for @ControllerAdvice: " + getApplicationContext());
+		}
+
+		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
+		AnnotationAwareOrderComparator.sort(beans);
+
+		for (ControllerAdviceBean bean : beans) {
+			Class<?> beanType = bean.getBeanType();
+			Set<Method> attrMethods = selectMethods(beanType, ATTRIBUTE_METHODS);
+			if (!attrMethods.isEmpty()) {
+				this.attributeAdviceCache.put(bean, attrMethods);
+				if (logger.isInfoEnabled()) {
+					logger.info("Detected @ModelAttribute methods in " + bean);
+				}
+			}
+			Set<Method> binderMethods = selectMethods(beanType, BINDER_METHODS);
+			if (!binderMethods.isEmpty()) {
+				this.binderAdviceCache.put(bean, binderMethods);
+				if (logger.isInfoEnabled()) {
+					logger.info("Detected @InitBinder methods in " + bean);
+				}
+			}
+			ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(beanType);
+			if (resolver.hasExceptionMappings()) {
+				this.exceptionHandlerAdviceCache.put(bean, resolver);
+				if (logger.isInfoEnabled()) {
+					logger.info("Detected @ExceptionHandler methods in " + bean);
+				}
+			}
+		}
 	}
 
 	protected List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
@@ -305,80 +363,97 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	@Override
 	public Mono<HandlerResult> handle(ServerWebExchange exchange, Object handler) {
 
+		Assert.notNull(handler, "Expected handler");
 		HandlerMethod handlerMethod = (HandlerMethod) handler;
 
 		BindingContext bindingContext = new InitBinderBindingContext(
 				getWebBindingInitializer(), getBinderMethods(handlerMethod));
 
-		Mono<Void> modelCompletion = this.modelInitializer.initModel(
-				bindingContext, getAttributeMethods(handlerMethod), exchange);
+		return this.modelInitializer
+				.initModel(bindingContext, getAttributeMethods(handlerMethod), exchange)
+				.then(() -> {
+					Function<Throwable, Mono<HandlerResult>> exceptionHandler =
+							ex -> handleException(exchange, handlerMethod, bindingContext, ex);
 
-		Function<Throwable, Mono<HandlerResult>> exceptionHandler =
-				ex -> handleException(ex, handlerMethod, bindingContext, exchange);
+					InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
+					invocable.setArgumentResolvers(getArgumentResolvers());
 
-		return modelCompletion.then(() -> {
-
-			InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
-			invocable.setArgumentResolvers(getArgumentResolvers());
-
-			return invocable.invoke(exchange, bindingContext)
-					.doOnNext(result -> result.setExceptionHandler(exceptionHandler))
-					.otherwise(exceptionHandler);
-		});
+					return invocable.invoke(exchange, bindingContext)
+							.doOnNext(result -> result.setExceptionHandler(exceptionHandler))
+							.otherwise(exceptionHandler);
+				});
 	}
 
 	private List<SyncInvocableHandlerMethod> getBinderMethods(HandlerMethod handlerMethod) {
 
+		List<SyncInvocableHandlerMethod> result = new ArrayList<>();
 		Class<?> handlerType = handlerMethod.getBeanType();
 
-		Set<Method> methods = this.binderMethodCache.computeIfAbsent(handlerType, aClass ->
-				MethodIntrospector.selectMethods(handlerType, BINDER_METHODS));
+		// Global methods first
+		this.binderAdviceCache.entrySet().forEach(entry -> {
+			if (entry.getKey().isApplicableToBeanType(handlerType)) {
+				Object bean = entry.getKey().resolveBean();
+				entry.getValue().forEach(method -> result.add(createBinderMethod(bean, method)));
+			}
+		});
 
-		return methods.stream()
-				.map(method -> {
+		this.binderMethodCache
+				.computeIfAbsent(handlerType, aClass -> selectMethods(handlerType, BINDER_METHODS))
+				.forEach(method -> {
 					Object bean = handlerMethod.getBean();
-					SyncInvocableHandlerMethod invocable = new SyncInvocableHandlerMethod(bean, method);
-					invocable.setSyncArgumentResolvers(getInitBinderArgumentResolvers());
-					return invocable;
-				})
-				.collect(Collectors.toList());
+					result.add(createBinderMethod(bean, method));
+				});
+
+		return result;
+	}
+
+	private SyncInvocableHandlerMethod createBinderMethod(Object bean, Method method) {
+		SyncInvocableHandlerMethod invocable = new SyncInvocableHandlerMethod(bean, method);
+		invocable.setSyncArgumentResolvers(getInitBinderArgumentResolvers());
+		return invocable;
 	}
 
 	private List<InvocableHandlerMethod> getAttributeMethods(HandlerMethod handlerMethod) {
 
+		List<InvocableHandlerMethod> result = new ArrayList<>();
 		Class<?> handlerType = handlerMethod.getBeanType();
 
-		Set<Method> methods = this.attributeMethodCache.computeIfAbsent(handlerType, aClass ->
-				MethodIntrospector.selectMethods(handlerType, ATTRIBUTE_METHODS));
+		// Global methods first
+		this.attributeAdviceCache.entrySet().forEach(entry -> {
+			if (entry.getKey().isApplicableToBeanType(handlerType)) {
+				Object bean = entry.getKey().resolveBean();
+				entry.getValue().forEach(method -> result.add(createHandlerMethod(bean, method)));
+			}
+		});
 
-		return methods.stream()
-				.map(method -> {
+		this.attributeMethodCache
+				.computeIfAbsent(handlerType, aClass -> selectMethods(handlerType, ATTRIBUTE_METHODS))
+				.forEach(method -> {
 					Object bean = handlerMethod.getBean();
-					InvocableHandlerMethod invocable = new InvocableHandlerMethod(bean, method);
-					invocable.setArgumentResolvers(getArgumentResolvers());
-					return invocable;
-				})
-				.collect(Collectors.toList());
+					result.add(createHandlerMethod(bean, method));
+				});
+
+		return result;
 	}
 
-	private Mono<HandlerResult> handleException(Throwable ex, HandlerMethod handlerMethod,
-			BindingContext bindingContext, ServerWebExchange exchange) {
+	private InvocableHandlerMethod createHandlerMethod(Object bean, Method method) {
+		InvocableHandlerMethod invocable = new InvocableHandlerMethod(bean, method);
+		invocable.setArgumentResolvers(getArgumentResolvers());
+		return invocable;
+	}
 
-		ExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache
-				.computeIfAbsent(handlerMethod.getBeanType(), ExceptionHandlerMethodResolver::new);
+	private Mono<HandlerResult> handleException(ServerWebExchange exchange, HandlerMethod handlerMethod,
+			BindingContext bindingContext, Throwable ex) {
 
-		Method method = resolver.resolveMethodByExceptionType(ex.getClass());
-
-		if (method != null) {
-			Object bean = handlerMethod.getBean();
-			InvocableHandlerMethod invocable = new InvocableHandlerMethod(bean, method);
-			invocable.setArgumentResolvers(getArgumentResolvers());
+		InvocableHandlerMethod invocable = getExceptionHandlerMethod(ex, handlerMethod);
+		if (invocable != null) {
 			try {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Invoking @ExceptionHandler method: " + invocable.getMethod());
 				}
 				bindingContext.getModel().asMap().clear();
-				return invocable.invoke(exchange, bindingContext, ex);
+				Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+				return invocable.invoke(exchange, bindingContext, cause, handlerMethod);
 			}
 			catch (Throwable invocationEx) {
 				if (logger.isWarnEnabled()) {
@@ -386,8 +461,34 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 				}
 			}
 		}
-
 		return Mono.error(ex);
+	}
+
+	private InvocableHandlerMethod getExceptionHandlerMethod(Throwable ex, HandlerMethod handlerMethod) {
+
+		Class<?> handlerType = handlerMethod.getBeanType();
+
+		ExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache
+				.computeIfAbsent(handlerType, ExceptionHandlerMethodResolver::new);
+
+		return Optional
+				.ofNullable(resolver.resolveMethodByThrowable(ex))
+				.map(method -> createHandlerMethod(handlerMethod.getBean(), method))
+				.orElseGet(() ->
+						this.exceptionHandlerAdviceCache.entrySet().stream()
+								.map(entry -> {
+									if (entry.getKey().isApplicableToBeanType(handlerType)) {
+										Method method = entry.getValue().resolveMethodByThrowable(ex);
+										if (method != null) {
+											Object bean = entry.getKey().resolveBean();
+											return createHandlerMethod(bean, method);
+										}
+									}
+									return null;
+								})
+								.filter(Objects::nonNull)
+								.findFirst()
+								.orElse(null));
 	}
 
 

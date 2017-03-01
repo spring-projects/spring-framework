@@ -31,7 +31,6 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.ui.Model;
-import org.springframework.util.ObjectUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -48,8 +47,8 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter.BINDER_METHODS;
 import static org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter.ATTRIBUTE_METHODS;
+import static org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter.BINDER_METHODS;
 
 /**
  * Unit tests for {@link ModelInitializer}.
@@ -76,8 +75,10 @@ public class ModelInitializerTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void basic() throws Exception {
+		TestController controller = new TestController();
+
 		Validator validator = mock(Validator.class);
-		Object controller = new TestController(validator);
+		controller.setValidator(validator);
 
 		List<SyncInvocableHandlerMethod> binderMethods = getBinderMethods(controller);
 		List<InvocableHandlerMethod> attributeMethods = getAttributeMethods(controller);
@@ -131,16 +132,18 @@ public class ModelInitializerTests {
 	@SuppressWarnings("unused")
 	private static class TestController {
 
-		private Validator[] validators;
+		private Validator validator;
 
-		public TestController(Validator... validators) {
-			this.validators = validators;
+
+		void setValidator(Validator validator) {
+			this.validator = validator;
 		}
+
 
 		@InitBinder
 		public void initDataBinder(WebDataBinder dataBinder) {
-			if (!ObjectUtils.isEmpty(this.validators)) {
-				dataBinder.addValidators(this.validators);
+			if (this.validator != null) {
+				dataBinder.addValidators(this.validator);
 			}
 		}
 

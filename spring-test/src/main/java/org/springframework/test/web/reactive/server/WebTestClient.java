@@ -180,6 +180,13 @@ public interface WebTestClient {
 	interface ControllerSpec {
 
 		/**
+		 * Register one or more
+		 * {@link org.springframework.web.bind.annotation.ControllerAdvice
+		 * ControllerAdvice} instances to be used in tests.
+		 */
+		ControllerSpec controllerAdvice(Object... controllerAdvice);
+
+		/**
 		 * Customize content type resolution.
 		 * @see WebFluxConfigurer#configureContentTypeResolver
 		 */
