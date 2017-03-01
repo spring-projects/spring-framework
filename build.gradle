@@ -1,14 +1,13 @@
 buildscript {
 	repositories {
 		maven { url "https://repo.spring.io/plugins-release" }
-		maven { url "http://dl.bintray.com/kotlin/kotlin-eap-1.1" }
 	}
 	dependencies {
 		classpath("io.spring.gradle:dependency-management-plugin:1.0.0.RELEASE")
 		classpath("io.spring.gradle:propdeps-plugin:0.0.8")
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
 		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.3")
-		classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.0-rc-91")
+		classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.0")
 	}
 }
 
@@ -71,7 +70,7 @@ configure(allprojects) { project ->
 	ext.junitVersion           = "4.12"
 	ext.junitJupiterVersion    = '5.0.0-M3'
 	ext.junitPlatformVersion   = '1.0.0-M3'
-	ext.kotlinVersion          = "1.1.0-rc-91"  // also change kotlin-gradle-plugin version when upgrading
+	ext.kotlinVersion          = "1.1.0"  // also change kotlin-gradle-plugin version when upgrading
 	ext.log4jVersion           = '2.8'
 	ext.nettyVersion           = "4.1.8.Final"
 	ext.okhttpVersion          = "2.7.5"
@@ -178,7 +177,6 @@ configure(allprojects) { project ->
 	repositories {
 		maven { url "https://repo.spring.io/libs-release" }
 		maven { url "https://repo.spring.io/milestone" }
-		maven { url "http://dl.bintray.com/kotlin/kotlin-eap-1.1" }
 	}
 
 	dependencies {
