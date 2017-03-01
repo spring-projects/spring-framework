@@ -4030,6 +4030,12 @@ corresponding status codes:
 
 | `TypeMismatchException`
 | 400 (Bad Request)
+
+| `MissingPathVariableException`
+| 500 (Internal Server Error)
+
+| `NoHandlerFoundException`
+| 404 (Not Found)
 |===
 
 The `DefaultHandlerExceptionResolver` works transparently by setting the status of the
