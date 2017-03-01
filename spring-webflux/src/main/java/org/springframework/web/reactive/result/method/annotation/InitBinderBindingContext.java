@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,30 +19,28 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
-import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
-import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * An extension of {@link BindingContext} that uses {@code @InitBinder} methods
- * to initialize a data binder instance.
+ * Variant of {@link BindingContext} that further initializes {@code DataBinder}
+ * instances through {@code @InitBinder} methods.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class InitBinderBindingContext extends BindingContext {
+class InitBinderBindingContext extends BindingContext {
 
 	private final List<SyncInvocableHandlerMethod> binderMethods;
 
-	/** BindingContext for @InitBinder method invocation */
-	private final BindingContext bindingContext;
+	/* Simple BindingContext to help with the invoking @InitBinder methods */
+	private final BindingContext binderMethodContext;
 
 
 	public InitBinderBindingContext(WebBindingInitializer initializer,
@@ -50,38 +48,41 @@ public class InitBinderBindingContext extends BindingContext {
 
 		super(initializer);
 		this.binderMethods = binderMethods;
-		this.bindingContext = new BindingContext(initializer);
+		this.binderMethodContext = new BindingContext(initializer);
 	}
 
 
 	@Override
-	protected WebExchangeDataBinder initDataBinder(WebExchangeDataBinder binder,
-			ServerWebExchange exchange) {
+	protected WebExchangeDataBinder initDataBinder(WebExchangeDataBinder binder, ServerWebExchange exchange) {
 
 		this.binderMethods.stream()
-				.filter(method -> isBinderMethodApplicable(method, binder))
-				.forEach(method -> invokeInitBinderMethod(binder, exchange, method));
+				.filter(binderMethod -> {
+					InitBinder annotation = binderMethod.getMethodAnnotation(InitBinder.class);
+					Collection<String> names = Arrays.asList(annotation.value());
+					return (names.size() == 0 || names.contains(binder.getObjectName()));
+				})
+				.forEach(method -> invokeBinderMethod(binder, exchange, method));
 
 		return binder;
 	}
 
-	/**
-	 * Whether the given {@code @InitBinder} method should be used to initialize
-	 * the given WebDataBinder instance. By default we check the attributes
-	 * names of the annotation, if present.
-	 */
-	protected boolean isBinderMethodApplicable(HandlerMethod binderMethod, WebDataBinder binder) {
-		InitBinder annot = binderMethod.getMethodAnnotation(InitBinder.class);
-		Collection<String> names = Arrays.asList(annot.value());
-		return (names.size() == 0 || names.contains(binder.getObjectName()));
-	}
+	private void invokeBinderMethod(WebExchangeDataBinder binder, ServerWebExchange exchange,
+			SyncInvocableHandlerMethod binderMethod) {
 
-	private void invokeInitBinderMethod(WebExchangeDataBinder binder, ServerWebExchange exchange,
-			SyncInvocableHandlerMethod method) {
+		Optional<Object> returnValue = binderMethod
+				.invokeForHandlerResult(exchange, this.binderMethodContext, binder)
+				.getReturnValue();
 
-		HandlerResult result = method.invokeForHandlerResult(exchange, this.bindingContext, binder);
-		if (result.getReturnValue().isPresent()) {
-			throw new IllegalStateException("@InitBinder methods should return void: " + method);
+		if (returnValue.isPresent()) {
+			throw new IllegalStateException(
+					"@InitBinder methods should return void: " + binderMethod);
+		}
+
+		// Should not happen (no argument resolvers)...
+
+		if (!this.binderMethodContext.getModel().asMap().isEmpty()) {
+			throw new IllegalStateException(
+					"@InitBinder methods should not add model attributes: " + binderMethod);
 		}
 	}
 

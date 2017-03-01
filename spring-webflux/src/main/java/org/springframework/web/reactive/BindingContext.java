@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,22 @@ import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A context for binding requests to method arguments that provides access to
- * the default model, data binding, validation, and type conversion.
+ * Context to assist with processing a request and binding it onto Objects.
+ *
+ * <p>Provides  methods to create a {@link WebExchangeDataBinder} for a specific
+ * target, command Object to apply data binding and validation to, or without a
+ * target Object for simple type conversion from request values.
+ *
+ * <p>Container for the default model for the request.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class BindingContext {
 
-	private final Model model = new BindingAwareConcurrentModel();
-
 	private final WebBindingInitializer initializer;
+
+	private final Model model = new BindingAwareConcurrentModel();
 
 
 	public BindingContext() {
@@ -54,15 +59,17 @@ public class BindingContext {
 
 
 	/**
-	 * Create a {@link WebExchangeDataBinder} for applying data binding, type
-	 * conversion, and validation on the given "target" object.
+	 * Create a {@link WebExchangeDataBinder} to apply data binding and
+	 * validation with on the target, command object.
+	 *
 	 * @param exchange the current exchange
 	 * @param target the object to create a data binder for
 	 * @param name the name of the target object
-	 * @return the {@link WebExchangeDataBinder} instance
+	 *
+	 * @return the created data binder
 	 */
 	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, Object target, String name) {
-		WebExchangeDataBinder dataBinder = createBinderInstance(target, name);
+		WebExchangeDataBinder dataBinder = new WebExchangeDataBinder(target, name);
 		if (this.initializer != null) {
 			this.initializer.initBinder(dataBinder);
 		}
@@ -70,28 +77,23 @@ public class BindingContext {
 	}
 
 	/**
-	 * Create a {@link WebExchangeDataBinder} without a "target" object, i.e.
-	 * for applying type conversion to simple types.
-	 * @param exchange the current exchange
-	 * @param name the name of the target object
-	 * @return a Mono for the created {@link WebExchangeDataBinder} instance
-	 */
-	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, String name) {
-		return createDataBinder(exchange, null, name);
-	}
-
-	/**
-	 * Create the data binder instance.
-	 */
-	protected WebExchangeDataBinder createBinderInstance(Object target, String objectName) {
-		return new WebExchangeDataBinder(target, objectName);
-	}
-
-	/**
 	 * Initialize the data binder instance for the given exchange.
 	 */
 	protected WebExchangeDataBinder initDataBinder(WebExchangeDataBinder binder, ServerWebExchange exchange) {
 		return binder;
+	}
+
+	/**
+	 * Create a {@link WebExchangeDataBinder} without a target object for type
+	 * conversion of request values to simple types.
+	 *
+	 * @param exchange the current exchange
+	 * @param name the name of the target object
+	 *
+	 * @return the created data binder
+	 */
+	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, String name) {
+		return createDataBinder(exchange, null, name);
 	}
 
 }
