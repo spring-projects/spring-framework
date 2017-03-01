@@ -17,14 +17,17 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import rx.Single;
 
-import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.core.MethodIntrospector;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.ui.Model;
@@ -34,35 +37,35 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
-import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
-import org.springframework.web.reactive.config.WebFluxConfigurationSupport;
-import org.springframework.web.reactive.result.ResolvableMethod;
+import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
+import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter.INIT_BINDER_METHODS;
+import static org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter.MODEL_ATTRIBUTE_METHODS;
 
 /**
- * Unit tests for {@link BindingContextFactory}.
+ * Unit tests for {@link ModelInitializer}.
  * @author Rossen Stoyanchev
  */
-public class BindingContextFactoryTests {
+public class ModelInitializerTests {
 
-	private BindingContextFactory contextFactory;
+	private ModelInitializer modelInitializer;
 
 	private ServerWebExchange exchange;
 
 
 	@Before
 	public void setup() throws Exception {
-		WebFluxConfigurationSupport configurationSupport = new WebFluxConfigurationSupport();
-		configurationSupport.setApplicationContext(new StaticApplicationContext());
-		RequestMappingHandlerAdapter adapter = configurationSupport.requestMappingHandlerAdapter();
-		adapter.afterPropertiesSet();
-		this.contextFactory = new BindingContextFactory(adapter);
+
+		this.modelInitializer = new ModelInitializer(new ReactiveAdapterRegistry());
 
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
@@ -74,15 +77,15 @@ public class BindingContextFactoryTests {
 	@Test
 	public void basic() throws Exception {
 		Validator validator = mock(Validator.class);
-		TestController controller = new TestController(validator);
+		Object controller = new TestController(validator);
 
-		HandlerMethod handlerMethod = ResolvableMethod.on(controller)
-				.annotated(RequestMapping.class)
-				.resolveHandlerMethod();
+		List<SyncInvocableHandlerMethod> binderMethods = getBinderMethods(controller);
+		List<InvocableHandlerMethod> attributeMethods = getAttributeMethods(controller);
 
-		BindingContext bindingContext =
-				this.contextFactory.createBindingContext(handlerMethod, this.exchange)
-						.blockMillis(5000);
+		WebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
+		BindingContext bindingContext = new InitBinderBindingContext(bindingInitializer, binderMethods);
+
+		this.modelInitializer.initModel(bindingContext, attributeMethods, this.exchange).blockMillis(5000);
 
 		WebExchangeDataBinder binder = bindingContext.createDataBinder(this.exchange, "name");
 		assertEquals(Collections.singletonList(validator), binder.getValidators());
@@ -104,6 +107,24 @@ public class BindingContextFactoryTests {
 
 		value = model.get("voidMonoMethodBean");
 		assertEquals("Void Mono Method Bean", ((TestBean) value).getName());
+	}
+
+	private List<SyncInvocableHandlerMethod> getBinderMethods(Object controller) {
+		return MethodIntrospector
+				.selectMethods(controller.getClass(), INIT_BINDER_METHODS).stream()
+				.map(method -> new SyncInvocableHandlerMethod(controller, method))
+				.collect(Collectors.toList());
+	}
+
+	private List<InvocableHandlerMethod> getAttributeMethods(Object controller) {
+		return MethodIntrospector
+				.selectMethods(controller.getClass(), MODEL_ATTRIBUTE_METHODS).stream()
+				.map(method -> {
+					InvocableHandlerMethod invocable = new InvocableHandlerMethod(controller, method);
+					invocable.setArgumentResolvers(Collections.singletonList(new ModelArgumentResolver()));
+					return invocable;
+				})
+				.collect(Collectors.toList());
 	}
 
 
