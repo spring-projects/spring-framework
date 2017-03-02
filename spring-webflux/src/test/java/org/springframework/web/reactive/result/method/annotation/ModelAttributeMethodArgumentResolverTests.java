@@ -29,7 +29,6 @@ import rx.Single;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
@@ -56,7 +55,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 	private BindingContext bindContext;
 
-	private ResolvableMethod testMethod = ResolvableMethod.onClass(this.getClass()).name("handle");
+	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
 	@Before
@@ -74,17 +73,17 @@ public class ModelAttributeMethodArgumentResolverTests {
 		ModelAttributeMethodArgumentResolver resolver =
 				new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry(), false);
 
-		ResolvableType type = forClass(Foo.class);
-		assertTrue(resolver.supportsParameter(parameter(type)));
+		MethodParameter param = this.testMethod.annotated(ModelAttribute.class).arg(Foo.class);
+		assertTrue(resolver.supportsParameter(param));
 
-		type = forClassWithGenerics(Mono.class, Foo.class);
-		assertTrue(resolver.supportsParameter(parameter(type)));
+		param = this.testMethod.annotated(ModelAttribute.class).arg(forClassWithGenerics(Mono.class, Foo.class));
+		assertTrue(resolver.supportsParameter(param));
 
-		type = forClass(Foo.class);
-		assertFalse(resolver.supportsParameter(parameterNotAnnotated(type)));
+		param = this.testMethod.notAnnotated(ModelAttribute.class).arg(Foo.class);
+		assertFalse(resolver.supportsParameter(param));
 
-		type = forClassWithGenerics(Mono.class, Foo.class);
-		assertFalse(resolver.supportsParameter(parameterNotAnnotated(type)));
+		param = this.testMethod.notAnnotated(ModelAttribute.class).arg(forClassWithGenerics(Mono.class, Foo.class));
+		assertFalse(resolver.supportsParameter(param));
 	}
 
 	@Test
@@ -92,22 +91,22 @@ public class ModelAttributeMethodArgumentResolverTests {
 		ModelAttributeMethodArgumentResolver resolver =
 				new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry(), true);
 
-		ResolvableType type = forClass(Foo.class);
-		assertTrue(resolver.supportsParameter(parameterNotAnnotated(type)));
+		MethodParameter param = this.testMethod.notAnnotated(ModelAttribute.class).arg(Foo.class);
+		assertTrue(resolver.supportsParameter(param));
 
-		type = forClassWithGenerics(Mono.class, Foo.class);
-		assertTrue(resolver.supportsParameter(parameterNotAnnotated(type)));
+		param = this.testMethod.notAnnotated(ModelAttribute.class).arg(forClassWithGenerics(Mono.class, Foo.class));
+		assertTrue(resolver.supportsParameter(param));
 
-		type = forClass(String.class);
-		assertFalse(resolver.supportsParameter(parameterNotAnnotated(type)));
+		param = this.testMethod.notAnnotated(ModelAttribute.class).arg(String.class);
+		assertFalse(resolver.supportsParameter(param));
 
-		type = forClassWithGenerics(Mono.class, String.class);
-		assertFalse(resolver.supportsParameter(parameterNotAnnotated(type)));
+		param = this.testMethod.notAnnotated(ModelAttribute.class).arg(forClassWithGenerics(Mono.class, String.class));
+		assertFalse(resolver.supportsParameter(param));
 	}
 
 	@Test
 	public void createAndBind() throws Exception {
-		testBindFoo(forClass(Foo.class), value -> {
+		testBindFoo(this.testMethod.annotated(ModelAttribute.class).arg(Foo.class), value -> {
 			assertEquals(Foo.class, value.getClass());
 			return (Foo) value;
 		});
@@ -115,7 +114,11 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 	@Test
 	public void createAndBindToMono() throws Exception {
-		testBindFoo(forClassWithGenerics(Mono.class, Foo.class), mono -> {
+
+		MethodParameter parameter = this.testMethod.notAnnotated(ModelAttribute.class)
+				.arg(forClassWithGenerics(Mono.class, Foo.class));
+
+		testBindFoo(parameter, mono -> {
 			assertTrue(mono.getClass().getName(), mono instanceof Mono);
 			Object value = ((Mono<?>) mono).blockMillis(5000);
 			assertEquals(Foo.class, value.getClass());
@@ -125,7 +128,11 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 	@Test
 	public void createAndBindToSingle() throws Exception {
-		testBindFoo(forClassWithGenerics(Single.class, Foo.class), single -> {
+
+		MethodParameter parameter = this.testMethod.annotated(ModelAttribute.class)
+				.arg(forClassWithGenerics(Single.class, Foo.class));
+
+		testBindFoo(parameter, single -> {
 			assertTrue(single.getClass().getName(), single instanceof Single);
 			Object value = ((Single<?>) single).toBlocking().value();
 			assertEquals(Foo.class, value.getClass());
@@ -139,7 +146,8 @@ public class ModelAttributeMethodArgumentResolverTests {
 		foo.setName("Jim");
 		this.bindContext.getModel().addAttribute(foo);
 
-		testBindFoo(forClass(Foo.class), value -> {
+		MethodParameter parameter = this.testMethod.notAnnotated(ModelAttribute.class).arg(Foo.class);
+		testBindFoo(parameter, value -> {
 			assertEquals(Foo.class, value.getClass());
 			return (Foo) value;
 		});
@@ -153,7 +161,8 @@ public class ModelAttributeMethodArgumentResolverTests {
 		foo.setName("Jim");
 		this.bindContext.getModel().addAttribute("foo", Mono.just(foo));
 
-		testBindFoo(forClass(Foo.class), value -> {
+		MethodParameter parameter = this.testMethod.notAnnotated(ModelAttribute.class).arg(Foo.class);
+		testBindFoo(parameter, value -> {
 			assertEquals(Foo.class, value.getClass());
 			return (Foo) value;
 		});
@@ -167,7 +176,8 @@ public class ModelAttributeMethodArgumentResolverTests {
 		foo.setName("Jim");
 		this.bindContext.getModel().addAttribute("foo", Single.just(foo));
 
-		testBindFoo(forClass(Foo.class), value -> {
+		MethodParameter parameter = this.testMethod.notAnnotated(ModelAttribute.class).arg(Foo.class);
+		testBindFoo(parameter, value -> {
 			assertEquals(Foo.class, value.getClass());
 			return (Foo) value;
 		});
@@ -181,7 +191,10 @@ public class ModelAttributeMethodArgumentResolverTests {
 		foo.setName("Jim");
 		this.bindContext.getModel().addAttribute("foo", Mono.just(foo));
 
-		testBindFoo(forClassWithGenerics(Mono.class, Foo.class), mono -> {
+		MethodParameter parameter = this.testMethod.notAnnotated(ModelAttribute.class)
+				.arg(forClassWithGenerics(Mono.class, Foo.class));
+
+		testBindFoo(parameter, mono -> {
 			assertTrue(mono.getClass().getName(), mono instanceof Mono);
 			Object value = ((Mono<?>) mono).blockMillis(5000);
 			assertEquals(Foo.class, value.getClass());
@@ -189,9 +202,9 @@ public class ModelAttributeMethodArgumentResolverTests {
 		});
 	}
 
-	private void testBindFoo(ResolvableType type, Function<Object, Foo> valueExtractor) throws Exception {
+	private void testBindFoo(MethodParameter param, Function<Object, Foo> valueExtractor) throws Exception {
 		Object value = createResolver()
-				.resolveArgument(parameter(type), this.bindContext, exchange("name=Robert&age=25"))
+				.resolveArgument(param, this.bindContext, exchange("name=Robert&age=25"))
 				.blockMillis(0);
 
 		Foo foo = valueExtractor.apply(value);
@@ -209,13 +222,18 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 	@Test
 	public void validationError() throws Exception {
-		testValidationError(forClass(Foo.class), resolvedArgumentMono -> resolvedArgumentMono);
+		MethodParameter parameter = this.testMethod.notAnnotated(ModelAttribute.class).arg(Foo.class);
+		testValidationError(parameter, Function.identity());
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	public void validationErrorToMono() throws Exception {
-		testValidationError(forClassWithGenerics(Mono.class, Foo.class),
+
+		MethodParameter parameter = this.testMethod.notAnnotated(ModelAttribute.class)
+				.arg(forClassWithGenerics(Mono.class, Foo.class));
+
+		testValidationError(parameter,
 				resolvedArgumentMono -> {
 					Object value = resolvedArgumentMono.blockMillis(5000);
 					assertNotNull(value);
@@ -227,7 +245,11 @@ public class ModelAttributeMethodArgumentResolverTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void validationErrorToSingle() throws Exception {
-		testValidationError(forClassWithGenerics(Single.class, Foo.class),
+
+		MethodParameter parameter = this.testMethod.annotated(ModelAttribute.class)
+				.arg(forClassWithGenerics(Single.class, Foo.class));
+
+		testValidationError(parameter,
 				resolvedArgumentMono -> {
 					Object value = resolvedArgumentMono.blockMillis(5000);
 					assertNotNull(value);
@@ -236,11 +258,11 @@ public class ModelAttributeMethodArgumentResolverTests {
 				});
 	}
 
-	private void testValidationError(ResolvableType type, Function<Mono<?>, Mono<?>> valueMonoExtractor)
+	private void testValidationError(MethodParameter param, Function<Mono<?>, Mono<?>> valueMonoExtractor)
 			throws URISyntaxException {
 
 		ServerWebExchange exchange = exchange("age=invalid");
-		Mono<?> mono = createResolver().resolveArgument(parameter(type), this.bindContext, exchange);
+		Mono<?> mono = createResolver().resolveArgument(param, this.bindContext, exchange);
 
 		mono = valueMonoExtractor.apply(mono);
 
@@ -257,16 +279,6 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 	private ModelAttributeMethodArgumentResolver createResolver() {
 		return new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry());
-	}
-
-	private MethodParameter parameter(ResolvableType type) {
-		return this.testMethod.resolveParam(type,
-				parameter -> parameter.hasParameterAnnotation(ModelAttribute.class));
-	}
-
-	private MethodParameter parameterNotAnnotated(ResolvableType type) {
-		return this.testMethod.resolveParam(type,
-				parameter -> !parameter.hasParameterAnnotations());
 	}
 
 	private ServerWebExchange exchange(String formData) throws URISyntaxException {

@@ -66,7 +66,7 @@ public class HttpEntityArgumentResolverTests {
 
 	private MockServerHttpRequest request;
 
-	private ResolvableMethod testMethod = ResolvableMethod.onClass(getClass()).name("handle");
+	private final ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
 	@Before
@@ -99,10 +99,8 @@ public class HttpEntityArgumentResolverTests {
 	@Test
 	public void doesNotSupport() throws Exception {
 		ResolvableType type = ResolvableType.forClassWithGenerics(Mono.class, String.class);
-		assertFalse(this.resolver.supportsParameter(this.testMethod.resolveParam(type)));
-
-		type = ResolvableType.forClass(String.class);
-		assertFalse(this.resolver.supportsParameter(this.testMethod.resolveParam(type)));
+		assertFalse(this.resolver.supportsParameter(this.testMethod.arg(type)));
+		assertFalse(this.resolver.supportsParameter(this.testMethod.arg(String.class)));
 	}
 
 	@Test
@@ -303,7 +301,7 @@ public class HttpEntityArgumentResolverTests {
 	}
 
 	private void testSupports(ResolvableType type) {
-		MethodParameter parameter = this.testMethod.resolveParam(type);
+		MethodParameter parameter = this.testMethod.arg(type);
 		assertTrue(this.resolver.supportsParameter(parameter));
 	}
 
@@ -314,7 +312,7 @@ public class HttpEntityArgumentResolverTests {
 				.body(body);
 		ServerWebExchange exchange = new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(type);
 		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
@@ -328,7 +326,7 @@ public class HttpEntityArgumentResolverTests {
 	@SuppressWarnings("unchecked")
 	private <T> HttpEntity<T> resolveValueWithEmptyBody(ResolvableType type) {
 		ServerWebExchange exchange = new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(type);
 		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), exchange);
 		HttpEntity<String> httpEntity = (HttpEntity<String>) result.block(Duration.ofSeconds(5));
 

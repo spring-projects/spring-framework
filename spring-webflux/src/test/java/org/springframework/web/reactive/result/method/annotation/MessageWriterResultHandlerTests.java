@@ -55,15 +55,16 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
-import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
+import static org.springframework.web.reactive.result.ResolvableMethod.on;
 
 /**
  * Unit tests for {@link AbstractMessageWriterResultHandler}.
@@ -89,8 +90,8 @@ public class MessageWriterResultHandlerTests {
 	@Test  // SPR-12894
 	public void useDefaultContentType() throws Exception {
 		Resource body = new ClassPathResource("logo.png", getClass());
-		ResolvableType type = ResolvableType.forType(Resource.class);
-		this.resultHandler.writeBody(body, returnType(type), this.exchange).block(Duration.ofSeconds(5));
+		MethodParameter type = on(TestController.class).resolveReturnType(Resource.class);
+		this.resultHandler.writeBody(body, type, this.exchange).block(Duration.ofSeconds(5));
 
 		assertEquals("image/x-png", this.response.getHeaders().getFirst("Content-Type"));
 	}
@@ -101,26 +102,40 @@ public class MessageWriterResultHandlerTests {
 				Collections.singleton(APPLICATION_JSON));
 
 		String body = "foo";
-		ResolvableType type = ResolvableType.forType(String.class);
-		this.resultHandler.writeBody(body, returnType(type), this.exchange).block(Duration.ofSeconds(5));
+		MethodParameter type = on(TestController.class).resolveReturnType(String.class);
+		this.resultHandler.writeBody(body, type, this.exchange).block(Duration.ofSeconds(5));
 
 		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
 	}
 
 	@Test
 	public void voidReturnType() throws Exception {
-		testVoidReturnType(null, ResolvableType.forType(void.class));
-		testVoidReturnType(Mono.empty(), ResolvableType.forClassWithGenerics(Mono.class, Void.class));
-		testVoidReturnType(Completable.complete(), ResolvableType.forClass(Completable.class));
-		testVoidReturnType(io.reactivex.Completable.complete(), ResolvableType.forClass(io.reactivex.Completable.class));
-		testVoidReturnType(Flux.empty(), ResolvableType.forClassWithGenerics(Flux.class, Void.class));
-		testVoidReturnType(Observable.empty(), ResolvableType.forClassWithGenerics(Observable.class, Void.class));
-		testVoidReturnType(io.reactivex.Observable.empty(), ResolvableType.forClassWithGenerics(io.reactivex.Observable.class, Void.class));
-		testVoidReturnType(Flowable.empty(), ResolvableType.forClassWithGenerics(Flowable.class, Void.class));
+		testVoid(null, on(TestController.class).resolveReturnType(void.class));
+
+		testVoid(Mono.empty(), on(TestController.class)
+				.resolveReturnType(forClassWithGenerics(Mono.class, Void.class)));
+
+		testVoid(Flux.empty(), on(TestController.class)
+				.resolveReturnType(forClassWithGenerics(Flux.class, Void.class)));
+
+		testVoid(Completable.complete(), on(TestController.class)
+				.resolveReturnType(Completable.class));
+
+		testVoid(Observable.empty(), on(TestController.class)
+				.resolveReturnType(forClassWithGenerics(Observable.class, Void.class)));
+
+		testVoid(io.reactivex.Completable.complete(), on(TestController.class)
+				.resolveReturnType(io.reactivex.Completable.class));
+
+		testVoid(io.reactivex.Observable.empty(), on(TestController.class)
+				.resolveReturnType(forClassWithGenerics(io.reactivex.Observable.class, Void.class)));
+
+		testVoid(Flowable.empty(), on(TestController.class)
+				.resolveReturnType(forClassWithGenerics(Flowable.class, Void.class)));
 	}
 
-	private void testVoidReturnType(Object body, ResolvableType type) {
-		this.resultHandler.writeBody(body, returnType(type), this.exchange).block(Duration.ofSeconds(5));
+	private void testVoid(Object body, MethodParameter returnType) {
+		this.resultHandler.writeBody(body, returnType, this.exchange).block(Duration.ofSeconds(5));
 
 		assertNull(this.response.getHeaders().get("Content-Type"));
 		StepVerifier.create(this.response.getBody())
@@ -130,19 +145,22 @@ public class MessageWriterResultHandlerTests {
 	@Test  // SPR-13135
 	public void unsupportedReturnType() throws Exception {
 		ByteArrayOutputStream body = new ByteArrayOutputStream();
-		ResolvableType type = ResolvableType.forType(OutputStream.class);
+		MethodParameter type = on(TestController.class).resolveReturnType(OutputStream.class);
 
 		HttpMessageWriter<?> writer = new EncoderHttpMessageWriter<>(new ByteBufferEncoder());
-		Mono<Void> mono = createResultHandler(writer).writeBody(body, returnType(type), this.exchange);
+		Mono<Void> mono = createResultHandler(writer).writeBody(body, type, this.exchange);
 
 		StepVerifier.create(mono).expectError(IllegalStateException.class).verify();
 	}
 
 	@Test  // SPR-12811
 	public void jacksonTypeOfListElement() throws Exception {
+
+		MethodParameter returnType = on(TestController.class)
+				.resolveReturnType(forClassWithGenerics(List.class, ParentClass.class));
+
 		List<ParentClass> body = Arrays.asList(new Foo("foo"), new Bar("bar"));
-		ResolvableType type = ResolvableType.forClassWithGenerics(List.class, ParentClass.class);
-		this.resultHandler.writeBody(body, returnType(type), this.exchange).block(Duration.ofSeconds(5));
+		this.resultHandler.writeBody(body, returnType, this.exchange).block(Duration.ofSeconds(5));
 
 		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
 		assertResponseBody("[{\"type\":\"foo\",\"parentProperty\":\"foo\"}," +
@@ -152,8 +170,8 @@ public class MessageWriterResultHandlerTests {
 	@Test  // SPR-13318
 	public void jacksonTypeWithSubType() throws Exception {
 		SimpleBean body = new SimpleBean(123L, "foo");
-		ResolvableType type = ResolvableType.forClass(Identifiable.class);
-		this.resultHandler.writeBody(body, returnType(type), this.exchange).block(Duration.ofSeconds(5));
+		MethodParameter type = on(TestController.class).resolveReturnType(Identifiable.class);
+		this.resultHandler.writeBody(body, type, this.exchange).block(Duration.ofSeconds(5));
 
 		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
 		assertResponseBody("{\"id\":123,\"name\":\"foo\"}");
@@ -161,18 +179,17 @@ public class MessageWriterResultHandlerTests {
 
 	@Test  // SPR-13318
 	public void jacksonTypeWithSubTypeOfListElement() throws Exception {
+
+		MethodParameter returnType = on(TestController.class)
+				.resolveReturnType(forClassWithGenerics(List.class, Identifiable.class));
+
 		List<SimpleBean> body = Arrays.asList(new SimpleBean(123L, "foo"), new SimpleBean(456L, "bar"));
-		ResolvableType type = ResolvableType.forClassWithGenerics(List.class, Identifiable.class);
-		this.resultHandler.writeBody(body, returnType(type), this.exchange).block(Duration.ofSeconds(5));
+		this.resultHandler.writeBody(body, returnType, this.exchange).block(Duration.ofSeconds(5));
 
 		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
 		assertResponseBody("[{\"id\":123,\"name\":\"foo\"},{\"id\":456,\"name\":\"bar\"}]");
 	}
 
-
-	private MethodParameter returnType(ResolvableType bodyType) {
-		return ResolvableMethod.onClass(TestController.class).returning(bodyType).resolveReturnType();
-	}
 
 	private AbstractMessageWriterResultHandler createResultHandler(HttpMessageWriter<?>... writers) {
 		List<HttpMessageWriter<?>> writerList;

@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +52,7 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.ResolvableMethod;
-import org.springframework.web.reactive.result.method.RequestMappingInfo.*;
+import org.springframework.web.reactive.result.method.RequestMappingInfo.BuilderConfiguration;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -60,10 +61,16 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.support.HttpRequestPathHelper;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
-import static org.springframework.web.reactive.result.method.RequestMappingInfo.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
+import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
+import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
 
 /**
  * Unit tests for {@link RequestMappingInfoHandlerMapping}.
@@ -95,9 +102,10 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void getHandlerDirectMatch() throws Exception {
-		String[] patterns = new String[] {"/foo"};
-		String[] params = new String[] {};
-		Method expected = resolveMethod(new TestController(), patterns, null, params);
+
+		Method expected = ResolvableMethod.on(TestController.class)
+				.annotated(RequestMapping.class, patterns("/foo"), params())
+				.resolveMethod();
 
 		this.request = MockServerHttpRequest.get("/foo").build();
 		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(createExchange()).block();
@@ -107,9 +115,10 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void getHandlerGlobMatch() throws Exception {
-		String[] patterns = new String[] {"/ba*"};
-		RequestMethod[] methods = new RequestMethod[] {GET, HEAD};
-		Method expected = resolveMethod(new TestController(), patterns, methods, null);
+
+		Method expected = ResolvableMethod.on(TestController.class)
+				.annotated(RequestMapping.class, patterns("/ba*"), methods(GET, HEAD))
+				.resolveMethod();
 
 		this.request = MockServerHttpRequest.get("/bar").build();
 		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(createExchange()).block();
@@ -119,8 +128,10 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void getHandlerEmptyPathMatch() throws Exception {
-		String[] patterns = new String[] {""};
-		Method expected = resolveMethod(new TestController(), patterns, null, null);
+
+		Method expected = ResolvableMethod.on(TestController.class)
+				.annotated(RequestMapping.class, patterns(""))
+				.resolveMethod();
 
 		this.request = MockServerHttpRequest.get("").build();
 		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(createExchange()).block();
@@ -133,9 +144,10 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void getHandlerBestMatch() throws Exception {
-		String[] patterns = new String[] {"/foo"};
-		String[] params = new String[] {"p"};
-		Method expected = resolveMethod(new TestController(), patterns, null, params);
+
+		Method expected = ResolvableMethod.on(TestController.class)
+				.annotated(RequestMapping.class, patterns("/foo"), params("p"))
+				.resolveMethod();
 
 		this.request = MockServerHttpRequest.get("/foo?p=anything").build();
 		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(createExchange()).block();
@@ -416,27 +428,16 @@ public class RequestMappingInfoHandlerMappingTests {
 		return (Map<String, String>) exchange.getAttributes().get(attrName);
 	}
 
-	private Method resolveMethod(Object controller, String[] patterns,
-			RequestMethod[] methods, String[] params) {
+	private Predicate<RequestMapping> patterns(String... patterns) {
+		return rm -> Arrays.equals(patterns, rm.path());
+	}
 
-		return ResolvableMethod.on(controller)
-				.matching(method -> {
-					RequestMapping annot = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
-					if (annot == null) {
-						return false;
-					}
-					else if (patterns != null && !Arrays.equals(annot.path(), patterns)) {
-						return false;
-					}
-					else if (methods != null && !Arrays.equals(annot.method(), methods)) {
-						return false;
-					}
-					else if (params != null && (!Arrays.equals(annot.params(), params))) {
-						return false;
-					}
-					return true;
-				})
-				.resolve();
+	private Predicate<RequestMapping> methods(RequestMethod... methods) {
+		return rm -> Arrays.equals(methods, rm.method());
+	}
+
+	private Predicate<RequestMapping> params(String... params) {
+		return rm -> Arrays.equals(params, rm.params());
 	}
 
 

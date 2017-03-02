@@ -82,7 +82,6 @@ public class RequestParamMethodArgumentResolverTests {
 		this.paramNotRequired = new SynthesizingMethodParameter(method, 6);
 		this.paramOptional = new SynthesizingMethodParameter(method, 7);
 
-
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultFormattingConversionService());
 		this.bindContext = new BindingContext(initializer);
@@ -216,7 +215,8 @@ public class RequestParamMethodArgumentResolverTests {
 			String stringNotAnnot,
 			@RequestParam("name") String paramRequired,
 			@RequestParam(name = "name", required = false) String paramNotRequired,
-			@RequestParam("name") Optional<Integer> paramOptional) {
+			@RequestParam("name") Optional<Integer> paramOptional,
+			@RequestParam Mono<String> paramMono) {
 	}
 
 }

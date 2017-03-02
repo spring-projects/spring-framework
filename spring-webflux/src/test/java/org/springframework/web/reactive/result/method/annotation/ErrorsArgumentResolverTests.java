@@ -35,8 +35,9 @@ import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link ErrorsMethodArgumentResolver}.
@@ -53,7 +54,7 @@ public class ErrorsArgumentResolverTests {
 
 	private ServerWebExchange exchange;
 
-	private final ResolvableMethod testMethod = ResolvableMethod.onClass(this.getClass()).name("handle");
+	private final ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
 	@Before
@@ -72,16 +73,16 @@ public class ErrorsArgumentResolverTests {
 
 	@Test
 	public void supports() throws Exception {
-		MethodParameter parameter = parameter(forClass(Errors.class));
+		MethodParameter parameter = this.testMethod.arg(Errors.class);
 		assertTrue(this.resolver.supportsParameter(parameter));
 
-		parameter = parameter(forClass(BindingResult.class));
+		parameter = this.testMethod.arg(BindingResult.class);
 		assertTrue(this.resolver.supportsParameter(parameter));
 
-		parameter = parameter(forClassWithGenerics(Mono.class, Errors.class));
+		parameter = this.testMethod.arg(ResolvableType.forClassWithGenerics(Mono.class, Errors.class));
 		assertFalse(this.resolver.supportsParameter(parameter));
 
-		parameter = parameter(forClass(String.class));
+		parameter = this.testMethod.arg(String.class);
 		assertFalse(this.resolver.supportsParameter(parameter));
 	}
 
@@ -99,7 +100,7 @@ public class ErrorsArgumentResolverTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void resolveErrorsAfterMonoModelAttribute() throws Exception {
-		MethodParameter parameter = parameter(forClass(BindingResult.class));
+		MethodParameter parameter = this.testMethod.arg(BindingResult.class);
 		this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange).blockMillis(5000);
 	}
 
@@ -109,17 +110,12 @@ public class ErrorsArgumentResolverTests {
 		String key = BindingResult.MODEL_KEY_PREFIX + "foo";
 		this.bindingContext.getModel().asMap().put(key, bindingResult);
 
-		MethodParameter parameter = parameter(forClass(Errors.class));
+		MethodParameter parameter = this.testMethod.arg(Errors.class);
 
 		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
 				.blockMillis(5000);
 
 		assertSame(this.bindingResult, actual);
-	}
-
-
-	private MethodParameter parameter(ResolvableType type) {
-		return this.testMethod.resolveParam(type);
 	}
 
 

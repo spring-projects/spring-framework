@@ -58,8 +58,11 @@ import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
 
 /**
  * Unit tests for {@link AbstractMessageReaderArgumentResolver}.
@@ -74,7 +77,7 @@ public class MessageReaderArgumentResolverTests {
 
 	private BindingContext bindingContext;
 
-	private ResolvableMethod testMethod = ResolvableMethod.onClass(this.getClass()).name("handle");
+	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
 	@Before
@@ -90,7 +93,7 @@ public class MessageReaderArgumentResolverTests {
 	public void missingContentType() throws Exception {
 		this.request = request().body("{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}");
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(type);
 		Mono<Object> result = this.resolver.readBody(param, true, this.bindingContext, exchange());
 
 		StepVerifier.create(result).expectError(UnsupportedMediaTypeStatusException.class).verify();
@@ -102,7 +105,7 @@ public class MessageReaderArgumentResolverTests {
 	public void emptyBody() throws Exception {
 		this.request = request().header("Content-Type", "application/json").build();
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(type);
 		Mono<TestBean> result = (Mono<TestBean>) this.resolver.readBody(
 				param, true, this.bindingContext, exchange()).block();
 
@@ -113,7 +116,7 @@ public class MessageReaderArgumentResolverTests {
 	public void monoTestBean() throws Exception {
 		String body = "{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}";
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(type);
 		Mono<Object> mono = resolveValue(param, body);
 
 		assertEquals(new TestBean("FOOFOO", "BARBAR"), mono.block());
@@ -123,7 +126,7 @@ public class MessageReaderArgumentResolverTests {
 	public void fluxTestBean() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
 		ResolvableType type = forClassWithGenerics(Flux.class, TestBean.class);
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(type);
 		Flux<TestBean> flux = resolveValue(param, body);
 
 		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
@@ -134,7 +137,7 @@ public class MessageReaderArgumentResolverTests {
 	public void singleTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
 		ResolvableType type = forClassWithGenerics(Single.class, TestBean.class);
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(type);
 		Single<TestBean> single = resolveValue(param, body);
 
 		assertEquals(new TestBean("f1", "b1"), single.toBlocking().value());
@@ -144,7 +147,7 @@ public class MessageReaderArgumentResolverTests {
 	public void rxJava2SingleTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
 		ResolvableType type = forClassWithGenerics(io.reactivex.Single.class, TestBean.class);
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(type);
 		io.reactivex.Single<TestBean> single = resolveValue(param, body);
 
 		assertEquals(new TestBean("f1", "b1"), single.blockingGet());
@@ -154,7 +157,7 @@ public class MessageReaderArgumentResolverTests {
 	public void rxJava2MaybeTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
 		ResolvableType type = forClassWithGenerics(Maybe.class, TestBean.class);
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(type);
 		Maybe<TestBean> maybe = resolveValue(param, body);
 
 		assertEquals(new TestBean("f1", "b1"), maybe.blockingGet());
@@ -164,7 +167,7 @@ public class MessageReaderArgumentResolverTests {
 	public void observableTestBean() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
 		ResolvableType type = forClassWithGenerics(Observable.class, TestBean.class);
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(type);
 		Observable<?> observable = resolveValue(param, body);
 
 		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
@@ -175,7 +178,7 @@ public class MessageReaderArgumentResolverTests {
 	public void rxJava2ObservableTestBean() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
 		ResolvableType type = forClassWithGenerics(io.reactivex.Observable.class, TestBean.class);
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(type);
 		io.reactivex.Observable<?> observable = resolveValue(param, body);
 
 		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
@@ -186,7 +189,7 @@ public class MessageReaderArgumentResolverTests {
 	public void flowableTestBean() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
 		ResolvableType type = forClassWithGenerics(Flowable.class, TestBean.class);
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(type);
 		Flowable<?> flowable = resolveValue(param, body);
 
 		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
@@ -197,7 +200,7 @@ public class MessageReaderArgumentResolverTests {
 	public void futureTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
 		ResolvableType type = forClassWithGenerics(CompletableFuture.class, TestBean.class);
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(type);
 		CompletableFuture<?> future = resolveValue(param, body);
 
 		assertEquals(new TestBean("f1", "b1"), future.get());
@@ -206,7 +209,7 @@ public class MessageReaderArgumentResolverTests {
 	@Test
 	public void testBean() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
-		MethodParameter param = this.testMethod.resolveParam(forClass(TestBean.class));
+		MethodParameter param = this.testMethod.arg(TestBean.class);
 		TestBean value = resolveValue(param, body);
 
 		assertEquals(new TestBean("f1", "b1"), value);
@@ -219,7 +222,7 @@ public class MessageReaderArgumentResolverTests {
 		map.put("foo", "f1");
 		map.put("bar", "b1");
 		ResolvableType type = forClassWithGenerics(Map.class, String.class, String.class);
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(type);
 		Map actual = resolveValue(param, body);
 
 		assertEquals(map, actual);
@@ -229,7 +232,7 @@ public class MessageReaderArgumentResolverTests {
 	public void list() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
 		ResolvableType type = forClassWithGenerics(List.class, TestBean.class);
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(type);
 		List<?> list = resolveValue(param, body);
 
 		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")), list);
@@ -239,7 +242,7 @@ public class MessageReaderArgumentResolverTests {
 	public void monoList() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
 		ResolvableType type = forClassWithGenerics(Mono.class, forClassWithGenerics(List.class, TestBean.class));
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(type);
 		Mono<?> mono = resolveValue(param, body);
 
 		List<?> list = (List<?>) mono.block(Duration.ofSeconds(5));
@@ -249,8 +252,7 @@ public class MessageReaderArgumentResolverTests {
 	@Test
 	public void array() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
-		ResolvableType type = forClass(TestBean[].class);
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(TestBean[].class);
 		TestBean[] value = resolveValue(param, body);
 
 		assertArrayEquals(new TestBean[] {new TestBean("f1", "b1"), new TestBean("f2", "b2")}, value);
@@ -261,7 +263,7 @@ public class MessageReaderArgumentResolverTests {
 	public void validateMonoTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\"}";
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(type);
 		Mono<TestBean> mono = resolveValue(param, body);
 
 		StepVerifier.create(mono).expectNextCount(0).expectError(ServerWebInputException.class).verify();
@@ -272,7 +274,7 @@ public class MessageReaderArgumentResolverTests {
 	public void validateFluxTestBean() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\"}]";
 		ResolvableType type = forClassWithGenerics(Flux.class, TestBean.class);
-		MethodParameter param = this.testMethod.resolveParam(type);
+		MethodParameter param = this.testMethod.arg(type);
 		Flux<TestBean> flux = resolveValue(param, body);
 
 		StepVerifier.create(flux)

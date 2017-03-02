@@ -43,11 +43,11 @@ import static org.mockito.Mockito.*;
  */
 public class ServerWebExchangeArgumentResolverTests {
 
-	private final ResolvableMethod testMethod = ResolvableMethod.onClass(getClass()).name("handle");
-
 	private final ServerWebExchangeArgumentResolver resolver = new ServerWebExchangeArgumentResolver();
 
 	private ServerWebExchange exchange;
+
+	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
 	@Before
@@ -62,29 +62,25 @@ public class ServerWebExchangeArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() throws Exception {
-		assertTrue(this.resolver.supportsParameter(parameter(ServerWebExchange.class)));
-		assertTrue(this.resolver.supportsParameter(parameter(ServerHttpRequest.class)));
-		assertTrue(this.resolver.supportsParameter(parameter(ServerHttpResponse.class)));
-		assertTrue(this.resolver.supportsParameter(parameter(HttpMethod.class)));
-		assertFalse(this.resolver.supportsParameter(parameter(String.class)));
+		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ServerWebExchange.class)));
+		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ServerHttpRequest.class)));
+		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ServerHttpResponse.class)));
+		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(HttpMethod.class)));
+		assertFalse(this.resolver.supportsParameter(this.testMethod.arg(String.class)));
 	}
 
 	@Test
 	public void resolveArgument() throws Exception {
-		testResolveArgument(parameter(ServerWebExchange.class), this.exchange);
-		testResolveArgument(parameter(ServerHttpRequest.class), this.exchange.getRequest());
-		testResolveArgument(parameter(ServerHttpResponse.class), this.exchange.getResponse());
-		testResolveArgument(parameter(HttpMethod.class), HttpMethod.GET);
+		testResolveArgument(this.testMethod.arg(ServerWebExchange.class), this.exchange);
+		testResolveArgument(this.testMethod.arg(ServerHttpRequest.class), this.exchange.getRequest());
+		testResolveArgument(this.testMethod.arg(ServerHttpResponse.class), this.exchange.getResponse());
+		testResolveArgument(this.testMethod.arg(HttpMethod.class), HttpMethod.GET);
 	}
 
 
 	private void testResolveArgument(MethodParameter parameter, Object expected) {
 		Mono<Object> mono = this.resolver.resolveArgument(parameter, new BindingContext(), this.exchange);
 		assertSame(expected, mono.block());
-	}
-
-	private MethodParameter parameter(Class<?> parameterType) {
-		return this.testMethod.resolveParam(parameter -> parameterType.equals(parameter.getParameterType()));
 	}
 
 
