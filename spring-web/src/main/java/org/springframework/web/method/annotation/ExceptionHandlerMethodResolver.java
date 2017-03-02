@@ -125,7 +125,7 @@ public class ExceptionHandlerMethodResolver {
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
 	public Method resolveMethod(Exception exception) {
-		return resolveMethod(exception);
+		return resolveMethodByThrowable(exception);
 	}
 
 	/**
