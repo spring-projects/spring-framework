@@ -233,7 +233,7 @@ public interface TransactionDefinition {
 	 * ({@link #PROPAGATION_SUPPORTS}). In the latter case, the flag will
 	 * only apply to managed resources within the application, such as a
 	 * Hibernate {@code Session}.
-	 <<	 * <p>This just serves as a hint for the actual transaction subsystem;
+	 * <p>This just serves as a hint for the actual transaction subsystem;
 	 * it will <i>not necessarily</i> cause failure of write access attempts.
 	 * A transaction manager which cannot interpret the read-only hint will
 	 * <i>not</i> throw an exception when asked for a read-only transaction.
