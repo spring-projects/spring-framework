@@ -111,8 +111,8 @@ public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 		}
 		catch (RaiseException ex) {
 			RubyException rubyEx = ex.getException();
-			String msg = (rubyEx != null && rubyEx.message != null) ?
-					rubyEx.message.toString() : "Unexpected JRuby error";
+			String msg = (rubyEx != null) ?
+					rubyEx.getMessage().toString() : "Unexpected JRuby error";
 			throw new ScriptCompilationException(scriptSource, msg, ex);
 		}
 		catch (JumpException ex) {
