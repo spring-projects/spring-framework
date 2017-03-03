@@ -38,7 +38,6 @@ import rx.Completable;
 import rx.Observable;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.ClassPathResource;
@@ -64,7 +63,7 @@ import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
-import static org.springframework.web.reactive.result.ResolvableMethod.on;
+import static org.springframework.web.method.ResolvableMethod.on;
 
 /**
  * Unit tests for {@link AbstractMessageWriterResultHandler}.

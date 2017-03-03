@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.result;
+package org.springframework.web.method;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -74,7 +74,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * <pre>
  *
- * import static org.springframework.web.reactive.result.ResolvableMethod.on;
+ * import static org.springframework.web.method.ResolvableMethod.on;
  *
  * // Return type
  * on(TestController.class).resolveReturnType(Foo.class);

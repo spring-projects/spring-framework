@@ -53,7 +53,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
-import org.springframework.web.reactive.result.ResolvableMethod;
+import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;

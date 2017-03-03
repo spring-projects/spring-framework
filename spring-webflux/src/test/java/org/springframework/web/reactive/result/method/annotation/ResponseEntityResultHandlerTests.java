@@ -65,7 +65,7 @@ import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.ResponseEntity.notFound;
 import static org.springframework.http.ResponseEntity.ok;
-import static org.springframework.web.reactive.result.ResolvableMethod.on;
+import static org.springframework.web.method.ResolvableMethod.on;
 
 /**
  * Unit tests for {@link ResponseEntityResultHandler}. When adding a test also

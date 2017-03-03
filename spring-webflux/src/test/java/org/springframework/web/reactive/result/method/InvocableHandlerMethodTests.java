@@ -44,7 +44,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.web.reactive.result.ResolvableMethod.on;
+import static org.springframework.web.method.ResolvableMethod.on;
 
 /**
  * Unit tests for {@link InvocableHandlerMethod}.

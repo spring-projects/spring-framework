@@ -64,7 +64,7 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.web.reactive.result.ResolvableMethod.on;
+import static org.springframework.web.method.ResolvableMethod.on;
 
 /**
  * ViewResolutionResultHandler relying on a canned {@link TestViewResolver}
