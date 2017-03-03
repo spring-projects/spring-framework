@@ -261,7 +261,9 @@ public class CronSequenceGenerator {
 	 */
 	private void parse(String expression) throws IllegalArgumentException {
 		String[] fields = StringUtils.tokenizeToStringArray(expression, " ");
-		if (!areValidCronFields(fields)) {
+		if (fields == null) {
+			throw new IllegalArgumentException("Cron expression must not be null");
+		} else if (!areValidCronFields(fields)) {
 			throw new IllegalArgumentException(String.format(
 					"Cron expression must consist of 6 fields (found %d in \"%s\")", fields.length, expression));
 		}
