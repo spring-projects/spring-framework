@@ -16,18 +16,12 @@
 
 package org.springframework.web.accept;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
+
+import java.util.*;
 
 /**
  * Central class to determine requested {@linkplain MediaType media types}
@@ -119,14 +113,15 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 
 	@Override
 	public List<MediaType> resolveMediaTypes(NativeWebRequest request) throws HttpMediaTypeNotAcceptableException {
+		List<MediaType> resolvedMediaTypes = new ArrayList<MediaType>();
 		for (ContentNegotiationStrategy strategy : this.strategies) {
 			List<MediaType> mediaTypes = strategy.resolveMediaTypes(request);
 			if (mediaTypes.isEmpty() || mediaTypes.equals(MEDIA_TYPE_ALL)) {
 				continue;
 			}
-			return mediaTypes;
+			resolvedMediaTypes.addAll(mediaTypes);
 		}
-		return Collections.emptyList();
+		return resolvedMediaTypes;
 	}
 
 	@Override
