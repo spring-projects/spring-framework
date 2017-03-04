@@ -16,10 +16,10 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,21 +28,25 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
 
 /**
  * Unit tests for {@link RequestParamMethodArgumentResolver}.
@@ -53,34 +57,15 @@ public class RequestParamMethodArgumentResolverTests {
 
 	private RequestParamMethodArgumentResolver resolver;
 
-	private MethodParameter paramNamedDefaultValueString;
-	private MethodParameter paramNamedStringArray;
-	private MethodParameter paramNamedMap;
-	private MethodParameter paramMap;
-	private MethodParameter paramStringNotAnnot;
-	private MethodParameter paramRequired;
-	private MethodParameter paramNotRequired;
-	private MethodParameter paramOptional;
-
 	private BindingContext bindContext;
+
+	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
 	@Before
 	public void setup() throws Exception {
+
 		this.resolver = new RequestParamMethodArgumentResolver(null, true);
-
-		ParameterNameDiscoverer paramNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
-		Method method = ReflectionUtils.findMethod(getClass(), "handle", (Class<?>[]) null);
-
-		this.paramNamedDefaultValueString = new SynthesizingMethodParameter(method, 0);
-		this.paramNamedStringArray = new SynthesizingMethodParameter(method, 1);
-		this.paramNamedMap = new SynthesizingMethodParameter(method, 2);
-		this.paramMap = new SynthesizingMethodParameter(method, 3);
-		this.paramStringNotAnnot = new SynthesizingMethodParameter(method, 4);
-		this.paramStringNotAnnot.initParameterNameDiscovery(paramNameDiscoverer);
-		this.paramRequired = new SynthesizingMethodParameter(method, 5);
-		this.paramNotRequired = new SynthesizingMethodParameter(method, 6);
-		this.paramOptional = new SynthesizingMethodParameter(method, 7);
 
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultFormattingConversionService());
@@ -91,47 +76,64 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test
 	public void supportsParameter() {
 		this.resolver = new RequestParamMethodArgumentResolver(null, true);
-		assertTrue(this.resolver.supportsParameter(this.paramNamedDefaultValueString));
-		assertTrue(this.resolver.supportsParameter(this.paramNamedStringArray));
-		assertTrue(this.resolver.supportsParameter(this.paramNamedMap));
-		assertFalse(this.resolver.supportsParameter(this.paramMap));
-		assertTrue(this.resolver.supportsParameter(this.paramStringNotAnnot));
-		assertTrue(this.resolver.supportsParameter(this.paramRequired));
-		assertTrue(this.resolver.supportsParameter(this.paramNotRequired));
-		assertTrue(this.resolver.supportsParameter(this.paramOptional));
 
+		MethodParameter param = this.testMethod.annotated(RequestParam.class, value("bar")).arg(String.class);
+		assertTrue(this.resolver.supportsParameter(param));
+
+		param = this.testMethod.annotated(RequestParam.class).arg(String[].class);
+		assertTrue(this.resolver.supportsParameter(param));
+
+		param = this.testMethod.annotated(RequestParam.class, name("name")).arg(Map.class);
+		assertTrue(this.resolver.supportsParameter(param));
+
+		param = this.testMethod.annotated(RequestParam.class, name("")).arg(Map.class);
+		assertFalse(this.resolver.supportsParameter(param));
+
+		param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
+		assertTrue(this.resolver.supportsParameter(param));
+
+		param = this.testMethod.annotated(RequestParam.class, required(), value("")).arg(String.class);
+		assertTrue(this.resolver.supportsParameter(param));
+
+		param = this.testMethod.annotated(RequestParam.class, required().negate()).arg(String.class);
+		assertTrue(this.resolver.supportsParameter(param));
+
+		param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
 		this.resolver = new RequestParamMethodArgumentResolver(null, false);
-		assertFalse(this.resolver.supportsParameter(this.paramStringNotAnnot));
+		assertFalse(this.resolver.supportsParameter(param));
 	}
 
 	@Test
 	public void resolveWithQueryString() throws Exception {
-		assertEquals("foo", resolve(this.paramNamedDefaultValueString, exchangeWithQuery("name=foo")));
+		MethodParameter param = this.testMethod.annotated(RequestParam.class, value("bar")).arg(String.class);
+		assertEquals("foo", resolve(param, exchangeWithQuery("name=foo")));
 	}
 
 	@Test
 	public void resolveWithFormData() throws Exception {
-		assertEquals("foo", resolve(this.paramNamedDefaultValueString, exchangeWithFormData("name=foo")));
+		MethodParameter param = this.testMethod.annotated(RequestParam.class, value("bar")).arg(String.class);
+		assertEquals("foo", resolve(param, exchangeWithFormData("name=foo")));
 	}
 
 	@Test
 	public void resolveStringArray() throws Exception {
-		Object result = resolve(this.paramNamedStringArray, exchangeWithQuery("name=foo&name=bar"));
+		MethodParameter param = this.testMethod.annotated(RequestParam.class).arg(String[].class);
+		Object result = resolve(param, exchangeWithQuery("name=foo&name=bar"));
 		assertTrue(result instanceof String[]);
 		assertArrayEquals(new String[] {"foo", "bar"}, (String[]) result);
 	}
 
 	@Test
 	public void resolveDefaultValue() throws Exception {
-		Object result = resolve(this.paramNamedDefaultValueString, exchange());
-		assertEquals("bar", result);
+		MethodParameter param = this.testMethod.annotated(RequestParam.class, value("bar")).arg(String.class);
+		assertEquals("bar", resolve(param, exchange()));
 	}
 
 	@Test
 	public void missingRequestParam() throws Exception {
 
-		Mono<Object> mono = this.resolver.resolveArgument(
-				this.paramNamedStringArray, this.bindContext, exchange());
+		MethodParameter param = this.testMethod.annotated(RequestParam.class).arg(String[].class);
+		Mono<Object> mono = this.resolver.resolveArgument(param, this.bindContext, exchange());
 
 		StepVerifier.create(mono)
 				.expectNextCount(0)
@@ -142,40 +144,52 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test
 	public void resolveSimpleTypeParam() throws Exception {
 		ServerWebExchange exchange = exchangeWithQuery("stringNotAnnot=plainValue");
-		Object result = resolve(this.paramStringNotAnnot, exchange);
+		MethodParameter param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
+		param.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		Object result = resolve(param, exchange);
 		assertEquals("plainValue", result);
 	}
 
 	@Test  // SPR-8561
 	public void resolveSimpleTypeParamToNull() throws Exception {
-		assertNull(resolve(this.paramStringNotAnnot, exchange()));
+		MethodParameter param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
+		param.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		assertNull(resolve(param, exchange()));
 	}
 
 	@Test  // SPR-10180
 	public void resolveEmptyValueToDefault() throws Exception {
 		ServerWebExchange exchange = exchangeWithQuery("name=");
-		Object result = resolve(this.paramNamedDefaultValueString, exchange);
+		MethodParameter param = this.testMethod.annotated(RequestParam.class, value("bar")).arg(String.class);
+		Object result = resolve(param, exchange);
 		assertEquals("bar", result);
 	}
 
 	@Test
 	public void resolveEmptyValueWithoutDefault() throws Exception {
-		assertEquals("", resolve(this.paramStringNotAnnot, exchangeWithQuery("stringNotAnnot=")));
+		MethodParameter param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
+		param.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		assertEquals("", resolve(param, exchangeWithQuery("stringNotAnnot=")));
 	}
 
 	@Test
 	public void resolveEmptyValueRequiredWithoutDefault() throws Exception {
-		assertEquals("", resolve(this.paramRequired, exchangeWithQuery("name=")));
+		MethodParameter param = this.testMethod
+				.annotated(RequestParam.class, required(), value(""))
+				.arg(String.class);
+
+		assertEquals("", resolve(param, exchangeWithQuery("name=")));
 	}
 
 	@Test
 	public void resolveOptionalParamValue() throws Exception {
 		ServerWebExchange exchange = exchange();
-		Object result = resolve(this.paramOptional, exchange);
+		MethodParameter param = this.testMethod.arg(forClassWithGenerics(Optional.class, Integer.class));
+		Object result = resolve(param, exchange);
 		assertEquals(Optional.empty(), result);
 
 		exchange = exchangeWithQuery("name=123");
-		result = resolve(this.paramOptional, exchange);
+		result = resolve(param, exchange);
 
 		assertEquals(Optional.class, result.getClass());
 		Optional<?> value = (Optional<?>) result;
@@ -203,6 +217,20 @@ public class RequestParamMethodArgumentResolverTests {
 
 	private Object resolve(MethodParameter parameter, ServerWebExchange exchange) {
 		return this.resolver.resolveArgument(parameter, this.bindContext, exchange).blockMillis(0);
+	}
+
+	private Predicate<RequestParam> name(String name) {
+		return a -> name.equals(a.name());
+	}
+
+	private Predicate<RequestParam> required() {
+		return RequestParam::required;
+	}
+
+	private Predicate<RequestParam> value(String value) {
+		return !value.isEmpty() ?
+				requestParam -> value.equals(requestParam.defaultValue()) :
+				requestParam -> ValueConstants.DEFAULT_NONE.equals(requestParam.defaultValue());
 	}
 
 

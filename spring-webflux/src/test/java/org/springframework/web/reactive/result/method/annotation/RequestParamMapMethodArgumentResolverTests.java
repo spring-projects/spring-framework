@@ -16,22 +16,22 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
@@ -47,50 +47,51 @@ public class RequestParamMapMethodArgumentResolverTests {
 
 	private RequestParamMapMethodArgumentResolver resolver;
 
-	private MethodParameter paramMap;
-	private MethodParameter paramMultiValueMap;
-	private MethodParameter paramNamedMap;
-	private MethodParameter paramMapWithoutAnnot;
+	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
 	@Before
 	public void setup() throws Exception {
 		this.resolver = new RequestParamMapMethodArgumentResolver();
-
-		Method method = getClass().getMethod("params", Map.class, MultiValueMap.class, Map.class, Map.class);
-		this.paramMap = new SynthesizingMethodParameter(method, 0);
-		this.paramMultiValueMap = new SynthesizingMethodParameter(method, 1);
-		this.paramNamedMap = new SynthesizingMethodParameter(method, 2);
-		this.paramMapWithoutAnnot = new SynthesizingMethodParameter(method, 3);
 	}
 
 
 	@Test
 	public void supportsParameter() {
-		assertTrue(this.resolver.supportsParameter(this.paramMap));
-		assertTrue(this.resolver.supportsParameter(this.paramMultiValueMap));
-		assertFalse(this.resolver.supportsParameter(this.paramNamedMap));
-		assertFalse(this.resolver.supportsParameter(this.paramMapWithoutAnnot));
+		MethodParameter param = this.testMethod.annotated(RequestParam.class, name("")).arg(Map.class);
+		assertTrue(this.resolver.supportsParameter(param));
+
+		param = this.testMethod.annotated(RequestParam.class).arg(MultiValueMap.class);
+		assertTrue(this.resolver.supportsParameter(param));
+
+		param = this.testMethod.annotated(RequestParam.class, name("name")).arg(Map.class);
+		assertFalse(this.resolver.supportsParameter(param));
+
+		param = this.testMethod.notAnnotated(RequestParam.class).arg(Map.class);
+		assertFalse(this.resolver.supportsParameter(param));
 	}
 
 	@Test
 	public void resolveMapArgumentWithQueryString() throws Exception {
-		Object result= resolve(this.paramMap, exchangeWithQuery("foo=bar"));
+		MethodParameter param = this.testMethod.annotated(RequestParam.class, name("")).arg(Map.class);
+		Object result= resolve(param, exchangeWithQuery("foo=bar"));
 		assertTrue(result instanceof Map);
 		assertEquals(Collections.singletonMap("foo", "bar"), result);
 	}
 
 	@Test
 	public void resolveMapArgumentWithFormData() throws Exception {
-		Object result= resolve(this.paramMap, exchangeWithFormData("foo=bar"));
+		MethodParameter param = this.testMethod.annotated(RequestParam.class, name("")).arg(Map.class);
+		Object result= resolve(param, exchangeWithFormData("foo=bar"));
 		assertTrue(result instanceof Map);
 		assertEquals(Collections.singletonMap("foo", "bar"), result);
 	}
 
 	@Test
 	public void resolveMultiValueMapArgument() throws Exception {
+		MethodParameter param = this.testMethod.annotated(RequestParam.class).arg(MultiValueMap.class);
 		ServerWebExchange exchange = exchangeWithQuery("foo=bar&foo=baz");
-		Object result= resolve(this.paramMultiValueMap, exchange);
+		Object result= resolve(param, exchange);
 
 		assertTrue(result instanceof MultiValueMap);
 		assertEquals(Collections.singletonMap("foo", Arrays.asList("bar", "baz")), result);
@@ -113,12 +114,17 @@ public class RequestParamMapMethodArgumentResolverTests {
 		return this.resolver.resolveArgument(parameter, null, exchange).blockMillis(0);
 	}
 
+	private Predicate<RequestParam> name(String name) {
+		return a -> name.equals(a.name());
+	}
+
 
 	@SuppressWarnings("unused")
-	public void params(@RequestParam Map<?, ?> param1,
-					   @RequestParam MultiValueMap<?, ?> param2,
-					   @RequestParam("name") Map<?, ?> param3,
-					   Map<?, ?> param4) {
+	public void handle(
+			@RequestParam Map<?, ?> param1,
+			@RequestParam MultiValueMap<?, ?> param2,
+			@RequestParam("name") Map<?, ?> param3,
+			Map<?, ?> param4) {
 	}
 
 }

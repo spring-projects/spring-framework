@@ -42,7 +42,7 @@ import org.springframework.core.MethodIntrospector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.objenesis.ObjenesisException;
 import org.springframework.objenesis.SpringObjenesis;
 import org.springframework.util.Assert;
@@ -83,7 +83,7 @@ import org.springframework.util.ReflectionUtils;
  * on(TestController.class).annotated(ResponseBody.class).resolveReturnType(Bar.class);
  *
  * // Annotation not present
- * on(TestController.class).isNotAnnotated(ResponseBody.class).resolveReturnType();
+ * on(TestController.class).notAnnotated(ResponseBody.class).resolveReturnType();
  *
  * // Annotation properties
  * on(TestController.class)
@@ -145,7 +145,7 @@ public class ResolvableMethod {
 	 * Return the declared return type of the resolved method.
 	 */
 	public MethodParameter returnType() {
-		return new MethodParameter(this.method, -1);
+		return new SynthesizingMethodParameter(this.method, -1);
 	}
 
 	/**
@@ -262,9 +262,17 @@ public class ResolvableMethod {
 		/**
 		 * Filter on methods not annotated with the given annotation type.
 		 */
-		public final <A extends Annotation> Builder isNotAnnotated(Class<A> annotationType) {
-			String message = "notAnnotated=" + annotationType.getName();
-			addFilter(message, m -> AnnotationUtils.findAnnotation(m, annotationType) == null);
+		public final Builder notAnnotated(Class<? extends Annotation>... annotationTypes) {
+			String message = "notAnnotated=" + Arrays.toString(annotationTypes);
+			addFilter(message, method -> {
+				if (annotationTypes.length != 0) {
+					return Arrays.stream(annotationTypes).noneMatch(annotType ->
+							AnnotatedElementUtils.findMergedAnnotation(method, annotType) != null);
+				}
+				else {
+					return method.getAnnotations().length == 0;
+				}
+			});
 			return this;
 		}
 
@@ -505,7 +513,10 @@ public class ResolvableMethod {
 		 */
 		@SafeVarargs
 		public final ArgResolver notAnnotated(Class<? extends Annotation>... annotationTypes) {
-			this.filters.add(p -> Arrays.stream(annotationTypes).noneMatch(p::hasParameterAnnotation));
+			this.filters.add(param ->
+					(annotationTypes.length != 0) ?
+							Arrays.stream(annotationTypes).noneMatch(param::hasParameterAnnotation) :
+							param.getParameterAnnotations().length == 0);
 			return this;
 		}
 
@@ -550,7 +561,7 @@ public class ResolvableMethod {
 		private List<MethodParameter> applyFilters() {
 			List<MethodParameter> matches = new ArrayList<>();
 			for (int i = 0; i < method.getParameterCount(); i++) {
-				MethodParameter param = new MethodParameter(method, i);
+				MethodParameter param = new SynthesizingMethodParameter(method, i);
 				if (this.filters.stream().allMatch(p -> p.test(param))) {
 					matches.add(param);
 				}
