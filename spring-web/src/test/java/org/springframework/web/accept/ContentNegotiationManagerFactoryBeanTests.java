@@ -16,13 +16,8 @@
 
 package org.springframework.web.accept;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockServletContext;
@@ -31,7 +26,13 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
-import static org.junit.Assert.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test fixture for {@link ContentNegotiationManagerFactoryBean} tests.
@@ -132,6 +133,25 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		this.servletRequest.addParameter("format", "json");
 
 		manager.resolveMediaTypes(this.webRequest);
+	}
+
+	@Test
+	public void processAllStrategies() throws Exception {
+		Map<String, MediaType> mediaTypes = new HashMap<>();
+		mediaTypes.put("json", MediaType.APPLICATION_JSON);
+		mediaTypes.put("xml", MediaType.APPLICATION_XML);
+		this.factoryBean.addMediaTypes(mediaTypes);
+
+		this.factoryBean.afterPropertiesSet();
+		ContentNegotiationManager manager = this.factoryBean.getObject();
+
+		this.servletRequest.setRequestURI("/flower.xml");
+		this.servletRequest.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
+
+		List<MediaType> resolvedMediaTypes = manager.resolveMediaTypes(this.webRequest);
+		assertEquals(2, resolvedMediaTypes.size());
+		assertTrue(resolvedMediaTypes.contains(MediaType.APPLICATION_JSON));
+		assertTrue(resolvedMediaTypes.contains(MediaType.APPLICATION_XML));
 	}
 
 	@Test
