@@ -868,9 +868,9 @@ such as a `static valueOf` method, is defined on the target class.
 		boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType);
 
 	}
-	
+
 	public interface ConditionalGenericConverter
-	        extends GenericConverter, ConditionalConverter {
+		extends GenericConverter, ConditionalConverter {
 
 	}
 ----
