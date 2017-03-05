@@ -62,7 +62,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.springframework.core.ResolvableType.forClass;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.method.ResolvableMethod.on;
 
@@ -90,11 +89,11 @@ public class ViewResolutionResultHandlerTests {
 
 		testSupports(on(TestController.class).resolveReturnType(String.class));
 		testSupports(on(TestController.class).resolveReturnType(View.class));
-		testSupports(on(TestController.class).resolveReturnType(forClassWithGenerics(Mono.class, String.class)));
-		testSupports(on(TestController.class).resolveReturnType(forClassWithGenerics(Mono.class, View.class)));
-		testSupports(on(TestController.class).resolveReturnType(forClassWithGenerics(Single.class, String.class)));
-		testSupports(on(TestController.class).resolveReturnType(forClassWithGenerics(Single.class, View.class)));
-		testSupports(on(TestController.class).resolveReturnType(forClassWithGenerics(Mono.class, Void.class)));
+		testSupports(on(TestController.class).resolveReturnType(Mono.class, String.class));
+		testSupports(on(TestController.class).resolveReturnType(Mono.class, View.class));
+		testSupports(on(TestController.class).resolveReturnType(Single.class, String.class));
+		testSupports(on(TestController.class).resolveReturnType(Single.class, View.class));
+		testSupports(on(TestController.class).resolveReturnType(Mono.class, Void.class));
 		testSupports(on(TestController.class).resolveReturnType(Completable.class));
 		testSupports(on(TestController.class).resolveReturnType(Model.class));
 		testSupports(on(TestController.class).resolveReturnType(Map.class));
@@ -139,27 +138,27 @@ public class ViewResolutionResultHandlerTests {
 		returnValue = new TestView("account");
 		testHandle("/path", returnType, returnValue, "account: {id=123}");
 
-		returnType = on(TestController.class).resolveReturnType(forClassWithGenerics(Mono.class, View.class));
+		returnType = on(TestController.class).resolveReturnType(Mono.class, View.class);
 		returnValue = Mono.just(new TestView("account"));
 		testHandle("/path", returnType, returnValue, "account: {id=123}");
 
-		returnType = on(TestController.class).resolveReturnType(forClass(String.class));
+		returnType = on(TestController.class).resolveReturnType(String.class);
 		returnValue = "account";
 		testHandle("/path", returnType, returnValue, "account: {id=123}", resolver);
 
-		returnType = on(TestController.class).resolveReturnType(forClassWithGenerics(Mono.class, String.class));
+		returnType = on(TestController.class).resolveReturnType(Mono.class, String.class);
 		returnValue = Mono.just("account");
 		testHandle("/path", returnType, returnValue, "account: {id=123}", resolver);
 
-		returnType = on(TestController.class).resolveReturnType(forClass(Model.class));
+		returnType = on(TestController.class).resolveReturnType(Model.class);
 		returnValue = new ConcurrentModel().addAttribute("name", "Joe");
 		testHandle("/account", returnType, returnValue, "account: {id=123, name=Joe}", resolver);
 
-		returnType = on(TestController.class).resolveReturnType(forClass(Map.class));
+		returnType = on(TestController.class).resolveReturnType(Map.class);
 		returnValue = Collections.singletonMap("name", "Joe");
 		testHandle("/account", returnType, returnValue, "account: {id=123, name=Joe}", resolver);
 
-		returnType = on(TestController.class).resolveReturnType(forClass(TestBean.class));
+		returnType = on(TestController.class).resolveReturnType(TestBean.class);
 		returnValue = new TestBean("Joe");
 		String responseBody = "account: {" +
 				"id=123, " +
@@ -184,17 +183,10 @@ public class ViewResolutionResultHandlerTests {
 
 	@Test
 	public void defaultViewName() throws Exception {
-
 		testDefaultViewName(null, on(TestController.class).resolveReturnType(String.class));
-
-		testDefaultViewName(Mono.empty(), on(TestController.class)
-				.resolveReturnType(forClassWithGenerics(Mono.class, String.class)));
-
-		testDefaultViewName(Mono.empty(), on(TestController.class)
-				.resolveReturnType(forClassWithGenerics(Mono.class, Void.class)));
-
-		testDefaultViewName(Completable.complete(), on(TestController.class)
-				.resolveReturnType(forClass(Completable.class)));
+		testDefaultViewName(Mono.empty(), on(TestController.class).resolveReturnType(Mono.class, String.class));
+		testDefaultViewName(Mono.empty(), on(TestController.class).resolveReturnType(Mono.class, Void.class));
+		testDefaultViewName(Completable.complete(), on(TestController.class).resolveReturnType(Completable.class));
 	}
 
 	private void testDefaultViewName(Object returnValue, MethodParameter returnType) throws URISyntaxException {

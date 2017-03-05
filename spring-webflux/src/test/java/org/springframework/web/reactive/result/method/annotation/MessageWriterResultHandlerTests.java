@@ -59,11 +59,10 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
-import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 import static org.springframework.web.method.ResolvableMethod.on;
+import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 
 /**
  * Unit tests for {@link AbstractMessageWriterResultHandler}.
@@ -110,27 +109,19 @@ public class MessageWriterResultHandlerTests {
 	@Test
 	public void voidReturnType() throws Exception {
 		testVoid(null, on(TestController.class).resolveReturnType(void.class));
+		testVoid(Mono.empty(), on(TestController.class).resolveReturnType(Mono.class, Void.class));
+		testVoid(Flux.empty(), on(TestController.class).resolveReturnType(Flux.class, Void.class));
+		testVoid(Completable.complete(), on(TestController.class).resolveReturnType(Completable.class));
+		testVoid(Observable.empty(), on(TestController.class).resolveReturnType(Observable.class, Void.class));
 
-		testVoid(Mono.empty(), on(TestController.class)
-				.resolveReturnType(forClassWithGenerics(Mono.class, Void.class)));
+		MethodParameter type = on(TestController.class).resolveReturnType(io.reactivex.Completable.class);
+		testVoid(io.reactivex.Completable.complete(), type);
 
-		testVoid(Flux.empty(), on(TestController.class)
-				.resolveReturnType(forClassWithGenerics(Flux.class, Void.class)));
+		type = on(TestController.class).resolveReturnType(io.reactivex.Observable.class, Void.class);
+		testVoid(io.reactivex.Observable.empty(), type);
 
-		testVoid(Completable.complete(), on(TestController.class)
-				.resolveReturnType(Completable.class));
-
-		testVoid(Observable.empty(), on(TestController.class)
-				.resolveReturnType(forClassWithGenerics(Observable.class, Void.class)));
-
-		testVoid(io.reactivex.Completable.complete(), on(TestController.class)
-				.resolveReturnType(io.reactivex.Completable.class));
-
-		testVoid(io.reactivex.Observable.empty(), on(TestController.class)
-				.resolveReturnType(forClassWithGenerics(io.reactivex.Observable.class, Void.class)));
-
-		testVoid(Flowable.empty(), on(TestController.class)
-				.resolveReturnType(forClassWithGenerics(Flowable.class, Void.class)));
+		type = on(TestController.class).resolveReturnType(Flowable.class, Void.class);
+		testVoid(Flowable.empty(), type);
 	}
 
 	private void testVoid(Object body, MethodParameter returnType) {
@@ -155,9 +146,7 @@ public class MessageWriterResultHandlerTests {
 	@Test  // SPR-12811
 	public void jacksonTypeOfListElement() throws Exception {
 
-		MethodParameter returnType = on(TestController.class)
-				.resolveReturnType(forClassWithGenerics(List.class, ParentClass.class));
-
+		MethodParameter returnType = on(TestController.class).resolveReturnType(List.class, ParentClass.class);
 		List<ParentClass> body = Arrays.asList(new Foo("foo"), new Bar("bar"));
 		this.resultHandler.writeBody(body, returnType, this.exchange).block(Duration.ofSeconds(5));
 
@@ -179,8 +168,7 @@ public class MessageWriterResultHandlerTests {
 	@Test  // SPR-13318
 	public void jacksonTypeWithSubTypeOfListElement() throws Exception {
 
-		MethodParameter returnType = on(TestController.class)
-				.resolveReturnType(forClassWithGenerics(List.class, Identifiable.class));
+		MethodParameter returnType = on(TestController.class).resolveReturnType(List.class, Identifiable.class);
 
 		List<SimpleBean> body = Arrays.asList(new SimpleBean(123L, "foo"), new SimpleBean(456L, "bar"));
 		this.resultHandler.writeBody(body, returnType, this.exchange).block(Duration.ofSeconds(5));

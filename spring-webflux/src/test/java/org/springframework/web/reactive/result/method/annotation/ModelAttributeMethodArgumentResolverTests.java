@@ -38,13 +38,16 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeBindException;
-import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.method.ResolvableMethod;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link ModelAttributeMethodArgumentResolver}.
@@ -76,13 +79,13 @@ public class ModelAttributeMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annotated(ModelAttribute.class).arg(Foo.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(ModelAttribute.class).arg(forClassWithGenerics(Mono.class, Foo.class));
+		param = this.testMethod.annotated(ModelAttribute.class).arg(Mono.class, Foo.class);
 		assertTrue(resolver.supportsParameter(param));
 
 		param = this.testMethod.notAnnotated(ModelAttribute.class).arg(Foo.class);
 		assertFalse(resolver.supportsParameter(param));
 
-		param = this.testMethod.notAnnotated(ModelAttribute.class).arg(forClassWithGenerics(Mono.class, Foo.class));
+		param = this.testMethod.notAnnotated(ModelAttribute.class).arg(Mono.class, Foo.class);
 		assertFalse(resolver.supportsParameter(param));
 	}
 
@@ -94,13 +97,13 @@ public class ModelAttributeMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.notAnnotated(ModelAttribute.class).arg(Foo.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.notAnnotated(ModelAttribute.class).arg(forClassWithGenerics(Mono.class, Foo.class));
+		param = this.testMethod.notAnnotated(ModelAttribute.class).arg(Mono.class, Foo.class);
 		assertTrue(resolver.supportsParameter(param));
 
 		param = this.testMethod.notAnnotated(ModelAttribute.class).arg(String.class);
 		assertFalse(resolver.supportsParameter(param));
 
-		param = this.testMethod.notAnnotated(ModelAttribute.class).arg(forClassWithGenerics(Mono.class, String.class));
+		param = this.testMethod.notAnnotated(ModelAttribute.class).arg(Mono.class, String.class);
 		assertFalse(resolver.supportsParameter(param));
 	}
 
@@ -115,8 +118,8 @@ public class ModelAttributeMethodArgumentResolverTests {
 	@Test
 	public void createAndBindToMono() throws Exception {
 
-		MethodParameter parameter = this.testMethod.notAnnotated(ModelAttribute.class)
-				.arg(forClassWithGenerics(Mono.class, Foo.class));
+		MethodParameter parameter = this.testMethod
+				.notAnnotated(ModelAttribute.class).arg(Mono.class, Foo.class);
 
 		testBindFoo(parameter, mono -> {
 			assertTrue(mono.getClass().getName(), mono instanceof Mono);
@@ -129,8 +132,8 @@ public class ModelAttributeMethodArgumentResolverTests {
 	@Test
 	public void createAndBindToSingle() throws Exception {
 
-		MethodParameter parameter = this.testMethod.annotated(ModelAttribute.class)
-				.arg(forClassWithGenerics(Single.class, Foo.class));
+		MethodParameter parameter = this.testMethod
+				.annotated(ModelAttribute.class).arg(Single.class, Foo.class);
 
 		testBindFoo(parameter, single -> {
 			assertTrue(single.getClass().getName(), single instanceof Single);
@@ -191,8 +194,8 @@ public class ModelAttributeMethodArgumentResolverTests {
 		foo.setName("Jim");
 		this.bindContext.getModel().addAttribute("foo", Mono.just(foo));
 
-		MethodParameter parameter = this.testMethod.notAnnotated(ModelAttribute.class)
-				.arg(forClassWithGenerics(Mono.class, Foo.class));
+		MethodParameter parameter = this.testMethod
+				.notAnnotated(ModelAttribute.class).arg(Mono.class, Foo.class);
 
 		testBindFoo(parameter, mono -> {
 			assertTrue(mono.getClass().getName(), mono instanceof Mono);
@@ -230,8 +233,8 @@ public class ModelAttributeMethodArgumentResolverTests {
 	@SuppressWarnings("unchecked")
 	public void validationErrorToMono() throws Exception {
 
-		MethodParameter parameter = this.testMethod.notAnnotated(ModelAttribute.class)
-				.arg(forClassWithGenerics(Mono.class, Foo.class));
+		MethodParameter parameter = this.testMethod
+				.notAnnotated(ModelAttribute.class).arg(Mono.class, Foo.class);
 
 		testValidationError(parameter,
 				resolvedArgumentMono -> {
@@ -246,8 +249,8 @@ public class ModelAttributeMethodArgumentResolverTests {
 	@SuppressWarnings("unchecked")
 	public void validationErrorToSingle() throws Exception {
 
-		MethodParameter parameter = this.testMethod.annotated(ModelAttribute.class)
-				.arg(forClassWithGenerics(Single.class, Foo.class));
+		MethodParameter parameter = this.testMethod
+				.annotated(ModelAttribute.class).arg(Single.class, Foo.class);
 
 		testValidationError(parameter,
 				resolvedArgumentMono -> {

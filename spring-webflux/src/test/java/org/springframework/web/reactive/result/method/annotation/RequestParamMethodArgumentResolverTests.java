@@ -26,7 +26,6 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.MediaType;
@@ -145,7 +144,6 @@ public class RequestParamMethodArgumentResolverTests {
 	public void resolveSimpleTypeParam() throws Exception {
 		ServerWebExchange exchange = exchangeWithQuery("stringNotAnnot=plainValue");
 		MethodParameter param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
-		param.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
 		Object result = resolve(param, exchange);
 		assertEquals("plainValue", result);
 	}
@@ -153,7 +151,6 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test  // SPR-8561
 	public void resolveSimpleTypeParamToNull() throws Exception {
 		MethodParameter param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
-		param.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
 		assertNull(resolve(param, exchange()));
 	}
 
@@ -168,7 +165,6 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test
 	public void resolveEmptyValueWithoutDefault() throws Exception {
 		MethodParameter param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
-		param.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
 		assertEquals("", resolve(param, exchangeWithQuery("stringNotAnnot=")));
 	}
 
