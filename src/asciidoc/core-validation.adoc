@@ -863,10 +863,14 @@ such as a `static valueOf` method, is defined on the target class.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	public interface ConditionalGenericConverter
-	        extends GenericConverter, ConditionalConverter {
+	public interface ConditionalConverter {
 
 		boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType);
+
+	}
+	
+	public interface ConditionalGenericConverter
+	        extends GenericConverter, ConditionalConverter {
 
 	}
 ----
