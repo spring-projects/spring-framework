@@ -44,17 +44,8 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.mock;
-import static org.mockito.BDDMockito.verify;
-import static org.mockito.BDDMockito.willThrow;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Arjen Poutsma
@@ -76,8 +67,9 @@ public class RestTemplateTests {
 	@SuppressWarnings("rawtypes")
 	private HttpMessageConverter converter;
 
+
 	@Before
-	public void setUp() {
+	public void setup() {
 		requestFactory = mock(ClientHttpRequestFactory.class);
 		request = mock(ClientHttpRequest.class);
 		response = mock(ClientHttpResponse.class);
@@ -87,6 +79,7 @@ public class RestTemplateTests {
 		template.setRequestFactory(requestFactory);
 		template.setErrorHandler(errorHandler);
 	}
+
 
 	@Test
 	public void varArgsTemplateVariables() throws Exception {
@@ -816,4 +809,5 @@ public class RestTemplateTests {
 
 		verify(response).close();
 	}
+
 }
