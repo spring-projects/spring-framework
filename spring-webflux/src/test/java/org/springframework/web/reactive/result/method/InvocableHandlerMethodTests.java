@@ -161,7 +161,7 @@ public class InvocableHandlerMethodTests {
 	@Test
 	public void invokeMethodWithResponseStatus() throws Exception {
 
-		Method method = on(TestController.class).annotated(ResponseStatus.class).resolveMethod();
+		Method method = on(TestController.class).annotPresent(ResponseStatus.class).resolveMethod();
 		Mono<HandlerResult> mono = invoke(new TestController(), method);
 
 		assertHandlerResultValue(mono, "created");

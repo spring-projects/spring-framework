@@ -76,16 +76,16 @@ public class ModelAttributeMethodArgumentResolverTests {
 		ModelAttributeMethodArgumentResolver resolver =
 				new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry(), false);
 
-		MethodParameter param = this.testMethod.annotated(ModelAttribute.class).arg(Foo.class);
+		MethodParameter param = this.testMethod.annotPresent(ModelAttribute.class).arg(Foo.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(ModelAttribute.class).arg(Mono.class, Foo.class);
+		param = this.testMethod.annotPresent(ModelAttribute.class).arg(Mono.class, Foo.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.notAnnotated(ModelAttribute.class).arg(Foo.class);
+		param = this.testMethod.annotNotPresent(ModelAttribute.class).arg(Foo.class);
 		assertFalse(resolver.supportsParameter(param));
 
-		param = this.testMethod.notAnnotated(ModelAttribute.class).arg(Mono.class, Foo.class);
+		param = this.testMethod.annotNotPresent(ModelAttribute.class).arg(Mono.class, Foo.class);
 		assertFalse(resolver.supportsParameter(param));
 	}
 
@@ -94,22 +94,22 @@ public class ModelAttributeMethodArgumentResolverTests {
 		ModelAttributeMethodArgumentResolver resolver =
 				new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry(), true);
 
-		MethodParameter param = this.testMethod.notAnnotated(ModelAttribute.class).arg(Foo.class);
+		MethodParameter param = this.testMethod.annotNotPresent(ModelAttribute.class).arg(Foo.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.notAnnotated(ModelAttribute.class).arg(Mono.class, Foo.class);
+		param = this.testMethod.annotNotPresent(ModelAttribute.class).arg(Mono.class, Foo.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.notAnnotated(ModelAttribute.class).arg(String.class);
+		param = this.testMethod.annotNotPresent(ModelAttribute.class).arg(String.class);
 		assertFalse(resolver.supportsParameter(param));
 
-		param = this.testMethod.notAnnotated(ModelAttribute.class).arg(Mono.class, String.class);
+		param = this.testMethod.annotNotPresent(ModelAttribute.class).arg(Mono.class, String.class);
 		assertFalse(resolver.supportsParameter(param));
 	}
 
 	@Test
 	public void createAndBind() throws Exception {
-		testBindFoo(this.testMethod.annotated(ModelAttribute.class).arg(Foo.class), value -> {
+		testBindFoo(this.testMethod.annotPresent(ModelAttribute.class).arg(Foo.class), value -> {
 			assertEquals(Foo.class, value.getClass());
 			return (Foo) value;
 		});
@@ -119,7 +119,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 	public void createAndBindToMono() throws Exception {
 
 		MethodParameter parameter = this.testMethod
-				.notAnnotated(ModelAttribute.class).arg(Mono.class, Foo.class);
+				.annotNotPresent(ModelAttribute.class).arg(Mono.class, Foo.class);
 
 		testBindFoo(parameter, mono -> {
 			assertTrue(mono.getClass().getName(), mono instanceof Mono);
@@ -133,7 +133,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 	public void createAndBindToSingle() throws Exception {
 
 		MethodParameter parameter = this.testMethod
-				.annotated(ModelAttribute.class).arg(Single.class, Foo.class);
+				.annotPresent(ModelAttribute.class).arg(Single.class, Foo.class);
 
 		testBindFoo(parameter, single -> {
 			assertTrue(single.getClass().getName(), single instanceof Single);
@@ -149,7 +149,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 		foo.setName("Jim");
 		this.bindContext.getModel().addAttribute(foo);
 
-		MethodParameter parameter = this.testMethod.notAnnotated(ModelAttribute.class).arg(Foo.class);
+		MethodParameter parameter = this.testMethod.annotNotPresent(ModelAttribute.class).arg(Foo.class);
 		testBindFoo(parameter, value -> {
 			assertEquals(Foo.class, value.getClass());
 			return (Foo) value;
@@ -164,7 +164,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 		foo.setName("Jim");
 		this.bindContext.getModel().addAttribute("foo", Mono.just(foo));
 
-		MethodParameter parameter = this.testMethod.notAnnotated(ModelAttribute.class).arg(Foo.class);
+		MethodParameter parameter = this.testMethod.annotNotPresent(ModelAttribute.class).arg(Foo.class);
 		testBindFoo(parameter, value -> {
 			assertEquals(Foo.class, value.getClass());
 			return (Foo) value;
@@ -179,7 +179,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 		foo.setName("Jim");
 		this.bindContext.getModel().addAttribute("foo", Single.just(foo));
 
-		MethodParameter parameter = this.testMethod.notAnnotated(ModelAttribute.class).arg(Foo.class);
+		MethodParameter parameter = this.testMethod.annotNotPresent(ModelAttribute.class).arg(Foo.class);
 		testBindFoo(parameter, value -> {
 			assertEquals(Foo.class, value.getClass());
 			return (Foo) value;
@@ -195,7 +195,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 		this.bindContext.getModel().addAttribute("foo", Mono.just(foo));
 
 		MethodParameter parameter = this.testMethod
-				.notAnnotated(ModelAttribute.class).arg(Mono.class, Foo.class);
+				.annotNotPresent(ModelAttribute.class).arg(Mono.class, Foo.class);
 
 		testBindFoo(parameter, mono -> {
 			assertTrue(mono.getClass().getName(), mono instanceof Mono);
@@ -225,7 +225,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 	@Test
 	public void validationError() throws Exception {
-		MethodParameter parameter = this.testMethod.notAnnotated(ModelAttribute.class).arg(Foo.class);
+		MethodParameter parameter = this.testMethod.annotNotPresent(ModelAttribute.class).arg(Foo.class);
 		testValidationError(parameter, Function.identity());
 	}
 
@@ -234,7 +234,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 	public void validationErrorToMono() throws Exception {
 
 		MethodParameter parameter = this.testMethod
-				.notAnnotated(ModelAttribute.class).arg(Mono.class, Foo.class);
+				.annotNotPresent(ModelAttribute.class).arg(Mono.class, Foo.class);
 
 		testValidationError(parameter,
 				resolvedArgumentMono -> {
@@ -250,7 +250,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 	public void validationErrorToSingle() throws Exception {
 
 		MethodParameter parameter = this.testMethod
-				.annotated(ModelAttribute.class).arg(Single.class, Foo.class);
+				.annotPresent(ModelAttribute.class).arg(Single.class, Foo.class);
 
 		testValidationError(parameter,
 				resolvedArgumentMono -> {

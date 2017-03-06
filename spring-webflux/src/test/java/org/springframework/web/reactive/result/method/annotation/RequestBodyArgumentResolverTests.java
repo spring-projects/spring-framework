@@ -20,7 +20,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Predicate;
 
 import io.reactivex.Maybe;
 import org.junit.Before;
@@ -50,6 +49,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.web.method.MvcAnnotationPredicates.requestBody;
 
 /**
  * Unit tests for {@link RequestBodyArgumentResolver}. When adding a test also
@@ -77,17 +77,17 @@ public class RequestBodyArgumentResolverTests {
 	public void supports() throws Exception {
 		MethodParameter param;
 
-		param = this.testMethod.annotated(RequestBody.class, required()).arg(Mono.class, String.class);
+		param = this.testMethod.annot(requestBody()).arg(Mono.class, String.class);
 		assertTrue(this.resolver.supportsParameter(param));
 
-		param = this.testMethod.notAnnotated(RequestBody.class).arg(String.class);
+		param = this.testMethod.annotNotPresent(RequestBody.class).arg(String.class);
 		assertFalse(this.resolver.supportsParameter(param));
 	}
 
 	@Test
 	public void stringBody() throws Exception {
 		String body = "line1";
-		MethodParameter param = this.testMethod.annotated(RequestBody.class, required()).arg(String.class);
+		MethodParameter param = this.testMethod.annot(requestBody()).arg(String.class);
 		String value = resolveValue(param, body);
 
 		assertEquals(body, value);
@@ -95,13 +95,13 @@ public class RequestBodyArgumentResolverTests {
 
 	@Test(expected = ServerWebInputException.class)
 	public void emptyBodyWithString() throws Exception {
-		MethodParameter param = this.testMethod.annotated(RequestBody.class, required()).arg(String.class);
+		MethodParameter param = this.testMethod.annot(requestBody()).arg(String.class);
 		resolveValueWithEmptyBody(param);
 	}
 
 	@Test
 	public void emptyBodyWithStringNotRequired() throws Exception {
-		MethodParameter param = this.testMethod.annotated(RequestBody.class, notRequired()).arg(String.class);
+		MethodParameter param = this.testMethod.annot(requestBody().notRequired()).arg(String.class);
 		String body = resolveValueWithEmptyBody(param);
 
 		assertNull(body);
@@ -110,15 +110,14 @@ public class RequestBodyArgumentResolverTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void emptyBodyWithMono() throws Exception {
-		MethodParameter param;
 
-		param = this.testMethod.annotated(RequestBody.class, required()).arg(Mono.class, String.class);
+		MethodParameter param = this.testMethod.annot(requestBody()).arg(Mono.class, String.class);
 		StepVerifier.create((Mono<Void>) resolveValueWithEmptyBody(param))
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
 				.verify();
 
-		param = this.testMethod.annotated(RequestBody.class, notRequired()).arg(Mono.class, String.class);
+		param = this.testMethod.annot(requestBody().notRequired()).arg(Mono.class, String.class);
 		StepVerifier.create((Mono<Void>) resolveValueWithEmptyBody(param))
 				.expectNextCount(0)
 				.expectComplete()
@@ -128,15 +127,14 @@ public class RequestBodyArgumentResolverTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void emptyBodyWithFlux() throws Exception {
-		MethodParameter param;
 
-		param = this.testMethod.annotated(RequestBody.class, required()).arg(Flux.class, String.class);
+		MethodParameter param = this.testMethod.annot(requestBody()).arg(Flux.class, String.class);
 		StepVerifier.create((Flux<Void>) resolveValueWithEmptyBody(param))
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
 				.verify();
 
-		param = this.testMethod.annotated(RequestBody.class, notRequired()).arg(Flux.class, String.class);
+		param = this.testMethod.annot(requestBody().notRequired()).arg(Flux.class, String.class);
 		StepVerifier.create((Flux<Void>) resolveValueWithEmptyBody(param))
 				.expectNextCount(0)
 				.expectComplete()
@@ -145,16 +143,15 @@ public class RequestBodyArgumentResolverTests {
 
 	@Test
 	public void emptyBodyWithSingle() throws Exception {
-		MethodParameter param;
 
-		param = this.testMethod.annotated(RequestBody.class, required()).arg(Single.class, String.class);
+		MethodParameter param = this.testMethod.annot(requestBody()).arg(Single.class, String.class);
 		Single<String> single = resolveValueWithEmptyBody(param);
 		StepVerifier.create(RxReactiveStreams.toPublisher(single))
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
 				.verify();
 
-		param = this.testMethod.annotated(RequestBody.class, notRequired()).arg(Single.class, String.class);
+		param = this.testMethod.annot(requestBody().notRequired()).arg(Single.class, String.class);
 		single = resolveValueWithEmptyBody(param);
 		StepVerifier.create(RxReactiveStreams.toPublisher(single))
 				.expectNextCount(0)
@@ -164,16 +161,15 @@ public class RequestBodyArgumentResolverTests {
 
 	@Test
 	public void emptyBodyWithMaybe() throws Exception {
-		MethodParameter param;
 
-		param = this.testMethod.annotated(RequestBody.class, required()).arg(Maybe.class, String.class);
+		MethodParameter param = this.testMethod.annot(requestBody()).arg(Maybe.class, String.class);
 		Maybe<String> maybe = resolveValueWithEmptyBody(param);
 		StepVerifier.create(maybe.toFlowable())
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
 				.verify();
 
-		param = this.testMethod.annotated(RequestBody.class, notRequired()).arg(Maybe.class, String.class);
+		param = this.testMethod.annot(requestBody().notRequired()).arg(Maybe.class, String.class);
 		maybe = resolveValueWithEmptyBody(param);
 		StepVerifier.create(maybe.toFlowable())
 				.expectNextCount(0)
@@ -184,18 +180,14 @@ public class RequestBodyArgumentResolverTests {
 	@Test
 	public void emptyBodyWithObservable() throws Exception {
 
-		MethodParameter param = this.testMethod
-				.annotated(RequestBody.class, required()).arg(Observable.class, String.class);
-
+		MethodParameter param = this.testMethod.annot(requestBody()).arg(Observable.class, String.class);
 		Observable<String> observable = resolveValueWithEmptyBody(param);
 		StepVerifier.create(RxReactiveStreams.toPublisher(observable))
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
 				.verify();
 
-		param = this.testMethod
-				.annotated(RequestBody.class, notRequired()).arg(Observable.class, String.class);
-
+		param = this.testMethod.annot(requestBody().notRequired()).arg(Observable.class, String.class);
 		observable = resolveValueWithEmptyBody(param);
 		StepVerifier.create(RxReactiveStreams.toPublisher(observable))
 				.expectNextCount(0)
@@ -206,18 +198,14 @@ public class RequestBodyArgumentResolverTests {
 	@Test
 	public void emptyBodyWithCompletableFuture() throws Exception {
 
-		MethodParameter param = this.testMethod
-				.annotated(RequestBody.class, required()).arg(CompletableFuture.class, String.class);
-
+		MethodParameter param = this.testMethod.annot(requestBody()).arg(CompletableFuture.class, String.class);
 		CompletableFuture<String> future = resolveValueWithEmptyBody(param);
 		future.whenComplete((text, ex) -> {
 			assertNull(text);
 			assertNotNull(ex);
 		});
 
-		param = this.testMethod
-				.annotated(RequestBody.class, notRequired()).arg(CompletableFuture.class, String.class);
-
+		param = this.testMethod.annot(requestBody().notRequired()).arg(CompletableFuture.class, String.class);
 		future = resolveValueWithEmptyBody(param);
 		future.whenComplete((text, ex) -> {
 			assertNotNull(text);
@@ -254,14 +242,6 @@ public class RequestBodyArgumentResolverTests {
 
 		//no inspection unchecked
 		return (T) value;
-	}
-
-	private Predicate<RequestBody> required() {
-		return RequestBody::required;
-	}
-
-	private Predicate<RequestBody> notRequired() {
-		return a -> !a.required();
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.method.annotation;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.Predicate;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +32,10 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.ResolvableMethod;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
 
 /**
  * Test fixture with {@link RequestParamMapMethodArgumentResolver}.
@@ -63,16 +65,16 @@ public class RequestParamMapMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() {
-		MethodParameter param = this.testMethod.annotated(RequestParam.class, name("")).arg(Map.class);
+		MethodParameter param = this.testMethod.annot(requestParam().noName()).arg(Map.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class).arg(MultiValueMap.class);
+		param = this.testMethod.annotPresent(RequestParam.class).arg(MultiValueMap.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class, name("name")).arg(Map.class);
+		param = this.testMethod.annot(requestParam().name("name")).arg(Map.class);
 		assertFalse(resolver.supportsParameter(param));
 
-		param = this.testMethod.notAnnotated(RequestParam.class).arg(Map.class);
+		param = this.testMethod.annotNotPresent(RequestParam.class).arg(Map.class);
 		assertFalse(resolver.supportsParameter(param));
 	}
 
@@ -83,7 +85,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 		request.addParameter(name, value);
 		Map<String, String> expected = Collections.singletonMap(name, value);
 
-		MethodParameter param = this.testMethod.annotated(RequestParam.class, name("")).arg(Map.class);
+		MethodParameter param = this.testMethod.annot(requestParam().noName()).arg(Map.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 
 		assertTrue(result instanceof Map);
@@ -101,15 +103,11 @@ public class RequestParamMapMethodArgumentResolverTests {
 		expected.add(name, value1);
 		expected.add(name, value2);
 
-		MethodParameter param = this.testMethod.annotated(RequestParam.class).arg(MultiValueMap.class);
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(MultiValueMap.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 
 		assertTrue(result instanceof MultiValueMap);
 		assertEquals("Invalid result", expected, result);
-	}
-
-	private Predicate<RequestParam> name(String name) {
-		return a -> name.equals(a.name());
 	}
 
 

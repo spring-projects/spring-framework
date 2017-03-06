@@ -61,7 +61,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.method.ResolvableMethod.on;
 
@@ -99,7 +98,7 @@ public class ViewResolutionResultHandlerTests {
 		testSupports(on(TestController.class).resolveReturnType(Map.class));
 		testSupports(on(TestController.class).resolveReturnType(TestBean.class));
 
-		testSupports(on(TestController.class).annotated(ModelAttribute.class).resolveReturnType());
+		testSupports(on(TestController.class).annotPresent(ModelAttribute.class).resolveReturnType());
 	}
 
 	private void testSupports(MethodParameter returnType) {
@@ -168,7 +167,7 @@ public class ViewResolutionResultHandlerTests {
 				"}";
 		testHandle("/account", returnType, returnValue, responseBody, resolver);
 
-		returnType = on(TestController.class).annotated(ModelAttribute.class).resolveReturnType();
+		returnType = on(TestController.class).annotPresent(ModelAttribute.class).resolveReturnType();
 		testHandle("/account", returnType, 99L, "account: {id=123, num=99}", resolver);
 	}
 

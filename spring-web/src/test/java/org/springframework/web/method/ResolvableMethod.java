@@ -18,14 +18,15 @@ package org.springframework.web.method;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.Log;
@@ -44,12 +45,16 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.objenesis.ObjenesisException;
 import org.springframework.objenesis.SpringObjenesis;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.web.bind.annotation.ValueConstants;
+
+import static java.util.stream.Collectors.joining;
 
 /**
  * Convenience class to resolve method parameters from hints.
@@ -74,6 +79,7 @@ import org.springframework.util.ReflectionUtils;
  * <pre>
  *
  * import static org.springframework.web.method.ResolvableMethod.on;
+ * import static org.springframework.web.method.MvcAnnotationPredicates.requestMapping;
  *
  * // Return type
  * on(TestController.class).resolveReturnType(Foo.class);
@@ -81,16 +87,13 @@ import org.springframework.util.ReflectionUtils;
  * on(TestController.class).resolveReturnType(Mono.class, responseEntity(Foo.class));
  *
  * // Annotation + return type
- * on(TestController.class).annotated(ResponseBody.class).resolveReturnType(Bar.class);
+ * on(TestController.class).annotPresent(RequestMapping.class).resolveReturnType(Bar.class);
  *
  * // Annotation not present
- * on(TestController.class).notAnnotated(ResponseBody.class).resolveReturnType();
+ * on(TestController.class).annotNotPresent(RequestMapping.class).resolveReturnType();
  *
  * // Annotation with attributes
- * on(TestController.class)
- *         .annotated(RequestMapping.class, patterns("/foo"), params("p"))
- *         .annotated(ResponseBody.class)
- *         .resolveReturnType();
+ * on(TestController.class).annot(requestMapping("/foo").params("p")).resolveReturnType();
  * </pre>
  *
  * <h2>2. Method Arguments</h2>
@@ -100,12 +103,14 @@ import org.springframework.util.ReflectionUtils;
  *
  * <pre>
  *
+ * import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
+ *
  * ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
  *
  * testMethod.arg(Foo.class);
- * testMethod.annotated(RequestBody.class)).arg(Bar.class);
- * testMethod.annotated(RequestBody.class), required()).arg(Bar.class);
- * testMethod.notAnnotated(RequestBody.class)).arg(Bar.class);
+ * testMethod.annotPresent(RequestParam.class).arg(Integer.class);
+ * testMethod.annotNotPresent(RequestParam.class)).arg(Integer.class);
+ * testMethod.annot(requestParam().name("c").notRequired()).arg(Integer.class);
  * </pre>
  *
  * <h3>3. Mock Handler Method Invocation</h3>
@@ -180,13 +185,17 @@ public class ResolvableMethod {
 	}
 
 	/**
-	 * Filter on method arguments that have the given annotation.
-	 * @param annotationType the annotation type
-	 * @param filter optional filters on the annotation
+	 * Filter on method arguments with annotation.
+	 * See {@link MvcAnnotationPredicates}.
 	 */
 	@SafeVarargs
-	public final <A extends Annotation> ArgResolver annotated(Class<A> annotationType, Predicate<A>... filter) {
-		return new ArgResolver().annotated(annotationType, filter);
+	public final ArgResolver annot(Predicate<MethodParameter>... filter) {
+		return new ArgResolver(filter);
+	}
+
+	@SafeVarargs
+	public final ArgResolver annotPresent(Class<? extends Annotation>... annotationTypes) {
+		return new ArgResolver().annotPresent(annotationTypes);
 	}
 
 	/**
@@ -194,16 +203,8 @@ public class ResolvableMethod {
 	 * @param annotationTypes the annotation types
 	 */
 	@SafeVarargs
-	public final ArgResolver notAnnotated(Class<? extends Annotation>... annotationTypes) {
-		return new ArgResolver().notAnnotated(annotationTypes);
-	}
-
-	/**
-	 * Filter on method arguments using customer predicates.
-	 */
-	@SafeVarargs
-	public final ArgResolver filtered(Predicate<MethodParameter>... filter) {
-		return new ArgResolver().filtered(filter);
+	public final ArgResolver annotNotPresent(Class<? extends Annotation>... annotationTypes) {
+		return new ArgResolver().annotNotPresent(annotationTypes);
 	}
 
 
@@ -215,11 +216,25 @@ public class ResolvableMethod {
 	private String formatMethod() {
 		return this.method().getName() +
 				Arrays.stream(this.method.getParameters())
-						.map(p -> {
-							Annotation[] annots = p.getAnnotations();
-							return (annots.length != 0 ? Arrays.toString(annots) : "") + " " + p;
-						})
-						.collect(Collectors.joining(",\n\t", "(\n\t", "\n)"));
+						.map(this::formatParameter)
+						.collect(joining(",\n\t", "(\n\t", "\n)"));
+	}
+
+	private String formatParameter(Parameter param) {
+		Annotation[] annot = param.getAnnotations();
+		return annot.length > 0 ?
+				Arrays.stream(annot).map(this::formatAnnotation).collect(joining(",", "[", "]")) + " " + param :
+				param.toString();
+	}
+
+	private String formatAnnotation(Annotation annotation) {
+		Map<String, Object> map = AnnotationUtils.getAnnotationAttributes(annotation);
+		map.forEach((key, value) -> {
+			if (value.equals(ValueConstants.DEFAULT_NONE)) {
+				map.put(key, "NONE");
+			}
+		});
+		return annotation.annotationType().getName() + map;
 	}
 
 	private static ResolvableType toResolvableType(Class<?> type, Class<?>... generics) {
@@ -273,25 +288,35 @@ public class ResolvableMethod {
 		}
 
 		/**
-		 * Filter on methods with the given annotation type.
-		 * @param annotationType the expected annotation type
-		 * @param filter optional filters on the actual annotation
+		 * Filter on annotated methods.
+		 * See {@link MvcAnnotationPredicates}.
 		 */
 		@SafeVarargs
-		public final <A extends Annotation> Builder annotated(Class<A> annotationType, Predicate<A>... filter) {
-			String message = "annotated=" + annotationType.getName();
-			addFilter(message, m -> {
-				A annot = AnnotatedElementUtils.findMergedAnnotation(m, annotationType);
-				return (annot != null && Arrays.stream(filter).allMatch(f -> f.test(annot)));
-			});
+		public final Builder annot(Predicate<Method>... filters) {
+			this.filters.addAll(Arrays.asList(filters));
+			return this;
+		}
+
+		/**
+		 * Filter on methods annotated with the given annotation type.
+		 * @see #annot(Predicate[])
+		 * @see MvcAnnotationPredicates
+		 */
+		@SafeVarargs
+		public final Builder annotPresent(Class<? extends Annotation>... annotationTypes) {
+			String message = "annotationPresent=" + Arrays.toString(annotationTypes);
+			addFilter(message, method ->
+					Arrays.stream(annotationTypes).allMatch(annotType ->
+							AnnotatedElementUtils.findMergedAnnotation(method, annotType) != null));
 			return this;
 		}
 
 		/**
 		 * Filter on methods not annotated with the given annotation type.
 		 */
-		public final Builder notAnnotated(Class<? extends Annotation>... annotationTypes) {
-			String message = "notAnnotated=" + Arrays.toString(annotationTypes);
+		@SafeVarargs
+		public final Builder annotNotPresent(Class<? extends Annotation>... annotationTypes) {
+			String message = "annotationNotPresent=" + Arrays.toString(annotationTypes);
 			addFilter(message, method -> {
 				if (annotationTypes.length != 0) {
 					return Arrays.stream(annotationTypes).noneMatch(annotType ->
@@ -335,15 +360,6 @@ public class ResolvableMethod {
 		}
 
 		/**
-		 * Add custom filters for matching methods.
-		 */
-		@SafeVarargs
-		public final Builder filtered(Predicate<Method>... filters) {
-			this.filters.addAll(Arrays.asList(filters));
-			return this;
-		}
-
-		/**
 		 * Build a {@code ResolvableMethod} from the provided filters which must
 		 * resolve to a unique, single method.
 		 *
@@ -365,7 +381,7 @@ public class ResolvableMethod {
 
 		private String formatMethods(Set<Method> methods) {
 			return "\nMatched:\n" + methods.stream()
-					.map(Method::toGenericString).collect(Collectors.joining(",\n\t", "[\n\t", "\n]"));
+					.map(Method::toGenericString).collect(joining(",\n\t", "[\n\t", "\n]"));
 		}
 
 		public ResolvableMethod mockCall(Consumer<T> invoker) {
@@ -440,7 +456,7 @@ public class ResolvableMethod {
 
 		private String formatFilters() {
 			return this.filters.stream().map(Object::toString)
-					.collect(Collectors.joining(",\n\t\t", "[\n\t\t", "\n\t]"));
+					.collect(joining(",\n\t\t", "[\n\t\t", "\n\t]"));
 		}
 	}
 
@@ -499,18 +515,25 @@ public class ResolvableMethod {
 			this.filters.addAll(Arrays.asList(filter));
 		}
 
-
 		/**
-		 * Filter on method arguments that have the given annotation.
-		 * @param annotationType the annotation type
-		 * @param filter optional filters on the annotation
+		 * Filter on method arguments with annotations.
+		 * See {@link MvcAnnotationPredicates}.
 		 */
 		@SafeVarargs
-		public final <A extends Annotation> ArgResolver annotated(Class<A> annotationType, Predicate<A>... filter) {
-			this.filters.add(param -> {
-				A annot = param.getParameterAnnotation(annotationType);
-				return (annot != null && Arrays.stream(filter).allMatch(f -> f.test(annot)));
-			});
+		public final ArgResolver annot(Predicate<MethodParameter>... filters) {
+			this.filters.addAll(Arrays.asList(filters));
+			return this;
+		}
+
+		/**
+		 * Filter on method arguments that have the given annotations.
+		 * @param annotationTypes the annotation types
+		 * @see #annot(Predicate[])
+		 * @see MvcAnnotationPredicates
+		 */
+		@SafeVarargs
+		public final ArgResolver annotPresent(Class<? extends Annotation>... annotationTypes) {
+			this.filters.add(param -> Arrays.stream(annotationTypes).allMatch(param::hasParameterAnnotation));
 			return this;
 		}
 
@@ -519,20 +542,11 @@ public class ResolvableMethod {
 		 * @param annotationTypes the annotation types
 		 */
 		@SafeVarargs
-		public final ArgResolver notAnnotated(Class<? extends Annotation>... annotationTypes) {
+		public final ArgResolver annotNotPresent(Class<? extends Annotation>... annotationTypes) {
 			this.filters.add(param ->
 					(annotationTypes.length != 0) ?
 							Arrays.stream(annotationTypes).noneMatch(param::hasParameterAnnotation) :
 							param.getParameterAnnotations().length == 0);
-			return this;
-		}
-
-		/**
-		 * Filter on method arguments using customer predicates.
-		 */
-		@SafeVarargs
-		public final ArgResolver filtered(Predicate<MethodParameter>... filter) {
-			this.filters.addAll(Arrays.asList(filter));
 			return this;
 		}
 
@@ -566,8 +580,10 @@ public class ResolvableMethod {
 		 */
 		public final MethodParameter arg() {
 			List<MethodParameter> matches = applyFilters();
-			Assert.state(!matches.isEmpty(), () -> "No matching arg in method\n" + formatMethod());
-			Assert.state(matches.size() == 1, () -> "Multiple matching args in method\n" + formatMethod());
+			Assert.state(!matches.isEmpty(), () ->
+					"No matching arg in method\n" + formatMethod());
+			Assert.state(matches.size() == 1, () ->
+					"Multiple matching args in method\n" + formatMethod() + "\nMatches:\n\t" + matches);
 			return matches.get(0);
 		}
 

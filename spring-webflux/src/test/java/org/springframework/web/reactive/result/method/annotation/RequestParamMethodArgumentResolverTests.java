@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +31,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
@@ -46,6 +44,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
 
 /**
  * Unit tests for {@link RequestParamMethodArgumentResolver}.
@@ -76,47 +75,47 @@ public class RequestParamMethodArgumentResolverTests {
 	public void supportsParameter() {
 		this.resolver = new RequestParamMethodArgumentResolver(null, true);
 
-		MethodParameter param = this.testMethod.annotated(RequestParam.class, value("bar")).arg(String.class);
+		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
 		assertTrue(this.resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class).arg(String[].class);
+		param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
 		assertTrue(this.resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class, name("name")).arg(Map.class);
+		param = this.testMethod.annot(requestParam().name("name")).arg(Map.class);
 		assertTrue(this.resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class, name("")).arg(Map.class);
+		param = this.testMethod.annot(requestParam().name("")).arg(Map.class);
 		assertFalse(this.resolver.supportsParameter(param));
 
-		param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
+		param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
 		assertTrue(this.resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class, required(), value("")).arg(String.class);
+		param = this.testMethod.annot(requestParam()).arg(String.class);
 		assertTrue(this.resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class, required().negate()).arg(String.class);
+		param = this.testMethod.annot(requestParam().notRequired()).arg(String.class);
 		assertTrue(this.resolver.supportsParameter(param));
 
-		param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
+		param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
 		this.resolver = new RequestParamMethodArgumentResolver(null, false);
 		assertFalse(this.resolver.supportsParameter(param));
 	}
 
 	@Test
 	public void resolveWithQueryString() throws Exception {
-		MethodParameter param = this.testMethod.annotated(RequestParam.class, value("bar")).arg(String.class);
+		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
 		assertEquals("foo", resolve(param, exchangeWithQuery("name=foo")));
 	}
 
 	@Test
 	public void resolveWithFormData() throws Exception {
-		MethodParameter param = this.testMethod.annotated(RequestParam.class, value("bar")).arg(String.class);
+		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
 		assertEquals("foo", resolve(param, exchangeWithFormData("name=foo")));
 	}
 
 	@Test
 	public void resolveStringArray() throws Exception {
-		MethodParameter param = this.testMethod.annotated(RequestParam.class).arg(String[].class);
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
 		Object result = resolve(param, exchangeWithQuery("name=foo&name=bar"));
 		assertTrue(result instanceof String[]);
 		assertArrayEquals(new String[] {"foo", "bar"}, (String[]) result);
@@ -124,14 +123,14 @@ public class RequestParamMethodArgumentResolverTests {
 
 	@Test
 	public void resolveDefaultValue() throws Exception {
-		MethodParameter param = this.testMethod.annotated(RequestParam.class, value("bar")).arg(String.class);
+		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
 		assertEquals("bar", resolve(param, exchange()));
 	}
 
 	@Test
 	public void missingRequestParam() throws Exception {
 
-		MethodParameter param = this.testMethod.annotated(RequestParam.class).arg(String[].class);
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
 		Mono<Object> mono = this.resolver.resolveArgument(param, this.bindContext, exchange());
 
 		StepVerifier.create(mono)
@@ -143,37 +142,34 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test
 	public void resolveSimpleTypeParam() throws Exception {
 		ServerWebExchange exchange = exchangeWithQuery("stringNotAnnot=plainValue");
-		MethodParameter param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
+		MethodParameter param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
 		Object result = resolve(param, exchange);
 		assertEquals("plainValue", result);
 	}
 
 	@Test  // SPR-8561
 	public void resolveSimpleTypeParamToNull() throws Exception {
-		MethodParameter param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
+		MethodParameter param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
 		assertNull(resolve(param, exchange()));
 	}
 
 	@Test  // SPR-10180
 	public void resolveEmptyValueToDefault() throws Exception {
 		ServerWebExchange exchange = exchangeWithQuery("name=");
-		MethodParameter param = this.testMethod.annotated(RequestParam.class, value("bar")).arg(String.class);
+		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
 		Object result = resolve(param, exchange);
 		assertEquals("bar", result);
 	}
 
 	@Test
 	public void resolveEmptyValueWithoutDefault() throws Exception {
-		MethodParameter param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
+		MethodParameter param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
 		assertEquals("", resolve(param, exchangeWithQuery("stringNotAnnot=")));
 	}
 
 	@Test
 	public void resolveEmptyValueRequiredWithoutDefault() throws Exception {
-		MethodParameter param = this.testMethod
-				.annotated(RequestParam.class, required(), value(""))
-				.arg(String.class);
-
+		MethodParameter param = this.testMethod.annot(requestParam()).arg(String.class);
 		assertEquals("", resolve(param, exchangeWithQuery("name=")));
 	}
 
@@ -213,20 +209,6 @@ public class RequestParamMethodArgumentResolverTests {
 
 	private Object resolve(MethodParameter parameter, ServerWebExchange exchange) {
 		return this.resolver.resolveArgument(parameter, this.bindContext, exchange).blockMillis(0);
-	}
-
-	private Predicate<RequestParam> name(String name) {
-		return a -> name.equals(a.name());
-	}
-
-	private Predicate<RequestParam> required() {
-		return RequestParam::required;
-	}
-
-	private Predicate<RequestParam> value(String value) {
-		return !value.isEmpty() ?
-				requestParam -> value.equals(requestParam.defaultValue()) :
-				requestParam -> ValueConstants.DEFAULT_NONE.equals(requestParam.defaultValue());
 	}
 
 

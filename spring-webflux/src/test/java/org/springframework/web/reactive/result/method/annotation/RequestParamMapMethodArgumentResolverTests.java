@@ -20,7 +20,6 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.Predicate;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +37,7 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
 
 /**
  * Unit tests for {@link RequestParamMapMethodArgumentResolver}.
@@ -58,22 +58,22 @@ public class RequestParamMapMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() {
-		MethodParameter param = this.testMethod.annotated(RequestParam.class, name("")).arg(Map.class);
+		MethodParameter param = this.testMethod.annot(requestParam().name("")).arg(Map.class);
 		assertTrue(this.resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class).arg(MultiValueMap.class);
+		param = this.testMethod.annotPresent(RequestParam.class).arg(MultiValueMap.class);
 		assertTrue(this.resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class, name("name")).arg(Map.class);
+		param = this.testMethod.annot(requestParam().name("name")).arg(Map.class);
 		assertFalse(this.resolver.supportsParameter(param));
 
-		param = this.testMethod.notAnnotated(RequestParam.class).arg(Map.class);
+		param = this.testMethod.annotNotPresent(RequestParam.class).arg(Map.class);
 		assertFalse(this.resolver.supportsParameter(param));
 	}
 
 	@Test
 	public void resolveMapArgumentWithQueryString() throws Exception {
-		MethodParameter param = this.testMethod.annotated(RequestParam.class, name("")).arg(Map.class);
+		MethodParameter param = this.testMethod.annot(requestParam().name("")).arg(Map.class);
 		Object result= resolve(param, exchangeWithQuery("foo=bar"));
 		assertTrue(result instanceof Map);
 		assertEquals(Collections.singletonMap("foo", "bar"), result);
@@ -81,7 +81,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 
 	@Test
 	public void resolveMapArgumentWithFormData() throws Exception {
-		MethodParameter param = this.testMethod.annotated(RequestParam.class, name("")).arg(Map.class);
+		MethodParameter param = this.testMethod.annot(requestParam().name("")).arg(Map.class);
 		Object result= resolve(param, exchangeWithFormData("foo=bar"));
 		assertTrue(result instanceof Map);
 		assertEquals(Collections.singletonMap("foo", "bar"), result);
@@ -89,7 +89,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 
 	@Test
 	public void resolveMultiValueMapArgument() throws Exception {
-		MethodParameter param = this.testMethod.annotated(RequestParam.class).arg(MultiValueMap.class);
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(MultiValueMap.class);
 		ServerWebExchange exchange = exchangeWithQuery("foo=bar&foo=baz");
 		Object result= resolve(param, exchange);
 
@@ -112,10 +112,6 @@ public class RequestParamMapMethodArgumentResolverTests {
 
 	private Object resolve(MethodParameter parameter, ServerWebExchange exchange) {
 		return this.resolver.resolveArgument(parameter, null, exchange).blockMillis(0);
-	}
-
-	private Predicate<RequestParam> name(String name) {
-		return a -> name.equals(a.name());
 	}
 
 

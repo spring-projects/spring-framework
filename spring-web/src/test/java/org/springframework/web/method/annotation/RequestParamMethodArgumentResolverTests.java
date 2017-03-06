@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
 import javax.servlet.http.Part;
 
 import org.junit.Before;
@@ -38,7 +37,6 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.DefaultDataBinderFactory;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -58,6 +56,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.mock;
+import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
+import static org.springframework.web.method.MvcAnnotationPredicates.requestPart;
 
 /**
  * Test fixture with {@link org.springframework.web.method.annotation.RequestParamMethodArgumentResolver}.
@@ -87,69 +87,69 @@ public class RequestParamMethodArgumentResolverTests {
 	public void supportsParameter() {
 		resolver = new RequestParamMethodArgumentResolver(null, true);
 
-		MethodParameter param = this.testMethod.annotated(RequestParam.class, value("bar")).arg(String.class);
+		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class).arg(String[].class);
+		param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class, name("name")).arg(Map.class);
+		param = this.testMethod.annot(requestParam().name("name")).arg(Map.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class).arg(MultipartFile.class);
+		param = this.testMethod.annotPresent(RequestParam.class).arg(MultipartFile.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class).arg(List.class, MultipartFile.class);
+		param = this.testMethod.annotPresent(RequestParam.class).arg(List.class, MultipartFile.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class).arg(MultipartFile[].class);
+		param = this.testMethod.annotPresent(RequestParam.class).arg(MultipartFile[].class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class).arg(Part.class);
+		param = this.testMethod.annotPresent(RequestParam.class).arg(Part.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class).arg(List.class, Part.class);
+		param = this.testMethod.annotPresent(RequestParam.class).arg(List.class, Part.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class).arg(Part[].class);
+		param = this.testMethod.annotPresent(RequestParam.class).arg(Part[].class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class, name("")).arg(Map.class);
+		param = this.testMethod.annot(requestParam().noName()).arg(Map.class);
 		assertFalse(resolver.supportsParameter(param));
 
-		param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
+		param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.notAnnotated().arg(MultipartFile.class);
+		param = this.testMethod.annotNotPresent().arg(MultipartFile.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.notAnnotated(RequestParam.class).arg(List.class, MultipartFile.class);
+		param = this.testMethod.annotNotPresent(RequestParam.class).arg(List.class, MultipartFile.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.notAnnotated(RequestParam.class).arg(Part.class);
+		param = this.testMethod.annotNotPresent(RequestParam.class).arg(Part.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestPart.class).arg(MultipartFile.class);
+		param = this.testMethod.annot(requestPart()).arg(MultipartFile.class);
 		assertFalse(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class, required(), value("")).arg(String.class);
+		param = this.testMethod.annot(requestParam()).arg(String.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class, required().negate()).arg(String.class);
+		param = this.testMethod.annot(requestParam().notRequired()).arg(String.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class).arg(Optional.class, Integer.class);
+		param = this.testMethod.annotPresent(RequestParam.class).arg(Optional.class, Integer.class);
 		assertTrue(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestParam.class).arg(Optional.class, MultipartFile.class);
+		param = this.testMethod.annotPresent(RequestParam.class).arg(Optional.class, MultipartFile.class);
 		assertTrue(resolver.supportsParameter(param));
 
 		resolver = new RequestParamMethodArgumentResolver(null, false);
 
-		param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
+		param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
 		assertFalse(resolver.supportsParameter(param));
 
-		param = this.testMethod.annotated(RequestPart.class).arg(MultipartFile.class);
+		param = this.testMethod.annotPresent(RequestPart.class).arg(MultipartFile.class);
 		assertFalse(resolver.supportsParameter(param));
 	}
 
@@ -158,7 +158,7 @@ public class RequestParamMethodArgumentResolverTests {
 		String expected = "foo";
 		request.addParameter("name", expected);
 
-		MethodParameter param = this.testMethod.annotated(RequestParam.class, value("bar")).arg(String.class);
+		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 		assertTrue(result instanceof String);
 		assertEquals("Invalid result", expected, result);
@@ -169,7 +169,7 @@ public class RequestParamMethodArgumentResolverTests {
 		String[] expected = new String[] {"foo", "bar"};
 		request.addParameter("name", expected);
 
-		MethodParameter param = this.testMethod.annotated(RequestParam.class).arg(String[].class);
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 		assertTrue(result instanceof String[]);
 		assertArrayEquals("Invalid result", expected, (String[]) result);
@@ -182,7 +182,7 @@ public class RequestParamMethodArgumentResolverTests {
 		request.addFile(expected);
 		webRequest = new ServletWebRequest(request);
 
-		MethodParameter param = this.testMethod.annotated(RequestParam.class).arg(MultipartFile.class);
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(MultipartFile.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 		assertTrue(result instanceof MultipartFile);
 		assertEquals("Invalid result", expected, result);
@@ -198,10 +198,9 @@ public class RequestParamMethodArgumentResolverTests {
 		request.addFile(new MockMultipartFile("other", "Hello World 3".getBytes()));
 		webRequest = new ServletWebRequest(request);
 
-		MethodParameter param = this.testMethod
-				.annotated(RequestParam.class).arg(List.class, MultipartFile.class);
-
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(List.class, MultipartFile.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
+
 		assertTrue(result instanceof List);
 		assertEquals(Arrays.asList(expected1, expected2), result);
 	}
@@ -216,8 +215,9 @@ public class RequestParamMethodArgumentResolverTests {
 		request.addFile(new MockMultipartFile("other", "Hello World 3".getBytes()));
 		webRequest = new ServletWebRequest(request);
 
-		MethodParameter param = this.testMethod.annotated(RequestParam.class).arg(MultipartFile[].class);
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(MultipartFile[].class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
+
 		assertTrue(result instanceof MultipartFile[]);
 		MultipartFile[] parts = (MultipartFile[]) result;
 		assertEquals(2, parts.length);
@@ -234,8 +234,9 @@ public class RequestParamMethodArgumentResolverTests {
 		request.addPart(expected);
 		webRequest = new ServletWebRequest(request);
 
-		MethodParameter param = this.testMethod.annotated(RequestParam.class).arg(Part.class);
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(Part.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
+
 		assertTrue(result instanceof Part);
 		assertEquals("Invalid result", expected, result);
 	}
@@ -252,8 +253,9 @@ public class RequestParamMethodArgumentResolverTests {
 		request.addPart(new MockPart("other", "Hello World 3".getBytes()));
 		webRequest = new ServletWebRequest(request);
 
-		MethodParameter param = this.testMethod.annotated(RequestParam.class).arg(List.class, Part.class);
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(List.class, Part.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
+
 		assertTrue(result instanceof List);
 		assertEquals(Arrays.asList(expected1, expected2), result);
 	}
@@ -270,8 +272,9 @@ public class RequestParamMethodArgumentResolverTests {
 		request.addPart(new MockPart("other", "Hello World 3".getBytes()));
 		webRequest = new ServletWebRequest(request);
 
-		MethodParameter param = this.testMethod.annotated(RequestParam.class).arg(Part[].class);
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(Part[].class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
+
 		assertTrue(result instanceof Part[]);
 		Part[] parts = (Part[]) result;
 		assertEquals(2, parts.length);
@@ -286,14 +289,14 @@ public class RequestParamMethodArgumentResolverTests {
 		request.addFile(expected);
 		webRequest = new ServletWebRequest(request);
 
-		MethodParameter param = this.testMethod.notAnnotated().arg(MultipartFile.class);
+		MethodParameter param = this.testMethod.annotNotPresent().arg(MultipartFile.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 		assertTrue(result instanceof MultipartFile);
 		assertEquals("Invalid result", expected, result);
 	}
 
 	@Test
-	public void resolveMultipartFileListNotAnnotated() throws Exception {
+	public void resolveMultipartFileListNotannot() throws Exception {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		MultipartFile expected1 = new MockMultipartFile("multipartFileList", "Hello World 1".getBytes());
 		MultipartFile expected2 = new MockMultipartFile("multipartFileList", "Hello World 2".getBytes());
@@ -302,7 +305,7 @@ public class RequestParamMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		MethodParameter param = this.testMethod
-				.notAnnotated(RequestParam.class).arg(List.class, MultipartFile.class);
+				.annotNotPresent(RequestParam.class).arg(List.class, MultipartFile.class);
 
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 		assertTrue(result instanceof List);
@@ -311,7 +314,7 @@ public class RequestParamMethodArgumentResolverTests {
 
 	@Test(expected = MultipartException.class)
 	public void isMultipartRequest() throws Exception {
-		MethodParameter param = this.testMethod.annotated(RequestParam.class).arg(MultipartFile.class);
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(MultipartFile.class);
 		resolver.resolveArgument(param, null, webRequest, null);
 		fail("Expected exception: request is not a multipart request");
 	}
@@ -325,7 +328,7 @@ public class RequestParamMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		MethodParameter param = this.testMethod
-				.notAnnotated(RequestParam.class).arg(List.class, MultipartFile.class);
+				.annotNotPresent(RequestParam.class).arg(List.class, MultipartFile.class);
 
 		Object actual = resolver.resolveArgument(param, null, webRequest, null);
 		assertTrue(actual instanceof List);
@@ -335,7 +338,7 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test(expected = MultipartException.class)
 	public void noMultipartContent() throws Exception {
 		request.setMethod("POST");
-		MethodParameter param = this.testMethod.annotated(RequestParam.class).arg(MultipartFile.class);
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(MultipartFile.class);
 		resolver.resolveArgument(param, null, webRequest, null);
 		fail("Expected exception: no multipart content");
 	}
@@ -344,7 +347,7 @@ public class RequestParamMethodArgumentResolverTests {
 	public void missingMultipartFile() throws Exception {
 		request.setMethod("POST");
 		request.setContentType("multipart/form-data");
-		MethodParameter param = this.testMethod.annotated(RequestParam.class).arg(MultipartFile.class);
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(MultipartFile.class);
 		resolver.resolveArgument(param, null, webRequest, null);
 		fail("Expected exception: no such part found");
 	}
@@ -358,7 +361,7 @@ public class RequestParamMethodArgumentResolverTests {
 		request.addPart(expected);
 		webRequest = new ServletWebRequest(request);
 
-		MethodParameter param = this.testMethod.notAnnotated(RequestParam.class).arg(Part.class);
+		MethodParameter param = this.testMethod.annotNotPresent(RequestParam.class).arg(Part.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 		assertTrue(result instanceof Part);
 		assertEquals("Invalid result", expected, result);
@@ -366,7 +369,7 @@ public class RequestParamMethodArgumentResolverTests {
 
 	@Test
 	public void resolveDefaultValue() throws Exception {
-		MethodParameter param = this.testMethod.annotated(RequestParam.class, value("bar")).arg(String.class);
+		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 		assertTrue(result instanceof String);
 		assertEquals("Invalid result", "bar", result);
@@ -374,7 +377,7 @@ public class RequestParamMethodArgumentResolverTests {
 
 	@Test(expected = MissingServletRequestParameterException.class)
 	public void missingRequestParam() throws Exception {
-		MethodParameter param = this.testMethod.annotated(RequestParam.class).arg(String[].class);
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
 		resolver.resolveArgument(param, null, webRequest, null);
 		fail("Expected exception");
 	}
@@ -389,7 +392,7 @@ public class RequestParamMethodArgumentResolverTests {
 
 		this.request.addParameter("stringNotAnnot", "");
 
-		MethodParameter param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
+		MethodParameter param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
 		Object arg = resolver.resolveArgument(param, null, webRequest, binderFactory);
 		assertNull(arg);
 	}
@@ -404,7 +407,7 @@ public class RequestParamMethodArgumentResolverTests {
 
 		this.request.addParameter("name", "");
 
-		MethodParameter param = this.testMethod.annotated(RequestParam.class, required().negate()).arg(String.class);
+		MethodParameter param = this.testMethod.annot(requestParam().notRequired()).arg(String.class);
 		Object arg = resolver.resolveArgument(param, null, webRequest, binderFactory);
 		assertNull(arg);
 	}
@@ -412,7 +415,7 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test
 	public void resolveSimpleTypeParam() throws Exception {
 		request.setParameter("stringNotAnnot", "plainValue");
-		MethodParameter param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
+		MethodParameter param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 
 		assertTrue(result instanceof String);
@@ -421,7 +424,7 @@ public class RequestParamMethodArgumentResolverTests {
 
 	@Test  // SPR-8561
 	public void resolveSimpleTypeParamToNull() throws Exception {
-		MethodParameter param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
+		MethodParameter param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 		assertNull(result);
 	}
@@ -429,7 +432,7 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test  // SPR-10180
 	public void resolveEmptyValueToDefault() throws Exception {
 		this.request.addParameter("name", "");
-		MethodParameter param = this.testMethod.annotated(RequestParam.class, value("bar")).arg(String.class);
+		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 		assertEquals("bar", result);
 	}
@@ -437,7 +440,7 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test
 	public void resolveEmptyValueWithoutDefault() throws Exception {
 		this.request.addParameter("stringNotAnnot", "");
-		MethodParameter param = this.testMethod.notAnnotated(RequestParam.class).arg(String.class);
+		MethodParameter param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 		assertEquals("", result);
 	}
@@ -445,7 +448,7 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test
 	public void resolveEmptyValueRequiredWithoutDefault() throws Exception {
 		this.request.addParameter("name", "");
-		MethodParameter param = this.testMethod.annotated(RequestParam.class, required(), value("")).arg(String.class);
+		MethodParameter param = this.testMethod.annot(requestParam().notRequired()).arg(String.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 		assertEquals("", result);
 	}
@@ -457,9 +460,7 @@ public class RequestParamMethodArgumentResolverTests {
 		initializer.setConversionService(new DefaultConversionService());
 		WebDataBinderFactory binderFactory = new DefaultDataBinderFactory(initializer);
 
-		MethodParameter param = this.testMethod
-				.annotated(RequestParam.class).arg(Optional.class, Integer.class);
-
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(Optional.class, Integer.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, binderFactory);
 		assertEquals(Optional.empty(), result);
 
@@ -480,10 +481,9 @@ public class RequestParamMethodArgumentResolverTests {
 		request.addFile(expected);
 		webRequest = new ServletWebRequest(request);
 
-		MethodParameter param = this.testMethod
-				.annotated(RequestParam.class).arg(Optional.class, MultipartFile.class);
-
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(Optional.class, MultipartFile.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, binderFactory);
+
 		assertTrue(result instanceof Optional);
 		assertEquals("Invalid result", expected, ((Optional<?>) result).get());
 	}
@@ -497,10 +497,9 @@ public class RequestParamMethodArgumentResolverTests {
 		request.setMethod("POST");
 		request.setContentType("multipart/form-data");
 
-		MethodParameter param = this.testMethod
-				.annotated(RequestParam.class).arg(Optional.class, MultipartFile.class);
-
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(Optional.class, MultipartFile.class);
 		Object actual = resolver.resolveArgument(param, null, webRequest, binderFactory);
+
 		assertEquals(Optional.empty(), actual);
 	}
 
@@ -510,25 +509,10 @@ public class RequestParamMethodArgumentResolverTests {
 		initializer.setConversionService(new DefaultConversionService());
 		WebDataBinderFactory binderFactory = new DefaultDataBinderFactory(initializer);
 
-		MethodParameter param = this.testMethod
-				.annotated(RequestParam.class).arg(Optional.class, MultipartFile.class);
-
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(Optional.class, MultipartFile.class);
 		Object actual = resolver.resolveArgument(param, null, webRequest, binderFactory);
+
 		assertEquals(Optional.empty(), actual);
-	}
-
-	private Predicate<RequestParam> name(String name) {
-		return a -> name.equals(a.name());
-	}
-
-	private Predicate<RequestParam> required() {
-		return RequestParam::required;
-	}
-
-	private Predicate<RequestParam> value(String value) {
-		return !value.isEmpty() ?
-				requestParam -> value.equals(requestParam.defaultValue()) :
-				requestParam -> ValueConstants.DEFAULT_NONE.equals(requestParam.defaultValue());
 	}
 
 
