@@ -53,7 +53,7 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 	private final int bufferSizeLimit;
 
 
-	private final Queue<WebSocketMessage<?>> buffer = new LinkedBlockingQueue<WebSocketMessage<?>>();
+	private final Queue<WebSocketMessage<?>> buffer = new LinkedBlockingQueue<>();
 
 	private final AtomicInteger bufferSize = new AtomicInteger();
 

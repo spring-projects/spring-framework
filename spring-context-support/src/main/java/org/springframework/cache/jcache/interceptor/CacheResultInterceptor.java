@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheResultOper
 		super(errorHandler);
 	}
 
+
 	@Override
 	protected Object invoke(CacheOperationInvocationContext<CacheResultOperation> context,
 			CacheOperationInvoker invoker) {
@@ -59,7 +60,7 @@ class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheResultOper
 
 		try {
 			Object invocationResult = invoker.invoke();
-			cache.put(cacheKey, invocationResult);
+			doPut(cache, cacheKey, invocationResult);
 			return invocationResult;
 		}
 		catch (CacheOperationInvoker.ThrowableWrapper ex) {
@@ -82,16 +83,14 @@ class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheResultOper
 		}
 	}
 
-
 	protected void cacheException(Cache exceptionCache, ExceptionTypeFilter filter, Object cacheKey, Throwable ex) {
 		if (exceptionCache == null) {
 			return;
 		}
 		if (filter.match(ex.getClass())) {
-			exceptionCache.put(cacheKey, ex);
+			doPut(exceptionCache, cacheKey, ex);
 		}
 	}
-
 
 	private Cache resolveExceptionCache(CacheOperationInvocationContext<CacheResultOperation> context) {
 		CacheResolver exceptionCacheResolver = context.getOperation().getExceptionCacheResolver();
@@ -101,9 +100,10 @@ class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheResultOper
 		return null;
 	}
 
+
 	/**
 	 * Rewrite the call stack of the specified {@code exception} so that it matches
-	 * the current call stack up-to (included) the specified method invocation.
+	 * the current call stack up to (included) the specified method invocation.
 	 * <p>Clone the specified exception. If the exception is not {@code serializable},
 	 * the original exception is returned. If no common ancestor can be found, returns
 	 * the original exception.
@@ -111,8 +111,8 @@ class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheResultOper
 	 * @param exception the exception to merge with the current call stack
 	 * @param className the class name of the common ancestor
 	 * @param methodName the method name of the common ancestor
-	 * @return a clone exception with a rewritten call stack composed of the current
-	 * call stack up to (included) the common ancestor specified by the {@code className} and
+	 * @return a clone exception with a rewritten call stack composed of the current call
+	 * stack up to (included) the common ancestor specified by the {@code className} and
 	 * {@code methodName} arguments, followed by stack trace elements of the specified
 	 * {@code exception} after the common ancestor.
 	 */

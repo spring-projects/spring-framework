@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -51,11 +52,11 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private UrlPathHelper pathHelper = new UrlPathHelper();
+	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
-	private final Map<String, ResourceHttpRequestHandler> handlerMap = new LinkedHashMap<String, ResourceHttpRequestHandler>();
+	private final Map<String, ResourceHttpRequestHandler> handlerMap = new LinkedHashMap<>();
 
 	private boolean autodetect = true;
 
@@ -65,15 +66,16 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * {@link #getForRequestUrl(javax.servlet.http.HttpServletRequest, String)}
 	 * in order to derive the lookup path for a target request URL path.
 	 */
-	public void setUrlPathHelper(UrlPathHelper pathHelper) {
-		this.pathHelper = pathHelper;
+	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		this.urlPathHelper = urlPathHelper;
 	}
 
 	/**
 	 * Return the configured {@code UrlPathHelper}.
+	 * @since 4.2.8
 	 */
-	public UrlPathHelper getPathHelper() {
-		return this.pathHelper;
+	public UrlPathHelper getUrlPathHelper() {
+		return this.urlPathHelper;
 	}
 
 	/**
@@ -135,11 +137,12 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		}
 	}
 
+
 	protected void detectResourceHandlers(ApplicationContext appContext) {
 		logger.debug("Looking for resource handler mappings");
 
 		Map<String, SimpleUrlHandlerMapping> map = appContext.getBeansOfType(SimpleUrlHandlerMapping.class);
-		List<SimpleUrlHandlerMapping> handlerMappings = new ArrayList<SimpleUrlHandlerMapping>(map.values());
+		List<SimpleUrlHandlerMapping> handlerMappings = new ArrayList<>(map.values());
 		AnnotationAwareOrderComparator.sort(handlerMappings);
 
 		for (SimpleUrlHandlerMapping hm : handlerMappings) {
@@ -158,7 +161,6 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		}
 	}
 
-
 	/**
 	 * A variation on {@link #getForLookupPath(String)} that accepts a full request
 	 * URL path (i.e. including context and servlet path) and returns the full request
@@ -172,7 +174,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 			logger.trace("Getting resource URL for request URL \"" + requestUrl + "\"");
 		}
 		int prefixIndex = getLookupPathIndex(request);
-		int suffixIndex = getQueryParamsIndex(requestUrl);
+		int suffixIndex = getEndPathIndex(requestUrl);
 		String prefix = requestUrl.substring(0, prefixIndex);
 		String suffix = requestUrl.substring(suffixIndex);
 		String lookupPath = requestUrl.substring(prefixIndex, suffixIndex);
@@ -181,14 +183,23 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	}
 
 	private int getLookupPathIndex(HttpServletRequest request) {
-		String requestUri = getPathHelper().getRequestUri(request);
-		String lookupPath = getPathHelper().getLookupPathForRequest(request);
+		UrlPathHelper pathHelper = getUrlPathHelper();
+		String requestUri = pathHelper.getRequestUri(request);
+		String lookupPath = pathHelper.getLookupPathForRequest(request);
 		return requestUri.indexOf(lookupPath);
 	}
 
-	private int getQueryParamsIndex(String lookupPath) {
-		int index = lookupPath.indexOf("?");
-		return index > 0 ? index : lookupPath.length();
+	private int getEndPathIndex(String lookupPath) {
+		int suffixIndex = lookupPath.length();
+		int queryIndex = lookupPath.indexOf("?");
+		if(queryIndex > 0) {
+			suffixIndex = queryIndex;
+		}
+		int hashIndex = lookupPath.indexOf("#");
+		if(hashIndex > 0) {
+			suffixIndex = Math.min(suffixIndex, hashIndex);
+		}
+		return suffixIndex;
 	}
 
 	/**
@@ -208,7 +219,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 			logger.trace("Getting resource URL for lookup path \"" + lookupPath + "\"");
 		}
 
-		List<String> matchingPatterns = new ArrayList<String>();
+		List<String> matchingPatterns = new ArrayList<>();
 		for (String pattern : this.handlerMap.keySet()) {
 			if (getPathMatcher().match(pattern, lookupPath)) {
 				matchingPatterns.add(pattern);

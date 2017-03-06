@@ -144,10 +144,8 @@ loading, and the transparent creation of contexts by, for example, a Servlet con
 The Context module also supports Java EE features such as EJB, JMX, and basic remoting.
 The `ApplicationContext` interface is the focal point of the Context module.
 `spring-context-support` provides support for integrating common third-party libraries
-into a Spring application context for caching (EhCache, Guava, JCache), mailing
-(JavaMail), scheduling (CommonJ, Quartz) and template engines (FreeMarker, JasperReports,
-Velocity).
-
+into a Spring application context, in particular for caching (EhCache, JCache) and
+scheduling (CommonJ, Quartz).
 
 The `spring-expression` module provides a powerful <<expressions,__Expression
 Language__>> for querying and manipulating an object graph at runtime. It is an extension
@@ -198,14 +196,13 @@ management for classes that implement special interfaces and for __all your POJO
 Old Java Objects)__.
 
 The `spring-orm` module provides integration layers for popular
-<<orm-introduction,object-relational mapping>> APIs, including <<orm-jpa,JPA>>,
-<<orm-jdo,JDO>>, and <<orm-hibernate,Hibernate>>. Using the `spring-orm` module you can
-use all of these O/R-mapping frameworks in combination with all of the other features
-Spring offers, such as the simple declarative transaction management feature mentioned
-previously.
+<<orm-introduction,object-relational mapping>> APIs, including <<orm-jpa,JPA>> and
+<<orm-hibernate,Hibernate>>. Using the `spring-orm` module you can use these
+O/R-mapping frameworks in combination with all of the other features Spring offers,
+such as the simple declarative transaction management feature mentioned previously.
 
 The `spring-oxm` module provides an abstraction layer that supports <<oxm,Object/XML
-mapping>> implementations such as JAXB, Castor, XMLBeans, JiBX and XStream.
+mapping>> implementations such as JAXB, Castor, JiBX and XStream.
 
 The `spring-jms` module (<<jms,Java Messaging Service>>) contains features for producing and
 consuming messages. Since Spring Framework 4.1, it provides integration with the
@@ -214,8 +211,8 @@ consuming messages. Since Spring Framework 4.1, it provides integration with the
 
 [[overview-web]]
 ==== Web
-The __Web__ layer consists of the `spring-web`, `spring-webmvc`, `spring-websocket`, and
-`spring-webmvc-portlet` modules.
+The __Web__ layer consists of the `spring-web`, `spring-webmvc` and `spring-websocket`
+modules.
 
 The `spring-web` module provides basic web-oriented integration features such as
 multipart file upload functionality and the initialization of the IoC container using
@@ -228,17 +225,13 @@ for web applications. Spring's MVC framework provides a clean separation between
 model code and web forms and integrates with all of the other features of the Spring
 Framework.
 
-The `spring-webmvc-portlet` module (also known as the __Web-Portlet__ module) provides
-the MVC implementation to be used in a Portlet environment and mirrors the functionality
-of the `spring-webmvc` module.
-
 
 [[overview-testing]]
 ==== Test
 The `spring-test` module supports the <<unit-testing,unit testing>> and
 <<integration-testing,integration testing>> of Spring components with JUnit or TestNG. It
 provides consistent <<testcontext-ctx-management,loading>> of Spring
-++ApplicationContext++s and <<testcontext-ctx-management-caching,caching>> of those
+``ApplicationContext``s and <<testcontext-ctx-management-caching,caching>> of those
 contexts. It also provides <<mock-objects,mock objects>> that you can use to test your
 code in isolation.
 
@@ -259,11 +252,11 @@ the web application fully transactional, just as it would be if you used EJB
 container-managed transactions. All your custom business logic can be implemented with
 simple POJOs and managed by Spring's IoC container. Additional services include support
 for sending email and validation that is independent of the web layer, which lets you
-choose where to execute validation rules. Spring's ORM support is integrated with JPA,
-Hibernate and JDO; for example, when using Hibernate, you can continue to use
-your existing mapping files and standard Hibernate `SessionFactory` configuration. Form
-controllers seamlessly integrate the web-layer with the domain model, removing the need
-for `ActionForms` or other classes that transform HTTP parameters to values for your
+choose where to execute validation rules. Spring's ORM support is integrated with JPA
+and Hibernate; for example, when using Hibernate, you can continue to use your existing
+mapping files and standard Hibernate `SessionFactory` configuration. Form controllers
+seamlessly integrate the web-layer with the domain model, removing the need for
+`ActionForms` or other classes that transform HTTP parameters to values for your
 domain model.
 
 .Spring middle-tier using a third-party web framework
@@ -281,7 +274,7 @@ layer.
 image::images/overview-remoting.png[width=400]
 
 When you need to access existing code through web services, you can use Spring's
-`Hessian-`, `Burlap-`, `Rmi-` or `JaxRpcProxyFactory` classes. Enabling remote access to
+`Hessian-`, `Rmi-` or `HttpInvokerProxyFactoryBean` classes. Enabling remote access to
 existing applications is not difficult.
 
 .EJBs - Wrapping existing POJOs
@@ -415,10 +408,6 @@ modules, see <<overview-modules>>.
 |org.springframework
 |spring-webmvc
 |REST Web Services and model-view-controller implementation for web applications
-
-|org.springframework
-|spring-webmvc-portlet
-|MVC implementation to be used in a Portlet environment
 
 |org.springframework
 |spring-websocket
@@ -725,9 +714,9 @@ into logging calls to the SLF4J API, so if other libraries in your application u
 API, then you have a single place to configure and manage logging.
 
 A common choice might be to bridge Spring to SLF4J, and then provide explicit binding
-from SLF4J to Log4J. You need to supply 4 dependencies (and exclude the existing
-`commons-logging`): the bridge, the SLF4J API, the binding to Log4J, and the Log4J
-implementation itself. In Maven you would do that like this
+from SLF4J to Log4j. You need to supply several dependencies (and exclude the existing
+`commons-logging`): the bridge, the SLF4J implementation for Log4j, and the Log4j
+implementation itself. In Maven you would do that like this:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes,attributes"]
@@ -747,22 +736,22 @@ implementation itself. In Maven you would do that like this
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
-			<version>1.5.8</version>
+			<version>1.7.22</version>
 		</dependency>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.5.8</version>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<version>2.7</version>
 		</dependency>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.5.8</version>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.7</version>
 		</dependency>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.14</version>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.7</version>
 		</dependency>
 	</dependencies>
 ----
@@ -782,47 +771,72 @@ Spring), because you only want one version of that API on the classpath.
 
 
 [[overview-logging-log4j]]
-===== Using Log4J
+===== Using Log4j
+
+NOTE: Log4j 1.x is EOL and the following applies to Log4j 2
+
 Many people use http://logging.apache.org/log4j[Log4j] as a logging framework for
 configuration and management purposes. It's efficient and well-established, and in fact
 it's what we use at runtime when we build and test Spring. Spring also provides some
 utilities for configuring and initializing Log4j, so it has an optional compile-time
 dependency on Log4j in some modules.
 
-To make Log4j work with the default JCL dependency ( `commons-logging`) all you need to
-do is put Log4j on the classpath, and provide it with a configuration file (
-`log4j.properties` or `log4j.xml` in the root of the classpath). So for Maven users this
-is your dependency declaration:
+To use Log4j with JCL, all you need to do is put Log4j on the classpath and provide
+it with a configuration file (`log4j2.xml`, `log4j2.properties`, or other
+http://logging.apache.org/log4j/2.x/manual/configuration.html[supported configuration
+formats]). For Maven users, the minimal dependencies needed are:
+
 
 [source,xml,indent=0]
 [subs="verbatim,quotes,attributes"]
 ----
 	<dependencies>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-core</artifactId>
-			<version>{spring-version}</version>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.7</version>
 		</dependency>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.14</version>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-jcl</artifactId>
+			<version>2.7</version>
 		</dependency>
 	</dependencies>
 ----
 
-And here's a sample log4j.properties for logging to the console:
+If you also wish to use SLF4J, the following dependencies are also needed:
 
-[literal]
-[subs="verbatim,quotes"]
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
 ----
-log4j.rootCategory=INFO, stdout
+	<dependencies>
+	  <dependency>
+		<groupId>org.apache.logging.log4j</groupId>
+		<artifactId>log4j-slf4j-impl</artifactId>
+		<version>2.7</version>
+	  </dependency>
+	</dependencies>
+----
 
-log4j.appender.stdout=org.apache.log4j.ConsoleAppender
-log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
-log4j.appender.stdout.layout.ConversionPattern=%d{ABSOLUTE} %5p %t %c{2}:%L - %m%n
+Here is an example `log4j2.xml` for logging to the console:
 
-log4j.category.org.springframework.beans.factory=DEBUG
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<Configuration status="WARN">
+	  <Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+		  <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+		</Console>
+	  </Appenders>
+	  <Loggers>
+		<Logger name="org.springframework.beans.factory" level="DEBUG"/>
+		<Root level="error">
+		  <AppenderRef ref="Console"/>
+		</Root>
+	  </Loggers>
+	</Configuration>
 ----
 
 [[overview-native-jcl]]
@@ -834,11 +848,11 @@ excluding `commons-logging` from your application is not enough in most situatio
 
 To be clear about this: the problems reported are usually not with JCL per se, or even
 with `commons-logging`: rather they are to do with binding `commons-logging` to another
-framework (often Log4J). This can fail because `commons-logging` changed the way they do
+framework (often Log4j). This can fail because `commons-logging` changed the way they do
 the runtime discovery in between the older versions (1.0) found in some containers and
 the modern versions that most people use now (1.1). Spring does not use any unusual
 parts of the JCL API, so nothing breaks there, but as soon as Spring or your application
-tries to do any logging you can find that the bindings to Log4J are not working.
+tries to do any logging you can find that the bindings to Log4j are not working.
 
 In such cases with WAS the easiest thing to do is to invert the class loader hierarchy
 (IBM calls it "parent last") so that the application controls the JCL dependency, not

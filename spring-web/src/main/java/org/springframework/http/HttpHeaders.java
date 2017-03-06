@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,11 @@
 package org.springframework.http;
 
 import java.io.Serializable;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,6 +39,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -58,6 +62,8 @@ import org.springframework.util.StringUtils;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Brian Clozel
+ * @author Juergen Hoeller
+ * @author Josh Long
  * @since 3.0
  */
 public class HttpHeaders implements MultiValueMap<String, String>, Serializable {
@@ -91,42 +97,42 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public static final String ACCEPT_RANGES = "Accept-Ranges";
 	/**
 	 * The CORS {@code Access-Control-Allow-Credentials} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
 	/**
 	 * The CORS {@code Access-Control-Allow-Headers} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
 	/**
 	 * The CORS {@code Access-Control-Allow-Methods} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
 	/**
 	 * The CORS {@code Access-Control-Allow-Origin} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
 	/**
 	 * The CORS {@code Access-Control-Expose-Headers} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
 	/**
 	 * The CORS {@code Access-Control-Max-Age} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age";
 	/**
 	 * The CORS {@code Access-Control-Request-Headers} request header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_REQUEST_HEADERS = "Access-Control-Request-Headers";
 	/**
 	 * The CORS {@code Access-Control-Request-Method} request header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method";
 	/**
@@ -381,6 +387,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	private static final Pattern ETAG_HEADER_VALUE_PATTERN = Pattern.compile("\\*|\\s*((W\\/)?(\"[^\"]*\"))\\s*,?");
 
+	private static final DecimalFormatSymbols DECIMAL_FORMAT_SYMBOLS = new DecimalFormatSymbols(Locale.ENGLISH);
+
 	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 
@@ -391,7 +399,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Constructs a new, empty instance of the {@code HttpHeaders} object.
 	 */
 	public HttpHeaders() {
-		this(new LinkedCaseInsensitiveMap<List<String>>(8, Locale.ENGLISH), false);
+		this(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH), false);
 	}
 
 	/**
@@ -401,7 +409,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		Assert.notNull(headers, "'headers' must not be null");
 		if (readOnly) {
 			Map<String, List<String>> map =
-					new LinkedCaseInsensitiveMap<List<String>>(headers.size(), Locale.ENGLISH);
+					new LinkedCaseInsensitiveMap<>(headers.size(), Locale.ENGLISH);
 			for (Entry<String, List<String>> entry : headers.entrySet()) {
 				List<String> values = Collections.unmodifiableList(entry.getValue());
 				map.put(entry.getKey(), values);
@@ -428,19 +436,68 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * <p>Returns an empty list when the acceptable media types are unspecified.
 	 */
 	public List<MediaType> getAccept() {
-		String value = getFirst(ACCEPT);
-		List<MediaType> result = (value != null ? MediaType.parseMediaTypes(value) : Collections.<MediaType>emptyList());
+		return MediaType.parseMediaTypes(get(ACCEPT));
+	}
 
-		// Some containers parse 'Accept' into multiple values
-		if (result.size() == 1) {
-			List<String> acceptHeader = get(ACCEPT);
-			if (acceptHeader.size() > 1) {
-				value = StringUtils.collectionToCommaDelimitedString(acceptHeader);
-				result = MediaType.parseMediaTypes(value);
-			}
+	/**
+	 * Set the acceptable language ranges, as specified by the
+	 * {@literal Accept-Language} header.
+	 * @since 5.0
+	 */
+	public void setAcceptLanguage(List<Locale.LanguageRange> languages) {
+		Assert.notNull(languages, "'languages' must not be null");
+		DecimalFormat decimal = new DecimalFormat("0.0", DECIMAL_FORMAT_SYMBOLS);
+		List<String> values = languages.stream()
+				.map(range ->
+						range.getWeight() == Locale.LanguageRange.MAX_WEIGHT ?
+								range.getRange() :
+								range.getRange() + ";q=" + decimal.format(range.getWeight()))
+				.collect(Collectors.toList());
+		set(ACCEPT_LANGUAGE, toCommaDelimitedString(values));
+	}
+
+	/**
+	 * Return the acceptable language ranges from the
+	 * {@literal Accept-Language} header
+	 * <p>If you only need the most preferred locale use
+	 * {@link #getAcceptLanguageAsLocale()} or if you need to filter based on
+	 * a list of supporeted locales you can pass the returned list to
+	 * {@link Locale#filter(List, Collection)}.
+	 * @since 5.0
+	 */
+	public List<Locale.LanguageRange> getAcceptLanguage() {
+		String value = getFirst(ACCEPT_LANGUAGE);
+		if (value != null) {
+			return Locale.LanguageRange.parse(value);
 		}
+		return Collections.emptyList();
+	}
 
-		return result;
+	/**
+	 * A variant of {@link #setAcceptLanguage(List)} that sets the {@literal Accept-Language}
+	 * header value to the specified locale.
+	 * @since 5.0
+	 */
+	public void setAcceptLanguageAsLocale(Locale locale) {
+		setAcceptLanguage(Collections.singletonList(new Locale.LanguageRange(locale.toLanguageTag())));
+	}
+
+	/**
+	 * A variant of {@link #getAcceptLanguage()} that converts each
+	 * {@link java.util.Locale.LanguageRange} to a {@link Locale} and returns
+	 * the first one on the list.
+	 * @since 5.0
+	 */
+	public Locale getAcceptLanguageAsLocale() {
+		List<Locale.LanguageRange> ranges = getAcceptLanguage();
+		if (ranges.isEmpty()) {
+			return null;
+		}
+		return ranges.stream()
+				.map(range -> Locale.forLanguageTag(range.getRange()))
+				.filter(locale -> StringUtils.hasText(locale.getDisplayName()))
+				.findFirst()
+				.orElse(null);
 	}
 
 	/**
@@ -451,10 +508,10 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Access-Control-Allow-Credentials} response header.
+	 * Return the value of the {@code Access-Control-Allow-Credentials} response header.
 	 */
 	public boolean getAccessControlAllowCredentials() {
-		return new Boolean(getFirst(ACCESS_CONTROL_ALLOW_CREDENTIALS));
+		return Boolean.parseBoolean(getFirst(ACCESS_CONTROL_ALLOW_CREDENTIALS));
 	}
 
 	/**
@@ -465,7 +522,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Access-Control-Allow-Headers} response header.
+	 * Return the value of the {@code Access-Control-Allow-Headers} response header.
 	 */
 	public List<String> getAccessControlAllowHeaders() {
 		return getValuesAsList(ACCESS_CONTROL_ALLOW_HEADERS);
@@ -482,10 +539,10 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return the value of the {@code Access-Control-Allow-Methods} response header.
 	 */
 	public List<HttpMethod> getAccessControlAllowMethods() {
-		List<HttpMethod> result = new ArrayList<HttpMethod>();
+		List<HttpMethod> result = new ArrayList<>();
 		String value = getFirst(ACCESS_CONTROL_ALLOW_METHODS);
 		if (value != null) {
-			String[] tokens = StringUtils.tokenizeToStringArray(value, ",", true, true);
+			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
 			for (String token : tokens) {
 				HttpMethod resolved = HttpMethod.resolve(token);
 				if (resolved != null) {
@@ -510,22 +567,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		return getFieldValues(ACCESS_CONTROL_ALLOW_ORIGIN);
 	}
 
-	protected String getFieldValues(String headerName) {
-		List<String> headerValues = this.headers.get(headerName);
-		if (headerValues != null) {
-			StringBuilder builder = new StringBuilder();
-			for (Iterator<String> iterator = headerValues.iterator(); iterator.hasNext(); ) {
-				String ifNoneMatch = iterator.next();
-				builder.append(ifNoneMatch);
-				if (iterator.hasNext()) {
-					builder.append(", ");
-				}
-			}
-			return builder.toString();
-		}
-		return null;
-	}
-
 	/**
 	 * Set the (new) value of the {@code Access-Control-Expose-Headers} response header.
 	 */
@@ -534,7 +575,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Access-Control-Expose-Headers} response header.
+	 * Return the value of the {@code Access-Control-Expose-Headers} response header.
 	 */
 	public List<String> getAccessControlExposeHeaders() {
 		return getValuesAsList(ACCESS_CONTROL_EXPOSE_HEADERS);
@@ -548,7 +589,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Access-Control-Max-Age} response header.
+	 * Return the value of the {@code Access-Control-Max-Age} response header.
 	 * <p>Returns -1 when the max age is unknown.
 	 */
 	public long getAccessControlMaxAge() {
@@ -564,7 +605,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Access-Control-Request-Headers} request header.
+	 * Return the value of the {@code Access-Control-Request-Headers} request header.
 	 */
 	public List<String> getAccessControlRequestHeaders() {
 		return getValuesAsList(ACCESS_CONTROL_REQUEST_HEADERS);
@@ -573,8 +614,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the (new) value of the {@code Access-Control-Request-Method} request header.
 	 */
-	public void setAccessControlRequestMethod(HttpMethod requestedMethod) {
-		set(ACCESS_CONTROL_REQUEST_METHOD, requestedMethod.name());
+	public void setAccessControlRequestMethod(HttpMethod requestMethod) {
+		set(ACCESS_CONTROL_REQUEST_METHOD, requestMethod.name());
 	}
 
 	/**
@@ -605,10 +646,10 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * as specified by the {@code Accept-Charset} header.
 	 */
 	public List<Charset> getAcceptCharset() {
-		List<Charset> result = new ArrayList<Charset>();
 		String value = getFirst(ACCEPT_CHARSET);
 		if (value != null) {
-			String[] tokens = value.split(",\\s*");
+			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
+			List<Charset> result = new ArrayList<>(tokens.length);
 			for (String token : tokens) {
 				int paramIdx = token.indexOf(';');
 				String charsetName;
@@ -622,8 +663,11 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 					result.add(Charset.forName(charsetName));
 				}
 			}
+			return result;
 		}
-		return result;
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 	/**
@@ -642,8 +686,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public Set<HttpMethod> getAllow() {
 		String value = getFirst(ALLOW);
 		if (!StringUtils.isEmpty(value)) {
-			List<HttpMethod> result = new LinkedList<HttpMethod>();
-			String[] tokens = value.split(",\\s*");
+			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
+			List<HttpMethod> result = new ArrayList<>(tokens.length);
 			for (String token : tokens) {
 				HttpMethod resolved = HttpMethod.resolve(token);
 				if (resolved != null) {
@@ -697,16 +741,86 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * for {@code form-data}.
 	 * @param name the control name
 	 * @param filename the filename (may be {@code null})
+	 * @see #setContentDisposition(ContentDisposition)
+	 * @see #getContentDisposition()
 	 */
 	public void setContentDispositionFormData(String name, String filename) {
+		setContentDispositionFormData(name, filename, null);
+	}
+
+	/**
+	 * Set the (new) value of the {@code Content-Disposition} header
+	 * for {@code form-data}, optionally encoding the filename using the RFC 5987.
+	 * <p>Only the US-ASCII, UTF-8 and ISO-8859-1 charsets are supported.
+	 * @param name the control name
+	 * @param filename the filename (may be {@code null})
+	 * @param charset the charset used for the filename (may be {@code null})
+	 * @since 4.3.3
+	 * @see #setContentDisposition(ContentDisposition)
+	 * @see #getContentDisposition()
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.4">RFC 7230 Section 3.2.4</a>
+	 */
+	public void setContentDispositionFormData(String name, String filename, Charset charset) {
 		Assert.notNull(name, "'name' must not be null");
-		StringBuilder builder = new StringBuilder("form-data; name=\"");
-		builder.append(name).append('\"');
-		if (filename != null) {
-			builder.append("; filename=\"");
-			builder.append(filename).append('\"');
+		ContentDisposition disposition = ContentDisposition.builder("form-data")
+				.name(name).filename(filename, charset).build();
+		setContentDisposition(disposition);
+	}
+
+	/**
+	 * Set the (new) value of the {@literal Content-Disposition} header. Supports the
+	 * disposition type and {@literal filename}, {@literal filename*} (encoded according
+	 * to RFC 5987, only the US-ASCII, UTF-8 and ISO-8859-1 charsets are supported),
+	 * {@literal name}, {@literal size} parameters.
+	 * @since 5.0
+	 * @see #getContentDisposition()
+	 */
+	public void setContentDisposition(ContentDisposition contentDisposition) {
+		set(CONTENT_DISPOSITION, contentDisposition.toString());
+	}
+
+	/**
+	 * Return the {@literal Content-Disposition} header parsed as a {@link ContentDisposition}
+	 * instance. Supports the disposition type and {@literal filename}, {@literal filename*}
+	 * (encoded according to RFC 5987, only the US-ASCII, UTF-8 and ISO-8859-1 charsets are
+	 * supported), {@literal name}, {@literal size} parameters.
+	 * @since 5.0
+	 * @see #setContentDisposition(ContentDisposition)
+	 */
+	public ContentDisposition getContentDisposition() {
+		String contentDisposition = getFirst(CONTENT_DISPOSITION);
+		if (contentDisposition != null) {
+			return ContentDisposition.parse(contentDisposition);
 		}
-		set(CONTENT_DISPOSITION, builder.toString());
+		return ContentDisposition.empty();
+	}
+
+	/**
+	 * Set the {@link Locale} of the content language,
+	 * as specified by the {@literal Content-Language} header.
+	 * <p>Use {@code set(CONTENT_LANGUAGE, ...)} if you need
+	 * to set multiple content languages.</p>
+	 * @since 5.0
+	 */
+	public void setContentLanguage(Locale locale) {
+		Assert.notNull(locale, "'locale' must not be null");
+		set(CONTENT_LANGUAGE, locale.toLanguageTag());
+	}
+
+	/**
+	 * Return the first {@link Locale} of the content languages,
+	 * as specified by the {@literal Content-Language} header.
+	 * <p>Returns {@code null} when the content language is unknown.
+	 * <p>Use {@code getValuesAsList(CONTENT_LANGUAGE)} if you need
+	 * to get multiple content languages.</p>
+	 * @since 5.0
+	 */
+	public Locale getContentLanguage() {
+		return getValuesAsList(CONTENT_LANGUAGE)
+				.stream()
+				.findFirst()
+				.map(Locale::forLanguageTag)
+				.orElse(null);
 	}
 
 	/**
@@ -808,7 +922,51 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
+	 * Set the (new) value of the {@code Host} header.
+	 * <p>If the given {@linkplain InetSocketAddress#getPort() port} is {@code 0},
+	 * the host header will only contain the
+	 * {@linkplain InetSocketAddress#getHostString() hostname}.
+	 * @since 5.0
+	 */
+	public void setHost(InetSocketAddress host) {
+		String value = (host.getPort() != 0 ?
+				String.format("%s:%d", host.getHostString(), host.getPort()) : host.getHostString());
+		set(HOST, value);
+	}
+
+	/**
+	 * Return the value of the required {@code Host} header.
+	 * <p>If the header value does not contain a port, the returned
+	 * {@linkplain InetSocketAddress#getPort() port} will be {@code 0}.
+	 * @since 5.0
+	 */
+	public InetSocketAddress getHost() {
+		String value = getFirst(HOST);
+		if (value == null) {
+			return null;
+		}
+		int idx = value.lastIndexOf(':');
+		String hostname = null;
+		int port = 0;
+		if (idx != -1 && idx < value.length() - 1) {
+			hostname = value.substring(0, idx);
+			String portString = value.substring(idx + 1);
+			try {
+				port = Integer.parseInt(portString);
+			}
+			catch (NumberFormatException ex) {
+				// ignored
+			}
+		}
+		if (hostname == null) {
+			hostname = value;
+		}
+		return InetSocketAddress.createUnresolved(hostname, port);
+	}
+
+	/**
 	 * Set the (new) value of the {@code If-Match} header.
+	 * @since 4.3
 	 */
 	public void setIfMatch(String ifMatch) {
 		set(IF_MATCH, ifMatch);
@@ -816,53 +974,18 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Set the (new) value of the {@code If-Match} header.
+	 * @since 4.3
 	 */
 	public void setIfMatch(List<String> ifMatchList) {
 		set(IF_MATCH, toCommaDelimitedString(ifMatchList));
 	}
 
-	protected String toCommaDelimitedString(List<String> list) {
-		StringBuilder builder = new StringBuilder();
-		for (Iterator<String> iterator = list.iterator(); iterator.hasNext(); ) {
-			String ifNoneMatch = iterator.next();
-			builder.append(ifNoneMatch);
-			if (iterator.hasNext()) {
-				builder.append(", ");
-			}
-		}
-		return builder.toString();
-	}
-
 	/**
 	 * Return the value of the {@code If-Match} header.
+	 * @since 4.3
 	 */
 	public List<String> getIfMatch() {
 		return getETagValuesAsList(IF_MATCH);
-	}
-
-	protected List<String> getETagValuesAsList(String headerName) {
-		List<String> values = get(headerName);
-		if (values != null) {
-			List<String> result = new ArrayList<String>();
-			for (String value : values) {
-				if (value != null) {
-					Matcher matcher = ETAG_HEADER_VALUE_PATTERN.matcher(value);
-					while (matcher.find()) {
-						if ("*".equals(matcher.group())) {
-							result.add(matcher.group());
-						}
-						else {
-							result.add(matcher.group(1));
-						}
-					}
-					if(result.size() == 0) {
-						throw new IllegalArgumentException("Could not parse '" + headerName + "' value=" + value);
-					}
-				}
-			}
-			return result;
-		}
-		return Collections.emptyList();
 	}
 
 	/**
@@ -905,31 +1028,10 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Return all values of a given header name,
-	 * even if this header is set multiple times.
-	 * @since 4.3
-	 */
-	public List<String> getValuesAsList(String headerName) {
-		List<String> values = get(headerName);
-		if (values != null) {
-			List<String> result = new ArrayList<String>();
-			for (String value : values) {
-				if (value != null) {
-					String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
-					for (String token : tokens) {
-						result.add(token);
-					}
-				}
-			}
-			return result;
-		}
-		return Collections.emptyList();
-	}
-
-	/**
 	 * Set the (new) value of the {@code If-Unmodified-Since} header.
 	 * <p>The date should be specified as the number of milliseconds since
 	 * January 1, 1970 GMT.
+	 * @since 4.3
 	 */
 	public void setIfUnmodifiedSince(long ifUnmodifiedSince) {
 		setDate(IF_UNMODIFIED_SINCE, ifUnmodifiedSince);
@@ -939,6 +1041,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return the value of the {@code If-Unmodified-Since} header.
 	 * <p>The date is returned as the number of milliseconds since
 	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
+	 * @since 4.3
 	 */
 	public long getIfUnmodifiedSince() {
 		return getFirstDate(IF_UNMODIFIED_SINCE, false);
@@ -1054,9 +1157,22 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Return the request header names subject to content negotiation.
+	 * @since 4.3
 	 */
 	public List<String> getVary() {
 		return getValuesAsList(VARY);
+	}
+
+	/**
+	 * Set the given date under the given header name after formatting it as a string
+	 * using the pattern {@code "EEE, dd MMM yyyy HH:mm:ss zzz"}. The equivalent of
+	 * {@link #set(String, String)} but for date headers.
+	 * @since 3.2.4
+	 */
+	public void setDate(String headerName, long date) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMATS[0], Locale.US);
+		dateFormat.setTimeZone(GMT);
+		set(headerName, dateFormat.format(new Date(date)));
 	}
 
 	/**
@@ -1065,6 +1181,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * if the value cannot be parsed as a date.
 	 * @param headerName the header name
 	 * @return the parsed date header, or -1 if none
+	 * @since 3.2.4
 	 */
 	public long getFirstDate(String headerName) {
 		return getFirstDate(headerName, true);
@@ -1109,15 +1226,91 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Set the given date under the given header name after formatting it as a string
-	 * using the pattern {@code "EEE, dd MMM yyyy HH:mm:ss zzz"}. The equivalent of
-	 * {@link #set(String, String)} but for date headers.
+	 * Return all values of a given header name,
+	 * even if this header is set multiple times.
+	 * @param headerName the header name
+	 * @return all associated values
+	 * @since 4.3
 	 */
-	public void setDate(String headerName, long date) {
-		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMATS[0], Locale.US);
-		dateFormat.setTimeZone(GMT);
-		set(headerName, dateFormat.format(new Date(date)));
+	public List<String> getValuesAsList(String headerName) {
+		List<String> values = get(headerName);
+		if (values != null) {
+			List<String> result = new ArrayList<>();
+			for (String value : values) {
+				if (value != null) {
+					String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
+					for (String token : tokens) {
+						result.add(token);
+					}
+				}
+			}
+			return result;
+		}
+		return Collections.emptyList();
 	}
+
+	/**
+	 * Retrieve a combined result from the field values of the ETag header.
+	 * @param headerName the header name
+	 * @return the combined result
+	 * @since 4.3
+	 */
+	protected List<String> getETagValuesAsList(String headerName) {
+		List<String> values = get(headerName);
+		if (values != null) {
+			List<String> result = new ArrayList<>();
+			for (String value : values) {
+				if (value != null) {
+					Matcher matcher = ETAG_HEADER_VALUE_PATTERN.matcher(value);
+					while (matcher.find()) {
+						if ("*".equals(matcher.group())) {
+							result.add(matcher.group());
+						}
+						else {
+							result.add(matcher.group(1));
+						}
+					}
+					if (result.isEmpty()) {
+						throw new IllegalArgumentException(
+								"Could not parse header '" + headerName + "' with value '" + value + "'");
+					}
+				}
+			}
+			return result;
+		}
+		return Collections.emptyList();
+	}
+
+	/**
+	 * Retrieve a combined result from the field values of multi-valued headers.
+	 * @param headerName the header name
+	 * @return the combined result
+	 * @since 4.3
+	 */
+	protected String getFieldValues(String headerName) {
+		List<String> headerValues = get(headerName);
+		return (headerValues != null ? toCommaDelimitedString(headerValues) : null);
+	}
+
+	/**
+	 * Turn the given list of header values into a comma-delimited result.
+	 * @param headerValues the list of header values
+	 * @return a combined result with comma delimitation
+	 */
+	protected String toCommaDelimitedString(List<String> headerValues) {
+		StringBuilder builder = new StringBuilder();
+		for (Iterator<String> it = headerValues.iterator(); it.hasNext(); ) {
+			String val = it.next();
+			builder.append(val);
+			if (it.hasNext()) {
+				builder.append(", ");
+			}
+		}
+		return builder.toString();
+	}
+
+
+	// MultiValueMap implementation
 
 	/**
 	 * Return the first header value for the given header name, if any.
@@ -1140,12 +1333,14 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	@Override
 	public void add(String headerName, String headerValue) {
-		List<String> headerValues = this.headers.get(headerName);
-		if (headerValues == null) {
-			headerValues = new LinkedList<String>();
-			this.headers.put(headerName, headerValues);
-		}
+		List<String> headerValues = this.headers.computeIfAbsent(headerName, k -> new LinkedList<>());
 		headerValues.add(headerValue);
+	}
+
+	@Override
+	public void addAll(String key, List<String> values) {
+		List<String> currentValues = this.headers.computeIfAbsent(key, k -> new LinkedList<>());
+		currentValues.addAll(values);
 	}
 
 	/**
@@ -1158,7 +1353,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	@Override
 	public void set(String headerName, String headerValue) {
-		List<String> headerValues = new LinkedList<String>();
+		List<String> headerValues = new LinkedList<>();
 		headerValues.add(headerValue);
 		this.headers.put(headerName, headerValues);
 	}
@@ -1172,7 +1367,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	@Override
 	public Map<String, String> toSingleValueMap() {
-		LinkedHashMap<String, String> singleValueMap = new LinkedHashMap<String,String>(this.headers.size());
+		LinkedHashMap<String, String> singleValueMap = new LinkedHashMap<>(this.headers.size());
 		for (Entry<String, List<String>> entry : this.headers.entrySet()) {
 			singleValueMap.put(entry.getKey(), entry.getValue().get(0));
 		}

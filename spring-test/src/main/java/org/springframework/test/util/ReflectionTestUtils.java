@@ -173,14 +173,14 @@ public class ReflectionTestUtils {
 		Field field = ReflectionUtils.findField(targetClass, name, type);
 		if (field == null) {
 			throw new IllegalArgumentException(String.format(
-					"Could not find field '%s' of type [%s] on target object [%s] or target class [%s]", name, type,
-					ultimateTarget, targetClass));
+					"Could not find field '%s' of type [%s] on %s or target class [%s]", name, type,
+					safeToString(ultimateTarget), targetClass));
 		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format(
-					"Setting field '%s' of type [%s] on target object [%s] or target class [%s] to value [%s]", name, type,
-					ultimateTarget, targetClass, value));
+					"Setting field '%s' of type [%s] on %s or target class [%s] to value [%s]", name, type,
+					safeToString(ultimateTarget), targetClass, value));
 		}
 		ReflectionUtils.makeAccessible(field);
 		ReflectionUtils.setField(field, ultimateTarget, value);
@@ -253,14 +253,13 @@ public class ReflectionTestUtils {
 
 		Field field = ReflectionUtils.findField(targetClass, name);
 		if (field == null) {
-			throw new IllegalArgumentException(
-				String.format("Could not find field '%s' on target object [%s] or target class [%s]", name,
-					ultimateTarget, targetClass));
+			throw new IllegalArgumentException(String.format("Could not find field '%s' on %s or target class [%s]",
+					name, safeToString(ultimateTarget), targetClass));
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Getting field '%s' from target object [%s] or target class [%s]", name,
-					ultimateTarget, targetClass));
+			logger.debug(String.format("Getting field '%s' from %s or target class [%s]", name,
+					safeToString(ultimateTarget), targetClass));
 		}
 		ReflectionUtils.makeAccessible(field);
 		return ReflectionUtils.getField(field, ultimateTarget);
@@ -327,13 +326,16 @@ public class ReflectionTestUtils {
 			method = ReflectionUtils.findMethod(target.getClass(), setterMethodName, paramTypes);
 		}
 		if (method == null) {
-			throw new IllegalArgumentException("Could not find setter method '" + setterMethodName +
-					"' on target [" + target + "] with parameter type [" + type + "]");
+			throw new IllegalArgumentException(String.format(
+					"Could not find setter method '%s' on %s with parameter type [%s]", setterMethodName,
+					safeToString(target), type));
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking setter method '" + setterMethodName + "' on target [" + target + "]");
+			logger.debug(String.format("Invoking setter method '%s' on %s with value [%s]", setterMethodName,
+					safeToString(target), value));
 		}
+
 		ReflectionUtils.makeAccessible(method);
 		ReflectionUtils.invokeMethod(method, target, value);
 	}
@@ -372,12 +374,12 @@ public class ReflectionTestUtils {
 			method = ReflectionUtils.findMethod(target.getClass(), getterMethodName);
 		}
 		if (method == null) {
-			throw new IllegalArgumentException("Could not find getter method '" + getterMethodName +
-					"' on target [" + target + "]");
+			throw new IllegalArgumentException(String.format(
+					"Could not find getter method '%s' on %s", getterMethodName, safeToString(target)));
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking getter method '" + getterMethodName + "' on target [" + target + "]");
+			logger.debug(String.format("Invoking getter method '%s' on %s", getterMethodName, safeToString(target)));
 		}
 		ReflectionUtils.makeAccessible(method);
 		return ReflectionUtils.invokeMethod(method, target);
@@ -412,8 +414,8 @@ public class ReflectionTestUtils {
 			methodInvoker.prepare();
 
 			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking method '" + name + "' on target [" + target + "] with arguments [" +
-						ObjectUtils.nullSafeToString(args) + "]");
+				logger.debug(String.format("Invoking method '%s' on %s with arguments %s", name, safeToString(target),
+						ObjectUtils.nullSafeToString(args)));
 			}
 
 			return (T) methodInvoker.invoke();
@@ -421,6 +423,16 @@ public class ReflectionTestUtils {
 		catch (Exception ex) {
 			ReflectionUtils.handleReflectionException(ex);
 			throw new IllegalStateException("Should never get here");
+		}
+	}
+
+	private static String safeToString(Object target) {
+		try {
+			return String.format("target object [%s]", target);
+		}
+		catch (Exception ex) {
+			return String.format("target of type [%s] whose toString() method threw [%s]",
+				(target != null ? target.getClass().getName() : "unknown"), ex);
 		}
 	}
 

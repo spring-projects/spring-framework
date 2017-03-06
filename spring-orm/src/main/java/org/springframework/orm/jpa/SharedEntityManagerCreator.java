@@ -65,9 +65,9 @@ public abstract class SharedEntityManagerCreator {
 
 	private static final Class<?>[] NO_ENTITY_MANAGER_INTERFACES = new Class<?>[0];
 
-	private static final Set<String> transactionRequiringMethods = new HashSet<String>(6);
+	private static final Set<String> transactionRequiringMethods = new HashSet<>(6);
 
-	private static final Set<String> queryTerminationMethods = new HashSet<String>(3);
+	private static final Set<String> queryTerminationMethods = new HashSet<>(3);
 
 	static {
 		transactionRequiringMethods.add("joinTransaction");
@@ -115,11 +115,11 @@ public abstract class SharedEntityManagerCreator {
 	 */
 	public static EntityManager createSharedEntityManager(
 			EntityManagerFactory emf, Map<?, ?> properties, boolean synchronizedWithTransaction) {
-		Class<?> entityManagerInterface = (emf instanceof EntityManagerFactoryInfo ?
+
+		Class<?> emIfc = (emf instanceof EntityManagerFactoryInfo ?
 				((EntityManagerFactoryInfo) emf).getEntityManagerInterface() : EntityManager.class);
 		return createSharedEntityManager(emf, properties, synchronizedWithTransaction,
-				(entityManagerInterface == null ? NO_ENTITY_MANAGER_INTERFACES :
-					new Class<?>[] { entityManagerInterface }));
+				(emIfc == null ? NO_ENTITY_MANAGER_INTERFACES : new Class<?>[] {emIfc}));
 	}
 
 	/**

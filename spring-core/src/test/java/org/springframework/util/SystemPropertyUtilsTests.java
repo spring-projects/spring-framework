@@ -94,7 +94,7 @@ public class SystemPropertyUtilsTests {
 		assertEquals("Y#{foo.bar}X", resolved);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testReplaceWithNoDefault() {
 		String resolved = SystemPropertyUtils.resolvePlaceholders("${test.prop}");
 		assertEquals("", resolved);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,8 +117,8 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 					}
 					this.client.start();
 				}
-				catch (Exception e) {
-					throw new IllegalStateException("Failed to start Jetty client", e);
+				catch (Exception ex) {
+					throw new IllegalStateException("Failed to start Jetty client", ex);
 				}
 			}
 		}
@@ -134,8 +134,8 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 					}
 					this.client.stop();
 				}
-				catch (Exception e) {
-					logger.error("Error stopping Jetty WebSocketClient", e);
+				catch (Exception ex) {
+					logger.error("Error stopping Jetty WebSocketClient", ex);
 				}
 			}
 		}
@@ -182,7 +182,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 			return this.taskExecutor.submitListenable(connectTask);
 		}
 		else {
-			ListenableFutureTask<WebSocketSession> task = new ListenableFutureTask<WebSocketSession>(connectTask);
+			ListenableFutureTask<WebSocketSession> task = new ListenableFutureTask<>(connectTask);
 			task.run();
 			return task;
 		}

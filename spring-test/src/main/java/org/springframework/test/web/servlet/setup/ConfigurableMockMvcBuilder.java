@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,8 @@ import org.springframework.test.web.servlet.ResultMatcher;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder<B>> extends MockMvcBuilder {
+public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder<B>>
+		extends MockMvcBuilder {
 
 	/**
 	 * Add filters mapped to any request (i.e. "/*"). For example:
@@ -121,6 +122,13 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	/**
 	 * Add a {@code MockMvcConfigurer} that automates MockMvc setup and
 	 * configures it for some specific purpose (e.g. security).
+	 *
+	 * <p>There is a built-in {@link SharedHttpSessionConfigurer} that can be
+	 * used to re-use the HTTP session across requests. 3rd party frameworks
+	 * like Spring Security also use this mechanism to provide configuration
+	 * shortcuts.
+	 *
+	 * @see SharedHttpSessionConfigurer
 	 */
 	<T extends B> T apply(MockMvcConfigurer configurer);
 

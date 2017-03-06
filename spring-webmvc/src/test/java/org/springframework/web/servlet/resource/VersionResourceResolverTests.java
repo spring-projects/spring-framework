@@ -150,8 +150,8 @@ public class VersionResourceResolverTests {
 		Resource actual = this.resolver.resolveResourceInternal(request, versionFile, this.locations, this.chain);
 		assertEquals(expected.getFilename(), actual.getFilename());
 		verify(this.versionStrategy, times(1)).getResourceVersion(expected);
-		assertThat(actual, instanceOf(VersionedResource.class));
-		assertEquals(version, ((VersionedResource)actual).getVersion());
+		assertThat(actual, instanceOf(HttpResource.class));
+		assertEquals("\"" + version + "\"", ((HttpResource)actual).getResponseHeaders().getETag());
 	}
 
 	@Test

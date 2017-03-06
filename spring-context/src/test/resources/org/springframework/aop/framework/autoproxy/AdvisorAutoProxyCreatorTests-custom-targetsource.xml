@@ -14,17 +14,17 @@
 
 	<bean id="test" scope="prototype" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Rod</value></property>
-		<property name="spouse"><ref local="wife"/></property>
+		<property name="spouse"><ref bean="wife"/></property>
 	</bean>
 
 	<bean id="prototypeTest" class="org.springframework.tests.sample.beans.CountingTestBean">
 		<property name="name"><value>Rod</value></property>
-		<property name="spouse"><ref local="wife"/></property>
+		<property name="spouse"><ref bean="wife"/></property>
 	</bean>
 
 	<bean id="lazyInitTest" class="org.springframework.tests.sample.beans.CountingTestBean" lazy-init="true">
 		<property name="name"><value>Rod</value></property>
-		<property name="spouse"><ref local="wife"/></property>
+		<property name="spouse"><ref bean="wife"/></property>
 	</bean>
 
 	<bean id="wife" class="org.springframework.tests.sample.beans.TestBean">

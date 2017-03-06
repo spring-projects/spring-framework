@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
  * <li>{@code ?} matches one character</li>
  * <li>{@code *} matches zero or more characters</li>
  * <li>{@code **} matches zero or more <em>directories</em> in a path</li>
+ * <li>{@code {spring:[a-z]+}} matches the regexp {@code [a-z]+} as a path variable named "spring"</li>
  * </ul>
  *
  * <h3>Examples</h3>
@@ -50,6 +51,8 @@ import java.util.regex.Pattern;
  * <li><code>org/&#42;&#42;/servlet/bla.jsp</code> &mdash; matches
  * {@code org/springframework/servlet/bla.jsp} but also
  * {@code org/springframework/testing/servlet/bla.jsp} and {@code org/servlet/bla.jsp}</li>
+ * <li>{@code com/{filename:\\w+}.jsp} will match {@code com/test.jsp} and assign the value {@code test}
+ * to the {@code filename} variable</li>
  * </ul>
  *
  * <p><strong>Note:</strong> a pattern and a path must both be absolute or must
@@ -87,9 +90,9 @@ public class AntPathMatcher implements PathMatcher {
 
 	private volatile Boolean cachePatterns;
 
-	private final Map<String, String[]> tokenizedPatternCache = new ConcurrentHashMap<String, String[]>(256);
+	private final Map<String, String[]> tokenizedPatternCache = new ConcurrentHashMap<>(256);
 
-	final Map<String, AntPathStringMatcher> stringMatcherCache = new ConcurrentHashMap<String, AntPathStringMatcher>(256);
+	final Map<String, AntPathStringMatcher> stringMatcherCache = new ConcurrentHashMap<>(256);
 
 
 	/**
@@ -132,7 +135,7 @@ public class AntPathMatcher implements PathMatcher {
 
 	/**
 	 * Specify whether to trim tokenized paths and patterns.
-	 * <p>Default is {@code true}.
+	 * <p>Default is {@code false}.
 	 */
 	public void setTrimTokens(boolean trimTokens) {
 		this.trimTokens = trimTokens;
@@ -487,7 +490,7 @@ public class AntPathMatcher implements PathMatcher {
 
 	@Override
 	public Map<String, String> extractUriTemplateVariables(String pattern, String path) {
-		Map<String, String> variables = new LinkedHashMap<String, String>();
+		Map<String, String> variables = new LinkedHashMap<>();
 		boolean result = doMatch(pattern, path, true, variables);
 		if (!result) {
 			throw new IllegalStateException("Pattern \"" + pattern + "\" is not a match for \"" + path + "\"");
@@ -623,7 +626,7 @@ public class AntPathMatcher implements PathMatcher {
 
 		private final Pattern pattern;
 
-		private final List<String> variableNames = new LinkedList<String>();
+		private final List<String> variableNames = new LinkedList<>();
 
 		public AntPathStringMatcher(String pattern) {
 			this(pattern, true);

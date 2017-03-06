@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Currency;
 import java.util.HashMap;
@@ -59,6 +61,7 @@ import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.beans.propertyeditors.InputSourceEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
 import org.springframework.beans.propertyeditors.LocaleEditor;
+import org.springframework.beans.propertyeditors.PathEditor;
 import org.springframework.beans.propertyeditors.PatternEditor;
 import org.springframework.beans.propertyeditors.PropertiesEditor;
 import org.springframework.beans.propertyeditors.ReaderEditor;
@@ -86,19 +89,6 @@ import org.springframework.util.ClassUtils;
  * @see java.beans.PropertyEditorSupport#setValue
  */
 public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
-
-	private static Class<?> zoneIdClass;
-
-	static {
-		try {
-			zoneIdClass = ClassUtils.forName("java.time.ZoneId", PropertyEditorRegistrySupport.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			// Java 8 ZoneId class not available
-			zoneIdClass = null;
-		}
-	}
-
 
 	private ConversionService conversionService;
 
@@ -167,7 +157,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 */
 	public void overrideDefaultEditor(Class<?> requiredType, PropertyEditor propertyEditor) {
 		if (this.overriddenDefaultEditors == null) {
-			this.overriddenDefaultEditors = new HashMap<Class<?>, PropertyEditor>();
+			this.overriddenDefaultEditors = new HashMap<>();
 		}
 		this.overriddenDefaultEditors.put(requiredType, propertyEditor);
 	}
@@ -199,7 +189,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * Actually register the default editors for this registry instance.
 	 */
 	private void createDefaultEditors() {
-		this.defaultEditors = new HashMap<Class<?>, PropertyEditor>(64);
+		this.defaultEditors = new HashMap<>(64);
 
 		// Simple editors, without parameterization capabilities.
 		// The JDK does not contain a default editor for any of these target types.
@@ -211,6 +201,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(InputStream.class, new InputStreamEditor());
 		this.defaultEditors.put(InputSource.class, new InputSourceEditor());
 		this.defaultEditors.put(Locale.class, new LocaleEditor());
+		this.defaultEditors.put(Path.class, new PathEditor());
 		this.defaultEditors.put(Pattern.class, new PatternEditor());
 		this.defaultEditors.put(Properties.class, new PropertiesEditor());
 		this.defaultEditors.put(Reader.class, new ReaderEditor());
@@ -219,9 +210,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(URI.class, new URIEditor());
 		this.defaultEditors.put(URL.class, new URLEditor());
 		this.defaultEditors.put(UUID.class, new UUIDEditor());
-		if (zoneIdClass != null) {
-			this.defaultEditors.put(zoneIdClass, new ZoneIdEditor());
-		}
+		this.defaultEditors.put(ZoneId.class, new ZoneIdEditor());
 
 		// Default instances of collection editors.
 		// Can be overridden by registering custom instances of those as custom editors.
@@ -298,13 +287,13 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		}
 		if (propertyPath != null) {
 			if (this.customEditorsForPath == null) {
-				this.customEditorsForPath = new LinkedHashMap<String, CustomEditorHolder>(16);
+				this.customEditorsForPath = new LinkedHashMap<>(16);
 			}
 			this.customEditorsForPath.put(propertyPath, new CustomEditorHolder(propertyEditor, requiredType));
 		}
 		else {
 			if (this.customEditors == null) {
-				this.customEditors = new LinkedHashMap<Class<?>, PropertyEditor>(16);
+				this.customEditors = new LinkedHashMap<>(16);
 			}
 			this.customEditors.put(requiredType, propertyEditor);
 			this.customEditorCache = null;
@@ -319,7 +308,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 				// Check property-specific editor first.
 				PropertyEditor editor = getCustomEditor(propertyPath, requiredType);
 				if (editor == null) {
-					List<String> strippedPaths = new LinkedList<String>();
+					List<String> strippedPaths = new LinkedList<>();
 					addStrippedPropertyPaths(strippedPaths, "", propertyPath);
 					for (Iterator<String> it = strippedPaths.iterator(); it.hasNext() && editor == null;) {
 						String strippedPath = it.next();
@@ -415,7 +404,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 						// Cache editor for search type, to avoid the overhead
 						// of repeated assignable-from checks.
 						if (this.customEditorCache == null) {
-							this.customEditorCache = new HashMap<Class<?>, PropertyEditor>();
+							this.customEditorCache = new HashMap<>();
 						}
 						this.customEditorCache.put(requiredType, editor);
 					}
@@ -435,7 +424,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		if (this.customEditorsForPath != null) {
 			CustomEditorHolder editorHolder = this.customEditorsForPath.get(propertyName);
 			if (editorHolder == null) {
-				List<String> strippedPaths = new LinkedList<String>();
+				List<String> strippedPaths = new LinkedList<>();
 				addStrippedPropertyPaths(strippedPaths, "", propertyName);
 				for (Iterator<String> it = strippedPaths.iterator(); it.hasNext() && editorHolder == null;) {
 					String strippedName = it.next();

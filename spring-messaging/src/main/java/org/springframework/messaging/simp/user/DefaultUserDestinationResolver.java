@@ -126,7 +126,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			return null;
 		}
 		String user = parseResult.getUser();
-		Set<String> targetSet = new HashSet<String>();
+		Set<String> targetSet = new HashSet<>();
 		for (String sessionId : parseResult.getSessionIds()) {
 			String actualDestination = parseResult.getActualDestination();
 			String targetDestination = getTargetDestination(sourceDestination, actualDestination, sessionId, user);
@@ -181,14 +181,14 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 					}
 					else {
 						Set<SimpSession> sessions = user.getSessions();
-						sessionIds = new HashSet<String>(sessions.size());
+						sessionIds = new HashSet<>(sessions.size());
 						for (SimpSession session : sessions) {
 							sessionIds.add(session.getId());
 						}
 					}
 				}
 				else {
-					sessionIds = Collections.<String>emptySet();
+					sessionIds = Collections.emptySet();
 				}
 			}
 			if (!this.keepLeadingSlash) {

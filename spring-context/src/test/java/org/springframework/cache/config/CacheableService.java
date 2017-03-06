@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.cache.config;
 
 /**
- * Basic service interface.
+ * Basic service interface for caching tests.
  *
  * @author Costin Leau
  * @author Phillip Webb
@@ -83,7 +83,6 @@ public interface CacheableService<T> {
 
 	T throwUncheckedSync(Object arg1);
 
-	// multi annotations
 	T multiCache(Object arg1);
 
 	T multiEvict(Object arg1);
@@ -95,4 +94,5 @@ public interface CacheableService<T> {
 	T multiUpdate(Object arg1);
 
 	TestEntity putRefersToResult(TestEntity arg1);
+
 }

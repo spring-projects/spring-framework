@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-public final class AspectImplementingInterfaceTests {
+public class AspectImplementingInterfaceTests {
 
 	@Test
 	public void testProxyCreation() {

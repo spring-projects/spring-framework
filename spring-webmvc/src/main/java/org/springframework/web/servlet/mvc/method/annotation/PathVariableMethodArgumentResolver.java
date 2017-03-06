@@ -57,16 +57,13 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver
 		implements UriComponentsContributor {
 
 	private static final TypeDescriptor STRING_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
-
-
-	public PathVariableMethodArgumentResolver() {
-	}
 
 
 	@Override
@@ -96,9 +93,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	@Override
-	protected void handleMissingValue(String name, MethodParameter parameter)
-			throws ServletRequestBindingException {
-
+	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
 		throw new MissingPathVariableException(name, parameter);
 	}
 
@@ -111,7 +106,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 		int scope = RequestAttributes.SCOPE_REQUEST;
 		Map<String, Object> pathVars = (Map<String, Object>) request.getAttribute(key, scope);
 		if (pathVars == null) {
-			pathVars = new HashMap<String, Object>();
+			pathVars = new HashMap<>();
 			request.setAttribute(key, pathVars, scope);
 		}
 		pathVars.put(name, arg);
@@ -121,13 +116,13 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	public void contributeMethodArgument(MethodParameter parameter, Object value,
 			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService conversionService) {
 
-		if (Map.class.isAssignableFrom(parameter.getNestedParameterType())) {
+		if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
 			return;
 		}
 
 		PathVariable ann = parameter.getParameterAnnotation(PathVariable.class);
-		String name = (ann == null || StringUtils.isEmpty(ann.value()) ? parameter.getParameterName() : ann.value());
-		value = formatUriValue(conversionService, new TypeDescriptor(parameter), value);
+		String name = (ann != null && !StringUtils.isEmpty(ann.value()) ? ann.value() : parameter.getParameterName());
+		value = formatUriValue(conversionService, new TypeDescriptor(parameter.nestedIfOptional()), value);
 		uriVariables.put(name, value);
 	}
 
@@ -150,7 +145,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	private static class PathVariableNamedValueInfo extends NamedValueInfo {
 
 		public PathVariableNamedValueInfo(PathVariable annotation) {
-			super(annotation.value(), true, ValueConstants.DEFAULT_NONE);
+			super(annotation.name(), annotation.required(), ValueConstants.DEFAULT_NONE);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,9 @@ import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 import org.junit.rules.ExpectedException;
 
-import org.springframework.core.annotation.AnnotationUtilsTests.WebController;
-import org.springframework.core.annotation.AnnotationUtilsTests.WebMapping;
+import org.springframework.core.annotation.AnnotationUtilsTests.*;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Indexed;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -54,6 +54,7 @@ import static org.springframework.core.annotation.AnnotationUtilsTests.*;
  *
  * @author Sam Brannen
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0.3
  * @see AnnotationUtilsTests
  * @see MultipleComposedAnnotationsOnSingleAnnotatedElementTests
@@ -76,19 +77,23 @@ public class AnnotatedElementUtilsTests {
 	@Test
 	public void getMetaAnnotationTypesOnClassWithMetaDepth1() {
 		Set<String> names = getMetaAnnotationTypes(TransactionalComponentClass.class, TransactionalComponent.class);
-		assertEquals(names(Transactional.class, Component.class), names);
+		assertEquals(names(Transactional.class, Component.class, Indexed.class), names);
 
 		names = getMetaAnnotationTypes(TransactionalComponentClass.class, TransactionalComponent.class.getName());
-		assertEquals(names(Transactional.class, Component.class), names);
+		assertEquals(names(Transactional.class, Component.class, Indexed.class), names);
 	}
 
 	@Test
 	public void getMetaAnnotationTypesOnClassWithMetaDepth2() {
 		Set<String> names = getMetaAnnotationTypes(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class);
-		assertEquals(names(TransactionalComponent.class, Transactional.class, Component.class), names);
+		assertEquals(names(TransactionalComponent.class, Transactional.class, Component.class, Indexed.class), names);
 
 		names = getMetaAnnotationTypes(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class.getName());
-		assertEquals(names(TransactionalComponent.class, Transactional.class, Component.class), names);
+		assertEquals(names(TransactionalComponent.class, Transactional.class, Component.class, Indexed.class), names);
+	}
+
+	private Set<String> names(Class<?>... classes) {
+		return stream(classes).map(Class::getName).collect(toSet());
 	}
 
 	@Test
@@ -715,8 +720,18 @@ public class AnnotatedElementUtilsTests {
 		assertEquals(SpringAppConfigClass.class.getAnnotation(Resource.class), findMergedAnnotation(SpringAppConfigClass.class, Resource.class));
 	}
 
-	private Set<String> names(Class<?>... classes) {
-		return stream(classes).map(Class::getName).collect(toSet());
+	@Test
+	public void getAllMergedAnnotationsOnClassWithInterface() throws Exception {
+		Method m = TransactionalServiceImpl.class.getMethod("doIt");
+		Set<Transactional> allMergedAnnotations = getAllMergedAnnotations(m, Transactional.class);
+		assertTrue(allMergedAnnotations.isEmpty());
+	}
+
+	@Test
+	public void findAllMergedAnnotationsOnClassWithInterface() throws Exception {
+		Method m = TransactionalServiceImpl.class.getMethod("doIt");
+		Set<Transactional> allMergedAnnotations = findAllMergedAnnotations(m, Transactional.class);
+		assertEquals(1, allMergedAnnotations.size());
 	}
 
 
@@ -1269,6 +1284,19 @@ public class AnnotatedElementUtilsTests {
 
 	@Resource(name = "x")
 	static class ResourceHolder {
+	}
+
+	interface TransactionalService {
+
+		@Transactional
+		void doIt();
+	}
+
+	class TransactionalServiceImpl implements TransactionalService {
+
+		@Override
+		public void doIt() {
+		}
 	}
 
 }

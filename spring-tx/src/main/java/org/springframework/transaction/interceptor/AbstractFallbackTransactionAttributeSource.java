@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * <p>As this base class is not marked Serializable, the cache will be recreated
 	 * after serialization - provided that the concrete subclass is Serializable.
 	 */
-	final Map<Object, TransactionAttribute> attributeCache = new ConcurrentHashMap<Object, TransactionAttribute>(1024);
+	private final Map<Object, TransactionAttribute> attributeCache = new ConcurrentHashMap<>(1024);
 
 
 	/**
@@ -82,6 +82,10 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 */
 	@Override
 	public TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass) {
+		if (method.getDeclaringClass() == Object.class) {
+			return null;
+		}
+
 		// First, see if we have a cached value.
 		Object cacheKey = getCacheKey(method, targetClass);
 		Object cached = this.attributeCache.get(cacheKey);
@@ -97,20 +101,22 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 		}
 		else {
 			// We need to work it out.
-			TransactionAttribute txAtt = computeTransactionAttribute(method, targetClass);
+			TransactionAttribute txAttr = computeTransactionAttribute(method, targetClass);
 			// Put it in the cache.
-			if (txAtt == null) {
+			if (txAttr == null) {
 				this.attributeCache.put(cacheKey, NULL_TRANSACTION_ATTRIBUTE);
 			}
 			else {
-				if (logger.isDebugEnabled()) {
-					Class<?> classToLog = (targetClass != null ? targetClass : method.getDeclaringClass());
-					logger.debug("Adding transactional method '" + classToLog.getSimpleName() + "." +
-							method.getName() + "' with attribute: " + txAtt);
+				String methodIdentification = ClassUtils.getQualifiedMethodName(method, targetClass);
+				if (txAttr instanceof DefaultTransactionAttribute) {
+					((DefaultTransactionAttribute) txAttr).setDescriptor(methodIdentification);
 				}
-				this.attributeCache.put(cacheKey, txAtt);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Adding transactional method '" + methodIdentification + "' with attribute: " + txAttr);
+				}
+				this.attributeCache.put(cacheKey, txAttr);
 			}
-			return txAtt;
+			return txAttr;
 		}
 	}
 
@@ -148,27 +154,27 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 		specificMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
 
 		// First try is the method in the target class.
-		TransactionAttribute txAtt = findTransactionAttribute(specificMethod);
-		if (txAtt != null) {
-			return txAtt;
+		TransactionAttribute txAttr = findTransactionAttribute(specificMethod);
+		if (txAttr != null) {
+			return txAttr;
 		}
 
 		// Second try is the transaction attribute on the target class.
-		txAtt = findTransactionAttribute(specificMethod.getDeclaringClass());
-		if (txAtt != null && ClassUtils.isUserLevelMethod(method)) {
-			return txAtt;
+		txAttr = findTransactionAttribute(specificMethod.getDeclaringClass());
+		if (txAttr != null && ClassUtils.isUserLevelMethod(method)) {
+			return txAttr;
 		}
 
 		if (specificMethod != method) {
 			// Fallback is to look at the original method.
-			txAtt = findTransactionAttribute(method);
-			if (txAtt != null) {
-				return txAtt;
+			txAttr = findTransactionAttribute(method);
+			if (txAttr != null) {
+				return txAttr;
 			}
 			// Last fallback is the class of the original method.
-			txAtt = findTransactionAttribute(method.getDeclaringClass());
-			if (txAtt != null && ClassUtils.isUserLevelMethod(method)) {
-				return txAtt;
+			txAttr = findTransactionAttribute(method.getDeclaringClass());
+			if (txAttr != null && ClassUtils.isUserLevelMethod(method)) {
+				return txAttr;
 			}
 		}
 

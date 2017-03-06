@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.lang.UsesJava7;
-import org.springframework.util.ClassUtils;
+import org.springframework.util.NumberUtils;
 
 /**
  * Generic utility methods for working with JDBC. Mainly for internal use
@@ -53,11 +52,6 @@ public abstract class JdbcUtils {
 	 * @see java.sql.Types
 	 */
 	public static final int TYPE_UNKNOWN = Integer.MIN_VALUE;
-
-
-	// Check for JDBC 4.1 getObject(int, Class) method - available on JDK 7 and higher
-	private static final boolean getObjectWithTypeAvailable =
-			ClassUtils.hasMethod(ResultSet.class, "getObject", int.class, Class.class);
 
 	private static final Log logger = LogFactory.getLog(JdbcUtils.class);
 
@@ -132,10 +126,11 @@ public abstract class JdbcUtils {
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
 	 * @param requiredType the required value type (may be {@code null})
-	 * @return the value object
+	 * @return the value object (possibly not of the specified required type,
+	 * with further conversion steps necessary)
 	 * @throws SQLException if thrown by the JDBC API
+	 * @see #getResultSetValue(ResultSet, int)
 	 */
-	@UsesJava7  // guard optional use of JDBC 4.1 (safe with 1.6 due to getObjectWithTypeAvailable check)
 	public static Object getResultSetValue(ResultSet rs, int index, Class<?> requiredType) throws SQLException {
 		if (requiredType == null) {
 			return getResultSetValue(rs, index);
@@ -190,23 +185,55 @@ public abstract class JdbcUtils {
 		else if (Clob.class == requiredType) {
 			return rs.getClob(index);
 		}
+		else if (requiredType.isEnum()) {
+			// Enums can either be represented through a String or an enum index value:
+			// leave enum type conversion up to the caller (e.g. a ConversionService)
+			// but make sure that we return nothing other than a String or an Integer.
+			Object obj = rs.getObject(index);
+			if (obj instanceof String) {
+				return obj;
+			}
+			else if (obj instanceof Number) {
+				// Defensively convert any Number to an Integer (as needed by our
+				// ConversionService's IntegerToEnumConverterFactory) for use as index
+				return NumberUtils.convertNumberToTargetClass((Number) obj, Integer.class);
+			}
+			else {
+				// e.g. on Postgres: getObject returns a PGObject but we need a String
+				return rs.getString(index);
+			}
+		}
+
 		else {
 			// Some unknown type desired -> rely on getObject.
-			if (getObjectWithTypeAvailable) {
-				try {
-					return rs.getObject(index, requiredType);
-				}
-				catch (AbstractMethodError err) {
-					logger.debug("JDBC driver does not implement JDBC 4.1 'getObject(int, Class)' method", err);
-				}
-				catch (SQLFeatureNotSupportedException ex) {
-					logger.debug("JDBC driver does not support JDBC 4.1 'getObject(int, Class)' method", ex);
-				}
-				catch (SQLException ex) {
-					logger.debug("JDBC driver has limited support for JDBC 4.1 'getObject(int, Class)' method", ex);
-				}
+			try {
+				return rs.getObject(index, requiredType);
 			}
-			// Fall back to getObject without type specification...
+			catch (AbstractMethodError err) {
+				logger.debug("JDBC driver does not implement JDBC 4.1 'getObject(int, Class)' method", err);
+			}
+			catch (SQLFeatureNotSupportedException ex) {
+				logger.debug("JDBC driver does not support JDBC 4.1 'getObject(int, Class)' method", ex);
+			}
+			catch (SQLException ex) {
+				logger.debug("JDBC driver has limited support for JDBC 4.1 'getObject(int, Class)' method", ex);
+			}
+
+			// Corresponding SQL types for JSR-310 / Joda-Time types, left up
+			// to the caller to convert them (e.g. through a ConversionService).
+			String typeName = requiredType.getSimpleName();
+			if ("LocalDate".equals(typeName)) {
+				return rs.getDate(index);
+			}
+			else if ("LocalTime".equals(typeName)) {
+				return rs.getTime(index);
+			}
+			else if ("LocalDateTime".equals(typeName)) {
+				return rs.getTimestamp(index);
+			}
+
+			// Fall back to getObject without type specification, again
+			// left up to the caller to convert the value if necessary.
 			return getResultSetValue(rs, index);
 		}
 
@@ -258,7 +285,7 @@ public abstract class JdbcUtils {
 				obj = rs.getDate(index);
 			}
 		}
-		else if (obj != null && obj instanceof java.sql.Date) {
+		else if (obj instanceof java.sql.Date) {
 			if ("java.sql.Timestamp".equals(rs.getMetaData().getColumnClassName(index))) {
 				obj = rs.getTimestamp(index);
 			}
@@ -385,7 +412,7 @@ public abstract class JdbcUtils {
 
 	/**
 	 * Extract a common name for the database in use even if various drivers/platforms provide varying names.
-	 * @param source the name as provided in database metedata
+	 * @param source the name as provided in database metadata
 	 * @return the common name to be used
 	 */
 	public static String commonDatabaseName(String source) {
@@ -444,7 +471,7 @@ public abstract class JdbcUtils {
 		StringBuilder result = new StringBuilder();
 		boolean nextIsUpper = false;
 		if (name != null && name.length() > 0) {
-			if (name.length() > 1 && name.substring(1,2).equals("_")) {
+			if (name.length() > 1 && name.substring(1, 2).equals("_")) {
 				result.append(name.substring(0, 1).toUpperCase());
 			}
 			else {

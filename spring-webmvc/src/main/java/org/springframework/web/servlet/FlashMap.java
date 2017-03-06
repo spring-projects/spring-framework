@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 
 	private String targetRequestPath;
 
-	private final MultiValueMap<String, String> targetRequestParams = new LinkedMultiValueMap<String, String>(4);
+	private final MultiValueMap<String, String> targetRequestParams = new LinkedMultiValueMap<>(4);
 
 	private long expirationTime = -1;
 

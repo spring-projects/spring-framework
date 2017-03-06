@@ -147,7 +147,6 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 	}
 
 	@Test  // SPR-11919
-	@SuppressWarnings("unchecked")
 	public void handleInfoGetWildflyNPE() throws Exception {
 		HttpServletResponse mockResponse = mock(HttpServletResponse.class);
 		ServletOutputStream ous = mock(ServletOutputStream.class);

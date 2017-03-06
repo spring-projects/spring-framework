@@ -11,7 +11,7 @@
 		<property name="entityManagerFactory" ref="entityManagerFactory"/>
 	</bean>
 
-	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
 		<property name="url" value="jdbc:hsqldb:mem:xdb"/>
 		<property name="username" value="sa"/>

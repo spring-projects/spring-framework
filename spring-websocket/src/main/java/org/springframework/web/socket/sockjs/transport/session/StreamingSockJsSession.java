@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,15 +47,6 @@ public abstract class StreamingSockJsSession extends AbstractHttpSockJsSession {
 
 
 	/**
-	 * @deprecated as of 4.2, since this method is no longer used.
-	 */
-	@Override
-	@Deprecated
-	protected boolean isStreaming() {
-		return true;
-	}
-
-	/**
 	 * Get the prelude to write to the response before any other data.
 	 * @since 4.2
 	 */
@@ -67,7 +58,7 @@ public abstract class StreamingSockJsSession extends AbstractHttpSockJsSession {
 			boolean initialRequest) throws IOException {
 
 		byte[] prelude = getPrelude(request);
-		Assert.notNull(prelude);
+		Assert.state(prelude != null, "Prelude expected");
 		response.getBody().write(prelude);
 		response.flush();
 

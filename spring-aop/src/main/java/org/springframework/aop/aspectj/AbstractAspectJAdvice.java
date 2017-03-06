@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -260,7 +260,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			}
 		}
 		if (this.argumentNames != null) {
-			if (this.aspectJAdviceMethod.getParameterTypes().length == this.argumentNames.length + 1) {
+			if (this.aspectJAdviceMethod.getParameterCount() == this.argumentNames.length + 1) {
 				// May need to add implicit join point arg name...
 				Class<?> firstArgType = this.aspectJAdviceMethod.getParameterTypes()[0];
 				if (firstArgType == JoinPoint.class ||
@@ -461,9 +461,9 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	}
 
 	private void bindExplicitArguments(int numArgumentsLeftToBind) {
-		this.argumentBindings = new HashMap<String, Integer>();
+		this.argumentBindings = new HashMap<>();
 
-		int numExpectedArgumentNames = this.aspectJAdviceMethod.getParameterTypes().length;
+		int numExpectedArgumentNames = this.aspectJAdviceMethod.getParameterCount();
 		if (this.argumentNames.length != numExpectedArgumentNames) {
 			throw new IllegalStateException("Expecting to find " + numExpectedArgumentNames +
 					" arguments to bind by name in advice, but actually found " +
@@ -620,7 +620,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 	protected Object invokeAdviceMethodWithGivenArgs(Object[] args) throws Throwable {
 		Object[] actualArgs = args;
-		if (this.aspectJAdviceMethod.getParameterTypes().length == 0) {
+		if (this.aspectJAdviceMethod.getParameterCount() == 0) {
 			actualArgs = null;
 		}
 		try {

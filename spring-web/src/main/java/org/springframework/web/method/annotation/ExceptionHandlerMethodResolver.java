@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.util.NestedServletException;
 
 /**
  * Discovers {@linkplain ExceptionHandler @ExceptionHandler} methods in a given class,
@@ -39,6 +38,7 @@ import org.springframework.web.util.NestedServletException;
  * to the exception types supported by a given {@link Method}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class ExceptionHandlerMethodResolver {
@@ -60,10 +60,10 @@ public class ExceptionHandlerMethodResolver {
 
 
 	private final Map<Class<? extends Throwable>, Method> mappedMethods =
-			new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
+			new ConcurrentHashMap<>(16);
 
 	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache =
-			new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
+			new ConcurrentHashMap<>(16);
 
 
 	/**
@@ -85,7 +85,7 @@ public class ExceptionHandlerMethodResolver {
 	 */
 	@SuppressWarnings("unchecked")
 	private List<Class<? extends Throwable>> detectExceptionMappings(Method method) {
-		List<Class<? extends Throwable>> result = new ArrayList<Class<? extends Throwable>>();
+		List<Class<? extends Throwable>> result = new ArrayList<>();
 		detectAnnotationExceptionMappings(method, result);
 		if (result.isEmpty()) {
 			for (Class<?> paramType : method.getParameterTypes()) {
@@ -125,9 +125,23 @@ public class ExceptionHandlerMethodResolver {
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
 	public Method resolveMethod(Exception exception) {
+		return resolveMethodByThrowable(exception);
+	}
+
+	/**
+	 * Find a {@link Method} to handle the given Throwable.
+	 * Use {@link ExceptionDepthComparator} if more than one match is found.
+	 * @param exception the exception
+	 * @return a Method to handle the exception, or {@code null} if none found
+	 * @since 5.0
+	 */
+	public Method resolveMethodByThrowable(Throwable exception) {
 		Method method = resolveMethodByExceptionType(exception.getClass());
-		if (method == null && exception instanceof NestedServletException && exception.getCause() != null) {
-			method = resolveMethodByExceptionType(exception.getCause().getClass());
+		if (method == null) {
+			Throwable cause = exception.getCause();
+			if (cause != null) {
+				method = resolveMethodByExceptionType(cause.getClass());
+			}
 		}
 		return method;
 	}
@@ -151,7 +165,7 @@ public class ExceptionHandlerMethodResolver {
 	 * Return the {@link Method} mapped to the given exception type, or {@code null} if none.
 	 */
 	private Method getMappedMethod(Class<? extends Throwable> exceptionType) {
-		List<Class<? extends Throwable>> matches = new ArrayList<Class<? extends Throwable>>();
+		List<Class<? extends Throwable>> matches = new ArrayList<>();
 		for (Class<? extends Throwable> mappedException : this.mappedMethods.keySet()) {
 			if (mappedException.isAssignableFrom(exceptionType)) {
 				matches.add(mappedException);

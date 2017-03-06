@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public final class SimpleAsyncTaskExecutorTests {
+public class SimpleAsyncTaskExecutorTests {
 
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,29 +18,22 @@ package org.springframework.tests;
 
 import org.springframework.core.io.ClassPathResource;
 
-import static java.lang.String.*;
-
 /**
  * Convenience utilities for common operations with test resources.
  *
  * @author Chris Beams
  */
-public class TestResourceUtils {
+public abstract class TestResourceUtils {
 
 	/**
-	 * Loads a {@link ClassPathResource} qualified by the simple name of clazz,
+	 * Load a {@link ClassPathResource} qualified by the simple name of clazz,
 	 * and relative to the package for clazz.
-	 *
 	 * <p>Example: given a clazz 'com.foo.BarTests' and a resourceSuffix of 'context.xml',
 	 * this method will return a ClassPathResource representing com/foo/BarTests-context.xml
-	 *
 	 * <p>Intended for use loading context configuration XML files within JUnit tests.
-	 *
-	 * @param clazz
-	 * @param resourceSuffix
 	 */
 	public static ClassPathResource qualifiedResource(Class<?> clazz, String resourceSuffix) {
-			return new ClassPathResource(format("%s-%s", clazz.getSimpleName(), resourceSuffix), clazz);
+		return new ClassPathResource(String.format("%s-%s", clazz.getSimpleName(), resourceSuffix), clazz);
 	}
 
 }

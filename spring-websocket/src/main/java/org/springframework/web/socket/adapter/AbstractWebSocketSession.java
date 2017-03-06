@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,15 +42,13 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	protected static final Log logger = LogFactory.getLog(NativeWebSocketSession.class);
 
+	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
 	private T nativeSession;
-
-	private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
 
 
 	/**
 	 * Create a new instance and associate the given attributes with it.
-	 *
 	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket
 	 * session; the provided attributes are copied, the original map is not used.
 	 */
@@ -83,7 +81,7 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 	}
 
 	public void initializeNativeSession(T session) {
-		Assert.notNull(session, "session must not be null");
+		Assert.notNull(session, "WebSocket session must not be null");
 		this.nativeSession = session;
 	}
 
@@ -93,7 +91,6 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	@Override
 	public final void sendMessage(WebSocketMessage<?> message) throws IOException {
-
 		checkNativeSessionInitialized();
 
 		if (logger.isTraceEnabled()) {
@@ -124,6 +121,7 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 	protected abstract void sendPingMessage(PingMessage message) throws IOException;
 
 	protected abstract void sendPongMessage(PongMessage message) throws IOException;
+
 
 	@Override
 	public final void close() throws IOException {

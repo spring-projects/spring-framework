@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,7 @@ abstract class SelectedValueComparator {
 	private static boolean exhaustiveCollectionCompare(
 			Collection<?> collection, Object candidateValue, BindStatus bindStatus) {
 
-		Map<PropertyEditor, Object> convertedValueCache = new HashMap<PropertyEditor, Object>(1);
+		Map<PropertyEditor, Object> convertedValueCache = new HashMap<>(1);
 		PropertyEditor editor = null;
 		boolean candidateIsString = (candidateValue instanceof String);
 		if (!candidateIsString) {

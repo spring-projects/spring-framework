@@ -94,7 +94,7 @@ final class MockWebResponseBuilder {
 
 	private List<NameValuePair> responseHeaders() {
 		Collection<String> headerNames = this.response.getHeaderNames();
-		List<NameValuePair> responseHeaders = new ArrayList<NameValuePair>(headerNames.size());
+		List<NameValuePair> responseHeaders = new ArrayList<>(headerNames.size());
 		for (String headerName : headerNames) {
 			List<Object> headerValues = this.response.getHeaderValues(headerName);
 			for (Object value : headerValues) {
@@ -112,6 +112,10 @@ final class MockWebResponseBuilder {
 	}
 
 	private String valueOfCookie(Cookie cookie) {
+		return createCookie(cookie).toString();
+	}
+
+	static com.gargoylesoftware.htmlunit.util.Cookie createCookie(Cookie cookie) {
 		Date expires = null;
 		if (cookie.getMaxAge() > -1) {
 			expires = new Date(System.currentTimeMillis() + cookie.getMaxAge() * 1000);
@@ -122,10 +126,9 @@ final class MockWebResponseBuilder {
 		result.setExpiryDate(expires);
 		result.setPath(cookie.getPath());
 		result.setSecure(cookie.getSecure());
-		if(cookie.isHttpOnly()) {
+		if (cookie.isHttpOnly()) {
 			result.setAttribute("httponly", "true");
 		}
-		return new com.gargoylesoftware.htmlunit.util.Cookie(result).toString();
+		return new com.gargoylesoftware.htmlunit.util.Cookie(result);
 	}
-
 }

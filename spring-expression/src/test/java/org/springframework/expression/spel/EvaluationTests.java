@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -625,7 +625,7 @@ public class EvaluationTests extends AbstractExpressionTests {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 
 		// Register a custom MethodResolver...
-		List<MethodResolver> customResolvers = new ArrayList<MethodResolver>();
+		List<MethodResolver> customResolvers = new ArrayList<>();
 		customResolvers.add(new CustomMethodResolver());
 		context.setMethodResolvers(customResolvers);
 
@@ -694,7 +694,7 @@ public class EvaluationTests extends AbstractExpressionTests {
 			integerArray[2] = 3;
 			integerArray[3] = 4;
 			integerArray[4] = 5;
-			listOfStrings = new ArrayList<String>();
+			listOfStrings = new ArrayList<>();
 			listOfStrings.add("abc");
 		}
 

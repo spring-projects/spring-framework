@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class DestinationPatternsMessageCondition extends AbstractMessageConditio
 
 
 	private static List<String> asList(String... patterns) {
-		return (patterns != null ? Arrays.asList(patterns) : Collections.<String>emptyList());
+		return (patterns != null ? Arrays.asList(patterns) : Collections.emptyList());
 	}
 
 	private static Set<String> prependLeadingSlash(Collection<String> patterns, PathMatcher pathMatcher) {
@@ -81,7 +81,7 @@ public class DestinationPatternsMessageCondition extends AbstractMessageConditio
 			return Collections.emptySet();
 		}
 		boolean slashSeparator = pathMatcher.combine("a", "a").equals("a/a");
-		Set<String> result = new LinkedHashSet<String>(patterns.size());
+		Set<String> result = new LinkedHashSet<>(patterns.size());
 		for (String pattern : patterns) {
 			if (slashSeparator) {
 				if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
@@ -121,7 +121,7 @@ public class DestinationPatternsMessageCondition extends AbstractMessageConditio
 	 */
 	@Override
 	public DestinationPatternsMessageCondition combine(DestinationPatternsMessageCondition other) {
-		Set<String> result = new LinkedHashSet<String>();
+		Set<String> result = new LinkedHashSet<>();
 		if (!this.patterns.isEmpty() && !other.patterns.isEmpty()) {
 			for (String pattern1 : this.patterns) {
 				for (String pattern2 : other.patterns) {
@@ -161,7 +161,7 @@ public class DestinationPatternsMessageCondition extends AbstractMessageConditio
 			return this;
 		}
 
-		List<String> matches = new ArrayList<String>();
+		List<String> matches = new ArrayList<>();
 		for (String pattern : this.patterns) {
 			if (pattern.equals(destination) || this.pathMatcher.match(pattern, destination)) {
 				matches.add(pattern);

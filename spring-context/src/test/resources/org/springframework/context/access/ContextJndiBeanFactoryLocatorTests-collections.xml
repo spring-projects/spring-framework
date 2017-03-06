@@ -8,7 +8,7 @@
 		<property name="age"><value>30</value></property>
 		<property name="spouse">
 		<!-- Could use id and href -->
-			<ref local="david"/>
+			<ref bean="david"/>
 		</property>
 	</bean>
 
@@ -29,8 +29,8 @@
 		<property name="friends">
 			<description>List of Rod's friends</description>
 			<list>
-				<ref local="jenny"/>
-				<ref local="david"/>
+				<ref bean="jenny"/>
+				<ref bean="david"/>
 			</list>
 		</property>
 	</bean>
@@ -40,7 +40,7 @@
 		<property name="age"><value>30</value></property>
 		<property name="spouse">
 		<!-- Could use id and href -->
-			<ref local="david"/>
+			<ref bean="david"/>
 		</property>
 	</bean>
 
@@ -54,8 +54,8 @@
 		<property name="age"><value>32</value></property>
 		<property name="friends">
 			<list>
-				<ref local="pJenny"/>
-				<ref local="pDavid"/>
+				<ref bean="pJenny"/>
+				<ref bean="pDavid"/>
 			</list>
 		</property>
 	</bean>
@@ -69,7 +69,7 @@
 		<property name="friends">
 			<list>
 				<description>My List</description>
-				<ref local="david"/>
+				<ref bean="david"/>
 			</list>
 		</property>
 	</bean>
@@ -77,10 +77,10 @@
 	<bean id="jumble" class="org.springframework.context.access.MixedCollectionBean">
 		<property name="jumble">
 			<list>
-				<ref local="david"/>
+				<ref bean="david"/>
 				<value>literal</value>
-				<ref local="jenny"/>
-				<idref local="rod"/>
+				<ref bean="jenny"/>
+				<idref bean="rod"/>
 			</list>
 		</property>
 	</bean>
@@ -88,9 +88,9 @@
 	<bean id="jumble2" class="org.springframework.context.access.MixedCollectionBean" lazy-init="true">
 		<property name="jumble">
 			<list>
-				<ref local="david"/>
+				<ref bean="david"/>
 				<value>literal</value>
-				<ref local="jenny"/>
+				<ref bean="jenny"/>
 				<idref bean="rod"/>
 				<idref bean="rod2"/>
 			</list>
@@ -102,7 +102,7 @@
 	</bean>
 
 	<bean id="verbose2" class="org.springframework.tests.sample.beans.TestBean">
-		<property name="name"><idref local="verbose"/></property>
+		<property name="name"><idref bean="verbose"/></property>
 	</bean>
 
 	<bean id="verbose3" class="org.springframework.tests.sample.beans.TestBean">
@@ -136,7 +136,7 @@
  					<key>
 						<ref bean="jennyKey"/>
 					</key>
-					<ref local="jenny"/>
+					<ref bean="jenny"/>
 				</entry>
 				<entry>
  					<key>
@@ -174,16 +174,16 @@
 					<key><null/></key>
 					<value>bar</value>
 				</entry>
-				<entry key="jenny"><ref local="jenny"/></entry>
+				<entry key="jenny"><ref bean="jenny"/></entry>
 				<entry key="list">
 					<list>
 						<value>zero</value>
 						<map>
 							<entry key="fo"><value>bar</value></entry>
-							<entry key="jen"><ref local="jenny"/></entry>
+							<entry key="jen"><ref bean="jenny"/></entry>
 						</map>
 						<list>
-							<ref local="jenny"/>
+							<ref bean="jenny"/>
 							<value>ba</value>
 						</list>
 						<null/>
@@ -192,7 +192,7 @@
 				<entry key="map">
 					<map>
 						<entry key="foo"><value>bar</value></entry>
-						<entry key="jenny"><ref local="jenny"/></entry>
+						<entry key="jenny"><ref bean="jenny"/></entry>
 					</map>
 				</entry>
 			</map>
@@ -211,7 +211,7 @@
 		<property name="set">
 			<set>
 				<value>bar</value>
-				<ref local="jenny"/>
+				<ref bean="jenny"/>
 				<null/>
 			</set>
 		</property>
@@ -247,7 +247,7 @@
 		<property name="objectArray">
 			<list>
 				<value>one</value>
-				<ref local="jenny"/>
+				<ref bean="jenny"/>
 			</list>
 		</property>
 	</bean>

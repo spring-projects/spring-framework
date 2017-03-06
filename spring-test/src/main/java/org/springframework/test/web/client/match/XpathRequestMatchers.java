@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client.match;
 
 import java.io.IOException;
@@ -46,12 +47,10 @@ public class XpathRequestMatchers {
 	 * Class constructor, not for direct instantiation. Use
 	 * {@link MockRestRequestMatchers#xpath(String, Object...)} or
 	 * {@link MockRestRequestMatchers#xpath(String, Map, Object...)}.
-	 *
 	 * @param expression the XPath expression
 	 * @param namespaces XML namespaces referenced in the XPath expression, or {@code null}
 	 * @param args arguments to parameterize the XPath expression with using the
 	 * formatting specifiers defined in {@link String#format(String, Object...)}
-	 *
 	 * @throws XPathExpressionException
 	 */
 	protected XpathRequestMatchers(String expression, Map<String, String> namespaces, Object ... args)
@@ -59,6 +58,7 @@ public class XpathRequestMatchers {
 
 		this.xpathHelper = new XpathExpectationsHelper(expression, namespaces, args);
 	}
+
 
 	/**
 	 * Apply the XPath and assert it with the given {@code Matcher<Node>}.
@@ -193,13 +193,12 @@ public class XpathRequestMatchers {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 				matchInternal(mockRequest);
 			}
-			catch (Exception e) {
-				throw new AssertionError("Failed to parse XML request content: " + e.getMessage());
+			catch (Exception ex) {
+				throw new AssertionError("Failed to parse XML request content", ex);
 			}
 		}
 
 		protected abstract void matchInternal(MockClientHttpRequest request) throws Exception;
-
 	}
 
 }

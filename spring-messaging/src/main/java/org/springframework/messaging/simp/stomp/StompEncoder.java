@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,13 @@ package org.springframework.messaging.simp.stomp;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,14 +42,36 @@ import org.springframework.util.Assert;
  * @author Andy Wilkinson
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @see StompDecoder
  */
-public final class StompEncoder  {
+public class StompEncoder  {
 
 	private static final byte LF = '\n';
 
 	private static final byte COLON = ':';
 
-	private final Log logger = LogFactory.getLog(StompEncoder.class);
+	private static final Log logger = LogFactory.getLog(StompEncoder.class);
+
+	private static final int HEADER_KEY_CACHE_LIMIT = 32;
+
+
+	private final Map<String, byte[]> headerKeyAccessCache =
+			new ConcurrentHashMap<>(HEADER_KEY_CACHE_LIMIT);
+
+	@SuppressWarnings("serial")
+	private final Map<String, byte[]> headerKeyUpdateCache =
+			new LinkedHashMap<String, byte[]>(HEADER_KEY_CACHE_LIMIT, 0.75f, true) {
+				@Override
+				protected boolean removeEldestEntry(Map.Entry<String, byte[]> eldest) {
+					if (size() > HEADER_KEY_CACHE_LIMIT) {
+						headerKeyAccessCache.remove(eldest.getKey());
+						return true;
+					}
+					else {
+						return false;
+					}
+				}
+			};
 
 
 	/**
@@ -78,10 +103,14 @@ public final class StompEncoder  {
 				}
 				output.write(StompDecoder.HEARTBEAT_PAYLOAD);
 			}
+
 			else {
 				StompCommand command = StompHeaderAccessor.getCommand(headers);
-				Assert.notNull(command, "Missing STOMP command: " + headers);
-				output.write(command.toString().getBytes(StompDecoder.UTF8_CHARSET));
+				if (command == null) {
+					throw new IllegalStateException("Missing STOMP command: " + headers);
+				}
+
+				output.write(command.toString().getBytes(StandardCharsets.UTF_8));
 				output.write(LF);
 				writeHeaders(command, headers, payload, output);
 				output.write(LF);
@@ -96,8 +125,8 @@ public final class StompEncoder  {
 		}
 	}
 
-	private void writeHeaders(StompCommand command, Map<String, Object> headers, byte[] payload, DataOutputStream output)
-			throws IOException {
+	private void writeHeaders(StompCommand command, Map<String, Object> headers, byte[] payload,
+			DataOutputStream output) throws IOException {
 
 		@SuppressWarnings("unchecked")
 		Map<String,List<String>> nativeHeaders =
@@ -114,33 +143,52 @@ public final class StompEncoder  {
 		boolean shouldEscape = (command != StompCommand.CONNECT && command != StompCommand.CONNECTED);
 
 		for (Entry<String, List<String>> entry : nativeHeaders.entrySet()) {
-			byte[] key = encodeHeaderString(entry.getKey(), shouldEscape);
 			if (command.requiresContentLength() && "content-length".equals(entry.getKey())) {
 				continue;
 			}
+
 			List<String> values = entry.getValue();
 			if (StompCommand.CONNECT.equals(command) &&
 					StompHeaderAccessor.STOMP_PASSCODE_HEADER.equals(entry.getKey())) {
-				values = Arrays.asList(StompHeaderAccessor.getPasscode(headers));
+				values = Collections.singletonList(StompHeaderAccessor.getPasscode(headers));
 			}
+
+			byte[] encodedKey = encodeHeaderKey(entry.getKey(), shouldEscape);
 			for (String value : values) {
-				output.write(key);
+				output.write(encodedKey);
 				output.write(COLON);
-				output.write(encodeHeaderString(value, shouldEscape));
+				output.write(encodeHeaderValue(value, shouldEscape));
 				output.write(LF);
 			}
 		}
+
 		if (command.requiresContentLength()) {
 			int contentLength = payload.length;
-			output.write("content-length:".getBytes(StompDecoder.UTF8_CHARSET));
-			output.write(Integer.toString(contentLength).getBytes(StompDecoder.UTF8_CHARSET));
+			output.write("content-length:".getBytes(StandardCharsets.UTF_8));
+			output.write(Integer.toString(contentLength).getBytes(StandardCharsets.UTF_8));
 			output.write(LF);
 		}
 	}
 
-	private byte[] encodeHeaderString(String input, boolean escape) {
+	private byte[] encodeHeaderKey(String input, boolean escape) {
 		String inputToUse = (escape ? escape(input) : input);
-		return inputToUse.getBytes(StompDecoder.UTF8_CHARSET);
+		if (this.headerKeyAccessCache.containsKey(inputToUse)) {
+			return this.headerKeyAccessCache.get(inputToUse);
+		}
+		synchronized (this.headerKeyUpdateCache) {
+			byte[] bytes = this.headerKeyUpdateCache.get(inputToUse);
+			if (bytes == null) {
+				bytes = inputToUse.getBytes(StandardCharsets.UTF_8);
+				this.headerKeyAccessCache.put(inputToUse, bytes);
+				this.headerKeyUpdateCache.put(inputToUse, bytes);
+			}
+			return bytes;
+		}
+	}
+
+	private byte[] encodeHeaderValue(String input, boolean escape) {
+		String inputToUse = (escape ? escape(input) : input);
+		return inputToUse.getBytes(StandardCharsets.UTF_8);
 	}
 
 	/**
@@ -148,26 +196,38 @@ public final class StompEncoder  {
 	 * <a href="http://stomp.github.io/stomp-specification-1.2.html#Value_Encoding">"Value Encoding"</a>.
 	 */
 	private String escape(String inString) {
-		StringBuilder sb = new StringBuilder(inString.length());
+		StringBuilder sb = null;
 		for (int i = 0; i < inString.length(); i++) {
 			char c = inString.charAt(i);
 			if (c == '\\') {
+				sb = getStringBuilder(sb, inString, i);
 				sb.append("\\\\");
 			}
 			else if (c == ':') {
+				sb = getStringBuilder(sb, inString, i);
 				sb.append("\\c");
 			}
 			else if (c == '\n') {
-				 sb.append("\\n");
+				sb = getStringBuilder(sb, inString, i);
+				sb.append("\\n");
 			}
 			else if (c == '\r') {
+				sb = getStringBuilder(sb, inString, i);
 				sb.append("\\r");
 			}
-			else {
+			else if (sb != null){
 				sb.append(c);
 			}
 		}
-		return sb.toString();
+		return (sb != null ? sb.toString() : inString);
+	}
+
+	private StringBuilder getStringBuilder(StringBuilder sb, String inString, int i) {
+		if (sb == null) {
+			sb = new StringBuilder(inString.length());
+			sb.append(inString.substring(0, i));
+		}
+		return sb;
 	}
 
 	private void writeBody(byte[] payload, DataOutputStream output) throws IOException {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client;
 
 import java.io.IOException;
@@ -33,7 +34,7 @@ import org.springframework.util.Assert;
  * for storing expectations and actual requests, and checking for unsatisfied
  * expectations at the end.
  *
- * <p>Sub-classes are responsible for validating each request by matching it to
+ * <p>Subclasses are responsible for validating each request by matching it to
  * to expectations following the order of declaration or not.
  *
  * @author Rossen Stoyanchev
@@ -41,9 +42,11 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractRequestExpectationManager implements RequestExpectationManager {
 
-	private final List<RequestExpectation> expectations = new LinkedList<RequestExpectation>();
+	private final List<RequestExpectation> expectations = new LinkedList<>();
 
-	private final List<ClientHttpRequest> requests = new LinkedList<ClientHttpRequest>();
+	private final List<ClientHttpRequest> requests = new LinkedList<>();
+
+	private final Object lock = new Object();
 
 
 	protected List<RequestExpectation> getExpectations() {
@@ -57,7 +60,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 
 	@Override
 	public ResponseActions expectRequest(ExpectedCount count, RequestMatcher matcher) {
-		Assert.state(getRequests().isEmpty(), "Cannot add more expectations after actual requests are made.");
+		Assert.state(getRequests().isEmpty(), "Cannot add more expectations after actual requests are made");
 		RequestExpectation expectation = new DefaultRequestExpectation(count, matcher);
 		getExpectations().add(expectation);
 		return expectation;
@@ -65,12 +68,14 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 
 	@Override
 	public ClientHttpResponse validateRequest(ClientHttpRequest request) throws IOException {
-		if (getRequests().isEmpty()) {
-			afterExpectationsDeclared();
+		synchronized (this.lock) {
+			if (getRequests().isEmpty()) {
+				afterExpectationsDeclared();
+			}
+			ClientHttpResponse response = validateRequestInternal(request);
+			getRequests().add(request);
+			return response;
 		}
-		ClientHttpResponse response = validateRequestInternal(request);
-		getRequests().add(request);
-		return response;
 	}
 
 	/**
@@ -81,11 +86,10 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 	}
 
 	/**
-	 * Sub-classes must implement the actual validation of the request
+	 * Subclasses must implement the actual validation of the request
 	 * matching it to a declared expectation.
 	 */
-	protected abstract ClientHttpResponse validateRequestInternal(ClientHttpRequest request)
-			throws IOException;
+	protected abstract ClientHttpResponse validateRequestInternal(ClientHttpRequest request) throws IOException;
 
 	@Override
 	public void verify() {
@@ -133,6 +137,12 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 		return new AssertionError(message + getRequestDetails());
 	}
 
+	@Override
+	public void reset() {
+		this.expectations.clear();
+		this.requests.clear();
+	}
+
 
 	/**
 	 * Helper class to manage a group of request expectations. It helps with
@@ -141,8 +151,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 	 */
 	protected static class RequestExpectationGroup {
 
-		private final Set<RequestExpectation> expectations = new LinkedHashSet<RequestExpectation>();
-
+		private final Set<RequestExpectation> expectations = new LinkedHashSet<>();
 
 		public Set<RequestExpectation> getExpectations() {
 			return this.expectations;
@@ -174,6 +183,10 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 				}
 			}
 			return null;
+		}
+
+		public void reset() {
+			this.expectations.clear();
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.messaging.simp.SimpMessageHeaderAccessor.*;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +44,6 @@ import org.springframework.messaging.support.MessageBuilder;
 public class UserDestinationMessageHandlerTests {
 
 	private static final String SESSION_ID = "123";
-
 
 	private UserDestinationMessageHandler handler;
 
@@ -138,7 +137,7 @@ public class UserDestinationMessageHandlerTests {
 		accessor.setNativeHeader(ORIGINAL_DESTINATION, "/user/joe/queue/foo");
 		accessor.setNativeHeader("customHeader", "customHeaderValue");
 		accessor.setLeaveMutable(true);
-		byte[] payload = "payload".getBytes(Charset.forName("UTF-8"));
+		byte[] payload = "payload".getBytes(StandardCharsets.UTF_8);
 		this.handler.handleMessage(MessageBuilder.createMessage(payload, accessor.getMessageHeaders()));
 
 		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
@@ -161,7 +160,7 @@ public class UserDestinationMessageHandlerTests {
 		accessor.setDestination("/topic/unresolved");
 		accessor.setNativeHeader(ORIGINAL_DESTINATION, "/user/joe/queue/foo");
 		accessor.setLeaveMutable(true);
-		byte[] payload = "payload".getBytes(Charset.forName("UTF-8"));
+		byte[] payload = "payload".getBytes(StandardCharsets.UTF_8);
 		this.handler.handleMessage(MessageBuilder.createMessage(payload, accessor.getMessageHeaders()));
 
 		// No re-broadcast

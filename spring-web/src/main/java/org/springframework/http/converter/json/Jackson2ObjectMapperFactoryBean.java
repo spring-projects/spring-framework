@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.TimeZone;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -164,6 +165,15 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	/**
+	 * Define the {@link JsonFactory} to be used to create the {@link ObjectMapper}
+	 * instance.
+	 * @since 5.0
+	 */
+	public void setFactory(JsonFactory factory) {
+		this.builder.factory(factory);
+	}
+
+	/**
 	 * Define the format for date/time with the given {@link DateFormat}.
 	 * <p>Note: Setting this property makes the exposed {@link ObjectMapper}
 	 * non-thread-safe, according to Jackson's thread safety rules.
@@ -256,8 +266,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	/**
 	 * Configure custom serializers. Each serializer is registered for the type
-	 * returned by {@link JsonSerializer#handledType()}, which must not be
-	 * {@code null}.
+	 * returned by {@link JsonSerializer#handledType()}, which must not be {@code null}.
 	 * @see #setSerializersByType(Map)
 	 */
 	public void setSerializers(JsonSerializer<?>... serializers) {
@@ -270,6 +279,16 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	 */
 	public void setSerializersByType(Map<Class<?>, JsonSerializer<?>> serializers) {
 		this.builder.serializersByType(serializers);
+	}
+
+	/**
+	 * Configure custom deserializers. Each deserializer is registered for the type
+	 * returned by {@link JsonDeserializer#handledType()}, which must not be {@code null}.
+	 * @since 4.3
+	 * @see #setDeserializersByType(Map)
+	 */
+	public void setDeserializers(JsonDeserializer<?>... deserializers) {
+		this.builder.deserializers(deserializers);
 	}
 
 	/**

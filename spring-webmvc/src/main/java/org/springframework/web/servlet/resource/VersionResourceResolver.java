@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 
@@ -65,7 +66,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	private AntPathMatcher pathMatcher = new AntPathMatcher();
 
 	/** Map from path pattern -> VersionStrategy */
-	private final Map<String, VersionStrategy> versionStrategyMap = new LinkedHashMap<String, VersionStrategy>();
+	private final Map<String, VersionStrategy> versionStrategyMap = new LinkedHashMap<>();
 
 
 	/**
@@ -93,7 +94,8 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 * default strategy to use except when it cannot be, for example when using
 	 * JavaScript module loaders, use {@link #addFixedVersionStrategy} instead
 	 * for serving JavaScript files.
-	 * @param pathPatterns one or more resource URL path patterns
+	 * @param pathPatterns one or more resource URL path patterns,
+	 * relative to the pattern configured with the resource handler
 	 * @return the current instance for chained method invocation
 	 * @see ContentVersionStrategy
 	 */
@@ -115,13 +117,14 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 * will also cofigure automatically a {@code "/v1.0.0/js/**"} with {@code "v1.0.0"} the
 	 * {@code version} String given as an argument.
 	 * @param version a version string
-	 * @param pathPatterns one or more resource URL path patterns
+	 * @param pathPatterns one or more resource URL path patterns,
+	 * relative to the pattern configured with the resource handler
 	 * @return the current instance for chained method invocation
 	 * @see FixedVersionStrategy
 	 */
 	public VersionResourceResolver addFixedVersionStrategy(String version, String... pathPatterns) {
 		List<String> patternsList = Arrays.asList(pathPatterns);
-		List<String> prefixedPatterns = new ArrayList<String>(pathPatterns.length);
+		List<String> prefixedPatterns = new ArrayList<>(pathPatterns.length);
 		String versionPrefix = "/" + version;
 		for (String pattern : patternsList) {
 			prefixedPatterns.add(pattern);
@@ -136,7 +139,8 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 * Register a custom VersionStrategy to apply to resource URLs that match the
 	 * given path patterns.
 	 * @param strategy the custom strategy
-	 * @param pathPatterns one or more resource URL path patterns
+	 * @param pathPatterns one or more resource URL path patterns,
+	 * relative to the pattern configured with the resource handler
 	 * @return the current instance for chained method invocation
 	 * @see VersionStrategy
 	 */
@@ -223,7 +227,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 */
 	protected VersionStrategy getStrategyForPath(String requestPath) {
 		String path = "/".concat(requestPath);
-		List<String> matchingPatterns = new ArrayList<String>();
+		List<String> matchingPatterns = new ArrayList<>();
 		for (String pattern : this.versionStrategyMap.keySet()) {
 			if (this.pathMatcher.match(pattern, path)) {
 				matchingPatterns.add(pattern);
@@ -238,7 +242,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	}
 
 
-	private class FileNameVersionedResource extends AbstractResource implements VersionedResource {
+	private class FileNameVersionedResource extends AbstractResource implements HttpResource {
 
 		private final Resource original;
 
@@ -262,6 +266,11 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		@Override
 		public boolean isOpen() {
 			return this.original.isOpen();
+		}
+
+		@Override
+		public boolean isFile() {
+			return this.original.isFile();
 		}
 
 		@Override
@@ -310,9 +319,18 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		}
 
 		@Override
-		public String getVersion() {
-			return this.version;
+		public HttpHeaders getResponseHeaders() {
+			HttpHeaders headers;
+			if(this.original instanceof HttpResource) {
+				headers = ((HttpResource) this.original).getResponseHeaders();
+			}
+			else {
+				headers = new HttpHeaders();
+			}
+			headers.setETag("\"" + this.version + "\"");
+			return headers;
 		}
+
 	}
 
 }

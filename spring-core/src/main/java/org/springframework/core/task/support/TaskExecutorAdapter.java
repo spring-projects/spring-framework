@@ -102,7 +102,7 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 				return ((ExecutorService) this.concurrentExecutor).submit(task);
 			}
 			else {
-				FutureTask<Object> future = new FutureTask<Object>(task, null);
+				FutureTask<Object> future = new FutureTask<>(task, null);
 				doExecute(this.concurrentExecutor, this.taskDecorator, future);
 				return future;
 			}
@@ -120,7 +120,7 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 				return ((ExecutorService) this.concurrentExecutor).submit(task);
 			}
 			else {
-				FutureTask<T> future = new FutureTask<T>(task);
+				FutureTask<T> future = new FutureTask<>(task);
 				doExecute(this.concurrentExecutor, this.taskDecorator, future);
 				return future;
 			}
@@ -134,7 +134,7 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 	@Override
 	public ListenableFuture<?> submitListenable(Runnable task) {
 		try {
-			ListenableFutureTask<Object> future = new ListenableFutureTask<Object>(task, null);
+			ListenableFutureTask<Object> future = new ListenableFutureTask<>(task, null);
 			doExecute(this.concurrentExecutor, this.taskDecorator, future);
 			return future;
 		}
@@ -147,7 +147,7 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 	@Override
 	public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
 		try {
-			ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+			ListenableFutureTask<T> future = new ListenableFutureTask<>(task);
 			doExecute(this.concurrentExecutor, this.taskDecorator, future);
 			return future;
 		}

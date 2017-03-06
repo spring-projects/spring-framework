@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResourceLoader;
 import org.springframework.web.context.support.StandardServletEnvironment;
@@ -78,8 +79,7 @@ import org.springframework.web.context.support.StandardServletEnvironment;
  * @see #doPost
  */
 @SuppressWarnings("serial")
-public abstract class HttpServletBean extends HttpServlet
-		implements EnvironmentCapable, EnvironmentAware {
+public abstract class HttpServletBean extends HttpServlet implements EnvironmentCapable, EnvironmentAware {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -88,7 +88,7 @@ public abstract class HttpServletBean extends HttpServlet
 	 * Set of required properties (Strings) that must be supplied as
 	 * config parameters to this servlet.
 	 */
-	private final Set<String> requiredProperties = new HashSet<String>();
+	private final Set<String> requiredProperties = new HashSet<>();
 
 	private ConfigurableEnvironment environment;
 
@@ -128,7 +128,9 @@ public abstract class HttpServletBean extends HttpServlet
 			bw.setPropertyValues(pvs, true);
 		}
 		catch (BeansException ex) {
-			logger.error("Failed to set bean properties on servlet '" + getServletName() + "'", ex);
+			if (logger.isErrorEnabled()) {
+				logger.error("Failed to set bean properties on servlet '" + getServletName() + "'", ex);
+			}
 			throw ex;
 		}
 
@@ -190,7 +192,7 @@ public abstract class HttpServletBean extends HttpServlet
 	 */
 	@Override
 	public void setEnvironment(Environment environment) {
-		Assert.isInstanceOf(ConfigurableEnvironment.class, environment);
+		Assert.isInstanceOf(ConfigurableEnvironment.class, environment, "ConfigurableEnvironment required");
 		this.environment = (ConfigurableEnvironment) environment;
 	}
 
@@ -231,12 +233,12 @@ public abstract class HttpServletBean extends HttpServlet
 		public ServletConfigPropertyValues(ServletConfig config, Set<String> requiredProperties)
 			throws ServletException {
 
-			Set<String> missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
-					new HashSet<String>(requiredProperties) : null;
+			Set<String> missingProps = (requiredProperties != null && !requiredProperties.isEmpty() ?
+					new HashSet<>(requiredProperties) : null);
 
-			Enumeration<String> en = config.getInitParameterNames();
-			while (en.hasMoreElements()) {
-				String property = en.nextElement();
+			Enumeration<String> paramNames = config.getInitParameterNames();
+			while (paramNames.hasMoreElements()) {
+				String property = paramNames.nextElement();
 				Object value = config.getInitParameter(property);
 				addPropertyValue(new PropertyValue(property, value));
 				if (missingProps != null) {
@@ -245,7 +247,7 @@ public abstract class HttpServletBean extends HttpServlet
 			}
 
 			// Fail if we are still missing properties.
-			if (missingProps != null && missingProps.size() > 0) {
+			if (!CollectionUtils.isEmpty(missingProps)) {
 				throw new ServletException(
 					"Initialization from ServletConfig for servlet '" + config.getServletName() +
 					"' failed; the following required properties were missing: " +

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -327,7 +327,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @since 4.1.1
 	 */
 	protected Set<Resource> doFindAllClassPathResources(String path) throws IOException {
-		Set<Resource> result = new LinkedHashSet<Resource>(16);
+		Set<Resource> result = new LinkedHashSet<>(16);
 		ClassLoader cl = getClassLoader();
 		Enumeration<URL> resourceUrls = (cl != null ? cl.getResources(path) : ClassLoader.getSystemResources(path));
 		while (resourceUrls.hasMoreElements()) {
@@ -365,19 +365,17 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (classLoader instanceof URLClassLoader) {
 			try {
 				for (URL url : ((URLClassLoader) classLoader).getURLs()) {
-					if (ResourceUtils.isJarFileURL(url)) {
-						try {
-							UrlResource jarResource = new UrlResource(
-									ResourceUtils.JAR_URL_PREFIX + url.toString() + ResourceUtils.JAR_URL_SEPARATOR);
-							if (jarResource.exists()) {
-								result.add(jarResource);
-							}
+					try {
+						UrlResource jarResource = new UrlResource(
+								ResourceUtils.JAR_URL_PREFIX + url.toString() + ResourceUtils.JAR_URL_SEPARATOR);
+						if (jarResource.exists()) {
+							result.add(jarResource);
 						}
-						catch (MalformedURLException ex) {
-							if (logger.isDebugEnabled()) {
-								logger.debug("Cannot search for matching files underneath [" + url +
-										"] because it cannot be converted to a valid 'jar:' URL: " + ex.getMessage());
-							}
+					}
+					catch (MalformedURLException ex) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Cannot search for matching files underneath [" + url +
+									"] because it cannot be converted to a valid 'jar:' URL: " + ex.getMessage());
 						}
 					}
 				}
@@ -418,20 +416,20 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	protected void addClassPathManifestEntries(Set<Resource> result) {
 		try {
 			String javaClassPathProperty = System.getProperty("java.class.path");
-			for (String url : StringUtils.delimitedListToStringArray(
+			for (String path : StringUtils.delimitedListToStringArray(
 					javaClassPathProperty, System.getProperty("path.separator"))) {
 				try {
-					if (url.endsWith(ResourceUtils.JAR_FILE_EXTENSION)) {
-						UrlResource jarResource = new UrlResource(ResourceUtils.JAR_URL_PREFIX +
-								ResourceUtils.FILE_URL_PREFIX + url + ResourceUtils.JAR_URL_SEPARATOR);
-						if (jarResource.exists()) {
-							result.add(jarResource);
-						}
+					File file = new File(path);
+					UrlResource jarResource = new UrlResource(ResourceUtils.JAR_URL_PREFIX +
+							ResourceUtils.FILE_URL_PREFIX + file.getAbsolutePath() +
+							ResourceUtils.JAR_URL_SEPARATOR);
+					if (jarResource.exists()) {
+						result.add(jarResource);
 					}
 				}
 				catch (MalformedURLException ex) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Cannot search for matching files underneath [" + url +
+						logger.debug("Cannot search for matching files underneath [" + path +
 								"] because it cannot be converted to a valid 'jar:' URL: " + ex.getMessage());
 					}
 				}
@@ -459,7 +457,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		String rootDirPath = determineRootDir(locationPattern);
 		String subPattern = locationPattern.substring(rootDirPath.length());
 		Resource[] rootDirResources = getResources(rootDirPath);
-		Set<Resource> result = new LinkedHashSet<Resource>(16);
+		Set<Resource> result = new LinkedHashSet<>(16);
 		for (Resource rootDirResource : rootDirResources) {
 			rootDirResource = resolveRootDirResource(rootDirResource);
 			URL rootDirURL = rootDirResource.getURL();
@@ -551,15 +549,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see java.net.JarURLConnection
 	 * @see org.springframework.util.PathMatcher
 	 */
-	@SuppressWarnings("deprecation")
 	protected Set<Resource> doFindPathMatchingJarResources(Resource rootDirResource, URL rootDirURL, String subPattern)
 			throws IOException {
-
-		// Check deprecated variant for potential overriding first...
-		Set<Resource> result = doFindPathMatchingJarResources(rootDirResource, subPattern);
-		if (result != null) {
-			return result;
-		}
 
 		URLConnection con = rootDirURL.openConnection();
 		JarFile jarFile;
@@ -614,7 +605,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				// The Sun JRE does not return a slash here, but BEA JRockit does.
 				rootEntryPath = rootEntryPath + "/";
 			}
-			result = new LinkedHashSet<Resource>(8);
+			Set<Resource> result = new LinkedHashSet<>(8);
 			for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
 				JarEntry entry = entries.nextElement();
 				String entryPath = entry.getName();
@@ -632,23 +623,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				jarFile.close();
 			}
 		}
-	}
-
-	/**
-	 * Find all resources in jar files that match the given location pattern
-	 * via the Ant-style PathMatcher.
-	 * @param rootDirResource the root directory as Resource
-	 * @param subPattern the sub pattern to match (below the root directory)
-	 * @return a mutable Set of matching Resource instances
-	 * @throws IOException in case of I/O errors
-	 * @deprecated as of Spring 4.3, in favor of
-	 * {@link #doFindPathMatchingJarResources(Resource, URL, String)}
-	 */
-	@Deprecated
-	protected Set<Resource> doFindPathMatchingJarResources(Resource rootDirResource, String subPattern)
-			throws IOException {
-
-		return null;
 	}
 
 	/**
@@ -711,7 +685,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			logger.debug("Looking for matching resources in directory tree [" + rootDir.getPath() + "]");
 		}
 		Set<File> matchingFiles = retrieveMatchingFiles(rootDir, subPattern);
-		Set<Resource> result = new LinkedHashSet<Resource>(matchingFiles.size());
+		Set<Resource> result = new LinkedHashSet<>(matchingFiles.size());
 		for (File file : matchingFiles) {
 			result.add(new FileSystemResource(file));
 		}
@@ -754,7 +728,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			fullPattern += "/";
 		}
 		fullPattern = fullPattern + StringUtils.replace(pattern, File.separator, "/");
-		Set<File> result = new LinkedHashSet<File>(8);
+		Set<File> result = new LinkedHashSet<>(8);
 		doRetrieveMatchingFiles(fullPattern, rootDir, result);
 		return result;
 	}
@@ -830,12 +804,12 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 		private final String rootPath;
 
-		private final Set<Resource> resources = new LinkedHashSet<Resource>();
+		private final Set<Resource> resources = new LinkedHashSet<>();
 
 		public PatternVirtualFileVisitor(String rootPath, String subPattern, PathMatcher pathMatcher) {
 			this.subPattern = subPattern;
 			this.pathMatcher = pathMatcher;
-			this.rootPath = (rootPath.length() == 0 || rootPath.endsWith("/") ? rootPath : rootPath + "/");
+			this.rootPath = (rootPath.isEmpty() || rootPath.endsWith("/") ? rootPath : rootPath + "/");
 		}
 
 		@Override

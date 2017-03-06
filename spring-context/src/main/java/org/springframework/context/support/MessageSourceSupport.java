@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,13 +52,12 @@ public abstract class MessageSourceSupport {
 	 * Used for passed-in default messages. MessageFormats for resolved
 	 * codes are cached on a specific basis in subclasses.
 	 */
-	private final Map<String, Map<Locale, MessageFormat>> messageFormatsPerMessage =
-			new HashMap<String, Map<Locale, MessageFormat>>();
+	private final Map<String, Map<Locale, MessageFormat>> messageFormatsPerMessage = new HashMap<>();
 
 
 	/**
-	 * Set whether to always apply the MessageFormat rules, parsing even
-	 * messages without arguments.
+	 * Set whether to always apply the {@code MessageFormat} rules,
+	 * parsing even messages without arguments.
 	 * <p>Default is "false": Messages without arguments are by default
 	 * returned as-is, without parsing them through MessageFormat.
 	 * Set this to "true" to enforce MessageFormat for all messages,
@@ -112,7 +111,7 @@ public abstract class MessageSourceSupport {
 	 * @return the formatted message (with resolved arguments)
 	 */
 	protected String formatMessage(String msg, Object[] args, Locale locale) {
-		if (msg == null || (!this.alwaysUseMessageFormat && ObjectUtils.isEmpty(args))) {
+		if (msg == null || (!isAlwaysUseMessageFormat() && ObjectUtils.isEmpty(args))) {
 			return msg;
 		}
 		MessageFormat messageFormat = null;
@@ -122,7 +121,7 @@ public abstract class MessageSourceSupport {
 				messageFormat = messageFormatsPerLocale.get(locale);
 			}
 			else {
-				messageFormatsPerLocale = new HashMap<Locale, MessageFormat>();
+				messageFormatsPerLocale = new HashMap<>();
 				this.messageFormatsPerMessage.put(msg, messageFormatsPerLocale);
 			}
 			if (messageFormat == null) {
@@ -130,12 +129,12 @@ public abstract class MessageSourceSupport {
 					messageFormat = createMessageFormat(msg, locale);
 				}
 				catch (IllegalArgumentException ex) {
-					// invalid message format - probably not intended for formatting,
-					// rather using a message structure with no arguments involved
-					if (this.alwaysUseMessageFormat) {
+					// Invalid message format - probably not intended for formatting,
+					// rather using a message structure with no arguments involved...
+					if (isAlwaysUseMessageFormat()) {
 						throw ex;
 					}
-					// silently proceed with raw message if format not enforced
+					// Silently proceed with raw message if format not enforced...
 					messageFormat = INVALID_MESSAGE_FORMAT;
 				}
 				messageFormatsPerLocale.put(locale, messageFormat);

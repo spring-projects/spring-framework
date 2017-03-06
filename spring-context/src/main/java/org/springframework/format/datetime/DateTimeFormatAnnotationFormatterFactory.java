@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,7 @@ import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
- * Formats fields annotated with the {@link DateTimeFormat} annotation using
- * a {@link DateFormatter}.
+ * Formats fields annotated with the {@link DateTimeFormat} annotation using a {@link DateFormatter}.
  *
  * @author Phillip Webb
  * @since 3.2
@@ -40,11 +39,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class DateTimeFormatAnnotationFormatterFactory  extends EmbeddedValueResolutionSupport
 		implements AnnotationFormatterFactory<DateTimeFormat> {
 
-
 	private static final Set<Class<?>> FIELD_TYPES;
 
 	static {
-		Set<Class<?>> fieldTypes = new HashSet<Class<?>>(4);
+		Set<Class<?>> fieldTypes = new HashSet<>(4);
 		fieldTypes.add(Date.class);
 		fieldTypes.add(Calendar.class);
 		fieldTypes.add(Long.class);

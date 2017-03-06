@@ -31,9 +31,9 @@ import static org.junit.Assert.*;
  * @author Dave Syer
  * @author Chris Beams
  */
-public final class BeanNameAutoProxyCreatorInitTests {
+public class BeanNameAutoProxyCreatorInitTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testIgnoreAdvisorThatIsCurrentlyCreation() {
 		ClassPathXmlApplicationContext ctx =
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());

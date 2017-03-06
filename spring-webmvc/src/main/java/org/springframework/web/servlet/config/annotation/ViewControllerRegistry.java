@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,10 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
  */
 public class ViewControllerRegistry {
 
-	private final List<ViewControllerRegistration> registrations = new ArrayList<ViewControllerRegistration>(4);
+	private final List<ViewControllerRegistration> registrations = new ArrayList<>(4);
 
 	private final List<RedirectViewControllerRegistration> redirectRegistrations =
-			new ArrayList<RedirectViewControllerRegistration>(10);
+			new ArrayList<>(10);
 
 	private int order = 1;
 
@@ -49,6 +49,9 @@ public class ViewControllerRegistry {
 	/**
 	 * Map a view controller to the given URL path (or pattern) in order to render
 	 * a response with a pre-configured status code and view.
+	 * <p>Patterns like {@code "/admin/**"} or {@code "/articles/{articlename:\\w+}"}
+	 * are allowed. See {@link org.springframework.util.AntPathMatcher} for more details on the
+	 * syntax.
 	 */
 	public ViewControllerRegistration addViewController(String urlPath) {
 		ViewControllerRegistration registration = new ViewControllerRegistration(urlPath);
@@ -106,7 +109,7 @@ public class ViewControllerRegistry {
 		if (this.registrations.isEmpty() && this.redirectRegistrations.isEmpty()) {
 			return null;
 		}
-		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
+		Map<String, Object> urlMap = new LinkedHashMap<>();
 		for (ViewControllerRegistration registration : this.registrations) {
 			urlMap.put(registration.getUrlPath(), registration.getViewController());
 		}

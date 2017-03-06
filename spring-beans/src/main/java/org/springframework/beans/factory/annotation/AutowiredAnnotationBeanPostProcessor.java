@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,6 @@ import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -120,8 +119,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Set<Class<? extends Annotation>> autowiredAnnotationTypes =
-			new LinkedHashSet<Class<? extends Annotation>>();
+	private final Set<Class<? extends Annotation>> autowiredAnnotationTypes = new LinkedHashSet<>();
 
 	private String requiredParameterName = "required";
 
@@ -131,14 +129,11 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	private ConfigurableListableBeanFactory beanFactory;
 
-	private final Set<String> lookupMethodsChecked =
-			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(256));
+	private final Set<String> lookupMethodsChecked = Collections.newSetFromMap(new ConcurrentHashMap<>(256));
 
-	private final Map<Class<?>, Constructor<?>[]> candidateConstructorsCache =
-			new ConcurrentHashMap<Class<?>, Constructor<?>[]>(256);
+	private final Map<Class<?>, Constructor<?>[]> candidateConstructorsCache = new ConcurrentHashMap<>(256);
 
-	private final Map<String, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<String, InjectionMetadata>(256);
+	private final Map<String, InjectionMetadata> injectionMetadataCache = new ConcurrentHashMap<>(256);
 
 
 	/**
@@ -221,10 +216,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
 			throw new IllegalArgumentException(
-					"AutowiredAnnotationBeanPostProcessor requires a ConfigurableListableBeanFactory");
+					"AutowiredAnnotationBeanPostProcessor requires a ConfigurableListableBeanFactory: " + beanFactory);
 		}
 		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
 	}
@@ -239,35 +234,52 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	@Override
-	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, final String beanName) throws BeansException {
+	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, final String beanName)
+			throws BeanCreationException {
+
+		// Let's check for lookup methods here..
 		if (!this.lookupMethodsChecked.contains(beanName)) {
-			ReflectionUtils.doWithMethods(beanClass, new ReflectionUtils.MethodCallback() {
-				@Override
-				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-					Lookup lookup = method.getAnnotation(Lookup.class);
-					if (lookup != null) {
-						LookupOverride override = new LookupOverride(method, lookup.value());
-						try {
-							RootBeanDefinition mbd = (RootBeanDefinition) beanFactory.getMergedBeanDefinition(beanName);
-							mbd.getMethodOverrides().addOverride(override);
-						}
-						catch (NoSuchBeanDefinitionException ex) {
-							throw new BeanCreationException(beanName,
-									"Cannot apply @Lookup to beans without corresponding bean definition");
+			try {
+				ReflectionUtils.doWithMethods(beanClass, new ReflectionUtils.MethodCallback() {
+					@Override
+					public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+						Lookup lookup = method.getAnnotation(Lookup.class);
+						if (lookup != null) {
+							LookupOverride override = new LookupOverride(method, lookup.value());
+							try {
+								RootBeanDefinition mbd = (RootBeanDefinition) beanFactory.getMergedBeanDefinition(beanName);
+								mbd.getMethodOverrides().addOverride(override);
+							}
+							catch (NoSuchBeanDefinitionException ex) {
+								throw new BeanCreationException(beanName,
+										"Cannot apply @Lookup to beans without corresponding bean definition");
+							}
 						}
 					}
-				}
-			});
+				});
+			}
+			catch (IllegalStateException ex) {
+				throw new BeanCreationException(beanName, "Lookup method resolution failed", ex);
+			}
 			this.lookupMethodsChecked.add(beanName);
 		}
 
 		// Quick check on the concurrent map first, with minimal locking.
 		Constructor<?>[] candidateConstructors = this.candidateConstructorsCache.get(beanClass);
 		if (candidateConstructors == null) {
+			// Fully synchronized resolution now...
 			synchronized (this.candidateConstructorsCache) {
 				candidateConstructors = this.candidateConstructorsCache.get(beanClass);
 				if (candidateConstructors == null) {
-					Constructor<?>[] rawCandidates = beanClass.getDeclaredConstructors();
+					Constructor<?>[] rawCandidates;
+					try {
+						rawCandidates = beanClass.getDeclaredConstructors();
+					}
+					catch (Throwable ex) {
+						throw new BeanCreationException(beanName,
+								"Resolution of declared constructors on bean Class [" + beanClass.getName() +
+								"] from ClassLoader [" + beanClass.getClassLoader() + "] failed", ex);
+					}
 					List<Constructor<?>> candidates = new ArrayList<Constructor<?>>(rawCandidates.length);
 					Constructor<?> requiredConstructor = null;
 					Constructor<?> defaultConstructor = null;
@@ -293,10 +305,6 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 										". Found constructor with 'required' Autowired annotation already: " +
 										requiredConstructor);
 							}
-							if (candidate.getParameterTypes().length == 0) {
-								throw new IllegalStateException(
-										"Autowired annotation requires at least one argument: " + candidate);
-							}
 							boolean required = determineRequiredStatus(ann);
 							if (required) {
 								if (!candidates.isEmpty()) {
@@ -309,7 +317,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 							}
 							candidates.add(candidate);
 						}
-						else if (candidate.getParameterTypes().length == 0) {
+						else if (candidate.getParameterCount() == 0) {
 							defaultConstructor = candidate;
 						}
 					}
@@ -321,14 +329,14 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 							}
 							else if (candidates.size() == 1 && logger.isWarnEnabled()) {
 								logger.warn("Inconsistent constructor declaration on bean with name '" + beanName +
-										"': single autowire-marked constructor flagged as optional - this constructor " +
-										"is effectively required since there is no default constructor to fall back to: " +
-										candidates.get(0));
+										"': single autowire-marked constructor flagged as optional - " +
+										"this constructor is effectively required since there is no " +
+										"default constructor to fall back to: " + candidates.get(0));
 							}
 						}
 						candidateConstructors = candidates.toArray(new Constructor<?>[candidates.size()]);
 					}
-					else if (rawCandidates.length == 1 && rawCandidates[0].getParameterTypes().length > 0) {
+					else if (rawCandidates.length == 1 && rawCandidates[0].getParameterCount() > 0) {
 						candidateConstructors = new Constructor<?>[] {rawCandidates[0]};
 					}
 					else {
@@ -343,7 +351,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	@Override
 	public PropertyValues postProcessPropertyValues(
-			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
+			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeanCreationException {
 
 		InjectionMetadata metadata = findAutowiringMetadata(beanName, bean.getClass(), pvs);
 		try {
@@ -362,9 +370,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 * 'Native' processing method for direct calls with an arbitrary target instance,
 	 * resolving all of its fields and methods which are annotated with {@code @Autowired}.
 	 * @param bean the target instance to process
-	 * @throws BeansException if autowiring failed
+	 * @throws BeanCreationException if autowiring failed
 	 */
-	public void processInjection(Object bean) throws BeansException {
+	public void processInjection(Object bean) throws BeanCreationException {
 		Class<?> clazz = bean.getClass();
 		InjectionMetadata metadata = findAutowiringMetadata(clazz.getName(), clazz, null);
 		try {
@@ -374,7 +382,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			throw ex;
 		}
 		catch (Throwable ex) {
-			throw new BeanCreationException("Injection of autowired dependencies failed for class [" + clazz + "]", ex);
+			throw new BeanCreationException(
+					"Injection of autowired dependencies failed for class [" + clazz + "]", ex);
 		}
 	}
 
@@ -391,14 +400,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					if (metadata != null) {
 						metadata.clear(pvs);
 					}
-					try {
-						metadata = buildAutowiringMetadata(clazz);
-						this.injectionMetadataCache.put(cacheKey, metadata);
-					}
-					catch (NoClassDefFoundError err) {
-						throw new IllegalStateException("Failed to introspect bean class [" + clazz.getName() +
-								"] for autowiring metadata: could not find class that it depends on", err);
-					}
+					metadata = buildAutowiringMetadata(clazz);
+					this.injectionMetadataCache.put(cacheKey, metadata);
 				}
 			}
 		}
@@ -406,12 +409,11 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	private InjectionMetadata buildAutowiringMetadata(final Class<?> clazz) {
-		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
+		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<>();
 		Class<?> targetClass = clazz;
 
 		do {
-			final LinkedList<InjectionMetadata.InjectedElement> currElements =
-					new LinkedList<InjectionMetadata.InjectedElement>();
+			final LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList<>();
 
 			ReflectionUtils.doWithLocalFields(targetClass, new ReflectionUtils.FieldCallback() {
 				@Override
@@ -445,9 +447,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 							}
 							return;
 						}
-						if (method.getParameterTypes().length == 0) {
+						if (method.getParameterCount() == 0) {
 							if (logger.isWarnEnabled()) {
-								logger.warn("Autowired annotation should be used on methods with parameters: " + method);
+								logger.warn("Autowired annotation should only be used on methods with parameters: " +
+										method);
 							}
 						}
 						boolean required = determineRequiredStatus(ann);
@@ -529,9 +532,6 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			DependencyDescriptor descriptor = (DependencyDescriptor) cachedArgument;
 			return this.beanFactory.resolveDependency(descriptor, beanName, null, null);
 		}
-		else if (cachedArgument instanceof RuntimeBeanReference) {
-			return this.beanFactory.getBean(((RuntimeBeanReference) cachedArgument).getBeanName());
-		}
 		else {
 			return cachedArgument;
 		}
@@ -564,7 +564,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			else {
 				DependencyDescriptor desc = new DependencyDescriptor(field, this.required);
 				desc.setContainingClass(bean.getClass());
-				Set<String> autowiredBeanNames = new LinkedHashSet<String>(1);
+				Set<String> autowiredBeanNames = new LinkedHashSet<>(1);
 				TypeConverter typeConverter = beanFactory.getTypeConverter();
 				try {
 					value = beanFactory.resolveDependency(desc, beanName, autowiredBeanNames, typeConverter);
@@ -581,7 +581,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 								String autowiredBeanName = autowiredBeanNames.iterator().next();
 								if (beanFactory.containsBean(autowiredBeanName)) {
 									if (beanFactory.isTypeMatch(autowiredBeanName, field.getType())) {
-										this.cachedFieldValue = new RuntimeBeanReference(autowiredBeanName);
+										this.cachedFieldValue = new ShortcutDependencyDescriptor(
+												desc, autowiredBeanName, field.getType());
 									}
 								}
 							}
@@ -632,7 +633,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				Class<?>[] paramTypes = method.getParameterTypes();
 				arguments = new Object[paramTypes.length];
 				DependencyDescriptor[] descriptors = new DependencyDescriptor[paramTypes.length];
-				Set<String> autowiredBeanNames = new LinkedHashSet<String>(paramTypes.length);
+				Set<String> autowiredBeans = new LinkedHashSet<>(paramTypes.length);
 				TypeConverter typeConverter = beanFactory.getTypeConverter();
 				for (int i = 0; i < arguments.length; i++) {
 					MethodParameter methodParam = new MethodParameter(method, i);
@@ -640,7 +641,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					currDesc.setContainingClass(bean.getClass());
 					descriptors[i] = currDesc;
 					try {
-						Object arg = beanFactory.resolveDependency(currDesc, beanName, autowiredBeanNames, typeConverter);
+						Object arg = beanFactory.resolveDependency(currDesc, beanName, autowiredBeans, typeConverter);
 						if (arg == null && !this.required) {
 							arguments = null;
 							break;
@@ -658,14 +659,15 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 							for (int i = 0; i < arguments.length; i++) {
 								this.cachedMethodArguments[i] = descriptors[i];
 							}
-							registerDependentBeans(beanName, autowiredBeanNames);
-							if (autowiredBeanNames.size() == paramTypes.length) {
-								Iterator<String> it = autowiredBeanNames.iterator();
+							registerDependentBeans(beanName, autowiredBeans);
+							if (autowiredBeans.size() == paramTypes.length) {
+								Iterator<String> it = autowiredBeans.iterator();
 								for (int i = 0; i < paramTypes.length; i++) {
 									String autowiredBeanName = it.next();
 									if (beanFactory.containsBean(autowiredBeanName)) {
 										if (beanFactory.isTypeMatch(autowiredBeanName, paramTypes[i])) {
-											this.cachedMethodArguments[i] = new RuntimeBeanReference(autowiredBeanName);
+											this.cachedMethodArguments[i] = new ShortcutDependencyDescriptor(
+													descriptors[i], autowiredBeanName, paramTypes[i]);
 										}
 									}
 								}
@@ -698,6 +700,29 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				arguments[i] = resolvedCachedArgument(beanName, this.cachedMethodArguments[i]);
 			}
 			return arguments;
+		}
+	}
+
+
+	/**
+	 * DependencyDescriptor variant with a pre-resolved target bean name.
+	 */
+	@SuppressWarnings("serial")
+	private static class ShortcutDependencyDescriptor extends DependencyDescriptor {
+
+		private final String shortcut;
+
+		private final Class<?> requiredType;
+
+		public ShortcutDependencyDescriptor(DependencyDescriptor original, String shortcut, Class<?> requiredType) {
+			super(original);
+			this.shortcut = shortcut;
+			this.requiredType = requiredType;
+		}
+
+		@Override
+		public Object resolveShortcut(BeanFactory beanFactory) {
+			return resolveCandidate(this.shortcut, this.requiredType, beanFactory);
 		}
 	}
 

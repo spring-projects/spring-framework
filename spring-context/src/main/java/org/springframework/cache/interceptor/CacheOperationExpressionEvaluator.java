@@ -61,14 +61,14 @@ class CacheOperationExpressionEvaluator extends CachedExpressionEvaluator {
 	public static final String RESULT_VARIABLE = "result";
 
 
-	private final Map<ExpressionKey, Expression> keyCache = new ConcurrentHashMap<ExpressionKey, Expression>(64);
+	private final Map<ExpressionKey, Expression> keyCache = new ConcurrentHashMap<>(64);
 
-	private final Map<ExpressionKey, Expression> conditionCache = new ConcurrentHashMap<ExpressionKey, Expression>(64);
+	private final Map<ExpressionKey, Expression> conditionCache = new ConcurrentHashMap<>(64);
 
-	private final Map<ExpressionKey, Expression> unlessCache = new ConcurrentHashMap<ExpressionKey, Expression>(64);
+	private final Map<ExpressionKey, Expression> unlessCache = new ConcurrentHashMap<>(64);
 
 	private final Map<AnnotatedElementKey, Method> targetMethodCache =
-			new ConcurrentHashMap<AnnotatedElementKey, Method>(64);
+			new ConcurrentHashMap<>(64);
 
 
 	/**

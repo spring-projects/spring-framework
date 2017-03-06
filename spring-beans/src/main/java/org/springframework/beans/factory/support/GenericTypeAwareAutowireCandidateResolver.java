@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,21 +74,31 @@ public class GenericTypeAwareAutowireCandidateResolver implements AutowireCandid
 			// No generic type -> we know it's a Class type-match, so no need to check again.
 			return true;
 		}
+
 		ResolvableType targetType = null;
+		boolean cacheType = false;
 		RootBeanDefinition rbd = null;
 		if (bdHolder.getBeanDefinition() instanceof RootBeanDefinition) {
 			rbd = (RootBeanDefinition) bdHolder.getBeanDefinition();
 		}
 		if (rbd != null) {
-			// First, check factory method return type, if applicable
-			targetType = getReturnTypeForFactoryMethod(rbd, descriptor);
+			targetType = rbd.targetType;
 			if (targetType == null) {
-				RootBeanDefinition dbd = getResolvedDecoratedDefinition(rbd);
-				if (dbd != null) {
-					targetType = getReturnTypeForFactoryMethod(dbd, descriptor);
+				cacheType = true;
+				// First, check factory method return type, if applicable
+				targetType = getReturnTypeForFactoryMethod(rbd, descriptor);
+				if (targetType == null) {
+					RootBeanDefinition dbd = getResolvedDecoratedDefinition(rbd);
+					if (dbd != null) {
+						targetType = dbd.targetType;
+						if (targetType == null) {
+							targetType = getReturnTypeForFactoryMethod(dbd, descriptor);
+						}
+					}
 				}
 			}
 		}
+
 		if (targetType == null) {
 			// Regular case: straight bean instance, with BeanFactory available.
 			if (this.beanFactory != null) {
@@ -106,7 +116,14 @@ public class GenericTypeAwareAutowireCandidateResolver implements AutowireCandid
 				}
 			}
 		}
-		if (targetType == null || (descriptor.fallbackMatchAllowed() && targetType.hasUnresolvableGenerics())) {
+
+		if (targetType == null) {
+			return true;
+		}
+		if (cacheType) {
+			rbd.targetType = targetType;
+		}
+		if (descriptor.fallbackMatchAllowed() && targetType.hasUnresolvableGenerics()) {
 			return true;
 		}
 		// Full check for complex generic type match...
@@ -130,22 +147,23 @@ public class GenericTypeAwareAutowireCandidateResolver implements AutowireCandid
 	protected ResolvableType getReturnTypeForFactoryMethod(RootBeanDefinition rbd, DependencyDescriptor descriptor) {
 		// Should typically be set for any kind of factory method, since the BeanFactory
 		// pre-resolves them before reaching out to the AutowireCandidateResolver...
-		Class<?> preResolved = rbd.resolvedFactoryMethodReturnType;
-		if (preResolved != null) {
-			return ResolvableType.forClass(preResolved);
-		}
-		else {
-			Method resolvedFactoryMethod = rbd.getResolvedFactoryMethod();
-			if (resolvedFactoryMethod != null) {
-				if (descriptor.getDependencyType().isAssignableFrom(resolvedFactoryMethod.getReturnType())) {
-					// Only use factory method metadata if the return type is actually expressive enough
-					// for our dependency. Otherwise, the returned instance type may have matched instead
-					// in case of a singleton instance having been registered with the container already.
-					return ResolvableType.forMethodReturnType(resolvedFactoryMethod);
-				}
+		ResolvableType returnType = rbd.factoryMethodReturnType;
+		if (returnType == null) {
+			Method factoryMethod = rbd.getResolvedFactoryMethod();
+			if (factoryMethod != null) {
+				returnType = ResolvableType.forMethodReturnType(factoryMethod);
 			}
-			return null;
 		}
+		if (returnType != null) {
+			Class<?> resolvedClass = returnType.resolve();
+			if (resolvedClass != null && descriptor.getDependencyType().isAssignableFrom(resolvedClass)) {
+				// Only use factory method metadata if the return type is actually expressive enough
+				// for our dependency. Otherwise, the returned instance type may have matched instead
+				// in case of a singleton instance having been registered with the container already.
+				return returnType;
+			}
+		}
+		return null;
 	}
 
 

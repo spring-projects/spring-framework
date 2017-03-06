@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.http.converter.json;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,8 +42,6 @@ import static org.junit.Assert.*;
  * @author Roy Clarkson
  */
 public class GsonHttpMessageConverterTests {
-
-	private static final Charset UTF8 = Charset.forName("UTF-8");
 
 	private GsonHttpMessageConverter converter = new GsonHttpMessageConverter();
 
@@ -94,7 +93,7 @@ public class GsonHttpMessageConverterTests {
 		assertEquals(42, n.longValue());
 		n = (Number) result.get("fraction");
 		assertEquals(42D, n.doubleValue(), 0D);
-		List<String> array = new ArrayList<String>();
+		List<String> array = new ArrayList<>();
 		array.add("Foo");
 		array.add("Bar");
 		assertEquals(array, result.get("array"));
@@ -118,7 +117,7 @@ public class GsonHttpMessageConverterTests {
 		body.setBool(true);
 		body.setBytes(new byte[]{0x1, 0x2});
 		this.converter.write(body, null, outputMessage);
-		Charset utf8 = Charset.forName("UTF-8");
+		Charset utf8 = StandardCharsets.UTF_8;
 		String result = outputMessage.getBodyAsString(utf8);
 		assertTrue(result.contains("\"string\":\"Foo\""));
 		assertTrue(result.contains("\"number\":42"));
@@ -132,12 +131,11 @@ public class GsonHttpMessageConverterTests {
 
 	@Test
 	public void writeUTF16() throws IOException {
-		Charset utf16 = Charset.forName("UTF-16BE");
-		MediaType contentType = new MediaType("application", "json", utf16);
+		MediaType contentType = new MediaType("application", "json", StandardCharsets.UTF_16BE);
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		String body = "H\u00e9llo W\u00f6rld";
 		this.converter.write(body, contentType, outputMessage);
-		assertEquals("Invalid result", "\"" + body + "\"", outputMessage.getBodyAsString(utf16));
+		assertEquals("Invalid result", "\"" + body + "\"", outputMessage.getBodyAsString(StandardCharsets.UTF_16BE));
 		assertEquals("Invalid content-type", contentType, outputMessage.getHeaders().getContentType());
 	}
 
@@ -166,8 +164,7 @@ public class GsonHttpMessageConverterTests {
 		};
 		String body = "[{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}]";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(
-				body.getBytes(UTF8));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 
 		List<MyBean> results = (List<MyBean>) converter.read(List.class, inputMessage);
@@ -189,8 +186,7 @@ public class GsonHttpMessageConverterTests {
 
 		String body = "[{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}]";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(
-				body.getBytes(UTF8));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 
 		GsonHttpMessageConverter converter = new GsonHttpMessageConverter();
@@ -210,7 +206,7 @@ public class GsonHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.setPrefixJson(true);
 		this.converter.writeInternal("foo", null, outputMessage);
-		assertEquals(")]}', \"foo\"", outputMessage.getBodyAsString(UTF8));
+		assertEquals(")]}', \"foo\"", outputMessage.getBodyAsString(StandardCharsets.UTF_8));
 	}
 
 	@Test
@@ -218,7 +214,7 @@ public class GsonHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.setJsonPrefix(")))");
 		this.converter.writeInternal("foo", null, outputMessage);
-		assertEquals(")))\"foo\"", outputMessage.getBodyAsString(UTF8));
+		assertEquals(")))\"foo\"", outputMessage.getBodyAsString(StandardCharsets.UTF_8));
 	}
 
 

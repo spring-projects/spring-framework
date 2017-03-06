@@ -84,13 +84,13 @@ public class SubProtocolWebSocketHandler
 	private final SubscribableChannel clientOutboundChannel;
 
 	private final Map<String, SubProtocolHandler> protocolHandlerLookup =
-			new TreeMap<String, SubProtocolHandler>(String.CASE_INSENSITIVE_ORDER);
+			new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
-	private final Set<SubProtocolHandler> protocolHandlers = new LinkedHashSet<SubProtocolHandler>();
+	private final Set<SubProtocolHandler> protocolHandlers = new LinkedHashSet<>();
 
 	private SubProtocolHandler defaultProtocolHandler;
 
-	private final Map<String, WebSocketSessionHolder> sessions = new ConcurrentHashMap<String, WebSocketSessionHolder>();
+	private final Map<String, WebSocketSessionHolder> sessions = new ConcurrentHashMap<>();
 
 	private int sendTimeLimit = 10 * 1000;
 
@@ -134,7 +134,7 @@ public class SubProtocolWebSocketHandler
 	}
 
 	public List<SubProtocolHandler> getProtocolHandlers() {
-		return new ArrayList<SubProtocolHandler>(this.protocolHandlers);
+		return new ArrayList<>(this.protocolHandlers);
 	}
 
 	/**
@@ -188,7 +188,7 @@ public class SubProtocolWebSocketHandler
 	 * Return all supported protocols.
 	 */
 	public List<String> getSubProtocols() {
-		return new ArrayList<String>(this.protocolHandlerLookup.keySet());
+		return new ArrayList<>(this.protocolHandlerLookup.keySet());
 	}
 
 	/**

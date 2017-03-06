@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ class RecursiveAnnotationArrayVisitor extends AbstractRecursiveAnnotationVisitor
 
 	private final String attributeName;
 
-	private final List<AnnotationAttributes> allNestedAttributes = new ArrayList<AnnotationAttributes>();
+	private final List<AnnotationAttributes> allNestedAttributes = new ArrayList<>();
 
 
 	public RecursiveAnnotationArrayVisitor(
@@ -69,7 +69,7 @@ class RecursiveAnnotationArrayVisitor extends AbstractRecursiveAnnotationVisitor
 	@Override
 	public AnnotationVisitor visitAnnotation(String attributeName, String asmTypeDescriptor) {
 		String annotationType = Type.getType(asmTypeDescriptor).getClassName();
-		AnnotationAttributes nestedAttributes = new AnnotationAttributes();
+		AnnotationAttributes nestedAttributes = new AnnotationAttributes(annotationType, this.classLoader);
 		this.allNestedAttributes.add(nestedAttributes);
 		return new RecursiveAnnotationAttributesVisitor(annotationType, nestedAttributes, this.classLoader);
 	}

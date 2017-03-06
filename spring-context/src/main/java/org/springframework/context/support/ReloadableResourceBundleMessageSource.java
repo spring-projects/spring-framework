@@ -101,15 +101,15 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 
 	/** Cache to hold filename lists per Locale */
 	private final ConcurrentMap<String, Map<Locale, List<String>>> cachedFilenames =
-			new ConcurrentHashMap<String, Map<Locale, List<String>>>();
+			new ConcurrentHashMap<>();
 
 	/** Cache to hold already loaded properties per filename */
 	private final ConcurrentMap<String, PropertiesHolder> cachedProperties =
-			new ConcurrentHashMap<String, PropertiesHolder>();
+			new ConcurrentHashMap<>();
 
 	/** Cache to hold merged loaded properties per locale */
 	private final ConcurrentMap<Locale, PropertiesHolder> cachedMergedProperties =
-			new ConcurrentHashMap<Locale, PropertiesHolder>();
+			new ConcurrentHashMap<>();
 
 
 	/**
@@ -237,7 +237,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 			return mergedHolder;
 		}
 		Properties mergedProps = newProperties();
-		mergedHolder = new PropertiesHolder(mergedProps, -1);
+		long latestTimestamp = -1;
 		String[] basenames = StringUtils.toStringArray(getBasenameSet());
 		for (int i = basenames.length - 1; i >= 0; i--) {
 			List<String> filenames = calculateAllFilenames(basenames[i], locale);
@@ -246,9 +246,13 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 				PropertiesHolder propHolder = getProperties(filename);
 				if (propHolder.getProperties() != null) {
 					mergedProps.putAll(propHolder.getProperties());
+					if (propHolder.getFileTimestamp() > latestTimestamp) {
+						latestTimestamp = propHolder.getFileTimestamp();
+					}
 				}
 			}
 		}
+		mergedHolder = new PropertiesHolder(mergedProps, latestTimestamp);
 		PropertiesHolder existing = this.cachedMergedProperties.putIfAbsent(locale, mergedHolder);
 		if (existing != null) {
 			mergedHolder = existing;
@@ -274,7 +278,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 				return filenames;
 			}
 		}
-		List<String> filenames = new ArrayList<String>(7);
+		List<String> filenames = new ArrayList<>(7);
 		filenames.addAll(calculateFilenamesForLocale(basename, locale));
 		if (isFallbackToSystemLocale() && !locale.equals(Locale.getDefault())) {
 			List<String> fallbackFilenames = calculateFilenamesForLocale(basename, Locale.getDefault());
@@ -287,7 +291,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 		}
 		filenames.add(basename);
 		if (localeMap == null) {
-			localeMap = new ConcurrentHashMap<Locale, List<String>>();
+			localeMap = new ConcurrentHashMap<>();
 			Map<Locale, List<String>> existing = this.cachedFilenames.putIfAbsent(basename, localeMap);
 			if (existing != null) {
 				localeMap = existing;
@@ -308,7 +312,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * @return the List of filenames to check
 	 */
 	protected List<String> calculateFilenamesForLocale(String basename, Locale locale) {
-		List<String> result = new ArrayList<String>(3);
+		List<String> result = new ArrayList<>(3);
 		String language = locale.getLanguage();
 		String country = locale.getCountry();
 		String variant = locale.getVariant();
@@ -553,7 +557,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 
 		/** Cache to hold already generated MessageFormats per message code */
 		private final ConcurrentMap<String, Map<Locale, MessageFormat>> cachedMessageFormats =
-				new ConcurrentHashMap<String, Map<Locale, MessageFormat>>();
+				new ConcurrentHashMap<>();
 
 		public PropertiesHolder() {
 			this.properties = null;
@@ -602,7 +606,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 			String msg = this.properties.getProperty(code);
 			if (msg != null) {
 				if (localeMap == null) {
-					localeMap = new ConcurrentHashMap<Locale, MessageFormat>();
+					localeMap = new ConcurrentHashMap<>();
 					Map<Locale, MessageFormat> existing = this.cachedMessageFormats.putIfAbsent(code, localeMap);
 					if (existing != null) {
 						localeMap = existing;

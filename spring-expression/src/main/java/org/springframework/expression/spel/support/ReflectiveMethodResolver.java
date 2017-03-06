@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 
 	public void registerMethodFilter(Class<?> type, MethodFilter filter) {
 		if (this.filters == null) {
-			this.filters = new HashMap<Class<?>, MethodFilter>();
+			this.filters = new HashMap<>();
 		}
 		if (filter != null) {
 			this.filters.put(type, filter);
@@ -109,13 +109,13 @@ public class ReflectiveMethodResolver implements MethodResolver {
 		try {
 			TypeConverter typeConverter = context.getTypeConverter();
 			Class<?> type = (targetObject instanceof Class ? (Class<?>) targetObject : targetObject.getClass());
-			List<Method> methods = new ArrayList<Method>(getMethods(type, targetObject));
+			List<Method> methods = new ArrayList<>(getMethods(type, targetObject));
 
 			// If a filter is registered for this type, call it
 			MethodFilter filter = (this.filters != null ? this.filters.get(type) : null);
 			if (filter != null) {
 				List<Method> filtered = filter.filter(methods);
-				methods = (filtered instanceof ArrayList ? filtered : new ArrayList<Method>(filtered));
+				methods = (filtered instanceof ArrayList ? filtered : new ArrayList<>(filtered));
 			}
 
 			// Sort methods into a sensible order
@@ -123,8 +123,8 @@ public class ReflectiveMethodResolver implements MethodResolver {
 				Collections.sort(methods, new Comparator<Method>() {
 					@Override
 					public int compare(Method m1, Method m2) {
-						int m1pl = m1.getParameterTypes().length;
-						int m2pl = m2.getParameterTypes().length;
+						int m1pl = m1.getParameterCount();
+						int m2pl = m2.getParameterCount();
 						// varargs methods go last
 						if (m1pl == m2pl) {
 						    if (!m1.isVarArgs() && m2.isVarArgs()) {
@@ -148,7 +148,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			}
 
 			// Remove duplicate methods (possible due to resolved bridge methods)
-			Set<Method> methodsToIterate = new LinkedHashSet<Method>(methods);
+			Set<Method> methodsToIterate = new LinkedHashSet<>(methods);
 
 			Method closeMatch = null;
 			int closeMatchDistance = Integer.MAX_VALUE;
@@ -158,7 +158,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			for (Method method : methodsToIterate) {
 				if (method.getName().equals(name)) {
 					Class<?>[] paramTypes = method.getParameterTypes();
-					List<TypeDescriptor> paramDescriptors = new ArrayList<TypeDescriptor>(paramTypes.length);
+					List<TypeDescriptor> paramDescriptors = new ArrayList<>(paramTypes.length);
 					for (int i = 0; i < paramTypes.length; i++) {
 						paramDescriptors.add(new TypeDescriptor(new MethodParameter(method, i)));
 					}
@@ -220,7 +220,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 
 	private Collection<Method> getMethods(Class<?> type, Object targetObject) {
 		if (targetObject instanceof Class) {
-			Set<Method> result = new LinkedHashSet<Method>();
+			Set<Method> result = new LinkedHashSet<>();
 			// Add these so that static methods are invocable on the type: e.g. Float.valueOf(..)
 			Method[] methods = getMethods(type);
 			for (Method method : methods) {

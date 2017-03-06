@@ -56,6 +56,26 @@ public class CronSequenceGeneratorTests {
 		new CronSequenceGenerator("*/-1 * * * * *").next(new Date(2012, 6, 1, 9, 0));
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void withInvertedMinuteRange() {
+		new CronSequenceGenerator("* 6-5 * * * *").next(new Date(2012, 6, 1, 9, 0));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void withInvertedHourRange() {
+		new CronSequenceGenerator("* * 6-5 * * *").next(new Date(2012, 6, 1, 9, 0));
+	}
+
+	@Test
+	public void withSameMinuteRange() {
+		new CronSequenceGenerator("* 6-6 * * * *").next(new Date(2012, 6, 1, 9, 0));
+	}
+
+	@Test
+	public void withSameHourRange() {
+		new CronSequenceGenerator("* * 6-6 * * *").next(new Date(2012, 6, 1, 9, 0));
+	}
+
 	@Test
 	public void validExpression() {
 		assertTrue(CronSequenceGenerator.isValidExpression("0 */2 1-4 * * *"));

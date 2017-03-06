@@ -49,12 +49,12 @@ public class MockFilterChainTests {
 		this.response = new MockHttpServletResponse();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void constructorNullServlet() {
 		new MockFilterChain((Servlet) null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void constructorNullFilter() {
 		new MockFilterChain(mock(Servlet.class), (Filter) null);
 	}

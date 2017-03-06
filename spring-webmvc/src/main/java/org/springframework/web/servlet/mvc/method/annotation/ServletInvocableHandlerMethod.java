@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ import org.springframework.web.util.NestedServletException;
  * a method argument that provides access to the response stream.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
@@ -81,6 +82,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		initResponseStatus();
 	}
 
+
 	private void initResponseStatus() {
 		ResponseStatus annotation = getMethodAnnotation(ResponseStatus.class);
 		if (annotation == null) {
@@ -92,7 +94,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		}
 	}
 
-
 	/**
 	 * Register {@link HandlerMethodReturnValueHandler} instances to use to
 	 * handle return values.
@@ -101,15 +102,16 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		this.returnValueHandlers = returnValueHandlers;
 	}
 
+
 	/**
-	 * Invokes the method and handles the return value through one of the
+	 * Invoke the method and handle the return value through one of the
 	 * configured {@link HandlerMethodReturnValueHandler}s.
 	 * @param webRequest the current request
 	 * @param mavContainer the ModelAndViewContainer for this request
 	 * @param providedArgs "given" arguments matched by type (not resolved)
 	 */
-	public void invokeAndHandle(ServletWebRequest webRequest,
-			ModelAndViewContainer mavContainer, Object... providedArgs) throws Exception {
+	public void invokeAndHandle(ServletWebRequest webRequest, ModelAndViewContainer mavContainer,
+			Object... providedArgs) throws Exception {
 
 		Object returnValue = invokeForRequest(webRequest, mavContainer, providedArgs);
 		setResponseStatus(webRequest);
@@ -151,7 +153,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		else {
 			webRequest.getResponse().setStatus(this.responseStatus.value());
 		}
-		// to be picked up by the RedirectView
+		// To be picked up by RedirectView
 		webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, this.responseStatus);
 	}
 
@@ -214,6 +216,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 					return result;
 				}
 			}, CALLABLE_METHOD);
+
 			setHandlerMethodReturnValueHandlers(ServletInvocableHandlerMethod.this.returnValueHandlers);
 			this.returnType = returnType;
 		}
@@ -281,16 +284,10 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 			if (this.returnValue != null) {
 				return this.returnValue.getClass();
 			}
-			Class<?> parameterType = super.getParameterType();
-			if (ResponseBodyEmitter.class.isAssignableFrom(parameterType) ||
-					StreamingResponseBody.class.isAssignableFrom(parameterType)) {
-				return parameterType;
+			if (!ResolvableType.NONE.equals(this.returnType)) {
+				return this.returnType.resolve();
 			}
-			if (ResolvableType.NONE.equals(this.returnType)) {
-				throw new IllegalArgumentException("Expected one of Callable, DeferredResult, or ListenableFuture: " +
-						super.getParameterType());
-			}
-			return this.returnType.getRawClass();
+			return super.getParameterType();
 		}
 
 		@Override

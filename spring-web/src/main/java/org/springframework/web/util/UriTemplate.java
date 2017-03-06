@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,13 +44,13 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class UriTemplate implements Serializable {
 
+	private final String uriTemplate;
+
 	private final UriComponents uriComponents;
 
 	private final List<String> variableNames;
 
 	private final Pattern matchPattern;
-
-	private final String uriTemplate;
 
 
 	/**
@@ -146,7 +146,7 @@ public class UriTemplate implements Serializable {
 	 */
 	public Map<String, String> match(String uri) {
 		Assert.notNull(uri, "'uri' must not be null");
-		Map<String, String> result = new LinkedHashMap<String, String>(this.variableNames.size());
+		Map<String, String> result = new LinkedHashMap<>(this.variableNames.size());
 		Matcher matcher = this.matchPattern.matcher(uri);
 		if (matcher.find()) {
 			for (int i = 1; i <= matcher.groupCount(); i++) {
@@ -173,7 +173,6 @@ public class UriTemplate implements Serializable {
 
 		private final Pattern pattern;
 
-
 		private TemplateInfo(List<String> vars, Pattern pattern) {
 			this.variableNames = vars;
 			this.pattern = pattern;
@@ -187,9 +186,9 @@ public class UriTemplate implements Serializable {
 			return this.pattern;
 		}
 
-		private static TemplateInfo parse(String uriTemplate) {
+		public static TemplateInfo parse(String uriTemplate) {
 			int level = 0;
-			List<String> variableNames = new ArrayList<String>();
+			List<String> variableNames = new ArrayList<>();
 			StringBuilder pattern = new StringBuilder();
 			StringBuilder builder = new StringBuilder();
 			for (int i = 0 ; i < uriTemplate.length(); i++) {
@@ -216,8 +215,7 @@ public class UriTemplate implements Serializable {
 						else {
 							if (idx + 1 == variable.length()) {
 								throw new IllegalArgumentException(
-										"No custom regular expression specified after ':' " +
-												"in \"" + variable + "\"");
+										"No custom regular expression specified after ':' in \"" + variable + "\"");
 							}
 							String regex = variable.substring(idx + 1, variable.length());
 							pattern.append('(');
@@ -238,7 +236,7 @@ public class UriTemplate implements Serializable {
 		}
 
 		private static String quote(StringBuilder builder) {
-			return builder.length() != 0 ? Pattern.quote(builder.toString()) : "";
+			return (builder.length() > 0 ? Pattern.quote(builder.toString()) : "");
 		}
 	}
 

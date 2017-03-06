@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,15 +33,16 @@ import org.springframework.util.ClassUtils;
  * {@link ExceptionDepthComparator} and the top match is returned.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public abstract class AbstractExceptionHandlerMethodResolver {
 
 	private static final Method NO_METHOD_FOUND = ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis");
 
-	private final Map<Class<? extends Throwable>, Method> mappedMethods = new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
+	private final Map<Class<? extends Throwable>, Method> mappedMethods = new ConcurrentHashMap<>(16);
 
-	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache = new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
+	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache = new ConcurrentHashMap<>(16);
 
 
 	/**
@@ -59,7 +60,7 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 	 */
 	@SuppressWarnings("unchecked")
 	protected static List<Class<? extends Throwable>> getExceptionsFromMethodSignature(Method method) {
-		List<Class<? extends Throwable>> result = new ArrayList<Class<? extends Throwable>>();
+		List<Class<? extends Throwable>> result = new ArrayList<>();
 		for (Class<?> paramType : method.getParameterTypes()) {
 			if (Throwable.class.isAssignableFrom(paramType)) {
 				result.add((Class<? extends Throwable>) paramType);
@@ -69,6 +70,7 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 		return result;
 	}
 
+
 	/**
 	 * Whether the contained type has any exception mappings.
 	 */
@@ -77,13 +79,30 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 	}
 
 	/**
-	 * Find a method to handle the given exception.
-	 * Use {@link org.springframework.core.ExceptionDepthComparator} if more than one match is found.
+	 * Find a {@link Method} to handle the given exception.
+	 * Use {@link ExceptionDepthComparator} if more than one match is found.
 	 * @param exception the exception
-	 * @return a method to handle the exception or {@code null}
+	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
 	public Method resolveMethod(Exception exception) {
-		Class<? extends Exception> exceptionType = exception.getClass();
+		Method method = resolveMethodByExceptionType(exception.getClass());
+		if (method == null) {
+			Throwable cause = exception.getCause();
+			if (cause != null) {
+				method = resolveMethodByExceptionType(cause.getClass());
+			}
+		}
+		return method;
+	}
+
+	/**
+	 * Find a {@link Method} to handle the given exception type. This can be
+	 * useful if an {@link Exception} instance is not available (e.g. for tools).
+	 * @param exceptionType the exception type
+	 * @return a Method to handle the exception, or {@code null} if none found
+	 * @since 4.3.1
+	 */
+	public Method resolveMethodByExceptionType(Class<? extends Throwable> exceptionType) {
 		Method method = this.exceptionLookupCache.get(exceptionType);
 		if (method == null) {
 			method = getMappedMethod(exceptionType);
@@ -93,10 +112,10 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 	}
 
 	/**
-	 * Return the method mapped to the given exception type or {@code null}.
+	 * Return the {@link Method} mapped to the given exception type, or {@code null} if none.
 	 */
-	private Method getMappedMethod(Class<? extends Exception> exceptionType) {
-		List<Class<? extends Throwable>> matches = new ArrayList<Class<? extends Throwable>>();
+	private Method getMappedMethod(Class<? extends Throwable> exceptionType) {
+		List<Class<? extends Throwable>> matches = new ArrayList<>();
 		for (Class<? extends Throwable> mappedException : this.mappedMethods.keySet()) {
 			if (mappedException.isAssignableFrom(exceptionType)) {
 				matches.add(mappedException);

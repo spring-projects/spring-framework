@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import javax.inject.Provider;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
@@ -31,9 +34,7 @@ import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,72 +63,66 @@ import org.springframework.tests.sample.beans.TestBean;
 import static org.junit.Assert.*;
 
 /**
- * Miscellaneous system tests covering {@link Bean} naming, aliases, scoping and error
- * handling within {@link Configuration} class definitions.
+ * Miscellaneous system tests covering {@link Bean} naming, aliases, scoping and
+ * error handling within {@link Configuration} class definitions.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class ConfigurationClassProcessingTests {
 
-	/**
-	 * Creates a new {@link BeanFactory}, populates it with a {@link BeanDefinition} for
-	 * each of the given {@link Configuration} <var>configClasses</var>, and then
-	 * post-processes the factory using JavaConfig's {@link ConfigurationClassPostProcessor}.
-	 * When complete, the factory is ready to service requests for any {@link Bean} methods
-	 * declared by <var>configClasses</var>.
-	 */
-	private DefaultListableBeanFactory initBeanFactory(Class<?>... configClasses) {
-		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-		for (Class<?> configClass : configClasses) {
-			String configBeanName = configClass.getName();
-			factory.registerBeanDefinition(configBeanName, new RootBeanDefinition(configClass));
-		}
-		ConfigurationClassPostProcessor ccpp = new ConfigurationClassPostProcessor();
-		ccpp.postProcessBeanDefinitionRegistry(factory);
-		ccpp.postProcessBeanFactory(factory);
-		RequiredAnnotationBeanPostProcessor rapp = new RequiredAnnotationBeanPostProcessor();
-		rapp.setBeanFactory(factory);
-		factory.addBeanPostProcessor(rapp);
-		factory.freezeConfiguration();
-		return factory;
-	}
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
 
 
 	@Test
-	public void customBeanNameIsRespected() {
+	public void customBeanNameIsRespectedWhenConfiguredViaNameAttribute() {
+		customBeanNameIsRespected(ConfigWithBeanWithCustomName.class,
+				() -> ConfigWithBeanWithCustomName.testBean, "customName");
+	}
+
+	@Test
+	public void customBeanNameIsRespectedWhenConfiguredViaValueAttribute() {
+		customBeanNameIsRespected(ConfigWithBeanWithCustomNameConfiguredViaValueAttribute.class,
+				() -> ConfigWithBeanWithCustomNameConfiguredViaValueAttribute.testBean, "enigma");
+	}
+
+	private void customBeanNameIsRespected(Class<?> testClass, Supplier<TestBean> testBeanSupplier, String beanName) {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
-		ac.registerBeanDefinition("config", new RootBeanDefinition(ConfigWithBeanWithCustomName.class));
+		ac.registerBeanDefinition("config", new RootBeanDefinition(testClass));
 		ac.refresh();
-		assertSame(ac.getBean("customName"), ConfigWithBeanWithCustomName.testBean);
+
+		assertSame(testBeanSupplier.get(), ac.getBean(beanName));
 
 		// method name should not be registered
-		try {
-			ac.getBean("methodName");
-			fail("bean should not have been registered with 'methodName'");
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// expected
-		}
+		exception.expect(NoSuchBeanDefinitionException.class);
+		ac.getBean("methodName");
 	}
 
 	@Test
-	public void aliasesAreRespected() {
-		BeanFactory factory = initBeanFactory(ConfigWithBeanWithAliases.class);
-		assertSame(factory.getBean("name1"), ConfigWithBeanWithAliases.testBean);
-		String[] aliases = factory.getAliases("name1");
-		for (String alias : aliases)
-			assertSame(factory.getBean(alias), ConfigWithBeanWithAliases.testBean);
+	public void aliasesAreRespectedWhenConfiguredViaNameAttribute() {
+		aliasesAreRespected(ConfigWithBeanWithAliases.class,
+				() -> ConfigWithBeanWithAliases.testBean, "name1");
+	}
+
+	@Test
+	public void aliasesAreRespectedWhenConfiguredViaValueAttribute() {
+		aliasesAreRespected(ConfigWithBeanWithAliasesConfiguredViaValueAttribute.class,
+				() -> ConfigWithBeanWithAliasesConfiguredViaValueAttribute.testBean, "enigma");
+	}
+
+	private void aliasesAreRespected(Class<?> testClass, Supplier<TestBean> testBeanSupplier, String beanName) {
+		TestBean testBean = testBeanSupplier.get();
+		BeanFactory factory = initBeanFactory(testClass);
+
+		assertSame(testBean, factory.getBean(beanName));
+		Arrays.stream(factory.getAliases(beanName)).map(factory::getBean).forEach(alias -> assertSame(testBean, alias));
 
 		// method name should not be registered
-		try {
-			factory.getBean("methodName");
-			fail("bean should not have been registered with 'methodName'");
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// expected
-		}
+		exception.expect(NoSuchBeanDefinitionException.class);
+		factory.getBean("methodName");
 	}
 
 	@Test  // SPR-11830
@@ -148,8 +143,9 @@ public class ConfigurationClassProcessingTests {
 		assertSame(ac.getBean("customName"), ConfigWithSetWithProviderImplementation.set);
 	}
 
-	@Test(expected=BeanDefinitionParsingException.class)
+	@Test
 	public void testFinalBeanMethod() {
+		exception.expect(BeanDefinitionParsingException.class);
 		initBeanFactory(ConfigWithFinalBean.class);
 	}
 
@@ -210,16 +206,18 @@ public class ConfigurationClassProcessingTests {
 
 	@Test
 	public void configurationWithAdaptivePrototypes() {
-		DefaultListableBeanFactory factory =
-				initBeanFactory(ConfigWithPrototypeBean.class, AdaptiveInjectionPoints.class);
-		AutowiredAnnotationBeanPostProcessor aabpp = new AutowiredAnnotationBeanPostProcessor();
-		aabpp.setBeanFactory(factory);
-		factory.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
-		factory.addBeanPostProcessor(aabpp);
+		AnnotationConfigApplicationContext factory = new AnnotationConfigApplicationContext();
+		factory.register(ConfigWithPrototypeBean.class, AdaptiveInjectionPoints.class);
+		factory.refresh();
 
 		AdaptiveInjectionPoints adaptive = factory.getBean(AdaptiveInjectionPoints.class);
 		assertEquals("adaptiveInjectionPoint1", adaptive.adaptiveInjectionPoint1.getName());
-		assertEquals("adaptiveInjectionPoint2", adaptive.adaptiveInjectionPoint2.getName());
+		assertEquals("setAdaptiveInjectionPoint2", adaptive.adaptiveInjectionPoint2.getName());
+
+		adaptive = factory.getBean(AdaptiveInjectionPoints.class);
+		assertEquals("adaptiveInjectionPoint1", adaptive.adaptiveInjectionPoint1.getName());
+		assertEquals("setAdaptiveInjectionPoint2", adaptive.adaptiveInjectionPoint2.getName());
+		factory.close();
 	}
 
 	@Test
@@ -241,15 +239,52 @@ public class ConfigurationClassProcessingTests {
 
 		SpousyTestBean listener = factory.getBean("listenerTestBean", SpousyTestBean.class);
 		assertTrue(listener.refreshed);
+		factory.close();
+	}
+
+
+	/**
+	 * Creates a new {@link BeanFactory}, populates it with a {@link BeanDefinition}
+	 * for each of the given {@link Configuration} {@code configClasses}, and then
+	 * post-processes the factory using JavaConfig's {@link ConfigurationClassPostProcessor}.
+	 * When complete, the factory is ready to service requests for any {@link Bean} methods
+	 * declared by {@code configClasses}.
+	 */
+	private DefaultListableBeanFactory initBeanFactory(Class<?>... configClasses) {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		for (Class<?> configClass : configClasses) {
+			String configBeanName = configClass.getName();
+			factory.registerBeanDefinition(configBeanName, new RootBeanDefinition(configClass));
+		}
+		ConfigurationClassPostProcessor ccpp = new ConfigurationClassPostProcessor();
+		ccpp.postProcessBeanDefinitionRegistry(factory);
+		ccpp.postProcessBeanFactory(factory);
+		RequiredAnnotationBeanPostProcessor rapp = new RequiredAnnotationBeanPostProcessor();
+		rapp.setBeanFactory(factory);
+		factory.addBeanPostProcessor(rapp);
+		factory.freezeConfiguration();
+		return factory;
 	}
 
 
 	@Configuration
 	static class ConfigWithBeanWithCustomName {
 
-		static TestBean testBean = new TestBean();
+		static TestBean testBean = new TestBean(ConfigWithBeanWithCustomName.class.getSimpleName());
 
-		@Bean(name="customName")
+		@Bean(name = "customName")
+		public TestBean methodName() {
+			return testBean;
+		}
+	}
+
+
+	@Configuration
+	static class ConfigWithBeanWithCustomNameConfiguredViaValueAttribute {
+
+		static TestBean testBean = new TestBean(ConfigWithBeanWithCustomNameConfiguredViaValueAttribute.class.getSimpleName());
+
+		@Bean("enigma")
 		public TestBean methodName() {
 			return testBean;
 		}
@@ -259,9 +294,21 @@ public class ConfigurationClassProcessingTests {
 	@Configuration
 	static class ConfigWithBeanWithAliases {
 
-		static TestBean testBean = new TestBean();
+		static TestBean testBean = new TestBean(ConfigWithBeanWithAliases.class.getSimpleName());
 
-		@Bean(name={"name1", "alias1", "alias2", "alias3"})
+		@Bean(name = { "name1", "alias1", "alias2", "alias3" })
+		public TestBean methodName() {
+			return testBean;
+		}
+	}
+
+
+	@Configuration
+	static class ConfigWithBeanWithAliasesConfiguredViaValueAttribute {
+
+		static TestBean testBean = new TestBean(ConfigWithBeanWithAliasesConfiguredViaValueAttribute.class.getSimpleName());
+
+		@Bean({ "enigma", "alias1", "alias2", "alias3" })
 		public TestBean methodName() {
 			return testBean;
 		}
@@ -271,9 +318,9 @@ public class ConfigurationClassProcessingTests {
 	@Configuration
 	static class ConfigWithBeanWithProviderImplementation implements Provider<TestBean> {
 
-		static TestBean testBean = new TestBean();
+		static TestBean testBean = new TestBean(ConfigWithBeanWithProviderImplementation.class.getSimpleName());
 
-		@Bean(name="customName")
+		@Bean(name = "customName")
 		public TestBean get() {
 			return testBean;
 		}
@@ -285,7 +332,7 @@ public class ConfigurationClassProcessingTests {
 
 		static Set<String> set = Collections.singleton("value");
 
-		@Bean(name="customName")
+		@Bean(name = "customName")
 		public Set<String> get() {
 			return set;
 		}
@@ -357,13 +404,18 @@ public class ConfigurationClassProcessingTests {
 	}
 
 
+	@Scope("prototype")
 	static class AdaptiveInjectionPoints {
 
 		@Autowired @Qualifier("adaptive1")
 		public TestBean adaptiveInjectionPoint1;
 
-		@Autowired @Qualifier("adaptive2")
 		public TestBean adaptiveInjectionPoint2;
+
+		@Autowired @Qualifier("adaptive2")
+		public void setAdaptiveInjectionPoint2(TestBean adaptiveInjectionPoint2) {
+			this.adaptiveInjectionPoint2 = adaptiveInjectionPoint2;
+		}
 	}
 
 
@@ -402,7 +454,7 @@ public class ConfigurationClassProcessingTests {
 			};
 		}
 
-		//@Bean
+		// @Bean
 		public BeanFactoryPostProcessor beanFactoryPostProcessor() {
 			return new BeanFactoryPostProcessor() {
 				@Override

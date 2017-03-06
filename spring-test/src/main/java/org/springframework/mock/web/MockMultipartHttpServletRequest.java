@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +35,10 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  * Mock implementation of the
  * {@link org.springframework.web.multipart.MultipartHttpServletRequest} interface.
  *
- * <p>As of Spring 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
+ * <p>As of Spring 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
  *
  * <p>Useful for testing application controllers that access multipart uploads.
- * The {@link MockMultipartFile} can be used to populate these mock requests
- * with files.
+ * {@link MockMultipartFile} can be used to populate these mock requests with files.
  *
  * @author Juergen Hoeller
  * @author Eric Crampton
@@ -49,8 +48,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  */
 public class MockMultipartHttpServletRequest extends MockHttpServletRequest implements MultipartHttpServletRequest {
 
-	private final MultiValueMap<String, MultipartFile> multipartFiles =
-			new LinkedMultiValueMap<String, MultipartFile>();
+	private final MultiValueMap<String, MultipartFile> multipartFiles = new LinkedMultiValueMap<>();
 
 
 	/**
@@ -112,7 +110,7 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 
 	@Override
 	public MultiValueMap<String, MultipartFile> getMultiFileMap() {
-		return new LinkedMultiValueMap<String, MultipartFile>(this.multipartFiles);
+		return new LinkedMultiValueMap<>(this.multipartFiles);
 	}
 
 	@Override

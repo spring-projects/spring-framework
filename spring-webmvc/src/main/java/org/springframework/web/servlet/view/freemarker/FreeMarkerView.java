@@ -405,7 +405,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 
 		@Override
 		public Enumeration<String> getInitParameterNames() {
-			return Collections.enumeration(Collections.<String>emptySet());
+			return Collections.enumeration(Collections.emptySet());
 		}
 	}
 

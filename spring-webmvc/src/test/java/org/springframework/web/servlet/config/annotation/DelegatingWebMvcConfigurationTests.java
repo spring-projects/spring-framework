@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -89,10 +89,10 @@ public class DelegatingWebMvcConfigurationTests {
 		delegatingConfig = new DelegatingWebMvcConfiguration();
 	}
 
+
 	@Test
 	public void requestMappingHandlerAdapter() throws Exception {
-
-		delegatingConfig.setConfigurers(Arrays.asList(webMvcConfigurer));
+		delegatingConfig.setConfigurers(Collections.singletonList(webMvcConfigurer));
 		RequestMappingHandlerAdapter adapter = delegatingConfig.requestMappingHandlerAdapter();
 
 		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
@@ -117,7 +117,7 @@ public class DelegatingWebMvcConfigurationTests {
 	public void configureMessageConverters() {
 		final HttpMessageConverter customConverter = mock(HttpMessageConverter.class);
 		final StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
-		List<WebMvcConfigurer> configurers = new ArrayList<WebMvcConfigurer>();
+		List<WebMvcConfigurer> configurers = new ArrayList<>();
 		configurers.add(new WebMvcConfigurerAdapter() {
 			@Override
 			public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -141,7 +141,7 @@ public class DelegatingWebMvcConfigurationTests {
 	public void getCustomValidator() {
 		given(webMvcConfigurer.getValidator()).willReturn(new LocalValidatorFactoryBean());
 
-		delegatingConfig.setConfigurers(Arrays.asList(webMvcConfigurer));
+		delegatingConfig.setConfigurers(Collections.singletonList(webMvcConfigurer));
 		delegatingConfig.mvcValidator();
 
 		verify(webMvcConfigurer).getValidator();
@@ -151,7 +151,7 @@ public class DelegatingWebMvcConfigurationTests {
 	public void getCustomMessageCodesResolver() {
 		given(webMvcConfigurer.getMessageCodesResolver()).willReturn(new DefaultMessageCodesResolver());
 
-		delegatingConfig.setConfigurers(Arrays.asList(webMvcConfigurer));
+		delegatingConfig.setConfigurers(Collections.singletonList(webMvcConfigurer));
 		delegatingConfig.getMessageCodesResolver();
 
 		verify(webMvcConfigurer).getMessageCodesResolver();
@@ -159,8 +159,7 @@ public class DelegatingWebMvcConfigurationTests {
 
 	@Test
 	public void handlerExceptionResolver() throws Exception {
-
-		delegatingConfig.setConfigurers(Arrays.asList(webMvcConfigurer));
+		delegatingConfig.setConfigurers(Collections.singletonList(webMvcConfigurer));
 		delegatingConfig.handlerExceptionResolver();
 
 		verify(webMvcConfigurer).configureMessageConverters(converters.capture());
@@ -176,7 +175,7 @@ public class DelegatingWebMvcConfigurationTests {
 
 	@Test
 	public void configureExceptionResolvers() throws Exception {
-		List<WebMvcConfigurer> configurers = new ArrayList<WebMvcConfigurer>();
+		List<WebMvcConfigurer> configurers = new ArrayList<>();
 		configurers.add(new WebMvcConfigurerAdapter() {
 			@Override
 			public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
@@ -186,7 +185,7 @@ public class DelegatingWebMvcConfigurationTests {
 		delegatingConfig.setConfigurers(configurers);
 
 		HandlerExceptionResolverComposite composite =
-			(HandlerExceptionResolverComposite) delegatingConfig.handlerExceptionResolver();
+				(HandlerExceptionResolverComposite) delegatingConfig.handlerExceptionResolver();
 		assertEquals("Only one custom converter is expected", 1, composite.getExceptionResolvers().size());
 	}
 
@@ -195,14 +194,14 @@ public class DelegatingWebMvcConfigurationTests {
 		final PathMatcher pathMatcher = mock(PathMatcher.class);
 		final UrlPathHelper pathHelper = mock(UrlPathHelper.class);
 
-		List<WebMvcConfigurer> configurers = new ArrayList<WebMvcConfigurer>();
+		List<WebMvcConfigurer> configurers = new ArrayList<>();
 		configurers.add(new WebMvcConfigurerAdapter() {
 			@Override
 			public void configurePathMatch(PathMatchConfigurer configurer) {
 				configurer.setUseRegisteredSuffixPatternMatch(true)
-					.setUseTrailingSlashMatch(false)
-					.setUrlPathHelper(pathHelper)
-					.setPathMatcher(pathMatcher);
+						.setUseTrailingSlashMatch(false)
+						.setUrlPathHelper(pathHelper)
+						.setPathMatcher(pathMatcher);
 			}
 		});
 		delegatingConfig.setConfigurers(configurers);

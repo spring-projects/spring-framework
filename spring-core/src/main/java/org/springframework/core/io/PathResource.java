@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
-import org.springframework.lang.UsesJava7;
 import org.springframework.util.Assert;
 
 /**
@@ -41,7 +42,6 @@ import org.springframework.util.Assert;
  * @since 4.0
  * @see java.nio.file.Path
  */
-@UsesJava7
 public class PathResource extends AbstractResource implements WritableResource {
 
 	private final Path path;
@@ -174,6 +174,14 @@ public class PathResource extends AbstractResource implements WritableResource {
 	}
 
 	/**
+	 * This implementation always indicates a file.
+	 */
+	@Override
+	public boolean isFile() {
+		return true;
+	}
+
+	/**
 	 * This implementation returns the underlying File reference.
 	 */
 	@Override
@@ -182,10 +190,19 @@ public class PathResource extends AbstractResource implements WritableResource {
 			return this.path.toFile();
 		}
 		catch (UnsupportedOperationException ex) {
-			// only Paths on the default file system can be converted to a File
-			// do exception translation for cases where conversion is not possible
+			// Only paths on the default file system can be converted to a File:
+			// Do exception translation for cases where conversion is not possible.
 			throw new FileNotFoundException(this.path + " cannot be resolved to " + "absolute file path");
 		}
+	}
+
+	/**
+	 * This implementation opens a InputStream for the underlying file.
+	 * @see java.nio.file.spi.FileSystemProvider#newInputStream(Path, OpenOption...)
+	 */
+	@Override
+	public ReadableByteChannel readableChannel() throws IOException {
+		return Files.newByteChannel(this.path, StandardOpenOption.READ);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.invocation.AbstractExceptionHandlerMethodResolver;
-import org.springframework.util.ReflectionUtils.MethodFilter;
 
 /**
  * A sub-class of {@link AbstractExceptionHandlerMethodResolver} that looks for
@@ -57,10 +56,10 @@ public class AnnotationExceptionHandlerMethodResolver extends AbstractExceptionH
 					}
 				});
 
-		Map<Class<? extends Throwable>, Method> result = new HashMap<Class<? extends Throwable>, Method>();
+		Map<Class<? extends Throwable>, Method> result = new HashMap<>();
 		for (Map.Entry<Method, MessageExceptionHandler> entry : methods.entrySet()) {
 			Method method = entry.getKey();
-			List<Class<? extends Throwable>> exceptionTypes = new ArrayList<Class<? extends Throwable>>();
+			List<Class<? extends Throwable>> exceptionTypes = new ArrayList<>();
 			exceptionTypes.addAll(Arrays.asList(entry.getValue().value()));
 			if (exceptionTypes.isEmpty()) {
 				exceptionTypes.addAll(getExceptionsFromMethodSignature(method));
@@ -75,19 +74,5 @@ public class AnnotationExceptionHandlerMethodResolver extends AbstractExceptionH
 		}
 		return result;
 	}
-
-
-	/**
-	 * A filter for selecting annotated exception handling methods.
-	 * @deprecated as of Spring 4.2.3, since it isn't used anymore
-	 */
-	@Deprecated
-	public final static MethodFilter EXCEPTION_HANDLER_METHOD_FILTER = new MethodFilter() {
-
-		@Override
-		public boolean matches(Method method) {
-			return AnnotationUtils.findAnnotation(method, MessageExceptionHandler.class) != null;
-		}
-	};
 
 }

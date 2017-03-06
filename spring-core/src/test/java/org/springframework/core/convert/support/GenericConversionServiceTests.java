@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,17 +54,15 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for the {@link GenericConversionService}.
+ * Unit tests for {@link GenericConversionService}.
  *
- * <p>For tests involving the {@link DefaultConversionService}, see
- * {@link DefaultConversionServiceTests}.
+ * <p>In this package for access to package-local converter implementations.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Phillip Webb
  * @author David Haraburda
  * @author Sam Brannen
- * @see DefaultConversionServiceTests
  */
 public class GenericConversionServiceTests {
 
@@ -229,7 +227,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testListToIterableConversion() {
-		List<Object> raw = new ArrayList<Object>();
+		List<Object> raw = new ArrayList<>();
 		raw.add("one");
 		raw.add("two");
 		Object converted = conversionService.convert(raw, Iterable.class);
@@ -238,7 +236,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testListToObjectConversion() {
-		List<Object> raw = new ArrayList<Object>();
+		List<Object> raw = new ArrayList<>();
 		raw.add("one");
 		raw.add("two");
 		Object converted = conversionService.convert(raw, Object.class);
@@ -247,7 +245,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testMapToObjectConversion() {
-		Map<Object, Object> raw = new HashMap<Object, Object>();
+		Map<Object, Object> raw = new HashMap<>();
 		raw.put("key", "value");
 		Object converted = conversionService.convert(raw, Object.class);
 		assertSame(raw, converted);
@@ -301,7 +299,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testWildcardMap() throws Exception {
-		Map<String, String> input = new LinkedHashMap<String, String>();
+		Map<String, String> input = new LinkedHashMap<>();
 		input.put("key", "value");
 		Object converted = conversionService.convert(input, TypeDescriptor.forObject(input), new TypeDescriptor(getClass().getField("wildcardMap")));
 		assertEquals(input, converted);
@@ -333,7 +331,7 @@ public class GenericConversionServiceTests {
 		Assume.group(TestGroup.PERFORMANCE);
 		StopWatch watch = new StopWatch("list<string> -> list<integer> conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
-		List<String> source = new LinkedList<String>();
+		List<String> source = new LinkedList<>();
 		source.add("1");
 		source.add("2");
 		source.add("3");
@@ -344,7 +342,7 @@ public class GenericConversionServiceTests {
 		watch.stop();
 		watch.start("convert 4,000,000 manually");
 		for (int i = 0; i < 4000000; i++) {
-			List<Integer> target = new ArrayList<Integer>(source.size());
+			List<Integer> target = new ArrayList<>(source.size());
 			for (String element : source) {
 				target.add(Integer.valueOf(element));
 			}
@@ -358,7 +356,7 @@ public class GenericConversionServiceTests {
 		Assume.group(TestGroup.PERFORMANCE);
 		StopWatch watch = new StopWatch("map<string, string> -> map<string, integer> conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
-		Map<String, String> source = new HashMap<String, String>();
+		Map<String, String> source = new HashMap<>();
 		source.put("1", "1");
 		source.put("2", "2");
 		source.put("3", "3");
@@ -369,7 +367,7 @@ public class GenericConversionServiceTests {
 		watch.stop();
 		watch.start("convert 4,000,000 manually");
 		for (int i = 0; i < 4000000; i++) {
-			Map<String, Integer> target = new HashMap<String, Integer>(source.size());
+			Map<String, Integer> target = new HashMap<>(source.size());
 			for (Map.Entry<String, String> entry : source.entrySet()) {
 				target.put(entry.getKey(), Integer.valueOf(entry.getValue()));
 			}
@@ -382,7 +380,7 @@ public class GenericConversionServiceTests {
 	public void emptyListToArray() {
 		conversionService.addConverter(new CollectionToArrayConverter(conversionService));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
 		TypeDescriptor targetType = TypeDescriptor.valueOf(String[].class);
 		assertTrue(conversionService.canConvert(sourceType, targetType));
@@ -393,7 +391,7 @@ public class GenericConversionServiceTests {
 	public void emptyListToObject() {
 		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
 		TypeDescriptor targetType = TypeDescriptor.valueOf(Integer.class);
 		assertTrue(conversionService.canConvert(sourceType, targetType));
@@ -420,7 +418,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testConvertiblePairsInSet() {
-		Set<GenericConverter.ConvertiblePair> set = new HashSet<GenericConverter.ConvertiblePair>();
+		Set<GenericConverter.ConvertiblePair> set = new HashSet<>();
 		set.add(new GenericConverter.ConvertiblePair(Number.class, String.class));
 		assert set.contains(new GenericConverter.ConvertiblePair(Number.class, String.class));
 	}
@@ -771,7 +769,7 @@ public class GenericConversionServiceTests {
 
 	private static class MyConditionalGenericConverter implements GenericConverter, ConditionalConverter {
 
-		private final List<TypeDescriptor> sourceTypes = new ArrayList<TypeDescriptor>();
+		private final List<TypeDescriptor> sourceTypes = new ArrayList<>();
 
 		@Override
 		public Set<ConvertiblePair> getConvertibleTypes() {

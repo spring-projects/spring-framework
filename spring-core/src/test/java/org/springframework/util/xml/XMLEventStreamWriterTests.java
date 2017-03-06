@@ -16,15 +16,18 @@
 
 package org.springframework.util.xml;
 
-import java.io.StringWriter;
+import org.junit.Before;
+import org.junit.Test;
+import org.w3c.dom.Node;
+import org.xmlunit.util.Predicate;
+
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
+import java.io.StringWriter;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import static org.custommonkey.xmlunit.XMLAssert.*;
+import static org.junit.Assert.assertThat;
+import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 public class XMLEventStreamWriterTests {
 
@@ -57,7 +60,8 @@ public class XMLEventStreamWriterTests {
 		streamWriter.writeEndElement();
 		streamWriter.writeEndDocument();
 
-		assertXMLEqual(XML, stringWriter.toString());
+		Predicate<Node> nodeFilter = n -> n.getNodeType() != Node.DOCUMENT_TYPE_NODE && n.getNodeType() != Node.PROCESSING_INSTRUCTION_NODE;
+		assertThat(stringWriter.toString(), isSimilarTo(XML).withNodeFilter(nodeFilter));
 	}
 
 

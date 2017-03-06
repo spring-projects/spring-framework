@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,13 +89,13 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private List<Object> controllerAdvice;
 
-	private List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+	private List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 
-	private List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+	private List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<>();
 
-	private List<HandlerMethodReturnValueHandler> customReturnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
+	private List<HandlerMethodReturnValueHandler> customReturnValueHandlers = new ArrayList<>();
 
-	private final List<MappedInterceptor> mappedInterceptors = new ArrayList<MappedInterceptor>();
+	private final List<MappedInterceptor> mappedInterceptors = new ArrayList<>();
 
 	private Validator validator = null;
 
@@ -119,7 +119,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private Boolean removeSemicolonContent;
 
-	private Map<String, String> placeHolderValues = new HashMap<String, String>();
+	private Map<String, String> placeholderValues = new HashMap<>();
 
 
 	/**
@@ -197,8 +197,8 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	/**
 	 * Set a ContentNegotiationManager.
 	 */
-	protected StandaloneMockMvcBuilder setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
-		this.contentNegotiationManager = contentNegotiationManager;
+	public StandaloneMockMvcBuilder setContentNegotiationManager(ContentNegotiationManager manager) {
+		this.contentNegotiationManager = manager;
 		return this;
 	}
 
@@ -317,9 +317,10 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	 * request mappings. This method allows manually provided placeholder values so they
 	 * can be resolved. Alternatively consider creating a test that initializes a
 	 * {@link WebApplicationContext}.
+	 * @since 4.2.8
 	 */
-	public StandaloneMockMvcBuilder addPlaceHolderValue(String name, String value) {
-		this.placeHolderValues.put(name, value);
+	public StandaloneMockMvcBuilder addPlaceholderValue(String name, String value) {
+		this.placeholderValues.put(name, value);
 		return this;
 	}
 
@@ -364,8 +365,8 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	}
 
 	private List<ViewResolver> initViewResolvers(WebApplicationContext wac) {
-		this.viewResolvers = (this.viewResolvers == null) ?
-				Arrays.<ViewResolver>asList(new InternalResourceViewResolver()) : this.viewResolvers;
+		this.viewResolvers = (this.viewResolvers != null ? this.viewResolvers :
+				Collections.<ViewResolver>singletonList(new InternalResourceViewResolver()));
 		for (Object viewResolver : this.viewResolvers) {
 			if (viewResolver instanceof WebApplicationObjectSupport) {
 				((WebApplicationObjectSupport) viewResolver).setApplicationContext(wac);
@@ -380,7 +381,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 		public StaticRequestMappingHandlerMapping getHandlerMapping() {
 			StaticRequestMappingHandlerMapping handlerMapping = new StaticRequestMappingHandlerMapping();
-			handlerMapping.setEmbeddedValueResolver(new StaticStringValueResolver(placeHolderValues));
+			handlerMapping.setEmbeddedValueResolver(new StaticStringValueResolver(placeholderValues));
 			handlerMapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
 			handlerMapping.setUseTrailingSlashMatch(useTrailingSlashPatternMatch);
 			handlerMapping.setOrder(0);
@@ -440,8 +441,8 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 				try {
 					((InitializingBean) mvcValidator).afterPropertiesSet();
 				}
-				catch (Exception e) {
-					throw new BeanInitializationException("Failed to initialize Validator", e);
+				catch (Exception ex) {
+					throw new BeanInitializationException("Failed to initialize Validator", ex);
 				}
 			}
 			return mvcValidator;

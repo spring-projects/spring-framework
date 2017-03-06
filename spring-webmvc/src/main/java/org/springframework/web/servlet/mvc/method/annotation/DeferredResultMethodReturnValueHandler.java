@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -47,12 +45,10 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 
 
 	public DeferredResultMethodReturnValueHandler() {
-		this.adapterMap = new HashMap<Class<?>, DeferredResultAdapter>(5);
+		this.adapterMap = new HashMap<>(5);
 		this.adapterMap.put(DeferredResult.class, new SimpleDeferredResultAdapter());
 		this.adapterMap.put(ListenableFuture.class, new ListenableFutureAdapter());
-		if (ClassUtils.isPresent("java.util.concurrent.CompletionStage", getClass().getClassLoader())) {
-			this.adapterMap.put(CompletionStage.class, new CompletionStageAdapter());
-		}
+		this.adapterMap.put(CompletionStage.class, new CompletionStageAdapter());
 	}
 
 
@@ -96,7 +92,10 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 		}
 
 		DeferredResultAdapter adapter = getAdapterFor(returnValue.getClass());
-		Assert.notNull(adapter);
+		if (adapter == null) {
+			throw new IllegalStateException(
+					"Could not find DeferredResultAdapter for return value type: " + returnValue.getClass());
+		}
 		DeferredResult<?> result = adapter.adaptToDeferredResult(returnValue);
 		WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(result, mavContainer);
 	}
@@ -109,10 +108,11 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 
 		@Override
 		public DeferredResult<?> adaptToDeferredResult(Object returnValue) {
-			Assert.isInstanceOf(DeferredResult.class, returnValue);
+			Assert.isInstanceOf(DeferredResult.class, returnValue, "DeferredResult expected");
 			return (DeferredResult<?>) returnValue;
 		}
 	}
+
 
 	/**
 	 * Adapter for {@code ListenableFuture} return values.
@@ -121,8 +121,8 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 
 		@Override
 		public DeferredResult<?> adaptToDeferredResult(Object returnValue) {
-			Assert.isInstanceOf(ListenableFuture.class, returnValue);
-			final DeferredResult<Object> result = new DeferredResult<Object>();
+			Assert.isInstanceOf(ListenableFuture.class, returnValue, "ListenableFuture expected");
+			final DeferredResult<Object> result = new DeferredResult<>();
 			((ListenableFuture<?>) returnValue).addCallback(new ListenableFutureCallback<Object>() {
 				@Override
 				public void onSuccess(Object value) {
@@ -137,16 +137,16 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 		}
 	}
 
+
 	/**
 	 * Adapter for {@code CompletionStage} return values.
 	 */
-	@UsesJava8
 	private static class CompletionStageAdapter implements DeferredResultAdapter {
 
 		@Override
 		public DeferredResult<?> adaptToDeferredResult(Object returnValue) {
-			Assert.isInstanceOf(CompletionStage.class, returnValue);
-			final DeferredResult<Object> result = new DeferredResult<Object>();
+			Assert.isInstanceOf(CompletionStage.class, returnValue, "CompletionStage expected");
+			final DeferredResult<Object> result = new DeferredResult<>();
 			@SuppressWarnings("unchecked")
 			CompletionStage<?> future = (CompletionStage<?>) returnValue;
 			future.handle(new BiFunction<Object, Throwable, Object>() {

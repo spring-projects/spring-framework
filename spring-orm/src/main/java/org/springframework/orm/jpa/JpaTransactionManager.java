@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 	private String persistenceUnitName;
 
-	private final Map<String, Object> jpaPropertyMap = new HashMap<String, Object>();
+	private final Map<String, Object> jpaPropertyMap = new HashMap<>();
 
 	private DataSource dataSource;
 
@@ -677,12 +677,17 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 		@Override
 		public Object createSavepoint() throws TransactionException {
+			if (this.entityManagerHolder.isRollbackOnly()) {
+				throw new CannotCreateTransactionException(
+						"Cannot create savepoint for transaction which is already marked as rollback-only");
+			}
 			return getSavepointManager().createSavepoint();
 		}
 
 		@Override
 		public void rollbackToSavepoint(Object savepoint) throws TransactionException {
 			getSavepointManager().rollbackToSavepoint(savepoint);
+			this.entityManagerHolder.resetRollbackOnly();
 		}
 
 		@Override

@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -136,35 +137,27 @@ abstract class BootstrapUtils {
 			testContextBootstrapper.setBootstrapContext(bootstrapContext);
 			return testContextBootstrapper;
 		}
+		catch (IllegalStateException ex) {
+			throw ex;
+		}
 		catch (Throwable ex) {
-			if (ex instanceof IllegalStateException) {
-				throw (IllegalStateException) ex;
-			}
 			throw new IllegalStateException("Could not load TestContextBootstrapper [" + clazz +
 					"]. Specify @BootstrapWith's 'value' attribute or make the default bootstrapper class available.",
 					ex);
 		}
 	}
 
-	/**
-	 * @since 4.3
-	 */
 	private static Class<?> resolveExplicitTestContextBootstrapper(Class<?> testClass) {
 		Set<BootstrapWith> annotations = AnnotatedElementUtils.findAllMergedAnnotations(testClass, BootstrapWith.class);
 		if (annotations.size() < 1) {
 			return null;
 		}
-		if (annotations.size() > 1) {
-			throw new IllegalStateException(String.format(
+		Assert.state(annotations.size() <= 1, () -> String.format(
 				"Configuration error: found multiple declarations of @BootstrapWith for test class [%s]: %s",
 				testClass.getName(), annotations));
-		}
 		return annotations.iterator().next().value();
 	}
 
-	/**
-	 * @since 4.3
-	 */
 	private static Class<?> resolveDefaultTestContextBootstrapper(Class<?> testClass) throws Exception {
 		ClassLoader classLoader = BootstrapUtils.class.getClassLoader();
 		AnnotationAttributes attributes = AnnotatedElementUtils.findMergedAnnotationAttributes(testClass,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.Set;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
-import org.springframework.lang.UsesJava8;
 
 /**
  * Convert an Object to {@code java.util.Optional<T>} if necessary using the
@@ -34,7 +33,6 @@ import org.springframework.lang.UsesJava8;
  * @author Juergen Hoeller
  * @since 4.1
  */
-@UsesJava8
 final class ObjectToOptionalConverter implements ConditionalGenericConverter {
 
 	private final ConversionService conversionService;
@@ -68,12 +66,12 @@ final class ObjectToOptionalConverter implements ConditionalGenericConverter {
 		else if (source instanceof Optional) {
 			return source;
 		}
-		else if (targetType.getResolvableType() == null) {
-			return Optional.of(source);
-		}
-		else {
+		else if (targetType.getResolvableType() != null) {
 			Object target = this.conversionService.convert(source, sourceType, new GenericTypeDescriptor(targetType));
 			return Optional.ofNullable(target);
+		}
+		else {
+			return Optional.of(source);
 		}
 	}
 

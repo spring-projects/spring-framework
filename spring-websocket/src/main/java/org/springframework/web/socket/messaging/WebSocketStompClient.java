@@ -301,7 +301,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		private volatile long lastWriteTime = -1;
 
-		private final List<ScheduledFuture<?>> inactivityTasks = new ArrayList<ScheduledFuture<?>>(2);
+		private final List<ScheduledFuture<?>> inactivityTasks = new ArrayList<>(2);
 
 		public WebSocketTcpConnectionHandlerAdapter(TcpConnectionHandler<byte[]> connectionHandler) {
 			Assert.notNull(connectionHandler, "TcpConnectionHandler must not be null");
@@ -378,7 +378,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		@Override
 		public ListenableFuture<Void> send(Message<byte[]> message) {
 			updateLastWriteTime();
-			SettableListenableFuture<Void> future = new SettableListenableFuture<Void>();
+			SettableListenableFuture<Void> future = new SettableListenableFuture<>();
 			try {
 				this.session.sendMessage(this.codec.encode(message, this.session.getClass()));
 				future.set(null);
@@ -468,7 +468,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		}
 
 		public List<Message<byte[]>> decode(WebSocketMessage<?> webSocketMessage) {
-			List<Message<byte[]>> result = Collections.<Message<byte[]>>emptyList();
+			List<Message<byte[]>> result = Collections.emptyList();
 			ByteBuffer byteBuffer;
 			if (webSocketMessage instanceof TextMessage) {
 				byteBuffer = ByteBuffer.wrap(((TextMessage) webSocketMessage).asBytes());

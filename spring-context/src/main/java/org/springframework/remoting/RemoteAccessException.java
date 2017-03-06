@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import org.springframework.core.NestedRuntimeException;
  * to transparently expose a plain Java business interface.
  *
  * <p>When using conforming proxies, switching the actual remoting protocol
- * e.g. from Hessian to Burlap does not affect client code. Clients work
- * with a plain natural Java business interface that the service exposes.
- * A client object simply receives an implementation for the interface that
- * it needs via a bean reference, like it does for a local bean as well.
+ * e.g. from Hessian does not affect client code. Clients work with a plain
+ * natural Java business interface that the service exposes. A client object
+ * simply receives an implementation for the interface that it needs via a
+ * bean reference, like it does for a local bean as well.
  *
  * <p>A client may catch RemoteAccessException if it wants to, but as
  * remote access errors are typically unrecoverable, it will probably let

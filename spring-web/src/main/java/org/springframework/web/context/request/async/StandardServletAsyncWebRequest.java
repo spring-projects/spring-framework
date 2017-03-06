@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.web.context.request.ServletWebRequest;
  *
  * <p>The servlet and all filters involved in an async request must have async
  * support enabled using the Servlet API or by adding an
- * {@code <async-support>true</async-support>} element to servlet and filter
+ * {@code <async-supported>true</async-supported>} element to servlet and filter
  * declarations in {@code web.xml}.
  *
  * @author Rossen Stoyanchev
@@ -48,9 +48,9 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	private AtomicBoolean asyncCompleted = new AtomicBoolean(false);
 
-	private final List<Runnable> timeoutHandlers = new ArrayList<Runnable>();
+	private final List<Runnable> timeoutHandlers = new ArrayList<>();
 
-	private final List<Runnable> completionHandlers = new ArrayList<Runnable>();
+	private final List<Runnable> completionHandlers = new ArrayList<>();
 
 
 	/**

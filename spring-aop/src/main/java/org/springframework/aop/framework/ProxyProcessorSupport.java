@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,7 +139,9 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 	 * @return whether the given interface is an internal language interface
 	 */
 	protected boolean isInternalLanguageInterface(Class<?> ifc) {
-		return ifc.getName().equals("groovy.lang.GroovyObject");
+		return (ifc.getName().equals("groovy.lang.GroovyObject") ||
+				ifc.getName().endsWith(".cglib.proxy.Factory") ||
+				ifc.getName().endsWith(".bytebuddy.MockAccess"));
 	}
 
 }

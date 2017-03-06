@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
 
 package org.springframework.http.converter.support;
 
-import javax.xml.transform.Source;
-
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
@@ -46,14 +45,17 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 	private static final boolean jackson2XmlPresent =
 			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", AllEncompassingFormHttpMessageConverter.class.getClassLoader());
 
+	private static final boolean jackson2SmilePresent =
+			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", AllEncompassingFormHttpMessageConverter.class.getClassLoader());
+
 	private static final boolean gsonPresent =
 			ClassUtils.isPresent("com.google.gson.Gson", AllEncompassingFormHttpMessageConverter.class.getClassLoader());
 
 
 	public AllEncompassingFormHttpMessageConverter() {
-		addPartConverter(new SourceHttpMessageConverter<Source>());
+		addPartConverter(new SourceHttpMessageConverter<>());
 
-		if (jaxb2Present && !jackson2Present) {
+		if (jaxb2Present && !jackson2XmlPresent) {
 			addPartConverter(new Jaxb2RootElementHttpMessageConverter());
 		}
 
@@ -66,6 +68,10 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 
 		if (jackson2XmlPresent) {
 			addPartConverter(new MappingJackson2XmlHttpMessageConverter());
+		}
+
+		if (jackson2SmilePresent) {
+			addPartConverter(new MappingJackson2SmileHttpMessageConverter());
 		}
 	}
 

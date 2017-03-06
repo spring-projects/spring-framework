@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,22 +45,22 @@ public class ConvertingComparatorTests {
 
 	private final TestComparator comparator = new TestComparator();
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowOnNullComparator() throws Exception {
-		new ConvertingComparator<String, Integer>(null, this.converter);
+		new ConvertingComparator<>(null, this.converter);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowOnNullConverter() throws Exception {
 		new ConvertingComparator<String, Integer>(this.comparator, null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowOnNullConversionService() throws Exception {
 		new ConvertingComparator<String, Integer>(this.comparator, null, Integer.class);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowOnNullType() throws Exception {
 		new ConvertingComparator<String, Integer>(this.comparator,
 			this.conversionService, null);
@@ -68,21 +68,21 @@ public class ConvertingComparatorTests {
 
 	@Test
 	public void shouldUseConverterOnCompare() throws Exception {
-		ConvertingComparator<String, Integer> convertingComparator = new ConvertingComparator<String, Integer>(
-			this.comparator, this.converter);
+		ConvertingComparator<String, Integer> convertingComparator = new ConvertingComparator<>(
+				this.comparator, this.converter);
 		testConversion(convertingComparator);
 	}
 
 	@Test
 	public void shouldUseConversionServiceOnCompare() throws Exception {
-		ConvertingComparator<String, Integer> convertingComparator = new ConvertingComparator<String, Integer>(
-			comparator, conversionService, Integer.class);
+		ConvertingComparator<String, Integer> convertingComparator = new ConvertingComparator<>(
+				comparator, conversionService, Integer.class);
 		testConversion(convertingComparator);
 	}
 
 	@Test
 	public void shouldGetForConverter() throws Exception {
-		testConversion(new ConvertingComparator<String, Integer>(comparator, converter));
+		testConversion(new ConvertingComparator<>(comparator, converter));
 	}
 
 	private void testConversion(ConvertingComparator<String, Integer> convertingComparator) {
@@ -109,11 +109,11 @@ public class ConvertingComparatorTests {
 	}
 
 	private ArrayList<Entry<String, Integer>> createReverseOrderMapEntryList() {
-		Map<String, Integer> map = new LinkedHashMap<String, Integer>();
+		Map<String, Integer> map = new LinkedHashMap<>();
 		map.put("b", 2);
 		map.put("a", 1);
-		ArrayList<Entry<String, Integer>> list = new ArrayList<Map.Entry<String, Integer>>(
-			map.entrySet());
+		ArrayList<Entry<String, Integer>> list = new ArrayList<>(
+				map.entrySet());
 		assertThat(list.get(0).getKey(), is("b"));
 		return list;
 	}

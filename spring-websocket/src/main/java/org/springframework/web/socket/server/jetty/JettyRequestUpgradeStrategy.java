@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,15 @@
 package org.springframework.web.socket.server.jetty;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.websocket.api.UpgradeRequest;
-import org.eclipse.jetty.websocket.api.UpgradeResponse;
 import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
 import org.eclipse.jetty.websocket.server.HandshakeRFC6455;
@@ -56,30 +53,32 @@ import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 
 /**
- * A {@link RequestUpgradeStrategy} for use with Jetty 9.0-9.3. Based on Jetty's
- * internal {@code org.eclipse.jetty.websocket.server.WebSocketHandler} class.
+ * A {@link RequestUpgradeStrategy} for use with Jetty 9.3 and 9.4. Based on
+ * Jetty's internal {@code org.eclipse.jetty.websocket.server.WebSocketHandler} class.
  *
  * @author Phillip Webb
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
+ * @author Juergen Hoeller
  * @since 4.0
  */
-public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Lifecycle, ServletContextAware {
+public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, ServletContextAware, Lifecycle {
 
-	// Pre-Jetty 9.3 init method without ServletContext
-	private static final Method webSocketFactoryInitMethod =
-			ClassUtils.getMethodIfAvailable(WebSocketServerFactory.class, "init");
-
-	private static final ThreadLocal<WebSocketHandlerContainer> wsContainerHolder =
-			new NamedThreadLocal<WebSocketHandlerContainer>("WebSocket Handler Container");
+	private static final ThreadLocal<WebSocketHandlerContainer> containerHolder =
+			new NamedThreadLocal<>("WebSocketHandlerContainer");
 
 
-	private final WebSocketServerFactory factory;
-
-	private volatile List<WebSocketExtension> supportedExtensions;
+	// Configurable factory adapter due to Jetty 9.3.15+ API differences:
+	// using WebSocketServerFactory(ServletContext) as a version indicator
+	private final WebSocketServerFactoryAdapter factoryAdapter =
+			(ClassUtils.hasConstructor(WebSocketServerFactory.class, ServletContext.class) ?
+					new ModernJettyWebSocketServerFactoryAdapter() : new LegacyJettyWebSocketServerFactoryAdapter());
 
 	private ServletContext servletContext;
 
 	private volatile boolean running = false;
+
+	private volatile List<WebSocketExtension> supportedExtensions;
 
 
 	/**
@@ -87,32 +86,64 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	 * its default constructor thus using a default {@link WebSocketPolicy}.
 	 */
 	public JettyRequestUpgradeStrategy() {
-		this(new WebSocketServerFactory());
+		this.factoryAdapter.setPolicy(WebSocketPolicy.newServerPolicy());
+	}
+
+	/**
+	 * A constructor accepting a {@link WebSocketPolicy} to be used when
+	 * creating the {@link WebSocketServerFactory} instance.
+	 * @param policy the policy to use
+	 * @since 4.3.5
+	 */
+	public JettyRequestUpgradeStrategy(WebSocketPolicy policy) {
+		Assert.notNull(policy, "WebSocketPolicy must not be null");
+		this.factoryAdapter.setPolicy(policy);
 	}
 
 	/**
 	 * A constructor accepting a {@link WebSocketServerFactory}.
-	 * This may be useful for modifying the factory's {@link WebSocketPolicy}
-	 * via {@link WebSocketServerFactory#getPolicy()}.
+	 * @param factory the pre-configured factory to use
 	 */
 	public JettyRequestUpgradeStrategy(WebSocketServerFactory factory) {
 		Assert.notNull(factory, "WebSocketServerFactory must not be null");
-		this.factory = factory;
-		this.factory.setCreator(new WebSocketCreator() {
-			@Override
-			public Object createWebSocket(ServletUpgradeRequest request, ServletUpgradeResponse response) {
-				// Cast to avoid infinite recursion
-				return createWebSocket((UpgradeRequest) request, (UpgradeResponse) response);
+		this.factoryAdapter.setFactory(factory);
+	}
+
+
+	@Override
+	public void setServletContext(ServletContext servletContext) {
+		this.servletContext = servletContext;
+	}
+
+	@Override
+	public void start() {
+		if (!isRunning()) {
+			this.running = true;
+			try {
+				this.factoryAdapter.start();
 			}
-			// For Jetty 9.0.x
-			public Object createWebSocket(UpgradeRequest request, UpgradeResponse response) {
-				WebSocketHandlerContainer container = wsContainerHolder.get();
-				Assert.state(container != null, "Expected WebSocketHandlerContainer");
-				response.setAcceptedSubProtocol(container.getSelectedProtocol());
-				response.setExtensions(container.getExtensionConfigs());
-				return container.getHandler();
+			catch (Throwable ex) {
+				throw new IllegalStateException("Unable to start Jetty WebSocketServerFactory", ex);
 			}
-		});
+		}
+	}
+
+	@Override
+	public void stop() {
+		if (isRunning()) {
+			this.running = false;
+			try {
+				this.factoryAdapter.stop();
+			}
+			catch (Throwable ex) {
+				throw new IllegalStateException("Unable to stop Jetty WebSocketServerFactory", ex);
+			}
+		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
 	}
 
 
@@ -124,54 +155,18 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	@Override
 	public List<WebSocketExtension> getSupportedExtensions(ServerHttpRequest request) {
 		if (this.supportedExtensions == null) {
-			this.supportedExtensions = getWebSocketExtensions();
+			this.supportedExtensions = buildWebSocketExtensions();
 		}
 		return this.supportedExtensions;
 	}
 
-	private List<WebSocketExtension> getWebSocketExtensions() {
-		List<WebSocketExtension> result = new ArrayList<WebSocketExtension>();
-		for (String name : this.factory.getExtensionFactory().getExtensionNames()) {
+	private List<WebSocketExtension> buildWebSocketExtensions() {
+		Set<String> names = this.factoryAdapter.getFactory().getExtensionFactory().getExtensionNames();
+		List<WebSocketExtension> result = new ArrayList<>(names.size());
+		for (String name : names) {
 			result.add(new WebSocketExtension(name));
 		}
 		return result;
-	}
-
-	@Override
-	public void setServletContext(ServletContext servletContext) {
-		this.servletContext = servletContext;
-	}
-
-	@Override
-	public boolean isRunning() {
-		return this.running;
-	}
-
-
-	@Override
-	public void start() {
-		if (!isRunning()) {
-			this.running = true;
-			try {
-				if (webSocketFactoryInitMethod != null) {
-					webSocketFactoryInitMethod.invoke(this.factory);
-				}
-				else {
-					this.factory.init(this.servletContext);
-				}
-			}
-			catch (Exception ex) {
-				throw new IllegalStateException("Unable to initialize Jetty WebSocketServerFactory", ex);
-			}
-		}
-	}
-
-	@Override
-	public void stop() {
-		if (isRunning()) {
-			this.running = false;
-			this.factory.cleanup();
-		}
 	}
 
 	@Override
@@ -179,13 +174,14 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 			String selectedProtocol, List<WebSocketExtension> selectedExtensions, Principal user,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) throws HandshakeFailureException {
 
-		Assert.isInstanceOf(ServletServerHttpRequest.class, request);
+		Assert.isInstanceOf(ServletServerHttpRequest.class, request, "ServletServerHttpRequest required");
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
 
-		Assert.isInstanceOf(ServletServerHttpResponse.class, response);
+		Assert.isInstanceOf(ServletServerHttpResponse.class, response, "ServletServerHttpResponse required");
 		HttpServletResponse servletResponse = ((ServletServerHttpResponse) response).getServletResponse();
 
-		Assert.isTrue(this.factory.isUpgradeRequest(servletRequest, servletResponse), "Not a WebSocket handshake");
+		Assert.isTrue(this.factoryAdapter.getFactory().isUpgradeRequest(servletRequest, servletResponse),
+				"Not a WebSocket handshake");
 
 		JettyWebSocketSession session = new JettyWebSocketSession(attributes, user);
 		JettyWebSocketHandlerAdapter handlerAdapter = new JettyWebSocketHandlerAdapter(wsHandler, session);
@@ -194,15 +190,15 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 				new WebSocketHandlerContainer(handlerAdapter, selectedProtocol, selectedExtensions);
 
 		try {
-			wsContainerHolder.set(container);
-			this.factory.acceptWebSocket(servletRequest, servletResponse);
+			containerHolder.set(container);
+			this.factoryAdapter.getFactory().acceptWebSocket(servletRequest, servletResponse);
 		}
 		catch (IOException ex) {
 			throw new HandshakeFailureException(
 					"Response update failed during upgrade to WebSocket: " + request.getURI(), ex);
 		}
 		finally {
-			wsContainerHolder.remove();
+			containerHolder.remove();
 		}
 	}
 
@@ -215,16 +211,18 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 		private final List<ExtensionConfig> extensionConfigs;
 
-		public WebSocketHandlerContainer(JettyWebSocketHandlerAdapter handler, String protocol, List<WebSocketExtension> extensions) {
+		public WebSocketHandlerContainer(
+				JettyWebSocketHandlerAdapter handler, String protocol, List<WebSocketExtension> extensions) {
+
 			this.handler = handler;
 			this.selectedProtocol = protocol;
 			if (CollectionUtils.isEmpty(extensions)) {
-				this.extensionConfigs = null;
+				this.extensionConfigs = new ArrayList<>(0);
 			}
 			else {
-				this.extensionConfigs = new ArrayList<ExtensionConfig>();
-				for (WebSocketExtension e : extensions) {
-					this.extensionConfigs.add(new WebSocketToJettyExtensionConfigAdapter(e));
+				this.extensionConfigs = new ArrayList<>(extensions.size());
+				for (WebSocketExtension extension : extensions) {
+					this.extensionConfigs.add(new WebSocketToJettyExtensionConfigAdapter(extension));
 				}
 			}
 		}
@@ -239,6 +237,95 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 		public List<ExtensionConfig> getExtensionConfigs() {
 			return this.extensionConfigs;
+		}
+	}
+
+
+	private static abstract class WebSocketServerFactoryAdapter {
+
+		private WebSocketPolicy policy;
+
+		private WebSocketServerFactory factory;
+
+		public void setPolicy(WebSocketPolicy policy) {
+			this.policy = policy;
+		}
+
+		public void setFactory(WebSocketServerFactory factory) {
+			this.factory = factory;
+		}
+
+		public WebSocketServerFactory getFactory() {
+			return this.factory;
+		}
+
+		public void start() throws Exception {
+			if (this.factory == null) {
+				this.factory = createFactory(this.policy);
+			}
+			this.factory.setCreator(new WebSocketCreator() {
+				@Override
+				public Object createWebSocket(ServletUpgradeRequest request, ServletUpgradeResponse response) {
+					WebSocketHandlerContainer container = containerHolder.get();
+					Assert.state(container != null, "Expected WebSocketHandlerContainer");
+					response.setAcceptedSubProtocol(container.getSelectedProtocol());
+					response.setExtensions(container.getExtensionConfigs());
+					return container.getHandler();
+				}
+			});
+			startFactory(this.factory);
+		}
+
+		public void stop() throws Exception {
+			if (this.factory != null) {
+				stopFactory(this.factory);
+			}
+		}
+
+		protected abstract WebSocketServerFactory createFactory(WebSocketPolicy policy) throws Exception;
+
+		protected abstract void startFactory(WebSocketServerFactory factory) throws Exception;
+
+		protected abstract void stopFactory(WebSocketServerFactory factory) throws Exception;
+	}
+
+
+	// Jetty 9.3.15+
+	private class ModernJettyWebSocketServerFactoryAdapter extends WebSocketServerFactoryAdapter {
+
+		@Override
+		protected WebSocketServerFactory createFactory(WebSocketPolicy policy) throws Exception {
+			return new WebSocketServerFactory(servletContext, policy);
+		}
+
+		@Override
+		protected void startFactory(WebSocketServerFactory factory) throws Exception {
+			factory.start();
+		}
+
+		@Override
+		protected void stopFactory(WebSocketServerFactory factory) throws Exception {
+			factory.stop();
+		}
+	}
+
+
+	// Jetty <9.3.15
+	private class LegacyJettyWebSocketServerFactoryAdapter extends WebSocketServerFactoryAdapter {
+
+		@Override
+		protected WebSocketServerFactory createFactory(WebSocketPolicy policy) throws Exception {
+			return WebSocketServerFactory.class.getConstructor(WebSocketPolicy.class).newInstance(policy);
+		}
+
+		@Override
+		protected void startFactory(WebSocketServerFactory factory) throws Exception {
+			WebSocketServerFactory.class.getMethod("init", ServletContext.class).invoke(factory, servletContext);
+		}
+
+		@Override
+		protected void stopFactory(WebSocketServerFactory factory) throws Exception {
+			WebSocketServerFactory.class.getMethod("cleanup").invoke(factory);
 		}
 	}
 

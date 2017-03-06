@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class MutablePropertyValuesTests extends AbstractPropertyValuesTests {
+public class MutablePropertyValuesTests extends AbstractPropertyValuesTests {
 
 	@Test
 	public void testValid() throws Exception {

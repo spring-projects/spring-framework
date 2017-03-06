@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util;
 
 import java.net.URI;
@@ -32,12 +33,14 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @since 4.3
+ * @deprecated as of 5.0 in favor of {@link DefaultUriBuilderFactory}
  */
+@Deprecated
 public abstract class AbstractUriTemplateHandler implements UriTemplateHandler {
 
 	private String baseUrl;
 
-	private final Map<String, Object> defaultUriVariables = new HashMap<String, Object>();
+	private final Map<String, Object> defaultUriVariables = new HashMap<>();
 
 
 	/**
@@ -91,7 +94,7 @@ public abstract class AbstractUriTemplateHandler implements UriTemplateHandler {
 	@Override
 	public URI expand(String uriTemplate, Map<String, ?> uriVariables) {
 		if (!getDefaultUriVariables().isEmpty()) {
-			Map<String, Object> map = new HashMap<String, Object>();
+			Map<String, Object> map = new HashMap<>();
 			map.putAll(getDefaultUriVariables());
 			map.putAll(uriVariables);
 			uriVariables = map;
@@ -106,6 +109,7 @@ public abstract class AbstractUriTemplateHandler implements UriTemplateHandler {
 		return insertBaseUrl(url);
 	}
 
+
 	/**
 	 * Actually expand and encode the URI template.
 	 */
@@ -116,13 +120,15 @@ public abstract class AbstractUriTemplateHandler implements UriTemplateHandler {
 	 */
 	protected abstract URI expandInternal(String uriTemplate, Object... uriVariables);
 
+
 	/**
 	 * Insert a base URL (if configured) unless the given URL has a host already.
 	 */
 	private URI insertBaseUrl(URI url) {
 		try {
-			if (getBaseUrl() != null && url.getHost() == null) {
-				url = new URI(getBaseUrl() + url.toString());
+			String baseUrl = getBaseUrl();
+			if (baseUrl != null && url.getHost() == null) {
+				url = new URI(baseUrl + url.toString());
 			}
 			return url;
 		}

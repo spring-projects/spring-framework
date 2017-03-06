@@ -20,7 +20,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -45,7 +47,9 @@ public class DefaultResourceLoader implements ResourceLoader {
 
 	private ClassLoader classLoader;
 
-	private final Set<ProtocolResolver> protocolResolvers = new LinkedHashSet<ProtocolResolver>(4);
+	private final Set<ProtocolResolver> protocolResolvers = new LinkedHashSet<>(4);
+
+	private final Map<Class<?>, Map<Resource, ?>> resourceCaches = new ConcurrentHashMap<>(4);
 
 
 	/**
@@ -109,6 +113,26 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 */
 	public Collection<ProtocolResolver> getProtocolResolvers() {
 		return this.protocolResolvers;
+	}
+
+	/**
+	 * Obtain a cache for the given value type, keyed by {@link Resource}.
+	 * @param valueType the value type, e.g. an ASM {@code MetadataReader}
+	 * @return the cache {@link Map}, shared at the {@code ResourceLoader} level
+	 * @since 5.0
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> Map<Resource, T> getResourceCache(Class<T> valueType) {
+		return (Map<Resource, T>) this.resourceCaches.computeIfAbsent(valueType, key -> new ConcurrentHashMap<>());
+	}
+
+	/**
+	 * Clear all resource caches in this resource loader.
+	 * @since 5.0
+	 * @see #getResourceCache
+	 */
+	public void clearResourceCaches() {
+		this.resourceCaches.clear();
 	}
 
 

@@ -34,7 +34,7 @@ import static org.springframework.tests.TestResourceUtils.*;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class ExposeInvocationInterceptorTests {
+public class ExposeInvocationInterceptorTests {
 
 	private static final Resource CONTEXT =
 		qualifiedResource(ExposeInvocationInterceptorTests.class, "context.xml");

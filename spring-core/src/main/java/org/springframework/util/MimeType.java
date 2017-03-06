@@ -120,7 +120,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
 	 */
 	public MimeType(String type, String subtype) {
-		this(type, subtype, Collections.<String, String>emptyMap());
+		this(type, subtype, Collections.emptyMap());
 	}
 
 	/**
@@ -165,14 +165,14 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
 	 */
 	public MimeType(String type, String subtype, Map<String, String> parameters) {
-		Assert.hasLength(type, "type must not be empty");
-		Assert.hasLength(subtype, "subtype must not be empty");
+		Assert.hasLength(type, "'type' must not be empty");
+		Assert.hasLength(subtype, "'subtype' must not be empty");
 		checkToken(type);
 		checkToken(subtype);
 		this.type = type.toLowerCase(Locale.ENGLISH);
 		this.subtype = subtype.toLowerCase(Locale.ENGLISH);
 		if (!CollectionUtils.isEmpty(parameters)) {
-			Map<String, String> map = new LinkedCaseInsensitiveMap<String>(parameters.size(), Locale.ENGLISH);
+			Map<String, String> map = new LinkedCaseInsensitiveMap<>(parameters.size(), Locale.ENGLISH);
 			for (Map.Entry<String, String> entry : parameters.entrySet()) {
 				String attribute = entry.getKey();
 				String value = entry.getValue();
@@ -202,8 +202,8 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 	protected void checkParameters(String attribute, String value) {
-		Assert.hasLength(attribute, "parameter attribute must not be empty");
-		Assert.hasLength(value, "parameter value must not be empty");
+		Assert.hasLength(attribute, "'attribute' must not be empty");
+		Assert.hasLength(value, "'value' must not be empty");
 		checkToken(attribute);
 		if (PARAM_CHARSET.equals(attribute)) {
 			value = unquote(value);
@@ -277,19 +277,8 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @since 4.3
 	 */
 	public Charset getCharset() {
-		String charSet = getParameter(PARAM_CHARSET);
-		return (charSet != null ? Charset.forName(unquote(charSet)) : null);
-	}
-
-	/**
-	 * Return the character set, as indicated by a {@code charset} parameter, if any.
-	 * @return the character set, or {@code null} if not available
-	 * @deprecated as of Spring 4.3, in favor of {@link #getCharset()} with its name
-	 * aligned with the Java return type name
-	 */
-	@Deprecated
-	public Charset getCharSet() {
-		return getCharset();
+		String charset = getParameter(PARAM_CHARSET);
+		return (charset != null ? Charset.forName(unquote(charset)) : null);
 	}
 
 	/**
@@ -493,9 +482,9 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		if (comp != 0) {
 			return comp;
 		}
-		TreeSet<String> thisAttributes = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+		TreeSet<String> thisAttributes = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 		thisAttributes.addAll(getParameters().keySet());
-		TreeSet<String> otherAttributes = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+		TreeSet<String> otherAttributes = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 		otherAttributes.addAll(other.getParameters().keySet());
 		Iterator<String> thisAttributesIterator = thisAttributes.iterator();
 		Iterator<String> otherAttributesIterator = otherAttributes.iterator();
@@ -531,7 +520,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 	private static Map<String, String> addCharsetParameter(Charset charset, Map<String, String> parameters) {
-		Map<String, String> map = new LinkedHashMap<String, String>(parameters);
+		Map<String, String> map = new LinkedHashMap<>(parameters);
 		map.put(PARAM_CHARSET, charset.name());
 		return map;
 	}

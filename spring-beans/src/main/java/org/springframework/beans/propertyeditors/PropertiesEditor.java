@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.propertyeditors;
 import java.beans.PropertyEditorSupport;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Properties;
 
@@ -49,7 +50,7 @@ public class PropertiesEditor extends PropertyEditorSupport {
 		if (text != null) {
 			try {
 				// Must use the ISO-8859-1 encoding because Properties.load(stream) expects it.
-				props.load(new ByteArrayInputStream(text.getBytes("ISO-8859-1")));
+				props.load(new ByteArrayInputStream(text.getBytes(StandardCharsets.ISO_8859_1)));
 			}
 			catch (IOException ex) {
 				// Should never happen.

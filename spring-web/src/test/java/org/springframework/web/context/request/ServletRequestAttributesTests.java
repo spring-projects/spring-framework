@@ -96,31 +96,6 @@ public class ServletRequestAttributesTests {
 	}
 
 	@Test
-	public void setGlobalSessionScopedAttribute() throws Exception {
-		MockHttpSession session = new MockHttpSession();
-		session.setAttribute(KEY, VALUE);
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.setSession(session);
-		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
-		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_GLOBAL_SESSION);
-		assertSame(VALUE, session.getAttribute(KEY));
-	}
-
-	@Test
-	public void setGlobalSessionScopedAttributeAfterCompletion() throws Exception {
-		MockHttpSession session = new MockHttpSession();
-		session.setAttribute(KEY, VALUE);
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.setSession(session);
-		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
-		assertSame(VALUE, attrs.getAttribute(KEY, RequestAttributes.SCOPE_GLOBAL_SESSION));
-		attrs.requestCompleted();
-		request.close();
-		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_GLOBAL_SESSION);
-		assertSame(VALUE, session.getAttribute(KEY));
-	}
-
-	@Test
 	public void getSessionScopedAttributeDoesNotForceCreationOfSession() throws Exception {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 

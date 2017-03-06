@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class MapDataSourceLookupTests {
+public class MapDataSourceLookupTests {
 
 	private static final String DATA_SOURCE_NAME = "dataSource";
 
@@ -50,7 +50,7 @@ public final class MapDataSourceLookupTests {
 
 	@Test
 	public void lookupSunnyDay() throws Exception {
-		Map<String, DataSource> dataSources = new HashMap<String, DataSource>();
+		Map<String, DataSource> dataSources = new HashMap<>();
 		StubDataSource expectedDataSource = new StubDataSource();
 		dataSources.put(DATA_SOURCE_NAME, expectedDataSource);
 		MapDataSourceLookup lookup = new MapDataSourceLookup();
@@ -62,7 +62,7 @@ public final class MapDataSourceLookupTests {
 
 	@Test
 	public void setDataSourcesIsAnIdempotentOperation() throws Exception {
-		Map<String, DataSource> dataSources = new HashMap<String, DataSource>();
+		Map<String, DataSource> dataSources = new HashMap<>();
 		StubDataSource expectedDataSource = new StubDataSource();
 		dataSources.put(DATA_SOURCE_NAME, expectedDataSource);
 		MapDataSourceLookup lookup = new MapDataSourceLookup();
@@ -75,7 +75,7 @@ public final class MapDataSourceLookupTests {
 
 	@Test
 	public void addingDataSourcePermitsOverride() throws Exception {
-		Map<String, DataSource> dataSources = new HashMap<String, DataSource>();
+		Map<String, DataSource> dataSources = new HashMap<>();
 		StubDataSource overridenDataSource = new StubDataSource();
 		StubDataSource expectedDataSource = new StubDataSource();
 		dataSources.put(DATA_SOURCE_NAME, overridenDataSource);

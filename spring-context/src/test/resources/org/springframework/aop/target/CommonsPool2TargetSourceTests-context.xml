@@ -13,7 +13,7 @@
 	</bean>
 
 	<bean id="poolConfigAdvisor" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-		<property name="targetObject"><ref local="poolTargetSource" /></property>
+		<property name="targetObject"><ref bean="poolTargetSource" /></property>
 		<property name="targetMethod"><value>getPoolingConfigMixin</value></property>
 	</bean>
 
@@ -23,16 +23,16 @@
 		This will create a bean for each thread ("apartment")
 	-->
 	<bean id="pooled"  class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="targetSource"><ref local="poolTargetSource"/></property>
+		<property name="targetSource"><ref bean="poolTargetSource"/></property>
 		<property name="interceptorNames"><value>nop</value></property>
 	</bean>
 
 	<bean id="pooledNoInterceptors"  class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="targetSource"><ref local="poolTargetSource"/></property>
+		<property name="targetSource"><ref bean="poolTargetSource"/></property>
 	</bean>
 
 	<bean id="pooledWithMixin" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="targetSource"><ref local="poolTargetSource"/></property>
+		<property name="targetSource"><ref bean="poolTargetSource"/></property>
 		<property name="interceptorNames"><value>poolConfigAdvisor</value></property>
 		<!-- Necessary as have a mixin and want to avoid losing the class,
 			 because there's no target interface -->
@@ -50,7 +50,7 @@
 	</bean>
 
 	<bean id="pooledPerson" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="targetSource"><ref local="personPoolTargetSource"/></property>
+		<property name="targetSource"><ref bean="personPoolTargetSource"/></property>
 		<property name="interceptorNames"><value>serializableNop</value></property>
 	
 	</bean>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  *
  * <p>Serializes remote invocation objects and deserializes remote invocation
  * result objects. Uses Java serialization just like RMI, but provides the
- * same ease of setup as Caucho's HTTP-based Hessian and Burlap protocols.
+ * same ease of setup as Caucho's HTTP-based Hessian protocol.
  *
  * <P>HTTP invoker is a very extensible and customizable protocol.
  * It supports the RemoteInvocationFactory mechanism, like RMI invoker,
@@ -140,12 +140,15 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 
 		RemoteInvocation invocation = createRemoteInvocation(methodInvocation);
 		RemoteInvocationResult result;
+
 		try {
 			result = executeRequest(invocation, methodInvocation);
 		}
 		catch (Throwable ex) {
-			throw convertHttpInvokerAccessException(ex);
+			RemoteAccessException rae = convertHttpInvokerAccessException(ex);
+			throw (rae != null ? rae : ex);
 		}
+
 		try {
 			return recreateRemoteInvocationResult(result);
 		}
@@ -161,7 +164,7 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	}
 
 	/**
-	 * Execute the given remote invocation via the HttpInvokerRequestExecutor.
+	 * Execute the given remote invocation via the {@link HttpInvokerRequestExecutor}.
 	 * <p>This implementation delegates to {@link #executeRequest(RemoteInvocation)}.
 	 * Can be overridden to react to the specific original MethodInvocation.
 	 * @param invocation the RemoteInvocation to execute
@@ -177,7 +180,7 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	}
 
 	/**
-	 * Execute the given remote invocation via the HttpInvokerRequestExecutor.
+	 * Execute the given remote invocation via the {@link HttpInvokerRequestExecutor}.
 	 * <p>Can be overridden in subclasses to pass a different configuration object
 	 * to the executor. Alternatively, add further configuration properties in a
 	 * subclass of this accessor: By default, the accessor passed itself as
@@ -196,9 +199,10 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 
 	/**
 	 * Convert the given HTTP invoker access exception to an appropriate
-	 * Spring RemoteAccessException.
+	 * Spring {@link RemoteAccessException}.
 	 * @param ex the exception to convert
-	 * @return the RemoteAccessException to throw
+	 * @return the RemoteAccessException to throw, or {@code null} to have the
+	 * original exception propagated to the caller
 	 */
 	protected RemoteAccessException convertHttpInvokerAccessException(Throwable ex) {
 		if (ex instanceof ConnectException) {
@@ -212,8 +216,13 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 					"Could not deserialize result from HTTP invoker remote service [" + getServiceUrl() + "]", ex);
 		}
 
-		return new RemoteAccessException(
+		if (ex instanceof Exception) {
+			return new RemoteAccessException(
 					"Could not access HTTP invoker remote service at [" + getServiceUrl() + "]", ex);
+		}
+
+		// For any other Throwable, e.g. OutOfMemoryError: let it get propagated as-is.
+		return null;
 	}
 
 }

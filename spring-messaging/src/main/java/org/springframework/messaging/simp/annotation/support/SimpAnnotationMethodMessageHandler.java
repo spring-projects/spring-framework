@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,6 @@ import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringValueResolver;
@@ -86,10 +85,6 @@ import org.springframework.validation.Validator;
  */
 public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHandler<SimpMessageMappingInfo>
 		implements EmbeddedValueResolverAware, SmartLifecycle {
-
-	private static final boolean completableFuturePresent = ClassUtils.isPresent(
-			"java.util.concurrent.CompletableFuture", SimpAnnotationMethodMessageHandler.class.getClassLoader());
-
 
 	private final SubscribableChannel clientInboundChannel;
 
@@ -134,7 +129,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		this.clientMessagingTemplate = new SimpMessagingTemplate(clientOutboundChannel);
 		this.brokerTemplate = brokerTemplate;
 
-		Collection<MessageConverter> converters = new ArrayList<MessageConverter>();
+		Collection<MessageConverter> converters = new ArrayList<>();
 		converters.add(new StringMessageConverter());
 		converters.add(new ByteArrayMessageConverter());
 		this.messageConverter = new CompositeMessageConverter(converters);
@@ -159,7 +154,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		if (CollectionUtils.isEmpty(prefixes)) {
 			return prefixes;
 		}
-		Collection<String> result = new ArrayList<String>(prefixes.size());
+		Collection<String> result = new ArrayList<>(prefixes.size());
 		for (String prefix : prefixes) {
 			if (!prefix.endsWith("/")) {
 				prefix = prefix + "/";
@@ -308,7 +303,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		ConfigurableBeanFactory beanFactory = (getApplicationContext() instanceof ConfigurableApplicationContext ?
 				((ConfigurableApplicationContext) getApplicationContext()).getBeanFactory() : null);
 
-		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 
 		// Annotation-based argument resolution
 		resolvers.add(new HeaderMethodArgumentResolver(this.conversionService, beanFactory));
@@ -327,13 +322,11 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	@Override
 	protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
-		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<HandlerMethodReturnValueHandler>();
+		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
 
 		// Single-purpose return value types
 		handlers.add(new ListenableFutureReturnValueHandler());
-		if (completableFuturePresent) {
-			handlers.add(new CompletableFutureReturnValueHandler());
-		}
+		handlers.add(new CompletableFutureReturnValueHandler());
 
 		// Annotation-based return value types
 		SendToMethodReturnValueHandler sendToHandler =
@@ -426,7 +419,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	@Override
 	protected Set<String> getDirectLookupDestinations(SimpMessageMappingInfo mapping) {
-		Set<String> result = new LinkedHashSet<String>();
+		Set<String> result = new LinkedHashSet<>();
 		for (String pattern : mapping.getDestinationConditions().getPatterns()) {
 			if (!this.pathMatcher.isPattern(pattern)) {
 				result.add(pattern);
@@ -487,7 +480,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 			Map<String, String> vars = getPathMatcher().extractUriTemplateVariables(pattern, lookupDestination);
 			if (!CollectionUtils.isEmpty(vars)) {
 				MessageHeaderAccessor mha = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
-				Assert.state(mha != null && mha.isMutable());
+				Assert.state(mha != null && mha.isMutable(), "Mutable MessageHeaderAccessor required");
 				mha.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);
 			}
 		}

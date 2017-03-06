@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.io.Closeable;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -67,18 +66,6 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	private static final String SHUTDOWN_METHOD_NAME = "shutdown";
 
 	private static final Log logger = LogFactory.getLog(DisposableBeanAdapter.class);
-
-	private static Class<?> closeableInterface;
-
-	static {
-		try {
-			closeableInterface = ClassUtils.forName("java.lang.AutoCloseable",
-					DisposableBeanAdapter.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			closeableInterface = Closeable.class;
-		}
-	}
 
 
 	private final Object bean;
@@ -191,7 +178,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	private String inferDestroyMethodIfNecessary(Object bean, RootBeanDefinition beanDefinition) {
 		String destroyMethodName = beanDefinition.getDestroyMethodName();
 		if (AbstractBeanDefinition.INFER_METHOD.equals(destroyMethodName) ||
-				(destroyMethodName == null && closeableInterface.isInstance(bean))) {
+				(destroyMethodName == null && bean instanceof AutoCloseable)) {
 			// Only perform destroy method inference or Closeable detection
 			// in case of the bean not explicitly implementing DisposableBean
 			if (!(bean instanceof DisposableBean)) {
@@ -220,18 +207,11 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	private List<DestructionAwareBeanPostProcessor> filterPostProcessors(List<BeanPostProcessor> processors, Object bean) {
 		List<DestructionAwareBeanPostProcessor> filteredPostProcessors = null;
 		if (!CollectionUtils.isEmpty(processors)) {
-			filteredPostProcessors = new ArrayList<DestructionAwareBeanPostProcessor>(processors.size());
+			filteredPostProcessors = new ArrayList<>(processors.size());
 			for (BeanPostProcessor processor : processors) {
 				if (processor instanceof DestructionAwareBeanPostProcessor) {
 					DestructionAwareBeanPostProcessor dabpp = (DestructionAwareBeanPostProcessor) processor;
-					try {
-						if (dabpp.requiresDestruction(bean)) {
-							filteredPostProcessors.add(dabpp);
-						}
-					}
-					catch (AbstractMethodError err) {
-						// A pre-4.3 third-party DestructionAwareBeanPostProcessor...
-						// As of 5.0, we can let requiresDestruction be a Java 8 default method which returns true.
+					if (dabpp.requiresDestruction(bean)) {
 						filteredPostProcessors.add(dabpp);
 					}
 				}
@@ -388,7 +368,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	protected Object writeReplace() {
 		List<DestructionAwareBeanPostProcessor> serializablePostProcessors = null;
 		if (this.beanPostProcessors != null) {
-			serializablePostProcessors = new ArrayList<DestructionAwareBeanPostProcessor>();
+			serializablePostProcessors = new ArrayList<>();
 			for (DestructionAwareBeanPostProcessor postProcessor : this.beanPostProcessors) {
 				if (postProcessor instanceof Serializable) {
 					serializablePostProcessors.add(postProcessor);
@@ -406,7 +386,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * @param beanDefinition the corresponding bean definition
 	 */
 	public static boolean hasDestroyMethod(Object bean, RootBeanDefinition beanDefinition) {
-		if (bean instanceof DisposableBean || closeableInterface.isInstance(bean)) {
+		if (bean instanceof DisposableBean || bean instanceof AutoCloseable) {
 			return true;
 		}
 		String destroyMethodName = beanDefinition.getDestroyMethodName();

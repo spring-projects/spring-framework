@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.web.servlet.config;
 import java.util.List;
 import java.util.Properties;
 
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
+import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.FactoryBean;
@@ -43,11 +45,13 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.cbor.MappingJackson2CborHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
@@ -171,6 +175,12 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	private static final boolean jackson2XmlPresent =
 			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
+	private static final boolean jackson2SmilePresent =
+			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+
+	private static final boolean jackson2CborPresent =
+			ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+
 	private static final boolean gsonPresent =
 			ClassUtils.isPresent("com.google.gson.Gson", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
@@ -193,10 +203,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 		if (element.hasAttribute("enable-matrix-variables")) {
 			Boolean enableMatrixVariables = Boolean.valueOf(element.getAttribute("enable-matrix-variables"));
-			handlerMappingDef.getPropertyValues().add("removeSemicolonContent", !enableMatrixVariables);
-		}
-		else if (element.hasAttribute("enableMatrixVariables")) {
-			Boolean enableMatrixVariables = Boolean.valueOf(element.getAttribute("enableMatrixVariables"));
 			handlerMappingDef.getPropertyValues().add("removeSemicolonContent", !enableMatrixVariables);
 		}
 
@@ -238,12 +244,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			Boolean ignoreDefaultModel = Boolean.valueOf(element.getAttribute("ignore-default-model-on-redirect"));
 			handlerAdapterDef.getPropertyValues().add("ignoreDefaultModelOnRedirect", ignoreDefaultModel);
 		}
-		else if (element.hasAttribute("ignoreDefaultModelOnRedirect")) {
-			// "ignoreDefaultModelOnRedirect" spelling is deprecated
-			Boolean ignoreDefaultModel = Boolean.valueOf(element.getAttribute("ignoreDefaultModelOnRedirect"));
-			handlerAdapterDef.getPropertyValues().add("ignoreDefaultModelOnRedirect", ignoreDefaultModel);
-		}
-
 		if (argumentResolvers != null) {
 			handlerAdapterDef.getPropertyValues().add("customArgumentResolvers", argumentResolvers);
 		}
@@ -433,13 +433,19 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		Properties props = new Properties();
 		if (romePresent) {
 			props.put("atom", MediaType.APPLICATION_ATOM_XML_VALUE);
-			props.put("rss", "application/rss+xml");
+			props.put("rss", MediaType.APPLICATION_RSS_XML_VALUE);
 		}
 		if (jaxb2Present || jackson2XmlPresent) {
 			props.put("xml", MediaType.APPLICATION_XML_VALUE);
 		}
 		if (jackson2Present || gsonPresent) {
 			props.put("json", MediaType.APPLICATION_JSON_VALUE);
+		}
+		if (jackson2SmilePresent) {
+			props.put("smile", "application/x-jackson-smile");
+		}
+		if (jackson2CborPresent) {
+			props.put("cbor", "application/cbor");
 		}
 		return props;
 	}
@@ -469,7 +475,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private ManagedList<?> getCallableInterceptors(Element element, Object source, ParserContext parserContext) {
-		ManagedList<? super Object> interceptors = new ManagedList<Object>();
+		ManagedList<? super Object> interceptors = new ManagedList<>();
 		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
 		if (asyncElement != null) {
 			Element interceptorsElement = DomUtils.getChildElementByTagName(asyncElement, "callable-interceptors");
@@ -486,7 +492,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private ManagedList<?> getDeferredResultInterceptors(Element element, Object source, ParserContext parserContext) {
-		ManagedList<? super Object> interceptors = new ManagedList<Object>();
+		ManagedList<? super Object> interceptors = new ManagedList<>();
 		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
 		if (asyncElement != null) {
 			Element interceptorsElement = DomUtils.getChildElementByTagName(asyncElement, "deferred-result-interceptors");
@@ -512,7 +518,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private ManagedList<Object> wrapLegacyResolvers(List<Object> list, ParserContext context) {
-		ManagedList<Object> result = new ManagedList<Object>();
+		ManagedList<Object> result = new ManagedList<>();
 		for (Object object : list) {
 			if (object instanceof BeanDefinitionHolder) {
 				BeanDefinitionHolder beanDef = (BeanDefinitionHolder) object;
@@ -537,7 +543,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 	private ManagedList<?> getMessageConverters(Element element, Object source, ParserContext parserContext) {
 		Element convertersElement = DomUtils.getChildElementByTagName(element, "message-converters");
-		ManagedList<? super Object> messageConverters = new ManagedList<Object>();
+		ManagedList<? super Object> messageConverters = new ManagedList<>();
 		if (convertersElement != null) {
 			messageConverters.setSource(source);
 			for (Element beanElement : DomUtils.getChildElementsByTagName(convertersElement, "bean", "ref")) {
@@ -583,6 +589,21 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			else if (gsonPresent) {
 				messageConverters.add(createConverterDefinition(GsonHttpMessageConverter.class, source));
 			}
+
+			if (jackson2SmilePresent) {
+				RootBeanDefinition jacksonConverterDef = createConverterDefinition(MappingJackson2SmileHttpMessageConverter.class, source);
+				GenericBeanDefinition jacksonFactoryDef = createObjectMapperFactoryDefinition(source);
+				jacksonFactoryDef.getPropertyValues().add("factory", new SmileFactory());
+				jacksonConverterDef.getConstructorArgumentValues().addIndexedArgumentValue(0, jacksonFactoryDef);
+				messageConverters.add(jacksonConverterDef);
+			}
+			if (jackson2CborPresent) {
+				RootBeanDefinition jacksonConverterDef = createConverterDefinition(MappingJackson2CborHttpMessageConverter.class, source);
+				GenericBeanDefinition jacksonFactoryDef = createObjectMapperFactoryDefinition(source);
+				jacksonFactoryDef.getPropertyValues().add("factory", new CBORFactory());
+				jacksonConverterDef.getConstructorArgumentValues().addIndexedArgumentValue(0, jacksonFactoryDef);
+				messageConverters.add(jacksonConverterDef);
+			}
 		}
 		return messageConverters;
 	}
@@ -604,7 +625,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 
 	private ManagedList<Object> extractBeanSubElements(Element parentElement, ParserContext parserContext) {
-		ManagedList<Object> list = new ManagedList<Object>();
+		ManagedList<Object> list = new ManagedList<>();
 		list.setSource(parserContext.extractSource(parentElement));
 		for (Element beanElement : DomUtils.getChildElementsByTagName(parentElement, "bean", "ref")) {
 			Object object = parserContext.getDelegate().parsePropertySubElement(beanElement, null);
@@ -614,7 +635,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
     private ManagedList<BeanReference> extractBeanRefSubElements(Element parentElement, ParserContext parserContext){
-        ManagedList<BeanReference> list = new ManagedList<BeanReference>();
+        ManagedList<BeanReference> list = new ManagedList<>();
         list.setSource(parserContext.extractSource(parentElement));
         for (Element refElement : DomUtils.getChildElementsByTagName(parentElement, "ref")) {
             BeanReference reference;

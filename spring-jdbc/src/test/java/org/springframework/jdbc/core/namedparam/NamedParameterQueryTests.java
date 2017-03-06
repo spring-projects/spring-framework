@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,7 +190,7 @@ public class NamedParameterQueryTests {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt(1)).willReturn(22);
 
-		Map<String, Object> parms = new HashMap<String, Object>();
+		Map<String, Object> parms = new HashMap<>();
 		parms.put("id", 3);
 		Object o = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id",
 				parms, Integer.class);
@@ -240,7 +240,7 @@ public class NamedParameterQueryTests {
 		given(resultSet.getInt(1)).willReturn(22);
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
-		List<Object[]> l1 = new ArrayList<Object[]>();
+		List<Object[]> l1 = new ArrayList<>();
 		l1.add(new Object[] {3, "Rod"});
 		l1.add(new Object[] {4, "Juergen"});
 		parms.addValue("multiExpressionList", l1);

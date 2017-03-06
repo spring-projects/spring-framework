@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.ser.impl.UnknownSerializer;
 import org.junit.Test;
 
 import org.springframework.http.converter.json.SpringHandlerInstantiator;
@@ -36,9 +38,6 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.ser.impl.UnknownSerializer;
-
 import static org.junit.Assert.*;
 
 /**
@@ -50,12 +49,10 @@ import static org.junit.Assert.*;
  */
 public class StandaloneMockMvcBuilderTests {
 
-	// SPR-10825
-
-	@Test
+	@Test  // SPR-10825
 	public void placeHoldersInRequestMapping() throws Exception {
 		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PlaceholderController());
-		builder.addPlaceHolderValue("sys.login.ajax", "/foo");
+		builder.addPlaceholderValue("sys.login.ajax", "/foo");
 		builder.build();
 
 		RequestMappingHandlerMapping hm = builder.wac.getBean(RequestMappingHandlerMapping.class);
@@ -67,9 +64,7 @@ public class StandaloneMockMvcBuilderTests {
 		assertEquals("handleWithPlaceholders", ((HandlerMethod) chain.getHandler()).getMethod().getName());
 	}
 
-	// SPR-13637
-
-	@Test
+	@Test  // SPR-13637
 	public void suffixPatternMatch() throws Exception {
 		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PersonController());
 		builder.setUseSuffixPatternMatch(false);
@@ -87,17 +82,14 @@ public class StandaloneMockMvcBuilderTests {
 		assertNull(chain);
 	}
 
-	// SPR-12553
-
-	@Test
+	@Test  // SPR-12553
 	public void applicationContextAttribute() {
 		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PlaceholderController());
-		builder.addPlaceHolderValue("sys.login.ajax", "/foo");
+		builder.addPlaceholderValue("sys.login.ajax", "/foo");
 		WebApplicationContext  wac = builder.initWebAppContext();
 		assertEquals(wac, WebApplicationContextUtils
 				.getRequiredWebApplicationContext(wac.getServletContext()));
 	}
-
 
 	@Test(expected = IllegalArgumentException.class)
 	public void addFiltersFiltersNull() {
@@ -123,9 +115,7 @@ public class StandaloneMockMvcBuilderTests {
 		builder.addFilter(new ContinueFilter(), (String) null);
 	}
 
-	// SPR-13375
-
-	@Test
+	@Test  // SPR-13375
 	@SuppressWarnings("rawtypes")
 	public void springHandlerInstantiator() {
 		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PersonController());
@@ -159,6 +149,7 @@ public class StandaloneMockMvcBuilderTests {
 		}
 	}
 
+
 	@Controller
 	private static class PersonController {
 
@@ -172,6 +163,7 @@ public class StandaloneMockMvcBuilderTests {
 			return "forward:/persons";
 		}
 	}
+
 
 	private class ContinueFilter extends OncePerRequestFilter {
 

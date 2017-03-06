@@ -17,7 +17,6 @@
 package org.springframework.test.context.transaction;
 
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -33,6 +32,7 @@ import org.springframework.transaction.annotation.TransactionManagementConfigure
 import org.springframework.transaction.interceptor.DelegatingTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -196,10 +196,8 @@ public abstract class TestContextTransactionUtils {
 				// look up single TransactionManagementConfigurer
 				Map<String, TransactionManagementConfigurer> configurers = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 					lbf, TransactionManagementConfigurer.class);
-				if (configurers.size() > 1) {
-					throw new IllegalStateException(
+				Assert.state(configurers.size() <= 1,
 						"Only one TransactionManagementConfigurer may exist in the ApplicationContext");
-				}
 				if (configurers.size() == 1) {
 					return configurers.values().iterator().next().annotationDrivenTransactionManager();
 				}
@@ -243,10 +241,9 @@ public abstract class TestContextTransactionUtils {
 
 		private final String name;
 
-
 		public TestContextTransactionAttribute(TransactionAttribute targetAttribute, TestContext testContext) {
 			super(targetAttribute);
-			this.name = testContext.getTestClass().getName() + "." + testContext.getTestMethod().getName();
+			this.name = ClassUtils.getQualifiedMethodName(testContext.getTestMethod(), testContext.getTestClass());
 		}
 
 		@Override

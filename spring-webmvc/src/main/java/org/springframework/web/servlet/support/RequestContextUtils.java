@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,14 @@ import java.util.TimeZone;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -36,6 +39,8 @@ import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ThemeResolver;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Utility class for easy access to request-specific state which has been
@@ -59,53 +64,6 @@ public abstract class RequestContextUtils {
 	 */
 	public static final String REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME = "requestDataValueProcessor";
 
-
-	/**
-	 * Look for the WebApplicationContext associated with the DispatcherServlet
-	 * that has initiated request processing.
-	 * @param request current HTTP request
-	 * @return the request-specific web application context
-	 * @throws IllegalStateException if no servlet-specific context has been found
-	 * @see #getWebApplicationContext(ServletRequest, ServletContext)
-	 * @deprecated as of Spring 4.2.1, in favor of
-	 * {@link #findWebApplicationContext(HttpServletRequest)}
-	 */
-	@Deprecated
-	public static WebApplicationContext getWebApplicationContext(ServletRequest request) throws IllegalStateException {
-		return getWebApplicationContext(request, null);
-	}
-
-	/**
-	 * Look for the WebApplicationContext associated with the DispatcherServlet
-	 * that has initiated request processing, and for the global context if none
-	 * was found associated with the current request. This method is useful to
-	 * allow components outside the framework, such as JSP tag handlers,
-	 * to access the most specific application context available.
-	 * @param request current HTTP request
-	 * @param servletContext current servlet context
-	 * @return the request-specific WebApplicationContext, or the global one
-	 * if no request-specific context has been found
-	 * @throws IllegalStateException if neither a servlet-specific nor a
-	 * global context has been found
-	 * @see DispatcherServlet#WEB_APPLICATION_CONTEXT_ATTRIBUTE
-	 * @see WebApplicationContextUtils#getRequiredWebApplicationContext(ServletContext)
-	 * @deprecated as of Spring 4.2.1, in favor of
-	 * {@link #findWebApplicationContext(HttpServletRequest, ServletContext)}
-	 */
-	@Deprecated
-	public static WebApplicationContext getWebApplicationContext(
-			ServletRequest request, ServletContext servletContext) throws IllegalStateException {
-
-		WebApplicationContext webApplicationContext = (WebApplicationContext) request.getAttribute(
-				DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
-		if (webApplicationContext == null) {
-			if (servletContext == null) {
-				throw new IllegalStateException("No WebApplicationContext found: not in a DispatcherServlet request?");
-			}
-			webApplicationContext = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
-		}
-		return webApplicationContext;
-	}
 
 	/**
 	 * Look for the WebApplicationContext associated with the DispatcherServlet
@@ -256,9 +214,8 @@ public abstract class RequestContextUtils {
 	}
 
 	/**
-	 * Return a read-only {@link Map} with "input" flash attributes saved on a
-	 * previous request.
-	 * @param request the current request
+	 * Return read-only "input" flash attributes from request before redirect.
+	 * @param request current request
 	 * @return a read-only Map, or {@code null} if not found
 	 * @see FlashMap
 	 */
@@ -268,23 +225,52 @@ public abstract class RequestContextUtils {
 	}
 
 	/**
-	 * Return the "output" FlashMap with attributes to save for a subsequent request.
-	 * @param request the current request
-	 * @return a {@link FlashMap} instance (never {@code null} within a DispatcherServlet request)
-	 * @see FlashMap
+	 * Return "output" FlashMap to save attributes for request after redirect.
+	 * @param request current request
+	 * @return a {@link FlashMap} instance, never {@code null} within a
+	 * {@code DispatcherServlet}-handled request
 	 */
 	public static FlashMap getOutputFlashMap(HttpServletRequest request) {
 		return (FlashMap) request.getAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE);
 	}
 
 	/**
-	 * Return the FlashMapManager instance to save flash attributes with
-	 * before a redirect.
+	 * Return the {@code FlashMapManager} instance to save flash attributes.
+	 * <p>As of 5.0 the convenience method {@link #saveOutputFlashMap} may be
+	 * used to save the "output" FlashMap.
 	 * @param request the current request
-	 * @return a {@link FlashMapManager} instance (never {@code null} within a DispatcherServlet request)
+	 * @return a {@link FlashMapManager} instance, never {@code null} within a
+	 * {@code DispatcherServlet}-handled request
 	 */
 	public static FlashMapManager getFlashMapManager(HttpServletRequest request) {
 		return (FlashMapManager) request.getAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE);
+	}
+
+	/**
+	 * Convenience method that retrieves the {@link #getOutputFlashMap "output"
+	 * FlashMap}, updates it with the path and query params of the target URL,
+	 * and then saves it using the {@link #getFlashMapManager FlashMapManager}.
+	 *
+	 * @param location the target URL for the redirect
+	 * @param request the current request
+	 * @param response the current response
+	 * @since 5.0
+	 */
+	public static void saveOutputFlashMap(String location, HttpServletRequest request,
+			HttpServletResponse response) {
+
+		FlashMap flashMap = getOutputFlashMap(request);
+		if (CollectionUtils.isEmpty(flashMap)) {
+			return;
+		}
+
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(location).build();
+		flashMap.setTargetRequestPath(uriComponents.getPath());
+		flashMap.addTargetRequestParams(uriComponents.getQueryParams());
+
+		FlashMapManager manager = getFlashMapManager(request);
+		Assert.state(manager != null, "No FlashMapManager. Is this a DispatcherServlet handled request?");
+		manager.saveOutputFlashMap(flashMap, request, response);
 	}
 
 }

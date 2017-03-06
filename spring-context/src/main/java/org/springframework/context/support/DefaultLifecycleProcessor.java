@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ import org.springframework.context.Lifecycle;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.Phased;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.util.Assert;
 
 /**
  * Default implementation of the {@link LifecycleProcessor} strategy.
@@ -70,7 +69,10 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		Assert.isInstanceOf(ConfigurableListableBeanFactory.class, beanFactory);
+		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
+			throw new IllegalArgumentException(
+					"DefaultLifecycleProcessor requires a ConfigurableListableBeanFactory: " + beanFactory);
+		}
 		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
 	}
 
@@ -129,7 +131,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	private void startBeans(boolean autoStartupOnly) {
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
-		Map<Integer, LifecycleGroup> phases = new HashMap<Integer, LifecycleGroup>();
+		Map<Integer, LifecycleGroup> phases = new HashMap<>();
 		for (Map.Entry<String, ? extends Lifecycle> entry : lifecycleBeans.entrySet()) {
 			Lifecycle bean = entry.getValue();
 			if (!autoStartupOnly || (bean instanceof SmartLifecycle && ((SmartLifecycle) bean).isAutoStartup())) {
@@ -142,8 +144,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 				group.add(entry.getKey(), bean);
 			}
 		}
-		if (phases.size() > 0) {
-			List<Integer> keys = new ArrayList<Integer>(phases.keySet());
+		if (!phases.isEmpty()) {
+			List<Integer> keys = new ArrayList<>(phases.keySet());
 			Collections.sort(keys);
 			for (Integer key : keys) {
 				phases.get(key).start();
@@ -184,7 +186,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	private void stopBeans() {
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
-		Map<Integer, LifecycleGroup> phases = new HashMap<Integer, LifecycleGroup>();
+		Map<Integer, LifecycleGroup> phases = new HashMap<>();
 		for (Map.Entry<String, Lifecycle> entry : lifecycleBeans.entrySet()) {
 			Lifecycle bean = entry.getValue();
 			int shutdownOrder = getPhase(bean);
@@ -195,8 +197,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 			group.add(entry.getKey(), bean);
 		}
-		if (phases.size() > 0) {
-			List<Integer> keys = new ArrayList<Integer>(phases.keySet());
+		if (!phases.isEmpty()) {
+			List<Integer> keys = new ArrayList<>(phases.keySet());
 			Collections.sort(keys, Collections.reverseOrder());
 			for (Integer key : keys) {
 				phases.get(key).stop();
@@ -269,7 +271,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * @return the Map of applicable beans, with bean names as keys and bean instances as values
 	 */
 	protected Map<String, Lifecycle> getLifecycleBeans() {
-		Map<String, Lifecycle> beans = new LinkedHashMap<String, Lifecycle>();
+		Map<String, Lifecycle> beans = new LinkedHashMap<>();
 		String[] beanNames = this.beanFactory.getBeanNamesForType(Lifecycle.class, false, false);
 		for (String beanName : beanNames) {
 			String beanNameToRegister = BeanFactoryUtils.transformedBeanName(beanName);
@@ -307,7 +309,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 */
 	private class LifecycleGroup {
 
-		private final List<LifecycleGroupMember> members = new ArrayList<LifecycleGroupMember>();
+		private final List<LifecycleGroupMember> members = new ArrayList<>();
 
 		private final int phase;
 

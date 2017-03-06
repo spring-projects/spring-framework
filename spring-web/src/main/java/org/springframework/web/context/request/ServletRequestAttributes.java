@@ -49,7 +49,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	public static final String DESTRUCTION_CALLBACK_NAME_PREFIX =
 			ServletRequestAttributes.class.getName() + ".DESTRUCTION_CALLBACK.";
 
-	protected static final Set<Class<?>> immutableValueTypes = new HashSet<Class<?>>(16);
+	protected static final Set<Class<?>> immutableValueTypes = new HashSet<>(16);
 
 	static {
 		immutableValueTypes.addAll(NumberUtils.STANDARD_NUMBER_TYPES);
@@ -65,7 +65,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	private volatile HttpSession session;
 
-	private final Map<String, Object> sessionAttributesToUpdate = new ConcurrentHashMap<String, Object>(1);
+	private final Map<String, Object> sessionAttributesToUpdate = new ConcurrentHashMap<>(1);
 
 
 	/**

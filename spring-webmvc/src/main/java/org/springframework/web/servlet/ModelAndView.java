@@ -51,7 +51,7 @@ public class ModelAndView {
 	/** Model Map */
 	private ModelMap model;
 
-	/** Optional status for the response */
+	/** Optional HTTP status for the response */
 	private HttpStatus status;
 
 	/** Indicates whether or not this instance has been cleared with a call to {@link #clear()} */
@@ -120,7 +120,6 @@ public class ModelAndView {
 		}
 	}
 
-
 	/**
 	 * Creates new ModelAndView given a view name, model, and status.
 	 * @param viewName name of the View to render, to be resolved
@@ -128,7 +127,9 @@ public class ModelAndView {
 	 * @param model Map of model names (Strings) to model objects
 	 * (Objects). Model entries may not be {@code null}, but the
 	 * model Map may be {@code null} if there is no model data.
-	 * @param status an alternative status code to use for the response.
+	 * @param status an alternative status code to use for the response;
+	 * The response status is set just prior to View rendering.
+	 * @since 4.3
 	 */
 	public ModelAndView(String viewName, Map<String, ?> model, HttpStatus status) {
 		this.view = viewName;
@@ -239,7 +240,8 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Set the status to use for the response.
+	 * Set the HTTP status to use for the response.
+	 * <p>The response status is set just prior to View rendering.
 	 * @since 4.3
 	 */
 	public void setStatus(HttpStatus status) {
@@ -247,7 +249,8 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Return the configured status for the response.
+	 * Return the configured HTTP status for the response, if any.
+	 * @since 4.3
 	 */
 	public HttpStatus getStatus() {
 		return this.status;

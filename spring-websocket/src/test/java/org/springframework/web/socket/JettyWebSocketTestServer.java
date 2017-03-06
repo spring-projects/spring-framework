@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public class JettyWebSocketTestServer implements WebSocketTestServer {
 
 	private Server jettyServer;
 
-	private int port = -1;
+	private int port;
 
 	private ServletContextHandler contextHandler;
 
@@ -50,11 +50,6 @@ public class JettyWebSocketTestServer implements WebSocketTestServer {
 	public void setup() {
 		// Let server pick its own random, available port.
 		this.jettyServer = new Server(0);
-	}
-
-	@Override
-	public int getPort() {
-		return this.port;
 	}
 
 	@Override
@@ -73,11 +68,6 @@ public class JettyWebSocketTestServer implements WebSocketTestServer {
 	}
 
 	@Override
-	public ServletContext getServletContext() {
-		return this.contextHandler.getServletContext();
-	}
-
-	@Override
 	public void undeployConfig() {
 		// Stopping jetty will undeploy the servlet
 	}
@@ -85,6 +75,7 @@ public class JettyWebSocketTestServer implements WebSocketTestServer {
 	@Override
 	public void start() throws Exception {
 		this.jettyServer.start();
+		this.contextHandler.start();
 
 		Connector[] connectors = jettyServer.getConnectors();
 		NetworkConnector connector = (NetworkConnector) connectors[0];
@@ -93,10 +84,27 @@ public class JettyWebSocketTestServer implements WebSocketTestServer {
 
 	@Override
 	public void stop() throws Exception {
-		if (this.jettyServer.isRunning()) {
-			this.jettyServer.setStopTimeout(5000);
-			this.jettyServer.stop();
+		try {
+			if (this.contextHandler.isRunning()) {
+				this.contextHandler.stop();
+			}
 		}
+		finally {
+			if (this.jettyServer.isRunning()) {
+				this.jettyServer.setStopTimeout(5000);
+				this.jettyServer.stop();
+			}
+		}
+	}
+
+	@Override
+	public int getPort() {
+		return this.port;
+	}
+
+	@Override
+	public ServletContext getServletContext() {
+		return this.contextHandler.getServletContext();
 	}
 
 }

@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class AroundAdviceCircularTests extends AroundAdviceBindingTests {
+public class AroundAdviceCircularTests extends AroundAdviceBindingTests {
 
 	@Test
 	public void testBothBeansAreProxies() {

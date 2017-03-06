@@ -12,7 +12,7 @@
 	<bean id="nopInterceptor" class="org.springframework.tests.aop.interceptor.SerializableNopInterceptor"/>
 
 	<bean id="settersAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
-		<property name="advice"><ref local="nopInterceptor"/></property>
+		<property name="advice"><ref bean="nopInterceptor"/></property>
 		<property name="pattern">
 			<value>
 				.*set.*
@@ -22,7 +22,7 @@
 
 	<bean id="settersAdvised" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="proxyInterfaces"><value>org.springframework.tests.sample.beans.ITestBean</value></property>
-		<property name="target"><ref local="test"/></property>
+		<property name="target"><ref bean="test"/></property>
 		<property name="interceptorNames"><value>settersAdvisor</value></property>
 	</bean>
 
@@ -38,7 +38,7 @@
 
 	<!-- Illustrates use of multiple patterns -->
 	<bean id="settersAndAbsquatulateAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
-		<property name="advice"><ref local="nopInterceptor"/></property>
+		<property name="advice"><ref bean="nopInterceptor"/></property>
 		<property name="patterns">
 			<list>
 				<value>.*get.*</value>
@@ -51,7 +51,7 @@
 		<property name="proxyInterfaces"><value>org.springframework.tests.sample.beans.ITestBean</value></property>
 		<!-- Force CGLIB so we can cast to TestBean -->
 		<property name="proxyTargetClass"><value>true</value></property>
-		<property name="target"><ref local="test"/></property>
+		<property name="target"><ref bean="test"/></property>
 		<property name="interceptorNames"><value>settersAndAbsquatulateAdvisor</value></property>
 	</bean>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public class JCacheCacheManagerTests extends AbstractTransactionSupportingCacheM
 		private final CacheManager cacheManager;
 
 		private CacheManagerMock() {
-			this.cacheNames = new ArrayList<String>();
+			this.cacheNames = new ArrayList<>();
 			this.cacheManager = mock(CacheManager.class);
 			given(cacheManager.getCacheNames()).willReturn(cacheNames);
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,16 +64,16 @@ public class CallMetaDataContext {
 	private String schemaName;
 
 	/** List of SqlParameter objects to be used in call execution */
-	private List<SqlParameter> callParameters = new ArrayList<SqlParameter>();
+	private List<SqlParameter> callParameters = new ArrayList<>();
 
 	/** Actual name to use for the return value in the output map */
 	private String actualFunctionReturnName;
 
 	/** Set of in parameter names to exclude use for any not listed */
-	private Set<String> limitedInParameterNames = new HashSet<String>();
+	private Set<String> limitedInParameterNames = new HashSet<>();
 
 	/** List of SqlParameter names for out parameters */
-	private List<String> outParameterNames = new ArrayList<String>();
+	private List<String> outParameterNames = new ArrayList<>();
 
 	/** Indicates whether this is a procedure or a function **/
 	private boolean function = false;
@@ -300,11 +300,11 @@ public class CallMetaDataContext {
 	 * Reconcile the provided parameters with available metadata and add new ones where appropriate.
 	 */
 	protected List<SqlParameter> reconcileParameters(List<SqlParameter> parameters) {
-		final List<SqlParameter> declaredReturnParams = new ArrayList<SqlParameter>();
-		final Map<String, SqlParameter> declaredParams = new LinkedHashMap<String, SqlParameter>();
+		final List<SqlParameter> declaredReturnParams = new ArrayList<>();
+		final Map<String, SqlParameter> declaredParams = new LinkedHashMap<>();
 		boolean returnDeclared = false;
-		List<String> outParamNames = new ArrayList<String>();
-		List<String> metaDataParamNames = new ArrayList<String>();
+		List<String> outParamNames = new ArrayList<>();
+		List<String> metaDataParamNames = new ArrayList<>();
 
 		// Get the names of the meta data parameters
 		for (CallParameterMetaData meta : this.metaDataProvider.getCallParameterMetaData()) {
@@ -343,7 +343,7 @@ public class CallMetaDataContext {
 		}
 		setOutParameterNames(outParamNames);
 
-		List<SqlParameter> workParams = new ArrayList<SqlParameter>();
+		List<SqlParameter> workParams = new ArrayList<>();
 		workParams.addAll(declaredReturnParams);
 
 		if (!this.metaDataProvider.isProcedureColumnMetaDataUsed()) {
@@ -351,7 +351,7 @@ public class CallMetaDataContext {
 			return workParams;
 		}
 
-		Map<String, String> limitedInParamNamesMap = new HashMap<String, String>(this.limitedInParameterNames.size());
+		Map<String, String> limitedInParamNamesMap = new HashMap<>(this.limitedInParameterNames.size());
 		for (String limitedParamName : this.limitedInParameterNames) {
 			limitedInParamNamesMap.put(
 					this.metaDataProvider.parameterNameToUse(limitedParamName).toLowerCase(), limitedParamName);
@@ -460,8 +460,8 @@ public class CallMetaDataContext {
 		Map<String, String> caseInsensitiveParameterNames =
 				SqlParameterSourceUtils.extractCaseInsensitiveParameterNames(parameterSource);
 
-		Map<String, String> callParameterNames = new HashMap<String, String>(this.callParameters.size());
-		Map<String, Object> matchedParameters = new HashMap<String, Object>(this.callParameters.size());
+		Map<String, String> callParameterNames = new HashMap<>(this.callParameters.size());
+		Map<String, Object> matchedParameters = new HashMap<>(this.callParameters.size());
 		for (SqlParameter parameter : this.callParameters) {
 			if (parameter.isInputValueProvided()) {
 				String parameterName = parameter.getName();
@@ -521,7 +521,7 @@ public class CallMetaDataContext {
 		if (!this.metaDataProvider.isProcedureColumnMetaDataUsed()) {
 			return inParameters;
 		}
-		Map<String, String> callParameterNames = new HashMap<String, String>(this.callParameters.size());
+		Map<String, String> callParameterNames = new HashMap<>(this.callParameters.size());
 		for (SqlParameter parameter : this.callParameters) {
 			if (parameter.isInputValueProvided()) {
 				String parameterName =  parameter.getName();
@@ -531,7 +531,7 @@ public class CallMetaDataContext {
 				}
 			}
 		}
-		Map<String, Object> matchedParameters = new HashMap<String, Object>(inParameters.size());
+		Map<String, Object> matchedParameters = new HashMap<>(inParameters.size());
 		for (String parameterName : inParameters.keySet()) {
 			String parameterNameToMatch = this.metaDataProvider.parameterNameToUse(parameterName);
 			String callParameterName = callParameterNames.get(parameterNameToMatch.toLowerCase());
@@ -569,7 +569,7 @@ public class CallMetaDataContext {
 	}
 
 	public Map<String, ?> matchInParameterValuesWithCallParameters(Object[] parameterValues) {
-		Map<String, Object> matchedParameters = new HashMap<String, Object>(parameterValues.length);
+		Map<String, Object> matchedParameters = new HashMap<>(parameterValues.length);
 		int i = 0;
 		for (SqlParameter parameter : this.callParameters) {
 			if (parameter.isInputValueProvided()) {

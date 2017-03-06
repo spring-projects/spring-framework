@@ -104,7 +104,7 @@ public class StandardServletAsyncWebRequestTests {
 
 	@Test
 	public void startAsyncAfterCompleted() throws Exception {
-		this.asyncRequest.onComplete(new AsyncEvent(null));
+		this.asyncRequest.onComplete(new AsyncEvent(new MockAsyncContext(this.request, this.response)));
 		try {
 			this.asyncRequest.startAsync();
 			fail("expected exception");
@@ -116,7 +116,7 @@ public class StandardServletAsyncWebRequestTests {
 
 	@Test
 	public void onTimeoutDefaultBehavior() throws Exception {
-		this.asyncRequest.onTimeout(new AsyncEvent(null));
+		this.asyncRequest.onTimeout(new AsyncEvent(new MockAsyncContext(this.request, this.response)));
 		assertEquals(200, this.response.getStatus());
 	}
 
@@ -124,11 +124,11 @@ public class StandardServletAsyncWebRequestTests {
 	public void onTimeoutHandler() throws Exception {
 		Runnable timeoutHandler = mock(Runnable.class);
 		this.asyncRequest.addTimeoutHandler(timeoutHandler);
-		this.asyncRequest.onTimeout(new AsyncEvent(null));
+		this.asyncRequest.onTimeout(new AsyncEvent(new MockAsyncContext(this.request, this.response)));
 		verify(timeoutHandler).run();
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void setTimeoutDuringConcurrentHandling() {
 		this.asyncRequest.startAsync();
 		this.asyncRequest.setTimeout(25L);
@@ -140,7 +140,7 @@ public class StandardServletAsyncWebRequestTests {
 		this.asyncRequest.addCompletionHandler(handler);
 
 		this.asyncRequest.startAsync();
-		this.asyncRequest.onComplete(new AsyncEvent(null));
+		this.asyncRequest.onComplete(new AsyncEvent(this.request.getAsyncContext()));
 
 		verify(handler).run();
 		assertTrue(this.asyncRequest.isAsyncComplete());
@@ -154,7 +154,7 @@ public class StandardServletAsyncWebRequestTests {
 		this.asyncRequest.addCompletionHandler(handler);
 
 		this.asyncRequest.startAsync();
-		this.asyncRequest.onError(new AsyncEvent(null));
+		this.asyncRequest.onError(new AsyncEvent(this.request.getAsyncContext()));
 
 		verify(handler).run();
 		assertTrue(this.asyncRequest.isAsyncComplete());

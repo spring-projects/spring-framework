@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.scheduling.annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -32,12 +33,18 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.beans.factory.config.NamedBeanHolder;
+import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
@@ -65,7 +72,7 @@ import org.springframework.util.StringValueResolver;
  *
  * <p>This post-processor is automatically registered by Spring's
  * {@code <task:annotation-driven>} XML element, and also by the
- * @{@link EnableScheduling} annotation.
+ * {@link EnableScheduling @EnableScheduling} annotation.
  *
  * <p>Autodetects any {@link SchedulingConfigurer} instances in the container,
  * allowing for customization of the scheduler to be used or for fine-grained
@@ -84,8 +91,9 @@ import org.springframework.util.StringValueResolver;
  * @see org.springframework.scheduling.config.ScheduledTaskRegistrar
  * @see AsyncAnnotationBeanPostProcessor
  */
-public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBeanPostProcessor,
-		Ordered, EmbeddedValueResolverAware, BeanFactoryAware, ApplicationContextAware,
+public class ScheduledAnnotationBeanPostProcessor
+		implements MergedBeanDefinitionPostProcessor, DestructionAwareBeanPostProcessor,
+		Ordered, EmbeddedValueResolverAware, BeanNameAware, BeanFactoryAware, ApplicationContextAware,
 		SmartInitializingSingleton, ApplicationListener<ContextRefreshedEvent>, DisposableBean {
 
 	/**
@@ -103,17 +111,17 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 
 	private StringValueResolver embeddedValueResolver;
 
+	private String beanName;
+
 	private BeanFactory beanFactory;
 
 	private ApplicationContext applicationContext;
 
 	private final ScheduledTaskRegistrar registrar = new ScheduledTaskRegistrar();
 
-	private final Set<Class<?>> nonAnnotatedClasses =
-			Collections.newSetFromMap(new ConcurrentHashMap<Class<?>, Boolean>(64));
+	private final Set<Class<?>> nonAnnotatedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
 
-	private final Map<Object, Set<ScheduledTask>> scheduledTasks =
-			new ConcurrentHashMap<Object, Set<ScheduledTask>>(16);
+	private final Map<Object, Set<ScheduledTask>> scheduledTasks = new IdentityHashMap<>(16);
 
 
 	@Override
@@ -139,6 +147,11 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.embeddedValueResolver = resolver;
+	}
+
+	@Override
+	public void setBeanName(String beanName) {
+		this.beanName = beanName;
 	}
 
 	/**
@@ -167,6 +180,9 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 
 	@Override
 	public void afterSingletonsInstantiated() {
+		// Remove resolved singleton classes from cache
+		this.nonAnnotatedClasses.clear();
+
 		if (this.applicationContext == null) {
 			// Not running in an ApplicationContext -> register tasks early...
 			finishRegistration();
@@ -200,12 +216,11 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 			Assert.state(this.beanFactory != null, "BeanFactory must be set to find scheduler by type");
 			try {
 				// Search for TaskScheduler bean...
-				this.registrar.setTaskScheduler(this.beanFactory.getBean(TaskScheduler.class));
+				this.registrar.setTaskScheduler(resolveSchedulerBean(TaskScheduler.class, false));
 			}
 			catch (NoUniqueBeanDefinitionException ex) {
 				try {
-					this.registrar.setTaskScheduler(
-							this.beanFactory.getBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, TaskScheduler.class));
+					this.registrar.setTaskScheduler(resolveSchedulerBean(TaskScheduler.class, true));
 				}
 				catch (NoSuchBeanDefinitionException ex2) {
 					if (logger.isInfoEnabled()) {
@@ -221,12 +236,11 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 				logger.debug("Could not find default TaskScheduler bean", ex);
 				// Search for ScheduledExecutorService bean next...
 				try {
-					this.registrar.setScheduler(this.beanFactory.getBean(ScheduledExecutorService.class));
+					this.registrar.setScheduler(resolveSchedulerBean(ScheduledExecutorService.class, false));
 				}
 				catch (NoUniqueBeanDefinitionException ex2) {
 					try {
-						this.registrar.setScheduler(
-								this.beanFactory.getBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, ScheduledExecutorService.class));
+						this.registrar.setScheduler(resolveSchedulerBean(ScheduledExecutorService.class, true));
 					}
 					catch (NoSuchBeanDefinitionException ex3) {
 						if (logger.isInfoEnabled()) {
@@ -249,6 +263,32 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 		this.registrar.afterPropertiesSet();
 	}
 
+	private <T> T resolveSchedulerBean(Class<T> schedulerType, boolean byName) {
+		if (byName) {
+			T scheduler = this.beanFactory.getBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, schedulerType);
+			if (this.beanFactory instanceof ConfigurableBeanFactory) {
+				((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(
+						DEFAULT_TASK_SCHEDULER_BEAN_NAME, this.beanName);
+			}
+			return scheduler;
+		}
+		else if (this.beanFactory instanceof AutowireCapableBeanFactory) {
+			NamedBeanHolder<T> holder = ((AutowireCapableBeanFactory) this.beanFactory).resolveNamedBean(schedulerType);
+			if (this.beanFactory instanceof ConfigurableBeanFactory) {
+				((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(
+						holder.getBeanName(), this.beanName);
+			}
+			return holder.getBeanInstance();
+		}
+		else {
+			return this.beanFactory.getBean(schedulerType);
+		}
+	}
+
+
+	@Override
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+	}
 
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) {
@@ -263,8 +303,8 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 					new MethodIntrospector.MetadataLookup<Set<Scheduled>>() {
 						@Override
 						public Set<Scheduled> inspect(Method method) {
-							Set<Scheduled> scheduledMethods =
-									AnnotatedElementUtils.getMergedRepeatableAnnotations(method, Scheduled.class, Schedules.class);
+							Set<Scheduled> scheduledMethods = AnnotatedElementUtils.getMergedRepeatableAnnotations(
+									method, Scheduled.class, Schedules.class);
 							return (!scheduledMethods.isEmpty() ? scheduledMethods : null);
 						}
 					});
@@ -293,7 +333,7 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 
 	protected void processScheduled(Scheduled scheduled, Method method, Object bean) {
 		try {
-			Assert.isTrue(method.getParameterTypes().length == 0,
+			Assert.isTrue(method.getParameterCount() == 0,
 					"Only no-arg methods may be annotated with @Scheduled");
 
 			Method invocableMethod = AopUtils.selectInvocableMethod(method, bean.getClass());
@@ -302,8 +342,7 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 			String errorMessage =
 					"Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";
 
-			Set<ScheduledTask> tasks =
-					new LinkedHashSet<ScheduledTask>(4);
+			Set<ScheduledTask> tasks = new LinkedHashSet<>(4);
 
 			// Determine initial delay
 			long initialDelay = scheduled.initialDelay();
@@ -397,7 +436,16 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 
 			// Check whether we had any attribute set
 			Assert.isTrue(processedSchedule, errorMessage);
-			this.scheduledTasks.put(bean, tasks);
+
+			// Finally register the scheduled tasks
+			synchronized (this.scheduledTasks) {
+				Set<ScheduledTask> registeredTasks = this.scheduledTasks.get(bean);
+				if (registeredTasks == null) {
+					registeredTasks = new LinkedHashSet<>(4);
+					this.scheduledTasks.put(bean, registeredTasks);
+				}
+				registeredTasks.addAll(tasks);
+			}
 		}
 		catch (IllegalArgumentException ex) {
 			throw new IllegalStateException(
@@ -408,7 +456,10 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 
 	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) {
-		Set<ScheduledTask> tasks = this.scheduledTasks.remove(bean);
+		Set<ScheduledTask> tasks;
+		synchronized (this.scheduledTasks) {
+			tasks = this.scheduledTasks.remove(bean);
+		}
 		if (tasks != null) {
 			for (ScheduledTask task : tasks) {
 				task.cancel();
@@ -418,18 +469,22 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 
 	@Override
 	public boolean requiresDestruction(Object bean) {
-		return this.scheduledTasks.containsKey(bean);
+		synchronized (this.scheduledTasks) {
+			return this.scheduledTasks.containsKey(bean);
+		}
 	}
 
 	@Override
 	public void destroy() {
-		Collection<Set<ScheduledTask>> allTasks = this.scheduledTasks.values();
-		for (Set<ScheduledTask> tasks : allTasks) {
-			for (ScheduledTask task : tasks) {
-				task.cancel();
+		synchronized (this.scheduledTasks) {
+			Collection<Set<ScheduledTask>> allTasks = this.scheduledTasks.values();
+			for (Set<ScheduledTask> tasks : allTasks) {
+				for (ScheduledTask task : tasks) {
+					task.cancel();
+				}
 			}
+			this.scheduledTasks.clear();
 		}
-		this.scheduledTasks.clear();
 		this.registrar.destroy();
 	}
 

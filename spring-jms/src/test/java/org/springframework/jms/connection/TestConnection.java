@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,16 @@ public class TestConnection implements Connection {
 
 	@Override
 	public Session createSession(boolean b, int i) throws JMSException {
+		return null;
+	}
+
+	@Override
+	public Session createSession(int sessionMode) throws JMSException {
+		return null;
+	}
+
+	@Override
+	public Session createSession() throws JMSException {
 		return null;
 	}
 
@@ -88,6 +98,16 @@ public class TestConnection implements Connection {
 
 	@Override
 	public ConnectionConsumer createDurableConnectionConsumer(Topic topic, String paramName, String paramName1, ServerSessionPool serverSessionPool, int i) throws JMSException {
+		return null;
+	}
+
+	@Override
+	public ConnectionConsumer createSharedConnectionConsumer(Topic topic, String subscriptionName, String messageSelector, ServerSessionPool sessionPool, int maxMessages) throws JMSException {
+		return null;
+	}
+
+	@Override
+	public ConnectionConsumer createSharedDurableConnectionConsumer(Topic topic, String subscriptionName, String messageSelector, ServerSessionPool sessionPool, int maxMessages) throws JMSException {
 		return null;
 	}
 

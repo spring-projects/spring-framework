@@ -17,7 +17,7 @@
 package org.springframework.http;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -112,7 +112,7 @@ public class HttpRangeTests {
 
 	@Test
 	public void toResourceRegion() {
-		byte[] bytes = "Spring Framework".getBytes(Charset.forName("UTF-8"));
+		byte[] bytes = "Spring Framework".getBytes(StandardCharsets.UTF_8);
 		ByteArrayResource resource = new ByteArrayResource(bytes);
 		HttpRange range = HttpRange.createByteRange(0, 5);
 		ResourceRegion region = range.toResourceRegion(resource);

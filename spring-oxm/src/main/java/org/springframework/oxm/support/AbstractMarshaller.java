@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.ext.LexicalHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.Unmarshaller;
@@ -184,8 +183,9 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	 * @return the XMLReader
 	 * @throws SAXException if thrown by JAXP methods
 	 */
+	@SuppressWarnings("deprecation")  // on JDK 9
 	protected XMLReader createXmlReader() throws SAXException {
-		XMLReader xmlReader = XMLReaderFactory.createXMLReader();
+		XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
 		xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
 		xmlReader.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
 		if (!isProcessExternalEntities()) {

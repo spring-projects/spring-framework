@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  */
 class DefaultResourceResolverChain implements ResourceResolverChain {
 
-	private final List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
+	private final List<ResourceResolver> resolvers = new ArrayList<>();
 
 	private int index = -1;
 

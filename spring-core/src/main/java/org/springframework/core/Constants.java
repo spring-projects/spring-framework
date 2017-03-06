@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class Constants {
 	private final String className;
 
 	/** Map from String field name to object value */
-	private final Map<String, Object> fieldCache = new HashMap<String, Object>();
+	private final Map<String, Object> fieldCache = new HashMap<>();
 
 
 	/**
@@ -59,7 +59,7 @@ public class Constants {
 	 * @throws IllegalArgumentException if the supplied {@code clazz} is {@code null}
 	 */
 	public Constants(Class<?> clazz) {
-		Assert.notNull(clazz);
+		Assert.notNull(clazz, "Class must not be null");
 		this.className = clazz.getName();
 		Field[] fields = clazz.getFields();
 		for (Field field : fields) {
@@ -159,7 +159,7 @@ public class Constants {
 	 */
 	public Set<String> getNames(String namePrefix) {
 		String prefixToUse = (namePrefix != null ? namePrefix.trim().toUpperCase(Locale.ENGLISH) : "");
-		Set<String> names = new HashSet<String>();
+		Set<String> names = new HashSet<>();
 		for (String code : this.fieldCache.keySet()) {
 			if (code.startsWith(prefixToUse)) {
 				names.add(code);
@@ -191,7 +191,7 @@ public class Constants {
 	 */
 	public Set<String> getNamesForSuffix(String nameSuffix) {
 		String suffixToUse = (nameSuffix != null ? nameSuffix.trim().toUpperCase(Locale.ENGLISH) : "");
-		Set<String> names = new HashSet<String>();
+		Set<String> names = new HashSet<>();
 		for (String code : this.fieldCache.keySet()) {
 			if (code.endsWith(suffixToUse)) {
 				names.add(code);
@@ -213,7 +213,7 @@ public class Constants {
 	 */
 	public Set<Object> getValues(String namePrefix) {
 		String prefixToUse = (namePrefix != null ? namePrefix.trim().toUpperCase(Locale.ENGLISH) : "");
-		Set<Object> values = new HashSet<Object>();
+		Set<Object> values = new HashSet<>();
 		for (String code : this.fieldCache.keySet()) {
 			if (code.startsWith(prefixToUse)) {
 				values.add(this.fieldCache.get(code));
@@ -245,7 +245,7 @@ public class Constants {
 	 */
 	public Set<Object> getValuesForSuffix(String nameSuffix) {
 		String suffixToUse = (nameSuffix != null ? nameSuffix.trim().toUpperCase(Locale.ENGLISH) : "");
-		Set<Object> values = new HashSet<Object>();
+		Set<Object> values = new HashSet<>();
 		for (String code : this.fieldCache.keySet()) {
 			if (code.endsWith(suffixToUse)) {
 				values.add(this.fieldCache.get(code));
@@ -331,6 +331,35 @@ public class Constants {
 			}
 		}
 		return parsedPrefix.toString();
+	}
+
+
+	/**
+	 * Exception thrown when the {@link Constants} class is asked for
+	 * an invalid constant name.
+	 */
+	@SuppressWarnings("serial")
+	public static class ConstantException extends IllegalArgumentException {
+
+		/**
+		 * Thrown when an invalid constant name is requested.
+		 * @param className name of the class containing the constant definitions
+		 * @param field invalid constant name
+		 * @param message description of the problem
+		 */
+		public ConstantException(String className, String field, String message) {
+			super("Field '" + field + "' " + message + " in class [" + className + "]");
+		}
+
+		/**
+		 * Thrown when an invalid constant value is looked up.
+		 * @param className name of the class containing the constant definitions
+		 * @param namePrefix prefix of the searched constant names
+		 * @param value the looked up constant value
+		 */
+		public ConstantException(String className, String namePrefix, Object value) {
+			super("No '" + namePrefix + "' field with value '" + value + "' found in class [" + className + "]");
+		}
 	}
 
 }

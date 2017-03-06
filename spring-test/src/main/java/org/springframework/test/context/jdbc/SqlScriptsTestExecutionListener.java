@@ -19,7 +19,6 @@ package org.springframework.test.context.jdbc;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -40,11 +39,10 @@ import org.springframework.test.context.transaction.TestContextTransactionUtils;
 import org.springframework.test.context.util.TestContextResourceUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -129,11 +127,11 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	private void executeSqlScripts(TestContext testContext, ExecutionPhase executionPhase) throws Exception {
 		boolean classLevel = false;
 
-		Set<Sql> sqlAnnotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(testContext.getTestMethod(), Sql.class,
-			SqlGroup.class);
+		Set<Sql> sqlAnnotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(
+				testContext.getTestMethod(), Sql.class, SqlGroup.class);
 		if (sqlAnnotations.isEmpty()) {
-			sqlAnnotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(testContext.getTestClass(), Sql.class,
-				SqlGroup.class);
+			sqlAnnotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(
+					testContext.getTestClass(), Sql.class, SqlGroup.class);
 			if (!sqlAnnotations.isEmpty()) {
 				classLevel = true;
 			}
@@ -147,26 +145,24 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	/**
 	 * Execute the SQL scripts configured via the supplied {@link Sql @Sql}
 	 * annotation for the given {@link ExecutionPhase} and {@link TestContext}.
-	 *
 	 * <p>Special care must be taken in order to properly support the configured
 	 * {@link SqlConfig#transactionMode}.
-	 *
 	 * @param sql the {@code @Sql} annotation to parse
 	 * @param executionPhase the current execution phase
 	 * @param testContext the current {@code TestContext}
-	 * @param classLevel {@code true} if {@link Sql @Sql} was declared at the
-	 * class level
+	 * @param classLevel {@code true} if {@link Sql @Sql} was declared at the class level
 	 */
 	private void executeSqlScripts(Sql sql, ExecutionPhase executionPhase, TestContext testContext, boolean classLevel)
 			throws Exception {
+
 		if (executionPhase != sql.executionPhase()) {
 			return;
 		}
 
 		MergedSqlConfig mergedSqlConfig = new MergedSqlConfig(sql.config(), testContext.getTestClass());
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Processing %s for execution phase [%s] and test context %s.", mergedSqlConfig,
-				executionPhase, testContext));
+			logger.debug(String.format("Processing %s for execution phase [%s] and test context %s.",
+					mergedSqlConfig, executionPhase, testContext));
 		}
 
 		final ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
@@ -181,15 +177,13 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		String[] scripts = getScripts(sql, testContext, classLevel);
 		scripts = TestContextResourceUtils.convertToClasspathResourcePaths(testContext.getTestClass(), scripts);
 		List<Resource> scriptResources = TestContextResourceUtils.convertToResourceList(
-			testContext.getApplicationContext(), scripts);
-
-		for (String statement : sql.statements()) {
-			if (StringUtils.hasText(statement)) {
-				statement = statement.trim();
-				scriptResources.add(new ByteArrayResource(statement.getBytes(), "from inlined SQL statement: " + statement));
+				testContext.getApplicationContext(), scripts);
+		for (String stmt : sql.statements()) {
+			if (StringUtils.hasText(stmt)) {
+				stmt = stmt.trim();
+				scriptResources.add(new ByteArrayResource(stmt.getBytes(), "from inlined SQL statement: " + stmt));
 			}
 		}
-
 		populator.setScripts(scriptResources.toArray(new Resource[scriptResources.size()]));
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL scripts: " + ObjectUtils.nullSafeToString(scriptResources));
@@ -198,58 +192,41 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		String dsName = mergedSqlConfig.getDataSource();
 		String tmName = mergedSqlConfig.getTransactionManager();
 		DataSource dataSource = TestContextTransactionUtils.retrieveDataSource(testContext, dsName);
-		final PlatformTransactionManager transactionManager = TestContextTransactionUtils.retrieveTransactionManager(
-			testContext, tmName);
-		final boolean newTxRequired = mergedSqlConfig.getTransactionMode() == TransactionMode.ISOLATED;
+		PlatformTransactionManager txMgr = TestContextTransactionUtils.retrieveTransactionManager(testContext, tmName);
+		boolean newTxRequired = (mergedSqlConfig.getTransactionMode() == TransactionMode.ISOLATED);
 
-		if (transactionManager == null) {
-			if (newTxRequired) {
-				throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: "
-						+ "cannot execute SQL scripts using Transaction Mode "
-						+ "[%s] without a PlatformTransactionManager.", testContext, TransactionMode.ISOLATED));
-			}
-
-			if (dataSource == null) {
-				throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: "
-						+ "supply at least a DataSource or PlatformTransactionManager.", testContext));
-			}
-
+		if (txMgr == null) {
+			Assert.state(!newTxRequired, () -> String.format("Failed to execute SQL scripts for test context %s: " +
+					"cannot execute SQL scripts using Transaction Mode " +
+					"[%s] without a PlatformTransactionManager.", testContext, TransactionMode.ISOLATED));
+			Assert.state(dataSource != null, () -> String.format("Failed to execute SQL scripts for test context %s: " +
+					"supply at least a DataSource or PlatformTransactionManager.", testContext));
 			// Execute scripts directly against the DataSource
 			populator.execute(dataSource);
 		}
 		else {
-			DataSource dataSourceFromTxMgr = getDataSourceFromTransactionManager(transactionManager);
-
+			DataSource dataSourceFromTxMgr = getDataSourceFromTransactionManager(txMgr);
 			// Ensure user configured an appropriate DataSource/TransactionManager pair.
-			if ((dataSource != null) && (dataSourceFromTxMgr != null) && !dataSource.equals(dataSourceFromTxMgr)) {
-				throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: "
-						+ "the configured DataSource [%s] (named '%s') is not the one associated "
-						+ "with transaction manager [%s] (named '%s').", testContext, dataSource.getClass().getName(),
-					dsName, transactionManager.getClass().getName(), tmName));
+			if (dataSource != null && dataSourceFromTxMgr != null && !dataSource.equals(dataSourceFromTxMgr)) {
+				throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: " +
+						"the configured DataSource [%s] (named '%s') is not the one associated with " +
+						"transaction manager [%s] (named '%s').", testContext, dataSource.getClass().getName(),
+						dsName, txMgr.getClass().getName(), tmName));
 			}
-
 			if (dataSource == null) {
 				dataSource = dataSourceFromTxMgr;
-				if (dataSource == null) {
-					throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: "
-							+ "could not obtain DataSource from transaction manager [%s] (named '%s').", testContext,
-						transactionManager.getClass().getName(), tmName));
-				}
+				Assert.state(dataSource != null, () -> String.format("Failed to execute SQL scripts for " +
+						"test context %s: could not obtain DataSource from transaction manager [%s] (named '%s').",
+						testContext, txMgr.getClass().getName(), tmName));
 			}
-
 			final DataSource finalDataSource = dataSource;
-			int propagation = newTxRequired ? TransactionDefinition.PROPAGATION_REQUIRES_NEW
-					: TransactionDefinition.PROPAGATION_REQUIRED;
-
-			TransactionAttribute transactionAttribute = TestContextTransactionUtils.createDelegatingTransactionAttribute(
-				testContext, new DefaultTransactionAttribute(propagation));
-
-			new TransactionTemplate(transactionManager, transactionAttribute).execute(new TransactionCallbackWithoutResult() {
-
-				@Override
-				public void doInTransactionWithoutResult(TransactionStatus status) {
-					populator.execute(finalDataSource);
-				}
+			int propagation = (newTxRequired ? TransactionDefinition.PROPAGATION_REQUIRES_NEW :
+					TransactionDefinition.PROPAGATION_REQUIRED);
+			TransactionAttribute txAttr = TestContextTransactionUtils.createDelegatingTransactionAttribute(
+					testContext, new DefaultTransactionAttribute(propagation));
+			new TransactionTemplate(txMgr, txAttr).execute(status -> {
+				populator.execute(finalDataSource);
+				return null;
 			});
 		}
 	}
@@ -262,8 +239,8 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 				return (DataSource) obj;
 			}
 		}
-		catch (Exception e) {
-			/* ignore */
+		catch (Exception ex) {
+			// ignore
 		}
 		return null;
 	}
@@ -271,7 +248,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	private String[] getScripts(Sql sql, TestContext testContext, boolean classLevel) {
 		String[] scripts = sql.scripts();
 		if (ObjectUtils.isEmpty(scripts) && ObjectUtils.isEmpty(sql.statements())) {
-			scripts = new String[] { detectDefaultScript(testContext, classLevel) };
+			scripts = new String[] {detectDefaultScript(testContext, classLevel)};
 		}
 		return scripts;
 	}
@@ -297,15 +274,15 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 
 		if (classPathResource.exists()) {
 			if (logger.isInfoEnabled()) {
-				logger.info(String.format("Detected default SQL script \"%s\" for test %s [%s]", prefixedResourcePath,
-					elementType, elementName));
+				logger.info(String.format("Detected default SQL script \"%s\" for test %s [%s]",
+						prefixedResourcePath, elementType, elementName));
 			}
 			return prefixedResourcePath;
 		}
 		else {
-			String msg = String.format("Could not detect default SQL script for test %s [%s]: "
-					+ "%s does not exist. Either declare statements or scripts via @Sql or make the "
-					+ "default SQL script available.", elementType, elementName, classPathResource);
+			String msg = String.format("Could not detect default SQL script for test %s [%s]: " +
+					"%s does not exist. Either declare statements or scripts via @Sql or make the " +
+					"default SQL script available.", elementType, elementName, classPathResource);
 			logger.error(msg);
 			throw new IllegalStateException(msg);
 		}

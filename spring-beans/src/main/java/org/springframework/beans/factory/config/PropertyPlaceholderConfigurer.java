@@ -222,24 +222,6 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 		doProcessProperties(beanFactoryToProcess, valueResolver);
 	}
 
-	/**
-	 * Parse the given String value for placeholder resolution.
-	 * @param strVal the String value to parse
-	 * @param props the Properties to resolve placeholders against
-	 * @param visitedPlaceholders the placeholders that have already been visited
-	 * during the current resolution attempt (ignored in this version of the code)
-	 * @deprecated as of Spring 3.0, in favor of using {@link #resolvePlaceholder}
-	 * with {@link org.springframework.util.PropertyPlaceholderHelper}.
-	 * Only retained for compatibility with Spring 2.5 extensions.
-	 */
-	@Deprecated
-	protected String parseStringValue(String strVal, Properties props, Set<?> visitedPlaceholders) {
-		PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper(
-				placeholderPrefix, placeholderSuffix, valueSeparator, ignoreUnresolvablePlaceholders);
-		PlaceholderResolver resolver = new PropertyPlaceholderConfigurerResolver(props);
-		return helper.replacePlaceholders(strVal, resolver);
-	}
-
 
 	private class PlaceholderResolvingStringValueResolver implements StringValueResolver {
 

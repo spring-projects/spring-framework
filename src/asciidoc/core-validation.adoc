@@ -136,7 +136,7 @@ and use it like so:
 			}
 			if (!addressValidator.supports(Address.class)) {
 				throw new IllegalArgumentException("The supplied [Validator] must " +
-					support the validation of [Address] instances.");
+					"support the validation of [Address] instances.");
 			}
 			this.addressValidator = addressValidator;
 		}
@@ -863,10 +863,14 @@ such as a `static valueOf` method, is defined on the target class.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	public interface ConditionalGenericConverter
-	        extends GenericConverter, ConditionalConverter {
+	public interface ConditionalConverter {
 
 		boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType);
+
+	}
+
+	public interface ConditionalGenericConverter
+		extends GenericConverter, ConditionalConverter {
 
 	}
 ----

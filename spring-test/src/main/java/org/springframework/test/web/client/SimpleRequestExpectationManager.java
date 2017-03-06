@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client;
 
 import java.io.IOException;
@@ -26,9 +27,9 @@ import org.springframework.util.Assert;
  * Simple {@code RequestExpectationManager} that matches requests to expectations
  * sequentially, i.e. in the order of declaration of expectations.
  *
- * <p>When request expectations have an expected count greater than one, only
- * the first execution is expected to match the order of declaration. Subsequent
- * request executions may be inserted anywhere thereafter.
+ * <p>When request expectations have an expected count greater than one,
+ * only the first execution is expected to match the order of declaration.
+ * Subsequent request executions may be inserted anywhere thereafter.
  *
  * @author Rossen Stoyanchev
  * @since 4.3
@@ -42,7 +43,7 @@ public class SimpleRequestExpectationManager extends AbstractRequestExpectationM
 
 	@Override
 	protected void afterExpectationsDeclared() {
-		Assert.state(this.expectationIterator == null);
+		Assert.state(this.expectationIterator == null, "Expectations already declared");
 		this.expectationIterator = getExpectations().iterator();
 	}
 
@@ -69,6 +70,13 @@ public class SimpleRequestExpectationManager extends AbstractRequestExpectationM
 			return this.expectationIterator.next();
 		}
 		throw createUnexpectedRequestError(request);
+	}
+
+	@Override
+	public void reset() {
+		super.reset();
+		this.expectationIterator = null;
+		this.repeatExpectations.reset();
 	}
 
 }

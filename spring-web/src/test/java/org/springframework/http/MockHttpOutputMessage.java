@@ -45,7 +45,7 @@ public class MockHttpOutputMessage implements HttpOutputMessage {
 
 	/**
 	 * Return a copy of the actual headers written at the time of the call to
-	 * getBody, i.e. ignoring any further changes that may have been made to
+	 * getResponseBody, i.e. ignoring any further changes that may have been made to
 	 * the underlying headers, e.g. via a previously obtained instance.
 	 */
 	public HttpHeaders getWrittenHeaders() {

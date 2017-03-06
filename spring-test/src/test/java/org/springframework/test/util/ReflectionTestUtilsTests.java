@@ -48,6 +48,8 @@ public class ReflectionTestUtilsTests {
 
 	private final Component component = new Component();
 
+	private final LegacyEntity entity = new LegacyEntity();
+
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 
@@ -200,17 +202,6 @@ public class ReflectionTestUtilsTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void setFieldWithNullValueForPrimitiveBoolean() throws Exception {
 		setField(person, "likesPets", null, boolean.class);
-	}
-
-	/**
-	 * Verifies behavior requested in <a href="https://jira.spring.io/browse/SPR-9571">SPR-9571</a>.
-	 */
-	@Test
-	public void setFieldOnLegacyEntityWithSideEffectsInToString() {
-		String testCollaborator = "test collaborator";
-		LegacyEntity entity = new LegacyEntity();
-		setField(entity, "collaborator", testCollaborator, Object.class);
-		assertTrue(entity.toString().contains(testCollaborator));
 	}
 
 	@Test
@@ -396,6 +387,39 @@ public class ReflectionTestUtilsTests {
 		exception.expect(IllegalStateException.class);
 		exception.expectMessage(startsWith("Method not found"));
 		invokeMethod(component, "configure", new Integer(42), "enigma", "baz", "quux");
+	}
+
+	@Test // SPR-14363
+	public void getFieldOnLegacyEntityWithSideEffectsInToString() {
+		Object collaborator = getField(entity, "collaborator");
+		assertNotNull(collaborator);
+	}
+
+	@Test // SPR-9571 and SPR-14363
+	public void setFieldOnLegacyEntityWithSideEffectsInToString() {
+		String testCollaborator = "test collaborator";
+		setField(entity, "collaborator", testCollaborator, Object.class);
+		assertTrue(entity.toString().contains(testCollaborator));
+	}
+
+	@Test // SPR-14363
+	public void invokeMethodOnLegacyEntityWithSideEffectsInToString() {
+		invokeMethod(entity, "configure", new Integer(42), "enigma");
+		assertEquals("number should have been configured", new Integer(42), entity.getNumber());
+		assertEquals("text should have been configured", "enigma", entity.getText());
+	}
+
+	@Test // SPR-14363
+	public void invokeGetterMethodOnLegacyEntityWithSideEffectsInToString() {
+		Object collaborator = invokeGetterMethod(entity, "collaborator");
+		assertNotNull(collaborator);
+	}
+
+	@Test // SPR-14363
+	public void invokeSetterMethodOnLegacyEntityWithSideEffectsInToString() {
+		String testCollaborator = "test collaborator";
+		invokeSetterMethod(entity, "collaborator", testCollaborator);
+		assertTrue(entity.toString().contains(testCollaborator));
 	}
 
 }

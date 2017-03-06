@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import org.springframework.http.MediaType;
@@ -24,6 +25,7 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
 import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
+import org.springframework.web.socket.sockjs.transport.SockJsSession;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
 
@@ -43,7 +45,12 @@ public class EventSourceTransportHandler extends AbstractHttpSendingTransportHan
 
 	@Override
 	protected MediaType getContentType() {
-		return new MediaType("text", "event-stream", UTF8_CHARSET);
+		return new MediaType("text", "event-stream", StandardCharsets.UTF_8);
+	}
+
+	@Override
+	public boolean checkSessionType(SockJsSession session) {
+		return session instanceof EventSourceStreamingSockJsSession;
 	}
 
 	@Override

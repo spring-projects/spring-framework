@@ -17,7 +17,7 @@
 package org.springframework.web.socket.messaging;
 
 import java.net.URI;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ScheduledFuture;
 
 import org.junit.Before;
@@ -56,23 +56,21 @@ import static org.mockito.Mockito.*;
  */
 public class WebSocketStompClientTests {
 
-	private static final Charset UTF_8 = Charset.forName("UTF-8");
-
-
-	private TestWebSocketStompClient stompClient;
-
 	@Mock
 	private TaskScheduler taskScheduler;
 
 	@Mock
 	private ConnectionHandlingStompSession stompSession;
 
+	@Mock
+	private WebSocketSession webSocketSession;
+
+
+	private TestWebSocketStompClient stompClient;
+
 	private ArgumentCaptor<WebSocketHandler> webSocketHandlerCaptor;
 
 	private SettableListenableFuture<WebSocketSession> handshakeFuture;
-
-	@Mock
-	private WebSocketSession webSocketSession;
 
 
 	@Before
@@ -102,10 +100,9 @@ public class WebSocketStompClientTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void webSocketConnectionEstablished() throws Exception {
 		connect().afterConnectionEstablished(this.webSocketSession);
-		verify(this.stompSession).afterConnected(isNotNull(TcpConnection.class));
+		verify(this.stompSession).afterConnected(notNull());
 	}
 
 	@Test
@@ -123,7 +120,7 @@ public class WebSocketStompClientTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public void handleWebSocketMessage() throws Exception {
 		String text = "SEND\na:alpha\n\nMessage payload\0";
 		connect().handleMessage(this.webSocketSession, new TextMessage(text));
@@ -137,11 +134,11 @@ public class WebSocketStompClientTests {
 		StompHeaders headers = StompHeaders.readOnlyStompHeaders(accessor.toNativeHeaderMap());
 		assertEquals(StompCommand.SEND, accessor.getCommand());
 		assertEquals("alpha", headers.getFirst("a"));
-		assertEquals("Message payload", new String(message.getPayload(), UTF_8));
+		assertEquals("Message payload", new String(message.getPayload(), StandardCharsets.UTF_8));
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public void handleWebSocketMessageSplitAcrossTwoMessage() throws Exception {
 		WebSocketHandler webSocketHandler = connect();
 
@@ -162,14 +159,14 @@ public class WebSocketStompClientTests {
 		StompHeaders headers = StompHeaders.readOnlyStompHeaders(accessor.toNativeHeaderMap());
 		assertEquals(StompCommand.SEND, accessor.getCommand());
 		assertEquals("alpha", headers.getFirst("a"));
-		assertEquals("Message payload", new String(message.getPayload(), UTF_8));
+		assertEquals("Message payload", new String(message.getPayload(), StandardCharsets.UTF_8));
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public void handleWebSocketMessageBinary() throws Exception {
 		String text = "SEND\na:alpha\n\nMessage payload\0";
-		connect().handleMessage(this.webSocketSession, new BinaryMessage(text.getBytes(UTF_8)));
+		connect().handleMessage(this.webSocketSession, new BinaryMessage(text.getBytes(StandardCharsets.UTF_8)));
 
 		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
 		verify(this.stompSession).handleMessage(captor.capture());
@@ -180,7 +177,7 @@ public class WebSocketStompClientTests {
 		StompHeaders headers = StompHeaders.readOnlyStompHeaders(accessor.toNativeHeaderMap());
 		assertEquals(StompCommand.SEND, accessor.getCommand());
 		assertEquals("alpha", headers.getFirst("a"));
-		assertEquals("Message payload", new String(message.getPayload(), UTF_8));
+		assertEquals("Message payload", new String(message.getPayload(), StandardCharsets.UTF_8));
 	}
 
 	@Test
@@ -193,7 +190,7 @@ public class WebSocketStompClientTests {
 	public void sendWebSocketMessage() throws Exception {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
 		accessor.setDestination("/topic/foo");
-		byte[] payload = "payload".getBytes(UTF_8);
+		byte[] payload = "payload".getBytes(StandardCharsets.UTF_8);
 
 		getTcpConnection().send(MessageBuilder.createMessage(payload, accessor.getMessageHeaders()));
 
@@ -209,7 +206,7 @@ public class WebSocketStompClientTests {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
 		accessor.setDestination("/b");
 		accessor.setContentType(MimeTypeUtils.APPLICATION_OCTET_STREAM);
-		byte[] payload = "payload".getBytes(UTF_8);
+		byte[] payload = "payload".getBytes(StandardCharsets.UTF_8);
 
 		getTcpConnection().send(MessageBuilder.createMessage(payload, accessor.getMessageHeaders()));
 
@@ -218,7 +215,7 @@ public class WebSocketStompClientTests {
 		BinaryMessage binaryMessage = binaryMessageCaptor.getValue();
 		assertNotNull(binaryMessage);
 		assertEquals("SEND\ndestination:/b\ncontent-type:application/octet-stream\ncontent-length:7\n\npayload\0",
-				new String(binaryMessage.getPayload().array(), UTF_8));
+				new String(binaryMessage.getPayload().array(), StandardCharsets.UTF_8));
 	}
 
 	@Test
@@ -249,7 +246,7 @@ public class WebSocketStompClientTests {
 			fail("Expected IllegalStateException");
 		}
 		catch (IllegalStateException ex) {
-			// Ignore
+			// ignore
 		}
 	}
 
@@ -290,7 +287,7 @@ public class WebSocketStompClientTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void cancelInactivityTasks() throws Exception {
 		TcpConnection<byte[]> tcpConnection = getTcpConnection();
 

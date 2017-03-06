@@ -31,7 +31,7 @@ import static org.mockito.BDDMockito.*;
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public final class AfterThrowingAdviceBindingTests {
+public class AfterThrowingAdviceBindingTests {
 
 	private ITestBean testBean;
 
@@ -51,20 +51,20 @@ public final class AfterThrowingAdviceBindingTests {
 		afterThrowingAdviceAspect.setCollaborator(mockCollaborator);
 	}
 
-	@Test(expected=Throwable.class)
+	@Test(expected = Throwable.class)
 	public void testSimpleAfterThrowing() throws Throwable {
 		this.testBean.exceptional(new Throwable());
 		verify(mockCollaborator).noArgs();
 	}
 
-	@Test(expected=Throwable.class)
+	@Test(expected = Throwable.class)
 	public void testAfterThrowingWithBinding() throws Throwable {
 		Throwable t = new Throwable();
 		this.testBean.exceptional(t);
 		verify(mockCollaborator).oneThrowable(t);
 	}
 
-	@Test(expected=Throwable.class)
+	@Test(expected = Throwable.class)
 	public void testAfterThrowingWithNamedTypeRestriction() throws Throwable {
 		Throwable t = new Throwable();
 		this.testBean.exceptional(t);
@@ -73,20 +73,20 @@ public final class AfterThrowingAdviceBindingTests {
 		verify(mockCollaborator).noArgsOnThrowableMatch();
 	}
 
-	@Test(expected=Throwable.class)
+	@Test(expected = Throwable.class)
 	public void testAfterThrowingWithRuntimeExceptionBinding() throws Throwable {
 		RuntimeException ex = new RuntimeException();
 		this.testBean.exceptional(ex);
 		verify(mockCollaborator).oneRuntimeException(ex);
 	}
 
-	@Test(expected=Throwable.class)
+	@Test(expected = Throwable.class)
 	public void testAfterThrowingWithTypeSpecified() throws Throwable {
 		this.testBean.exceptional(new Throwable());
 		verify(mockCollaborator).noArgsOnThrowableMatch();
 	}
 
-	@Test(expected=Throwable.class)
+	@Test(expected = Throwable.class)
 	public void testAfterThrowingWithRuntimeTypeSpecified() throws Throwable {
 		this.testBean.exceptional(new RuntimeException());
 		verify(mockCollaborator).noArgsOnRuntimeExceptionMatch();

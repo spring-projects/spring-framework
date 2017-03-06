@@ -56,7 +56,7 @@ import com.gargoylesoftware.htmlunit.WebRequest;
  */
 public final class HostRequestMatcher implements WebRequestMatcher {
 
-	private final Set<String> hosts = new HashSet<String>();
+	private final Set<String> hosts = new HashSet<>();
 
 
 	/**

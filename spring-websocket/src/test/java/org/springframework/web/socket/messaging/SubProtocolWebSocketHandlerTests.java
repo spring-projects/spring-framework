@@ -91,7 +91,7 @@ public class SubProtocolWebSocketHandlerTests {
 				isA(ConcurrentWebSocketSessionDecorator.class), eq(this.inClientChannel));
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void subProtocolNoMatch() throws Exception {
 		this.webSocketHandler.setDefaultProtocolHandler(defaultHandler);
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler, mqttHandler));
@@ -132,13 +132,13 @@ public class SubProtocolWebSocketHandlerTests {
 				isA(ConcurrentWebSocketSessionDecorator.class), eq(this.inClientChannel));
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void noSubProtocolTwoHandlers() throws Exception {
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler, mqttHandler));
 		this.webSocketHandler.afterConnectionEstablished(session);
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void noSubProtocolNoDefaultHandler() throws Exception {
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler, mqttHandler));
 		this.webSocketHandler.afterConnectionEstablished(session);

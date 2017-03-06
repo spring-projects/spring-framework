@@ -107,21 +107,21 @@ public class CachedIntrospectionResults {
 	 * accept classes from, even if the classes do not qualify as cache-safe.
 	 */
 	static final Set<ClassLoader> acceptedClassLoaders =
-			Collections.newSetFromMap(new ConcurrentHashMap<ClassLoader, Boolean>(16));
+			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
 	/**
 	 * Map keyed by Class containing CachedIntrospectionResults, strongly held.
 	 * This variant is being used for cache-safe bean classes.
 	 */
 	static final ConcurrentMap<Class<?>, CachedIntrospectionResults> strongClassCache =
-			new ConcurrentHashMap<Class<?>, CachedIntrospectionResults>(64);
+			new ConcurrentHashMap<>(64);
 
 	/**
 	 * Map keyed by Class containing CachedIntrospectionResults, softly held.
 	 * This variant is being used for non-cache-safe bean classes.
 	 */
 	static final ConcurrentMap<Class<?>, CachedIntrospectionResults> softClassCache =
-			new ConcurrentReferenceHashMap<Class<?>, CachedIntrospectionResults>(64);
+			new ConcurrentReferenceHashMap<>(64);
 
 
 	/**
@@ -283,7 +283,7 @@ public class CachedIntrospectionResults {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Caching PropertyDescriptors for class [" + beanClass.getName() + "]");
 			}
-			this.propertyDescriptorCache = new LinkedHashMap<String, PropertyDescriptor>();
+			this.propertyDescriptorCache = new LinkedHashMap<>();
 
 			// This call is slow so we do it once.
 			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
@@ -321,7 +321,7 @@ public class CachedIntrospectionResults {
 				clazz = clazz.getSuperclass();
 			}
 
-			this.typeDescriptorCache = new ConcurrentReferenceHashMap<PropertyDescriptor, TypeDescriptor>();
+			this.typeDescriptorCache = new ConcurrentReferenceHashMap<>();
 		}
 		catch (IntrospectionException ex) {
 			throw new FatalBeanException("Failed to obtain BeanInfo for class [" + beanClass.getName() + "]", ex);

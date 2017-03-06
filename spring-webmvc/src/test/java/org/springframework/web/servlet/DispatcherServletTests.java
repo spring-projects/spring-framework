@@ -55,13 +55,11 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.Controller;
-import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.WebUtils;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -697,38 +695,6 @@ public class DispatcherServletTests {
 		assertEquals(getServletContext(), myServlet.getServletConfig().getServletContext());
 		complexDispatcherServlet.destroy();
 		assertNull(myServlet.getServletConfig());
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	public void webApplicationContextLookup() {
-		MockServletContext servletContext = new MockServletContext();
-		MockHttpServletRequest request = new MockHttpServletRequest(servletContext, "GET", "/invalid.do");
-
-		try {
-			RequestContextUtils.getWebApplicationContext(request);
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
-
-		try {
-			RequestContextUtils.getWebApplicationContext(request, servletContext);
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
-
-		servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,
-				new StaticWebApplicationContext());
-		try {
-			RequestContextUtils.getWebApplicationContext(request, servletContext);
-		}
-		catch (IllegalStateException ex) {
-			fail("Should not have thrown IllegalStateException: " + ex.getMessage());
-		}
 	}
 
 	@Test

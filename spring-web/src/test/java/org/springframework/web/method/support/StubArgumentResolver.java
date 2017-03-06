@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public class StubArgumentResolver implements HandlerMethodArgumentResolver {
 
 	private final Object stubValue;
 
-	private List<MethodParameter> resolvedParameters = new ArrayList<MethodParameter>();
+	private List<MethodParameter> resolvedParameters = new ArrayList<>();
 
 	public StubArgumentResolver(Class<?> supportedParameterType, Object stubValue) {
 		this.parameterType = supportedParameterType;

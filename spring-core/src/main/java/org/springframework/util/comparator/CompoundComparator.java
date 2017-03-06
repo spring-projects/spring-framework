@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,11 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 1.2.2
+ * @deprecated as of Spring Framework 5.0, in favor of the standard JDK 8
+ * {@link Comparator#thenComparing(Comparator)}
  */
-@SuppressWarnings({ "serial", "rawtypes" })
+@Deprecated
+@SuppressWarnings({"serial", "rawtypes"})
 public class CompoundComparator<T> implements Comparator<T>, Serializable {
 
 	private final List<InvertibleComparator> comparators;
@@ -49,7 +52,7 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 	 * IllegalStateException is thrown.
 	 */
 	public CompoundComparator() {
-		this.comparators = new ArrayList<InvertibleComparator>();
+		this.comparators = new ArrayList<>();
 	}
 
 	/**
@@ -62,9 +65,9 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 	@SuppressWarnings("unchecked")
 	public CompoundComparator(Comparator... comparators) {
 		Assert.notNull(comparators, "Comparators must not be null");
-		this.comparators = new ArrayList<InvertibleComparator>(comparators.length);
+		this.comparators = new ArrayList<>(comparators.length);
 		for (Comparator comparator : comparators) {
-			this.addComparator(comparator);
+			addComparator(comparator);
 		}
 	}
 
@@ -121,7 +124,7 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 	 * @param ascending the sort order: ascending (true) or descending (false)
 	 */
 	public void setComparator(int index, Comparator<T> comparator, boolean ascending) {
-		this.comparators.set(index, new InvertibleComparator<T>(comparator, ascending));
+		this.comparators.set(index, new InvertibleComparator<>(comparator, ascending));
 	}
 
 	/**
@@ -165,10 +168,11 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 		return this.comparators.size();
 	}
 
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public int compare(T o1, T o2) {
-		Assert.state(this.comparators.size() > 0,
+		Assert.state(!this.comparators.isEmpty(),
 				"No sort definitions have been added to this CompoundComparator to compare");
 		for (InvertibleComparator comparator : this.comparators) {
 			int result = comparator.compare(o1, o2);
@@ -178,6 +182,7 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 		}
 		return 0;
 	}
+
 
 	@Override
 	@SuppressWarnings("unchecked")

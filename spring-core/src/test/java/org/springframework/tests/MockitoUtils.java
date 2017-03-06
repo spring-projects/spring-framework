@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,34 +30,33 @@ import static org.junit.Assert.*;
  *
  * @author Phillip Webb
  */
-public class MockitoUtils {
-
-	private static MockUtil mockUtil = new MockUtil();
+public abstract class MockitoUtils {
 
 	/**
 	 * Verify the same invocations have been applied to two mocks. This is generally not
 	 * the preferred way test with mockito and should be avoided if possible.
 	 * @param expected the mock containing expected invocations
 	 * @param actual the mock containing actual invocations
-	 * @param argumentAdapters adapters that can be used to change argument values before
-	 *        they are compared
+	 * @param argumentAdapters adapters that can be used to change argument values before they are compared
 	 */
 	public static <T> void verifySameInvocations(T expected, T actual, InvocationArgumentsAdapter... argumentAdapters) {
-		List<Invocation> expectedInvocations = mockUtil.getMockHandler(expected).getInvocationContainer().getInvocations();
-		List<Invocation> actualInvocations = mockUtil.getMockHandler(actual).getInvocationContainer().getInvocations();
+		List<Invocation> expectedInvocations = MockUtil.getMockHandler(expected).getInvocationContainer().getInvocations();
+		List<Invocation> actualInvocations = MockUtil.getMockHandler(actual).getInvocationContainer().getInvocations();
 		verifySameInvocations(expectedInvocations, actualInvocations, argumentAdapters);
 	}
 
-	private static void verifySameInvocations(List<Invocation> expectedInvocations, List<Invocation> actualInvocations, InvocationArgumentsAdapter... argumentAdapters) {
+	private static void verifySameInvocations(List<Invocation> expectedInvocations, List<Invocation> actualInvocations,
+			InvocationArgumentsAdapter... argumentAdapters) {
+
 		assertThat(expectedInvocations.size(), is(equalTo(actualInvocations.size())));
 		for (int i = 0; i < expectedInvocations.size(); i++) {
 			verifySameInvocation(expectedInvocations.get(i), actualInvocations.get(i), argumentAdapters);
 		}
 	}
 
-	private static void verifySameInvocation(Invocation expectedInvocation, Invocation actualInvocation, InvocationArgumentsAdapter... argumentAdapters) {
-		System.out.println(expectedInvocation);
-		System.out.println(actualInvocation);
+	private static void verifySameInvocation(Invocation expectedInvocation, Invocation actualInvocation,
+			InvocationArgumentsAdapter... argumentAdapters) {
+
 		assertThat(expectedInvocation.getMethod(), is(equalTo(actualInvocation.getMethod())));
 		Object[] expectedArguments = getInvocationArguments(expectedInvocation, argumentAdapters);
 		Object[] actualArguments = getInvocationArguments(actualInvocation, argumentAdapters);
@@ -72,16 +71,18 @@ public class MockitoUtils {
 		return arguments;
 	}
 
+
 	/**
 	 * Adapter strategy that can be used to change invocation arguments.
 	 */
-	public static interface InvocationArgumentsAdapter {
+	public interface InvocationArgumentsAdapter {
 
 		/**
-		 * Change the arguments if required
+		 * Change the arguments if required.
 		 * @param arguments the source arguments
 		 * @return updated or original arguments (never {@code null})
 		 */
 		Object[] adaptArguments(Object[] arguments);
 	}
+
 }

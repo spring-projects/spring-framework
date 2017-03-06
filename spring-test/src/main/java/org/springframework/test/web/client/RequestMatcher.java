@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,11 @@ import org.springframework.http.client.ClientHttpRequest;
  * @author Craig Walls
  * @since 3.2
  */
+@FunctionalInterface
 public interface RequestMatcher {
 
 	/**
-	 * Match the given request against some expectations.
+	 * Match the given request against specific expectations.
 	 * @param request the request to make assertions on
 	 * @throws IOException in case of I/O errors
 	 * @throws AssertionError if expectations are not met

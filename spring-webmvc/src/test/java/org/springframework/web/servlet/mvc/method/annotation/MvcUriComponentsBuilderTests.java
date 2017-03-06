@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,6 @@
  */
 
 package org.springframework.web.servlet.mvc.method.annotation;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -58,6 +54,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
+
 /**
  * Unit tests for {@link org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder}.
  *
@@ -73,12 +73,12 @@ public class MvcUriComponentsBuilderTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(this.request));
 	}
 
 	@After
-	public void tearDown() {
+	public void reset() {
 		RequestContextHolder.resetRequestAttributes();
 	}
 
@@ -219,6 +219,14 @@ public class MvcUriComponentsBuilderTests {
 	public void testFromMethodNameWithMetaAnnotation() throws Exception {
 		UriComponents uriComponents = fromMethodName(MetaAnnotationController.class, "handleInput").build();
 		assertThat(uriComponents.toUriString(), is("http://localhost/input"));
+	}
+
+	@Test // SPR-14405
+	public void testFromMappingNameWithOptionalParam() throws Exception {
+		UriComponents uriComponents = fromMethodName(ControllerWithMethods.class,
+				"methodWithOptionalParam", new Object[] {null}).build();
+
+		assertThat(uriComponents.toUriString(), is("http://localhost/something/optional-param"));
 	}
 
 	@Test
@@ -364,35 +372,38 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
+
 	@RequestMapping("/people")
 	interface PersonController {
-
 	}
 
-	class PersonControllerImpl implements PersonController {
 
+	private class PersonControllerImpl implements PersonController {
 	}
+
 
 	@RequestMapping("/people/{id}/addresses")
-	static class PersonsAddressesController {
+	private static class PersonsAddressesController {
 
 		@RequestMapping("/{country}")
-		public HttpEntity<Void> getAddressesForCountry(@PathVariable String country) {
+		HttpEntity<Void> getAddressesForCountry(@PathVariable String country) {
 			return null;
 		}
 	}
 
-	@RequestMapping({ "/persons", "/people" })
-	class InvalidController {
 
+	@RequestMapping({"/persons", "/people"})
+	private class InvalidController {
 	}
 
-	class UnmappedController {
+
+	private class UnmappedController {
 
 		@RequestMapping
 		public void unmappedMethod() {
 		}
 	}
+
 
 	@RequestMapping("/something")
 	static class ControllerWithMethods {
@@ -424,15 +435,22 @@ public class MvcUriComponentsBuilderTests {
 				@RequestParam List<Integer> items, @RequestParam Integer limit) {
 			return null;
 		}
+
+		@RequestMapping("/optional-param")
+		HttpEntity<Void> methodWithOptionalParam(@RequestParam(defaultValue = "") String q) {
+			return null;
+		}
 	}
+
 
 	@RequestMapping("/extended")
+	@SuppressWarnings("WeakerAccess")
 	static class ExtendedController extends ControllerWithMethods {
-
 	}
 
+
 	@RequestMapping("/user/{userId}/contacts")
-	static class UserContactController {
+	private static class UserContactController {
 
 		@RequestMapping("/create")
 		public String showCreate(@PathVariable Integer userId) {
@@ -440,12 +458,14 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
+
 	static abstract class AbstractCrudController<T, ID> {
 
 		abstract T get(ID id);
 	}
 
-	static class PersonCrudController extends AbstractCrudController<Person, Long> {
+
+	private static class PersonCrudController extends AbstractCrudController<Person, Long> {
 
 		@RequestMapping(path = "/{id}", method = RequestMethod.GET)
 		public Person get(@PathVariable Long id) {
@@ -453,18 +473,19 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
+
 	@Controller
-	static class MetaAnnotationController {
+	private static class MetaAnnotationController {
 
 		@RequestMapping
 		public void handle() {
 		}
 
-		@PostJson(path="/input")
+		@PostJson(path = "/input")
 		public void handleInput() {
 		}
-
 	}
+
 
 	@RequestMapping(method = RequestMethod.POST,
 			produces = MediaType.APPLICATION_JSON_VALUE,
@@ -472,9 +493,11 @@ public class MvcUriComponentsBuilderTests {
 	@Target({ElementType.METHOD, ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
-	@interface PostJson {
+	private @interface PostJson {
+
 		String[] path() default {};
 	}
+
 
 	@EnableWebMvc
 	static class WebConfig extends WebMvcConfigurerAdapter {

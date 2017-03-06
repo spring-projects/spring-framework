@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -49,6 +50,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 2.5
  * @see AutowireCandidateQualifier
  * @see Qualifier
@@ -56,7 +58,7 @@ import org.springframework.util.StringUtils;
  */
 public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwareAutowireCandidateResolver {
 
-	private final Set<Class<? extends Annotation>> qualifierTypes = new LinkedHashSet<Class<? extends Annotation>>(2);
+	private final Set<Class<? extends Annotation>> qualifierTypes = new LinkedHashSet<>(2);
 
 	private Class<? extends Annotation> valueAnnotationType = Value.class;
 
@@ -225,8 +227,12 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 			qualifier = bd.getQualifier(ClassUtils.getShortName(type));
 		}
 		if (qualifier == null) {
-			// First, check annotation on factory method, if applicable
-			Annotation targetAnnotation = getFactoryMethodAnnotation(bd, type);
+			// First, check annotation on qualified element, if any
+			Annotation targetAnnotation = getQualifiedElementAnnotation(bd, type);
+			// Then, check annotation on factory method, if applicable
+			if (targetAnnotation == null) {
+				targetAnnotation = getFactoryMethodAnnotation(bd, type);
+			}
 			if (targetAnnotation == null) {
 				RootBeanDefinition dbd = getResolvedDecoratedDefinition(bd);
 				if (dbd != null) {
@@ -289,6 +295,11 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 			}
 		}
 		return true;
+	}
+
+	protected Annotation getQualifiedElementAnnotation(RootBeanDefinition bd, Class<? extends Annotation> type) {
+		AnnotatedElement qualifiedElement = bd.getQualifiedElement();
+		return (qualifiedElement != null ? AnnotationUtils.getAnnotation(qualifiedElement, type) : null);
 	}
 
 	protected Annotation getFactoryMethodAnnotation(RootBeanDefinition bd, Class<? extends Annotation> type) {

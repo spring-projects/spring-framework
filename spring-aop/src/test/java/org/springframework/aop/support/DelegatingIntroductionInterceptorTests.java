@@ -43,9 +43,9 @@ import static org.mockito.BDDMockito.*;
  * @author Chris Beams
  * @since 13.05.2003
  */
-public final class DelegatingIntroductionInterceptorTests {
+public class DelegatingIntroductionInterceptorTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testNullTarget() throws Exception {
 		// Shouldn't accept null target
 		new DelegatingIntroductionInterceptor(null);

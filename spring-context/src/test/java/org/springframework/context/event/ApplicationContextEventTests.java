@@ -380,6 +380,50 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	}
 
 	@Test
+	public void anonymousClassAsListener() {
+		final Set<MyEvent> seenEvents = new HashSet<>();
+		StaticApplicationContext context = new StaticApplicationContext();
+		context.addApplicationListener(new ApplicationListener<MyEvent>() {
+			@Override
+			public void onApplicationEvent(MyEvent event) {
+				seenEvents.add(event);
+			}
+		});
+		context.refresh();
+
+		MyEvent event1 = new MyEvent(context);
+		context.publishEvent(event1);
+		context.publishEvent(new MyOtherEvent(context));
+		MyEvent event2 = new MyEvent(context);
+		context.publishEvent(event2);
+		assertSame(2, seenEvents.size());
+		assertTrue(seenEvents.contains(event1));
+		assertTrue(seenEvents.contains(event2));
+
+		context.close();
+	}
+
+	@Test
+	public void lambdaAsListener() {
+		final Set<MyEvent> seenEvents = new HashSet<>();
+		StaticApplicationContext context = new StaticApplicationContext();
+		ApplicationListener<MyEvent> listener = seenEvents::add;
+		context.addApplicationListener(listener);
+		context.refresh();
+
+		MyEvent event1 = new MyEvent(context);
+		context.publishEvent(event1);
+		context.publishEvent(new MyOtherEvent(context));
+		MyEvent event2 = new MyEvent(context);
+		context.publishEvent(event2);
+		assertSame(2, seenEvents.size());
+		assertTrue(seenEvents.contains(event1));
+		assertTrue(seenEvents.contains(event2));
+
+		context.close();
+	}
+
+	@Test
 	public void beanPostProcessorPublishesEvents() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("listener", new RootBeanDefinition(BeanThatListens.class));
@@ -415,7 +459,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 	public static class MyOrderedListener1 implements ApplicationListener<ApplicationEvent>, Ordered {
 
-		public final Set<ApplicationEvent> seenEvents = new HashSet<ApplicationEvent>();
+		public final Set<ApplicationEvent> seenEvents = new HashSet<>();
 
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
@@ -459,7 +503,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 	public static class MyPayloadListener implements ApplicationListener<PayloadApplicationEvent> {
 
-		public final Set<Object> seenPayloads = new HashSet<Object>();
+		public final Set<Object> seenPayloads = new HashSet<>();
 
 		@Override
 		public void onApplicationEvent(PayloadApplicationEvent event) {
@@ -470,7 +514,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 	public static class MyNonSingletonListener implements ApplicationListener<ApplicationEvent> {
 
-		public static final Set<ApplicationEvent> seenEvents = new HashSet<ApplicationEvent>();
+		public static final Set<ApplicationEvent> seenEvents = new HashSet<>();
 
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
@@ -482,7 +526,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	@Order(5)
 	public static class MyOrderedListener3 implements ApplicationListener<ApplicationEvent> {
 
-		public final Set<ApplicationEvent> seenEvents = new HashSet<ApplicationEvent>();
+		public final Set<ApplicationEvent> seenEvents = new HashSet<>();
 
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {

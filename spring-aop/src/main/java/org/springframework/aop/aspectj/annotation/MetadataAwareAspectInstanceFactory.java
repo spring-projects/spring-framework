@@ -41,7 +41,7 @@ public interface MetadataAwareAspectInstanceFactory extends AspectInstanceFactor
 
 	/**
 	 * Return the best possible creation mutex for this factory.
-	 * @return the mutex object (never {@code null})
+	 * @return the mutex object (may be {@code null} for no mutex to use)
 	 * @since 4.3
 	 */
 	Object getAspectCreationMutex();

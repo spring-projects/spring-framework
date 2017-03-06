@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.util.Assert;
 
 /**
@@ -84,26 +85,33 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 		}
 		MediaType contentType = getContentType(responseWrapper);
 
-		for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-			if (messageConverter instanceof GenericHttpMessageConverter) {
-				GenericHttpMessageConverter<?> genericMessageConverter = (GenericHttpMessageConverter<?>) messageConverter;
-				if (genericMessageConverter.canRead(this.responseType, null, contentType)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Reading [" + this.responseType + "] as \"" +
-								contentType + "\" using [" + messageConverter + "]");
+		try {
+			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
+				if (messageConverter instanceof GenericHttpMessageConverter) {
+					GenericHttpMessageConverter<?> genericMessageConverter =
+							(GenericHttpMessageConverter<?>) messageConverter;
+					if (genericMessageConverter.canRead(this.responseType, null, contentType)) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Reading [" + this.responseType + "] as \"" +
+									contentType + "\" using [" + messageConverter + "]");
+						}
+						return (T) genericMessageConverter.read(this.responseType, null, responseWrapper);
 					}
-					return (T) genericMessageConverter.read(this.responseType, null, responseWrapper);
+				}
+				if (this.responseClass != null) {
+					if (messageConverter.canRead(this.responseClass, contentType)) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Reading [" + this.responseClass.getName() + "] as \"" +
+									contentType + "\" using [" + messageConverter + "]");
+						}
+						return (T) messageConverter.read((Class) this.responseClass, responseWrapper);
+					}
 				}
 			}
-			if (this.responseClass != null) {
-				if (messageConverter.canRead(this.responseClass, contentType)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Reading [" + this.responseClass.getName() + "] as \"" +
-								contentType + "\" using [" + messageConverter + "]");
-					}
-					return (T) messageConverter.read((Class) this.responseClass, responseWrapper);
-				}
-			}
+		}
+		catch(IOException | HttpMessageNotReadableException exc) {
+			throw new RestClientException("Error while extracting response for type ["
+					+ this.responseType + "] and content type [" + contentType + "]", exc);
 		}
 
 		throw new RestClientException("Could not extract response: no suitable HttpMessageConverter found " +

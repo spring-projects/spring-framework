@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,9 @@
  */
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.*;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -42,9 +39,12 @@ import org.springframework.web.context.request.async.StandardServletAsyncWebRequ
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for ResponseBodyEmitterReturnValueHandler.
+ *
  * @author Rossen Stoyanchev
  */
 public class ResponseBodyEmitterReturnValueHandlerTests {
@@ -59,8 +59,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 
 	@Before
-	public void setUp() throws Exception {
-
+	public void setup() throws Exception {
 		List<HttpMessageConverter<?>> converters = Arrays.asList(
 				new StringHttpMessageConverter(), new MappingJackson2HttpMessageConverter());
 
@@ -73,6 +72,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		WebAsyncUtils.getAsyncManager(this.webRequest).setAsyncWebRequest(asyncWebRequest);
 		this.request.setAsyncSupported(true);
 	}
+
 
 	@Test
 	public void supportsReturnType() throws Exception {
@@ -147,7 +147,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 		assertTrue(this.request.isAsyncStarted());
 		assertEquals(200, this.response.getStatus());
-		assertEquals("text/event-stream", this.response.getContentType());
+		assertEquals("text/event-stream;charset=UTF-8", this.response.getContentType());
 
 		SimpleBean bean1 = new SimpleBean();
 		bean1.setId(1L);
@@ -157,7 +157,8 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		bean2.setId(2L);
 		bean2.setName("John");
 
-		emitter.send(event().comment("a test").name("update").id("1").reconnectTime(5000L).data(bean1).data(bean2));
+		emitter.send(SseEmitter.event().
+				comment("a test").name("update").id("1").reconnectTime(5000L).data(bean1).data(bean2));
 
 		assertEquals(":a test\n" +
 						"event:update\n" +
@@ -177,19 +178,21 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 		assertTrue(this.request.isAsyncStarted());
 		assertEquals(200, this.response.getStatus());
-		assertEquals("text/event-stream", this.response.getContentType());
+		assertEquals("text/event-stream;charset=UTF-8", this.response.getContentType());
 		assertEquals("bar", this.response.getHeader("foo"));
 	}
 
 	@Test
 	public void responseEntitySseNoContent() throws Exception {
 		MethodParameter returnType = returnType("handleResponseEntitySse");
-		ResponseEntity<?> entity = ResponseEntity.noContent().build();
+		ResponseEntity<?> entity = ResponseEntity.noContent().header("foo", "bar").build();
 		handleReturnValue(entity, returnType);
 
 		assertFalse(this.request.isAsyncStarted());
 		assertEquals(204, this.response.getStatus());
+		assertEquals(Collections.singletonList("bar"), this.response.getHeaders("foo"));
 	}
+
 
 	private void handleReturnValue(Object returnValue, MethodParameter returnType) throws Exception {
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
@@ -200,7 +203,6 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		Method method = TestController.class.getDeclaredMethod(methodName);
 		return new MethodParameter(method, -1);
 	}
-
 
 
 	@SuppressWarnings("unused")
@@ -233,8 +235,8 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		private ResponseEntity handleRawResponseEntity() {
 			return null;
 		}
-
 	}
+
 
 	private static class SimpleBean {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Represents a simple property or field reference.
@@ -99,53 +101,34 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			TypeDescriptor resultDescriptor = result.getTypeDescriptor();
 			// Create a new collection or map ready for the indexer
 			if (List.class == resultDescriptor.getType()) {
-				try {
-					if (isWritableProperty(this.name, contextObject, evalContext)) {
-						List<?> newList = ArrayList.class.newInstance();
-						writeProperty(contextObject, evalContext, this.name, newList);
-						result = readProperty(contextObject, evalContext, this.name);
-					}
-				}
-				catch (InstantiationException ex) {
-					throw new SpelEvaluationException(getStartPosition(), ex,
-							SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
-				}
-				catch (IllegalAccessException ex) {
-					throw new SpelEvaluationException(getStartPosition(), ex,
-							SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+				if (isWritableProperty(this.name, contextObject, evalContext)) {
+					List<?> newList = new ArrayList<>();
+					writeProperty(contextObject, evalContext, this.name, newList);
+					result = readProperty(contextObject, evalContext, this.name);
 				}
 			}
 			else if (Map.class == resultDescriptor.getType()) {
-				try {
-					if (isWritableProperty(this.name,contextObject, evalContext)) {
-						Map<?,?> newMap = HashMap.class.newInstance();
-						writeProperty(contextObject, evalContext, this.name, newMap);
-						result = readProperty(contextObject, evalContext, this.name);
-					}
-				}
-				catch (InstantiationException ex) {
-					throw new SpelEvaluationException(getStartPosition(), ex,
-							SpelMessage.UNABLE_TO_CREATE_MAP_FOR_INDEXING);
-				}
-				catch (IllegalAccessException ex) {
-					throw new SpelEvaluationException(getStartPosition(), ex,
-							SpelMessage.UNABLE_TO_CREATE_MAP_FOR_INDEXING);
+				if (isWritableProperty(this.name,contextObject, evalContext)) {
+					Map<?,?> newMap = new HashMap<>();
+					writeProperty(contextObject, evalContext, this.name, newMap);
+					result = readProperty(contextObject, evalContext, this.name);
 				}
 			}
 			else {
 				// 'simple' object
 				try {
 					if (isWritableProperty(this.name,contextObject, evalContext)) {
-						Object newObject  = result.getTypeDescriptor().getType().newInstance();
+						Class<?> clazz = result.getTypeDescriptor().getType();
+						Object newObject = ReflectionUtils.accessibleConstructor(clazz).newInstance();
 						writeProperty(contextObject, evalContext, this.name, newObject);
 						result = readProperty(contextObject, evalContext, this.name);
 					}
 				}
-				catch (InstantiationException ex) {
-					throw new SpelEvaluationException(getStartPosition(), ex,
+				catch (InvocationTargetException ex) {
+					throw new SpelEvaluationException(getStartPosition(), ex.getTargetException(),
 							SpelMessage.UNABLE_TO_DYNAMICALLY_CREATE_OBJECT, result.getTypeDescriptor().getType());
 				}
-				catch (IllegalAccessException ex) {
+				catch (Throwable ex) {
 					throw new SpelEvaluationException(getStartPosition(), ex,
 							SpelMessage.UNABLE_TO_DYNAMICALLY_CREATE_OBJECT, result.getTypeDescriptor().getType());
 				}
@@ -306,8 +289,8 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	private List<PropertyAccessor> getPropertyAccessorsToTry(Object contextObject, List<PropertyAccessor> propertyAccessors) {
 		Class<?> targetType = (contextObject != null ? contextObject.getClass() : null);
 
-		List<PropertyAccessor> specificAccessors = new ArrayList<PropertyAccessor>();
-		List<PropertyAccessor> generalAccessors = new ArrayList<PropertyAccessor>();
+		List<PropertyAccessor> specificAccessors = new ArrayList<>();
+		List<PropertyAccessor> generalAccessors = new ArrayList<>();
 		for (PropertyAccessor resolver : propertyAccessors) {
 			Class<?>[] targets = resolver.getSpecificTargetClasses();
 			if (targets == null) {
@@ -326,7 +309,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				}
 			}
 		}
-		List<PropertyAccessor> resolvers = new ArrayList<PropertyAccessor>();
+		List<PropertyAccessor> resolvers = new ArrayList<>();
 		resolvers.addAll(specificAccessors);
 		generalAccessors.removeAll(specificAccessors);
 		resolvers.addAll(generalAccessors);
@@ -371,10 +354,12 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 		@Override
 		public TypedValue getValue() {
-			TypedValue value = this.ref.getValueInternal(this.contextObject, this.evalContext, this.autoGrowNullReferences);
-			if (this.ref.cachedReadAccessor instanceof CompilablePropertyAccessor) {
-				CompilablePropertyAccessor accessor = (CompilablePropertyAccessor) this.ref.cachedReadAccessor;
-				this.ref.exitTypeDescriptor = CodeFlow.toDescriptor(accessor.getPropertyType());
+			TypedValue value =
+					this.ref.getValueInternal(this.contextObject, this.evalContext, this.autoGrowNullReferences);
+			PropertyAccessor accessorToUse = this.ref.cachedReadAccessor;
+			if (accessorToUse instanceof CompilablePropertyAccessor) {
+				this.ref.exitTypeDescriptor =
+						CodeFlow.toDescriptor(((CompilablePropertyAccessor) accessorToUse).getPropertyType());
 			}
 			return value;
 		}

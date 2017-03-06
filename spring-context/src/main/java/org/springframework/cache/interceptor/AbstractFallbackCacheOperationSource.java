@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,8 +70,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * <p>As this base class is not marked Serializable, the cache will be recreated
 	 * after serialization - provided that the concrete subclass is Serializable.
 	 */
-	private final Map<Object, Collection<CacheOperation>> attributeCache =
-			new ConcurrentHashMap<Object, Collection<CacheOperation>>(1024);
+	private final Map<Object, Collection<CacheOperation>> attributeCache = new ConcurrentHashMap<>(1024);
 
 
 	/**
@@ -84,6 +83,10 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 */
 	@Override
 	public Collection<CacheOperation> getCacheOperations(Method method, Class<?> targetClass) {
+		if (method.getDeclaringClass() == Object.class) {
+			return null;
+		}
+
 		Object cacheKey = getCacheKey(method, targetClass);
 		Collection<CacheOperation> cached = this.attributeCache.get(cacheKey);
 

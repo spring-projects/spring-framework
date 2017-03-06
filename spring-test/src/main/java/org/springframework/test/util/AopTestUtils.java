@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.aop.framework.AopProxyUtils
  * @see ReflectionTestUtils
  */
-public class AopTestUtils {
+public abstract class AopTestUtils {
 
 	/**
 	 * Get the <em>target</em> object of the supplied {@code candidate} object.
@@ -42,24 +42,23 @@ public class AopTestUtils {
 	 * {@linkplain AopUtils#isAopProxy proxy}, the target of the proxy will
 	 * be returned; otherwise, the {@code candidate} will be returned
 	 * <em>as is</em>.
-	 *
-	 * @param candidate the instance to check (potentially a Spring AOP proxy);
-	 * never {@code null}
-	 * @return the target object or the {@code candidate}; never {@code null}
+	 * @param candidate the instance to check (potentially a Spring AOP proxy;
+	 * never {@code null})
+	 * @return the target object or the {@code candidate} (never {@code null})
 	 * @throws IllegalStateException if an error occurs while unwrapping a proxy
 	 * @see Advised#getTargetSource()
 	 * @see #getUltimateTargetObject
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T getTargetObject(Object candidate) {
-		Assert.notNull(candidate, "candidate must not be null");
+		Assert.notNull(candidate, "Candidate must not be null");
 		try {
-			if (AopUtils.isAopProxy(candidate) && (candidate instanceof Advised)) {
+			if (AopUtils.isAopProxy(candidate) && candidate instanceof Advised) {
 				return (T) ((Advised) candidate).getTargetSource().getTarget();
 			}
 		}
-		catch (Exception e) {
-			throw new IllegalStateException("Failed to unwrap proxied object.", e);
+		catch (Throwable ex) {
+			throw new IllegalStateException("Failed to unwrap proxied object", ex);
 		}
 		return (T) candidate;
 	}
@@ -72,25 +71,23 @@ public class AopTestUtils {
 	 * {@linkplain AopUtils#isAopProxy proxy}, the ultimate target of all
 	 * nested proxies will be returned; otherwise, the {@code candidate}
 	 * will be returned <em>as is</em>.
-	 *
-	 * @param candidate the instance to check (potentially a Spring AOP proxy);
-	 * never {@code null}
-	 * @return the ultimate target object or the {@code candidate}; never
-	 * {@code null}
+	 * @param candidate the instance to check (potentially a Spring AOP proxy;
+	 * never {@code null})
+	 * @return the target object or the {@code candidate} (never {@code null})
 	 * @throws IllegalStateException if an error occurs while unwrapping a proxy
 	 * @see Advised#getTargetSource()
 	 * @see org.springframework.aop.framework.AopProxyUtils#ultimateTargetClass
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T getUltimateTargetObject(Object candidate) {
-		Assert.notNull(candidate, "candidate must not be null");
+		Assert.notNull(candidate, "Candidate must not be null");
 		try {
-			if (AopUtils.isAopProxy(candidate) && (candidate instanceof Advised)) {
+			if (AopUtils.isAopProxy(candidate) && candidate instanceof Advised) {
 				return (T) getUltimateTargetObject(((Advised) candidate).getTargetSource().getTarget());
 			}
 		}
-		catch (Exception e) {
-			throw new IllegalStateException("Failed to unwrap proxied object.", e);
+		catch (Throwable ex) {
+			throw new IllegalStateException("Failed to unwrap proxied object", ex);
 		}
 		return (T) candidate;
 	}

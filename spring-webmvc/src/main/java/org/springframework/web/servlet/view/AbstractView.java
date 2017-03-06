@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	private String requestContextAttribute;
 
-	private final Map<String, Object> staticAttributes = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> staticAttributes = new LinkedHashMap<>();
 
 	private boolean exposePathVariables = true;
 
@@ -281,7 +281,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * flag on but do not list specific bean names for this property.
 	 */
 	public void setExposedContextBeanNames(String... exposedContextBeanNames) {
-		this.exposedContextBeanNames = new HashSet<String>(Arrays.asList(exposedContextBeanNames));
+		this.exposedContextBeanNames = new HashSet<>(Arrays.asList(exposedContextBeanNames));
 	}
 
 
@@ -319,7 +319,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 		size += (model != null ? model.size() : 0);
 		size += (pathVars != null ? pathVars.size() : 0);
 
-		Map<String, Object> mergedModel = new LinkedHashMap<String, Object>(size);
+		Map<String, Object> mergedModel = new LinkedHashMap<>(size);
 		mergedModel.putAll(this.staticAttributes);
 		if (pathVars != null) {
 			mergedModel.putAll(pathVars);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.util.MultiValueMap;
  * lookups between file extensions and MediaTypes in both directions.
  *
  * <p>Initially created with a map of file extensions and media types.
- * Subsequently sub-classes can use {@link #addMapping} to add more mappings.
+ * Subsequently subclasses can use {@link #addMapping} to add more mappings.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -43,12 +43,12 @@ import org.springframework.util.MultiValueMap;
 public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExtensionResolver {
 
 	private final ConcurrentMap<String, MediaType> mediaTypes =
-			new ConcurrentHashMap<String, MediaType>(64);
+			new ConcurrentHashMap<>(64);
 
 	private final MultiValueMap<MediaType, String> fileExtensions =
-			new LinkedMultiValueMap<MediaType, String>();
+			new LinkedMultiValueMap<>();
 
-	private final List<String> allFileExtensions = new LinkedList<String>();
+	private final List<String> allFileExtensions = new LinkedList<>();
 
 
 	/**
@@ -67,8 +67,12 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 	}
 
 
+	public Map<String, MediaType> getMediaTypes() {
+		return this.mediaTypes;
+	}
+
 	protected List<MediaType> getAllMediaTypes() {
-		return new ArrayList<MediaType>(this.mediaTypes.values());
+		return new ArrayList<>(this.mediaTypes.values());
 	}
 
 	/**
@@ -86,7 +90,7 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 	@Override
 	public List<String> resolveFileExtensions(MediaType mediaType) {
 		List<String> fileExtensions = this.fileExtensions.get(mediaType);
-		return (fileExtensions != null) ? fileExtensions : Collections.<String>emptyList();
+		return (fileExtensions != null) ? fileExtensions : Collections.emptyList();
 	}
 
 	@Override

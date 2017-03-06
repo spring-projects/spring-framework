@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public class DefaultSockJsService extends TransportHandlingSockJsService impleme
 
 
 	private static Set<TransportHandler> getDefaultTransportHandlers(Collection<TransportHandler> overrides) {
-		Set<TransportHandler> result = new LinkedHashSet<TransportHandler>(8);
+		Set<TransportHandler> result = new LinkedHashSet<>(8);
 		result.add(new XhrPollingTransportHandler());
 		result.add(new XhrReceivingTransportHandler());
 		result.add(new XhrStreamingTransportHandler());

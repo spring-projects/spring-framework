@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,7 @@ import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
+import org.springframework.web.socket.sockjs.transport.SockJsSession;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSession;
@@ -49,7 +51,12 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 
 	@Override
 	protected MediaType getContentType() {
-		return new MediaType("application", "javascript", UTF8_CHARSET);
+		return new MediaType("application", "javascript", StandardCharsets.UTF_8);
+	}
+
+	@Override
+	public boolean checkSessionType(SockJsSession session) {
+		return session instanceof PollingSockJsSession;
 	}
 
 	@Override
@@ -67,7 +74,7 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 			String callback = getCallbackParam(request);
 			if (!StringUtils.hasText(callback)) {
 				response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-				response.getBody().write("\"callback\" parameter required".getBytes(UTF8_CHARSET));
+				response.getBody().write("\"callback\" parameter required".getBytes(StandardCharsets.UTF_8));
 				return;
 			}
 		}

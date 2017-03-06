@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public class ObjectUtilsTests {
 		assertTrue(isEmpty(Collections.emptyList()));
 		assertTrue(isEmpty(Collections.emptySet()));
 
-		Set<String> set = new HashSet<String>();
+		Set<String> set = new HashSet<>();
 		set.add("foo");
 		assertFalse(isEmpty(set));
 		assertFalse(isEmpty(Arrays.asList("foo")));
@@ -120,7 +120,7 @@ public class ObjectUtilsTests {
 	public void isEmptyMap() {
 		assertTrue(isEmpty(Collections.emptyMap()));
 
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		HashMap<String, Object> map = new HashMap<>();
 		map.put("foo", 42L);
 		assertFalse(isEmpty(map));
 	}

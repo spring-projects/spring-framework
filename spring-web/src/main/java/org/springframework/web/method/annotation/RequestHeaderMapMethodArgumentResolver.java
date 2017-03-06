@@ -62,7 +62,7 @@ public class RequestHeaderMapMethodArgumentResolver implements HandlerMethodArgu
 				result = new HttpHeaders();
 			}
 			else {
-				result = new LinkedMultiValueMap<String, String>();
+				result = new LinkedMultiValueMap<>();
 			}
 			for (Iterator<String> iterator = webRequest.getHeaderNames(); iterator.hasNext();) {
 				String headerName = iterator.next();
@@ -76,7 +76,7 @@ public class RequestHeaderMapMethodArgumentResolver implements HandlerMethodArgu
 			return result;
 		}
 		else {
-			Map<String, String> result = new LinkedHashMap<String, String>();
+			Map<String, String> result = new LinkedHashMap<>();
 			for (Iterator<String> iterator = webRequest.getHeaderNames(); iterator.hasNext();) {
 				String headerName = iterator.next();
 				String headerValue = webRequest.getHeader(headerName);

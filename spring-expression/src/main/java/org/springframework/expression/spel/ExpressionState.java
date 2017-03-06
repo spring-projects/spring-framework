@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,12 +92,12 @@ public class ExpressionState {
 
 	private void ensureVariableScopesInitialized() {
 		if (this.variableScopes == null) {
-			this.variableScopes = new Stack<VariableScope>();
+			this.variableScopes = new Stack<>();
 			// top level empty variable scope
 			this.variableScopes.add(new VariableScope());
 		}
 		if (this.scopeRootObjects == null) {
-			this.scopeRootObjects = new Stack<TypedValue>();
+			this.scopeRootObjects = new Stack<>();
 		}
 	}
 
@@ -113,14 +113,14 @@ public class ExpressionState {
 
 	public void pushActiveContextObject(TypedValue obj) {
 		if (this.contextObjects == null) {
-			this.contextObjects = new Stack<TypedValue>();
+			this.contextObjects = new Stack<>();
 		}
 		this.contextObjects.push(obj);
 	}
 
 	public void popActiveContextObject() {
 		if (this.contextObjects == null) {
-			this.contextObjects = new Stack<TypedValue>();
+			this.contextObjects = new Stack<>();
 		}
 		this.contextObjects.pop();
 	}
@@ -183,7 +183,7 @@ public class ExpressionState {
 
 	public void enterScope() {
 		ensureVariableScopesInitialized();
-		this.variableScopes.push(new VariableScope(Collections.<String,Object>emptyMap()));
+		this.variableScopes.push(new VariableScope(Collections.emptyMap()));
 		this.scopeRootObjects.push(getActiveContextObject());
 	}
 
@@ -250,7 +250,7 @@ public class ExpressionState {
 	 */
 	private static class VariableScope {
 
-		private final Map<String, Object> vars = new HashMap<String, Object>();
+		private final Map<String, Object> vars = new HashMap<>();
 
 		public VariableScope() {
 		}

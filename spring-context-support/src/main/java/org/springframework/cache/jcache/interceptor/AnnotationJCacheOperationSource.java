@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 	}
 
 	private <A extends Annotation> CacheMethodDetails<A> createMethodDetails(Method method, A annotation, String cacheName) {
-		return new DefaultCacheMethodDetails<A>(method, annotation, cacheName);
+		return new DefaultCacheMethodDetails<>(method, annotation, cacheName);
 	}
 
 	protected CacheResolver getCacheResolver(CacheResolverFactory factory, CacheMethodDetails<?> details) {
@@ -200,7 +200,7 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 	 */
 	protected String generateDefaultCacheName(Method method) {
 		Class<?>[] parameterTypes = method.getParameterTypes();
-		List<String> parameters = new ArrayList<String>(parameterTypes.length);
+		List<String> parameters = new ArrayList<>(parameterTypes.length);
 		for (Class<?> parameterType : parameterTypes) {
 			parameters.add(parameterType.getName());
 		}

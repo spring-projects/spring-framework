@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,6 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -101,8 +100,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.StaxUtils;
 
 /**
- * Implementation of the {@code GenericMarshaller} interface for JAXB 2.1/2.2,
- * as included in JDK 6 update 4+ and Java 7/8.
+ * Implementation of the {@code GenericMarshaller} interface for JAXB 2.2.
  *
  * <p>The typical usage will be to set either the "contextPath" or the "classesToBeBound"
  * property on this bean, possibly customize the marshaller and unmarshaller by setting
@@ -545,6 +543,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		}
 	}
 
+	@SuppressWarnings("deprecation")  // on JDK 9
 	private Schema loadSchema(Resource[] resources, String schemaLanguage) throws IOException, SAXException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Setting validation schema to " +
@@ -553,7 +552,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		Assert.notEmpty(resources, "No resources given");
 		Assert.hasLength(schemaLanguage, "No schema language provided");
 		Source[] schemaSources = new Source[resources.length];
-		XMLReader xmlReader = XMLReaderFactory.createXMLReader();
+		XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
 		xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
 		for (int i = 0; i < resources.length; i++) {
 			Assert.notNull(resources[i], "Resource is null");
@@ -589,7 +588,6 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 							supportsInternal(classArgument, false));
 				}
 				else if (typeArgument instanceof GenericArrayType) {
-					// Only on JDK 6 - see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5041784
 					GenericArrayType arrayType = (GenericArrayType) typeArgument;
 					return (Byte.TYPE == arrayType.getGenericComponentType());
 				}
@@ -774,9 +772,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		}
 		catch (NullPointerException ex) {
 			if (!isSupportDtd()) {
-				throw new UnmarshallingFailureException("NPE while unmarshalling. " +
-						"This can happen on JDK 1.6 due to the presence of DTD " +
-						"declarations, which are disabled.", ex);
+				throw new UnmarshallingFailureException("NPE while unmarshalling: " +
+						"This can happen due to the presence of DTD declarations which are disabled.", ex);
 			}
 			throw ex;
 		}
@@ -805,6 +802,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		}
 	}
 
+	@SuppressWarnings("deprecation")  // on JDK 9
 	private Source processSource(Source source) {
 		if (StaxUtils.isStaxSource(source) || source instanceof DOMSource) {
 			return source;
@@ -833,7 +831,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 		try {
 			if (xmlReader == null) {
-				xmlReader = XMLReaderFactory.createXMLReader();
+				xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
 			}
 			xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
 			String name = "http://xml.org/sax/features/external-general-entities";
@@ -897,7 +895,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	/**
 	 * Convert the given {@code JAXBException} to an appropriate exception from the
 	 * {@code org.springframework.oxm} hierarchy.
-	 * @param ex {@code JAXBException} that occured
+	 * @param ex {@code JAXBException} that occurred
 	 * @return the corresponding {@code XmlMappingException}
 	 */
 	protected XmlMappingException convertJaxbException(JAXBException ex) {
@@ -940,7 +938,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			try {
 				contentId = URLEncoder.encode(contentId, "UTF-8");
 			}
-			catch (UnsupportedEncodingException e) {
+			catch (UnsupportedEncodingException ex) {
 				// ignore
 			}
 			return CID + contentId;
@@ -951,7 +949,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 				URI uri = new URI(elementNamespace);
 				return uri.getHost();
 			}
-			catch (URISyntaxException e) {
+			catch (URISyntaxException ex) {
 				// ignore
 			}
 			return dataHandler.getName();
@@ -997,7 +995,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 				try {
 					contentId = URLDecoder.decode(contentId, "UTF-8");
 				}
-				catch (UnsupportedEncodingException e) {
+				catch (UnsupportedEncodingException ex) {
 					// ignore
 				}
 				contentId = '<' + contentId + '>';

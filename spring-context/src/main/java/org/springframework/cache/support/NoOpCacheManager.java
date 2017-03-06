@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -41,9 +40,9 @@ import org.springframework.cache.CacheManager;
  */
 public class NoOpCacheManager implements CacheManager {
 
-	private final ConcurrentMap<String, Cache> caches = new ConcurrentHashMap<String, Cache>(16);
+	private final ConcurrentMap<String, Cache> caches = new ConcurrentHashMap<>(16);
 
-	private final Set<String> cacheNames = new LinkedHashSet<String>(16);
+	private final Set<String> cacheNames = new LinkedHashSet<>(16);
 
 
 	/**
@@ -70,58 +69,6 @@ public class NoOpCacheManager implements CacheManager {
 	public Collection<String> getCacheNames() {
 		synchronized (this.cacheNames) {
 			return Collections.unmodifiableSet(this.cacheNames);
-		}
-	}
-
-
-	private static class NoOpCache implements Cache {
-
-		private final String name;
-
-		public NoOpCache(String name) {
-			this.name = name;
-		}
-
-		@Override
-		public void clear() {
-		}
-
-		@Override
-		public void evict(Object key) {
-		}
-
-		@Override
-		public ValueWrapper get(Object key) {
-			return null;
-		}
-
-		@Override
-		public <T> T get(Object key, Class<T> type) {
-			return null;
-		}
-
-		@Override
-		public <T> T get(Object key, Callable<T> valueLoader) {
-			return null;
-		}
-
-		@Override
-		public String getName() {
-			return this.name;
-		}
-
-		@Override
-		public Object getNativeCache() {
-			return null;
-		}
-
-		@Override
-		public void put(Object key, Object value) {
-		}
-
-		@Override
-		public ValueWrapper putIfAbsent(Object key, Object value) {
-			return null;
 		}
 	}
 

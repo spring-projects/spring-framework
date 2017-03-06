@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,22 @@ import org.springframework.stereotype.Component;
  * {@code @Configuration} classes are candidates for component scanning (typically using
  * Spring XML's {@code <context:component-scan/>} element) and therefore may also take
  * advantage of {@link Autowired @Autowired}/{@link javax.inject.Inject @Inject}
- * at the field and method level (but not at the constructor level).
+ * like any regular {@code @Component}. In particular, if a single constructor is present
+ * autowiring semantics will be applied transparently:
+ *
+ * <pre class="code">
+ * &#064;Configuration
+ * public class AppConfig {
+ *     private final SomeBean someBean;
+ *
+ *     public AppConfig(SomeBean someBean) {
+ *         this.someBean = someBean;
+ *     }
+ *
+ *     // &#064;Bean definition using "SomeBean"
+ *
+ * }</pre>
+ *
  * <p>{@code @Configuration} classes may not only be bootstrapped using
  * component scanning, but may also themselves <em>configure</em> component scanning using
  * the {@link ComponentScan @ComponentScan} annotation:
@@ -104,13 +119,13 @@ import org.springframework.stereotype.Component;
  *
  * Externalized values may be looked up by injecting the Spring
  * {@link org.springframework.core.env.Environment} into a {@code @Configuration}
- * class using the {@code @Autowired} or the {@code @Inject} annotation:
+ * class the usual (e.g. using the {@code @Autowired} annotation):
  *
  * <pre class="code">
  * &#064;Configuration
  * public class AppConfig {
  *
- *     &#064Inject Environment env;
+ *     &#064Autowired Environment env;
  *
  *     &#064;Bean
  *     public MyBean myBean() {
@@ -175,7 +190,7 @@ import org.springframework.stereotype.Component;
  * <p>{@code @Configuration} classes may be composed using the {@link Import @Import} annotation,
  * not unlike the way that {@code <import>} works in Spring XML. Because
  * {@code @Configuration} objects are managed as Spring beans within the container,
- * imported configurations may be injected using {@code @Autowired} or {@code @Inject}:
+ * imported configurations may be injected the usual way (e.g. via constructor injection):
  *
  * <pre class="code">
  * &#064;Configuration
@@ -191,7 +206,11 @@ import org.springframework.stereotype.Component;
  * &#064;Import(DatabaseConfig.class)
  * public class AppConfig {
  *
- *     &#064Inject DatabaseConfig dataConfig;
+ *     private final DatabaseConfig dataConfig;
+ *
+ *     public AppConfig(DatabaseConfig dataConfig) {
+ *         this.dataConfig = dataConfig;
+ *     }
  *
  *     &#064;Bean
  *     public MyBean myBean() {
@@ -240,8 +259,8 @@ import org.springframework.stereotype.Component;
  * As mentioned above, {@code @Configuration} classes may be declared as regular Spring
  * {@code <bean>} definitions within Spring XML files. It is also possible to
  * import Spring XML configuration files into {@code @Configuration} classes using
- * the {@link ImportResource @ImportResource} annotation. Bean definitions imported from XML can be
- * injected using {@code @Autowired} or {@code @Inject}:
+ * the {@link ImportResource @ImportResource} annotation. Bean definitions imported from
+ * XML can be injected the usual way (e.g. using the {@code Inject} annotation):
  *
  * <pre class="code">
  * &#064;Configuration
@@ -338,11 +357,14 @@ import org.springframework.stereotype.Component;
  * <h2>Constraints when authoring {@code @Configuration} classes</h2>
  *
  * <ul>
- * <li>&#064;Configuration classes must be non-final
- * <li>&#064;Configuration classes must be non-local (may not be declared within a method)
- * <li>&#064;Configuration classes must have a default/no-arg constructor and may not use
- * {@link Autowired @Autowired} constructor parameters. Any nested configuration classes
- * must be {@code static}.
+ * <li>Configuration classes must be provided as classes (i.e. not as instances returned
+ * from factory methods), allowing for runtime enhancements through a generated subclass.
+ * <li>Configuration classes must be non-final.
+ * <li>Configuration classes must be non-local (i.e. may not be declared within a method).
+ * <li>Any nested configuration classes must be declared as {@code static}.
+ * <li>{@code @Bean} methods may not in turn create further configuration classes
+ * (any such instances will be treated as regular beans, with their configuration
+ * annotations remaining undetected).
  * </ul>
  *
  * @author Rod Johnson

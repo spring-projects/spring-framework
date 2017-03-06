@@ -35,7 +35,6 @@ import static org.junit.Assert.*;
  * @author Rob Winch
  * @since 4.2
  */
-@SuppressWarnings("deprecation")
 public class MockMvcWebConnectionTests {
 
 	private final WebClient webClient = new WebClient();
@@ -50,7 +49,7 @@ public class MockMvcWebConnectionTests {
 
 	@Test
 	public void contextPathNull() throws IOException {
-		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, (String) null));
+		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient));
 
 		Page page = this.webClient.getPage("http://localhost/context/a");
 
@@ -59,7 +58,7 @@ public class MockMvcWebConnectionTests {
 
 	@Test
 	public void contextPathExplicit() throws IOException {
-		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, "/context"));
+		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, "/context"));
 
 		Page page = this.webClient.getPage("http://localhost/context/a");
 
@@ -68,7 +67,7 @@ public class MockMvcWebConnectionTests {
 
 	@Test
 	public void contextPathEmpty() throws IOException {
-		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, ""));
+		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, ""));
 
 		Page page = this.webClient.getPage("http://localhost/context/a");
 
@@ -77,7 +76,7 @@ public class MockMvcWebConnectionTests {
 
 	@Test
 	public void forward() throws IOException {
-		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, ""));
+		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, ""));
 
 		Page page = this.webClient.getPage("http://localhost/forward");
 
@@ -87,13 +86,13 @@ public class MockMvcWebConnectionTests {
 	@Test(expected = IllegalArgumentException.class)
 	@SuppressWarnings("resource")
 	public void contextPathDoesNotStartWithSlash() throws IOException {
-		new MockMvcWebConnection(this.mockMvc, "context");
+		new MockMvcWebConnection(this.mockMvc, this.webClient, "context");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	@SuppressWarnings("resource")
 	public void contextPathEndsWithSlash() throws IOException {
-		new MockMvcWebConnection(this.mockMvc, "/context/");
+		new MockMvcWebConnection(this.mockMvc, this.webClient, "/context/");
 	}
 
 }

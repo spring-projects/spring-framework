@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	protected static final Log logger = LogFactory.getLog(CglibAopProxy.class);
 
 	/** Keeps track of the Classes that we have validated for final methods */
-	private static final Map<Class<?>, Boolean> validatedClasses = new WeakHashMap<Class<?>, Boolean>();
+	private static final Map<Class<?>, Boolean> validatedClasses = new WeakHashMap<>();
 
 
 	/** The configuration used to configure this proxy */
@@ -202,19 +202,13 @@ class CglibAopProxy implements AopProxy, Serializable {
 			// Generate the proxy class and create a proxy instance.
 			return createProxyClassAndInstance(enhancer, callbacks);
 		}
-		catch (CodeGenerationException ex) {
+		catch (CodeGenerationException | IllegalArgumentException ex) {
 			throw new AopConfigException("Could not generate CGLIB subclass of class [" +
 					this.advised.getTargetClass() + "]: " +
 					"Common causes of this problem include using a final class or a non-visible class",
 					ex);
 		}
-		catch (IllegalArgumentException ex) {
-			throw new AopConfigException("Could not generate CGLIB subclass of class [" +
-					this.advised.getTargetClass() + "]: " +
-					"Common causes of this problem include using a final class or a non-visible class",
-					ex);
-		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			// TargetSource.getTarget() failed
 			throw new AopConfigException("Unexpected AOP exception", ex);
 		}
@@ -256,7 +250,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 * methods across ClassLoaders, and writes warnings to the log for each one found.
 	 */
 	private void doValidateClass(Class<?> proxySuperClass, ClassLoader proxyClassLoader) {
-		if (Object.class != proxySuperClass) {
+		if (proxySuperClass != Object.class) {
 			Method[] methods = proxySuperClass.getDeclaredMethods();
 			for (Method method : methods) {
 				int mod = method.getModifiers();
@@ -322,7 +316,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		if (isStatic && isFrozen) {
 			Method[] methods = rootClass.getMethods();
 			Callback[] fixedCallbacks = new Callback[methods.length];
-			this.fixedInterceptorMap = new HashMap<String, Integer>(methods.length);
+			this.fixedInterceptorMap = new HashMap<>(methods.length);
 
 			// TODO: small memory optimisation here (can skip creation for methods with no advice)
 			for (int x = 0; x < methods.length; x++) {
@@ -351,7 +345,8 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 */
 	private static Object processReturnType(Object proxy, Object target, Method method, Object retVal) {
 		// Massage return value if necessary
-		if (retVal != null && retVal == target && !RawTargetAccess.class.isAssignableFrom(method.getDeclaringClass())) {
+		if (retVal != null && retVal == target &&
+				!RawTargetAccess.class.isAssignableFrom(method.getDeclaringClass())) {
 			// Special case: it returned "this". Note that we can't help
 			// if the target sets a reference to itself in another returned object.
 			retVal = proxy;

@@ -171,7 +171,7 @@ public class DelegatingFilterProxyTests {
 		assertNull(targetFilter.filterConfig);
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void testDelegatingFilterProxyWithTargetBeanNameAndNoApplicationContext() throws ServletException, IOException {
 		MockServletContext sc = new MockServletContext();
 

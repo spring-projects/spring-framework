@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,37 +55,21 @@ import org.springframework.web.util.WebUtils;
 /**
  * Mock implementation of the {@link javax.servlet.ServletContext} interface.
  *
- * <p>As of Spring 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
+ * <p>As of Spring 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
  *
- * <p>Compatible with Servlet 3.0 but can be configured to expose a specific version
- * through {@link #setMajorVersion}/{@link #setMinorVersion}; default is 3.0.
- * Note that Servlet 3.0 support is limited: servlet, filter and listener
+ * <p>Compatible with Servlet 3.1 but can be configured to expose a specific version
+ * through {@link #setMajorVersion}/{@link #setMinorVersion}; default is 3.1.
+ * Note that Servlet 3.1 support is limited: servlet, filter and listener
  * registration methods are not supported; neither is JSP configuration.
  * We generally do not recommend to unit test your ServletContainerInitializers and
  * WebApplicationInitializers which is where those registration methods would be used.
  *
- * <p>Used for testing the Spring web framework; only rarely necessary for testing
- * application controllers. As long as application components don't explicitly
- * access the {@code ServletContext}, {@code ClassPathXmlApplicationContext} or
- * {@code FileSystemXmlApplicationContext} can be used to load the context files
- * for testing, even for {@code DispatcherServlet} context definitions.
- *
- * <p>For setting up a full {@code WebApplicationContext} in a test environment,
- * you can use {@code AnnotationConfigWebApplicationContext},
- * {@code XmlWebApplicationContext}, or {@code GenericWebApplicationContext},
- * passing in an appropriate {@code MockServletContext} instance. You might want
- * to configure your {@code MockServletContext} with a {@code FileSystemResourceLoader}
- * in that case to ensure that resource paths are interpreted as relative filesystem
- * locations.
- *
- * <p>A common setup is to point your JVM working directory to the root of your
- * web application directory, in combination with filesystem-based resource loading.
- * This allows to load the context files as used in the web application, with
- * relative paths getting interpreted correctly. Such a setup will work with both
- * {@code FileSystemXmlApplicationContext} (which will load straight from the
- * filesystem) and {@code XmlWebApplicationContext} with an underlying
- * {@code MockServletContext} (as long as the {@code MockServletContext} has been
- * configured with a {@code FileSystemResourceLoader}).
+ * <p>For setting up a full {@code WebApplicationContext} in a test environment, you can
+ * use {@code AnnotationConfigWebApplicationContext}, {@code XmlWebApplicationContext},
+ * or {@code GenericWebApplicationContext}, passing in a corresponding
+ * {@code MockServletContext} instance. Consider configuring your
+ * {@code MockServletContext} with a {@code FileSystemResourceLoader} in order to
+ * interpret resource paths as relative filesystem locations.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -95,18 +79,15 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.context.support.AnnotationConfigWebApplicationContext
  * @see org.springframework.web.context.support.XmlWebApplicationContext
  * @see org.springframework.web.context.support.GenericWebApplicationContext
- * @see org.springframework.context.support.ClassPathXmlApplicationContext
- * @see org.springframework.context.support.FileSystemXmlApplicationContext
  */
 public class MockServletContext implements ServletContext {
 
-	/** Default Servlet name used by Tomcat, Jetty, JBoss, and GlassFish: {@value}. */
+	/** Default Servlet name used by Tomcat, Jetty, JBoss, and GlassFish: {@value} */
 	private static final String COMMON_DEFAULT_SERVLET_NAME = "default";
 
 	private static final String TEMP_DIR_SYSTEM_PROPERTY = "java.io.tmpdir";
 
-	private static final Set<SessionTrackingMode> DEFAULT_SESSION_TRACKING_MODES =
-			new LinkedHashSet<SessionTrackingMode>(3);
+	private static final Set<SessionTrackingMode> DEFAULT_SESSION_TRACKING_MODES = new LinkedHashSet<>(4);
 
 	static {
 		DEFAULT_SESSION_TRACKING_MODES.add(SessionTrackingMode.COOKIE);
@@ -123,31 +104,33 @@ public class MockServletContext implements ServletContext {
 
 	private String contextPath = "";
 
-	private final Map<String, ServletContext> contexts = new HashMap<String, ServletContext>();
+	private final Map<String, ServletContext> contexts = new HashMap<>();
 
 	private int majorVersion = 3;
 
-	private int minorVersion = 0;
+	private int minorVersion = 1;
 
 	private int effectiveMajorVersion = 3;
 
-	private int effectiveMinorVersion = 0;
+	private int effectiveMinorVersion = 1;
 
-	private final Map<String, RequestDispatcher> namedRequestDispatchers = new HashMap<String, RequestDispatcher>();
+	private final Map<String, RequestDispatcher> namedRequestDispatchers = new HashMap<>();
 
 	private String defaultServletName = COMMON_DEFAULT_SERVLET_NAME;
 
-	private final Map<String, String> initParameters = new LinkedHashMap<String, String>();
+	private final Map<String, String> initParameters = new LinkedHashMap<>();
 
-	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> attributes = new LinkedHashMap<>();
 
 	private String servletContextName = "MockServletContext";
 
-	private final Set<String> declaredRoles = new LinkedHashSet<String>();
+	private final Set<String> declaredRoles = new LinkedHashSet<>();
 
 	private Set<SessionTrackingMode> sessionTrackingModes;
 
 	private final SessionCookieConfig sessionCookieConfig = new MockSessionCookieConfig();
+
+	private int sessionTimeout;
 
 
 	/**
@@ -304,7 +287,7 @@ public class MockServletContext implements ServletContext {
 			if (ObjectUtils.isEmpty(fileList)) {
 				return null;
 			}
-			Set<String> resourcePaths = new LinkedHashSet<String>(fileList.length);
+			Set<String> resourcePaths = new LinkedHashSet<>(fileList.length);
 			for (String fileEntry : fileList) {
 				String resultPath = actualPath + fileEntry;
 				if (resource.createRelative(fileEntry).getFile().isDirectory()) {
@@ -355,9 +338,8 @@ public class MockServletContext implements ServletContext {
 
 	@Override
 	public RequestDispatcher getRequestDispatcher(String path) {
-		if (!path.startsWith("/")) {
-			throw new IllegalArgumentException("RequestDispatcher path at ServletContext level must start with '/'");
-		}
+		Assert.isTrue(path.startsWith("/"),
+				() -> "RequestDispatcher path [" + path + "] at ServletContext level must start with '/'");
 		return new MockRequestDispatcher(path);
 	}
 
@@ -426,13 +408,13 @@ public class MockServletContext implements ServletContext {
 	@Override
 	@Deprecated
 	public Enumeration<Servlet> getServlets() {
-		return Collections.enumeration(Collections.<Servlet>emptySet());
+		return Collections.enumeration(Collections.emptySet());
 	}
 
 	@Override
 	@Deprecated
 	public Enumeration<String> getServletNames() {
-		return Collections.enumeration(Collections.<String>emptySet());
+		return Collections.enumeration(Collections.emptySet());
 	}
 
 	@Override
@@ -502,7 +484,7 @@ public class MockServletContext implements ServletContext {
 
 	@Override
 	public Enumeration<String> getAttributeNames() {
-		return Collections.enumeration(new LinkedHashSet<String>(this.attributes.keySet()));
+		return Collections.enumeration(new LinkedHashSet<>(this.attributes.keySet()));
 	}
 
 	@Override
@@ -571,6 +553,16 @@ public class MockServletContext implements ServletContext {
 		return this.sessionCookieConfig;
 	}
 
+	// @Override - but only against Servlet 4.0
+	public void setSessionTimeout(int sessionTimeout) {
+		this.sessionTimeout = sessionTimeout;
+	}
+
+	// @Override - but only against Servlet 4.0
+	public int getSessionTimeout() {
+		return this.sessionTimeout;
+	}
+
 
 	//---------------------------------------------------------------------
 	// Unsupported Servlet 3.0 registration methods
@@ -578,6 +570,11 @@ public class MockServletContext implements ServletContext {
 
 	@Override
 	public JspConfigDescriptor getJspConfigDescriptor() {
+		throw new UnsupportedOperationException();
+	}
+
+	// @Override - but only against Servlet 4.0
+	public ServletRegistration.Dynamic addJspFile(String servletName, String jspFile) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -674,6 +671,11 @@ public class MockServletContext implements ServletContext {
 
 	@Override
 	public <T extends EventListener> T createListener(Class<T> c) throws ServletException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String getVirtualServerName() {
 		throw new UnsupportedOperationException();
 	}
 

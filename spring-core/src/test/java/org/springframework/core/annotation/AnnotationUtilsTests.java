@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1357,11 +1357,6 @@ public class AnnotationUtilsTests {
 		assertNotNull(synthesizedWebMapping2);
 
 		assertThat(webMappingWithAliases.toString(), is(not(synthesizedWebMapping1.toString())));
-
-		// The unsynthesized annotation for handleMappedWithSamePathAndValueAttributes()
-		// should produce the same toString() results as synthesized annotations for
-		// handleMappedWithPathAttribute()
-		assertToStringForWebMappingWithPathAndValue(webMappingWithPathAndValue);
 		assertToStringForWebMappingWithPathAndValue(synthesizedWebMapping1);
 		assertToStringForWebMappingWithPathAndValue(synthesizedWebMapping2);
 	}
@@ -1543,14 +1538,8 @@ public class AnnotationUtilsTests {
 		assertArrayEquals(new char[] { 'x', 'y', 'z' }, chars);
 	}
 
+
 	@SafeVarargs
-	// The following "varargs" suppression is necessary for javac from OpenJDK
-	// (1.8.0_60-b27); however, Eclipse warns that it's unnecessary. See the following
-	// Eclipse issues for details.
-	//
-	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=344783
-	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=349669#c10
-	// @SuppressWarnings("varargs")
 	static <T> T[] asArray(T... arr) {
 		return arr;
 	}
@@ -1996,7 +1985,6 @@ public class AnnotationUtilsTests {
 	static class GroupOfCharsClass {
 	}
 
-
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface AliasForWithMissingAttributeDeclaration {
 
@@ -2121,12 +2109,12 @@ public class AnnotationUtilsTests {
 
 	@ContextConfig
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface ImplicitAliasesContextConfig {
+	public @interface ImplicitAliasesContextConfig {
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "location")
 		String xmlFile() default "";
 
-		@AliasFor(annotation = ContextConfig.class, value = "location")
+		@AliasFor(annotation = ContextConfig.class, attribute = "location")
 		String groovyScript() default "";
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "location")

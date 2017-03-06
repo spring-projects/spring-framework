@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.channels.ReadableByteChannel;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
  * {@link Resource} implementation for {@code java.io.File} handles.
- * Obviously supports resolution as File, and also as URL.
+ * Supports resolution as a {@code File} and also as a {@code URL}.
  * Implements the extended {@link WritableResource} interface.
  *
  * @author Juergen Hoeller
@@ -84,7 +85,6 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	public final String getPath() {
 		return this.path;
 	}
-
 
 	/**
 	 * This implementation returns whether the underlying file exists.
@@ -154,11 +154,28 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	}
 
 	/**
+	 * This implementation always indicates a file.
+	 */
+	@Override
+	public boolean isFile() {
+		return true;
+	}
+
+	/**
 	 * This implementation returns the underlying File reference.
 	 */
 	@Override
 	public File getFile() {
 		return this.file;
+	}
+
+	/**
+	 * This implementation opens a FileChannel for the underlying file.
+	 * @see java.nio.channels.FileChannel
+	 */
+	@Override
+	public ReadableByteChannel readableChannel() throws IOException {
+		return new FileInputStream(this.file).getChannel();
 	}
 
 	/**

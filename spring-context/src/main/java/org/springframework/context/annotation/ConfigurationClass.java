@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,17 +54,17 @@ final class ConfigurationClass {
 
 	private String beanName;
 
-	private final Set<ConfigurationClass> importedBy = new LinkedHashSet<ConfigurationClass>(1);
+	private final Set<ConfigurationClass> importedBy = new LinkedHashSet<>(1);
 
-	private final Set<BeanMethod> beanMethods = new LinkedHashSet<BeanMethod>();
+	private final Set<BeanMethod> beanMethods = new LinkedHashSet<>();
 
 	private final Map<String, Class<? extends BeanDefinitionReader>> importedResources =
-			new LinkedHashMap<String, Class<? extends BeanDefinitionReader>>();
+			new LinkedHashMap<>();
 
 	private final Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> importBeanDefinitionRegistrars =
-			new LinkedHashMap<ImportBeanDefinitionRegistrar, AnnotationMetadata>();
+			new LinkedHashMap<>();
 
-	final Set<String> skippedBeanMethods = new HashSet<String>();
+	final Set<String> skippedBeanMethods = new HashSet<>();
 
 
 	/**
@@ -233,7 +233,7 @@ final class ConfigurationClass {
 
 	@Override
 	public String toString() {
-		return "ConfigurationClass:beanName=" + this.beanName + ",resource=" + this.resource;
+		return "ConfigurationClass: beanName '" + this.beanName + "', " + this.resource;
 	}
 
 

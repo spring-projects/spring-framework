@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,6 @@ import java.rmi.UnknownHostException;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.omg.CORBA.COMM_FAILURE;
-import org.omg.CORBA.CompletionStatus;
-import org.omg.CORBA.NO_RESPONSE;
-import org.omg.CORBA.SystemException;
 
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
@@ -170,22 +166,7 @@ public abstract class RmiClientInterceptorUtils {
 	public static boolean isConnectFailure(RemoteException ex) {
 		return (ex instanceof ConnectException || ex instanceof ConnectIOException ||
 				ex instanceof UnknownHostException || ex instanceof NoSuchObjectException ||
-				ex instanceof StubNotFoundException || ex.getCause() instanceof SocketException ||
-				isCorbaConnectFailure(ex.getCause()));
-	}
-
-	/**
-	 * Check whether the given RMI exception root cause indicates a CORBA
-	 * connection failure.
-	 * <p>This is relevant on the IBM JVM, in particular for WebSphere EJB clients.
-	 * <p>See the
-	 * <a href="http://www.redbooks.ibm.com/Redbooks.nsf/RedbookAbstracts/tips0243.html">IBM website</code>
-	 * for details.
-	 * @param ex the RMI exception to check
-	 */
-	private static boolean isCorbaConnectFailure(Throwable ex) {
-		return ((ex instanceof COMM_FAILURE || ex instanceof NO_RESPONSE) &&
-				((SystemException) ex).completed == CompletionStatus.COMPLETED_NO);
+				ex instanceof StubNotFoundException || ex.getCause() instanceof SocketException);
 	}
 
 }

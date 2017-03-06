@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class ProxyFactoryBeanTests {
+public class ProxyFactoryBeanTests {
 
 	private static final Class<?> CLASS = ProxyFactoryBeanTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
@@ -714,7 +714,7 @@ public final class ProxyFactoryBeanTests {
 	@SuppressWarnings("serial")
 	public static class PointcutForVoid extends DefaultPointcutAdvisor {
 
-		public static List<String> methodNames = new LinkedList<String>();
+		public static List<String> methodNames = new LinkedList<>();
 
 		public static void reset() {
 			methodNames.clear();

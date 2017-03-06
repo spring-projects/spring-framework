@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public interface WebSocketSession extends Closeable {
 	URI getUri();
 
 	/**
-	 * Return the headers used in the handshake request.
+	 * Return the headers used in the handshake request (never {@code null}).
 	 */
 	HttpHeaders getHandshakeHeaders();
 
@@ -57,13 +57,13 @@ public interface WebSocketSession extends Closeable {
 	 * HandshakeInterceptor}. On the client side the map can be populated via
 	 * {@link org.springframework.web.socket.client.WebSocketClient
 	 * WebSocketClient} handshake methods.
-	 * @return a Map with the session attributes, never {@code null}.
+	 * @return a Map with the session attributes (never {@code null})
 	 */
 	Map<String, Object> getAttributes();
 
 	/**
-	 * Return a {@link java.security.Principal} instance containing the name of the
-	 * authenticated user.
+	 * Return a {@link java.security.Principal} instance containing the name
+	 * of the authenticated user.
 	 * <p>If the user has not been authenticated, the method returns <code>null</code>.
 	 */
 	Principal getPrincipal();
@@ -79,8 +79,9 @@ public interface WebSocketSession extends Closeable {
 	InetSocketAddress getRemoteAddress();
 
 	/**
-	 * Return the negotiated sub-protocol or {@code null} if none was specified or
-	 * negotiated successfully.
+	 * Return the negotiated sub-protocol.
+	 * @return the protocol identifier, or {@code null} if no protocol
+	 * was specified or negotiated successfully
 	 */
 	String getAcceptedProtocol();
 
@@ -105,8 +106,9 @@ public interface WebSocketSession extends Closeable {
 	int getBinaryMessageSizeLimit();
 
 	/**
-	 * Return the negotiated extensions or {@code null} if none was specified or
-	 * negotiated successfully.
+	 * Determine the negotiated extensions.
+	 * @return the list of extensions, or an empty list if no extension
+	 * was specified or negotiated successfully
 	 */
 	List<WebSocketExtension> getExtensions();
 

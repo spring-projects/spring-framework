@@ -178,9 +178,8 @@ public abstract class ScriptUtils {
 		boolean inSingleQuote = false;
 		boolean inDoubleQuote = false;
 		boolean inEscape = false;
-		char[] content = script.toCharArray();
 		for (int i = 0; i < script.length(); i++) {
-			char c = content[i];
+			char c = script.charAt(i);
 			if (inEscape) {
 				inEscape = false;
 				sb.append(c);
@@ -342,9 +341,8 @@ public abstract class ScriptUtils {
 	 */
 	public static boolean containsSqlScriptDelimiters(String script, String delim) {
 		boolean inLiteral = false;
-		char[] content = script.toCharArray();
 		for (int i = 0; i < script.length(); i++) {
-			if (content[i] == '\'') {
+			if (script.charAt(i) == '\'') {
 				inLiteral = !inLiteral;
 			}
 			if (!inLiteral && script.startsWith(delim, i)) {
@@ -460,7 +458,7 @@ public abstract class ScriptUtils {
 				separator = FALLBACK_STATEMENT_SEPARATOR;
 			}
 
-			List<String> statements = new LinkedList<String>();
+			List<String> statements = new LinkedList<>();
 			splitSqlScript(resource, script, separator, commentPrefix, blockCommentStartDelimiter,
 					blockCommentEndDelimiter, statements);
 

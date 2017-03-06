@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	 */
 	protected NativeMessageHeaderAccessor(Map<String, List<String>> nativeHeaders) {
 		if (!CollectionUtils.isEmpty(nativeHeaders)) {
-			setHeader(NATIVE_HEADERS, new LinkedMultiValueMap<String, String>(nativeHeaders));
+			setHeader(NATIVE_HEADERS, new LinkedMultiValueMap<>(nativeHeaders));
 		}
 	}
 
@@ -79,7 +79,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 			if (map != null) {
 				// Force removal since setHeader checks for equality
 				removeHeader(NATIVE_HEADERS);
-				setHeader(NATIVE_HEADERS, new LinkedMultiValueMap<String, String>(map));
+				setHeader(NATIVE_HEADERS, new LinkedMultiValueMap<>(map));
 			}
 		}
 	}
@@ -94,7 +94,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	 */
 	public Map<String, List<String>> toNativeHeaderMap() {
 		Map<String, List<String>> map = getNativeHeaders();
-		return (map != null ? new LinkedMultiValueMap<String, String>(map) : Collections.<String, List<String>>emptyMap());
+		return (map != null ? new LinkedMultiValueMap<>(map) : Collections.emptyMap());
 	}
 
 	@Override
@@ -154,10 +154,10 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 			return;
 		}
 		if (map == null) {
-			map = new LinkedMultiValueMap<String, String>(4);
+			map = new LinkedMultiValueMap<>(4);
 			setHeader(NATIVE_HEADERS, map);
 		}
-		List<String> values = new LinkedList<String>();
+		List<String> values = new LinkedList<>();
 		values.add(value);
 		if (!ObjectUtils.nullSafeEquals(values, getHeader(name))) {
 			setModified(true);
@@ -175,12 +175,12 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		}
 		Map<String, List<String>> nativeHeaders = getNativeHeaders();
 		if (nativeHeaders == null) {
-			nativeHeaders = new LinkedMultiValueMap<String, String>(4);
+			nativeHeaders = new LinkedMultiValueMap<>(4);
 			setHeader(NATIVE_HEADERS, nativeHeaders);
 		}
 		List<String> values = nativeHeaders.get(name);
 		if (values == null) {
-			values = new LinkedList<String>();
+			values = new LinkedList<>();
 			nativeHeaders.put(name, values);
 		}
 		values.add(value);

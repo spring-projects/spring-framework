@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public class HandlerExecutionChain {
 		if (handler instanceof HandlerExecutionChain) {
 			HandlerExecutionChain originalChain = (HandlerExecutionChain) handler;
 			this.handler = originalChain.getHandler();
-			this.interceptorList = new ArrayList<HandlerInterceptor>();
+			this.interceptorList = new ArrayList<>();
 			CollectionUtils.mergeArrayIntoCollection(originalChain.getInterceptors(), this.interceptorList);
 			CollectionUtils.mergeArrayIntoCollection(interceptors, this.interceptorList);
 		}
@@ -98,7 +98,7 @@ public class HandlerExecutionChain {
 
 	private List<HandlerInterceptor> initInterceptorList() {
 		if (this.interceptorList == null) {
-			this.interceptorList = new ArrayList<HandlerInterceptor>();
+			this.interceptorList = new ArrayList<>();
 			if (this.interceptors != null) {
 				// An interceptor array specified through the constructor
 				this.interceptorList.addAll(Arrays.asList(this.interceptors));

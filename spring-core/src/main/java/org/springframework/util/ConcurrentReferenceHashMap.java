@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -483,7 +483,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 					@Override
 					public void add(V value) {
 						@SuppressWarnings("unchecked")
-						Entry<K, V> newEntry = new Entry<K, V>((K) key, value);
+						Entry<K, V> newEntry = new Entry<>((K) key, value);
 						Reference<K, V> newReference = Segment.this.referenceManager.createReference(newEntry, hash, head);
 						Segment.this.references[index] = newReference;
 						Segment.this.count++;
@@ -532,7 +532,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 					Set<Reference<K, V>> toPurge = Collections.emptySet();
 					if (reference != null) {
-						toPurge = new HashSet<Reference<K, V>>();
+						toPurge = new HashSet<>();
 						while (reference != null) {
 							toPurge.add(reference);
 							reference = this.referenceManager.pollForPurge();
@@ -903,7 +903,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 		@Override
 		public void remove() {
-			Assert.state(this.last != null);
+			Assert.state(this.last != null, "No element to remove");
 			ConcurrentReferenceHashMap.this.remove(this.last.getKey());
 		}
 	}
@@ -924,7 +924,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	 */
 	protected class ReferenceManager {
 
-		private final ReferenceQueue<Entry<K, V>> queue = new ReferenceQueue<Entry<K, V>>();
+		private final ReferenceQueue<Entry<K, V>> queue = new ReferenceQueue<>();
 
 		/**
 		 * Factory method used to create a new {@link Reference}.
@@ -935,9 +935,9 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		 */
 		public Reference<K, V> createReference(Entry<K, V> entry, int hash, Reference<K, V> next) {
 			if (ConcurrentReferenceHashMap.this.referenceType == ReferenceType.WEAK) {
-				return new WeakEntryReference<K, V>(entry, hash, next, this.queue);
+				return new WeakEntryReference<>(entry, hash, next, this.queue);
 			}
-			return new SoftEntryReference<K, V>(entry, hash, next, this.queue);
+			return new SoftEntryReference<>(entry, hash, next, this.queue);
 		}
 
 		/**

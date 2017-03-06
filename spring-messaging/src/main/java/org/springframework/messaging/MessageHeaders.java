@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * @param timestamp the {@link #TIMESTAMP} header value
 	 */
 	protected MessageHeaders(Map<String, Object> headers, UUID id, Long timestamp) {
-		this.headers = (headers != null ? new HashMap<String, Object>(headers) : new HashMap<String, Object>());
+		this.headers = (headers != null ? new HashMap<>(headers) : new HashMap<String, Object>());
 
 		if (id == null) {
 			this.headers.put(ID, getIdGenerator().generateId());
@@ -147,7 +147,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * @param keysToIgnore the keys of the entries to ignore
 	 */
 	private MessageHeaders(MessageHeaders original, Set<String> keysToIgnore) {
-		this.headers = new HashMap<String, Object>(original.headers.size() - keysToIgnore.size());
+		this.headers = new HashMap<>(original.headers.size() - keysToIgnore.size());
 		for (Map.Entry<String, Object> entry : original.headers.entrySet()) {
 			if (!keysToIgnore.contains(entry.getKey())) {
 				this.headers.put(entry.getKey(), entry.getValue());
@@ -268,7 +268,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	// Serialization methods
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
-		Set<String> keysToIgnore = new HashSet<String>();
+		Set<String> keysToIgnore = new HashSet<>();
 		for (Map.Entry<String, Object> entry : this.headers.entrySet()) {
 			if (!(entry.getValue() instanceof Serializable)) {
 				keysToIgnore.add(entry.getKey());

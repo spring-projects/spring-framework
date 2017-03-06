@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 
 /**
@@ -44,7 +43,7 @@ interface AnnotationAttributeExtractor<S> {
 	 * type supported by this extractor.
 	 * @return the annotated element, or {@code null} if unknown
 	 */
-	AnnotatedElement getAnnotatedElement();
+	Object getAnnotatedElement();
 
 	/**
 	 * Get the underlying source of annotation attributes.

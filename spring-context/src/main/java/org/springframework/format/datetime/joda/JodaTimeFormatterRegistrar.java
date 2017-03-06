@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
-import org.springframework.util.ClassUtils;
 
 /**
  * Configures Joda-Time's formatting system for use with Spring.
@@ -63,17 +62,9 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
 
 	/**
-	 * Strictly speaking, this should not be necessary since we formally require JodaTime 2.x.
-	 * However, since Joda-Time formatters are being registered automatically, we defensively
-	 * adapt to Joda-Time 1.x when encountered on the classpath. To be removed in Spring 5.0.
-	 */
-	private static final boolean jodaTime2Available = ClassUtils.isPresent(
-			"org.joda.time.YearMonth", JodaTimeFormatterRegistrar.class.getClassLoader());
-
-	/**
 	 * User defined formatters.
 	 */
-	private final Map<Type, DateTimeFormatter> formatters = new HashMap<Type, DateTimeFormatter>();
+	private final Map<Type, DateTimeFormatter> formatters = new HashMap<>();
 
 	/**
 	 * Factories used when specific formatters have not been specified.
@@ -82,7 +73,7 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
 
 	public JodaTimeFormatterRegistrar() {
-		this.factories = new HashMap<Type, DateTimeFormatterFactory>();
+		this.factories = new HashMap<>();
 		for (Type type : Type.values()) {
 			this.factories.put(type, new DateTimeFormatterFactory());
 		}
@@ -209,9 +200,8 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
 		registry.addFormatterForFieldType(Period.class, new PeriodFormatter());
 		registry.addFormatterForFieldType(Duration.class, new DurationFormatter());
-		if (jodaTime2Available) {
-			JodaTime2Delegate.registerAdditionalFormatters(registry);
-		}
+		registry.addFormatterForFieldType(YearMonth.class, new YearMonthFormatter());
+		registry.addFormatterForFieldType(MonthDay.class, new MonthDayFormatter());
 
 		registry.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
 	}
@@ -238,18 +228,6 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
 		for (Class<?> fieldType : fieldTypes) {
 			registry.addFormatterForFieldType(fieldType, printer, parser);
-		}
-	}
-
-
-	/**
-	 * Inner class to avoid a hard dependency on Joda-Time 2.x.
-	 */
-	private static class JodaTime2Delegate {
-
-		public static void registerAdditionalFormatters(FormatterRegistry registry) {
-			registry.addFormatterForFieldType(YearMonth.class, new YearMonthFormatter());
-			registry.addFormatterForFieldType(MonthDay.class, new MonthDayFormatter());
 		}
 	}
 

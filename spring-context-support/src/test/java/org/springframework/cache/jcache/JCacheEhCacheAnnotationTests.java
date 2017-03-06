@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.cache.jcache;
 
-import javax.annotation.Resource;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.configuration.MutableConfiguration;
@@ -26,6 +25,7 @@ import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.config.AbstractCacheAnnotationTests;
@@ -81,7 +81,7 @@ public class JCacheEhCacheAnnotationTests extends AbstractCacheAnnotationTests {
 	@EnableCaching
 	static class EnableCachingConfig extends CachingConfigurerSupport {
 
-		@Resource
+		@Autowired
 		CachingProvider cachingProvider;
 
 		@Override
@@ -93,7 +93,7 @@ public class JCacheEhCacheAnnotationTests extends AbstractCacheAnnotationTests {
 		@Bean
 		public CacheManager jCacheManager() {
 			CacheManager cacheManager = this.cachingProvider.getCacheManager();
-			MutableConfiguration<Object, Object> mutableConfiguration = new MutableConfiguration<Object, Object>();
+			MutableConfiguration<Object, Object> mutableConfiguration = new MutableConfiguration<>();
 			mutableConfiguration.setStoreByValue(false);  // otherwise value has to be Serializable
 			cacheManager.createCache("testCache", mutableConfiguration);
 			cacheManager.createCache("primary", mutableConfiguration);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,22 +78,22 @@ public abstract class TransactionSynchronizationManager {
 	private static final Log logger = LogFactory.getLog(TransactionSynchronizationManager.class);
 
 	private static final ThreadLocal<Map<Object, Object>> resources =
-			new NamedThreadLocal<Map<Object, Object>>("Transactional resources");
+			new NamedThreadLocal<>("Transactional resources");
 
 	private static final ThreadLocal<Set<TransactionSynchronization>> synchronizations =
-			new NamedThreadLocal<Set<TransactionSynchronization>>("Transaction synchronizations");
+			new NamedThreadLocal<>("Transaction synchronizations");
 
 	private static final ThreadLocal<String> currentTransactionName =
-			new NamedThreadLocal<String>("Current transaction name");
+			new NamedThreadLocal<>("Current transaction name");
 
 	private static final ThreadLocal<Boolean> currentTransactionReadOnly =
-			new NamedThreadLocal<Boolean>("Current transaction read-only status");
+			new NamedThreadLocal<>("Current transaction read-only status");
 
 	private static final ThreadLocal<Integer> currentTransactionIsolationLevel =
-			new NamedThreadLocal<Integer>("Current transaction isolation level");
+			new NamedThreadLocal<>("Current transaction isolation level");
 
 	private static final ThreadLocal<Boolean> actualTransactionActive =
-			new NamedThreadLocal<Boolean>("Actual transaction active");
+			new NamedThreadLocal<>("Actual transaction active");
 
 
 	//-------------------------------------------------------------------------
@@ -177,7 +177,7 @@ public abstract class TransactionSynchronizationManager {
 		Map<Object, Object> map = resources.get();
 		// set ThreadLocal Map if none found
 		if (map == null) {
-			map = new HashMap<Object, Object>();
+			map = new HashMap<>();
 			resources.set(map);
 		}
 		Object oldValue = map.put(actualKey, value);
@@ -270,7 +270,7 @@ public abstract class TransactionSynchronizationManager {
 			throw new IllegalStateException("Cannot activate transaction synchronization - already active");
 		}
 		logger.trace("Initializing transaction synchronization");
-		synchronizations.set(new LinkedHashSet<TransactionSynchronization>());
+		synchronizations.set(new LinkedHashSet<>());
 	}
 
 	/**
@@ -313,7 +313,7 @@ public abstract class TransactionSynchronizationManager {
 		}
 		else {
 			// Sort lazily here, not in registerSynchronization.
-			List<TransactionSynchronization> sortedSynchs = new ArrayList<TransactionSynchronization>(synchs);
+			List<TransactionSynchronization> sortedSynchs = new ArrayList<>(synchs);
 			AnnotationAwareOrderComparator.sort(sortedSynchs);
 			return Collections.unmodifiableList(sortedSynchs);
 		}
@@ -461,11 +461,11 @@ public abstract class TransactionSynchronizationManager {
 	 * @see #setActualTransactionActive
 	 */
 	public static void clear() {
-		clearSynchronization();
-		setCurrentTransactionName(null);
-		setCurrentTransactionReadOnly(false);
-		setCurrentTransactionIsolationLevel(null);
-		setActualTransactionActive(false);
+		synchronizations.remove();
+		currentTransactionName.remove();
+		currentTransactionReadOnly.remove();;
+		currentTransactionIsolationLevel.remove();;
+		actualTransactionActive.remove();
 	}
 
 }

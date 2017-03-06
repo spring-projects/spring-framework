@@ -75,7 +75,7 @@ public class AnnotationCacheOperationSourceTests {
 
 	@Test
 	public void emptyCaching() throws Exception {
-		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "emptyCaching", 0);
+		getOps(AnnotatedClass.class, "emptyCaching", 0);
 	}
 
 	@Test
@@ -155,7 +155,7 @@ public class AnnotationCacheOperationSourceTests {
 
 	@Test
 	public void keyAndKeyGeneratorCannotBeSetTogether() {
-		exception.expect(IllegalStateException.class);
+		this.exception.expect(IllegalStateException.class);
 		getOps(AnnotatedClass.class, "invalidKeyAndKeyGeneratorSet");
 	}
 
@@ -189,7 +189,7 @@ public class AnnotationCacheOperationSourceTests {
 
 	@Test
 	public void cacheResolverAndCacheManagerCannotBeSetTogether() {
-		exception.expect(IllegalStateException.class);
+		this.exception.expect(IllegalStateException.class);
 		getOps(AnnotatedClass.class, "invalidCacheResolverAndCacheManagerSet");
 	}
 
@@ -245,6 +245,22 @@ public class AnnotationCacheOperationSourceTests {
 	}
 
 	@Test
+	public void cacheConfigFromInterface() {
+		assertNull(getOps(InterfaceCacheConfig.class, "interfaceCacheConfig"));
+		Collection<CacheOperation> ops = getOps(CacheConfigIfc.class, "interfaceCacheConfig");
+		CacheOperation cacheOperation = ops.iterator().next();
+		assertSharedConfig(cacheOperation, "", "", "", "myCache");
+	}
+
+	@Test
+	public void cacheAnnotationOverride() {
+		Collection<CacheOperation> ops = getOps(InterfaceCacheConfig.class, "interfaceCacheableOverride");
+		assertSame(1, ops.size());
+		CacheOperation cacheOperation = ops.iterator().next();
+		assertTrue(cacheOperation instanceof CacheableOperation);
+	}
+
+	@Test
 	public void partialClassLevelWithCustomCacheManager() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClassWithSomeDefault.class, "methodLevelCacheManager", 1);
 		CacheOperation cacheOperation = ops.iterator().next();
@@ -275,7 +291,7 @@ public class AnnotationCacheOperationSourceTests {
 	private Collection<CacheOperation> getOps(Class<?> target, String name) {
 		try {
 			Method method = target.getMethod(name);
-			return source.getCacheOperations(method, target);
+			return this.source.getCacheOperations(method, target);
 		}
 		catch (NoSuchMethodException ex) {
 			throw new IllegalStateException(ex);
@@ -430,11 +446,35 @@ public class AnnotationCacheOperationSourceTests {
 
 
 	@CacheConfigFoo
-	@CacheConfig(cacheNames = "myCache") // multiple sources
+	@CacheConfig(cacheNames = "myCache")  // multiple sources
 	private static class MultipleCacheConfig {
 
 		@Cacheable
 		public void multipleCacheConfig() {
+		}
+	}
+
+
+	@CacheConfig(cacheNames = "myCache")
+	private interface CacheConfigIfc {
+
+		@Cacheable
+		void interfaceCacheConfig();
+
+		@CachePut
+		void interfaceCacheableOverride();
+	}
+
+
+	private static class InterfaceCacheConfig implements CacheConfigIfc {
+
+		@Override
+		public void interfaceCacheConfig() {
+		}
+
+		@Override
+		@Cacheable
+		public void interfaceCacheableOverride() {
 		}
 	}
 
@@ -491,7 +531,7 @@ public class AnnotationCacheOperationSourceTests {
 
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.METHOD, ElementType.TYPE })
+	@Target({ElementType.METHOD, ElementType.TYPE})
 	@Cacheable(cacheNames = "shadowed cache name", key = "shadowed key")
 	@interface ComposedCacheable {
 
@@ -507,7 +547,7 @@ public class AnnotationCacheOperationSourceTests {
 
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.METHOD, ElementType.TYPE })
+	@Target({ElementType.METHOD, ElementType.TYPE})
 	@CacheEvict(cacheNames = "shadowed cache name", key = "shadowed key")
 	@interface ComposedCacheEvict {
 

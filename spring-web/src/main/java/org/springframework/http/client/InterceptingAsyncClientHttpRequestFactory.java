@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,29 +32,28 @@ import org.springframework.http.HttpMethod;
  */
 public class InterceptingAsyncClientHttpRequestFactory implements AsyncClientHttpRequestFactory {
 
-    private AsyncClientHttpRequestFactory delegate;
+	private AsyncClientHttpRequestFactory delegate;
 
-    private List<AsyncClientHttpRequestInterceptor> interceptors;
+	private List<AsyncClientHttpRequestInterceptor> interceptors;
 
 
-    /**
-     * Create new instance of {@link InterceptingAsyncClientHttpRequestFactory}
-     * with delegated request factory and list of interceptors.
-     *
-     * @param delegate the request factory to delegate to
-     * @param interceptors the list of interceptors to use
-     */
-    public InterceptingAsyncClientHttpRequestFactory(AsyncClientHttpRequestFactory delegate,
-            List<AsyncClientHttpRequestInterceptor> interceptors) {
+	/**
+	 * Create new instance of {@link InterceptingAsyncClientHttpRequestFactory}
+	 * with delegated request factory and list of interceptors.
+	 * @param delegate the request factory to delegate to
+	 * @param interceptors the list of interceptors to use
+	 */
+	public InterceptingAsyncClientHttpRequestFactory(AsyncClientHttpRequestFactory delegate,
+			List<AsyncClientHttpRequestInterceptor> interceptors) {
 
-        this.delegate = delegate;
-        this.interceptors = (interceptors != null ? interceptors :
-                Collections.<AsyncClientHttpRequestInterceptor>emptyList());
-    }
+		this.delegate = delegate;
+		this.interceptors = (interceptors != null ? interceptors : Collections.emptyList());
+	}
 
-    @Override
-    public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod method) {
-        return new InterceptingAsyncClientHttpRequest(this.delegate, this.interceptors, uri, method);
-    }
+
+	@Override
+	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod method) {
+		return new InterceptingAsyncClientHttpRequest(this.delegate, this.interceptors, uri, method);
+	}
 
 }

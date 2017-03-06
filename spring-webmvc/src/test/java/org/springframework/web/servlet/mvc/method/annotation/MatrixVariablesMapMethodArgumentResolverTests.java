@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,22 +47,28 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 
 	private MatrixVariableMapMethodArgumentResolver resolver;
 
-	private MethodParameter paramString;
-	private MethodParameter paramMap;
-	private MethodParameter paramMultivalueMap;
-	private MethodParameter paramMapForPathVar;
-	private MethodParameter paramMapWithName;
-
 	private ModelAndViewContainer mavContainer;
 
 	private ServletWebRequest webRequest;
 
 	private MockHttpServletRequest request;
 
+	private MethodParameter paramString;
+	private MethodParameter paramMap;
+	private MethodParameter paramMultivalueMap;
+	private MethodParameter paramMapForPathVar;
+	private MethodParameter paramMapWithName;
+
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.resolver = new MatrixVariableMapMethodArgumentResolver();
+		this.mavContainer = new ModelAndViewContainer();
+		this.request = new MockHttpServletRequest();
+		this.webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
+
+		Map<String, MultiValueMap<String, String>> params = new LinkedHashMap<>();
+		this.request.setAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, params);
 
 		Method method = getClass().getMethod("handle", String.class,
 				Map.class, MultiValueMap.class, MultiValueMap.class, Map.class);
@@ -72,14 +78,8 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 		this.paramMultivalueMap = new SynthesizingMethodParameter(method, 2);
 		this.paramMapForPathVar = new SynthesizingMethodParameter(method, 3);
 		this.paramMapWithName = new SynthesizingMethodParameter(method, 4);
-
-		this.mavContainer = new ModelAndViewContainer();
-		this.request = new MockHttpServletRequest();
-		this.webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
-
-		Map<String, MultiValueMap<String, String>> params = new LinkedHashMap<String, MultiValueMap<String, String>>();
-		this.request.setAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, params);
 	}
+
 
 	@Test
 	public void supportsParameter() {
@@ -102,7 +102,7 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 		Map<String, String> map = (Map<String, String>) this.resolver.resolveArgument(
 				this.paramMap, this.mavContainer, this.webRequest, null);
 
-		assertEquals(Arrays.asList("red", "green", "blue"), map.get("colors"));
+		assertEquals("red", map.get("colors"));
 
 		@SuppressWarnings("unchecked")
 		MultiValueMap<String, String> multivalueMap = (MultiValueMap<String, String>) this.resolver.resolveArgument(
@@ -131,7 +131,7 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 		Map<String, String> mapAll = (Map<String, String>) this.resolver.resolveArgument(
 				this.paramMap, this.mavContainer, this.webRequest, null);
 
-		assertEquals(Arrays.asList("red", "purple", "yellow", "orange"), mapAll.get("colors"));
+		assertEquals("red", mapAll.get("colors"));
 	}
 
 	@Test
@@ -163,7 +163,7 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 				(Map<String, MultiValueMap<String, String>>) this.request.getAttribute(
 						HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE);
 
-		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		matrixVariables.put(pathVarName, params);
 
 		return params;
