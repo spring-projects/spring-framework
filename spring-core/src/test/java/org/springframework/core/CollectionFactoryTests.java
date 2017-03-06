@@ -83,7 +83,7 @@ public class CollectionFactoryTests {
 	@Test
 	public void createCollectionIsNotTypeSafeForEnumSet() {
 		Collection<Integer> ints = createCollection(EnumSet.class, Color.class, 3);
-
+                //Test
 		// Use a try-catch block to ensure that the exception is thrown as a result of the
 		// next line and not as a result of the previous line.
 		try {
