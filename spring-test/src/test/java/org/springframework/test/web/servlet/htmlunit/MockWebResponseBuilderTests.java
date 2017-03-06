@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.htmlunit;
 
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import javax.servlet.http.Cookie;
 
@@ -47,7 +48,7 @@ public class MockWebResponseBuilderTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.webRequest = new WebRequest(new URL("http://example.com:80/test/this/here"));
 		this.responseBuilder = new MockWebResponseBuilder(System.currentTimeMillis(), this.webRequest, this.response);
 	}
@@ -81,7 +82,7 @@ public class MockWebResponseBuilderTests {
 		this.response.addHeader("Content-Type", "text/html; charset=UTF-8");
 		WebResponse webResponse = this.responseBuilder.build();
 
-		assertThat(webResponse.getContentCharset(), equalTo("UTF-8"));
+		assertThat(webResponse.getContentCharset(), equalTo(StandardCharsets.UTF_8));
 	}
 
 	@Test

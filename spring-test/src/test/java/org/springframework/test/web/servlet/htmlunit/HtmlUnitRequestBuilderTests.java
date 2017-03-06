@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.test.web.servlet.htmlunit;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -28,9 +29,12 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
 
 import com.gargoylesoftware.htmlunit.FormEncodingType;
+import com.gargoylesoftware.htmlunit.HttpMethod;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.util.NameValuePair;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.auth.UsernamePasswordCredentials;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,15 +45,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.gargoylesoftware.htmlunit.HttpMethod;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebRequest;
-import com.gargoylesoftware.htmlunit.util.NameValuePair;
-
-import static java.util.Arrays.asList;
+import static java.util.Arrays.*;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.junit.Assert.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 /**
  * Unit tests for {@link HtmlUnitRequestBuilder}.
@@ -72,11 +71,12 @@ public class HtmlUnitRequestBuilderTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		webRequest = new WebRequest(new URL("http://example.com:80/test/this/here"));
 		webRequest.setHttpMethod(HttpMethod.GET);
 		requestBuilder = new HtmlUnitRequestBuilder(sessions, webClient, webRequest);
 	}
+
 
 	// --- constructor
 
@@ -94,6 +94,7 @@ public class HtmlUnitRequestBuilderTests {
 	public void constructorNullWebRequest() {
 		new HtmlUnitRequestBuilder(sessions, webClient, null);
 	}
+
 
 	// --- buildRequest
 
@@ -114,12 +115,11 @@ public class HtmlUnitRequestBuilderTests {
 
 	@Test
 	public void buildRequestCharacterEncoding() {
-		String charset = "UTF-8";
-		webRequest.setCharset(charset);
+		webRequest.setCharset(StandardCharsets.UTF_8);
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getCharacterEncoding(), equalTo(charset));
+		assertThat(actualRequest.getCharacterEncoding(), equalTo("UTF-8"));
 	}
 
 	@Test
@@ -151,7 +151,7 @@ public class HtmlUnitRequestBuilderTests {
 		assertThat(actualRequest.getHeader("Content-Type"), equalTo(contentType));
 	}
 
-	@Test // SPR-14916
+	@Test  // SPR-14916
 	public void buildRequestContentTypeWithFormSubmission() {
 		webRequest.setEncodingType(FormEncodingType.URL_ENCODED);
 
