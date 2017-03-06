@@ -343,7 +343,7 @@ project("spring-core") {
 	// both into the spring-core jar. cglib 3.2 itself depends on asm 5.x and is therefore
 	// further transformed by the JarJar task to depend on org.springframework.asm; this
 	// avoids including two different copies of asm unnecessarily.
-	def cglibVersion = "3.2.4"
+	def cglibVersion = "3.2.5"
 	def objenesisVersion = "2.5.1"
 
 	configurations {
