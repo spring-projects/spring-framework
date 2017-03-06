@@ -132,6 +132,10 @@ public class MockServletContext implements ServletContext {
 
 	private int sessionTimeout;
 
+	private String requestCharacterEncoding;
+
+	private String responseCharacterEncoding;
+
 
 	/**
 	 * Create a new {@code MockServletContext}, using no base path and a
@@ -561,6 +565,26 @@ public class MockServletContext implements ServletContext {
 	// @Override - but only against Servlet 4.0
 	public int getSessionTimeout() {
 		return this.sessionTimeout;
+	}
+
+	// @Override - but only against Servlet 4.0
+	public void setRequestCharacterEncoding(String requestCharacterEncoding) {
+		this.requestCharacterEncoding = requestCharacterEncoding;
+	}
+
+	// @Override - but only against Servlet 4.0
+	public String getRequestCharacterEncoding() {
+		return this.requestCharacterEncoding;
+	}
+
+	// @Override - but only against Servlet 4.0
+	public void setResponseCharacterEncoding(String responseCharacterEncoding) {
+		this.responseCharacterEncoding = responseCharacterEncoding;
+	}
+
+	// @Override - but only against Servlet 4.0
+	public String getResponseCharacterEncoding() {
+		return this.responseCharacterEncoding;
 	}
 
 
