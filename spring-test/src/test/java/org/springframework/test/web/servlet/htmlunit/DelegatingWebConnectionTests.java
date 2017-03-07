@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,13 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class DelegatingWebConnectionTests {
 
+	private DelegatingWebConnection webConnection;
+
+	private WebRequest request;
+
+	private WebResponse expectedResponse;
+
+
 	@Mock
 	private WebRequestMatcher matcher1;
 
@@ -72,21 +79,15 @@ public class DelegatingWebConnectionTests {
 	private WebConnection connection2;
 
 
-	private DelegatingWebConnection webConnection;
-
-	private WebRequest request;
-
-	private WebResponse expectedResponse;
-
-
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		request = new WebRequest(new URL("http://localhost/"));
 		WebResponseData data = new WebResponseData("".getBytes("UTF-8"), 200, "", Collections.<NameValuePair> emptyList());
 		expectedResponse = new WebResponse(data, request, 100L);
 		webConnection = new DelegatingWebConnection(defaultConnection,
 				new DelegateWebConnection(matcher1, connection1), new DelegateWebConnection(matcher2, connection2));
 	}
+
 
 	@Test
 	public void getResponseDefault() throws Exception {
