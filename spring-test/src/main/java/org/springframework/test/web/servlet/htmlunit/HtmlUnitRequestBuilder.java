@@ -259,7 +259,8 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		}
 		else {
 			Assert.isTrue(uriComponents.getPath().startsWith(this.contextPath),
-					() -> uriComponents.getPath() + " should start with contextPath " + this.contextPath);
+					() -> "\"" + uriComponents.getPath() +
+							"\" should start with context path \"" + this.contextPath + "\"");
 			request.setContextPath(this.contextPath);
 		}
 	}
@@ -273,7 +274,8 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			while (tokens.hasMoreTokens()) {
 				String cookieName = tokens.nextToken().trim();
 				Assert.isTrue(tokens.hasMoreTokens(),
-						() -> "Expected value for cookie name '" + cookieName + "'. Full cookie was " + cookieHeaderValue);
+						() -> "Expected value for cookie name '" + cookieName +
+								"': full cookie header was [" + cookieHeaderValue + "]");
 				String cookieValue = tokens.nextToken().trim();
 				processCookie(request, cookies, new Cookie(cookieName, cookieValue));
 			}
@@ -384,7 +386,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 
 	private Locale parseLocale(String locale) {
 		Matcher matcher = LOCALE_PATTERN.matcher(locale);
-		Assert.isTrue(matcher.matches(), () -> "Invalid locale " + locale);
+		Assert.isTrue(matcher.matches(), () -> "Invalid locale value [" + locale + "]");
 		String language = matcher.group(1);
 		String country = matcher.group(2);
 		if (country == null) {

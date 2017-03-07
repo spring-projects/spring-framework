@@ -146,7 +146,7 @@ public class RestTemplateTests {
 		verify(response).close();
 	}
 
-	@Test // SPR-15201
+	@Test  // SPR-15201
 	public void uriTemplateWithTrailingSlash() throws Exception {
 		String url = "http://example.com/spring/";
 		given(requestFactory.createRequest(new URI(url), HttpMethod.GET)).willReturn(request);
@@ -280,7 +280,6 @@ public class RestTemplateTests {
 
 	@Test
 	public void getForObjectWithCustomUriTemplateHandler() throws Exception {
-
 		DefaultUriBuilderFactory uriTemplateHandler = new DefaultUriBuilderFactory();
 		template.setUriTemplateHandler(uriTemplateHandler);
 
@@ -305,7 +304,6 @@ public class RestTemplateTests {
 
 		verify(response).close();
 	}
-
 
 	@Test
 	public void headForHeaders() throws Exception {
