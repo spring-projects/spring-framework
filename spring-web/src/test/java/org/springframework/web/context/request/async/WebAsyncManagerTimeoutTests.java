@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,9 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.context.request.NativeWebRequest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.mock;
-import static org.mockito.BDDMockito.verify;
-import static org.springframework.web.context.request.async.CallableProcessingInterceptor.RESULT_NONE;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.web.context.request.async.CallableProcessingInterceptor.*;
 
 /**
  * {@link WebAsyncManager} tests where container-triggered timeout/completion
@@ -53,8 +50,9 @@ public class WebAsyncManagerTimeoutTests {
 
 	private MockHttpServletResponse servletResponse;
 
+
 	@Before
-	public void setUp() {
+	public void setup() {
 		this.servletRequest = new MockHttpServletRequest("GET", "/test");
 		this.servletRequest.setAsyncSupported(true);
 		this.servletResponse = new MockHttpServletResponse();
@@ -67,9 +65,9 @@ public class WebAsyncManagerTimeoutTests {
 		this.asyncManager.setAsyncWebRequest(this.asyncWebRequest);
 	}
 
+
 	@Test
 	public void startCallableProcessingTimeoutAndComplete() throws Exception {
-
 		StubCallable callable = new StubCallable();
 
 		CallableProcessingInterceptor interceptor = mock(CallableProcessingInterceptor.class);

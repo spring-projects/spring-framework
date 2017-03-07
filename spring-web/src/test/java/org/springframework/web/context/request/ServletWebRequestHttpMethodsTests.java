@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.web.context.request;
 
-import static org.junit.Assert.*;
-
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -33,6 +31,8 @@ import org.junit.runners.Parameterized.Parameters;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
+
+import static org.junit.Assert.*;
 
 /**
  * Parameterized tests for ServletWebRequest
@@ -66,8 +66,9 @@ public class ServletWebRequestHttpMethodsTests {
 		});
 	}
 
+
 	@Before
-	public void setUp() {
+	public void setup() {
 		currentDate = new Date();
 		dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
 		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -75,6 +76,7 @@ public class ServletWebRequestHttpMethodsTests {
 		servletResponse = new MockHttpServletResponse();
 		request = new ServletWebRequest(servletRequest, servletResponse);
 	}
+
 
 	@Test
 	public void checkNotModifiedNon2xxStatus() {
@@ -87,8 +89,7 @@ public class ServletWebRequestHttpMethodsTests {
 		assertNull(servletResponse.getHeader("Last-Modified"));
 	}
 
-	// SPR-13516
-	@Test
+	@Test  // SPR-13516
 	public void checkNotModifiedInvalidStatus() {
 		long epochTime = currentDate.getTime();
 		servletRequest.addHeader("If-Modified-Since", epochTime);
@@ -97,7 +98,7 @@ public class ServletWebRequestHttpMethodsTests {
 		assertFalse(request.checkNotModified(epochTime));
 	}
 
-	@Test // SPR-14559
+	@Test  // SPR-14559
 	public void checkNotModifiedInvalidIfNoneMatchHeader() {
 		String eTag = "\"etagvalue\"";
 		servletRequest.addHeader("If-None-Match", "missingquotes");
@@ -223,8 +224,7 @@ public class ServletWebRequestHttpMethodsTests {
 		assertEquals(dateFormat.format(currentDate.getTime()), servletResponse.getHeader("Last-Modified"));
 	}
 
-	// SPR-14224
-	@Test
+	@Test  // SPR-14224
 	public void checkNotModifiedETagAndModifiedTimestamp() {
 		String eTag = "\"Foo\"";
 		servletRequest.addHeader("If-None-Match", eTag);
