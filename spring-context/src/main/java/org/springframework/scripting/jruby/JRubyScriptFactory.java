@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.scripting.jruby;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 
 import org.jruby.RubyException;
 import org.jruby.exceptions.JumpException;
@@ -28,6 +29,7 @@ import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.scripting.ScriptFactory} implementation
@@ -37,8 +39,8 @@ import org.springframework.util.ClassUtils;
  * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor};
  * see the latter's javadoc for a configuration example.
  *
- * <p>Note: Spring 4.0 supports JRuby 1.5 and higher.
- * As of Spring 4.2, JRuby 9.0.0.0 is supported but only through
+ * <p>Note: Spring 4.0 supports JRuby 1.5 and higher, with 1.7.x recommended.
+ * As of Spring 4.2, JRuby 9.0.0.0 is supported as well but primarily through
  * {@link org.springframework.scripting.support.StandardScriptFactory}.
  *
  * @author Juergen Hoeller
@@ -51,6 +53,9 @@ import org.springframework.util.ClassUtils;
  */
 @Deprecated
 public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
+
+	private static final Method getMessageMethod = ClassUtils.getMethodIfAvailable(RubyException.class, "getMessage");
+
 
 	private final String scriptSourceLocator;
 
@@ -110,10 +115,21 @@ public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 					scriptSource.getScriptAsString(), actualInterfaces, this.beanClassLoader);
 		}
 		catch (RaiseException ex) {
+			String msg = null;
 			RubyException rubyEx = ex.getException();
-			String msg = (rubyEx != null && rubyEx.message != null) ?
-					rubyEx.message.toString() : "Unexpected JRuby error";
-			throw new ScriptCompilationException(scriptSource, msg, ex);
+			if (rubyEx != null) {
+				if (getMessageMethod != null) {
+					// JRuby 9.1.7+ enforces access via getMessage() method
+					msg = ReflectionUtils.invokeMethod(getMessageMethod, rubyEx).toString();
+				}
+				else {
+					// JRuby 1.7.x: no accessor, just a public message field
+					if (rubyEx.message != null){
+						msg = rubyEx.message.toString();
+					}
+				}
+			}
+			throw new ScriptCompilationException(scriptSource, (msg != null ? msg : "Unexpected JRuby error"), ex);
 		}
 		catch (JumpException ex) {
 			throw new ScriptCompilationException(scriptSource, ex);
