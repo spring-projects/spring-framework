@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,14 @@ public abstract class AbstractRequestAttributesScope implements Scope {
 		if (scopedObject == null) {
 			scopedObject = objectFactory.getObject();
 			attributes.setAttribute(name, scopedObject, getScope());
+			// Retrieve object again, registering it for implicit session attribute updates.
+			// As a bonus, we also allow for potential decoration at the getAttribute level.
+			Object retrievedObject = attributes.getAttribute(name, getScope());
+			if (retrievedObject != null) {
+				// Only proceed with retrieved object if still present (the expected case).
+				// If it disappeared concurrently, we return our locally created instance.
+				scopedObject = retrievedObject;
+			}
 		}
 		return scopedObject;
 	}
