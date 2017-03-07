@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class WebAsyncManagerTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		this.servletRequest = new MockHttpServletRequest();
 		this.asyncManager = WebAsyncUtils.getAsyncManager(servletRequest);
 		this.asyncManager.setTaskExecutor(new SyncTaskExecutor());
@@ -53,6 +53,7 @@ public class WebAsyncManagerTests {
 		verify(this.asyncWebRequest).addCompletionHandler((Runnable) notNull());
 		reset(this.asyncWebRequest);
 	}
+
 
 	@Test
 	public void startAsyncProcessingWithoutAsyncWebRequest() throws Exception {
@@ -87,7 +88,7 @@ public class WebAsyncManagerTests {
 		assertTrue(this.asyncManager.isConcurrentHandlingStarted());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setAsyncWebRequestAfterAsyncStarted() {
 		this.asyncWebRequest.startAsync();
 		this.asyncManager.setAsyncWebRequest(null);
@@ -233,7 +234,7 @@ public class WebAsyncManagerTests {
 		given(this.asyncWebRequest.getNativeRequest(HttpServletRequest.class)).willReturn(this.servletRequest);
 
 		@SuppressWarnings("unchecked")
-		WebAsyncTask<Object> asyncTask = new WebAsyncTask<Object>(1000L, executor, mock(Callable.class));
+		WebAsyncTask<Object> asyncTask = new WebAsyncTask<>(1000L, executor, mock(Callable.class));
 		this.asyncManager.startCallableProcessing(asyncTask);
 
 		verify(executor).submit((Runnable) notNull());
@@ -256,7 +257,7 @@ public class WebAsyncManagerTests {
 
 	@Test
 	public void startDeferredResultProcessing() throws Exception {
-		DeferredResult<String> deferredResult = new DeferredResult<String>(1000L);
+		DeferredResult<String> deferredResult = new DeferredResult<>(1000L);
 		String concurrentResult = "abc";
 
 		DeferredResultProcessingInterceptor interceptor = mock(DeferredResultProcessingInterceptor.class);
@@ -278,7 +279,7 @@ public class WebAsyncManagerTests {
 
 	@Test
 	public void startDeferredResultProcessingBeforeConcurrentHandlingException() throws Exception {
-		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
+		DeferredResult<Integer> deferredResult = new DeferredResult<>();
 		Exception exception = new Exception();
 
 		DeferredResultProcessingInterceptor interceptor = mock(DeferredResultProcessingInterceptor.class);
@@ -303,7 +304,7 @@ public class WebAsyncManagerTests {
 	@Test
 	public void startDeferredResultProcessingPreProcessException() throws Exception {
 
-		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
+		DeferredResult<Integer> deferredResult = new DeferredResult<>();
 		Exception exception = new Exception();
 
 		DeferredResultProcessingInterceptor interceptor = mock(DeferredResultProcessingInterceptor.class);
@@ -323,7 +324,7 @@ public class WebAsyncManagerTests {
 
 	@Test
 	public void startDeferredResultProcessingPostProcessException() throws Exception {
-		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
+		DeferredResult<Integer> deferredResult = new DeferredResult<>();
 		Exception exception = new Exception();
 
 		DeferredResultProcessingInterceptor interceptor = mock(DeferredResultProcessingInterceptor.class);
