@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,25 +28,27 @@ import org.springframework.core.annotation.AliasFor;
 /**
  * An {@link EventListener} that is invoked according to a {@link TransactionPhase}.
  *
- * <p>If the event is not published within the boundaries of a managed transaction, the event
- * is discarded unless the {@link #fallbackExecution} flag is explicitly set. If a
+ * <p>If the event is not published within the boundaries of a managed transaction, the
+ * event is discarded unless the {@link #fallbackExecution} flag is explicitly set. If a
  * transaction is running, the event is processed according to its {@code TransactionPhase}.
  *
- * <p>Adding {@link org.springframework.core.annotation.Order @Order} on your annotated method
- * allows you to prioritize that listener amongst other listeners running in the same phase.
+ * <p>Adding {@link org.springframework.core.annotation.Order @Order} to your annotated
+ * method allows you to prioritize that listener amongst other listeners running before
+ * or after transaction completion.
  *
  * @author Stephane Nicoll
  * @author Sam Brannen
  * @since 4.2
  */
-@EventListener
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@EventListener
 public @interface TransactionalEventListener {
 
 	/**
 	 * Phase to bind the handling of an event to.
+	 * <p>The default phase is {@link TransactionPhase#AFTER_COMMIT}.
 	 * <p>If no transaction is in progress, the event is not processed at
 	 * all unless {@link #fallbackExecution} has been enabled explicitly.
 	 */
@@ -76,7 +78,7 @@ public @interface TransactionalEventListener {
 	/**
 	 * Spring Expression Language (SpEL) attribute used for making the event
 	 * handling conditional.
-	 * <p>Default is {@code ""}, meaning the event is always handled.
+	 * <p>The default is {@code ""}, meaning the event is always handled.
 	 * @see EventListener#condition
 	 */
 	String condition() default "";
