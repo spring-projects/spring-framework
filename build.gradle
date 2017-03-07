@@ -75,7 +75,7 @@ configure(allprojects) { project ->
 	ext.nettyVersion           = "4.1.8.Final"
 	ext.okhttp3Version         = "3.6.0"
 	ext.poiVersion             = "3.15"
-	ext.protobufVersion        = "3.1.0"
+	ext.protobufVersion        = "3.2.0"
 	ext.quartzVersion          = "2.2.3"
 	ext.reactorVersion         = "Aluminium-SR1"
 	ext.romeVersion            = "1.7.1"
@@ -867,7 +867,7 @@ project("spring-webflux") {
 		testRuntime("org.jboss.xnio:xnio-nio:${xnioVersion}")
 		testRuntime("org.jboss.logging:jboss-logging:3.3.0.Final")
 		testRuntime("org.webjars:underscorejs:1.8.3")
-		testRuntime("org.jruby:jruby:9.1.7.0")
+		testRuntime("org.jruby:jruby:9.1.8.0")
 		testRuntime("org.python:jython-standalone:2.5.3")
 		testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
 		testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
@@ -974,7 +974,7 @@ project("spring-webmvc") {
 		testCompile("joda-time:joda-time:${jodaVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.mozilla:rhino:1.7.7.1")
-		testRuntime("org.jruby:jruby:9.1.7.0")
+		testRuntime("org.jruby:jruby:9.1.8.0")
 		testRuntime("org.python:jython-standalone:2.5.3")
 		testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
 		testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
