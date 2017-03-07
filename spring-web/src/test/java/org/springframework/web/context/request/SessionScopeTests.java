@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.context.request;
 
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.After;
 import org.junit.Before;
@@ -48,7 +49,7 @@ public class SessionScopeTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.beanFactory.registerScope("session", new SessionScope());
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.loadBeanDefinitions(new ClassPathResource("sessionScopeTests.xml", getClass()));
@@ -59,9 +60,17 @@ public class SessionScopeTests {
 		RequestContextHolder.setRequestAttributes(null);
 	}
 
+
 	@Test
 	public void getFromScope() throws Exception {
-		MockHttpSession session = new MockHttpSession();
+		AtomicInteger count = new AtomicInteger();
+		MockHttpSession session = new MockHttpSession() {
+			@Override
+			public void setAttribute(String name, Object value) {
+				super.setAttribute(name, value);
+				count.incrementAndGet();
+			}
+		};
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setSession(session);
 		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
@@ -70,8 +79,41 @@ public class SessionScopeTests {
 		String name = "sessionScopedObject";
 		assertNull(session.getAttribute(name));
 		TestBean bean = (TestBean) this.beanFactory.getBean(name);
+		assertEquals(1, count.intValue());
 		assertEquals(session.getAttribute(name), bean);
 		assertSame(bean, this.beanFactory.getBean(name));
+		assertEquals(1, count.intValue());
+
+		// should re-propagate updated attribute
+		requestAttributes.requestCompleted();
+		assertEquals(session.getAttribute(name), bean);
+		assertEquals(2, count.intValue());
+	}
+
+	@Test
+	public void getFromScopeWithSingleAccess() throws Exception {
+		AtomicInteger count = new AtomicInteger();
+		MockHttpSession session = new MockHttpSession() {
+			@Override
+			public void setAttribute(String name, Object value) {
+				super.setAttribute(name, value);
+				count.incrementAndGet();
+			}
+		};
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setSession(session);
+		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
+
+		RequestContextHolder.setRequestAttributes(requestAttributes);
+		String name = "sessionScopedObject";
+		assertNull(session.getAttribute(name));
+		TestBean bean = (TestBean) this.beanFactory.getBean(name);
+		assertEquals(1, count.intValue());
+
+		// should re-propagate updated attribute
+		requestAttributes.requestCompleted();
+		assertEquals(session.getAttribute(name), bean);
+		assertEquals(2, count.intValue());
 	}
 
 	@Test
