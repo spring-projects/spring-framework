@@ -361,14 +361,14 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 						columnType == DatabaseMetaData.procedureColumnOut)) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Skipping metadata for: " + columnType + " " + procs.getInt("DATA_TYPE") +
-							" " + procs.getString("TYPE_NAME") + " " + procs.getBoolean("NULLABLE") +
+							" " + procs.getString("TYPE_NAME") + " " + procs.getShort("NULLABLE") == 1 +
 							" (probably a member of a collection)"
 						);
 					}
 				}
 				else {
 					CallParameterMetaData meta = new CallParameterMetaData(columnName, columnType,
-							procs.getInt("DATA_TYPE"), procs.getString("TYPE_NAME"), procs.getBoolean("NULLABLE")
+							procs.getInt("DATA_TYPE"), procs.getString("TYPE_NAME"), procs.getShort("NULLABLE") == 1
 					);
 					this.callParameterMetaData.add(meta);
 					if (logger.isDebugEnabled()) {
