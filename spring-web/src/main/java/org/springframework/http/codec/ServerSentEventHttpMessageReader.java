@@ -31,6 +31,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Decoder;
+import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -56,6 +57,8 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	private static final IntPredicate NEWLINE_DELIMITER = b -> b == '\n' || b == '\r';
 
 	private static final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+
+	private static final StringDecoder stringDecoder = new StringDecoder(false);
 
 
 	private final List<Decoder<?>> dataDecoders;
@@ -177,6 +180,13 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	@Override
 	public Mono<Object> readMono(ResolvableType elementType, ReactiveHttpInputMessage inputMessage,
 			Map<String, Object> hints) {
+
+		// Let's give StringDecoder a chance since SSE is ordered ahead of it
+
+		if (String.class.equals(elementType.getRawClass())) {
+			Flux<DataBuffer> body = inputMessage.getBody();
+			return stringDecoder.decodeToMono(body, elementType, null, null).cast(Object.class);
+		}
 
 		return Mono.error(new UnsupportedOperationException(
 				"ServerSentEventHttpMessageReader only supports reading stream of events as a Flux"));

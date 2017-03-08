@@ -21,6 +21,7 @@ import java.util.Collections;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
@@ -155,6 +156,20 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAll
 				})
 				.expectComplete()
 				.verify();
+	}
+
+	@Test // SPR-15331
+	public void decodeFullContentAsString() {
+
+		String body = "data:foo\ndata:bar\n\ndata:baz\n\n";
+		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(body);
+
+		String actual = messageReader
+				.readMono(ResolvableType.forClass(String.class), request, Collections.emptyMap())
+				.cast(String.class)
+				.block(Duration.ZERO);
+
+		assertEquals(body, actual);
 	}
 
 }
