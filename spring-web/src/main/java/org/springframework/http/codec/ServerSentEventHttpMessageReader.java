@@ -27,7 +27,6 @@ import java.util.function.IntPredicate;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuples;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
@@ -35,6 +34,7 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.util.Assert;
@@ -54,6 +54,8 @@ import static java.util.stream.Collectors.joining;
 public class ServerSentEventHttpMessageReader implements HttpMessageReader<Object> {
 
 	private static final IntPredicate NEWLINE_DELIMITER = b -> b == '\n' || b == '\r';
+
+	private static final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 
 	private final List<Decoder<?>> dataDecoders;
@@ -93,13 +95,12 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 				.map(buffer -> {
 					CharBuffer charBuffer = StandardCharsets.UTF_8.decode(buffer.asByteBuffer());
 					DataBufferUtils.release(buffer);
-					return Tuples.of(charBuffer.toString(), buffer.factory());
+					return charBuffer.toString();
 				})
-				.bufferUntil(data -> data.getT1().equals("\n"))
-				.concatMap(tuples -> {
-					String[] lines = tuples.stream().map(t -> t.getT1()).collect(joining()).split("\\r?\\n");
-					DataBufferFactory factory = tuples.stream().findAny().get().getT2();
-					ServerSentEvent<Object> event = buildEvent(lines, factory, dataType, hints);
+				.bufferUntil(line -> line.equals("\n"))
+				.concatMap(rawLines -> {
+					String[] lines = rawLines.stream().collect(joining()).split("\\r?\\n");
+					ServerSentEvent<Object> event = buildEvent(lines, dataType, hints);
 					return (hasSseWrapper ? Mono.just(event) : Mono.justOrEmpty(event.data()));
 				})
 				.cast(Object.class);
@@ -122,8 +123,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		return Flux.fromIterable(results);
 	}
 
-	private ServerSentEvent<Object> buildEvent(String[] lines, DataBufferFactory bufferFactory,
-			ResolvableType dataType, Map<String, Object> hints) {
+	private ServerSentEvent<Object> buildEvent(String[] lines, ResolvableType dataType, Map<String, Object> hints) {
 
 		ServerSentEvent.Builder<Object> sseBuilder = ServerSentEvent.builder();
 		StringBuilder mutableData = new StringBuilder();
@@ -146,36 +146,31 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 				mutableComment.append(line.substring(1)).append("\n");
 			}
 		}
-
-
 		if (mutableData.length() > 0) {
 			String data = mutableData.toString();
-			sseBuilder.data(decodeData(data, bufferFactory, dataType, hints));
+			sseBuilder.data(decodeData(data, dataType, hints));
 		}
-
-
 		if (mutableComment.length() > 0) {
 			String comment = mutableComment.toString();
 			sseBuilder.comment(comment.substring(0, comment.length() - 1));
 		}
-
 		return sseBuilder.build();
 	}
 
-	private Object decodeData(String data, DataBufferFactory bufferFactory, ResolvableType dataType,
-			Map<String, Object> hints) {
+	private Object decodeData(String data, ResolvableType dataType, Map<String, Object> hints) {
 
 		if (String.class.isAssignableFrom(dataType.getRawClass())) {
 			return data.substring(0, data.length() - 1);
 		}
 
-		DataBuffer dataBuffer = bufferFactory.wrap(data.getBytes(StandardCharsets.UTF_8));
+		byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
+		Mono<DataBuffer> input = Mono.just(bufferFactory.wrap(bytes));
 
 		return this.dataDecoders.stream()
 				.filter(e -> e.canDecode(dataType, MimeTypeUtils.APPLICATION_JSON))
 				.findFirst()
 				.orElseThrow(() -> new CodecException("No suitable decoder found!"))
-				.decodeToMono(Mono.just(dataBuffer), dataType, MimeTypeUtils.APPLICATION_JSON, hints)
+				.decodeToMono(input, dataType, MimeTypeUtils.APPLICATION_JSON, hints)
 				.block(Duration.ZERO);
 	}
 
