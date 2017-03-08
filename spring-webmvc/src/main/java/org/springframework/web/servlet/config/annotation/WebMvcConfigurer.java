@@ -167,19 +167,29 @@ public interface WebMvcConfigurer {
 	void extendMessageConverters(List<HttpMessageConverter<?>> converters);
 
 	/**
-	 * Configure the {@link HandlerExceptionResolver}s to handle unresolved
-	 * controller exceptions. If no resolvers are added to the list, default
-	 * exception resolvers are added instead.
+	 * Configure exception resolvers.
+	 * <p>The given list starts out empty. If it is left empty, the framework
+	 * configures a default set of resolvers, see
+	 * {@link WebMvcConfigurationSupport#addDefaultHandlerExceptionResolvers(List)}.
+	 * Or if any exception resolvers are added to the list, then the application
+	 * effectively takes over and must provide, fully initialized, exception
+	 * resolvers.
+	 * <p>Alternatively you can use
+	 * {@link #extendHandlerExceptionResolvers(List)} which allows you to extend
+	 * or modify the list of exception resolvers configured by default.
 	 * @param exceptionResolvers initially an empty list
+	 * @see #extendHandlerExceptionResolvers(List)
+	 * @see WebMvcConfigurationSupport#addDefaultHandlerExceptionResolvers(List)
 	 */
 	void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers);
 
 	/**
-	 * A hook for extending or modifying the list of {@link HandlerExceptionResolver}s
-	 * after it has been configured. This may be useful for example to allow default
-	 * resolvers to be registered and then insert a custom one through this method.
+	 * Extending or modify the list of exception resolvers configured by default.
+	 * This can be useful for inserting a custom exception resolver without
+	 * interfering with default ones.
 	 * @param exceptionResolvers the list of configured resolvers to extend
 	 * @since 4.3
+	 * @see WebMvcConfigurationSupport#addDefaultHandlerExceptionResolvers(List)
 	 */
 	void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers);
 
