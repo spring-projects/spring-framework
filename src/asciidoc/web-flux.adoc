@@ -347,7 +347,7 @@ HttpServlet servlet = new ServletHttpHandlerAdapter(handler);
 
 // Reactor Netty
 ReactorHttpHandlerAdapter adapter = new ReactorHttpHandlerAdapter(handler);
-HttpServer.create(host, port).newHandler(adapter).onClose().block();
+HttpServer.create(host, port).newHandler(adapter).block();
 
 // RxNetty
 RxNettyHttpHandlerAdapter adapter = new RxNettyHttpHandlerAdapter(handler);
