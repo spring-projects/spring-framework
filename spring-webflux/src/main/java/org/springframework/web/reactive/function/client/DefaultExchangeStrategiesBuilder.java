@@ -70,26 +70,38 @@ class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Builder {
 
 
 	public void defaultConfiguration() {
+		defaultReaders();
+		defaultWriters();
+	}
+
+	private void defaultReaders() {
 		messageReader(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		messageReader(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
-		if (jackson2Present) {
-			messageReader(new ServerSentEventHttpMessageReader(Collections.singletonList(new Jackson2JsonDecoder())));
-		}
-		else {
-			messageReader(new ServerSentEventHttpMessageReader(Collections.emptyList()));
-		}
+		messageReader(new ServerSentEventHttpMessageReader(sseDecoders()));
 		messageReader(new DecoderHttpMessageReader<>(new StringDecoder(false)));
+		if (jaxb2Present) {
+			messageReader(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
+		}
+		if (jackson2Present) {
+			messageReader(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
+		}
+	}
+
+	private List<Decoder<?>> sseDecoders() {
+		return jackson2Present ? Collections.singletonList(new Jackson2JsonDecoder()) :
+				Collections.emptyList();
+	}
+
+	private void defaultWriters() {
 		messageWriter(new EncoderHttpMessageWriter<>(new ByteArrayEncoder()));
 		messageWriter(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
 		messageWriter(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 		messageWriter(new ResourceHttpMessageWriter());
 		messageWriter(new FormHttpMessageWriter());
 		if (jaxb2Present) {
-			messageReader(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
 			messageWriter(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
 		}
 		if (jackson2Present) {
-			messageReader(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
 			messageWriter(new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder()));
 		}
 	}
