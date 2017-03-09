@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
@@ -291,7 +290,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 		public <T> FluxExchangeResult<T> decodeBody(ResolvableType elementType) {
 			Flux<T> body = this.response.body(toFlux(elementType));
-			return new FluxExchangeResult<>(this, body);
+			return new FluxExchangeResult<>(this, body, getTimeout());
 		}
 
 		@SuppressWarnings("unchecked")
@@ -339,17 +338,6 @@ class DefaultWebTestClient implements WebTestClient {
 		@Override
 		public BodySpec expectBody() {
 			return new DefaultBodySpec(this.result);
-		}
-
-		@Override
-		public ResponseSpec consumeWith(Consumer<ExchangeResult> consumer) {
-			this.result.assertWithDiagnostics(() -> consumer.accept(this.result));
-			return this;
-		}
-
-		@Override
-		public ExchangeResult returnResult() {
-			return this.result;
 		}
 	}
 

@@ -50,7 +50,7 @@ class WiretapClientHttpResponse extends ClientHttpResponseDecorator {
 	/**
 	 * Return a "promise" with the response body content read from the server.
 	 */
-	public MonoProcessor<byte[]> getBodyContent() {
+	public MonoProcessor<byte[]> getRecordedContent() {
 		return this.body;
 	}
 

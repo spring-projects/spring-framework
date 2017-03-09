@@ -37,7 +37,7 @@ public class EntityExchangeResult<T> extends ExchangeResult {
 
 
 	/**
-	 * Return the body extracted from the response.
+	 * Return the entity extracted from the response body.
 	 */
 	public T getResponseBody() {
 		return this.body;

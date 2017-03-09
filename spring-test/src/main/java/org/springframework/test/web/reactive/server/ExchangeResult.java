@@ -18,6 +18,7 @@ package org.springframework.test.web.reactive.server;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,20 +30,18 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Provides access to request and response details from an exchange performed
- * through the {@link WebTestClient}.
+ * Container for request and response details for exchanges performed through
+ * {@link WebTestClient}.
  *
- * <p>When an {@code ExchangeResult} is first created it has the status and the
- * headers of the response ready. Later when the response body is extracted,
- * the {@code ExchangeResult} is re-created as {@link EntityExchangeResult} or
- * {@link FluxExchangeResult} also exposing the extracted entities.
- *
- * <p>Serialized request and response content may also be accessed through the
- * methods {@link #getRequestContent()} and {@link #getResponseContent()} after
- * that content has been fully read or written.
+ * <p>Note that a decoded response body is not exposed at this level since the
+ * body may not have been decoded and consumed yet. Sub-types
+ * {@link EntityExchangeResult} and {@link FluxExchangeResult} provide access
+ * to a decoded response entity and a decoded (but not consumed) response body
+ * respectively.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -53,8 +52,8 @@ import org.springframework.util.MultiValueMap;
 public class ExchangeResult {
 
 	private static final List<MediaType> PRINTABLE_MEDIA_TYPES = Arrays.asList(
-			MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.parseMediaType("text/*"),
-			MediaType.APPLICATION_FORM_URLENCODED);
+			MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+			MediaType.parseMediaType("text/*"), MediaType.APPLICATION_FORM_URLENCODED);
 
 
 	private final WiretapClientHttpRequest request;
@@ -101,11 +100,15 @@ public class ExchangeResult {
 	}
 
 	/**
-	 * Return a "promise" for the raw request body content once completed.
+	 * Return the raw request body content written as a {@code byte[]}.
+	 * @throws IllegalStateException if the request body is not fully written yet.
 	 */
-	public MonoProcessor<byte[]> getRequestContent() {
-		return this.request.getBodyContent();
+	public byte[] getRequestBodyContent() {
+		MonoProcessor<byte[]> body = this.request.getRecordedContent();
+		Assert.isTrue(body.isTerminated(), "Request body incomplete.");
+		return body.block(Duration.ZERO);
 	}
+
 
 	/**
 	 * Return the status of the executed request.
@@ -129,10 +132,13 @@ public class ExchangeResult {
 	}
 
 	/**
-	 * Return a "promise" for the raw response body content once completed.
+	 * Return the raw request body content written as a {@code byte[]}.
+	 * @throws IllegalStateException if the response is not fully read yet.
 	 */
-	public MonoProcessor<byte[]> getResponseContent() {
-		return this.response.getBodyContent();
+	public byte[] getResponseBodyContent() {
+		MonoProcessor<byte[]> body = this.response.getRecordedContent();
+		Assert.state(body.isTerminated(), "Response body incomplete.");
+		return body.block(Duration.ZERO);
 	}
 
 
@@ -157,12 +163,12 @@ public class ExchangeResult {
 				"> " + getMethod() + " " + getUrl() + "\n" +
 				"> " + formatHeaders(getRequestHeaders(), "\n> ") + "\n" +
 				"\n" +
-				formatBody(getRequestHeaders().getContentType(), getRequestContent()) + "\n" +
+				formatBody(getRequestHeaders().getContentType(), this.request.getRecordedContent()) + "\n" +
 				"\n" +
 				"< " + getStatus() + " " + getStatusReason() + "\n" +
 				"< " + formatHeaders(getResponseHeaders(), "\n< ") + "\n" +
 				"\n" +
-				formatBody(getResponseHeaders().getContentType(), getResponseContent()) + "\n\n";
+				formatBody(getResponseHeaders().getContentType(), this.response.getRecordedContent()) + "\n\n";
 	}
 
 	private String getStatusReason() {

@@ -483,19 +483,6 @@ public interface WebTestClient {
 		 */
 		BodySpec expectBody();
 
-		/**
-		 * Consume request and response details of the exchange. Only status
-		 * response headers are available at this stage before one of the
-		 * {@code expectBody} methods is used.
-		 */
-		ResponseSpec consumeWith(Consumer<ExchangeResult> consumer);
-
-		/**
-		 * Return the request and response details of the exchange. Only status
-		 * and response headers are available at this stage before one of the
-		 * {@code expectBody} methods is used.
-		 */
-		ExchangeResult returnResult();
 	}
 
 	/**
