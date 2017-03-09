@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.core.codec;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.StandardOpenOption;
 import java.util.Map;
 
 import reactor.core.publisher.Flux;
@@ -65,6 +68,18 @@ public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 	@Override
 	protected Flux<DataBuffer> encode(Resource resource, DataBufferFactory dataBufferFactory,
 			ResolvableType type, MimeType mimeType, Map<String, Object> hints) {
+
+		try {
+			if (resource.isFile()) {
+				File file = resource.getFile();
+				AsynchronousFileChannel channel =
+						AsynchronousFileChannel.open(file.toPath(), StandardOpenOption.READ);
+				return DataBufferUtils.read(channel, dataBufferFactory, this.bufferSize);
+			}
+		}
+		catch (IOException ignore) {
+			// fallback to resource.readableChannel(), below
+		}
 
 		try {
 			ReadableByteChannel channel = resource.readableChannel();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -51,13 +52,9 @@ public class ResourceRegionEncoderTests extends AbstractDataBufferAllocatingTest
 
 	private ResourceRegionEncoder encoder;
 
-	private Resource resource;
-
 	@Before
 	public void setUp() {
 		this.encoder = new ResourceRegionEncoder();
-		String content = "Spring Framework test resource content.";
-		this.resource = new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8));
 		this.bufferFactory = new DefaultDataBufferFactory();
 	}
 
@@ -74,12 +71,23 @@ public class ResourceRegionEncoderTests extends AbstractDataBufferAllocatingTest
 	}
 
 	@Test
-	public void shouldEncodeResourceRegion() throws Exception {
+	public void shouldEncodeResourceRegionFileResource() throws Exception {
+		shouldEncodeResourceRegion(
+				new ClassPathResource("ResourceRegionEncoderTests.txt", getClass()));
+	}
 
-		ResourceRegion region = new ResourceRegion(this.resource, 0, 6);
+	@Test
+	public void shouldEncodeResourceRegionByteArrayResource() throws Exception {
+		String content = "Spring Framework test resource content.";
+		shouldEncodeResourceRegion(new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8)));
+	}
+
+	private void shouldEncodeResourceRegion(Resource resource) {
+		ResourceRegion region = new ResourceRegion(resource, 0, 6);
 		Flux<DataBuffer> result = this.encoder.encode(Mono.just(region), this.bufferFactory,
-				ResolvableType.forClass(ResourceRegion.class), MimeTypeUtils.APPLICATION_OCTET_STREAM
-				, Collections.emptyMap());
+				ResolvableType.forClass(ResourceRegion.class),
+				MimeTypeUtils.APPLICATION_OCTET_STREAM,
+				Collections.emptyMap());
 
 		StepVerifier.create(result)
 				.consumeNextWith(stringConsumer("Spring"))
@@ -88,13 +96,24 @@ public class ResourceRegionEncoderTests extends AbstractDataBufferAllocatingTest
 	}
 
 	@Test
-	public void shouldEncodeMultipleResourceRegions() throws Exception {
+	public void shouldEncodeMultipleResourceRegionsFileResource() throws Exception {
+		shouldEncodeMultipleResourceRegions(
+				new ClassPathResource("ResourceRegionEncoderTests.txt", getClass()));
+	}
 
+	@Test
+	public void shouldEncodeMultipleResourceRegionsByteArrayResource() throws Exception {
+		String content = "Spring Framework test resource content.";
+		shouldEncodeMultipleResourceRegions(
+				new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8)));
+	}
+
+	private void shouldEncodeMultipleResourceRegions(Resource resource) {
 		Flux<ResourceRegion> regions = Flux.just(
-				new ResourceRegion(this.resource, 0, 6),
-				new ResourceRegion(this.resource, 7, 9),
-				new ResourceRegion(this.resource, 17, 4),
-				new ResourceRegion(this.resource, 22, 17)
+				new ResourceRegion(resource, 0, 6),
+				new ResourceRegion(resource, 7, 9),
+				new ResourceRegion(resource, 17, 4),
+				new ResourceRegion(resource, 22, 17)
 		);
 		String boundary = MimeTypeUtils.generateMultipartBoundaryString();
 
