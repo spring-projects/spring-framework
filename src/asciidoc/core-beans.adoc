@@ -5891,7 +5891,7 @@ Or, using Gradle:
 [subs="verbatim,quotes,attributes"]
 ----
 	dependencies {
-		compileOnly("org.springframework:spring-context-indexed:{spring-version}")
+		compileOnly("org.springframework:spring-context-indexer:{spring-version}")
 	}
 ----
 
