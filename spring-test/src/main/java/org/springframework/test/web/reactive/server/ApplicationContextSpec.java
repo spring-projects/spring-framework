@@ -38,7 +38,7 @@ class ApplicationContextSpec extends AbstractMockServerSpec<ApplicationContextSp
 
 
 	@Override
-	protected WebHttpHandlerBuilder createHttpHandlerBuilder() {
+	protected WebHttpHandlerBuilder initHttpHandlerBuilder() {
 		return WebHttpHandlerBuilder.applicationContext(this.applicationContext);
 	}
 

@@ -15,8 +15,9 @@
  */
 package org.springframework.test.web.reactive.server;
 
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
+import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
@@ -29,37 +30,28 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 abstract class AbstractMockServerSpec<B extends WebTestClient.MockServerSpec<B>>
 		implements WebTestClient.MockServerSpec<B> {
 
-	private Function<ServerWebExchange, ServerWebExchange> exchangeMutator;
+	private final ExchangeMutatorWebFilter exchangeMutatorFilter = new ExchangeMutatorWebFilter();
 
 
 	@Override
-	public <T extends B> T exchangeMutator(Function<ServerWebExchange, ServerWebExchange> mutator) {
-		this.exchangeMutator = this.exchangeMutator != null ? this.exchangeMutator.andThen(mutator) : mutator;
+	public <T extends B> T exchangeMutator(UnaryOperator<ServerWebExchange> mutator) {
+		this.exchangeMutatorFilter.register(mutator);
 		return self();
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <T extends B> T self() {
+	private <T extends B> T self() {
 		return (T) this;
 	}
 
 
 	@Override
 	public WebTestClient.Builder configureClient() {
-
-		WebHttpHandlerBuilder handlerBuilder = createHttpHandlerBuilder();
-
-		if (this.exchangeMutator != null) {
-			handlerBuilder.prependFilter((exchange, chain) -> {
-				exchange = this.exchangeMutator.apply(exchange);
-				return chain.filter(exchange);
-			});
-		}
-
-		return new DefaultWebTestClientBuilder(handlerBuilder.build());
+		HttpHandler handler = initHttpHandlerBuilder().prependFilter(this.exchangeMutatorFilter).build();
+		return new DefaultWebTestClientBuilder(handler, this.exchangeMutatorFilter);
 	}
 
-	protected abstract WebHttpHandlerBuilder createHttpHandlerBuilder();
+	protected abstract WebHttpHandlerBuilder initHttpHandlerBuilder();
 
 	@Override
 	public WebTestClient build() {

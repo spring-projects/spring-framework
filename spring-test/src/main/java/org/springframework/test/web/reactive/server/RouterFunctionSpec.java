@@ -44,7 +44,7 @@ public class RouterFunctionSpec extends AbstractMockServerSpec<RouterFunctionSpe
 
 
 	@Override
-	protected WebHttpHandlerBuilder createHttpHandlerBuilder() {
+	protected WebHttpHandlerBuilder initHttpHandlerBuilder() {
 		return WebHttpHandlerBuilder.applicationContext(initApplicationContext());
 	}
 

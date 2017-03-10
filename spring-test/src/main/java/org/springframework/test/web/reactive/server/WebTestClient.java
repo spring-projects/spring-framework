@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.reactivestreams.Publisher;
 
@@ -123,6 +124,16 @@ public interface WebTestClient {
 	 */
 	WebTestClient filter(ExchangeFilterFunction filterFunction);
 
+	/**
+	 * Filter the client applying the given transformation function on the
+	 * {@code ServerWebExchange} to every request.
+	 * <p><strong>Note:</strong> this option is applicable only when testing
+	 * without an actual running server.
+	 * @param mutator the transformation function
+	 * @return the filtered client
+	 */
+	WebTestClient exchangeMutator(UnaryOperator<ServerWebExchange> mutator);
+
 
 	// Static, factory methods
 
@@ -176,10 +187,10 @@ public interface WebTestClient {
 		/**
 		 * Configure a transformation function on {@code ServerWebExchange} to
 		 * be applied at the start of server-side, request processing.
-		 * @param function the transforming function.
+		 * @param mutator the transforming function.
 		 * @see ServerWebExchange#mutate()
 		 */
-		<T extends B> T exchangeMutator(Function<ServerWebExchange, ServerWebExchange> function);
+		<T extends B> T exchangeMutator(UnaryOperator<ServerWebExchange> mutator);
 
 		/**
 		 * Proceed to configure and build the test client.

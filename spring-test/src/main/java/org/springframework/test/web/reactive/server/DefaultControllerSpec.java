@@ -115,7 +115,7 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 
 
 	@Override
-	protected WebHttpHandlerBuilder createHttpHandlerBuilder() {
+	protected WebHttpHandlerBuilder initHttpHandlerBuilder() {
 		return WebHttpHandlerBuilder.applicationContext(initApplicationContext());
 	}
 

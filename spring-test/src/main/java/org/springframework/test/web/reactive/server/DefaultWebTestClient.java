@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -42,6 +43,7 @@ import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.UriBuilder;
 
 import static java.util.stream.Collectors.toList;
@@ -63,23 +65,29 @@ class DefaultWebTestClient implements WebTestClient {
 
 	private final WiretapConnector wiretapConnector;
 
+	private final ExchangeMutatorWebFilter exchangeMutatorWebFilter;
+
 	private final Duration timeout;
 
 	private final AtomicLong requestIndex = new AtomicLong();
 
 
-	DefaultWebTestClient(WebClient.Builder webClientBuilder, ClientHttpConnector connector, Duration timeout) {
+	DefaultWebTestClient(WebClient.Builder webClientBuilder, ClientHttpConnector connector,
+			ExchangeMutatorWebFilter webFilter, Duration timeout) {
+
 		Assert.notNull(webClientBuilder, "WebClient.Builder is required");
 
 		this.wiretapConnector = new WiretapConnector(connector);
 		this.webClient = webClientBuilder.clientConnector(this.wiretapConnector).build();
+		this.exchangeMutatorWebFilter = webFilter;
 		this.timeout = (timeout != null ? timeout : Duration.ofSeconds(5));
 	}
 
 	private DefaultWebTestClient(DefaultWebTestClient webTestClient, ExchangeFilterFunction filter) {
 		this.webClient = webTestClient.webClient.filter(filter);
-		this.timeout = webTestClient.timeout;
 		this.wiretapConnector = webTestClient.wiretapConnector;
+		this.exchangeMutatorWebFilter = webTestClient.exchangeMutatorWebFilter;
+		this.timeout = webTestClient.timeout;
 	}
 
 
@@ -131,6 +139,20 @@ class DefaultWebTestClient implements WebTestClient {
 	@Override
 	public WebTestClient filter(ExchangeFilterFunction filter) {
 		return new DefaultWebTestClient(this, filter);
+	}
+
+	@Override
+	public WebTestClient exchangeMutator(UnaryOperator<ServerWebExchange> mutator) {
+
+		Assert.notNull(this.exchangeMutatorWebFilter,
+				"This option is applicable only for tests without an actual running server");
+
+		return filter((request, next) -> {
+			String requestId = request.headers().getFirst(WiretapConnector.REQUEST_ID_HEADER_NAME);
+			Assert.notNull(requestId, "No request-id header");
+			this.exchangeMutatorWebFilter.register(requestId, mutator);
+			return next.exchange(request);
+		});
 	}
 
 

@@ -23,6 +23,7 @@ import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
@@ -68,13 +69,19 @@ class WiretapConnector implements ClientHttpConnector {
 				})
 				.map(response ->  {
 					WiretapClientHttpRequest wrappedRequest = requestRef.get();
-					String requestId = wrappedRequest.getHeaders().getFirst(REQUEST_ID_HEADER_NAME);
+					String requestId = getRequestId(wrappedRequest.getHeaders());
 					Assert.notNull(requestId, "No request-id header");
 					WiretapClientHttpResponse wrappedResponse = new WiretapClientHttpResponse(response);
 					ExchangeResult result = new ExchangeResult(wrappedRequest, wrappedResponse);
 					this.exchanges.put(requestId, result);
 					return wrappedResponse;
 				});
+	}
+
+	public static String getRequestId(HttpHeaders headers) {
+		String requestId = headers.getFirst(REQUEST_ID_HEADER_NAME);
+		Assert.notNull(requestId, "No request-id header");
+		return requestId;
 	}
 
 	/**

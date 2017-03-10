@@ -16,7 +16,7 @@
 package org.springframework.test.web.reactive.server.samples.bind;
 
 import java.security.Principal;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,13 +43,12 @@ public class ControllerTests {
 
 	@Before
 	public void setUp() throws Exception {
-
 		this.client = WebTestClient.bindToController(new TestController())
-				.exchangeMutator(identityMutator("Pablo"))
+				.exchangeMutator(identitySetup("Pablo"))
 				.build();
 	}
 
-	private Function<ServerWebExchange, ServerWebExchange> identityMutator(String userName) {
+	private UnaryOperator<ServerWebExchange> identitySetup(String userName) {
 		return exchange -> {
 			Principal user = mock(Principal.class);
 			when(user.getName()).thenReturn(userName);
@@ -59,11 +58,20 @@ public class ControllerTests {
 
 
 	@Test
-	public void test() throws Exception {
+	public void basic() throws Exception {
 		this.client.get().uri("/test")
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody(String.class).value().isEqualTo("Hello Pablo!");
+	}
+
+	@Test
+	public void perRequestIdentityOverride() throws Exception {
+		this.client.exchangeMutator(identitySetup("Giovani"))
+				.get().uri("/test")
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody(String.class).value().isEqualTo("Hello Giovani!");
 	}
 
 
