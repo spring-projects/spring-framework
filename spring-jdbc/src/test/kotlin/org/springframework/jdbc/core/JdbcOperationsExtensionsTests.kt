@@ -88,7 +88,7 @@ class JdbcOperationsExtensionsTests {
 
 	@Test
 	fun `queryForObject with RowMapper-like function`() {
-		val i = template.queryForObject("select age from customer where id = ?", 3) { rs, i ->
+		val i = template.queryForObject("select age from customer where id = ?", 3) { rs, _ ->
 			rs.getInt(1)
 		}
 		assertEquals(22, i)
@@ -181,7 +181,7 @@ class JdbcOperationsExtensionsTests {
 
 	@Test
 	fun `query with RowMapper-like function`() {
-		val i = template.query("select age from customer where id = ?", 3) { rs, i ->
+		val i = template.query("select age from customer where id = ?", 3) { rs, _ ->
 			rs.getInt(1)
 		}
 		assertEquals(22, i.first())

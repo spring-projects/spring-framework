@@ -133,8 +133,10 @@ class RouterFunctionExtensionsTests {
 			path("/baz") { handle(req) }
 		}
 
+		@Suppress("UNUSED_PARAMETER")
 		fun handleFromClass(req: ServerRequest) = ok().build()
 	}
 }
 
+@Suppress("UNUSED_PARAMETER")
 fun handle(req: ServerRequest) = ok().build()
