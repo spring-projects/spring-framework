@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.resource;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -87,7 +88,7 @@ public class AppCacheManifestTransformerTests {
 		given(resource.getFilename()).willReturn("foobar.file");
 		given(this.chain.transform(exchange, resource)).willReturn(Mono.just(resource));
 
-		Resource result = this.transformer.transform(exchange, resource, this.chain).blockMillis(5000);
+		Resource result = this.transformer.transform(exchange, resource, this.chain).block(Duration.ofMillis(5000));
 		assertEquals(resource, result);
 	}
 
@@ -98,7 +99,7 @@ public class AppCacheManifestTransformerTests {
 		Resource resource = new ClassPathResource("test/error.appcache", getClass());
 		given(this.chain.transform(exchange, resource)).willReturn(Mono.just(resource));
 
-		Resource result = this.transformer.transform(exchange, resource, this.chain).blockMillis(5000);
+		Resource result = this.transformer.transform(exchange, resource, this.chain).block(Duration.ofMillis(5000));
 		assertEquals(resource, result);
 	}
 
@@ -119,7 +120,7 @@ public class AppCacheManifestTransformerTests {
 		this.chain = new DefaultResourceTransformerChain(resolverChain, transformers);
 
 		Resource resource = new ClassPathResource("test/test.appcache", getClass());
-		Resource result = this.transformer.transform(exchange, resource, this.chain).blockMillis(5000);
+		Resource result = this.transformer.transform(exchange, resource, this.chain).block(Duration.ofMillis(5000));
 		byte[] bytes = FileCopyUtils.copyToByteArray(result.getInputStream());
 		String content = new String(bytes, "UTF-8");
 

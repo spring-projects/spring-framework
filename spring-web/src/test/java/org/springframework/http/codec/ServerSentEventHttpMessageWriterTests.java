@@ -67,7 +67,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		Mono<ServerSentEvent<String>> source = Mono.just(event);
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		messageWriter.write(source, ResolvableType.forClass(ServerSentEvent.class),
-				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap()).blockMillis(5000);
+				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap()).block(Duration.ofMillis(5000));
 
 		StepVerifier.create(outputMessage.getBodyAsString())
 				.expectNext("id:c42\n" +
@@ -86,7 +86,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		Flux<String> source = Flux.just("foo", "bar");
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		messageWriter.write(source, ResolvableType.forClass(String.class),
-				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap()).blockMillis(5000);
+				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap()).block(Duration.ofMillis(5000));
 
 		StepVerifier.create(outputMessage.getBodyAsString())
 				.expectNext("data:foo\n\ndata:bar\n\n")
@@ -99,7 +99,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		Flux<String> source = Flux.just("foo\nbar", "foo\nbaz");
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		messageWriter.write(source, ResolvableType.forClass(String.class),
-				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap()).blockMillis(5000);
+				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap()).block(Duration.ofMillis(5000));
 
 		StepVerifier.create(outputMessage.getBodyAsString())
 				.expectNext("data:foo\n" +
@@ -116,7 +116,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				new Pojo("foofoofoo", "barbarbar"));
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		messageWriter.write(source, ResolvableType.forClass(Pojo.class),
-				MediaType.TEXT_EVENT_STREAM, outputMessage, Collections.emptyMap()).blockMillis(5000);
+				MediaType.TEXT_EVENT_STREAM, outputMessage, Collections.emptyMap()).block(Duration.ofMillis(5000));
 
 		StepVerifier.create(outputMessage.getBodyAsString())
 				.expectNext("data:{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n\n" +
@@ -135,7 +135,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				new Pojo("foofoofoo", "barbarbar"));
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		messageWriter.write(source, ResolvableType.forClass(Pojo.class),
-				MediaType.TEXT_EVENT_STREAM, outputMessage, Collections.emptyMap()).blockMillis(5000);
+				MediaType.TEXT_EVENT_STREAM, outputMessage, Collections.emptyMap()).block(Duration.ofMillis(5000));
 
 		StepVerifier.create(outputMessage.getBodyAsString())
 				.expectNext("data:{\n" +

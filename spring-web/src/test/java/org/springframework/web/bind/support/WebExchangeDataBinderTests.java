@@ -19,6 +19,7 @@ package org.springframework.web.bind.support;
 import java.beans.PropertyEditorSupport;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.time.Duration;
 import java.util.Iterator;
 
 import org.junit.Before;
@@ -64,7 +65,7 @@ public class WebExchangeDataBinderTests {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("spouse", "someValue");
 		formData.add("spouse.name", "test");
-		this.binder.bind(exchange(formData)).blockMillis(5000);
+		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
 
 		assertNotNull(this.testBean.getSpouse());
 		assertEquals("test", testBean.getSpouse().getName());
@@ -75,11 +76,11 @@ public class WebExchangeDataBinderTests {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("_postProcessed", "visible");
 		formData.add("postProcessed", "on");
-		this.binder.bind(exchange(formData)).blockMillis(5000);
+		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
 		assertTrue(this.testBean.isPostProcessed());
 
 		formData.remove("postProcessed");
-		this.binder.bind(exchange(formData)).blockMillis(5000);
+		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
 		assertFalse(this.testBean.isPostProcessed());
 	}
 
@@ -90,11 +91,11 @@ public class WebExchangeDataBinderTests {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("_postProcessed", "visible");
 		formData.add("postProcessed", "on");
-		this.binder.bind(exchange(formData)).blockMillis(5000);
+		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
 		assertTrue(this.testBean.isPostProcessed());
 
 		formData.remove("postProcessed");
-		this.binder.bind(exchange(formData)).blockMillis(5000);
+		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
 		assertFalse(this.testBean.isPostProcessed());
 	}
 
@@ -103,11 +104,11 @@ public class WebExchangeDataBinderTests {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("!postProcessed", "off");
 		formData.add("postProcessed", "on");
-		this.binder.bind(exchange(formData)).blockMillis(5000);
+		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
 		assertTrue(this.testBean.isPostProcessed());
 
 		formData.remove("postProcessed");
-		this.binder.bind(exchange(formData)).blockMillis(5000);
+		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
 		assertFalse(this.testBean.isPostProcessed());
 	}
 
@@ -117,15 +118,15 @@ public class WebExchangeDataBinderTests {
 		formData.add("!postProcessed", "on");
 		formData.add("_postProcessed", "visible");
 		formData.add("postProcessed", "on");
-		this.binder.bind(exchange(formData)).blockMillis(5000);
+		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
 		assertTrue(this.testBean.isPostProcessed());
 
 		formData.remove("postProcessed");
-		this.binder.bind(exchange(formData)).blockMillis(5000);
+		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
 		assertTrue(this.testBean.isPostProcessed());
 
 		formData.remove("!postProcessed");
-		this.binder.bind(exchange(formData)).blockMillis(5000);
+		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
 		assertFalse(this.testBean.isPostProcessed());
 	}
 
@@ -134,11 +135,11 @@ public class WebExchangeDataBinderTests {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("!name", "anonymous");
 		formData.add("name", "Scott");
-		this.binder.bind(exchange(formData)).blockMillis(5000);
+		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
 		assertEquals("Scott", this.testBean.getName());
 
 		formData.remove("name");
-		this.binder.bind(exchange(formData)).blockMillis(5000);
+		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
 		assertEquals("anonymous", this.testBean.getName());
 	}
 
@@ -148,12 +149,12 @@ public class WebExchangeDataBinderTests {
 		formData.add("stringArray", "bar");
 		formData.add("stringArray", "abc");
 		formData.add("stringArray", "123,def");
-		this.binder.bind(exchange(formData)).blockMillis(5000);
+		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
 		assertEquals("Expected all three items to be bound", 3, this.testBean.getStringArray().length);
 
 		formData.remove("stringArray");
 		formData.add("stringArray", "123,def");
-		this.binder.bind(exchange(formData)).blockMillis(5000);
+		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
 		assertEquals("Expected only 1 item to be bound", 1, this.testBean.getStringArray().length);
 	}
 
@@ -162,7 +163,7 @@ public class WebExchangeDataBinderTests {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 		formData.add("spouse.name", "test");
 		formData.add("spouse", "someValue");
-		this.binder.bind(exchange(formData)).blockMillis(5000);
+		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
 
 		assertNotNull(this.testBean.getSpouse());
 		assertEquals("test", this.testBean.getSpouse().getName());
@@ -173,7 +174,7 @@ public class WebExchangeDataBinderTests {
 		String url = "/path?spouse=someValue&spouse.name=test";
 		MockServerHttpRequest request = MockServerHttpRequest.post(url).build();
 		ServerWebExchange exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
-		this.binder.bind(exchange).blockMillis(5000);
+		this.binder.bind(exchange).block(Duration.ofMillis(5000));
 
 		assertNotNull(this.testBean.getSpouse());
 		assertEquals("test", this.testBean.getSpouse().getName());

@@ -195,17 +195,17 @@ public class ViewResolutionResultHandlerTests {
 
 		this.request = MockServerHttpRequest.get("/account").build();
 		ServerWebExchange exchange = createExchange();
-		handler.handleResult(exchange, result).blockMillis(5000);
+		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
 		assertResponseBody(exchange, "account: {id=123}");
 
 		this.request = MockServerHttpRequest.get("/account/").build();
 		exchange = createExchange();
-		handler.handleResult(exchange, result).blockMillis(5000);
+		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
 		assertResponseBody(exchange, "account: {id=123}");
 
 		this.request = MockServerHttpRequest.get("/account.123").build();
 		exchange = createExchange();
-		handler.handleResult(exchange, result).blockMillis(5000);
+		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
 		assertResponseBody(exchange, "account: {id=123}");
 	}
 
@@ -281,7 +281,7 @@ public class ViewResolutionResultHandlerTests {
 		this.request = MockServerHttpRequest.get("/account").build();
 		ServerWebExchange exchange = createExchange();
 
-		handler.handleResult(exchange, result).blockMillis(5000);
+		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
 		assertResponseBody(exchange, "account: {" +
 				"attr1=TestBean[name=Bean1], " +
 				"attr2=[TestBean[name=Bean1], TestBean[name=Bean2]], " +

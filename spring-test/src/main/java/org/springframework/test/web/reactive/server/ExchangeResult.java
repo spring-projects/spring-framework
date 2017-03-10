@@ -187,7 +187,7 @@ public class ExchangeResult {
 
 	private String formatBody(MediaType contentType, MonoProcessor<byte[]> body) {
 		if (body.isSuccess()) {
-			byte[] bytes = body.blockMillis(0);
+			byte[] bytes = body.block(Duration.ZERO);
 			if (bytes.length == 0) {
 				return "No content";
 			}

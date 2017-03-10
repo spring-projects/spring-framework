@@ -17,6 +17,7 @@
 package org.springframework.messaging.tcp.reactor;
 
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -175,7 +176,8 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	private <T> Function<Flux<T>, Publisher<?>> reconnectFunction(ReconnectStrategy reconnectStrategy) {
 		return flux -> flux
 				.scan(1, (count, element) -> count++)
-				.flatMap(attempt -> Mono.delayMillis(reconnectStrategy.getTimeToNextAttempt(attempt)));
+				.flatMap(attempt -> Mono.delay(
+						Duration.ofMillis(reconnectStrategy.getTimeToNextAttempt(attempt))));
 	}
 
 	@Override
