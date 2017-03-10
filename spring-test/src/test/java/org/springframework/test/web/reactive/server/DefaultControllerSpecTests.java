@@ -17,10 +17,11 @@ package org.springframework.test.web.reactive.server;
 
 import org.junit.Test;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-
-import static org.junit.Assert.assertSame;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Unit tests for {@link DefaultControllerSpec}.
@@ -29,44 +30,47 @@ import static org.junit.Assert.assertSame;
 public class DefaultControllerSpecTests {
 
 	@Test
-	public void controllers() throws Exception {
-		OneController controller1 = new OneController();
-		SecondController controller2 = new SecondController();
-
-		TestControllerSpec spec = new TestControllerSpec(controller1, controller2);
-		ApplicationContext context = spec.createApplicationContext();
-
-		assertSame(controller1, context.getBean(OneController.class));
-		assertSame(controller2, context.getBean(SecondController.class));
+	public void controller() throws Exception {
+		new DefaultControllerSpec(new MyController()).build()
+				.get().uri("/")
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody(String.class).value().isEqualTo("Success");
 	}
 
 	@Test
 	public void controllerAdvice() throws Exception {
-		OneControllerAdvice advice = new OneControllerAdvice();
-
-		TestControllerSpec spec = new TestControllerSpec(new OneController());
-		spec.controllerAdvice(advice);
-		ApplicationContext context = spec.createApplicationContext();
-
-		assertSame(advice, context.getBean(OneControllerAdvice.class));
+		new DefaultControllerSpec(new MyController())
+				.controllerAdvice(new MyControllerAdvice())
+				.build()
+				.get().uri("/exception")
+				.exchange()
+				.expectStatus().isBadRequest()
+				.expectBody(String.class).value().isEqualTo("Handled exception");
 	}
 
-	private static class OneController {}
 
-	private static class SecondController {}
+	@RestController
+	private static class MyController {
 
-	private static class OneControllerAdvice {}
-
-
-	private static class TestControllerSpec extends DefaultControllerSpec {
-
-		TestControllerSpec(Object... controllers) {
-			super(controllers);
+		@GetMapping("/")
+		public String handle() {
+			return "Success";
 		}
 
-		@Override
-		public AnnotationConfigApplicationContext createApplicationContext() {
-			return super.createApplicationContext();
+		@GetMapping("/exception")
+		public void handleWithError() {
+			throw new IllegalStateException();
+		}
+
+	}
+
+	@ControllerAdvice
+	private static class MyControllerAdvice {
+
+		@ExceptionHandler
+		public ResponseEntity<String> handle(IllegalStateException ex) {
+			return ResponseEntity.status(400).body("Handled exception");
 		}
 	}
 

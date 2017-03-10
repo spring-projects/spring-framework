@@ -15,12 +15,20 @@
  */
 package org.springframework.test.web.reactive.server.samples.bind;
 
+import java.security.Principal;
+import java.util.function.Function;
+
 import org.junit.Before;
 import org.junit.Test;
+import reactor.core.publisher.Mono;
 
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ServerWebExchange;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Bind to annotated controllers.
@@ -35,7 +43,18 @@ public class ControllerTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.client = WebTestClient.bindToController(new TestController()).build();
+
+		this.client = WebTestClient.bindToController(new TestController())
+				.exchangeMutator(identityMutator("Pablo"))
+				.build();
+	}
+
+	private Function<ServerWebExchange, ServerWebExchange> identityMutator(String userName) {
+		return exchange -> {
+			Principal user = mock(Principal.class);
+			when(user.getName()).thenReturn(userName);
+			return exchange.mutate().principal(Mono.just(user)).build();
+		};
 	}
 
 
@@ -44,7 +63,7 @@ public class ControllerTests {
 		this.client.get().uri("/test")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value().isEqualTo("It works!");
+				.expectBody(String.class).value().isEqualTo("Hello Pablo!");
 	}
 
 
@@ -52,8 +71,9 @@ public class ControllerTests {
 	static class TestController {
 
 		@GetMapping("/test")
-		public String handle() {
-			return "It works!";
+		public String handle(Principal principal) {
+			return "Hello " + principal.getName() + "!";
 		}
 	}
+
 }

@@ -152,7 +152,7 @@ public class ExchangeResult {
 			assertion.run();
 		}
 		catch (AssertionError ex) {
-			throw new AssertionError("Assertion failed on the following exchange:" + this, ex);
+			throw new AssertionError(ex.getMessage() + "\n" + this, ex);
 		}
 	}
 
@@ -168,7 +168,7 @@ public class ExchangeResult {
 				"< " + getStatus() + " " + getStatusReason() + "\n" +
 				"< " + formatHeaders(getResponseHeaders(), "\n< ") + "\n" +
 				"\n" +
-				formatBody(getResponseHeaders().getContentType(), this.response.getRecordedContent()) + "\n\n";
+				formatBody(getResponseHeaders().getContentType(), this.response.getRecordedContent()) +"\n";
 	}
 
 	private String getStatusReason() {

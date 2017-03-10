@@ -34,7 +34,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -48,9 +47,7 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.RouterFunction;
-import org.springframework.web.reactive.function.server.RouterFunctions;
-import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
-import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
@@ -149,9 +146,8 @@ public interface WebTestClient {
 	 * @return the {@link WebTestClient} builder
 	 * @see org.springframework.web.reactive.config.EnableWebFlux
 	 */
-	static Builder bindToApplicationContext(ApplicationContext applicationContext) {
-		HttpHandler httpHandler = WebHttpHandlerBuilder.applicationContext(applicationContext).build();
-		return new DefaultWebTestClientBuilder(httpHandler);
+	static MockServerSpec<?> bindToApplicationContext(ApplicationContext applicationContext) {
+		return new ApplicationContextSpec(applicationContext);
 	}
 
 	/**
@@ -159,9 +155,8 @@ public interface WebTestClient {
 	 * @param routerFunction the RouterFunction to test
 	 * @return the {@link WebTestClient} builder
 	 */
-	static Builder bindToRouterFunction(RouterFunction<?> routerFunction) {
-		HttpWebHandlerAdapter httpHandler = RouterFunctions.toHttpHandler(routerFunction);
-		return new DefaultWebTestClientBuilder(httpHandler);
+	static MockServerSpec<?> bindToRouterFunction(RouterFunction<?> routerFunction) {
+		return new RouterFunctionSpec(routerFunction);
 	}
 
 	/**
@@ -174,10 +169,35 @@ public interface WebTestClient {
 
 
 	/**
+	 * Base specification for setting up tests without a server.
+	 */
+	interface MockServerSpec<B extends MockServerSpec<B>> {
+
+		/**
+		 * Configure a transformation function on {@code ServerWebExchange} to
+		 * be applied at the start of server-side, request processing.
+		 * @param function the transforming function.
+		 * @see ServerWebExchange#mutate()
+		 */
+		<T extends B> T exchangeMutator(Function<ServerWebExchange, ServerWebExchange> function);
+
+		/**
+		 * Proceed to configure and build the test client.
+		 */
+		Builder configureClient();
+
+		/**
+		 * Shortcut to build the test client.
+		 */
+		WebTestClient build();
+
+	}
+
+	/**
 	 * Specification for customizing controller configuration equivalent to, and
 	 * internally delegating to, a {@link WebFluxConfigurer}.
 	 */
-	interface ControllerSpec {
+	interface ControllerSpec extends MockServerSpec<ControllerSpec> {
 
 		/**
 		 * Register one or more
@@ -233,16 +253,6 @@ public interface WebTestClient {
 		 * @see WebFluxConfigurer#configureViewResolvers
 		 */
 		ControllerSpec viewResolvers(Consumer<ViewResolverRegistry> consumer);
-
-		/**
-		 * Proceed to configure and build the test client.
-		 */
-		Builder configureClient();
-
-		/**
-		 * Shortcut to build the test client.
-		 */
-		WebTestClient build();
 
 	}
 
