@@ -131,7 +131,7 @@ public class WebHttpHandlerBuilder {
 
 
 	/**
-	 * Add the given filters to use for processing requests.
+	 * Add the given filters.
 	 * @param filters the filters to add
 	 */
 	public WebHttpHandlerBuilder filters(List<? extends WebFilter> filters) {
@@ -142,13 +142,33 @@ public class WebHttpHandlerBuilder {
 	}
 
 	/**
-	 * Add the given exception handler to apply at the end of request processing.
+	 * Insert the given filter before other configured filters.
+	 * @param filter the filters to insert
+	 */
+	public WebHttpHandlerBuilder prependFilter(WebFilter filter) {
+		Assert.notNull(filter, "WebFilter is required");
+		this.filters.add(0, filter);
+		return this;
+	}
+
+	/**
+	 * Add the given exception handlers.
 	 * @param handlers the exception handlers
 	 */
 	public WebHttpHandlerBuilder exceptionHandlers(List<WebExceptionHandler> handlers) {
 		if (!ObjectUtils.isEmpty(handlers)) {
 			this.exceptionHandlers.addAll(handlers);
 		}
+		return this;
+	}
+
+	/**
+	 * Insert the given exception handler before other configured handlers.
+	 * @param handler the exception handler to insert
+	 */
+	public WebHttpHandlerBuilder prependExceptionHandler(WebExceptionHandler handler) {
+		Assert.notNull(handler, "WebExceptionHandler is required");
+		this.exceptionHandlers.add(0, handler);
 		return this;
 	}
 
