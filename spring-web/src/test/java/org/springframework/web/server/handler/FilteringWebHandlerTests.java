@@ -16,6 +16,10 @@
 
 package org.springframework.web.server.handler;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
@@ -110,9 +114,13 @@ public class FilteringWebHandlerTests {
 	@Test
 	public void handleErrorFromFilter() throws Exception {
 		TestExceptionHandler exceptionHandler = new TestExceptionHandler();
-		HttpHandler handler = WebHttpHandlerBuilder.webHandler(new StubWebHandler())
-				.filters(new ExceptionFilter()).exceptionHandlers(exceptionHandler).build();
-		handler.handle(this.request, this.response).block();
+		List<ExceptionFilter> filters = Collections.singletonList(new ExceptionFilter());
+		List<WebExceptionHandler> exceptionHandlers = Collections.singletonList(exceptionHandler);
+
+		WebHttpHandlerBuilder.webHandler(new StubWebHandler())
+				.filters(filters).exceptionHandlers(exceptionHandlers).build()
+				.handle(this.request, this.response)
+				.block();
 
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatusCode());
 
@@ -123,7 +131,7 @@ public class FilteringWebHandlerTests {
 
 
 	private HttpHandler createHttpHandler(StubWebHandler webHandler, WebFilter... filters) {
-		return WebHttpHandlerBuilder.webHandler(webHandler).filters(filters).build();
+		return WebHttpHandlerBuilder.webHandler(webHandler).filters(Arrays.asList(filters)).build();
 	}
 
 

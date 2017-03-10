@@ -18,6 +18,7 @@ package org.springframework.web.reactive;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -158,8 +159,8 @@ public class DispatcherHandlerErrorTests {
 		this.request = MockServerHttpRequest.get("/unknown-argument-type").build();
 		ServerWebExchange exchange = createExchange();
 
-		WebExceptionHandler exceptionHandler = new ServerError500ExceptionHandler();
-		WebHandler webHandler = new ExceptionHandlingWebHandler(this.dispatcherHandler, exceptionHandler);
+		List<WebExceptionHandler> handlers = Collections.singletonList(new ServerError500ExceptionHandler());
+		WebHandler webHandler = new ExceptionHandlingWebHandler(this.dispatcherHandler, handlers);
 		webHandler.handle(exchange).block(Duration.ofSeconds(5));
 
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exchange.getResponse().getStatusCode());

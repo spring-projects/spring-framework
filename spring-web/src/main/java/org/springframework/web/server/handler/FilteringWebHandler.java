@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.server.handler;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,8 +27,8 @@ import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.WebHandler;
 
 /**
- * WebHandler that delegates to a chain of {@link WebFilter} instances and then
- * to the target {@link WebHandler}.
+ * WebHandler decorator that invokes a chain of {@link WebFilter}s before the
+ * delegate {@link WebHandler}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -39,25 +38,29 @@ public class FilteringWebHandler extends WebHandlerDecorator {
 	private final List<WebFilter> filters;
 
 
-	public FilteringWebHandler(WebHandler targetHandler, WebFilter... filters) {
-		super(targetHandler);
-		this.filters = initList(filters);
-	}
-
-	private static List<WebFilter> initList(WebFilter[] list) {
-		return (list != null ? Collections.unmodifiableList(Arrays.asList(list)) : Collections.emptyList());
+	/**
+	 * Constructor.
+	 * @param filters the chain of filters
+	 */
+	public FilteringWebHandler(WebHandler webHandler, List<WebFilter> filters) {
+		super(webHandler);
+		this.filters = Collections.unmodifiableList(filters);
 	}
 
 
 	/**
-	 * Return a read-only list of the configured filters.
+	 * Return read-only list of the configured filters.
 	 */
 	public List<WebFilter> getFilters() {
 		return this.filters;
 	}
 
+
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange) {
+		if (this.filters.isEmpty()) {
+			return super.handle(exchange);
+		}
 		return new DefaultWebFilterChain().filter(exchange);
 	}
 

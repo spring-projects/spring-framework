@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 package org.springframework.web.server.adapter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -65,7 +63,7 @@ public class WebHttpHandlerBuilder {
 	public static final String WEB_SESSION_MANAGER_BEAN_NAME = "webSessionManager";
 
 
-	private final WebHandler targetHandler;
+	private final WebHandler webHandler;
 
 	private final List<WebFilter> filters = new ArrayList<>();
 
@@ -76,16 +74,15 @@ public class WebHttpHandlerBuilder {
 
 	/**
 	 * Private constructor.
-	 * See factory method {@link #webHandler(WebHandler)}.
 	 */
-	private WebHttpHandlerBuilder(WebHandler targetHandler) {
-		Assert.notNull(targetHandler, "WebHandler must not be null");
-		this.targetHandler = targetHandler;
+	private WebHttpHandlerBuilder(WebHandler webHandler) {
+		Assert.notNull(webHandler, "WebHandler must not be null");
+		this.webHandler = webHandler;
 	}
 
 
 	/**
-	 * Factory method to create a new builder instance.
+	 * Static factory method to create a new builder instance.
 	 * @param webHandler the target handler for the request
 	 * @return the prepared builder
 	 */
@@ -94,8 +91,8 @@ public class WebHttpHandlerBuilder {
 	}
 
 	/**
-	 * Factory method to create a new builder instance by detecting beans in an
-	 * {@link ApplicationContext}. The following are detected:
+	 * Static factory method to create a new builder instance by detecting beans
+	 * in an {@link ApplicationContext}. The following are detected:
 	 * <ul>
 	 *	<li>{@link WebHandler} [1] -- looked up by the name
 	 *	{@link #WEB_HANDLER_BEAN_NAME}.
@@ -111,24 +108,15 @@ public class WebHttpHandlerBuilder {
 	 */
 	public static WebHttpHandlerBuilder applicationContext(ApplicationContext context) {
 
-		// Target WebHandler
-
 		WebHttpHandlerBuilder builder = new WebHttpHandlerBuilder(
 				context.getBean(WEB_HANDLER_BEAN_NAME, WebHandler.class));
 
-		// WebFilter...
+		// Autowire lists for @Bean + @Order
 
-		AutowiredFiltersContainer filtersContainer = new AutowiredFiltersContainer();
-		context.getAutowireCapableBeanFactory().autowireBean(filtersContainer);
-		builder.filters(filtersContainer.getFilters());
-
-		// WebExceptionHandler...
-
-		AutowiredExceptionHandlersContainer handlersContainer = new AutowiredExceptionHandlersContainer();
-		context.getAutowireCapableBeanFactory().autowireBean(handlersContainer);
-		builder.exceptionHandlers(handlersContainer.getExceptionHandlers());
-
-		// WebSessionManager
+		SortedBeanContainer container = new SortedBeanContainer();
+		context.getAutowireCapableBeanFactory().autowireBean(container);
+		builder.filters(container.getFilters());
+		builder.exceptionHandlers(container.getExceptionHandlers());
 
 		try {
 			builder.sessionManager(
@@ -146,15 +134,7 @@ public class WebHttpHandlerBuilder {
 	 * Add the given filters to use for processing requests.
 	 * @param filters the filters to add
 	 */
-	public WebHttpHandlerBuilder filters(WebFilter... filters) {
-		return filters(Arrays.asList(filters));
-	}
-
-	/**
-	 * Add the given filters to use for processing requests.
-	 * @param filters the filters to add
-	 */
-	public WebHttpHandlerBuilder filters(Collection<? extends WebFilter> filters) {
+	public WebHttpHandlerBuilder filters(List<? extends WebFilter> filters) {
 		if (!ObjectUtils.isEmpty(filters)) {
 			this.filters.addAll(filters);
 		}
@@ -163,19 +143,11 @@ public class WebHttpHandlerBuilder {
 
 	/**
 	 * Add the given exception handler to apply at the end of request processing.
-	 * @param exceptionHandlers the exception handlers
+	 * @param handlers the exception handlers
 	 */
-	public WebHttpHandlerBuilder exceptionHandlers(WebExceptionHandler... exceptionHandlers) {
-		return exceptionHandlers(Arrays.asList(exceptionHandlers));
-	}
-
-	/**
-	 * Add the given exception handler to apply at the end of request processing.
-	 * @param exceptionHandlers the exception handlers
-	 */
-	public WebHttpHandlerBuilder exceptionHandlers(List<WebExceptionHandler> exceptionHandlers) {
-		if (!ObjectUtils.isEmpty(exceptionHandlers)) {
-			this.exceptionHandlers.addAll(exceptionHandlers);
+	public WebHttpHandlerBuilder exceptionHandlers(List<WebExceptionHandler> handlers) {
+		if (!ObjectUtils.isEmpty(handlers)) {
+			this.exceptionHandlers.addAll(handlers);
 		}
 		return this;
 	}
@@ -184,37 +156,40 @@ public class WebHttpHandlerBuilder {
 	 * Configure the {@link WebSessionManager} to set on the
 	 * {@link ServerWebExchange WebServerExchange}.
 	 * <p>By default {@link DefaultWebSessionManager} is used.
-	 * @param sessionManager the session manager
+	 * @param manager the session manager
 	 * @see HttpWebHandlerAdapter#setSessionManager(WebSessionManager)
 	 */
-	public WebHttpHandlerBuilder sessionManager(WebSessionManager sessionManager) {
-		this.sessionManager = sessionManager;
+	public WebHttpHandlerBuilder sessionManager(WebSessionManager manager) {
+		this.sessionManager = manager;
 		return this;
 	}
+
 
 	/**
 	 * Build the {@link HttpHandler}.
 	 */
 	public HttpHandler build() {
-		WebHandler webHandler = this.targetHandler;
-		if (!this.filters.isEmpty()) {
-			WebFilter[] array = new WebFilter[this.filters.size()];
-			webHandler = new FilteringWebHandler(webHandler, this.filters.toArray(array));
-		}
-		WebExceptionHandler[] array = new WebExceptionHandler[this.exceptionHandlers.size()];
-		webHandler = new ExceptionHandlingWebHandler(webHandler,  this.exceptionHandlers.toArray(array));
-		// TODO: protected method for further decoration
-		HttpWebHandlerAdapter httpHandler = new HttpWebHandlerAdapter(webHandler);
+
+		WebHandler decorated;
+
+		decorated = new FilteringWebHandler(this.webHandler, this.filters);
+		decorated = new ExceptionHandlingWebHandler(decorated,  this.exceptionHandlers);
+
+		HttpWebHandlerAdapter adapted = new HttpWebHandlerAdapter(decorated);
 		if (this.sessionManager != null) {
-			httpHandler.setSessionManager(this.sessionManager);
+			adapted.setSessionManager(this.sessionManager);
 		}
-		return httpHandler;
+
+		return adapted;
 	}
 
 
-	private static class AutowiredFiltersContainer {
+	private static class SortedBeanContainer {
 
 		private List<WebFilter> filters;
+
+		private List<WebExceptionHandler> exceptionHandlers;
+
 
 		@Autowired(required = false)
 		public void setFilters(List<WebFilter> filters) {
@@ -224,11 +199,6 @@ public class WebHttpHandlerBuilder {
 		public List<WebFilter> getFilters() {
 			return this.filters;
 		}
-	}
-
-	private static class AutowiredExceptionHandlersContainer {
-
-		private List<WebExceptionHandler> exceptionHandlers;
 
 		@Autowired(required = false)
 		public void setExceptionHandlers(List<WebExceptionHandler> exceptionHandlers) {

@@ -16,6 +16,8 @@
 
 package org.springframework.web.server.handler;
 
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -90,7 +92,7 @@ public class ExceptionHandlingHttpHandlerTests {
 	}
 
 	private WebHandler createWebHandler(WebExceptionHandler... handlers) {
-		return new ExceptionHandlingWebHandler(this.targetHandler, handlers);
+		return new ExceptionHandlingWebHandler(this.targetHandler, Arrays.asList(handlers));
 	}
 
 
@@ -101,11 +103,11 @@ public class ExceptionHandlingHttpHandlerTests {
 		private final boolean raise;
 
 
-		public StubWebHandler(RuntimeException exception) {
+		StubWebHandler(RuntimeException exception) {
 			this(exception, false);
 		}
 
-		public StubWebHandler(RuntimeException exception, boolean raise) {
+		StubWebHandler(RuntimeException exception, boolean raise) {
 			this.exception = exception;
 			this.raise = raise;
 		}
