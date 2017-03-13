@@ -129,6 +129,17 @@ public interface ServerResponse {
 	}
 
 	/**
+	 * Create a builder with a {@linkplain HttpStatus#SEE_OTHER 303 See Other}
+	 * status and a location header set to the given URI.
+	 * @param location the location URI
+	 * @return the created builder
+	 */
+	static BodyBuilder seeOther(URI location) {
+		BodyBuilder builder = status(HttpStatus.SEE_OTHER);
+		return builder.location(location);
+	}
+
+	/**
 	 * Create a builder with a {@linkplain HttpStatus#TEMPORARY_REDIRECT 307 Temporary Redirect}
 	 * status and a location header set to the given URI.
 	 * @param location the location URI
