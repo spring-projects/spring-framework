@@ -27,15 +27,16 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * An extension of {@code InvocableHandlerMethod} for synchronous, non-blocking
- * method invocation via {@link #invokeForHandlerResult}. By allowing only
- * {@link SyncHandlerMethodArgumentResolver}s to be configured, the invocation
- * is guaranteed to be non-blocking.
+ * Extension of {@code InvocableHandlerMethod} that can only be configured with
+ * synchronous argument resolvers and thus exposing an additional, synchronous
+ * {@link #invokeForHandlerResult} returning a {@code HandlerResult} vs
+ * {@code Mono<HandlerResult>}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class SyncInvocableHandlerMethod extends InvocableHandlerMethod {
+
 
 	public SyncInvocableHandlerMethod(HandlerMethod handlerMethod) {
 		super(handlerMethod);
@@ -53,10 +54,14 @@ public class SyncInvocableHandlerMethod extends InvocableHandlerMethod {
 	 */
 	@Override
 	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-		resolvers.forEach(resolver ->
-				Assert.isInstanceOf(SyncHandlerMethodArgumentResolver.class, resolver,
-						"SyncHandlerMethodArgumentResolver requires SyncHandlerMethodArgumentResolver"));
+		resolvers.forEach(this::assertSyncResolvers);
 		super.setArgumentResolvers(resolvers);
+	}
+
+	private void assertSyncResolvers(HandlerMethodArgumentResolver resolver) {
+		Assert.isInstanceOf(SyncHandlerMethodArgumentResolver.class, resolver,
+				"SyncInvocableHandlerMethod requires resolvers of type " +
+						"SyncHandlerMethodArgumentResolver");
 	}
 
 	/**
@@ -75,7 +80,7 @@ public class SyncInvocableHandlerMethod extends InvocableHandlerMethod {
 	public HandlerResult invokeForHandlerResult(ServerWebExchange exchange,
 			BindingContext bindingContext, Object... providedArgs) {
 
-		// This will not block
+		// This will not block with only sync resolvers allowed
 		return super.invoke(exchange, bindingContext, providedArgs).block();
 	}
 

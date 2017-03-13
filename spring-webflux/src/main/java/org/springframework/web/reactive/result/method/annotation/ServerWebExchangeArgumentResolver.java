@@ -45,6 +45,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class ServerWebExchangeArgumentResolver implements SyncHandlerMethodArgumentResolver {
 
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
@@ -55,10 +56,10 @@ public class ServerWebExchangeArgumentResolver implements SyncHandlerMethodArgum
 	}
 
 	@Override
-	public Optional<Object> resolveArgumentValue(MethodParameter parameter, BindingContext context,
-			ServerWebExchange exchange) {
+	public Optional<Object> resolveArgumentValue(MethodParameter methodParameter,
+			BindingContext context, ServerWebExchange exchange) {
 
-		Class<?> paramType = parameter.getParameterType();
+		Class<?> paramType = methodParameter.getParameterType();
 		if (ServerWebExchange.class.isAssignableFrom(paramType)) {
 			return Optional.of(exchange);
 		}
@@ -73,8 +74,8 @@ public class ServerWebExchangeArgumentResolver implements SyncHandlerMethodArgum
 		}
 		else {
 			// should never happen...
-			throw new IllegalArgumentException(
-					"Unknown parameter type: " + paramType + " in method: " + parameter.getMethod());
+			throw new IllegalArgumentException("Unknown parameter type: " +
+					paramType + " in method: " + methodParameter.getMethod());
 		}
 	}
 

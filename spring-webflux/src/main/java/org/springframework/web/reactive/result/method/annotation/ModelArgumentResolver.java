@@ -32,16 +32,17 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class ModelArgumentResolver implements SyncHandlerMethodArgumentResolver {
 
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return Model.class.isAssignableFrom(parameter.getParameterType());
 	}
 
 	@Override
-	public Optional<Object> resolveArgumentValue(MethodParameter parameter, BindingContext bindingContext,
-			ServerWebExchange exchange) {
+	public Optional<Object> resolveArgumentValue(MethodParameter methodParameter,
+			BindingContext context, ServerWebExchange exchange) {
 
-		return Optional.of(bindingContext.getModel());
+		return Optional.of(context.getModel());
 	}
 
 }

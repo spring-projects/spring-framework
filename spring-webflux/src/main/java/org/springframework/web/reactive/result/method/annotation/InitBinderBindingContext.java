@@ -29,8 +29,7 @@ import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Variant of {@link BindingContext} that further initializes {@code DataBinder}
- * instances through {@code @InitBinder} methods.
+ * Extends {@link BindingContext} with {@code @InitBinder} method initialization.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -43,7 +42,7 @@ class InitBinderBindingContext extends BindingContext {
 	private final BindingContext binderMethodContext;
 
 
-	public InitBinderBindingContext(WebBindingInitializer initializer,
+	InitBinderBindingContext(WebBindingInitializer initializer,
 			List<SyncInvocableHandlerMethod> binderMethods) {
 
 		super(initializer);
@@ -53,24 +52,25 @@ class InitBinderBindingContext extends BindingContext {
 
 
 	@Override
-	protected WebExchangeDataBinder initDataBinder(WebExchangeDataBinder binder, ServerWebExchange exchange) {
+	protected WebExchangeDataBinder initDataBinder(WebExchangeDataBinder dataBinder,
+			ServerWebExchange exchange) {
 
 		this.binderMethods.stream()
 				.filter(binderMethod -> {
 					InitBinder annotation = binderMethod.getMethodAnnotation(InitBinder.class);
 					Collection<String> names = Arrays.asList(annotation.value());
-					return (names.size() == 0 || names.contains(binder.getObjectName()));
+					return (names.size() == 0 || names.contains(dataBinder.getObjectName()));
 				})
-				.forEach(method -> invokeBinderMethod(binder, exchange, method));
+				.forEach(method -> invokeBinderMethod(dataBinder, exchange, method));
 
-		return binder;
+		return dataBinder;
 	}
 
-	private void invokeBinderMethod(WebExchangeDataBinder binder, ServerWebExchange exchange,
-			SyncInvocableHandlerMethod binderMethod) {
+	private void invokeBinderMethod(WebExchangeDataBinder dataBinder,
+			ServerWebExchange exchange, SyncInvocableHandlerMethod binderMethod) {
 
 		Optional<Object> returnValue = binderMethod
-				.invokeForHandlerResult(exchange, this.binderMethodContext, binder)
+				.invokeForHandlerResult(exchange, this.binderMethodContext, dataBinder)
 				.getReturnValue();
 
 		if (returnValue.isPresent()) {
@@ -78,7 +78,7 @@ class InitBinderBindingContext extends BindingContext {
 					"@InitBinder methods should return void: " + binderMethod);
 		}
 
-		// Should not happen (no argument resolvers)...
+		// Should not happen (no Model argument resolution) ...
 
 		if (!this.binderMethodContext.getModel().asMap().isEmpty()) {
 			throw new IllegalStateException(

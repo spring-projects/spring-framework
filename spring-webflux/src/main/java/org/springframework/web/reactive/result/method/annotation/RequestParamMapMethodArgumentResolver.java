@@ -45,11 +45,12 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class RequestParamMapMethodArgumentResolver implements SyncHandlerMethodArgumentResolver {
 
+
 	@Override
-	public boolean supportsParameter(MethodParameter parameter) {
-		RequestParam requestParam = parameter.getParameterAnnotation(RequestParam.class);
+	public boolean supportsParameter(MethodParameter methodParam) {
+		RequestParam requestParam = methodParam.getParameterAnnotation(RequestParam.class);
 		if (requestParam != null) {
-			if (Map.class.isAssignableFrom(parameter.getParameterType())) {
+			if (Map.class.isAssignableFrom(methodParam.getParameterType())) {
 				return !StringUtils.hasText(requestParam.name());
 			}
 		}
@@ -57,23 +58,16 @@ public class RequestParamMapMethodArgumentResolver implements SyncHandlerMethodA
 	}
 
 	@Override
-	public Optional<Object> resolveArgumentValue(MethodParameter parameter, BindingContext context,
-			ServerWebExchange exchange) {
+	public Optional<Object> resolveArgumentValue(MethodParameter methodParameter,
+			BindingContext context, ServerWebExchange exchange) {
 
-		MultiValueMap<String, String> requestParams = getRequestParams(exchange);
-		Object value = (isMultiValueMap(parameter) ? requestParams : requestParams.toSingleValueMap());
-		return Optional.of(value);
-	}
+		Class<?> paramType = methodParameter.getParameterType();
+		boolean isMultiValueMap = MultiValueMap.class.isAssignableFrom(paramType);
 
-	private MultiValueMap<String, String> getRequestParams(ServerWebExchange exchange) {
-		MultiValueMap<String, String> params = exchange.getRequestParams().subscribe().peek();
-		Assert.notNull(params, "Expected form data (if any) to be parsed.");
-		return params;
-	}
+		MultiValueMap<String, String> requestParams = exchange.getRequestParams().subscribe().peek();
+		Assert.notNull(requestParams, "Expected form data (if any) to be parsed.");
 
-	private boolean isMultiValueMap(MethodParameter parameter) {
-		Class<?> paramType = parameter.getParameterType();
-		return MultiValueMap.class.isAssignableFrom(paramType);
+		return Optional.of(isMultiValueMap ? requestParams : requestParams.toSingleValueMap());
 	}
 
 }

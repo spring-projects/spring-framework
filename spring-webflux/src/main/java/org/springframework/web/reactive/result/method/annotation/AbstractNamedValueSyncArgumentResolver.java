@@ -38,35 +38,45 @@ import org.springframework.web.server.ServerWebExchange;
 public abstract class AbstractNamedValueSyncArgumentResolver extends AbstractNamedValueArgumentResolver
 		implements SyncHandlerMethodArgumentResolver {
 
-	public AbstractNamedValueSyncArgumentResolver(ConfigurableBeanFactory beanFactory) {
+
+	protected AbstractNamedValueSyncArgumentResolver(ConfigurableBeanFactory beanFactory) {
 		super(beanFactory);
 	}
 
 
 	@Override
-	public Optional<Object> resolveArgumentValue(MethodParameter parameter,
-			BindingContext bindingContext, ServerWebExchange exchange) {
+	public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext,
+			ServerWebExchange exchange) {
 
-		// This will not block
-		Object value = resolveArgument(parameter, bindingContext, exchange).block();
+		// Flip the default implementation from SyncHandlerMethodArgumentResolver:
+		// instead of delegating to (sync) resolveArgumentValue,
+		// call (async) super.resolveArgument shared with non-blocking resolvers;
+		// actual resolution below still sync...
+
+		return super.resolveArgument(parameter, bindingContext, exchange);
+	}
+
+	@Override
+	public Optional<Object> resolveArgumentValue(MethodParameter parameter,
+			BindingContext context, ServerWebExchange exchange) {
+
+		// This won't block since resolveName below doesn't
+		Object value = resolveArgument(parameter, context, exchange).block();
+
 		return Optional.ofNullable(value);
 	}
 
 	@Override
-	protected Mono<Object> resolveName(String name, MethodParameter parameter, ServerWebExchange exchange) {
-		return Mono.justOrEmpty(resolveNamedValue(name, parameter, exchange));
+	protected final Mono<Object> resolveName(String name, MethodParameter param,
+			ServerWebExchange exchange) {
+
+		return Mono.justOrEmpty(resolveNamedValue(name, param, exchange));
 	}
 
 	/**
-	 * An abstract method for synchronous resolution of method argument values
-	 * that sub-classes must implement.
-	 * @param name the name of the value being resolved
-	 * @param parameter the method parameter to resolve to an argument value
-	 * (pre-nested in case of a {@link java.util.Optional} declaration)
-	 * @param exchange the current exchange
-	 * @return the resolved argument value, if any
+	 * Actually resolve the value synchronously.
 	 */
-	protected abstract Optional<Object> resolveNamedValue(String name, MethodParameter parameter,
-			ServerWebExchange exchange);
+	protected abstract Optional<Object> resolveNamedValue(String name,
+			MethodParameter param, ServerWebExchange exchange);
 
 }

@@ -40,6 +40,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class PathVariableMapMethodArgumentResolver implements SyncHandlerMethodArgumentResolver {
 
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		PathVariable ann = parameter.getParameterAnnotation(PathVariable.class);
@@ -47,12 +48,9 @@ public class PathVariableMapMethodArgumentResolver implements SyncHandlerMethodA
 				&& !StringUtils.hasText(ann.value()));
 	}
 
-	/**
-	 * Return a Map with all URI template variables or an empty map.
-	 */
 	@Override
-	public Optional<Object> resolveArgumentValue(MethodParameter parameter, BindingContext bindingContext,
-			ServerWebExchange exchange) {
+	public Optional<Object> resolveArgumentValue(MethodParameter methodParameter,
+			BindingContext context, ServerWebExchange exchange) {
 
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 		Object value = exchange.getAttribute(name).orElse(Collections.emptyMap());

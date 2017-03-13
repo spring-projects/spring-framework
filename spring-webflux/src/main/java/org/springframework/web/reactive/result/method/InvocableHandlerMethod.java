@@ -29,7 +29,6 @@ import java.util.stream.Stream;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -95,12 +94,26 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
+	 * Return the conifgured argument resolvers.
+	 */
+	public List<HandlerMethodArgumentResolver> getResolvers() {
+		return this.resolvers;
+	}
+
+	/**
 	 * Set the ParameterNameDiscoverer for resolving parameter names when needed
 	 * (e.g. default request attribute name).
 	 * <p>Default is a {@link DefaultParameterNameDiscoverer}.
 	 */
 	public void setParameterNameDiscoverer(ParameterNameDiscoverer nameDiscoverer) {
 		this.parameterNameDiscoverer = nameDiscoverer;
+	}
+
+	/**
+	 * Return the configured parameter name discoverer.
+	 */
+	public ParameterNameDiscoverer getParameterNameDiscoverer() {
+		return this.parameterNameDiscoverer;
 	}
 
 

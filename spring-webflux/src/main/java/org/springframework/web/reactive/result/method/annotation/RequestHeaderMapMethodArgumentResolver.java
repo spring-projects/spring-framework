@@ -42,6 +42,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class RequestHeaderMapMethodArgumentResolver implements SyncHandlerMethodArgumentResolver {
 
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return (parameter.hasParameterAnnotation(RequestHeader.class) &&
@@ -49,17 +50,14 @@ public class RequestHeaderMapMethodArgumentResolver implements SyncHandlerMethod
 	}
 
 	@Override
-	public Optional<Object> resolveArgumentValue(MethodParameter parameter, BindingContext context,
-			ServerWebExchange exchange) {
+	public Optional<Object> resolveArgumentValue(MethodParameter methodParameter,
+			BindingContext context, ServerWebExchange exchange) {
+
+		Class<?> paramType = methodParameter.getParameterType();
+		boolean isMultiValueMap = MultiValueMap.class.isAssignableFrom(paramType);
 
 		HttpHeaders headers = exchange.getRequest().getHeaders();
-		Object value = (isMultiValueMap(parameter) ? headers : headers.toSingleValueMap());
-		return Optional.of(value);
-	}
-
-	private boolean isMultiValueMap(MethodParameter parameter) {
-		Class<?> paramType = parameter.getParameterType();
-		return MultiValueMap.class.isAssignableFrom(paramType);
+		return Optional.of(isMultiValueMap ? headers : headers.toSingleValueMap());
 	}
 
 }

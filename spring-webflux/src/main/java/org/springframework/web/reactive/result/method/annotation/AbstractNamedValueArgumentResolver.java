@@ -171,6 +171,9 @@ public abstract class AbstractNamedValueArgumentResolver implements HandlerMetho
 	protected abstract Mono<Object> resolveName(String name, MethodParameter parameter,
 			ServerWebExchange exchange);
 
+	/**
+	 * Apply type conversion if necessary.
+	 */
 	private Object applyConversion(Object value, NamedValueInfo namedValueInfo, MethodParameter parameter,
 			BindingContext bindingContext, ServerWebExchange exchange) {
 
@@ -187,6 +190,9 @@ public abstract class AbstractNamedValueArgumentResolver implements HandlerMetho
 		return value;
 	}
 
+	/**
+	 * Resolve the default value, if any.
+	 */
 	private Mono<Object> getDefaultValue(NamedValueInfo namedValueInfo, MethodParameter parameter,
 			BindingContext bindingContext, Model model, ServerWebExchange exchange) {
 
