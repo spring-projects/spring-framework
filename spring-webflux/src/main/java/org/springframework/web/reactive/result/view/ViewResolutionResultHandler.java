@@ -46,7 +46,7 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
-import org.springframework.web.reactive.result.AbstractHandlerResultHandler;
+import org.springframework.web.reactive.result.HandlerResultHandlerSupport;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.support.HttpRequestPathHelper;
@@ -77,7 +77,7 @@ import org.springframework.web.server.support.HttpRequestPathHelper;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ViewResolutionResultHandler extends AbstractHandlerResultHandler
+public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 		implements HandlerResultHandler, Ordered {
 
 	private static final Object NO_VALUE = new Object();

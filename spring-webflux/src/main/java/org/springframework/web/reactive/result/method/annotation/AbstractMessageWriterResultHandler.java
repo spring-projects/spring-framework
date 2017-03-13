@@ -33,7 +33,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
-import org.springframework.web.reactive.result.AbstractHandlerResultHandler;
+import org.springframework.web.reactive.result.HandlerResultHandlerSupport;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -44,7 +44,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public abstract class AbstractMessageWriterResultHandler extends AbstractHandlerResultHandler {
+public abstract class AbstractMessageWriterResultHandler extends HandlerResultHandlerSupport {
 
 	private final List<HttpMessageWriter<?>> messageWriters;
 

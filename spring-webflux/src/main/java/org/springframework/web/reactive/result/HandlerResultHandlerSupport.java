@@ -36,12 +36,13 @@ import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Base class for {@link org.springframework.web.reactive.HandlerResultHandler
- * HandlerResultHandler} implementations that perform content negotiation.
+ * HandlerResultHandler} with support for content negotiation and access to a
+ * {@code ReactiveAdapter} registry.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public abstract class AbstractHandlerResultHandler implements Ordered {
+public abstract class HandlerResultHandlerSupport implements Ordered {
 
 	private static final MediaType MEDIA_TYPE_APPLICATION_ALL = new MediaType("application");
 
@@ -53,11 +54,11 @@ public abstract class AbstractHandlerResultHandler implements Ordered {
 	private int order = LOWEST_PRECEDENCE;
 
 
-	protected AbstractHandlerResultHandler(RequestedContentTypeResolver contentTypeResolver) {
+	protected HandlerResultHandlerSupport(RequestedContentTypeResolver contentTypeResolver) {
 		this(contentTypeResolver, new ReactiveAdapterRegistry());
 	}
 
-	protected AbstractHandlerResultHandler(RequestedContentTypeResolver contentTypeResolver,
+	protected HandlerResultHandlerSupport(RequestedContentTypeResolver contentTypeResolver,
 			ReactiveAdapterRegistry adapterRegistry) {
 
 		Assert.notNull(contentTypeResolver, "'contentTypeResolver' is required.");
@@ -72,14 +73,6 @@ public abstract class AbstractHandlerResultHandler implements Ordered {
 	 */
 	public ReactiveAdapterRegistry getAdapterRegistry() {
 		return this.adapterRegistry;
-	}
-
-	/**
-	 * Shortcut to get a ReactiveAdapter for the top-level return value type.
-	 */
-	protected ReactiveAdapter getAdapter(HandlerResult result) {
-		Class<?> returnType = result.getReturnType().getRawClass();
-		return getAdapterRegistry().getAdapter(returnType, result.getReturnValue());
 	}
 
 	/**
@@ -104,6 +97,15 @@ public abstract class AbstractHandlerResultHandler implements Ordered {
 		return this.order;
 	}
 
+
+	/**
+	 * Get a {@code ReactiveAdapter} for the top-level return value type.
+	 * @return the matching adapter or {@code null}
+	 */
+	protected ReactiveAdapter getAdapter(HandlerResult result) {
+		Class<?> returnType = result.getReturnType().getRawClass();
+		return getAdapterRegistry().getAdapter(returnType, result.getReturnValue());
+	}
 
 	/**
 	 * Select the best media type for the current request through a content

@@ -37,7 +37,7 @@ import static org.junit.Assert.*;
 import static org.springframework.http.MediaType.*;
 
 /**
- * Unit tests for {@link AbstractHandlerResultHandler}.
+ * Unit tests for {@link HandlerResultHandlerSupport}.
  * @author Rossen Stoyanchev
  */
 public class HandlerResultHandlerTests {
@@ -112,7 +112,7 @@ public class HandlerResultHandlerTests {
 
 
 	@SuppressWarnings("WeakerAccess")
-	private static class TestResultHandler extends AbstractHandlerResultHandler {
+	private static class TestResultHandler extends HandlerResultHandlerSupport {
 
 		protected TestResultHandler() {
 			this(new HeaderContentTypeResolver());

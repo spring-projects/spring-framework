@@ -110,7 +110,7 @@ public class ModelAttributeMethodArgumentResolver implements HandlerMethodArgume
 				if (adapter.isNoValue() || adapter.isMultiValue()) {
 					return false;
 				}
-				clazz = ResolvableType.forMethodParameter(parameter).getGeneric(0).getRawClass();
+				clazz = parameter.nested().getNestedParameterType();
 			}
 			return !BeanUtils.isSimpleProperty(clazz);
 		}
