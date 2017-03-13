@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server;
 
 import reactor.core.publisher.Flux;
@@ -25,7 +26,7 @@ import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.client.reactive.ClientHttpResponseDecorator;
 
 /**
- * Client HTTP response decorator that interceptrs and saves the content read
+ * Client HTTP response decorator that intercepts and saves the content read
  * from the server.
  *
  * @author Rossen Stoyanchev

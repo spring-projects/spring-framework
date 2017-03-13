@@ -39,10 +39,12 @@ import static org.junit.Assert.assertNotNull;
  * Unit tests for {@link WiretapConnector}.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class WebTestClientConnectorTests {
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void captureAndClaim() throws Exception {
 
 		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, "/test");

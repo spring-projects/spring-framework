@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server.samples.bind;
 
 import org.junit.After;
@@ -33,6 +34,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  * Bind to a running server, making actual requests over a socket.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class HttpServerTests {
 

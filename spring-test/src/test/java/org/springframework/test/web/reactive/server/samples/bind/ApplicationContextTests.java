@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server.samples.bind;
 
 import java.security.Principal;
@@ -38,8 +39,8 @@ import static org.mockito.Mockito.when;
  * Binding to server infrastructure declared in a Spring ApplicationContext.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
-@SuppressWarnings("unused")
 public class ApplicationContextTests {
 
 	private WebTestClient client;

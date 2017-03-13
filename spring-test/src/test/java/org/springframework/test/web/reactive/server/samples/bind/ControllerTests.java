@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server.samples.bind;
 
 import java.security.Principal;
 import java.util.function.UnaryOperator;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
@@ -34,19 +34,15 @@ import static org.mockito.Mockito.when;
  * Bind to annotated controllers.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
-@SuppressWarnings("unused")
 public class ControllerTests {
 
-	private WebTestClient client;
+	private final WebTestClient client = WebTestClient
+			.bindToController(new TestController())
+			.exchangeMutator(identitySetup("Pablo"))
+			.build();
 
-
-	@Before
-	public void setUp() throws Exception {
-		this.client = WebTestClient.bindToController(new TestController())
-				.exchangeMutator(identitySetup("Pablo"))
-				.build();
-	}
 
 	private UnaryOperator<ServerWebExchange> identitySetup(String userName) {
 		return exchange -> {

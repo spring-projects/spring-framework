@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server;
 
 import org.springframework.context.ApplicationContext;
@@ -48,7 +49,6 @@ public class RouterFunctionSpec extends AbstractMockServerSpec<RouterFunctionSpe
 		return WebHttpHandlerBuilder.applicationContext(initApplicationContext());
 	}
 
-	@SuppressWarnings("Convert2MethodRef")
 	private ApplicationContext initApplicationContext() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.registerBean("webHandler", DispatcherHandler.class, () -> new DispatcherHandler());
