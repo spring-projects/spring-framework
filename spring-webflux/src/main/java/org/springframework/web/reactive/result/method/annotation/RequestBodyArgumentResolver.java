@@ -74,8 +74,8 @@ public class RequestBodyArgumentResolver extends AbstractMessageReaderArgumentRe
 	public Mono<Object> resolveArgument(MethodParameter param, BindingContext bindingContext,
 			ServerWebExchange exchange) {
 
-		boolean isRequired = param.getParameterAnnotation(RequestBody.class).required();
-		return readBody(param, isRequired, bindingContext, exchange);
+		RequestBody annotation = param.getParameterAnnotation(RequestBody.class);
+		return readBody(param, annotation.required(), bindingContext, exchange);
 	}
 
 }

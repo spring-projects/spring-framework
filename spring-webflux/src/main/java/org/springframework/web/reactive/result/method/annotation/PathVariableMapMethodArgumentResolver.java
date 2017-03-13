@@ -43,9 +43,10 @@ public class PathVariableMapMethodArgumentResolver implements SyncHandlerMethodA
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		PathVariable ann = parameter.getParameterAnnotation(PathVariable.class);
-		return (ann != null && (Map.class.isAssignableFrom(parameter.getParameterType()))
-				&& !StringUtils.hasText(ann.value()));
+		PathVariable annotation = parameter.getParameterAnnotation(PathVariable.class);
+		return (annotation != null &&
+				Map.class.isAssignableFrom(parameter.getParameterType()) &&
+				!StringUtils.hasText(annotation.value()));
 	}
 
 	@Override

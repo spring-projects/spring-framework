@@ -25,10 +25,12 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import org.springframework.core.Ordered;
+import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -70,6 +72,14 @@ public abstract class AbstractHandlerResultHandler implements Ordered {
 	 */
 	public ReactiveAdapterRegistry getAdapterRegistry() {
 		return this.adapterRegistry;
+	}
+
+	/**
+	 * Shortcut to get a ReactiveAdapter for the top-level return value type.
+	 */
+	protected ReactiveAdapter getAdapter(HandlerResult result) {
+		Class<?> returnType = result.getReturnType().getRawClass();
+		return getAdapterRegistry().getAdapter(returnType, result.getReturnValue());
 	}
 
 	/**

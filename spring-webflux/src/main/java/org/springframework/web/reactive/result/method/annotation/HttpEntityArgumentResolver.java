@@ -22,9 +22,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -69,29 +67,20 @@ public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentRes
 	}
 
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter param, BindingContext bindingContext,
+	public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext,
 			ServerWebExchange exchange) {
 
-		ResolvableType entityType = ResolvableType.forMethodParameter(param);
-		MethodParameter bodyParameter = new MethodParameter(param);
-		bodyParameter.increaseNestingLevel();
+		Class<?> entityType = parameter.getParameterType();
 
-		return readBody(bodyParameter, false, bindingContext, exchange)
-				.map(body -> createHttpEntity(body, entityType, exchange))
-				.defaultIfEmpty(createHttpEntity(null, entityType, exchange));
+		return readBody(parameter.nested(), false, bindingContext, exchange)
+				.map(body -> createEntity(body, entityType, exchange.getRequest()))
+				.defaultIfEmpty(createEntity(null, entityType, exchange.getRequest()));
 	}
 
-	private Object createHttpEntity(Object body, ResolvableType entityType,
-			ServerWebExchange exchange) {
-
-		ServerHttpRequest request = exchange.getRequest();
-		HttpHeaders headers = request.getHeaders();
-		if (RequestEntity.class == entityType.getRawClass()) {
-			return new RequestEntity<>(body, headers, request.getMethod(), request.getURI());
-		}
-		else {
-			return new HttpEntity<>(body, headers);
-		}
+	private Object createEntity(Object body, Class<?> entityType, ServerHttpRequest request) {
+		return RequestEntity.class.equals(entityType) ?
+				new RequestEntity<>(body, request.getHeaders(), request.getMethod(), request.getURI()) :
+				new HttpEntity<>(body, request.getHeaders());
 	}
 
 }

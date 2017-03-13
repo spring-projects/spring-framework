@@ -113,11 +113,7 @@ public abstract class AbstractMessageReaderArgumentResolver {
 
 		ResolvableType bodyType = ResolvableType.forMethodParameter(bodyParameter);
 		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(bodyType.resolve());
-
-		ResolvableType elementType = ResolvableType.forMethodParameter(bodyParameter);
-		if (adapter != null) {
-			elementType = elementType.getGeneric(0);
-		}
+		ResolvableType elementType = (adapter != null ? bodyType.getGeneric(0) : bodyType);
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
@@ -139,8 +135,8 @@ public abstract class AbstractMessageReaderArgumentResolver {
 					else {
 						flux = reader.read(elementType, request, readHints);
 					}
-					flux = flux.onErrorResumeWith(ex -> Flux.error(wrapReadError(ex, bodyParameter)));
-					if (checkRequired(adapter, isBodyRequired)) {
+					flux = flux.onErrorResumeWith(ex -> Flux.error(getReadError(bodyParameter, ex)));
+					if (isBodyRequired || !adapter.supportsEmpty()) {
 						flux = flux.switchIfEmpty(Flux.error(getRequiredBodyError(bodyParameter)));
 					}
 					Object[] hints = extractValidationHints(bodyParameter);
@@ -159,8 +155,8 @@ public abstract class AbstractMessageReaderArgumentResolver {
 					else {
 						mono = reader.readMono(elementType, request, readHints);
 					}
-					mono = mono.otherwise(ex -> Mono.error(wrapReadError(ex, bodyParameter)));
-					if (checkRequired(adapter, isBodyRequired)) {
+					mono = mono.otherwise(ex -> Mono.error(getReadError(bodyParameter, ex)));
+					if (isBodyRequired || (adapter != null && !adapter.supportsEmpty())) {
 						mono = mono.otherwiseIfEmpty(Mono.error(getRequiredBodyError(bodyParameter)));
 					}
 					Object[] hints = extractValidationHints(bodyParameter);
@@ -181,15 +177,11 @@ public abstract class AbstractMessageReaderArgumentResolver {
 		return Mono.error(new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes));
 	}
 
-	protected ServerWebInputException wrapReadError(Throwable ex, MethodParameter parameter) {
+	private ServerWebInputException getReadError(MethodParameter parameter, Throwable ex) {
 		return new ServerWebInputException("Failed to read HTTP message", parameter, ex);
 	}
 
-	protected boolean checkRequired(ReactiveAdapter adapter, boolean isBodyRequired) {
-		return adapter != null && !adapter.supportsEmpty() || isBodyRequired;
-	}
-
-	protected ServerWebInputException getRequiredBodyError(MethodParameter parameter) {
+	private ServerWebInputException getRequiredBodyError(MethodParameter parameter) {
 		return new ServerWebInputException("Required request body is missing: " +
 				parameter.getMethod().toGenericString());
 	}
@@ -199,7 +191,7 @@ public abstract class AbstractMessageReaderArgumentResolver {
 	 * a (possibly empty) Object[] with validation hints. A return value of
 	 * {@code null} indicates that validation is not required.
 	 */
-	protected Object[] extractValidationHints(MethodParameter parameter) {
+	private Object[] extractValidationHints(MethodParameter parameter) {
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation ann : annotations) {
 			Validated validAnnot = AnnotationUtils.getAnnotation(ann, Validated.class);
@@ -211,8 +203,8 @@ public abstract class AbstractMessageReaderArgumentResolver {
 		return null;
 	}
 
-	protected void validate(Object target, Object[] validationHints,
-			MethodParameter param, BindingContext binding, ServerWebExchange exchange) {
+	private void validate(Object target, Object[] validationHints, MethodParameter param,
+			BindingContext binding, ServerWebExchange exchange) {
 
 		String name = Conventions.getVariableNameForParameter(param);
 		WebExchangeDataBinder binder = binding.createDataBinder(exchange, target, name);

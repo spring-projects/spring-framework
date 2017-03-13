@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +28,6 @@ import rx.Single;
 
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
@@ -41,7 +41,10 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.web.method.ResolvableMethod.on;
 
 /**
  * Unit tests for {@link ResponseBodyResultHandler}.When adding a test also
@@ -75,22 +78,42 @@ public class ResponseBodyResultHandlerTests {
 	@Test
 	public void supports() throws NoSuchMethodException {
 		Object controller = new TestController();
-		testSupports(controller, "handleToString", true);
-		testSupports(controller, "doWork", false);
+		Method method;
 
-		controller = new TestRestController();
-		testSupports(controller, "handleToString", true);
-		testSupports(controller, "handleToMonoString", true);
-		testSupports(controller, "handleToSingleString", true);
-		testSupports(controller, "handleToCompletable", true);
-		testSupports(controller, "handleToResponseEntity", false);
-		testSupports(controller, "handleToMonoResponseEntity", false);
+		method = on(TestController.class).annotPresent(ResponseBody.class).resolveMethod();
+		testSupports(controller, method);
+
+		method = on(TestController.class).annotNotPresent(ResponseBody.class).resolveMethod();
+		HandlerResult handlerResult = getHandlerResult(controller, method);
+		assertFalse(this.resultHandler.supports(handlerResult));
 	}
 
-	private void testSupports(Object controller, String method, boolean result) throws NoSuchMethodException {
-		HandlerMethod hm = handlerMethod(controller, method);
-		HandlerResult handlerResult = new HandlerResult(hm, null, hm.getReturnType());
-		assertEquals(result, this.resultHandler.supports(handlerResult));
+	@Test
+	public void supportsRestController() throws NoSuchMethodException {
+		Object controller = new TestRestController();
+		Method method;
+
+		method = on(TestRestController.class).returning(String.class).resolveMethod();
+		testSupports(controller, method);
+
+		method = on(TestRestController.class).returning(Mono.class, String.class).resolveMethod();
+		testSupports(controller, method);
+
+		method = on(TestRestController.class).returning(Single.class, String.class).resolveMethod();
+		testSupports(controller, method);
+
+		method = on(TestRestController.class).returning(Completable.class).resolveMethod();
+		testSupports(controller, method);
+	}
+
+	private void testSupports(Object controller, Method method) {
+		HandlerResult handlerResult = getHandlerResult(controller, method);
+		assertTrue(this.resultHandler.supports(handlerResult));
+	}
+
+	private HandlerResult getHandlerResult(Object controller, Method method) {
+		HandlerMethod handlerMethod = new HandlerMethod(controller, method);
+		return new HandlerResult(handlerMethod, null, handlerMethod.getReturnType());
 	}
 
 	@Test
@@ -98,10 +121,6 @@ public class ResponseBodyResultHandlerTests {
 		assertEquals(100, this.resultHandler.getOrder());
 	}
 
-
-	private HandlerMethod handlerMethod(Object controller, String method) throws NoSuchMethodException {
-		return new HandlerMethod(controller, controller.getClass().getMethod(method));
-	}
 
 
 	@RestController
@@ -123,14 +142,6 @@ public class ResponseBodyResultHandlerTests {
 		}
 
 		public Completable handleToCompletable() {
-			return null;
-		}
-
-		public ResponseEntity<String> handleToResponseEntity() {
-			return null;
-		}
-
-		public Mono<ResponseEntity<String>> handleToMonoResponseEntity() {
 			return null;
 		}
 	}

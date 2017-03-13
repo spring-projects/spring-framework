@@ -55,31 +55,26 @@ public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandle
 
 
 	/**
-	 * Constructor with {@link HttpMessageWriter}s and a
-	 * {@code RequestedContentTypeResolver}.
-	 *
-	 * @param messageWriters writers for serializing to the response body stream
-	 * @param contentTypeResolver for resolving the requested content type
+	 * Basic constructor with a default {@link ReactiveAdapterRegistry}.
+	 * @param writers writers for serializing to the response body
+	 * @param resolver to determine the requested content type
 	 */
-	public ResponseBodyResultHandler(List<HttpMessageWriter<?>> messageWriters,
-			RequestedContentTypeResolver contentTypeResolver) {
+	public ResponseBodyResultHandler(List<HttpMessageWriter<?>> writers,
+			RequestedContentTypeResolver resolver) {
 
-		this(messageWriters, contentTypeResolver, new ReactiveAdapterRegistry());
+		this(writers, resolver, new ReactiveAdapterRegistry());
 	}
 
 	/**
-	 * Constructor with an additional {@link ReactiveAdapterRegistry}.
-	 *
-	 * @param messageWriters writers for serializing to the response body stream
-	 * @param contentTypeResolver for resolving the requested content type
-	 * @param adapterRegistry for adapting other reactive types (e.g. rx.Observable,
-	 * rx.Single, etc.) to Flux or Mono
+	 * Constructor with an {@link ReactiveAdapterRegistry} instance.
+	 * @param writers writers for serializing to the response body
+	 * @param resolver to determine the requested content type
+	 * @param registry for adaptation to reactive types
 	 */
-	public ResponseBodyResultHandler(List<HttpMessageWriter<?>> messageWriters,
-			RequestedContentTypeResolver contentTypeResolver,
-			ReactiveAdapterRegistry adapterRegistry) {
+	public ResponseBodyResultHandler(List<HttpMessageWriter<?>> writers,
+			RequestedContentTypeResolver resolver, ReactiveAdapterRegistry registry) {
 
-		super(messageWriters, contentTypeResolver, adapterRegistry);
+		super(writers, resolver, registry);
 		setOrder(100);
 	}
 
@@ -87,30 +82,9 @@ public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandle
 	@Override
 	public boolean supports(HandlerResult result) {
 		MethodParameter parameter = result.getReturnTypeSource();
-		return hasResponseBodyAnnotation(parameter) && !isHttpEntityType(result);
-	}
-
-	private boolean hasResponseBodyAnnotation(MethodParameter parameter) {
 		Class<?> containingClass = parameter.getContainingClass();
 		return (AnnotationUtils.findAnnotation(containingClass, ResponseBody.class) != null ||
 				parameter.getMethodAnnotation(ResponseBody.class) != null);
-	}
-
-	private boolean isHttpEntityType(HandlerResult result) {
-		Class<?> rawClass = result.getReturnType().getRawClass();
-		if (HttpEntity.class.isAssignableFrom(rawClass)) {
-			return true;
-		}
-		else {
-			ReactiveAdapter adapter = getAdapterRegistry().getAdapter(rawClass, result.getReturnValue());
-			if (adapter != null && !adapter.isNoValue()) {
-				ResolvableType genericType = result.getReturnType().getGeneric(0);
-				if (HttpEntity.class.isAssignableFrom(genericType.getRawClass())) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	@Override
