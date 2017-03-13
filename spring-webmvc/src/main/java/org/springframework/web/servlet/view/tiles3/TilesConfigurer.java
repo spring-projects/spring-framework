@@ -55,11 +55,11 @@ import org.apache.tiles.preparer.factory.PreparerFactory;
 import org.apache.tiles.request.ApplicationContext;
 import org.apache.tiles.request.ApplicationContextAware;
 import org.apache.tiles.request.ApplicationResource;
-import org.apache.tiles.startup.DefaultTilesInitializer;
 import org.apache.tiles.startup.TilesInitializer;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -122,9 +122,9 @@ import org.springframework.web.context.ServletContextAware;
  * @see TilesView
  * @see TilesViewResolver
  */
-public class TilesConfigurer implements ServletContextAware, InitializingBean, DisposableBean {
+public class TilesConfigurer implements ServletContextAware, InitializingBean, DisposableBean, org.springframework.context.ApplicationContextAware {
 
-	private static final boolean tilesElPresent =
+	static final boolean tilesElPresent =
 			ClassUtils.isPresent("org.apache.tiles.el.ELAttributeEvaluator", TilesConfigurer.class.getClassLoader());
 
 
@@ -132,20 +132,21 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 
 	private TilesInitializer tilesInitializer;
 
-	private String[] definitions;
+	String[] definitions;
 
-	private boolean checkRefresh = false;
+	boolean checkRefresh = false;
 
-	private boolean validateDefinitions = true;
+	boolean validateDefinitions = true;
 
-	private Class<? extends DefinitionsFactory> definitionsFactoryClass;
+	Class<? extends DefinitionsFactory> definitionsFactoryClass;
 
-	private Class<? extends PreparerFactory> preparerFactoryClass;
+	Class<? extends PreparerFactory> preparerFactoryClass;
 
-	private boolean useMutableTilesContainer = false;
+	boolean useMutableTilesContainer = false;
 
-	private ServletContext servletContext;
+	ServletContext servletContext;
 
+	private org.springframework.context.ApplicationContext applicationContext;
 
 	/**
 	 * Configure Tiles using a custom TilesInitializer, typically specified as an inner bean.
@@ -159,7 +160,12 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		this.tilesInitializer = tilesInitializer;
 	}
 
-	/**
+    @Override
+    public void setApplicationContext(org.springframework.context.ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
+
+    /**
 	 * Specify whether to apply Tiles 3.0's "complete-autoload" configuration.
 	 * <p>See {@link org.apache.tiles.extras.complete.CompleteAutoloadTilesContainerFactory}
 	 * for details on the complete-autoload mode.
@@ -266,7 +272,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	public void afterPropertiesSet() throws TilesException {
 		ApplicationContext preliminaryContext = new SpringWildcardServletTilesApplicationContext(this.servletContext);
 		if (this.tilesInitializer == null) {
-			this.tilesInitializer = new SpringTilesInitializer();
+			this.tilesInitializer = new SpringTilesInitializer(this, applicationContext.getId());
 		}
 		this.tilesInitializer.initialize(preliminaryContext);
 	}
@@ -281,110 +287,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	}
 
 
-	private class SpringTilesInitializer extends DefaultTilesInitializer {
-
-		@Override
-		protected AbstractTilesContainerFactory createContainerFactory(ApplicationContext context) {
-			return new SpringTilesContainerFactory();
-		}
-	}
-
-
-	private class SpringTilesContainerFactory extends BasicTilesContainerFactory {
-
-		@Override
-		protected TilesContainer createDecoratedContainer(TilesContainer originalContainer, ApplicationContext context) {
-			return (useMutableTilesContainer ? new CachingTilesContainer(originalContainer) : originalContainer);
-		}
-
-		@Override
-		protected List<ApplicationResource> getSources(ApplicationContext applicationContext) {
-			if (definitions != null) {
-				List<ApplicationResource> result = new LinkedList<>();
-				for (String definition : definitions) {
-					Collection<ApplicationResource> resources = applicationContext.getResources(definition);
-					if (resources != null) {
-						result.addAll(resources);
-					}
-				}
-				return result;
-			}
-			else {
-				return super.getSources(applicationContext);
-			}
-		}
-
-		@Override
-		protected BaseLocaleUrlDefinitionDAO instantiateLocaleDefinitionDao(ApplicationContext applicationContext,
-				LocaleResolver resolver) {
-			BaseLocaleUrlDefinitionDAO dao = super.instantiateLocaleDefinitionDao(applicationContext, resolver);
-			if (checkRefresh && dao instanceof CachingLocaleUrlDefinitionDAO) {
-				((CachingLocaleUrlDefinitionDAO) dao).setCheckRefresh(true);
-			}
-			return dao;
-		}
-
-		@Override
-		protected DefinitionsReader createDefinitionsReader(ApplicationContext context) {
-			DigesterDefinitionsReader reader = (DigesterDefinitionsReader) super.createDefinitionsReader(context);
-			reader.setValidating(validateDefinitions);
-			return reader;
-		}
-
-		@Override
-		protected DefinitionsFactory createDefinitionsFactory(ApplicationContext applicationContext,
-				LocaleResolver resolver) {
-
-			if (definitionsFactoryClass != null) {
-				DefinitionsFactory factory = BeanUtils.instantiateClass(definitionsFactoryClass);
-				if (factory instanceof ApplicationContextAware) {
-					((ApplicationContextAware) factory).setApplicationContext(applicationContext);
-				}
-				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(factory);
-				if (bw.isWritableProperty("localeResolver")) {
-					bw.setPropertyValue("localeResolver", resolver);
-				}
-				if (bw.isWritableProperty("definitionDAO")) {
-					bw.setPropertyValue("definitionDAO", createLocaleDefinitionDao(applicationContext, resolver));
-				}
-				return factory;
-			}
-			else {
-				return super.createDefinitionsFactory(applicationContext, resolver);
-			}
-		}
-
-		@Override
-		protected PreparerFactory createPreparerFactory(ApplicationContext context) {
-			if (preparerFactoryClass != null) {
-				return BeanUtils.instantiateClass(preparerFactoryClass);
-			}
-			else {
-				return super.createPreparerFactory(context);
-			}
-		}
-
-		@Override
-		protected LocaleResolver createLocaleResolver(ApplicationContext context) {
-			return new SpringLocaleResolver();
-		}
-
-		@Override
-		protected AttributeEvaluatorFactory createAttributeEvaluatorFactory(ApplicationContext context,
-				LocaleResolver resolver) {
-			AttributeEvaluator evaluator;
-			if (tilesElPresent && JspFactory.getDefaultFactory() != null) {
-				evaluator = new TilesElActivator().createEvaluator();
-			}
-			else {
-				evaluator = new DirectAttributeEvaluator();
-			}
-			return new BasicAttributeEvaluatorFactory(evaluator);
-		}
-	}
-
-
-	private static class SpringCompleteAutoloadTilesInitializer extends CompleteAutoloadTilesInitializer {
+    private static class SpringCompleteAutoloadTilesInitializer extends CompleteAutoloadTilesInitializer {
 
 		@Override
 		protected AbstractTilesContainerFactory createContainerFactory(ApplicationContext context) {
@@ -402,9 +305,9 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	}
 
 
-	private class TilesElActivator {
+	static class TilesElActivator {
 
-		public AttributeEvaluator createEvaluator() {
+		public AttributeEvaluator createEvaluator(final ServletContext servletContext) {
 			ELAttributeEvaluator evaluator = new ELAttributeEvaluator();
 			evaluator.setExpressionFactory(
 					JspFactory.getDefaultFactory().getJspApplicationContext(servletContext).getExpressionFactory());
