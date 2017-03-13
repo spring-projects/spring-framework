@@ -43,8 +43,9 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A subclass of {@link HandlerMethod} that can resolve method arguments from
- * a {@link ServerWebExchange} and use that to invoke the underlying method.
+ * Extension of {@link HandlerMethod} that invokes the underlying method with
+ * argument values resolved from the current HTTP request through a list of
+ * {@link HandlerMethodArgumentResolver}.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -94,7 +95,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Return the conifgured argument resolvers.
+	 * Return the configured argument resolvers.
 	 */
 	public List<HandlerMethodArgumentResolver> getResolvers() {
 		return this.resolvers;

@@ -409,7 +409,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 
 	private SyncInvocableHandlerMethod createBinderMethod(Object bean, Method method) {
 		SyncInvocableHandlerMethod invocable = new SyncInvocableHandlerMethod(bean, method);
-		invocable.setSyncArgumentResolvers(getInitBinderArgumentResolvers());
+		invocable.setArgumentResolvers(getInitBinderArgumentResolvers());
 		return invocable;
 	}
 
