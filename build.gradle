@@ -72,7 +72,7 @@ configure(allprojects) { project ->
 	ext.junitPlatformVersion   = '1.0.0-M3'
 	ext.kotlinVersion          = "1.1.0"  // also change kotlin-gradle-plugin version when upgrading
 	ext.log4jVersion           = '2.8.1'
-	ext.nettyVersion           = "4.1.8.Final"
+	ext.nettyVersion           = "4.1.9.Final"
 	ext.okhttp3Version         = "3.6.0"
 	ext.poiVersion             = "3.15"
 	ext.protobufVersion        = "3.2.0"
@@ -87,7 +87,7 @@ configure(allprojects) { project ->
 	ext.slf4jVersion           = "1.7.24"
 	ext.snakeyamlVersion       = "1.18"
 	ext.snifferVersion         = "1.15"
-	ext.testngVersion          = "6.10"
+	ext.testngVersion          = "6.11"
 	ext.tiles3Version          = "3.0.7"
 	ext.tomcatVersion          = "8.5.12"
 	ext.tyrusVersion           = "1.13.1"
