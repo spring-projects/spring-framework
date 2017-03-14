@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,14 +52,16 @@ public interface TransactionSynchronization extends Flushable {
 	 * Supposed to unbind resources from TransactionSynchronizationManager if managing any.
 	 * @see TransactionSynchronizationManager#unbindResource
 	 */
-	void suspend();
+	default void suspend() {
+	}
 
 	/**
 	 * Resume this synchronization.
 	 * Supposed to rebind resources to TransactionSynchronizationManager if managing any.
 	 * @see TransactionSynchronizationManager#bindResource
 	 */
-	void resume();
+	default void resume() {
+	}
 
 	/**
 	 * Flush the underlying session to the datastore, if applicable:
@@ -67,7 +69,8 @@ public interface TransactionSynchronization extends Flushable {
 	 * @see org.springframework.transaction.TransactionStatus#flush()
 	 */
 	@Override
-	void flush();
+	default void flush() {
+	}
 
 	/**
 	 * Invoked before transaction commit (before "beforeCompletion").
@@ -83,7 +86,8 @@ public interface TransactionSynchronization extends Flushable {
 	 * (note: do not throw TransactionException subclasses here!)
 	 * @see #beforeCompletion
 	 */
-	void beforeCommit(boolean readOnly);
+	default void beforeCommit(boolean readOnly) {
+	}
 
 	/**
 	 * Invoked before transaction commit/rollback.
@@ -96,7 +100,8 @@ public interface TransactionSynchronization extends Flushable {
 	 * @see #beforeCommit
 	 * @see #afterCompletion
 	 */
-	void beforeCompletion();
+	default void beforeCompletion() {
+	}
 
 	/**
 	 * Invoked after transaction commit. Can perform further operations right
@@ -113,7 +118,8 @@ public interface TransactionSynchronization extends Flushable {
 	 * @throws RuntimeException in case of errors; will be <b>propagated to the caller</b>
 	 * (note: do not throw TransactionException subclasses here!)
 	 */
-	void afterCommit();
+	default void afterCommit() {
+	}
 
 	/**
 	 * Invoked after transaction commit/rollback.
@@ -133,6 +139,7 @@ public interface TransactionSynchronization extends Flushable {
 	 * @see #STATUS_UNKNOWN
 	 * @see #beforeCompletion
 	 */
-	void afterCompletion(int status);
+	default void afterCompletion(int status) {
+	}
 
 }
