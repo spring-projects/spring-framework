@@ -53,7 +53,11 @@ import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link ResourceWebHandler}.
@@ -200,7 +204,7 @@ public class ResourceWebHandlerTests {
 		ServerWebExchange exchange = createExchange("js/foo.js");
 		this.handler.handle(exchange).blockMillis(5000);
 
-		assertEquals(MediaType.parseMediaType("text/javascript"), this.response.getHeaders().getContentType());
+		assertEquals(MediaType.parseMediaType("application/javascript"), this.response.getHeaders().getContentType());
 		assertResponseBody("function foo() { console.log(\"hello world\"); }");
 	}
 
@@ -209,7 +213,7 @@ public class ResourceWebHandlerTests {
 		ServerWebExchange exchange = createExchange("js/baz.js");
 		this.handler.handle(exchange).blockMillis(5000);
 
-		assertEquals(MediaType.parseMediaType("text/javascript"), this.response.getHeaders().getContentType());
+		assertEquals(MediaType.parseMediaType("application/javascript"), this.response.getHeaders().getContentType());
 		assertResponseBody("function foo() { console.log(\"hello world\"); }");
 	}
 

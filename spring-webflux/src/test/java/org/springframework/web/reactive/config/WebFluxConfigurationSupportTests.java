@@ -65,8 +65,16 @@ import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewRes
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.*;
-import static org.springframework.http.MediaType.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
+import static org.springframework.http.MediaType.APPLICATION_XML;
+import static org.springframework.http.MediaType.IMAGE_PNG;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 /**
  * Unit tests for {@link WebFluxConfigurationSupport}.
@@ -105,7 +113,7 @@ public class WebFluxConfigurationSupportTests {
 		List<MediaType> list = Collections.singletonList(MediaType.APPLICATION_JSON);
 		assertEquals(list, resolver.resolveMediaTypes(createExchange()));
 
-		this.request = MockServerHttpRequest.get("/path.xml").build();
+		this.request = MockServerHttpRequest.get("/path.foobar").build();
 		assertEquals(Collections.emptyList(), resolver.resolveMediaTypes(createExchange()));
 	}
 
