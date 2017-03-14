@@ -16,7 +16,6 @@
 
 package org.springframework.http.server.reactive;
 
-import java.util.Map;
 import java.util.function.BiFunction;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -24,7 +23,10 @@ import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.server.HttpServerRequest;
 import reactor.ipc.netty.http.server.HttpServerResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.util.Assert;
 
 /**
  * Adapt {@link HttpHandler} to the Reactor Netty channel handling function.
@@ -32,18 +34,19 @@ import org.springframework.core.io.buffer.NettyDataBufferFactory;
  * @author Stephane Maldini
  * @since 5.0
  */
-public class ReactorHttpHandlerAdapter extends HttpHandlerAdapterSupport
+public class ReactorHttpHandlerAdapter
 		implements BiFunction<HttpServerRequest, HttpServerResponse, Mono<Void>> {
+
+	private static final Log logger = LogFactory.getLog(ReactorHttpHandlerAdapter.class);
+
+
+	private final HttpHandler httpHandler;
 
 
 	public ReactorHttpHandlerAdapter(HttpHandler httpHandler) {
-		super(httpHandler);
+		Assert.notNull(httpHandler, "HttpHandler must not be null");
+		this.httpHandler = httpHandler;
 	}
-
-	public ReactorHttpHandlerAdapter(Map<String, HttpHandler> handlerMap) {
-		super(handlerMap);
-	}
-
 
 	@Override
 	public Mono<Void> apply(HttpServerRequest request, HttpServerResponse response) {
@@ -52,7 +55,7 @@ public class ReactorHttpHandlerAdapter extends HttpHandlerAdapterSupport
 		ReactorServerHttpRequest req = new ReactorServerHttpRequest(request, bufferFactory);
 		ReactorServerHttpResponse resp = new ReactorServerHttpResponse(response, bufferFactory);
 
-		return getHttpHandler().handle(req, resp)
+		return this.httpHandler.handle(req, resp)
 				.otherwise(ex -> {
 					logger.error("Could not complete request", ex);
 					response.status(HttpResponseStatus.INTERNAL_SERVER_ERROR);

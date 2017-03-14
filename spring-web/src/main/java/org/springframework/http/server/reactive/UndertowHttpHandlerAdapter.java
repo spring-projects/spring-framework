@@ -16,9 +16,10 @@
 
 package org.springframework.http.server.reactive;
 
-import java.util.Map;
-
 import io.undertow.server.HttpServerExchange;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -34,18 +35,19 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 5.0
  */
-public class UndertowHttpHandlerAdapter extends HttpHandlerAdapterSupport
-		implements io.undertow.server.HttpHandler {
+public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandler {
+
+	private static final Log logger = LogFactory.getLog(ReactorHttpHandlerAdapter.class);
+
+
+	private final HttpHandler httpHandler;
 
 	private DataBufferFactory bufferFactory = new DefaultDataBufferFactory(false);
 
 
 	public UndertowHttpHandlerAdapter(HttpHandler httpHandler) {
-		super(httpHandler);
-	}
-
-	public UndertowHttpHandlerAdapter(Map<String, HttpHandler> handlerMap) {
-		super(handlerMap);
+		Assert.notNull(httpHandler, "HttpHandler must not be null");
+		this.httpHandler = httpHandler;
 	}
 
 
@@ -66,7 +68,7 @@ public class UndertowHttpHandlerAdapter extends HttpHandlerAdapterSupport
 		ServerHttpResponse response = new UndertowServerHttpResponse(exchange, getDataBufferFactory());
 
 		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(exchange);
-		getHttpHandler().handle(request, response).subscribe(resultSubscriber);
+		this.httpHandler.handle(request, response).subscribe(resultSubscriber);
 	}
 
 
