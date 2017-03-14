@@ -16,12 +16,15 @@
 
 package org.springframework.http.server.reactive;
 
+import java.util.Map;
+
 import reactor.core.publisher.Mono;
 
 /**
  * Contract for handling HTTP requests in a non-blocking way.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public interface HttpHandler {
@@ -33,5 +36,15 @@ public interface HttpHandler {
 	 * @return {@code Mono<Void>} to indicate when request handling is complete
 	 */
 	Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response);
+
+	/**
+	 * Return a composite {@link HttpHandler} that maps multiple
+	 * {@link HttpHandler}s each mapped to a distinct context path.
+	 * @param handlerMap the source handler map
+	 * @return a composite {@link HttpHandler}
+	 */
+	static HttpHandler of(Map<String, ? extends HttpHandler> handlerMap) {
+		return new CompositeHttpHandler(handlerMap);
+	}
 
 }

@@ -17,22 +17,22 @@
 package org.springframework.http.server.reactive;
 
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.reactivestreams.Publisher;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.util.Assert;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import io.reactivex.netty.protocol.http.server.RequestHandler;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import rx.Observable;
 import rx.RxReactiveStreams;
-
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
 
 /**
  * Adapt {@link HttpHandler} to the RxNetty {@link RequestHandler}.
@@ -40,16 +40,17 @@ import org.springframework.core.io.buffer.NettyDataBufferFactory;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class RxNettyHttpHandlerAdapter extends HttpHandlerAdapterSupport
-		implements RequestHandler<ByteBuf, ByteBuf> {
+public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBuf> {
+
+	private static final Log logger = LogFactory.getLog(ReactorHttpHandlerAdapter.class);
+
+
+	private final HttpHandler httpHandler;
 
 
 	public RxNettyHttpHandlerAdapter(HttpHandler httpHandler) {
-		super(httpHandler);
-	}
-
-	public RxNettyHttpHandlerAdapter(Map<String, HttpHandler> handlerMap) {
-		super(handlerMap);
+		Assert.notNull(httpHandler, "HttpHandler must not be null");
+		this.httpHandler = httpHandler;
 	}
 
 
@@ -64,7 +65,7 @@ public class RxNettyHttpHandlerAdapter extends HttpHandlerAdapterSupport
 		RxNettyServerHttpRequest request = new RxNettyServerHttpRequest(nativeRequest, bufferFactory, remoteAddress);
 		RxNettyServerHttpResponse response = new RxNettyServerHttpResponse(nativeResponse, bufferFactory);
 
-		Publisher<Void> result = getHttpHandler().handle(request, response)
+		Publisher<Void> result = this.httpHandler.handle(request, response)
 				.otherwise(ex -> {
 					logger.error("Could not complete request", ex);
 					nativeResponse.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);

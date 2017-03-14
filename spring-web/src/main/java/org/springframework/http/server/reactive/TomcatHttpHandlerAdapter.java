@@ -18,7 +18,6 @@ package org.springframework.http.server.reactive;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import javax.servlet.AsyncContext;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -43,10 +42,6 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 	public TomcatHttpHandlerAdapter(HttpHandler httpHandler) {
 		super(httpHandler);
-	}
-
-	public TomcatHttpHandlerAdapter(Map<String, HttpHandler> handlerMap) {
-		super(handlerMap);
 	}
 
 
