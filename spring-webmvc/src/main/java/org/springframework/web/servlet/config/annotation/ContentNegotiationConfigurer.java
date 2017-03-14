@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.accept.ContentNegotiationStrategy;
@@ -76,9 +77,8 @@ import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
  * type such as "application/json".
  *
  * <p>The path extension strategy will also use {@link ServletContext#getMimeType}
- * and the Java Activation framework (JAF), if available, to resolve a path
- * extension to a MediaType. You may however {@link #useJaf suppress} the use
- * of JAF.
+ * and the {@link MediaTypeFactory} to resolve a path
+ * extension to a MediaType.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -119,8 +119,8 @@ public class ContentNegotiationConfigurer {
 	 * (see Spring Framework reference documentation for more details on RFD
 	 * attack protection).
 	 * <p>The path extension strategy will also try to use
-	 * {@link ServletContext#getMimeType} and JAF (if present) to resolve path
-	 * extensions. To change this behavior see the {@link #useJaf} property.
+	 * {@link ServletContext#getMimeType} and {@link MediaTypeFactory} to resolve path
+	 * extensions.
 	 * @param extension the key to look up
 	 * @param mediaType the media type
 	 * @see #mediaTypes(Map)
@@ -166,14 +166,10 @@ public class ContentNegotiationConfigurer {
 	}
 
 	/**
-	 * When {@link #favorPathExtension} is set, this property determines whether
-	 * to allow use of JAF (Java Activation Framework) to resolve a path
-	 * extension to a specific MediaType.
-	 * <p>By default this is not set in which case
-	 * {@code PathExtensionContentNegotiationStrategy} will use JAF if available.
+	 * @deprecated as 5.0, in favor of {@link MediaTypeFactory}, which has no JAF dependency.
 	 */
+	@Deprecated
 	public ContentNegotiationConfigurer useJaf(boolean useJaf) {
-		this.factory.setUseJaf(useJaf);
 		return this;
 	}
 

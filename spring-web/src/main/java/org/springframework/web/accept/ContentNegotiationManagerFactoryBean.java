@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import javax.servlet.ServletContext;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.ServletContextAware;
@@ -81,8 +82,7 @@ import org.springframework.web.context.ServletContextAware;
  * "application/json".
  *
  * <p>The path extension strategy will also use {@link ServletContext#getMimeType}
- * and the Java Activation framework (JAF), if available, to resolve a path
- * extension to a MediaType. You may {@link #setUseJaf suppress} the use of JAF.
+ * and {@link MediaTypeFactory} to resolve a path extension to a MediaType.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -99,8 +99,6 @@ public class ContentNegotiationManagerFactoryBean
 	private Map<String, MediaType> mediaTypes = new HashMap<>();
 
 	private boolean ignoreUnknownPathExtensions = true;
-
-	private Boolean useJaf;
 
 	private String parameterName = "format";
 
@@ -130,8 +128,8 @@ public class ContentNegotiationManagerFactoryBean
 	 * (see Spring Framework reference documentation for more details on RFD
 	 * attack protection).
 	 * <p>The path extension strategy will also try to use
-	 * {@link ServletContext#getMimeType} and JAF (if present) to resolve path
-	 * extensions. To change this behavior see the {@link #useJaf} property.
+	 * {@link ServletContext#getMimeType} and
+	 * {@link org.springframework.http.MediaTypeFactory} to resolve path extensions.
 	 * @param mediaTypes media type mappings
 	 * @see #addMediaType(String, MediaType)
 	 * @see #addMediaTypes(Map)
@@ -177,18 +175,10 @@ public class ContentNegotiationManagerFactoryBean
 	}
 
 	/**
-	 * When {@link #setFavorPathExtension favorPathExtension} is set, this
-	 * property determines whether to allow use of JAF (Java Activation Framework)
-	 * to resolve a path extension to a specific MediaType.
-	 * <p>By default this is not set in which case
-	 * {@code PathExtensionContentNegotiationStrategy} will use JAF if available.
+	 * @deprecated as 5.0, in favor of {@link MediaTypeFactory}, which has no JAF dependency.
 	 */
+	@Deprecated
 	public void setUseJaf(boolean useJaf) {
-		this.useJaf = useJaf;
-	}
-
-	private boolean isUseJafTurnedOff() {
-		return (this.useJaf != null && !this.useJaf);
 	}
 
 	/**
@@ -254,7 +244,7 @@ public class ContentNegotiationManagerFactoryBean
 
 		if (this.favorPathExtension) {
 			PathExtensionContentNegotiationStrategy strategy;
-			if (this.servletContext != null && !isUseJafTurnedOff()) {
+			if (this.servletContext != null) {
 				strategy = new ServletPathExtensionContentNegotiationStrategy(
 						this.servletContext, this.mediaTypes);
 			}
@@ -262,9 +252,6 @@ public class ContentNegotiationManagerFactoryBean
 				strategy = new PathExtensionContentNegotiationStrategy(this.mediaTypes);
 			}
 			strategy.setIgnoreUnknownExtensions(this.ignoreUnknownPathExtensions);
-			if (this.useJaf != null) {
-				strategy.setUseJaf(this.useJaf);
-			}
 			strategies.add(strategy);
 		}
 
