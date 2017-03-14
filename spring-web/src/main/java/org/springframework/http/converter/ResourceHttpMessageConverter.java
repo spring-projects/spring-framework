@@ -27,16 +27,14 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.StreamUtils;
 
 /**
  * Implementation of {@link HttpMessageConverter} that can read/write {@link Resource Resources}
  * and supports byte range requests.
  *
- * <p>By default, this converter can read all media types. The Java Activation Framework (JAF) -
- * if available - is used to determine the {@code Content-Type} of written resources.
- * If JAF is not available, {@code application/octet-stream} is used.
+ * <p>By default, this converter can read all media types. The {@link MediaTypeFactory} is used
+ * to determine the {@code Content-Type} of written resources.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -44,9 +42,6 @@ import org.springframework.util.StreamUtils;
  * @since 3.0.2
  */
 public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<Resource> {
-
-	private static final boolean jafPresent = ClassUtils.isPresent(
-			"javax.activation.FileTypeMap", ResourceHttpMessageConverter.class.getClassLoader());
 
 	private final boolean supportsReadStreaming;
 
@@ -107,12 +102,8 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 
 	@Override
 	protected MediaType getDefaultContentType(Resource resource) {
-		if (jafPresent) {
-			return MediaTypeFactory.getMediaType(resource);
-		}
-		else {
-			return MediaType.APPLICATION_OCTET_STREAM;
-		}
+		MediaType mediaType = MediaTypeFactory.getMediaType(resource);
+		return mediaType != null ? mediaType : MediaType.APPLICATION_OCTET_STREAM;
 	}
 
 	@Override

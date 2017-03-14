@@ -24,6 +24,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -31,7 +32,6 @@ import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
@@ -43,9 +43,6 @@ import org.springframework.util.StreamUtils;
  * @since 4.3
  */
 public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
-
-	private static final boolean jafPresent = ClassUtils.isPresent(
-			"javax.activation.FileTypeMap", ResourceHttpMessageConverter.class.getClassLoader());
 
 	public ResourceRegionHttpMessageConverter() {
 		super(MediaType.ALL);
@@ -80,18 +77,24 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	@Override
 	@SuppressWarnings("unchecked")
 	protected MediaType getDefaultContentType(Object object) {
-		if (jafPresent) {
-			if(object instanceof ResourceRegion) {
-				return MediaTypeFactory.getMediaType(((ResourceRegion) object).getResource());
-			}
-			else {
-				Collection<ResourceRegion> regions = (Collection<ResourceRegion>) object;
-				if(regions.size() > 0) {
-					return MediaTypeFactory.getMediaType(regions.iterator().next().getResource());
-				}
+		Resource resource = null;
+		if (object instanceof ResourceRegion) {
+			resource = ((ResourceRegion) object).getResource();
+		}
+		else {
+			Collection<ResourceRegion> regions = (Collection<ResourceRegion>) object;
+			if (regions.size() > 0) {
+				resource = regions.iterator().next().getResource();
 			}
 		}
-		return MediaType.APPLICATION_OCTET_STREAM;
+		MediaType result = null;
+		if (resource != null) {
+			result = MediaTypeFactory.getMediaType(resource);
+		}
+		if (result == null) {
+			return MediaType.APPLICATION_OCTET_STREAM;
+		}
+		return result;
 	}
 
 	@Override
