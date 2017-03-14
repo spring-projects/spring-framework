@@ -29,6 +29,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -64,13 +65,15 @@ public class RequestHeaderMethodArgumentResolverTests {
 	private MethodParameter paramNamedValueMap;
 	private MethodParameter paramDate;
 	private MethodParameter paramInstant;
+	private MethodParameter paramMono;
 
 
 	@Before
 	public void setup() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
-		this.resolver = new RequestHeaderMethodArgumentResolver(context.getBeanFactory());
+		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
+		this.resolver = new RequestHeaderMethodArgumentResolver(context.getBeanFactory(), adapterRegistry);
 
 		this.request = MockServerHttpRequest.get("/").build();
 
@@ -87,6 +90,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 		this.paramNamedValueMap = new SynthesizingMethodParameter(method, 5);
 		this.paramDate = new SynthesizingMethodParameter(method, 6);
 		this.paramInstant = new SynthesizingMethodParameter(method, 7);
+		this.paramMono = new SynthesizingMethodParameter(method, 8);
 	}
 
 
@@ -95,6 +99,15 @@ public class RequestHeaderMethodArgumentResolverTests {
 		assertTrue("String parameter not supported", resolver.supportsParameter(paramNamedDefaultValueStringHeader));
 		assertTrue("String array parameter not supported", resolver.supportsParameter(paramNamedValueStringArray));
 		assertFalse("non-@RequestParam parameter supported", resolver.supportsParameter(paramNamedValueMap));
+		try {
+			this.resolver.supportsParameter(this.paramMono);
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			assertTrue("Unexpected error message:\n" + ex.getMessage(),
+					ex.getMessage().startsWith(
+							"RequestHeaderMethodArgumentResolver doesn't support reactive type wrapper"));
+		}
 	}
 
 	@Test
@@ -237,7 +250,8 @@ public class RequestHeaderMethodArgumentResolverTests {
 			@RequestHeader("${systemProperty}") String param5,
 			@RequestHeader("name") Map<?, ?> unsupported,
 			@RequestHeader("name") Date dateParam,
-			@RequestHeader("name") Instant instantParam) {
+			@RequestHeader("name") Instant instantParam,
+			@RequestHeader Mono<String> alsoNotSupported) {
 	}
 
 }

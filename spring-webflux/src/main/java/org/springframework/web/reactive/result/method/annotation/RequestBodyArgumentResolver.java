@@ -47,19 +47,7 @@ import org.springframework.web.server.ServerWebInputException;
 public class RequestBodyArgumentResolver extends AbstractMessageReaderArgumentResolver
 		implements HandlerMethodArgumentResolver {
 
-	/**
-	 * Constructor with {@link HttpMessageReader}'s and a {@link Validator}.
-	 * @param readers readers for de-serializing the request body with
-	 */
-	public RequestBodyArgumentResolver(List<HttpMessageReader<?>> readers) {
-		super(readers);
-	}
 
-	/**
-	 * Constructor that also accepts a {@link ReactiveAdapterRegistry}.
-	 * @param readers readers for de-serializing the request body with
-	 * @param registry for adapting to other reactive types from Flux and Mono
-	 */
 	public RequestBodyArgumentResolver(List<HttpMessageReader<?>> readers, ReactiveAdapterRegistry registry) {
 		super(readers, registry);
 	}

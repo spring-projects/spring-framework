@@ -19,10 +19,12 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -43,16 +45,22 @@ import org.springframework.web.server.ServerWebExchange;
  * @see WebSessionArgumentResolver
  * @see PrincipalArgumentResolver
  */
-public class ServerWebExchangeArgumentResolver implements SyncHandlerMethodArgumentResolver {
+public class ServerWebExchangeArgumentResolver extends HandlerMethodArgumentResolverSupport
+		implements SyncHandlerMethodArgumentResolver {
+
+
+	public ServerWebExchangeArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
+		super(adapterRegistry);
+	}
 
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		Class<?> paramType = parameter.getParameterType();
-		return (ServerWebExchange.class.isAssignableFrom(paramType) ||
-				ServerHttpRequest.class.isAssignableFrom(paramType) ||
-				ServerHttpResponse.class.isAssignableFrom(paramType) ||
-				HttpMethod.class == paramType);
+		return checkParamTypeNoReactiveWrapper(parameter,
+				type -> ServerWebExchange.class.isAssignableFrom(type) ||
+						ServerHttpRequest.class.isAssignableFrom(type) ||
+						ServerHttpResponse.class.isAssignableFrom(type) ||
+						HttpMethod.class == type);
 	}
 
 	@Override

@@ -40,6 +40,7 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -59,42 +60,24 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ModelAttributeMethodArgumentResolver implements HandlerMethodArgumentResolver {
-
-	private final ReactiveAdapterRegistry adapterRegistry;
+public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentResolverSupport
+		implements HandlerMethodArgumentResolver {
 
 	private final boolean useDefaultResolution;
 
 
 	/**
-	 * Class constructor.
-	 * @param registry for adapting to other reactive types from and to Mono
-	 */
-	public ModelAttributeMethodArgumentResolver(ReactiveAdapterRegistry registry) {
-		this(registry, false);
-	}
-
-	/**
 	 * Class constructor with a default resolution mode flag.
-	 * @param registry for adapting to other reactive types from and to Mono
+	 * @param adapterRegistry for adapting to other reactive types from and to Mono
 	 * @param useDefaultResolution if "true", non-simple method arguments and
 	 * return values are considered model attributes with or without a
 	 * {@code @ModelAttribute} annotation present.
 	 */
-	public ModelAttributeMethodArgumentResolver(ReactiveAdapterRegistry registry,
+	public ModelAttributeMethodArgumentResolver(ReactiveAdapterRegistry adapterRegistry,
 			boolean useDefaultResolution) {
 
-		Assert.notNull(registry, "'ReactiveAdapterRegistry' is required.");
+		super(adapterRegistry);
 		this.useDefaultResolution = useDefaultResolution;
-		this.adapterRegistry = registry;
-	}
-
-
-	/**
-	 * Return the configured {@link ReactiveAdapterRegistry}.
-	 */
-	public ReactiveAdapterRegistry getAdapterRegistry() {
-		return this.adapterRegistry;
 	}
 
 
@@ -103,16 +86,8 @@ public class ModelAttributeMethodArgumentResolver implements HandlerMethodArgume
 		if (parameter.hasParameterAnnotation(ModelAttribute.class)) {
 			return true;
 		}
-		if (this.useDefaultResolution) {
-			Class<?> clazz = parameter.getParameterType();
-			ReactiveAdapter adapter = getAdapterRegistry().getAdapter(clazz);
-			if (adapter != null) {
-				if (adapter.isNoValue() || adapter.isMultiValue()) {
-					return false;
-				}
-				clazz = parameter.nested().getNestedParameterType();
-			}
-			return !BeanUtils.isSimpleProperty(clazz);
+		else if (this.useDefaultResolution) {
+			return checkParamType(parameter, type -> !BeanUtils.isSimpleProperty(type));
 		}
 		return false;
 	}
@@ -124,6 +99,10 @@ public class ModelAttributeMethodArgumentResolver implements HandlerMethodArgume
 		ResolvableType type = ResolvableType.forMethodParameter(parameter);
 		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(type.resolve());
 		ResolvableType valueType = (adapter != null ? type.getGeneric(0) : type);
+
+		Assert.state(adapter == null || !adapter.isMultiValue(),
+				getClass().getSimpleName() + " doesn't support multi-value reactive type wrapper: " +
+						parameter.getGenericParameterType());
 
 		String name = getAttributeName(valueType, parameter);
 		Mono<?> valueMono = getAttributeMono(name, valueType, context.getModel());

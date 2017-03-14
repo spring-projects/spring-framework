@@ -23,8 +23,10 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
@@ -37,6 +39,7 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
 
 /**
@@ -52,7 +55,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 
 	@Before
 	public void setup() throws Exception {
-		this.resolver = new RequestParamMapMethodArgumentResolver();
+		this.resolver = new RequestParamMapMethodArgumentResolver(new ReactiveAdapterRegistry());
 	}
 
 
@@ -69,6 +72,17 @@ public class RequestParamMapMethodArgumentResolverTests {
 
 		param = this.testMethod.annotNotPresent(RequestParam.class).arg(Map.class);
 		assertFalse(this.resolver.supportsParameter(param));
+
+		try {
+			param = this.testMethod.annot(requestParam()).arg(Mono.class, Map.class);
+			this.resolver.supportsParameter(param);
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			assertTrue("Unexpected error message:\n" + ex.getMessage(),
+					ex.getMessage().startsWith(
+							"RequestParamMapMethodArgumentResolver doesn't support reactive type wrapper"));
+		}
 	}
 
 	@Test
@@ -120,7 +134,8 @@ public class RequestParamMapMethodArgumentResolverTests {
 			@RequestParam Map<?, ?> param1,
 			@RequestParam MultiValueMap<?, ?> param2,
 			@RequestParam("name") Map<?, ?> param3,
-			Map<?, ?> param4) {
+			Map<?, ?> param4,
+			@RequestParam Mono<Map<?, ?>> paramMono) {
 	}
 
 }

@@ -27,6 +27,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -44,6 +45,7 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link PathVariableMethodArgumentResolver}.
@@ -58,17 +60,15 @@ public class PathVariableMethodArgumentResolverTests {
 	private ServerWebExchange exchange;
 
 	private MethodParameter paramNamedString;
-
 	private MethodParameter paramString;
-
 	private MethodParameter paramNotRequired;
-
 	private MethodParameter paramOptional;
+	private MethodParameter paramMono;
 
 
 	@Before
 	public void setup() throws Exception {
-		this.resolver = new PathVariableMethodArgumentResolver(null);
+		this.resolver = new PathVariableMethodArgumentResolver(null, new ReactiveAdapterRegistry());
 
 		ServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
@@ -78,6 +78,7 @@ public class PathVariableMethodArgumentResolverTests {
 		paramString = new SynthesizingMethodParameter(method, 1);
 		paramNotRequired = new SynthesizingMethodParameter(method, 2);
 		paramOptional = new SynthesizingMethodParameter(method, 3);
+		paramMono = new SynthesizingMethodParameter(method, 4);
 	}
 
 
@@ -85,6 +86,15 @@ public class PathVariableMethodArgumentResolverTests {
 	public void supportsParameter() {
 		assertTrue(this.resolver.supportsParameter(this.paramNamedString));
 		assertFalse(this.resolver.supportsParameter(this.paramString));
+		try {
+			this.resolver.supportsParameter(this.paramMono);
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			assertTrue("Unexpected error message:\n" + ex.getMessage(),
+					ex.getMessage().startsWith(
+							"PathVariableMethodArgumentResolver doesn't support reactive type wrapper"));
+		}
 	}
 
 	@Test
@@ -161,10 +171,13 @@ public class PathVariableMethodArgumentResolverTests {
 	}
 
 
-	@SuppressWarnings("unused")
-	public void handle(@PathVariable(value = "name") String param1, String param2,
+	@SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
+	public void handle(
+			@PathVariable(value = "name") String param1,
+			String param2,
 			@PathVariable(name = "name", required = false) String param3,
-			@PathVariable("name") Optional<String> param4) {
+			@PathVariable("name") Optional<String> param4,
+			@PathVariable Mono<String> param5) {
 	}
 
 }

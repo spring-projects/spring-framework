@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 
@@ -26,12 +27,14 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.method.MvcAnnotationPredicates;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
@@ -43,6 +46,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
 
@@ -63,7 +67,8 @@ public class RequestParamMethodArgumentResolverTests {
 	@Before
 	public void setup() throws Exception {
 
-		this.resolver = new RequestParamMethodArgumentResolver(null, true);
+		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
+		this.resolver = new RequestParamMethodArgumentResolver(null, adapterRegistry, true);
 
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultFormattingConversionService());
@@ -73,7 +78,6 @@ public class RequestParamMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() {
-		this.resolver = new RequestParamMethodArgumentResolver(null, true);
 
 		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
 		assertTrue(this.resolver.supportsParameter(param));
@@ -96,9 +100,40 @@ public class RequestParamMethodArgumentResolverTests {
 		param = this.testMethod.annot(requestParam().notRequired()).arg(String.class);
 		assertTrue(this.resolver.supportsParameter(param));
 
-		param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
-		this.resolver = new RequestParamMethodArgumentResolver(null, false);
+	}
+
+	@Test
+	public void doesNotSupportParameterWithDefaultResolutionTurnedOff() {
+		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
+		this.resolver = new RequestParamMethodArgumentResolver(null, adapterRegistry, false);
+
+		MethodParameter param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
 		assertFalse(this.resolver.supportsParameter(param));
+	}
+
+	@Test
+	public void doesNotSupportReactiveWrapper() {
+		MethodParameter param;
+		try {
+			param = this.testMethod.annot(requestParam()).arg(Mono.class, String.class);
+			this.resolver.supportsParameter(param);
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			assertTrue("Unexpected error message:\n" + ex.getMessage(),
+					ex.getMessage().startsWith(
+							"RequestParamMethodArgumentResolver doesn't support reactive type wrapper"));
+		}
+		try {
+			param = this.testMethod.annotNotPresent(RequestParam.class).arg(Mono.class, String.class);
+			this.resolver.supportsParameter(param);
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			assertTrue("Unexpected error message:\n" + ex.getMessage(),
+					ex.getMessage().startsWith(
+							"RequestParamMethodArgumentResolver doesn't support reactive type wrapper"));
+		}
 	}
 
 	@Test
@@ -208,7 +243,7 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 	private Object resolve(MethodParameter parameter, ServerWebExchange exchange) {
-		return this.resolver.resolveArgument(parameter, this.bindContext, exchange).blockMillis(0);
+		return this.resolver.resolveArgument(parameter, this.bindContext, exchange).block(Duration.ZERO);
 	}
 
 
@@ -219,6 +254,7 @@ public class RequestParamMethodArgumentResolverTests {
 			@RequestParam("name") Map<?, ?> param3,
 			@RequestParam Map<?, ?> param4,
 			String stringNotAnnot,
+			Mono<String> monoStringNotAnnot,
 			@RequestParam("name") String paramRequired,
 			@RequestParam(name = "name", required = false) String paramNotRequired,
 			@RequestParam("name") Optional<Integer> paramOptional,

@@ -28,6 +28,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -44,8 +45,14 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link SessionAttributeMethodArgumentResolver}.
@@ -67,7 +74,8 @@ public class SessionAttributeMethodArgumentResolverTests {
 	public void setup() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
-		this.resolver = new SessionAttributeMethodArgumentResolver(context.getBeanFactory());
+		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
+		this.resolver = new SessionAttributeMethodArgumentResolver(context.getBeanFactory(), adapterRegistry);
 
 		this.session = mock(WebSession.class);
 		WebSessionManager sessionManager = new MockWebSessionManager(this.session);

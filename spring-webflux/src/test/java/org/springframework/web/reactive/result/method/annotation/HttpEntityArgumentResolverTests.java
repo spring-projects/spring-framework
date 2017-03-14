@@ -34,6 +34,7 @@ import rx.RxReactiveStreams;
 import rx.Single;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.HttpEntity;
@@ -44,14 +45,19 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.method.ResolvableMethod;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
 
 /**
  * Unit tests for {@link HttpEntityArgumentResolver}.When adding a test also
@@ -78,7 +84,7 @@ public class HttpEntityArgumentResolverTests {
 	private HttpEntityArgumentResolver createResolver() {
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
 		readers.add(new DecoderHttpMessageReader<>(new StringDecoder()));
-		return new HttpEntityArgumentResolver(readers);
+		return new HttpEntityArgumentResolver(readers, new ReactiveAdapterRegistry());
 	}
 
 
@@ -105,6 +111,15 @@ public class HttpEntityArgumentResolverTests {
 	public void doesNotSupport() throws Exception {
 		assertFalse(this.resolver.supportsParameter(this.testMethod.arg(Mono.class, String.class)));
 		assertFalse(this.resolver.supportsParameter(this.testMethod.arg(String.class)));
+		try {
+			this.resolver.supportsParameter(this.testMethod.arg(Mono.class, httpEntityType(String.class)));
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			assertTrue("Unexpected error message:\n" + ex.getMessage(),
+					ex.getMessage().startsWith(
+							"HttpEntityArgumentResolver doesn't support reactive type wrapper"));
+		}
 	}
 
 	@Test
@@ -348,6 +363,7 @@ public class HttpEntityArgumentResolverTests {
 			HttpEntity<io.reactivex.Observable<String>> rxJava2ObservableBody,
 			HttpEntity<Flowable<String>> flowableBody,
 			HttpEntity<CompletableFuture<String>> completableFutureBody,
-			RequestEntity<String> requestEntity) {}
+			RequestEntity<String> requestEntity,
+			Mono<HttpEntity<String>> httpEntityMono) {}
 
 }

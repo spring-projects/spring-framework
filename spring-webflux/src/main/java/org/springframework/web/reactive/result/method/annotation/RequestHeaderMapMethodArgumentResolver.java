@@ -20,10 +20,12 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -40,14 +42,24 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  * @see RequestHeaderMethodArgumentResolver
  */
-public class RequestHeaderMapMethodArgumentResolver implements SyncHandlerMethodArgumentResolver {
+public class RequestHeaderMapMethodArgumentResolver extends HandlerMethodArgumentResolverSupport
+		implements SyncHandlerMethodArgumentResolver {
+
+
+	public RequestHeaderMapMethodArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
+		super(adapterRegistry);
+	}
 
 
 	@Override
-	public boolean supportsParameter(MethodParameter parameter) {
-		return (parameter.hasParameterAnnotation(RequestHeader.class) &&
-				Map.class.isAssignableFrom(parameter.getParameterType()));
+	public boolean supportsParameter(MethodParameter param) {
+		return checkAnnotatedParamNoReactiveWrapper(param, RequestHeader.class, this::allParams);
 	}
+
+	private boolean allParams(RequestHeader annotation, Class<?> type) {
+		return Map.class.isAssignableFrom(type);
+	}
+
 
 	@Override
 	public Optional<Object> resolveArgumentValue(MethodParameter methodParameter,

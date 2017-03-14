@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
@@ -112,7 +113,8 @@ public class InitBinderBindingContextTests {
 	@Test
 	public void createBinderTypeConversion() throws Exception {
 		this.request = MockServerHttpRequest.get("/path?requestParam=22").build();
-		this.argumentResolvers.add(new RequestParamMethodArgumentResolver(null, false));
+		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
+		this.argumentResolvers.add(new RequestParamMethodArgumentResolver(null, adapterRegistry, false));
 
 		BindingContext context = createBindingContext("initBinderTypeConversion", WebDataBinder.class, int.class);
 		WebDataBinder dataBinder = context.createDataBinder(createExchange(), null, "foo");

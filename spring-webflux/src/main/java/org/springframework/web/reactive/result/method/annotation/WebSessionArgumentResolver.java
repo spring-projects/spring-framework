@@ -19,8 +19,11 @@ package org.springframework.web.reactive.result.method.annotation;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.util.Assert;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 
@@ -31,26 +34,26 @@ import org.springframework.web.server.WebSession;
  * @since 5.0
  * @see ServerWebExchangeArgumentResolver
  */
-public class WebSessionArgumentResolver implements HandlerMethodArgumentResolver {
+public class WebSessionArgumentResolver extends HandlerMethodArgumentResolverSupport
+		implements HandlerMethodArgumentResolver {
+
+
+	public WebSessionArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
+		super(adapterRegistry);
+	}
+
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return (WebSession.class.isAssignableFrom(parameter.getParameterType()));
+		return checkParamTypeNoReactiveWrapper(parameter, WebSession.class::isAssignableFrom);
 	}
 
 	@Override
 	public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext context,
 			ServerWebExchange exchange) {
 
-		Class<?> paramType = parameter.getParameterType();
-		if (WebSession.class.isAssignableFrom(paramType)) {
-			return exchange.getSession().cast(Object.class);
-		}
-		else {
-			// should never happen...
-			throw new IllegalArgumentException(
-					"Unknown parameter type: " + paramType + " in method: " + parameter.getMethod());
-		}
+		Assert.isAssignable(WebSession.class, parameter.getParameterType());
+		return exchange.getSession().cast(Object.class);
 	}
 
 }

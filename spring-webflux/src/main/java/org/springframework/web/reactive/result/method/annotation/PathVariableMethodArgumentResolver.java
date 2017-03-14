@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -52,21 +53,26 @@ import org.springframework.web.server.ServerWebExchange;
 public class PathVariableMethodArgumentResolver extends AbstractNamedValueSyncArgumentResolver {
 
 
-	public PathVariableMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
-		super(beanFactory);
+	/**
+	 * @param beanFactory a bean factory to use for resolving  ${...}
+	 * placeholder and #{...} SpEL expressions in default values;
+	 * or {@code null} if default values are not expected to contain expressions
+	 * @param adapterRegistry for checking reactive type wrappers
+	 */
+	public PathVariableMethodArgumentResolver(ConfigurableBeanFactory beanFactory,
+			ReactiveAdapterRegistry adapterRegistry) {
+
+		super(beanFactory, adapterRegistry);
 	}
 
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		if (!parameter.hasParameterAnnotation(PathVariable.class)) {
-			return false;
-		}
-		if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
-			String paramName = parameter.getParameterAnnotation(PathVariable.class).value();
-			return StringUtils.hasText(paramName);
-		}
-		return true;
+		return checkAnnotatedParamNoReactiveWrapper(parameter, PathVariable.class, this::singlePathVariable);
+	}
+
+	private boolean singlePathVariable(PathVariable pathVariable, Class<?> type) {
+		return !Map.class.isAssignableFrom(type) || StringUtils.hasText(pathVariable.name());
 	}
 
 	@Override

@@ -21,6 +21,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -40,15 +41,18 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueSyn
 	 * @param beanFactory a bean factory to use for resolving  ${...}
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to contain expressions
+	 * @param adapterRegistry for checking reactive type wrappers
 	 */
-	public ExpressionValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
-		super(beanFactory);
+	public ExpressionValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory,
+			ReactiveAdapterRegistry adapterRegistry) {
+
+		super(beanFactory, adapterRegistry);
 	}
 
 
 	@Override
-	public boolean supportsParameter(MethodParameter parameter) {
-		return parameter.hasParameterAnnotation(Value.class);
+	public boolean supportsParameter(MethodParameter param) {
+		return checkAnnotatedParamNoReactiveWrapper(param, Value.class, (annot, type) -> true);
 	}
 
 	@Override

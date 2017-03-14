@@ -21,8 +21,11 @@ import java.security.Principal;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.util.Assert;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -32,26 +35,26 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  * @see ServerWebExchangeArgumentResolver
  */
-public class PrincipalArgumentResolver implements HandlerMethodArgumentResolver {
+public class PrincipalArgumentResolver extends HandlerMethodArgumentResolverSupport
+		implements HandlerMethodArgumentResolver {
+
+
+	public PrincipalArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
+		super(adapterRegistry);
+	}
+
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return (Principal.class.isAssignableFrom(parameter.getParameterType()));
+		return checkParamTypeNoReactiveWrapper(parameter, Principal.class::isAssignableFrom);
 	}
 
 	@Override
 	public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext context,
 			ServerWebExchange exchange) {
 
-		Class<?> paramType = parameter.getParameterType();
-		if (Principal.class.isAssignableFrom(paramType)) {
-			return exchange.getPrincipal().cast(Object.class);
-		}
-		else {
-			// should never happen...
-			throw new IllegalArgumentException(
-					"Unknown parameter type: " + paramType + " in method: " + parameter.getMethod());
-		}
+		Assert.isAssignable(Principal.class, parameter.getParameterType());
+		return exchange.getPrincipal().cast(Object.class);
 	}
 
 }

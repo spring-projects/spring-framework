@@ -25,9 +25,11 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -47,27 +49,43 @@ public class ExpressionValueMethodArgumentResolverTests {
 
 	private MethodParameter paramSystemProperty;
 	private MethodParameter paramNotSupported;
+	private MethodParameter paramAlsoNotSupported;
 
 
 	@Before
 	public void setup() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
-		this.resolver = new ExpressionValueMethodArgumentResolver(context.getBeanFactory());
+		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
+		this.resolver = new ExpressionValueMethodArgumentResolver(context.getBeanFactory(), adapterRegistry);
 
 		ServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
 
-		Method method = getClass().getMethod("params", int.class, String.class);
+		Method method = ReflectionUtils.findMethod(getClass(), "params", (Class<?>[]) null);
 		this.paramSystemProperty = new MethodParameter(method, 0);
 		this.paramNotSupported = new MethodParameter(method, 1);
+		this.paramAlsoNotSupported = new MethodParameter(method, 2);
 	}
 
 
 	@Test
 	public void supportsParameter() throws Exception {
 		assertTrue(this.resolver.supportsParameter(this.paramSystemProperty));
+	}
+
+	@Test
+	public void doesNotSupport() throws Exception {
 		assertFalse(this.resolver.supportsParameter(this.paramNotSupported));
+		try {
+			this.resolver.supportsParameter(this.paramAlsoNotSupported);
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			assertTrue("Unexpected error message:\n" + ex.getMessage(),
+					ex.getMessage().startsWith(
+							"ExpressionValueMethodArgumentResolver doesn't support reactive type wrapper"));
+		}
 	}
 
 	@Test
@@ -90,7 +108,10 @@ public class ExpressionValueMethodArgumentResolverTests {
 
 
 	@SuppressWarnings("unused")
-	public void params(@Value("#{systemProperties.systemProperty}") int param1, String notSupported) {
+	public void params(
+			@Value("#{systemProperties.systemProperty}") int param1,
+			String notSupported,
+			@Value("#{systemProperties.foo}") Mono<String> alsoNotSupported) {
 	}
 
 }

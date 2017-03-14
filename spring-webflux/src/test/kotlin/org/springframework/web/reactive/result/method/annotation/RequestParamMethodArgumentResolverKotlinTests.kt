@@ -3,6 +3,7 @@ package org.springframework.web.reactive.result.method.annotation
 import org.junit.Before
 import org.junit.Test
 import org.springframework.core.MethodParameter
+import org.springframework.core.ReactiveAdapterRegistry
 import org.springframework.core.annotation.SynthesizingMethodParameter
 import org.springframework.format.support.DefaultFormattingConversionService
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest
@@ -34,7 +35,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 
     @Before
     fun setup() {
-        this.resolver = RequestParamMethodArgumentResolver(null, true)
+        this.resolver = RequestParamMethodArgumentResolver(null, ReactiveAdapterRegistry(), true)
         this.request = MockServerHttpRequest.get("/").build()
         val initializer = ConfigurableWebBindingInitializer()
         initializer.conversionService = DefaultFormattingConversionService()

@@ -21,10 +21,12 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -38,16 +40,24 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  * @see PathVariableMethodArgumentResolver
  */
-public class PathVariableMapMethodArgumentResolver implements SyncHandlerMethodArgumentResolver {
+public class PathVariableMapMethodArgumentResolver extends HandlerMethodArgumentResolverSupport
+		implements SyncHandlerMethodArgumentResolver {
+
+
+	public PathVariableMapMethodArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
+		super(adapterRegistry);
+	}
 
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		PathVariable annotation = parameter.getParameterAnnotation(PathVariable.class);
-		return (annotation != null &&
-				Map.class.isAssignableFrom(parameter.getParameterType()) &&
-				!StringUtils.hasText(annotation.value()));
+		return checkAnnotatedParamNoReactiveWrapper(parameter, PathVariable.class, this::allVariables);
 	}
+
+	private boolean allVariables(PathVariable pathVariable, Class<?> type) {
+		return Map.class.isAssignableFrom(type) && !StringUtils.hasText(pathVariable.value());
+	}
+
 
 	@Override
 	public Optional<Object> resolveArgumentValue(MethodParameter methodParameter,

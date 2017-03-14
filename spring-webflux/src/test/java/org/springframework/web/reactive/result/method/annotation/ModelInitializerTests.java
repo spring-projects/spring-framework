@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -120,12 +121,15 @@ public class ModelInitializerTests {
 	private List<InvocableHandlerMethod> getAttributeMethods(Object controller) {
 		return MethodIntrospector
 				.selectMethods(controller.getClass(), ATTRIBUTE_METHODS).stream()
-				.map(method -> {
-					InvocableHandlerMethod invocable = new InvocableHandlerMethod(controller, method);
-					invocable.setArgumentResolvers(Collections.singletonList(new ModelArgumentResolver()));
-					return invocable;
-				})
+				.map(method -> toInvocable(controller, method))
 				.collect(Collectors.toList());
+	}
+
+	private InvocableHandlerMethod toInvocable(Object controller, Method method) {
+		ModelArgumentResolver resolver = new ModelArgumentResolver(new ReactiveAdapterRegistry());
+		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod(controller, method);
+		handlerMethod.setArgumentResolvers(Collections.singletonList(resolver));
+		return handlerMethod;
 	}
 
 

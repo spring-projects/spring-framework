@@ -30,6 +30,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -40,33 +41,18 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolver {
+public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverSupport
+		implements HandlerMethodArgumentResolver {
 
-	private final ReactiveAdapterRegistry adapterRegistry;
 
-
-	/**
-	 * Class constructor.
-	 * @param registry for adapting to other reactive types from and to Mono
-	 */
 	public ErrorsMethodArgumentResolver(ReactiveAdapterRegistry registry) {
-		Assert.notNull(registry, "'ReactiveAdapterRegistry' is required.");
-		this.adapterRegistry = registry;
-	}
-
-
-	/**
-	 * Return the configured {@link ReactiveAdapterRegistry}.
-	 */
-	public ReactiveAdapterRegistry getAdapterRegistry() {
-		return this.adapterRegistry;
+		super(registry);
 	}
 
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		Class<?> clazz = parameter.getParameterType();
-		return Errors.class.isAssignableFrom(clazz);
+		return checkParamTypeNoReactiveWrapper(parameter, Errors.class::isAssignableFrom);
 	}
 
 

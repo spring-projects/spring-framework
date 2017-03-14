@@ -21,6 +21,7 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -43,7 +44,8 @@ import static org.mockito.Mockito.*;
  */
 public class ServerWebExchangeArgumentResolverTests {
 
-	private final ServerWebExchangeArgumentResolver resolver = new ServerWebExchangeArgumentResolver();
+	private final ServerWebExchangeArgumentResolver resolver =
+			new ServerWebExchangeArgumentResolver(new ReactiveAdapterRegistry());
 
 	private ServerWebExchange exchange;
 
@@ -67,6 +69,15 @@ public class ServerWebExchangeArgumentResolverTests {
 		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ServerHttpResponse.class)));
 		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(HttpMethod.class)));
 		assertFalse(this.resolver.supportsParameter(this.testMethod.arg(String.class)));
+		try {
+			this.resolver.supportsParameter(this.testMethod.arg(Mono.class, ServerWebExchange.class));
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			assertTrue("Unexpected error message:\n" + ex.getMessage(),
+					ex.getMessage().startsWith(
+							"ServerWebExchangeArgumentResolver doesn't support reactive type wrapper"));
+		}
 	}
 
 	@Test
@@ -91,7 +102,8 @@ public class ServerWebExchangeArgumentResolverTests {
 			ServerHttpResponse response,
 			WebSession session,
 			HttpMethod httpMethod,
-			String s) {
+			String s,
+			Mono<ServerWebExchange> monoExchange) {
 	}
 
 }

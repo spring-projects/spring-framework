@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.server.ServerWebExchange;
@@ -36,8 +37,10 @@ import org.springframework.web.server.ServerWebInputException;
 public class SessionAttributeMethodArgumentResolver extends AbstractNamedValueArgumentResolver {
 
 
-	public SessionAttributeMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
-		super(beanFactory);
+	public SessionAttributeMethodArgumentResolver(ConfigurableBeanFactory beanFactory,
+			ReactiveAdapterRegistry adapterRegistry) {
+
+		super(beanFactory, adapterRegistry);
 	}
 
 

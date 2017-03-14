@@ -26,7 +26,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.validation.Validator;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
@@ -42,19 +41,7 @@ import org.springframework.web.server.ServerWebExchange;
 public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentResolver
 		implements HandlerMethodArgumentResolver {
 
-	/**
-	 * Constructor with {@link HttpMessageReader}'s and a {@link Validator}.
-	 * @param readers readers for de-serializing the request body with
-	 */
-	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> readers) {
-		super(readers);
-	}
 
-	/**
-	 * Constructor that also accepts a {@link ReactiveAdapterRegistry}.
-	 * @param readers readers for de-serializing the request body with
-	 * @param registry for adapting to other reactive types from Flux and Mono
-	 */
 	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> readers, ReactiveAdapterRegistry registry) {
 		super(readers, registry);
 	}
@@ -62,8 +49,8 @@ public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentRes
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		Class<?> clazz = parameter.getParameterType();
-		return (HttpEntity.class.equals(clazz) || RequestEntity.class.equals(clazz));
+		return checkParamTypeNoReactiveWrapper(parameter,
+				type -> HttpEntity.class.equals(type) || RequestEntity.class.equals(type));
 	}
 
 	@Override

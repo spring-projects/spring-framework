@@ -19,8 +19,11 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.ui.Model;
+import org.springframework.util.Assert;
 import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -30,18 +33,25 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ModelArgumentResolver implements SyncHandlerMethodArgumentResolver {
+public class ModelArgumentResolver extends HandlerMethodArgumentResolverSupport
+		implements SyncHandlerMethodArgumentResolver {
+
+
+	public ModelArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
+		super(adapterRegistry);
+	}
 
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return Model.class.isAssignableFrom(parameter.getParameterType());
+		return checkParamTypeNoReactiveWrapper(parameter, Model.class::isAssignableFrom);
 	}
 
 	@Override
 	public Optional<Object> resolveArgumentValue(MethodParameter methodParameter,
 			BindingContext context, ServerWebExchange exchange) {
 
+		Assert.isAssignable(Model.class, methodParameter.getParameterType());
 		return Optional.of(context.getModel());
 	}
 

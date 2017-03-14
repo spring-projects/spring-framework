@@ -294,26 +294,26 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 
 		// Annotation-based argument resolution
-		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory()));
-		resolvers.add(new RequestParamMapMethodArgumentResolver());
-		resolvers.add(new PathVariableMethodArgumentResolver(getBeanFactory()));
-		resolvers.add(new PathVariableMapMethodArgumentResolver());
+		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), getReactiveAdapterRegistry(), false));
+		resolvers.add(new RequestParamMapMethodArgumentResolver(getReactiveAdapterRegistry()));
+		resolvers.add(new PathVariableMethodArgumentResolver(getBeanFactory(), getReactiveAdapterRegistry()));
+		resolvers.add(new PathVariableMapMethodArgumentResolver(getReactiveAdapterRegistry()));
 		resolvers.add(new RequestBodyArgumentResolver(getMessageReaders(), getReactiveAdapterRegistry()));
-		resolvers.add(new ModelAttributeMethodArgumentResolver(getReactiveAdapterRegistry()));
-		resolvers.add(new RequestHeaderMethodArgumentResolver(getBeanFactory()));
-		resolvers.add(new RequestHeaderMapMethodArgumentResolver());
-		resolvers.add(new CookieValueMethodArgumentResolver(getBeanFactory()));
-		resolvers.add(new ExpressionValueMethodArgumentResolver(getBeanFactory()));
-		resolvers.add(new SessionAttributeMethodArgumentResolver(getBeanFactory()));
-		resolvers.add(new RequestAttributeMethodArgumentResolver(getBeanFactory()));
+		resolvers.add(new ModelAttributeMethodArgumentResolver(getReactiveAdapterRegistry(), false));
+		resolvers.add(new RequestHeaderMethodArgumentResolver(getBeanFactory(), getReactiveAdapterRegistry()));
+		resolvers.add(new RequestHeaderMapMethodArgumentResolver(getReactiveAdapterRegistry()));
+		resolvers.add(new CookieValueMethodArgumentResolver(getBeanFactory(), getReactiveAdapterRegistry()));
+		resolvers.add(new ExpressionValueMethodArgumentResolver(getBeanFactory(), getReactiveAdapterRegistry()));
+		resolvers.add(new SessionAttributeMethodArgumentResolver(getBeanFactory(), getReactiveAdapterRegistry()));
+		resolvers.add(new RequestAttributeMethodArgumentResolver(getBeanFactory(), getReactiveAdapterRegistry()));
 
 		// Type-based argument resolution
 		resolvers.add(new HttpEntityArgumentResolver(getMessageReaders(), getReactiveAdapterRegistry()));
-		resolvers.add(new ModelArgumentResolver());
+		resolvers.add(new ModelArgumentResolver(getReactiveAdapterRegistry()));
 		resolvers.add(new ErrorsMethodArgumentResolver(getReactiveAdapterRegistry()));
-		resolvers.add(new ServerWebExchangeArgumentResolver());
-		resolvers.add(new PrincipalArgumentResolver());
-		resolvers.add(new WebSessionArgumentResolver());
+		resolvers.add(new ServerWebExchangeArgumentResolver(getReactiveAdapterRegistry()));
+		resolvers.add(new PrincipalArgumentResolver(getReactiveAdapterRegistry()));
+		resolvers.add(new WebSessionArgumentResolver(getReactiveAdapterRegistry()));
 
 		// Custom resolvers
 		if (getCustomArgumentResolvers() != null) {
@@ -321,7 +321,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 		}
 
 		// Catch-all
-		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), true));
+		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), getReactiveAdapterRegistry(), true));
 		resolvers.add(new ModelAttributeMethodArgumentResolver(getReactiveAdapterRegistry(), true));
 		return resolvers;
 	}
@@ -330,19 +330,19 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 		List<SyncHandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 
 		// Annotation-based argument resolution
-		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), false));
-		resolvers.add(new RequestParamMapMethodArgumentResolver());
-		resolvers.add(new PathVariableMethodArgumentResolver(getBeanFactory()));
-		resolvers.add(new PathVariableMapMethodArgumentResolver());
-		resolvers.add(new RequestHeaderMethodArgumentResolver(getBeanFactory()));
-		resolvers.add(new RequestHeaderMapMethodArgumentResolver());
-		resolvers.add(new CookieValueMethodArgumentResolver(getBeanFactory()));
-		resolvers.add(new ExpressionValueMethodArgumentResolver(getBeanFactory()));
-		resolvers.add(new RequestAttributeMethodArgumentResolver(getBeanFactory()));
+		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), getReactiveAdapterRegistry(), false));
+		resolvers.add(new RequestParamMapMethodArgumentResolver(getReactiveAdapterRegistry()));
+		resolvers.add(new PathVariableMethodArgumentResolver(getBeanFactory(), getReactiveAdapterRegistry()));
+		resolvers.add(new PathVariableMapMethodArgumentResolver(getReactiveAdapterRegistry()));
+		resolvers.add(new RequestHeaderMethodArgumentResolver(getBeanFactory(), getReactiveAdapterRegistry()));
+		resolvers.add(new RequestHeaderMapMethodArgumentResolver(getReactiveAdapterRegistry()));
+		resolvers.add(new CookieValueMethodArgumentResolver(getBeanFactory(), getReactiveAdapterRegistry()));
+		resolvers.add(new ExpressionValueMethodArgumentResolver(getBeanFactory(), getReactiveAdapterRegistry()));
+		resolvers.add(new RequestAttributeMethodArgumentResolver(getBeanFactory(), getReactiveAdapterRegistry()));
 
 		// Type-based argument resolution
-		resolvers.add(new ModelArgumentResolver());
-		resolvers.add(new ServerWebExchangeArgumentResolver());
+		resolvers.add(new ModelArgumentResolver(getReactiveAdapterRegistry()));
+		resolvers.add(new ServerWebExchangeArgumentResolver(getReactiveAdapterRegistry()));
 
 		// Custom resolvers
 		if (getCustomInitBinderArgumentResolvers() != null) {
@@ -350,7 +350,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 		}
 
 		// Catch-all
-		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), true));
+		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), getReactiveAdapterRegistry(), true));
 		return resolvers;
 	}
 

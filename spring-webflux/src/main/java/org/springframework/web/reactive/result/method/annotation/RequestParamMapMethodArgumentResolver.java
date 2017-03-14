@@ -20,11 +20,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -43,19 +45,24 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  * @see RequestParamMethodArgumentResolver
  */
-public class RequestParamMapMethodArgumentResolver implements SyncHandlerMethodArgumentResolver {
+public class RequestParamMapMethodArgumentResolver extends HandlerMethodArgumentResolverSupport
+		implements SyncHandlerMethodArgumentResolver {
+
+
+	public RequestParamMapMethodArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
+		super(adapterRegistry);
+	}
 
 
 	@Override
-	public boolean supportsParameter(MethodParameter methodParam) {
-		RequestParam requestParam = methodParam.getParameterAnnotation(RequestParam.class);
-		if (requestParam != null) {
-			if (Map.class.isAssignableFrom(methodParam.getParameterType())) {
-				return !StringUtils.hasText(requestParam.name());
-			}
-		}
-		return false;
+	public boolean supportsParameter(MethodParameter param) {
+		return checkAnnotatedParamNoReactiveWrapper(param, RequestParam.class, this::allParams);
 	}
+
+	private boolean allParams(RequestParam requestParam, Class<?> type) {
+		return Map.class.isAssignableFrom(type) && !StringUtils.hasText(requestParam.name());
+	}
+
 
 	@Override
 	public Optional<Object> resolveArgumentValue(MethodParameter methodParameter,

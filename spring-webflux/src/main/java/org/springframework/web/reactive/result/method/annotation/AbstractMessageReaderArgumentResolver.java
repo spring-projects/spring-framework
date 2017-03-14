@@ -42,6 +42,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
@@ -58,11 +59,9 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public abstract class AbstractMessageReaderArgumentResolver {
+public abstract class AbstractMessageReaderArgumentResolver extends HandlerMethodArgumentResolverSupport {
 
 	private final List<HttpMessageReader<?>> messageReaders;
-
-	private final ReactiveAdapterRegistry adapterRegistry;
 
 	private final List<MediaType> supportedMediaTypes;
 
@@ -83,10 +82,10 @@ public abstract class AbstractMessageReaderArgumentResolver {
 	protected AbstractMessageReaderArgumentResolver(List<HttpMessageReader<?>> messageReaders,
 			ReactiveAdapterRegistry adapterRegistry) {
 
+		super(adapterRegistry);
 		Assert.notEmpty(messageReaders, "At least one HttpMessageReader is required.");
 		Assert.notNull(adapterRegistry, "'adapterRegistry' is required");
 		this.messageReaders = messageReaders;
-		this.adapterRegistry = adapterRegistry;
 		this.supportedMediaTypes = messageReaders.stream()
 				.flatMap(converter -> converter.getReadableMediaTypes().stream())
 				.collect(Collectors.toList());
@@ -98,13 +97,6 @@ public abstract class AbstractMessageReaderArgumentResolver {
 	 */
 	public List<HttpMessageReader<?>> getMessageReaders() {
 		return this.messageReaders;
-	}
-
-	/**
-	 * Return the configured {@link ReactiveAdapterRegistry}.
-	 */
-	public ReactiveAdapterRegistry getAdapterRegistry() {
-		return this.adapterRegistry;
 	}
 
 

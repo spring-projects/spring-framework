@@ -281,7 +281,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 
 	private ModelAttributeMethodArgumentResolver createResolver() {
-		return new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry());
+		return new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry(), false);
 	}
 
 	private ServerWebExchange exchange(String formData) throws URISyntaxException {

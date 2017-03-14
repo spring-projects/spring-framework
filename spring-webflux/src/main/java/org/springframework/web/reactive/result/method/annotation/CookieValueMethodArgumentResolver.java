@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpCookie;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.server.ServerWebExchange;
@@ -42,15 +43,18 @@ public class CookieValueMethodArgumentResolver extends AbstractNamedValueSyncArg
 	 * @param beanFactory a bean factory to use for resolving  ${...}
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to contain expressions
+	 * @param adapterRegistry for checking reactive type wrappers
 	 */
-	public CookieValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
-		super(beanFactory);
+	public CookieValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory,
+			ReactiveAdapterRegistry adapterRegistry) {
+
+		super(beanFactory, adapterRegistry);
 	}
 
 
 	@Override
-	public boolean supportsParameter(MethodParameter parameter) {
-		return parameter.hasParameterAnnotation(CookieValue.class);
+	public boolean supportsParameter(MethodParameter param) {
+		return checkAnnotatedParamNoReactiveWrapper(param, CookieValue.class, (annot, type) -> true);
 	}
 
 	@Override

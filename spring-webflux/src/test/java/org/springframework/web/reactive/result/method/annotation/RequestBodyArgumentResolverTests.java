@@ -32,6 +32,7 @@ import rx.RxReactiveStreams;
 import rx.Single;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
@@ -69,7 +70,7 @@ public class RequestBodyArgumentResolverTests {
 	public void setup() {
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
 		readers.add(new DecoderHttpMessageReader<>(new StringDecoder()));
-		this.resolver = new RequestBodyArgumentResolver(readers);
+		this.resolver = new RequestBodyArgumentResolver(readers, new ReactiveAdapterRegistry());
 	}
 
 

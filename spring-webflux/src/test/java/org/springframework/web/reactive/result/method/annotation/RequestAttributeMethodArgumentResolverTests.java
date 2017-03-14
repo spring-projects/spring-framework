@@ -28,6 +28,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -61,7 +62,8 @@ public class RequestAttributeMethodArgumentResolverTests {
 	public void setup() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
-		this.resolver = new RequestAttributeMethodArgumentResolver(context.getBeanFactory());
+		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
+		this.resolver = new RequestAttributeMethodArgumentResolver(context.getBeanFactory(), adapterRegistry);
 
 		ServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
@@ -74,6 +76,15 @@ public class RequestAttributeMethodArgumentResolverTests {
 	public void supportsParameter() throws Exception {
 		assertTrue(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 0)));
 		assertFalse(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 4)));
+		try {
+			this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 5));
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			assertTrue("Unexpected error message:\n" + ex.getMessage(),
+					ex.getMessage().startsWith(
+							"RequestAttributeMethodArgumentResolver doesn't support reactive type wrapper"));
+		}
 	}
 
 	@Test
@@ -151,7 +162,8 @@ public class RequestAttributeMethodArgumentResolverTests {
 			@RequestAttribute("specialFoo") Foo namedFoo,
 			@RequestAttribute(name="foo", required = false) Foo notRequiredFoo,
 			@RequestAttribute(name="foo") Optional<Foo> optionalFoo,
-			String notSupported) {
+			String notSupported,
+			@RequestAttribute Mono<Foo> alsoNotSupported) {
 	}
 
 

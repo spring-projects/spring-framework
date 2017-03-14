@@ -25,11 +25,13 @@ import reactor.test.StepVerifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebInputException;
@@ -53,6 +55,7 @@ public class CookieValueMethodArgumentResolverTests {
 	private MethodParameter cookieParameter;
 	private MethodParameter cookieStringParameter;
 	private MethodParameter stringParameter;
+	private MethodParameter cookieMonoParameter;
 
 
 	@Before
@@ -60,14 +63,16 @@ public class CookieValueMethodArgumentResolverTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
 
-		this.resolver = new CookieValueMethodArgumentResolver(context.getBeanFactory());
+		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
+		this.resolver = new CookieValueMethodArgumentResolver(context.getBeanFactory(), adapterRegistry);
 		this.request = MockServerHttpRequest.get("/").build();
 		this.bindingContext = new BindingContext();
 
-		Method method = getClass().getMethod("params", HttpCookie.class, String.class, String.class);
+		Method method = ReflectionUtils.findMethod(getClass(), "params", (Class<?>[]) null);
 		this.cookieParameter = new SynthesizingMethodParameter(method, 0);
 		this.cookieStringParameter = new SynthesizingMethodParameter(method, 1);
 		this.stringParameter = new SynthesizingMethodParameter(method, 2);
+		this.cookieMonoParameter = new SynthesizingMethodParameter(method, 3);
 	}
 
 
@@ -75,7 +80,20 @@ public class CookieValueMethodArgumentResolverTests {
 	public void supportsParameter() {
 		assertTrue(this.resolver.supportsParameter(this.cookieParameter));
 		assertTrue(this.resolver.supportsParameter(this.cookieStringParameter));
+	}
+
+	@Test
+	public void doesNotSupportParameter() {
 		assertFalse(this.resolver.supportsParameter(this.stringParameter));
+		try {
+			this.resolver.supportsParameter(this.cookieMonoParameter);
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			assertTrue("Unexpected error message:\n" + ex.getMessage(),
+					ex.getMessage().startsWith(
+							"CookieValueMethodArgumentResolver doesn't support reactive type wrapper"));
+		}
 	}
 
 	@Test
@@ -128,7 +146,8 @@ public class CookieValueMethodArgumentResolverTests {
 	public void params(
 			@CookieValue("name") HttpCookie cookie,
 			@CookieValue(name = "name", defaultValue = "bar") String cookieString,
-			String stringParam) {
+			String stringParam,
+			@CookieValue Mono<String> monoCookie) {
 	}
 
 }

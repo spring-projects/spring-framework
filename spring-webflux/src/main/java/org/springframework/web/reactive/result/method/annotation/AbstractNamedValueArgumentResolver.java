@@ -27,11 +27,13 @@ import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
@@ -56,7 +58,8 @@ import org.springframework.web.server.ServerWebInputException;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public abstract class AbstractNamedValueArgumentResolver implements HandlerMethodArgumentResolver {
+public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodArgumentResolverSupport
+		implements HandlerMethodArgumentResolver {
 
 	private final ConfigurableBeanFactory configurableBeanFactory;
 
@@ -69,8 +72,12 @@ public abstract class AbstractNamedValueArgumentResolver implements HandlerMetho
 	 * @param beanFactory a bean factory to use for resolving ${...} placeholder
 	 * and #{...} SpEL expressions in default values, or {@code null} if default
 	 * values are not expected to contain expressions
+	 * @param adapterRegistry for checking reactive type wrappers
 	 */
-	public AbstractNamedValueArgumentResolver(ConfigurableBeanFactory beanFactory) {
+	public AbstractNamedValueArgumentResolver(ConfigurableBeanFactory beanFactory,
+			ReactiveAdapterRegistry adapterRegistry) {
+
+		super(adapterRegistry);
 		this.configurableBeanFactory = beanFactory;
 		this.expressionContext = (beanFactory != null ? new BeanExpressionContext(beanFactory, null) : null);
 	}
