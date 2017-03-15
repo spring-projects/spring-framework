@@ -7,7 +7,7 @@ buildscript {
 		classpath("io.spring.gradle:propdeps-plugin:0.0.8")
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
 		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.3")
-		classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.0")
+		classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.1")
 	}
 }
 
@@ -70,7 +70,7 @@ configure(allprojects) { project ->
 	ext.junitVersion           = "4.12"
 	ext.junitJupiterVersion    = '5.0.0-M3'
 	ext.junitPlatformVersion   = '1.0.0-M3'
-	ext.kotlinVersion          = "1.1.0"  // also change kotlin-gradle-plugin version when upgrading
+	ext.kotlinVersion          = "1.1.1"  // also change kotlin-gradle-plugin version when upgrading
 	ext.log4jVersion           = '2.8.1'
 	ext.nettyVersion           = "4.1.9.Final"
 	ext.okhttp3Version         = "3.6.0"
