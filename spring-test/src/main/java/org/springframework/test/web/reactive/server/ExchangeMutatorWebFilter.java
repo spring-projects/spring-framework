@@ -16,10 +16,9 @@
 
 package org.springframework.test.web.reactive.server;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import reactor.core.publisher.Mono;
@@ -38,9 +37,10 @@ import org.springframework.web.server.WebFilterChain;
  */
 class ExchangeMutatorWebFilter implements WebFilter {
 
-	private volatile List<UnaryOperator<ServerWebExchange>> globalMutators = new ArrayList<>(4);
+	private volatile Function<ServerWebExchange, ServerWebExchange> globalMutator;
 
-	private final Map<String, UnaryOperator<ServerWebExchange>> requestMutators = new ConcurrentHashMap<>(4);
+	private final Map<String, Function<ServerWebExchange, ServerWebExchange>> perRequestMutators =
+			new ConcurrentHashMap<>(4);
 
 
 	/**
@@ -49,7 +49,7 @@ class ExchangeMutatorWebFilter implements WebFilter {
 	 */
 	public void register(UnaryOperator<ServerWebExchange> mutator) {
 		Assert.notNull(mutator, "'mutator' is required");
-		this.globalMutators.add(mutator);
+		this.globalMutator = this.globalMutator != null ? this.globalMutator.andThen(mutator) : mutator;
 	}
 
 	/**
@@ -58,19 +58,20 @@ class ExchangeMutatorWebFilter implements WebFilter {
 	 * @param mutator the transformation function
 	 */
 	public void register(String requestId, UnaryOperator<ServerWebExchange> mutator) {
-		this.requestMutators.put(requestId, mutator);
+		this.perRequestMutators.compute(requestId,
+				(s, value) -> value != null ? value.andThen(mutator) : mutator);
 	}
 
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 
-		for (UnaryOperator<ServerWebExchange> mutator : this.globalMutators) {
-			exchange = mutator.apply(exchange);
+		if (this.globalMutator != null) {
+			exchange = this.globalMutator.apply(exchange);
 		}
 
 		String requestId = WiretapConnector.getRequestId(exchange.getRequest().getHeaders());
-		UnaryOperator<ServerWebExchange> mutator = this.requestMutators.remove(requestId);
+		Function<ServerWebExchange, ServerWebExchange> mutator = this.perRequestMutators.remove(requestId);
 		if (mutator != null) {
 			exchange = mutator.apply(exchange);
 		}

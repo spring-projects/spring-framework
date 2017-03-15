@@ -24,6 +24,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -40,11 +41,11 @@ public class ControllerTests {
 
 	private final WebTestClient client = WebTestClient
 			.bindToController(new TestController())
-			.exchangeMutator(identitySetup("Pablo"))
+			.exchangeMutator(principal("Pablo"))
 			.build();
 
 
-	private UnaryOperator<ServerWebExchange> identitySetup(String userName) {
+	private UnaryOperator<ServerWebExchange> principal(String userName) {
 		return exchange -> {
 			Principal user = mock(Principal.class);
 			when(user.getName()).thenReturn(userName);
@@ -55,28 +56,51 @@ public class ControllerTests {
 
 	@Test
 	public void basic() throws Exception {
-		this.client.get().uri("/test")
+		this.client.get().uri("/principal")
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody(String.class).value().isEqualTo("Hello Pablo!");
 	}
 
 	@Test
-	public void perRequestIdentityOverride() throws Exception {
-		this.client.exchangeMutator(identitySetup("Giovani"))
-				.get().uri("/test")
+	public void perRequestExchangeMutator() throws Exception {
+		this.client.exchangeMutator(principal("Giovanni"))
+				.get().uri("/principal")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value().isEqualTo("Hello Giovani!");
+				.expectBody(String.class).value().isEqualTo("Hello Giovanni!");
+	}
+
+	@Test
+	public void perRequestMultipleExchangeMutators() throws Exception {
+		this.client
+				.exchangeMutator(attribute("attr1", "foo"))
+				.exchangeMutator(attribute("attr2", "bar"))
+				.get().uri("/attributes")
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody(String.class).value().isEqualTo("foo+bar");
+	}
+
+	private UnaryOperator<ServerWebExchange> attribute(String attrName, String attrValue) {
+		return exchange -> {
+			exchange.getAttributes().put(attrName, attrValue);
+			return exchange;
+		};
 	}
 
 
 	@RestController
 	static class TestController {
 
-		@GetMapping("/test")
+		@GetMapping("/principal")
 		public String handle(Principal principal) {
 			return "Hello " + principal.getName() + "!";
+		}
+
+		@GetMapping("/attributes")
+		public String handle(@RequestAttribute String attr1, @RequestAttribute String attr2) {
+			return attr1 + "+" + attr2;
 		}
 	}
 
