@@ -18,7 +18,6 @@ package org.springframework.http.server.reactive.bootstrap;
 
 import io.netty.buffer.ByteBuf;
 
-import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter;
 
 /**
@@ -38,8 +37,7 @@ public class RxNettyHttpServer extends AbstractHttpServer {
 	}
 
 	private RxNettyHttpHandlerAdapter createHttpHandlerAdapter() {
-		return new RxNettyHttpHandlerAdapter(getHttpHandlerMap() != null
-				? HttpHandler.of(getHttpHandlerMap()) : getHttpHandler());
+		return new RxNettyHttpHandlerAdapter(resolveHttpHandler());
 	}
 
 

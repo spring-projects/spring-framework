@@ -48,7 +48,7 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class ServletHttpHandlerAdapter implements Servlet {
 
-	private static final Log logger = LogFactory.getLog(ReactorHttpHandlerAdapter.class);
+	private static final Log logger = LogFactory.getLog(ServletHttpHandlerAdapter.class);
 
 
 	private static final int DEFAULT_BUFFER_SIZE = 8192;
@@ -110,12 +110,18 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		this.httpHandler.handle(httpRequest, httpResponse).subscribe(subscriber);
 	}
 
-	protected ServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context) throws IOException {
-		return new ServletServerHttpRequest(request, context, getDataBufferFactory(), getBufferSize());
+	protected ServerHttpRequest createRequest(HttpServletRequest request,
+			AsyncContext context) throws IOException {
+
+		return new ServletServerHttpRequest(
+				request, context, getDataBufferFactory(), getBufferSize());
 	}
 
-	protected ServerHttpResponse createResponse(HttpServletResponse response, AsyncContext context) throws IOException {
-		return new ServletServerHttpResponse(response, context, getDataBufferFactory(), getBufferSize());
+	protected ServerHttpResponse createResponse(HttpServletResponse response,
+			AsyncContext context) throws IOException {
+
+		return new ServletServerHttpResponse(
+				response, context, getDataBufferFactory(), getBufferSize());
 	}
 
 

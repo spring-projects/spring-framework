@@ -34,26 +34,27 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
- * Unit tests for {@link HttpHandler}.
+ * Unit tests for {@link ContextPathCompositeHandler}.
  *
  * @author Rossen Stoyanchev
  */
-public class HttpHandlerTests {
+public class ContextPathCompositeHandlerTests {
+
 
 	@Test
 	public void invalidContextPath() {
-		testInvalidContextPath("  ", "Context path must not be empty");
-		testInvalidContextPath("path", "Context path must begin with '/'");
-		testInvalidContextPath("/path/", "Context path must not end with '/'");
+		testInvalid("  ", "Context path must not be empty");
+		testInvalid("path", "Context path must begin with '/'");
+		testInvalid("/path/", "Context path must not end with '/'");
 	}
 
-	private void testInvalidContextPath(String contextPath, String errorMessage) {
+	private void testInvalid(String contextPath, String expectedError) {
 		try {
-			new TestHttpHandlerAdapter(Collections.singletonMap(contextPath, new TestHttpHandler()));
+			new ContextPathCompositeHandler(Collections.singletonMap(contextPath, new TestHttpHandler()));
 			fail();
 		}
 		catch (IllegalArgumentException ex) {
-			assertEquals(errorMessage, ex.getMessage());
+			assertEquals(expectedError, ex.getMessage());
 		}
 	}
 
@@ -68,7 +69,7 @@ public class HttpHandlerTests {
 		map.put("/another/path", handler2);
 		map.put("/yet/another/path", handler3);
 
-		testPath("/another/path/and/more", map);
+		testHandle("/another/path/and/more", map);
 
 		assertInvoked(handler2, "/another/path");
 		assertNotInvoked(handler1, handler3);
@@ -85,7 +86,7 @@ public class HttpHandlerTests {
 		map.put("/another/path", handler2);
 		map.put("/yet/another/path", handler3);
 
-		testPath("/path", map);
+		testHandle("/path", map);
 
 		assertInvoked(handler1, "/path");
 		assertNotInvoked(handler2, handler3);
@@ -101,7 +102,7 @@ public class HttpHandlerTests {
 		TestHttpHandler handler = new TestHttpHandler();
 		Map<String, HttpHandler> map = Collections.singletonMap("/another/path", handler);
 
-		new TestHttpHandlerAdapter(map).handle(request);
+		new ContextPathCompositeHandler(map).handle(request, new MockServerHttpResponse());
 
 		assertTrue(handler.wasInvoked());
 		assertEquals("/yet/another/path", handler.getRequest().getContextPath());
@@ -116,16 +117,18 @@ public class HttpHandlerTests {
 		map.put("/path", handler1);
 		map.put("/another/path", handler2);
 
-		ServerHttpResponse response = testPath("/yet/another/path", map);
+		ServerHttpResponse response = testHandle("/yet/another/path", map);
 
 		assertNotInvoked(handler1, handler2);
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 	}
 
 
-	private ServerHttpResponse testPath(String path, Map<String, HttpHandler> handlerMap) {
-		TestHttpHandlerAdapter adapter = new TestHttpHandlerAdapter(handlerMap);
-		return adapter.handle(path);
+	private ServerHttpResponse testHandle(String pathToHandle, Map<String, HttpHandler> handlerMap) {
+		ServerHttpRequest request = MockServerHttpRequest.get(pathToHandle).build();
+		ServerHttpResponse response = new MockServerHttpResponse();
+		new ContextPathCompositeHandler(handlerMap).handle(request, response);
+		return response;
 	}
 
 	private void assertInvoked(TestHttpHandler handler, String contextPath) {
@@ -135,30 +138,6 @@ public class HttpHandlerTests {
 
 	private void assertNotInvoked(TestHttpHandler... handlers) {
 		Arrays.stream(handlers).forEach(handler -> assertFalse(handler.wasInvoked()));
-	}
-
-
-	@SuppressWarnings("WeakerAccess")
-	private static class TestHttpHandlerAdapter {
-
-
-		private final HttpHandler httpHandler;
-
-
-		public TestHttpHandlerAdapter(Map<String, HttpHandler> handlerMap) {
-			this.httpHandler = HttpHandler.of(handlerMap);
-		}
-
-		public ServerHttpResponse handle(String path) {
-			ServerHttpRequest request = MockServerHttpRequest.get(path).build();
-			return handle(request);
-		}
-
-		public ServerHttpResponse handle(ServerHttpRequest request) {
-			ServerHttpResponse response = new MockServerHttpResponse();
-			this.httpHandler.handle(request, response);
-			return response;
-		}
 	}
 
 

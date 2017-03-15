@@ -35,24 +35,24 @@ import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 /**
- * Builder for an {@link HttpHandler} that adapts to a target {@link WebHandler}
- * along with a chain of {@link WebFilter}s and a set of
- * {@link WebExceptionHandler}s.
+ * This builder has two purposes.
  *
- * <p>Example usage:
- * <pre>
- * WebFilter filter = ... ;
- * WebHandler webHandler = ... ;
- * WebExceptionHandler exceptionHandler = ...;
+ * <p>One is to assemble a processing chain that consists of a target
+ * {@link WebHandler}, then decorated with a set of {@link WebFilter}'s, then
+ * further decorated with a set of {@link WebExceptionHandler}'s.
  *
- * HttpHandler httpHandler = WebHttpHandlerBuilder.webHandler(webHandler)
- *         .filters(filter)
- *         .exceptionHandlers(exceptionHandler)
- *         .build();
- * </pre>
+ * <p>The second purpose is to adapt the resulting processing chain to an
+ * {@link HttpHandler} -- the lowest level reactive HTTP handling abstraction,
+ * which can then be used with any of the supported runtimes. The adaptation
+ * is done with the help of {@link HttpWebHandlerAdapter}.
+ *
+ * <p>The processing chain can be assembled manually via builder methods, or
+ * detected from Spring configuration via
+ * {@link #applicationContext(ApplicationContext)}, or a mix of both.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see HttpWebHandlerAdapter
  */
 public class WebHttpHandlerBuilder {
 

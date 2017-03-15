@@ -42,7 +42,7 @@ import rx.RxReactiveStreams;
  */
 public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBuf> {
 
-	private static final Log logger = LogFactory.getLog(ReactorHttpHandlerAdapter.class);
+	private static final Log logger = LogFactory.getLog(RxNettyHttpHandlerAdapter.class);
 
 
 	private final HttpHandler httpHandler;

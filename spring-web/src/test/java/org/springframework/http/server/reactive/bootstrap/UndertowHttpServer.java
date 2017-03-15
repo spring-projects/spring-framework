@@ -20,7 +20,6 @@ import java.net.InetSocketAddress;
 
 import io.undertow.Undertow;
 
-import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.UndertowHttpHandlerAdapter;
 
 /**
@@ -39,8 +38,7 @@ public class UndertowHttpServer extends AbstractHttpServer {
 	}
 
 	private UndertowHttpHandlerAdapter initHttpHandlerAdapter() {
-		return new UndertowHttpHandlerAdapter(getHttpHandlerMap() != null
-				? HttpHandler.of(getHttpHandlerMap()) : getHttpHandler());
+		return new UndertowHttpHandlerAdapter(resolveHttpHandler());
 	}
 
 	@Override

@@ -21,7 +21,7 @@ import java.io.File;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
-import org.springframework.http.server.reactive.HttpHandler;
+
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
 import org.springframework.http.server.reactive.TomcatHttpHandlerAdapter;
 import org.springframework.util.Assert;
@@ -68,8 +68,7 @@ public class TomcatHttpServer extends AbstractHttpServer {
 	}
 
 	private ServletHttpHandlerAdapter initServletAdapter() {
-		return new TomcatHttpHandlerAdapter(getHttpHandlerMap() != null
-				? HttpHandler.of(getHttpHandlerMap()) : getHttpHandler());
+		return new TomcatHttpHandlerAdapter(resolveHttpHandler());
 	}
 
 
