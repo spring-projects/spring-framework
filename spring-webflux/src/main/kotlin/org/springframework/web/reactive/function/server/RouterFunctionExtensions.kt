@@ -57,8 +57,10 @@ import reactor.core.publisher.Mono
 
 typealias Routes = RouterDsl.() -> Unit
 
-fun RouterFunction<*>.route(request: ServerRequest, configure: Routes) =
-		RouterDsl().apply(configure).invoke(request)
+/**
+ * Allow to create easily a [RouterFunction] from [Routes]
+ */
+fun router(routes: Routes) = RouterDsl().apply(routes).router()
 
 class RouterDsl {
 

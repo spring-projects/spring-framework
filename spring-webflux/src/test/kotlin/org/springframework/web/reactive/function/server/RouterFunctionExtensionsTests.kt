@@ -32,7 +32,7 @@ class RouterFunctionExtensionsTests {
 	@Test
 	fun header() {
 		val request = builder().header("bar", "bar").build()
-		StepVerifier.create(FooController().route(request))
+		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
 				.verifyComplete()
 	}
@@ -40,7 +40,7 @@ class RouterFunctionExtensionsTests {
 	@Test
 	fun accept() {
 		val request = builder().header(ACCEPT, APPLICATION_ATOM_XML_VALUE).build()
-		StepVerifier.create(FooController().route(request))
+		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
 				.verifyComplete()
 	}
@@ -48,7 +48,7 @@ class RouterFunctionExtensionsTests {
 	@Test
 	fun acceptAndPOST() {
 		val request = builder().method(POST).uri(URI("/api/foo/")).header(ACCEPT, APPLICATION_JSON_VALUE).build()
-		StepVerifier.create(FooController().route(request))
+		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
 				.verifyComplete()
 	}
@@ -56,7 +56,7 @@ class RouterFunctionExtensionsTests {
 	@Test
 	fun contentType() {
 		val request = builder().header(CONTENT_TYPE, APPLICATION_OCTET_STREAM_VALUE).build()
-		StepVerifier.create(FooController().route(request))
+		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
 				.verifyComplete()
 	}
@@ -64,7 +64,7 @@ class RouterFunctionExtensionsTests {
 	@Test
 	fun resourceByPath() {
 		val request = builder().uri(URI("/org/springframework/web/reactive/function/response.txt")).build()
-		StepVerifier.create(FooController().route(request))
+		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
 				.verifyComplete()
 	}
@@ -72,7 +72,7 @@ class RouterFunctionExtensionsTests {
 	@Test
 	fun method() {
 		val request = builder().method(PATCH).build()
-		StepVerifier.create(FooController().route(request))
+		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
 				.verifyComplete()
 	}
@@ -80,7 +80,7 @@ class RouterFunctionExtensionsTests {
 	@Test
 	fun path() {
 		val request = builder().uri(URI("/baz")).build()
-		StepVerifier.create(FooController().route(request))
+		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
 				.verifyComplete()
 	}
@@ -88,7 +88,7 @@ class RouterFunctionExtensionsTests {
 	@Test
 	fun resource() {
 		val request = builder().uri(URI("/response.txt")).build()
-		StepVerifier.create(FooController().route(request))
+		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
 				.verifyComplete()
 	}
@@ -100,43 +100,41 @@ class RouterFunctionExtensionsTests {
 				.header(ACCEPT, APPLICATION_PDF_VALUE)
 				.header(CONTENT_TYPE, APPLICATION_PDF_VALUE)
 				.build()
-		StepVerifier.create(FooController().route(request))
+		StepVerifier.create(sampleRouter().route(request))
 				.verifyComplete()
 	}
 
-	class FooController : RouterFunction<ServerResponse> {
 
-		override fun route(req: ServerRequest) = route(req) {
-			(GET("/foo/") or GET("/foos/")) { handle(req) }
-			"/api".route {
-				POST("/foo/")  { handleFromClass(req) }
-				PUT("/foo/") { handleFromClass(req) }
-				"/foo/"  { handleFromClass(req) }
-			}
-			accept(APPLICATION_ATOM_XML, ::handle)
-			contentType(APPLICATION_OCTET_STREAM) { handle(req) }
-			method(PATCH) { handle(req) }
-			headers({ it.accept().contains(APPLICATION_JSON) }).route {
-				GET("/api/foo/", ::handle)
-			}
-			headers({ it.header("bar").isNotEmpty() }, ::handle)
-			resources("/org/springframework/web/reactive/function/**",
-					ClassPathResource("/org/springframework/web/reactive/function/response.txt"))
-			resources {
-				if (it.path() == "/response.txt") {
-					Mono.just(ClassPathResource("/org/springframework/web/reactive/function/response.txt"))
-				}
-				else {
-					Mono.empty()
-				}
-			}
-			path("/baz") { handle(req) }
+	fun sampleRouter() = router {
+		(GET("/foo/") or GET("/foos/")) { req -> handle(req) }
+		"/api".route {
+			POST("/foo/", ::handleFromClass)
+			PUT("/foo/", :: handleFromClass)
+			"/foo/"  { handleFromClass(it) }
 		}
-
-		@Suppress("UNUSED_PARAMETER")
-		fun handleFromClass(req: ServerRequest) = ok().build()
+		accept(APPLICATION_ATOM_XML, ::handle)
+		contentType(APPLICATION_OCTET_STREAM, ::handle)
+		method(PATCH, ::handle)
+		headers({ it.accept().contains(APPLICATION_JSON) }).route {
+			GET("/api/foo/", ::handle)
+		}
+		headers({ it.header("bar").isNotEmpty() }, ::handle)
+		resources("/org/springframework/web/reactive/function/**",
+				ClassPathResource("/org/springframework/web/reactive/function/response.txt"))
+		resources {
+			if (it.path() == "/response.txt") {
+				Mono.just(ClassPathResource("/org/springframework/web/reactive/function/response.txt"))
+			}
+			else {
+				Mono.empty()
+			}
+		}
+		path("/baz", ::handle)
 	}
 }
+
+@Suppress("UNUSED_PARAMETER")
+fun handleFromClass(req: ServerRequest) = ok().build()
 
 @Suppress("UNUSED_PARAMETER")
 fun handle(req: ServerRequest) = ok().build()
