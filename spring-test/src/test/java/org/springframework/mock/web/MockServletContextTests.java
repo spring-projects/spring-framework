@@ -18,16 +18,19 @@ package org.springframework.mock.web;
 
 import java.util.Map;
 import java.util.Set;
-import javax.activation.FileTypeMap;
-import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletRegistration;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import org.springframework.http.MediaType;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller
@@ -87,10 +90,7 @@ public class MockServletContextTests {
 	 */
 	@Test
 	public void getMimeTypeWithCustomConfiguredType() {
-		FileTypeMap defaultFileTypeMap = FileTypeMap.getDefaultFileTypeMap();
-		assertThat(defaultFileTypeMap, instanceOf(MimetypesFileTypeMap.class));
-		MimetypesFileTypeMap mimetypesFileTypeMap = (MimetypesFileTypeMap) defaultFileTypeMap;
-		mimetypesFileTypeMap.addMimeTypes("text/enigma    enigma");
+		sc.addMimeType("enigma", new MediaType("text", "enigma"));
 		assertEquals("text/enigma", sc.getMimeType("filename.enigma"));
 	}
 
