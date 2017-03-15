@@ -107,7 +107,7 @@ class RouterFunctionExtensionsTests {
 
 	fun sampleRouter() = router {
 		(GET("/foo/") or GET("/foos/")) { req -> handle(req) }
-		"/api".route {
+		"/api".nest {
 			POST("/foo/", ::handleFromClass)
 			PUT("/foo/", :: handleFromClass)
 			"/foo/"  { handleFromClass(it) }
@@ -115,7 +115,7 @@ class RouterFunctionExtensionsTests {
 		accept(APPLICATION_ATOM_XML, ::handle)
 		contentType(APPLICATION_OCTET_STREAM, ::handle)
 		method(PATCH, ::handle)
-		headers({ it.accept().contains(APPLICATION_JSON) }).route {
+		headers({ it.accept().contains(APPLICATION_JSON) }).nest {
 			GET("/api/foo/", ::handle)
 		}
 		headers({ it.header("bar").isNotEmpty() }, ::handle)

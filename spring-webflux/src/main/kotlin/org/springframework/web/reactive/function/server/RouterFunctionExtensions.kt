@@ -80,11 +80,11 @@ class RouterDsl {
 
 	operator fun RequestPredicate.not(): RequestPredicate = this.negate()
 
-	fun RequestPredicate.route(r: Routes) {
+	fun RequestPredicate.nest(r: Routes) {
 		routes += RouterFunctions.nest(this, RouterDsl().apply(r).router())
 	}
 
-	fun String.route(r: Routes) {
+	fun String.nest(r: Routes) {
 		routes += RouterFunctions.nest(pathPrefix(this), RouterDsl().apply(r).router())
 	}
 
