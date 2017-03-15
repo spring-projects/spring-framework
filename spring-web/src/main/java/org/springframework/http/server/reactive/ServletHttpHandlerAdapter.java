@@ -17,7 +17,6 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
-import java.util.Map;
 import javax.servlet.AsyncContext;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -28,6 +27,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -45,12 +46,18 @@ import org.springframework.util.Assert;
  */
 @WebServlet(asyncSupported = true)
 @SuppressWarnings("serial")
-public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport implements Servlet {
+public class ServletHttpHandlerAdapter implements Servlet {
+
+	private static final Log logger = LogFactory.getLog(ReactorHttpHandlerAdapter.class);
+
 
 	private static final int DEFAULT_BUFFER_SIZE = 8192;
 
 
+	private final HttpHandler httpHandler;
+
 	private int bufferSize = DEFAULT_BUFFER_SIZE;
+
 
 	// Servlet is based on blocking I/O, hence the usage of non-direct, heap-based buffers
 	// (i.e. 'false' as constructor argument)
@@ -58,11 +65,8 @@ public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport impleme
 
 
 	public ServletHttpHandlerAdapter(HttpHandler httpHandler) {
-		super(httpHandler);
-	}
-
-	public ServletHttpHandlerAdapter(Map<String, HttpHandler> handlerMap) {
-		super(handlerMap);
+		Assert.notNull(httpHandler, "HttpHandler must not be null");
+		this.httpHandler = httpHandler;
 	}
 
 
@@ -103,7 +107,7 @@ public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport impleme
 		ServerHttpResponse httpResponse = createResponse(((HttpServletResponse) response), asyncContext);
 
 		HandlerResultSubscriber subscriber = new HandlerResultSubscriber(asyncContext);
-		getHttpHandler().handle(httpRequest, httpResponse).subscribe(subscriber);
+		this.httpHandler.handle(httpRequest, httpResponse).subscribe(subscriber);
 	}
 
 	protected ServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context) throws IOException {

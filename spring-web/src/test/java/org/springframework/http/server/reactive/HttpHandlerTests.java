@@ -34,11 +34,11 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
- * Unit tests for {@link HttpHandlerAdapterSupport}.
+ * Unit tests for {@link HttpHandler}.
  *
  * @author Rossen Stoyanchev
  */
-public class HttpHandlerAdapterSupportTests {
+public class HttpHandlerTests {
 
 	@Test
 	public void invalidContextPath() {
@@ -139,10 +139,14 @@ public class HttpHandlerAdapterSupportTests {
 
 
 	@SuppressWarnings("WeakerAccess")
-	private static class TestHttpHandlerAdapter extends HttpHandlerAdapterSupport {
+	private static class TestHttpHandlerAdapter {
+
+
+		private final HttpHandler httpHandler;
+
 
 		public TestHttpHandlerAdapter(Map<String, HttpHandler> handlerMap) {
-			super(handlerMap);
+			this.httpHandler = HttpHandler.of(handlerMap);
 		}
 
 		public ServerHttpResponse handle(String path) {
@@ -152,7 +156,7 @@ public class HttpHandlerAdapterSupportTests {
 
 		public ServerHttpResponse handle(ServerHttpRequest request) {
 			ServerHttpResponse response = new MockServerHttpResponse();
-			getHttpHandler().handle(request, response);
+			this.httpHandler.handle(request, response);
 			return response;
 		}
 	}
