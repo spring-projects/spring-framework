@@ -104,8 +104,10 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		try {
 			contentType = request.getHeaders().getContentType();
 			if (MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType)) {
-				Map<String, Object> hints = Collections.emptyMap();
-				return FORM_READER.readMono(FORM_DATA_VALUE_TYPE, request, hints).cache();
+				return FORM_READER
+						.readMono(FORM_DATA_VALUE_TYPE, request, Collections.emptyMap())
+						.otherwiseIfEmpty(EMPTY_FORM_DATA)
+						.cache();
 			}
 		}
 		catch (InvalidMediaTypeException ex) {

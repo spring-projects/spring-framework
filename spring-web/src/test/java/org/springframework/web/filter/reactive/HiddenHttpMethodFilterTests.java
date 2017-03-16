@@ -16,7 +16,7 @@
 
 package org.springframework.web.filter.reactive;
 
-import java.util.Optional;
+import java.time.Duration;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -27,6 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
 
@@ -34,116 +35,90 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 /**
- * Tests for {@link HiddenHttpMethodFilter}
- *
+ * Tests for {@link HiddenHttpMethodFilter}.
  * @author Greg Turnquist
+ * @author Rossen Stoyanchev
  */
 public class HiddenHttpMethodFilterTests {
 
 	private final HiddenHttpMethodFilter filter = new HiddenHttpMethodFilter();
 
+	private final TestWebFilterChain filterChain = new TestWebFilterChain();
+
+
 	@Test
 	public void filterWithParameter() {
-		ServerWebExchange mockExchange = createExchange(Optional.of("DELETE"));
-
-		WebFilterChain filterChain = exchange -> {
-			assertEquals("Invalid method", HttpMethod.DELETE, exchange.getRequest().getMethod());
-			return Mono.empty();
-		};
-
-		StepVerifier.create(filter.filter(mockExchange, filterChain))
-				.expectComplete()
-				.verify();
+		postForm("_method=DELETE").block(Duration.ZERO);
+		assertEquals(HttpMethod.DELETE, this.filterChain.getHttpMethod());
 	}
 
 	@Test
-	public void filterWithInvalidParameter() {
-		ServerWebExchange mockExchange = createExchange(Optional.of("INVALID"));
+	public void filterWithNoParameter() {
+		postForm("").block(Duration.ZERO);
+		assertEquals(HttpMethod.POST, this.filterChain.getHttpMethod());
+	}
 
-		WebFilterChain filterChain = exchange -> Mono.empty();
+	@Test
+	public void filterWithEmptyStringParameter() {
+		postForm("_method=").block(Duration.ZERO);
+		assertEquals(HttpMethod.POST, this.filterChain.getHttpMethod());
+	}
 
-		StepVerifier.create(filter.filter(mockExchange, filterChain))
+	@Test
+	public void filterWithDifferentMethodParam() {
+		this.filter.setMethodParamName("_foo");
+		postForm("_foo=DELETE").block(Duration.ZERO);
+		assertEquals(HttpMethod.DELETE, this.filterChain.getHttpMethod());
+	}
+
+	@Test
+	public void filterWithInvalidMethodValue() {
+		StepVerifier.create(postForm("_method=INVALID"))
 				.consumeErrorWith(error -> {
 					assertThat(error, Matchers.instanceOf(IllegalArgumentException.class));
-					assertEquals(error.getMessage(), "HttpMethod 'INVALID' is not supported");
+					assertEquals(error.getMessage(), "HttpMethod 'INVALID' not supported");
 				})
 				.verify();
 	}
 
 	@Test
-	public void filterWithNoParameter() {
-		ServerWebExchange mockExchange = createExchange(Optional.empty());
+	public void filterWithHttpPut() {
 
-		WebFilterChain filterChain = exchange -> {
-			assertEquals("Invalid method", HttpMethod.POST, exchange.getRequest().getMethod());
+		ServerWebExchange exchange = MockServerHttpRequest.put("/")
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+				.body("_method=DELETE")
+				.toExchange();
+
+		this.filter.filter(exchange, this.filterChain).block(Duration.ZERO);
+		assertEquals(HttpMethod.PUT, this.filterChain.getHttpMethod());
+	}
+
+
+	private Mono<Void> postForm(String body) {
+
+		MockServerWebExchange exchange = MockServerHttpRequest.post("/")
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+				.body(body)
+				.toExchange();
+
+		return this.filter.filter(exchange, this.filterChain);
+	}
+
+
+	private static class TestWebFilterChain implements WebFilterChain {
+
+		private HttpMethod httpMethod;
+
+
+		public HttpMethod getHttpMethod() {
+			return this.httpMethod;
+		}
+
+		@Override
+		public Mono<Void> filter(ServerWebExchange exchange) {
+			this.httpMethod = exchange.getRequest().getMethod();
 			return Mono.empty();
-		};
-
-		StepVerifier.create(filter.filter(mockExchange, filterChain))
-				.expectComplete()
-				.verify();
-	}
-
-	@Test
-	public void filterWithEmptyStringParameter() {
-		ServerWebExchange mockExchange = createExchange(Optional.of(""));
-
-		WebFilterChain filterChain = exchange -> {
-			assertEquals("Invalid method", HttpMethod.POST, exchange.getRequest().getMethod());
-			return Mono.empty();
-		};
-
-		StepVerifier.create(filter.filter(mockExchange, filterChain))
-				.expectComplete()
-				.verify();
-	}
-
-	@Test
-	public void filterWithDifferentMethodParam() {
-		ServerWebExchange mockExchange = createExchange("_foo", Optional.of("DELETE"));
-
-		WebFilterChain filterChain = exchange -> {
-			assertEquals("Invalid method", HttpMethod.DELETE, exchange.getRequest().getMethod());
-			return Mono.empty();
-		};
-
-		filter.setMethodParam("_foo");
-
-		StepVerifier.create(filter.filter(mockExchange, filterChain))
-				.expectComplete()
-				.verify();
-	}
-
-	@Test
-	public void filterWithoutPost() {
-		ServerWebExchange mockExchange = createExchange(Optional.of("DELETE")).mutate()
-				.request(builder -> builder.method(HttpMethod.PUT))
-				.build();
-
-		WebFilterChain filterChain = exchange -> {
-			assertEquals("Invalid method", HttpMethod.PUT, exchange.getRequest().getMethod());
-			return Mono.empty();
-		};
-
-		StepVerifier.create(filter.filter(mockExchange, filterChain))
-				.expectComplete()
-				.verify();
-	}
-
-	private ServerWebExchange createExchange(Optional<String> optionalMethod) {
-		return createExchange("_method", optionalMethod);
-	}
-
-	private ServerWebExchange createExchange(String methodName, Optional<String> optionalBody) {
-		MockServerHttpRequest.BodyBuilder builder = MockServerHttpRequest
-				.post("/hotels")
-				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
-
-		MockServerHttpRequest request = optionalBody
-				.map(method -> builder.body(methodName + "=" + method))
-				.orElse(builder.build());
-
-		return request.toExchange();
+		}
 	}
 
 }
