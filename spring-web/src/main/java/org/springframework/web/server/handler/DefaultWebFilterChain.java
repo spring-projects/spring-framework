@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.web.server.handler;
 
 import java.util.Arrays;
@@ -22,47 +21,44 @@ import java.util.List;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.util.CollectionUtils;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.WebHandler;
 
 /**
- * WebHandler decorator that invokes a chain of {@link WebFilter}s before the
- * delegate {@link WebHandler}.
+ * Default implementation of {@link WebFilterChain}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class FilteringWebHandler extends WebHandlerDecorator {
+public class DefaultWebFilterChain implements WebFilterChain {
 
-	private final WebFilter[] filters;
+	private final List<WebFilter> filters;
 
+	private final WebHandler handler;
 
-	/**
-	 * Constructor.
-	 * @param filters the chain of filters
-	 */
-	public FilteringWebHandler(WebHandler webHandler, List<WebFilter> filters) {
-		super(webHandler);
-		this.filters = !CollectionUtils.isEmpty(filters) ?
-				filters.toArray(new WebFilter[filters.size()]) : new WebFilter[0];
-	}
+	private volatile int index;
 
 
-	/**
-	 * Return a read-only list of the configured filters.
-	 */
-	public List<WebFilter> getFilters() {
-		return Arrays.asList(this.filters);
+	public DefaultWebFilterChain(WebHandler handler, WebFilter... filters) {
+		Assert.notNull(handler, "WebHandler is required");
+		this.filters = ObjectUtils.isEmpty(filters) ? Collections.emptyList() : Arrays.asList(filters);
+		this.handler = handler;
 	}
 
 
 	@Override
-	public Mono<Void> handle(ServerWebExchange exchange) {
-		return this.filters.length != 0 ?
-				new DefaultWebFilterChain(getDelegate(), this.filters).filter(exchange) :
-				super.handle(exchange);
+	public Mono<Void> filter(ServerWebExchange exchange) {
+		if (this.index < this.filters.size()) {
+			WebFilter filter = this.filters.get(this.index++);
+			return filter.filter(exchange, this);
+		}
+		else {
+			return this.handler.handle(exchange);
+		}
 	}
 
 }
