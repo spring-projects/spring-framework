@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test fixture for {@link ContentNegotiationManagerFactoryBean} tests.
@@ -70,7 +70,7 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		assertEquals("Should be able to resolve file extensions by default",
 				Collections.singletonList(MediaType.IMAGE_GIF), manager.resolveMediaTypes(this.webRequest));
 
-		this.servletRequest.setRequestURI("/flower.xyz");
+		this.servletRequest.setRequestURI("/flower.foobarbaz");
 
 		assertEquals("Should ignore unknown extensions by default",
 				Collections.<MediaType>emptyList(), manager.resolveMediaTypes(this.webRequest));
@@ -107,20 +107,6 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		assertEquals(Collections.singletonList(MediaType.IMAGE_GIF), manager.resolveMediaTypes(this.webRequest));
 	}
 
-	@Test
-	public void favorPathWithJafTurnedOff() throws Exception {
-		this.factoryBean.setFavorPathExtension(true);
-		this.factoryBean.setUseJaf(false);
-		this.factoryBean.afterPropertiesSet();
-		ContentNegotiationManager manager = this.factoryBean.getObject();
-
-		this.servletRequest.setRequestURI("/flower.foo");
-		assertEquals(Collections.emptyList(), manager.resolveMediaTypes(this.webRequest));
-
-		this.servletRequest.setRequestURI("/flower.gif");
-		assertEquals(Collections.emptyList(), manager.resolveMediaTypes(this.webRequest));
-	}
-
 	@Test(expected = HttpMediaTypeNotAcceptableException.class)  // SPR-10170
 	public void favorPathWithIgnoreUnknownPathExtensionTurnedOff() throws Exception {
 		this.factoryBean.setFavorPathExtension(true);
@@ -128,7 +114,7 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		this.factoryBean.afterPropertiesSet();
 		ContentNegotiationManager manager = this.factoryBean.getObject();
 
-		this.servletRequest.setRequestURI("/flower.xyz");
+		this.servletRequest.setRequestURI("/flower.foobarbaz");
 		this.servletRequest.addParameter("format", "json");
 
 		manager.resolveMediaTypes(this.webRequest);

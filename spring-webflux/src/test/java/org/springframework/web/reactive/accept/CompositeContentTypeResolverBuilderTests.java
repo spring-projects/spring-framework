@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class CompositeContentTypeResolverBuilderTests {
 		assertEquals("Should be able to resolve file extensions by default",
 				Collections.singletonList(MediaType.IMAGE_GIF), resolver.resolveMediaTypes(exchange));
 
-		exchange = createExchange("/flower.xyz");
+		exchange = createExchange("/flower.foobar");
 
 		assertEquals("Should ignore unknown extensions by default",
 				Collections.<MediaType>emptyList(), resolver.resolveMediaTypes(exchange));
@@ -84,20 +84,6 @@ public class CompositeContentTypeResolverBuilderTests {
 		assertEquals(Collections.singletonList(MediaType.IMAGE_GIF), resolver.resolveMediaTypes(exchange));
 	}
 
-	@Test
-	public void favorPathWithJafTurnedOff() throws Exception {
-		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder()
-				.favorPathExtension(true)
-				.useJaf(false)
-				.build();
-
-		ServerWebExchange exchange = createExchange("/flower.foo");
-		assertEquals(Collections.emptyList(), resolver.resolveMediaTypes(exchange));
-
-		exchange = createExchange("/flower.gif");
-		assertEquals(Collections.emptyList(), resolver.resolveMediaTypes(exchange));
-	}
-
 	@Test(expected = NotAcceptableStatusException.class) // SPR-10170
 	public void favorPathWithIgnoreUnknownPathExtensionTurnedOff() throws Exception {
 		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder()
@@ -105,7 +91,7 @@ public class CompositeContentTypeResolverBuilderTests {
 				.ignoreUnknownPathExtensions(false)
 				.build();
 
-		ServerWebExchange exchange = createExchange("/flower.xyz?format=json");
+		ServerWebExchange exchange = createExchange("/flower.foobar?format=json");
 		resolver.resolveMediaTypes(exchange);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,61 +16,87 @@
 
 package org.springframework.http;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.activation.FileTypeMap;
-import javax.activation.MimetypesFileTypeMap;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
  * A factory delegate for resolving {@link MediaType} objects
  * from {@link Resource} handles or filenames.
  *
- * <p>This implementation is based on the Java Activation Framework,
- * sharing the MIME type definitions with Spring's JavaMail support.
- * However, JAF is an implementation detail and not leaking out.
- *
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  * @since 5.0
  */
 public class MediaTypeFactory {
 
-	private static final FileTypeMap fileTypeMap;
+	private static final String MIME_TYPES_FILE_NAME = "/org/springframework/http/mime.types";
+
+	private static final MultiValueMap<String, MediaType> fileExtensionToMediaTypes;
 
 	static {
-		fileTypeMap = loadFileTypeMapFromContextSupportModule();
+		fileExtensionToMediaTypes = parseMimeTypes();
 	}
 
+	/**
+	 * Parse the {@code mime.types} file found in the resources. Format is:
+	 * <code>
+	 * # comments begin with a '#'<br>
+	 * # the format is &lt;mime type> &lt;space separated file extensions><br>
+	 * # for example:<br>
+	 * text/plain    txt text<br>
+	 * # this would map file.txt and file.text to<br>
+	 * # the mime type "text/plain"<br>
+	 * </code>
+	 * @return a multi-value map, mapping media types to file extensions.
+	 */
+	private static MultiValueMap<String, MediaType> parseMimeTypes() {
+		InputStream is = null;
+		try {
+			is = MediaTypeFactory.class.getResourceAsStream(MIME_TYPES_FILE_NAME);
+			BufferedReader reader =
+					new BufferedReader(new InputStreamReader(is, StandardCharsets.US_ASCII));
 
-	private static FileTypeMap loadFileTypeMapFromContextSupportModule() {
-		// See if we can find the extended mime.types from the context-support module...
-		Resource mappingLocation = new ClassPathResource("org/springframework/mail/javamail/mime.types");
-		if (mappingLocation.exists()) {
-			InputStream inputStream = null;
-			try {
-				inputStream = mappingLocation.getInputStream();
-				return new MimetypesFileTypeMap(inputStream);
+			MultiValueMap<String, MediaType> result = new LinkedMultiValueMap<>();
+			String line;
+			while ((line = reader.readLine()) != null) {
+				if (line.isEmpty() || line.charAt(0) == '#') {
+					continue;
+				}
+				String[] tokens = StringUtils.tokenizeToStringArray(line, " \t\n\r\f");
+				MediaType mediaType = MediaType.parseMediaType(tokens[0]);
+
+				for (int i = 1; i < tokens.length; i++) {
+					String fileExtension = tokens[i].toLowerCase(Locale.ENGLISH);
+					result.add(fileExtension, mediaType);
+				}
 			}
-			catch (IOException ex) {
-				// ignore
-			}
-			finally {
-				if (inputStream != null) {
-					try {
-						inputStream.close();
-					}
-					catch (IOException ex) {
-						// ignore
-					}
+			return result;
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException("Could not load '" + MIME_TYPES_FILE_NAME + "'", ex);
+		}
+		finally {
+			if (is != null) {
+				try {
+					is.close();
+				}
+				catch (IOException ignore) {
 				}
 			}
 		}
-		return FileTypeMap.getDefaultFileTypeMap();
 	}
-
 
 	/**
 	 * Determine a media type for the given resource, if possible.
@@ -88,8 +114,20 @@ public class MediaTypeFactory {
 	 * @return the corresponding media type, or {@code null} if none found
 	 */
 	public static MediaType getMediaType(String filename) {
-		String mediaType = fileTypeMap.getContentType(filename);
-		return (StringUtils.hasText(mediaType) ? MediaType.parseMediaType(mediaType) : null);
+		List<MediaType> mediaTypes = getMediaTypes(filename);
+		return (!mediaTypes.isEmpty() ? mediaTypes.get(0) : null);
+	}
+
+	/**
+	 * Determine the media types for the given file name, if possible.
+	 * @param filename the file name plus extension
+	 * @return the corresponding media types, or an empty list if none found
+	 */
+	public static List<MediaType> getMediaTypes(String filename) {
+		return Optional.ofNullable(StringUtils.getFilenameExtension(filename))
+				.map(s -> s.toLowerCase(Locale.ENGLISH))
+				.map(fileExtensionToMediaTypes::get)
+				.orElse(Collections.emptyList());
 	}
 
 }

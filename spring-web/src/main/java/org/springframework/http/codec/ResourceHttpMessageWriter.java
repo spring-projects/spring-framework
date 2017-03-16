@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,8 +135,10 @@ public class ResourceHttpMessageWriter extends AbstractServerHttpMessageWriter<R
 		if (headers.getContentType() == null) {
 			if (mediaType == null || !mediaType.isConcrete() ||
 					MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
-				mediaType = Optional.ofNullable(MediaTypeFactory.getMediaType(resource)).
-						orElse(MediaType.APPLICATION_OCTET_STREAM);
+				mediaType = MediaTypeFactory.getMediaType(resource);
+				if (mediaType == null) {
+					mediaType = MediaType.APPLICATION_OCTET_STREAM;
+				}
 			}
 			headers.setContentType(mediaType);
 		}

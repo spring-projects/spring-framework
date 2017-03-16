@@ -91,7 +91,7 @@ public class MessageWriterResultHandlerTests {
 		MethodParameter type = on(TestController.class).resolveReturnType(Resource.class);
 		this.resultHandler.writeBody(body, type, this.exchange).block(Duration.ofSeconds(5));
 
-		assertEquals("image/x-png", this.response.getHeaders().getFirst("Content-Type"));
+		assertEquals("image/png", this.response.getHeaders().getFirst("Content-Type"));
 	}
 
 	@Test  // SPR-13631
