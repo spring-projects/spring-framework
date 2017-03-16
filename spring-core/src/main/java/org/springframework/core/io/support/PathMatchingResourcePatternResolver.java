@@ -284,9 +284,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 		}
 		else {
-			// Only look for a pattern after a prefix here
-			// (to not get fooled by a pattern symbol in a strange prefix).
-			int prefixEnd = locationPattern.indexOf(":") + 1;
+			// Generally only look for a pattern after a prefix here,
+			// and on Tomcat only after the "*/" separator for its "war:" protocol.
+			int prefixEnd = (locationPattern.startsWith("war:") ? locationPattern.indexOf("*/") + 1 :
+					locationPattern.indexOf(":") + 1);
 			if (getPathMatcher().isPattern(locationPattern.substring(prefixEnd))) {
 				// a file pattern
 				return findPathMatchingResources(locationPattern);
