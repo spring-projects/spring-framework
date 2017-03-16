@@ -50,6 +50,7 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
@@ -192,6 +193,12 @@ public interface WebTestClient {
 		 * @see ServerWebExchange#mutate()
 		 */
 		<T extends B> T exchangeMutator(UnaryOperator<ServerWebExchange> mutator);
+
+		/**
+		 * Configure {@link WebFilter}'s for server request processing.
+		 * @param filter one or more filters
+		 */
+		<T extends B> T webFilter(WebFilter... filter);
 
 		/**
 		 * Proceed to configure and build the test client.

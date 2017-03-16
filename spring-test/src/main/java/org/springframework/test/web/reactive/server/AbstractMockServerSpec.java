@@ -16,10 +16,14 @@
 
 package org.springframework.test.web.reactive.server;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.UnaryOperator;
 
-import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
@@ -33,10 +37,23 @@ abstract class AbstractMockServerSpec<B extends WebTestClient.MockServerSpec<B>>
 
 	private final ExchangeMutatorWebFilter exchangeMutatorFilter = new ExchangeMutatorWebFilter();
 
+	private final List<WebFilter> filters = new ArrayList<>(4);
+
+
+	AbstractMockServerSpec() {
+		this.filters.add(this.exchangeMutatorFilter);
+	}
+
 
 	@Override
 	public <T extends B> T exchangeMutator(UnaryOperator<ServerWebExchange> mutator) {
 		this.exchangeMutatorFilter.register(mutator);
+		return self();
+	}
+
+	@Override
+	public <T extends B> T webFilter(WebFilter... filter) {
+		this.filters.addAll(Arrays.asList(filter));
 		return self();
 	}
 
@@ -48,11 +65,24 @@ abstract class AbstractMockServerSpec<B extends WebTestClient.MockServerSpec<B>>
 
 	@Override
 	public WebTestClient.Builder configureClient() {
-		HttpHandler handler = initHttpHandlerBuilder().prependFilter(this.exchangeMutatorFilter).build();
-		return new DefaultWebTestClientBuilder(handler, this.exchangeMutatorFilter);
+		WebHttpHandlerBuilder builder = initHttpHandlerBuilder();
+		filtersInReverse().forEach(builder::prependFilter);
+		return new DefaultWebTestClientBuilder(builder.build(), this.exchangeMutatorFilter);
 	}
 
+	/**
+	 * Sub-classes to create the {@code WebHttpHandlerBuilder} to use.
+	 */
 	protected abstract WebHttpHandlerBuilder initHttpHandlerBuilder();
+
+	/**
+	 * Return the filters in reverse order for pre-pending.
+	 */
+	private List<WebFilter> filtersInReverse() {
+		List<WebFilter> result = new ArrayList<>(this.filters);
+		Collections.reverse(result);
+		return result;
+	}
 
 	@Override
 	public WebTestClient build() {

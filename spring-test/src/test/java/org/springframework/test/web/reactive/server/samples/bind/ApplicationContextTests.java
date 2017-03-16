@@ -32,9 +32,7 @@ import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.server.ServerWebExchange;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.springframework.web.server.WebFilter;
 
 /**
  * Binding to server infrastructure declared in a Spring ApplicationContext.
@@ -56,24 +54,16 @@ public class ApplicationContextTests {
 
 		this.client = WebTestClient.bindToApplicationContext(context)
 				.exchangeMutator(principal("Pablo"))
+				.webFilter(prefixFilter("Mr."))
 				.build();
 	}
-
-	private UnaryOperator<ServerWebExchange> principal(String userName) {
-		return exchange -> {
-			Principal user = mock(Principal.class);
-			when(user.getName()).thenReturn(userName);
-			return exchange.mutate().principal(Mono.just(user)).build();
-		};
-	}
-
 
 	@Test
 	public void basic() throws Exception {
 		this.client.get().uri("/principal")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value().isEqualTo("Hello Pablo!");
+				.expectBody(String.class).value().isEqualTo("Hello Mr. Pablo!");
 	}
 
 	@Test
@@ -82,7 +72,7 @@ public class ApplicationContextTests {
 				.get().uri("/principal")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value().isEqualTo("Hello Giovanni!");
+				.expectBody(String.class).value().isEqualTo("Hello Mr. Giovanni!");
 	}
 
 	@Test
@@ -94,6 +84,18 @@ public class ApplicationContextTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody(String.class).value().isEqualTo("foo+bar");
+	}
+
+
+	private UnaryOperator<ServerWebExchange> principal(String userName) {
+		return exchange -> exchange.mutate().principal(Mono.just(new TestUser(userName))).build();
+	}
+
+	private WebFilter prefixFilter(String prefix) {
+		return (exchange, chain) -> {
+			Mono<Principal> user = exchange.getPrincipal().map(p -> new TestUser(prefix + " " + p.getName()));
+			return chain.filter(exchange.mutate().principal(user).build());
+		};
 	}
 
 	private UnaryOperator<ServerWebExchange> attribute(String attrName, String attrValue) {
@@ -126,6 +128,20 @@ public class ApplicationContextTests {
 		@GetMapping("/attributes")
 		public String handle(@RequestAttribute String attr1, @RequestAttribute String attr2) {
 			return attr1 + "+" + attr2;
+		}
+	}
+
+	private static class TestUser implements Principal {
+
+		private final String name;
+
+		TestUser(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String getName() {
+			return this.name;
 		}
 	}
 
