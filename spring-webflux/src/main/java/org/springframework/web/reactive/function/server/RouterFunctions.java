@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.function.server.support.HandlerFunctionAdapter;
 import org.springframework.web.reactive.function.server.support.ServerResponseResultHandler;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
@@ -155,7 +156,7 @@ public abstract class RouterFunctions {
 	 * For instance
 	 * <pre class="code">
 	 * Resource location = new FileSystemResource("public-resources/");
-	 * RoutingFunction&lt;Resource&gt; resources = RouterFunctions.resources("/resources/**", location);
+	 * RoutingFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources("/resources/**", location);
      * </pre>
 	 * @param pattern the pattern to match
 	 * @param location the location directory relative to which resources should be resolved
@@ -232,10 +233,22 @@ public abstract class RouterFunctions {
 			addAttributes(exchange, request);
 			return routerFunction.route(request)
 					.defaultIfEmpty(notFound())
-					.then(handlerFunction -> handlerFunction.handle(request))
+					.then(handlerFunction -> invokeHandler(handlerFunction, request))
+					.otherwise(ResponseStatusException.class, RouterFunctions::responseStatusFallback)
 					.then(response -> response.writeTo(exchange, strategies));
 		});
 	}
+
+	private static <T extends ServerResponse> Mono<T> invokeHandler(HandlerFunction<T> handlerFunction,
+			ServerRequest request) {
+		try {
+			return handlerFunction.handle(request);
+		}
+		catch (Throwable t) {
+			return Mono.error(t);
+		}
+	}
+
 
 	/**
 	 * Convert the given {@code RouterFunction} into a {@code HandlerMapping}.
@@ -282,6 +295,11 @@ public abstract class RouterFunctions {
 	@SuppressWarnings("unchecked")
 	private static <T extends ServerResponse> HandlerFunction<T> notFound() {
 		return (HandlerFunction<T>) NOT_FOUND_HANDLER;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T extends ServerResponse> Mono<T> responseStatusFallback(ResponseStatusException ex) {
+		return (Mono<T>) ServerResponse.status(ex.getStatus()).build();
 	}
 
 	@SuppressWarnings("unchecked")
