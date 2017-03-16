@@ -455,6 +455,9 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 					try {
 						sendHeartbeat();
 					}
+					catch (Throwable ex) {
+						// Ignore: already handled in writeFrame...
+					}
 					finally {
 						this.expired = true;
 					}
