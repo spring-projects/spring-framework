@@ -18,13 +18,9 @@ package org.springframework.web.cors.reactive;
 
 import org.junit.Test;
 
-import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -42,7 +38,7 @@ public class UrlBasedCorsConfigurationSourceTests {
 
 	@Test
 	public void empty() {
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/bar/test.html");
+		ServerWebExchange exchange = MockServerHttpRequest.get("/bar/test.html").toExchange();
 		assertNull(this.configSource.getCorsConfiguration(exchange));
 	}
 
@@ -51,22 +47,16 @@ public class UrlBasedCorsConfigurationSourceTests {
 		CorsConfiguration config = new CorsConfiguration();
 		this.configSource.registerCorsConfiguration("/bar/**", config);
 
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/foo/test.html");
+		ServerWebExchange exchange = MockServerHttpRequest.get("/foo/test.html").toExchange();
 		assertNull(this.configSource.getCorsConfiguration(exchange));
 
-		exchange = createExchange(HttpMethod.GET, "/bar/test.html");
+		exchange = MockServerHttpRequest.get("/bar/test.html").toExchange();
 		assertEquals(config, this.configSource.getCorsConfiguration(exchange));
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void unmodifiableConfigurationsMap() {
 		this.configSource.getCorsConfigurations().put("/**", new CorsConfiguration());
-	}
-
-	private ServerWebExchange createExchange(HttpMethod httpMethod, String url) {
-		ServerHttpRequest request = MockServerHttpRequest.method(httpMethod, url).build();
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		return new DefaultServerWebExchange(request, response);
 	}
 
 }

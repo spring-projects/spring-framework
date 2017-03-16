@@ -25,15 +25,13 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
-import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.method.ResolvableMethod;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.reactive.BindingContext;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -53,7 +51,7 @@ public class ErrorsArgumentResolverTests {
 
 	private BindingResult bindingResult;
 
-	private ServerWebExchange exchange;
+	private MockServerWebExchange exchange = MockServerHttpRequest.post("/path").toExchange();
 
 	private final ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
@@ -61,11 +59,6 @@ public class ErrorsArgumentResolverTests {
 	@Before
 	public void setup() throws Exception {
 		this.resolver = new ErrorsMethodArgumentResolver(new ReactiveAdapterRegistry());
-
-		MockServerHttpRequest request = MockServerHttpRequest.post("/path").build();
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(request, response);
-
 		Foo foo = new Foo();
 		WebExchangeDataBinder binder = this.bindingContext.createDataBinder(this.exchange, foo, "foo");
 		this.bindingResult = binder.getBindingResult();

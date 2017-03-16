@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
@@ -26,17 +25,16 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.web.reactive.BindingContext;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.method.ResolvableMethod;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link ServerWebExchangeArgumentResolver}.
@@ -47,19 +45,9 @@ public class ServerWebExchangeArgumentResolverTests {
 	private final ServerWebExchangeArgumentResolver resolver =
 			new ServerWebExchangeArgumentResolver(new ReactiveAdapterRegistry());
 
-	private ServerWebExchange exchange;
+	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/path").toExchange();
 
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
-
-
-	@Before
-	public void setup() throws Exception {
-		ServerHttpRequest request = MockServerHttpRequest.get("/path").build();
-		ServerHttpResponse response = new MockServerHttpResponse();
-
-		WebSessionManager sessionManager = new MockWebSessionManager(mock(WebSession.class));
-		this.exchange = new DefaultServerWebExchange(request, response, sessionManager);
-	}
 
 
 	@Test

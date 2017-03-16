@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.resource;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -27,11 +28,10 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@code ResourceTransformerSupport}.
@@ -45,8 +45,6 @@ public class ResourceTransformerSupportTests {
 
 	private TestResourceTransformerSupport transformer;
 
-	private MockServerHttpRequest request;
-
 
 	@Before
 	public void setup() {
@@ -59,8 +57,6 @@ public class ResourceTransformerSupportTests {
 
 		this.transformer = new TestResourceTransformerSupport();
 		this.transformer.setResourceUrlProvider(createResourceUrlProvider(resolvers));
-
-		this.request = MockServerHttpRequest.get("").build();
 	}
 
 	private ResourceUrlProvider createResourceUrlProvider(List<ResourceResolver> resolvers) {
@@ -75,11 +71,11 @@ public class ResourceTransformerSupportTests {
 
 	@Test
 	public void resolveUrlPath() throws Exception {
-		this.request = MockServerHttpRequest.get("/resources/main.css").build();
+		MockServerWebExchange exchange = MockServerHttpRequest.get("/resources/main.css").toExchange();
 		String resourcePath = "/resources/bar.css";
 		Resource css = new ClassPathResource("test/main.css", getClass());
 		String actual = this.transformer.resolveUrlPath(
-				resourcePath, createExchange(), css, this.transformerChain).blockMillis(5000);
+				resourcePath, exchange, css, this.transformerChain).block(Duration.ofSeconds(5));
 
 		assertEquals("/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
 		assertEquals("/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
@@ -88,8 +84,9 @@ public class ResourceTransformerSupportTests {
 	@Test
 	public void resolveUrlPathWithRelativePath() throws Exception {
 		Resource css = new ClassPathResource("test/main.css", getClass());
+		MockServerWebExchange exchange = MockServerHttpRequest.get("").toExchange();
 		String actual = this.transformer.resolveUrlPath(
-				"bar.css", createExchange(), css, this.transformerChain).blockMillis(5000);
+				"bar.css", exchange, css, this.transformerChain).block(Duration.ofSeconds(5));
 
 		assertEquals("bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
 	}
@@ -97,15 +94,11 @@ public class ResourceTransformerSupportTests {
 	@Test
 	public void resolveUrlPathWithRelativePathInParentDirectory() throws Exception {
 		Resource imagePng = new ClassPathResource("test/images/image.png", getClass());
+		MockServerWebExchange exchange = MockServerHttpRequest.get("").toExchange();
 		String actual = this.transformer.resolveUrlPath(
-				"../bar.css", createExchange(), imagePng, this.transformerChain).blockMillis(5000);
+				"../bar.css", exchange, imagePng, this.transformerChain).block(Duration.ofSeconds(5));
 
 		assertEquals("../bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
-	}
-
-
-	private DefaultServerWebExchange createExchange() {
-		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}
 
 

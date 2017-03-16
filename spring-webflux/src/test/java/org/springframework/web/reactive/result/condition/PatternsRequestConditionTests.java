@@ -16,21 +16,18 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Set;
 
 import org.junit.Test;
 
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
 
 /**
  * Unit tests for {@link PatternsRequestCondition}.
@@ -83,7 +80,7 @@ public class PatternsRequestConditionTests {
 	@Test
 	public void matchDirectPath() throws Exception {
 		PatternsRequestCondition condition = new PatternsRequestCondition("/foo");
-		PatternsRequestCondition match = condition.getMatchingCondition(createExchange("/foo"));
+		PatternsRequestCondition match = condition.getMatchingCondition(get("/foo").toExchange());
 
 		assertNotNull(match);
 	}
@@ -91,7 +88,7 @@ public class PatternsRequestConditionTests {
 	@Test
 	public void matchPattern() throws Exception {
 		PatternsRequestCondition condition = new PatternsRequestCondition("/foo/*");
-		PatternsRequestCondition match = condition.getMatchingCondition(createExchange("/foo/bar"));
+		PatternsRequestCondition match = condition.getMatchingCondition(get("/foo/bar").toExchange());
 
 		assertNotNull(match);
 	}
@@ -99,7 +96,7 @@ public class PatternsRequestConditionTests {
 	@Test
 	public void matchSortPatterns() throws Exception {
 		PatternsRequestCondition condition = new PatternsRequestCondition("/*/*", "/foo/bar", "/foo/*");
-		PatternsRequestCondition match = condition.getMatchingCondition(createExchange("/foo/bar"));
+		PatternsRequestCondition match = condition.getMatchingCondition(get("/foo/bar").toExchange());
 		PatternsRequestCondition expected = new PatternsRequestCondition("/foo/bar", "/foo/*", "/*/*");
 
 		assertEquals(expected, match);
@@ -107,7 +104,7 @@ public class PatternsRequestConditionTests {
 
 	@Test
 	public void matchSuffixPattern() throws Exception {
-		ServerWebExchange exchange = createExchange("/foo.html");
+		ServerWebExchange exchange = get("/foo.html").toExchange();
 
 		PatternsRequestCondition condition = new PatternsRequestCondition("/{foo}");
 		PatternsRequestCondition match = condition.getMatchingCondition(exchange);
@@ -130,13 +127,13 @@ public class PatternsRequestConditionTests {
 		Set<String> extensions = Collections.singleton("json");
 		PatternsRequestCondition condition = new PatternsRequestCondition(patterns, null, null, true, false, extensions);
 
-		ServerWebExchange exchange = createExchange("/jobs/my.job");
+		MockServerWebExchange exchange = get("/jobs/my.job").toExchange();
 		PatternsRequestCondition match = condition.getMatchingCondition(exchange);
 
 		assertNotNull(match);
 		assertEquals("/jobs/{jobName}", match.getPatterns().iterator().next());
 
-		exchange = createExchange("/jobs/my.job.json");
+		exchange = get("/jobs/my.job.json").toExchange();
 		match = condition.getMatchingCondition(exchange);
 
 		assertNotNull(match);
@@ -153,7 +150,7 @@ public class PatternsRequestConditionTests {
 
 		PatternsRequestCondition combined = condition1.combine(condition2);
 
-		ServerWebExchange exchange = createExchange("/prefix/suffix.json");
+		MockServerWebExchange exchange = get("/prefix/suffix.json").toExchange();
 		PatternsRequestCondition match = combined.getMatchingCondition(exchange);
 
 		assertNotNull(match);
@@ -161,7 +158,7 @@ public class PatternsRequestConditionTests {
 
 	@Test
 	public void matchTrailingSlash() throws Exception {
-		ServerWebExchange exchange = createExchange("/foo/");
+		MockServerWebExchange exchange = get("/foo/").toExchange();
 
 		PatternsRequestCondition condition = new PatternsRequestCondition("/foo");
 		PatternsRequestCondition match = condition.getMatchingCondition(exchange);
@@ -185,7 +182,7 @@ public class PatternsRequestConditionTests {
 	@Test
 	public void matchPatternContainsExtension() throws Exception {
 		PatternsRequestCondition condition = new PatternsRequestCondition("/foo.jpg");
-		PatternsRequestCondition match = condition.getMatchingCondition(createExchange("/foo.html"));
+		PatternsRequestCondition match = condition.getMatchingCondition(get("/foo.html").toExchange());
 
 		assertNull(match);
 	}
@@ -195,7 +192,7 @@ public class PatternsRequestConditionTests {
 		PatternsRequestCondition c1 = new PatternsRequestCondition("/foo*");
 		PatternsRequestCondition c2 = new PatternsRequestCondition("/foo*");
 
-		assertEquals(0, c1.compareTo(c2, createExchange("/foo")));
+		assertEquals(0, c1.compareTo(c2, get("/foo").toExchange()));
 	}
 
 	@Test
@@ -203,12 +200,12 @@ public class PatternsRequestConditionTests {
 		PatternsRequestCondition c1 = new PatternsRequestCondition("/fo*");
 		PatternsRequestCondition c2 = new PatternsRequestCondition("/foo");
 
-		assertEquals(1, c1.compareTo(c2, createExchange("/foo")));
+		assertEquals(1, c1.compareTo(c2, get("/foo").toExchange()));
 	}
 
 	@Test
 	public void compareNumberOfMatchingPatterns() throws Exception {
-		ServerWebExchange exchange = createExchange("/foo.html");
+		ServerWebExchange exchange = get("/foo.html").toExchange();
 
 		PatternsRequestCondition c1 = new PatternsRequestCondition("/foo", "*.jpeg");
 		PatternsRequestCondition c2 = new PatternsRequestCondition("/foo", "*.html");
@@ -220,10 +217,5 @@ public class PatternsRequestConditionTests {
 		assertEquals(1, match1.compareTo(match2, exchange));
 	}
 
-
-	private ServerWebExchange createExchange(String path) throws URISyntaxException {
-		ServerHttpRequest request = MockServerHttpRequest.get(path).build();
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
-	}
 
 }

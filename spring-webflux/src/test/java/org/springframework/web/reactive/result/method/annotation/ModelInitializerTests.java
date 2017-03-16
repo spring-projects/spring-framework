@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import rx.Single;
@@ -30,7 +29,6 @@ import rx.Single;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.ui.Model;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
@@ -44,7 +42,6 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -57,20 +54,9 @@ import static org.springframework.web.reactive.result.method.annotation.RequestM
  */
 public class ModelInitializerTests {
 
-	private ModelInitializer modelInitializer;
+	private final ModelInitializer modelInitializer = new ModelInitializer(new ReactiveAdapterRegistry());
 
-	private ServerWebExchange exchange;
-
-
-	@Before
-	public void setup() throws Exception {
-
-		this.modelInitializer = new ModelInitializer(new ReactiveAdapterRegistry());
-
-		MockServerHttpRequest request = MockServerHttpRequest.get("/path").build();
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(request, response);
-	}
+	private final ServerWebExchange exchange = MockServerHttpRequest.get("/path").toExchange();
 
 
 	@SuppressWarnings("unchecked")

@@ -31,13 +31,12 @@ import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rossen Stoyanchev
@@ -47,9 +46,7 @@ public class FreeMarkerViewTests {
 	private static final String TEMPLATE_PATH = "classpath*:org/springframework/web/reactive/view/freemarker/";
 
 
-	private ServerWebExchange exchange;
-
-	private MockServerHttpResponse response;
+	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/path").toExchange();
 
 	private GenericApplicationContext context;
 
@@ -69,10 +66,6 @@ public class FreeMarkerViewTests {
 		configurer.setTemplateLoaderPath(TEMPLATE_PATH);
 		configurer.setResourceLoader(this.context);
 		this.freeMarkerConfig = configurer.createConfiguration();
-
-		MockServerHttpRequest request = MockServerHttpRequest.get("/path").build();
-		this.response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(request, this.response);
 	}
 
 
@@ -115,7 +108,7 @@ public class FreeMarkerViewTests {
 		model.addAttribute("hello", "hi FreeMarker");
 		view.render(model, null, this.exchange).blockMillis(5000);
 
-		StepVerifier.create(this.response.getBody())
+		StepVerifier.create(this.exchange.getResponse().getBody())
 				.consumeNextWith(buf -> assertEquals("<html><body>hi FreeMarker</body></html>", asString(buf)))
 				.expectComplete()
 				.verify();

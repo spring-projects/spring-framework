@@ -29,7 +29,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import io.reactivex.Flowable;
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -42,23 +41,20 @@ import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.springframework.core.io.buffer.support.DataBufferTestUtils.dumpString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.web.method.ResolvableMethod.on;
@@ -70,18 +66,26 @@ import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_T
  */
 public class MessageWriterResultHandlerTests {
 
-	private AbstractMessageWriterResultHandler resultHandler;
+	private final AbstractMessageWriterResultHandler resultHandler = initResultHandler();
 
-	private MockServerHttpResponse response = new MockServerHttpResponse();
-
-	private ServerWebExchange exchange;
+	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/path").toExchange();
 
 
-	@Before
-	public void setup() throws Exception {
-		this.resultHandler = createResultHandler();
-		ServerHttpRequest request = MockServerHttpRequest.get("/path").build();
-		this.exchange = new DefaultServerWebExchange(request, this.response);
+	private AbstractMessageWriterResultHandler initResultHandler(HttpMessageWriter<?>... writers) {
+		List<HttpMessageWriter<?>> writerList;
+		if (ObjectUtils.isEmpty(writers)) {
+			writerList = new ArrayList<>();
+			writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
+			writerList.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
+			writerList.add(new ResourceHttpMessageWriter());
+			writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
+			writerList.add(new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder()));
+		}
+		else {
+			writerList = Arrays.asList(writers);
+		}
+		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder().build();
+		return new AbstractMessageWriterResultHandler(writerList, resolver) {};
 	}
 
 
@@ -91,7 +95,7 @@ public class MessageWriterResultHandlerTests {
 		MethodParameter type = on(TestController.class).resolveReturnType(Resource.class);
 		this.resultHandler.writeBody(body, type, this.exchange).block(Duration.ofSeconds(5));
 
-		assertEquals("image/x-png", this.response.getHeaders().getFirst("Content-Type"));
+		assertEquals("image/x-png", this.exchange.getResponse().getHeaders().getFirst("Content-Type"));
 	}
 
 	@Test  // SPR-13631
@@ -103,7 +107,7 @@ public class MessageWriterResultHandlerTests {
 		MethodParameter type = on(TestController.class).resolveReturnType(String.class);
 		this.resultHandler.writeBody(body, type, this.exchange).block(Duration.ofSeconds(5));
 
-		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
+		assertEquals(APPLICATION_JSON_UTF8, this.exchange.getResponse().getHeaders().getContentType());
 	}
 
 	@Test
@@ -127,8 +131,8 @@ public class MessageWriterResultHandlerTests {
 	private void testVoid(Object body, MethodParameter returnType) {
 		this.resultHandler.writeBody(body, returnType, this.exchange).block(Duration.ofSeconds(5));
 
-		assertNull(this.response.getHeaders().get("Content-Type"));
-		StepVerifier.create(this.response.getBody())
+		assertNull(this.exchange.getResponse().getHeaders().get("Content-Type"));
+		StepVerifier.create(this.exchange.getResponse().getBody())
 				.expectErrorMatches(ex -> ex.getMessage().startsWith("The body is not set.")).verify();
 	}
 
@@ -138,7 +142,7 @@ public class MessageWriterResultHandlerTests {
 		MethodParameter type = on(TestController.class).resolveReturnType(OutputStream.class);
 
 		HttpMessageWriter<?> writer = new EncoderHttpMessageWriter<>(new ByteBufferEncoder());
-		Mono<Void> mono = createResultHandler(writer).writeBody(body, type, this.exchange);
+		Mono<Void> mono = initResultHandler(writer).writeBody(body, type, this.exchange);
 
 		StepVerifier.create(mono).expectError(IllegalStateException.class).verify();
 	}
@@ -150,7 +154,7 @@ public class MessageWriterResultHandlerTests {
 		List<ParentClass> body = Arrays.asList(new Foo("foo"), new Bar("bar"));
 		this.resultHandler.writeBody(body, returnType, this.exchange).block(Duration.ofSeconds(5));
 
-		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
+		assertEquals(APPLICATION_JSON_UTF8, this.exchange.getResponse().getHeaders().getContentType());
 		assertResponseBody("[{\"type\":\"foo\",\"parentProperty\":\"foo\"}," +
 				"{\"type\":\"bar\",\"parentProperty\":\"bar\"}]");
 	}
@@ -161,7 +165,7 @@ public class MessageWriterResultHandlerTests {
 		MethodParameter type = on(TestController.class).resolveReturnType(Identifiable.class);
 		this.resultHandler.writeBody(body, type, this.exchange).block(Duration.ofSeconds(5));
 
-		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
+		assertEquals(APPLICATION_JSON_UTF8, this.exchange.getResponse().getHeaders().getContentType());
 		assertResponseBody("{\"id\":123,\"name\":\"foo\"}");
 	}
 
@@ -173,32 +177,14 @@ public class MessageWriterResultHandlerTests {
 		List<SimpleBean> body = Arrays.asList(new SimpleBean(123L, "foo"), new SimpleBean(456L, "bar"));
 		this.resultHandler.writeBody(body, returnType, this.exchange).block(Duration.ofSeconds(5));
 
-		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
+		assertEquals(APPLICATION_JSON_UTF8, this.exchange.getResponse().getHeaders().getContentType());
 		assertResponseBody("[{\"id\":123,\"name\":\"foo\"},{\"id\":456,\"name\":\"bar\"}]");
 	}
 
 
-	private AbstractMessageWriterResultHandler createResultHandler(HttpMessageWriter<?>... writers) {
-		List<HttpMessageWriter<?>> writerList;
-		if (ObjectUtils.isEmpty(writers)) {
-			writerList = new ArrayList<>();
-			writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
-			writerList.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
-			writerList.add(new ResourceHttpMessageWriter());
-			writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
-			writerList.add(new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder()));
-		}
-		else {
-			writerList = Arrays.asList(writers);
-		}
-		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder().build();
-		return new AbstractMessageWriterResultHandler(writerList, resolver) {};
-	}
-
 	private void assertResponseBody(String responseBody) {
-		StepVerifier.create(this.response.getBody())
-				.consumeNextWith(buf -> assertEquals(responseBody,
-						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)))
+		StepVerifier.create(this.exchange.getResponse().getBody())
+				.consumeNextWith(buf -> assertEquals(responseBody, dumpString(buf, StandardCharsets.UTF_8)))
 				.expectComplete()
 				.verify();
 	}

@@ -24,9 +24,7 @@ import org.junit.Test;
 
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 
@@ -36,7 +34,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class RequestContextTests {
 
-	private ServerWebExchange exchange;
+	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/").contextPath("foo/").toExchange();
 
 	private GenericApplicationContext applicationContext;
 
@@ -45,9 +43,6 @@ public class RequestContextTests {
 
 	@Before
 	public void init() {
-		MockServerHttpRequest request = MockServerHttpRequest.get("/").contextPath("foo/").build();
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(request, response);
 		this.applicationContext = new GenericApplicationContext();
 		this.applicationContext.refresh();
 	}

@@ -29,9 +29,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -163,9 +161,7 @@ public class VersionResourceResolverTests {
 		String version = "version";
 		String file = "bar.css";
 		Resource expected = new ClassPathResource("test/" + file, getClass());
-		MockServerHttpRequest request = MockServerHttpRequest.get("/resources/bar-version.css").build();
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		ServerWebExchange exchange = new DefaultServerWebExchange(request, response);
+		ServerWebExchange exchange = MockServerHttpRequest.get("/resources/bar-version.css").toExchange();
 		given(this.chain.resolveResource(exchange, versionFile, this.locations)).willReturn(Mono.empty());
 		given(this.chain.resolveResource(exchange, file, this.locations)).willReturn(Mono.just(expected));
 		given(this.versionStrategy.extractVersion(versionFile)).willReturn(version);

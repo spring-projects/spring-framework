@@ -20,21 +20,17 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
@@ -54,16 +50,8 @@ import static org.springframework.web.method.ResolvableMethod.on;
  */
 public class InvocableHandlerMethodTests {
 
-	private ServerWebExchange exchange;
-
-
-	@Before
-	public void setup() throws Exception {
-		this.exchange = new DefaultServerWebExchange(
-				MockServerHttpRequest.get("http://localhost:8080/path").build(),
-				new MockServerHttpResponse(),
-				new MockWebSessionManager());
-	}
+	private final MockServerWebExchange exchange =
+			MockServerHttpRequest.get("http://localhost:8080/path").toExchange();
 
 
 	@Test

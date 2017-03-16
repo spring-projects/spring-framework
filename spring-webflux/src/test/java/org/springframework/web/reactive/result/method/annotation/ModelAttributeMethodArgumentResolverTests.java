@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -31,7 +32,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -41,7 +41,6 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -123,7 +122,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 		testBindFoo(parameter, mono -> {
 			assertTrue(mono.getClass().getName(), mono instanceof Mono);
-			Object value = ((Mono<?>) mono).blockMillis(5000);
+			Object value = ((Mono<?>) mono).block(Duration.ofSeconds(5));
 			assertEquals(Foo.class, value.getClass());
 			return (Foo) value;
 		});
@@ -199,7 +198,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 		testBindFoo(parameter, mono -> {
 			assertTrue(mono.getClass().getName(), mono instanceof Mono);
-			Object value = ((Mono<?>) mono).blockMillis(5000);
+			Object value = ((Mono<?>) mono).block(Duration.ofSeconds(5));
 			assertEquals(Foo.class, value.getClass());
 			return (Foo) value;
 		});
@@ -207,8 +206,8 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 	private void testBindFoo(MethodParameter param, Function<Object, Foo> valueExtractor) throws Exception {
 		Object value = createResolver()
-				.resolveArgument(param, this.bindContext, exchange("name=Robert&age=25"))
-				.blockMillis(0);
+				.resolveArgument(param, this.bindContext, postForm("name=Robert&age=25"))
+				.block(Duration.ZERO);
 
 		Foo foo = valueExtractor.apply(value);
 		assertEquals("Robert", foo.getName());
@@ -238,7 +237,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 		testValidationError(parameter,
 				resolvedArgumentMono -> {
-					Object value = resolvedArgumentMono.blockMillis(5000);
+					Object value = resolvedArgumentMono.block(Duration.ofSeconds(5));
 					assertNotNull(value);
 					assertTrue(value instanceof Mono);
 					return (Mono<?>) value;
@@ -254,7 +253,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 		testValidationError(parameter,
 				resolvedArgumentMono -> {
-					Object value = resolvedArgumentMono.blockMillis(5000);
+					Object value = resolvedArgumentMono.block(Duration.ofSeconds(5));
 					assertNotNull(value);
 					assertTrue(value instanceof Single);
 					return Mono.from(RxReactiveStreams.toPublisher((Single) value));
@@ -264,7 +263,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 	private void testValidationError(MethodParameter param, Function<Mono<?>, Mono<?>> valueMonoExtractor)
 			throws URISyntaxException {
 
-		ServerWebExchange exchange = exchange("age=invalid");
+		ServerWebExchange exchange = postForm("age=invalid");
 		Mono<?> mono = createResolver().resolveArgument(param, this.bindContext, exchange);
 
 		mono = valueMonoExtractor.apply(mono);
@@ -284,10 +283,11 @@ public class ModelAttributeMethodArgumentResolverTests {
 		return new ModelAttributeMethodArgumentResolver(new ReactiveAdapterRegistry(), false);
 	}
 
-	private ServerWebExchange exchange(String formData) throws URISyntaxException {
-		MediaType mediaType = MediaType.APPLICATION_FORM_URLENCODED;
-		MockServerHttpRequest request = MockServerHttpRequest.post("/").contentType(mediaType).body(formData);
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
+	private ServerWebExchange postForm(String formData) throws URISyntaxException {
+		return MockServerHttpRequest.post("/")
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.body(formData)
+				.toExchange();
 	}
 
 

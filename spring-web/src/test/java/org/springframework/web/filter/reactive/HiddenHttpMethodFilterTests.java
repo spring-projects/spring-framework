@@ -27,10 +27,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -145,9 +143,7 @@ public class HiddenHttpMethodFilterTests {
 				.map(method -> builder.body(methodName + "=" + method))
 				.orElse(builder.build());
 
-		MockServerHttpResponse response = new MockServerHttpResponse();
-
-		return new DefaultServerWebExchange(request, response);
+		return request.toExchange();
 	}
 
 }

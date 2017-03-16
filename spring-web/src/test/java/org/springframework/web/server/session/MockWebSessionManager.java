@@ -30,10 +30,6 @@ public class MockWebSessionManager implements WebSessionManager {
 	private final Mono<WebSession> session;
 
 
-	public MockWebSessionManager() {
-		this(Mono.empty());
-	}
-
 	public MockWebSessionManager(WebSession session) {
 		this(Mono.just(session));
 	}

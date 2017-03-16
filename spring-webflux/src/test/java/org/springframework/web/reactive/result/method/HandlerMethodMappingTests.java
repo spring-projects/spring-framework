@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -28,21 +27,17 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 import org.springframework.web.util.ParsingPathMatcher;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Unit tests for {@link AbstractHandlerMethodMapping}.
@@ -79,7 +74,7 @@ public class HandlerMethodMappingTests {
 	public void directMatch() throws Exception {
 		String key = "foo";
 		this.mapping.registerMapping(key, this.handler, this.method1);
-		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, key));
+		Mono<Object> result = this.mapping.getHandler(MockServerHttpRequest.get(key).toExchange());
 
 		assertEquals(this.method1, ((HandlerMethod) result.block()).getMethod());
 	}
@@ -89,7 +84,7 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping("/fo*", this.handler, this.method1);
 		this.mapping.registerMapping("/f*", this.handler, this.method2);
 
-		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, "/foo"));
+		Mono<Object> result = this.mapping.getHandler(MockServerHttpRequest.get("/foo").toExchange());
 		assertEquals(this.method1, ((HandlerMethod) result.block()).getMethod());
 	}
 
@@ -97,7 +92,7 @@ public class HandlerMethodMappingTests {
 	public void ambiguousMatch() throws Exception {
 		this.mapping.registerMapping("/f?o", this.handler, this.method1);
 		this.mapping.registerMapping("/fo?", this.handler, this.method2);
-		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, "/foo"));
+		Mono<Object> result = this.mapping.getHandler(MockServerHttpRequest.get("/foo").toExchange());
 
 		StepVerifier.create(result).expectError(IllegalStateException.class).verify();
 	}
@@ -136,22 +131,15 @@ public class HandlerMethodMappingTests {
 	public void unregisterMapping() throws Exception {
 		String key = "foo";
 		this.mapping.registerMapping(key, this.handler, this.method1);
-		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, key));
+		Mono<Object> result = this.mapping.getHandler(MockServerHttpRequest.get(key).toExchange());
 
 		assertNotNull(result.block());
 
 		this.mapping.unregisterMapping(key);
-		result = this.mapping.getHandler(createExchange(HttpMethod.GET, key));
+		result = this.mapping.getHandler(MockServerHttpRequest.get(key).toExchange());
 
 		assertNull(result.block());
 		assertNull(this.mapping.getMappingRegistry().getMappingsByUrl(key));
-	}
-
-
-	private ServerWebExchange createExchange(HttpMethod httpMethod, String path) throws URISyntaxException {
-		ServerHttpRequest request = MockServerHttpRequest.method(httpMethod, path).build();
-		WebSessionManager sessionManager = new MockWebSessionManager();
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 	}
 
 

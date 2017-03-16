@@ -24,7 +24,6 @@ import java.util.concurrent.CompletableFuture;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -38,18 +37,15 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -58,6 +54,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.post;
 
 /**
  * Unit tests for {@link HttpEntityArgumentResolver}.When adding a test also
@@ -71,15 +69,8 @@ public class HttpEntityArgumentResolverTests {
 
 	private HttpEntityArgumentResolver resolver = createResolver();
 
-	private MockServerHttpRequest request;
-
 	private final ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
-
-	@Before
-	public void setup() throws Exception {
-		this.request = MockServerHttpRequest.post("/path").build();
-	}
 
 	private HttpEntityArgumentResolver createResolver() {
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
@@ -225,71 +216,71 @@ public class HttpEntityArgumentResolverTests {
 
 	@Test
 	public void httpEntityWithStringBody() throws Exception {
-		String body = "line1";
+		ServerWebExchange exchange = postExchange("line1");
 		ResolvableType type = httpEntityType(String.class);
-		HttpEntity<String> httpEntity = resolveValue(type, body);
+		HttpEntity<String> httpEntity = resolveValue(exchange, type);
 
-		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
+		assertEquals(exchange.getRequest().getHeaders(), httpEntity.getHeaders());
 		assertEquals("line1", httpEntity.getBody());
 	}
 
 	@Test
 	public void httpEntityWithMonoBody() throws Exception {
-		String body = "line1";
+		ServerWebExchange exchange = postExchange("line1");
 		ResolvableType type = httpEntityType(Mono.class, String.class);
-		HttpEntity<Mono<String>> httpEntity = resolveValue(type, body);
+		HttpEntity<Mono<String>> httpEntity = resolveValue(exchange, type);
 
-		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
+		assertEquals(exchange.getRequest().getHeaders(), httpEntity.getHeaders());
 		assertEquals("line1", httpEntity.getBody().block());
 	}
 
 	@Test
 	public void httpEntityWithSingleBody() throws Exception {
-		String body = "line1";
+		ServerWebExchange exchange = postExchange("line1");
 		ResolvableType type = httpEntityType(Single.class, String.class);
-		HttpEntity<Single<String>> httpEntity = resolveValue(type, body);
+		HttpEntity<Single<String>> httpEntity = resolveValue(exchange, type);
 
-		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
+		assertEquals(exchange.getRequest().getHeaders(), httpEntity.getHeaders());
 		assertEquals("line1", httpEntity.getBody().toBlocking().value());
 	}
 
 	@Test
 	public void httpEntityWithRxJava2SingleBody() throws Exception {
-		String body = "line1";
+		ServerWebExchange exchange = postExchange("line1");
 		ResolvableType type = httpEntityType(io.reactivex.Single.class, String.class);
-		HttpEntity<io.reactivex.Single<String>> httpEntity = resolveValue(type, body);
+		HttpEntity<io.reactivex.Single<String>> httpEntity = resolveValue(exchange, type);
 
-		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
+		assertEquals(exchange.getRequest().getHeaders(), httpEntity.getHeaders());
 		assertEquals("line1", httpEntity.getBody().blockingGet());
 	}
 
 	@Test
 	public void httpEntityWithRxJava2MaybeBody() throws Exception {
-		String body = "line1";
+		ServerWebExchange exchange = postExchange("line1");
 		ResolvableType type = httpEntityType(Maybe.class, String.class);
-		HttpEntity<Maybe<String>> httpEntity = resolveValue(type, body);
+		HttpEntity<Maybe<String>> httpEntity = resolveValue(exchange, type);
 
-		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
+		assertEquals(exchange.getRequest().getHeaders(), httpEntity.getHeaders());
 		assertEquals("line1", httpEntity.getBody().blockingGet());
 	}
 
 	@Test
 	public void httpEntityWithCompletableFutureBody() throws Exception {
-		String body = "line1";
+		ServerWebExchange exchange = postExchange("line1");
 		ResolvableType type = httpEntityType(CompletableFuture.class, String.class);
-		HttpEntity<CompletableFuture<String>> httpEntity = resolveValue(type, body);
+		HttpEntity<CompletableFuture<String>> httpEntity = resolveValue(exchange, type);
 
-		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
+		assertEquals(exchange.getRequest().getHeaders(), httpEntity.getHeaders());
 		assertEquals("line1", httpEntity.getBody().get());
 	}
 
 	@Test
 	public void httpEntityWithFluxBody() throws Exception {
-		String body = "line1\nline2\nline3\n";
+		ServerWebExchange exchange = postExchange("line1\nline2\nline3\n");
 		ResolvableType type = httpEntityType(Flux.class, String.class);
-		HttpEntity<Flux<String>> httpEntity = resolveValue(type, body);
+		HttpEntity<Flux<String>> httpEntity = resolveValue(exchange, type);
 
-		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
+		assertEquals(exchange.getRequest().getHeaders(), httpEntity.getHeaders());
 		StepVerifier.create(httpEntity.getBody())
 				.expectNext("line1\n")
 				.expectNext("line2\n")
@@ -300,16 +291,20 @@ public class HttpEntityArgumentResolverTests {
 
 	@Test
 	public void requestEntity() throws Exception {
-		String body = "line1";
+		ServerWebExchange exchange = postExchange("line1");
 		ResolvableType type = forClassWithGenerics(RequestEntity.class, String.class);
-		RequestEntity<String> requestEntity = resolveValue(type, body);
+		RequestEntity<String> requestEntity = resolveValue(exchange, type);
 
-		assertEquals(this.request.getMethod(), requestEntity.getMethod());
-		assertEquals(this.request.getURI(), requestEntity.getUrl());
-		assertEquals(this.request.getHeaders(), requestEntity.getHeaders());
+		assertEquals(exchange.getRequest().getMethod(), requestEntity.getMethod());
+		assertEquals(exchange.getRequest().getURI(), requestEntity.getUrl());
+		assertEquals(exchange.getRequest().getHeaders(), requestEntity.getHeaders());
 		assertEquals("line1", requestEntity.getBody());
 	}
 
+
+	private MockServerWebExchange postExchange(String body) {
+		return post("/path").header("foo", "bar").contentType(TEXT_PLAIN).body(body).toExchange();
+	}
 
 	private ResolvableType httpEntityType(Class<?> bodyType, Class<?>... generics) {
 		return ResolvableType.forClassWithGenerics(HttpEntity.class,
@@ -318,14 +313,8 @@ public class HttpEntityArgumentResolverTests {
 						ResolvableType.forClassWithGenerics(bodyType, generics));
 	}
 
-
 	@SuppressWarnings("unchecked")
-	private <T> T resolveValue(ResolvableType type, String body) {
-		this.request = MockServerHttpRequest.post("/path").header("foo", "bar")
-				.contentType(MediaType.TEXT_PLAIN)
-				.body(body);
-		ServerWebExchange exchange = new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
-
+	private <T> T resolveValue(ServerWebExchange exchange, ResolvableType type) {
 		MethodParameter param = this.testMethod.arg(type);
 		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), exchange);
 		Object value = result.block(Duration.ofSeconds(5));
@@ -339,12 +328,12 @@ public class HttpEntityArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> HttpEntity<T> resolveValueWithEmptyBody(ResolvableType type) {
-		ServerWebExchange exchange = new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
+		ServerWebExchange exchange = post("/path").toExchange();
 		MethodParameter param = this.testMethod.arg(type);
 		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), exchange);
 		HttpEntity<String> httpEntity = (HttpEntity<String>) result.block(Duration.ofSeconds(5));
 
-		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
+		assertEquals(exchange.getRequest().getHeaders(), httpEntity.getHeaders());
 		return (HttpEntity<T>) httpEntity;
 	}
 

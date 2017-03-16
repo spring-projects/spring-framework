@@ -27,7 +27,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -43,8 +42,7 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.ui.ConcurrentModel;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -54,7 +52,6 @@ import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
@@ -62,6 +59,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
 import static org.springframework.web.method.ResolvableMethod.on;
 
 /**
@@ -72,15 +70,7 @@ import static org.springframework.web.method.ResolvableMethod.on;
  */
 public class ViewResolutionResultHandlerTests {
 
-	private MockServerHttpRequest request;
-
 	private final BindingContext bindingContext = new BindingContext();
-
-
-	@Before
-	public void setup() throws Exception {
-		this.request = MockServerHttpRequest.get("/path").build();
-	}
 
 
 	@Test
@@ -193,18 +183,15 @@ public class ViewResolutionResultHandlerTests {
 		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, this.bindingContext);
 		ViewResolutionResultHandler handler = resultHandler(new TestViewResolver("account"));
 
-		this.request = MockServerHttpRequest.get("/account").build();
-		ServerWebExchange exchange = createExchange();
+		MockServerWebExchange exchange = get("/account").toExchange();
 		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
 		assertResponseBody(exchange, "account: {id=123}");
 
-		this.request = MockServerHttpRequest.get("/account/").build();
-		exchange = createExchange();
+		exchange = get("/account/").toExchange();
 		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
 		assertResponseBody(exchange, "account: {id=123}");
 
-		this.request = MockServerHttpRequest.get("/account.123").build();
-		exchange = createExchange();
+		exchange = get("/account.123").toExchange();
 		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
 		assertResponseBody(exchange, "account: {id=123}");
 	}
@@ -215,8 +202,7 @@ public class ViewResolutionResultHandlerTests {
 		MethodParameter returnType = on(TestController.class).resolveReturnType(String.class);
 		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, this.bindingContext);
 
-		this.request = MockServerHttpRequest.get("/path").build();
-		ServerWebExchange exchange = createExchange();
+		MockServerWebExchange exchange = get("/path").toExchange();
 		Mono<Void> mono = resultHandler().handleResult(exchange, result);
 
 		StepVerifier.create(mono)
@@ -231,8 +217,7 @@ public class ViewResolutionResultHandlerTests {
 		MethodParameter returnType = on(TestController.class).resolveReturnType(TestBean.class);
 		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType, this.bindingContext);
 
-		this.request = MockServerHttpRequest.get("/account").accept(APPLICATION_JSON).build();
-		ServerWebExchange exchange = createExchange();
+		MockServerWebExchange exchange = get("/account").accept(APPLICATION_JSON).toExchange();
 
 		TestView defaultView = new TestView("jsonView", APPLICATION_JSON);
 
@@ -254,8 +239,7 @@ public class ViewResolutionResultHandlerTests {
 		MethodParameter returnType = on(TestController.class).resolveReturnType(TestBean.class);
 		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType, this.bindingContext);
 
-		this.request = MockServerHttpRequest.get("/account").accept(APPLICATION_JSON).build();
-		ServerWebExchange exchange = createExchange();
+		MockServerWebExchange exchange = get("/account").accept(APPLICATION_JSON).toExchange();
 
 		ViewResolutionResultHandler resultHandler = resultHandler(new TestViewResolver("account"));
 		Mono<Void> mono = resultHandler.handleResult(exchange, handlerResult);
@@ -278,8 +262,7 @@ public class ViewResolutionResultHandlerTests {
 		HandlerResult result = new HandlerResult(new Object(), null, returnType, this.bindingContext);
 		ViewResolutionResultHandler handler = resultHandler(new TestViewResolver("account"));
 
-		this.request = MockServerHttpRequest.get("/account").build();
-		ServerWebExchange exchange = createExchange();
+		MockServerWebExchange exchange = get("/account").toExchange();
 
 		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
 		assertResponseBody(exchange, "account: {" +
@@ -294,10 +277,6 @@ public class ViewResolutionResultHandlerTests {
 				"}");
 	}
 
-
-	private ServerWebExchange createExchange() {
-		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
-	}
 
 	private ViewResolutionResultHandler resultHandler(ViewResolver... resolvers) {
 		return resultHandler(Collections.emptyList(), resolvers);
@@ -318,16 +297,14 @@ public class ViewResolutionResultHandlerTests {
 		model.asMap().clear();
 		model.addAttribute("id", "123");
 		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, this.bindingContext);
-		this.request = MockServerHttpRequest.get(path).build();
-		ServerWebExchange exchange = createExchange();
+		MockServerWebExchange exchange = get(path).toExchange();
 		resultHandler(resolvers).handleResult(exchange, result).block(Duration.ofSeconds(5));
 		assertResponseBody(exchange, responseBody);
 		return exchange;
 	}
 
-	private void assertResponseBody(ServerWebExchange exchange, String responseBody) {
-		MockServerHttpResponse response = (MockServerHttpResponse) exchange.getResponse();
-		StepVerifier.create(response.getBody())
+	private void assertResponseBody(MockServerWebExchange exchange, String responseBody) {
+		StepVerifier.create(exchange.getResponse().getBody())
 				.consumeNextWith(buf -> assertEquals(responseBody, DataBufferTestUtils.dumpString(buf, UTF_8)))
 				.expectComplete()
 				.verify();

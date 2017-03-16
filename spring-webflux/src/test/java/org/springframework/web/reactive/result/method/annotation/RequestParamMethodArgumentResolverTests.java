@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
@@ -31,15 +30,13 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
-import org.springframework.web.method.MvcAnnotationPredicates;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -139,19 +136,25 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test
 	public void resolveWithQueryString() throws Exception {
 		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
-		assertEquals("foo", resolve(param, exchangeWithQuery("name=foo")));
+		assertEquals("foo", resolve(param, MockServerHttpRequest.get("/path?name=foo").toExchange()));
 	}
 
 	@Test
 	public void resolveWithFormData() throws Exception {
+
+		ServerWebExchange exchange = MockServerHttpRequest.post("/path")
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.body("name=foo")
+				.toExchange();
+
 		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
-		assertEquals("foo", resolve(param, exchangeWithFormData("name=foo")));
+		assertEquals("foo", resolve(param, exchange));
 	}
 
 	@Test
 	public void resolveStringArray() throws Exception {
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
-		Object result = resolve(param, exchangeWithQuery("name=foo&name=bar"));
+		Object result = resolve(param, MockServerHttpRequest.get("/path?name=foo&name=bar").toExchange());
 		assertTrue(result instanceof String[]);
 		assertArrayEquals(new String[] {"foo", "bar"}, (String[]) result);
 	}
@@ -159,14 +162,15 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test
 	public void resolveDefaultValue() throws Exception {
 		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
-		assertEquals("bar", resolve(param, exchange()));
+		assertEquals("bar", resolve(param, MockServerHttpRequest.get("/").toExchange()));
 	}
 
 	@Test
 	public void missingRequestParam() throws Exception {
 
+		MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
-		Mono<Object> mono = this.resolver.resolveArgument(param, this.bindContext, exchange());
+		Mono<Object> mono = this.resolver.resolveArgument(param, this.bindContext, exchange);
 
 		StepVerifier.create(mono)
 				.expectNextCount(0)
@@ -176,7 +180,7 @@ public class RequestParamMethodArgumentResolverTests {
 
 	@Test
 	public void resolveSimpleTypeParam() throws Exception {
-		ServerWebExchange exchange = exchangeWithQuery("stringNotAnnot=plainValue");
+		ServerWebExchange exchange = MockServerHttpRequest.get("/path?stringNotAnnot=plainValue").toExchange();
 		MethodParameter param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
 		Object result = resolve(param, exchange);
 		assertEquals("plainValue", result);
@@ -185,12 +189,12 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test  // SPR-8561
 	public void resolveSimpleTypeParamToNull() throws Exception {
 		MethodParameter param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
-		assertNull(resolve(param, exchange()));
+		assertNull(resolve(param, MockServerHttpRequest.get("/").toExchange()));
 	}
 
 	@Test  // SPR-10180
 	public void resolveEmptyValueToDefault() throws Exception {
-		ServerWebExchange exchange = exchangeWithQuery("name=");
+		ServerWebExchange exchange = MockServerHttpRequest.get("/path?name=").toExchange();
 		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
 		Object result = resolve(param, exchange);
 		assertEquals("bar", result);
@@ -199,23 +203,23 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test
 	public void resolveEmptyValueWithoutDefault() throws Exception {
 		MethodParameter param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
-		assertEquals("", resolve(param, exchangeWithQuery("stringNotAnnot=")));
+		assertEquals("", resolve(param, MockServerHttpRequest.get("/path?stringNotAnnot=").toExchange()));
 	}
 
 	@Test
 	public void resolveEmptyValueRequiredWithoutDefault() throws Exception {
 		MethodParameter param = this.testMethod.annot(requestParam()).arg(String.class);
-		assertEquals("", resolve(param, exchangeWithQuery("name=")));
+		assertEquals("", resolve(param, MockServerHttpRequest.get("/path?name=").toExchange()));
 	}
 
 	@Test
 	public void resolveOptionalParamValue() throws Exception {
-		ServerWebExchange exchange = exchange();
+		ServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
 		MethodParameter param = this.testMethod.arg(forClassWithGenerics(Optional.class, Integer.class));
 		Object result = resolve(param, exchange);
 		assertEquals(Optional.empty(), result);
 
-		exchange = exchangeWithQuery("name=123");
+		exchange = MockServerHttpRequest.get("/path?name=123").toExchange();
 		result = resolve(param, exchange);
 
 		assertEquals(Optional.class, result.getClass());
@@ -224,23 +228,6 @@ public class RequestParamMethodArgumentResolverTests {
 		assertEquals(123, value.get());
 	}
 
-
-	private ServerWebExchange exchangeWithQuery(String query) throws URISyntaxException {
-		MockServerHttpRequest request = MockServerHttpRequest.get("/path?" + query).build();
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
-	}
-
-	private ServerWebExchange exchangeWithFormData(String formData) throws URISyntaxException {
-		MockServerHttpRequest request = MockServerHttpRequest.post("/path")
-				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-				.body(formData);
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
-	}
-
-	private ServerWebExchange exchange() {
-		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
-	}
 
 	private Object resolve(MethodParameter parameter, ServerWebExchange exchange) {
 		return this.resolver.resolveArgument(parameter, this.bindContext, exchange).block(Duration.ZERO);

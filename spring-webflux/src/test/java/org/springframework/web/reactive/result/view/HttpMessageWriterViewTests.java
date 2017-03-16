@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.view;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,14 +35,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.MimeType;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.DefaultWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -146,14 +143,11 @@ public class HttpMessageWriterViewTests {
 		this.model.addAttribute("pojoData", pojoData);
 		this.view.setModelKeys(Collections.singleton("pojoData"));
 
-		MockServerHttpRequest request = MockServerHttpRequest.get("/path").build();
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		WebSessionManager manager = new DefaultWebSessionManager();
-		ServerWebExchange exchange = new DefaultServerWebExchange(request, response, manager);
+		MockServerWebExchange exchange = MockServerHttpRequest.get("/path").toExchange();
 
-		this.view.render(this.model, MediaType.APPLICATION_JSON, exchange).blockMillis(5000);
+		this.view.render(this.model, MediaType.APPLICATION_JSON, exchange).block(Duration.ofSeconds(5));
 
-		StepVerifier.create(response.getBody())
+		StepVerifier.create(exchange.getResponse().getBody())
 				.consumeNextWith( buf -> assertEquals("{\"foo\":\"f\",\"bar\":\"b\"}",
 						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8))
 				)

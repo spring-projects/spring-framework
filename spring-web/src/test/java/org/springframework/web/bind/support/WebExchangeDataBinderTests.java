@@ -27,13 +27,11 @@ import org.junit.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
@@ -173,8 +171,7 @@ public class WebExchangeDataBinderTests {
 	public void testBindingWithQueryParams() throws Exception {
 		String url = "/path?spouse=someValue&spouse.name=test";
 		MockServerHttpRequest request = MockServerHttpRequest.post(url).build();
-		ServerWebExchange exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
-		this.binder.bind(exchange).block(Duration.ofMillis(5000));
+		this.binder.bind(request.toExchange()).block(Duration.ofSeconds(5));
 
 		assertNotNull(this.testBean.getSpouse());
 		assertEquals("test", this.testBean.getSpouse().getName());
@@ -208,13 +205,11 @@ public class WebExchangeDataBinderTests {
 	}
 
 	private ServerWebExchange exchange(MultiValueMap<String, String> formData) {
-
-		MockServerHttpRequest request = MockServerHttpRequest
+		return MockServerHttpRequest
 				.post("/")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-				.body(generateForm(formData));
-
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse());
+				.body(generateForm(formData))
+				.toExchange();
 	}
 
 

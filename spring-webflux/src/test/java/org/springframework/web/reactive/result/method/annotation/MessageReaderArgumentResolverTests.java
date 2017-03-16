@@ -54,6 +54,7 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.method.ResolvableMethod;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -63,6 +64,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.post;
 
 /**
  * Unit tests for {@link AbstractMessageReaderArgumentResolver}.
@@ -73,8 +75,6 @@ public class MessageReaderArgumentResolverTests {
 
 	private AbstractMessageReaderArgumentResolver resolver = resolver(new Jackson2JsonDecoder());
 
-	private MockServerHttpRequest request;
-
 	private BindingContext bindingContext;
 
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
@@ -82,7 +82,6 @@ public class MessageReaderArgumentResolverTests {
 
 	@Before
 	public void setup() throws Exception {
-		this.request = request().build();
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setValidator(new TestBeanValidator());
 		this.bindingContext = new BindingContext(initializer);
@@ -91,10 +90,10 @@ public class MessageReaderArgumentResolverTests {
 
 	@Test
 	public void missingContentType() throws Exception {
-		this.request = request().body("{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}");
+		ServerWebExchange exchange = post("/path").body("{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}").toExchange();
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
 		MethodParameter param = this.testMethod.arg(type);
-		Mono<Object> result = this.resolver.readBody(param, true, this.bindingContext, exchange());
+		Mono<Object> result = this.resolver.readBody(param, true, this.bindingContext, exchange);
 
 		StepVerifier.create(result).expectError(UnsupportedMediaTypeStatusException.class).verify();
 	}
@@ -103,11 +102,11 @@ public class MessageReaderArgumentResolverTests {
 
 	@Test @SuppressWarnings("unchecked") // SPR-9942
 	public void emptyBody() throws Exception {
-		this.request = request().header("Content-Type", "application/json").build();
+		ServerWebExchange exchange = post("/path").contentType(MediaType.APPLICATION_JSON).toExchange();
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
 		MethodParameter param = this.testMethod.arg(type);
 		Mono<TestBean> result = (Mono<TestBean>) this.resolver.readBody(
-				param, true, this.bindingContext, exchange()).block();
+				param, true, this.bindingContext, exchange).block();
 
 		StepVerifier.create(result).expectError(ServerWebInputException.class).verify();
 	}
@@ -296,8 +295,8 @@ public class MessageReaderArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValue(MethodParameter param, String body) {
-		this.request = request().contentType(MediaType.APPLICATION_JSON).body(body);
-		Mono<Object> result = this.resolver.readBody(param, true, this.bindingContext, exchange());
+		ServerWebExchange exchange = post("/path").contentType(MediaType.APPLICATION_JSON).body(body).toExchange();
+		Mono<Object> result = this.resolver.readBody(param, true, this.bindingContext, exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
 		assertNotNull(value);
@@ -305,14 +304,6 @@ public class MessageReaderArgumentResolverTests {
 				param.getParameterType().isAssignableFrom(value.getClass()));
 
 		return (T) value;
-	}
-
-	private MockServerHttpRequest.BodyBuilder request() {
-		return MockServerHttpRequest.post("/path");
-	}
-
-	private DefaultServerWebExchange exchange() {
-		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
 	}
 
 	@SuppressWarnings("Convert2MethodRef")

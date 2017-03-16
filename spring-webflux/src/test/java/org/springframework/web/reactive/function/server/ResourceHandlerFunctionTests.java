@@ -31,11 +31,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Arjen Poutsma
@@ -49,10 +48,8 @@ public class ResourceHandlerFunctionTests {
 
 	@Test
 	public void get() throws IOException {
-		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("http://localhost").build();
-		MockServerHttpResponse mockResponse = new MockServerHttpResponse();
-		ServerWebExchange exchange = new DefaultServerWebExchange(mockRequest, mockResponse,
-				new MockWebSessionManager());
+		MockServerWebExchange exchange = MockServerHttpRequest.get("http://localhost").toExchange();
+		MockServerHttpResponse mockResponse = exchange.getResponse();
 
 		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults());
 
@@ -90,10 +87,8 @@ public class ResourceHandlerFunctionTests {
 
 	@Test
 	public void head() throws IOException {
-		MockServerHttpRequest mockRequest = MockServerHttpRequest.head("http://localhost").build();
-		MockServerHttpResponse mockResponse = new MockServerHttpResponse();
-		ServerWebExchange exchange = new DefaultServerWebExchange(mockRequest, mockResponse,
-				new MockWebSessionManager());
+		MockServerWebExchange exchange = MockServerHttpRequest.head("http://localhost").toExchange();
+		MockServerHttpResponse mockResponse = exchange.getResponse();
 
 		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults());
 
@@ -119,10 +114,8 @@ public class ResourceHandlerFunctionTests {
 
 	@Test
 	public void options() {
-		MockServerHttpRequest mockRequest = MockServerHttpRequest.options("http://localhost").build();
-		MockServerHttpResponse mockResponse = new MockServerHttpResponse();
-		ServerWebExchange exchange = new DefaultServerWebExchange(mockRequest, mockResponse,
-				new MockWebSessionManager());
+		MockServerWebExchange exchange = MockServerHttpRequest.options("http://localhost").toExchange();
+		MockServerHttpResponse mockResponse = exchange.getResponse();
 
 		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults());
 

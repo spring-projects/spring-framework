@@ -19,7 +19,6 @@ import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.Collections;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.beans.FatalBeanException;
@@ -29,7 +28,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ClassUtils;
@@ -44,8 +43,6 @@ import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -56,15 +53,7 @@ import static org.mockito.Mockito.mock;
  */
 public class ControllerAdviceTests {
 
-	private ServerWebExchange exchange;
-
-
-	@Before
-	public void setUp() throws Exception {
-		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(request, response);
-	}
+	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
 
 
 	@Test

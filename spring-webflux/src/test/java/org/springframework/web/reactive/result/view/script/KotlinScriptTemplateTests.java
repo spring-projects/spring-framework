@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,10 +31,9 @@ import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.DefaultWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for Kotlin script templates running on Kotlin JSR 223 support
@@ -74,12 +72,9 @@ public class KotlinScriptTemplateTests {
 	private MockServerHttpResponse renderViewWithModel(String viewUrl, Map<String, Object> model, Locale locale, Class<?> configuration) throws Exception {
 		ScriptTemplateView view = createViewWithUrl(viewUrl, configuration);
 		view.setLocale(locale);
-		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		WebSessionManager manager = new DefaultWebSessionManager();
-		ServerWebExchange exchange = new DefaultServerWebExchange(request, response, manager);
+		MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
 		view.renderInternal(model, MediaType.TEXT_HTML, exchange).block();
-		return response;
+		return exchange.getResponse();
 	}
 
 	private ScriptTemplateView createViewWithUrl(String viewUrl, Class<?> configuration) throws Exception {

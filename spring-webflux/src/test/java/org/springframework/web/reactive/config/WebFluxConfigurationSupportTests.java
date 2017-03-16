@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.context.ApplicationContext;
@@ -43,7 +42,6 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.validation.Validator;
@@ -62,25 +60,25 @@ import org.springframework.web.reactive.result.view.ViewResolutionResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewResolver;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.*;
-import static org.springframework.http.MediaType.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
+import static org.springframework.http.MediaType.APPLICATION_XML;
+import static org.springframework.http.MediaType.IMAGE_PNG;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 /**
  * Unit tests for {@link WebFluxConfigurationSupport}.
  * @author Rossen Stoyanchev
  */
 public class WebFluxConfigurationSupportTests {
-
-	private MockServerHttpRequest request;
-
-
-	@Before
-	public void setup() throws Exception {
-		this.request = MockServerHttpRequest.get("/").build();
-	}
 
 
 	@Test
@@ -101,12 +99,12 @@ public class WebFluxConfigurationSupportTests {
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
 		assertSame(resolver, mapping.getContentTypeResolver());
 
-		this.request = MockServerHttpRequest.get("/path.json").build();
+		ServerWebExchange exchange = MockServerHttpRequest.get("/path.json").toExchange();
 		List<MediaType> list = Collections.singletonList(MediaType.APPLICATION_JSON);
-		assertEquals(list, resolver.resolveMediaTypes(createExchange()));
+		assertEquals(list, resolver.resolveMediaTypes(exchange));
 
-		this.request = MockServerHttpRequest.get("/path.xml").build();
-		assertEquals(Collections.emptyList(), resolver.resolveMediaTypes(createExchange()));
+		exchange = MockServerHttpRequest.get("/path.xml").toExchange();
+		assertEquals(Collections.emptyList(), resolver.resolveMediaTypes(exchange));
 	}
 
 	@Test
@@ -261,24 +259,14 @@ public class WebFluxConfigurationSupportTests {
 	}
 
 
-	private DefaultServerWebExchange createExchange() {
-		return new DefaultServerWebExchange(this.request, new MockServerHttpResponse());
-	}
-
 	private void assertHasMessageReader(List<HttpMessageReader<?>> readers, Class<?> clazz, MediaType mediaType) {
 		ResolvableType type = ResolvableType.forClass(clazz);
-		assertTrue(readers.stream()
-				.filter(c -> mediaType == null || c.canRead(type, mediaType))
-				.findAny()
-				.isPresent());
+		assertTrue(readers.stream().anyMatch(c -> mediaType == null || c.canRead(type, mediaType)));
 	}
 
 	private void assertHasMessageWriter(List<HttpMessageWriter<?>> writers, Class<?> clazz, MediaType mediaType) {
 		ResolvableType type = ResolvableType.forClass(clazz);
-		assertTrue(writers.stream()
-				.filter(c -> mediaType == null || c.canWrite(type, mediaType))
-				.findAny()
-				.isPresent());
+		assertTrue(writers.stream().anyMatch(c -> mediaType == null || c.canWrite(type, mediaType)));
 	}
 
 	private ApplicationContext loadConfig(Class<?>... configurationClasses) {

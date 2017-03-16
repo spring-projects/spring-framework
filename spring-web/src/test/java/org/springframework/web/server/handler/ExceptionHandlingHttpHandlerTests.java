@@ -18,17 +18,15 @@ package org.springframework.web.server.handler;
 
 import java.util.Arrays;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 
@@ -38,20 +36,9 @@ import static org.junit.Assert.assertEquals;
  */
 public class ExceptionHandlingHttpHandlerTests {
 
-	private MockServerHttpResponse response;
+	private final MockServerWebExchange exchange = MockServerHttpRequest.get("http://localhost:8080").toExchange();
 
-	private ServerWebExchange exchange;
-
-	private WebHandler targetHandler;
-
-
-	@Before
-	public void setUp() throws Exception {
-		MockServerHttpRequest request = MockServerHttpRequest.get("http://localhost:8080").build();
-		this.response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(request, this.response);
-		this.targetHandler = new StubWebHandler(new IllegalStateException("boo"));
-	}
+	private final WebHandler targetHandler = new StubWebHandler(new IllegalStateException("boo"));
 
 
 	@Test
@@ -59,7 +46,7 @@ public class ExceptionHandlingHttpHandlerTests {
 		WebExceptionHandler exceptionHandler = new BadRequestExceptionHandler();
 		createWebHandler(exceptionHandler).handle(this.exchange).block();
 
-		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatusCode());
+		assertEquals(HttpStatus.BAD_REQUEST, this.exchange.getResponse().getStatusCode());
 	}
 
 	@Test
@@ -72,7 +59,7 @@ public class ExceptionHandlingHttpHandlerTests {
 		};
 		createWebHandler(exceptionHandlers).handle(this.exchange).block();
 
-		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatusCode());
+		assertEquals(HttpStatus.BAD_REQUEST, this.exchange.getResponse().getStatusCode());
 	}
 
 	@Test
@@ -80,7 +67,7 @@ public class ExceptionHandlingHttpHandlerTests {
 		WebExceptionHandler exceptionHandler = new UnresolvedExceptionHandler();
 		createWebHandler(exceptionHandler).handle(this.exchange).block();
 
-		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatusCode());
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.exchange.getResponse().getStatusCode());
 	}
 
 	@Test
@@ -88,7 +75,7 @@ public class ExceptionHandlingHttpHandlerTests {
 		WebExceptionHandler exceptionHandler = new BadRequestExceptionHandler();
 		createWebHandler(exceptionHandler).handle(this.exchange).block();
 
-		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatusCode());
+		assertEquals(HttpStatus.BAD_REQUEST, this.exchange.getResponse().getStatusCode());
 	}
 
 	private WebHandler createWebHandler(WebExceptionHandler... handlers) {

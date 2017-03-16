@@ -29,14 +29,12 @@ import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolver;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Arjen Poutsma
@@ -111,10 +109,7 @@ public class DefaultRenderingResponseTests {
 		Map<String, Object> model = Collections.singletonMap("foo", "bar");
 		Mono<RenderingResponse> result = RenderingResponse.create("view").modelAttributes(model).build();
 
-		MockServerHttpRequest request = MockServerHttpRequest.get("http://localhost").build();
-		MockServerHttpResponse mockResponse = new MockServerHttpResponse();
-		ServerWebExchange exchange =
-				new DefaultServerWebExchange(request, mockResponse, new MockWebSessionManager());
+		MockServerWebExchange exchange = MockServerHttpRequest.get("http://localhost").toExchange();
 		ViewResolver viewResolver = mock(ViewResolver.class);
 		View view = mock(View.class);
 		when(viewResolver.resolveViewName("view", Locale.ENGLISH)).thenReturn(Mono.just(view));

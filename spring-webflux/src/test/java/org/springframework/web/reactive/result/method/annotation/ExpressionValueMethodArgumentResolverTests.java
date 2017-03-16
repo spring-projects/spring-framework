@@ -26,15 +26,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.reactive.BindingContext;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link ExpressionValueMethodArgumentResolver}.
@@ -45,7 +45,7 @@ public class ExpressionValueMethodArgumentResolverTests {
 
 	private ExpressionValueMethodArgumentResolver resolver;
 
-	private ServerWebExchange exchange;
+	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
 
 	private MethodParameter paramSystemProperty;
 	private MethodParameter paramNotSupported;
@@ -58,9 +58,6 @@ public class ExpressionValueMethodArgumentResolverTests {
 		context.refresh();
 		ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
 		this.resolver = new ExpressionValueMethodArgumentResolver(context.getBeanFactory(), adapterRegistry);
-
-		ServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse());
 
 		Method method = ReflectionUtils.findMethod(getClass(), "params", (Class<?>[]) null);
 		this.paramSystemProperty = new MethodParameter(method, 0);
