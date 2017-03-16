@@ -103,6 +103,15 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		return this.cookies;
 	}
 
+
+	/**
+	 * Shortcut to wrap the request with a {@code MockServerWebExchange}.
+	 */
+	public MockServerWebExchange toExchange() {
+		return new MockServerWebExchange(this);
+	}
+
+
 	// Static builder methods
 
 	/**
@@ -199,8 +208,8 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 
 	/**
-	 * Defines a builder that adds headers to the request.
-	 * @param <B> the builder subclass
+	 * Request builder exposing properties not related to the body.
+	 * @param <B> the builder sub-class
 	 */
 	public interface BaseBuilder<B extends BaseBuilder<B>> {
 
@@ -220,12 +229,24 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		B cookie(String path, HttpCookie... cookie);
 
 		/**
+		 * Add the given cookies.
+		 * @param cookies the cookies.
+		 */
+		B cookies(MultiValueMap<String, HttpCookie> cookies);
+
+		/**
 		 * Add the given, single header value under the given name.
 		 * @param headerName  the header name
 		 * @param headerValues the header value(s)
 		 * @see HttpHeaders#add(String, String)
 		 */
 		B header(String headerName, String... headerValues);
+
+		/**
+		 * Add the given header values.
+		 * @param headers the header values
+		 */
+		B headers(MultiValueMap<String, String> headers);
 
 		/**
 		 * Set the list of acceptable {@linkplain MediaType media types}, as
@@ -278,6 +299,12 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		 * @see BodyBuilder#body(String)
 		 */
 		MockServerHttpRequest build();
+
+		/**
+		 * Shortcut for:<br>
+		 * {@code build().toExchange()}
+		 */
+		MockServerWebExchange toExchange();
 	}
 
 	/**
@@ -361,10 +388,22 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
+		public BodyBuilder cookies(MultiValueMap<String, HttpCookie> cookies) {
+			this.cookies.putAll(cookies);
+			return this;
+		}
+
+		@Override
 		public BodyBuilder header(String headerName, String... headerValues) {
 			for (String headerValue : headerValues) {
 				this.headers.add(headerName, headerValue);
 			}
+			return this;
+		}
+
+		@Override
+		public BodyBuilder headers(MultiValueMap<String, String> headers) {
+			this.headers.putAll(headers);
 			return this;
 		}
 
@@ -441,6 +480,11 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		public MockServerHttpRequest build() {
 			return body(Flux.empty());
+		}
+
+		@Override
+		public MockServerWebExchange toExchange() {
+			return build().toExchange();
 		}
 	}
 

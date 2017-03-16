@@ -103,6 +103,15 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		return this.cookies;
 	}
 
+
+	/**
+	 * Shortcut to wrap the request with a {@code MockServerWebExchange}.
+	 */
+	public MockServerWebExchange toExchange() {
+		return new MockServerWebExchange(this);
+	}
+
+
 	// Static builder methods
 
 	/**
@@ -199,8 +208,8 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 
 	/**
-	 * Defines a builder that adds headers to the request.
-	 * @param <B> the builder subclass
+	 * Request builder exposing properties not related to the body.
+	 * @param <B> the builder sub-class
 	 */
 	public interface BaseBuilder<B extends BaseBuilder<B>> {
 
@@ -290,6 +299,12 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		 * @see BodyBuilder#body(String)
 		 */
 		MockServerHttpRequest build();
+
+		/**
+		 * Shortcut for:<br>
+		 * {@code build().toExchange()}
+		 */
+		MockServerWebExchange toExchange();
 	}
 
 	/**
@@ -465,6 +480,11 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		public MockServerHttpRequest build() {
 			return body(Flux.empty());
+		}
+
+		@Override
+		public MockServerWebExchange toExchange() {
+			return build().toExchange();
 		}
 	}
 
