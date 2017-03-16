@@ -30,6 +30,7 @@ import io.undertow.server.handlers.CookieImpl;
 import io.undertow.util.HttpString;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
+import org.xnio.channels.Channels;
 import org.xnio.channels.StreamSinkChannel;
 import reactor.core.publisher.Mono;
 
@@ -79,24 +80,28 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 
 	@Override
 	public Mono<Void> writeWith(File file, long position, long count) {
-		applyHeaders();
-		applyCookies();
-		try {
-			StreamSinkChannel responseChannel = getUndertowExchange().getResponseChannel();
-			@SuppressWarnings("resource")
-			FileChannel in = new FileInputStream(file).getChannel();
-			long result = responseChannel.transferFrom(in, position, count);
-			if (result < count) {
-				return Mono.error(new IOException(
-						"Could only write " + result + " out of " + count + " bytes"));
-			}
-			else {
+		return doCommit(() -> {
+			FileChannel source = null;
+			try {
+				source = new FileInputStream(file).getChannel();
+				StreamSinkChannel destination = getUndertowExchange().getResponseChannel();
+				Channels.transferBlocking(destination, source, position, count);
 				return Mono.empty();
 			}
-		}
-		catch (IOException ex) {
-			return Mono.error(ex);
-		}
+			catch (IOException ex) {
+				return Mono.error(ex);
+			}
+			finally {
+				if (source != null) {
+					try {
+						source.close();
+					}
+					catch (IOException ex) {
+						// ignore
+					}
+				}
+			}
+		});
 	}
 
 	@Override
