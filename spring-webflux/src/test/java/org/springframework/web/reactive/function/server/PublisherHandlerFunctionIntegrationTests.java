@@ -16,11 +16,9 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,41 +28,20 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.web.reactive.function.BodyExtractors.toMono;
-import static org.springframework.web.reactive.function.BodyInserters.fromPublisher;
-import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
-import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.junit.Assert.*;
+import static org.springframework.web.reactive.function.BodyExtractors.*;
+import static org.springframework.web.reactive.function.BodyInserters.*;
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
+import static org.springframework.web.reactive.function.server.RouterFunctions.*;
 
 /**
  * @author Arjen Poutsma
  */
 public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
-	private RestTemplate restTemplate;
-
-	@Before
-	public void createRestTemplate() {
-		restTemplate = new RestTemplate();
-		restTemplate.setErrorHandler(new ResponseErrorHandler() {
-			@Override
-			public boolean hasError(ClientHttpResponse response) throws IOException {
-				return false;
-			}
-
-			@Override
-			public void handleError(ClientHttpResponse response) throws IOException {
-
-			}
-		});
-
-	}
+	private final RestTemplate restTemplate = new RestTemplate();
 
 
 	@Override
@@ -72,9 +49,7 @@ public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunc
 		PersonHandler personHandler = new PersonHandler();
 		return route(GET("/mono"), personHandler::mono)
 				.and(route(POST("/mono"), personHandler::postMono))
-				.and(route(GET("/flux"), personHandler::flux))
-				.and(route(GET("/throwRSE"), personHandler::throwResponseStatusException))
-				.and(route(GET("/returnRSE"), personHandler::returnResponseStatusException));
+				.and(route(GET("/flux"), personHandler::flux));
 	}
 
 
@@ -111,19 +86,6 @@ public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunc
 		assertEquals("Jack", result.getBody().getName());
 	}
 
-	@Test
-	public void responseStatusException() {
-		ResponseEntity<String> result =
-				restTemplate.getForEntity("http://localhost:" + port + "/throwRSE", String.class);
-
-		assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
-
-		result = restTemplate.getForEntity("http://localhost:" + port + "/returnRSE", String.class);
-
-		assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
-	}
-
-
 
 	private static class PersonHandler {
 
@@ -142,14 +104,6 @@ public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunc
 			Person person2 = new Person("Jane");
 			return ServerResponse.ok().body(
 					fromPublisher(Flux.just(person1, person2), Person.class));
-		}
-
-		public Mono<ServerResponse> throwResponseStatusException(ServerRequest request) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request");
-		}
-
-		public Mono<ServerResponse> returnResponseStatusException(ServerRequest request) {
-			return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request"));
 		}
 	}
 
