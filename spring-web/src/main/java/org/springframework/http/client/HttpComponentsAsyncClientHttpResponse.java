@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,9 @@ import org.springframework.util.StreamUtils;
  * @author Arjen Poutsma
  * @since 4.0
  * @see HttpComponentsAsyncClientHttpRequest#executeAsync()
+ * @deprecated as of Spring 5.0, with no direct replacement
  */
+@Deprecated
 final class HttpComponentsAsyncClientHttpResponse extends AbstractClientHttpResponse {
 
 	private final HttpResponse httpResponse;

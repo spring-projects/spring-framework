@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,10 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.AsyncClientHttpRequest;
-import org.springframework.http.client.AsyncClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.http.client.support.InterceptingAsyncHttpAccessor;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -59,15 +56,17 @@ import org.springframework.web.util.UriTemplateHandler;
  * <p><strong>Note:</strong> by default {@code AsyncRestTemplate} relies on
  * standard JDK facilities to establish HTTP connections. You can switch to use
  * a different HTTP library such as Apache HttpComponents, Netty, and OkHttp by
- * using a constructor accepting an {@link AsyncClientHttpRequestFactory}.
+ * using a constructor accepting an {@link org.springframework.http.client.AsyncClientHttpRequestFactory}.
  *
  * <p>For more information, please refer to the {@link RestTemplate} API documentation.
  *
  * @author Arjen Poutsma
  * @since 4.0
  * @see RestTemplate
+ * @deprecated as of Spring 5.0, in favor of {@link org.springframework.web.reactive.function.client.WebClient}
  */
-public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements AsyncRestOperations {
+@Deprecated
+public class AsyncRestTemplate extends org.springframework.http.client.support.InterceptingAsyncHttpAccessor implements AsyncRestOperations {
 
 	private final RestTemplate syncTemplate;
 
@@ -97,14 +96,14 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 
 	/**
 	 * Create a new instance of the {@code AsyncRestTemplate} using the given
-	 * {@link AsyncClientHttpRequestFactory}.
+	 * {@link org.springframework.http.client.AsyncClientHttpRequestFactory}.
 	 * <p>This constructor will cast the given asynchronous
 	 * {@code AsyncClientHttpRequestFactory} to a {@link ClientHttpRequestFactory}. Since
 	 * all implementations of {@code ClientHttpRequestFactory} provided in Spring also
 	 * implement {@code AsyncClientHttpRequestFactory}, this should not result in a
 	 * {@code ClassCastException}.
 	 */
-	public AsyncRestTemplate(AsyncClientHttpRequestFactory asyncRequestFactory) {
+	public AsyncRestTemplate(org.springframework.http.client.AsyncClientHttpRequestFactory asyncRequestFactory) {
 		this(asyncRequestFactory, (ClientHttpRequestFactory) asyncRequestFactory);
 	}
 
@@ -115,18 +114,18 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 	 * @param syncRequestFactory the synchronous request factory
 	 */
 	public AsyncRestTemplate(
-			AsyncClientHttpRequestFactory asyncRequestFactory, ClientHttpRequestFactory syncRequestFactory) {
+			org.springframework.http.client.AsyncClientHttpRequestFactory asyncRequestFactory, ClientHttpRequestFactory syncRequestFactory) {
 
 		this(asyncRequestFactory, new RestTemplate(syncRequestFactory));
 	}
 
 	/**
 	 * Create a new instance of the {@code AsyncRestTemplate} using the given
-	 * {@link AsyncClientHttpRequestFactory} and synchronous {@link RestTemplate}.
+	 * {@link org.springframework.http.client.AsyncClientHttpRequestFactory} and synchronous {@link RestTemplate}.
 	 * @param requestFactory the asynchronous request factory to use
 	 * @param restTemplate the synchronous template to use
 	 */
-	public AsyncRestTemplate(AsyncClientHttpRequestFactory requestFactory, RestTemplate restTemplate) {
+	public AsyncRestTemplate(org.springframework.http.client.AsyncClientHttpRequestFactory requestFactory, RestTemplate restTemplate) {
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
 		this.syncTemplate = restTemplate;
 		setAsyncRequestFactory(requestFactory);
@@ -505,7 +504,7 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 		Assert.notNull(url, "'url' must not be null");
 		Assert.notNull(method, "'method' must not be null");
 		try {
-			AsyncClientHttpRequest request = createAsyncRequest(url, method);
+			org.springframework.http.client.AsyncClientHttpRequest request = createAsyncRequest(url, method);
 			if (requestCallback != null) {
 				requestCallback.doWithRequest(request);
 			}
@@ -647,7 +646,7 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 		}
 
 		@Override
-		public void doWithRequest(final AsyncClientHttpRequest request) throws IOException {
+		public void doWithRequest(final org.springframework.http.client.AsyncClientHttpRequest request) throws IOException {
 			if (this.adaptee != null) {
 				this.adaptee.doWithRequest(new ClientHttpRequest() {
 					@Override
