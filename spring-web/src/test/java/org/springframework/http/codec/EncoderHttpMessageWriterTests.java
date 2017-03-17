@@ -16,66 +16,149 @@
 
 package org.springframework.http.codec;
 
-import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
-import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
-import static java.nio.charset.StandardCharsets.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.http.MediaType.TEXT_HTML;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
+import static org.springframework.http.MediaType.TEXT_XML;
 
 /**
  * Unit tests for {@link EncoderHttpMessageWriter}.
- *
- * @author Marcin Kamionowski
  * @author Rossen Stoyanchev
  */
 public class EncoderHttpMessageWriterTests {
 
-	private MockServerHttpResponse response = new MockServerHttpResponse();
+	private static final Map<String, Object> NO_HINTS = Collections.emptyMap();
+
+	private static final MediaType TEXT_PLAIN_UTF_8 = new MediaType("text", "plain", UTF_8);
+
+
+	@Mock
+	private Encoder<String> encoder;
+
+	private ArgumentCaptor<MediaType> mediaTypeCaptor;
+
+	private MockServerHttpResponse response;
+
+
+	@Before
+	public void setUp() throws Exception {
+		MockitoAnnotations.initMocks(this);
+		this.mediaTypeCaptor = ArgumentCaptor.forClass(MediaType.class);
+		this.response = new MockServerHttpResponse();
+	}
 
 
 	@Test
-	public void writableMediaTypes() throws Exception {
-		EncoderHttpMessageWriter<ByteBuffer> writer = createWriter(new ByteBufferEncoder());
-		assertThat(writer.getWritableMediaTypes(), containsInAnyOrder(MimeTypeUtils.ALL));
+	public void getWritableMediaTypes() throws Exception {
+		HttpMessageWriter<?> writer = getWriter(MimeTypeUtils.TEXT_HTML, MimeTypeUtils.TEXT_XML);
+		assertEquals(Arrays.asList(TEXT_HTML, TEXT_XML), writer.getWritableMediaTypes());
 	}
 
 	@Test
-	public void supportedMediaTypes() throws Exception {
-		EncoderHttpMessageWriter<ByteBuffer> writer = createWriter(new ByteBufferEncoder());
-		assertTrue(writer.canWrite(ResolvableType.forClass(ByteBuffer.class), MediaType.ALL));
-		assertTrue(writer.canWrite(ResolvableType.forClass(ByteBuffer.class), MediaType.TEXT_PLAIN));
+	public void canWrite() throws Exception {
+		HttpMessageWriter<?> writer = getWriter(MimeTypeUtils.TEXT_HTML);
+		when(this.encoder.canEncode(forClass(String.class), TEXT_HTML)).thenReturn(true);
+
+		assertTrue(writer.canWrite(forClass(String.class), TEXT_HTML));
+		assertFalse(writer.canWrite(forClass(String.class), TEXT_XML));
 	}
 
 	@Test
-	public void encodeByteBuffer(){
-		String payload = "Buffer payload";
-		Mono<ByteBuffer> source = Mono.just(ByteBuffer.wrap(payload.getBytes(UTF_8)));
+	public void useNegotiatedMediaType() throws Exception {
+		HttpMessageWriter<String> writer = getWriter(MimeTypeUtils.ALL);
+		writer.write(Mono.just("body"), forClass(String.class), TEXT_PLAIN, this.response, NO_HINTS);
 
-		EncoderHttpMessageWriter<ByteBuffer> writer = createWriter(new ByteBufferEncoder());
-		writer.write(source, ResolvableType.forClass(ByteBuffer.class),
-				MediaType.APPLICATION_OCTET_STREAM, this.response, Collections.emptyMap()).blockMillis(5000);
-
-		assertThat(this.response.getHeaders().getContentType(), is(MediaType.APPLICATION_OCTET_STREAM));
-		StepVerifier.create(this.response.getBodyAsString())
-				.expectNext(payload)
-				.expectComplete()
-				.verify();
+		assertEquals(TEXT_PLAIN, response.getHeaders().getContentType());
+		assertEquals(TEXT_PLAIN, this.mediaTypeCaptor.getValue());
 	}
 
-	private <T> EncoderHttpMessageWriter<T> createWriter(Encoder<T> encoder) {
-		return new EncoderHttpMessageWriter<>(encoder);
+	@Test
+	public void useDefaultMediaType() throws Exception {
+		testDefaultMediaType(null);
+		testDefaultMediaType(new MediaType("text", "*"));
+		testDefaultMediaType(new MediaType("*", "*"));
+		testDefaultMediaType(MediaType.APPLICATION_OCTET_STREAM);
+	}
+
+	private void testDefaultMediaType(MediaType negotiatedMediaType) {
+
+		this.response = new MockServerHttpResponse();
+		this.mediaTypeCaptor = ArgumentCaptor.forClass(MediaType.class);
+
+		MimeType defaultContentType = MimeTypeUtils.TEXT_XML;
+		HttpMessageWriter<String> writer = getWriter(defaultContentType);
+		writer.write(Mono.just("body"), forClass(String.class), negotiatedMediaType, this.response, NO_HINTS);
+
+		assertEquals(defaultContentType, this.response.getHeaders().getContentType());
+		assertEquals(defaultContentType, this.mediaTypeCaptor.getValue());
+	}
+
+	@Test
+	public void useDefaultMediaTypeCharset() throws Exception {
+		HttpMessageWriter<String> writer = getWriter(TEXT_PLAIN_UTF_8, TEXT_HTML);
+		writer.write(Mono.just("body"), forClass(String.class), TEXT_HTML, response, NO_HINTS);
+
+		assertEquals(new MediaType("text", "html", UTF_8), this.response.getHeaders().getContentType());
+		assertEquals(new MediaType("text", "html", UTF_8), this.mediaTypeCaptor.getValue());
+	}
+
+	@Test
+	public void useNegotiatedMediaTypeCharset() throws Exception {
+
+		MediaType negotiatedMediaType = new MediaType("text", "html", ISO_8859_1);
+
+		HttpMessageWriter<String> writer = getWriter(TEXT_PLAIN_UTF_8, TEXT_HTML);
+		writer.write(Mono.just("body"), forClass(String.class), negotiatedMediaType, this.response, NO_HINTS);
+
+		assertEquals(negotiatedMediaType, this.response.getHeaders().getContentType());
+		assertEquals(negotiatedMediaType, this.mediaTypeCaptor.getValue());
+	}
+
+	@Test
+	public void useHttpOutputMessageMediaType() throws Exception {
+
+		MediaType outputMessageMediaType = MediaType.TEXT_HTML;
+		this.response.getHeaders().setContentType(outputMessageMediaType);
+
+		HttpMessageWriter<String> writer = getWriter(TEXT_PLAIN_UTF_8, TEXT_HTML);
+		writer.write(Mono.just("body"), forClass(String.class), TEXT_PLAIN, this.response, NO_HINTS);
+
+		assertEquals(outputMessageMediaType, this.response.getHeaders().getContentType());
+		assertEquals(outputMessageMediaType, this.mediaTypeCaptor.getValue());
+	}
+
+
+	private HttpMessageWriter<String> getWriter(MimeType... mimeTypes) {
+		List<MimeType> typeList = Arrays.asList(mimeTypes);
+		when(this.encoder.getEncodableMimeTypes()).thenReturn(typeList);
+		when(this.encoder.encode(any(), any(), any(), this.mediaTypeCaptor.capture(), any())).thenReturn(Flux.empty());
+		return new EncoderHttpMessageWriter<>(this.encoder);
 	}
 
 }

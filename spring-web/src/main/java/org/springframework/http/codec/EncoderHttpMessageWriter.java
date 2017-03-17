@@ -26,7 +26,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
@@ -94,19 +93,19 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 		if (headers.getContentType() == null) {
 			MediaType fallback = this.defaultMediaType;
-			MediaType selected = useFallback(mediaType, fallback) ? fallback : mediaType;
-			if (selected != null) {
-				selected = addDefaultCharset(selected, fallback);
-				headers.setContentType(selected);
+			mediaType = useFallback(mediaType, fallback) ? fallback : mediaType;
+			if (mediaType != null) {
+				mediaType = addDefaultCharset(mediaType, fallback);
+				headers.setContentType(mediaType);
 			}
 		}
 
-		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
-		Flux<DataBuffer> body = this.encoder.encode(inputStream, bufferFactory, elementType, mediaType, hints);
+		Flux<DataBuffer> body = this.encoder.encode(inputStream,
+				outputMessage.bufferFactory(), elementType, headers.getContentType(), hints);
+
 		return (hints.get(FLUSHING_STRATEGY_HINT) == AFTER_EACH_ELEMENT ?
 				outputMessage.writeAndFlushWith(body.map(Flux::just)) : outputMessage.writeWith(body));
 	}
-
 
 	private static boolean useFallback(MediaType main, MediaType fallback) {
 		return main == null || !main.isConcrete() ||
