@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,10 @@
 
 package org.springframework.http.codec;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.reactivestreams.Publisher;
-import static org.springframework.core.codec.AbstractEncoder.FLUSHING_STRATEGY_HINT;
-import static org.springframework.core.codec.AbstractEncoder.FlushingStrategy.AFTER_EACH_ELEMENT;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -33,10 +30,13 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
+import org.springframework.util.Assert;
+
+import static org.springframework.core.codec.AbstractEncoder.FLUSHING_STRATEGY_HINT;
+import static org.springframework.core.codec.AbstractEncoder.FlushingStrategy.AFTER_EACH_ELEMENT;
 
 /**
- * Implementation of the {@link HttpMessageWriter} interface that delegates
- * to an {@link Encoder}.
+ * Implementation of {@code HttpMessageWriter} delegating to an {@link Encoder}.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
@@ -47,39 +47,41 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 	private final Encoder<T> encoder;
 
-	private final List<MediaType> writableMediaTypes;
+	private final List<MediaType> mediaTypes;
 
 
 	/**
-	 * Create a {@code CodecHttpMessageConverter} with the given {@link Encoder}.
-	 * @param encoder the encoder to use
+	 * Create an instance wrapping the given {@link Encoder}.
 	 */
 	public EncoderHttpMessageWriter(Encoder<T> encoder) {
+		Assert.notNull(encoder, "Encoder is required");
 		this.encoder = encoder;
-		this.writableMediaTypes = (encoder != null ?
-				MediaType.asMediaTypes(encoder.getEncodableMimeTypes()) : Collections.emptyList());
+		this.mediaTypes = MediaType.asMediaTypes(encoder.getEncodableMimeTypes());
+	}
+
+
+	/**
+	 * Return the {@code Encoder} of this writer.
+	 */
+	public Encoder<T> getEncoder() {
+		return this.encoder;
+	}
+
+	@Override
+	public List<MediaType> getWritableMediaTypes() {
+		return this.mediaTypes;
 	}
 
 
 	@Override
 	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
-		return this.encoder != null && this.encoder.canEncode(elementType, mediaType);
+		return this.encoder.canEncode(elementType, mediaType);
 	}
-
-	@Override
-	public List<MediaType> getWritableMediaTypes() {
-		return this.writableMediaTypes;
-	}
-
 
 	@Override
 	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType elementType,
 			MediaType mediaType, ReactiveHttpOutputMessage outputMessage,
 			Map<String, Object> hints) {
-
-		if (this.encoder == null) {
-			return Mono.error(new IllegalStateException("No decoder set"));
-		}
 
 		HttpHeaders headers = outputMessage.getHeaders();
 		if (headers.getContentType() == null) {
@@ -119,9 +121,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	 * @return the content type, or {@code null}
 	 */
 	protected MediaType getDefaultContentType(ResolvableType elementType) {
-		return writableMediaTypes.stream()
-				.filter(MediaType::isConcrete)
-				.findFirst().orElse(null);
+		return this.mediaTypes.stream().filter(MediaType::isConcrete).findFirst().orElse(null);
 	}
 
 }
