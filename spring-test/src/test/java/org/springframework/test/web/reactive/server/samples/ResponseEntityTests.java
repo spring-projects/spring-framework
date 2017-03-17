@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.hamcrest.CoreMatchers.endsWith;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 
 /**
@@ -115,7 +115,8 @@ public class ResponseEntityTests {
 	@Test
 	public void postEntity() throws Exception {
 		this.client.post().uri("/persons")
-				.exchange(Mono.just(new Person("John")), Person.class)
+				.body(Mono.just(new Person("John")), Person.class)
+				.exchange()
 				.expectStatus().isCreated()
 				.expectHeader().valueEquals("location", "/persons/John")
 				.expectBody().isEmpty();
