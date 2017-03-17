@@ -67,12 +67,6 @@ public class ResourceRegionHttpMessageWriterTests {
 
 
 	@Test
-	public void defaultContentType() throws Exception {
-		assertEquals(MimeTypeUtils.APPLICATION_OCTET_STREAM,
-				this.writer.getDefaultContentType(ResolvableType.forClass(ResourceRegion.class)));
-	}
-
-	@Test
 	public void writableMediaTypes() throws Exception {
 		assertThat(this.writer.getWritableMediaTypes(),
 				containsInAnyOrder(MimeTypeUtils.APPLICATION_OCTET_STREAM, MimeTypeUtils.ALL));

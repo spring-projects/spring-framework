@@ -49,6 +49,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 	private final List<MediaType> mediaTypes;
 
+	private final MediaType defaultMediaType;
+
 
 	/**
 	 * Create an instance wrapping the given {@link Encoder}.
@@ -57,6 +59,11 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		Assert.notNull(encoder, "Encoder is required");
 		this.encoder = encoder;
 		this.mediaTypes = MediaType.asMediaTypes(encoder.getEncodableMimeTypes());
+		this.defaultMediaType = initDefaultMediaType(this.mediaTypes);
+	}
+
+	private static MediaType initDefaultMediaType(List<MediaType> mediaTypes) {
+		return mediaTypes.stream().filter(MediaType::isConcrete).findFirst().orElse(null);
 	}
 
 
@@ -84,23 +91,13 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 			Map<String, Object> hints) {
 
 		HttpHeaders headers = outputMessage.getHeaders();
+
 		if (headers.getContentType() == null) {
-			MediaType contentTypeToUse = mediaType;
-			if (mediaType == null || mediaType.isWildcardType() || mediaType.isWildcardSubtype()) {
-				contentTypeToUse = getDefaultContentType(elementType);
-			}
-			else if (MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
-				MediaType contentType = getDefaultContentType(elementType);
-				contentTypeToUse = (contentType != null ? contentType : contentTypeToUse);
-			}
-			if (contentTypeToUse != null) {
-				if (contentTypeToUse.getCharset() == null) {
-					MediaType contentType = getDefaultContentType(elementType);
-					if (contentType != null && contentType.getCharset() != null) {
-						contentTypeToUse = new MediaType(contentTypeToUse, contentType.getCharset());
-					}
-				}
-				headers.setContentType(contentTypeToUse);
+			MediaType fallback = this.defaultMediaType;
+			MediaType selected = useFallback(mediaType, fallback) ? fallback : mediaType;
+			if (selected != null) {
+				selected = addDefaultCharset(selected, fallback);
+				headers.setContentType(selected);
 			}
 		}
 
@@ -110,18 +107,17 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 				outputMessage.writeAndFlushWith(body.map(Flux::just)) : outputMessage.writeWith(body));
 	}
 
-	/**
-	 * Return the default content type for the given {@code ResolvableType}.
-	 * Used when {@link #write} is called without a concrete content type.
-	 *
-	 * <p>By default returns the first of {@link Encoder#getEncodableMimeTypes()
-	 * encodableMimeTypes} that is concrete({@link MediaType#isConcrete()}), if any.
-	 *
-	 * @param elementType the type of element for encoding
-	 * @return the content type, or {@code null}
-	 */
-	protected MediaType getDefaultContentType(ResolvableType elementType) {
-		return this.mediaTypes.stream().filter(MediaType::isConcrete).findFirst().orElse(null);
+
+	private static boolean useFallback(MediaType main, MediaType fallback) {
+		return main == null || !main.isConcrete() ||
+				main.equals(MediaType.APPLICATION_OCTET_STREAM) && fallback != null;
+	}
+
+	private static MediaType addDefaultCharset(MediaType main, MediaType defaultType) {
+		if (main.getCharset() == null && defaultType != null && defaultType.getCharset() != null) {
+			return new MediaType(main, defaultType.getCharset());
+		}
+		return main;
 	}
 
 }
