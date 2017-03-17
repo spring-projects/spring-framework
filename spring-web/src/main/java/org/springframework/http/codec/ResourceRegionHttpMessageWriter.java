@@ -24,54 +24,66 @@ import java.util.Optional;
 import java.util.OptionalLong;
 
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ResourceRegionEncoder;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
 
 /**
- * Implementation of {@link HttpMessageWriter} that can write
- * {@link ResourceRegion ResourceRegion}s.
- *
- * <p>Note that there is no {@link HttpMessageReader} counterpart.
+ * Package private helper for {@link ResourceHttpMessageWriter} to assist with
+ * writing {@link ResourceRegion ResourceRegion}s.
  *
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
-class ResourceRegionHttpMessageWriter extends EncoderHttpMessageWriter<ResourceRegion> {
+class ResourceRegionHttpMessageWriter {
 
 	public static final String BOUNDARY_STRING_HINT = ResourceRegionHttpMessageWriter.class.getName() + ".boundaryString";
 
+	private static final ResolvableType TYPE = ResolvableType.forClass(ResourceRegion.class);
+
+
+	private final ResourceRegionEncoder encoder;
+
+
 	public ResourceRegionHttpMessageWriter() {
-		super(new ResourceRegionEncoder());
+		this.encoder = new ResourceRegionEncoder();
 	}
 
 	public ResourceRegionHttpMessageWriter(int bufferSize) {
-		super(new ResourceRegionEncoder(bufferSize));
+		this.encoder = new ResourceRegionEncoder(bufferSize);
 	}
 
-	@Override
-	public Mono<Void> write(Publisher<? extends ResourceRegion> inputStream, ResolvableType type,
-			MediaType contentType, ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
+
+	public Mono<Void> writeRegions(Publisher<? extends ResourceRegion> inputStream, MediaType contentType,
+			ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
 
 		if (hints != null && hints.containsKey(BOUNDARY_STRING_HINT)) {
 			String boundary = (String) hints.get(BOUNDARY_STRING_HINT);
 			hints.put(ResourceRegionEncoder.BOUNDARY_STRING_HINT, boundary);
-			outputMessage.getHeaders()
-					.setContentType(MediaType.parseMediaType("multipart/byteranges;boundary=" + boundary));
-			return super.write(inputStream, type, contentType, outputMessage, hints);
+
+			MediaType multipartType = MediaType.parseMediaType("multipart/byteranges;boundary=" + boundary);
+			outputMessage.getHeaders().setContentType(multipartType);
+
+			DataBufferFactory bufferFactory = outputMessage.bufferFactory();
+			Flux<DataBuffer> body = this.encoder.encode(inputStream, bufferFactory, TYPE, contentType, hints);
+			return outputMessage.writeWith(body);
 		}
 		else {
 			return Mono.from(inputStream)
 					.then(region -> {
 						writeSingleResourceRegionHeaders(region, contentType, outputMessage);
-						return writeResourceRegion(region, type, outputMessage);
+						return writeResourceRegion(region, outputMessage);
 					});
 		}
 	}
@@ -109,8 +121,8 @@ class ResourceRegionHttpMessageWriter extends EncoderHttpMessageWriter<ResourceR
 		return OptionalLong.empty();
 	}
 
-	private Mono<Void> writeResourceRegion(ResourceRegion region,
-			ResolvableType type, ReactiveHttpOutputMessage outputMessage) {
+	private Mono<Void> writeResourceRegion(ResourceRegion region, ReactiveHttpOutputMessage outputMessage) {
+
 		if (outputMessage instanceof ZeroCopyHttpOutputMessage) {
 			Optional<File> file = getFile(region.getResource());
 			if (file.isPresent()) {
@@ -122,8 +134,13 @@ class ResourceRegionHttpMessageWriter extends EncoderHttpMessageWriter<ResourceR
 		}
 
 		// non-zero copy fallback, using ResourceRegionEncoder
-		return super.write(Mono.just(region), type,
-				outputMessage.getHeaders().getContentType(), outputMessage, Collections.emptyMap());
+
+		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
+		MediaType contentType = outputMessage.getHeaders().getContentType();
+		Map<String, Object> hints = Collections.emptyMap();
+
+		Flux<DataBuffer> body = this.encoder.encode(Mono.just(region), bufferFactory, TYPE, contentType, hints);
+		return outputMessage.writeWith(body);
 	}
 
 	private static Optional<File> getFile(Resource resource) {

@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -538,7 +537,6 @@ public class ResourceWebHandlerTests {
 	}
 
 	@Test
-	@Ignore("Until issue resolved: ResourceRegion should not use response content-type")
 	public void partialContentMultipleByteRanges() throws Exception {
 		MockServerWebExchange exchange = MockServerHttpRequest.get("").header("Range", "bytes=0-1, 4-5, 8-9").toExchange();
 		setPathWithinHandlerMapping(exchange, "foo.txt");

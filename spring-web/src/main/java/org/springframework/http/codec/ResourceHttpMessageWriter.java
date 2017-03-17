@@ -119,9 +119,9 @@ public class ResourceHttpMessageWriter extends AbstractServerHttpMessageWriter<R
 						.flatMap(resource -> Flux.fromIterable(HttpRange.toResourceRegions(httpRanges, resource)));
 
 				return this.resourceRegionHttpMessageWriter
-						.write(regions, ResolvableType.forClass(ResourceRegion.class), mediaType, response, mergedHints);
+						.writeRegions(regions, mediaType, response, mergedHints);
 			}
-			else {
+				else {
 				return write(inputStream, elementType, mediaType, response, mergedHints);
 			}
 		}
