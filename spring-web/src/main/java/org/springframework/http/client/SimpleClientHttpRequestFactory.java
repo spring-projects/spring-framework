@@ -36,6 +36,7 @@ import org.springframework.util.Assert;
  * @see java.net.HttpURLConnection
  * @see HttpComponentsClientHttpRequestFactory
  */
+@SuppressWarnings("deprecation")
 public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory {
 
 	private static final int DEFAULT_CHUNK_SIZE = 4096;

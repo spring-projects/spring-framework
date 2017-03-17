@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,6 @@ package org.springframework.http.client.support;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.http.client.AsyncClientHttpRequestFactory;
-import org.springframework.http.client.AsyncClientHttpRequestInterceptor;
-import org.springframework.http.client.InterceptingAsyncClientHttpRequestFactory;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -31,38 +28,40 @@ import org.springframework.util.CollectionUtils;
  * @author Jakub Narloch
  * @author Rossen Stoyanchev
  * @since 4.3
+ * @deprecated as of Spring 5.0, with no direct replacement
  */
+@Deprecated
 public abstract class InterceptingAsyncHttpAccessor extends AsyncHttpAccessor {
 
-    private List<AsyncClientHttpRequestInterceptor> interceptors =
+	private List<org.springframework.http.client.AsyncClientHttpRequestInterceptor> interceptors =
 			new ArrayList<>();
 
 
-    /**
-     * Set the request interceptors that this accessor should use.
-     * @param interceptors the list of interceptors
-     */
-    public void setInterceptors(List<AsyncClientHttpRequestInterceptor> interceptors) {
-        this.interceptors = interceptors;
-    }
+	/**
+	 * Set the request interceptors that this accessor should use.
+	 * @param interceptors the list of interceptors
+	 */
+	public void setInterceptors(List<org.springframework.http.client.AsyncClientHttpRequestInterceptor> interceptors) {
+		this.interceptors = interceptors;
+	}
 
-    /**
-     * Return the request interceptor that this accessor uses.
-     */
-    public List<AsyncClientHttpRequestInterceptor> getInterceptors() {
-        return this.interceptors;
-    }
+	/**
+	 * Return the request interceptor that this accessor uses.
+	 */
+	public List<org.springframework.http.client.AsyncClientHttpRequestInterceptor> getInterceptors() {
+		return this.interceptors;
+	}
 
 
-    @Override
-    public AsyncClientHttpRequestFactory getAsyncRequestFactory() {
-        AsyncClientHttpRequestFactory delegate = super.getAsyncRequestFactory();
-        if (!CollectionUtils.isEmpty(getInterceptors())) {
-            return new InterceptingAsyncClientHttpRequestFactory(delegate, getInterceptors());
-        }
-        else {
-            return delegate;
-        }
-    }
+	@Override
+	public org.springframework.http.client.AsyncClientHttpRequestFactory getAsyncRequestFactory() {
+		org.springframework.http.client.AsyncClientHttpRequestFactory delegate = super.getAsyncRequestFactory();
+		if (!CollectionUtils.isEmpty(getInterceptors())) {
+			return new org.springframework.http.client.InterceptingAsyncClientHttpRequestFactory(delegate, getInterceptors());
+		}
+		else {
+			return delegate;
+		}
+	}
 
 }
