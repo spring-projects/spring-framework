@@ -132,7 +132,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertNotNull(mono.block());
 		assertEquals(Optional.class, mono.block().getClass());
-		assertFalse(((Optional) mono.block()).isPresent());
+		assertFalse(((Optional<?>) mono.block()).isPresent());
 
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultFormattingConversionService());
@@ -144,7 +144,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 
 		assertNotNull(mono.block());
 		assertEquals(Optional.class, mono.block().getClass());
-		Optional optional = (Optional) mono.block();
+		Optional<?> optional = (Optional<?>) mono.block();
 		assertTrue(optional.isPresent());
 		assertSame(foo, optional.get());
 	}

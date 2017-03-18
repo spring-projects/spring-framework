@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +74,7 @@ public class ModelInitializerTests {
 		WebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
 		BindingContext bindingContext = new InitBinderBindingContext(bindingInitializer, binderMethods);
 
-		this.modelInitializer.initModel(bindingContext, attributeMethods, this.exchange).blockMillis(5000);
+		this.modelInitializer.initModel(bindingContext, attributeMethods, this.exchange).block(Duration.ofMillis(5000));
 
 		WebExchangeDataBinder binder = bindingContext.createDataBinder(this.exchange, "name");
 		assertEquals(Collections.singletonList(validator), binder.getValidators());
@@ -85,7 +86,7 @@ public class ModelInitializerTests {
 		assertEquals("Bean", ((TestBean) value).getName());
 
 		value = model.get("monoBean");
-		assertEquals("Mono Bean", ((Mono<TestBean>) value).blockMillis(5000).getName());
+		assertEquals("Mono Bean", ((Mono<TestBean>) value).block(Duration.ofMillis(5000)).getName());
 
 		value = model.get("singleBean");
 		assertEquals("Single Bean", ((Single<TestBean>) value).toBlocking().value().getName());

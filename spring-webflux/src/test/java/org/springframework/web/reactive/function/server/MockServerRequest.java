@@ -105,6 +105,7 @@ public class MockServerRequest implements ServerRequest {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <S> S body(BodyExtractor<S, ? super ServerHttpRequest> extractor, Map<String, Object> hints) {
 		return (S) this.body;
 	}

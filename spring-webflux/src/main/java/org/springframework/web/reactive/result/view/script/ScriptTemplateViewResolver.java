@@ -20,7 +20,6 @@ import java.util.Locale;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.web.reactive.result.view.AbstractUrlBasedView;
 import org.springframework.web.reactive.result.view.UrlBasedViewResolver;
 import org.springframework.web.reactive.result.view.View;
 

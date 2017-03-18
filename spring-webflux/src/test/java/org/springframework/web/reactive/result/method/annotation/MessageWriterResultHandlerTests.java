@@ -255,6 +255,7 @@ public class MessageWriterResultHandlerTests {
 			return id;
 		}
 
+		@SuppressWarnings("unused")
 		public String getName() {
 			return name;
 		}

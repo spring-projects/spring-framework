@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.socket;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -40,7 +42,6 @@ import static org.junit.Assert.assertThat;
  * Integration tests with server-side {@link WebSocketHandler}s.
  * @author Rossen Stoyanchev
  */
-@SuppressWarnings({"unused", "WeakerAccess"})
 public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 
@@ -62,9 +63,9 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 						.thenMany(session.receive().take(count).map(WebSocketMessage::getPayloadAsText))
 						.subscribeWith(output)
 						.then())
-				.blockMillis(5000);
+				.block(Duration.ofMillis(5000));
 
-		assertEquals(input.collectList().blockMillis(5000), output.collectList().blockMillis(5000));
+		assertEquals(input.collectList().block(Duration.ofMillis(5000)), output.collectList().block(Duration.ofMillis(5000)));
 	}
 
 	@Test
@@ -91,13 +92,13 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 								.then();
 					}
 				})
-				.blockMillis(5000);
+				.block(Duration.ofMillis(5000));
 
 		HandshakeInfo info = infoRef.get();
 		assertThat(info.getHeaders().getFirst("Upgrade"), Matchers.equalToIgnoringCase("websocket"));
 		assertEquals(protocol, info.getHeaders().getFirst("Sec-WebSocket-Protocol"));
 		assertEquals("Wrong protocol accepted", protocol, info.getSubProtocol().orElse("none"));
-		assertEquals("Wrong protocol detected on the server side", protocol, output.blockMillis(5000));
+		assertEquals("Wrong protocol detected on the server side", protocol, output.block(Duration.ofMillis(5000)));
 	}
 
 	@Test
@@ -111,9 +112,9 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 						.map(WebSocketMessage::getPayloadAsText)
 						.subscribeWith(output)
 						.then())
-				.blockMillis(5000);
+				.block(Duration.ofMillis(5000));
 
-		assertEquals("my-header:my-value", output.blockMillis(5000));
+		assertEquals("my-header:my-value", output.block(Duration.ofMillis(5000)));
 	}
 
 
@@ -174,7 +175,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 	// https://github.com/ReactiveX/RxNetty/issues/560
 
 	private static Mono<Void> doSend(WebSocketSession session, Publisher<WebSocketMessage> output) {
-		return session.send(Mono.delayMillis(100).thenMany(output));
+		return session.send(Mono.delay(Duration.ofMillis(100)).thenMany(output));
 	}
 
 }

@@ -18,6 +18,7 @@ package org.springframework.web.reactive.result.view.freemarker;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Locale;
 
 import freemarker.template.Configuration;
@@ -106,7 +107,7 @@ public class FreeMarkerViewTests {
 
 		ModelMap model = new ExtendedModelMap();
 		model.addAttribute("hello", "hi FreeMarker");
-		view.render(model, null, this.exchange).blockMillis(5000);
+		view.render(model, null, this.exchange).block(Duration.ofMillis(5000));
 
 		StepVerifier.create(this.exchange.getResponse().getBody())
 				.consumeNextWith(buf -> assertEquals("<html><body>hi FreeMarker</body></html>", asString(buf)))

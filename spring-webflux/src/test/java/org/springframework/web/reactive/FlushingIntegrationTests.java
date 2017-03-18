@@ -19,7 +19,6 @@ package org.springframework.web.reactive;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -29,23 +28,20 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
 import org.springframework.web.reactive.function.BodyExtractors;
-import org.springframework.web.reactive.function.client.ExchangeFunction;
-import org.springframework.web.reactive.function.client.ExchangeFunctions;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.DefaultUriBuilderFactory;
-import org.springframework.web.util.UriBuilderFactory;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * @author Sebastien Deleuze
+ * @since 5.0
  */
 public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
@@ -55,7 +51,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 	@Before
 	public void setup() throws Exception {
 		// TODO: fix failing RxNetty tests
-		Assume.assumeFalse(this.server instanceof RxNettyHttpServer);
+		assumeFalse(this.server instanceof RxNettyHttpServer);
 
 		super.setup();
 		this.webClient = WebClient.create("http://localhost:" + this.port);
@@ -118,7 +114,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 			String path = request.getURI().getPath();
 			if (path.endsWith("write-and-flush")) {
 				Flux<Publisher<DataBuffer>> responseBody = Flux
-						.intervalMillis(50)
+						.interval(Duration.ofMillis(50))
 						.map(l -> toDataBuffer("data" + l, response.bufferFactory()))
 						.take(2)
 						.map(Flux::just);

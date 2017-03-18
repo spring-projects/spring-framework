@@ -102,11 +102,11 @@ public class JsonStreamingIntegrationTests extends AbstractHttpHandlerIntegratio
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class Person {
 
 		private String name;
 
-		@SuppressWarnings("unused")
 		public Person() {
 		}
 

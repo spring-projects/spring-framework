@@ -15,6 +15,7 @@
  */
 package org.springframework.web.reactive.resource;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -78,7 +79,7 @@ public class VersionResourceResolverTests {
 		this.resolver.setStrategyMap(Collections.singletonMap("/**", this.versionStrategy));
 		Resource actual = this.resolver
 				.resolveResourceInternal(null, file, this.locations, this.chain)
-				.blockMillis(5000);
+				.block(Duration.ofMillis(5000));
 
 		assertEquals(expected, actual);
 		verify(this.chain, times(1)).resolveResource(null, file, this.locations);
@@ -93,7 +94,7 @@ public class VersionResourceResolverTests {
 		this.resolver.setStrategyMap(Collections.emptyMap());
 		Resource actual = this.resolver
 				.resolveResourceInternal(null, file, this.locations, this.chain)
-				.blockMillis(5000);
+				.block(Duration.ofMillis(5000));
 
 		assertNull(actual);
 		verify(this.chain, times(1)).resolveResource(null, file, this.locations);
@@ -108,7 +109,7 @@ public class VersionResourceResolverTests {
 		this.resolver.setStrategyMap(Collections.singletonMap("/**", this.versionStrategy));
 		Resource actual = this.resolver
 				.resolveResourceInternal(null, file, this.locations, this.chain)
-				.blockMillis(5000);
+				.block(Duration.ofMillis(5000));
 
 		assertNull(actual);
 		verify(this.chain, times(1)).resolveResource(null, file, this.locations);
@@ -128,7 +129,7 @@ public class VersionResourceResolverTests {
 		this.resolver.setStrategyMap(Collections.singletonMap("/**", this.versionStrategy));
 		Resource actual = this.resolver
 				.resolveResourceInternal(null, versionFile, this.locations, this.chain)
-				.blockMillis(5000);
+				.block(Duration.ofMillis(5000));
 
 		assertNull(actual);
 		verify(this.versionStrategy, times(1)).removeVersion(versionFile, version);
@@ -149,7 +150,7 @@ public class VersionResourceResolverTests {
 		this.resolver.setStrategyMap(Collections.singletonMap("/**", this.versionStrategy));
 		Resource actual = this.resolver
 				.resolveResourceInternal(null, versionFile, this.locations, this.chain)
-				.blockMillis(5000);
+				.block(Duration.ofMillis(5000));
 
 		assertNull(actual);
 		verify(this.versionStrategy, times(1)).getResourceVersion(expected);
@@ -171,7 +172,7 @@ public class VersionResourceResolverTests {
 		this.resolver.setStrategyMap(Collections.singletonMap("/**", this.versionStrategy));
 		Resource actual = this.resolver
 				.resolveResourceInternal(exchange, versionFile, this.locations, this.chain)
-				.blockMillis(5000);
+				.block(Duration.ofMillis(5000));
 
 		assertEquals(expected.getFilename(), actual.getFilename());
 		verify(this.versionStrategy, times(1)).getResourceVersion(expected);

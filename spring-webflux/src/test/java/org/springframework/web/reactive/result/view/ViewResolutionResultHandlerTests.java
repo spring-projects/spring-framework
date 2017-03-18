@@ -355,6 +355,7 @@ public class ViewResolutionResultHandlerTests {
 			this.mediaTypes = Arrays.asList(mediaTypes);
 		}
 
+		@SuppressWarnings("unused")
 		public String getName() {
 			return this.name;
 		}
@@ -387,6 +388,7 @@ public class ViewResolutionResultHandlerTests {
 			this.name = name;
 		}
 
+		@SuppressWarnings("unused")
 		public String getName() {
 			return this.name;
 		}
@@ -440,7 +442,7 @@ public class ViewResolutionResultHandlerTests {
 			return null;
 		}
 
-		Map map() {
+		Map<?,?> map() {
 			return null;
 		}
 

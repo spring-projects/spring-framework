@@ -245,7 +245,6 @@ public class ModelAttributeMethodArgumentResolverTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void validationErrorToSingle() throws Exception {
 
 		MethodParameter parameter = this.testMethod
@@ -256,7 +255,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 					Object value = resolvedArgumentMono.block(Duration.ofSeconds(5));
 					assertNotNull(value);
 					assertTrue(value instanceof Single);
-					return Mono.from(RxReactiveStreams.toPublisher((Single) value));
+					return Mono.from(RxReactiveStreams.toPublisher((Single<?>) value));
 				});
 	}
 
@@ -303,6 +302,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class Foo {
 
 		private String name;

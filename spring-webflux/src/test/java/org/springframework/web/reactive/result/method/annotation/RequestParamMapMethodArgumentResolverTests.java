@@ -16,18 +16,16 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.net.URISyntaxException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -48,15 +46,9 @@ import static org.springframework.web.method.MvcAnnotationPredicates.requestPara
  */
 public class RequestParamMapMethodArgumentResolverTests {
 
-	private RequestParamMapMethodArgumentResolver resolver;
+	private RequestParamMapMethodArgumentResolver resolver = new RequestParamMapMethodArgumentResolver(new ReactiveAdapterRegistry());
 
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
-
-
-	@Before
-	public void setup() throws Exception {
-		this.resolver = new RequestParamMapMethodArgumentResolver(new ReactiveAdapterRegistry());
-	}
 
 
 	@Test
@@ -114,11 +106,10 @@ public class RequestParamMapMethodArgumentResolverTests {
 
 
 	private Object resolve(MethodParameter parameter, ServerWebExchange exchange) {
-		return this.resolver.resolveArgument(parameter, null, exchange).blockMillis(0);
+		return this.resolver.resolveArgument(parameter, null, exchange).block(Duration.ofMillis(0));
 	}
 
 
-	@SuppressWarnings("unused")
 	public void handle(
 			@RequestParam Map<?, ?> param1,
 			@RequestParam MultiValueMap<?, ?> param2,

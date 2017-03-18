@@ -258,6 +258,7 @@ public class BodyInsertersTests {
 	interface SafeToSerialize {}
 
 
+	@SuppressWarnings("unused")
 	private static class User {
 
 		@JsonView(SafeToSerialize.class)

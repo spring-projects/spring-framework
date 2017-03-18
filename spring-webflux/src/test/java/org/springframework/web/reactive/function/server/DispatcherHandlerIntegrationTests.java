@@ -77,7 +77,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 
 		return WebHttpHandlerBuilder.webHandler(webHandler).build();
 	}
-	
+
 
 	@Test
 	public void mono() throws Exception {
@@ -101,7 +101,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		assertEquals("John", body.get(0).getName());
 		assertEquals("Jane", body.get(1).getName());
 	}
-	
+
 
 	@Configuration
 	static class TestConfiguration extends WebFluxConfigurationSupport {
@@ -155,7 +155,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 			return new ServerResponseResultHandler();
 		}
 	}
-	
+
 
 	private static class PersonHandler {
 
@@ -169,10 +169,6 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 			Person person2 = new Person("Jane");
 			return ServerResponse.ok().body(
 					fromPublisher(Flux.just(person1, person2), Person.class));
-		}
-
-		public Mono<ServerResponse> view() {
-			return ServerResponse.ok().render("foo", "bar");
 		}
 
 	}
@@ -193,6 +189,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 			return this.name;
 		}
 
+		@SuppressWarnings("unused")
 		public void setName(String name) {
 			this.name = name;
 		}
@@ -205,8 +202,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 			if (o == null || getClass() != o.getClass()) {
 				return false;
 			}
-			Person
-					person = (Person) o;
+			Person person = (Person) o;
 			return !(this.name != null ? !this.name.equals(person.name) : person.name != null);
 		}
 
@@ -220,5 +216,5 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 			return "Person{" + "name='" + this.name + '\'' + '}';
 		}
 	}
-	
+
 }

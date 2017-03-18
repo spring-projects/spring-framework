@@ -192,11 +192,11 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class Person {
 
 		private String name;
 
-		@SuppressWarnings("unused")
 		public Person() {
 		}
 

@@ -19,14 +19,12 @@ package org.springframework.web.reactive.result.view.script;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
@@ -41,13 +39,6 @@ import static org.junit.Assert.assertEquals;
  */
 @Ignore("JRuby not compatible with JDK 9 yet")
 public class JRubyScriptTemplateTests {
-
-	private StaticApplicationContext context;
-
-	@Before
-	public void setup() {
-		this.context = new StaticApplicationContext();
-	}
 
 	@Test
 	public void renderTemplate() throws Exception {

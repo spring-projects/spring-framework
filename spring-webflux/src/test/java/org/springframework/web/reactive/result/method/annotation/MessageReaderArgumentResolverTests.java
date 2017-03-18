@@ -45,8 +45,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
@@ -57,7 +55,6 @@ import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -222,7 +219,7 @@ public class MessageReaderArgumentResolverTests {
 		map.put("bar", "b1");
 		ResolvableType type = forClassWithGenerics(Map.class, String.class, String.class);
 		MethodParameter param = this.testMethod.arg(type);
-		Map actual = resolveValue(param, body);
+		Map<String, String> actual = resolveValue(param, body);
 
 		assertEquals(map, actual);
 	}
@@ -335,13 +332,13 @@ public class MessageReaderArgumentResolverTests {
 
 
 	@XmlRootElement
+	@SuppressWarnings("unused")
 	private static class TestBean {
 
 		private String foo;
 
 		private String bar;
 
-		@SuppressWarnings("unused")
 		public TestBean() {
 		}
 
@@ -426,7 +423,7 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 
-	@SuppressWarnings({"serial"})
+	@SuppressWarnings({"serial", "unused"})
 	private static class SimpleBean implements Identifiable {
 
 		private Long id;

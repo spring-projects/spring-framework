@@ -104,7 +104,7 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping(key1, this.handler, this.method1);
 		this.mapping.registerMapping(key2, this.handler, this.method2);
 
-		List directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
+		List<String> directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
 
 		assertNotNull(directUrlMatches);
 		assertEquals(1, directUrlMatches.size());
@@ -120,7 +120,7 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping(key1, handler1, this.method1);
 		this.mapping.registerMapping(key2, handler2, this.method1);
 
-		List directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
+		List<String> directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
 
 		assertNotNull(directUrlMatches);
 		assertEquals(1, directUrlMatches.size());

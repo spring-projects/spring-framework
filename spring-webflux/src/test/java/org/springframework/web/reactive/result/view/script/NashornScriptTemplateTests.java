@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,11 @@ package org.springframework.web.reactive.result.view.script;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
@@ -34,18 +32,11 @@ import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Unit tests for pure Javascript templates running on Nashorn engine.
+ * Unit tests for pure JavaScript templates running on Nashorn engine.
  *
  * @author Sebastien Deleuze
  */
 public class NashornScriptTemplateTests {
-
-	private StaticApplicationContext context;
-
-	@Before
-	public void setup() {
-		this.context = new StaticApplicationContext();
-	}
 
 	@Test
 	public void renderTemplate() throws Exception {

@@ -124,6 +124,7 @@ public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunc
 			return name;
 		}
 
+		@SuppressWarnings("unused")
 		public void setName(String name) {
 			this.name = name;
 		}

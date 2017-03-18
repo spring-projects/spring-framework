@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.time.Duration;
+
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -107,7 +109,7 @@ public class ErrorsArgumentResolverTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void resolveErrorsAfterMonoModelAttribute() throws Exception {
 		MethodParameter parameter = this.testMethod.arg(BindingResult.class);
-		this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange).blockMillis(5000);
+		this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange).block(Duration.ofMillis(5000));
 	}
 
 
@@ -119,12 +121,13 @@ public class ErrorsArgumentResolverTests {
 		MethodParameter parameter = this.testMethod.arg(Errors.class);
 
 		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
-				.blockMillis(5000);
+				.block(Duration.ofMillis(5000));
 
 		assertSame(this.bindingResult, actual);
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class Foo {
 
 		private String name;
@@ -145,7 +148,6 @@ public class ErrorsArgumentResolverTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	void handle(
 			@ModelAttribute Foo foo,
 			Errors errors,

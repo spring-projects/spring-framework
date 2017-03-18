@@ -129,7 +129,7 @@ public class RequestAttributeMethodArgumentResolverTests {
 
 		assertNotNull(mono.block());
 		assertEquals(Optional.class, mono.block().getClass());
-		assertFalse(((Optional) mono.block()).isPresent());
+		assertFalse(((Optional<?>) mono.block()).isPresent());
 
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultFormattingConversionService());
@@ -141,7 +141,7 @@ public class RequestAttributeMethodArgumentResolverTests {
 
 		assertNotNull(mono.block());
 		assertEquals(Optional.class, mono.block().getClass());
-		Optional optional = (Optional) mono.block();
+		Optional<?> optional = (Optional<?>) mono.block();
 		assertTrue(optional.isPresent());
 		assertSame(foo, optional.get());
 	}

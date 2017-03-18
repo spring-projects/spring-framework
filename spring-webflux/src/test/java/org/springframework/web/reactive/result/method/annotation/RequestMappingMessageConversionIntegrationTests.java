@@ -601,12 +601,11 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 
 
 	@XmlRootElement
-	@SuppressWarnings("WeakerAccess")
+	@SuppressWarnings("unused")
 	private static class Person {
 
 		private String name;
 
-		@SuppressWarnings("unused")
 		public Person() {
 		}
 
