@@ -33,6 +33,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * @author Arjen Poutsma
+ * @since 5.0
  */
 @SuppressWarnings("unchecked")
 public class RouterFunctionsTests {
@@ -179,7 +180,8 @@ public class RouterFunctionsTests {
 	@Test
 	public void toHttpHandlerHandlerReturnResponseStatusExceptionInResponseWriteTo() throws Exception {
 		HandlerFunction<ServerResponse> handlerFunction =
-				request -> Mono.just(new ServerResponse() {
+				// Mono.<ServerResponse> is required for compilation in Eclipse
+				request -> Mono.<ServerResponse> just(new ServerResponse() {
 					@Override
 					public HttpStatus statusCode() {
 						return HttpStatus.OK;
@@ -211,7 +213,8 @@ public class RouterFunctionsTests {
 	@Test
 	public void toHttpHandlerHandlerThrowResponseStatusExceptionInResponseWriteTo() throws Exception {
 		HandlerFunction<ServerResponse> handlerFunction =
-				request -> Mono.just(new ServerResponse() {
+				// Mono.<ServerResponse> is required for compilation in Eclipse
+				request -> Mono.<ServerResponse> just(new ServerResponse() {
 					@Override
 					public HttpStatus statusCode() {
 						return HttpStatus.OK;
