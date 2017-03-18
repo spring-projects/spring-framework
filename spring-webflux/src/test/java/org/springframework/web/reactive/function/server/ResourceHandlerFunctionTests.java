@@ -99,15 +99,9 @@ public class ResourceHandlerFunctionTests {
 			return res.writeTo(exchange, HandlerStrategies.withDefaults());
 		});
 
-		StepVerifier.create(result)
-				.expectComplete()
-				.verify();
-
 		StepVerifier.create(result).expectComplete().verify();
+		StepVerifier.create(mockResponse.getBody()).expectComplete().verify();
 
-		StepVerifier.create(mockResponse.getBody())
-				.expectComplete()
-				.verify();
 		assertEquals(MediaType.TEXT_PLAIN, mockResponse.getHeaders().getContentType());
 		assertEquals(this.resource.contentLength(), mockResponse.getHeaders().getContentLength());
 	}
