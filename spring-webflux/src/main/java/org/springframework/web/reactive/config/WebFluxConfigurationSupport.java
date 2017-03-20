@@ -50,7 +50,6 @@ import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.codec.Jackson2ServerHttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
@@ -487,7 +486,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		}
 		if (jackson2Present) {
 			Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
-			writers.add(new Jackson2ServerHttpMessageWriter(encoder));
+			writers.add(new EncoderHttpMessageWriter<>(encoder));
 			sseDataEncoders.add(encoder);
 		}
 		writers.add(new ServerSentEventHttpMessageWriter(sseDataEncoders));

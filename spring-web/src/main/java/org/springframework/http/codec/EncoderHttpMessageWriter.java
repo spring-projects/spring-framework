@@ -16,6 +16,7 @@
 
 package org.springframework.http.codec;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -35,9 +36,6 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 
-import static org.springframework.core.codec.AbstractEncoder.FLUSHING_STRATEGY_HINT;
-import static org.springframework.core.codec.AbstractEncoder.FlushingStrategy.AFTER_EACH_ELEMENT;
-
 /**
  * {@code HttpMessageWriter} that wraps and delegates to a {@link Encoder}.
  *
@@ -52,11 +50,21 @@ import static org.springframework.core.codec.AbstractEncoder.FlushingStrategy.AF
  */
 public class EncoderHttpMessageWriter<T> implements ServerHttpMessageWriter<T> {
 
+	/**
+	 * Default list of media types that signify a "streaming" scenario such that
+	 * there may be a time lag between items written and hence requires flushing.
+	 */
+	public static final List<MediaType> DEFAULT_STREAMING_MEDIA_TYPES =
+			Collections.singletonList(MediaType.APPLICATION_STREAM_JSON);
+
+
 	private final Encoder<T> encoder;
 
 	private final List<MediaType> mediaTypes;
 
 	private final MediaType defaultMediaType;
+
+	private final List<MediaType> streamingMediaTypes = new ArrayList<>(1);
 
 
 	/**
@@ -67,6 +75,7 @@ public class EncoderHttpMessageWriter<T> implements ServerHttpMessageWriter<T> {
 		this.encoder = encoder;
 		this.mediaTypes = MediaType.asMediaTypes(encoder.getEncodableMimeTypes());
 		this.defaultMediaType = initDefaultMediaType(this.mediaTypes);
+		this.streamingMediaTypes.addAll(DEFAULT_STREAMING_MEDIA_TYPES);
 	}
 
 	private static MediaType initDefaultMediaType(List<MediaType> mediaTypes) {
@@ -84,6 +93,23 @@ public class EncoderHttpMessageWriter<T> implements ServerHttpMessageWriter<T> {
 	@Override
 	public List<MediaType> getWritableMediaTypes() {
 		return this.mediaTypes;
+	}
+
+	/**
+	 * Configure "streaming" media types for which flushing should be performed
+	 * automatically vs at the end of the input stream.
+	 * <p>By default this is set to {@link #DEFAULT_STREAMING_MEDIA_TYPES}.
+	 * @param mediaTypes one or more media types to add to the list
+	 */
+	public void setStreamingMediaTypes(List<MediaType> mediaTypes) {
+		this.streamingMediaTypes.addAll(mediaTypes);
+	}
+
+	/**
+	 * Return the configured list of "streaming" media types.
+	 */
+	public List<MediaType> getStreamingMediaTypes() {
+		return Collections.unmodifiableList(this.streamingMediaTypes);
 	}
 
 
@@ -111,8 +137,9 @@ public class EncoderHttpMessageWriter<T> implements ServerHttpMessageWriter<T> {
 		Flux<DataBuffer> body = this.encoder.encode(inputStream,
 				outputMessage.bufferFactory(), elementType, headers.getContentType(), hints);
 
-		return (hints.get(FLUSHING_STRATEGY_HINT) == AFTER_EACH_ELEMENT ?
-				outputMessage.writeAndFlushWith(body.map(Flux::just)) : outputMessage.writeWith(body));
+		return isStreamingMediaType(headers.getContentType()) ?
+				outputMessage.writeAndFlushWith(body.map(Flux::just)) :
+				outputMessage.writeWith(body);
 	}
 
 	private static boolean useFallback(MediaType main, MediaType fallback) {
@@ -125,6 +152,10 @@ public class EncoderHttpMessageWriter<T> implements ServerHttpMessageWriter<T> {
 			return new MediaType(main, defaultType.getCharset());
 		}
 		return main;
+	}
+
+	private boolean isStreamingMediaType(MediaType contentType) {
+		return this.streamingMediaTypes.stream().anyMatch(contentType::isCompatibleWith);
 	}
 
 
