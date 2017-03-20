@@ -44,38 +44,13 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
  * @since 5.0
  * @see com.fasterxml.jackson.annotation.JsonView
  */
-public class Jackson2ServerHttpMessageWriter extends AbstractServerHttpMessageWriter<Object> {
+public class Jackson2ServerHttpMessageWriter extends EncoderHttpMessageWriter<Object> {
 
 
 	public Jackson2ServerHttpMessageWriter(Encoder<Object> encoder) {
-		super(new EncoderHttpMessageWriter<>(encoder));
+		super(encoder);
 	}
 
-	public Jackson2ServerHttpMessageWriter(HttpMessageWriter<Object> writer) {
-		super(writer);
-	}
-
-
-	@Override
-	protected Map<String, Object> resolveWriteHints(ResolvableType streamType,
-			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request) {
-
-		Map<String, Object> hints = new HashMap<>();
-		Object source = streamType.getSource();
-		MethodParameter returnValue = (source instanceof MethodParameter ? (MethodParameter)source : null);
-		if (returnValue != null) {
-			JsonView annotation = returnValue.getMethodAnnotation(JsonView.class);
-			if (annotation != null) {
-				Class<?>[] classes = annotation.value();
-				if (classes.length != 1) {
-					throw new IllegalArgumentException(
-							"@JsonView only supported for write hints with exactly 1 class argument: " + returnValue);
-				}
-				hints.put(AbstractJackson2Codec.JSON_VIEW_HINT, classes[0]);
-			}
-		}
-		return hints;
-	}
 
 	@Override
 	public Mono<Void> write(Publisher<?> inputStream, ResolvableType elementType, MediaType mediaType,
@@ -100,4 +75,26 @@ public class Jackson2ServerHttpMessageWriter extends AbstractServerHttpMessageWr
 		}
 		return super.write(inputStream, streamType, elementType, mediaType, request, response, hints);
 	}
+
+	@Override
+	protected Map<String, Object> resolveWriteHints(ResolvableType streamType, ResolvableType elementType,
+			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
+
+		Map<String, Object> hints = new HashMap<>();
+		Object source = streamType.getSource();
+		MethodParameter returnValue = (source instanceof MethodParameter ? (MethodParameter)source : null);
+		if (returnValue != null) {
+			JsonView annotation = returnValue.getMethodAnnotation(JsonView.class);
+			if (annotation != null) {
+				Class<?>[] classes = annotation.value();
+				if (classes.length != 1) {
+					throw new IllegalArgumentException(
+							"@JsonView only supported for write hints with exactly 1 class argument: " + returnValue);
+				}
+				hints.put(AbstractJackson2Codec.JSON_VIEW_HINT, classes[0]);
+			}
+		}
+		return hints;
+	}
+
 }

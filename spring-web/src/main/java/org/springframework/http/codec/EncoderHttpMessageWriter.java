@@ -16,6 +16,8 @@
 
 package org.springframework.http.codec;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +31,8 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 
 import static org.springframework.core.codec.AbstractEncoder.FLUSHING_STRATEGY_HINT;
@@ -42,7 +46,7 @@ import static org.springframework.core.codec.AbstractEncoder.FlushingStrategy.AF
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
+public class EncoderHttpMessageWriter<T> implements ServerHttpMessageWriter<T> {
 
 	private final Encoder<T> encoder;
 
@@ -117,6 +121,31 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 			return new MediaType(main, defaultType.getCharset());
 		}
 		return main;
+	}
+
+
+	// ServerHttpMessageWriter...
+
+	@Override
+	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType streamType,
+			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request,
+			ServerHttpResponse response, Map<String, Object> hints) {
+
+		Map<String, Object> allHints = new HashMap<>();
+		allHints.putAll(resolveWriteHints(streamType, elementType, mediaType, request, response));
+		allHints.putAll(hints);
+
+		return write(inputStream, elementType, mediaType, response, allHints);
+	}
+
+	/**
+	 * Resolve hints to pass to the encoder, e.g. by checking for annotations
+	 * on a controller method parameter or checking the server request.
+	 */
+	protected Map<String, Object> resolveWriteHints(ResolvableType streamType, ResolvableType elementType,
+			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
+
+		return Collections.emptyMap();
 	}
 
 }
