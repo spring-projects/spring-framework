@@ -39,7 +39,11 @@ import static org.springframework.core.codec.AbstractEncoder.FLUSHING_STRATEGY_H
 import static org.springframework.core.codec.AbstractEncoder.FlushingStrategy.AFTER_EACH_ELEMENT;
 
 /**
- * Implementation of {@code HttpMessageWriter} delegating to an {@link Encoder}.
+ * {@code HttpMessageWriter} that wraps and delegates to a {@link Encoder}.
+ *
+ * <p>Also a {@code ServerHttpMessageWriter} that pre-resolves encoding hints
+ * from the extra information available on the server side such as the request
+ * or controller method annotations.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
@@ -132,19 +136,24 @@ public class EncoderHttpMessageWriter<T> implements ServerHttpMessageWriter<T> {
 			ServerHttpResponse response, Map<String, Object> hints) {
 
 		Map<String, Object> allHints = new HashMap<>();
-		allHints.putAll(resolveWriteHints(streamType, elementType, mediaType, request, response));
+		allHints.putAll(getWriteHints(streamType, elementType, mediaType, request, response));
 		allHints.putAll(hints);
 
 		return write(inputStream, elementType, mediaType, response, allHints);
 	}
 
 	/**
-	 * Resolve hints to pass to the encoder, e.g. by checking for annotations
-	 * on a controller method parameter or checking the server request.
+	 * Get additional hints for encoding for example based on the server request
+	 * or annotations from controller method parameters. By default, delegate to
+	 * the encoder if it is an instance of {@link ServerHttpEncoder}.
 	 */
-	protected Map<String, Object> resolveWriteHints(ResolvableType streamType, ResolvableType elementType,
+	protected Map<String, Object> getWriteHints(ResolvableType streamType, ResolvableType elementType,
 			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
+		if (this.encoder instanceof ServerHttpEncoder) {
+			ServerHttpEncoder<?> httpEncoder = (ServerHttpEncoder<?>) this.encoder;
+			return httpEncoder.getEncodeHints(streamType, elementType, mediaType, request, response);
+		}
 		return Collections.emptyMap();
 	}
 

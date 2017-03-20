@@ -20,21 +20,19 @@ package org.springframework.http.codec;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import org.reactivestreams.Publisher;
-import static org.springframework.core.codec.AbstractEncoder.FLUSHING_STRATEGY_HINT;
-import static org.springframework.core.codec.AbstractEncoder.FlushingStrategy.AFTER_EACH_ELEMENT;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractEncoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
-import org.springframework.http.codec.json.AbstractJackson2Codec;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+
+import static org.springframework.core.codec.AbstractEncoder.FLUSHING_STRATEGY_HINT;
+import static org.springframework.core.codec.AbstractEncoder.FlushingStrategy.AFTER_EACH_ELEMENT;
 
 /**
  * Jackson {@link ServerHttpMessageWriter} that resolves {@code @JsonView} annotated handler
@@ -74,27 +72,6 @@ public class Jackson2ServerHttpMessageWriter extends EncoderHttpMessageWriter<Ob
 			return super.write(inputStream, streamType, elementType, mediaType, request, response, hintsWithFlush);
 		}
 		return super.write(inputStream, streamType, elementType, mediaType, request, response, hints);
-	}
-
-	@Override
-	protected Map<String, Object> resolveWriteHints(ResolvableType streamType, ResolvableType elementType,
-			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
-
-		Map<String, Object> hints = new HashMap<>();
-		Object source = streamType.getSource();
-		MethodParameter returnValue = (source instanceof MethodParameter ? (MethodParameter)source : null);
-		if (returnValue != null) {
-			JsonView annotation = returnValue.getMethodAnnotation(JsonView.class);
-			if (annotation != null) {
-				Class<?>[] classes = annotation.value();
-				if (classes.length != 1) {
-					throw new IllegalArgumentException(
-							"@JsonView only supported for write hints with exactly 1 class argument: " + returnValue);
-				}
-				hints.put(AbstractJackson2Codec.JSON_VIEW_HINT, classes[0]);
-			}
-		}
-		return hints;
 	}
 
 }
