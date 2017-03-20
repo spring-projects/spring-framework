@@ -17,6 +17,7 @@
 package org.springframework.http.codec;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +29,8 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.http.HttpMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 
 /**
@@ -38,7 +41,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
+public class DecoderHttpMessageReader<T> implements ServerHttpMessageReader<T> {
 
 	private final Decoder<T> decoder;
 
@@ -92,6 +95,41 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 	private MediaType getContentType(HttpMessage inputMessage) {
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		return (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
+	}
+
+
+	// ServerHttpMessageReader...
+
+	@Override
+	public Flux<T> read(ResolvableType streamType, ResolvableType elementType,
+			ServerHttpRequest request, ServerHttpResponse response, Map<String, Object> hints) {
+
+		Map<String, Object> allHints = new HashMap<>(4);
+		allHints.putAll(resolveReadHints(streamType, elementType, request, response));
+		allHints.putAll(hints);
+
+		return read(elementType, request, allHints);
+	}
+
+	@Override
+	public Mono<T> readMono(ResolvableType streamType, ResolvableType elementType,
+			ServerHttpRequest request, ServerHttpResponse response, Map<String, Object> hints) {
+
+		Map<String, Object> allHints = new HashMap<>(4);
+		allHints.putAll(resolveReadHints(streamType, elementType, request, response));
+		allHints.putAll(hints);
+
+		return readMono(elementType, request, allHints);
+	}
+
+	/**
+	 * Resolve hints to pass to the decoder, e.g. by checking for annotations
+	 * on a controller method parameter or checking the server request.
+	 */
+	protected Map<String, Object> resolveReadHints(ResolvableType streamType,
+			ResolvableType elementType, ServerHttpRequest request, ServerHttpResponse response) {
+
+		return Collections.emptyMap();
 	}
 
 }

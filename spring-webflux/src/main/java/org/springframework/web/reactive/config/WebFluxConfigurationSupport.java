@@ -491,12 +491,8 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 			Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
 			writers.add(new Jackson2ServerHttpMessageWriter(encoder));
 			sseDataEncoders.add(encoder);
-			HttpMessageWriter<Object> writer = new ServerSentEventHttpMessageWriter(sseDataEncoders);
-			writers.add(new Jackson2ServerHttpMessageWriter(writer));
 		}
-		else {
-			writers.add(new ServerSentEventHttpMessageWriter(sseDataEncoders));
-		}
+		writers.add(new ServerSentEventHttpMessageWriter(sseDataEncoders));
 	}
 
 	/**
