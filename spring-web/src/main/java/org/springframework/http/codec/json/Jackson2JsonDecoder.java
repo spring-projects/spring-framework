@@ -17,9 +17,11 @@
 package org.springframework.http.codec.json;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -30,10 +32,12 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
-import org.springframework.core.codec.Decoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.codec.ServerHttpDecoder;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
@@ -45,7 +49,7 @@ import org.springframework.util.MimeType;
  * @since 5.0
  * @see Jackson2JsonEncoder
  */
-public class Jackson2JsonDecoder extends AbstractJackson2Codec implements Decoder<Object> {
+public class Jackson2JsonDecoder extends AbstractJackson2Codec implements ServerHttpDecoder<Object> {
 
 	private final JsonObjectDecoder fluxObjectDecoder = new JsonObjectDecoder(true);
 
@@ -121,6 +125,29 @@ public class Jackson2JsonDecoder extends AbstractJackson2Codec implements Decode
 						throw new CodecException("Error while reading the data", ex);
 					}
 				});
+	}
+
+
+	// ServerHttpDecoder...
+
+	@Override
+	public Map<String, Object> getDecodeHints(ResolvableType actualType, ResolvableType elementType,
+			ServerHttpRequest request, ServerHttpResponse response) {
+
+		Object source = actualType.getSource();
+		MethodParameter parameter = (source instanceof MethodParameter ? (MethodParameter)source : null);
+		if (parameter != null) {
+			JsonView annotation = parameter.getParameterAnnotation(JsonView.class);
+			if (annotation != null) {
+				Class<?>[] classes = annotation.value();
+				if (classes.length != 1) {
+					throw new IllegalArgumentException(
+							"@JsonView only supported for read hints with exactly 1 class argument: " + parameter);
+				}
+				return Collections.singletonMap(AbstractJackson2Codec.JSON_VIEW_HINT, classes[0]);
+			}
+		}
+		return Collections.emptyMap();
 	}
 
 }

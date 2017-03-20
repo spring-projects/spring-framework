@@ -34,7 +34,11 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of {@code HttpMessageReader} delegating to a {@link Decoder}.
+ * {@code HttpMessageReader} that wraps and delegates to a {@link Decoder}.
+ *
+ * <p>Also a {@code ServerHttpMessageReader} that pre-resolves decoding hints
+ * from the extra information available on the server side such as the request
+ * or controller method parameter annotations.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
@@ -105,7 +109,7 @@ public class DecoderHttpMessageReader<T> implements ServerHttpMessageReader<T> {
 			ServerHttpRequest request, ServerHttpResponse response, Map<String, Object> hints) {
 
 		Map<String, Object> allHints = new HashMap<>(4);
-		allHints.putAll(resolveReadHints(streamType, elementType, request, response));
+		allHints.putAll(getReadHints(streamType, elementType, request, response));
 		allHints.putAll(hints);
 
 		return read(elementType, request, allHints);
@@ -116,19 +120,24 @@ public class DecoderHttpMessageReader<T> implements ServerHttpMessageReader<T> {
 			ServerHttpRequest request, ServerHttpResponse response, Map<String, Object> hints) {
 
 		Map<String, Object> allHints = new HashMap<>(4);
-		allHints.putAll(resolveReadHints(streamType, elementType, request, response));
+		allHints.putAll(getReadHints(streamType, elementType, request, response));
 		allHints.putAll(hints);
 
 		return readMono(elementType, request, allHints);
 	}
 
 	/**
-	 * Resolve hints to pass to the decoder, e.g. by checking for annotations
-	 * on a controller method parameter or checking the server request.
+	 * Get additional hints for decoding for example based on the server request
+	 * or annotations from controller method parameters. By default, delegate to
+	 * the decoder if it is an instance of {@link ServerHttpDecoder}.
 	 */
-	protected Map<String, Object> resolveReadHints(ResolvableType streamType,
+	protected Map<String, Object> getReadHints(ResolvableType streamType,
 			ResolvableType elementType, ServerHttpRequest request, ServerHttpResponse response) {
 
+		if (this.decoder instanceof ServerHttpDecoder) {
+			ServerHttpDecoder<?> httpDecoder = (ServerHttpDecoder<?>) this.decoder;
+			return httpDecoder.getDecodeHints(streamType, elementType, request, response);
+		}
 		return Collections.emptyMap();
 	}
 

@@ -35,6 +35,8 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
 
@@ -47,7 +49,7 @@ import org.springframework.util.MimeTypeUtils;
  * @author Arjen Poutsma
  * @since 5.0
  */
-public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Object> {
+public class ServerSentEventHttpMessageWriter implements ServerHttpMessageWriter<Object> {
 
 	/**
 	 * Server-Sent Events hint key expecting a {@link Boolean} value which when set to true
@@ -159,6 +161,25 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 		byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
 		DataBuffer buffer = bufferFactory.allocateBuffer(bytes.length).write(bytes);
 		return Mono.just(buffer);
+	}
+
+	@Override
+	public Mono<Void> write(Publisher<?> inputStream, ResolvableType streamType, ResolvableType elementType,
+			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response,
+			Map<String, Object> hints) {
+
+		Map<String, Object> allHints = this.dataEncoders.stream()
+				.filter(encoder -> encoder instanceof ServerHttpEncoder)
+				.map(encoder -> (ServerHttpEncoder<?>) encoder)
+				.map(encoder -> encoder.getEncodeHints(streamType, elementType, mediaType, request, response))
+				.reduce(new HashMap<>(), (t, u) -> {
+					t.putAll(u);
+					return t;
+				});
+
+		allHints.putAll(hints);
+
+		return write(inputStream, elementType, mediaType, response, allHints);
 	}
 
 }

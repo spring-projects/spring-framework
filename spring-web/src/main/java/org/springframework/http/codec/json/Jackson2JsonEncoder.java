@@ -18,9 +18,11 @@ package org.springframework.http.codec.json;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
@@ -31,19 +33,24 @@ import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.reactivestreams.Publisher;
-import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
-import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerHttpEncoder;
 import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
+
+import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
 
 /**
  * Encode from an {@code Object} stream to a byte stream of JSON objects,
@@ -54,7 +61,7 @@ import org.springframework.util.MimeType;
  * @since 5.0
  * @see Jackson2JsonDecoder
  */
-public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Encoder<Object> {
+public class Jackson2JsonEncoder extends AbstractJackson2Codec implements ServerHttpEncoder<Object> {
 
 	private final PrettyPrinter ssePrettyPrinter;
 
@@ -142,6 +149,30 @@ public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Encode
 		}
 
 		return buffer;
+	}
+
+
+	// ServerHttpEncoder...
+
+	@Override
+	public Map<String, Object> getEncodeHints(ResolvableType actualType, ResolvableType elementType,
+			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
+
+		Map<String, Object> hints = new HashMap<>();
+		Object source = actualType.getSource();
+		MethodParameter returnValue = (source instanceof MethodParameter ? (MethodParameter)source : null);
+		if (returnValue != null) {
+			JsonView annotation = returnValue.getMethodAnnotation(JsonView.class);
+			if (annotation != null) {
+				Class<?>[] classes = annotation.value();
+				if (classes.length != 1) {
+					throw new IllegalArgumentException(
+							"@JsonView only supported for write hints with exactly 1 class argument: " + returnValue);
+				}
+				hints.put(AbstractJackson2Codec.JSON_VIEW_HINT, classes[0]);
+			}
+		}
+		return hints;
 	}
 
 }
