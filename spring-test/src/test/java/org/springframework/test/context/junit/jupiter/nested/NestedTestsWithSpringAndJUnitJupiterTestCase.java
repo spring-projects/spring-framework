@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Integration tests that verify support for {@code @Nested} test classes
  * in conjunction with the {@link SpringExtension} in a JUnit 5 (Jupiter)
  * environment.
- * 
+ *
  * @author Sam Brannen
  * @since 5.0
  * @see org.springframework.test.context.junit4.nested.NestedTestsWithSpringRulesTests
