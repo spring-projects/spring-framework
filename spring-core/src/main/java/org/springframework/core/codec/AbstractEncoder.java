@@ -31,13 +31,6 @@ import org.springframework.util.MimeType;
  */
 public abstract class AbstractEncoder<T> implements Encoder<T> {
 
-	/**
-	 * Hint key to use with a {@link FlushingStrategy} value.
-	 */
-	public static final String FLUSHING_STRATEGY_HINT = AbstractEncoder.class.getName() + ".flushingStrategy";
-
-	public enum FlushingStrategy { AUTO, AFTER_EACH_ELEMENT }
-
 	private final List<MimeType> encodableMimeTypes;
 
 
