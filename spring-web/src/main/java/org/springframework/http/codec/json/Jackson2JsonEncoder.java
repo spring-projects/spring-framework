@@ -122,7 +122,7 @@ public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Encode
 			writer = this.mapper.writer();
 		}
 
-		if (javaType != null && javaType.isContainerType()) {
+		if (javaType != null && (javaType.isContainerType()) ) {
 			writer = writer.forType(javaType);
 		}
 
