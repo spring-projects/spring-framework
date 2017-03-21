@@ -21,8 +21,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ServerHttpMessageReader;
+import org.springframework.http.codec.ServerHttpMessageWriter;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -76,12 +76,12 @@ public class DelegatingWebFluxConfiguration extends WebFluxConfigurationSupport 
 	}
 
 	@Override
-	protected void configureMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+	protected void configureMessageReaders(List<ServerHttpMessageReader<?>> messageReaders) {
 		this.configurers.configureMessageReaders(messageReaders);
 	}
 
 	@Override
-	protected void extendMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+	protected void extendMessageReaders(List<ServerHttpMessageReader<?>> messageReaders) {
 		this.configurers.extendMessageReaders(messageReaders);
 	}
 
@@ -101,12 +101,12 @@ public class DelegatingWebFluxConfiguration extends WebFluxConfigurationSupport 
 	}
 
 	@Override
-	protected void configureMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
+	protected void configureMessageWriters(List<ServerHttpMessageWriter<?>> messageWriters) {
 		this.configurers.configureMessageWriters(messageWriters);
 	}
 
 	@Override
-	protected void extendMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
+	protected void extendMessageWriters(List<ServerHttpMessageWriter<?>> messageWriters) {
 		this.configurers.extendMessageWriters(messageWriters);
 	}
 
