@@ -34,8 +34,8 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpRequest;
-import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ServerHttpMessageReader;
+import org.springframework.http.codec.ServerHttpMessageWriter;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -247,13 +247,13 @@ public interface WebTestClient {
 		 * Modify or extend the list of built-in message readers.
 		 * @see WebFluxConfigurer#configureMessageReaders
 		 */
-		ControllerSpec messageReaders(Consumer<List<HttpMessageReader<?>>> readers);
+		ControllerSpec messageReaders(Consumer<List<ServerHttpMessageReader<?>>> readers);
 
 		/**
 		 * Modify or extend the list of built-in message writers.
 		 * @see WebFluxConfigurer#configureMessageWriters
 		 */
-		ControllerSpec messageWriters(Consumer<List<HttpMessageWriter<?>>> writers);
+		ControllerSpec messageWriters(Consumer<List<ServerHttpMessageWriter<?>>> writers);
 
 		/**
 		 * Register formatters and converters to use for type conversion.

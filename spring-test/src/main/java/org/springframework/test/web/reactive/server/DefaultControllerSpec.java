@@ -25,8 +25,8 @@ import java.util.function.Consumer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ServerHttpMessageReader;
+import org.springframework.http.codec.ServerHttpMessageWriter;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.Validator;
@@ -85,13 +85,13 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 	}
 
 	@Override
-	public DefaultControllerSpec messageReaders(Consumer<List<HttpMessageReader<?>>> consumer) {
+	public DefaultControllerSpec messageReaders(Consumer<List<ServerHttpMessageReader<?>>> consumer) {
 		this.configurer.readersConsumer = consumer;
 		return this;
 	}
 
 	@Override
-	public DefaultControllerSpec messageWriters(Consumer<List<HttpMessageWriter<?>>> consumer) {
+	public DefaultControllerSpec messageWriters(Consumer<List<ServerHttpMessageWriter<?>>> consumer) {
 		this.configurer.writersConsumer = consumer;
 		return this;
 	}
@@ -145,9 +145,9 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 
 		private Consumer<PathMatchConfigurer> pathMatchConsumer;
 
-		private Consumer<List<HttpMessageReader<?>>> readersConsumer;
+		private Consumer<List<ServerHttpMessageReader<?>>> readersConsumer;
 
-		private Consumer<List<HttpMessageWriter<?>>> writersConsumer;
+		private Consumer<List<ServerHttpMessageWriter<?>>> writersConsumer;
 
 		private Consumer<FormatterRegistry> formattersConsumer;
 
@@ -178,14 +178,14 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 		}
 
 		@Override
-		public void extendMessageReaders(List<HttpMessageReader<?>> readers) {
+		public void extendMessageReaders(List<ServerHttpMessageReader<?>> readers) {
 			if (this.readersConsumer != null) {
 				this.readersConsumer.accept(readers);
 			}
 		}
 
 		@Override
-		public void extendMessageWriters(List<HttpMessageWriter<?>> writers) {
+		public void extendMessageWriters(List<ServerHttpMessageWriter<?>> writers) {
 			if (this.writersConsumer != null) {
 				this.writersConsumer.accept(writers);
 			}
