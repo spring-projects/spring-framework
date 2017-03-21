@@ -21,7 +21,6 @@ import java.util.Collections;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
@@ -39,8 +38,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class ServerSentEventHttpMessageReaderTests extends AbstractDataBufferAllocatingTestCase {
 
-	private ServerSentEventHttpMessageReader messageReader = new ServerSentEventHttpMessageReader(
-			Collections.singletonList(new Jackson2JsonDecoder()));
+	private ServerSentEventHttpMessageReader messageReader =
+			new ServerSentEventHttpMessageReader(new Jackson2JsonDecoder());
 
 	@Test
 	public void cantRead() {

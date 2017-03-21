@@ -99,11 +99,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 			messageReader(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
 			Jackson2JsonEncoder jsonEncoder = new Jackson2JsonEncoder();
 			messageWriter(new EncoderHttpMessageWriter<>(jsonEncoder));
-			messageWriter(
-					new ServerSentEventHttpMessageWriter(Collections.singletonList(jsonEncoder)));
-		}
-		else {
-			messageWriter(new ServerSentEventHttpMessageWriter());
+			messageWriter(new ServerSentEventHttpMessageWriter(jsonEncoder));
 		}
 		localeResolver(DEFAULT_LOCALE_RESOLVER);
 	}

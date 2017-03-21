@@ -29,7 +29,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -39,7 +38,6 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.util.Assert;
-import org.springframework.util.MimeTypeUtils;
 
 import static java.util.stream.Collectors.joining;
 
@@ -61,18 +59,22 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	private static final StringDecoder stringDecoder = new StringDecoder(false);
 
 
-	private final List<Decoder<?>> dataDecoders;
+	private final Decoder<?> decoder;
 
 
-	public ServerSentEventHttpMessageReader() {
-		this.dataDecoders = Collections.emptyList();
+	/**
+	 * Constructor with JSON {@code Encoder} for encoding objects.
+	 */
+	public ServerSentEventHttpMessageReader(Decoder<?> decoder) {
+		Assert.notNull(decoder, "Decoder must not be null");
+		this.decoder = decoder;
 	}
 
-	public ServerSentEventHttpMessageReader(List<Decoder<?>> dataDecoders) {
-		Assert.notNull(dataDecoders, "'dataDecoders' must not be null");
-		this.dataDecoders = new ArrayList<>(dataDecoders);
-	}
 
+	@Override
+	public List<MediaType> getReadableMediaTypes() {
+		return Collections.singletonList(MediaType.TEXT_EVENT_STREAM);
+	}
 
 	@Override
 	public boolean canRead(ResolvableType elementType, MediaType mediaType) {
@@ -80,18 +82,13 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 				ServerSentEvent.class.isAssignableFrom(elementType.getRawClass());
 	}
 
-	@Override
-	public List<MediaType> getReadableMediaTypes() {
-		return Collections.singletonList(MediaType.TEXT_EVENT_STREAM);
-	}
-
 
 	@Override
 	public Flux<Object> read(ResolvableType elementType, ReactiveHttpInputMessage message,
 			Map<String, Object> hints) {
 
-		boolean hasSseWrapper = ServerSentEvent.class.isAssignableFrom(elementType.getRawClass());
-		ResolvableType dataType = (hasSseWrapper ? elementType.getGeneric(0) : elementType);
+		boolean shouldWrap = ServerSentEvent.class.isAssignableFrom(elementType.getRawClass());
+		ResolvableType valueType = shouldWrap ? elementType.getGeneric(0) : elementType;
 
 		return Flux.from(message.getBody())
 				.concatMap(ServerSentEventHttpMessageReader::splitOnNewline)
@@ -103,8 +100,8 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 				.bufferUntil(line -> line.equals("\n"))
 				.concatMap(rawLines -> {
 					String[] lines = rawLines.stream().collect(joining()).split("\\r?\\n");
-					ServerSentEvent<Object> event = buildEvent(lines, dataType, hints);
-					return (hasSseWrapper ? Mono.just(event) : Mono.justOrEmpty(event.data()));
+					ServerSentEvent<Object> event = buildEvent(lines, valueType, hints);
+					return (shouldWrap ? Mono.just(event) : Mono.justOrEmpty(event.data()));
 				})
 				.cast(Object.class);
 	}
@@ -126,7 +123,8 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		return Flux.fromIterable(results);
 	}
 
-	private ServerSentEvent<Object> buildEvent(String[] lines, ResolvableType dataType, Map<String, Object> hints) {
+	private ServerSentEvent<Object> buildEvent(String[] lines, ResolvableType valueType,
+			Map<String, Object> hints) {
 
 		ServerSentEvent.Builder<Object> sseBuilder = ServerSentEvent.builder();
 		StringBuilder mutableData = new StringBuilder();
@@ -151,7 +149,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		}
 		if (mutableData.length() > 0) {
 			String data = mutableData.toString();
-			sseBuilder.data(decodeData(data, dataType, hints));
+			sseBuilder.data(decodeData(data, valueType, hints));
 		}
 		if (mutableComment.length() > 0) {
 			String comment = mutableComment.toString();
@@ -169,11 +167,8 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
 		Mono<DataBuffer> input = Mono.just(bufferFactory.wrap(bytes));
 
-		return this.dataDecoders.stream()
-				.filter(e -> e.canDecode(dataType, MimeTypeUtils.APPLICATION_JSON))
-				.findFirst()
-				.orElseThrow(() -> new CodecException("No suitable decoder found!"))
-				.decodeToMono(input, dataType, MimeTypeUtils.APPLICATION_JSON, hints)
+		return this.decoder
+				.decodeToMono(input, dataType, MediaType.TEXT_EVENT_STREAM, hints)
 				.block(Duration.ZERO);
 	}
 
@@ -181,7 +176,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	public Mono<Object> readMono(ResolvableType elementType, ReactiveHttpInputMessage message,
 			Map<String, Object> hints) {
 
-		// Let's give StringDecoder a chance since SSE is ordered ahead of it
+		// For single String give StringDecoder a chance which comes after SSE in the order
 
 		if (String.class.equals(elementType.getRawClass())) {
 			Flux<DataBuffer> body = message.getBody();

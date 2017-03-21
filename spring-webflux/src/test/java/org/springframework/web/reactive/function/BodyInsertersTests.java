@@ -21,7 +21,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,9 +58,9 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static java.nio.charset.StandardCharsets.*;
-import static org.junit.Assert.*;
-import static org.springframework.http.codec.json.Jackson2CodecSupport.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertArrayEquals;
+import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
 
 /**
  * @author Arjen Poutsma
@@ -83,8 +82,7 @@ public class BodyInsertersTests {
 		messageWriters.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
 		Jackson2JsonEncoder jsonEncoder = new Jackson2JsonEncoder();
 		messageWriters.add(new EncoderHttpMessageWriter<>(jsonEncoder));
-		messageWriters
-				.add(new ServerSentEventHttpMessageWriter(Collections.singletonList(jsonEncoder)));
+		messageWriters.add(new ServerSentEventHttpMessageWriter(jsonEncoder));
 		messageWriters.add(new FormHttpMessageWriter());
 
 		this.context = new BodyInserter.Context() {

@@ -77,7 +77,10 @@ class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Builder {
 	private void defaultReaders() {
 		messageReader(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		messageReader(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
-		messageReader(new ServerSentEventHttpMessageReader(sseDecoders()));
+		if (jackson2Present) {
+			// SSE ahead of String e.g. "test/event-stream" + Flux<String>
+			messageReader(new ServerSentEventHttpMessageReader(new Jackson2JsonDecoder()));
+		}
 		messageReader(new DecoderHttpMessageReader<>(new StringDecoder(false)));
 		if (jaxb2Present) {
 			messageReader(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
@@ -85,11 +88,6 @@ class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Builder {
 		if (jackson2Present) {
 			messageReader(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
 		}
-	}
-
-	private List<Decoder<?>> sseDecoders() {
-		return jackson2Present ? Collections.singletonList(new Jackson2JsonDecoder()) :
-				Collections.emptyList();
 	}
 
 	private void defaultWriters() {

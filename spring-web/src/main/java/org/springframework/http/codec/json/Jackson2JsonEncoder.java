@@ -28,7 +28,6 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.reactivestreams.Publisher;
@@ -42,7 +41,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerHttpEncoder;
-import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -97,20 +95,24 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements ServerH
 		Assert.notNull(elementType, "'elementType' must not be null");
 
 		if (inputStream instanceof Mono) {
-			return Flux.from(inputStream).map(value -> encodeValue(value, bufferFactory, elementType, hints));
+			return Flux.from(inputStream).map(value ->
+					encodeValue(value, mimeType, bufferFactory, elementType, hints));
 		}
 		else if (APPLICATION_STREAM_JSON.isCompatibleWith(mimeType)) {
 			return Flux.from(inputStream).map(value -> {
-				DataBuffer buffer = encodeValue(value, bufferFactory, elementType, hints);
+				DataBuffer buffer = encodeValue(value, mimeType, bufferFactory, elementType, hints);
 				buffer.write(new byte[]{'\n'});
 				return buffer;
 			});
 		}
-		ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, elementType);
-		return Flux.from(inputStream).collectList().map(list -> encodeValue(list, bufferFactory, listType, hints)).flux();
+		else {
+			ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, elementType);
+			return Flux.from(inputStream).collectList().map(list ->
+					encodeValue(list, mimeType, bufferFactory, listType, hints)).flux();
+		}
 	}
 
-	private DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory,
+	private DataBuffer encodeValue(Object value, MimeType mimeType, DataBufferFactory bufferFactory,
 			ResolvableType elementType, Map<String, Object> hints) {
 
 		TypeFactory typeFactory = this.mapper.getTypeFactory();
@@ -126,9 +128,9 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements ServerH
 			writer = writer.forType(javaType);
 		}
 
-		SerializationConfig config = writer.getConfig();
-		Boolean sseHint = (Boolean) hints.get(ServerSentEventHttpMessageWriter.SSE_CONTENT_HINT);
-		if (Boolean.TRUE.equals(sseHint) && config.isEnabled(SerializationFeature.INDENT_OUTPUT)) {
+		if (MediaType.TEXT_EVENT_STREAM.isCompatibleWith(mimeType) &&
+				writer.getConfig().isEnabled(SerializationFeature.INDENT_OUTPUT)) {
+
 			writer = writer.with(this.ssePrettyPrinter);
 		}
 
