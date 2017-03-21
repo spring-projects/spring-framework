@@ -41,10 +41,17 @@ public class BindingContext {
 	private final Model model = new BindingAwareConcurrentModel();
 
 
+	/**
+	 * Create a new {@code BindingContext}.
+	 */
 	public BindingContext() {
 		this(null);
 	}
 
+	/**
+	 * Create a new {@code BindingContext} with the given initializer.
+	 * @param initializer the binding initializer to apply (may be {@code null})
+	 */
 	public BindingContext(WebBindingInitializer initializer) {
 		this.initializer = initializer;
 	}
@@ -61,11 +68,9 @@ public class BindingContext {
 	/**
 	 * Create a {@link WebExchangeDataBinder} to apply data binding and
 	 * validation with on the target, command object.
-	 *
 	 * @param exchange the current exchange
 	 * @param target the object to create a data binder for
 	 * @param name the name of the target object
-	 *
 	 * @return the created data binder
 	 */
 	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, Object target, String name) {
@@ -86,10 +91,8 @@ public class BindingContext {
 	/**
 	 * Create a {@link WebExchangeDataBinder} without a target object for type
 	 * conversion of request values to simple types.
-	 *
 	 * @param exchange the current exchange
 	 * @param name the name of the target object
-	 *
 	 * @return the created data binder
 	 */
 	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, String name) {

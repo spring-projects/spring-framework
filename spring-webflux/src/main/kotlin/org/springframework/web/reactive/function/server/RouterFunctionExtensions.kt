@@ -49,10 +49,10 @@ import reactor.core.publisher.Mono
  * 	}
  * ```
  *
+ * @author Sebastien Deleuze
+ * @author Yevhenii Melnyk
  * @since 5.0
  * @see <a href="https://youtrack.jetbrains.com/issue/KT-15667">Kotlin issue about supporting ::foo for member functions</a>
- * @author Sebastien De leuze
- * @author Yevhenii Melnyk
  */
 
 typealias Routes = RouterDsl.() -> Unit
@@ -176,7 +176,6 @@ class RouterDsl {
 	}
 
 	fun pathExtension(predicate: (String) -> Boolean) = RequestPredicates.pathExtension(predicate)
-
 
 	fun queryParam(name: String, predicate: (String) -> Boolean, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.queryParam(name, predicate), HandlerFunction { f(it) })

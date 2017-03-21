@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,13 +45,13 @@ import static org.junit.Assert.assertTrue;
  */
 public class WebExchangeDataBinderTests {
 
-	private WebExchangeDataBinder binder;
-
 	private TestBean testBean;
+
+	private WebExchangeDataBinder binder;
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.testBean = new TestBean();
 		this.binder = new WebExchangeDataBinder(this.testBean, "person");
 		this.binder.registerCustomEditor(ITestBean.class, new TestBeanPropertyEditor());
@@ -176,6 +176,7 @@ public class WebExchangeDataBinderTests {
 		assertNotNull(this.testBean.getSpouse());
 		assertEquals("test", this.testBean.getSpouse().getName());
 	}
+
 
 	private String generateForm(MultiValueMap<String, String> form) {
 		StringBuilder builder = new StringBuilder();

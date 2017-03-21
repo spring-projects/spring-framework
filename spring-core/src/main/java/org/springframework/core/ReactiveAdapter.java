@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public class ReactiveAdapter {
 	/**
 	 * Adapt the given instance to a Reactive Streams Publisher.
 	 * @param source the source object to adapt from
-	 * @return the Publisher repesenting the adaptation
+	 * @return the Publisher representing the adaptation
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> Publisher<T> toPublisher(Object source) {

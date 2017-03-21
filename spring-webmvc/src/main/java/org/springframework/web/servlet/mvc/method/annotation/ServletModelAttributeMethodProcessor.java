@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.springframework.web.servlet.HandlerMapping;
 public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodProcessor {
 
 	/**
+	 * Class constructor.
 	 * @param annotationNotRequired if "true", non-simple method arguments and
 	 * return values are considered model attributes with or without a
 	 * {@code @ModelAttribute} annotation
@@ -87,19 +88,19 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * a URI variable first and then a request parameter.
 	 * @param attributeName the model attribute name
 	 * @param request the current request
-	 * @return the request value to try to convert or {@code null}
+	 * @return the request value to try to convert, or {@code null} if none
 	 */
 	protected String getRequestValueForAttribute(String attributeName, NativeWebRequest request) {
 		Map<String, String> variables = getUriTemplateVariables(request);
-		if (StringUtils.hasText(variables.get(attributeName))) {
-			return variables.get(attributeName);
+		String variableValue = variables.get(attributeName);
+		if (StringUtils.hasText(variableValue)) {
+			return variableValue;
 		}
-		else if (StringUtils.hasText(request.getParameter(attributeName))) {
-			return request.getParameter(attributeName);
+		String parameterValue = request.getParameter(attributeName);
+		if (StringUtils.hasText(parameterValue)) {
+			return parameterValue;
 		}
-		else {
-			return null;
-		}
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -115,11 +116,12 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * <p>The default implementation converts only if there a registered
 	 * {@link Converter} that can perform the conversion.
 	 * @param sourceValue the source value to create the model attribute from
-	 * @param attributeName the name of the attribute, never {@code null}
+	 * @param attributeName the name of the attribute (never {@code null})
 	 * @param methodParam the method parameter
 	 * @param binderFactory for creating WebDataBinder instance
 	 * @param request the current request
-	 * @return the created model attribute, or {@code null}
+	 * @return the created model attribute, or {@code null} if no suitable
+	 * conversion found
 	 * @throws Exception
 	 */
 	protected Object createAttributeFromRequestValue(String sourceValue, String attributeName,
