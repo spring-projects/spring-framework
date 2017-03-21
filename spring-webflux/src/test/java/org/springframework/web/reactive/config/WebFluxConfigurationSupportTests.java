@@ -36,8 +36,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
-import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ServerHttpMessageReader;
+import org.springframework.http.codec.ServerHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
@@ -127,7 +127,7 @@ public class WebFluxConfigurationSupportTests {
 		RequestMappingHandlerAdapter adapter = context.getBean(name, RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
 
-		List<HttpMessageReader<?>> readers = adapter.getMessageReaders();
+		List<ServerHttpMessageReader<?>> readers = adapter.getMessageReaders();
 		assertEquals(7, readers.size());
 
 		assertHasMessageReader(readers, byte[].class, APPLICATION_OCTET_STREAM);
@@ -160,7 +160,7 @@ public class WebFluxConfigurationSupportTests {
 		RequestMappingHandlerAdapter adapter = context.getBean(name, RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
 
-		List<HttpMessageReader<?>> messageReaders = adapter.getMessageReaders();
+		List<ServerHttpMessageReader<?>> messageReaders = adapter.getMessageReaders();
 		assertEquals(2, messageReaders.size());
 
 		assertHasMessageReader(messageReaders, String.class, TEXT_PLAIN);
@@ -177,7 +177,7 @@ public class WebFluxConfigurationSupportTests {
 
 		assertEquals(0, handler.getOrder());
 
-		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
+		List<ServerHttpMessageWriter<?>> writers = handler.getMessageWriters();
 		assertEquals(8, writers.size());
 
 		assertHasMessageWriter(writers, byte[].class, APPLICATION_OCTET_STREAM);
@@ -203,7 +203,7 @@ public class WebFluxConfigurationSupportTests {
 
 		assertEquals(100, handler.getOrder());
 
-		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
+		List<ServerHttpMessageWriter<?>> writers = handler.getMessageWriters();
 		assertEquals(8, writers.size());
 
 		assertHasMessageWriter(writers, byte[].class, APPLICATION_OCTET_STREAM);
@@ -259,12 +259,12 @@ public class WebFluxConfigurationSupportTests {
 	}
 
 
-	private void assertHasMessageReader(List<HttpMessageReader<?>> readers, Class<?> clazz, MediaType mediaType) {
+	private void assertHasMessageReader(List<ServerHttpMessageReader<?>> readers, Class<?> clazz, MediaType mediaType) {
 		ResolvableType type = ResolvableType.forClass(clazz);
 		assertTrue(readers.stream().anyMatch(c -> mediaType == null || c.canRead(type, mediaType)));
 	}
 
-	private void assertHasMessageWriter(List<HttpMessageWriter<?>> writers, Class<?> clazz, MediaType mediaType) {
+	private void assertHasMessageWriter(List<ServerHttpMessageWriter<?>> writers, Class<?> clazz, MediaType mediaType) {
 		ResolvableType type = ResolvableType.forClass(clazz);
 		assertTrue(writers.stream().anyMatch(c -> mediaType == null || c.canWrite(type, mediaType)));
 	}
@@ -297,22 +297,22 @@ public class WebFluxConfigurationSupportTests {
 	static class CustomMessageConverterConfig extends WebFluxConfigurationSupport {
 
 		@Override
-		protected void configureMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+		protected void configureMessageReaders(List<ServerHttpMessageReader<?>> messageReaders) {
 			messageReaders.add(new DecoderHttpMessageReader<>(new StringDecoder()));
 		}
 
 		@Override
-		protected void configureMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
+		protected void configureMessageWriters(List<ServerHttpMessageWriter<?>> messageWriters) {
 			messageWriters.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 		}
 
 		@Override
-		protected void extendMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+		protected void extendMessageReaders(List<ServerHttpMessageReader<?>> messageReaders) {
 			messageReaders.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
 		}
 
 		@Override
-		protected void extendMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
+		protected void extendMessageWriters(List<ServerHttpMessageWriter<?>> messageWriters) {
 			messageWriters.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
 		}
 	}

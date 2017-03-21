@@ -37,7 +37,6 @@ import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.FormHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.codec.Jackson2ServerHttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
@@ -99,7 +98,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 		if (jackson2Present) {
 			messageReader(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
 			Jackson2JsonEncoder jsonEncoder = new Jackson2JsonEncoder();
-			messageWriter(new Jackson2ServerHttpMessageWriter(jsonEncoder));
+			messageWriter(new EncoderHttpMessageWriter<>(jsonEncoder));
 			messageWriter(
 					new ServerSentEventHttpMessageWriter(Collections.singletonList(jsonEncoder)));
 		}

@@ -29,8 +29,8 @@ import rx.Single;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
-import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
+import org.springframework.http.codec.ServerHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.stereotype.Controller;
@@ -64,7 +64,7 @@ public class ResponseBodyResultHandlerTests {
 
 	@Before
 	public void setup() throws Exception {
-		List<HttpMessageWriter<?>> writerList = new ArrayList<>(5);
+		List<ServerHttpMessageWriter<?>> writerList = new ArrayList<>(5);
 		writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
 		writerList.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 		writerList.add(new ResourceHttpMessageWriter());

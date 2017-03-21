@@ -43,15 +43,15 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.ServerHttpMessageReader;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.method.ResolvableMethod;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
@@ -305,7 +305,7 @@ public class MessageReaderArgumentResolverTests {
 
 	@SuppressWarnings("Convert2MethodRef")
 	private AbstractMessageReaderArgumentResolver resolver(Decoder<?>... decoders) {
-		List<HttpMessageReader<?>> readers = new ArrayList<>();
+		List<ServerHttpMessageReader<?>> readers = new ArrayList<>();
 		Arrays.asList(decoders).forEach(decoder -> readers.add(new DecoderHttpMessageReader<>(decoder)));
 		return new AbstractMessageReaderArgumentResolver(readers) {};
 	}
