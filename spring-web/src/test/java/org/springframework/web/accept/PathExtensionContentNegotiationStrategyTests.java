@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.ServletContext;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +29,8 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * A test fixture for PathExtensionContentNegotiationStrategy.
@@ -70,7 +70,7 @@ public class PathExtensionContentNegotiationStrategyTests {
 	}
 
 	@Test
-	public void resolveMediaTypesFromJaf() throws Exception {
+	public void resolveMediaTypesFromMediaTypeFactory() throws Exception {
 
 		this.servletRequest.setRequestURI("test.xls");
 
@@ -78,21 +78,6 @@ public class PathExtensionContentNegotiationStrategyTests {
 		List<MediaType> mediaTypes = strategy.resolveMediaTypes(this.webRequest);
 
 		assertEquals(Arrays.asList(new MediaType("application", "vnd.ms-excel")), mediaTypes);
-	}
-
-	// SPR-10334
-
-	@Test
-	public void getMediaTypeFromFilenameNoJaf() throws Exception {
-
-		this.servletRequest.setRequestURI("test.json");
-
-		ServletContext servletCxt = this.servletRequest.getServletContext();
-		PathExtensionContentNegotiationStrategy strategy = new ServletPathExtensionContentNegotiationStrategy(servletCxt);
-		strategy.setUseJaf(false);
-		List<MediaType> mediaTypes = strategy.resolveMediaTypes(this.webRequest);
-
-		assertEquals(Collections.<MediaType>emptyList(), mediaTypes);
 	}
 
 	// SPR-8678
@@ -128,7 +113,7 @@ public class PathExtensionContentNegotiationStrategyTests {
 	@Test
 	public void resolveMediaTypesIgnoreUnknownExtension() throws Exception {
 
-		this.servletRequest.setRequestURI("test.xyz");
+		this.servletRequest.setRequestURI("test.foobar");
 
 		PathExtensionContentNegotiationStrategy strategy = new PathExtensionContentNegotiationStrategy();
 		List<MediaType> mediaTypes = strategy.resolveMediaTypes(this.webRequest);
@@ -139,7 +124,7 @@ public class PathExtensionContentNegotiationStrategyTests {
 	@Test(expected = HttpMediaTypeNotAcceptableException.class)
 	public void resolveMediaTypesDoNotIgnoreUnknownExtension() throws Exception {
 
-		this.servletRequest.setRequestURI("test.xyz");
+		this.servletRequest.setRequestURI("test.foobar");
 
 		PathExtensionContentNegotiationStrategy strategy = new PathExtensionContentNegotiationStrategy();
 		strategy.setIgnoreUnknownExtensions(false);

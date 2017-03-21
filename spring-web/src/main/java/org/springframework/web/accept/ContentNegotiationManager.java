@@ -143,10 +143,9 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	 * <p>At startup this method returns extensions explicitly registered with
 	 * either {@link PathExtensionContentNegotiationStrategy} or
 	 * {@link ParameterContentNegotiationStrategy}. At runtime if there is a
-	 * "path extension" strategy and its
-	 * {@link PathExtensionContentNegotiationStrategy#setUseJaf(boolean)
-	 * useJaf} property is set to "true", the list of extensions may
-	 * increase as file extensions are resolved via JAF and cached.
+	 * "path extension" strategy, the list of extensions may
+	 * increase as file extensions are resolved via
+	 * {@link org.springframework.http.MediaTypeFactory} and cached.
 	 */
 	@Override
 	public List<String> getAllFileExtensions() {

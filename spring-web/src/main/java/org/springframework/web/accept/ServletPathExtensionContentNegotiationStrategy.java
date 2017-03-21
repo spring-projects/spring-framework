@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,8 @@ public class ServletPathExtensionContentNegotiationStrategy extends PathExtensio
 	/**
 	 * Create an instance without any mappings to start with. Mappings may be
 	 * added later when extensions are resolved through
-	 * {@link ServletContext#getMimeType(String)} or via JAF.
+	 * {@link ServletContext#getMimeType(String)} or via
+	 * {@link org.springframework.http.MediaTypeFactory}.
 	 */
 	public ServletPathExtensionContentNegotiationStrategy(ServletContext context) {
 		this(context, null);
@@ -61,7 +62,8 @@ public class ServletPathExtensionContentNegotiationStrategy extends PathExtensio
 
 	/**
 	 * Resolve file extension via {@link ServletContext#getMimeType(String)}
-	 * and also delegate to base class for a potential JAF lookup.
+	 * and also delegate to base class for a potential
+	 * {@link org.springframework.http.MediaTypeFactory} lookup.
 	 */
 	@Override
 	protected MediaType handleNoMatch(NativeWebRequest webRequest, String extension)

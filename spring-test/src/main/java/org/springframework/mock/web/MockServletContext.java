@@ -29,7 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.activation.FileTypeMap;
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
@@ -47,9 +46,12 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -135,6 +137,8 @@ public class MockServletContext implements ServletContext {
 	private String requestCharacterEncoding;
 
 	private String responseCharacterEncoding;
+
+	private final Map<String, MediaType> mimeTypes = new LinkedHashMap<>();
 
 
 	/**
@@ -256,29 +260,27 @@ public class MockServletContext implements ServletContext {
 		return this.effectiveMinorVersion;
 	}
 
-	/**
-	 * This method uses the default
-	 * {@link javax.activation.FileTypeMap#getDefaultFileTypeMap() FileTypeMap}
-	 * from the Java Activation Framework to resolve MIME types.
-	 * <p>The Java Activation Framework returns {@code "application/octet-stream"}
-	 * if the MIME type is unknown (i.e., it never returns {@code null}). Thus, in
-	 * order to honor the {@link ServletContext#getMimeType(String)} contract,
-	 * this method returns {@code null} if the MIME type is
-	 * {@code "application/octet-stream"}.
-	 * <p>{@code MockServletContext} does not provide a direct mechanism for
-	 * setting a custom MIME type; however, if the default {@code FileTypeMap}
-	 * is an instance of {@code javax.activation.MimetypesFileTypeMap}, a custom
-	 * MIME type named {@code text/enigma} can be registered for a custom
-	 * {@code .puzzle} file extension in the following manner:
-	 * <pre style="code">
-	 * MimetypesFileTypeMap mimetypesFileTypeMap = (MimetypesFileTypeMap) FileTypeMap.getDefaultFileTypeMap();
-	 * mimetypesFileTypeMap.addMimeTypes("text/enigma    puzzle");
-	 * </pre>
-	 */
 	@Override
 	public String getMimeType(String filePath) {
-		String mimeType = FileTypeMap.getDefaultFileTypeMap().getContentType(filePath);
-		return ("application/octet-stream".equals(mimeType) ? null : mimeType);
+		String extension = StringUtils.getFilenameExtension(filePath);
+		MediaType result;
+		if (this.mimeTypes.containsKey(extension)) {
+			result = this.mimeTypes.get(extension);
+		}
+		else {
+			result = MediaTypeFactory.getMediaType(filePath);
+		}
+		return result != null ? result.toString() : null;
+	}
+
+	/**
+	 * Adds a mime type mapping for use by {@link #getMimeType(String)}.
+	 * @param fileExtension a file extension, such as {@code txt}, {@code gif}
+	 * @param mimeType the mime type
+	 */
+	public void addMimeType(String fileExtension, MediaType mimeType) {
+		Assert.notNull(fileExtension, "'fileExtension' must not be null");
+		this.mimeTypes.put(fileExtension, mimeType);
 	}
 
 	@Override

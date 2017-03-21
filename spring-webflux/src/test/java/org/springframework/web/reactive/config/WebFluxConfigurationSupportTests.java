@@ -103,7 +103,7 @@ public class WebFluxConfigurationSupportTests {
 		List<MediaType> list = Collections.singletonList(MediaType.APPLICATION_JSON);
 		assertEquals(list, resolver.resolveMediaTypes(exchange));
 
-		exchange = MockServerHttpRequest.get("/path.xml").toExchange();
+		exchange = MockServerHttpRequest.get("/path.foobar").toExchange();
 		assertEquals(Collections.emptyList(), resolver.resolveMediaTypes(exchange));
 	}
 

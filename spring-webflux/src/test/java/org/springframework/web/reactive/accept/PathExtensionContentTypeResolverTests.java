@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,18 +59,6 @@ public class PathExtensionContentTypeResolverTests {
 		assertEquals(Collections.singletonList(new MediaType("application", "vnd.ms-excel")), mediaTypes);
 	}
 
-	// SPR-10334
-
-	@Test
-	public void getMediaTypeFromFilenameNoJaf() throws Exception {
-		ServerWebExchange exchange = MockServerHttpRequest.get("test.json").toExchange();
-		PathExtensionContentTypeResolver resolver = new PathExtensionContentTypeResolver();
-		resolver.setUseJaf(false);
-		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
-
-		assertEquals(Collections.<MediaType>emptyList(), mediaTypes);
-	}
-
 	// SPR-9390
 
 	@Test
@@ -86,7 +74,7 @@ public class PathExtensionContentTypeResolverTests {
 
 	@Test
 	public void resolveMediaTypesIgnoreUnknownExtension() throws Exception {
-		ServerWebExchange exchange = MockServerHttpRequest.get("test.xyz").toExchange();
+		ServerWebExchange exchange = MockServerHttpRequest.get("test.foobar").toExchange();
 		PathExtensionContentTypeResolver resolver = new PathExtensionContentTypeResolver();
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 
@@ -95,7 +83,7 @@ public class PathExtensionContentTypeResolverTests {
 
 	@Test(expected = NotAcceptableStatusException.class)
 	public void resolveMediaTypesDoNotIgnoreUnknownExtension() throws Exception {
-		ServerWebExchange exchange = MockServerHttpRequest.get("test.xyz").toExchange();
+		ServerWebExchange exchange = MockServerHttpRequest.get("test.foobar").toExchange();
 		PathExtensionContentTypeResolver resolver = new PathExtensionContentTypeResolver();
 		resolver.setIgnoreUnknownExtensions(false);
 		resolver.resolveMediaTypes(exchange);

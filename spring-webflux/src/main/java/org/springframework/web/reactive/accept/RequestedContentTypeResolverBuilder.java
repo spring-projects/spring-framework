@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,9 +74,9 @@ import org.springframework.util.CollectionUtils;
  * {@link #mediaTypes(Map)}. This will be used to resolve path extensions or a
  * parameter value such as "json" to a media type such as "application/json".
  *
- * <p>The path extension strategy will also use the Java Activation framework
- * (JAF), if available, to resolve a path extension to a MediaType. You may
- * {@link #useJaf suppress} the use of JAF.
+ * <p>The path extension strategy will also use
+ * {@link org.springframework.http.MediaTypeFactory} to resolve a path extension
+ * to a MediaType.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -92,8 +92,6 @@ public class RequestedContentTypeResolverBuilder {
 	private Map<String, MediaType> mediaTypes = new HashMap<>();
 
 	private boolean ignoreUnknownPathExtensions = true;
-
-	private Boolean useJaf;
 
 	private String parameterName = "format";
 
@@ -119,8 +117,9 @@ public class RequestedContentTypeResolverBuilder {
 	 * whitelisted for the purpose of Reflected File Download attack detection
 	 * (see Spring Framework reference documentation for more details on RFD
 	 * attack protection).
-	 * <p>The path extension strategy will also try to use JAF (if present) to
-	 * resolve path extensions. To change this behavior see {@link #useJaf}.
+	 * <p>The path extension strategy will also use the
+	 * {@link org.springframework.http.MediaTypeFactory} to resolve path
+	 * extensions.
 	 * @param mediaTypes media type mappings
 	 */
 	public RequestedContentTypeResolverBuilder mediaTypes(Map<String, MediaType> mediaTypes) {
@@ -150,18 +149,6 @@ public class RequestedContentTypeResolverBuilder {
 	 */
 	public RequestedContentTypeResolverBuilder ignoreUnknownPathExtensions(boolean ignore) {
 		this.ignoreUnknownPathExtensions = ignore;
-		return this;
-	}
-
-	/**
-	 * When {@link #favorPathExtension favorPathExtension} is set, this
-	 * property determines whether to allow use of JAF (Java Activation Framework)
-	 * to resolve a path extension to a specific MediaType.
-	 * <p>By default this is not set in which case
-	 * {@code PathExtensionContentNegotiationStrategy} will use JAF if available.
-	 */
-	public RequestedContentTypeResolverBuilder useJaf(boolean useJaf) {
-		this.useJaf = useJaf;
 		return this;
 	}
 
@@ -224,9 +211,6 @@ public class RequestedContentTypeResolverBuilder {
 		if (this.favorPathExtension) {
 			PathExtensionContentTypeResolver resolver = new PathExtensionContentTypeResolver(this.mediaTypes);
 			resolver.setIgnoreUnknownExtensions(this.ignoreUnknownPathExtensions);
-			if (this.useJaf != null) {
-				resolver.setUseJaf(this.useJaf);
-			}
 			resolvers.add(resolver);
 		}
 
