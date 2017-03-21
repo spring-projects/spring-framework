@@ -32,7 +32,6 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerHttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -49,7 +48,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 /**
  * Abstract base class for argument resolvers that resolve method arguments
- * by reading the request body with an {@link HttpMessageReader}.
+ * by reading the request body with an {@link ServerHttpMessageReader}.
  *
  * <p>Applies validation if the method argument is annotated with
  * {@code @javax.validation.Valid} or
@@ -61,16 +60,16 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  */
 public abstract class AbstractMessageReaderArgumentResolver extends HandlerMethodArgumentResolverSupport {
 
-	private final List<HttpMessageReader<?>> messageReaders;
+	private final List<ServerHttpMessageReader<?>> messageReaders;
 
 	private final List<MediaType> supportedMediaTypes;
 
 
 	/**
-	 * Constructor with {@link HttpMessageReader}'s and a {@link Validator}.
+	 * Constructor with {@link ServerHttpMessageReader}'s and a {@link Validator}.
 	 * @param readers readers to convert from the request body
 	 */
-	protected AbstractMessageReaderArgumentResolver(List<HttpMessageReader<?>> readers) {
+	protected AbstractMessageReaderArgumentResolver(List<ServerHttpMessageReader<?>> readers) {
 		this(readers, new ReactiveAdapterRegistry());
 	}
 
@@ -79,7 +78,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	 * @param messageReaders readers to convert from the request body
 	 * @param adapterRegistry for adapting to other reactive types from Flux and Mono
 	 */
-	protected AbstractMessageReaderArgumentResolver(List<HttpMessageReader<?>> messageReaders,
+	protected AbstractMessageReaderArgumentResolver(List<ServerHttpMessageReader<?>> messageReaders,
 			ReactiveAdapterRegistry adapterRegistry) {
 
 		super(adapterRegistry);
@@ -95,7 +94,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	/**
 	 * Return the configured message converters.
 	 */
-	public List<HttpMessageReader<?>> getMessageReaders() {
+	public List<ServerHttpMessageReader<?>> getMessageReaders() {
 		return this.messageReaders;
 	}
 
@@ -114,19 +113,12 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 			mediaType = MediaType.APPLICATION_OCTET_STREAM;
 		}
 
-		for (HttpMessageReader<?> reader : getMessageReaders()) {
+		for (ServerHttpMessageReader<?> reader : getMessageReaders()) {
 
 			if (reader.canRead(elementType, mediaType)) {
 				Map<String, Object> readHints = Collections.emptyMap();
 				if (adapter != null && adapter.isMultiValue()) {
-					Flux<?> flux;
-					if (reader instanceof ServerHttpMessageReader) {
-						ServerHttpMessageReader<?> serverReader = ((ServerHttpMessageReader<?>) reader);
-						flux = serverReader.read(bodyType, elementType, request, response, readHints);
-					}
-					else {
-						flux = reader.read(elementType, request, readHints);
-					}
+					Flux<?> flux = reader.read(bodyType, elementType, request, response, readHints);
 					flux = flux.onErrorResumeWith(ex -> Flux.error(getReadError(bodyParameter, ex)));
 					if (isBodyRequired || !adapter.supportsEmpty()) {
 						flux = flux.switchIfEmpty(Flux.error(getRequiredBodyError(bodyParameter)));
@@ -139,14 +131,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 					return Mono.just(adapter.fromPublisher(flux));
 				}
 				else {
-					Mono<?> mono;
-					if (reader instanceof ServerHttpMessageReader) {
-						ServerHttpMessageReader<?> serverReader = (ServerHttpMessageReader<?>) reader;
-						mono = serverReader.readMono(bodyType, elementType, request, response, readHints);
-					}
-					else {
-						mono = reader.readMono(elementType, request, readHints);
-					}
+					Mono<?> mono = reader.readMono(bodyType, elementType, request, response, readHints);
 					mono = mono.otherwise(ex -> Mono.error(getReadError(bodyParameter, ex)));
 					if (isBodyRequired || (adapter != null && !adapter.supportsEmpty())) {
 						mono = mono.otherwiseIfEmpty(Mono.error(getRequiredBodyError(bodyParameter)));

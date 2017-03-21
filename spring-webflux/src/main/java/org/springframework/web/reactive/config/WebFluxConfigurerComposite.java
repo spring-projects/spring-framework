@@ -23,8 +23,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.format.FormatterRegistry;
-import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ServerHttpMessageReader;
+import org.springframework.http.codec.ServerHttpMessageWriter;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -76,12 +76,12 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 	}
 
 	@Override
-	public void configureMessageReaders(List<HttpMessageReader<?>> readers) {
+	public void configureMessageReaders(List<ServerHttpMessageReader<?>> readers) {
 		this.delegates.stream().forEach(delegate -> delegate.configureMessageReaders(readers));
 	}
 
 	@Override
-	public void extendMessageReaders(List<HttpMessageReader<?>> readers) {
+	public void extendMessageReaders(List<ServerHttpMessageReader<?>> readers) {
 		this.delegates.stream().forEach(delegate -> delegate.extendMessageReaders(readers));
 	}
 
@@ -101,12 +101,12 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 	}
 
 	@Override
-	public void configureMessageWriters(List<HttpMessageWriter<?>> writers) {
+	public void configureMessageWriters(List<ServerHttpMessageWriter<?>> writers) {
 		this.delegates.stream().forEach(delegate -> delegate.configureMessageWriters(writers));
 	}
 
 	@Override
-	public void extendMessageWriters(List<HttpMessageWriter<?>> writers) {
+	public void extendMessageWriters(List<ServerHttpMessageWriter<?>> writers) {
 		this.delegates.stream().forEach(delegate -> delegate.extendMessageWriters(writers));
 	}
 

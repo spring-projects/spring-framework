@@ -39,7 +39,7 @@ import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.ServerHttpMessageReader;
 import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.method.ResolvableMethod;
@@ -73,7 +73,7 @@ public class HttpEntityArgumentResolverTests {
 
 
 	private HttpEntityArgumentResolver createResolver() {
-		List<HttpMessageReader<?>> readers = new ArrayList<>();
+		List<ServerHttpMessageReader<?>> readers = new ArrayList<>();
 		readers.add(new DecoderHttpMessageReader<>(new StringDecoder()));
 		return new HttpEntityArgumentResolver(readers, new ReactiveAdapterRegistry());
 	}

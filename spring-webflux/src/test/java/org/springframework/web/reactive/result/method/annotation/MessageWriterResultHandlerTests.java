@@ -42,8 +42,8 @@ import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
-import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
+import org.springframework.http.codec.ServerHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
@@ -71,8 +71,8 @@ public class MessageWriterResultHandlerTests {
 	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/path").toExchange();
 
 
-	private AbstractMessageWriterResultHandler initResultHandler(HttpMessageWriter<?>... writers) {
-		List<HttpMessageWriter<?>> writerList;
+	private AbstractMessageWriterResultHandler initResultHandler(ServerHttpMessageWriter<?>... writers) {
+		List<ServerHttpMessageWriter<?>> writerList;
 		if (ObjectUtils.isEmpty(writers)) {
 			writerList = new ArrayList<>();
 			writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
@@ -141,7 +141,7 @@ public class MessageWriterResultHandlerTests {
 		ByteArrayOutputStream body = new ByteArrayOutputStream();
 		MethodParameter type = on(TestController.class).resolveReturnType(OutputStream.class);
 
-		HttpMessageWriter<?> writer = new EncoderHttpMessageWriter<>(new ByteBufferEncoder());
+		ServerHttpMessageWriter<?> writer = new EncoderHttpMessageWriter<>(new ByteBufferEncoder());
 		Mono<Void> mono = initResultHandler(writer).writeBody(body, type, this.exchange);
 
 		StepVerifier.create(mono).expectError(IllegalStateException.class).verify();

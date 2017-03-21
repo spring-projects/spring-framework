@@ -22,8 +22,8 @@ import java.util.Optional;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ServerHttpMessageReader;
+import org.springframework.http.codec.ServerHttpMessageWriter;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
@@ -97,14 +97,14 @@ public interface WebFluxConfigurer {
 	 * in addition to the default ones.
 	 * @param readers an empty list to add message readers to
 	 */
-	default void configureMessageReaders(List<HttpMessageReader<?>> readers) {
+	default void configureMessageReaders(List<ServerHttpMessageReader<?>> readers) {
 	}
 
 	/**
 	 * An alternative to {@link #configureMessageReaders(List)} that allows
 	 * modifying the message readers to use after default ones have been added.
 	 */
-	default void extendMessageReaders(List<HttpMessageReader<?>> readers) {
+	default void extendMessageReaders(List<ServerHttpMessageReader<?>> readers) {
 	}
 
 	/**
@@ -141,14 +141,14 @@ public interface WebFluxConfigurer {
 	 * in addition to the default ones.
 	 * @param writers a empty list to add message writers to
 	 */
-	default void configureMessageWriters(List<HttpMessageWriter<?>> writers) {
+	default void configureMessageWriters(List<ServerHttpMessageWriter<?>> writers) {
 	}
 
 	/**
 	 * An alternative to {@link #configureMessageWriters(List)} that allows
 	 * modifying the message writers to use after default ones have been added.
 	 */
-	default void extendMessageWriters(List<HttpMessageWriter<?>> writers) {
+	default void extendMessageWriters(List<ServerHttpMessageWriter<?>> writers) {
 	}
 
 	/**

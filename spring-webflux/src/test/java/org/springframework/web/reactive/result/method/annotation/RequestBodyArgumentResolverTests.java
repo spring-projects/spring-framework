@@ -35,7 +35,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.ServerHttpMessageReader;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.method.ResolvableMethod;
@@ -66,7 +66,7 @@ public class RequestBodyArgumentResolverTests {
 
 	@Before
 	public void setup() {
-		List<HttpMessageReader<?>> readers = new ArrayList<>();
+		List<ServerHttpMessageReader<?>> readers = new ArrayList<>();
 		readers.add(new DecoderHttpMessageReader<>(new StringDecoder()));
 		this.resolver = new RequestBodyArgumentResolver(readers, new ReactiveAdapterRegistry());
 	}

@@ -48,9 +48,9 @@ import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
-import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
+import org.springframework.http.codec.ServerHttpMessageReader;
+import org.springframework.http.codec.ServerHttpMessageWriter;
 import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
@@ -104,9 +104,9 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	private PathMatchConfigurer pathMatchConfigurer;
 
-	private List<HttpMessageReader<?>> messageReaders;
+	private List<ServerHttpMessageReader<?>> messageReaders;
 
-	private List<HttpMessageWriter<?>> messageWriters;
+	private List<ServerHttpMessageWriter<?>> messageWriters;
 
 	private ApplicationContext applicationContext;
 
@@ -299,7 +299,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 * <p>Use {@link #configureMessageReaders} to configure the list or
 	 * {@link #extendMessageReaders} to add in addition to the default ones.
 	 */
-	protected final List<HttpMessageReader<?>> getMessageReaders() {
+	protected final List<ServerHttpMessageReader<?>> getMessageReaders() {
 		if (this.messageReaders == null) {
 			this.messageReaders = new ArrayList<>();
 			configureMessageReaders(this.messageReaders);
@@ -318,7 +318,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 * {@link #addDefaultHttpMessageReaders}.
 	 * @param messageReaders a list to add message readers to, initially an empty
 	 */
-	protected void configureMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+	protected void configureMessageReaders(List<ServerHttpMessageReader<?>> messageReaders) {
 	}
 
 	/**
@@ -327,7 +327,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 * {@code ByteBuffer}, {@code String}, {@code Resource}, JAXB2, and Jackson
 	 * (if present on the classpath).
 	 */
-	protected final void addDefaultHttpMessageReaders(List<HttpMessageReader<?>> readers) {
+	protected final void addDefaultHttpMessageReaders(List<ServerHttpMessageReader<?>> readers) {
 		readers.add(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		readers.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
 		readers.add(new DecoderHttpMessageReader<>(new DataBufferDecoder()));
@@ -345,7 +345,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 * Override this to modify the list of message readers after it has been
 	 * configured, for example to add some in addition to the default ones.
 	 */
-	protected void extendMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+	protected void extendMessageReaders(List<ServerHttpMessageReader<?>> messageReaders) {
 	}
 
 	/**
@@ -450,7 +450,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 * <p>Use {@link #configureMessageWriters(List)} to configure the list or
 	 * {@link #extendMessageWriters(List)} to add in addition to the default ones.
 	 */
-	protected final List<HttpMessageWriter<?>> getMessageWriters() {
+	protected final List<ServerHttpMessageWriter<?>> getMessageWriters() {
 		if (this.messageWriters == null) {
 			this.messageWriters = new ArrayList<>();
 			configureMessageWriters(this.messageWriters);
@@ -468,13 +468,13 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 * {@link #addDefaultHttpMessageWriters}.
 	 * @param messageWriters a list to add message writers to, initially an empty
 	 */
-	protected void configureMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
+	protected void configureMessageWriters(List<ServerHttpMessageWriter<?>> messageWriters) {
 	}
 	/**
 	 * Adds default converters that sub-classes can call from
 	 * {@link #configureMessageWriters(List)}.
 	 */
-	protected final void addDefaultHttpMessageWriters(List<HttpMessageWriter<?>> writers) {
+	protected final void addDefaultHttpMessageWriters(List<ServerHttpMessageWriter<?>> writers) {
 		List<Encoder<?>> sseDataEncoders = new ArrayList<>();
 		writers.add(new EncoderHttpMessageWriter<>(new ByteArrayEncoder()));
 		writers.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
@@ -496,7 +496,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 * Override this to modify the list of message writers after it has been
 	 * configured, for example to add some in addition to the default ones.
 	 */
-	protected void extendMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
+	protected void extendMessageWriters(List<ServerHttpMessageWriter<?>> messageWriters) {
 	}
 
 	@Bean

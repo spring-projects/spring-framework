@@ -49,9 +49,10 @@ import org.springframework.web.reactive.function.server.support.ServerResponseRe
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.BodyInserters.*;
-import static org.springframework.web.reactive.function.server.RouterFunctions.*;
+import static org.junit.Assert.assertEquals;
+import static org.springframework.web.reactive.function.BodyInserters.fromObject;
+import static org.springframework.web.reactive.function.BodyInserters.fromPublisher;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
  * Tests the use of {@link HandlerFunction} and {@link RouterFunction} in a
@@ -123,12 +124,12 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 					new HandlerStrategies() {
 						@Override
 						public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-							return () -> getMessageReaders().stream();
+							return () -> getMessageReaders().stream().map(reader -> (HttpMessageReader<?>) reader);
 						}
 
 						@Override
 						public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
-							return () -> getMessageWriters().stream();
+							return () -> getMessageWriters().stream().map(writer -> (HttpMessageWriter<?>) writer);
 						}
 
 						@Override
