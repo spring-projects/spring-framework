@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,10 @@
  */
 package org.springframework.web.servlet.config.annotation;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 
 import org.springframework.http.MediaType;
@@ -209,11 +211,18 @@ public class ContentNegotiationConfigurer {
 
 	/**
 	 * Set the default content type to use when no content type is requested.
-	 * <p>By default this is not set.
+	 * <p>
+	 * Media types are ordered in the same manner as a "quality" parameter on incoming
+	 * requests. If destinations which do not support any of the media types provided are
+	 * present, end the list with {@link MediaType#ALL} to allow standard media type
+	 * determination
+	 * <p>
+	 * By default this is not set.
+	 * 
 	 * @see #defaultContentTypeStrategy
 	 */
-	public ContentNegotiationConfigurer defaultContentType(MediaType defaultContentType) {
-		this.factory.setDefaultContentType(defaultContentType);
+	public ContentNegotiationConfigurer defaultContentType(MediaType... defaultContentTypes) {
+		this.factory.setDefaultContentType(Arrays.asList(defaultContentTypes));
 		return this;
 	}
 
