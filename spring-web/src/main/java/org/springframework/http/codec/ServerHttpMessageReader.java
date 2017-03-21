@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,46 +27,43 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
- * Server oriented {@link HttpMessageReader} that allows to resolve hints using annotations or
- * perform additional operation using {@link ServerHttpRequest} or {@link ServerHttpResponse}.
+ * An extension of {@code HttpMessageReader} for decoding and reading the
+ * request body with extra information available on the server side.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public interface ServerHttpMessageReader<T> extends HttpMessageReader<T> {
 
 	/**
-	 * Read a {@link Flux} of the given type form the given input message with additional server related
-	 * parameters which could be used to create some hints or set the response status for example.
+	 * Decode and read the request body to an object stream.
 	 *
-	 * Return hints that can be used to customize how the body should be read
-	 * @param streamType the original type used in the method parameter. For annotation
-	 * based controllers, the {@link MethodParameter} is available via {@link ResolvableType#getSource()}.
-	 * @param elementType the stream element type to return
-	 * Typically the value of a {@code Content-Type} header.
-	 * @param request the current HTTP request
-	 * @param response the current HTTP response
+	 * @param actualType the actual type of the target method parameter; for
+	 * annotated controllers, the {@link MethodParameter} can be accessed via
+	 * {@link ResolvableType#getSource()}.
+	 * @param elementType the type of Objects in the output stream
+	 * @param request the current request
+	 * @param response the current response
 	 * @param hints additional information about how to read the body
-	 * @return the converted {@link Flux} of elements
+	 * @return the decoded stream of elements
 	 */
-	Flux<T> read(ResolvableType streamType, ResolvableType elementType, ServerHttpRequest request,
+	Flux<T> read(ResolvableType actualType, ResolvableType elementType, ServerHttpRequest request,
 			ServerHttpResponse response, Map<String, Object> hints);
 
 	/**
-	 * Read a {@link Mono} of the given type form the given input message with additional server related
-	 * parameters which could be used to create some hints or set the response status for example.
+	 * Decode and read the request body to a single object.
 	 *
-	 * Return hints that can be used to customize how the body should be read
-	 * @param streamType the original type used in the method parameter. For annotation
-	 * based controllers, the {@link MethodParameter} is available via {@link ResolvableType#getSource()}.
-	 * @param elementType the stream element type to return
-	 * Typically the value of a {@code Content-Type} header.
-	 * @param request the current HTTP request
-	 * @param response the current HTTP response
+	 * @param actualType the actual type of the target method parameter; for
+	 * annotated controllers, the {@link MethodParameter} can be accessed via
+	 * {@link ResolvableType#getSource()}.
+	 * @param elementType the type of Objects in the output stream
+	 * @param request the current request
+	 * @param response the current response
 	 * @param hints additional information about how to read the body
-	 * @return the converted {@link Mono} of object
+	 * @return the decoded stream of elements
 	 */
-	Mono<T> readMono(ResolvableType streamType, ResolvableType elementType, ServerHttpRequest request,
+	Mono<T> readMono(ResolvableType actualType, ResolvableType elementType, ServerHttpRequest request,
 			ServerHttpResponse response, Map<String, Object> hints);
 
 }

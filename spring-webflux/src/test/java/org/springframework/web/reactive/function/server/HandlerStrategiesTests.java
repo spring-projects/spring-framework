@@ -99,7 +99,7 @@ public class HandlerStrategiesTests {
 		@Override
 		public Mono<Void> write(Publisher<?> inputStream, ResolvableType type,
 				MediaType contentType,
-				ReactiveHttpOutputMessage outputMessage,
+				ReactiveHttpOutputMessage message,
 				Map<String, Object> hints) {
 			return Mono.empty();
 		}
@@ -119,13 +119,13 @@ public class HandlerStrategiesTests {
 		}
 
 		@Override
-		public Flux<Object> read(ResolvableType type, ReactiveHttpInputMessage inputMessage,
+		public Flux<Object> read(ResolvableType type, ReactiveHttpInputMessage message,
 				Map<String, Object> hints) {
 			return Flux.empty();
 		}
 
 		@Override
-		public Mono<Object> readMono(ResolvableType type, ReactiveHttpInputMessage inputMessage,
+		public Mono<Object> readMono(ResolvableType type, ReactiveHttpInputMessage message,
 				Map<String, Object> hints) {
 			return Mono.empty();
 		}

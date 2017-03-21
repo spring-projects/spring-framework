@@ -17,6 +17,7 @@
 package org.springframework.http.codec;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,17 +29,23 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.http.HttpMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of {@code HttpMessageReader} delegating to a {@link Decoder}.
+ * {@code HttpMessageReader} that wraps and delegates to a {@link Decoder}.
+ *
+ * <p>Also a {@code ServerHttpMessageReader} that pre-resolves decoding hints
+ * from the extra information available on the server side such as the request
+ * or controller method parameter annotations.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
+public class DecoderHttpMessageReader<T> implements ServerHttpMessageReader<T> {
 
 	private final Decoder<T> decoder;
 
@@ -74,24 +81,64 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 	}
 
 	@Override
-	public Flux<T> read(ResolvableType elementType, ReactiveHttpInputMessage inputMessage,
+	public Flux<T> read(ResolvableType elementType, ReactiveHttpInputMessage message,
 			Map<String, Object> hints) {
 
-		MediaType contentType = getContentType(inputMessage);
-		return this.decoder.decode(inputMessage.getBody(), elementType, contentType, hints);
+		MediaType contentType = getContentType(message);
+		return this.decoder.decode(message.getBody(), elementType, contentType, hints);
 	}
 
 	@Override
-	public Mono<T> readMono(ResolvableType elementType, ReactiveHttpInputMessage inputMessage,
+	public Mono<T> readMono(ResolvableType elementType, ReactiveHttpInputMessage message,
 			Map<String, Object> hints) {
 
-		MediaType contentType = getContentType(inputMessage);
-		return this.decoder.decodeToMono(inputMessage.getBody(), elementType, contentType, hints);
+		MediaType contentType = getContentType(message);
+		return this.decoder.decodeToMono(message.getBody(), elementType, contentType, hints);
 	}
 
 	private MediaType getContentType(HttpMessage inputMessage) {
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		return (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
+	}
+
+
+	// ServerHttpMessageReader...
+
+	@Override
+	public Flux<T> read(ResolvableType actualType, ResolvableType elementType,
+			ServerHttpRequest request, ServerHttpResponse response, Map<String, Object> hints) {
+
+		Map<String, Object> allHints = new HashMap<>(4);
+		allHints.putAll(getReadHints(actualType, elementType, request, response));
+		allHints.putAll(hints);
+
+		return read(elementType, request, allHints);
+	}
+
+	@Override
+	public Mono<T> readMono(ResolvableType actualType, ResolvableType elementType,
+			ServerHttpRequest request, ServerHttpResponse response, Map<String, Object> hints) {
+
+		Map<String, Object> allHints = new HashMap<>(4);
+		allHints.putAll(getReadHints(actualType, elementType, request, response));
+		allHints.putAll(hints);
+
+		return readMono(elementType, request, allHints);
+	}
+
+	/**
+	 * Get additional hints for decoding for example based on the server request
+	 * or annotations from controller method parameters. By default, delegate to
+	 * the decoder if it is an instance of {@link ServerHttpDecoder}.
+	 */
+	protected Map<String, Object> getReadHints(ResolvableType streamType,
+			ResolvableType elementType, ServerHttpRequest request, ServerHttpResponse response) {
+
+		if (this.decoder instanceof ServerHttpDecoder) {
+			ServerHttpDecoder<?> httpDecoder = (ServerHttpDecoder<?>) this.decoder;
+			return httpDecoder.getDecodeHints(streamType, elementType, request, response);
+		}
+		return Collections.emptyMap();
 	}
 
 }

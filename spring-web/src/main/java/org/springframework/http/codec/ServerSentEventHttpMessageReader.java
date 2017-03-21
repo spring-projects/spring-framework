@@ -87,13 +87,13 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 
 
 	@Override
-	public Flux<Object> read(ResolvableType elementType, ReactiveHttpInputMessage inputMessage,
+	public Flux<Object> read(ResolvableType elementType, ReactiveHttpInputMessage message,
 			Map<String, Object> hints) {
 
 		boolean hasSseWrapper = ServerSentEvent.class.isAssignableFrom(elementType.getRawClass());
 		ResolvableType dataType = (hasSseWrapper ? elementType.getGeneric(0) : elementType);
 
-		return Flux.from(inputMessage.getBody())
+		return Flux.from(message.getBody())
 				.concatMap(ServerSentEventHttpMessageReader::splitOnNewline)
 				.map(buffer -> {
 					CharBuffer charBuffer = StandardCharsets.UTF_8.decode(buffer.asByteBuffer());
@@ -178,13 +178,13 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	}
 
 	@Override
-	public Mono<Object> readMono(ResolvableType elementType, ReactiveHttpInputMessage inputMessage,
+	public Mono<Object> readMono(ResolvableType elementType, ReactiveHttpInputMessage message,
 			Map<String, Object> hints) {
 
 		// Let's give StringDecoder a chance since SSE is ordered ahead of it
 
 		if (String.class.equals(elementType.getRawClass())) {
-			Flux<DataBuffer> body = inputMessage.getBody();
+			Flux<DataBuffer> body = message.getBody();
 			return stringDecoder.decodeToMono(body, elementType, null, null).cast(Object.class);
 		}
 

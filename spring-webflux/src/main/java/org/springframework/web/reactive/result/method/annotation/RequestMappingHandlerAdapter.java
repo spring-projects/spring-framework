@@ -44,7 +44,7 @@ import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.DataBufferDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.ServerHttpMessageReader;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -76,7 +76,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	private static final Log logger = LogFactory.getLog(RequestMappingHandlerAdapter.class);
 
 
-	private final List<HttpMessageReader<?>> messageReaders = new ArrayList<>(10);
+	private final List<ServerHttpMessageReader<?>> messageReaders = new ArrayList<>(10);
 
 	private WebBindingInitializer webBindingInitializer;
 
@@ -124,7 +124,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	/**
 	 * Configure message readers to de-serialize the request body with.
 	 */
-	public void setMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+	public void setMessageReaders(List<ServerHttpMessageReader<?>> messageReaders) {
 		this.messageReaders.clear();
 		this.messageReaders.addAll(messageReaders);
 	}
@@ -132,7 +132,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	/**
 	 * Return the configured message readers.
 	 */
-	public List<HttpMessageReader<?>> getMessageReaders() {
+	public List<ServerHttpMessageReader<?>> getMessageReaders() {
 		return this.messageReaders;
 	}
 

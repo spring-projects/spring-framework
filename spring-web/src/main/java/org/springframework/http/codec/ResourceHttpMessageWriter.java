@@ -176,7 +176,7 @@ public class ResourceHttpMessageWriter implements ServerHttpMessageWriter<Resour
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Mono<Void> write(Publisher<? extends Resource> inputStream, ResolvableType streamType,
+	public Mono<Void> write(Publisher<? extends Resource> inputStream, ResolvableType actualType,
 			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request,
 			ServerHttpResponse response, Map<String, Object> hints) {
 

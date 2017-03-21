@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,29 +28,29 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
- * Server oriented {@link HttpMessageWriter} that allows to resolve hints using annotations or
- * perform additional operation using {@link ServerHttpRequest} or {@link ServerHttpResponse}.
+ * An extension of {@code HttpMessageWriter} for encoding and writing the
+ * response body with extra information available on the server side.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public interface ServerHttpMessageWriter<T> extends HttpMessageWriter<T> {
 
 	/**
-	 * Write a given object to the given output message with additional server related
-	 * parameters which could be used to create some hints or set the response status for example.
+	 * Encode and write the given object stream to the response.
 	 *
-	 * @param streamType the original type used for the method return value. For annotation
-	 * based controllers, the {@link MethodParameter} is available via {@link ResolvableType#getSource()}.
-	 * Can be {@code null}.
-	 * @param elementType the stream element type to process
-	 * @param mediaType the content type to use when writing. May be {@code null} to
-	 * indicate that the default content type of the converter must be used.
-	 * @param request the current HTTP request
-	 * @param response the current HTTP response
-	 * @return a {@link Mono} that indicates completion or error
+	 * @param actualType the actual return type of the method that returned the
+	 * value; for annotated controllers, the {@link MethodParameter} can be
+	 * accessed via {@link ResolvableType#getSource()}.
+	 * @param elementType the type of Objects in the input stream
+	 * @param mediaType the content type to use, possibly {@code null} indicating
+	 * the default content type of the writer should be used.
+	 * @param request the current request
+	 * @param response the current response
+	 * @return a {@link Mono} that indicates completion of writing or error
 	 */
-	Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType streamType,
+	Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType actualType,
 			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request,
 			ServerHttpResponse response, Map<String, Object> hints);
 
