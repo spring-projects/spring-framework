@@ -120,10 +120,10 @@ public class EncoderHttpMessageWriter<T> implements ServerHttpMessageWriter<T> {
 
 	@Override
 	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType elementType,
-			MediaType mediaType, ReactiveHttpOutputMessage outputMessage,
+			MediaType mediaType, ReactiveHttpOutputMessage message,
 			Map<String, Object> hints) {
 
-		HttpHeaders headers = outputMessage.getHeaders();
+		HttpHeaders headers = message.getHeaders();
 
 		if (headers.getContentType() == null) {
 			MediaType fallback = this.defaultMediaType;
@@ -135,11 +135,11 @@ public class EncoderHttpMessageWriter<T> implements ServerHttpMessageWriter<T> {
 		}
 
 		Flux<DataBuffer> body = this.encoder.encode(inputStream,
-				outputMessage.bufferFactory(), elementType, headers.getContentType(), hints);
+				message.bufferFactory(), elementType, headers.getContentType(), hints);
 
 		return isStreamingMediaType(headers.getContentType()) ?
-				outputMessage.writeAndFlushWith(body.map(Flux::just)) :
-				outputMessage.writeWith(body);
+				message.writeAndFlushWith(body.map(Flux::just)) :
+				message.writeWith(body);
 	}
 
 	private static boolean useFallback(MediaType main, MediaType fallback) {
@@ -162,12 +162,12 @@ public class EncoderHttpMessageWriter<T> implements ServerHttpMessageWriter<T> {
 	// ServerHttpMessageWriter...
 
 	@Override
-	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType streamType,
+	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType actualType,
 			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request,
 			ServerHttpResponse response, Map<String, Object> hints) {
 
 		Map<String, Object> allHints = new HashMap<>();
-		allHints.putAll(getWriteHints(streamType, elementType, mediaType, request, response));
+		allHints.putAll(getWriteHints(actualType, elementType, mediaType, request, response));
 		allHints.putAll(hints);
 
 		return write(inputStream, elementType, mediaType, response, allHints);

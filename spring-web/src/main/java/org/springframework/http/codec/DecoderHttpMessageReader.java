@@ -81,19 +81,19 @@ public class DecoderHttpMessageReader<T> implements ServerHttpMessageReader<T> {
 	}
 
 	@Override
-	public Flux<T> read(ResolvableType elementType, ReactiveHttpInputMessage inputMessage,
+	public Flux<T> read(ResolvableType elementType, ReactiveHttpInputMessage message,
 			Map<String, Object> hints) {
 
-		MediaType contentType = getContentType(inputMessage);
-		return this.decoder.decode(inputMessage.getBody(), elementType, contentType, hints);
+		MediaType contentType = getContentType(message);
+		return this.decoder.decode(message.getBody(), elementType, contentType, hints);
 	}
 
 	@Override
-	public Mono<T> readMono(ResolvableType elementType, ReactiveHttpInputMessage inputMessage,
+	public Mono<T> readMono(ResolvableType elementType, ReactiveHttpInputMessage message,
 			Map<String, Object> hints) {
 
-		MediaType contentType = getContentType(inputMessage);
-		return this.decoder.decodeToMono(inputMessage.getBody(), elementType, contentType, hints);
+		MediaType contentType = getContentType(message);
+		return this.decoder.decodeToMono(message.getBody(), elementType, contentType, hints);
 	}
 
 	private MediaType getContentType(HttpMessage inputMessage) {
@@ -105,22 +105,22 @@ public class DecoderHttpMessageReader<T> implements ServerHttpMessageReader<T> {
 	// ServerHttpMessageReader...
 
 	@Override
-	public Flux<T> read(ResolvableType streamType, ResolvableType elementType,
+	public Flux<T> read(ResolvableType actualType, ResolvableType elementType,
 			ServerHttpRequest request, ServerHttpResponse response, Map<String, Object> hints) {
 
 		Map<String, Object> allHints = new HashMap<>(4);
-		allHints.putAll(getReadHints(streamType, elementType, request, response));
+		allHints.putAll(getReadHints(actualType, elementType, request, response));
 		allHints.putAll(hints);
 
 		return read(elementType, request, allHints);
 	}
 
 	@Override
-	public Mono<T> readMono(ResolvableType streamType, ResolvableType elementType,
+	public Mono<T> readMono(ResolvableType actualType, ResolvableType elementType,
 			ServerHttpRequest request, ServerHttpResponse response, Map<String, Object> hints) {
 
 		Map<String, Object> allHints = new HashMap<>(4);
-		allHints.putAll(getReadHints(streamType, elementType, request, response));
+		allHints.putAll(getReadHints(actualType, elementType, request, response));
 		allHints.putAll(hints);
 
 		return readMono(elementType, request, allHints);

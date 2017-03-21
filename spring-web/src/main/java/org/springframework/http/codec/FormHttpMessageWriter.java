@@ -82,13 +82,13 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 
 	@Override
 	public Mono<Void> write(Publisher<? extends MultiValueMap<String, String>> inputStream,
-			ResolvableType elementType, MediaType mediaType, ReactiveHttpOutputMessage outputMessage,
+			ResolvableType elementType, MediaType mediaType, ReactiveHttpOutputMessage message,
 			Map<String, Object> hints) {
 
-		MediaType contentType = outputMessage.getHeaders().getContentType();
+		MediaType contentType = message.getHeaders().getContentType();
 		if (contentType == null) {
 			contentType = MediaType.APPLICATION_FORM_URLENCODED;
-			outputMessage.getHeaders().setContentType(contentType);
+			message.getHeaders().setContentType(contentType);
 		}
 
 		Charset charset = getMediaTypeCharset(contentType);
@@ -99,9 +99,9 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 				.map(form -> generateForm(form, charset))
 				.then(value -> {
 					ByteBuffer byteBuffer = charset.encode(value);
-					DataBuffer buffer = outputMessage.bufferFactory().wrap(byteBuffer);
-					outputMessage.getHeaders().setContentLength(byteBuffer.remaining());
-					return outputMessage.writeWith(Mono.just(buffer));
+					DataBuffer buffer = message.bufferFactory().wrap(byteBuffer);
+					message.getHeaders().setContentLength(byteBuffer.remaining());
+					return message.writeWith(Mono.just(buffer));
 				});
 
 	}

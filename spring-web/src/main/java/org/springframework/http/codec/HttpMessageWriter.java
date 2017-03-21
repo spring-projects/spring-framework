@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 
 /**
- * Strategy interface that specifies a converter that can convert a stream of
- * Objects to a stream of bytes to be written to the HTTP response body.
+ * Strategy for encoding a stream of objects of type {@code <T>} and writing
+ * the encoded stream of bytes to an {@link ReactiveHttpOutputMessage}.
+ *
+ * @param <T> the type of objects in the input stream
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
@@ -38,34 +40,31 @@ import org.springframework.http.ReactiveHttpOutputMessage;
 public interface HttpMessageWriter<T> {
 
 	/**
-	 * Indicates whether the given class can be written by this converter.
-	 * @param elementType the stream element type to test for writability
-	 * @param mediaType the media type to write, can be {@code null} if not specified.
-	 * Typically the value of an {@code Accept} header.
-	 * @return {@code true} if writable; {@code false} otherwise
+	 * Return the {@link MediaType}'s that this writer supports.
+	 */
+	List<MediaType> getWritableMediaTypes();
+
+	/**
+	 * Whether the given object type is supported by this writer.
+	 * @param elementType the type of object to check
+	 * @param mediaType the media type for the write, possibly {@code null}
+	 * @return {@code true} if writable, {@code false} otherwise
 	 */
 	boolean canWrite(ResolvableType elementType, MediaType mediaType);
 
 	/**
-	 * Write an given object to the given output message.
-	 * @param inputStream the input stream to write
-	 * @param elementType the stream element type to process. This type must have previously
-	 * been passed to the {@link #canWrite} canWrite} method of this interface, which must
-	 * have returned {@code true}.
-	 * @param mediaType the content type to use when writing, typically the value of an
-	 * {@code Accept} header. May be {@code null} to indicate that the default content
-	 * type of the converter must be used.
-	 * @param outputMessage the message to write to
-	 * @param hints additional information about how to write
-	 * @return a {@link Mono} that indicates completion or error
+	 * Write an given stream of object to the output message.
+	 * @param inputStream the objects to write
+	 * @param elementType the type of objects in the stream which must have been
+	 * previously checked via {@link #canWrite(ResolvableType, MediaType)}
+	 * @param mediaType the content type for the write, possibly {@code null} to
+	 * indicate that the default content type of the writer must be used.
+	 * @param message the message to write to
+	 * @param hints additional information about how to encode and write
+	 * @return indicates completion or error
 	 */
 	Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType elementType,
-			MediaType mediaType, ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints);
+			MediaType mediaType, ReactiveHttpOutputMessage message, Map<String, Object> hints);
 
-	/**
-	 * Return the list of {@link MediaType} objects that can be written by this converter.
-	 * @return the list of supported readable media types
-	 */
-	List<MediaType> getWritableMediaTypes();
 
 }

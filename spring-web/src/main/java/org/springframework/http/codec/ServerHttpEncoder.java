@@ -33,7 +33,6 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
  */
 public interface ServerHttpEncoder<T> extends Encoder<T> {
 
-
 	/**
 	 * Get decoding hints based on the server request or annotations on the
 	 * target controller method parameter.

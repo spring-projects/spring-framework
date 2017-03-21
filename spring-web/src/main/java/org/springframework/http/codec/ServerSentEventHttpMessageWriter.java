@@ -87,14 +87,14 @@ public class ServerSentEventHttpMessageWriter implements ServerHttpMessageWriter
 
 	@Override
 	public Mono<Void> write(Publisher<?> inputStream, ResolvableType elementType, MediaType mediaType,
-			ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
+			ReactiveHttpOutputMessage message, Map<String, Object> hints) {
 
-		outputMessage.getHeaders().setContentType(MediaType.TEXT_EVENT_STREAM);
+		message.getHeaders().setContentType(MediaType.TEXT_EVENT_STREAM);
 
-		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
+		DataBufferFactory bufferFactory = message.bufferFactory();
 		Flux<Publisher<DataBuffer>> body = encode(inputStream, bufferFactory, elementType, hints);
 
-		return outputMessage.writeAndFlushWith(body);
+		return message.writeAndFlushWith(body);
 	}
 
 	private Flux<Publisher<DataBuffer>> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory,
@@ -164,14 +164,14 @@ public class ServerSentEventHttpMessageWriter implements ServerHttpMessageWriter
 	}
 
 	@Override
-	public Mono<Void> write(Publisher<?> inputStream, ResolvableType streamType, ResolvableType elementType,
+	public Mono<Void> write(Publisher<?> inputStream, ResolvableType actualType, ResolvableType elementType,
 			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response,
 			Map<String, Object> hints) {
 
 		Map<String, Object> allHints = this.dataEncoders.stream()
 				.filter(encoder -> encoder instanceof ServerHttpEncoder)
 				.map(encoder -> (ServerHttpEncoder<?>) encoder)
-				.map(encoder -> encoder.getEncodeHints(streamType, elementType, mediaType, request, response))
+				.map(encoder -> encoder.getEncodeHints(actualType, elementType, mediaType, request, response))
 				.reduce(new HashMap<>(), (t, u) -> {
 					t.putAll(u);
 					return t;
