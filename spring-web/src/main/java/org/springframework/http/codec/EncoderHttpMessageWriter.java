@@ -29,7 +29,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -123,23 +122,28 @@ public class EncoderHttpMessageWriter<T> implements ServerHttpMessageWriter<T> {
 			MediaType mediaType, ReactiveHttpOutputMessage message,
 			Map<String, Object> hints) {
 
-		HttpHeaders headers = message.getHeaders();
+		MediaType contentType = updateContentType(message, mediaType);
 
-		if (headers.getContentType() == null) {
-			MediaType fallback = this.defaultMediaType;
-			mediaType = useFallback(mediaType, fallback) ? fallback : mediaType;
-			if (mediaType != null) {
-				mediaType = addDefaultCharset(mediaType, fallback);
-				headers.setContentType(mediaType);
-			}
-		}
+		Flux<DataBuffer> body = this.encoder.encode(
+				inputStream, message.bufferFactory(), elementType, contentType, hints);
 
-		Flux<DataBuffer> body = this.encoder.encode(inputStream,
-				message.bufferFactory(), elementType, headers.getContentType(), hints);
-
-		return isStreamingMediaType(headers.getContentType()) ?
+		return isStreamingMediaType(contentType) ?
 				message.writeAndFlushWith(body.map(Flux::just)) :
 				message.writeWith(body);
+	}
+
+	private MediaType updateContentType(ReactiveHttpOutputMessage message, MediaType mediaType) {
+		MediaType result = message.getHeaders().getContentType();
+		if (result != null) {
+			return result;
+		}
+		MediaType fallback = this.defaultMediaType;
+		result = useFallback(mediaType, fallback) ? fallback : mediaType;
+		if (result != null) {
+			result = addDefaultCharset(result, fallback);
+			message.getHeaders().setContentType(result);
+		}
+		return result;
 	}
 
 	private static boolean useFallback(MediaType main, MediaType fallback) {
