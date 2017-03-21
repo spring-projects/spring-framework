@@ -52,7 +52,6 @@ import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.server.MethodNotAllowedException;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
@@ -209,7 +208,7 @@ public class ResourceWebHandlerTests {
 		setPathWithinHandlerMapping(exchange, "js/foo.js");
 		this.handler.handle(exchange).block(TIMEOUT);
 
-		assertEquals(MediaType.parseMediaType("text/javascript"), exchange.getResponse().getHeaders().getContentType());
+		assertEquals(MediaType.parseMediaType("application/javascript"), exchange.getResponse().getHeaders().getContentType());
 		assertResponseBody(exchange, "function foo() { console.log(\"hello world\"); }");
 	}
 
@@ -219,7 +218,7 @@ public class ResourceWebHandlerTests {
 		setPathWithinHandlerMapping(exchange, "js/baz.js");
 		this.handler.handle(exchange).block(TIMEOUT);
 
-		assertEquals(MediaType.parseMediaType("text/javascript"), exchange.getResponse().getHeaders().getContentType());
+		assertEquals(MediaType.parseMediaType("application/javascript"), exchange.getResponse().getHeaders().getContentType());
 		assertResponseBody(exchange, "function foo() { console.log(\"hello world\"); }");
 	}
 
