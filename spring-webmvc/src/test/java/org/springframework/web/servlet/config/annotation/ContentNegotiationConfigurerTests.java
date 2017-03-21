@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -110,6 +109,14 @@ public class ContentNegotiationConfigurerTests {
 		ContentNegotiationManager manager = this.configurer.getContentNegotiationManager();
 
 		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(this.webRequest));
+	}
+	
+	@Test
+	public void setMultipleDefaultContentTypes() throws Exception {
+		this.configurer.defaultContentType(MediaType.APPLICATION_JSON, MediaType.ALL);
+		ContentNegotiationManager manager = this.configurer.getContentNegotiationManager();
+
+		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON, MediaType.ALL), manager.resolveMediaTypes(this.webRequest));
 	}
 
 	@Test
