@@ -6097,7 +6097,7 @@ features are not available as shown in the table below:
 
 | @Autowired
 | @Inject
-| `@Inject` has no 'required' attribute; can be used with Java 8's `Optional` instead.
+| `@Inject` has no 'required' attribute; cannot be used with Java 8's `Optional`.
 
 | @Component
 | @Named / @ManagedBean
