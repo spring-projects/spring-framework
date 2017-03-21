@@ -18,11 +18,10 @@ package org.springframework.http.codec.json;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.HashMap;
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
@@ -61,7 +60,7 @@ import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
  * @since 5.0
  * @see Jackson2JsonDecoder
  */
-public class Jackson2JsonEncoder extends AbstractJackson2Codec implements ServerHttpEncoder<Object> {
+public class Jackson2JsonEncoder extends Jackson2CodecSupport implements ServerHttpEncoder<Object> {
 
 	private final PrettyPrinter ssePrettyPrinter;
 
@@ -112,30 +111,24 @@ public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Server
 	}
 
 	private DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory,
-			ResolvableType type, Map<String, Object> hints) {
+			ResolvableType elementType, Map<String, Object> hints) {
 
 		TypeFactory typeFactory = this.mapper.getTypeFactory();
-		JavaType javaType = typeFactory.constructType(type.getType());
-		if (type.isInstance(value)) {
-			javaType = getJavaType(type.getType(), null);
+		JavaType javaType = typeFactory.constructType(elementType.getType());
+		if (elementType.isInstance(value)) {
+			javaType = getJavaType(elementType.getType(), null);
 		}
 
-		ObjectWriter writer;
-		Class<?> jsonView = (Class<?>)hints.get(AbstractJackson2Codec.JSON_VIEW_HINT);
-		if (jsonView != null) {
-			writer = this.mapper.writerWithView(jsonView);
-		}
-		else {
-			writer = this.mapper.writer();
-		}
+		Class<?> jsonView = (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT);
+		ObjectWriter writer = jsonView != null ? this.mapper.writerWithView(jsonView): this.mapper.writer();
 
 		if (javaType != null && javaType.isContainerType()) {
 			writer = writer.forType(javaType);
 		}
 
-		Boolean sse = (Boolean)hints.get(ServerSentEventHttpMessageWriter.SSE_CONTENT_HINT);
 		SerializationConfig config = writer.getConfig();
-		if (Boolean.TRUE.equals(sse) && config.isEnabled(SerializationFeature.INDENT_OUTPUT)) {
+		Boolean sseHint = (Boolean) hints.get(ServerSentEventHttpMessageWriter.SSE_CONTENT_HINT);
+		if (Boolean.TRUE.equals(sseHint) && config.isEnabled(SerializationFeature.INDENT_OUTPUT)) {
 			writer = writer.with(this.ssePrettyPrinter);
 		}
 
@@ -158,21 +151,12 @@ public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Server
 	public Map<String, Object> getEncodeHints(ResolvableType actualType, ResolvableType elementType,
 			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
-		Map<String, Object> hints = new HashMap<>();
-		Object source = actualType.getSource();
-		MethodParameter returnValue = (source instanceof MethodParameter ? (MethodParameter)source : null);
-		if (returnValue != null) {
-			JsonView annotation = returnValue.getMethodAnnotation(JsonView.class);
-			if (annotation != null) {
-				Class<?>[] classes = annotation.value();
-				if (classes.length != 1) {
-					throw new IllegalArgumentException(
-							"@JsonView only supported for write hints with exactly 1 class argument: " + returnValue);
-				}
-				hints.put(AbstractJackson2Codec.JSON_VIEW_HINT, classes[0]);
-			}
-		}
-		return hints;
+		return getHints(actualType);
+	}
+
+	@Override
+	protected <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType) {
+		return parameter.getMethodAnnotation(annotType);
 	}
 
 }

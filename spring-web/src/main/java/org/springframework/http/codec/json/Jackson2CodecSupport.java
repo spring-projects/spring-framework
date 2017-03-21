@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,34 +16,46 @@
 
 package org.springframework.http.codec.json;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 
 /**
- * Abstract base class for Jackson based decoder/encoder implementations.
+ * Base class providing support methods for Jackson 2 encoding and decoding.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
+ * @since 5.0
  */
-public class AbstractJackson2Codec {
+public abstract class Jackson2CodecSupport {
 
 	/**
-	 * Hint key to use with a {@link Class} value specifying the JSON View to use to serialize
-	 * or deserialize an object.
+	 * The key for the hint to specify a "JSON View" for encoding or decoding
+	 * with the value expected to be a {@link Class}.
 	 * @see <a href="http://wiki.fasterxml.com/JacksonJsonViews">Jackson JSON Views</a>
 	 */
-	public static final String JSON_VIEW_HINT = AbstractJackson2Codec.class.getName() + ".jsonView";
+	public static final String JSON_VIEW_HINT = Jackson2CodecSupport.class.getName() + ".jsonView";
+
+	private static final String JSON_VIEW_HINT_ERROR =
+			"@JsonView only supported for write hints with exactly 1 class argument: ";
 
 	protected static final List<MimeType> JSON_MIME_TYPES = Arrays.asList(
 				new MimeType("application", "json", StandardCharsets.UTF_8),
@@ -54,10 +66,9 @@ public class AbstractJackson2Codec {
 
 
 	/**
-	 * Create a new Jackson codec for the given mapper.
-	 * @param mapper the Jackson ObjectMapper to use
+	 * Constructor with a Jackson {@link ObjectMapper} to use.
 	 */
-	protected AbstractJackson2Codec(ObjectMapper mapper) {
+	protected Jackson2CodecSupport(ObjectMapper mapper) {
 		Assert.notNull(mapper, "ObjectMapper must not be null");
 		this.mapper = mapper;
 	}
@@ -140,5 +151,23 @@ public class AbstractJackson2Codec {
 		}
 		return ResolvableType.NONE;
 	}
+
+	protected Map<String, Object> getHints(ResolvableType actualType) {
+		return getParameter(actualType)
+				.flatMap(parameter -> Optional.ofNullable(getAnnotation(parameter, JsonView.class))
+						.map(annotation -> {
+							Class<?>[] classes = annotation.value();
+							Assert.isTrue(classes.length == 1, JSON_VIEW_HINT_ERROR + parameter);
+							return Collections.<String, Object>singletonMap(JSON_VIEW_HINT, classes[0]);
+						}))
+				.orElse(Collections.emptyMap());
+	}
+
+	protected Optional<MethodParameter> getParameter(ResolvableType type) {
+		return Optional.ofNullable (type.getSource() instanceof MethodParameter ?
+				(MethodParameter) type.getSource() : null);
+	}
+
+	protected abstract <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType);
 
 }
