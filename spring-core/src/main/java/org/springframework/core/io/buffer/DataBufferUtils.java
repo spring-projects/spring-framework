@@ -113,7 +113,7 @@ public abstract class DataBufferUtils {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
 
 		return Flux.create(emitter -> {
-			emitter.onDispose(() -> closeChannel(channel));
+			emitter.setCancellation(() -> closeChannel(channel));
 			AsynchronousFileChannelCompletionHandler completionHandler =
 					new AsynchronousFileChannelCompletionHandler(emitter, position,
 							dataBufferFactory, byteBuffer);
