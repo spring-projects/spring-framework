@@ -5976,6 +5976,11 @@ other beans through a `Provider.get()` call. As a variant of the example above:
 	public class SimpleMovieLister {
 
 		private Provider<MovieFinder> movieFinder;
+		
+		@Inject
+		public void setMovieFinder(Provider<MovieFinder> movieFinder) {
+			this.movieFinder = movieFinder;
+		}
 
 		@Inject
 		public void setMovieFinder(Provider<MovieFinder> movieFinder) {
