@@ -137,7 +137,7 @@ public class RenderingResponseIntegrationTests extends AbstractRouterFunctionInt
 
 		@Override
 		public List<MediaType> getSupportedMediaTypes() {
-			return Collections.emptyList();
+			return Collections.singletonList(MediaType.TEXT_PLAIN);
 		}
 
 		@Override

@@ -166,11 +166,11 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 			Stream<ViewResolver> viewResolverStream = strategies.viewResolvers().get();
 
 			return Flux.fromStream(viewResolverStream)
-					.concatMap(viewResolver -> viewResolver.resolveViewName(this.name, locale))
+					.concatMap(viewResolver -> viewResolver.resolveViewName(name(), locale))
 					.next()
 					.otherwiseIfEmpty(Mono.error(new IllegalArgumentException("Could not resolve view with name '" +
-							this.name +"'")))
-					.then(view -> view.render(this.model, contentType, exchange));
+							name() +"'")))
+					.then(view -> view.render(model(), contentType, exchange));
 		}
 
 		private Locale resolveLocale(ServerWebExchange exchange, HandlerStrategies strategies) {

@@ -204,7 +204,7 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 		public Mono<Void> writeTo(ServerWebExchange exchange, HandlerStrategies strategies) {
 			ServerHttpResponse response = exchange.getResponse();
 			writeStatusAndHeaders(response);
-			return this.inserter.insert(response, new BodyInserter.Context() {
+			return inserter().insert(response, new BodyInserter.Context() {
 				@Override
 				public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
 					return strategies.messageWriters();

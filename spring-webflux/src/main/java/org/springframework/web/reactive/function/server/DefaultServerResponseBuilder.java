@@ -248,8 +248,9 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 			response.setStatusCode(this.statusCode);
 			HttpHeaders responseHeaders = response.getHeaders();
 
-			if (!this.headers.isEmpty()) {
-				this.headers.entrySet().stream()
+			HttpHeaders headers = headers();
+			if (!headers.isEmpty()) {
+				headers.entrySet().stream()
 						.filter(entry -> !responseHeaders.containsKey(entry.getKey()))
 						.forEach(entry -> responseHeaders
 								.put(entry.getKey(), entry.getValue()));
