@@ -104,7 +104,7 @@ public class HttpMessageWriterViewTests {
 
 	@Test
 	public void extractObjectMultipleMatchesNotSupported() throws Exception {
-		HttpMessageWriterView view = new HttpMessageWriterView(new CharSequenceEncoder());
+		HttpMessageWriterView view = new HttpMessageWriterView(CharSequenceEncoder.allMimeTypes());
 		view.setModelKeys(new HashSet<>(Arrays.asList("foo1", "foo2")));
 		this.model.addAttribute("foo1", "bar1");
 		this.model.addAttribute("foo2", "bar2");

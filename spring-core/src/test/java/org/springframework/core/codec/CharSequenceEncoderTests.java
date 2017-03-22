@@ -43,7 +43,7 @@ public class CharSequenceEncoderTests extends AbstractDataBufferAllocatingTestCa
 
 	@Before
 	public void createEncoder() {
-		this.encoder = new CharSequenceEncoder();
+		this.encoder = CharSequenceEncoder.textPlainOnly();
 	}
 
 	@Test

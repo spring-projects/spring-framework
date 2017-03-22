@@ -37,6 +37,7 @@ import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.DataBufferDecoder;
 import org.springframework.core.codec.DataBufferEncoder;
+import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.convert.converter.Converter;
@@ -469,6 +470,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 */
 	protected void configureMessageWriters(List<ServerHttpMessageWriter<?>> messageWriters) {
 	}
+
 	/**
 	 * Adds default converters that sub-classes can call from
 	 * {@link #configureMessageWriters(List)}.
@@ -477,15 +479,24 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		writers.add(new EncoderHttpMessageWriter<>(new ByteArrayEncoder()));
 		writers.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
 		writers.add(new EncoderHttpMessageWriter<>(new DataBufferEncoder()));
-		writers.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
+		writers.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()));
 		writers.add(new ResourceHttpMessageWriter());
 		if (jaxb2Present) {
 			writers.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
 		}
 		if (jackson2Present) {
-			Jackson2JsonEncoder jacksonEncoder = new Jackson2JsonEncoder();
-			writers.add(new EncoderHttpMessageWriter<>(jacksonEncoder));
-			writers.add(new ServerSentEventHttpMessageWriter(jacksonEncoder));
+			writers.add(new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder()));
+		}
+		writers.add(new ServerSentEventHttpMessageWriter(getSseEncoder()));
+		writers.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
+	}
+
+	private Encoder<?> getSseEncoder() {
+		if (jackson2Present) {
+			return new Jackson2JsonEncoder();
+		}
+		else {
+			return null;
 		}
 	}
 

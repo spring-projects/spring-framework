@@ -27,6 +27,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -34,7 +35,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.util.Assert;
 
 /**
  * {@code ServerHttpMessageWriter} for {@code "text/event-stream"} responses.
@@ -54,17 +54,24 @@ public class ServerSentEventHttpMessageWriter implements ServerHttpMessageWriter
 
 
 	/**
+	 * Constructor without an {@code Encoder}. In this mode only {@code String}
+	 * is supported for event data to be encoded.
+	 */
+	public ServerSentEventHttpMessageWriter() {
+		this(null);
+	}
+
+	/**
 	 * Constructor with JSON {@code Encoder} for encoding objects. Support for
 	 * {@code String} event data is built-in.
 	 */
 	public ServerSentEventHttpMessageWriter(Encoder<?> encoder) {
-		Assert.notNull(encoder, "'encoder' must not be null");
 		this.encoder = encoder;
 	}
 
 
 	/**
-	 * Return the configured {@code Encoder}.
+	 * Return the configured {@code Encoder}, possibly {@code null}.
 	 */
 	public Encoder<?> getEncoder() {
 		return this.encoder;
@@ -78,7 +85,7 @@ public class ServerSentEventHttpMessageWriter implements ServerHttpMessageWriter
 
 	@Override
 	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
-		return mediaType == null || MediaType.TEXT_EVENT_STREAM.isCompatibleWith(mediaType) ||
+		return mediaType == null || MediaType.TEXT_EVENT_STREAM.includes(mediaType) ||
 				ServerSentEvent.class.isAssignableFrom(elementType.getRawClass());
 	}
 
@@ -133,6 +140,10 @@ public class ServerSentEventHttpMessageWriter implements ServerHttpMessageWriter
 		if (data instanceof String) {
 			String text = (String) data;
 			return Flux.from(encodeText(text.replaceAll("\\n", "\ndata:") + "\n", factory));
+		}
+
+		if (this.encoder == null) {
+			return Flux.error(new CodecException("No SSE encoder configured and the data is not String."));
 		}
 
 		return ((Encoder<T>) this.encoder)

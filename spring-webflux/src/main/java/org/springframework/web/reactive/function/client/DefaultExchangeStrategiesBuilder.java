@@ -75,12 +75,10 @@ class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Builder {
 	}
 
 	private void defaultReaders() {
+		// SSE first (constrained to "text/event-stream")
+		messageReader(new ServerSentEventHttpMessageReader(getSseDecoder()));
 		messageReader(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		messageReader(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
-		if (jackson2Present) {
-			// SSE ahead of String e.g. "test/event-stream" + Flux<String>
-			messageReader(new ServerSentEventHttpMessageReader(new Jackson2JsonDecoder()));
-		}
 		messageReader(new DecoderHttpMessageReader<>(new StringDecoder(false)));
 		if (jaxb2Present) {
 			messageReader(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
@@ -90,10 +88,19 @@ class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Builder {
 		}
 	}
 
+	private Decoder<?> getSseDecoder() {
+		if (jackson2Present) {
+			return new Jackson2JsonDecoder();
+		}
+		else {
+			return null;
+		}
+	}
+
 	private void defaultWriters() {
 		messageWriter(new EncoderHttpMessageWriter<>(new ByteArrayEncoder()));
 		messageWriter(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
-		messageWriter(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
+		messageWriter(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
 		messageWriter(new ResourceHttpMessageWriter());
 		messageWriter(new FormHttpMessageWriter());
 		if (jaxb2Present) {

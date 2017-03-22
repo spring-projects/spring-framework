@@ -178,7 +178,7 @@ public class WebFluxConfigurationSupportTests {
 		assertEquals(0, handler.getOrder());
 
 		List<ServerHttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertEquals(8, writers.size());
+		assertEquals(9, writers.size());
 
 		assertHasMessageWriter(writers, byte[].class, APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, ByteBuffer.class, APPLICATION_OCTET_STREAM);
@@ -204,7 +204,7 @@ public class WebFluxConfigurationSupportTests {
 		assertEquals(100, handler.getOrder());
 
 		List<ServerHttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertEquals(8, writers.size());
+		assertEquals(9, writers.size());
 
 		assertHasMessageWriter(writers, byte[].class, APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, ByteBuffer.class, APPLICATION_OCTET_STREAM);
@@ -303,7 +303,7 @@ public class WebFluxConfigurationSupportTests {
 
 		@Override
 		protected void configureMessageWriters(List<ServerHttpMessageWriter<?>> messageWriters) {
-			messageWriters.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
+			messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()));
 		}
 
 		@Override

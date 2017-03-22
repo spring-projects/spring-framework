@@ -31,6 +31,7 @@ import org.springframework.core.codec.ByteArrayEncoder;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
+import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
@@ -88,7 +89,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 		messageWriter(new EncoderHttpMessageWriter<>(new ByteArrayEncoder()));
 		messageWriter(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
-		messageWriter(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
+		messageWriter(new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()));
 		messageWriter(new ResourceHttpMessageWriter());
 
 		if (jaxb2Present) {
@@ -97,11 +98,22 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 		}
 		if (jackson2Present) {
 			messageReader(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
-			Jackson2JsonEncoder jsonEncoder = new Jackson2JsonEncoder();
-			messageWriter(new EncoderHttpMessageWriter<>(jsonEncoder));
-			messageWriter(new ServerSentEventHttpMessageWriter(jsonEncoder));
+			messageWriter(new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder()));
 		}
+
+		messageWriter(new ServerSentEventHttpMessageWriter(getSseEncoder()));
+		messageWriter(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
+
 		localeResolver(DEFAULT_LOCALE_RESOLVER);
+	}
+
+	private Encoder<?> getSseEncoder() {
+		if (jackson2Present) {
+			return new Jackson2JsonEncoder();
+		}
+		else {
+			return null;
+		}
 	}
 
 	public void applicationContext(ApplicationContext applicationContext) {

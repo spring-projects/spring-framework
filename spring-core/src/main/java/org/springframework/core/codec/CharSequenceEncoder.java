@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,14 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 
 /**
  * Encode from a {@code CharSequence} stream to a bytes stream.
  *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 5.0
  * @see StringDecoder
  */
@@ -43,8 +45,8 @@ public class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
-	public CharSequenceEncoder() {
-		super(new MimeType("text", "plain", DEFAULT_CHARSET));
+	private CharSequenceEncoder(MimeType... mimeTypes) {
+		super(mimeTypes);
 	}
 
 
@@ -71,6 +73,21 @@ public class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 			ByteBuffer byteBuffer = charset.encode(charBuffer);
 			return bufferFactory.wrap(byteBuffer);
 		});
+	}
+
+
+	/**
+	 * Create a {@code CharSequenceEncoder} that supports only "text/plain".
+	 */
+	public static CharSequenceEncoder textPlainOnly() {
+		return new CharSequenceEncoder(new MimeType("text", "plain", DEFAULT_CHARSET));
+	}
+
+	/**
+	 * Create a {@code CharSequenceEncoder} that supports all MIME types.
+	 */
+	public static CharSequenceEncoder allMimeTypes() {
+		return new CharSequenceEncoder(new MimeType("text", "plain", DEFAULT_CHARSET), MimeTypeUtils.ALL);
 	}
 
 }

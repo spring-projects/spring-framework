@@ -104,7 +104,7 @@ public class DefaultClientRequestBuilderTests {
 				.body(inserter).build();
 
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
-		messageWriters.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
+		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
 
 		ExchangeStrategies strategies = mock(ExchangeStrategies.class);
 		when(strategies.messageWriters()).thenReturn(messageWriters::stream);

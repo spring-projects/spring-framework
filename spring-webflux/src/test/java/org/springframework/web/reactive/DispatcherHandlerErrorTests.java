@@ -186,8 +186,8 @@ public class DispatcherHandlerErrorTests {
 
 		@Bean
 		public ResponseBodyResultHandler resultHandler() {
-			return new ResponseBodyResultHandler(
-					Collections.singletonList(new EncoderHttpMessageWriter<>(new CharSequenceEncoder())),
+			return new ResponseBodyResultHandler(Collections.singletonList(
+					new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly())),
 					new HeaderContentTypeResolver());
 		}
 
