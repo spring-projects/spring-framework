@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -56,11 +57,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.support.HttpRequestPathHelper;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
@@ -141,7 +138,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
 		assertError(mono, MethodNotAllowedException.class,
-				ex -> assertEquals(new HashSet<>(Arrays.asList("GET", "HEAD")), ex.getSupportedMethods()));
+				ex -> assertEquals(EnumSet.of(HttpMethod.GET, HttpMethod.HEAD), ex.getSupportedMethods()));
 	}
 
 	@Test  // SPR-9603
@@ -192,10 +189,10 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void getHandlerHttpOptions() throws Exception {
-		testHttpOptions("/foo", "GET,HEAD");
-		testHttpOptions("/person/1", "PUT");
-		testHttpOptions("/persons", "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS");
-		testHttpOptions("/something", "PUT,POST");
+		testHttpOptions("/foo", EnumSet.of(HttpMethod.GET, HttpMethod.HEAD));
+		testHttpOptions("/person/1", EnumSet.of(HttpMethod.PUT));
+		testHttpOptions("/persons", EnumSet.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH, HttpMethod.DELETE, HttpMethod.OPTIONS));
+		testHttpOptions("/something", EnumSet.of(HttpMethod.PUT, HttpMethod.POST));
 	}
 
 	@Test
@@ -349,7 +346,7 @@ public class RequestMappingInfoHandlerMappingTests {
 						ex.getSupportedMediaTypes()));
 	}
 
-	private void testHttpOptions(String requestURI, String allowHeader) throws Exception {
+	private void testHttpOptions(String requestURI, Set<HttpMethod> allowedMethods) throws Exception {
 		ServerWebExchange exchange = MockServerHttpRequest.options(requestURI).toExchange();
 		HandlerMethod handlerMethod = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
 
@@ -363,7 +360,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		Optional<Object> value = result.getReturnValue();
 		assertTrue(value.isPresent());
 		assertEquals(HttpHeaders.class, value.get().getClass());
-		assertEquals(allowHeader, ((HttpHeaders) value.get()).getFirst("Allow"));
+		assertEquals(allowedMethods, ((HttpHeaders) value.get()).getAllow());
 	}
 
 	private void testMediaTypeNotAcceptable(String url) throws Exception {

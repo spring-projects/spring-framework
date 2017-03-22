@@ -187,7 +187,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		}
 
 		if (HttpMethod.GET != method) {
-			return Mono.error(new MethodNotAllowedException(method.name(), Collections.singleton("GET")));
+			return Mono.error(new MethodNotAllowedException(method, Collections.singleton(HttpMethod.GET)));
 		}
 
 		if (!"WebSocket".equalsIgnoreCase(headers.getUpgrade())) {

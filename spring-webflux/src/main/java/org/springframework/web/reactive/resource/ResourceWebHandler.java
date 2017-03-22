@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -89,13 +88,9 @@ public class ResourceWebHandler
 		implements WebHandler, InitializingBean, SmartInitializingSingleton {
 
 	/** Set of supported HTTP methods */
-	private static final Set<String> SUPPORTED_METHODS = new LinkedHashSet<>(2);
+	private static final Set<HttpMethod> SUPPORTED_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
 
 	private static final Log logger = LogFactory.getLog(ResourceWebHandler.class);
-
-	static {
-		SUPPORTED_METHODS.addAll(Arrays.asList("GET", "HEAD"));
-	}
 
 
 	private final List<Resource> locations = new ArrayList<>(4);
@@ -294,9 +289,9 @@ public class ResourceWebHandler
 						}
 
 						// Supported methods and required session
-						String httpMehtod = exchange.getRequest().getMethod().name();
-						if (!SUPPORTED_METHODS.contains(httpMehtod)) {
-							return Mono.error(new MethodNotAllowedException(httpMehtod, SUPPORTED_METHODS));
+						HttpMethod httpMethod = exchange.getRequest().getMethod();
+						if (!SUPPORTED_METHODS.contains(httpMethod)) {
+							return Mono.error(new MethodNotAllowedException(httpMethod, SUPPORTED_METHODS));
 						}
 
 						// Header phase

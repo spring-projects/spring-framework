@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -218,12 +219,12 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		if (helper.hasMethodsMismatch()) {
 			HttpMethod httpMethod = request.getMethod();
-			Set<String> methods = helper.getAllowedMethods();
+			Set<HttpMethod> methods = helper.getAllowedMethods();
 			if (HttpMethod.OPTIONS.matches(httpMethod.name())) {
 				HttpOptionsHandler handler = new HttpOptionsHandler(methods);
 				return new HandlerMethod(handler, HTTP_OPTIONS_HANDLE_METHOD);
 			}
-			throw new MethodNotAllowedException(httpMethod.name(), methods);
+			throw new MethodNotAllowedException(httpMethod, methods);
 		}
 
 		if (helper.hasConsumesMismatch()) {
@@ -280,42 +281,42 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		 * Any partial matches for "methods"?
 		 */
 		public boolean hasMethodsMismatch() {
-			return !this.partialMatches.stream().
-					filter(PartialMatch::hasMethodsMatch).findAny().isPresent();
+			return this.partialMatches.stream().
+					noneMatch(PartialMatch::hasMethodsMatch);
 		}
 
 		/**
 		 * Any partial matches for "methods" and "consumes"?
 		 */
 		public boolean hasConsumesMismatch() {
-			return !this.partialMatches.stream().
-					filter(PartialMatch::hasConsumesMatch).findAny().isPresent();
+			return this.partialMatches.stream().
+					noneMatch(PartialMatch::hasConsumesMatch);
 		}
 
 		/**
 		 * Any partial matches for "methods", "consumes", and "produces"?
 		 */
 		public boolean hasProducesMismatch() {
-			return !this.partialMatches.stream().
-					filter(PartialMatch::hasProducesMatch).findAny().isPresent();
+			return this.partialMatches.stream().
+					noneMatch(PartialMatch::hasProducesMatch);
 		}
 
 		/**
 		 * Any partial matches for "methods", "consumes", "produces", and "params"?
 		 */
 		public boolean hasParamsMismatch() {
-			return !this.partialMatches.stream().
-					filter(PartialMatch::hasParamsMatch).findAny().isPresent();
+			return this.partialMatches.stream().
+					noneMatch(PartialMatch::hasParamsMatch);
 		}
 
 		/**
 		 * Return declared HTTP methods.
 		 */
-		public Set<String> getAllowedMethods() {
+		public Set<HttpMethod> getAllowedMethods() {
 			return this.partialMatches.stream().
 					flatMap(m -> m.getInfo().getMethodsCondition().getMethods().stream()).
-					map(requestMethod -> requestMethod.name()).
-					collect(Collectors.toCollection(LinkedHashSet::new));
+					map(requestMethod -> HttpMethod.resolve(requestMethod.name())).
+					collect(Collectors.toSet());
 		}
 
 		/**
@@ -413,29 +414,23 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		private final HttpHeaders headers = new HttpHeaders();
 
 
-		public HttpOptionsHandler(Set<String> declaredMethods) {
+		public HttpOptionsHandler(Set<HttpMethod> declaredMethods) {
 			this.headers.setAllow(initAllowedHttpMethods(declaredMethods));
 		}
 
-		private static Set<HttpMethod> initAllowedHttpMethods(Set<String> declaredMethods) {
-			Set<HttpMethod> result = new LinkedHashSet<>(declaredMethods.size());
+		private static Set<HttpMethod> initAllowedHttpMethods(Set<HttpMethod> declaredMethods) {
 			if (declaredMethods.isEmpty()) {
-				for (HttpMethod method : HttpMethod.values()) {
-					if (!HttpMethod.TRACE.equals(method)) {
-						result.add(method);
-					}
-				}
+				return EnumSet.allOf(HttpMethod.class).stream()
+						.filter(method -> !method.equals(HttpMethod.TRACE))
+						.collect(Collectors.toSet());
 			}
 			else {
-				boolean hasHead = declaredMethods.contains("HEAD");
-				for (String method : declaredMethods) {
-					result.add(HttpMethod.valueOf(method));
-					if (!hasHead && "GET".equals(method)) {
-						result.add(HttpMethod.HEAD);
-					}
+				Set<HttpMethod> result = new LinkedHashSet<>(declaredMethods);
+				if (result.contains(HttpMethod.GET)) {
+					result.add(HttpMethod.HEAD);
 				}
+				return result;
 			}
-			return result;
 		}
 
 		@SuppressWarnings("unused")
