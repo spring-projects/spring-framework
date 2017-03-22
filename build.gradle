@@ -55,7 +55,7 @@ configure(allprojects) { project ->
 	ext.httpasyncVersion       = "4.1.3"
 	ext.httpclientVersion      = "4.5.3"
 	ext.interceptorApiVersion  = "1.2"
-	ext.jackson2Version        = "2.9.0.pr1"
+	ext.jackson2Version        = "2.9.0.pr2"
 	ext.javamailVersion        = "1.5.6"
 	ext.jaxbVersion            = "2.2.11"
 	ext.jaxwsVersion           = "2.2.11"
