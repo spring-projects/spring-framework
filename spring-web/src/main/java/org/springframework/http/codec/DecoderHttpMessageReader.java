@@ -129,13 +129,13 @@ public class DecoderHttpMessageReader<T> implements ServerHttpMessageReader<T> {
 	/**
 	 * Get additional hints for decoding for example based on the server request
 	 * or annotations from controller method parameters. By default, delegate to
-	 * the decoder if it is an instance of {@link ServerHttpDecoder}.
+	 * the decoder if it is an instance of {@link HttpDecoder}.
 	 */
 	protected Map<String, Object> getReadHints(ResolvableType streamType,
 			ResolvableType elementType, ServerHttpRequest request, ServerHttpResponse response) {
 
-		if (this.decoder instanceof ServerHttpDecoder) {
-			ServerHttpDecoder<?> httpDecoder = (ServerHttpDecoder<?>) this.decoder;
+		if (this.decoder instanceof HttpDecoder) {
+			HttpDecoder<?> httpDecoder = (HttpDecoder<?>) this.decoder;
 			return httpDecoder.getDecodeHints(streamType, elementType, request, response);
 		}
 		return Collections.emptyMap();

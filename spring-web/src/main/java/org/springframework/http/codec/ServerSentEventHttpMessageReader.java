@@ -71,6 +71,13 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	}
 
 
+	/**
+	 * Return the configured {@code Decoder}.
+	 */
+	public Decoder<?> getDecoder() {
+		return this.decoder;
+	}
+
 	@Override
 	public List<MediaType> getReadableMediaTypes() {
 		return Collections.singletonList(MediaType.TEXT_EVENT_STREAM);

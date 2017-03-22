@@ -19,6 +19,8 @@ package org.springframework.http.codec.json;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -40,14 +42,13 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerHttpEncoder;
+import org.springframework.http.codec.HttpEncoder;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
-import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
 
 /**
  * Encode from an {@code Object} stream to a byte stream of JSON objects,
@@ -58,9 +59,12 @@ import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
  * @since 5.0
  * @see Jackson2JsonDecoder
  */
-public class Jackson2JsonEncoder extends Jackson2CodecSupport implements ServerHttpEncoder<Object> {
+public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpEncoder<Object> {
+
+	private final List<MediaType> streamingMediaTypes = new ArrayList<>(1);
 
 	private final PrettyPrinter ssePrettyPrinter;
+
 
 
 	public Jackson2JsonEncoder() {
@@ -69,9 +73,32 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements ServerH
 
 	public Jackson2JsonEncoder(ObjectMapper mapper) {
 		super(mapper);
-		DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
-		prettyPrinter.indentObjectsWith(new DefaultIndenter("  ", "\ndata:"));
-		this.ssePrettyPrinter = prettyPrinter;
+		this.streamingMediaTypes.add(MediaType.APPLICATION_STREAM_JSON);
+		this.ssePrettyPrinter = initSsePrettyPrinter();
+	}
+
+	private static PrettyPrinter initSsePrettyPrinter() {
+		DefaultPrettyPrinter printer = new DefaultPrettyPrinter();
+		printer.indentObjectsWith(new DefaultIndenter("  ", "\ndata:"));
+		return printer;
+	}
+
+
+	/**
+	 * Configure "streaming" media types for which flushing should be performed
+	 * automatically vs at the end of the stream.
+	 * <p>By default this is set to {@link MediaType#APPLICATION_STREAM_JSON}.
+	 * @param mediaTypes one or more media types to add to the list
+	 * @see HttpEncoder#getStreamingMediaTypes()
+	 */
+	public void setStreamingMediaTypes(List<MediaType> mediaTypes) {
+		this.streamingMediaTypes.clear();
+		this.streamingMediaTypes.addAll(mediaTypes);
+	}
+
+	@Override
+	public List<MimeType> getEncodableMimeTypes() {
+		return JSON_MIME_TYPES;
 	}
 
 
@@ -79,11 +106,6 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements ServerH
 	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
 		return this.mapper.canSerialize(elementType.getRawClass()) &&
 				(mimeType == null || JSON_MIME_TYPES.stream().anyMatch(m -> m.isCompatibleWith(mimeType)));
-	}
-
-	@Override
-	public List<MimeType> getEncodableMimeTypes() {
-		return JSON_MIME_TYPES;
 	}
 
 	@Override
@@ -98,7 +120,7 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements ServerH
 			return Flux.from(inputStream).map(value ->
 					encodeValue(value, mimeType, bufferFactory, elementType, hints));
 		}
-		else if (APPLICATION_STREAM_JSON.isCompatibleWith(mimeType)) {
+		else if (MediaType.APPLICATION_STREAM_JSON.isCompatibleWith(mimeType)) {
 			return Flux.from(inputStream).map(value -> {
 				DataBuffer buffer = encodeValue(value, mimeType, bufferFactory, elementType, hints);
 				buffer.write(new byte[]{'\n'});
@@ -147,7 +169,12 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements ServerH
 	}
 
 
-	// ServerHttpEncoder...
+	// HttpEncoder...
+
+	@Override
+	public List<MediaType> getStreamingMediaTypes() {
+		return Collections.unmodifiableList(this.streamingMediaTypes);
+	}
 
 	@Override
 	public Map<String, Object> getEncodeHints(ResolvableType actualType, ResolvableType elementType,

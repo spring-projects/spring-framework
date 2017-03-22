@@ -19,34 +19,33 @@ package org.springframework.http.codec;
 import java.util.Map;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.Encoder;
-import org.springframework.http.MediaType;
+import org.springframework.core.codec.Decoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 
-
 /**
- * {@code Encoder} extension for server-side encoding of the HTTP response body.
+ * Extension of {@code Decoder} exposing extra methods relevant in the context
+ * of HTTP applications.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public interface ServerHttpEncoder<T> extends Encoder<T> {
+public interface HttpDecoder<T> extends Decoder<T> {
 
 	/**
 	 * Get decoding hints based on the server request or annotations on the
 	 * target controller method parameter.
 	 *
-	 * @param actualType the actual source type to encode, possibly a reactive
+	 * @param actualType the actual target type to decode to, possibly a reactive
 	 * wrapper and sourced from {@link org.springframework.core.MethodParameter},
-	 * i.e. providing access to method annotations.
+	 * i.e. providing access to method parameter annotations.
 	 * @param elementType the element type within {@code Flux/Mono} that we're
-	 * trying to encode.
+	 * trying to decode to.
 	 * @param request the current request
 	 * @param response the current response
 	 * @return a Map with hints, possibly empty
 	 */
-	Map<String, Object> getEncodeHints(ResolvableType actualType, ResolvableType elementType,
-			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response);
+	Map<String, Object> getDecodeHints(ResolvableType actualType, ResolvableType elementType,
+			ServerHttpRequest request, ServerHttpResponse response);
 
 }

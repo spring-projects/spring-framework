@@ -63,6 +63,13 @@ public class ServerSentEventHttpMessageWriter implements ServerHttpMessageWriter
 	}
 
 
+	/**
+	 * Return the configured {@code Encoder}.
+	 */
+	public Encoder<?> getEncoder() {
+		return this.encoder;
+	}
+
 	@Override
 	public List<MediaType> getWritableMediaTypes() {
 		return WRITABLE_MEDIA_TYPES;
@@ -154,8 +161,8 @@ public class ServerSentEventHttpMessageWriter implements ServerHttpMessageWriter
 	private Map<String, Object> getEncodeHints(ResolvableType actualType, ResolvableType elementType,
 			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
-		if (this.encoder instanceof ServerHttpEncoder) {
-			ServerHttpEncoder<?> httpEncoder = (ServerHttpEncoder<?>) this.encoder;
+		if (this.encoder instanceof HttpEncoder) {
+			HttpEncoder<?> httpEncoder = (HttpEncoder<?>) this.encoder;
 			return httpEncoder.getEncodeHints(actualType, elementType, mediaType, request, response);
 		}
 		return Collections.emptyMap();
