@@ -47,6 +47,20 @@ public interface RenderingResponse extends ServerResponse {
 	// Builder
 
 	/**
+	 * Create a builder with the template name, status code, headers and model of the given response.
+	 * @param other the response to copy the values from
+	 * @return the created builder
+	 */
+	static Builder from(RenderingResponse other) {
+		Assert.notNull(other, "'other' must not be null");
+		DefaultRenderingResponseBuilder builder = new DefaultRenderingResponseBuilder(other.name());
+		builder.status(other.statusCode());
+		builder.headers(other.headers());
+		builder.modelAttributes(other.model());
+		return builder;
+	}
+
+	/**
 	 * Create a builder with the given template name.
 	 * @param name the name of the template to render
 	 * @return the created builder

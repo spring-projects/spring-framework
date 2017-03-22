@@ -56,14 +56,9 @@ public class RenderingResponseIntegrationTests extends AbstractRouterFunctionInt
 		RouterFunction<RenderingResponse> normalRoute = route(GET("/normal"), handler::render);
 		RouterFunction<RenderingResponse> filteredRoute = route(GET("/filter"), handler::render)
 				.filter(ofResponseProcessor(
-						response -> {
-							Map<String, Object> model = new LinkedHashMap<>(response.model());
-							model.put("qux", "quux");
-
-							return RenderingResponse.create(response.name())
-									.modelAttributes(model)
-									.build();
-						}));
+						response -> RenderingResponse.from(response)
+								.modelAttribute("qux", "quux")
+								.build()));
 
 		return normalRoute.and(filteredRoute);
 	}
