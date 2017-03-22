@@ -256,7 +256,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
-	public void jsonView() throws Exception {
+	public void fieldLevelJsonView() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		JacksonViewBean bean = new JacksonViewBean();
 		bean.setWithView1("with");
@@ -271,6 +271,24 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertThat(result, containsString("\"withView1\":\"with\""));
 		assertThat(result, not(containsString("\"withView2\":\"with\"")));
 		assertThat(result, not(containsString("\"withoutView\":\"without\"")));
+	}
+
+	@Test
+	public void classLevelJsonView() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		JacksonViewBean bean = new JacksonViewBean();
+		bean.setWithView1("with");
+		bean.setWithView2("with");
+		bean.setWithoutView("without");
+
+		MappingJacksonValue jacksonValue = new MappingJacksonValue(bean);
+		jacksonValue.setSerializationView(MyJacksonView3.class);
+		this.converter.writeInternal(jacksonValue, null, outputMessage);
+
+		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
+		assertThat(result, not(containsString("\"withView1\":\"with\"")));
+		assertThat(result, not(containsString("\"withView2\":\"with\"")));
+		assertThat(result, containsString("\"withoutView\":\"without\""));
 	}
 
 	@Test
@@ -449,12 +467,15 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 
-	private interface MyJacksonView1 {};
+	private interface MyJacksonView1 {}
 
-	private interface MyJacksonView2 {};
+	private interface MyJacksonView2 {}
+
+	private interface MyJacksonView3 {}
 
 
 	@SuppressWarnings("unused")
+	@JsonView(MyJacksonView3.class)
 	private static class JacksonViewBean {
 
 		@JsonView(MyJacksonView1.class)
