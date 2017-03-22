@@ -16,32 +16,32 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.net.URI;
+import static org.junit.Assert.assertEquals;
+import static org.springframework.web.reactive.function.BodyExtractors.toMono;
+import static org.springframework.web.reactive.function.BodyInserters.fromPublisher;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+
 import java.util.List;
 
 import org.junit.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.WebClient;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
-
-import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.BodyExtractors.*;
-import static org.springframework.web.reactive.function.BodyInserters.*;
-import static org.springframework.web.reactive.function.server.RequestPredicates.*;
-import static org.springframework.web.reactive.function.server.RouterFunctions.*;
-
 /**
  * @author Arjen Poutsma
+ * @author Jonathan Borenstein
  */
-public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunctionIntegrationTests {
+public class PublisherHandlerFunctionIntegrationTests
+extends AbstractRouterFunctionIntegrationTests {
 
-	private final RestTemplate restTemplate = new RestTemplate();
+	private WebClient webClient = WebClient.create();
 
 
 	@Override
@@ -55,21 +55,31 @@ public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunc
 
 	@Test
 	public void mono() throws Exception {
-		ResponseEntity<Person> result =
-				restTemplate.getForEntity("http://localhost:" + port + "/mono", Person.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("John", result.getBody().getName());
+		ClientResponse response = webClient.get()
+				.uri("http://localhost:" + port + "/mono")
+				.exchange()
+				.block();
+
+		Mono<Person> person = response.bodyToMono(Person.class);
+
+		assertEquals(HttpStatus.OK, response.statusCode());
+		assertEquals("John", person.block().getName());
 	}
 
 	@Test
 	public void flux() throws Exception {
-		ParameterizedTypeReference<List<Person>> reference = new ParameterizedTypeReference<List<Person>>() {};
-		ResponseEntity<List<Person>> result =
-				restTemplate.exchange("http://localhost:" + port + "/flux", HttpMethod.GET, null, reference);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		List<Person> body = result.getBody();
+		ClientResponse response = webClient.get()
+				.uri("http://localhost:" + port + "/flux")
+				.exchange()
+				.block();
+
+		assertEquals(HttpStatus.OK, response.statusCode());
+
+		Flux<List<Person>> fluxList = response.bodyToFlux(Person.class).buffer();
+		List<Person> body = fluxList.blockFirst();
+
 		assertEquals(2, body.size());
 		assertEquals("John", body.get(0).getName());
 		assertEquals("Jane", body.get(1).getName());
@@ -77,20 +87,24 @@ public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunc
 
 	@Test
 	public void postMono() {
-		URI uri = URI.create("http://localhost:" + port + "/mono");
 		Person person = new Person("Jack");
-		RequestEntity<Person> requestEntity = RequestEntity.post(uri).body(person);
-		ResponseEntity<Person> result = restTemplate.exchange(requestEntity, Person.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("Jack", result.getBody().getName());
+		ClientResponse response = webClient.post()
+				.uri("http://localhost:" + port + "/mono")
+				.exchange(BodyInserters.fromObject(person)).block();
+
+		Mono<Person> personResponse = response.bodyToMono(Person.class);
+
+
+		assertEquals(HttpStatus.OK, response.statusCode());
+		assertEquals("Jack", personResponse.block().getName());
 	}
 
 
 	private static class PersonHandler {
 
 		public Mono<ServerResponse> mono(ServerRequest request) {
-			Person person = new Person("John");
+			Person person = new Person("John");		
 			return ServerResponse.ok().body(fromPublisher(Mono.just(person), Person.class));
 		}
 
@@ -105,8 +119,8 @@ public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunc
 			return ServerResponse.ok().body(
 					fromPublisher(Flux.just(person1, person2), Person.class));
 		}
-	}
 
+	}
 
 	private static class Person {
 
@@ -124,7 +138,6 @@ public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunc
 			return name;
 		}
 
-		@SuppressWarnings("unused")
 		public void setName(String name) {
 			this.name = name;
 		}
@@ -148,8 +161,11 @@ public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunc
 
 		@Override
 		public String toString() {
-			return "Person{" + "name='" + name + '\'' + '}';
+			return "Person{" +
+					"name='" + name + '\'' +
+					'}';
 		}
 	}
+
 
 }
