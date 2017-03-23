@@ -263,14 +263,12 @@ public class MockServletContext implements ServletContext {
 	@Override
 	public String getMimeType(String filePath) {
 		String extension = StringUtils.getFilenameExtension(filePath);
-		MediaType result;
 		if (this.mimeTypes.containsKey(extension)) {
-			result = this.mimeTypes.get(extension);
+			return this.mimeTypes.get(extension).toString();
 		}
 		else {
-			result = MediaTypeFactory.getMediaType(filePath);
+			return MediaTypeFactory.getMediaType(filePath).orElse(MediaType.APPLICATION_OCTET_STREAM).toString();
 		}
-		return result != null ? result.toString() : null;
 	}
 
 	/**

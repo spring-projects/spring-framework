@@ -18,6 +18,7 @@ package org.springframework.web.accept;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -112,9 +113,9 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 	protected MediaType handleNoMatch(NativeWebRequest webRequest, String extension)
 			throws HttpMediaTypeNotAcceptableException {
 
-		MediaType mediaType = MediaTypeFactory.getMediaType("file." + extension);
-		if (mediaType != null) {
-			return mediaType;
+		Optional<MediaType> mediaType = MediaTypeFactory.getMediaType("file." + extension);
+		if (mediaType.isPresent()) {
+			return mediaType.get();
 		}
 		if (this.ignoreUnknownExtensions) {
 			return null;
@@ -140,7 +141,7 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 			mediaType = lookupMediaType(extension);
 		}
 		if (mediaType == null) {
-			mediaType = MediaTypeFactory.getMediaType(filename);
+			mediaType = MediaTypeFactory.getMediaType(filename).orElse(null);
 		}
 		return mediaType;
 	}

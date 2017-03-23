@@ -102,8 +102,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 
 	@Override
 	protected MediaType getDefaultContentType(Resource resource) {
-		MediaType mediaType = MediaTypeFactory.getMediaType(resource);
-		return mediaType != null ? mediaType : MediaType.APPLICATION_OCTET_STREAM;
+		return MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
 	}
 
 	@Override

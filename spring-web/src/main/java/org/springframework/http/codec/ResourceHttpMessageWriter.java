@@ -136,8 +136,7 @@ public class ResourceHttpMessageWriter implements ServerHttpMessageWriter<Resour
 		if (type != null && type.isConcrete() && !type.equals(MediaType.APPLICATION_OCTET_STREAM)) {
 			return type;
 		}
-		type = MediaTypeFactory.getMediaType(resource);
-		return type != null ? type : MediaType.APPLICATION_OCTET_STREAM;
+		return MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
 	}
 
 	private static OptionalLong lengthOf(Resource resource) {

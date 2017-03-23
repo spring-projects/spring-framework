@@ -87,14 +87,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 				resource = regions.iterator().next().getResource();
 			}
 		}
-		MediaType result = null;
-		if (resource != null) {
-			result = MediaTypeFactory.getMediaType(resource);
-		}
-		if (result == null) {
-			return MediaType.APPLICATION_OCTET_STREAM;
-		}
-		return result;
+		return MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
 	}
 
 	@Override

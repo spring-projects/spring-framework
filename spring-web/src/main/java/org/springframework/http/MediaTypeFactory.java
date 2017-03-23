@@ -103,9 +103,12 @@ public class MediaTypeFactory {
 	 * @param resource the resource to introspect
 	 * @return the corresponding media type, or {@code null} if none found
 	 */
-	public static MediaType getMediaType(Resource resource) {
+	public static Optional<MediaType> getMediaType(Resource resource) {
+		if (resource == null) {
+			return Optional.empty();
+		}
 		String filename = resource.getFilename();
-		return (filename != null ? getMediaType(filename) : null);
+		return (filename != null ? getMediaType(filename) : Optional.empty());
 	}
 
 	/**
@@ -113,9 +116,9 @@ public class MediaTypeFactory {
 	 * @param filename the file name plus extension
 	 * @return the corresponding media type, or {@code null} if none found
 	 */
-	public static MediaType getMediaType(String filename) {
+	public static Optional<MediaType> getMediaType(String filename) {
 		List<MediaType> mediaTypes = getMediaTypes(filename);
-		return (!mediaTypes.isEmpty() ? mediaTypes.get(0) : null);
+		return (!mediaTypes.isEmpty() ? Optional.of(mediaTypes.get(0)) : Optional.empty());
 	}
 
 	/**
