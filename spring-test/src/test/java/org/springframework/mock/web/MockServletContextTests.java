@@ -82,6 +82,7 @@ public class MockServletContextTests {
 	public void getMimeType() {
 		assertEquals("text/html", sc.getMimeType("test.html"));
 		assertEquals("image/gif", sc.getMimeType("test.gif"));
+		assertNull(sc.getMimeType("test.foobar"));
 	}
 
 	/**
