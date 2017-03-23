@@ -51,6 +51,8 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
+	private boolean useRegisteredExtensionsOnly = false;
+
 	private boolean ignoreUnknownExtensions = true;
 
 
@@ -81,10 +83,20 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 	}
 
 	/**
-	 * @deprecated as 5.0, in favor of {@link MediaTypeFactory}, which has no JAF dependency.
+	 * @deprecated as of 5.0, in favor of {@link #setUseRegisteredExtensionsOnly(boolean)}.
 	 */
 	@Deprecated
 	public void setUseJaf(boolean useJaf) {
+		setUseRegisteredExtensionsOnly(!useJaf);
+	}
+
+	/**
+	 * Whether to only use the registered mappings to look up file extensions, or also refer to
+	 * defaults.
+	 * <p>By default this is set to {@code false}, meaning that defaults are used.
+	 */
+	public void setUseRegisteredExtensionsOnly(boolean useRegisteredExtensionsOnly) {
+		this.useRegisteredExtensionsOnly = useRegisteredExtensionsOnly;
 	}
 
 	/**
@@ -113,9 +125,11 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 	protected MediaType handleNoMatch(NativeWebRequest webRequest, String extension)
 			throws HttpMediaTypeNotAcceptableException {
 
-		Optional<MediaType> mediaType = MediaTypeFactory.getMediaType("file." + extension);
-		if (mediaType.isPresent()) {
-			return mediaType.get();
+		if (!this.useRegisteredExtensionsOnly) {
+			Optional<MediaType> mediaType = MediaTypeFactory.getMediaType("file." + extension);
+			if (mediaType.isPresent()) {
+				return mediaType.get();
+			}
 		}
 		if (this.ignoreUnknownExtensions) {
 			return null;

@@ -100,6 +100,8 @@ public class ContentNegotiationManagerFactoryBean
 
 	private boolean ignoreUnknownPathExtensions = true;
 
+	private Boolean useRegisteredExtensionsOnly;
+
 	private String parameterName = "format";
 
 	private ContentNegotiationStrategy defaultNegotiationStrategy;
@@ -175,10 +177,27 @@ public class ContentNegotiationManagerFactoryBean
 	}
 
 	/**
-	 * @deprecated as 5.0, in favor of {@link MediaTypeFactory}, which has no JAF dependency.
+	 * @deprecated as of 5.0, in favor of {@link #setUseRegisteredExtensionsOnly(boolean)}, which
+	 * has reverse behavior.
 	 */
 	@Deprecated
 	public void setUseJaf(boolean useJaf) {
+		setUseRegisteredExtensionsOnly(!useJaf);
+	}
+
+	/**
+	 * When {@link #setFavorPathExtension favorPathExtension} is set, this
+	 * property determines whether to use only registered {@code MediaType} mappings
+	 * to resolve a path extension to a specific MediaType.
+	 * <p>By default this is not set in which case
+	 * {@code PathExtensionContentNegotiationStrategy} will use defaults if available.
+	 */
+	public void setUseRegisteredExtensionsOnly(boolean useRegisteredExtensionsOnly) {
+		this.useRegisteredExtensionsOnly = useRegisteredExtensionsOnly;
+	}
+
+	private boolean useRegisteredExtensionsOnly() {
+		return (this.useRegisteredExtensionsOnly != null && this.useRegisteredExtensionsOnly);
 	}
 
 	/**
@@ -244,7 +263,7 @@ public class ContentNegotiationManagerFactoryBean
 
 		if (this.favorPathExtension) {
 			PathExtensionContentNegotiationStrategy strategy;
-			if (this.servletContext != null) {
+			if (this.servletContext != null && !useRegisteredExtensionsOnly()) {
 				strategy = new ServletPathExtensionContentNegotiationStrategy(
 						this.servletContext, this.mediaTypes);
 			}
@@ -252,6 +271,9 @@ public class ContentNegotiationManagerFactoryBean
 				strategy = new PathExtensionContentNegotiationStrategy(this.mediaTypes);
 			}
 			strategy.setIgnoreUnknownExtensions(this.ignoreUnknownPathExtensions);
+			if (this.useRegisteredExtensionsOnly != null) {
+				strategy.setUseRegisteredExtensionsOnly(this.useRegisteredExtensionsOnly);
+			}
 			strategies.add(strategy);
 		}
 

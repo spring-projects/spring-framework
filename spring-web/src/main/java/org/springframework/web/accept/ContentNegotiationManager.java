@@ -143,7 +143,9 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	 * <p>At startup this method returns extensions explicitly registered with
 	 * either {@link PathExtensionContentNegotiationStrategy} or
 	 * {@link ParameterContentNegotiationStrategy}. At runtime if there is a
-	 * "path extension" strategy, the list of extensions may
+	 * "path extension" strategy and its
+	 * {@link PathExtensionContentNegotiationStrategy#setUseRegisteredExtensionsOnly(boolean)
+	 * useRegisteredExtensionsOnly} property is set to "false", the list of extensions may
 	 * increase as file extensions are resolved via
 	 * {@link org.springframework.http.MediaTypeFactory} and cached.
 	 */

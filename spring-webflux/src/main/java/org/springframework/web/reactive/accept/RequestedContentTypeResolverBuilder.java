@@ -93,6 +93,8 @@ public class RequestedContentTypeResolverBuilder {
 
 	private boolean ignoreUnknownPathExtensions = true;
 
+	private Boolean useRegisteredExtensionsOnly;
+
 	private String parameterName = "format";
 
 	private RequestedContentTypeResolver contentTypeResolver;
@@ -149,6 +151,18 @@ public class RequestedContentTypeResolverBuilder {
 	 */
 	public RequestedContentTypeResolverBuilder ignoreUnknownPathExtensions(boolean ignore) {
 		this.ignoreUnknownPathExtensions = ignore;
+		return this;
+	}
+
+	/**
+	 * When {@link #favorPathExtension favorPathExtension} is set, this
+	 * property determines whether to use only registered {@code MediaType} mappings
+	 * to resolve a path extension to a specific MediaType.
+	 * <p>By default this is not set in which case
+	 * {@code PathExtensionContentNegotiationStrategy} will use defaults if available.
+	 */
+	public RequestedContentTypeResolverBuilder useRegisteredExtensionsOnly(boolean useRegisteredExtensionsOnly) {
+		this.useRegisteredExtensionsOnly = useRegisteredExtensionsOnly;
 		return this;
 	}
 
@@ -211,6 +225,9 @@ public class RequestedContentTypeResolverBuilder {
 		if (this.favorPathExtension) {
 			PathExtensionContentTypeResolver resolver = new PathExtensionContentTypeResolver(this.mediaTypes);
 			resolver.setIgnoreUnknownExtensions(this.ignoreUnknownPathExtensions);
+			if (this.useRegisteredExtensionsOnly != null) {
+				resolver.setUseRegisteredExtensionsOnly(this.useRegisteredExtensionsOnly);
+			}
 			resolvers.add(resolver);
 		}
 
