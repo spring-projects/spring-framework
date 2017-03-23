@@ -104,8 +104,8 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpEnc
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
-		return this.mapper.canSerialize(elementType.getRawClass()) &&
-				(mimeType == null || JSON_MIME_TYPES.stream().anyMatch(m -> m.isCompatibleWith(mimeType)));
+		Class<?> clazz = elementType.getRawClass();
+		return this.mapper.canSerialize(clazz) && supportsMimeType(mimeType);
 	}
 
 	@Override

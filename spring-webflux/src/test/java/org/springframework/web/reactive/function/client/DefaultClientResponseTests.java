@@ -123,7 +123,7 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getBody()).thenReturn(body);
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
-				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
+				.singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders::stream);
 
 		Mono<String> resultMono = defaultClientResponse.body(toMono(String.class));
@@ -144,7 +144,7 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getBody()).thenReturn(body);
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
-				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
+				.singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders::stream);
 
 		Mono<String> resultMono = defaultClientResponse.bodyToMono(String.class);
@@ -159,7 +159,7 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getStatusCode()).thenReturn(HttpStatus.NOT_FOUND);
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
-				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
+				.singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders::stream);
 
 		Mono<String> resultMono = defaultClientResponse.bodyToMono(String.class);
@@ -183,7 +183,7 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getBody()).thenReturn(body);
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
-				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
+				.singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders::stream);
 
 		Flux<String> resultFlux = defaultClientResponse.bodyToFlux(String.class);
@@ -199,7 +199,7 @@ public class DefaultClientResponseTests {
 		when(mockResponse.getStatusCode()).thenReturn(HttpStatus.INTERNAL_SERVER_ERROR);
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
-				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
+				.singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 		when(mockExchangeStrategies.messageReaders()).thenReturn(messageReaders::stream);
 
 		Flux<String> resultFlux = defaultClientResponse.bodyToFlux(String.class);

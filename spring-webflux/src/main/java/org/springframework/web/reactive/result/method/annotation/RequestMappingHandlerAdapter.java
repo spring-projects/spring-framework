@@ -114,10 +114,11 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 
 
 	public RequestMappingHandlerAdapter() {
+		// TODO: improve with better (shared) defaults
 		this.messageReaders.add(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		this.messageReaders.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
 		this.messageReaders.add(new DecoderHttpMessageReader<>(new DataBufferDecoder()));
-		this.messageReaders.add(new DecoderHttpMessageReader<>(new StringDecoder()));
+		this.messageReaders.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 	}
 
 

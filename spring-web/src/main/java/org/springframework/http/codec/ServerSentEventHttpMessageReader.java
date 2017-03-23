@@ -55,7 +55,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 
 	private static final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
-	private static final StringDecoder stringDecoder = new StringDecoder(false);
+	private static final StringDecoder stringDecoder = StringDecoder.textPlainOnly(false);
 
 
 	private final Decoder<?> decoder;
@@ -189,6 +189,9 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	@Override
 	public Mono<Object> readMono(ResolvableType elementType, ReactiveHttpInputMessage message,
 			Map<String, Object> hints) {
+
+		// We're ahead of String + "*/*"
+		// Let's see if we can aggregate the output (lest we time out)...
 
 		if (String.class.equals(elementType.getRawClass())) {
 			Flux<DataBuffer> body = message.getBody();

@@ -67,7 +67,7 @@ public class RequestBodyArgumentResolverTests {
 	@Before
 	public void setup() {
 		List<ServerHttpMessageReader<?>> readers = new ArrayList<>();
-		readers.add(new DecoderHttpMessageReader<>(new StringDecoder()));
+		readers.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 		this.resolver = new RequestBodyArgumentResolver(readers, new ReactiveAdapterRegistry());
 	}
 

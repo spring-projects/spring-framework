@@ -22,6 +22,8 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 import org.junit.Test;
+
+import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.http.MediaType.*;
 import static org.springframework.http.codec.json.Jackson2JsonDecoder.*;
 import static org.springframework.http.codec.json.JacksonViewBean.*;
@@ -50,16 +52,18 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 	@Test
 	public void canDecode() {
 		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder();
-		ResolvableType type = ResolvableType.forClass(Pojo.class);
-		assertTrue(decoder.canDecode(type, APPLICATION_JSON));
-		assertTrue(decoder.canDecode(type, null));
-		assertFalse(decoder.canDecode(type, APPLICATION_XML));
+
+		assertTrue(decoder.canDecode(forClass(Pojo.class), APPLICATION_JSON));
+		assertTrue(decoder.canDecode(forClass(Pojo.class), null));
+
+		assertFalse(decoder.canDecode(forClass(String.class), null));
+		assertFalse(decoder.canDecode(forClass(Pojo.class), APPLICATION_XML));
 	}
 
 	@Test
 	public void decodePojo() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
-		ResolvableType elementType = ResolvableType.forClass(Pojo.class);
+		ResolvableType elementType = forClass(Pojo.class);
 		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, null,
 				emptyMap());
 
@@ -71,7 +75,7 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 	@Test
 	public void decodePojoWithError() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer("{\"foo\":}"));
-		ResolvableType elementType = ResolvableType.forClass(Pojo.class);
+		ResolvableType elementType = forClass(Pojo.class);
 		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, null,
 				emptyMap());
 
@@ -98,7 +102,7 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 		Flux<DataBuffer> source = Flux.just(stringBuffer(
 				"[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]"));
 
-		ResolvableType elementType = ResolvableType.forClass(Pojo.class);
+		ResolvableType elementType = forClass(Pojo.class);
 		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, null,
 				emptyMap());
 
@@ -112,7 +116,7 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 	public void fieldLevelJsonView() throws Exception {
 		Flux<DataBuffer> source = Flux.just(
 				stringBuffer("{\"withView1\" : \"with\", \"withView2\" : \"with\", \"withoutView\" : \"without\"}"));
-		ResolvableType elementType = ResolvableType.forClass(JacksonViewBean.class);
+		ResolvableType elementType = forClass(JacksonViewBean.class);
 		Map<String, Object> hints = singletonMap(JSON_VIEW_HINT, MyJacksonView1.class);
 		Flux<JacksonViewBean> flux = new Jackson2JsonDecoder()
 				.decode(source, elementType, null, hints).cast(JacksonViewBean.class);
@@ -130,7 +134,7 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 	public void classLevelJsonView() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(
 				"{\"withView1\" : \"with\", \"withView2\" : \"with\", \"withoutView\" : \"without\"}"));
-		ResolvableType elementType = ResolvableType.forClass(JacksonViewBean.class);
+		ResolvableType elementType = forClass(JacksonViewBean.class);
 		Map<String, Object> hints = singletonMap(JSON_VIEW_HINT, MyJacksonView3.class);
 		Flux<JacksonViewBean> flux = new Jackson2JsonDecoder()
 				.decode(source, elementType, null, hints).cast(JacksonViewBean.class);
@@ -147,7 +151,7 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 	@Test
 	public void decodeEmptyBodyToMono() throws Exception {
 		Flux<DataBuffer> source = Flux.empty();
-		ResolvableType elementType = ResolvableType.forClass(Pojo.class);
+		ResolvableType elementType = forClass(Pojo.class);
 		Mono<Object> mono = new Jackson2JsonDecoder().decodeToMono(source, elementType,
 				null, emptyMap());
 

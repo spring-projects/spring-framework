@@ -75,17 +75,17 @@ class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Builder {
 	}
 
 	private void defaultReaders() {
-		// SSE first (constrained to "text/event-stream")
-		messageReader(new ServerSentEventHttpMessageReader(getSseDecoder()));
 		messageReader(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		messageReader(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
-		messageReader(new DecoderHttpMessageReader<>(new StringDecoder(false)));
+		messageReader(new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly(false)));
 		if (jaxb2Present) {
 			messageReader(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
 		}
 		if (jackson2Present) {
 			messageReader(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
 		}
+		messageReader(new ServerSentEventHttpMessageReader(getSseDecoder()));
+		messageReader(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(false)));
 	}
 
 	private Decoder<?> getSseDecoder() {

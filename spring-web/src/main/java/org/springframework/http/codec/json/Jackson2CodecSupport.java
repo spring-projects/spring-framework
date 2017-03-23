@@ -74,6 +74,11 @@ public abstract class Jackson2CodecSupport {
 	}
 
 
+	protected boolean supportsMimeType(MimeType mimeType) {
+		return mimeType == null ||
+				JSON_MIME_TYPES.stream().anyMatch(m -> m.isCompatibleWith(mimeType));
+	}
+
 	/**
 	 * Return the Jackson {@link JavaType} for the specified type and context class.
 	 * <p>The default implementation returns {@code typeFactory.constructType(type, contextClass)},

@@ -84,7 +84,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 	public void defaultConfiguration() {
 		messageReader(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		messageReader(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
-		messageReader(new DecoderHttpMessageReader<>(new StringDecoder()));
+		messageReader(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 		messageReader(new FormHttpMessageReader());
 
 		messageWriter(new EncoderHttpMessageWriter<>(new ByteArrayEncoder()));

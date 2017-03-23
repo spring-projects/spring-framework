@@ -52,9 +52,10 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.WebSession;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.web.reactive.function.BodyExtractors.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
 /**
  * @author Arjen Poutsma
@@ -190,7 +191,7 @@ public class DefaultServerRequestTests {
 		when(mockRequest.getBody()).thenReturn(body);
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
-				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
+				.singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 		when(mockHandlerStrategies.messageReaders()).thenReturn(messageReaders::stream);
 
 		Mono<String> resultMono = defaultRequest.body(toMono(String.class));
@@ -210,7 +211,7 @@ public class DefaultServerRequestTests {
 		when(mockRequest.getBody()).thenReturn(body);
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
-				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
+				.singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 		when(mockHandlerStrategies.messageReaders()).thenReturn(messageReaders::stream);
 
 		Mono<String> resultMono = defaultRequest.bodyToMono(String.class);
@@ -230,7 +231,7 @@ public class DefaultServerRequestTests {
 		when(mockRequest.getBody()).thenReturn(body);
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
-				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
+				.singleton(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 		when(mockHandlerStrategies.messageReaders()).thenReturn(messageReaders::stream);
 
 		Flux<String> resultFlux = defaultRequest.bodyToFlux(String.class);

@@ -298,7 +298,7 @@ public class WebFluxConfigurationSupportTests {
 
 		@Override
 		protected void configureMessageReaders(List<ServerHttpMessageReader<?>> messageReaders) {
-			messageReaders.add(new DecoderHttpMessageReader<>(new StringDecoder()));
+			messageReaders.add(new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly(true)));
 		}
 
 		@Override

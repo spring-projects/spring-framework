@@ -331,7 +331,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		readers.add(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		readers.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
 		readers.add(new DecoderHttpMessageReader<>(new DataBufferDecoder()));
-		readers.add(new DecoderHttpMessageReader<>(new StringDecoder()));
+		readers.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 		readers.add(new DecoderHttpMessageReader<>(new ResourceDecoder()));
 		if (jaxb2Present) {
 			readers.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));

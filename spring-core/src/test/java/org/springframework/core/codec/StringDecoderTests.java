@@ -38,7 +38,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
-	private StringDecoder decoder = new StringDecoder();
+	private StringDecoder decoder = StringDecoder.allMimeTypes(true);
 
 
 	@Test
@@ -57,7 +57,7 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void decode() throws InterruptedException {
-		this.decoder = new StringDecoder(false);
+		this.decoder = StringDecoder.allMimeTypes(false);
 		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"), stringBuffer("baz"));
 		Flux<String> output = this.decoder.decode(source, ResolvableType.forClass(String.class),
 				null, Collections.emptyMap());
@@ -111,7 +111,7 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void decodeToMono() throws InterruptedException {
-		this.decoder = new StringDecoder(false);
+		this.decoder = StringDecoder.allMimeTypes(false);
 		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"), stringBuffer("baz"));
 		Mono<String> output = this.decoder.decodeToMono(source,
 				ResolvableType.forClass(String.class), null, Collections.emptyMap());

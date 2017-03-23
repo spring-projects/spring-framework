@@ -67,7 +67,7 @@ public class BodyExtractorsTests {
 	public void createContext() {
 		final List<HttpMessageReader<?>> messageReaders = new ArrayList<>();
 		messageReaders.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
-		messageReaders.add(new DecoderHttpMessageReader<>(new StringDecoder()));
+		messageReaders.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 		messageReaders.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
 		messageReaders.add(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
 		messageReaders.add(new FormHttpMessageReader());

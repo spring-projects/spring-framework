@@ -67,9 +67,11 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpDec
 	@Override
 	public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
 		JavaType javaType = this.mapper.getTypeFactory().constructType(elementType.getType());
-		return this.mapper.canDeserialize(javaType) &&
-				(mimeType == null || JSON_MIME_TYPES.stream().anyMatch(m -> m.isCompatibleWith(mimeType)));
+		// Skip String (CharSequenceDecoder + "*/*" comes after)
+		return !CharSequence.class.isAssignableFrom(elementType.resolve(Object.class)) &&
+				this.mapper.canDeserialize(javaType) && supportsMimeType(mimeType);
 	}
+
 
 	@Override
 	public List<MimeType> getDecodableMimeTypes() {

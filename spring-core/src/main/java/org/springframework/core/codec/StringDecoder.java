@@ -60,19 +60,11 @@ public class StringDecoder extends AbstractDecoder<String> {
 
 	/**
 	 * Create a {@code StringDecoder} that decodes a bytes stream to a String stream
-	 * <p>By default, this decoder will split along new lines.
-	 */
-	public StringDecoder() {
-		this(true);
-	}
-
-	/**
-	 * Create a {@code StringDecoder} that decodes a bytes stream to a String stream
 	 * @param splitOnNewline whether this decoder should split the received data buffers
 	 * along newline characters
 	 */
-	public StringDecoder(boolean splitOnNewline) {
-		super(new MimeType("text", "*", DEFAULT_CHARSET), MimeTypeUtils.ALL);
+	private StringDecoder(boolean splitOnNewline, MimeType... mimeTypes) {
+		super(mimeTypes);
 		this.splitOnNewline = splitOnNewline;
 	}
 
@@ -134,6 +126,24 @@ public class StringDecoder extends AbstractDecoder<String> {
 		else {
 			return DEFAULT_CHARSET;
 		}
+	}
+
+
+	/**
+	 * Create a {@code StringDecoder} for {@code "text/plain"}.
+	 * @param splitOnNewline whether to split the byte stream into lines
+	 */
+	public static StringDecoder textPlainOnly(boolean splitOnNewline) {
+		return new StringDecoder(splitOnNewline, new MimeType("text", "plain", DEFAULT_CHARSET));
+	}
+
+	/**
+	 * Create a {@code StringDecoder} that supports all MIME types.
+	 * @param splitOnNewline whether to split the byte stream into lines
+	 */
+	public static StringDecoder allMimeTypes(boolean splitOnNewline) {
+		return new StringDecoder(splitOnNewline,
+				new MimeType("text", "plain", DEFAULT_CHARSET), MimeTypeUtils.ALL);
 	}
 
 }

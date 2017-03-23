@@ -74,7 +74,7 @@ public class HttpEntityArgumentResolverTests {
 
 	private HttpEntityArgumentResolver createResolver() {
 		List<ServerHttpMessageReader<?>> readers = new ArrayList<>();
-		readers.add(new DecoderHttpMessageReader<>(new StringDecoder()));
+		readers.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 		return new HttpEntityArgumentResolver(readers, new ReactiveAdapterRegistry());
 	}
 
