@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,13 +46,18 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  * a security context). Furthermore, it allows to customize request
  * execution via the {@link HttpInvokerRequestExecutor} strategy.
  *
- * <p>Can use the JDK's {@link java.rmi.server.RMIClassLoader} to load
- * classes from a given {@link #setCodebaseUrl codebase}, performing
- * on-demand dynamic code download from a remote location. The codebase
- * can consist of multiple URLs, separated by spaces. Note that
- * RMIClassLoader requires a SecurityManager to be set, analogous to
- * when using dynamic class download with standard RMI!
+ * <p>Can use the JDK's {@link java.rmi.server.RMIClassLoader} to load classes
+ * from a given {@link #setCodebaseUrl codebase}, performing on-demand dynamic
+ * code download from a remote location. The codebase can consist of multiple
+ * URLs, separated by spaces. Note that RMIClassLoader requires a SecurityManager
+ * to be set, analogous to when using dynamic class download with standard RMI!
  * (See the RMI documentation for details.)
+ *
+ * <p><b>WARNING: Be aware of vulnerabilities due to unsafe Java deserialization:
+ * Manipulated input streams could lead to unwanted code execution on the server
+ * during the deserialization step. As a consequence, do not expose HTTP invoker
+ * endpoints to untrusted clients but rather just between your own services.</b>
+ * In general, we strongly recommend any other message format (e.g. JSON) instead.
  *
  * @author Juergen Hoeller
  * @since 1.1
