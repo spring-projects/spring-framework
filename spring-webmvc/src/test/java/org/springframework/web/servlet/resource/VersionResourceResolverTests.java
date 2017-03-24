@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,6 +180,13 @@ public class VersionResourceResolverTests {
 		assertThat(this.resolver.getStrategyForPath("fixedversion/js/something.js"), Matchers.instanceOf(FixedVersionStrategy.class));
 		assertThat(this.resolver.getStrategyForPath("css/something.css"), Matchers.instanceOf(FixedVersionStrategy.class));
 		assertThat(this.resolver.getStrategyForPath("fixedversion/css/something.css"), Matchers.instanceOf(FixedVersionStrategy.class));
+	}
+
+	@Test // SPR-15372
+	public void resolveUrlPathNoVersionStrategy() throws Exception {
+		given(this.chain.resolveUrlPath("/foo.css", this.locations)).willReturn("/foo.css");
+		String resolved = this.resolver.resolveUrlPathInternal("/foo.css", this.locations, this.chain);
+		assertThat(resolved, is("/foo.css"));
 	}
 
 
