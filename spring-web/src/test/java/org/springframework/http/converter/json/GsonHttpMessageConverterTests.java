@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ public class GsonHttpMessageConverterTests {
 		assertEquals(42, n.longValue());
 		n = (Number) result.get("fraction");
 		assertEquals(42D, n.doubleValue(), 0D);
-		List<String> array = new ArrayList<String>();
+		List<String> array = new ArrayList<>();
 		array.add("Foo");
 		array.add("Bar");
 		assertEquals(array, result.get("array"));
@@ -118,15 +118,14 @@ public class GsonHttpMessageConverterTests {
 		body.setBool(true);
 		body.setBytes(new byte[]{0x1, 0x2});
 		this.converter.write(body, null, outputMessage);
-		Charset utf8 = Charset.forName("UTF-8");
-		String result = outputMessage.getBodyAsString(utf8);
+		String result = outputMessage.getBodyAsString(UTF8);
 		assertTrue(result.contains("\"string\":\"Foo\""));
 		assertTrue(result.contains("\"number\":42"));
 		assertTrue(result.contains("fraction\":42.0"));
 		assertTrue(result.contains("\"array\":[\"Foo\",\"Bar\"]"));
 		assertTrue(result.contains("\"bool\":true"));
 		assertTrue(result.contains("\"bytes\":[1,2]"));
-		assertEquals("Invalid content-type", new MediaType("application", "json", utf8),
+		assertEquals("Invalid content-type", new MediaType("application", "json", UTF8),
 				outputMessage.getHeaders().getContentType());
 	}
 
@@ -166,8 +165,7 @@ public class GsonHttpMessageConverterTests {
 		};
 		String body = "[{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}]";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(
-				body.getBytes(UTF8));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(UTF8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 
 		List<MyBean> results = (List<MyBean>) converter.read(List.class, inputMessage);
@@ -189,8 +187,7 @@ public class GsonHttpMessageConverterTests {
 
 		String body = "[{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}]";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(
-				body.getBytes(UTF8));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(UTF8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 
 		GsonHttpMessageConverter converter = new GsonHttpMessageConverter();
