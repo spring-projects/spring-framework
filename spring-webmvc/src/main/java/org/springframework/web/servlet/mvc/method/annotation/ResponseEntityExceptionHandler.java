@@ -227,7 +227,7 @@ public abstract class ResponseEntityExceptionHandler {
 		pageNotFoundLogger.warn(ex.getMessage());
 
 		Set<HttpMethod> supportedMethods = ex.getSupportedHttpMethods();
-		if (!supportedMethods.isEmpty()) {
+		if (!CollectionUtils.isEmpty(supportedMethods)) {
 			headers.setAllow(supportedMethods);
 		}
 		return handleExceptionInternal(ex, null, headers, status, request);
