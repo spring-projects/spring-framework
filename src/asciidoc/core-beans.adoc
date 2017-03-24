@@ -8396,7 +8396,7 @@ follows:
 	}
 ----
 
-As you can see above, the method signature actually _infer_ which even type it listens to. This
+As you can see above, the method signature actually _infer_ which event type it listens to. This
 also works for nested generics as long as the actual event resolves the generics parameter you
 would filter on.
 
