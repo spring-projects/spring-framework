@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,12 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  * expense of being tied to Java. Nevertheless, it is as easy to set up as
  * Hessian and Burlap, which is its main advantage compared to RMI.
  *
+ * <p><b>WARNING: Be aware of vulnerabilities due to unsafe Java deserialization:
+ * Manipulated input streams could lead to unwanted code execution on the server
+ * during the deserialization step. As a consequence, do not expose HTTP invoker
+ * endpoints to untrusted clients but rather just between your own services.</b>
+ * In general, we strongly recommend any other message format (e.g. JSON) instead.
+ *
  * @author Juergen Hoeller
  * @since 2.5.1
  * @see org.springframework.remoting.httpinvoker.HttpInvokerClientInterceptor
@@ -53,15 +59,14 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  * @see org.springframework.remoting.caucho.SimpleBurlapServiceExporter
  */
 @UsesSunHttpServer
-public class SimpleHttpInvokerServiceExporter extends RemoteInvocationSerializingExporter
-		implements HttpHandler {
+public class SimpleHttpInvokerServiceExporter extends RemoteInvocationSerializingExporter implements HttpHandler {
 
 	/**
 	 * Reads a remote invocation from the request, executes it,
 	 * and writes the remote invocation result to the response.
-	 * @see #readRemoteInvocation(com.sun.net.httpserver.HttpExchange)
-	 * @see #invokeAndCreateResult(org.springframework.remoting.support.RemoteInvocation, Object)
-	 * @see #writeRemoteInvocationResult(com.sun.net.httpserver.HttpExchange, org.springframework.remoting.support.RemoteInvocationResult)
+	 * @see #readRemoteInvocation(HttpExchange)
+	 * @see #invokeAndCreateResult(RemoteInvocation, Object)
+	 * @see #writeRemoteInvocationResult(HttpExchange, RemoteInvocationResult)
 	 */
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
@@ -79,10 +84,8 @@ public class SimpleHttpInvokerServiceExporter extends RemoteInvocationSerializin
 
 	/**
 	 * Read a RemoteInvocation from the given HTTP request.
-	 * <p>Delegates to
-	 * {@link #readRemoteInvocation(com.sun.net.httpserver.HttpExchange, java.io.InputStream)}
-	 * with the
-	 * {@link com.sun.net.httpserver.HttpExchange#getRequestBody()} request's input stream}.
+	 * <p>Delegates to {@link #readRemoteInvocation(HttpExchange, InputStream)}
+	 * with the {@link HttpExchange#getRequestBody()} request's input stream}.
 	 * @param exchange current HTTP request/response
 	 * @return the RemoteInvocation object
 	 * @throws java.io.IOException in case of I/O failure

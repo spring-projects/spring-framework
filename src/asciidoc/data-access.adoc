@@ -7037,13 +7037,13 @@ which consists of string aliases mapped to classes:
 
 [WARNING]
 ====
-
-By default, XStream allows for arbitrary classes to be unmarshalled, which can result in
-security vulnerabilities. As such, it is __not recommended to use the
+By default, XStream allows for arbitrary classes to be unmarshalled, which can lead to
+unsafe Java serialization effects. As such, it is __not recommended to use the
 `XStreamMarshaller` to unmarshal XML from external sources__ (i.e. the Web), as this can
-result in __security vulnerabilities__. If you do use the `XStreamMarshaller` to
-unmarshal XML from an external source, set the `supportedClasses` property on the
-`XStreamMarshaller`, like so:
+result in __security vulnerabilities__.
+
+If you choose to use the `XStreamMarshaller` to unmarshal XML from an external source,
+set the `supportedClasses` property on the `XStreamMarshaller`, like as follows:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]

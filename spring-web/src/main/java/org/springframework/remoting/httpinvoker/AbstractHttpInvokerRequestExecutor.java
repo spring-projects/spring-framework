@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,13 +43,14 @@ import org.springframework.util.Assert;
  * @since 1.1
  * @see #doExecuteRequest
  */
-public abstract class AbstractHttpInvokerRequestExecutor
-		implements HttpInvokerRequestExecutor, BeanClassLoaderAware {
+public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerRequestExecutor, BeanClassLoaderAware {
 
 	/**
 	 * Default content type: "application/x-java-serialized-object"
 	 */
 	public static final String CONTENT_TYPE_SERIALIZED_OBJECT = "application/x-java-serialized-object";
+
+	private static final int SERIALIZED_INVOCATION_BYTE_ARRAY_INITIAL_SIZE = 1024;
 
 
 	protected static final String HTTP_METHOD_POST = "POST";
@@ -65,9 +66,6 @@ public abstract class AbstractHttpInvokerRequestExecutor
 	protected static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
 
 	protected static final String ENCODING_GZIP = "gzip";
-
-
-	private static final int SERIALIZED_INVOCATION_BYTE_ARRAY_INITIAL_SIZE = 1024;
 
 
 	protected final Log logger = LogFactory.getLog(getClass());

@@ -388,6 +388,21 @@ advanced and easier-to-use functionality. Refer to
 http://hc.apache.org/httpcomponents-client-ga/[hc.apache.org/httpcomponents-client-ga/]
 for more information.
 
+[WARNING]
+====
+Be aware of vulnerabilities due to unsafe Java deserialization:
+Manipulated input streams could lead to unwanted code execution on the server
+during the deserialization step. As a consequence, do not expose HTTP invoker
+endpoints to untrusted clients but rather just between your own services.
+In general, we strongly recommend any other message format (e.g. JSON) instead.
+
+If you are concerned about security vulnerabilities due to Java serialization,
+consider the general-purpose serialization filter mechanism at the core JVM level,
+originally developed for JDK 9 but backported to JDK 8, 7 and 6 in the meantime:
+https://blogs.oracle.com/java-platform-group/entry/incoming_filter_serialization_data_a
+http://openjdk.java.net/jeps/290
+====
+
 
 
 [[remoting-httpinvoker-server]]
@@ -2560,7 +2575,7 @@ be obtained from JNDI instead (using `<jee:jndi-lookup>`). The Spring-based mess
 listeners can then interact with the server-hosted `ResourceAdapter`, also using the
 server's built-in `WorkManager`.
 
-Please consult the JavaDoc for `JmsMessageEndpointManager`, `JmsActivationSpecConfig`,
+Please consult the javadoc for `JmsMessageEndpointManager`, `JmsActivationSpecConfig`,
 and `ResourceAdapterFactoryBean` for more details.
 
 Spring also provides a generic JCA message endpoint manager which is not tied to JMS:
@@ -2568,7 +2583,7 @@ Spring also provides a generic JCA message endpoint manager which is not tied to
 for using any message listener type (e.g. a CCI MessageListener) and any
 provider-specific ActivationSpec object. Check out your JCA provider's documentation to
 find out about the actual capabilities of your connector, and consult
-`GenericMessageEndpointManager`'s JavaDoc for the Spring-specific configuration details.
+`GenericMessageEndpointManager`'s javadoc for the Spring-specific configuration details.
 
 [NOTE]
 ====
@@ -6028,7 +6043,6 @@ along with an inline image.
 
 [WARNING]
 ====
-
 Inline resources are added to the mime message using the specified `Content-ID` (
 `identifier1234` in the above example). The order in which you are adding the text and
 the resource are __very__ important. Be sure to __first add the text__ and after that
