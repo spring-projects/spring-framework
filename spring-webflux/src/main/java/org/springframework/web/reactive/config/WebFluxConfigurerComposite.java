@@ -23,8 +23,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.format.FormatterRegistry;
-import org.springframework.http.codec.ServerHttpMessageReader;
-import org.springframework.http.codec.ServerHttpMessageWriter;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -52,42 +51,37 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 
 	@Override
 	public void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
-		this.delegates.stream().forEach(delegate -> delegate.configureContentTypeResolver(builder));
+		this.delegates.forEach(delegate -> delegate.configureContentTypeResolver(builder));
 	}
 
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
-		this.delegates.stream().forEach(delegate -> delegate.addCorsMappings(registry));
+		this.delegates.forEach(delegate -> delegate.addCorsMappings(registry));
 	}
 
 	@Override
 	public void configurePathMatching(PathMatchConfigurer configurer) {
-		this.delegates.stream().forEach(delegate -> delegate.configurePathMatching(configurer));
+		this.delegates.forEach(delegate -> delegate.configurePathMatching(configurer));
 	}
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		this.delegates.stream().forEach(delegate -> delegate.addResourceHandlers(registry));
+		this.delegates.forEach(delegate -> delegate.addResourceHandlers(registry));
 	}
 
 	@Override
 	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-		this.delegates.stream().forEach(delegate -> delegate.addArgumentResolvers(resolvers));
+		this.delegates.forEach(delegate -> delegate.addArgumentResolvers(resolvers));
 	}
 
 	@Override
-	public void configureMessageReaders(List<ServerHttpMessageReader<?>> readers) {
-		this.delegates.stream().forEach(delegate -> delegate.configureMessageReaders(readers));
-	}
-
-	@Override
-	public void extendMessageReaders(List<ServerHttpMessageReader<?>> readers) {
-		this.delegates.stream().forEach(delegate -> delegate.extendMessageReaders(readers));
+	public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
+		this.delegates.forEach(delegate -> delegate.configureHttpMessageCodecs(configurer));
 	}
 
 	@Override
 	public void addFormatters(FormatterRegistry registry) {
-		this.delegates.stream().forEach(delegate -> delegate.addFormatters(registry));
+		this.delegates.forEach(delegate -> delegate.addFormatters(registry));
 	}
 
 	@Override
@@ -101,18 +95,8 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 	}
 
 	@Override
-	public void configureMessageWriters(List<ServerHttpMessageWriter<?>> writers) {
-		this.delegates.stream().forEach(delegate -> delegate.configureMessageWriters(writers));
-	}
-
-	@Override
-	public void extendMessageWriters(List<ServerHttpMessageWriter<?>> writers) {
-		this.delegates.stream().forEach(delegate -> delegate.extendMessageWriters(writers));
-	}
-
-	@Override
 	public void configureViewResolvers(ViewResolverRegistry registry) {
-		this.delegates.stream().forEach(delegate -> delegate.configureViewResolvers(registry));
+		this.delegates.forEach(delegate -> delegate.configureViewResolvers(registry));
 	}
 
 	private <T> Optional<T> createSingleBean(Function<WebFluxConfigurer, Optional<T>> factory,

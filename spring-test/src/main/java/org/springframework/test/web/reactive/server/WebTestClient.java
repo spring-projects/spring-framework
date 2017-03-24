@@ -34,8 +34,7 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpRequest;
-import org.springframework.http.codec.ServerHttpMessageReader;
-import org.springframework.http.codec.ServerHttpMessageWriter;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -244,16 +243,10 @@ public interface WebTestClient {
 		ControllerSpec pathMatching(Consumer<PathMatchConfigurer> consumer);
 
 		/**
-		 * Modify or extend the list of built-in message readers.
-		 * @see WebFluxConfigurer#configureMessageReaders
+		 * Modify or extend the list of built-in message readers and writers.
+		 * @see WebFluxConfigurer#configureHttpMessageCodecs
 		 */
-		ControllerSpec messageReaders(Consumer<List<ServerHttpMessageReader<?>>> readers);
-
-		/**
-		 * Modify or extend the list of built-in message writers.
-		 * @see WebFluxConfigurer#configureMessageWriters
-		 */
-		ControllerSpec messageWriters(Consumer<List<ServerHttpMessageWriter<?>>> writers);
+		ControllerSpec httpMessageCodecs(Consumer<ServerCodecConfigurer> configurer);
 
 		/**
 		 * Register formatters and converters to use for type conversion.

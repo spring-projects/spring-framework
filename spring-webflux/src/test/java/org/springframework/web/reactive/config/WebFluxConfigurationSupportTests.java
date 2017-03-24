@@ -34,10 +34,9 @@ import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.ServerHttpMessageReader;
 import org.springframework.http.codec.ServerHttpMessageWriter;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
@@ -128,7 +127,7 @@ public class WebFluxConfigurationSupportTests {
 		assertNotNull(adapter);
 
 		List<ServerHttpMessageReader<?>> readers = adapter.getMessageReaders();
-		assertEquals(7, readers.size());
+		assertEquals(8, readers.size());
 
 		assertHasMessageReader(readers, byte[].class, APPLICATION_OCTET_STREAM);
 		assertHasMessageReader(readers, ByteBuffer.class, APPLICATION_OCTET_STREAM);
@@ -297,23 +296,12 @@ public class WebFluxConfigurationSupportTests {
 	static class CustomMessageConverterConfig extends WebFluxConfigurationSupport {
 
 		@Override
-		protected void configureMessageReaders(List<ServerHttpMessageReader<?>> messageReaders) {
-			messageReaders.add(new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly(true)));
-		}
-
-		@Override
-		protected void configureMessageWriters(List<ServerHttpMessageWriter<?>> messageWriters) {
-			messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()));
-		}
-
-		@Override
-		protected void extendMessageReaders(List<ServerHttpMessageReader<?>> messageReaders) {
-			messageReaders.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
-		}
-
-		@Override
-		protected void extendMessageWriters(List<ServerHttpMessageWriter<?>> messageWriters) {
-			messageWriters.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
+		protected void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
+			configurer.registerDefaults(false);
+			configurer.customCodec().decoder(StringDecoder.textPlainOnly(true));
+			configurer.customCodec().decoder(new Jaxb2XmlDecoder());
+			configurer.customCodec().encoder(CharSequenceEncoder.textPlainOnly());
+			configurer.customCodec().encoder(new Jaxb2XmlEncoder());
 		}
 	}
 

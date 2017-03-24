@@ -30,8 +30,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.http.codec.ServerHttpMessageReader;
 import org.springframework.http.codec.ServerHttpMessageWriter;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -58,7 +58,7 @@ public class DelegatingWebFluxConfigurationTests {
 	private WebFluxConfigurer webFluxConfigurer;
 
 	@Captor
-	private ArgumentCaptor<List<ServerHttpMessageReader<?>>> readers;
+	private ArgumentCaptor<ServerCodecConfigurer> codecsConfigurer;
 
 	@Captor
 	private ArgumentCaptor<List<ServerHttpMessageWriter<?>>> writers;
@@ -96,15 +96,14 @@ public class DelegatingWebFluxConfigurationTests {
 		ConversionService initializerConversionService = initializer.getConversionService();
 		assertTrue(initializer.getValidator() instanceof LocalValidatorFactoryBean);
 
-		verify(webFluxConfigurer).configureMessageReaders(readers.capture());
-		verify(webFluxConfigurer).extendMessageReaders(readers.capture());
+		verify(webFluxConfigurer).configureHttpMessageCodecs(codecsConfigurer.capture());
 		verify(webFluxConfigurer).getValidator();
 		verify(webFluxConfigurer).getMessageCodesResolver();
 		verify(webFluxConfigurer).addFormatters(formatterRegistry.capture());
 		verify(webFluxConfigurer).addArgumentResolvers(any());
 
 		assertSame(formatterRegistry.getValue(), initializerConversionService);
-		assertEquals(7, readers.getValue().size());
+		assertEquals(8, codecsConfigurer.getValue().getReaders().size());
 	}
 
 	@Test
@@ -126,8 +125,7 @@ public class DelegatingWebFluxConfigurationTests {
 		delegatingConfig.setConfigurers(Collections.singletonList(webFluxConfigurer));
 		delegatingConfig.responseBodyResultHandler();
 
-		verify(webFluxConfigurer).configureMessageWriters(writers.capture());
-		verify(webFluxConfigurer).extendMessageWriters(writers.capture());
+		verify(webFluxConfigurer).configureHttpMessageCodecs(codecsConfigurer.capture());
 		verify(webFluxConfigurer).configureContentTypeResolver(any(RequestedContentTypeResolverBuilder.class));
 	}
 

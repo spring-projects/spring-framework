@@ -26,26 +26,10 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.codec.ByteArrayDecoder;
-import org.springframework.core.codec.ByteArrayEncoder;
-import org.springframework.core.codec.ByteBufferDecoder;
-import org.springframework.core.codec.ByteBufferEncoder;
-import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.codec.Encoder;
-import org.springframework.core.codec.StringDecoder;
-import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.http.codec.EncoderHttpMessageWriter;
-import org.springframework.http.codec.FormHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.codec.ResourceHttpMessageWriter;
-import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
-import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
 /**
@@ -61,16 +45,6 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 					.map(Locale.LanguageRange::getRange)
 					.map(Locale::forLanguageTag).findFirst();
 
-	private static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					DefaultHandlerStrategiesBuilder.class.getClassLoader()) &&
-					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-							DefaultHandlerStrategiesBuilder.class.getClassLoader());
-
-	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder",
-					DefaultHandlerStrategiesBuilder.class.getClassLoader());
-
 
 	private final List<HttpMessageReader<?>> messageReaders = new ArrayList<>();
 
@@ -82,38 +56,10 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 
 	public void defaultConfiguration() {
-		messageReader(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
-		messageReader(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
-		messageReader(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		messageReader(new FormHttpMessageReader());
-
-		messageWriter(new EncoderHttpMessageWriter<>(new ByteArrayEncoder()));
-		messageWriter(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
-		messageWriter(new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()));
-		messageWriter(new ResourceHttpMessageWriter());
-
-		if (jaxb2Present) {
-			messageReader(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
-			messageWriter(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
-		}
-		if (jackson2Present) {
-			messageReader(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
-			messageWriter(new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder()));
-		}
-
-		messageWriter(new ServerSentEventHttpMessageWriter(getSseEncoder()));
-		messageWriter(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
-
+		ServerCodecConfigurer configurer = new ServerCodecConfigurer();
+		configurer.getReaders().forEach(this::messageReader);
+		configurer.getWriters().forEach(this::messageWriter);
 		localeResolver(DEFAULT_LOCALE_RESOLVER);
-	}
-
-	private Encoder<?> getSseEncoder() {
-		if (jackson2Present) {
-			return new Jackson2JsonEncoder();
-		}
-		else {
-			return null;
-		}
 	}
 
 	public void applicationContext(ApplicationContext applicationContext) {

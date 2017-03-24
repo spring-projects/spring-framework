@@ -30,32 +30,13 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.codec.ByteArrayDecoder;
-import org.springframework.core.codec.ByteArrayEncoder;
-import org.springframework.core.codec.ByteBufferDecoder;
-import org.springframework.core.codec.ByteBufferEncoder;
-import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.codec.DataBufferDecoder;
-import org.springframework.core.codec.DataBufferEncoder;
-import org.springframework.core.codec.Encoder;
-import org.springframework.core.codec.ResourceDecoder;
-import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.http.codec.EncoderHttpMessageWriter;
-import org.springframework.http.codec.ResourceHttpMessageWriter;
-import org.springframework.http.codec.ServerHttpMessageReader;
-import org.springframework.http.codec.ServerHttpMessageWriter;
-import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
-import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
@@ -104,9 +85,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	private PathMatchConfigurer pathMatchConfigurer;
 
-	private List<ServerHttpMessageReader<?>> messageReaders;
-
-	private List<ServerHttpMessageWriter<?>> messageWriters;
+	private ServerCodecConfigurer messageCodecsConfigurer;
 
 	private ApplicationContext applicationContext;
 
@@ -267,7 +246,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	@Bean
 	public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
 		RequestMappingHandlerAdapter adapter = createRequestMappingHandlerAdapter();
-		adapter.setMessageReaders(getMessageReaders());
+		adapter.setMessageReaders(getMessageCodecsConfigurer().getReaders());
 		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
 		adapter.setReactiveAdapterRegistry(webFluxAdapterRegistry());
 
@@ -294,58 +273,22 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	/**
-	 * Main method to access message readers to use for decoding
-	 * controller method arguments with.
-	 * <p>Use {@link #configureMessageReaders} to configure the list or
-	 * {@link #extendMessageReaders} to add in addition to the default ones.
+	 * Main method to access the configurer for HTTP message readers and writers.
+	 * <p>Use {@link #configureHttpMessageCodecs(ServerCodecConfigurer)} to
+	 * configure the readers and writers.
 	 */
-	protected final List<ServerHttpMessageReader<?>> getMessageReaders() {
-		if (this.messageReaders == null) {
-			this.messageReaders = new ArrayList<>();
-			configureMessageReaders(this.messageReaders);
-			if (this.messageReaders.isEmpty()) {
-				addDefaultHttpMessageReaders(this.messageReaders);
-			}
-			extendMessageReaders(this.messageReaders);
+	protected final ServerCodecConfigurer getMessageCodecsConfigurer() {
+		if (this.messageCodecsConfigurer == null) {
+			this.messageCodecsConfigurer = new ServerCodecConfigurer();
+			configureHttpMessageCodecs(this.getMessageCodecsConfigurer());
 		}
-		return this.messageReaders;
+		return this.messageCodecsConfigurer;
 	}
 
 	/**
-	 * Override to configure the message readers to use for decoding
-	 * controller method arguments.
-	 * <p>If no message readres are specified, default will be added via
-	 * {@link #addDefaultHttpMessageReaders}.
-	 * @param messageReaders a list to add message readers to, initially an empty
+	 * Override to configure the HTTP message readers and writers to use.
 	 */
-	protected void configureMessageReaders(List<ServerHttpMessageReader<?>> messageReaders) {
-	}
-
-	/**
-	 * Adds default converters that sub-classes can call from
-	 * {@link #configureMessageReaders(List)} for {@code byte[]},
-	 * {@code ByteBuffer}, {@code String}, {@code Resource}, JAXB2, and Jackson
-	 * (if present on the classpath).
-	 */
-	protected final void addDefaultHttpMessageReaders(List<ServerHttpMessageReader<?>> readers) {
-		readers.add(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
-		readers.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
-		readers.add(new DecoderHttpMessageReader<>(new DataBufferDecoder()));
-		readers.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		readers.add(new DecoderHttpMessageReader<>(new ResourceDecoder()));
-		if (jaxb2Present) {
-			readers.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
-		}
-		if (jackson2Present) {
-			readers.add(new  DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
-		}
-	}
-
-	/**
-	 * Override this to modify the list of message readers after it has been
-	 * configured, for example to add some in addition to the default ones.
-	 */
-	protected void extendMessageReaders(List<ServerHttpMessageReader<?>> messageReaders) {
+	protected void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
 	}
 
 	/**
@@ -435,76 +378,14 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	@Bean
 	public ResponseEntityResultHandler responseEntityResultHandler() {
-		return new ResponseEntityResultHandler(
-				getMessageWriters(), webFluxContentTypeResolver(), webFluxAdapterRegistry());
+		return new ResponseEntityResultHandler(getMessageCodecsConfigurer().getWriters(),
+				webFluxContentTypeResolver(), webFluxAdapterRegistry());
 	}
 
 	@Bean
 	public ResponseBodyResultHandler responseBodyResultHandler() {
-		return new ResponseBodyResultHandler(
-				getMessageWriters(), webFluxContentTypeResolver(), webFluxAdapterRegistry());
-	}
-
-	/**
-	 * Main method to access message writers to use for encoding return values.
-	 * <p>Use {@link #configureMessageWriters(List)} to configure the list or
-	 * {@link #extendMessageWriters(List)} to add in addition to the default ones.
-	 */
-	protected final List<ServerHttpMessageWriter<?>> getMessageWriters() {
-		if (this.messageWriters == null) {
-			this.messageWriters = new ArrayList<>();
-			configureMessageWriters(this.messageWriters);
-			if (this.messageWriters.isEmpty()) {
-				addDefaultHttpMessageWriters(this.messageWriters);
-			}
-			extendMessageWriters(this.messageWriters);
-		}
-		return this.messageWriters;
-	}
-	/**
-	 * Override to configure the message writers to use for encoding
-	 * return values.
-	 * <p>If no message readers are specified, default will be added via
-	 * {@link #addDefaultHttpMessageWriters}.
-	 * @param messageWriters a list to add message writers to, initially an empty
-	 */
-	protected void configureMessageWriters(List<ServerHttpMessageWriter<?>> messageWriters) {
-	}
-
-	/**
-	 * Adds default converters that sub-classes can call from
-	 * {@link #configureMessageWriters(List)}.
-	 */
-	protected final void addDefaultHttpMessageWriters(List<ServerHttpMessageWriter<?>> writers) {
-		writers.add(new EncoderHttpMessageWriter<>(new ByteArrayEncoder()));
-		writers.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
-		writers.add(new EncoderHttpMessageWriter<>(new DataBufferEncoder()));
-		writers.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()));
-		writers.add(new ResourceHttpMessageWriter());
-		if (jaxb2Present) {
-			writers.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
-		}
-		if (jackson2Present) {
-			writers.add(new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder()));
-		}
-		writers.add(new ServerSentEventHttpMessageWriter(getSseEncoder()));
-		writers.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
-	}
-
-	private Encoder<?> getSseEncoder() {
-		if (jackson2Present) {
-			return new Jackson2JsonEncoder();
-		}
-		else {
-			return null;
-		}
-	}
-
-	/**
-	 * Override this to modify the list of message writers after it has been
-	 * configured, for example to add some in addition to the default ones.
-	 */
-	protected void extendMessageWriters(List<ServerHttpMessageWriter<?>> messageWriters) {
+		return new ResponseBodyResultHandler(getMessageCodecsConfigurer().getWriters(),
+				webFluxContentTypeResolver(), webFluxAdapterRegistry());
 	}
 
 	@Bean
