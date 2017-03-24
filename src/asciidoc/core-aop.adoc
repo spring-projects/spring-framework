@@ -405,16 +405,20 @@ proxy (bound to `target`).
 
 [NOTE]
 ====
-Due to the proxy-based nature of Spring's AOP framework, protected methods are by
-definition __not__ intercepted, neither for JDK proxies (where this isn't applicable)
-nor for CGLIB proxies (where this is technically possible but not recommendable for AOP
-purposes). As a consequence, any given pointcut will be matched against __public methods
-only__!
+Due to the proxy-based nature of Spring's AOP framework, calls within the target object
+are by definition __not__ intercepted. For JDK proxies, only public interface method
+calls on the proxy can be intercepted. With CGLIB, public and protected method calls on
+the proxy will be intercepted, and even package-visible methods if necessary. However,
+common interactions through proxies should always be designed through public signatures.
 
-If your interception needs include protected/private methods or even constructors,
-consider the use of Spring-driven <<aop-aj-ltw,native AspectJ weaving>> instead of
-Spring's proxy-based AOP framework. This constitutes a different mode of AOP usage with
-different characteristics, so be sure to make yourself familiar with weaving first
+Note that pointcut definitions are generally matched against any intercepted method.
+If a pointcut is strictly meant to be public-only, even in a CGLIB proxy scenario with
+potential non-public interactions through proxies, it needs to be defined accordingly.
+
+If your interception needs include method calls or even constructors within the target
+class, consider the use of Spring-driven <<aop-aj-ltw,native AspectJ weaving>> instead
+of Spring's proxy-based AOP framework. This constitutes a different mode of AOP usage
+with different characteristics, so be sure to make yourself familiar with weaving first
 before making a decision.
 ====
 
@@ -1558,7 +1562,6 @@ advisor, and aspect elements (note these must be declared in that order).
 
 [WARNING]
 ====
-
 The `<aop:config>` style of configuration makes heavy use of Spring's
 <<aop-autoproxy,auto-proxying>> mechanism. This can cause issues (such as advice not
 being woven) if you are already using explicit auto-proxying via the use of

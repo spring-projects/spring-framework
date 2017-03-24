@@ -1361,7 +1361,7 @@ element.
 
 	<bean id="theClientBean" class="...">
 		<property name="targetName">
-			<idref bean="theTargetBean" />
+			<idref bean="theTargetBean"/>
 		</property>
 	</bean>
 ----
@@ -1375,7 +1375,7 @@ following snippet:
 	<bean id="theTargetBean" class="..." />
 
 	<bean id="client" class="...">
-		<property name="targetName" value="theTargetBean" />
+		<property name="targetName" value="theTargetBean"/>
 	</bean>
 ----
 
@@ -5412,7 +5412,7 @@ comma/semicolon/space-separated list that includes the parent package of each cl
 [NOTE]
 ====
 for concision, the above may have used the `value` attribute of the
-annotation, i.e. `ComponentScan("org.example")`
+annotation, i.e. `@ComponentScan("org.example")`
 ====
 
 The following is an alternative using XML
@@ -5964,6 +5964,11 @@ other beans through a `Provider.get()` call. As a variant of the example above:
 	public class SimpleMovieLister {
 
 		private Provider<MovieFinder> movieFinder;
+
+		@Inject
+		public void setMovieFinder(Provider<MovieFinder> movieFinder) {
+			this.movieFinder = movieFinder;
+		}
 
 		public void listMovies() {
 			this.movieFinder.get().findMovies(...);
@@ -8314,7 +8319,7 @@ synchronously. This means the `publishEvent()` method blocks until all listeners
 finished processing the event. One advantage of this synchronous and single-threaded
 approach is that when a listener receives an event, it operates inside the transaction
 context of the publisher if a transaction context is available. If another strategy for
-event publication becomes necessary, refer to the JavaDoc for Spring's
+event publication becomes necessary, refer to the javadoc for Spring's
 `ApplicationEventMulticaster` interface.
 
 The following example shows the bean definitions used to register and configure each of
@@ -8381,9 +8386,10 @@ follows:
 	}
 ----
 
-As you can see above, the method signature actually _infer_ which even type it listens to. This
-also works for nested generics as long as the actual event resolves the generics parameter you
-would filter on.
+As you can see above, the method signature once again declares the event type it listens to,
+but this time with a flexible name and without implementing a specific listener interface.
+The event type can also be narrowed through generics as long as the actual event type
+resolves your generic parameter in its implementation hierarchy.
 
 If your method should listen to several events or if you want to define it with no
 parameter at all, the event type(s) can also be specified on the annotation itself:
@@ -8393,7 +8399,7 @@ parameter at all, the event type(s) can also be specified on the annotation itse
 ----
 	@EventListener({ContextStartedEvent.class, ContextRefreshedEvent.class})
 	public void handleContextStart() {
-
+		...
 	}
 ----
 
@@ -8643,7 +8649,7 @@ platform's JMX server - all through Spring's standard transaction management and
 and JMX support facilities. Application components can also interact with the
 application server's JCA WorkManager through Spring's `TaskExecutor` abstraction.
 
-Check out the JavaDoc of the
+Check out the javadoc of the
 {api-spring-framework}/jca/context/SpringContextResourceAdapter.html[`SpringContextResourceAdapter`]
 class for the configuration details involved in RAR deployment.
 
@@ -8651,7 +8657,7 @@ __For a simple deployment of a Spring ApplicationContext as a Java EE RAR file:_
 all application classes into a RAR file, which is a standard JAR file with a different
 file extension. Add all required library JARs into the root of the RAR archive. Add a
 "META-INF/ra.xml" deployment descriptor (as shown in ``SpringContextResourceAdapter``s
-JavaDoc) and the corresponding Spring XML bean definition file(s) (typically
+javadoc) and the corresponding Spring XML bean definition file(s) (typically
 "META-INF/applicationContext.xml"), and drop the resulting RAR file into your
 application server's deployment directory.
 

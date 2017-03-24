@@ -249,7 +249,7 @@ variables and functions are described in the language reference sections
 <<expressions-ref-variables,Variables>> and <<expressions-ref-functions,Functions>>. The
 `StandardEvaluationContext` is also where you can register custom
 ``ConstructorResolver``s, ``MethodResolver``s, and ``PropertyAccessor``s to extend how SpEL
-evaluates expressions. Please refer to the JavaDoc of these classes for more details.
+evaluates expressions. Please refer to the javadoc of these classes for more details.
 
 
 [[expressions-type-conversion]]
