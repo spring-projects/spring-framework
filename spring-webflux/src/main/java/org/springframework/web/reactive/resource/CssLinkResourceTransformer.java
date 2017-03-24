@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 							.concatMap(segment -> {
 								String segmentContent = segment.getContent(fullContent);
 								if (segment.isLink() && !hasScheme(segmentContent)) {
-									String link = toAbsolutePath(segmentContent, exchange.getRequest());
+									String link = toAbsolutePath(segmentContent, exchange);
 									return resolveUrlPath(link, exchange, newResource, transformerChain)
 											.defaultIfEmpty(segmentContent);
 								}
