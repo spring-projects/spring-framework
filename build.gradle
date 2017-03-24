@@ -60,9 +60,9 @@ configure(allprojects) { project ->
 	ext.jaxbVersion            = "2.2.11"
 	ext.jaxwsVersion           = "2.2.11"
 	ext.jcaVersion             = "1.7"
-	ext.jettyVersion           = "9.4.2.v20170220"
+	ext.jettyVersion           = "9.4.3.v20170317"
 	ext.jmsVersion             = "2.0.1"
-	ext.jodaVersion            = "2.9.7"
+	ext.jodaVersion            = "2.9.9"
 	ext.jpaVersion             = "2.1.1"
 	ext.jsfVersion             = "2.2"
 	ext.jspVersion             = "2.3.2-b02"
@@ -84,7 +84,7 @@ configure(allprojects) { project ->
 	ext.rxjava2Version         = '2.0.7'
 	ext.rxnettyVersion         = '0.5.2'
 	ext.servletVersion         = "3.1.0"
-	ext.slf4jVersion           = "1.7.24"
+	ext.slf4jVersion           = "1.7.25"
 	ext.snakeyamlVersion       = "1.18"
 	ext.snifferVersion         = "1.15"
 	ext.testngVersion          = "6.11"
