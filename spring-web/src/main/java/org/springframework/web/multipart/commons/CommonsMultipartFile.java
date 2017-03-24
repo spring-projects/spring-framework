@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,7 +165,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 			if (logger.isDebugEnabled()) {
 				String action = "transferred";
 				if (!this.fileItem.isInMemory()) {
-					action = isAvailable() ? "copied" : "moved";
+					action = (isAvailable() ? "copied" : "moved");
 				}
 				logger.debug("Multipart file '" + getName() + "' with original filename [" +
 						getOriginalFilename() + "], stored " + getStorageDescription() + ": " +
@@ -173,14 +173,18 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 			}
 		}
 		catch (FileUploadException ex) {
-			throw new IllegalStateException(ex.getMessage());
+			throw new IllegalStateException(ex.getMessage(), ex);
+		}
+		catch (IllegalStateException ex) {
+			// Pass through when coming from FileItem directly
+			throw ex;
 		}
 		catch (IOException ex) {
+			// From I/O operations within FileItem.write
 			throw ex;
 		}
 		catch (Exception ex) {
-			logger.error("Could not transfer to file", ex);
-			throw new IOException("Could not transfer to file: " + ex.getMessage());
+			throw new IOException("File transfer failed", ex);
 		}
 	}
 
