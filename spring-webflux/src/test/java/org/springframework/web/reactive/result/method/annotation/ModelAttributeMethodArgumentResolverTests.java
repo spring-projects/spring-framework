@@ -42,16 +42,13 @@ import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ModelAttributeMethodArgumentResolver}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  */
 public class ModelAttributeMethodArgumentResolverTests {
 
@@ -116,7 +113,6 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 	@Test
 	public void createAndBindToMono() throws Exception {
-
 		MethodParameter parameter = this.testMethod
 				.annotNotPresent(ModelAttribute.class).arg(Mono.class, Foo.class);
 
@@ -130,7 +126,6 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 	@Test
 	public void createAndBindToSingle() throws Exception {
-
 		MethodParameter parameter = this.testMethod
 				.annotPresent(ModelAttribute.class).arg(Single.class, Foo.class);
 
@@ -211,6 +206,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 		Foo foo = valueExtractor.apply(value);
 		assertEquals("Robert", foo.getName());
+		assertEquals(25, foo.getAge());
 
 		String key = "foo";
 		String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + key;
@@ -231,7 +227,6 @@ public class ModelAttributeMethodArgumentResolverTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void validationErrorToMono() throws Exception {
-
 		MethodParameter parameter = this.testMethod
 				.annotNotPresent(ModelAttribute.class).arg(Mono.class, Foo.class);
 
@@ -246,7 +241,6 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 	@Test
 	public void validationErrorToSingle() throws Exception {
-
 		MethodParameter parameter = this.testMethod
 				.annotPresent(ModelAttribute.class).arg(Single.class, Foo.class);
 
@@ -264,7 +258,6 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 		ServerWebExchange exchange = postForm("age=invalid");
 		Mono<?> mono = createResolver().resolveArgument(param, this.bindContext, exchange);
-
 		mono = valueMonoExtractor.apply(mono);
 
 		StepVerifier.create(mono)
@@ -275,6 +268,31 @@ public class ModelAttributeMethodArgumentResolverTests {
 					assertTrue(bindException.hasFieldErrors("age"));
 				})
 				.verify();
+	}
+
+	@Test
+	public void bindDataClass() throws Exception {
+		testBindBar(this.testMethod.annotNotPresent(ModelAttribute.class).arg(Bar.class));
+	}
+
+	private void testBindBar(MethodParameter param) throws Exception {
+		Object value = createResolver()
+				.resolveArgument(param, this.bindContext, postForm("name=Robert&age=25&count=1"))
+				.block(Duration.ZERO);
+
+		Bar bar = (Bar) value;
+		assertEquals("Robert", bar.getName());
+		assertEquals(25, bar.getAge());
+		assertEquals(1, bar.getCount());
+
+		String key = "bar";
+		String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + key;
+
+		Map<String, Object> map = bindContext.getModel().asMap();
+		assertEquals(map.toString(), 2, map.size());
+		assertSame(bar, map.get(key));
+		assertNotNull(map.get(bindingResultKey));
+		assertTrue(map.get(bindingResultKey) instanceof BindingResult);
 	}
 
 
@@ -298,7 +316,8 @@ public class ModelAttributeMethodArgumentResolverTests {
 			Foo fooNotAnnotated,
 			String stringNotAnnotated,
 			Mono<Foo> monoNotAnnotated,
-			Mono<String> monoStringNotAnnotated) {
+			Mono<String> monoStringNotAnnotated,
+			Bar barNotAnnotated) {
 	}
 
 
@@ -330,6 +349,37 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 		public void setAge(int age) {
 			this.age = age;
+		}
+	}
+
+
+	private static class Bar {
+
+		private final String name;
+
+		private final int age;
+
+		private int count;
+
+		public Bar(String name, int age) {
+			this.name = name;
+			this.age = age;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public int getAge() {
+			return this.age;
+		}
+
+		public int getCount() {
+			return count;
+		}
+
+		public void setCount(int count) {
+			this.count = count;
 		}
 	}
 

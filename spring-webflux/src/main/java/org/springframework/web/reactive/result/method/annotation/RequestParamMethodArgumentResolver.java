@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,19 +59,19 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueSyncAr
 
 	/**
 	 * Class constructor with a default resolution mode flag.
-	 * @param beanFactory a bean factory used for resolving  ${...} placeholder
+	 * @param factory a bean factory used for resolving  ${...} placeholder
 	 * and #{...} SpEL expressions in default values, or {@code null} if default
 	 * values are not expected to contain expressions
-	 * @param adapterRegistry for checking reactive type wrappers
+	 * @param registry for checking reactive type wrappers
 	 * @param useDefaultResolution in default resolution mode a method argument
 	 * that is a simple type, as defined in {@link BeanUtils#isSimpleProperty},
 	 * is treated as a request parameter even if it isn't annotated, the
 	 * request parameter name is derived from the method parameter name.
 	 */
-	public RequestParamMethodArgumentResolver(ConfigurableBeanFactory beanFactory,
-			ReactiveAdapterRegistry adapterRegistry, boolean useDefaultResolution) {
+	public RequestParamMethodArgumentResolver(
+			ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry, boolean useDefaultResolution) {
 
-		super(beanFactory, adapterRegistry);
+		super(factory, registry);
 		this.useDefaultResolution = useDefaultResolution;
 	}
 
@@ -82,7 +82,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueSyncAr
 			return true;
 		}
 		else if (this.useDefaultResolution) {
-			return checkParamTypeNoReactiveWrapper(param, BeanUtils::isSimpleProperty);
+			return checkParameterTypeNoReactiveWrapper(param, BeanUtils::isSimpleProperty);
 		}
 		return false;
 	}

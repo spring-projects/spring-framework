@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,17 +52,14 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class PathVariableMethodArgumentResolver extends AbstractNamedValueSyncArgumentResolver {
 
-
 	/**
-	 * @param beanFactory a bean factory to use for resolving  ${...}
+	 * @param factory a bean factory to use for resolving  ${...}
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to contain expressions
-	 * @param adapterRegistry for checking reactive type wrappers
+	 * @param registry for checking reactive type wrappers
 	 */
-	public PathVariableMethodArgumentResolver(ConfigurableBeanFactory beanFactory,
-			ReactiveAdapterRegistry adapterRegistry) {
-
-		super(beanFactory, adapterRegistry);
+	public PathVariableMethodArgumentResolver(ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+		super(factory, registry);
 	}
 
 
@@ -83,9 +80,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueSyncAr
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter,
-			ServerWebExchange exchange) {
-
+	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
 		String attributeName = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 		return exchange.getAttribute(attributeName)
 				.map(value -> ((Map<String, String>) value).get(name));
@@ -98,8 +93,8 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueSyncAr
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected void handleResolvedValue(Object arg, String name, MethodParameter parameter,
-			Model model, ServerWebExchange exchange) {
+	protected void handleResolvedValue(
+			Object arg, String name, MethodParameter parameter, Model model, ServerWebExchange exchange) {
 
 		// TODO: View.PATH_VARIABLES ?
 	}

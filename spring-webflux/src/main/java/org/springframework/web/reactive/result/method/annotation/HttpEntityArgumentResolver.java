@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentResolver
-		implements HandlerMethodArgumentResolver {
-
+public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentResolver {
 
 	public HttpEntityArgumentResolver(List<ServerHttpMessageReader<?>> readers,
 			ReactiveAdapterRegistry registry) {
@@ -51,16 +49,15 @@ public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentRes
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return checkParamTypeNoReactiveWrapper(parameter,
+		return checkParameterTypeNoReactiveWrapper(parameter,
 				type -> HttpEntity.class.equals(type) || RequestEntity.class.equals(type));
 	}
 
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext,
-			ServerWebExchange exchange) {
+	public Mono<Object> resolveArgument(
+			MethodParameter parameter, BindingContext bindingContext, ServerWebExchange exchange) {
 
 		Class<?> entityType = parameter.getParameterType();
-
 		return readBody(parameter.nested(), false, bindingContext, exchange)
 				.map(body -> createEntity(body, entityType, exchange.getRequest()))
 				.defaultIfEmpty(createEntity(null, entityType, exchange.getRequest()));

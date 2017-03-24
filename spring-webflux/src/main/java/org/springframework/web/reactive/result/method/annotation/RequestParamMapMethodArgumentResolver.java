@@ -48,7 +48,6 @@ import org.springframework.web.server.ServerWebExchange;
 public class RequestParamMapMethodArgumentResolver extends HandlerMethodArgumentResolverSupport
 		implements SyncHandlerMethodArgumentResolver {
 
-
 	public RequestParamMapMethodArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
 		super(adapterRegistry);
 	}

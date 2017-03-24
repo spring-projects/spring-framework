@@ -56,12 +56,9 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.post;
+import static org.junit.Assert.*;
+import static org.springframework.core.ResolvableType.*;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.*;
 
 /**
  * Unit tests for {@link AbstractMessageReaderArgumentResolver}.
@@ -307,7 +304,16 @@ public class MessageReaderArgumentResolverTests {
 	private AbstractMessageReaderArgumentResolver resolver(Decoder<?>... decoders) {
 		List<ServerHttpMessageReader<?>> readers = new ArrayList<>();
 		Arrays.asList(decoders).forEach(decoder -> readers.add(new DecoderHttpMessageReader<>(decoder)));
-		return new AbstractMessageReaderArgumentResolver(readers) {};
+		return new AbstractMessageReaderArgumentResolver(readers) {
+			@Override
+			public boolean supportsParameter(MethodParameter parameter) {
+				return false;
+			}
+			@Override
+			public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext, ServerWebExchange exchange) {
+				return null;
+			}
+		};
 	}
 
 

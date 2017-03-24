@@ -38,17 +38,14 @@ import org.springframework.web.server.ServerWebInputException;
  */
 public class CookieValueMethodArgumentResolver extends AbstractNamedValueSyncArgumentResolver {
 
-
 	/**
-	 * @param beanFactory a bean factory to use for resolving  ${...}
+	 * @param factory a bean factory to use for resolving  ${...}
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to contain expressions
-	 * @param adapterRegistry for checking reactive type wrappers
+	 * @param registry for checking reactive type wrappers
 	 */
-	public CookieValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory,
-			ReactiveAdapterRegistry adapterRegistry) {
-
-		super(beanFactory, adapterRegistry);
+	public CookieValueMethodArgumentResolver(ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+		super(factory, registry);
 	}
 
 
@@ -64,9 +61,7 @@ public class CookieValueMethodArgumentResolver extends AbstractNamedValueSyncArg
 	}
 
 	@Override
-	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter,
-			ServerWebExchange exchange) {
-
+	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
 		HttpCookie cookie = exchange.getRequest().getCookies().getFirst(name);
 		Class<?> paramType = parameter.getNestedParameterType();
 		if (HttpCookie.class.isAssignableFrom(paramType)) {

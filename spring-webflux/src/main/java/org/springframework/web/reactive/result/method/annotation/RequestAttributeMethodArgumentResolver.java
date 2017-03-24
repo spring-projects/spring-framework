@@ -36,15 +36,13 @@ public class RequestAttributeMethodArgumentResolver extends AbstractNamedValueSy
 
 
 	/**
-	 * @param beanFactory a bean factory to use for resolving  ${...}
+	 * @param factory a bean factory to use for resolving  ${...}
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to have expressions
-	 * @param adapterRegistry for checking reactive type wrappers
+	 * @param registry for checking reactive type wrappers
 	 */
-	public RequestAttributeMethodArgumentResolver(ConfigurableBeanFactory beanFactory,
-			ReactiveAdapterRegistry adapterRegistry) {
-
-		super(beanFactory, adapterRegistry);
+	public RequestAttributeMethodArgumentResolver(ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry) {
+		super(factory, registry);
 	}
 
 
@@ -61,9 +59,7 @@ public class RequestAttributeMethodArgumentResolver extends AbstractNamedValueSy
 	}
 
 	@Override
-	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter,
-			ServerWebExchange exchange) {
-
+	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
 		return exchange.getAttribute(name);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,15 +33,14 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public interface SyncHandlerMethodArgumentResolver extends HandlerMethodArgumentResolver {
 
-
 	/**
 	 * {@inheritDoc}
 	 * <p>By default this simply delegates to {@link #resolveArgumentValue} for
 	 * synchronous resolution.
 	 */
 	@Override
-	default Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext,
-			ServerWebExchange exchange) {
+	default Mono<Object> resolveArgument(
+			MethodParameter parameter, BindingContext bindingContext, ServerWebExchange exchange) {
 
 		return Mono.justOrEmpty(resolveArgumentValue(parameter, bindingContext, exchange));
 	}
@@ -53,7 +52,7 @@ public interface SyncHandlerMethodArgumentResolver extends HandlerMethodArgument
 	 * @param exchange the current exchange
 	 * @return an {@code Optional} with the resolved value, possibly empty
 	 */
-	Optional<Object> resolveArgumentValue(MethodParameter parameter, BindingContext bindingContext,
-			ServerWebExchange exchange);
+	Optional<Object> resolveArgumentValue(
+			MethodParameter parameter, BindingContext bindingContext, ServerWebExchange exchange);
 
 }

@@ -44,7 +44,7 @@ public interface HandlerMethodArgumentResolver {
 	 * @param exchange the current exchange
 	 * @return {@code Mono} for the argument value, possibly empty
 	 */
-	Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext,
-			ServerWebExchange exchange);
+	Mono<Object> resolveArgument(
+			MethodParameter parameter, BindingContext bindingContext, ServerWebExchange exchange);
 
 }

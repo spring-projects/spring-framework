@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,6 @@ import org.springframework.web.server.ServerWebExchange;
 public class ServerWebExchangeArgumentResolver extends HandlerMethodArgumentResolverSupport
 		implements SyncHandlerMethodArgumentResolver {
 
-
 	public ServerWebExchangeArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
 		super(adapterRegistry);
 	}
@@ -56,7 +55,7 @@ public class ServerWebExchangeArgumentResolver extends HandlerMethodArgumentReso
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return checkParamTypeNoReactiveWrapper(parameter,
+		return checkParameterTypeNoReactiveWrapper(parameter,
 				type -> ServerWebExchange.class.isAssignableFrom(type) ||
 						ServerHttpRequest.class.isAssignableFrom(type) ||
 						ServerHttpResponse.class.isAssignableFrom(type) ||

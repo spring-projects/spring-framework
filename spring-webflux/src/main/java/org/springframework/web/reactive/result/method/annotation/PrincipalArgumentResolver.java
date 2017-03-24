@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.BindingContext;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -35,9 +34,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  * @see ServerWebExchangeArgumentResolver
  */
-public class PrincipalArgumentResolver extends HandlerMethodArgumentResolverSupport
-		implements HandlerMethodArgumentResolver {
-
+public class PrincipalArgumentResolver extends HandlerMethodArgumentResolverSupport {
 
 	public PrincipalArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
 		super(adapterRegistry);
@@ -46,7 +43,7 @@ public class PrincipalArgumentResolver extends HandlerMethodArgumentResolverSupp
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return checkParamTypeNoReactiveWrapper(parameter, Principal.class::isAssignableFrom);
+		return checkParameterTypeNoReactiveWrapper(parameter, Principal.class::isAssignableFrom);
 	}
 
 	@Override

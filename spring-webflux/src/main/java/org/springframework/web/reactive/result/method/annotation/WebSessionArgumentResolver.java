@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,7 @@ import org.springframework.web.server.WebSession;
  * @since 5.0
  * @see ServerWebExchangeArgumentResolver
  */
-public class WebSessionArgumentResolver extends HandlerMethodArgumentResolverSupport
-		implements HandlerMethodArgumentResolver {
-
+public class WebSessionArgumentResolver extends HandlerMethodArgumentResolverSupport {
 
 	public WebSessionArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
 		super(adapterRegistry);
@@ -45,12 +43,12 @@ public class WebSessionArgumentResolver extends HandlerMethodArgumentResolverSup
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return checkParamTypeNoReactiveWrapper(parameter, WebSession.class::isAssignableFrom);
+		return checkParameterTypeNoReactiveWrapper(parameter, WebSession.class::isAssignableFrom);
 	}
 
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext context,
-			ServerWebExchange exchange) {
+	public Mono<Object> resolveArgument(
+			MethodParameter parameter, BindingContext context, ServerWebExchange exchange) {
 
 		Assert.isAssignable(WebSession.class, parameter.getParameterType());
 		return exchange.getSession().cast(Object.class);

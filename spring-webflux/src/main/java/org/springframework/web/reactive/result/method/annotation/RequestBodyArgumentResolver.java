@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,7 @@ import org.springframework.web.server.ServerWebInputException;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class RequestBodyArgumentResolver extends AbstractMessageReaderArgumentResolver
-		implements HandlerMethodArgumentResolver {
-
+public class RequestBodyArgumentResolver extends AbstractMessageReaderArgumentResolver {
 
 	public RequestBodyArgumentResolver(List<ServerHttpMessageReader<?>> readers,
 			ReactiveAdapterRegistry registry) {
@@ -60,8 +58,8 @@ public class RequestBodyArgumentResolver extends AbstractMessageReaderArgumentRe
 	}
 
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter param, BindingContext bindingContext,
-			ServerWebExchange exchange) {
+	public Mono<Object> resolveArgument(
+			MethodParameter param, BindingContext bindingContext, ServerWebExchange exchange) {
 
 		RequestBody annotation = param.getParameterAnnotation(RequestBody.class);
 		return readBody(param, annotation.required(), bindingContext, exchange);
