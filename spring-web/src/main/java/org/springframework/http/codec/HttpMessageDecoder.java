@@ -25,12 +25,12 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
  * Extension of {@code Decoder} exposing extra methods relevant in the context
- * of HTTP applications.
+ * of HTTP request or response body decoding.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public interface HttpDecoder<T> extends Decoder<T> {
+public interface HttpMessageDecoder<T> extends Decoder<T> {
 
 	/**
 	 * Get decoding hints based on the server request or annotations on the

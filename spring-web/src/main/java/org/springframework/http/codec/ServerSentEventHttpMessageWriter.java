@@ -172,8 +172,8 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	private Map<String, Object> getEncodeHints(ResolvableType actualType, ResolvableType elementType,
 			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
-		if (this.encoder instanceof HttpEncoder) {
-			HttpEncoder<?> httpEncoder = (HttpEncoder<?>) this.encoder;
+		if (this.encoder instanceof HttpMessageEncoder) {
+			HttpMessageEncoder<?> httpEncoder = (HttpMessageEncoder<?>) this.encoder;
 			return httpEncoder.getEncodeHints(actualType, elementType, mediaType, request, response);
 		}
 		return Collections.emptyMap();

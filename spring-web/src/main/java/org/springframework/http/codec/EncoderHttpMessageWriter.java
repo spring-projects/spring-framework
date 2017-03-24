@@ -130,8 +130,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	}
 
 	private boolean isStreamingMediaType(MediaType contentType) {
-		return this.encoder instanceof HttpEncoder &&
-				((HttpEncoder<?>) this.encoder).getStreamingMediaTypes().stream()
+		return this.encoder instanceof HttpMessageEncoder &&
+				((HttpMessageEncoder<?>) this.encoder).getStreamingMediaTypes().stream()
 						.anyMatch(contentType::isCompatibleWith);
 	}
 
@@ -153,13 +153,13 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	/**
 	 * Get additional hints for encoding for example based on the server request
 	 * or annotations from controller method parameters. By default, delegate to
-	 * the encoder if it is an instance of {@link HttpEncoder}.
+	 * the encoder if it is an instance of {@link HttpMessageEncoder}.
 	 */
 	protected Map<String, Object> getWriteHints(ResolvableType streamType, ResolvableType elementType,
 			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
-		if (this.encoder instanceof HttpEncoder) {
-			HttpEncoder<?> httpEncoder = (HttpEncoder<?>) this.encoder;
+		if (this.encoder instanceof HttpMessageEncoder) {
+			HttpMessageEncoder<?> httpEncoder = (HttpMessageEncoder<?>) this.encoder;
 			return httpEncoder.getEncodeHints(streamType, elementType, mediaType, request, response);
 		}
 		return Collections.emptyMap();
