@@ -42,9 +42,11 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.DataBufferDecoder;
+import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.http.codec.ServerHttpMessageReader;
+import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -76,7 +78,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	private static final Log logger = LogFactory.getLog(RequestMappingHandlerAdapter.class);
 
 
-	private final List<ServerHttpMessageReader<?>> messageReaders = new ArrayList<>(10);
+	private final List<HttpMessageReader<?>> messageReaders = new ArrayList<>(10);
 
 	private WebBindingInitializer webBindingInitializer;
 
@@ -114,26 +116,30 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 
 
 	public RequestMappingHandlerAdapter() {
-		// TODO: improve with better (shared) defaults
 		this.messageReaders.add(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		this.messageReaders.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
 		this.messageReaders.add(new DecoderHttpMessageReader<>(new DataBufferDecoder()));
+		this.messageReaders.add(new DecoderHttpMessageReader<>(new ResourceDecoder()));
 		this.messageReaders.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 	}
 
 
 	/**
-	 * Configure message readers to de-serialize the request body with.
+	 * Configure HTTP message readers to de-serialize the request body with.
+	 * <p>By default only basic data types such as bytes and text are registered.
+	 * Consider using {@link ServerCodecConfigurer} to configure a richer list
+	 * including JSON encoding .
+	 * @see ServerCodecConfigurer
 	 */
-	public void setMessageReaders(List<ServerHttpMessageReader<?>> messageReaders) {
+	public void setMessageReaders(List<HttpMessageReader<?>> messageReaders) {
 		this.messageReaders.clear();
 		this.messageReaders.addAll(messageReaders);
 	}
 
 	/**
-	 * Return the configured message readers.
+	 * Return the configured HTTP message readers.
 	 */
-	public List<ServerHttpMessageReader<?>> getMessageReaders() {
+	public List<HttpMessageReader<?>> getMessageReaders() {
 		return this.messageReaders;
 	}
 

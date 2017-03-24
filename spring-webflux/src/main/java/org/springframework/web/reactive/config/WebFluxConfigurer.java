@@ -22,8 +22,7 @@ import java.util.Optional;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.http.codec.ServerHttpMessageReader;
-import org.springframework.http.codec.ServerHttpMessageWriter;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
@@ -89,22 +88,10 @@ public interface WebFluxConfigurer {
 	}
 
 	/**
-	 * Configure the message readers to use for decoding the request body where
-	 * {@code @RequestBody} and {@code HttpEntity} controller method arguments
-	 * are used. If none are specified, default ones are added based on
-	 * {@link WebFluxConfigurationSupport#addDefaultHttpMessageReaders}.
-	 * <p>See {@link #extendMessageReaders(List)} for adding readers
-	 * in addition to the default ones.
-	 * @param readers an empty list to add message readers to
+	 * Configure custom HTTP message readers and writers or override built-in ones.
+	 * @param configurer the configurer to use
 	 */
-	default void configureMessageReaders(List<ServerHttpMessageReader<?>> readers) {
-	}
-
-	/**
-	 * An alternative to {@link #configureMessageReaders(List)} that allows
-	 * modifying the message readers to use after default ones have been added.
-	 */
-	default void extendMessageReaders(List<ServerHttpMessageReader<?>> readers) {
+	default void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
 	}
 
 	/**
@@ -130,25 +117,6 @@ public interface WebFluxConfigurer {
 	 */
 	default Optional<MessageCodesResolver> getMessageCodesResolver() {
 		return Optional.empty();
-	}
-
-	/**
-	 * Configure the message writers to use to encode the response body based on
-	 * the return values of {@code @ResponseBody}, and {@code ResponseEntity}
-	 * controller methods. If none are specified, default ones are added based on
-	 * {@link WebFluxConfigurationSupport#addDefaultHttpMessageWriters(List)}.
-	 * <p>See {@link #extendMessageWriters(List)} for adding writers
-	 * in addition to the default ones.
-	 * @param writers a empty list to add message writers to
-	 */
-	default void configureMessageWriters(List<ServerHttpMessageWriter<?>> writers) {
-	}
-
-	/**
-	 * An alternative to {@link #configureMessageWriters(List)} that allows
-	 * modifying the message writers to use after default ones have been added.
-	 */
-	default void extendMessageWriters(List<ServerHttpMessageWriter<?>> writers) {
 	}
 
 	/**

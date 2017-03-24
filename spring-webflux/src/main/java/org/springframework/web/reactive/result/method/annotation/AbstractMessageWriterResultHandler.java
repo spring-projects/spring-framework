@@ -27,7 +27,7 @@ import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerHttpMessageWriter;
+import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
@@ -38,24 +38,24 @@ import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Abstract base class for result handlers that handle return values by writing
- * to the response with {@link ServerHttpMessageWriter}.
+ * to the response with {@link HttpMessageWriter}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public abstract class AbstractMessageWriterResultHandler extends HandlerResultHandlerSupport {
 
-	private final List<ServerHttpMessageWriter<?>> messageWriters;
+	private final List<HttpMessageWriter<?>> messageWriters;
 
 
 	/**
-	 * Constructor with {@link ServerHttpMessageWriter}s and a
+	 * Constructor with {@link HttpMessageWriter}s and a
 	 * {@code RequestedContentTypeResolver}.
 	 *
 	 * @param messageWriters for serializing Objects to the response body stream
 	 * @param contentTypeResolver for resolving the requested content type
 	 */
-	protected AbstractMessageWriterResultHandler(List<ServerHttpMessageWriter<?>> messageWriters,
+	protected AbstractMessageWriterResultHandler(List<HttpMessageWriter<?>> messageWriters,
 			RequestedContentTypeResolver contentTypeResolver) {
 
 		super(contentTypeResolver);
@@ -71,7 +71,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 	 * @param adapterRegistry for adapting other reactive types (e.g. rx.Observable,
 	 * rx.Single, etc.) to Flux or Mono
 	 */
-	protected AbstractMessageWriterResultHandler(List<ServerHttpMessageWriter<?>> messageWriters,
+	protected AbstractMessageWriterResultHandler(List<HttpMessageWriter<?>> messageWriters,
 			RequestedContentTypeResolver contentTypeResolver,
 			ReactiveAdapterRegistry adapterRegistry) {
 
@@ -84,7 +84,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 	/**
 	 * Return the configured message converters.
 	 */
-	public List<ServerHttpMessageWriter<?>> getMessageWriters() {
+	public List<HttpMessageWriter<?>> getMessageWriters() {
 		return this.messageWriters;
 	}
 
@@ -115,7 +115,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 		ServerHttpResponse response = exchange.getResponse();
 		MediaType bestMediaType = selectMediaType(exchange, () -> getProducibleMediaTypes(elementType));
 		if (bestMediaType != null) {
-			for (ServerHttpMessageWriter<?> writer : getMessageWriters()) {
+			for (HttpMessageWriter<?> writer : getMessageWriters()) {
 				if (writer.canWrite(elementType, bestMediaType)) {
 					return writer.write((Publisher) publisher, bodyType, elementType,
 							bestMediaType, request, response, Collections.emptyMap());

@@ -22,9 +22,12 @@ import java.util.Map;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
  * Strategy for encoding a stream of objects of type {@code <T>} and writing
@@ -66,5 +69,27 @@ public interface HttpMessageWriter<T> {
 	Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType elementType,
 			MediaType mediaType, ReactiveHttpOutputMessage message, Map<String, Object> hints);
 
+
+	/**
+	 * Server-side only alternative to
+	 * {@link #write(Publisher, ResolvableType, MediaType, ReactiveHttpOutputMessage, Map)}
+	 * with additional context available.
+	 *
+	 * @param actualType the actual return type of the method that returned the
+	 * value; for annotated controllers, the {@link MethodParameter} can be
+	 * accessed via {@link ResolvableType#getSource()}.
+	 * @param elementType the type of Objects in the input stream
+	 * @param mediaType the content type to use, possibly {@code null} indicating
+	 * the default content type of the writer should be used.
+	 * @param request the current request
+	 * @param response the current response
+	 * @return a {@link Mono} that indicates completion of writing or error
+	 */
+	default Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType actualType,
+			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request,
+			ServerHttpResponse response, Map<String, Object> hints) {
+
+		return write(inputStream, elementType, mediaType, response, hints);
+	}
 
 }

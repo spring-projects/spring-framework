@@ -29,12 +29,12 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
  * Extension of {@code Encoder} exposing extra methods relevant in the context
- * of HTTP applications.
+ * of HTTP request or response body encoding.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public interface HttpEncoder<T> extends Encoder<T> {
+public interface HttpMessageEncoder<T> extends Encoder<T> {
 
 	/**
 	 * Return "streaming" media types for which flushing should be performed

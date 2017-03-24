@@ -22,9 +22,12 @@ import java.util.Map;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
  * Strategy for reading from a {@link ReactiveHttpInputMessage} and decoding
@@ -74,5 +77,44 @@ public interface HttpMessageReader<T> {
 	 */
 	Mono<T> readMono(ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints);
 
+	/**
+	 * Server-side only alternative to
+	 * {@link #read(ResolvableType, ReactiveHttpInputMessage, Map)} with
+	 * additional context available.
+	 *
+	 * @param actualType the actual type of the target method parameter; for
+	 * annotated controllers, the {@link MethodParameter} can be accessed via
+	 * {@link ResolvableType#getSource()}.
+	 * @param elementType the type of Objects in the output stream
+	 * @param request the current request
+	 * @param response the current response
+	 * @param hints additional information about how to read the body
+	 * @return the decoded stream of elements
+	 */
+	default Flux<T> read(ResolvableType actualType, ResolvableType elementType, ServerHttpRequest request,
+			ServerHttpResponse response, Map<String, Object> hints) {
+
+		return read(elementType, request, hints);
+	}
+
+	/**
+	 * Server-side only alternative to
+	 * {@link #readMono(ResolvableType, ReactiveHttpInputMessage, Map)} with
+	 * additional, context available.
+	 *
+	 * @param actualType the actual type of the target method parameter; for
+	 * annotated controllers, the {@link MethodParameter} can be accessed via
+	 * {@link ResolvableType#getSource()}.
+	 * @param elementType the type of Objects in the output stream
+	 * @param request the current request
+	 * @param response the current response
+	 * @param hints additional information about how to read the body
+	 * @return the decoded stream of elements
+	 */
+	default Mono<T> readMono(ResolvableType actualType, ResolvableType elementType, ServerHttpRequest request,
+			ServerHttpResponse response, Map<String, Object> hints) {
+
+		return readMono(elementType, request, hints);
+	}
 
 }

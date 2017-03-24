@@ -42,7 +42,7 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.HttpEncoder;
+import org.springframework.http.codec.HttpMessageEncoder;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -59,7 +59,7 @@ import org.springframework.util.MimeType;
  * @since 5.0
  * @see Jackson2JsonDecoder
  */
-public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpEncoder<Object> {
+public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpMessageEncoder<Object> {
 
 	private final List<MediaType> streamingMediaTypes = new ArrayList<>(1);
 
@@ -89,7 +89,7 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpEnc
 	 * automatically vs at the end of the stream.
 	 * <p>By default this is set to {@link MediaType#APPLICATION_STREAM_JSON}.
 	 * @param mediaTypes one or more media types to add to the list
-	 * @see HttpEncoder#getStreamingMediaTypes()
+	 * @see HttpMessageEncoder#getStreamingMediaTypes()
 	 */
 	public void setStreamingMediaTypes(List<MediaType> mediaTypes) {
 		this.streamingMediaTypes.clear();
@@ -169,7 +169,7 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpEnc
 	}
 
 
-	// HttpEncoder...
+	// HttpMessageEncoder...
 
 	@Override
 	public List<MediaType> getStreamingMediaTypes() {

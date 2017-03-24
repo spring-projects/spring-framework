@@ -120,16 +120,19 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		@Bean
 		public HandlerMapping handlerMapping(RouterFunction<?> routerFunction,
 				ApplicationContext applicationContext) {
+
 			return RouterFunctions.toHandlerMapping(routerFunction,
 					new HandlerStrategies() {
 						@Override
 						public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-							return () -> getMessageReaders().stream().map(reader -> (HttpMessageReader<?>) reader);
+							return () -> getMessageCodecsConfigurer().getReaders().stream()
+									.map(reader -> (HttpMessageReader<?>) reader);
 						}
 
 						@Override
 						public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
-							return () -> getMessageWriters().stream().map(writer -> (HttpMessageWriter<?>) writer);
+							return () -> getMessageCodecsConfigurer().getWriters().stream()
+									.map(writer -> (HttpMessageWriter<?>) writer);
 						}
 
 						@Override
