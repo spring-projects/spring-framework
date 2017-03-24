@@ -99,10 +99,10 @@ public class ServerCodecConfigurer {
 	/**
 	 * Prepare a list of HTTP message readers.
 	 */
-	public List<ServerHttpMessageReader<?>> getReaders() {
+	public List<HttpMessageReader<?>> getReaders() {
 
 		// Built-in, concrete Java type readers
-		List<ServerHttpMessageReader<?>> result = new ArrayList<>();
+		List<HttpMessageReader<?>> result = new ArrayList<>();
 		this.defaultCodecs.addReaderTo(result, ByteArrayDecoder.class, ByteArrayDecoder::new);
 		this.defaultCodecs.addReaderTo(result, ByteBufferDecoder.class, ByteBufferDecoder::new);
 		this.defaultCodecs.addReaderTo(result, DataBufferDecoder.class, DataBufferDecoder::new);
@@ -131,10 +131,10 @@ public class ServerCodecConfigurer {
 	/**
 	 * Prepare a list of HTTP message writers.
 	 */
-	public List<ServerHttpMessageWriter<?>> getWriters() {
+	public List<HttpMessageWriter<?>> getWriters() {
 
 		// Built-in, concrete Java type readers
-		List<ServerHttpMessageWriter<?>> result = new ArrayList<>();
+		List<HttpMessageWriter<?>> result = new ArrayList<>();
 		this.defaultCodecs.addWriterTo(result, ByteArrayEncoder.class, ByteArrayEncoder::new);
 		this.defaultCodecs.addWriterTo(result, ByteBufferEncoder.class, ByteBufferEncoder::new);
 		this.defaultCodecs.addWriterTo(result, DataBufferEncoder.class, DataBufferEncoder::new);
@@ -169,9 +169,9 @@ public class ServerCodecConfigurer {
 
 		private boolean suppressed = false;
 
-		private final Map<Class<?>, ServerHttpMessageReader<?>> readers = new HashMap<>();
+		private final Map<Class<?>, HttpMessageReader<?>> readers = new HashMap<>();
 
-		private final Map<Class<?>, ServerHttpMessageWriter<?>> writers = new HashMap<>();
+		private final Map<Class<?>, HttpMessageWriter<?>> writers = new HashMap<>();
 
 
 		/**
@@ -197,7 +197,7 @@ public class ServerCodecConfigurer {
 		 * @param encoder the encoder to use
 		 */
 		public void sse(Encoder<?> encoder) {
-			ServerHttpMessageWriter<?> writer = new ServerSentEventHttpMessageWriter(encoder);
+			HttpMessageWriter<?> writer = new ServerSentEventHttpMessageWriter(encoder);
 			this.writers.put(ServerSentEventHttpMessageWriter.class, writer);
 		}
 
@@ -208,14 +208,14 @@ public class ServerCodecConfigurer {
 			this.suppressed = suppressed;
 		}
 
-		private <T, D extends Decoder<T>> void addReaderTo(List<ServerHttpMessageReader<?>> result,
+		private <T, D extends Decoder<T>> void addReaderTo(List<HttpMessageReader<?>> result,
 				Class<D> key, Supplier<D> fallback) {
 
 			addReaderTo(result, () -> findReader(key, fallback));
 		}
 
-		private void addReaderTo(List<ServerHttpMessageReader<?>> result,
-				Supplier<ServerHttpMessageReader<?>> reader) {
+		private void addReaderTo(List<HttpMessageReader<?>> result,
+				Supplier<HttpMessageReader<?>> reader) {
 
 			if (!this.suppressed) {
 				result.add(reader.get());
@@ -230,14 +230,14 @@ public class ServerCodecConfigurer {
 		}
 
 
-		private <T, E extends Encoder<T>> void addWriterTo(List<ServerHttpMessageWriter<?>> result,
+		private <T, E extends Encoder<T>> void addWriterTo(List<HttpMessageWriter<?>> result,
 				Class<E> key, Supplier<E> fallback) {
 
 			addWriterTo(result, () -> findWriter(key, fallback));
 		}
 
-		private void addWriterTo(List<ServerHttpMessageWriter<?>> result,
-				Supplier<ServerHttpMessageWriter<?>> writer) {
+		private void addWriterTo(List<HttpMessageWriter<?>> result,
+				Supplier<HttpMessageWriter<?>> writer) {
 
 			if (!this.suppressed) {
 				result.add(writer.get());
@@ -252,25 +252,25 @@ public class ServerCodecConfigurer {
 		}
 
 
-		private void addStringReaderTextOnlyTo(List<ServerHttpMessageReader<?>> result) {
+		private void addStringReaderTextOnlyTo(List<HttpMessageReader<?>> result) {
 			addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly(true)));
 		}
 
-		private void addStringReaderTo(List<ServerHttpMessageReader<?>> result) {
+		private void addStringReaderTo(List<HttpMessageReader<?>> result) {
 			addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 		}
 
-		private void addStringWriterTextPlainOnlyTo(List<ServerHttpMessageWriter<?>> result) {
+		private void addStringWriterTextPlainOnlyTo(List<HttpMessageWriter<?>> result) {
 			addWriterTo(result, () -> new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()));
 		}
 
-		private void addStringWriterTo(List<ServerHttpMessageWriter<?>> result) {
+		private void addStringWriterTo(List<HttpMessageWriter<?>> result) {
 			addWriterTo(result, () -> new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
 		}
 
-		private void addSseWriterTo(List<ServerHttpMessageWriter<?>> result) {
+		private void addSseWriterTo(List<HttpMessageWriter<?>> result) {
 			addWriterTo(result, () -> {
-				ServerHttpMessageWriter<?> writer = this.writers.get(ServerSentEventHttpMessageWriter.class);
+				HttpMessageWriter<?> writer = this.writers.get(ServerSentEventHttpMessageWriter.class);
 				if (writer != null) {
 					return writer;
 				}
@@ -288,13 +288,13 @@ public class ServerCodecConfigurer {
 	 */
 	public static class CustomCodecConfigurer {
 
-		private final List<ServerHttpMessageReader<?>> typedReaders = new ArrayList<>();
+		private final List<HttpMessageReader<?>> typedReaders = new ArrayList<>();
 
-		private final List<ServerHttpMessageWriter<?>> typedWriters = new ArrayList<>();
+		private final List<HttpMessageWriter<?>> typedWriters = new ArrayList<>();
 
-		private final List<ServerHttpMessageReader<?>> objectReaders = new ArrayList<>();
+		private final List<HttpMessageReader<?>> objectReaders = new ArrayList<>();
 
-		private final List<ServerHttpMessageWriter<?>> objectWriters = new ArrayList<>();
+		private final List<HttpMessageWriter<?>> objectWriters = new ArrayList<>();
 
 
 		/**
@@ -314,21 +314,21 @@ public class ServerCodecConfigurer {
 		}
 
 		/**
-		 * Add a custom {@link ServerHttpMessageReader}. For readers of type
+		 * Add a custom {@link HttpMessageReader}. For readers of type
 		 * {@link DecoderHttpMessageReader} consider using the shortcut
 		 * {@link #decoder(Decoder)} instead.
 		 */
-		public void reader(ServerHttpMessageReader<?> reader) {
+		public void reader(HttpMessageReader<?> reader) {
 			boolean canReadToObject = reader.canRead(ResolvableType.forClass(Object.class), null);
 			(canReadToObject ? this.objectReaders : this.typedReaders).add(reader);
 		}
 
 		/**
-		 * Add a custom {@link ServerHttpMessageWriter}. For readers of type
+		 * Add a custom {@link HttpMessageWriter}. For readers of type
 		 * {@link EncoderHttpMessageWriter} consider using the shortcut
 		 * {@link #encoder(Encoder)} instead.
 		 */
-		public void writer(ServerHttpMessageWriter<?> writer) {
+		public void writer(HttpMessageWriter<?> writer) {
 			boolean canWriteObject = writer.canWrite(ResolvableType.forClass(Object.class), null);
 			(canWriteObject ? this.objectWriters : this.typedWriters).add(writer);
 		}
@@ -336,19 +336,19 @@ public class ServerCodecConfigurer {
 
 		// Internal methods for building a list of custom readers or writers...
 
-		private void addTypedReadersTo(List<ServerHttpMessageReader<?>> result) {
+		private void addTypedReadersTo(List<HttpMessageReader<?>> result) {
 			result.addAll(this.typedReaders);
 		}
 
-		private void addObjectReadersTo(List<ServerHttpMessageReader<?>> result) {
+		private void addObjectReadersTo(List<HttpMessageReader<?>> result) {
 			result.addAll(this.objectReaders);
 		}
 
-		private void addTypedWritersTo(List<ServerHttpMessageWriter<?>> result) {
+		private void addTypedWritersTo(List<HttpMessageWriter<?>> result) {
 			result.addAll(this.typedWriters);
 		}
 
-		private void addObjectWritersTo(List<ServerHttpMessageWriter<?>> result) {
+		private void addObjectWritersTo(List<HttpMessageWriter<?>> result) {
 			result.addAll(this.objectWriters);
 		}
 	}

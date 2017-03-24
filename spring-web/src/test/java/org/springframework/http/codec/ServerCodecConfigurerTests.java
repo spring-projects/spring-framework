@@ -60,7 +60,7 @@ public class ServerCodecConfigurerTests {
 
 	@Test
 	public void defaultReaders() throws Exception {
-		List<ServerHttpMessageReader<?>> readers = this.configurer.getReaders();
+		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
 		assertEquals(8, readers.size());
 		assertEquals(ByteArrayDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ByteBufferDecoder.class, getNextDecoder(readers).getClass());
@@ -74,7 +74,7 @@ public class ServerCodecConfigurerTests {
 
 	@Test
 	public void defaultWriters() throws Exception {
-		List<ServerHttpMessageWriter<?>> writers = this.configurer.getWriters();
+		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
 		assertEquals(9, writers.size());
 		assertEquals(ByteArrayEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(ByteBufferEncoder.class, getNextEncoder(writers).getClass());
@@ -96,8 +96,8 @@ public class ServerCodecConfigurerTests {
 		when(customDecoder1.canDecode(ResolvableType.forClass(Object.class), null)).thenReturn(false);
 		when(customDecoder2.canDecode(ResolvableType.forClass(Object.class), null)).thenReturn(true);
 
-		ServerHttpMessageReader<?> customReader1 = mock(ServerHttpMessageReader.class);
-		ServerHttpMessageReader<?> customReader2 = mock(ServerHttpMessageReader.class);
+		HttpMessageReader<?> customReader1 = mock(HttpMessageReader.class);
+		HttpMessageReader<?> customReader2 = mock(HttpMessageReader.class);
 
 		when(customReader1.canRead(ResolvableType.forClass(Object.class), null)).thenReturn(false);
 		when(customReader2.canRead(ResolvableType.forClass(Object.class), null)).thenReturn(true);
@@ -108,7 +108,7 @@ public class ServerCodecConfigurerTests {
 		this.configurer.customCodec().reader(customReader1);
 		this.configurer.customCodec().reader(customReader2);
 
-		List<ServerHttpMessageReader<?>> readers = this.configurer.getReaders();
+		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
 
 		assertEquals(12, readers.size());
 		assertEquals(ByteArrayDecoder.class, getNextDecoder(readers).getClass());
@@ -134,8 +134,8 @@ public class ServerCodecConfigurerTests {
 		when(customEncoder1.canEncode(ResolvableType.forClass(Object.class), null)).thenReturn(false);
 		when(customEncoder2.canEncode(ResolvableType.forClass(Object.class), null)).thenReturn(true);
 
-		ServerHttpMessageWriter<?> customWriter1 = mock(ServerHttpMessageWriter.class);
-		ServerHttpMessageWriter<?> customWriter2 = mock(ServerHttpMessageWriter.class);
+		HttpMessageWriter<?> customWriter1 = mock(HttpMessageWriter.class);
+		HttpMessageWriter<?> customWriter2 = mock(HttpMessageWriter.class);
 
 		when(customWriter1.canWrite(ResolvableType.forClass(Object.class), null)).thenReturn(false);
 		when(customWriter2.canWrite(ResolvableType.forClass(Object.class), null)).thenReturn(true);
@@ -146,7 +146,7 @@ public class ServerCodecConfigurerTests {
 		this.configurer.customCodec().writer(customWriter1);
 		this.configurer.customCodec().writer(customWriter2);
 
-		List<ServerHttpMessageWriter<?>> writers = this.configurer.getWriters();
+		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
 
 		assertEquals(13, writers.size());
 		assertEquals(ByteArrayEncoder.class, getNextEncoder(writers).getClass());
@@ -173,8 +173,8 @@ public class ServerCodecConfigurerTests {
 		when(customDecoder1.canDecode(ResolvableType.forClass(Object.class), null)).thenReturn(false);
 		when(customDecoder2.canDecode(ResolvableType.forClass(Object.class), null)).thenReturn(true);
 
-		ServerHttpMessageReader<?> customReader1 = mock(ServerHttpMessageReader.class);
-		ServerHttpMessageReader<?> customReader2 = mock(ServerHttpMessageReader.class);
+		HttpMessageReader<?> customReader1 = mock(HttpMessageReader.class);
+		HttpMessageReader<?> customReader2 = mock(HttpMessageReader.class);
 
 		when(customReader1.canRead(ResolvableType.forClass(Object.class), null)).thenReturn(false);
 		when(customReader2.canRead(ResolvableType.forClass(Object.class), null)).thenReturn(true);
@@ -187,7 +187,7 @@ public class ServerCodecConfigurerTests {
 
 		this.configurer.registerDefaults(false);
 
-		List<ServerHttpMessageReader<?>> readers = this.configurer.getReaders();
+		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
 
 		assertEquals(4, readers.size());
 		assertSame(customDecoder1, getNextDecoder(readers));
@@ -205,8 +205,8 @@ public class ServerCodecConfigurerTests {
 		when(customEncoder1.canEncode(ResolvableType.forClass(Object.class), null)).thenReturn(false);
 		when(customEncoder2.canEncode(ResolvableType.forClass(Object.class), null)).thenReturn(true);
 
-		ServerHttpMessageWriter<?> customWriter1 = mock(ServerHttpMessageWriter.class);
-		ServerHttpMessageWriter<?> customWriter2 = mock(ServerHttpMessageWriter.class);
+		HttpMessageWriter<?> customWriter1 = mock(HttpMessageWriter.class);
+		HttpMessageWriter<?> customWriter2 = mock(HttpMessageWriter.class);
 
 		when(customWriter1.canWrite(ResolvableType.forClass(Object.class), null)).thenReturn(false);
 		when(customWriter2.canWrite(ResolvableType.forClass(Object.class), null)).thenReturn(true);
@@ -219,7 +219,7 @@ public class ServerCodecConfigurerTests {
 
 		this.configurer.registerDefaults(false);
 
-		List<ServerHttpMessageWriter<?>> writers = this.configurer.getWriters();
+		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
 
 		assertEquals(4, writers.size());
 		assertSame(customEncoder1, getNextEncoder(writers));
@@ -264,13 +264,13 @@ public class ServerCodecConfigurerTests {
 	}
 
 
-	private Decoder<?> getNextDecoder(List<ServerHttpMessageReader<?>> readers) {
+	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {
 		HttpMessageReader<?> reader = readers.get(this.index.getAndIncrement());
 		assertEquals(DecoderHttpMessageReader.class, reader.getClass());
 		return ((DecoderHttpMessageReader) reader).getDecoder();
 	}
 
-	private Encoder<?> getNextEncoder(List<ServerHttpMessageWriter<?>> writers) {
+	private Encoder<?> getNextEncoder(List<HttpMessageWriter<?>> writers) {
 		HttpMessageWriter<?> writer = writers.get(this.index.getAndIncrement());
 		assertEquals(EncoderHttpMessageWriter.class, writer.getClass());
 		return ((EncoderHttpMessageWriter) writer).getEncoder();
@@ -288,8 +288,8 @@ public class ServerCodecConfigurerTests {
 		assertEquals(!textOnly, encoder.canEncode(forClass(String.class), MediaType.TEXT_EVENT_STREAM));
 	}
 
-	private void assertSseWriter(List<ServerHttpMessageWriter<?>> writers) {
-		ServerHttpMessageWriter<?> writer = writers.get(this.index.getAndIncrement());
+	private void assertSseWriter(List<HttpMessageWriter<?>> writers) {
+		HttpMessageWriter<?> writer = writers.get(this.index.getAndIncrement());
 		assertEquals(ServerSentEventHttpMessageWriter.class, writer.getClass());
 		Encoder<?> encoder = ((ServerSentEventHttpMessageWriter) writer).getEncoder();
 		assertNotNull(encoder);

@@ -44,7 +44,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
-import org.springframework.http.codec.ServerHttpMessageWriter;
+import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
@@ -83,8 +83,8 @@ public class ResponseEntityResultHandlerTests {
 		this.resultHandler = createHandler();
 	}
 
-	private ResponseEntityResultHandler createHandler(ServerHttpMessageWriter<?>... writers) {
-		List<ServerHttpMessageWriter<?>> writerList;
+	private ResponseEntityResultHandler createHandler(HttpMessageWriter<?>... writers) {
+		List<HttpMessageWriter<?>> writerList;
 		if (ObjectUtils.isEmpty(writers)) {
 			writerList = new ArrayList<>();
 			writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));

@@ -30,7 +30,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.ServerHttpMessageWriter;
+import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
@@ -57,7 +57,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 	 * @param writers writers for serializing to the response body
 	 * @param resolver to determine the requested content type
 	 */
-	public ResponseEntityResultHandler(List<ServerHttpMessageWriter<?>> writers,
+	public ResponseEntityResultHandler(List<HttpMessageWriter<?>> writers,
 			RequestedContentTypeResolver resolver) {
 
 		this(writers, resolver, new ReactiveAdapterRegistry());
@@ -69,7 +69,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 	 * @param resolver to determine the requested content type
 	 * @param registry for adaptation to reactive types
 	 */
-	public ResponseEntityResultHandler(List<ServerHttpMessageWriter<?>> writers,
+	public ResponseEntityResultHandler(List<HttpMessageWriter<?>> writers,
 			RequestedContentTypeResolver resolver, ReactiveAdapterRegistry registry) {
 
 		super(writers, resolver, registry);

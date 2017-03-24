@@ -23,7 +23,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.http.codec.ServerHttpMessageWriter;
+import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
@@ -34,7 +34,7 @@ import org.springframework.web.server.ServerWebExchange;
 /**
  * {@code HandlerResultHandler} that handles return values from methods annotated
  * with {@code @ResponseBody} writing to the body of the request or response with
- * an {@link ServerHttpMessageWriter}.
+ * an {@link HttpMessageWriter}.
  *
  * <p>By default the order for this result handler is set to 100. As it detects
  * the presence of {@code @ResponseBody} it should be ordered after result
@@ -56,7 +56,7 @@ public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandle
 	 * @param writers writers for serializing to the response body
 	 * @param resolver to determine the requested content type
 	 */
-	public ResponseBodyResultHandler(List<ServerHttpMessageWriter<?>> writers,
+	public ResponseBodyResultHandler(List<HttpMessageWriter<?>> writers,
 			RequestedContentTypeResolver resolver) {
 
 		this(writers, resolver, new ReactiveAdapterRegistry());
@@ -68,7 +68,7 @@ public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandle
 	 * @param resolver to determine the requested content type
 	 * @param registry for adaptation to reactive types
 	 */
-	public ResponseBodyResultHandler(List<ServerHttpMessageWriter<?>> writers,
+	public ResponseBodyResultHandler(List<HttpMessageWriter<?>> writers,
 			RequestedContentTypeResolver resolver, ReactiveAdapterRegistry registry) {
 
 		super(writers, resolver, registry);

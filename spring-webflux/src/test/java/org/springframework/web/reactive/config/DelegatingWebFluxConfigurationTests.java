@@ -30,7 +30,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.http.codec.ServerHttpMessageWriter;
+import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -61,7 +61,7 @@ public class DelegatingWebFluxConfigurationTests {
 	private ArgumentCaptor<ServerCodecConfigurer> codecsConfigurer;
 
 	@Captor
-	private ArgumentCaptor<List<ServerHttpMessageWriter<?>>> writers;
+	private ArgumentCaptor<List<HttpMessageWriter<?>>> writers;
 
 	@Captor
 	private ArgumentCaptor<FormatterRegistry> formatterRegistry;

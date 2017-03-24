@@ -53,7 +53,7 @@ import static java.util.Collections.emptyMap;
 /**
  * {@code HttpMessageWriter} that can write a {@link Resource}.
  *
- * <p>Also an implementation of {@code ServerHttpMessageWriter} with support
+ * <p>Also an implementation of {@code HttpMessageWriter} with support
  * for writing one or more {@link ResourceRegion}'s based on the HTTP ranges
  * specified in the request.
  *
@@ -68,7 +68,7 @@ import static java.util.Collections.emptyMap;
  * @see ResourceRegionEncoder
  * @see HttpRange
  */
-public class ResourceHttpMessageWriter implements ServerHttpMessageWriter<Resource> {
+public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 
 	private static final ResolvableType REGION_TYPE = ResolvableType.forClass(ResourceRegion.class);
 
@@ -102,7 +102,7 @@ public class ResourceHttpMessageWriter implements ServerHttpMessageWriter<Resour
 	}
 
 
-	// HttpMessageWriter (client and server): single Resource
+	// Client or server: single Resource...
 
 	@Override
 	public Mono<Void> write(Publisher<? extends Resource> inputStream, ResolvableType elementType,
@@ -171,7 +171,7 @@ public class ResourceHttpMessageWriter implements ServerHttpMessageWriter<Resour
 	}
 
 
-	// ServerHttpMessageWriter (server only): single Resource or sub-regions
+	// Server-side only: single Resource or sub-regions...
 
 	@Override
 	@SuppressWarnings("unchecked")

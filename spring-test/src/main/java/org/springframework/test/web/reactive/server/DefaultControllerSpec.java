@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.http.codec.ServerHttpMessageWriter;
+import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -141,7 +141,7 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 
 		private Consumer<ServerCodecConfigurer> messageCodecsConsumer;
 
-		private Consumer<List<ServerHttpMessageWriter<?>>> writersConsumer;
+		private Consumer<List<HttpMessageWriter<?>>> writersConsumer;
 
 		private Consumer<FormatterRegistry> formattersConsumer;
 

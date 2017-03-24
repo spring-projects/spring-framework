@@ -43,7 +43,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.http.codec.ServerHttpMessageReader;
+import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -302,7 +302,7 @@ public class MessageReaderArgumentResolverTests {
 
 	@SuppressWarnings("Convert2MethodRef")
 	private AbstractMessageReaderArgumentResolver resolver(Decoder<?>... decoders) {
-		List<ServerHttpMessageReader<?>> readers = new ArrayList<>();
+		List<HttpMessageReader<?>> readers = new ArrayList<>();
 		Arrays.asList(decoders).forEach(decoder -> readers.add(new DecoderHttpMessageReader<>(decoder)));
 		return new AbstractMessageReaderArgumentResolver(readers) {
 			@Override

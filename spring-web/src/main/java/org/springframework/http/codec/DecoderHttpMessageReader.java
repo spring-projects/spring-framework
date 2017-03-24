@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
 /**
  * {@code HttpMessageReader} that wraps and delegates to a {@link Decoder}.
  *
- * <p>Also a {@code ServerHttpMessageReader} that pre-resolves decoding hints
+ * <p>Also a {@code HttpMessageReader} that pre-resolves decoding hints
  * from the extra information available on the server side such as the request
  * or controller method parameter annotations.
  *
@@ -45,7 +45,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class DecoderHttpMessageReader<T> implements ServerHttpMessageReader<T> {
+public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 
 	private final Decoder<T> decoder;
 
@@ -102,7 +102,7 @@ public class DecoderHttpMessageReader<T> implements ServerHttpMessageReader<T> {
 	}
 
 
-	// ServerHttpMessageReader...
+	// Server-side only...
 
 	@Override
 	public Flux<T> read(ResolvableType actualType, ResolvableType elementType,

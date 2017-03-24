@@ -34,8 +34,8 @@ import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerHttpMessageReader;
-import org.springframework.http.codec.ServerHttpMessageWriter;
+import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
@@ -126,7 +126,7 @@ public class WebFluxConfigurationSupportTests {
 		RequestMappingHandlerAdapter adapter = context.getBean(name, RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
 
-		List<ServerHttpMessageReader<?>> readers = adapter.getMessageReaders();
+		List<HttpMessageReader<?>> readers = adapter.getMessageReaders();
 		assertEquals(8, readers.size());
 
 		assertHasMessageReader(readers, byte[].class, APPLICATION_OCTET_STREAM);
@@ -159,7 +159,7 @@ public class WebFluxConfigurationSupportTests {
 		RequestMappingHandlerAdapter adapter = context.getBean(name, RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
 
-		List<ServerHttpMessageReader<?>> messageReaders = adapter.getMessageReaders();
+		List<HttpMessageReader<?>> messageReaders = adapter.getMessageReaders();
 		assertEquals(2, messageReaders.size());
 
 		assertHasMessageReader(messageReaders, String.class, TEXT_PLAIN);
@@ -176,7 +176,7 @@ public class WebFluxConfigurationSupportTests {
 
 		assertEquals(0, handler.getOrder());
 
-		List<ServerHttpMessageWriter<?>> writers = handler.getMessageWriters();
+		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
 		assertEquals(9, writers.size());
 
 		assertHasMessageWriter(writers, byte[].class, APPLICATION_OCTET_STREAM);
@@ -202,7 +202,7 @@ public class WebFluxConfigurationSupportTests {
 
 		assertEquals(100, handler.getOrder());
 
-		List<ServerHttpMessageWriter<?>> writers = handler.getMessageWriters();
+		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
 		assertEquals(9, writers.size());
 
 		assertHasMessageWriter(writers, byte[].class, APPLICATION_OCTET_STREAM);
@@ -258,12 +258,12 @@ public class WebFluxConfigurationSupportTests {
 	}
 
 
-	private void assertHasMessageReader(List<ServerHttpMessageReader<?>> readers, Class<?> clazz, MediaType mediaType) {
+	private void assertHasMessageReader(List<HttpMessageReader<?>> readers, Class<?> clazz, MediaType mediaType) {
 		ResolvableType type = ResolvableType.forClass(clazz);
 		assertTrue(readers.stream().anyMatch(c -> mediaType == null || c.canRead(type, mediaType)));
 	}
 
-	private void assertHasMessageWriter(List<ServerHttpMessageWriter<?>> writers, Class<?> clazz, MediaType mediaType) {
+	private void assertHasMessageWriter(List<HttpMessageWriter<?>> writers, Class<?> clazz, MediaType mediaType) {
 		ResolvableType type = ResolvableType.forClass(clazz);
 		assertTrue(writers.stream().anyMatch(c -> mediaType == null || c.canWrite(type, mediaType)));
 	}

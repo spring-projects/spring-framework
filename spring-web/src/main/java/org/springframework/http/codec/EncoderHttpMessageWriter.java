@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
 /**
  * {@code HttpMessageWriter} that wraps and delegates to a {@link Encoder}.
  *
- * <p>Also a {@code ServerHttpMessageWriter} that pre-resolves encoding hints
+ * <p>Also a {@code HttpMessageWriter} that pre-resolves encoding hints
  * from the extra information available on the server side such as the request
  * or controller method annotations.
  *
@@ -46,7 +46,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class EncoderHttpMessageWriter<T> implements ServerHttpMessageWriter<T> {
+public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 	private final Encoder<T> encoder;
 
@@ -136,7 +136,7 @@ public class EncoderHttpMessageWriter<T> implements ServerHttpMessageWriter<T> {
 	}
 
 
-	// ServerHttpMessageWriter...
+	// Server side only...
 
 	@Override
 	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType actualType,

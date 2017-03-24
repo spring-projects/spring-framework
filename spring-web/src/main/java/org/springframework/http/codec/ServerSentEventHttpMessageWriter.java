@@ -37,14 +37,14 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
- * {@code ServerHttpMessageWriter} for {@code "text/event-stream"} responses.
+ * {@code HttpMessageWriter} for {@code "text/event-stream"} responses.
  *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ServerSentEventHttpMessageWriter implements ServerHttpMessageWriter<Object> {
+public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Object> {
 
 	private static final List<MediaType> WRITABLE_MEDIA_TYPES =
 			Collections.singletonList(MediaType.TEXT_EVENT_STREAM);

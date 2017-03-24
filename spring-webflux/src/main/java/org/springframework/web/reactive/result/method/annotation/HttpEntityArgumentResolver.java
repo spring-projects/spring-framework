@@ -24,7 +24,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.RequestEntity;
-import org.springframework.http.codec.ServerHttpMessageReader;
+import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
@@ -40,7 +40,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentResolver {
 
-	public HttpEntityArgumentResolver(List<ServerHttpMessageReader<?>> readers,
+	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> readers,
 			ReactiveAdapterRegistry registry) {
 
 		super(readers, registry);

@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.http.codec.ServerHttpMessageReader;
+import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
@@ -45,7 +45,7 @@ import org.springframework.web.server.ServerWebInputException;
  */
 public class RequestBodyArgumentResolver extends AbstractMessageReaderArgumentResolver {
 
-	public RequestBodyArgumentResolver(List<ServerHttpMessageReader<?>> readers,
+	public RequestBodyArgumentResolver(List<HttpMessageReader<?>> readers,
 			ReactiveAdapterRegistry registry) {
 
 		super(readers, registry);
