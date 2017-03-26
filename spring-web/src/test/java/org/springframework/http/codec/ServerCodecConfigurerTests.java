@@ -61,12 +61,13 @@ public class ServerCodecConfigurerTests {
 	@Test
 	public void defaultReaders() throws Exception {
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
-		assertEquals(8, readers.size());
+		assertEquals(9, readers.size());
 		assertEquals(ByteArrayDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ByteBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(DataBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ResourceDecoder.class, getNextDecoder(readers).getClass());
 		assertStringDecoder(getNextDecoder(readers), true);
+		assertEquals(FormHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
 		assertEquals(Jaxb2XmlDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(Jackson2JsonDecoder.class, getNextDecoder(readers).getClass());
 		assertStringDecoder(getNextDecoder(readers), false);
@@ -110,12 +111,13 @@ public class ServerCodecConfigurerTests {
 
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
 
-		assertEquals(12, readers.size());
+		assertEquals(13, readers.size());
 		assertEquals(ByteArrayDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ByteBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(DataBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ResourceDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(StringDecoder.class, getNextDecoder(readers).getClass());
+		assertEquals(FormHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
 		assertSame(customDecoder1, getNextDecoder(readers));
 		assertSame(customReader1, readers.get(this.index.getAndIncrement()));
 		assertEquals(Jaxb2XmlDecoder.class, getNextDecoder(readers).getClass());

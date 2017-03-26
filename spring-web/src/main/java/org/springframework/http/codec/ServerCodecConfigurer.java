@@ -109,6 +109,8 @@ public class ServerCodecConfigurer {
 		this.defaultCodecs.addReaderTo(result, ResourceDecoder.class, ResourceDecoder::new);
 		this.defaultCodecs.addStringReaderTextOnlyTo(result);
 
+		this.defaultCodecs.addReaderTo(result, FormHttpMessageReader::new);
+
 		// Custom, concrete Java type readers
 		this.customCodecs.addTypedReadersTo(result);
 
