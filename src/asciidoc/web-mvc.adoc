@@ -771,9 +771,7 @@ __URI templates__ can be used for convenient access to selected parts of a URL i
 `@RequestMapping` method.
 
 A URI Template is a URI-like string, containing one or more variable names. When you
-substitute values for these variables, the template becomes a URI. The
-http://bitworking.org/projects/URI-Templates/[proposed RFC] for URI Templates defines
-how a URI is parameterized. For example, the URI Template
+substitute values for these variables, the template becomes a URI. For example
 `http://www.example.com/users/{userId}` contains the variable __userId__. Assigning the
 value __fred__ to the variable yields `http://www.example.com/users/fred`.
 

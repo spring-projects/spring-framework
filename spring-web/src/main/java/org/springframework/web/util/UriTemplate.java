@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
 
 /**
  * Represents a URI template. A URI template is a URI-like String that contains variables
- * enclosed by braces ({@code {}}), which can be expanded to produce an actual URI.
+ * enclosed by braces ({@code {}}) which can be expanded to produce an actual URI.
  *
  * <p>See {@link #expand(Map)}, {@link #expand(Object[])}, and {@link #match(String)}
  * for example usages.
@@ -39,7 +39,6 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @since 3.0
- * @see <a href="http://bitworking.org/projects/URI-Templates/">URI Templates</a>
  */
 @SuppressWarnings("serial")
 public class UriTemplate implements Serializable {
