@@ -41,7 +41,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Base class for client or server codec configurers.
+ * Base class for client or server HTTP message reader and writer configurers.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -103,13 +103,13 @@ public abstract class AbstractCodecConfigurer {
 		List<HttpMessageReader<?>> result = new ArrayList<>();
 
 		addDefaultTypedReaders(result);
-		addCustomTypedReaders(result);
+		customCodec().addTypedReadersTo(result);
 
 		addDefaultObjectReaders(result);
-		addCustomObjectReaders(result);
+		customCodec().addObjectReadersTo(result);
 
+		// String + "*/*"
 		defaultCodec().addStringReaderTo(result);
-
 		return result;
 	}
 
@@ -125,13 +125,6 @@ public abstract class AbstractCodecConfigurer {
 	}
 
 	/**
-	 * Add custom, concrete, Java type readers.
-	 */
-	protected void addCustomTypedReaders(List<HttpMessageReader<?>> result) {
-		customCodec().addTypedReadersTo(result);
-	}
-
-	/**
 	 * Add built-in, Object-based readers.
 	 */
 	protected void addDefaultObjectReaders(List<HttpMessageReader<?>> result) {
@@ -144,14 +137,6 @@ public abstract class AbstractCodecConfigurer {
 	}
 
 	/**
-	 * Add custom, Object-based readers.
-	 */
-	protected void addCustomObjectReaders(List<HttpMessageReader<?>> result) {
-		customCodec().addObjectReadersTo(result);
-	}
-
-
-	/**
 	 * Prepare a list of HTTP message writers.
 	 */
 	public List<HttpMessageWriter<?>> getWriters() {
@@ -159,14 +144,13 @@ public abstract class AbstractCodecConfigurer {
 		List<HttpMessageWriter<?>> result = new ArrayList<>();
 
 		addDefaultTypedWriter(result);
-		addCustomTypedWriter(result);
+		customCodec().addTypedWritersTo(result);
 
 		addDefaultObjectWriters(result);
-		addCustomObjectWriters(result);
+		customCodec().addObjectWritersTo(result);
 
 		// String + "*/*"
 		defaultCodec().addStringWriterTo(result);
-
 		return result;
 	}
 
@@ -182,13 +166,6 @@ public abstract class AbstractCodecConfigurer {
 	}
 
 	/**
-	 * Add custom, concrete, Java type readers.
-	 */
-	protected void addCustomTypedWriter(List<HttpMessageWriter<?>> result) {
-		customCodec().addTypedWritersTo(result);
-	}
-
-	/**
 	 * Add built-in, Object-based readers.
 	 */
 	protected void addDefaultObjectWriters(List<HttpMessageWriter<?>> result) {
@@ -199,14 +176,6 @@ public abstract class AbstractCodecConfigurer {
 			defaultCodec().addWriterTo(result, Jackson2JsonEncoder.class, Jackson2JsonEncoder::new);
 		}
 	}
-
-	/**
-	 * Add custom, Object-based readers.
-	 */
-	protected void addCustomObjectWriters(List<HttpMessageWriter<?>> result) {
-		customCodec().addObjectWritersTo(result);
-	}
-
 
 
 	/**

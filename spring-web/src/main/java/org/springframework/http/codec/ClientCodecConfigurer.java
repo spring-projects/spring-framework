@@ -21,6 +21,15 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 
 /**
+ * Helps to configure a list of client-side HTTP message readers and writers
+ * with support for built-in defaults and options to register additional custom
+ * readers and writers via {@link #customCodec()}.
+ *
+ * <p>The built-in defaults include basic data types such as various byte
+ * representations, resources, strings, forms, but also others like JAXB2 and
+ * Jackson 2 based on classpath detection. There are options to
+ * {@link #defaultCodec() override} some of the defaults or to have them
+ * {@link #registerDefaults(boolean) turned off} completely.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
