@@ -23,27 +23,14 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.codec.ByteArrayDecoder;
-import org.springframework.core.codec.ByteArrayEncoder;
-import org.springframework.core.codec.ByteBufferDecoder;
-import org.springframework.core.codec.ByteBufferEncoder;
-import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
-import org.springframework.core.codec.StringDecoder;
+import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
-import org.springframework.http.codec.FormHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.codec.ResourceHttpMessageWriter;
-import org.springframework.http.codec.ServerSentEventHttpMessageReader;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
-import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * Default implementation of {@link ExchangeStrategies.Builder}.
@@ -53,62 +40,15 @@ import org.springframework.util.ClassUtils;
  */
 class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Builder {
 
-	private static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					DefaultExchangeStrategiesBuilder.class.getClassLoader()) &&
-					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-							DefaultExchangeStrategiesBuilder.class.getClassLoader());
-
-	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder",
-					DefaultExchangeStrategiesBuilder.class.getClassLoader());
-
-
 	private final List<HttpMessageReader<?>> messageReaders = new ArrayList<>();
 
 	private final List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 
 
 	public void defaultConfiguration() {
-		defaultReaders();
-		defaultWriters();
-	}
-
-	private void defaultReaders() {
-		messageReader(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
-		messageReader(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
-		messageReader(new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly(false)));
-		if (jaxb2Present) {
-			messageReader(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
-		}
-		if (jackson2Present) {
-			messageReader(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
-		}
-		messageReader(new ServerSentEventHttpMessageReader(getSseDecoder()));
-		messageReader(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(false)));
-	}
-
-	private Decoder<?> getSseDecoder() {
-		if (jackson2Present) {
-			return new Jackson2JsonDecoder();
-		}
-		else {
-			return null;
-		}
-	}
-
-	private void defaultWriters() {
-		messageWriter(new EncoderHttpMessageWriter<>(new ByteArrayEncoder()));
-		messageWriter(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
-		messageWriter(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
-		messageWriter(new ResourceHttpMessageWriter());
-		messageWriter(new FormHttpMessageWriter());
-		if (jaxb2Present) {
-			messageWriter(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
-		}
-		if (jackson2Present) {
-			messageWriter(new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder()));
-		}
+		ClientCodecConfigurer configurer = new ClientCodecConfigurer();
+		configurer.getReaders().forEach(this::messageReader);
+		configurer.getWriters().forEach(this::messageWriter);
 	}
 
 	public void applicationContext(ApplicationContext applicationContext) {

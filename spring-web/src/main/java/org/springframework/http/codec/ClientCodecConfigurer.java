@@ -1,0 +1,85 @@
+/*
+ * Copyright 2002-2017 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.springframework.http.codec;
+
+import java.util.List;
+
+import org.springframework.core.codec.Decoder;
+import org.springframework.http.codec.json.Jackson2JsonDecoder;
+
+/**
+ *
+ * @author Rossen Stoyanchev
+ * @since 5.0
+ */
+public class ClientCodecConfigurer extends AbstractCodecConfigurer {
+
+
+	public ClientCodecConfigurer() {
+		super(new ClientDefaultCodecConfigurer());
+	}
+
+
+	@Override
+	public ClientDefaultCodecConfigurer defaultCodec() {
+		return (ClientDefaultCodecConfigurer) super.defaultCodec();
+	}
+
+
+	@Override
+	protected void addDefaultTypedWriter(List<HttpMessageWriter<?>> result) {
+		super.addDefaultTypedWriter(result);
+		defaultCodec().addWriterTo(result, FormHttpMessageWriter::new);
+	}
+
+	@Override
+	protected void addDefaultObjectReaders(List<HttpMessageReader<?>> result) {
+		super.addDefaultObjectReaders(result);
+		defaultCodec().addServerSentEventReaderTo(result);
+	}
+
+
+	/**
+	 * Extension of {@code DefaultCodecConfigurer} with extra client options.
+	 */
+	public static class ClientDefaultCodecConfigurer extends DefaultCodecConfigurer {
+
+		/**
+		 * Configure the {@code Decoder} to use for Server-Sent Events.
+		 * <p>By default the {@link #jackson2Decoder} override is used for SSE.
+		 * @param decoder the decoder to use
+		 */
+		public void serverSentEventDecoder(Decoder<?> decoder) {
+			HttpMessageReader<?> reader = new ServerSentEventHttpMessageReader(decoder);
+			getReaders().put(ServerSentEventHttpMessageReader.class, reader);
+		}
+
+
+		// Internal methods for building a list of default readers or writers...
+
+		private void addServerSentEventReaderTo(List<HttpMessageReader<?>> result) {
+			addReaderTo(result, () -> findReader(ServerSentEventHttpMessageReader.class, () -> {
+				Decoder<?> decoder = null;
+				if (jackson2Present) {
+					decoder = findDecoderReader(
+							Jackson2JsonDecoder.class, Jackson2JsonDecoder::new).getDecoder();
+				}
+				return new ServerSentEventHttpMessageReader(decoder);
+			}));
+		}
+	}
+
+}
