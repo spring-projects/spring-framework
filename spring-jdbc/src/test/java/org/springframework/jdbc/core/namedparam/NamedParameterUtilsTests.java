@@ -189,6 +189,26 @@ public class NamedParameterUtilsTests {
 		assertEquals(expectedSql, NamedParameterUtils.substituteNamedParameters(parsedSql, null));
 	}
 
+	@Test  // SPR-15382
+	public void parseSqlStatementWithPostgresAnyArrayStringsExistsOperator() throws Exception {
+		String expectedSql = "select '[\"3\", \"11\"]'::jsonb ?| '{1,3,11,12,17}'::text[]";
+		String sql = "select '[\"3\", \"11\"]'::jsonb ?| '{1,3,11,12,17}'::text[]";
+
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		assertEquals(0, parsedSql.getTotalParameterCount());
+		assertEquals(expectedSql, NamedParameterUtils.substituteNamedParameters(parsedSql, null));
+	}
+
+	@Test  // SPR-15382
+	public void parseSqlStatementWithPostgresAllArrayStringsExistsOperator() throws Exception {
+		String expectedSql = "select '[\"3\", \"11\"]'::jsonb ?& '{1,3,11,12,17}'::text[] AND ? = 'Back in Black'";
+		String sql = "select '[\"3\", \"11\"]'::jsonb ?& '{1,3,11,12,17}'::text[] AND :album = 'Back in Black'";
+
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		assertEquals(1, parsedSql.getTotalParameterCount());
+		assertEquals(expectedSql, NamedParameterUtils.substituteNamedParameters(parsedSql, null));
+	}
+
 	@Test  // SPR-7476
 	public void parseSqlStatementWithEscapedColon() throws Exception {
 		String expectedSql = "select '0\\:0' as a, foo from bar where baz < DATE(? 23:59:59) and baz = ?";
