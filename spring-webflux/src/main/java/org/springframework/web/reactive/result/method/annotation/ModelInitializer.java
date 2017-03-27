@@ -38,8 +38,8 @@ import org.springframework.web.server.ServerWebExchange;
 
 
 /**
- * Helper class to assist {@link RequestMappingHandlerAdapter} with
- * initialization of the default model through {@code @ModelAttribute} methods.
+ * Package-private class to assist {@link RequestMappingHandlerAdapter} with
+ * default model initialization through {@code @ModelAttribute} methods.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

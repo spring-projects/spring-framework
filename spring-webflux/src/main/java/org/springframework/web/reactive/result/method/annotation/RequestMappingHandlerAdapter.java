@@ -16,15 +16,8 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
@@ -37,25 +30,17 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.DataBufferDecoder;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.WebBindingInitializer;
-import org.springframework.web.method.ControllerAdviceBean;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
@@ -64,8 +49,6 @@ import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
-
-import static org.springframework.core.MethodIntrospector.selectMethods;
 
 /**
  * Supports the invocation of {@code @RequestMapping} methods.
@@ -94,22 +77,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 
 	private ConfigurableApplicationContext applicationContext;
 
-
-	private final Map<Class<?>, Set<Method>> binderMethodCache = new ConcurrentHashMap<>(64);
-
-	private final Map<Class<?>, Set<Method>> attributeMethodCache = new ConcurrentHashMap<>(64);
-
-	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
-			new ConcurrentHashMap<>(64);
-
-
-	private final Map<ControllerAdviceBean, Set<Method>> binderAdviceCache = new LinkedHashMap<>(64);
-
-	private final Map<ControllerAdviceBean, Set<Method>> attributeAdviceCache = new LinkedHashMap<>(64);
-
-	private final Map<ControllerAdviceBean, ExceptionHandlerMethodResolver> exceptionHandlerAdviceCache =
-			new LinkedHashMap<>(64);
-
+	private ControllerMethodResolver controllerMethodResolver;
 
 	private ModelInitializer modelInitializer;
 
@@ -158,10 +126,18 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 		return this.webBindingInitializer;
 	}
 
+	/**
+	 * Configure the registry for adapting various reactive types.
+	 * <p>By default this is an instance of {@link ReactiveAdapterRegistry} with
+	 * default settings.
+	 */
 	public void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
 		this.reactiveAdapterRegistry = registry;
 	}
 
+	/**
+	 * Return the configured registry for adapting reactive types.
+	 */
 	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
 		return this.reactiveAdapterRegistry;
 	}
@@ -250,51 +226,18 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		initControllerAdviceCache();
+
 		if (this.argumentResolvers == null) {
 			this.argumentResolvers = getDefaultArgumentResolvers();
 		}
 		if (this.initBinderArgumentResolvers == null) {
 			this.initBinderArgumentResolvers = getDefaultInitBinderArgumentResolvers();
 		}
+
+		this.controllerMethodResolver = new ControllerMethodResolver(
+				getArgumentResolvers(), getInitBinderArgumentResolvers(), getApplicationContext());
+
 		this.modelInitializer = new ModelInitializer(getReactiveAdapterRegistry());
-	}
-
-	private void initControllerAdviceCache() {
-		if (getApplicationContext() == null) {
-			return;
-		}
-		if (logger.isInfoEnabled()) {
-			logger.info("Looking for @ControllerAdvice: " + getApplicationContext());
-		}
-
-		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
-		AnnotationAwareOrderComparator.sort(beans);
-
-		for (ControllerAdviceBean bean : beans) {
-			Class<?> beanType = bean.getBeanType();
-			Set<Method> attrMethods = selectMethods(beanType, ATTRIBUTE_METHODS);
-			if (!attrMethods.isEmpty()) {
-				this.attributeAdviceCache.put(bean, attrMethods);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected @ModelAttribute methods in " + bean);
-				}
-			}
-			Set<Method> binderMethods = selectMethods(beanType, BINDER_METHODS);
-			if (!binderMethods.isEmpty()) {
-				this.binderAdviceCache.put(bean, binderMethods);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected @InitBinder methods in " + bean);
-				}
-			}
-			ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(beanType);
-			if (resolver.hasExceptionMappings()) {
-				this.exceptionHandlerAdviceCache.put(bean, resolver);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected @ExceptionHandler methods in " + bean);
-				}
-			}
-		}
 	}
 
 	protected List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
@@ -374,10 +317,10 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 		HandlerMethod handlerMethod = (HandlerMethod) handler;
 
 		BindingContext bindingContext = new InitBinderBindingContext(
-				getWebBindingInitializer(), getBinderMethods(handlerMethod));
+				getWebBindingInitializer(), getInitBinderMethods(handlerMethod));
 
 		return this.modelInitializer
-				.initModel(bindingContext, getAttributeMethods(handlerMethod), exchange)
+				.initModel(bindingContext, getModelAttributeMethods(handlerMethod), exchange)
 				.then(() -> {
 					Function<Throwable, Mono<HandlerResult>> exceptionHandler =
 							ex -> handleException(exchange, handlerMethod, bindingContext, ex);
@@ -391,68 +334,20 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 				});
 	}
 
-	private List<SyncInvocableHandlerMethod> getBinderMethods(HandlerMethod handlerMethod) {
-
-		List<SyncInvocableHandlerMethod> result = new ArrayList<>();
-		Class<?> handlerType = handlerMethod.getBeanType();
-
-		// Global methods first
-		this.binderAdviceCache.entrySet().forEach(entry -> {
-			if (entry.getKey().isApplicableToBeanType(handlerType)) {
-				Object bean = entry.getKey().resolveBean();
-				entry.getValue().forEach(method -> result.add(createBinderMethod(bean, method)));
-			}
-		});
-
-		this.binderMethodCache
-				.computeIfAbsent(handlerType, aClass -> selectMethods(handlerType, BINDER_METHODS))
-				.forEach(method -> {
-					Object bean = handlerMethod.getBean();
-					result.add(createBinderMethod(bean, method));
-				});
-
-		return result;
+	private List<SyncInvocableHandlerMethod> getInitBinderMethods(HandlerMethod handlerMethod) {
+		return this.controllerMethodResolver.resolveInitBinderMethods(handlerMethod);
 	}
 
-	private SyncInvocableHandlerMethod createBinderMethod(Object bean, Method method) {
-		SyncInvocableHandlerMethod invocable = new SyncInvocableHandlerMethod(bean, method);
-		invocable.setArgumentResolvers(getInitBinderArgumentResolvers());
-		return invocable;
-	}
-
-	private List<InvocableHandlerMethod> getAttributeMethods(HandlerMethod handlerMethod) {
-
-		List<InvocableHandlerMethod> result = new ArrayList<>();
-		Class<?> handlerType = handlerMethod.getBeanType();
-
-		// Global methods first
-		this.attributeAdviceCache.entrySet().forEach(entry -> {
-			if (entry.getKey().isApplicableToBeanType(handlerType)) {
-				Object bean = entry.getKey().resolveBean();
-				entry.getValue().forEach(method -> result.add(createHandlerMethod(bean, method)));
-			}
-		});
-
-		this.attributeMethodCache
-				.computeIfAbsent(handlerType, aClass -> selectMethods(handlerType, ATTRIBUTE_METHODS))
-				.forEach(method -> {
-					Object bean = handlerMethod.getBean();
-					result.add(createHandlerMethod(bean, method));
-				});
-
-		return result;
-	}
-
-	private InvocableHandlerMethod createHandlerMethod(Object bean, Method method) {
-		InvocableHandlerMethod invocable = new InvocableHandlerMethod(bean, method);
-		invocable.setArgumentResolvers(getArgumentResolvers());
-		return invocable;
+	private List<InvocableHandlerMethod> getModelAttributeMethods(HandlerMethod handlerMethod) {
+		return this.controllerMethodResolver.resolveModelAttributeMethods(handlerMethod);
 	}
 
 	private Mono<HandlerResult> handleException(ServerWebExchange exchange, HandlerMethod handlerMethod,
 			BindingContext bindingContext, Throwable ex) {
 
-		InvocableHandlerMethod invocable = getExceptionHandlerMethod(ex, handlerMethod);
+		InvocableHandlerMethod invocable =
+				this.controllerMethodResolver.resolveExceptionHandlerMethod(ex, handlerMethod);
+
 		if (invocable != null) {
 			try {
 				if (logger.isDebugEnabled()) {
@@ -470,46 +365,5 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 		}
 		return Mono.error(ex);
 	}
-
-	private InvocableHandlerMethod getExceptionHandlerMethod(Throwable ex, HandlerMethod handlerMethod) {
-
-		Class<?> handlerType = handlerMethod.getBeanType();
-
-		ExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache
-				.computeIfAbsent(handlerType, ExceptionHandlerMethodResolver::new);
-
-		return Optional
-				.ofNullable(resolver.resolveMethodByThrowable(ex))
-				.map(method -> createHandlerMethod(handlerMethod.getBean(), method))
-				.orElseGet(() ->
-						this.exceptionHandlerAdviceCache.entrySet().stream()
-								.map(entry -> {
-									if (entry.getKey().isApplicableToBeanType(handlerType)) {
-										Method method = entry.getValue().resolveMethodByThrowable(ex);
-										if (method != null) {
-											Object bean = entry.getKey().resolveBean();
-											return createHandlerMethod(bean, method);
-										}
-									}
-									return null;
-								})
-								.filter(Objects::nonNull)
-								.findFirst()
-								.orElse(null));
-	}
-
-
-	/**
-	 * MethodFilter that matches {@link InitBinder @InitBinder} methods.
-	 */
-	public static final ReflectionUtils.MethodFilter BINDER_METHODS = method ->
-			AnnotationUtils.findAnnotation(method, InitBinder.class) != null;
-
-	/**
-	 * MethodFilter that matches {@link ModelAttribute @ModelAttribute} methods.
-	 */
-	public static final ReflectionUtils.MethodFilter ATTRIBUTE_METHODS = method ->
-			(AnnotationUtils.findAnnotation(method, RequestMapping.class) == null) &&
-					(AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null);
 
 }

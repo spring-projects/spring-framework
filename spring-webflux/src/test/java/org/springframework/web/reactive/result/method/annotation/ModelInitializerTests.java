@@ -29,8 +29,10 @@ import rx.Single;
 
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.ui.Model;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -46,8 +48,6 @@ import org.springframework.web.server.ServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter.ATTRIBUTE_METHODS;
-import static org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter.BINDER_METHODS;
 
 /**
  * Unit tests for {@link ModelInitializer}.
@@ -188,4 +188,10 @@ public class ModelInitializerTests {
 		}
 	}
 
+	private static final ReflectionUtils.MethodFilter BINDER_METHODS = method ->
+			AnnotationUtils.findAnnotation(method, InitBinder.class) != null;
+
+	private static final ReflectionUtils.MethodFilter ATTRIBUTE_METHODS = method ->
+			(AnnotationUtils.findAnnotation(method, RequestMapping.class) == null) &&
+					(AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null);
 }
