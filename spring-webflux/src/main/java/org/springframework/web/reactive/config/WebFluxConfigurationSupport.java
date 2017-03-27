@@ -71,16 +71,6 @@ import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
  */
 public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
-	private static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					WebFluxConfigurationSupport.class.getClassLoader()) &&
-			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-					WebFluxConfigurationSupport.class.getClassLoader());
-
-	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder", WebFluxConfigurationSupport.class.getClassLoader());
-
-
 	private Map<String, CorsConfiguration> corsConfigurations;
 
 	private PathMatchConfigurer pathMatchConfigurer;
@@ -159,7 +149,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 */
 	protected Map<String, MediaType> getDefaultMediaTypeMappings() {
 		Map<String, MediaType> map = new HashMap<>();
-		if (jackson2Present) {
+		if (ServerCodecConfigurer.jackson2Present) {
 			map.put("json", MediaType.APPLICATION_JSON);
 		}
 		return map;
