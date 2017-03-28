@@ -146,7 +146,6 @@ public class ResponseEntityTests {
 		}
 
 		@GetMapping(produces = "text/event-stream")
-		@SuppressWarnings("deprecation")
 		Flux<Person> getPersonStream() {
 			return Flux.intervalMillis(100).onBackpressureBuffer(10).map(index -> new Person("N" + index));
 		}
