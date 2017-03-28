@@ -111,7 +111,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * Listeners can call this method to cancel further writing.
 	 */
 	public void cancel() {
-		this.subscription.cancel();
+		if (this.subscription != null) {
+			this.subscription.cancel();
+		}
 	}
 
 

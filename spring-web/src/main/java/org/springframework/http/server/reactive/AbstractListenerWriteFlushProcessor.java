@@ -98,7 +98,9 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 	 * Listeners can call this method to cancel further writing.
 	 */
 	protected void cancel() {
-		this.subscription.cancel();
+		if (this.subscription != null) {
+			this.subscription.cancel();
+		}
 	}
 
 
