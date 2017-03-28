@@ -562,7 +562,7 @@ public abstract class ObjectUtils {
 	 * @see Boolean#hashCode()
 	 */
 	public static int hashCode(boolean bool) {
-		return (bool ? 1231 : 1237);
+		return Boolean.hashCode(bool);
 	}
 
 	/**
@@ -570,7 +570,7 @@ public abstract class ObjectUtils {
 	 * @see Double#hashCode()
 	 */
 	public static int hashCode(double dbl) {
-		return hashCode(Double.doubleToLongBits(dbl));
+		return Double.hashCode(dbl);
 	}
 
 	/**
@@ -578,7 +578,7 @@ public abstract class ObjectUtils {
 	 * @see Float#hashCode()
 	 */
 	public static int hashCode(float flt) {
-		return Float.floatToIntBits(flt);
+		return Float.hashCode(flt);
 	}
 
 	/**
@@ -586,7 +586,7 @@ public abstract class ObjectUtils {
 	 * @see Long#hashCode()
 	 */
 	public static int hashCode(long lng) {
-		return (int) (lng ^ (lng >>> 32));
+		return Long.hashCode(lng);
 	}
 
 
