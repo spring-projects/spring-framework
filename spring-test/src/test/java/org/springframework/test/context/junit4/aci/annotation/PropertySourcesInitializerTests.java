@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.PropertySource;
 import org.springframework.mock.env.MockPropertySource;
 import org.springframework.test.context.ContextConfiguration;
@@ -48,8 +47,7 @@ public class PropertySourcesInitializerTests {
 	static class Config {
 
 		@Value("${enigma}")
-		// If the PropertySourcesPlaceholderConfigurer is not configured as a
-		// static @Bean, then the following can be used to directly access the
+		// The following can also be used to directly access the
 		// environment instead of relying on placeholder replacement.
 		// @Value("#{ environment['enigma'] }")
 		private String enigma;
@@ -60,10 +58,6 @@ public class PropertySourcesInitializerTests {
 			return enigma;
 		}
 
-		@Bean
-		public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
-			return new PropertySourcesPlaceholderConfigurer();
-		}
 	}
 
 
