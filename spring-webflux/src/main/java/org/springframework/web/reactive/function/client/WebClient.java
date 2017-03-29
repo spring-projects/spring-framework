@@ -23,13 +23,17 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
@@ -58,43 +62,49 @@ public interface WebClient {
 	 * Prepare an HTTP GET request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec get();
+	UriSpec<RequestHeadersSpec<?>> get();
 
 	/**
 	 * Prepare an HTTP HEAD request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec head();
+	UriSpec<RequestHeadersSpec<?>> head();
 
 	/**
 	 * Prepare an HTTP POST request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec post();
+	UriSpec<RequestBodySpec> post();
 
 	/**
 	 * Prepare an HTTP PUT request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec put();
+	UriSpec<RequestBodySpec> put();
 
 	/**
 	 * Prepare an HTTP PATCH request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec patch();
+	UriSpec<RequestBodySpec> patch();
 
 	/**
 	 * Prepare an HTTP DELETE request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec delete();
+	UriSpec<RequestHeadersSpec<?>> delete();
 
 	/**
 	 * Prepare an HTTP OPTIONS request.
 	 * @return a spec for specifying the target URL
 	 */
-	UriSpec options();
+	UriSpec<RequestHeadersSpec<?>> options();
+
+	/**
+	 * Prepare a request for the specified {@code HttpMethod}.
+	 * @return a spec for specifying the target URL
+	 */
+	UriSpec<RequestBodySpec> method(HttpMethod method);
 
 
 	/**
@@ -266,38 +276,38 @@ public interface WebClient {
 	/**
 	 * Contract for specifying the URI for a request.
 	 */
-	interface UriSpec {
+	interface UriSpec<S extends RequestHeadersSpec<?>> {
 
 		/**
 		 * Specify the URI using an absolute, fully constructed {@link URI}.
 		 */
-		HeaderSpec uri(URI uri);
+		S uri(URI uri);
 
 		/**
 		 * Specify the URI for the request using a URI template and URI variables.
 		 * If a {@link UriBuilderFactory} was configured for the client (e.g.
 		 * with a base URI) it will be used to expand the URI template.
 		 */
-		HeaderSpec uri(String uri, Object... uriVariables);
+		S uri(String uri, Object... uriVariables);
 
 		/**
 		 * Specify the URI for the request using a URI template and URI variables.
 		 * If a {@link UriBuilderFactory} was configured for the client (e.g.
 		 * with a base URI) it will be used to expand the URI template.
 		 */
-		HeaderSpec uri(String uri, Map<String, ?> uriVariables);
+		S uri(String uri, Map<String, ?> uriVariables);
 
 		/**
 		 * Build the URI for the request using the {@link UriBuilderFactory}
 		 * configured for this client.
 		 */
-		HeaderSpec uri(Function<UriBuilder, URI> uriFunction);
+		S uri(Function<UriBuilder, URI> uriFunction);
 	}
 
 	/**
 	 * Contract for specifying request headers leading up to the exchange.
 	 */
-	interface HeaderSpec {
+	interface RequestHeadersSpec<S extends RequestHeadersSpec<S>> {
 
 		/**
 		 * Set the list of acceptable {@linkplain MediaType media types}, as
@@ -305,7 +315,7 @@ public interface WebClient {
 		 * @param acceptableMediaTypes the acceptable media types
 		 * @return this builder
 		 */
-		HeaderSpec accept(MediaType... acceptableMediaTypes);
+		S accept(MediaType... acceptableMediaTypes);
 
 		/**
 		 * Set the list of acceptable {@linkplain Charset charsets}, as specified
@@ -313,25 +323,7 @@ public interface WebClient {
 		 * @param acceptableCharsets the acceptable charsets
 		 * @return this builder
 		 */
-		HeaderSpec acceptCharset(Charset... acceptableCharsets);
-
-		/**
-		 * Set the length of the body in bytes, as specified by the
-		 * {@code Content-Length} header.
-		 * @param contentLength the content length
-		 * @return this builder
-		 * @see HttpHeaders#setContentLength(long)
-		 */
-		HeaderSpec contentLength(long contentLength);
-
-		/**
-		 * Set the {@linkplain MediaType media type} of the body, as specified
-		 * by the {@code Content-Type} header.
-		 * @param contentType the content type
-		 * @return this builder
-		 * @see HttpHeaders#setContentType(MediaType)
-		 */
-		HeaderSpec contentType(MediaType contentType);
+		S acceptCharset(Charset... acceptableCharsets);
 
 		/**
 		 * Add a cookie with the given name and value.
@@ -339,14 +331,14 @@ public interface WebClient {
 		 * @param value the cookie value
 		 * @return this builder
 		 */
-		HeaderSpec cookie(String name, String value);
+		S cookie(String name, String value);
 
 		/**
 		 * Copy the given cookies into the entity's cookies map.
 		 * @param cookies the existing cookies to copy from
 		 * @return this builder
 		 */
-		HeaderSpec cookies(MultiValueMap<String, String> cookies);
+		S cookies(MultiValueMap<String, String> cookies);
 
 		/**
 		 * Set the value of the {@code If-Modified-Since} header.
@@ -355,14 +347,14 @@ public interface WebClient {
 		 * @param ifModifiedSince the new value of the header
 		 * @return this builder
 		 */
-		HeaderSpec ifModifiedSince(ZonedDateTime ifModifiedSince);
+		S ifModifiedSince(ZonedDateTime ifModifiedSince);
 
 		/**
 		 * Set the values of the {@code If-None-Match} header.
 		 * @param ifNoneMatches the new value of the header
 		 * @return this builder
 		 */
-		HeaderSpec ifNoneMatch(String... ifNoneMatches);
+		S ifNoneMatch(String... ifNoneMatches);
 
 		/**
 		 * Add the given, single header value under the given name.
@@ -370,40 +362,107 @@ public interface WebClient {
 		 * @param headerValues the header value(s)
 		 * @return this builder
 		 */
-		HeaderSpec header(String headerName, String... headerValues);
+		S header(String headerName, String... headerValues);
 
 		/**
 		 * Copy the given headers into the entity's headers map.
 		 * @param headers the existing headers to copy from
 		 * @return this builder
 		 */
-		HeaderSpec headers(HttpHeaders headers);
+		S headers(HttpHeaders headers);
 
 		/**
-		 * Perform the request without a request body.
+		 * Exchange the built request for a delayed {@code ClientResponse}.
 		 * @return a {@code Mono} with the response
 		 */
 		Mono<ClientResponse> exchange();
 
 		/**
-		 * Set the body of the request to the given {@code BodyInserter} and
-		 * perform the request.
-		 * @param inserter the {@code BodyInserter} that writes to the request
-		 * @param <T> the type contained in the body
-		 * @return a {@code Mono} with the response
+		 * Execute the built request, and use the given extractor to return the response body as a
+		 * delayed {@code T}.
+		 * @param extractor the extractor for the response body
+		 * @param <T> the response type
+		 * @return the body of the response, extracted with {@code extractor}
 		 */
-		<T> Mono<ClientResponse> exchange(BodyInserter<T, ? super ClientHttpRequest> inserter);
+		<T> Mono<T> retrieve(BodyExtractor<T, ? super ClientHttpResponse> extractor);
 
 		/**
-		 * Set the body of the request to the given {@code Publisher} and
-		 * perform the request.
+		 * Execute the built request, and return the response body as a delayed {@code T}.
+		 * <p>This method is a convenient shortcut for {@link #retrieve(BodyExtractor)} with a
+		 * {@linkplain org.springframework.web.reactive.function.BodyExtractors#toMono(Class)
+		 * Mono body extractor}.
+		 * @param responseType the class of the response
+		 * @param <T> the response type
+		 * @return the body of the response
+		 */
+		<T> Mono<T> retrieveMono(Class<T> responseType);
+
+		/**
+		 * Execute the built request, and return the response body as a delayed sequence of
+		 * {@code T}'s.
+		 * <p>This method is a convenient shortcut for {@link #retrieve(BodyExtractor)} with a
+		 * {@linkplain org.springframework.web.reactive.function.BodyExtractors#toFlux(Class)}
+		 * Flux body extractor}.
+		 * @param responseType the class of the response
+		 * @param <T> the response type
+		 * @return the body of the response
+		 */
+		<T> Flux<T> retrieveFlux(Class<T> responseType);
+
+	}
+
+	interface RequestBodySpec extends RequestHeadersSpec<RequestBodySpec> {
+
+		/**
+		 * Set the length of the body in bytes, as specified by the
+		 * {@code Content-Length} header.
+		 * @param contentLength the content length
+		 * @return this builder
+		 * @see HttpHeaders#setContentLength(long)
+		 */
+		RequestBodySpec contentLength(long contentLength);
+
+		/**
+		 * Set the {@linkplain MediaType media type} of the body, as specified
+		 * by the {@code Content-Type} header.
+		 * @param contentType the content type
+		 * @return this builder
+		 * @see HttpHeaders#setContentType(MediaType)
+		 */
+		RequestBodySpec contentType(MediaType contentType);
+
+		/**
+		 * Set the body of the request to the given {@code BodyInserter}.
+		 * @param inserter the {@code BodyInserter} that writes to the request
+		 * @param <T> the type contained in the body
+		 * @return this builder
+		 */
+		<T> RequestHeadersSpec<?> body(BodyInserter<T, ? super ClientHttpRequest> inserter);
+
+		/**
+		 * Set the body of the request to the given {@code Publisher}.
+		 * <p>This method is a convenient shortcut for {@link #body(BodyInserter)} with a
+		 * {@linkplain org.springframework.web.reactive.function.BodyInserters#fromPublisher}
+		 * Publisher body inserter}.
 		 * @param publisher the {@code Publisher} to write to the request
 		 * @param elementClass the class of elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
 		 * @param <S> the type of the {@code Publisher}
-		 * @return a {@code Mono} with the response
+		 * @return this builder
 		 */
-		<T, S extends Publisher<T>> Mono<ClientResponse> exchange(S publisher, Class<T> elementClass);
+		<T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, Class<T> elementClass);
+
+		/**
+		 * Set the body of the request to the given {@code Object}.
+		 * <p>This method is a convenient shortcut for {@link #body(BodyInserter)} with a
+		 * {@linkplain org.springframework.web.reactive.function.BodyInserters#fromObject
+		 * Object body inserter}.
+		 * @param body the {@code Object} to write to the request
+		 * @param <T> the type contained in the body
+		 * @return this builder
+		 */
+		<T> RequestHeadersSpec<?> body(T body);
+
 	}
 
 }
