@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.config;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +49,7 @@ import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.reactive.result.SimpleHandlerAdapter;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
@@ -240,11 +239,9 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
 		adapter.setReactiveAdapterRegistry(webFluxAdapterRegistry());
 
-		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
-		addArgumentResolvers(resolvers);
-		if (!resolvers.isEmpty()) {
-			adapter.setCustomArgumentResolvers(resolvers);
-		}
+		ArgumentResolverConfigurer configurer = new ArgumentResolverConfigurer();
+		configureArgumentResolvers(configurer);
+		adapter.setArgumentResolverConfigurer(configurer);
 
 		return adapter;
 	}
@@ -257,9 +254,9 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	/**
-	 * Provide custom argument resolvers without overriding the built-in ones.
+	 * Configure resolvers for custom controller method arguments.
 	 */
-	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+	protected void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
 	}
 
 	/**

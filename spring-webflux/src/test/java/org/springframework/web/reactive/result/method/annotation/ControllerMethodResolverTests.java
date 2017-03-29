@@ -67,8 +67,9 @@ public class ControllerMethodResolverTests {
 	@Before
 	public void setUp() throws Exception {
 
-		List<HandlerMethodArgumentResolver> customResolvers =
-				Arrays.asList(new CustomArgumentResolver(), new CustomSyncArgumentResolver());
+		ArgumentResolverConfigurer configurer = new ArgumentResolverConfigurer();
+		configurer.addCustomResolver(new CustomArgumentResolver());
+		configurer.addCustomResolver(new CustomSyncArgumentResolver());
 
 		List<HttpMessageReader<?>> messageReaders = Arrays.asList(
 				new DecoderHttpMessageReader<>(new ByteArrayDecoder()),
@@ -79,7 +80,7 @@ public class ControllerMethodResolverTests {
 		applicationContext.refresh();
 
 		this.methodResolver = new ControllerMethodResolver(
-				customResolvers, messageReaders, new ReactiveAdapterRegistry(), applicationContext);
+				configurer, messageReaders, new ReactiveAdapterRegistry(), applicationContext);
 
 		Method method = ResolvableMethod.on(TestController.class).mockCall(TestController::handle).method();
 		this.handlerMethod = new HandlerMethod(new TestController(), method);

@@ -29,6 +29,7 @@ import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 
 /**
  * Defines callback methods to customize the configuration for Web Reactive
@@ -80,11 +81,10 @@ public interface WebFluxConfigurer {
 	}
 
 	/**
-	 * Provide custom controller method argument resolvers. Such resolvers do
-	 * not override and will be invoked after the built-in ones.
-	 * @param resolvers a list of resolvers to add
+	 * Configure resolvers for custom controller method arguments.
+	 * @param configurer to configurer to use
 	 */
-	default void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+	default void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
 	}
 
 	/**

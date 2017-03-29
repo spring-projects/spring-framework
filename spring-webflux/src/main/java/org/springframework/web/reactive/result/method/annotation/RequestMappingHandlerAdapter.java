@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -44,7 +43,6 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -63,9 +61,9 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 
 	private WebBindingInitializer webBindingInitializer;
 
-	private ReactiveAdapterRegistry reactiveAdapterRegistry = new ReactiveAdapterRegistry();
+	private ArgumentResolverConfigurer argumentResolverConfigurer;
 
-	private final List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<>(8);
+	private ReactiveAdapterRegistry reactiveAdapterRegistry;
 
 	private ConfigurableApplicationContext applicationContext;
 
@@ -118,6 +116,21 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	}
 
 	/**
+	 * Configure resolvers for controller method arguments.
+	 */
+	public void setArgumentResolverConfigurer(ArgumentResolverConfigurer configurer) {
+		Assert.notNull(configurer, "ArgumentResolverConfigurer is required");
+		this.argumentResolverConfigurer = configurer;
+	}
+
+	/**
+	 * Return the configured resolvers for controller method arguments.
+	 */
+	public ArgumentResolverConfigurer getArgumentResolverConfigurer() {
+		return this.argumentResolverConfigurer;
+	}
+
+	/**
 	 * Configure the registry for adapting various reactive types.
 	 * <p>By default this is an instance of {@link ReactiveAdapterRegistry} with
 	 * default settings.
@@ -131,21 +144,6 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	 */
 	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
 		return this.reactiveAdapterRegistry;
-	}
-
-	/**
-	 * Configure resolvers for custom controller method arguments.
-	 */
-	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-		this.customArgumentResolvers.clear();
-		this.customArgumentResolvers.addAll(resolvers);
-	}
-
-	/**
-	 * Return the configured custom argument resolvers.
-	 */
-	public List<HandlerMethodArgumentResolver> getCustomArgumentResolvers() {
-		return this.customArgumentResolvers;
 	}
 
 	/**
@@ -164,18 +162,22 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 		return this.applicationContext;
 	}
 
-	public ConfigurableBeanFactory getBeanFactory() {
-		return this.applicationContext.getBeanFactory();
-	}
-
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
 
-		this.methodResolver = new ControllerMethodResolver(getCustomArgumentResolvers(),
-				getMessageReaders(), getReactiveAdapterRegistry(), getApplicationContext());
+		if (this.argumentResolverConfigurer == null) {
+			this.argumentResolverConfigurer = new ArgumentResolverConfigurer();
+		}
 
-		this.modelInitializer = new ModelInitializer(getReactiveAdapterRegistry());
+		if (this.reactiveAdapterRegistry == null) {
+			this.reactiveAdapterRegistry = new ReactiveAdapterRegistry();
+		}
+
+		this.methodResolver = new ControllerMethodResolver(this.argumentResolverConfigurer,
+				this.messageReaders, this.reactiveAdapterRegistry, this.applicationContext);
+
+		this.modelInitializer = new ModelInitializer(this.reactiveAdapterRegistry);
 	}
 
 

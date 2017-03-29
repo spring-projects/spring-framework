@@ -17,6 +17,7 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,34 +96,36 @@ class ControllerMethodResolver {
 			new LinkedHashMap<>(64);
 
 
-	ControllerMethodResolver(List<HandlerMethodArgumentResolver> customResolvers,
+	ControllerMethodResolver(ArgumentResolverConfigurer argumentResolverConfigurer,
 			List<HttpMessageReader<?>> messageReaders, ReactiveAdapterRegistry reactiveRegistry,
 			ConfigurableApplicationContext applicationContext) {
 
-		Assert.notNull(customResolvers, "'customResolvers' should not be null");
+		Assert.notNull(argumentResolverConfigurer, "ArgumentResolverConfigurer is required");
 		Assert.notNull(reactiveRegistry, "ReactiveAdapterRegistry is required");
 		Assert.notNull(applicationContext, "ConfigurableApplicationContext is required");
 
-		ResolverRegistrar registrar = ResolverRegistrar.customResolvers(customResolvers).basic();
+		ArgumentResolverRegistrar registrar;
+
+		registrar= ArgumentResolverRegistrar.configurer(argumentResolverConfigurer).basic();
 		addResolversTo(registrar, reactiveRegistry, applicationContext);
 		this.initBinderResolvers = registrar.getSyncResolvers();
 
-		registrar = ResolverRegistrar.customResolvers(customResolvers).modelAttributeSupport();
+		registrar = ArgumentResolverRegistrar.configurer(argumentResolverConfigurer).modelAttributeSupport();
 		addResolversTo(registrar, reactiveRegistry, applicationContext);
 		this.modelAttributeResolvers = registrar.getResolvers();
 
-		registrar = ResolverRegistrar.customResolvers(customResolvers).fullSupport(messageReaders);
+		registrar = ArgumentResolverRegistrar.configurer(argumentResolverConfigurer).fullSupport(messageReaders);
 		addResolversTo(registrar, reactiveRegistry, applicationContext);
 		this.requestMappingResolvers = registrar.getResolvers();
 
-		registrar = ResolverRegistrar.customResolvers(customResolvers).basic();
+		registrar = ArgumentResolverRegistrar.configurer(argumentResolverConfigurer).basic();
 		addResolversTo(registrar, reactiveRegistry, applicationContext);
 		this.exceptionHandlerResolvers = registrar.getResolvers();
 
 		initControllerAdviceCaches(applicationContext);
 	}
 
-	private void addResolversTo(ResolverRegistrar registrar,
+	private void addResolversTo(ArgumentResolverRegistrar registrar,
 			ReactiveAdapterRegistry reactiveRegistry, ConfigurableApplicationContext context) {
 
 		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
@@ -319,7 +322,7 @@ class ControllerMethodResolver {
 					(AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null);
 
 
-	private static class ResolverRegistrar {
+	private static class ArgumentResolverRegistrar {
 
 		private final List<HandlerMethodArgumentResolver> customResolvers;
 
@@ -330,10 +333,10 @@ class ControllerMethodResolver {
 		private final List<HandlerMethodArgumentResolver> result = new ArrayList<>();
 
 
-		private ResolverRegistrar(List<HandlerMethodArgumentResolver> customResolvers,
+		private ArgumentResolverRegistrar(ArgumentResolverConfigurer configurer,
 				List<HttpMessageReader<?>> messageReaders, boolean modelAttribute) {
 
-			this.customResolvers = new ArrayList<>(customResolvers);
+			this.customResolvers = configurer.getCustomResolvers();
 			this.messageReaders = messageReaders != null ? new ArrayList<>(messageReaders) : null;
 			this.modelAttributeSupported = modelAttribute;
 		}
@@ -372,32 +375,32 @@ class ControllerMethodResolver {
 		}
 
 
-		public static Builder customResolvers(List<HandlerMethodArgumentResolver> customResolvers) {
-			return new Builder(customResolvers);
+		public static Builder configurer(ArgumentResolverConfigurer configurer) {
+			return new Builder(configurer);
 		}
 
 
 		public static class Builder {
 
-			private final List<HandlerMethodArgumentResolver> customResolvers;
+			private final ArgumentResolverConfigurer configurer;
 
 
-			public Builder(List<HandlerMethodArgumentResolver> customResolvers) {
-				this.customResolvers = new ArrayList<>(customResolvers);
+			public Builder(ArgumentResolverConfigurer configurer) {
+				this.configurer = configurer;
 			}
 
 
-			public ResolverRegistrar fullSupport(List<HttpMessageReader<?>> readers) {
+			public ArgumentResolverRegistrar fullSupport(List<HttpMessageReader<?>> readers) {
 				Assert.notEmpty(readers, "No message readers");
-				return new ResolverRegistrar(this.customResolvers, readers, true);
+				return new ArgumentResolverRegistrar(this.configurer, readers, true);
 			}
 
-			public ResolverRegistrar modelAttributeSupport() {
-				return new ResolverRegistrar(this.customResolvers, null, true);
+			public ArgumentResolverRegistrar modelAttributeSupport() {
+				return new ArgumentResolverRegistrar(this.configurer, null, true);
 			}
 
-			public ResolverRegistrar basic() {
-				return new ResolverRegistrar(this.customResolvers, null, false);
+			public ArgumentResolverRegistrar basic() {
+				return new ArgumentResolverRegistrar(this.configurer, null, false);
 			}
 		}
 
