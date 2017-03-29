@@ -33,7 +33,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.util.MultiValueMap;
@@ -99,12 +98,6 @@ class DefaultClientResponse implements ClientResponse {
 	@Override
 	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
 		return bodyToPublisher(BodyExtractors.toFlux(elementClass), Flux::error);
-	}
-
-	@Override
-	public <T> Mono<ResponseEntity<T>> toResponseEntity(Class<T> responseClass) {
-		return bodyToMono(responseClass)
-				.map(t -> new ResponseEntity<>(t, headers().asHttpHeaders(), statusCode()));
 	}
 
 	private <T extends Publisher<?>> T bodyToPublisher(

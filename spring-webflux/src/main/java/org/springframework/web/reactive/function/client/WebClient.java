@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.client;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -29,11 +30,10 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
-import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
@@ -372,42 +372,53 @@ public interface WebClient {
 		S headers(HttpHeaders headers);
 
 		/**
-		 * Exchange the built request for a delayed {@code ClientResponse}.
+		 * Exchange the request for a {@code ClientResponse} with full access
+		 * to the response status and headers before extracting the body.
+		 *
+		 * <p>Use {@link Mono#then(Function)} or {@link Mono#flatMap(Function)}
+		 * to compose further on the response:
+		 *
+		 * <pre>
+		 *	Mono&lt;Pojo&gt; mono = client.get().uri("/")
+		 *		.accept(MediaType.APPLICATION_JSON)
+		 *		.exchange()
+		 *		.then(response -> response.bodyToMono(Pojo.class));
+		 *
+		 *	Flux&lt;Pojo&gt; flux = client.get().uri("/")
+		 *		.accept(MediaType.APPLICATION_STREAM_JSON)
+		 *		.exchange()
+		 *		.then(response -> response.bodyToFlux(Pojo.class));
+		 * </pre>
+		 *
 		 * @return a {@code Mono} with the response
 		 */
 		Mono<ClientResponse> exchange();
 
 		/**
-		 * Execute the built request, and use the given extractor to return the response body as a
-		 * delayed {@code T}.
-		 * @param extractor the extractor for the response body
-		 * @param <T> the response type
-		 * @return the body of the response, extracted with {@code extractor}
+		 * A variant of {@link #exchange()} that provides the shortest path to
+		 * retrieving the full response (i.e. status, headers, and body) where
+		 * instead of returning {@code Mono<ClientResponse>} it exposes shortcut
+		 * methods to extract the response body.
+		 *
+		 * <p>Use of this method is simpler when you don't need to deal directly
+		 * with {@link ClientResponse}, e.g. to use a custom {@code BodyExtractor}
+		 * or to check the status and headers before extracting the response.
+		 *
+		 * <pre>
+		 *	Mono&lt;Pojo&gt; bodyMono = client.get().uri("/")
+		 *		.accept(MediaType.APPLICATION_JSON)
+		 *		.retrieve()
+		 *		.bodyToMono(Pojo.class);
+		 *
+		 *	Mono&lt;ResponseEntity&lt;Pojo&gt;&gt; entityMono = client.get().uri("/")
+		 *		.accept(MediaType.APPLICATION_JSON)
+		 *		.retrieve()
+		 *		.bodyToEntity(Pojo.class);
+		 * </pre>
+		 *
+		 * @return spec with options for extracting the response body
 		 */
-		<T> Mono<T> retrieve(BodyExtractor<T, ? super ClientHttpResponse> extractor);
-
-		/**
-		 * Execute the built request, and return the response body as a delayed {@code T}.
-		 * <p>This method is a convenient shortcut for {@link #retrieve(BodyExtractor)} with a
-		 * {@linkplain org.springframework.web.reactive.function.BodyExtractors#toMono(Class)
-		 * Mono body extractor}.
-		 * @param responseType the class of the response
-		 * @param <T> the response type
-		 * @return the body of the response
-		 */
-		<T> Mono<T> retrieveMono(Class<T> responseType);
-
-		/**
-		 * Execute the built request, and return the response body as a delayed sequence of
-		 * {@code T}'s.
-		 * <p>This method is a convenient shortcut for {@link #retrieve(BodyExtractor)} with a
-		 * {@linkplain org.springframework.web.reactive.function.BodyExtractors#toFlux(Class)}
-		 * Flux body extractor}.
-		 * @param responseType the class of the response
-		 * @param <T> the response type
-		 * @return the body of the response
-		 */
-		<T> Flux<T> retrieveFlux(Class<T> responseType);
+		ResponseSpec retrieve();
 
 	}
 
@@ -462,6 +473,50 @@ public interface WebClient {
 		 * @return this builder
 		 */
 		<T> RequestHeadersSpec<?> body(T body);
+
+	}
+
+	interface ResponseSpec {
+
+		/**
+		 * Extract the response body to an Object of type {@code <T>} by
+		 * invoking {@link ClientResponse#bodyToMono(Class)}.
+		 *
+		 * @param bodyType the expected response body type
+		 * @param <T> response body type
+		 * @return {@code Mono} with the result
+		 */
+		<T> Mono<T> bodyToMono(Class<T> bodyType);
+
+		/**
+		 * Extract the response body to a stream of Objects of type {@code <T>}
+		 * by invoking {@link ClientResponse#bodyToFlux(Class)}.
+		 *
+		 * @param elementType the type of element in the response
+		 * @param <T> the type of elements in the response
+		 * @return the body of the response
+		 */
+		<T> Flux<T> bodyToFlux(Class<T> elementType);
+
+		/**
+		 * A variant of {@link #bodyToMono(Class)} that also provides access to
+		 * the response status and headers.
+		 *
+		 * @param bodyType the expected response body type
+		 * @param <T> response body type
+		 * @return {@code Mono} with the result
+		 */
+		<T> Mono<ResponseEntity<T>> bodyToEntity(Class<T> bodyType);
+
+		/**
+		 * A variant of {@link #bodyToFlux(Class)} collected via
+		 * {@link Flux#collectList()} and wrapped in {@code ResponseEntity}.
+		 *
+		 * @param elementType the expected response body list element type
+		 * @param <T> the type of elements in the list
+		 * @return {@code Mono} with the result
+		 */
+		<T> Mono<ResponseEntity<List<T>>> bodyToEntityList(Class<T> elementType);
 
 	}
 

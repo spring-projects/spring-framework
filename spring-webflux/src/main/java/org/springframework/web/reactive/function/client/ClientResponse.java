@@ -27,7 +27,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
@@ -88,14 +87,6 @@ public interface ClientResponse {
 	 * 4xx or 5xx
 	 */
 	<T> Flux<T> bodyToFlux(Class<? extends T> elementClass);
-
-	/**
-	 * Converts this {@code ClientResponse} into a {@code ResponseEntity}.
-	 * @param responseClass the type of response contained in the {@code ResponseEntity}
-	 * @param <T> the response type
-	 * @return a mono containing the response entity
-	 */
-	<T> Mono<ResponseEntity<T>> toResponseEntity(Class<T> responseClass);
 
 
 	/**
