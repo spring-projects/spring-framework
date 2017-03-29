@@ -17,7 +17,6 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +37,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -96,33 +96,34 @@ class ControllerMethodResolver {
 			new LinkedHashMap<>(64);
 
 
-	ControllerMethodResolver(ArgumentResolverConfigurer argumentResolverConfigurer,
-			List<HttpMessageReader<?>> messageReaders, ReactiveAdapterRegistry reactiveRegistry,
-			ConfigurableApplicationContext applicationContext) {
+	ControllerMethodResolver(ArgumentResolverConfigurer argumentResolvers,
+			ServerCodecConfigurer messageCodecs, ReactiveAdapterRegistry reactiveRegistry,
+			ConfigurableApplicationContext context) {
 
-		Assert.notNull(argumentResolverConfigurer, "ArgumentResolverConfigurer is required");
+		Assert.notNull(argumentResolvers, "ArgumentResolverConfigurer is required");
+		Assert.notNull(messageCodecs, "ServerCodecConfigurer is required");
 		Assert.notNull(reactiveRegistry, "ReactiveAdapterRegistry is required");
-		Assert.notNull(applicationContext, "ConfigurableApplicationContext is required");
+		Assert.notNull(context, "ApplicationContext is required");
 
 		ArgumentResolverRegistrar registrar;
 
-		registrar= ArgumentResolverRegistrar.configurer(argumentResolverConfigurer).basic();
-		addResolversTo(registrar, reactiveRegistry, applicationContext);
+		registrar= ArgumentResolverRegistrar.configurer(argumentResolvers).basic();
+		addResolversTo(registrar, reactiveRegistry, context);
 		this.initBinderResolvers = registrar.getSyncResolvers();
 
-		registrar = ArgumentResolverRegistrar.configurer(argumentResolverConfigurer).modelAttributeSupport();
-		addResolversTo(registrar, reactiveRegistry, applicationContext);
+		registrar = ArgumentResolverRegistrar.configurer(argumentResolvers).modelAttributeSupport();
+		addResolversTo(registrar, reactiveRegistry, context);
 		this.modelAttributeResolvers = registrar.getResolvers();
 
-		registrar = ArgumentResolverRegistrar.configurer(argumentResolverConfigurer).fullSupport(messageReaders);
-		addResolversTo(registrar, reactiveRegistry, applicationContext);
+		registrar = ArgumentResolverRegistrar.configurer(argumentResolvers).fullSupport(messageCodecs);
+		addResolversTo(registrar, reactiveRegistry, context);
 		this.requestMappingResolvers = registrar.getResolvers();
 
-		registrar = ArgumentResolverRegistrar.configurer(argumentResolverConfigurer).basic();
-		addResolversTo(registrar, reactiveRegistry, applicationContext);
+		registrar = ArgumentResolverRegistrar.configurer(argumentResolvers).basic();
+		addResolversTo(registrar, reactiveRegistry, context);
 		this.exceptionHandlerResolvers = registrar.getResolvers();
 
-		initControllerAdviceCaches(applicationContext);
+		initControllerAdviceCaches(context);
 	}
 
 	private void addResolversTo(ArgumentResolverRegistrar registrar,
@@ -333,11 +334,11 @@ class ControllerMethodResolver {
 		private final List<HandlerMethodArgumentResolver> result = new ArrayList<>();
 
 
-		private ArgumentResolverRegistrar(ArgumentResolverConfigurer configurer,
-				List<HttpMessageReader<?>> messageReaders, boolean modelAttribute) {
+		private ArgumentResolverRegistrar(ArgumentResolverConfigurer resolvers,
+				ServerCodecConfigurer codecs, boolean modelAttribute) {
 
-			this.customResolvers = configurer.getCustomResolvers();
-			this.messageReaders = messageReaders != null ? new ArrayList<>(messageReaders) : null;
+			this.customResolvers = resolvers.getCustomResolvers();
+			this.messageReaders = codecs != null ? codecs.getReaders() : null;
 			this.modelAttributeSupported = modelAttribute;
 		}
 
@@ -382,25 +383,24 @@ class ControllerMethodResolver {
 
 		public static class Builder {
 
-			private final ArgumentResolverConfigurer configurer;
+			private final ArgumentResolverConfigurer resolvers;
 
 
 			public Builder(ArgumentResolverConfigurer configurer) {
-				this.configurer = configurer;
+				this.resolvers = configurer;
 			}
 
 
-			public ArgumentResolverRegistrar fullSupport(List<HttpMessageReader<?>> readers) {
-				Assert.notEmpty(readers, "No message readers");
-				return new ArgumentResolverRegistrar(this.configurer, readers, true);
+			public ArgumentResolverRegistrar fullSupport(ServerCodecConfigurer codecs) {
+				return new ArgumentResolverRegistrar(this.resolvers, codecs, true);
 			}
 
 			public ArgumentResolverRegistrar modelAttributeSupport() {
-				return new ArgumentResolverRegistrar(this.configurer, null, true);
+				return new ArgumentResolverRegistrar(this.resolvers, null, true);
 			}
 
 			public ArgumentResolverRegistrar basic() {
-				return new ArgumentResolverRegistrar(this.configurer, null, false);
+				return new ArgumentResolverRegistrar(this.resolvers, null, false);
 			}
 		}
 

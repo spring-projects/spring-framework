@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -29,13 +28,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.codec.ByteArrayDecoder;
-import org.springframework.core.codec.ByteBufferDecoder;
-import org.springframework.core.codec.DataBufferDecoder;
-import org.springframework.core.codec.ResourceDecoder;
-import org.springframework.core.codec.StringDecoder;
-import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.support.WebBindingInitializer;
@@ -57,7 +49,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	private static final Log logger = LogFactory.getLog(RequestMappingHandlerAdapter.class);
 
 
-	private final List<HttpMessageReader<?>> messageReaders = new ArrayList<>(32);
+	private ServerCodecConfigurer messageCodecConfigurer;
 
 	private WebBindingInitializer webBindingInitializer;
 
@@ -72,32 +64,19 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	private ModelInitializer modelInitializer;
 
 
-	public RequestMappingHandlerAdapter() {
-		this.messageReaders.add(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
-		this.messageReaders.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
-		this.messageReaders.add(new DecoderHttpMessageReader<>(new DataBufferDecoder()));
-		this.messageReaders.add(new DecoderHttpMessageReader<>(new ResourceDecoder()));
-		this.messageReaders.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-	}
-
-
 	/**
 	 * Configure HTTP message readers to de-serialize the request body with.
-	 * <p>By default only basic data types such as bytes and text are registered.
-	 * Consider using {@link ServerCodecConfigurer} to configure a richer list
-	 * including JSON encoding .
-	 * @see ServerCodecConfigurer
+	 * <p>By default this is set to {@link ServerCodecConfigurer} with defaults.
 	 */
-	public void setMessageReaders(List<HttpMessageReader<?>> messageReaders) {
-		this.messageReaders.clear();
-		this.messageReaders.addAll(messageReaders);
+	public void setMessageCodecConfigurer(ServerCodecConfigurer configurer) {
+		this.messageCodecConfigurer = configurer;
 	}
 
 	/**
-	 * Return the configured HTTP message readers.
+	 * Return the configurer for HTTP message readers.
 	 */
-	public List<HttpMessageReader<?>> getMessageReaders() {
-		return this.messageReaders;
+	public ServerCodecConfigurer getMessageCodecConfigurer() {
+		return this.messageCodecConfigurer;
 	}
 
 	/**
@@ -166,6 +145,10 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	@Override
 	public void afterPropertiesSet() throws Exception {
 
+		if (this.messageCodecConfigurer == null) {
+			this.messageCodecConfigurer = new ServerCodecConfigurer();
+		}
+
 		if (this.argumentResolverConfigurer == null) {
 			this.argumentResolverConfigurer = new ArgumentResolverConfigurer();
 		}
@@ -175,7 +158,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 		}
 
 		this.methodResolver = new ControllerMethodResolver(this.argumentResolverConfigurer,
-				this.messageReaders, this.reactiveAdapterRegistry, this.applicationContext);
+				this.messageCodecConfigurer, this.reactiveAdapterRegistry, this.applicationContext);
 
 		this.modelInitializer = new ModelInitializer(this.reactiveAdapterRegistry);
 	}
