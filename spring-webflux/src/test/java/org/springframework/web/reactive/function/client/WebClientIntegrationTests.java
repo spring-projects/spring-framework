@@ -35,8 +35,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
 
-import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.BodyInserters.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /**
  * Integration tests using a {@link ExchangeFunction} through {@link WebClient}.
@@ -188,7 +188,8 @@ public class WebClientIntegrationTests {
 				.uri("/pojo/capitalize")
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
-				.exchange(fromObject(new Pojo("foofoo", "barbar")))
+				.body(new Pojo("foofoo", "barbar"))
+				.exchange()
 				.then(response -> response.bodyToMono(Pojo.class));
 
 		StepVerifier.create(result)
