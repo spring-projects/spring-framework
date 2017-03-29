@@ -6,7 +6,8 @@
 == Introduction to the Spring IoC container and beans
 
 This chapter covers the Spring Framework implementation of the Inversion of Control
-(IoC) footnote:[See pass:specialcharacters,macros[<<background-ioc>>] ] principle. IoC
+(IoC) footnote:[See pass:specialcharacters,macros[<<overview.adoc#background-ioc,
+Inversion of Control>>] ] principle. IoC
 is also known as __dependency injection__ (DI). It is a process whereby objects define
 their dependencies, that is, the other objects they work with, only through constructor
 arguments, arguments to a factory method, or properties that are set on the object
@@ -1042,8 +1043,8 @@ Setter injection should primarily only be used for optional dependencies that ca
 assigned reasonable default values within the class. Otherwise, not-null checks must be
 performed everywhere the code uses the dependency. One benefit of setter injection is that
 setter methods make objects of that class amenable to reconfiguration or re-injection
-later. Management through <<jmx,JMX MBeans>> is therefore a compelling use case for setter
-injection.
+later. Management through <<integration.adoc#jmx,JMX MBeans>> is therefore a compelling
+use case for setter injection.
 
 Use the DI style that makes the most sense for a particular class. Sometimes, when dealing
 with third-party classes for which you do not have the source, the choice is made for you.
@@ -1718,8 +1719,8 @@ The above configuration is equivalent to the following Java code:
 The p-namespace enables you to use the `bean` element's attributes, instead of nested
 `<property/>` elements, to describe your property values and/or collaborating beans.
 
-Spring supports extensible configuration formats <<xsd-configuration,with namespaces>>, which are
-based on an XML Schema definition. The `beans` configuration format discussed in this
+Spring supports extensible configuration formats <<appendix.adoc#xsd-configuration,with namespaces>>,
+which are based on an XML Schema definition. The `beans` configuration format discussed in this
 chapter is defined in an XML Schema document. However, the p-namespace is not defined in
 an XSD file and exists only in the core of Spring.
 
@@ -2429,7 +2430,7 @@ The following scopes are supported out of the box. You can also create
 | Scopes a single bean definition to the lifecycle of a `ServletContext`. Only valid in
   the context of a web-aware Spring `ApplicationContext`.
 
-| <<websocket-stomp-websocket-scope,websocket>>
+| <<web.adoc#websocket-stomp-websocket-scope,websocket>>
 | Scopes a single bean definition to the lifecycle of a `WebSocket`. Only valid in
   the context of a web-aware Spring `ApplicationContext`.
 |===
@@ -2779,11 +2780,12 @@ understand the "why" as well as the "how" behind it.
 
 To create such a proxy, you insert a child `<aop:scoped-proxy/>` element into a scoped
 bean definition (see <<beans-factory-scopes-other-injection-proxies>> and
-<<xsd-configuration>>). Why do definitions of beans scoped at the `request`, `session`
-and custom-scope levels require the `<aop:scoped-proxy/>` element? Let's examine the
-following singleton bean definition and contrast it with what you need to define for
-the aforementioned scopes (note that the following `userPreferences` bean definition
-as it stands is __incomplete__).
+<<appendix.adoc#xsd-configuration, XML Schema-based configuration>>).
+Why do definitions of beans scoped at the `request`, `session` and custom-scope
+levels require the `<aop:scoped-proxy/>` element?
+Let's examine the following singleton bean definition and contrast it with
+what you need to define for the aforementioned scopes (note that the following
+`userPreferences` bean definition as it stands is __incomplete__).
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -3583,7 +3585,7 @@ dependency type:
 | `BootstrapContextAware`
 | Resource adapter `BootstrapContext` the container runs in. Typically available only in
   JCA aware ``ApplicationContext``s
-| <<cci>>
+| <<integration.adoc#cci, JCA CCI>>
 
 | `LoadTimeWeaverAware`
 | Defined __weaver__ for processing class definition at load time
@@ -3596,7 +3598,7 @@ dependency type:
 
 | `NotificationPublisherAware`
 | Spring JMX notification publisher
-| <<jmx-notifications>>
+| <<integration.adoc#jmx-notifications, Notifications>>
 
 | `ResourceLoaderAware`
 | Configured loader for low-level access to resources
@@ -3605,12 +3607,12 @@ dependency type:
 | `ServletConfigAware`
 | Current `ServletConfig` the container runs in. Valid only in a web-aware Spring
   `ApplicationContext`
-| <<mvc>>
+| <<web.adoc#mvc, Spring MVC>>
 
 | `ServletContextAware`
 | Current `ServletContext` the container runs in. Valid only in a web-aware Spring
   `ApplicationContext`
-| <<mvc>>
+| <<web.adoc#mvc, Spring MVC>>
 |===
 
 Note again that usage of these interfaces ties your code to the Spring API and does not
@@ -3884,7 +3886,7 @@ Notice how the `InstantiationTracingBeanPostProcessor` is simply defined. It doe
 even have a name, and because it is a bean it can be dependency-injected just like any
 other bean. (The preceding configuration also defines a bean that is backed by a Groovy
 script. The Spring dynamic language support is detailed in the chapter entitled
-<<dynamic-language>>.)
+<<integration.adoc#dynamic-language, Dynamic language support>>.)
 
 The following simple Java application executes the preceding code and configuration:
 
@@ -4266,7 +4268,7 @@ as well as the aforementioned
 application context in which it is defined. This means that, if you put
 `<context:annotation-config/>` in a `WebApplicationContext` for a `DispatcherServlet`,
 it only checks for `@Autowired` beans in your controllers, and not your services. See
-<<mvc-servlet>> for more information.
+<<web.adoc#mvc-servlet, The DispatcherServlet>> for more information.
 ====
 
 
@@ -5231,7 +5233,7 @@ than using the traditional XML files. Take a look at the `@Configuration`, `@Bea
 The `@Repository` annotation is a marker for any class that fulfills the role or
 __stereotype__ of a repository (also known as Data Access Object or DAO). Among the uses
 of this marker is the automatic translation of exceptions as described in
-<<orm-exception-translation>>.
+<<data-access.adoc#orm-exception-translation, Exception translation>>.
 
 Spring provides further stereotype annotations: `@Component`, `@Service`, and
 `@Controller`. `@Component` is a generic stereotype for any Spring-managed component.
@@ -5323,7 +5325,7 @@ Or with an overridden value for the `proxyMode` as follows:
 	}
 ----
 
-For further details, consult the <<annotation-programming-model,Spring Annotation Programming Model>>.
+For further details, consult the <<appendix.adoc#annotation-programming-model,Spring Annotation Programming Model>>.
 
 
 [[beans-scanning-autodetection]]
@@ -7693,7 +7695,8 @@ In addition, profiles may also be activated declaratively through the
 variables, JVM system properties, servlet context parameters in `web.xml`, or even as an
 entry in JNDI (see <<beans-property-source-abstraction>>). In integration tests, active
 profiles can be declared via the `@ActiveProfiles` annotation in the `spring-test` module
-(see <<testcontext-ctx-management-env-profiles>>).
+(see <<testing.adoc#testcontext-ctx-management-env-profiles,
+Context configuration with environment profiles>>).
 
 Note that profiles are not an "either-or" proposition; it is possible to activate multiple
 profiles at once. Programmatically, simply provide multiple profile names to the
@@ -7936,9 +7939,10 @@ Alternatively for XML configuration use the `context:load-time-weaver` element:
 
 Once configured for the `ApplicationContext`. Any bean within that `ApplicationContext`
 may implement `LoadTimeWeaverAware`, thereby receiving a reference to the load-time
-weaver instance. This is particularly useful in combination with <<orm-jpa,Spring's JPA
-support>> where load-time weaving may be necessary for JPA class transformation. Consult
-the `LocalContainerEntityManagerFactoryBean` javadocs for more detail. For more on
+weaver instance. This is particularly useful in combination with
+<<data-acess.adoc#orm-jpa,Spring's JPA support>> where load-time weaving may be necessary
+for JPA class transformation.
+Consult the `LocalContainerEntityManagerFactoryBean` javadocs for more detail. For more on
 AspectJ load-time weaving, see <<aop-aj-ltw>>.
 
 
@@ -8483,7 +8487,7 @@ events instead.
 ==== Asynchronous Listeners
 
 If you want a particular listener to process events asynchronously, simply reuse the
-<<scheduling-annotation-support-async,regular `@Async` support>>:
+<<integration.adoc#scheduling-annotation-support-async,regular `@Async` support>>:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]

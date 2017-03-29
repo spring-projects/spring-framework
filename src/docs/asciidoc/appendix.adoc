@@ -3,7 +3,8 @@
 :doc-root: https://docs.spring.io
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :wiki-spring-framework: https://github.com/spring-projects/spring-framework/wiki
-
+:toc: left
+:toclevels: 2
 
 [[spring-whats-new]]
 == What's New in the Spring Framework
@@ -36,13 +37,14 @@ the respective sections of the reference manual.
 === Classic ORM usage
 This section documents the classic usage patterns that you might encounter in a legacy
 Spring application. For the currently recommended usage patterns, please refer to the
-<<orm,ORM>> chapter.
+<<data-access.adoc#orm,ORM>> chapter.
 
 
 
 [[classic-spring-hibernate]]
 ==== Hibernate
-For the currently recommended usage patterns for Hibernate see <<orm-hibernate>>.
+For the currently recommended usage patterns for Hibernate see
+<<data-access.adoc#orm-hibernate,the Hibernate section>>.
 
 
 [[orm-hibernate-template]]
@@ -238,8 +240,8 @@ used.
 
 [[classic-spring-aysnc-messages]]
 ==== Asynchronous Message Reception
-<<jms-receiving-async-message-listener-adapter,MessageListenerAdapter's>> are used in
-conjunction with Spring's <<jms-mdp,message listener containers>> to support
+<<integration.adoc#jms-receiving-async-message-listener-adapter,MessageListenerAdapter's>> are used in
+conjunction with Spring's <<integration.adoc#jms-mdp,message listener containers>> to support
 asynchronous message reception by exposing almost any class as a Message-driven POJO. If
 you are using the JMS 1.0.2 API, you will want to use the 1.0.2 specific classes such as
 `MessageListenerAdapter102`, `SimpleMessageListenerContainer102`, and
@@ -264,7 +266,7 @@ differentiate between a `javax.jms.QueueConnection` and a `javax.jmsTopicConnect
 ==== Transaction Management
 In a JMS 1.0.2 environment the class `JmsTransactionManager102` provides support for
 managing JMS transactions for a single Connection Factory. Please refer to the reference
-documentation on <<jms-tx,JMS Transaction Management>> for more information on this
+documentation on <<integration.adoc#jms-tx,JMS Transaction Management>> for more information on this
 functionality.
 
 
@@ -273,7 +275,7 @@ functionality.
 == Classic Spring AOP Usage
 In this appendix we discuss the lower-level Spring AOP APIs and the AOP support used in
 Spring 1.2 applications. For new applications, we recommend the use of the Spring 2.0
-AOP support described in the <<aop,AOP>> chapter, but when working with existing
+AOP support described in the <<core.adoc#aop,AOP>> chapter, but when working with existing
 applications, or when reading books and articles, you may come across Spring 1.2 style
 examples. Spring 2.0 is fully backwards compatible with Spring 1.2 and everything
 described in this appendix is fully supported in Spring 2.0.
@@ -1037,14 +1039,16 @@ In common with most `FactoryBean` implementations provided with Spring, the
 `ProxyFactoryBean` class is itself a JavaBean. Its properties are used to:
 
 * Specify the target you want to proxy.
-* Specify whether to use CGLIB (see below and also <<aop-pfb-proxy-types>>).
+* Specify whether to use CGLIB (see below and also <<core.adoc#aop-pfb-proxy-types,
+JDK- and CGLIB-based proxies>>).
 
 Some key properties are inherited from `org.springframework.aop.framework.ProxyConfig`
 (the superclass for all AOP proxy factories in Spring). These key properties include:
 
 * `proxyTargetClass`: `true` if the target class is to be proxied, rather than the
   target class' interfaces. If this property value is set to `true`, then CGLIB proxies
-  will be created (but see also below <<aop-pfb-proxy-types>>).
+  will be created (but see also below
+  <<core.adoc#aop-pfb-proxy-types,JDK- and CGLIB-based proxies>>).
 * `optimize`: controls whether or not aggressive optimizations are applied to proxies
   __created via CGLIB__. One should not blithely use this setting unless one fully
   understands how the relevant AOP proxy handles optimization. This is currently used
@@ -1067,7 +1071,8 @@ Some key properties are inherited from `org.springframework.aop.framework.ProxyC
 Other properties specific to `ProxyFactoryBean` include:
 
 * `proxyInterfaces`: array of String interface names. If this isn't supplied, a CGLIB
-  proxy for the target class will be used (but see also below <<aop-pfb-proxy-types>>).
+  proxy for the target class will be used (but see also below
+  <<core.adoc#aop-pfb-proxy-types,JDK- and CGLIB-based proxies>>).
 * `interceptorNames`: String array of `Advisor`, interceptor or other advice names to
   apply. Ordering is significant, on a first come-first served basis. That is to say
   that the first interceptor in the list will be the first to be able to intercept the
@@ -1079,7 +1084,8 @@ factories. You can't mention bean references here since doing so would result in
 
 You can append an interceptor name with an asterisk ( `*`). This will result in the
 application of all advisor beans with names starting with the part before the asterisk
-to be applied. An example of using this feature can be found in <<aop-global-advisors>>.
+to be applied. An example of using this feature can be found in
+<<core.adoc#aop-global-advisors,Using 'global' advisors>>.
 
 *  singleton: whether or not the factory should return a single object, no matter how
   often the `getObject()` method is called. Several `FactoryBean` implementations offer
@@ -1377,7 +1383,7 @@ this case, the transaction propagation settings:
 
 Note that in the example above, we have explicitly marked the parent bean definition as
 __abstract__ by using the __abstract__ attribute, as described
-<<beans-child-bean-definitions,previously>>, so that it may not actually ever be
+<<core.adoc#beans-child-bean-definitions,previously>>, so that it may not actually ever be
 instantiated. Application contexts (but not simple bean factories) will by default
 pre-instantiate all singletons. It is therefore important (at least for singleton beans)
 that if you have a (parent) bean definition which you intend to use only as a template,
@@ -2462,7 +2468,7 @@ Before...
 
 The above configuration uses a Spring `FactoryBean` implementation, the
 `PropertiesFactoryBean`, to instantiate a `java.util.Properties` instance with values
-loaded from the supplied <<resources, `Resource`>> location).
+loaded from the supplied <<core.adoc#resources, `Resource`>> location).
 
 After...
 
@@ -2907,8 +2913,8 @@ The `lang` tags deal with exposing objects that have been written in a dynamic l
 such as JRuby or Groovy as beans in the Spring container.
 
 These tags (and the dynamic language support) are comprehensively covered in the chapter
-entitled <<dynamic-language>>. Please do consult that chapter for full details on this
-support and the `lang` tags themselves.
+entitled <<integration.adoc#dynamic-language,Dynamic language support>>.
+Please do consult that chapter for full details on this support and the `lang` tags themselves.
 
 In the interest of completeness, to use the tags in the `lang` schema, you need to have
 the following preamble at the top of your Spring XML configuration file; the text in the
@@ -2934,9 +2940,10 @@ are available to you.
 ==== the jms schema
 
 The `jms` tags deal with configuring JMS-related beans such as Spring's
-<<jms-mdp,MessageListenerContainers>>. These tags are detailed in the section of the
-<<jms,JMS chapter>> entitled <<jms-namespace>>. Please do consult that chapter for full
-details on this support and the `jms` tags themselves.
+<<integration.adoc#jms-mdp,MessageListenerContainers>>. These tags are detailed in the
+section of the <<integration.adoc#jms,JMS chapter>> entitled <<integration.adoc#jms-namespace,
+JMS namespace support>>. Please do consult that chapter for full details on this support
+and the `jms` tags themselves.
 
 In the interest of completeness, to use the tags in the `jms` schema, you need to have
 the following preamble at the top of your Spring XML configuration file; the text in the
@@ -2962,7 +2969,8 @@ are available to you.
 ==== the tx (transaction) schema
 
 The `tx` tags deal with configuring all of those beans in Spring's comprehensive support
-for transactions. These tags are covered in the chapter entitled <<transaction>>.
+for transactions. These tags are covered in the chapter entitled
+<<data-access.adoc#transaction,Transaction Management>>.
 
 [TIP]
 ====
@@ -3010,7 +3018,8 @@ using AOP). The above XML snippet contains the relevant lines needed to referenc
 
 The `aop` tags deal with configuring all things AOP in Spring: this includes Spring's
 own proxy-based AOP framework and Spring's integration with the AspectJ AOP framework.
-These tags are comprehensively covered in the chapter entitled <<aop>>.
+These tags are comprehensively covered in the chapter entitled <<core.adoc#aop,
+Aspect Oriented Programming with Spring>>.
 
 In the interest of completeness, to use the tags in the `aop` schema, you need to have
 the following preamble at the top of your Spring XML configuration file; the text in the
@@ -3064,8 +3073,8 @@ The `context` schema was only introduced in Spring 2.5.
 ===== <property-placeholder/>
 
 This element activates the replacement of `${...}` placeholders, resolved against the
-specified properties file (as a <<resources,Spring resource location>>). This element is
-a convenience mechanism that sets up a<<beans-factory-placeholderconfigurer,
+specified properties file (as a <<core.adoc#resources,Spring resource location>>). This element is
+a convenience mechanism that sets up a<<core.adoc#beans-factory-placeholderconfigurer,
 `PropertyPlaceholderConfigurer`>> for you; if you need more control over the
 `PropertyPlaceholderConfigurer`, just define one yourself explicitly.
 
@@ -3074,8 +3083,8 @@ a convenience mechanism that sets up a<<beans-factory-placeholderconfigurer,
 ===== <annotation-config/>
 
 Activates the Spring infrastructure for various annotations to be detected in bean
-classes: Spring's <<beans-required-annotation, `@Required`>> and
-<<beans-annotation-config, `@Autowired`>>, as well as JSR 250's `@PostConstruct`,
+classes: Spring's <<core.adoc#beans-required-annotation, `@Required`>> and
+<<core.adoc#beans-annotation-config, `@Autowired`>>, as well as JSR 250's `@PostConstruct`,
 `@PreDestroy` and `@Resource` (if available), and JPA's `@PersistenceContext` and
 `@PersistenceUnit` (if available). Alternatively, you can choose to activate the
 individual `BeanPostProcessors` for those annotations explicitly.
@@ -3083,33 +3092,37 @@ individual `BeanPostProcessors` for those annotations explicitly.
 [NOTE]
 ====
 This element does __not__ activate processing of Spring's
-<<transaction-declarative-annotations, `@Transactional`>> annotation. Use the
-<<tx-decl-explained, `<tx:annotation-driven/>`>> element for that purpose.
+<<data-access.adoc#transaction-declarative-annotations, `@Transactional`>> annotation. Use the
+<<data-access.adoc#tx-decl-explained, `<tx:annotation-driven/>`>> element for that purpose.
 ====
 
 
 [[xsd-config-body-schemas-context-component-scan]]
 ===== <component-scan/>
 
-This element is detailed in <<beans-annotation-config>>.
+This element is detailed in <<core.adoc#beans-annotation-config,
+Annotation-based container configuration>>.
 
 
 [[xsd-config-body-schemas-context-ltw]]
 ===== <load-time-weaver/>
 
-This element is detailed in <<aop-aj-ltw>>.
+This element is detailed in <<core.adoc#aop-aj-ltw,
+Load-time weaving with AspectJ in the Spring Framework>>.
 
 
 [[xsd-config-body-schemas-context-sc]]
 ===== <spring-configured/>
 
-This element is detailed in <<aop-atconfigurable>>.
+This element is detailed in <<core.adoc#aop-atconfigurable,
+Using AspectJ to dependency inject domain objects with Spring>>.
 
 
 [[xsd-config-body-schemas-context-mbe]]
 ===== <mbean-export/>
 
-This element is detailed in <<jmx-context-mbeanexport>>.
+This element is detailed in <<integration.adoc#jmx-context-mbeanexport,
+Configuring annotation based MBean export>>.
 
 
 
@@ -3134,8 +3147,9 @@ distribution.
 ==== the jdbc schema
 
 The `jdbc` tags allow you to quickly configure an embedded database or initialize an
-existing data source. These tags are documented in <<jdbc-embedded-database-support>>
-and <<jdbc-intializing-datasource>> respectively.
+existing data source. These tags are documented in
+<<data-access.adoc#jdbc-embedded-database-support,Embedded database support>>
+and <<data-access.adoc#jdbc-initializing-datasource,Initializing a DataSource>> respectively.
 
 To use the tags in the `jdbc` schema, you need to have the following preamble at the top
 of your Spring XML configuration file; the text in the following snippet references the
@@ -3161,7 +3175,8 @@ correct schema so that the tags in the `jdbc` namespace are available to you.
 
 The `cache` tags can be used to enable support for Spring's `@CacheEvict`, `@CachePut`
 and `@Caching` annotations. It it also supports declarative XML-based caching. See
-<<cache-annotation-enable>> and <<cache-declarative-xml>> for details.
+<<integration.adoc#cache-annotation-enable,Enable caching annotations>> and
+<<integration.adoc#cache-declarative-xml,Declarative XML-based caching>> for details.
 
 To use the tags in the `cache` schema, you need to have the following preamble at the
 top of your Spring XML configuration file; the text in the following snippet references
@@ -3188,7 +3203,8 @@ the correct schema so that the tags in the `cache` namespace are available to yo
 Last but not least we have the tags in the `beans` schema. These are the same tags that
 have been in Spring since the very dawn of the framework. Examples of the various tags
 in the `beans` schema are not shown here because they are quite comprehensively covered
-in <<beans-factory-properties-detailed>> (and indeed in that entire <<beans,chapter>>).
+in <<core.adoc#beans-factory-properties-detailed,Dependencies and configuration in detail>>
+(and indeed in that entire <<core.adoc#beans,chapter>>).
 
 One thing that is new to the beans tags themselves in Spring 2.0 is the idea of
 arbitrary bean metadata. In Spring 2.0 it is now possible to add zero or more key /
@@ -3365,7 +3381,7 @@ The `NamespaceHandler` interface is pretty simple in that it features just three
 * `BeanDefinitionHolder decorate(Node, BeanDefinitionHolder, ParserContext)` - called
   when Spring encounters an attribute or nested element of a different namespace. The
   decoration of one or more bean definitions is used for example with
-  the<<beans-factory-scopes,out-of-the-box	scopes Spring 2.0 supports>>. We'll start by
+  the<<core.adoc#beans-factory-scopes,out-of-the-box scopes Spring 2.0 supports>>. We'll start by
   highlighting a simple example, without using decoration, after which we will	show
   decoration in a somewhat more advanced example.
 

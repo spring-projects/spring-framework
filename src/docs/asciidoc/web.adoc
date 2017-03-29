@@ -2,9 +2,9 @@
 = The Web
 :doc-root: https://docs.spring.io
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
+:toc: left
+:toclevels: 2
 
-[partintro]
---
 This part of the reference documentation covers Spring Framework's support for the
 presentation tier (and specifically web-based presentation tiers) including support
 for WebSocket-style messaging in web applications.
@@ -16,11 +16,6 @@ integration with other web technologies, such as <<jsf,JSF>>.
 The section then concludes with comprehensive coverage of the Spring Framework
 <<websocket>> (including <<websocket-stomp>>).
 
-* <<mvc>>
-* <<view>>
-* <<web-integration>>
-* <<websocket>>
---
 
 include::web/web-mvc.adoc[leveloffset=+1]
 

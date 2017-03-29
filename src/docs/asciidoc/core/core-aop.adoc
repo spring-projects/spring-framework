@@ -259,8 +259,9 @@ element:
 	<aop:aspectj-autoproxy/>
 ----
 
-This assumes that you are using schema support as described in <<xsd-configuration>>. See
-<<xsd-config-body-schemas-aop>> for how to import the tags in the `aop` namespace.
+This assumes that you are using schema support as described in <<appendix.adoc#xsd-configuration,
+XML Schema-based configuration>>. See <<appendix.adoc#xsd-config-body-schemas-aop, the AOP schema>>
+for how to import the tags in the `aop` namespace.
 
 
 
@@ -572,7 +573,7 @@ write:
 ----
 
 The `<aop:config>` and `<aop:advisor>` elements are discussed in <<aop-schema>>. The
-transaction elements are discussed in <<transaction>>.
+transaction elements are discussed in <<data-access.adoc#transaction, Transaction Management>>.
 
 
 [[aop-pointcuts-examples]]
@@ -1552,7 +1553,9 @@ the new __syntax__ and refer the reader to the discussion in the previous sectio
 of advice parameters.
 
 To use the aop namespace tags described in this section, you need to import the
-`spring-aop` schema as described in <<xsd-configuration>>. See <<xsd-config-body-schemas-aop>>
+`spring-aop` schema as described in <<appendix.adoc#xsd-configuration,
+XML Schema-based configuration>>.
+See <<appendix.adoc#xsd-config-body-schemas-aop, the AOP schema>>
 for how to import the tags in the `aop` namespace.
 
 Within your Spring configurations, all aspect and advisor elements must be placed within
@@ -2790,7 +2793,7 @@ using Java based configuration simply add `@EnableSpringConfigured` to any
 	}
 ----
 
-If you prefer XML based configuration, the Spring <<xsd-config-body-schemas-context,
+If you prefer XML based configuration, the Spring <<appendix.adoc#xsd-config-body-schemas-context,
 `context` namespace>> defines a convenient `context:spring-configured` element:
 
 [source,xml,indent=0]
@@ -3030,8 +3033,8 @@ profiling tool to that specific area immediately afterwards.
 [NOTE]
 ====
 The example presented here uses XML style configuration, it is also possible to
-configure and use @AspectJ with <<beans-java,Java Configuration>>. Specifically the
-`@EnableLoadTimeWeaving` annotation can be used as an alternative to
+configure and use @AspectJ with <<beans-java,Java Configuration>>.
+Specifically the `@EnableLoadTimeWeaving` annotation can be used as an alternative to
 `<context:load-time-weaver/>` (see <<aop-aj-ltw-spring,below>> for details).
 ====
 

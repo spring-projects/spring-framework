@@ -2,9 +2,9 @@
 = Core Technologies
 :doc-root: https://docs.spring.io
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
+:toc: left
+:toclevels: 2
 
-[partintro]
---
 This part of the reference documentation covers all of those technologies that are
 absolutely integral to the Spring Framework.
 
@@ -18,17 +18,6 @@ enterprise programming.
 Coverage of Spring's integration with AspectJ (currently the richest - in terms of
 features - and certainly most mature AOP implementation in the Java enterprise space) is
 also provided.
-
-
-* <<beans>>
-* <<resources>>
-* <<validation>>
-* <<expressions>>
-* <<aop>>
-* <<aop-api>>
---
-
-
 
 include::core/core-beans.adoc[leveloffset=+1]
 

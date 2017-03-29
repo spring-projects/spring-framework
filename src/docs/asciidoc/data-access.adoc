@@ -2,23 +2,15 @@
 = Data Access
 :doc-root: https://docs.spring.io
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
+:toc: left
+:toclevels: 2
 
-[partintro]
---
 This part of the reference documentation is concerned with data access and the
 interaction between the data access layer and the business or service layer.
 
 Spring's comprehensive transaction management support is covered in some detail,
 followed by thorough coverage of the various data access frameworks and technologies
 that the Spring Framework integrates with.
-
-* <<transaction>>
-* <<dao>>
-* <<jdbc>>
-* <<orm>>
-* <<oxm>>
---
-
 
 [[transaction]]
 == Transaction Management
@@ -309,9 +301,11 @@ infrastructure.
 [NOTE]
 ====
 The above definition of the `dataSource` bean uses the `<jndi-lookup/>` tag from the
-`jee` namespace. For more information on schema-based configuration, see <<xsd-configuration>>,
-and for more information on the `<jee/>` tags see the section entitled
-<<xsd-config-body-schemas-jee>>.
+`jee` namespace. For more information on schema-based configuration, see
+<<appendix.adoc#xsd-configuration, XML Schema-based configuration>>,
+and for more information on the `<jee/>`
+tags see the section entitled <<appendix.adoc#xsd-config-body-schemas-jee,
+the JEE schema>>.
 ====
 
 You can also use Hibernate local transactions easily, as shown in the following
@@ -540,7 +534,7 @@ of transaction-related issues.
 
 The most important concepts to grasp with regard to the Spring Framework's declarative
 transaction support are that this support is enabled
-<<aop-understanding-aop-proxies,__via AOP proxies__>>, and that the transactional advice
+<<core.adoc#aop-understanding-aop-proxies,__via AOP proxies__>>, and that the transactional advice
 is driven by __metadata__ (currently XML- or annotation-based). The combination of AOP
 with transactional metadata yields an AOP proxy that uses a `TransactionInterceptor` in
 conjunction with an appropriate `PlatformTransactionManager` implementation to drive
@@ -548,7 +542,7 @@ transactions __around method invocations__.
 
 [NOTE]
 ====
-Spring AOP is covered in <<aop>>.
+Spring AOP is covered in <<core.adoc#aop, the AOP section>>.
 ====
 
 Conceptually, calling a method on a transactional proxy looks like this...
@@ -703,7 +697,7 @@ using an advisor. The result indicates that at the execution of a `fooServiceOpe
 the advice defined by `txAdvice` will be run.
 
 The expression defined within the `<aop:pointcut/>` element is an AspectJ pointcut
-expression; see <<aop>> for more details on pointcut expressions in Spring.
+expression; see <<core.adoc#aop, the AOP section>> for more details on pointcut expressions in Spring.
 
 A common requirement is to make an entire service layer transactional. The best way to
 do this is simply to change the pointcut expression to match any operation in your
@@ -721,7 +715,7 @@ service layer. For example:
 [NOTE]
 ====
 __In this example it is assumed that all your service interfaces are defined in the
-`x.y.service` package; see <<aop>> for more details.__
+`x.y.service` package; see <<core.adoc#aop, the AOP section>> for more details.__
 ====
 
 Now that we've analyzed the configuration, you may be asking yourself, "__Okay... but
@@ -1210,8 +1204,8 @@ any kind of method.
   affected classes with Spring's AspectJ transaction aspect, modifying the target class
   byte code to apply to any kind of method call. AspectJ weaving requires
   spring-aspects.jar in the classpath as well as load-time weaving (or compile-time
-  weaving) enabled. (See <<aop-aj-ltw-spring>> for details on how to set up load-time
-  weaving.)
+  weaving) enabled. (See <<core.adoc#aop-aj-ltw-spring, Spring configuration>>
+  for details on how to set up load-time weaving.)
 
 | `proxy-target-class`
 | `proxyTargetClass`
@@ -1220,16 +1214,16 @@ any kind of method.
   for classes annotated with the `@Transactional` annotation. If the
   `proxy-target-class` attribute is set to `true`, then class-based proxies are created.
   If `proxy-target-class` is `false` or if the attribute is omitted, then standard JDK
-  interface-based proxies are created. (See <<aop-proxying>> for a detailed examination
-  of the different proxy types.)
+  interface-based proxies are created. (See <<core.adoc#aop-proxying, Proxying mechanisms>>
+  for a detailed examination of the different proxy types.)
 
 | `order`
 | `order`
 | Ordered.LOWEST_PRECEDENCE
 | Defines the order of the transaction advice that is applied to beans annotated with
   `@Transactional`. (For more information about the rules related to ordering of AOP
-  advice, see <<aop-ataspectj-advice-ordering>>.) No specified ordering means that the
-  AOP subsystem determines the order of the advice.
+  advice, see <<core.adoc#aop-ataspectj-advice-ordering, Advice ordering>>.)
+  No specified ordering means that the AOP subsystem determines the order of the advice.
 |===
 
 [NOTE]
@@ -1248,7 +1242,7 @@ different proxy types.)
 `@Transactional` on beans in the same application context they are defined in. This
 means that, if you put annotation driven configuration in a `WebApplicationContext` for
 a `DispatcherServlet`, it only checks for `@Transactional` beans in your controllers,
-and not your services. See <<mvc-servlet>> for more information.
+and not your services. See <<web.adoc#mvc-servlet, MVC>> for more information.
 ====
 
 The most derived location takes precedence when evaluating the transactional settings
@@ -1395,7 +1389,7 @@ used if no specifically qualified PlatformTransactionManager bean is found.
 [[tx-custom-attributes]]
 ===== Custom shortcut annotations
 If you find you are repeatedly using the same attributes with `@Transactional` on many
-different methods, then <<beans-meta-annotations,Spring's meta-annotation support>> allows
+different methods, then <<core.adoc#beans-meta-annotations,Spring's meta-annotation support>> allows
 you to define custom shortcut annotations for your specific use cases. For example,
 defining the following annotations
 
@@ -1511,13 +1505,13 @@ When you invoke the `updateFoo(Foo)` method, you want to see the following actio
 [NOTE]
 ====
 This chapter is not concerned with explaining AOP in any great detail (except as it
-applies to transactions). See <<aop>> for detailed coverage of the following AOP
+applies to transactions). See <<core.adoc#aop, AOP>> for detailed coverage of the following AOP
 configuration and AOP in general.
 ====
 
 Here is the code for a simple profiling aspect discussed above. The ordering of advice
 is controlled through the `Ordered` interface. For full details on advice ordering, see
-<<aop-ataspectj-advice-ordering>>.
+<<core.adoc#aop-ataspectj-advice-ordering, Advice ordering>>.
 .
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1694,7 +1688,7 @@ you how to do it programmatically.
 [NOTE]
 ====
 Prior to continuing, you may want to read <<transaction-declarative-annotations>> and
-<<aop>> respectively.
+<<core.adoc#aop, AOP>> respectively.
 ====
 
 [source,java,indent=0]
@@ -1724,8 +1718,8 @@ annotated, regardless of visibility.
 To weave your applications with the `AnnotationTransactionAspect` you must either build
 your application with AspectJ (see the
 http://www.eclipse.org/aspectj/doc/released/devguide/index.html[AspectJ Development
-Guide]) or use load-time weaving. See <<aop-aj-ltw>> for a discussion of load-time
-weaving with AspectJ.
+Guide]) or use load-time weaving. See <<core.adoc#aop-aj-ltw, Load-time weaving with
+AspectJ in the Spring Framework>> for a discussion of load-time weaving with AspectJ.
 
 
 
@@ -4689,7 +4683,7 @@ Embedded databases provide a lightweight way to test data access code. The follo
 data access integration test template that uses an embedded database. Using a template
 like this can be useful for _one-offs_ when the embedded database does not need to be
 reused across test classes. However, if you wish to create an embedded database that is
-shared within a test suite, consider using the <<testcontext-framework,Spring TestContext
+shared within a test suite, consider using the <<testing.adoc#testcontext-framework,Spring TestContext
 Framework>> and configuring the embedded database as a bean in the Spring
 `ApplicationContext` as described in <<jdbc-embedded-database-xml>> and
 <<jdbc-embedded-database-java>>.
@@ -4935,8 +4929,8 @@ tools through Dependency Injection. They can participate in Spring's resource an
 transaction management, and they comply with Spring's generic transaction and DAO
 exception hierarchies. The recommended integration style is to code DAOs against plain
 Hibernate or JPA APIs. The older style of using Spring's DAO templates is no longer
-recommended; however, coverage of this style can be found in the <<classic-spring-orm>>
-in the appendices.
+recommended; however, coverage of this style can be found in the
+<<appendix.adoc#classic-spring-orm, Classic ORM usage>> in the appendices.
 
 Spring adds significant enhancements to the ORM layer of your choice when you create
 data access applications. You can leverage as much of the integration support as you
@@ -5727,9 +5721,10 @@ Spring provides a number of `LoadTimeWeaver` implementations for various environ
 allowing `ClassTransformer` instances to be applied only __per class loader__ and not
 per VM.
 
-Refer to <<aop-aj-ltw-spring>> in the AOP chapter for more insight regarding the
-`LoadTimeWeaver` implementations and their setup, either generic or customized to
-various platforms (such as Tomcat, WebLogic, GlassFish, Resin and JBoss).
+Refer to <<core.adoc#aop-aj-ltw-spring, Spring configuration>> in the AOP chapter for
+more insight regarding the `LoadTimeWeaver` implementations and their setup, either
+generic or customized to various platforms (such as Tomcat, WebLogic, GlassFish,
+Resin and JBoss).
 
 As described in the aforementioned section, you can configure a context-wide
 `LoadTimeWeaver` using the `@EnableLoadTimeWeaving` annotation of

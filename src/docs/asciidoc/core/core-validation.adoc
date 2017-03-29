@@ -1,8 +1,5 @@
-
 [[validation]]
 = Validation, Data Binding, and Type Conversion
-
-
 
 
 [[validation-introduction]]
@@ -666,7 +663,7 @@ Next we configure a `CustomEditorConfigurer` and inject an instance of our
 ----
 
 Finally, and in a bit of a departure from the focus of this chapter, for those of you
-using <<mvc,Spring's MVC web framework>>, using `PropertyEditorRegistrars` in
+using <<web.adoc#mvc,Spring's MVC web framework>>, using `PropertyEditorRegistrars` in
 conjunction with data-binding `Controllers` (such as `SimpleFormController`) can be very
 convenient. Find below an example of using a `PropertyEditorRegistrar` in the
 implementation of an `initBinder(..)` method:
@@ -961,7 +958,7 @@ either of the Converter, ConverterFactory, or GenericConverter interfaces.
 ----
 
 It is also common to use a ConversionService within a Spring MVC application. See
-<<mvc-config-conversion>> in the Spring MVC chapter.
+<<web.adoc#mvc-config-conversion, Conversion and Formatting>> in the Spring MVC chapter.
 
 In certain situations you may wish to apply formatting during conversion. See
 <<format-FormatterRegistry-SPI>> for details on using
@@ -1313,7 +1310,7 @@ converter and formatter registration.
 [[format-configuring-formatting-mvc]]
 === Configuring Formatting in Spring MVC
 
-See <<mvc-config-conversion>> in the Spring MVC chapter.
+See <<web.adoc#mvc-config-conversion, Conversion and Formatting>> in the Spring MVC chapter.
 
 
 
@@ -1406,7 +1403,8 @@ If you are using Spring MVC remember to explicitly configure the conversion serv
 is used. For Java based `@Configuration` this means extending the
 `WebMvcConfigurationSupport` class and overriding the `mvcConversionService()` method.
 For XML you should use the `'conversion-service'` attribute of the
-`mvc:annotation-driven` element. See <<mvc-config-conversion>> for details.
+`mvc:annotation-driven` element.
+See <<web.adoc#mvc-config-conversion, Conversion and Formatting>> for details.
 
 
 
@@ -1635,5 +1633,5 @@ locally on a DataBinder instance. See <<validation-mvc-configuring>>.
 [[validation-mvc]]
 === Spring MVC 3 Validation
 
-See <<mvc-config-validation>> in the Spring MVC chapter.
+See <<web.adoc#mvc-config-validation, Validation>> in the Spring MVC chapter.
 

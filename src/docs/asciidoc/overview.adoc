@@ -2,34 +2,8 @@
 = Overview of Spring Framework
 :doc-root: https://docs.spring.io
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
-
-[partintro]
---
-The Spring Framework is a lightweight solution and a potential one-stop-shop for
-building your enterprise-ready applications. However, Spring is modular, allowing you to
-use only those parts that you need, without having to bring in the rest. You can use the
-IoC container, with any web framework on top, but you can also use only the
-<<orm-hibernate,Hibernate integration code>> or the <<jdbc-introduction,JDBC abstraction
-layer>>. The Spring Framework supports declarative transaction management, remote access
-to your logic through RMI or web services, and various options for persisting your data.
-It offers a full-featured <<mvc-introduction,MVC framework>>, and enables you to
-integrate <<aop-introduction,AOP>> transparently into your software.
-
-Spring is designed to be non-intrusive, meaning that your domain logic code generally
-has no dependencies on the framework itself. In your integration layer (such as the data
-access layer), some dependencies on the data access technology and the Spring libraries
-will exist. However, it should be easy to isolate these dependencies from the rest of
-your code base.
-
-This document is a reference guide to Spring Framework features. If you have any
-requests, comments, or questions on this document, please post them on the
-https://groups.google.com/forum/#!forum/spring-framework-contrib[user mailing
-list]. Questions on the Framework itself should be asked on StackOverflow
-(see https://spring.io/questions[]).
---
-
-
-
+:toc: left
+:toclevels: 2
 
 
 [[overview-getting-started-with-spring]]
@@ -127,18 +101,18 @@ in <<dependency-management,Dependency Management tools>>.
 
 [[overview-core-container]]
 ==== Core Container
-The <<beans-introduction,__Core Container__>> consists of the `spring-core`,
+The <<core.adoc#beans-introduction,__Core Container__>> consists of the `spring-core`,
 `spring-beans`, `spring-context`, `spring-context-support`, and `spring-expression`
 (Spring Expression Language) modules.
 
-The `spring-core` and `spring-beans` modules <<beans-introduction,provide the fundamental
-parts of the framework>>, including the IoC and Dependency Injection features. The
-`BeanFactory` is a sophisticated implementation of the factory pattern. It removes the
+The `spring-core` and `spring-beans` modules <<core.adoc#beans-introduction,provide
+the fundamental parts of the framework>>, including the IoC and Dependency Injection features.
+The `BeanFactory` is a sophisticated implementation of the factory pattern. It removes the
 need for programmatic singletons and allows you to decouple the configuration and
 specification of dependencies from your actual program logic.
 
-The <<context-introduction,__Context__>> (`spring-context`) module builds on the solid
-base provided by the <<beans-introduction,__Core and Beans__>> modules: it is a means to
+The <<core.adoc#context-introduction,__Context__>> (`spring-context`) module builds on the solid
+base provided by the <<core.adoc#beans-introduction,__Core and Beans__>> modules: it is a means to
 access objects in a framework-style manner that is similar to a JNDI registry. The
 Context module inherits its features from the Beans module and adds support for
 internationalization (using, for example, resource bundles), event propagation, resource
@@ -149,7 +123,7 @@ The `ApplicationContext` interface is the focal point of the Context module.
 into a Spring application context, in particular for caching (EhCache, JCache) and
 scheduling (CommonJ, Quartz).
 
-The `spring-expression` module provides a powerful <<expressions,__Expression
+The `spring-expression` module provides a powerful <<core.adoc#expressions,__Expression
 Language__>> for querying and manipulating an object graph at runtime. It is an extension
 of the unified expression language (unified EL) as specified in the JSP 2.1
 specification. The language supports setting and getting property values, property
@@ -161,7 +135,7 @@ list aggregations.
 
 [[overview-aop-instrumentation]]
 ==== AOP and Instrumentation
-The `spring-aop` module provides an <<aop-introduction,__AOP__>> Alliance-compliant
+The `spring-aop` module provides an <<core.adoc#aop-introduction,__AOP__>> Alliance-compliant
 aspect-oriented programming implementation allowing you to define, for example,
 method interceptors and pointcuts to cleanly decouple code that implements functionality
 that should be separated. Using source-level metadata functionality, you can also
@@ -189,25 +163,26 @@ annotation based programming model.
 The __Data Access/Integration__ layer consists of the JDBC, ORM, OXM, JMS, and
 Transaction modules.
 
-The `spring-jdbc` module provides a <<jdbc-introduction,JDBC>>-abstraction layer that
-removes the need to do tedious JDBC coding and parsing of database-vendor specific error
-codes.
+The `spring-jdbc` module provides a <<data-access.adoc#jdbc-introduction,JDBC>>-abstraction
+layer that removes the need to do tedious JDBC coding and parsing of database-vendor
+specific error codes.
 
-The `spring-tx` module supports <<transaction,programmatic and declarative transaction>>
+The `spring-tx` module supports <<data-access.adoc#transaction,programmatic and declarative transaction>>
 management for classes that implement special interfaces and for __all your POJOs (Plain
 Old Java Objects)__.
 
 The `spring-orm` module provides integration layers for popular
-<<orm-introduction,object-relational mapping>> APIs, including <<orm-jpa,JPA>> and
-<<orm-hibernate,Hibernate>>. Using the `spring-orm` module you can use these
-O/R-mapping frameworks in combination with all of the other features Spring offers,
-such as the simple declarative transaction management feature mentioned previously.
+<<data-access.adoc#orm-introduction,object-relational mapping>> APIs,
+including <<data-access.adoc#orm-jpa,JPA>> and <<data-access.adoc#orm-hibernate,Hibernate>>.
+Using the `spring-orm` module you can use these O/R-mapping frameworks in combination with
+all of the other features Spring offers, such as the simple declarative transaction
+management feature mentioned previously.
 
-The `spring-oxm` module provides an abstraction layer that supports <<oxm,Object/XML
-mapping>> implementations such as JAXB, Castor, JiBX and XStream.
+The `spring-oxm` module provides an abstraction layer that supports
+<<data-access.adoc#oxm,Object/XML mapping>> implementations such as JAXB, Castor, JiBX and XStream.
 
-The `spring-jms` module (<<jms,Java Messaging Service>>) contains features for producing and
-consuming messages. Since Spring Framework 4.1, it provides integration with the
+The `spring-jms` module (<<integration.adoc#jms,Java Messaging Service>>) contains features for
+producing and consuming messages. Since Spring Framework 4.1, it provides integration with the
 `spring-messaging` module.
 
 
@@ -222,7 +197,7 @@ Servlet listeners and a web-oriented application context. It also contains an HT
 and the web-related parts of Spring's remoting support.
 
 The `spring-webmvc` module (also known as the __Web-Servlet__ module) contains Spring's
-model-view-controller (<<mvc-introduction,__MVC__>>) and REST Web Services implementation
+model-view-controller (<<web.adoc#mvc-introduction,__MVC__>>) and REST Web Services implementation
 for web applications. Spring's MVC framework provides a clean separation between domain
 model code and web forms and integrates with all of the other features of the Spring
 Framework.
@@ -230,11 +205,11 @@ Framework.
 
 [[overview-testing]]
 ==== Test
-The `spring-test` module supports the <<unit-testing,unit testing>> and
-<<integration-testing,integration testing>> of Spring components with JUnit or TestNG. It
-provides consistent <<testcontext-ctx-management,loading>> of Spring
-``ApplicationContext``s and <<testcontext-ctx-management-caching,caching>> of those
-contexts. It also provides <<mock-objects,mock objects>> that you can use to test your
+The `spring-test` module supports the <<testing.adoc#unit-testing,unit testing>> and
+<<testing.adoc#integration-testing,integration testing>> of Spring components with JUnit or TestNG. It
+provides consistent <<testing.adoc#testcontext-ctx-management,loading>> of Spring
+``ApplicationContext``s and <<testing.adoc#testcontext-ctx-management-caching,caching>> of those
+contexts. It also provides <<testing.adoc#mock-objects,mock objects>> that you can use to test your
 code in isolation.
 
 
@@ -249,8 +224,8 @@ framework integration.
 .Typical full-fledged Spring web application
 image::images/overview-full.png[]
 
-Spring's <<transaction-declarative,declarative transaction management features>> make
-the web application fully transactional, just as it would be if you used EJB
+Spring's <<data-access.adoc#transaction-declarative,declarative transaction management features>>
+make the web application fully transactional, just as it would be if you used EJB
 container-managed transactions. All your custom business logic can be implemented with
 simple POJOs and managed by Spring's IoC container. Additional services include support
 for sending email and validation that is independent of the web layer, which lets you
@@ -282,7 +257,7 @@ existing applications is not difficult.
 .EJBs - Wrapping existing POJOs
 image::images/overview-ejb.png[]
 
-The Spring Framework also provides an <<ejb,access and abstraction layer>> for
+The Spring Framework also provides an <<integration.adoc#ejb,access and abstraction layer>> for
 Enterprise JavaBeans, enabling you to reuse your existing POJOs and wrap them in
 stateless session beans for use in scalable, fail-safe web applications that might need
 declarative security.

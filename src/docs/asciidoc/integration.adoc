@@ -4,22 +4,11 @@
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :doc-spring-amqp: {doc-root}/spring-amqp/docs/current/reference
 :doc-spring-gemfire: {doc-root}/spring-gemfire/docs/current/reference
+:toc: left
+:toclevels: 2
 
-[partintro]
---
 This part of the reference documentation covers the Spring Framework's integration with
 a number of Java EE (and related) technologies.
-
-* <<remoting>>
-* <<ejb>>
-* <<jms>>
-* <<jmx>>
-* <<cci>>
-* <<mail>>
-* <<scheduling>>
-* <<dynamic-language>>
-* <<cache>>
---
 
 
 [[remoting]]
@@ -1960,10 +1949,11 @@ message listener (including database operations etc).
 ==== Transaction management
 Spring provides a `JmsTransactionManager` that manages transactions for a single JMS
 `ConnectionFactory`. This allows JMS applications to leverage the managed transaction
-features of Spring as described in <<transaction>>. The `JmsTransactionManager` performs
-local resource transactions, binding a JMS Connection/Session pair from the specified
-`ConnectionFactory` to the thread. `JmsTemplate` automatically detects such
-transactional resources and operates on them accordingly.
+features of Spring as described in <<data-access.adoc#transaction,Transaction Management>>.
+The `JmsTransactionManager` performs local resource transactions, binding a JMS
+Connection/Session pair from the specified `ConnectionFactory` to the thread.
+`JmsTemplate` automatically detects such transactional resources and operates
+on them accordingly.
 
 In a Java EE environment, the `ConnectionFactory` will pool Connections and Sessions, so
 those resources are efficiently reused across transactions. In a standalone environment,
@@ -3218,10 +3208,10 @@ are exposed as attributes and all __public__ methods (bar those inherited from t
 
 [NOTE]
 ====
-`MBeanExporter` is a `Lifecycle` bean (see <<beans-factory-lifecycle-processor>>)
-and MBeans are exported as late as possible during the application lifecycle by default. It
-is possible to configure the `phase` at which the export happens or disable automatic
-registration by setting the `autoStartup` flag.
+`MBeanExporter` is a `Lifecycle` bean (see <<core.adoc#beans-factory-lifecycle-processor,
+Startup and shutdown callbacks>>) and MBeans are exported as late as possible during
+the application lifecycle by default. It is possible to configure the `phase` at which
+the export happens or disable automatic registration by setting the `autoStartup` flag.
 ====
 
 
@@ -3306,7 +3296,7 @@ be used:
 
 For platforms/cases where the existing `MBeanServer` has a dynamic (or unknown)
 `agentId` which is retrieved through lookup methods, one should use
-<<beans-factory-class-static-factory-method,factory-method>>:
+<<core.adoc#beans-factory-class-static-factory-method,factory-method>>:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -5688,7 +5678,7 @@ the actual execution strategy. Simply switch between `JtaTransactionManager` and
 `CciLocalTransactionManager` as needed, keeping your transaction demarcation as-is.
 
 For more information on Spring's transaction facilities, see the chapter entitled
-<<transaction>>.
+<<data-access.adoc#transaction,Transaction Management>>.
 
 
 
@@ -5887,7 +5877,7 @@ callback interface. Please note in this case that the `mailSender` property is o
 [NOTE]
 ====
 The mail code is a crosscutting concern and could well be a candidate for refactoring
-into a <<aop,custom Spring AOP aspect>>, which then could be executed at appropriate
+into a <<core.adoc#aop,custom Spring AOP aspect>>, which then could be executed at appropriate
 joinpoints on the `OrderManager` target.
 ====
 
@@ -7045,7 +7035,8 @@ container. Using the dynamic-language-backed beans with a plain `BeanFactory`
 implementation is supported, but you have to manage the plumbing of the Spring internals
 to do so.
 
-For more information on schema-based configuration, see <<xsd-configuration>>.
+For more information on schema-based configuration, see <<appendix.adoc#xsd-configuration,
+XML Schema-based configuration>>.
 ====
 
 [source,xml,indent=0]
@@ -7875,7 +7866,8 @@ this feature.
 ====
 
 Find below an example of a Spring `org.springframework.validation.Validator` implemented
-using the Groovy dynamic language. (See <<validator>> for a discussion of the
+using the Groovy dynamic language. (See <<core.adoc#validator,
+Validation using Spring’s Validator interface>> for a discussion of the
 `Validator` interface.)
 
 [source,groovy,indent=0]
@@ -7917,7 +7909,7 @@ framework actually is unaware that a bean that is being advised might be a scrip
 bean, so all of the AOP use cases and functionality that you may be using or aim to use
 will work with scripted beans. There is just one (small) thing that you need to be aware
 of when advising scripted beans... you cannot use class-based proxies, you must
-use <<aop-proxying,interface-based proxies>>.
+use <<core.adoc#aop-proxying,interface-based proxies>>.
 
 You are of course not just limited to advising scripted beans... you can also write
 aspects themselves in a supported dynamic language and use such beans to advise other
@@ -7931,11 +7923,11 @@ though.
 In case it is not immediately obvious, scripted beans can of course be scoped just like
 any other bean. The `scope` attribute on the various `<lang:language/>` elements allows
 you to control the scope of the underlying scripted bean, just as it does with a regular
-bean. (The default scope is <<beans-factory-scopes-singleton,singleton>>, just as it is
+bean. (The default scope is <<core.adoc#beans-factory-scopes-singleton,singleton>>, just as it is
 with 'regular' beans.)
 
 Find below an example of using the `scope` attribute to define a Groovy bean scoped as
-a <<beans-factory-scopes-prototype,prototype>>.
+a <<core.adoc#beans-factory-scopes-prototype,prototype>>.
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -7958,8 +7950,8 @@ a <<beans-factory-scopes-prototype,prototype>>.
 	</beans>
 ----
 
-See <<beans-factory-scopes>> in <<beans>> for a fuller discussion of the scoping support
-in the Spring Framework.
+See <<core.adoc#beans-factory-scopes,Bean scopes>> in <<core.adoc#beans,The IoC container>>
+for a fuller discussion of the scoping support in the Spring Framework.
 
 
 
@@ -7982,8 +7974,8 @@ this chapter.
 [[cache-introduction]]
 === Introduction
 Since version 3.1, Spring Framework provides support for transparently adding caching
-into an existing Spring application. Similar to the <<transaction,transaction>> support,
-the caching abstraction allows consistent use of various caching solutions with minimal
+into an existing Spring application. Similar to the <<data-acess.adoc#transaction,transaction>>
+support, the caching abstraction allows consistent use of various caching solutions with minimal
 impact on the code.
 
 As from Spring 4.1, the cache abstraction has been significantly improved with the
@@ -8174,7 +8166,7 @@ they are no use for the cache. Further more what if only one of the two is impor
 while the other is not?
 
 For such cases, the `@Cacheable` annotation allows the user to specify how the key is
-generated through its `key` attribute. The developer can use <<expressions,SpEL>> to
+generated through its `key` attribute. The developer can use <<core.adoc#expressions,SpEL>> to
 pick the arguments of interest (or their nested properties), perform operations or even
 invoke arbitrary methods without having to write any code or implement any interface.
 This is the recommended approach over the
@@ -8183,7 +8175,7 @@ quite different in signatures as the code base grows; while the default strategy
 work for some methods, it rarely does for all methods.
 
 Below are some examples of various SpEL declarations - if you are not familiar with it,
-do yourself a favor and read <<expressions>>:
+do yourself a favor and read <<core.adoc#expressions,Spring Expression Language>>:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -8344,7 +8336,7 @@ Note that `result` still refers to `Book` and not `Optional`.
 ===== Available caching SpEL evaluation context
 
 Each `SpEL` expression evaluates again a dedicated
-<<expressions-language-ref,`context`>>. In addition to the build in parameters, the
+<<core.adoc#expressions-language-ref,`context`>>. In addition to the build in parameters, the
 framework provides dedicated caching related metadata such as the argument names. The
 next table lists the items made available to the context so one can use them for key and
 conditional computations:
@@ -8561,7 +8553,7 @@ Alternatively for XML configuration use the `cache:annotation-driven` element:
 Both the `cache:annotation-driven` element and `@EnableCaching` annotation allow various
 options to be specified that influence the way the caching behavior is added to the
 application through AOP. The configuration is intentionally similar with that of
-<<tx-annotation-driven-settings, `@Transactional`>>:
+<<data-access.adoc#tx-annotation-driven-settings, `@Transactional`>>:
 
 [NOTE]
 ====
@@ -8611,7 +8603,8 @@ javadoc for more details].
   affected classes with Spring's AspectJ caching aspect, modifying the target class byte
   code to apply to any kind of method call. AspectJ weaving requires spring-aspects.jar
   in the classpath as well as load-time weaving (or compile-time weaving) enabled. (See
-  <<aop-aj-ltw-spring>> for details on how to set up load-time weaving.)
+  <<core.adoc#aop-aj-ltw-spring, Spring configuration>> for details on how to set up
+  load-time weaving.)
 
 | `proxy-target-class`
 | `proxyTargetClass`
@@ -8620,16 +8613,16 @@ javadoc for more details].
   classes annotated with the `@Cacheable` or `@CacheEvict` annotations. If the
   `proxy-target-class` attribute is set to `true`, then class-based proxies are created.
   If `proxy-target-class` is `false` or if the attribute is omitted, then standard JDK
-  interface-based proxies are created. (See <<aop-proxying>> for a detailed examination
-  of the different proxy types.)
+  interface-based proxies are created. (See <<core.adoc#aop-proxying,Proxying mechanisms>>
+  for a detailed examination of the different proxy types.)
 
 | `order`
 | `order`
 | Ordered.LOWEST_PRECEDENCE
 | Defines the order of the cache advice that is applied to beans annotated with
   `@Cacheable` or `@CacheEvict`. (For more information about the rules related to
-  ordering of AOP advice, see <<aop-ataspectj-advice-ordering>>.) No specified ordering
-  means that the AOP subsystem determines the order of the advice.
+  ordering of AOP advice, see <<core.adoc#aop-ataspectj-advice-ordering,Advice ordering>>.)
+  No specified ordering means that the AOP subsystem determines the order of the advice.
 |===
 
 [NOTE]
@@ -8637,8 +8630,8 @@ javadoc for more details].
 `<cache:annotation-driven/>` only looks for `@Cacheable/@CachePut/@CacheEvict/@Caching`
 on beans in the same application context it is defined in. This means that, if you put
 `<cache:annotation-driven/>` in a `WebApplicationContext` for a `DispatcherServlet`, it
-only checks for beans in your controllers, and not your services. See <<mvc-servlet>>
-for more information.
+only checks for beans in your controllers, and not your services.
+See <<web.adoc#mvc-servlet,the MVC section>> for more information.
 ====
 
 .Method visibility and cache annotations
@@ -8694,8 +8687,8 @@ triggers cache population or eviction. This is quite handy as a template mechani
 eliminates the need to duplicate cache annotation declarations (especially useful if the
 key or condition are specified) or if the foreign imports (`org.springframework`) are
 not allowed in your code base. Similar to the rest of the
-<<beans-stereotype-annotations,stereotype>> annotations, `@Cacheable`, `@CachePut`,
-`@CacheEvict` and `@CacheConfig` can be used as <<beans-meta-annotations,meta-annotations>>,
+<<core.adoc#beans-stereotype-annotations,stereotype>> annotations, `@Cacheable`, `@CachePut`,
+`@CacheEvict` and `@CacheConfig` can be used as <<core.adoc#beans-meta-annotations,meta-annotations>>,
 that is annotations that can annotate other annotations. To wit, let us replace a common
 `@Cacheable` declaration with our own, custom annotation:
 
@@ -8867,7 +8860,7 @@ caches, a consistent and identical key generation implementation should be used.
 If annotations are not an option (no access to the sources or no external code), one can
 use XML for declarative caching. So instead of annotating the methods for caching, one
 specifies the target method and the caching directives externally (similar to the
-declarative transaction management <<transaction-declarative-first-example,advice>>).
+declarative transaction management <<data-access.adoc#transaction-declarative-first-example,advice>>).
 The previous example can be translated into:
 
 [source,xml,indent=0]
@@ -8899,7 +8892,8 @@ evicting data. Both definitions are working against the `books` cache.
 
 The `aop:config` definition applies the cache advice to the appropriate points in the
 program by using the AspectJ pointcut expression (more information is available in
-<<aop>>). In the example above, all methods from the `BookService` are considered and
+<<core.adoc#aop, Aspect Oriented Programming with Spring>>).
+In the example above, all methods from the `BookService` are considered and
 the cache advice applied to them.
 
 The declarative XML caching supports all of the annotation-based model so moving between

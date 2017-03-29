@@ -30,8 +30,8 @@ the first edition. Alternatively, see
 
 You cannot add advice to final methods when you use Spring MVC. For example, you cannot
 add advice to the `AbstractController.setSynchronizeOnSession()` method. Refer to
-<<aop-understanding-aop-proxies>> for more information on AOP proxies and why you cannot
-add advice to final methods.
+<<core.adoc#aop-understanding-aop-proxies, Understanding AOP proxies>>
+for more information on AOP proxies and why you cannot add advice to final methods.
 ****
 
 In Spring Web MVC you can use any object as a command or form-backing object; you do not
@@ -106,14 +106,15 @@ Spring's web module includes many unique web support features:
 * __A simple yet powerful JSP tag library known as the Spring tag library that provides
   support for features such as data binding and themes__. The custom tags allow for
   maximum flexibility in terms of markup code. For information on the tag library
-  descriptor, see the appendix entitled <<spring-tld>>
+  descriptor, see the appendix entitled <<appendix.adoc#spring-tld, Spring TLD>>
 * __A JSP form tag library, introduced in Spring 2.0, that makes writing forms in JSP
   pages much easier.__ For information on the tag library descriptor, see the appendix
-  entitled <<spring-form-tld>>
+  entitled <<appendix.adoc#spring-form-tld, Spring Form TLD>>
 * __Beans whose lifecycle is scoped to the current HTTP request or HTTP `Session`.__
   This is not a specific feature of Spring MVC itself, but rather of the
   `WebApplicationContext` container(s) that Spring MVC uses. These bean scopes are
-  described in <<beans-factory-scopes-other>>
+  described in <<core.adoc#beans-factory-scopes-other, Request, session, application,
+  and WebSocket scopes>>
 
 
 
@@ -217,10 +218,11 @@ Below is the `web.xml` equivalent of the above code based example:
 ----
 
 
-As detailed in <<context-introduction>>, `ApplicationContext` instances in Spring can be
-scoped. In the Web MVC framework, each `DispatcherServlet` has its own
-`WebApplicationContext`, which inherits all the beans already defined in the root
-`WebApplicationContext`. The root `WebApplicationContext` should contain all the
+As detailed in <<core.adoc#context-introduction,Additional Capabilities of the ApplicationContext>>,
+`ApplicationContext` instances in Spring can be scoped.
+In the Web MVC framework, each `DispatcherServlet` has its own `WebApplicationContext`,
+which inherits all the beans already defined in the root `WebApplicationContext`.
+The root `WebApplicationContext` should contain all the
 infrastructure beans that should be shared between your other contexts and Servlet
 instances. These inherited beans can be overridden in the servlet-specific
 scope, and you can define new scope-specific beans local to a given Servlet instance.
@@ -1766,8 +1768,9 @@ The next step is data binding. The `WebDataBinder` class matches request paramet
 -- including query string parameters and form fields -- to model attribute fields by
 name. Matching fields are populated after type conversion (from String to the target
 field type) has been applied where necessary. Data binding and validation are covered in
-<<validation>>. Customizing the data binding process for a controller level is covered
-in <<mvc-ann-webdatabinder>>.
+<<core.adoc#validation, Validation>>.
+Customizing the data binding process for a controller level is covered in
+<<mvc-ann-webdatabinder>>.
 
 As a result of data binding there may be errors such as missing required fields or type
 conversion errors. To check for such errors add a `BindingResult` argument immediately
@@ -1856,8 +1859,8 @@ annotation:
 	}
 ----
 
-See <<validation-beanvalidation>> and <<validation>> for details on how to configure and
-use validation.
+See <<core.adoc#validation-beanvalidation, Bean validation>> and
+<<core.adoc#validation, Spring validation>> for details on how to configure and use validation.
 
 
 
@@ -2058,7 +2061,7 @@ an `@ModelAttribute` parameter) they're bound to. If the target type is not `Str
 Spring automatically converts to the appropriate type. All simple types such as int,
 long, Date, etc. are supported. You can further customize the conversion process through
 a `WebDataBinder` (see <<mvc-ann-webdatabinder>>) or by registering `Formatters` with
-the `FormattingConversionService` (see <<format>>).
+the `FormattingConversionService` (see <<core.adoc#format, Spring Field Formatting>>).
 
 
 [[mvc-ann-webdatabinder]]
@@ -2606,7 +2609,7 @@ the timeout value. The class constructor of `WebAsyncTask` also allows providing
 [[mvc-ann-tests]]
 === Testing Controllers
 The `spring-test` module offers first class support for testing annotated controllers.
-See <<spring-mvc-test-framework>>.
+See <<testing.adoc#spring-mvc-test-framework, Spring MVC Test Framework>>.
 
 
 
@@ -4814,11 +4817,11 @@ requests with annotated controller methods using annotations such as `@RequestMa
 
 It also enables the following:
 
-. Spring 3 style type conversion through a <<core-convert,ConversionService>> instance
+. Spring 3 style type conversion through a <<core.adoc#core-convert,ConversionService>> instance
 in addition to the JavaBeans PropertyEditors used for Data Binding.
-. Support for <<format,formatting>> Number fields using the `@NumberFormat` annotation
+. Support for <<core.adoc#format,formatting>> Number fields using the `@NumberFormat` annotation
 through the `ConversionService`.
-. Support for <<format,formatting>> `Date`, `Calendar`, `Long`, and Joda Time fields using the
+. Support for <<core.adoc#format,formatting>> `Date`, `Calendar`, `Long`, and Joda Time fields using the
 `@DateTimeFormat` annotation.
 . Support for <<mvc-config-validation,validating>> `@Controller` inputs with `@Valid`, if
 a JSR-303 Provider is present on the classpath.
@@ -4971,20 +4974,20 @@ To register custom formatters and converters simply supply a `ConversionService`
 
 [NOTE]
 ====
-See <<format-FormatterRegistrar-SPI>> and the `FormattingConversionServiceFactoryBean`
-for more information on when to use FormatterRegistrars.
+See <<core.adoc#format-FormatterRegistrar-SPI,FormatterRegistrar SPI>>
+and the `FormattingConversionServiceFactoryBean` for more information on when to use FormatterRegistrars.
 ====
 
 [[mvc-config-validation]]
 === Validation
 
-Spring provides a <<validator,Validator interface>> that can be used for validation in all layers
+Spring provides a <<core.adoc#validator,Validator interface>> that can be used for validation in all layers
 of an application. In Spring MVC you can configure it for use as a global `Validator` instance, to be used
 whenever an `@Valid` or `@Validated` controller method argument is encountered, and/or as a local
 `Validator` within a controller through an `@InitBinder` method. Global and local validator
 instances can be combined to provide composite validation.
 
-Spring also <<validation-beanvalidation-overview,supports JSR-303/JSR-349>> Bean Validation
+Spring also <<core.adoc#validation-beanvalidation-overview,supports JSR-303/JSR-349>> Bean Validation
 via `LocalValidatorFactoryBean` which adapts the Spring `org.springframework.validation.Validator`
 interface to the Bean Validation `javax.validation.Validator` contract. This class can be
 plugged into Spring MVC as a global validator as described next.

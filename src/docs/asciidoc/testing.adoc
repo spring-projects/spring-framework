@@ -3,9 +3,9 @@
 :doc-root: https://docs.spring.io
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :doc-spring-boot: {doc-root}/spring-boot/docs/current/reference
+:toc: left
+:toclevels: 2
 
-[partintro]
---
 The adoption of the test-driven-development (TDD) approach to software
 development is certainly advocated by the Spring team, and so coverage of Spring's
 support for integration testing is covered (alongside best practices for unit testing).
@@ -14,7 +14,6 @@ integration testing easier (in that the presence of setter methods and appropria
 constructors on classes makes them easier to wire together in a test without having to
 set up service locator registries and suchlike)... the chapter dedicated solely to
 testing will hopefully convince you of this as well.
---
 
 
 [[testing-introduction]]
@@ -24,8 +23,6 @@ the value-add of the IoC principle to <<unit-testing,unit testing>> and on the b
 of the Spring Framework's support for <<integration-testing,integration testing>>. __(A
 thorough treatment of testing in the enterprise is beyond the scope of this reference
 manual.)__
-
-
 
 
 [[unit-testing]]
@@ -57,10 +54,11 @@ support classes.
 [[mock-objects-env]]
 ==== Environment
 The `org.springframework.mock.env` package contains mock implementations of the
-`Environment` and `PropertySource` abstractions (see <<beans-definition-profiles>>
-and <<beans-property-source-abstraction>>). `MockEnvironment` and
-`MockPropertySource` are useful for developing __out-of-container__ tests for code that
-depends on environment-specific properties.
+`Environment` and `PropertySource` abstractions (see
+<<core.adoc#beans-definition-profiles, Bean definition profiles>>
+and <<core.adoc#beans-property-source-abstraction, PropertySource abstraction>>).
+`MockEnvironment` and `MockPropertySource` are useful for developing
+__out-of-container__ tests for code that depends on environment-specific properties.
 
 
 [[mock-objects-jndi]]
@@ -158,7 +156,7 @@ This will enable you to test things such as:
 The Spring Framework provides first-class support for integration testing in the
 `spring-test` module. The name of the actual JAR file might include the release version
 and might also be in the long `org.springframework.test` form, depending on where you
-get it from (see the <<dependency-management,section on Dependency Management>> for an
+get it from (see the <<core.adoc#dependency-management,section on Dependency Management>> for an
 explanation). This library includes the `org.springframework.test` package, which
 contains valuable classes for integration testing with a Spring container. This testing
 does not rely on an application server or other deployment environment. Such tests are
@@ -312,8 +310,9 @@ provide convenience methods which delegate to the aforementioned methods in
 
 The `spring-jdbc` module provides support for configuring and launching an embedded
 database which can be used in integration tests that interact with a database. For
-details, see <<jdbc-embedded-database-support>> and
-<<jdbc-embedded-database-dao-testing>>.
+details, see <<data-access.adoc#jdbc-embedded-database-support, Embedded database support>>
+and <<data-access.adoc#jdbc-embedded-database-dao-testing, Testing data access logic
+with an embedded database>>.
 
 
 
@@ -978,7 +977,7 @@ well as any __set up__ or __tear down__ of the test fixture.
 [[integration-testing-annotations-meta]]
 ==== Meta-Annotation Support for Testing
 It is possible to use most test-related annotations as
-<<beans-meta-annotations,meta-annotations>> in order to create custom _composed
+<<core.adoc#beans-meta-annotations,meta-annotations>> in order to create custom _composed
 annotations_ and reduce configuration duplication across a test suite.
 
 Each of the following may be used as meta-annotations in conjunction with the
@@ -1053,7 +1052,7 @@ configuration of individual test classes as follows:
 	public class UserRepositoryTests { }
 ----
 
-For further details, consult the <<annotation-programming-model,Spring Annotation Programming Model>>.
+For further details, consult the <<core.adoc#annotation-programming-model,Spring Annotation Programming Model>>.
 
 
 [[testcontext-framework]]
@@ -1442,7 +1441,7 @@ a default location based on the name of the test class. If your class is named
 ===== Context configuration with Groovy scripts
 
 To load an `ApplicationContext` for your tests using Groovy scripts that utilize the
-<<groovy-bean-definition-dsl,Groovy Bean Definition DSL>>, annotate your test class with
+<<core.adoc#groovy-bean-definition-dsl,Groovy Bean Definition DSL>>, annotate your test class with
 `@ContextConfiguration` and configure the `locations` or `value` attribute with an array
 that contains the resource locations of Groovy scripts. Resource lookup semantics for
 Groovy scripts are the same as those described for <<testcontext-ctx-management-xml,XML
@@ -1516,7 +1515,8 @@ The following listing demonstrates how to combine both in an integration test.
 ===== Context configuration with annotated classes
 
 To load an `ApplicationContext` for your tests using __annotated classes__ (see
-<<beans-java>>), annotate your test class with `@ContextConfiguration` and configure the
+<<core.adoc#beans-java, Java-based container configuration>>),
+annotate your test class with `@ContextConfiguration` and configure the
 `classes` attribute with an array that contains references to annotated classes.
 
 [source,java,indent=0]
@@ -2660,7 +2660,7 @@ instantiated. Thus the use of `@Autowired` or `@Inject` for constructors has no 
 for test classes.
 ====
 
-Because `@Autowired` is used to perform <<beans-factory-autowire, __autowiring by type__
+Because `@Autowired` is used to perform <<core.adoc#beans-factory-autowire, __autowiring by type__
 >>, if you have multiple bean definitions of the same type, you cannot rely on this
 approach for those particular beans. In that case, you can use `@Autowired` in
 conjunction with `@Qualifier`. As of Spring 3.0 you may also choose to use `@Inject` in
@@ -2813,7 +2813,7 @@ request-scoped and session-scoped beans by following these steps.
 
 The following code snippet displays the XML configuration for a login use case. Note
 that the `userService` bean has a dependency on a request-scoped `loginAction` bean.
-Also, the `LoginAction` is instantiated using <<expressions,SpEL expressions>> that
+Also, the `LoginAction` is instantiated using <<core.adoc#expressions,SpEL expressions>> that
 retrieve the username and password from the current HTTP request. In our test, we will
 want to configure these request parameters via the mock managed by the TestContext
 framework.
@@ -2954,7 +2954,7 @@ application code that is invoked via tests). Spring-managed and application-mana
 transactions will typically participate in test-managed transactions; however, caution
 should be taken if Spring-managed or application-managed transactions are configured with
 any _propagation_ type other than `REQUIRED` or `SUPPORTS` (see the discussion on
-<<tx-propagation,transaction propagation>> for details).
+<<data-access.adoc#tx-propagation,transaction propagation>> for details).
 
 [[testcontext-tx-enabling-transactions]]
 ===== Enabling and disabling transactions
@@ -3236,8 +3236,9 @@ When writing integration tests against a relational database, it is often benefi
 to execute SQL scripts to modify the database schema or insert test data into tables.
 The `spring-jdbc` module provides support for _initializing_ an embedded or existing
 database by executing SQL scripts when the Spring `ApplicationContext` is loaded. See
-<<jdbc-embedded-database-support>> and <<jdbc-embedded-database-dao-testing>> for
-details.
+<<data-access.adoc#jdbc-embedded-database-support,  Embedded database support>> and
+<<data-access.adoc#jdbc-embedded-database-dao-testing,
+Testing data access logic with an embedded database>> for details.
 
 Although it is very useful to initialize a database for testing _once_ when the
 `ApplicationContext` is loaded, sometimes it is essential to be able to modify the

@@ -4,16 +4,33 @@ The Spring Framework team and contributors https://github.com/spring-projects/sp
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 
 
-<<overview.adoc#spring-introduction,Overview>>
+The Spring Framework is a lightweight solution and a potential one-stop-shop for
+building your enterprise-ready applications. However, Spring is modular, allowing you to
+use only those parts that you need, without having to bring in the rest. You can use the
+IoC container, with any web framework on top, but you can also use only the
+<<data-access.adoc#orm-hibernate,Hibernate integration code>> or the
+<<data-access.adoc#jdbc-introduction,JDBC abstraction layer>>. The Spring Framework supports declarative
+transaction management, remote access to your logic through RMI or web services, and various
+options for persisting your data.
+It offers a full-featured web frameworks such as <<web.adoc#mvc-introduction,Spring MVC>>
+and <<web.adoc#web-reactive, Spring WebFlux>>; and it enables you to
+integrate <<core.adoc#aop-introduction,AOP>> transparently into your software.
 
-<<core.adoc#spring-core,Core>>
+This document is a reference guide to Spring Framework features. Questions on the
+Framework itself should be asked on StackOverflow (see https://spring.io/questions[]).
 
-<<testing.adoc#testing,Testing>>
+This reference document provides the following sections:
 
-<<data-access.adoc#spring-data-tier,Data Access>>
+* <<overview.adoc#spring-introduction,Overview of the Spring Framework>>
 
-<<web.adoc#spring-web,Web>>
+* <<core.adoc#spring-core,Core concepts such as IoC and AOP>>
 
-<<integration.adoc#spring-integration,Integration>>
+* <<testing.adoc#testing,Testing with Spring>>
 
-<<appendix.adoc#spring-appendices,Appendix>>
+* <<data-access.adoc#spring-data-tier,Data Access and transaction management>>
+
+* <<web.adoc#spring-web,Web frameworks>>
+
+* <<integration.adoc#spring-integration,Integration with other technologies>>
+
+* <<appendix.adoc#spring-appendices,Appendix>>
