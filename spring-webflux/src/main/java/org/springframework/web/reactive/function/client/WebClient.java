@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
@@ -30,7 +31,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
@@ -373,6 +376,38 @@ public interface WebClient {
 		 * @return a {@code Mono} with the response
 		 */
 		Mono<ClientResponse> exchange();
+
+		/**
+		 * Execute the built request, and use the given extractor to return the response body as a
+		 * delayed {@code T}.
+		 * @param extractor the extractor for the response body
+		 * @param <T> the response type
+		 * @return the body of the response, extracted with {@code extractor}
+		 */
+		<T> Mono<T> retrieve(BodyExtractor<T, ? super ClientHttpResponse> extractor);
+
+		/**
+		 * Execute the built request, and return the response body as a delayed {@code T}.
+		 * <p>This method is a convenient shortcut for {@link #retrieve(BodyExtractor)} with a
+		 * {@linkplain org.springframework.web.reactive.function.BodyExtractors#toMono(Class)
+		 * Mono body extractor}.
+		 * @param responseType the class of the response
+		 * @param <T> the response type
+		 * @return the body of the response
+		 */
+		<T> Mono<T> retrieveMono(Class<T> responseType);
+
+		/**
+		 * Execute the built request, and return the response body as a delayed sequence of
+		 * {@code T}'s.
+		 * <p>This method is a convenient shortcut for {@link #retrieve(BodyExtractor)} with a
+		 * {@linkplain org.springframework.web.reactive.function.BodyExtractors#toFlux(Class)}
+		 * Flux body extractor}.
+		 * @param responseType the class of the response
+		 * @param <T> the response type
+		 * @return the body of the response
+		 */
+		<T> Flux<T> retrieveFlux(Class<T> responseType);
 
 	}
 

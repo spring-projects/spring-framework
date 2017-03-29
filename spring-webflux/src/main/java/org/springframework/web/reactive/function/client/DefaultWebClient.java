@@ -26,15 +26,18 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -324,6 +327,21 @@ class DefaultWebClient implements WebClient {
 				defaultCookies.forEach(result::putIfAbsent);
 				return result;
 			}
+		}
+
+		@Override
+		public <T> Mono<T> retrieve(BodyExtractor<T, ? super ClientHttpResponse> extractor) {
+			return exchange().map(clientResponse -> clientResponse.body(extractor));
+		}
+
+		@Override
+		public <T> Mono<T> retrieveMono(Class<T> responseType) {
+			return exchange().then(clientResponse -> clientResponse.bodyToMono(responseType));
+		}
+
+		@Override
+		public <T> Flux<T> retrieveFlux(Class<T> responseType) {
+			return exchange().flatMap(clientResponse -> clientResponse.bodyToFlux(responseType));
 		}
 	}
 

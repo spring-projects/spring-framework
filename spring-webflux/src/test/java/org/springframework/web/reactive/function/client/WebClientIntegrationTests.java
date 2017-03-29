@@ -134,6 +134,50 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
+	public void jsonStringRetrieveMono() throws Exception {
+		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
+				.setBody(content));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/json")
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieveMono(String.class);
+
+		StepVerifier.create(result)
+				.expectNext(content)
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("/json", recordedRequest.getPath());
+		Assert.assertEquals("application/json", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+	}
+
+	@Test
+	public void jsonStringRetrieveFlux() throws Exception {
+		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
+				.setBody(content));
+
+		Flux<String> result = this.webClient.get()
+				.uri("/json")
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieveFlux(String.class);
+
+		StepVerifier.create(result)
+				.expectNext(content)
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("/json", recordedRequest.getPath());
+		Assert.assertEquals("application/json", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+	}
+
+	@Test
 	public void jsonPojoMono() throws Exception {
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
 				.setBody("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}"));
