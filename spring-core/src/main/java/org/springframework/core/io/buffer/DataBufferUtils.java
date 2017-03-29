@@ -103,6 +103,7 @@ public abstract class DataBufferUtils {
 	 * @param bufferSize the maximum size of the data buffers
 	 * @return a flux of data buffers read from the given channel
 	 */
+	@SuppressWarnings("deprecation")
 	public static Flux<DataBuffer> read(AsynchronousFileChannel channel,
 			long position, DataBufferFactory dataBufferFactory, int bufferSize) {
 

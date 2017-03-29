@@ -55,6 +55,7 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 	}
 
 
+	@SuppressWarnings("deprecation")
 	private class WriteWithBarrier extends Operators.SubscriberAdapter<T, Void> implements Publisher<T> {
 
 		/**
