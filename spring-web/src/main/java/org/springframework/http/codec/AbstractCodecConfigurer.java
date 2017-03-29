@@ -181,7 +181,7 @@ public abstract class AbstractCodecConfigurer {
 	/**
 	 * A registry and a factory for built-in HTTP message readers and writers.
 	 */
-	public static class DefaultCodecConfigurer {
+	public abstract static class DefaultCodecConfigurer {
 
 		private boolean suppressed = false;
 
@@ -280,13 +280,9 @@ public abstract class AbstractCodecConfigurer {
 		}
 
 
-		protected void addStringReaderTextOnlyTo(List<HttpMessageReader<?>> result) {
-			addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly(true)));
-		}
+		protected abstract void addStringReaderTextOnlyTo(List<HttpMessageReader<?>> result);
 
-		protected void addStringReaderTo(List<HttpMessageReader<?>> result) {
-			addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		}
+		protected abstract void addStringReaderTo(List<HttpMessageReader<?>> result);
 
 		protected void addStringWriterTextPlainOnlyTo(List<HttpMessageWriter<?>> result) {
 			addWriterTo(result, () -> new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()));

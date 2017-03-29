@@ -15,11 +15,17 @@
  */
 package org.springframework.http.codec;
 
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
+import reactor.core.publisher.Flux;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteArrayEncoder;
 import org.springframework.core.codec.ByteBufferDecoder;
@@ -31,6 +37,7 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
@@ -112,10 +119,17 @@ public class ServerCodecConfigurerTests {
 		return ((EncoderHttpMessageWriter) writer).getEncoder();
 	}
 
+	@SuppressWarnings("unchecked")
 	private void assertStringDecoder(Decoder<?> decoder, boolean textOnly) {
 		assertEquals(StringDecoder.class, decoder.getClass());
 		assertTrue(decoder.canDecode(forClass(String.class), MimeTypeUtils.TEXT_PLAIN));
 		assertEquals(!textOnly, decoder.canDecode(forClass(String.class), MediaType.TEXT_EVENT_STREAM));
+
+		Flux<String> flux = (Flux<String>) decoder.decode(
+				Flux.just(new DefaultDataBufferFactory().wrap("line1\nline2".getBytes(StandardCharsets.UTF_8))),
+				ResolvableType.forClass(String.class), MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap());
+
+		assertEquals(Arrays.asList("line1\n", "line2"), flux.collectList().block(Duration.ZERO));
 	}
 
 	private void assertStringEncoder(Encoder<?> encoder, boolean textOnly) {

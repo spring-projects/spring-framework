@@ -18,6 +18,7 @@ package org.springframework.http.codec;
 import java.util.List;
 
 import org.springframework.core.codec.Decoder;
+import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 
 /**
@@ -78,6 +79,14 @@ public class ClientCodecConfigurer extends AbstractCodecConfigurer {
 
 
 		// Internal methods for building a list of default readers or writers...
+
+		protected void addStringReaderTextOnlyTo(List<HttpMessageReader<?>> result) {
+			addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly(false)));
+		}
+
+		protected void addStringReaderTo(List<HttpMessageReader<?>> result) {
+			addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(false)));
+		}
 
 		private void addServerSentEventReaderTo(List<HttpMessageReader<?>> result) {
 			addReaderTo(result, () -> findReader(ServerSentEventHttpMessageReader.class, () -> {

@@ -282,7 +282,19 @@ public class CodecConfigurerTests {
 	private static class TestCodecConfigurer extends AbstractCodecConfigurer {
 
 		private TestCodecConfigurer() {
-			super(new DefaultCodecConfigurer());
+			super(new TestDefaultCodecConfigurer());
+		}
+
+
+		private static class TestDefaultCodecConfigurer extends DefaultCodecConfigurer {
+
+			protected void addStringReaderTextOnlyTo(List<HttpMessageReader<?>> result) {
+				addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly(true)));
+			}
+
+			protected void addStringReaderTo(List<HttpMessageReader<?>> result) {
+				addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
+			}
 		}
 	}
 
