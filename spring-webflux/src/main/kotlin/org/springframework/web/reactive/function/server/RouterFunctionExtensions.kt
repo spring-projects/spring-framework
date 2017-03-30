@@ -19,7 +19,7 @@ package org.springframework.web.reactive.function.server
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.web.reactive.function.server.RequestPredicates.pathPrefix
+import org.springframework.web.reactive.function.server.RequestPredicates.*
 import reactor.core.publisher.Mono
 
 /**
@@ -96,92 +96,92 @@ class RouterDsl {
 		routes += RouterFunctions.route(RequestPredicates.GET(pattern), HandlerFunction { f(it) })
 	}
 
-	fun GET(pattern: String) = RequestPredicates.GET(pattern)
+	fun GET(pattern: String): RequestPredicate = RequestPredicates.GET(pattern)
 
 	fun HEAD(pattern: String, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.HEAD(pattern), HandlerFunction { f(it) })
 	}
 
-	fun HEAD(pattern: String) = RequestPredicates.HEAD(pattern)
+	fun HEAD(pattern: String): RequestPredicate = RequestPredicates.HEAD(pattern)
 
 	fun POST(pattern: String, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.POST(pattern), HandlerFunction { f(it) })
 	}
 
-	fun POST(pattern: String) = RequestPredicates.POST(pattern)
+	fun POST(pattern: String): RequestPredicate = RequestPredicates.POST(pattern)
 
 	fun PUT(pattern: String, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.PUT(pattern), HandlerFunction { f(it) })
 	}
 
-	fun PUT(pattern: String) = RequestPredicates.PUT(pattern)
+	fun PUT(pattern: String): RequestPredicate = RequestPredicates.PUT(pattern)
 
 	fun PATCH(pattern: String, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.PATCH(pattern), HandlerFunction { f(it) })
 	}
 
-	fun PATCH(pattern: String) = RequestPredicates.PATCH(pattern)
+	fun PATCH(pattern: String): RequestPredicate = RequestPredicates.PATCH(pattern)
 
 	fun DELETE(pattern: String, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.DELETE(pattern), HandlerFunction { f(it) })
 	}
 
-	fun DELETE(pattern: String) = RequestPredicates.DELETE(pattern)
+	fun DELETE(pattern: String): RequestPredicate = RequestPredicates.DELETE(pattern)
 
 
 	fun OPTIONS(pattern: String, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.OPTIONS(pattern), HandlerFunction { f(it) })
 	}
 
-	fun OPTIONS(pattern: String) = RequestPredicates.OPTIONS(pattern)
+	fun OPTIONS(pattern: String): RequestPredicate = RequestPredicates.OPTIONS(pattern)
 
 	fun accept(mediaType: MediaType, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.accept(mediaType), HandlerFunction { f(it) })
 	}
 
-	fun accept(mediaType: MediaType) = RequestPredicates.accept(mediaType)
+	fun accept(mediaType: MediaType): RequestPredicate = RequestPredicates.accept(mediaType)
 
 	fun contentType(mediaType: MediaType, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.contentType(mediaType), HandlerFunction { f(it) })
 	}
 
-	fun contentType(mediaType: MediaType) = RequestPredicates.contentType(mediaType)
+	fun contentType(mediaType: MediaType): RequestPredicate = RequestPredicates.contentType(mediaType)
 
 	fun headers(headerPredicate: (ServerRequest.Headers) -> Boolean, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.headers(headerPredicate), HandlerFunction { f(it) })
 	}
 
-	fun headers(headerPredicate: (ServerRequest.Headers) -> Boolean) = RequestPredicates.headers(headerPredicate)
+	fun headers(headerPredicate: (ServerRequest.Headers) -> Boolean): RequestPredicate = RequestPredicates.headers(headerPredicate)
 
 	fun method(httpMethod: HttpMethod, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.method(httpMethod), HandlerFunction { f(it) })
 	}
 
-	fun method(httpMethod: HttpMethod) = RequestPredicates.method(httpMethod)
+	fun method(httpMethod: HttpMethod): RequestPredicate = RequestPredicates.method(httpMethod)
 
 	fun path(pattern: String, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.path(pattern), HandlerFunction { f(it) })
 	}
 
-	fun path(pattern: String) = RequestPredicates.path(pattern)
+	fun path(pattern: String): RequestPredicate = RequestPredicates.path(pattern)
 
 	fun pathExtension(extension: String, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.pathExtension(extension), HandlerFunction { f(it) })
 	}
 
-	fun pathExtension(extension: String) = RequestPredicates.pathExtension(extension)
+	fun pathExtension(extension: String): RequestPredicate = RequestPredicates.pathExtension(extension)
 
 	fun pathExtension(predicate: (String) -> Boolean, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.pathExtension(predicate), HandlerFunction { f(it) })
 	}
 
-	fun pathExtension(predicate: (String) -> Boolean) = RequestPredicates.pathExtension(predicate)
+	fun pathExtension(predicate: (String) -> Boolean): RequestPredicate = RequestPredicates.pathExtension(predicate)
 
 	fun queryParam(name: String, predicate: (String) -> Boolean, f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.queryParam(name, predicate), HandlerFunction { f(it) })
 	}
 
-	fun queryParam(name: String, predicate: (String) -> Boolean) = RequestPredicates.queryParam(name, predicate)
+	fun queryParam(name: String, predicate: (String) -> Boolean): RequestPredicate = RequestPredicates.queryParam(name, predicate)
 
 	operator fun String.invoke(f: (ServerRequest) -> Mono<ServerResponse>) {
 		routes += RouterFunctions.route(RequestPredicates.path(this),  HandlerFunction { f(it) })

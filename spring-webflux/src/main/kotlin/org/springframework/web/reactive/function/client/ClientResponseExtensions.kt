@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun <T : Any> ClientResponse.bodyToMono(type: KClass<T>) : Mono<T> = bodyToMono(type.java)
+fun <T : Any> ClientResponse.bodyToMono(type: KClass<T>): Mono<T> = bodyToMono(type.java)
 
 /**
  * Extension for [ClientResponse.bodyToMono] providing a `bodyToMono<Foo>()` variant.
@@ -19,7 +19,7 @@ fun <T : Any> ClientResponse.bodyToMono(type: KClass<T>) : Mono<T> = bodyToMono(
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Any> ClientResponse.bodyToMono() = bodyToMono(T::class.java)
+inline fun <reified T : Any> ClientResponse.bodyToMono(): Mono<T> = bodyToMono(T::class.java)
 
 
 /**
@@ -28,7 +28,7 @@ inline fun <reified T : Any> ClientResponse.bodyToMono() = bodyToMono(T::class.j
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun <T : Any> ClientResponse.bodyToFlux(type: KClass<T>) : Flux<T> = bodyToFlux(type.java)
+fun <T : Any> ClientResponse.bodyToFlux(type: KClass<T>): Flux<T> = bodyToFlux(type.java)
 
 /**
  * Extension for [ClientResponse.bodyToFlux] providing a `bodyToFlux<Foo>()` variant.
@@ -36,4 +36,4 @@ fun <T : Any> ClientResponse.bodyToFlux(type: KClass<T>) : Flux<T> = bodyToFlux(
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Any> ClientResponse.bodyToFlux() = bodyToFlux(T::class.java)
+inline fun <reified T : Any> ClientResponse.bodyToFlux(): Flux<T> = bodyToFlux(T::class.java)

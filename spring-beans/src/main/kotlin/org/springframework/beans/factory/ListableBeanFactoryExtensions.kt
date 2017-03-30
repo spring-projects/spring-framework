@@ -10,8 +10,8 @@ import kotlin.reflect.KClass
  * @since 5.0
  */
 fun <T : Any> ListableBeanFactory.getBeanNamesForType(type: KClass<T>,
-		includeNonSingletons: Boolean = true, allowEagerInit: Boolean = true) =
-				getBeanNamesForType(type.java, includeNonSingletons, allowEagerInit)
+		includeNonSingletons: Boolean = true, allowEagerInit: Boolean = true): Array<out String> =
+	getBeanNamesForType(type.java, includeNonSingletons, allowEagerInit)
 
 /**
  * Extension for [ListableBeanFactory.getBeanNamesForType] providing a `getBeanNamesForType<Foo>()` variant.
@@ -19,8 +19,8 @@ fun <T : Any> ListableBeanFactory.getBeanNamesForType(type: KClass<T>,
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Any> ListableBeanFactory.getBeanNamesForType(includeNonSingletons: Boolean = true, allowEagerInit: Boolean = true) =
-				getBeanNamesForType(T::class.java, includeNonSingletons, allowEagerInit)
+inline fun <reified T : Any> ListableBeanFactory.getBeanNamesForType(includeNonSingletons: Boolean = true, allowEagerInit: Boolean = true): Array<out String> =
+	getBeanNamesForType(T::class.java, includeNonSingletons, allowEagerInit)
 
 /**
  * Extension for [ListableBeanFactory.getBeansOfType] providing a [KClass] based variant.
@@ -28,9 +28,8 @@ inline fun <reified T : Any> ListableBeanFactory.getBeanNamesForType(includeNonS
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun <T : Any> ListableBeanFactory.getBeansOfType(type: KClass<T>,
-		includeNonSingletons: Boolean = true, allowEagerInit: Boolean = true) =
-				getBeansOfType(type.java, includeNonSingletons, allowEagerInit)
+fun <T : Any> ListableBeanFactory.getBeansOfType(type: KClass<T>, includeNonSingletons: Boolean = true, allowEagerInit: Boolean = true): Map<String, Any> =
+	getBeansOfType(type.java, includeNonSingletons, allowEagerInit)
 
 /**
  * Extension for [ListableBeanFactory.getBeansOfType] providing a `getBeansOfType<Foo>()` variant.
@@ -38,7 +37,7 @@ fun <T : Any> ListableBeanFactory.getBeansOfType(type: KClass<T>,
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Any> ListableBeanFactory.getBeansOfType(includeNonSingletons: Boolean = true, allowEagerInit: Boolean = true) =
+inline fun <reified T : Any> ListableBeanFactory.getBeansOfType(includeNonSingletons: Boolean = true, allowEagerInit: Boolean = true): Map<String, Any> =
 				getBeansOfType(T::class.java, includeNonSingletons, allowEagerInit)
 
 /**
@@ -47,7 +46,7 @@ inline fun <reified T : Any> ListableBeanFactory.getBeansOfType(includeNonSingle
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun <T : Annotation> ListableBeanFactory.getBeanNamesForAnnotation(type: KClass<T>) =
+fun <T : Annotation> ListableBeanFactory.getBeanNamesForAnnotation(type: KClass<T>): Array<out String> =
 		getBeanNamesForAnnotation(type.java)
 
 /**
@@ -56,7 +55,7 @@ fun <T : Annotation> ListableBeanFactory.getBeanNamesForAnnotation(type: KClass<
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Annotation> ListableBeanFactory.getBeanNamesForAnnotation() =
+inline fun <reified T : Annotation> ListableBeanFactory.getBeanNamesForAnnotation(): Array<out String> =
 		getBeanNamesForAnnotation(T::class.java)
 
 /**
@@ -65,7 +64,7 @@ inline fun <reified T : Annotation> ListableBeanFactory.getBeanNamesForAnnotatio
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun <T : Annotation> ListableBeanFactory.getBeansWithAnnotation(type: KClass<T>) =
+fun <T : Annotation> ListableBeanFactory.getBeansWithAnnotation(type: KClass<T>): MutableMap<String, Any> =
 		getBeansWithAnnotation(type.java)
 
 /**
@@ -74,7 +73,7 @@ fun <T : Annotation> ListableBeanFactory.getBeansWithAnnotation(type: KClass<T>)
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Annotation> ListableBeanFactory.getBeansWithAnnotation() =
+inline fun <reified T : Annotation> ListableBeanFactory.getBeansWithAnnotation(): MutableMap<String, Any> =
 		getBeansWithAnnotation(T::class.java)
 
 /**
@@ -83,7 +82,7 @@ inline fun <reified T : Annotation> ListableBeanFactory.getBeansWithAnnotation()
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun <T : Annotation> ListableBeanFactory.findAnnotationOnBean(beanName:String, type: KClass<T>) =
+fun <T : Annotation> ListableBeanFactory.findAnnotationOnBean(beanName:String, type: KClass<T>): Annotation? =
 		findAnnotationOnBean(beanName, type.java)
 
 /**
@@ -92,6 +91,6 @@ fun <T : Annotation> ListableBeanFactory.findAnnotationOnBean(beanName:String, t
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Annotation> ListableBeanFactory.findAnnotationOnBean(beanName:String) =
+inline fun <reified T : Annotation> ListableBeanFactory.findAnnotationOnBean(beanName:String): Annotation? =
 		findAnnotationOnBean(beanName, T::class.java)
 
