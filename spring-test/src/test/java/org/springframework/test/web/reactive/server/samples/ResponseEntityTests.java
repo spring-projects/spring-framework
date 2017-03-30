@@ -17,6 +17,7 @@
 package org.springframework.test.web.reactive.server.samples;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static java.time.Duration.*;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.junit.Assert.*;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
@@ -148,7 +150,7 @@ public class ResponseEntityTests {
 
 		@GetMapping(produces = "text/event-stream")
 		Flux<Person> getPersonStream() {
-			return Flux.intervalMillis(100).onBackpressureBuffer(10).map(index -> new Person("N" + index));
+			return Flux.interval(ofMillis(100)).onBackpressureBuffer(10).map(index -> new Person("N" + index));
 		}
 
 		@PostMapping

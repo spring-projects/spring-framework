@@ -17,14 +17,13 @@
 package org.springframework.web.reactive.function.client
 
 import org.reactivestreams.Publisher
-import reactor.core.publisher.Mono
 
 /**
- * Extension for [WebClient.RequestHeadersSpec.exchangePublisher] providing a variant without explicit class
+ * Extension for [WebClient.RequestBodySpec.body] providing a variant without explicit class
  * parameter thanks to Kotlin reified type parameters.
  *
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Any, S : Publisher<T>> WebClient.RequestBodySpec.body(publisher: S):
-        Mono<ClientResponse> = body(publisher, T::class.java)
+inline fun <reified T : Any, S : Publisher<T>> WebClient.RequestBodySpec.body(publisher: S): WebClient.RequestHeadersSpec<*>
+        = body(publisher, T::class.java)
