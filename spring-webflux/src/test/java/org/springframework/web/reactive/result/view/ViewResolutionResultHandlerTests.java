@@ -32,7 +32,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import rx.Completable;
-import rx.Observable;
 import rx.Single;
 
 import org.springframework.core.MethodParameter;
@@ -247,34 +246,6 @@ public class ViewResolutionResultHandlerTests {
 				.expectNextCount(0)
 				.expectError(NotAcceptableStatusException.class)
 				.verify();
-	}
-
-	@Test
-	public void modelWithAsyncAttributes() throws Exception {
-		this.bindingContext.getModel()
-				.addAttribute("attr1", Mono.just(new TestBean("Bean1")))
-				.addAttribute("attr2", Flux.just(new TestBean("Bean1"), new TestBean("Bean2")))
-				.addAttribute("attr3", Single.just(new TestBean("Bean2")))
-				.addAttribute("attr4", Observable.just(new TestBean("Bean1"), new TestBean("Bean2")))
-				.addAttribute("attr5", Mono.empty());
-
-		MethodParameter returnType = on(TestController.class).resolveReturnType(void.class);
-		HandlerResult result = new HandlerResult(new Object(), null, returnType, this.bindingContext);
-		ViewResolutionResultHandler handler = resultHandler(new TestViewResolver("account"));
-
-		MockServerWebExchange exchange = get("/account").toExchange();
-
-		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
-		assertResponseBody(exchange, "account: {" +
-				"attr1=TestBean[name=Bean1], " +
-				"attr2=[TestBean[name=Bean1], TestBean[name=Bean2]], " +
-				"attr3=TestBean[name=Bean2], " +
-				"attr4=[TestBean[name=Bean1], TestBean[name=Bean2]], " +
-				"org.springframework.validation.BindingResult.attr1=" +
-				"org.springframework.validation.BeanPropertyBindingResult: 0 errors, " +
-				"org.springframework.validation.BindingResult.attr3=" +
-				"org.springframework.validation.BeanPropertyBindingResult: 0 errors" +
-				"}");
 	}
 
 

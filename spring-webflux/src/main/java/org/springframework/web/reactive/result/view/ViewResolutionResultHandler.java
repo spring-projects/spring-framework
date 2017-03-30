@@ -224,10 +224,9 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
 					}
 
-					return resolveAsyncAttributes(model.asMap())
-							.doOnSuccess(aVoid -> addBindingResult(result.getBindingContext(), exchange))
-							.then(viewsMono)
-							.then(views -> render(views, model.asMap(), exchange));
+					addBindingResult(result.getBindingContext(), exchange);
+
+					return viewsMono.then(views -> render(views, model.asMap(), exchange));
 				});
 	}
 
@@ -274,44 +273,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 		return ClassUtils.getShortNameAsProperty(returnValueType);
 	}
 
-	private Mono<Void> resolveAsyncAttributes(Map<String, Object> model) {
 
-		List<String> names = new ArrayList<>();
-		List<Mono<?>> valueMonos = new ArrayList<>();
-
-		for (Map.Entry<String, ?> entry : model.entrySet()) {
-			ReactiveAdapter adapter = getAdapterRegistry().getAdapter(null, entry.getValue());
-			if (adapter != null) {
-				names.add(entry.getKey());
-				if (adapter.isMultiValue()) {
-					Flux<Object> value = Flux.from(adapter.toPublisher(entry.getValue()));
-					valueMonos.add(value.collectList().defaultIfEmpty(Collections.emptyList()));
-				}
-				else {
-					Mono<Object> value = Mono.from(adapter.toPublisher(entry.getValue()));
-					valueMonos.add(value.defaultIfEmpty(NO_VALUE));
-				}
-			}
-		}
-
-		if (names.isEmpty()) {
-			return Mono.empty();
-		}
-
-		return Mono.when(valueMonos,
-				values -> {
-					for (int i=0; i < values.length; i++) {
-						if (values[i] != NO_VALUE) {
-							model.put(names.get(i), values[i]);
-						}
-						else {
-							model.remove(names.get(i));
-						}
-					}
-					return NO_VALUE;
-				})
-				.then();
-	}
 
 	private void addBindingResult(BindingContext context, ServerWebExchange exchange) {
 		Map<String, Object> model = context.getModel().asMap();
