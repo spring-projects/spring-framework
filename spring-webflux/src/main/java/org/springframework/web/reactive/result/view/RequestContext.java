@@ -175,7 +175,7 @@ public class RequestContext {
 	}
 
 	/**
-	 * Return the context path of the the current web application. This is
+	 * Return the context path of the current web application. This is
 	 * useful for building links to other resources within the application.
 	 * <p>Delegates to {@link ServerHttpRequest#getContextPath()}.
 	 */
