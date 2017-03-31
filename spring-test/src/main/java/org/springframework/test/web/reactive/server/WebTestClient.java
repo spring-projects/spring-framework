@@ -458,7 +458,7 @@ public interface WebTestClient {
 		/**
 		 * Set the body of the request to the given {@code BodyInserter}.
 		 * @param inserter the inserter
-		 * @param <T> the body type, or the the element type (for a stream)
+		 * @param <T> the body type or the element type (for a stream)
 		 * @return spec for decoding the response
 		 * @see org.springframework.web.reactive.function.BodyInserters
 		 */

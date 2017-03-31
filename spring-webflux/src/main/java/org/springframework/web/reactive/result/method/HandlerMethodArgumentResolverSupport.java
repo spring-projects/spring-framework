@@ -53,7 +53,7 @@ public abstract class HandlerMethodArgumentResolverSupport implements HandlerMet
 
 
 	/**
-	 * Evaluate the {@code Predicate} on the the method parameter type or on
+	 * Evaluate the {@code Predicate} on the method parameter type or on
 	 * the generic type within a reactive type wrapper.
 	 */
 	protected boolean checkParameterType(MethodParameter parameter, Predicate<Class<?>> predicate) {
