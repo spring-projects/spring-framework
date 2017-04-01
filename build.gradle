@@ -70,8 +70,8 @@ configure(allprojects) { project ->
 	ext.jspVersion             = "2.3.2-b02"
 	ext.jtaVersion             = "1.2"
 	ext.junitVersion           = "4.12"
-	ext.junitJupiterVersion    = '5.0.0-M3'
-	ext.junitPlatformVersion   = '1.0.0-M3'
+	ext.junitJupiterVersion    = '5.0.0-M4'
+	ext.junitPlatformVersion   = '1.0.0-M4'
 	ext.kotlinVersion          = "1.1.1"  // also change kotlin-gradle-plugin version when upgrading
 	ext.log4jVersion           = '2.8.1'
 	ext.nettyVersion           = "4.1.9.Final"
