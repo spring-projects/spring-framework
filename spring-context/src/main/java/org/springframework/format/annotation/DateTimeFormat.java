@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  * Declares that a field should be formatted as a date time.
  *
  * <p>Supports formatting by style pattern, ISO date time pattern, or custom format pattern string.
- * Can be applied to {@code java.util.Date}, {@code java.util.Calendar}, {@code java.long.Long},
+ * Can be applied to {@code java.util.Date}, {@code java.util.Calendar}, {@code java.lang.Long},
  * Joda-Time value types; and as of Spring 4 and JDK 8, to JSR-310 <code>java.time</code> types too.
  *
  * <p>For style-based formatting, set the {@link #style} attribute to be the style pattern code.
