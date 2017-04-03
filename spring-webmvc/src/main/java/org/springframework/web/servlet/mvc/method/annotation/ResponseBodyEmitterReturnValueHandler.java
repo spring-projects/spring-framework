@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -35,6 +36,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncUtils;
@@ -57,10 +59,15 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 
 	private final List<HttpMessageConverter<?>> messageConverters;
 
+	private final ReactiveTypeHandler reactiveHandler;
 
-	public ResponseBodyEmitterReturnValueHandler(List<HttpMessageConverter<?>> messageConverters) {
+
+	public ResponseBodyEmitterReturnValueHandler(List<HttpMessageConverter<?>> messageConverters,
+			ReactiveAdapterRegistry reactiveRegistry, ContentNegotiationManager manager) {
+
 		Assert.notEmpty(messageConverters, "HttpMessageConverter List must not be empty");
 		this.messageConverters = messageConverters;
+		this.reactiveHandler = new ReactiveTypeHandler(reactiveRegistry, manager);
 	}
 
 
@@ -71,11 +78,8 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 				ResolvableType.forMethodParameter(returnType).getGeneric(0).resolve() :
 				returnType.getParameterType();
 
-		return bodyType != null && supportsBodyType(bodyType);
-	}
-
-	private boolean supportsBodyType(Class<?> bodyType) {
-		return ResponseBodyEmitter.class.isAssignableFrom(bodyType);
+		return bodyType != null && (ResponseBodyEmitter.class.isAssignableFrom(bodyType) ||
+				this.reactiveHandler.isReactiveType(bodyType));
 	}
 
 	@Override
@@ -111,7 +115,11 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 			emitter = (ResponseBodyEmitter) returnValue;
 		}
 		else {
-			throw new IllegalStateException("Unexpected return value type: " + returnValue);
+			emitter = this.reactiveHandler.handleValue(returnValue, returnType, mavContainer, webRequest);
+		}
+
+		if (emitter == null) {
+			return;
 		}
 
 		emitter.extendResponse(outputMessage);

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.springframework.core.MethodParameter;
@@ -270,7 +271,13 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		public ConcurrentResultMethodParameter(Object returnValue) {
 			super(-1);
 			this.returnValue = returnValue;
-			this.returnType = ResolvableType.forType(super.getGenericParameterType()).getGeneric(0);
+
+			ResolvableType candidateReturnType =
+					ResolvableType.forType(super.getGenericParameterType()).getGeneric(0);
+
+			this.returnType = returnValue instanceof ReactiveTypeHandler.CollectedValuesList ?
+					ResolvableType.forClassWithGenerics(List.class, candidateReturnType) :
+					candidateReturnType;
 		}
 
 		public ConcurrentResultMethodParameter(ConcurrentResultMethodParameter original) {

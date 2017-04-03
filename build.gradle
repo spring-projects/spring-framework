@@ -914,6 +914,7 @@ project("spring-webmvc") {
 			exclude group: "org.springframework", module: "spring-web"
 		}
 		optional('org.webjars:webjars-locator:0.32-1')
+		optional("org.reactivestreams:reactive-streams")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("dom4j:dom4j:1.6.1") {
 			exclude group: "xml-apis", module: "xml-apis"
@@ -937,6 +938,10 @@ project("spring-webmvc") {
 		testCompile("joda-time:joda-time:${jodaVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.mozilla:rhino:1.7.7.1")
+		testCompile("io.projectreactor:reactor-core")
+		testCompile("io.reactivex:rxjava:${rxjavaVersion}")
+		testCompile("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
+		testCompile("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
 		testRuntime("org.jruby:jruby:9.1.8.0")
 		testRuntime("org.python:jython-standalone:2.5.3")
 		testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")

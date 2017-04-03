@@ -79,6 +79,16 @@ public class ReactiveAdapterRegistry {
 
 
 	/**
+	 * Whether the registry has any adapters which would be the case if any of
+	 * Reactor, RxJava 2, or RxJava 1 (+ RxJava Reactive Streams bridge) are
+	 * present on the classpath.
+	 */
+	public boolean hasAdapters() {
+		return !this.adapters.isEmpty();
+	}
+
+
+	/**
 	 * Register a reactive type along with functions to adapt to and from a
 	 * Reactive Streams {@link Publisher}. The functions can assume their
 	 * input is never be {@code null} nor {@link Optional}.
@@ -112,6 +122,10 @@ public class ReactiveAdapterRegistry {
 	public ReactiveAdapter getAdapter(Class<?> reactiveType, Object source) {
 		Object sourceToUse = (source instanceof Optional ? ((Optional<?>) source).orElse(null) : source);
 		Class<?> clazz = (sourceToUse != null ? sourceToUse.getClass() : reactiveType);
+
+		if (reactiveType == null) {
+			return null;
+		}
 
 		return this.adapters.stream()
 				.filter(adapter -> adapter.getReactiveType() == clazz)
