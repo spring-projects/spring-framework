@@ -35,7 +35,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -50,6 +49,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.core.NestedIOException;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.CompositePropertySource;
@@ -290,6 +290,17 @@ class ConfigurationClassParser {
 
 		// Process any @Import annotations
 		processImports(configClass, sourceClass, getImports(sourceClass), true);
+
+		// Process any @DeferredImport annotations
+		if (sourceClass.getMetadata().isAnnotated(DeferredImport.class.getName())) {
+			Collection<SourceClass> deferredImportClasses = sourceClass.getAnnotationAttributes(DeferredImport.class.getName(), "value");
+			int order = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), DeferredImport.class).getNumber("order");
+			if (this.deferredImportSelectors != null){
+				this.deferredImportSelectors.add(new DeferredImportSelectorHolder(configClass, new StaticDeferredImportSelector(deferredImportClasses, order)));
+			} else {
+				processImports(configClass, sourceClass, deferredImportClasses, true);
+			}
+		}
 
 		// Process any @ImportResource annotations
 		if (sourceClass.getMetadata().isAnnotated(ImportResource.class.getName())) {
@@ -923,6 +934,29 @@ class ConfigurationClassParser {
 					"already present in the current import stack %s", importStack.peek().getSimpleName(),
 					attemptedImport.getSimpleName(), attemptedImport.getSimpleName(), importStack),
 					new Location(importStack.peek().getResource(), attemptedImport.getMetadata()));
+		}
+	}
+
+	private static class StaticDeferredImportSelector implements DeferredImportSelector, Ordered {
+		private ArrayList<String> imports;
+		private int order;
+
+		public StaticDeferredImportSelector(Collection<SourceClass> importedClasses, int order) {
+			this.imports = new ArrayList<String>(importedClasses.size());
+			for (SourceClass sourceClass : importedClasses) {
+				this.imports.add(sourceClass.getMetadata().getClassName());
+			}
+			this.order = order;
+		}
+
+		@Override
+		public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+			return this.imports.toArray(new String[this.imports.size()]);
+		}
+
+		@Override
+		public int getOrder() {
+			return this.order;
 		}
 	}
 
