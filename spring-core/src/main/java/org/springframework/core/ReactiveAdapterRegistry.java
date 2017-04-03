@@ -123,7 +123,7 @@ public class ReactiveAdapterRegistry {
 		Object sourceToUse = (source instanceof Optional ? ((Optional<?>) source).orElse(null) : source);
 		Class<?> clazz = (sourceToUse != null ? sourceToUse.getClass() : reactiveType);
 
-		if (reactiveType == null) {
+		if (clazz == null) {
 			return null;
 		}
 
