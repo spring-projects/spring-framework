@@ -41,6 +41,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
+@SuppressWarnings("deprecation")
 public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMethodReturnValueHandler {
 
 	private final Map<Class<?>, DeferredResultAdapter> adapterMap;
@@ -61,7 +62,9 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 	 * <p>By default the map contains adapters for {@code DeferredResult}, which
 	 * simply downcasts, {@link ListenableFuture}, and {@link CompletionStage}.
 	 * @return the map of adapters
+	 * @deprecated in 4.3.8, see comments on {@link DeferredResultAdapter}
 	 */
+	@Deprecated
 	public Map<Class<?>, DeferredResultAdapter> getAdapterMap() {
 		return this.adapterMap;
 	}

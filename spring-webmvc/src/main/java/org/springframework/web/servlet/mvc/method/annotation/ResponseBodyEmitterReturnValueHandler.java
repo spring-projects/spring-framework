@@ -52,6 +52,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * @author Rossen Stoyanchev
  * @since 4.2
  */
+@SuppressWarnings("deprecation")
 public class ResponseBodyEmitterReturnValueHandler implements AsyncHandlerMethodReturnValueHandler {
 
 	private static final Log logger = LogFactory.getLog(ResponseBodyEmitterReturnValueHandler.class);
@@ -75,7 +76,9 @@ public class ResponseBodyEmitterReturnValueHandler implements AsyncHandlerMethod
 	 * By default the map contains a single adapter {@code ResponseBodyEmitter}
 	 * that simply downcasts the return value.
 	 * @return the map of adapters
+	 * @deprecated in 4.3.8, see comments on {@link ResponseBodyEmitterAdapter}
 	 */
+	@Deprecated
 	public Map<Class<?>, ResponseBodyEmitterAdapter> getAdapterMap() {
 		return this.adapterMap;
 	}

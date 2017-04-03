@@ -19,20 +19,15 @@ package org.springframework.web.method.support;
 import org.springframework.core.MethodParameter;
 
 /**
- * A {@link HandlerMethodReturnValueHandler} that handles return values that
- * represent asynchronous computation. Such handlers need to be invoked with
- * precedence over other handlers that might otherwise match the return value
- * type: e.g. a method that returns a Promise type that is also annotated with
- * {@code @ResponseBody}.
+ * A return value handler that supports async types. Such return value types
+ * need to be handled with priority so the async value can be "unwrapped".
  *
- * <p>In {@link #handleReturnValue}, implementations of this class should create
- * a {@link org.springframework.web.context.request.async.DeferredResult} or
- * adapt to it and then invoke {@code WebAsyncManager} to start async processing.
- * For example:
- * <pre>
- * DeferredResult<?> deferredResult = (DeferredResult<?>) returnValue;
- * WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(deferredResult, mavContainer);
- * </pre>
+ * <p><strong>Note: </strong> implementing this contract is not required but it
+ * should be implemented when the handler needs to be prioritized ahead of others.
+ * For example custom (async) handlers, by default ordered after built-in
+ * handlers, should take precedence over {@code @ResponseBody} or
+ * {@code @ModelAttribute} handling, which should occur once the async value is
+ * ready.
  *
  * @author Rossen Stoyanchev
  * @since 4.2

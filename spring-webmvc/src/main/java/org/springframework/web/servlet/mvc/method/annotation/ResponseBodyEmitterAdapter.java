@@ -23,7 +23,12 @@ import org.springframework.http.server.ServerHttpResponse;
  *
  * @author Rossen Stoyanchev
  * @since 4.3
+ *
+ * @deprecated in 4.3.8 since 5.0 adds first-class support for reactive type
+ * return values from Spring MVC controller methods based on the pluggable
+ * {@code ReactiveAdapterRegistry} mechanism.
  */
+@Deprecated
 public interface ResponseBodyEmitterAdapter {
 
 	/**
