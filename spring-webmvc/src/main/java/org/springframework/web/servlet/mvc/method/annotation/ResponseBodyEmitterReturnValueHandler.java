@@ -18,9 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,81 +39,43 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
-import org.springframework.web.method.support.AsyncHandlerMethodReturnValueHandler;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Handler for return values of type {@link ResponseBodyEmitter} (and the
- * {@code ResponseEntity<ResponseBodyEmitter>} sub-class) as well as any other
- * async type with a {@link #getAdapterMap() registered adapter}.
+ * Handler for return values of type {@link ResponseBodyEmitter} and sub-classes
+ * such as {@link SseEmitter} including the same types wrapped with
+ * {@link ResponseEntity}.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
  */
-public class ResponseBodyEmitterReturnValueHandler implements AsyncHandlerMethodReturnValueHandler {
+public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodReturnValueHandler {
 
 	private static final Log logger = LogFactory.getLog(ResponseBodyEmitterReturnValueHandler.class);
 
 
 	private final List<HttpMessageConverter<?>> messageConverters;
 
-	private final Map<Class<?>, ResponseBodyEmitterAdapter> adapterMap;
-
 
 	public ResponseBodyEmitterReturnValueHandler(List<HttpMessageConverter<?>> messageConverters) {
 		Assert.notEmpty(messageConverters, "HttpMessageConverter List must not be empty");
 		this.messageConverters = messageConverters;
-		this.adapterMap = new HashMap<>(4);
-		this.adapterMap.put(ResponseBodyEmitter.class, new SimpleResponseBodyEmitterAdapter());
-	}
-
-
-	/**
-	 * Return the map with {@code ResponseBodyEmitter} adapters.
-	 * By default the map contains a single adapter {@code ResponseBodyEmitter}
-	 * that simply downcasts the return value.
-	 * @return the map of adapters
-	 */
-	public Map<Class<?>, ResponseBodyEmitterAdapter> getAdapterMap() {
-		return this.adapterMap;
-	}
-
-	private ResponseBodyEmitterAdapter getAdapterFor(Class<?> type) {
-		if (type != null) {
-			for (Class<?> adapteeType : getAdapterMap().keySet()) {
-				if (adapteeType.isAssignableFrom(type)) {
-					return getAdapterMap().get(adapteeType);
-				}
-			}
-		}
-		return null;
 	}
 
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		Class<?> bodyType;
-		if (ResponseEntity.class.isAssignableFrom(returnType.getParameterType())) {
-			bodyType = ResolvableType.forMethodParameter(returnType).getGeneric(0).resolve();
-		}
-		else {
-			bodyType = returnType.getParameterType();
-		}
-		return (getAdapterFor(bodyType) != null);
+
+		Class<?> bodyType = ResponseEntity.class.isAssignableFrom(returnType.getParameterType()) ?
+				ResolvableType.forMethodParameter(returnType).getGeneric(0).resolve() :
+				returnType.getParameterType();
+
+		return bodyType != null && supportsBodyType(bodyType);
 	}
 
-	@Override
-	public boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType) {
-		if (returnValue != null) {
-			Object adaptFrom = returnValue;
-			if (returnValue instanceof ResponseEntity) {
-				adaptFrom = ((ResponseEntity) returnValue).getBody();
-			}
-			if (adaptFrom != null) {
-				return (getAdapterFor(adaptFrom.getClass()) != null);
-			}
-		}
-		return false;
+	private boolean supportsBodyType(Class<?> bodyType) {
+		return ResponseBodyEmitter.class.isAssignableFrom(bodyType);
 	}
 
 	@Override
@@ -145,12 +105,15 @@ public class ResponseBodyEmitterReturnValueHandler implements AsyncHandlerMethod
 		ServletRequest request = webRequest.getNativeRequest(ServletRequest.class);
 		ShallowEtagHeaderFilter.disableContentCaching(request);
 
-		ResponseBodyEmitterAdapter adapter = getAdapterFor(returnValue.getClass());
-		if (adapter == null) {
-			throw new IllegalStateException(
-					"Could not find ResponseBodyEmitterAdapter for return value type: " + returnValue.getClass());
+		ResponseBodyEmitter emitter;
+
+		if (returnValue instanceof ResponseBodyEmitter) {
+			emitter = (ResponseBodyEmitter) returnValue;
 		}
-		ResponseBodyEmitter emitter = adapter.adaptToEmitter(returnValue, outputMessage);
+		else {
+			throw new IllegalStateException("Unexpected return value type: " + returnValue);
+		}
+
 		emitter.extendResponse(outputMessage);
 
 		// Commit the response and wrap to ignore further header changes
@@ -165,18 +128,6 @@ public class ResponseBodyEmitterReturnValueHandler implements AsyncHandlerMethod
 		emitter.initialize(handler);
 	}
 
-
-	/**
-	 * Adapter for {@code ResponseBodyEmitter} return values.
-	 */
-	private static class SimpleResponseBodyEmitterAdapter implements ResponseBodyEmitterAdapter {
-
-		@Override
-		public ResponseBodyEmitter adaptToEmitter(Object returnValue, ServerHttpResponse response) {
-			Assert.isInstanceOf(ResponseBodyEmitter.class, returnValue, "ResponseBodyEmitter expected");
-			return (ResponseBodyEmitter) returnValue;
-		}
-	}
 
 	/**
 	 * ResponseBodyEmitter.Handler that writes with HttpMessageConverter's.
