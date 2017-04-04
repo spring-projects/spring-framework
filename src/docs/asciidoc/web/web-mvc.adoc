@@ -1408,18 +1408,18 @@ of `java.util.Optional` in those cases is equivalent to having `required=false`.
 ==== Supported method return types
 The following are the supported return types:
 
-* A `ModelAndView` object, with the model implicitly enriched with command objects and
+* `ModelAndView` object, with the model implicitly enriched with command objects and
   the results of `@ModelAttribute` annotated reference data accessor methods.
-* A `Model` object, with the view name implicitly determined through a
+* `Model` object, with the view name implicitly determined through a
   `RequestToViewNameTranslator` and the model implicitly enriched with command objects
   and the results of `@ModelAttribute` annotated reference data accessor methods.
-* A `Map` object for exposing a model, with the view name implicitly determined through
+* `Map` object for exposing a model, with the view name implicitly determined through
   a `RequestToViewNameTranslator` and the model implicitly enriched with command objects
   and the results of `@ModelAttribute` annotated reference data accessor methods.
-* A `View` object, with the model implicitly determined through command objects and
+* `View` object, with the model implicitly determined through command objects and
   `@ModelAttribute` annotated reference data accessor methods. The handler method may
   also programmatically enrich the model by declaring a `Model` argument (see above).
-* A `String` value that is interpreted as the logical view name, with the model
+* `String` value that is interpreted as the logical view name, with the model
   implicitly determined through command objects and `@ModelAttribute` annotated
   reference data accessor methods. The handler method may also programmatically enrich
   the model by declaring a `Model` argument (see above).
@@ -1431,22 +1431,25 @@ The following are the supported return types:
 * If the method is annotated with `@ResponseBody`, the return type is written to the
   response HTTP body. The return value will be converted to the declared method argument
   type using ``HttpMessageConverter``s. See <<mvc-ann-responsebody>>.
-* An `HttpEntity<?>` or `ResponseEntity<?>` object to provide access to the Servlet
+* `HttpEntity<?>` or `ResponseEntity<?>` object to provide access to the Servlet
   response HTTP headers and contents. The entity body will be converted to the response
   stream using ``HttpMessageConverter``s. See <<mvc-ann-httpentity>>.
-* An `HttpHeaders` object to return a response with no body.
-* A `Callable<?>` can be returned when the application wants to produce the return value
-  asynchronously in a thread managed by Spring MVC.
-* A `DeferredResult<?>` can be returned when the application wants to produce the return
-  value from a thread of its own choosing.
-* A `ListenableFuture<?>` or `CompletableFuture<?>`/`CompletionStage<?>` can be returned
-  when the application wants to produce the value from a thread pool submission.
-* A `ResponseBodyEmitter` can be returned to write multiple objects to the response
+* `HttpHeaders` object to return a response with no body.
+* `Callable<?>` async computation in a Spring MVC managed thread.
+* `DeferredResult<?>` async result produced later from an application managed, or any thread.
+* `ListenableFuture<?>` as an alternative equivalent to using `DeferredResult`.
+* `CompletableFuture<?>` or `CompletionStage<?>` as an alternative equivalent to `DeferredResult`.
+* `ResponseBodyEmitter` can be returned to write multiple objects to the response
   asynchronously; also supported as the body within a `ResponseEntity`.
-* An `SseEmitter` can be returned to write Server-Sent Events to the response
+* `SseEmitter` can be returned to write Server-Sent Events to the response
   asynchronously; also supported as the body within a `ResponseEntity`.
-* A `StreamingResponseBody` can be returned to write to the response OutputStream
+* `StreamingResponseBody` can be returned to write to the response OutputStream
   asynchronously; also supported as the body within a `ResponseEntity`.
+* Reactive types from Reactor 3, RxJava 2, RxJava 1 or others registered through
+  the configured `ReactiveAdapterRegistry` can be returned as an alternative
+  equivalent to using `DeferredResult` for single-valued types, or
+  `ResponseBodyEmitter` and `SseEmitter` for multi-valued reactive types where a streaming
+  media type (e.g. "text/event-stream", "application/json+stream") is requested.
 * Any other return type is considered to be a single model attribute to be exposed to
   the view, using the attribute name specified through `@ModelAttribute` at the method
   level (or the default attribute name based on the return type class name). The model
@@ -2515,6 +2518,49 @@ Here is an example of that:
 Note that `StreamingResponseBody` can also be used as the body in a
 `ResponseEntity` in order to customize the status and headers of
 the response.
+
+
+[[mvc-ann-async-reactive-types]]
+==== Async Requests with Reactive Types
+
+If using the reactive `WebClient` from `spring-webflux`, or another client, or
+a data store with reactive support, you can return reactive types directly from
+Spring MVC controller methods.
+
+* If the return type has single-value stream semantics such as Reactor `Mono` or
+RxJava `Single` it is adapted and equivalent to using `DeferredResult`.
+* If the return type has multi-value stream semantics such as Reactor `Flux` or
+RxJava `Observable` / `Flowable` and if the media type indicates streaming, e.g.
+"application/stream+json" or "text/event-stream", it is adapted and equivalent to
+using `ResponseBodyEmitter` or `SseEmitter`. You can also return
+`Flux<ServerSentEvent>` or `Observable<ServerSentEvent>`.
+* If the return type has multi-value stream semantics but the media type does not
+imply streaming, e.g. "application/json", it is adapted and equivalent to using
+`DeferredResult<List<?>>`, e.g. JSON array.
+
+Reactive libraries are detected and adapted to a Reactive Streams `Publisher`
+through Spring's pluggable `ReactiveAdapterRegistry` which by default supports
+Reactor 3, RxJava 2, and RxJava 1. Note that for RxJava 1 you will need to add
+https://github.com/ReactiveX/RxJavaReactiveStreams["io.reactivex:rxjava-reactive-streams"]
+to the classpath.
+
+A common assumption with reactive libraries is not block the processing thread.
+The `WebClient` with Reactor Netty for example is based on event-loop style
+handling using a small, fixed number of threads and those must not be blocked
+when writing to the `ServletResponseOutputStream`. Reactive libraries have
+operators for that but Spring MVC automatically writes asynchronously so you
+don't need to use that. The underlying `TaskExecutor` for this can be configured
+through the MVC Java config and the MVC namespace as described in the following
+section.
+
+[NOTE]
+====
+Unlike Spring MVC, Spring WebFlux is built on a non-blocking, reactive foundation
+and uses the Servlet 3.1 non-blocking I/O that's also based on event loop style
+processing and hence does not require a thread to absorb the effect of blocking.
+====
+
+
 
 
 [[mvc-ann-async-configuration]]
