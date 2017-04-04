@@ -38,6 +38,7 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyExtractors;
@@ -103,6 +104,12 @@ class DefaultServerRequest implements ServerRequest {
 					public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
 						return DefaultServerRequest.this.strategies.messageReaders();
 					}
+
+					@Override
+					public Optional<ServerHttpResponse> serverResponse() {
+						return Optional.of(exchange().getResponse());
+					}
+
 					@Override
 					public Map<String, Object> hints() {
 						return hints;

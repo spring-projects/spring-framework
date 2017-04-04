@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.function;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -33,6 +34,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -67,9 +69,18 @@ public abstract class BodyExtractors {
 	 */
 	public static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(ResolvableType elementType) {
 		Assert.notNull(elementType, "'elementType' must not be null");
-		return (request, context) -> readWithMessageReaders(request, context,
+		return (inputMessage, context) -> readWithMessageReaders(inputMessage, context,
 				elementType,
-				reader -> reader.readMono(elementType, request, context.hints()),
+				reader -> {
+					Optional<ServerHttpResponse> serverResponse = context.serverResponse();
+					if (serverResponse.isPresent() && inputMessage instanceof ServerHttpRequest) {
+						return reader.readMono(elementType, elementType, (ServerHttpRequest) inputMessage,
+								serverResponse.get(), context.hints());
+					}
+					else {
+						return reader.readMono(elementType, inputMessage, context.hints());
+					}
+				},
 				Mono::error);
 	}
 
@@ -94,7 +105,16 @@ public abstract class BodyExtractors {
 		Assert.notNull(elementType, "'elementType' must not be null");
 		return (inputMessage, context) -> readWithMessageReaders(inputMessage, context,
 				elementType,
-				reader -> reader.read(elementType, inputMessage, context.hints()),
+				reader -> {
+					Optional<ServerHttpResponse> serverResponse = context.serverResponse();
+					if (serverResponse.isPresent() && inputMessage instanceof ServerHttpRequest) {
+						return reader.read(elementType, elementType, (ServerHttpRequest) inputMessage,
+								serverResponse.get(), context.hints());
+					}
+					else {
+						return reader.read(elementType, inputMessage, context.hints());
+					}
+				},
 				Flux::error);
 	}
 
@@ -107,9 +127,12 @@ public abstract class BodyExtractors {
 	// the server-side
 	public static BodyExtractor<Mono<MultiValueMap<String, String>>, ServerHttpRequest> toFormData() {
 		return (serverRequest, context) -> {
-					HttpMessageReader<MultiValueMap<String, String>> messageReader = formMessageReader(context);
-					return messageReader.readMono(FORM_TYPE, serverRequest, context.hints());
-				};
+			HttpMessageReader<MultiValueMap<String, String>> messageReader =
+					formMessageReader(context);
+			return context.serverResponse()
+					.map(serverResponse -> messageReader.readMono(FORM_TYPE, FORM_TYPE, serverRequest, serverResponse, context.hints()))
+					.orElseGet(() -> messageReader.readMono(FORM_TYPE, serverRequest, context.hints()));
+		};
 	}
 
 	/**

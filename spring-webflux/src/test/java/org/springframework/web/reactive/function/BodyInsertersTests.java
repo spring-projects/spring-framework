@@ -21,9 +21,11 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -42,6 +44,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRange;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
@@ -52,14 +55,16 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.client.reactive.test.MockClientHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.*;
 import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
 
 /**
@@ -91,6 +96,12 @@ public class BodyInsertersTests {
 			public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
 				return messageWriters::stream;
 			}
+
+			@Override
+			public Optional<ServerHttpRequest> serverRequest() {
+				return Optional.empty();
+			}
+
 			@Override
 			public Map<String, Object> hints() {
 				return hints;
@@ -173,6 +184,48 @@ public class BodyInsertersTests {
 		StepVerifier.create(result).expectComplete().verify();
 
 		byte[] expectedBytes = Files.readAllBytes(body.getFile().toPath());
+
+		StepVerifier.create(response.getBody())
+				.consumeNextWith(dataBuffer -> {
+					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
+					dataBuffer.read(resultBytes);
+					assertArrayEquals(expectedBytes, resultBytes);
+				})
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void ofResourceRange() throws Exception {
+		final int rangeStart = 10;
+		Resource body = new ClassPathResource("response.txt", getClass());
+		BodyInserter<Resource, ReactiveHttpOutputMessage> inserter = BodyInserters.fromResource(body);
+
+		MockServerHttpRequest request = MockServerHttpRequest.get("/foo")
+				.range(HttpRange.createByteRange(rangeStart))
+				.build();
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Mono<Void> result = inserter.insert(response, new BodyInserter.Context() {
+			@Override
+			public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
+				return Collections.<HttpMessageWriter<?>>singleton(new ResourceHttpMessageWriter())::stream;
+			}
+
+			@Override
+			public Optional<ServerHttpRequest> serverRequest() {
+				return Optional.of(request);
+			}
+
+			@Override
+			public Map<String, Object> hints() {
+				return hints;
+			}
+		});
+		StepVerifier.create(result).expectComplete().verify();
+
+		byte[] allBytes = Files.readAllBytes(body.getFile().toPath());
+		byte[] expectedBytes = new byte[allBytes.length - rangeStart];
+		System.arraycopy(allBytes, rangeStart, expectedBytes, 0, expectedBytes.length);
 
 		StepVerifier.create(response.getBody())
 				.consumeNextWith(dataBuffer -> {
