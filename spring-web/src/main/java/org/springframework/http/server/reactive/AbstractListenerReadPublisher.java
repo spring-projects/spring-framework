@@ -49,7 +49,6 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
-	@SuppressWarnings("unused")
 	private volatile long demand;
 
 	@SuppressWarnings("rawtypes")
@@ -96,8 +95,8 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	 * Listeners can call this to notify when a read error has occurred.
 	 */
 	public final void onError(Throwable t) {
-		if (this.logger.isErrorEnabled()) {
-			this.logger.error(this.state + " onError: " + t, t);
+		if (this.logger.isTraceEnabled()) {
+			this.logger.trace(this.state + " onError: " + t);
 		}
 		this.state.get().onError(this, t);
 	}
