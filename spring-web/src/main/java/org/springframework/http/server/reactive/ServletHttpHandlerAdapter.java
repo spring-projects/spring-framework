@@ -108,9 +108,8 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		ServerHttpRequest httpRequest = createRequest(((HttpServletRequest) request), asyncContext);
 		ServerHttpResponse httpResponse = createResponse(((HttpServletResponse) response), asyncContext);
 
-		asyncContext.addListener(TIMEOUT_LISTENER);
-
 		HandlerResultSubscriber subscriber = new HandlerResultSubscriber(asyncContext);
+		asyncContext.addListener(subscriber);
 		this.httpHandler.handle(httpRequest, httpResponse).subscribe(subscriber);
 	}
 
@@ -150,36 +149,12 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	}
 
 
-	private final static AsyncListener TIMEOUT_LISTENER = new AsyncListener() {
-
-		@Override
-		public void onTimeout(AsyncEvent event) throws IOException {
-			event.getAsyncContext().complete();
-		}
-
-		@Override
-		public void onError(AsyncEvent event) throws IOException {
-			event.getAsyncContext().complete();
-		}
-
-		@Override
-		public void onStartAsync(AsyncEvent event) throws IOException {
-			// no-op
-		}
-
-		@Override
-		public void onComplete(AsyncEvent event) throws IOException {
-			// no-op
-		}
-	};
-
-
-	private class HandlerResultSubscriber implements Subscriber<Void> {
+	private class HandlerResultSubscriber implements Subscriber<Void>, AsyncListener {
 
 		private final AsyncContext asyncContext;
 
 
-		public HandlerResultSubscriber(AsyncContext asyncContext) {
+		HandlerResultSubscriber(AsyncContext asyncContext) {
 			this.asyncContext = asyncContext;
 		}
 
@@ -223,6 +198,29 @@ public class ServletHttpHandlerAdapter implements Servlet {
 				// AsyncContext recycled and should not be used
 				// e.g. TIMEOUT_LISTENER (above) may have completed the AsyncContext
 			}
+		}
+
+
+		// AsyncListener...
+
+		@Override
+		public void onTimeout(AsyncEvent event) throws IOException {
+			runIfAsyncNotComplete(() -> event.getAsyncContext().complete());
+		}
+
+		@Override
+		public void onError(AsyncEvent event) throws IOException {
+			runIfAsyncNotComplete(() -> event.getAsyncContext().complete());
+		}
+
+		@Override
+		public void onStartAsync(AsyncEvent event) throws IOException {
+			// No-op
+		}
+
+		@Override
+		public void onComplete(AsyncEvent event) throws IOException {
+			// No-op
 		}
 	}
 
