@@ -67,10 +67,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		List<HttpMessageConverter<?>> converters = Arrays.asList(
 				new StringHttpMessageConverter(), new MappingJackson2HttpMessageConverter());
 
-		ReactiveAdapterRegistry registry = new ReactiveAdapterRegistry();
-		TaskExecutor executor = new SyncTaskExecutor();
-		ContentNegotiationManager manager = new ContentNegotiationManager();
-		this.handler = new ResponseBodyEmitterReturnValueHandler(converters, registry, executor, manager);
+		this.handler = new ResponseBodyEmitterReturnValueHandler(converters);
 		this.request = new MockHttpServletRequest();
 		this.response = new MockHttpServletResponse();
 		this.webRequest = new ServletWebRequest(this.request, this.response);

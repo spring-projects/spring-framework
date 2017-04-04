@@ -32,6 +32,7 @@ import org.reactivestreams.Subscription;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
@@ -77,6 +78,10 @@ class ReactiveTypeHandler {
 
 	private final ContentNegotiationManager contentNegotiationManager;
 
+
+	public ReactiveTypeHandler() {
+		this(new ReactiveAdapterRegistry(), new SyncTaskExecutor(), new ContentNegotiationManager());
+	}
 
 	ReactiveTypeHandler(ReactiveAdapterRegistry registry, TaskExecutor executor,
 			ContentNegotiationManager manager) {

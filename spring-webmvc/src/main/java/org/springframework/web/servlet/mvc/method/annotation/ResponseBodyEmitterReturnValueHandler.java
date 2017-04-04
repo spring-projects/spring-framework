@@ -50,6 +50,9 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * such as {@link SseEmitter} including the same types wrapped with
  * {@link ResponseEntity}.
  *
+ * <p>As of 5.0 also supports reactive return value types for any reactive
+ * library with registered adapters in {@link ReactiveAdapterRegistry}.
+ *
  * @author Rossen Stoyanchev
  * @since 4.2
  */
@@ -63,6 +66,28 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 	private final ReactiveTypeHandler reactiveHandler;
 
 
+	/**
+	 * Simple constructor with reactive type support based on a default instance of
+	 * {@link ReactiveAdapterRegistry},
+	 * {@link org.springframework.core.task.SyncTaskExecutor}, and
+	 * {@link ContentNegotiationManager} with an Accept header strategy.
+	 */
+	public ResponseBodyEmitterReturnValueHandler(List<HttpMessageConverter<?>> messageConverters) {
+		Assert.notEmpty(messageConverters, "HttpMessageConverter List must not be empty");
+		this.messageConverters = messageConverters;
+		this.reactiveHandler = new ReactiveTypeHandler();
+	}
+
+	/**
+	 * Complete constructor with pluggable "reactive" type support.
+	 *
+	 * @param messageConverters converters to write emitted objects with
+	 * @param reactiveRegistry for reactive return value type support
+	 * @param executor for blocking I/O writes of items emitted from reactive types
+	 * @param manager for detecting streaming media types
+	 *
+	 * @since 5.0
+	 */
 	public ResponseBodyEmitterReturnValueHandler(List<HttpMessageConverter<?>> messageConverters,
 			ReactiveAdapterRegistry reactiveRegistry, TaskExecutor executor,
 			ContentNegotiationManager manager) {
