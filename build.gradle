@@ -72,6 +72,7 @@ configure(allprojects) { project ->
 	ext.junitVersion           = "4.12"
 	ext.junitJupiterVersion    = '5.0.0-M4'
 	ext.junitPlatformVersion   = '1.0.0-M4'
+	ext.kotlinCoroutinesVersion= "0.14.1"
 	ext.kotlinVersion          = "1.1.1"  // also change kotlin-gradle-plugin version when upgrading
 	ext.log4jVersion           = '2.8.1'
 	ext.nettyVersion           = "4.1.9.Final"
@@ -367,6 +368,7 @@ project("spring-core") {
 		compile("commons-logging:commons-logging:1.2")
 		optional("net.sf.jopt-simple:jopt-simple:5.0.3")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
+		optional("org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinCoroutinesVersion}")
 		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 		optional("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}")
 		optional("org.reactivestreams:reactive-streams")
