@@ -64,8 +64,8 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class ServletRequestMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
-	private static final Method getPushBuilderMethod =
-			ClassUtils.getMethodIfAvailable(HttpServletRequest.class, "getPushBuilder");
+	private static final Method newPushBuilderMethod =
+			ClassUtils.getMethodIfAvailable(HttpServletRequest.class, "newPushBuilder");
 
 
 	@Override
@@ -75,7 +75,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 				ServletRequest.class.isAssignableFrom(paramType) ||
 				MultipartRequest.class.isAssignableFrom(paramType) ||
 				HttpSession.class.isAssignableFrom(paramType) ||
-				(getPushBuilderMethod != null && getPushBuilderMethod.getReturnType().isAssignableFrom(paramType)) ||
+				(newPushBuilderMethod != null && newPushBuilderMethod.getReturnType().isAssignableFrom(paramType)) ||
 				Principal.class.isAssignableFrom(paramType) ||
 				InputStream.class.isAssignableFrom(paramType) ||
 				Reader.class.isAssignableFrom(paramType) ||
@@ -127,8 +127,8 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 			}
 			return session;
 		}
-		else if (getPushBuilderMethod != null && getPushBuilderMethod.getReturnType().isAssignableFrom(paramType)) {
-			Object pushBuilder = ReflectionUtils.invokeMethod(getPushBuilderMethod, request);
+		else if (newPushBuilderMethod != null && newPushBuilderMethod.getReturnType().isAssignableFrom(paramType)) {
+			Object pushBuilder = ReflectionUtils.invokeMethod(newPushBuilderMethod, request);
 			if (pushBuilder != null && !paramType.isInstance(pushBuilder)) {
 				throw new IllegalStateException(
 						"Current push builder is not of type [" + paramType.getName() + "]: " + pushBuilder);
