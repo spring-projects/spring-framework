@@ -30,6 +30,7 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -254,9 +255,11 @@ public class ServletInvocableHandlerMethodTests {
 
 	@Test
 	public void wrapConcurrentResult_ResponseBodyEmitter() throws Exception {
-		ReactiveAdapterRegistry registry = new ReactiveAdapterRegistry();
-		ContentNegotiationManager manager = new ContentNegotiationManager();
-		this.returnValueHandlers.addHandler(new ResponseBodyEmitterReturnValueHandler(this.converters, registry, manager));
+
+		this.returnValueHandlers.addHandler(
+				new ResponseBodyEmitterReturnValueHandler(this.converters,
+						new ReactiveAdapterRegistry(), new SyncTaskExecutor(), new ContentNegotiationManager()));
+
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new StreamingHandler(), "handleEmitter");
 		handlerMethod = handlerMethod.wrapConcurrentResult(null);
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);

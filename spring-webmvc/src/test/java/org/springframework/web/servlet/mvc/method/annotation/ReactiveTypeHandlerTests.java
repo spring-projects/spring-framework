@@ -34,6 +34,7 @@ import rx.SingleEmitter;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.ServletServerHttpResponse;
@@ -75,7 +76,7 @@ public class ReactiveTypeHandlerTests {
 		ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
 		factoryBean.afterPropertiesSet();
 		ContentNegotiationManager manager = factoryBean.getObject();
-		this.handler = new ReactiveTypeHandler(new ReactiveAdapterRegistry(), manager);
+		this.handler = new ReactiveTypeHandler(new ReactiveAdapterRegistry(), new SyncTaskExecutor(), manager);
 		resetRequest();
 	}
 

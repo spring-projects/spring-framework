@@ -26,6 +26,8 @@ import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.task.SyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -66,8 +68,9 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 				new StringHttpMessageConverter(), new MappingJackson2HttpMessageConverter());
 
 		ReactiveAdapterRegistry registry = new ReactiveAdapterRegistry();
+		TaskExecutor executor = new SyncTaskExecutor();
 		ContentNegotiationManager manager = new ContentNegotiationManager();
-		this.handler = new ResponseBodyEmitterReturnValueHandler(converters, registry, manager);
+		this.handler = new ResponseBodyEmitterReturnValueHandler(converters, registry, executor, manager);
 		this.request = new MockHttpServletRequest();
 		this.response = new MockHttpServletResponse();
 		this.webRequest = new ServletWebRequest(this.request, this.response);

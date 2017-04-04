@@ -23,6 +23,7 @@ import java.util.Set;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * A controller method return value type for asynchronous request processing
@@ -221,6 +222,12 @@ public class ResponseBodyEmitter {
 	 */
 	public synchronized void onCompletion(Runnable callback) {
 		this.completionCallback.setDelegate(callback);
+	}
+
+
+	@Override
+	public String toString() {
+		return "ResponseBodyEmitter@" + ObjectUtils.getIdentityHexString(this);
 	}
 
 

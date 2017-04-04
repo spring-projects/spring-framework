@@ -19,7 +19,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -27,6 +32,7 @@ import org.reactivestreams.Subscription;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.ServerHttpResponse;
@@ -60,18 +66,26 @@ import org.springframework.web.servlet.HandlerMapping;
  */
 class ReactiveTypeHandler {
 
+	private static Log logger = LogFactory.getLog(ReactiveTypeHandler.class);
+
 	private static final MediaType JSON_TYPE = new MediaType("application", "*+json");
 
 
 	private final ReactiveAdapterRegistry reactiveRegistry;
 
+	private final TaskExecutor taskExecutor;
+
 	private final ContentNegotiationManager contentNegotiationManager;
 
 
-	ReactiveTypeHandler(ReactiveAdapterRegistry registry, ContentNegotiationManager manager) {
+	ReactiveTypeHandler(ReactiveAdapterRegistry registry, TaskExecutor executor,
+			ContentNegotiationManager manager) {
+
 		Assert.notNull(registry, "ReactiveAdapterRegistry is required");
+		Assert.notNull(executor, "TaskExecutor is required");
 		Assert.notNull(manager, "ContentNegotiationManager is required");
 		this.reactiveRegistry = registry;
+		this.taskExecutor = executor;
 		this.contentNegotiationManager = manager;
 	}
 
@@ -108,17 +122,17 @@ class ReactiveTypeHandler {
 			if (mediaTypes.stream().anyMatch(MediaType.TEXT_EVENT_STREAM::includes) ||
 					ServerSentEvent.class.isAssignableFrom(elementType)) {
 				SseEmitter emitter = new SseEmitter();
-				new SseEmitterSubscriber(emitter).connect(adapter, returnValue);
+				new SseEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
 			}
 			if (mediaTypes.stream().anyMatch(MediaType.APPLICATION_STREAM_JSON::includes)) {
 				ResponseBodyEmitter emitter = getEmitter(MediaType.APPLICATION_STREAM_JSON);
-				new JsonEmitterSubscriber(emitter).connect(adapter, returnValue);
+				new JsonEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
 			}
 			if (CharSequence.class.isAssignableFrom(elementType) && !jsonArrayOfStrings) {
 				ResponseBodyEmitter emitter = getEmitter(mediaType.orElse(MediaType.TEXT_PLAIN));
-				new TextEmitterSubscriber(emitter).connect(adapter, returnValue);
+				new TextEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
 			}
 		}
@@ -161,13 +175,25 @@ class ReactiveTypeHandler {
 
 	private static abstract class AbstractEmitterSubscriber implements Subscriber<Object> {
 
+		private static final Object COMPLETE_SIGNAL = new Object();
+
+
 		private final ResponseBodyEmitter emitter;
+
+		private final TaskExecutor taskExecutor;
 
 		private Subscription subscription;
 
+		private final Queue<Object> queue = new ConcurrentLinkedQueue<>();
 
-		protected AbstractEmitterSubscriber(ResponseBodyEmitter emitter) {
+		private final AtomicBoolean executing = new AtomicBoolean(false);
+
+		private volatile boolean done;
+
+
+		protected AbstractEmitterSubscriber(ResponseBodyEmitter emitter, TaskExecutor executor) {
 			this.emitter = emitter;
+			this.taskExecutor = executor;
 		}
 
 
@@ -181,42 +207,113 @@ class ReactiveTypeHandler {
 			return this.emitter;
 		}
 
+
 		@Override
-		public void onSubscribe(Subscription subscription) {
+		public final void onSubscribe(Subscription subscription) {
 			this.subscription = subscription;
-			this.emitter.onTimeout(subscription::cancel);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Subscribed to Publisher for " + this.emitter);
+			}
+			this.emitter.onTimeout(() -> {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Connection timed out for " + this.emitter);
+				}
+				terminate();
+				this.emitter.complete();
+			});
 			subscription.request(1);
 		}
 
 		@Override
-		public void onNext(Object element) {
-			try {
-				send(element);
-				this.subscription.request(1);
+		public final void onNext(Object element) {
+			this.queue.offer(element);
+			trySchedule();
+		}
+
+		@Override
+		public final void onError(Throwable ex) {
+			this.queue.offer(ex);
+			trySchedule();
+		}
+
+		@Override
+		public final void onComplete() {
+			this.queue.offer(COMPLETE_SIGNAL);
+			trySchedule();
+		}
+
+		private void trySchedule() {
+			if (this.executing.compareAndSet(false, true)) {
+				try {
+					this.taskExecutor.execute(() -> {
+						try {
+							Object signal = this.queue.poll();
+							if (!this.done) {
+								handle(signal);
+							}
+						}
+						finally {
+							this.executing.set(false);
+							if(!this.queue.isEmpty())
+								trySchedule();
+						}
+					});
+				}
+				catch (Throwable ex) {
+					try {
+						terminate();
+					}
+					finally {
+						this.executing.set(false);
+						this.queue.clear();
+					}
+				}
 			}
-			catch (IOException ex) {
-				this.subscription.cancel();
+		}
+
+		private void handle(Object signal) {
+			if (signal instanceof Throwable) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Publisher error for " + this.emitter, (Throwable) signal);
+				}
+				this.done = true;
+				this.emitter.completeWithError((Throwable) signal);
+			}
+			else if (signal == COMPLETE_SIGNAL) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Publishing completed for " + this.emitter);
+				}
+				this.done = true;
+				this.emitter.complete();
+			}
+			else {
+				try {
+					send(signal);
+					this.subscription.request(1);
+				}
+				catch (final Throwable ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Send error for " + this.emitter, ex);
+					}
+					terminate();
+				}
 			}
 		}
 
 		protected abstract void send(Object element) throws IOException;
 
-		@Override
-		public void onError(Throwable ex) {
-			this.emitter.completeWithError(ex);
+		private void terminate() {
+			this.done = true;
+			this.subscription.cancel();
 		}
 
-		@Override
-		public void onComplete() {
-			this.emitter.complete();
-		}
 	}
 
 
 	private static class SseEmitterSubscriber extends AbstractEmitterSubscriber {
 
-		SseEmitterSubscriber(SseEmitter sseEmitter) {
-			super(sseEmitter);
+		SseEmitterSubscriber(SseEmitter sseEmitter, TaskExecutor executor) {
+			super(sseEmitter, executor);
 		}
 
 		@Override
@@ -243,8 +340,8 @@ class ReactiveTypeHandler {
 
 	private static class JsonEmitterSubscriber extends AbstractEmitterSubscriber {
 
-		JsonEmitterSubscriber(ResponseBodyEmitter emitter) {
-			super(emitter);
+		JsonEmitterSubscriber(ResponseBodyEmitter emitter, TaskExecutor executor) {
+			super(emitter, executor);
 		}
 
 		@Override
@@ -257,8 +354,8 @@ class ReactiveTypeHandler {
 
 	private static class TextEmitterSubscriber extends AbstractEmitterSubscriber {
 
-		TextEmitterSubscriber(ResponseBodyEmitter emitter) {
-			super(emitter);
+		TextEmitterSubscriber(ResponseBodyEmitter emitter, TaskExecutor executor) {
+			super(emitter, executor);
 		}
 
 		@Override
