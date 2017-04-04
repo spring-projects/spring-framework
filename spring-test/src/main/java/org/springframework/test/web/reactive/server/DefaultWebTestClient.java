@@ -132,7 +132,6 @@ class DefaultWebTestClient implements WebTestClient {
 		return toUriSpec(wc -> wc.method(HttpMethod.OPTIONS));
 	}
 
-	@SuppressWarnings("unchecked")
 	private <S extends RequestHeadersSpec<?>> UriSpec<S> toUriSpec(
 			Function<WebClient, WebClient.UriSpec<WebClient.RequestBodySpec>> function) {
 

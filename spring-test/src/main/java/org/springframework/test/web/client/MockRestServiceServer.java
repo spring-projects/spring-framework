@@ -263,7 +263,6 @@ public class MockRestServiceServer {
 	 * Mock ClientHttpRequestFactory that creates requests by iterating
 	 * over the list of expected {@link DefaultRequestExpectation}'s.
 	 */
-	@SuppressWarnings("deprecation")
 	private class MockClientHttpRequestFactory implements ClientHttpRequestFactory, org.springframework.http.client.AsyncClientHttpRequestFactory {
 
 		@Override

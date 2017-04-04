@@ -17,7 +17,6 @@
 package org.springframework.test.web.reactive.server.samples;
 
 import java.net.URI;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
