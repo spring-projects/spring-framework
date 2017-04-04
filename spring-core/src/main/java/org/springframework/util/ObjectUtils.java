@@ -447,7 +447,7 @@ public abstract class ObjectUtils {
 		}
 		int hash = INITIAL_HASH;
 		for (boolean element : array) {
-			hash = MULTIPLIER * hash + hashCode(element);
+			hash = MULTIPLIER * hash + Boolean.hashCode(element);
 		}
 		return hash;
 	}
@@ -492,7 +492,7 @@ public abstract class ObjectUtils {
 		}
 		int hash = INITIAL_HASH;
 		for (double element : array) {
-			hash = MULTIPLIER * hash + hashCode(element);
+			hash = MULTIPLIER * hash + Double.hashCode(element);
 		}
 		return hash;
 	}
@@ -507,7 +507,7 @@ public abstract class ObjectUtils {
 		}
 		int hash = INITIAL_HASH;
 		for (float element : array) {
-			hash = MULTIPLIER * hash + hashCode(element);
+			hash = MULTIPLIER * hash + Float.hashCode(element);
 		}
 		return hash;
 	}
@@ -537,7 +537,7 @@ public abstract class ObjectUtils {
 		}
 		int hash = INITIAL_HASH;
 		for (long element : array) {
-			hash = MULTIPLIER * hash + hashCode(element);
+			hash = MULTIPLIER * hash + Long.hashCode(element);
 		}
 		return hash;
 	}
@@ -558,35 +558,39 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return the same value as {@link Boolean#hashCode()}}.
-	 * @see Boolean#hashCode()
+	 * Return the same value as {@link Boolean#hashCode(boolean)}}.
+	 * @deprecated as of Spring Framework 5.0, in favor of the native JDK 8 variant
 	 */
+	@Deprecated
 	public static int hashCode(boolean bool) {
-		return (bool ? 1231 : 1237);
+		return Boolean.hashCode(bool);
 	}
 
 	/**
-	 * Return the same value as {@link Double#hashCode()}}.
-	 * @see Double#hashCode()
+	 * Return the same value as {@link Double#hashCode(double)}}.
+	 * @deprecated as of Spring Framework 5.0, in favor of the native JDK 8 variant
 	 */
+	@Deprecated
 	public static int hashCode(double dbl) {
-		return hashCode(Double.doubleToLongBits(dbl));
+		return Double.hashCode(dbl);
 	}
 
 	/**
-	 * Return the same value as {@link Float#hashCode()}}.
-	 * @see Float#hashCode()
+	 * Return the same value as {@link Float#hashCode(float)}}.
+	 * @deprecated as of Spring Framework 5.0, in favor of the native JDK 8 variant
 	 */
+	@Deprecated
 	public static int hashCode(float flt) {
-		return Float.floatToIntBits(flt);
+		return Float.hashCode(flt);
 	}
 
 	/**
-	 * Return the same value as {@link Long#hashCode()}}.
-	 * @see Long#hashCode()
+	 * Return the same value as {@link Long#hashCode(long)}}.
+	 * @deprecated as of Spring Framework 5.0, in favor of the native JDK 8 variant
 	 */
+	@Deprecated
 	public static int hashCode(long lng) {
-		return (int) (lng ^ (lng >>> 32));
+		return Long.hashCode(lng);
 	}
 
 
