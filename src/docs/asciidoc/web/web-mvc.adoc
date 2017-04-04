@@ -2544,14 +2544,15 @@ Reactor 3, RxJava 2, and RxJava 1. Note that for RxJava 1 you will need to add
 https://github.com/ReactiveX/RxJavaReactiveStreams["io.reactivex:rxjava-reactive-streams"]
 to the classpath.
 
-A common assumption with reactive libraries is not block the processing thread.
+A common assumption with reactive libraries is to not block the processing thread.
 The `WebClient` with Reactor Netty for example is based on event-loop style
 handling using a small, fixed number of threads and those must not be blocked
 when writing to the `ServletResponseOutputStream`. Reactive libraries have
 operators for that but Spring MVC automatically writes asynchronously so you
-don't need to use that. The underlying `TaskExecutor` for this can be configured
+don't need to use them. The underlying `TaskExecutor` for this must be configured
 through the MVC Java config and the MVC namespace as described in the following
-section.
+section which by default is a `SyncTaskExecutor` and hence not suitable for
+production use.
 
 [NOTE]
 ====
