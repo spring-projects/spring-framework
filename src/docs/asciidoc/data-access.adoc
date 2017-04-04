@@ -2088,7 +2088,7 @@ The exception hierarchy that Spring provides can be seen below. (Please note tha
 class hierarchy detailed in the image shows only a subset of the entire
 `DataAccessException` hierarchy.)
 
-image::images/DataAccessException.gif[]
+image::images/DataAccessException.png[]
 
 
 
