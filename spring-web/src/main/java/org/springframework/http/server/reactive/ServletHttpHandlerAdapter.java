@@ -166,16 +166,32 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		@Override
 		public void onError(Throwable ex) {
-			logger.error("Could not complete request", ex);
-			HttpServletResponse response = (HttpServletResponse) this.asyncContext.getResponse();
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			this.asyncContext.complete();
+			ServletRequest request = getRequest();
+			if (request != null && request.isAsyncStarted()) {
+				logger.error("Could not complete request", ex);
+				HttpServletResponse response = (HttpServletResponse) this.asyncContext.getResponse();
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				this.asyncContext.complete();
+			}
 		}
 
 		@Override
 		public void onComplete() {
-			logger.debug("Successfully completed request");
-			this.asyncContext.complete();
+			ServletRequest request = getRequest();
+			if (request != null && request.isAsyncStarted()) {
+				logger.debug("Successfully completed request");
+				this.asyncContext.complete();
+			}
+		}
+
+		private ServletRequest getRequest() {
+			ServletRequest request = null;
+			try {
+				request = this.asyncContext.getRequest();
+			} catch (IllegalStateException ignore) {
+				// AsyncContext has been recycled and should not be used
+			}
+			return request;
 		}
 	}
 
