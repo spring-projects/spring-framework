@@ -180,13 +180,11 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 			Throwable ex = event.getThrowable();
 			ex = (ex != null ? ex : new IllegalStateException("Async operation timeout."));
 			handleError(ex);
-			event.getAsyncContext().complete();
 		}
 
 		@Override
 		public void onError(AsyncEvent event) {
 			handleError(event.getThrowable());
-			event.getAsyncContext().complete();
 		}
 
 		void handleError(Throwable ex) {
