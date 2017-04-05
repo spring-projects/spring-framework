@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,12 @@
 package org.springframework.web.reactive.result.view;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -37,53 +38,65 @@ import org.springframework.web.server.ServerWebExchange;
 
 
 /**
- * A {@link View} that delegates to an {@link HttpMessageWriter}.
+ * {@code View} that writes model attribute(s) with an {@link HttpMessageWriter}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class HttpMessageWriterView implements View {
 
-	private final HttpMessageWriter<?> messageWriter;
+	private final HttpMessageWriter<?> writer;
 
 	private final Set<String> modelKeys = new HashSet<>(4);
 
-	private final List<MediaType> mediaTypes;
+	private final boolean canWriteMap;
 
 
 	/**
-	 * Create a {@code View} with the given {@code Encoder} wrapping it as an
-	 * {@link EncoderHttpMessageWriter}.
+	 * Constructor with an {@code Encoder}.
 	 */
 	public HttpMessageWriterView(Encoder<?> encoder) {
 		this(new EncoderHttpMessageWriter<>(encoder));
 	}
 
 	/**
-	 * Create a View that delegates to the given message messageWriter.
+	 * Constructor with a fully initialized {@link HttpMessageWriter}.
 	 */
-	public HttpMessageWriterView(HttpMessageWriter<?> messageWriter) {
-		Assert.notNull(messageWriter, "'messageWriter' is required.");
-		this.messageWriter = messageWriter;
-		this.mediaTypes = messageWriter.getWritableMediaTypes();
+	public HttpMessageWriterView(HttpMessageWriter<?> writer) {
+		Assert.notNull(writer, "'writer' is required.");
+		this.writer = writer;
+		this.canWriteMap = writer.canWrite(ResolvableType.forClass(Map.class), null);
 	}
 
 
 	/**
-	 * Return the configured message messageWriter.
+	 * Return the configured message writer.
 	 */
 	public HttpMessageWriter<?> getMessageWriter() {
-		return this.messageWriter;
+		return this.writer;
 	}
 
 	/**
-	 * By default model attributes are filtered with
-	 * {@link HttpMessageWriter#canWrite} to find the ones that can be
-	 * rendered. Use this property to further narrow the list and consider only
-	 * attribute(s) under specific model key(s).
-	 * <p>If more than one matching attribute is found, than a Map is rendered,
-	 * or if the {@code Encoder} does not support rendering a {@code Map} then
-	 * an exception is raised.
+	 * {@inheritDoc}
+	 * <p>The implementation of this method for {@link HttpMessageWriterView}
+	 * delegates to {@link HttpMessageWriter#getWritableMediaTypes()}.
+	 */
+	@Override
+	public List<MediaType> getSupportedMediaTypes() {
+		return this.writer.getWritableMediaTypes();
+	}
+
+	/**
+	 * Set the attributes in the model that should be rendered by this view.
+	 * When set, all other model attributes will be ignored. The matching
+	 * attributes are further narrowed with {@link HttpMessageWriter#canWrite}.
+	 * The matching attributes are processed as follows:
+	 * <ul>
+	 * <li>0: nothing is written to the response body.
+	 * <li>1: the matching attribute is passed to the writer.
+	 * <li>2..N: if the writer supports {@link Map}, write all matches;
+	 * otherwise raise an {@link IllegalStateException}.
+	 * </ul>
 	 */
 	public void setModelKeys(Set<String> modelKeys) {
 		this.modelKeys.clear();
@@ -99,73 +112,50 @@ public class HttpMessageWriterView implements View {
 		return this.modelKeys;
 	}
 
-	@Override
-	public List<MediaType> getSupportedMediaTypes() {
-		return this.mediaTypes;
-	}
 
 	@Override
-	public Mono<Void> render(Map<String, ?> model, MediaType contentType,
-			ServerWebExchange exchange) {
-		Object value = extractObjectToRender(model);
-		return applyMessageWriter(value, contentType, exchange);
+	@SuppressWarnings("unchecked")
+	public Mono<Void> render(Map<String, ?> model, MediaType contentType, ServerWebExchange exchange) {
+		return getObjectToRender(model)
+				.map(value -> {
+					Publisher stream = Mono.justOrEmpty(value);
+					ResolvableType type = ResolvableType.forClass(value.getClass());
+					ServerHttpResponse response = exchange.getResponse();
+					return this.writer.write(stream, type, contentType, response, Collections.emptyMap());
+				})
+				.orElseGet(() -> exchange.getResponse().setComplete());
 	}
 
-	protected Object extractObjectToRender(Map<String, ?> model) {
-		Map<String, Object> map = new HashMap<>(model.size());
-		for (Map.Entry<String, ?> entry : model.entrySet()) {
-			if (isEligibleAttribute(entry.getKey(), entry.getValue())) {
-				map.put(entry.getKey(), entry.getValue());
-			}
+	private Optional<Object> getObjectToRender(Map<String, ?> model) {
+
+		Map<String, ?> result = model.entrySet().stream()
+				.filter(this::isMatch)
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+		if (result.isEmpty()) {
+			return Optional.empty();
 		}
-		if (map.isEmpty()) {
-			return null;
+		else if (result.size() == 1) {
+			return Optional.of(result.values().iterator().next());
 		}
-		else if (map.size() == 1) {
-			return map.values().iterator().next();
-		}
-		else if (getMessageWriter().canWrite(ResolvableType.forClass(Map.class), null)) {
-			return map;
+		else if (this.canWriteMap) {
+			return Optional.of(result);
 		}
 		else {
-			throw new IllegalStateException(
-					"Multiple matching attributes found: " + map + ". " +
-							"However Map rendering is not supported by " + getMessageWriter());
+			throw new IllegalStateException("Multiple matches found: " + result + " but " +
+					"Map rendering is not supported by " + getMessageWriter().getClass().getName());
 		}
 	}
 
-	/**
-	 * Whether the given model attribute key-value pair is eligible for encoding.
-	 * <p>The default implementation checks against the configured
-	 * {@link #setModelKeys model keys} and whether the Encoder supports the
-	 * value type.
-	 */
-	protected boolean isEligibleAttribute(String attributeName, Object attributeValue) {
-		ResolvableType type = ResolvableType.forClass(attributeValue.getClass());
-		if (getModelKeys().isEmpty()) {
-			return getMessageWriter().canWrite(type, null);
+	private boolean isMatch(Map.Entry<String, ?> entry) {
+		if (entry.getValue() == null) {
+			return false;
 		}
-		if (getModelKeys().contains(attributeName)) {
-			if (getMessageWriter().canWrite(type, null)) {
-				return true;
-			}
-			throw new IllegalStateException(
-					"Model object [" + attributeValue + "] retrieved via key " +
-							"[" + attributeName + "] is not supported by " + getMessageWriter());
+		if (!getModelKeys().isEmpty() && !getModelKeys().contains(entry.getKey())) {
+			return false;
 		}
-		return false;
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T> Mono<Void> applyMessageWriter(Object value, MediaType contentType, ServerWebExchange exchange) {
-		if (value == null) {
-			return Mono.empty();
-		}
-		Publisher<? extends T> stream = Mono.just((T) value);
-		ResolvableType type = ResolvableType.forClass(value.getClass());
-		ServerHttpResponse response = exchange.getResponse();
-		return ((HttpMessageWriter<T>) getMessageWriter()).write(stream, type, contentType,
-				response, Collections.emptyMap());
+		ResolvableType type = ResolvableType.forInstance(entry.getValue());
+		return getMessageWriter().canWrite(type, null);
 	}
 
 }

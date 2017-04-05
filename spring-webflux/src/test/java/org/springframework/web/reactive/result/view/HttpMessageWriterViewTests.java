@@ -20,16 +20,15 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.codec.CharSequenceEncoder;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
@@ -38,12 +37,9 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
-import org.springframework.util.MimeType;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 
@@ -55,83 +51,70 @@ public class HttpMessageWriterViewTests {
 
 	private HttpMessageWriterView view = new HttpMessageWriterView(new Jackson2JsonEncoder());
 
-	private ModelMap model = new ExtendedModelMap();
+	private final ModelMap model = new ExtendedModelMap();
+
+	private final MockServerWebExchange exchange = MockServerHttpRequest.get("/").toExchange();
 
 
 	@Test
 	public void supportedMediaTypes() throws Exception {
-		List<MimeType> mimeTypes = Arrays.asList(
-				new MimeType("application", "json", StandardCharsets.UTF_8),
-				new MimeType("application", "*+json", StandardCharsets.UTF_8));
-
-		assertEquals(mimeTypes, this.view.getSupportedMediaTypes());
+		assertEquals(Arrays.asList(
+				MediaType.parseMediaType("application/json;charset=UTF-8"),
+				MediaType.parseMediaType("application/*+json;charset=UTF-8")),
+				this.view.getSupportedMediaTypes());
 	}
 
 	@Test
-	public void extractObject() throws Exception {
+	public void singleMatch() throws Exception {
 		this.view.setModelKeys(Collections.singleton("foo2"));
 		this.model.addAttribute("foo1", "bar1");
 		this.model.addAttribute("foo2", "bar2");
 		this.model.addAttribute("foo3", "bar3");
 
-		assertEquals("bar2", this.view.extractObjectToRender(this.model));
+		assertEquals("\"bar2\"", doRender());
 	}
 
 	@Test
-	public void extractObjectNoMatch() throws Exception {
+	public void noMatch() throws Exception {
 		this.view.setModelKeys(Collections.singleton("foo2"));
 		this.model.addAttribute("foo1", "bar1");
 
-		assertNull(this.view.extractObjectToRender(this.model));
+		assertEquals("", doRender());
 	}
 
 	@Test
-	public void extractObjectMultipleMatches() throws Exception {
+	public void noMatchBecauseNotSupported() throws Exception {
+		this.view = new HttpMessageWriterView(new Jaxb2XmlEncoder());
+		this.view.setModelKeys(new HashSet<>(Collections.singletonList("foo1")));
+		this.model.addAttribute("foo1", "bar1");
+
+		assertEquals("", doRender());
+	}
+
+	@Test
+	public void multipleMatches() throws Exception {
 		this.view.setModelKeys(new HashSet<>(Arrays.asList("foo1", "foo2")));
 		this.model.addAttribute("foo1", "bar1");
 		this.model.addAttribute("foo2", "bar2");
 		this.model.addAttribute("foo3", "bar3");
 
-		Object value = this.view.extractObjectToRender(this.model);
-		assertNotNull(value);
-		assertEquals(HashMap.class, value.getClass());
-
-		Map<?, ?> map = (Map<?, ?>) value;
-		assertEquals(2, map.size());
-		assertEquals("bar1", map.get("foo1"));
-		assertEquals("bar2", map.get("foo2"));
+		assertEquals("{\"foo1\":\"bar1\",\"foo2\":\"bar2\"}", doRender());
 	}
 
 	@Test
-	public void extractObjectMultipleMatchesNotSupported() throws Exception {
-		HttpMessageWriterView view = new HttpMessageWriterView(CharSequenceEncoder.allMimeTypes());
-		view.setModelKeys(new HashSet<>(Arrays.asList("foo1", "foo2")));
+	public void multipleMatchesNotSupported() throws Exception {
+		this.view = new HttpMessageWriterView(CharSequenceEncoder.allMimeTypes());
+		this.view.setModelKeys(new HashSet<>(Arrays.asList("foo1", "foo2")));
 		this.model.addAttribute("foo1", "bar1");
 		this.model.addAttribute("foo2", "bar2");
 
 		try {
-			view.extractObjectToRender(this.model);
+			doRender();
 			fail();
 		}
 		catch (IllegalStateException ex) {
 			String message = ex.getMessage();
 			assertTrue(message, message.contains("Map rendering is not supported"));
-		}
-	}
-
-	@Test
-	public void extractObjectNotSupported() throws Exception {
-		HttpMessageWriterView view = new HttpMessageWriterView(new Jaxb2XmlEncoder());
-		view.setModelKeys(new HashSet<>(Collections.singletonList("foo1")));
-		this.model.addAttribute("foo1", "bar1");
-
-		try {
-			view.extractObjectToRender(this.model);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			String message = ex.getMessage();
-			assertTrue(message, message.contains("[foo1] is not supported"));
 		}
 	}
 
@@ -143,17 +126,23 @@ public class HttpMessageWriterViewTests {
 		this.model.addAttribute("pojoData", pojoData);
 		this.view.setModelKeys(Collections.singleton("pojoData"));
 
-		MockServerWebExchange exchange = MockServerHttpRequest.get("/path").toExchange();
+		this.view.render(this.model, MediaType.APPLICATION_JSON, exchange).block(Duration.ZERO);
 
-		this.view.render(this.model, MediaType.APPLICATION_JSON, exchange).block(Duration.ofSeconds(5));
-
-		StepVerifier.create(exchange.getResponse().getBody())
-				.consumeNextWith( buf -> assertEquals("{\"foo\":\"f\",\"bar\":\"b\"}",
-						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8))
-				)
+		StepVerifier.create(this.exchange.getResponse().getBody())
+				.consumeNextWith(buf -> assertEquals("{\"foo\":\"f\",\"bar\":\"b\"}", dumpString(buf)))
 				.expectComplete()
 				.verify();
 	}
+
+	private String dumpString(DataBuffer buf) {
+		return DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8);
+	}
+
+	private String doRender() {
+		this.view.render(this.model, MediaType.APPLICATION_JSON, this.exchange).block(Duration.ZERO);
+		return this.exchange.getResponse().getBodyAsString().block(Duration.ZERO);
+	}
+
 
 
 	@SuppressWarnings("unused")

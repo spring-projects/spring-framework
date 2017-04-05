@@ -55,13 +55,13 @@ import org.springframework.web.server.support.HttpRequestPathHelper;
  * {@code HandlerResultHandler} that encapsulates the view resolution algorithm
  * supporting the following return types:
  * <ul>
- *     <li>String-based view name
- *     <li>Reference to a {@link View}
- *     <li>{@link Model}
- *     <li>{@link Map}
- *     <li>Return types annotated with {@code @ModelAttribute}
- *     <li>{@link BeanUtils#isSimpleProperty Non-simple} return types are
- *     treated as a model attribute
+ *     <li>{@link Void} or no value -- default view name</li>
+ *     <li>{@link String} -- view name unless {@code @ModelAttribute}-annotated
+ *     <li>{@link View} -- View to render with
+ *     <li>{@link Model} -- attributes to add to the model
+ *     <li>{@link Map} -- attributes to add to the model
+ *     <li>{@link ModelAttribute @ModelAttribute} -- attribute for the model
+ *     <li>Non-simple value -- attribute for the model
  * </ul>
  *
  * <p>A String-based view name is resolved through the configured
@@ -71,8 +71,9 @@ import org.springframework.web.server.support.HttpRequestPathHelper;
  *
  * <p>By default this resolver is ordered at {@link Ordered#LOWEST_PRECEDENCE}
  * and generally needs to be late in the order since it interprets any String
- * return value as a view name while others may interpret the same otherwise
- * based on annotations (e.g. for {@code @ResponseBody}).
+ * return value as a view name or any non-simple value type as a model attribute
+ * while other result handlers may interpret the same otherwise based on the
+ * presence of annotations, e.g. for {@code @ResponseBody}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -174,11 +175,16 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 		ReactiveAdapter adapter = getAdapter(result);
 
 		if (adapter != null) {
-			Assert.isTrue(!adapter.isMultiValue(), "Only single-value async return type supported.");
+			Assert.isTrue(!adapter.isMultiValue(), "Multi-value " +
+					"reactive types not supported in view resolution: " + result.getReturnType());
+
 			valueMono = result.getReturnValue()
-					.map(value -> Mono.from(adapter.toPublisher(value))).orElse(Mono.empty());
+					.map(value -> Mono.from(adapter.toPublisher(value)))
+					.orElse(Mono.empty());
+
 			valueType = adapter.isNoValue() ?
-					ResolvableType.forClass(Void.class) : result.getReturnType().getGeneric(0);
+					ResolvableType.forClass(Void.class) :
+					result.getReturnType().getGeneric(0);
 		}
 		else {
 			valueMono = Mono.justOrEmpty(result.getReturnValue());
@@ -224,7 +230,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
 					}
 
-					addBindingResult(result.getBindingContext(), exchange);
+					updateBindingContext(result.getBindingContext(), exchange);
 
 					return viewsMono.then(views -> render(views, model.asMap(), exchange));
 				});
@@ -259,11 +265,6 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 				});
 	}
 
-	/**
-	 * Return the name of a model attribute return value based on the method
-	 * {@code @ModelAttribute} annotation, if present, or derived from the type
-	 * of the return value otherwise.
-	 */
 	private String getNameForReturnValue(Class<?> returnValueType, MethodParameter returnType) {
 		ModelAttribute annotation = returnType.getMethodAnnotation(ModelAttribute.class);
 		if (annotation != null && StringUtils.hasText(annotation.value())) {
@@ -273,9 +274,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 		return ClassUtils.getShortNameAsProperty(returnValueType);
 	}
 
-
-
-	private void addBindingResult(BindingContext context, ServerWebExchange exchange) {
+	private void updateBindingContext(BindingContext context, ServerWebExchange exchange) {
 		Map<String, Object> model = context.getModel().asMap();
 		model.keySet().stream()
 				.filter(name -> isBindingCandidate(name, model.get(name)))
