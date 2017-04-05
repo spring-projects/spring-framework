@@ -27,7 +27,7 @@ This reference document provides the following sections:
 
 * <<testing.adoc#testing,Testing with Spring>>
 
-* <<data-access.adoc#spring-data-tier,Data Access and transaction management>>
+* <<data-access.adoc#spring-data-tier,Data access and transaction management>>
 
 * <<web.adoc#spring-web,Web frameworks>>
 
