@@ -58,7 +58,7 @@ configure(allprojects) { project ->
 	ext.httpclientVersion      = "4.5.3"
 	ext.interceptorApiVersion  = "1.2"
 	ext.jackson2Version        = "2.9.0.pr2"
-	ext.javamailVersion        = "1.5.6"
+	ext.javamailVersion        = "1.6.0-rc1"
 	ext.jaxbVersion            = "2.2.11"
 	ext.jaxwsVersion           = "2.2.11"
 	ext.jcaVersion             = "1.7"
@@ -83,20 +83,20 @@ configure(allprojects) { project ->
 	ext.romeVersion            = "1.7.1"
 	ext.rxjavaVersion          = '1.2.9'
 	ext.rxjavaAdapterVersion   = '1.2.1'
-	ext.rxjava2Version         = '2.0.7'
+	ext.rxjava2Version         = '2.0.8'
 	ext.rxnettyVersion         = '0.5.2'
 	ext.servletVersion         = "3.1.0"
 	ext.slf4jVersion           = "1.7.25"
 	ext.snakeyamlVersion       = "1.18"
 	ext.testngVersion          = "6.11"
 	ext.tiles3Version          = "3.0.7"
-	ext.tomcatVersion          = "8.5.12"
+	ext.tomcatVersion          = "8.5.13"
 	ext.tyrusVersion           = "1.13.1"
-	ext.undertowVersion        = "1.4.11.Final"
+	ext.undertowVersion        = "1.4.12.Final"
 	ext.websocketVersion       = "1.1"
 	ext.woodstoxVersion        = "5.0.3"
 	ext.xmlunitVersion         = "2.3.0"
-	ext.xnioVersion            = "3.4.3.Final"
+	ext.xnioVersion            = "3.4.5.Final"
 	ext.xstreamVersion         = "1.4.9"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
@@ -188,7 +188,6 @@ configure(allprojects) { project ->
 		}
 		testCompile("org.hamcrest:hamcrest-all:${hamcrestVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-core:${log4jVersion}")
-		testRuntime("org.apache.logging.log4j:log4j-jcl:${log4jVersion}")
 	}
 
 	ext.javadocLinks = [
@@ -364,7 +363,8 @@ project("spring-core") {
 
 		compile(files(cglibRepackJar))
 		compile(files(objenesisRepackJar))
-		compile("commons-logging:commons-logging:1.2")
+		optional("org.apache.logging.log4j:log4j-api:${log4jVersion}")
+		optional("org.slf4j:slf4j-api:${slf4jVersion}")
 		optional("net.sf.jopt-simple:jopt-simple:5.0.3")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
@@ -372,8 +372,8 @@ project("spring-core") {
 		optional("org.reactivestreams:reactive-streams")
 		optional("io.projectreactor:reactor-core")
 		optional "io.reactivex:rxjava:${rxjavaVersion}"
-		optional "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 		optional "io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}"
+		optional "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 		optional("io.netty:netty-buffer:${nettyVersion}")
 		testCompile("io.projectreactor.addons:reactor-test")
 		testCompile("javax.xml.bind:jaxb-api:${jaxbVersion}")
@@ -577,7 +577,6 @@ project("spring-messaging") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
 		testCompile("io.netty:netty-all:${nettyVersion}")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 		testCompile("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}")
 		testRuntime("javax.activation:activation:${activationApiVersion}")
@@ -712,8 +711,8 @@ project("spring-web") {
 			exclude group: 'io.reactivex', module: 'rxjava'
 		}
 		optional("io.reactivex:rxjava:${rxjavaVersion}")
-		optional "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 		optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
+		optional "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 		optional("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		optional("io.undertow:undertow-core:${undertowVersion}")
 		optional("org.jboss.xnio:xnio-api:${xnioVersion}")
@@ -759,7 +758,6 @@ project("spring-web") {
 		testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
 		testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
@@ -820,7 +818,6 @@ project("spring-webflux") {
 		testCompile("org.jboss.xnio:xnio-api:${xnioVersion}")
 		testCompile("com.fasterxml:aalto-xml:1.0.0")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
 		testRuntime("javax.el:javax.el-api:${elApiVersion}")
 		testRuntime("org.glassfish:javax.el:3.0.1-b08")
@@ -863,7 +860,6 @@ project("spring-orm") {
 		optional("javax.servlet:javax.servlet-api:${servletVersion}")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testRuntime("javax.xml.bind:jaxb-api:${jaxbVersion}")
 	}
 }
@@ -936,7 +932,6 @@ project("spring-webmvc") {
 		testCompile("commons-fileupload:commons-fileupload:${fileuploadVersion}")
 		testCompile("commons-io:commons-io:2.5")
 		testCompile("joda-time:joda-time:${jodaVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.mozilla:rhino:1.7.7.1")
 		testCompile("io.projectreactor:reactor-core")
 		testCompile("io.reactivex:rxjava:${rxjavaVersion}")
@@ -997,7 +992,6 @@ project("spring-websocket") {
 		testCompile("io.projectreactor:reactor-core")
 		testCompile("io.projectreactor.ipc:reactor-netty")
 		testCompile("io.netty:netty-all:${nettyVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testRuntime("org.jboss.xnio:xnio-nio:${xnioVersion}")
 		testRuntime("org.jboss.logging:jboss-logging:3.3.1.Final")
 	}
@@ -1070,7 +1064,6 @@ project("spring-test") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 		testCompile("javax.cache:cache-api:${cacheApiVersion}")
 		testCompile('de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1')
