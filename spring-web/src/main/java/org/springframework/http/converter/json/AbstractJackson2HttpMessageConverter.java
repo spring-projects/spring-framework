@@ -36,12 +36,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractGenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -234,6 +236,9 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 				}
 			}
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
+		}
+		catch (InvalidDefinitionException ex) {
+			throw new HttpMessageNotReadableException("Could not read document: " + ex.getMessage(), ex, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		catch (IOException ex) {
 			throw new HttpMessageNotReadableException("Could not read document: " + ex.getMessage(), ex);
