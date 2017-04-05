@@ -31,9 +31,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import org.junit.Assert;
 import org.junit.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
@@ -380,6 +382,22 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertTrue(result.contains("\"number\":123"));
 	}
 
+	@Test
+	public void readWithNoDefaultConstructor() throws Exception {
+		String body = "{\"property1\":\"foo\",\"property2\":\"bar\"}";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
+		try {
+			converter.read(BeanWithNoDefaultConstructor.class, inputMessage);
+		}
+		catch (HttpMessageNotReadableException ex) {
+			assertTrue(ex.getErrorStatus().isPresent());
+			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getErrorStatus().get());
+			return;
+		}
+		fail();
+	}
+
 
 	interface MyInterface {
 
@@ -535,6 +553,27 @@ public class MappingJackson2HttpMessageConverterTests {
 		public void setProperty2(String property2) {
 			this.property2 = property2;
 		}
+	}
+
+	private static class BeanWithNoDefaultConstructor {
+
+		private final String property1;
+
+		private final String property2;
+
+		public BeanWithNoDefaultConstructor(String property1, String property2) {
+			this.property1 = property1;
+			this.property2 = property2;
+		}
+
+		public String getProperty1() {
+			return property1;
+		}
+
+		public String getProperty2() {
+			return property2;
+		}
+
 	}
 
 }
