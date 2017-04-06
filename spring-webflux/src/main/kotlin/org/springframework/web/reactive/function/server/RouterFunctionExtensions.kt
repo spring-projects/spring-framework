@@ -19,7 +19,6 @@ package org.springframework.web.reactive.function.server
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.web.reactive.function.server.RequestPredicates.*
 import reactor.core.publisher.Mono
 
 /**
@@ -66,13 +65,13 @@ class RouterDsl {
 
 	val routes = mutableListOf<RouterFunction<ServerResponse>>()
 
-	infix fun RequestPredicate.and(other: String): RequestPredicate = this.and(pathPrefix(other))
+	infix fun RequestPredicate.and(other: String): RequestPredicate = this.and(path(other))
 
-	infix fun RequestPredicate.or(other: String): RequestPredicate = this.or(pathPrefix(other))
+	infix fun RequestPredicate.or(other: String): RequestPredicate = this.or(path(other))
 
-	infix fun String.and(other: RequestPredicate): RequestPredicate = pathPrefix(this).and(other)
+	infix fun String.and(other: RequestPredicate): RequestPredicate = path(this).and(other)
 
-	infix fun String.or(other: RequestPredicate): RequestPredicate = pathPrefix(this).or(other)
+	infix fun String.or(other: RequestPredicate): RequestPredicate = path(this).or(other)
 
 	infix fun RequestPredicate.and(other: RequestPredicate): RequestPredicate = this.and(other)
 
@@ -85,7 +84,7 @@ class RouterDsl {
 	}
 
 	fun String.nest(r: Routes) {
-		routes += RouterFunctions.nest(pathPrefix(this), RouterDsl().apply(r).router())
+		routes += RouterFunctions.nest(path(this), RouterDsl().apply(r).router())
 	}
 
 	operator fun RequestPredicate.invoke(f: (ServerRequest) -> Mono<ServerResponse>) {

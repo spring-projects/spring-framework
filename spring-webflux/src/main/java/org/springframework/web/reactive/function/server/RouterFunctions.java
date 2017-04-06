@@ -28,7 +28,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.reactive.function.server.support.*;
+import org.springframework.web.reactive.function.server.support.HandlerFunctionAdapter;
+import org.springframework.web.reactive.function.server.support.ServerResponseResultHandler;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
@@ -136,19 +137,17 @@ public abstract class RouterFunctions {
 		Assert.notNull(predicate, "'predicate' must not be null");
 		Assert.notNull(routerFunction, "'routerFunction' must not be null");
 
-		return request -> {
-			if (predicate.test(request)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Nested predicate \"%s\" matches against \"%s\"",
-							predicate, request));
-				}
-				ServerRequest subRequest = predicate.nestRequest(request);
-				return routerFunction.route(subRequest);
-			}
-			else {
-				return Mono.empty();
-			}
-		};
+		return request -> predicate.nest(request)
+				.map(nestedRequest -> {
+							if (logger.isDebugEnabled()) {
+								logger.debug(
+										String.format("Nested predicate \"%s\" matches against \"%s\"",
+												predicate, request));
+							}
+							return routerFunction.route(nestedRequest);
+						}
+				)
+				.orElseGet(Mono::empty);
 	}
 
 	/**
