@@ -49,12 +49,14 @@ public class ServerCodecConfigurer extends AbstractCodecConfigurer {
 	}
 
 
+	@Override
 	protected void addDefaultTypedReaders(List<HttpMessageReader<?>> result) {
 		super.addDefaultTypedReaders(result);
 		defaultCodec().addReaderTo(result, FormHttpMessageReader::new);
 	}
 
 
+	@Override
 	protected void addDefaultObjectWriters(List<HttpMessageWriter<?>> result) {
 		super.addDefaultObjectWriters(result);
 		defaultCodec().addServerSentEventWriterTo(result);
@@ -79,10 +81,12 @@ public class ServerCodecConfigurer extends AbstractCodecConfigurer {
 
 		// Internal methods for building a list of default readers or writers...
 
+		@Override
 		protected void addStringReaderTextOnlyTo(List<HttpMessageReader<?>> result) {
 			addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly(true)));
 		}
 
+		@Override
 		protected void addStringReaderTo(List<HttpMessageReader<?>> result) {
 			addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 		}

@@ -32,7 +32,6 @@ import org.springframework.core.codec.DataBufferEncoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.ResourceDecoder;
-import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
@@ -50,12 +49,12 @@ public abstract class AbstractCodecConfigurer {
 
 	public static final boolean jackson2Present =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					ServerCodecConfigurer.class.getClassLoader()) &&
+					AbstractCodecConfigurer.class.getClassLoader()) &&
 					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-							ServerCodecConfigurer.class.getClassLoader());
+							AbstractCodecConfigurer.class.getClassLoader());
 
 	public static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder", ServerCodecConfigurer.class.getClassLoader());
+			ClassUtils.isPresent("javax.xml.bind.Binder", AbstractCodecConfigurer.class.getClassLoader());
 
 
 	private final DefaultCodecConfigurer defaultCodecs;
