@@ -244,7 +244,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 */
 	@Override
 	public String getFilename() {
-		return new File(this.url.getFile()).getName();
+		return new File(this.url.getPath()).getName();
 	}
 
 	/**
