@@ -1408,8 +1408,10 @@ of `java.util.Optional` in those cases is equivalent to having `required=false`.
 ==== Supported method return types
 The following are the supported return types:
 
-* `ModelAndView` object, with the model implicitly enriched with command objects and
-  the results of `@ModelAttribute` annotated reference data accessor methods.
+* `ModelAndView` object (Spring MVC), providing a view, model attributes, and
+   optionally a response status.
+* `Rendering` object (Spring WebFlux), providing a view, model attributes, and
+   optionally a response status.
 * `Model` object, with the view name implicitly determined through a
   `RequestToViewNameTranslator` and the model implicitly enriched with command objects
   and the results of `@ModelAttribute` annotated reference data accessor methods.

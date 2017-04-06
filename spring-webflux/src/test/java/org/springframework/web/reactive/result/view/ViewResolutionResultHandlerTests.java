@@ -39,6 +39,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
@@ -86,6 +87,8 @@ public class ViewResolutionResultHandlerTests {
 		testSupports(on(TestController.class).resolveReturnType(Model.class));
 		testSupports(on(TestController.class).resolveReturnType(Map.class));
 		testSupports(on(TestController.class).resolveReturnType(TestBean.class));
+		testSupports(on(TestController.class).resolveReturnType(Rendering.class));
+		testSupports(on(TestController.class).resolveReturnType(Mono.class, Rendering.class));
 
 		testSupports(on(TestController.class).annotPresent(ModelAttribute.class).resolveReturnType());
 	}
@@ -148,16 +151,22 @@ public class ViewResolutionResultHandlerTests {
 
 		returnType = on(TestController.class).resolveReturnType(TestBean.class);
 		returnValue = new TestBean("Joe");
-		String responseBody = "account: {" +
-				"id=123, " +
+		String responseBody = "account: {id=123, " +
 				"org.springframework.validation.BindingResult.testBean=" +
 				"org.springframework.validation.BeanPropertyBindingResult: 0 errors, " +
-				"testBean=TestBean[name=Joe]" +
-				"}";
+				"testBean=TestBean[name=Joe]}";
 		testHandle("/account", returnType, returnValue, responseBody, resolver);
 
 		returnType = on(TestController.class).annotPresent(ModelAttribute.class).resolveReturnType();
 		testHandle("/account", returnType, 99L, "account: {id=123, num=99}", resolver);
+
+		returnType = on(TestController.class).resolveReturnType(Rendering.class);
+		HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+		returnValue = Rendering.view("account").modelAttribute("a", "a1").status(status).header("h", "h1").build();
+		String expected = "account: {a=a1, id=123}";
+		ServerWebExchange exchange = testHandle("/path", returnType, returnValue, expected, resolver);
+		assertEquals(status, exchange.getResponse().getStatusCode());
+		assertEquals("h1", exchange.getResponse().getHeaders().getFirst("h"));
 	}
 
 	@Test
@@ -427,6 +436,14 @@ public class ViewResolutionResultHandlerTests {
 
 		@ModelAttribute("num")
 		Long longAttribute() {
+			return null;
+		}
+
+		Rendering rendering() {
+			return null;
+		}
+
+		Mono<Rendering> monoRendering() {
 			return null;
 		}
 	}

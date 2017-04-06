@@ -159,7 +159,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 		}
 		return (CharSequence.class.isAssignableFrom(type) || View.class.isAssignableFrom(type) ||
 				Model.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) ||
-				!BeanUtils.isSimpleProperty(type));
+				Rendering.class.isAssignableFrom(type) || !BeanUtils.isSimpleProperty(type));
 	}
 
 	private boolean hasModelAnnotation(MethodParameter parameter) {
@@ -223,6 +223,15 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 					}
 					else if (CharSequence.class.isAssignableFrom(clazz) && !hasModelAnnotation(parameter)) {
 						viewsMono = resolveViews(returnValue.toString(), locale);
+					}
+					else if (Rendering.class.isAssignableFrom(clazz)) {
+						Rendering render = (Rendering) returnValue;
+						render.status().ifPresent(exchange.getResponse()::setStatusCode);
+						exchange.getResponse().getHeaders().putAll(render.headers());
+						model.addAllAttributes(render.modelAttributes());
+						Object view = render.view().orElse(getDefaultViewName(exchange));
+						viewsMono = (view instanceof String ? resolveViews((String) view, locale) :
+								Mono.just(Collections.singletonList((View) view)));
 					}
 					else {
 						String name = getNameForReturnValue(clazz, parameter);

@@ -157,9 +157,10 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <p>The following return types are supported for handler methods:
  * <ul>
- * <li>{@code ModelAndView} object (from Servlet MVC),
- * with the model implicitly enriched with command objects and the results
- * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
+ * <li>{@link org.springframework.web.servlet.ModelAndView} object (Spring MVC only),
+ * providing a view, model attributes, and optionally a response status.
+ * <li>{@link org.springframework.web.reactive.result.view.Rendering} object (Spring WebFlux only),
+ * providing a view, model attributes, and optionally a response status.
  * <li>{@link org.springframework.ui.Model Model} object, with the view name implicitly
  * determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}
  * and the model implicitly enriched with command objects and the results
