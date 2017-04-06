@@ -38,7 +38,7 @@ class WildcardTheRestPathElement extends PathElement {
 				matchingContext.candidate[candidateIndex] != separator) {
 			return false;
 		}
-		if (matchingContext.determineRemaining) {
+		if (matchingContext.determineRemainingPath) {
 			matchingContext.remainingPathIndex = matchingContext.candidateLength;
 		}
 		return true;

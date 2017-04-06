@@ -39,30 +39,23 @@ class SeparatorPathElement extends PathElement {
 	@Override
 	public boolean matches(int candidateIndex, MatchingContext matchingContext) {
 		boolean matched = false;
-		if (candidateIndex < matchingContext.candidateLength) {
-			if (matchingContext.candidate[candidateIndex] == separator) {
-				// Skip further separators in the path (they are all 'matched'
-				// by a single SeparatorPathElement)
-				while ((candidateIndex + 1) < matchingContext.candidateLength &&
-						matchingContext.candidate[candidateIndex + 1] == separator) {
-					candidateIndex++;
-				}
-				if (next == null) {
-					if (matchingContext.determineRemaining) {
-						matchingContext.remainingPathIndex = candidateIndex + 1;
-						matched = true;
-					}
-					else {
-						matched = ((candidateIndex + 1) == matchingContext.candidateLength);
-					}
+		if (candidateIndex < matchingContext.candidateLength &&
+			matchingContext.candidate[candidateIndex] == separator) {
+			if (next == null) {
+				if (matchingContext.determineRemainingPath) {
+					matchingContext.remainingPathIndex = candidateIndex + 1;
+					matched = true;
 				}
 				else {
-					candidateIndex++;
-					if (matchingContext.isMatchStartMatching && candidateIndex == matchingContext.candidateLength) {
-						return true; // no more data but matches up to this point
-					}
-					matched = next.matches(candidateIndex, matchingContext);
+					matched = ((candidateIndex + 1) == matchingContext.candidateLength);
 				}
+			}
+			else {
+				candidateIndex++;
+				if (matchingContext.isMatchStartMatching && candidateIndex == matchingContext.candidateLength) {
+					return true; // no more data but matches up to this point
+				}
+				matched = next.matches(candidateIndex, matchingContext);
 			}
 		}
 		return matched;

@@ -32,12 +32,29 @@ public class PathPatternParser {
 
 	// The expected path separator to split path elements during parsing, default '/'
 	private char separator = DEFAULT_SEPARATOR;
+	
+	// If true the PathPatterns produced by the parser will allow patterns
+	// that don't have a trailing slash to match paths that may or may not
+	// have a trailing slash
+	private boolean matchOptionalTrailingSlash = true;
 
 	/**
 	 * Create a path pattern parser that will use the default separator '/' when
 	 * parsing patterns.
 	 */
 	public PathPatternParser() {
+	}
+	
+	/**
+	 * Control behavior of the path patterns produced by this parser. The default
+	 * value for matchOptionalTrailingSlash is true but here it can be set to false.
+	 * If true then PathPatterns without a trailing slash will match paths with or
+	 * without a trailing slash.
+	 * 
+	 * @param matchOptionalTrailingSlash boolean value to override the default value of true
+	 */
+	public void setMatchOptionalTrailingSlash(boolean matchOptionalTrailingSlash) {
+		this.matchOptionalTrailingSlash = matchOptionalTrailingSlash;
 	}
 	
 	/**
@@ -64,7 +81,7 @@ public class PathPatternParser {
 	 * @return a PathPattern for quickly matching paths against the specified path pattern
 	 */
 	public PathPattern parse(String pathPattern) {
-		InternalPathPatternParser ippp = new InternalPathPatternParser(separator, caseSensitive);
+		InternalPathPatternParser ippp = new InternalPathPatternParser(separator, caseSensitive, matchOptionalTrailingSlash);
 		return ippp.parse(pathPattern);
 	}
 

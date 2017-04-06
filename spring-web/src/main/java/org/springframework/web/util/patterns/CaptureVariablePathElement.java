@@ -22,7 +22,8 @@ import org.springframework.web.util.patterns.PathPattern.MatchingContext;
 
 /**
  * A path element representing capturing a piece of the path as a variable. In the pattern
- * '/foo/{bar}/goo' the {bar} is represented as a {@link CaptureVariablePathElement}.
+ * '/foo/{bar}/goo' the {bar} is represented as a {@link CaptureVariablePathElement}. There
+ * must be at least one character to bind to the variable.
  *
  * @author Andy Clement
  */
@@ -66,6 +67,10 @@ class CaptureVariablePathElement extends PathElement {
 	@Override
 	public boolean matches(int candidateIndex, MatchingContext matchingContext) {
 		int nextPos = matchingContext.scanAhead(candidateIndex);
+		// There must be at least one character to capture:
+		if (nextPos == candidateIndex) {
+			return false;
+		}
 		CharSequence candidateCapture = null;
 		if (constraintPattern != null) {
 			// TODO possible optimization - only regex match if rest of pattern matches? Benefit likely to vary pattern to pattern
@@ -80,13 +85,18 @@ class CaptureVariablePathElement extends PathElement {
 		}
 		boolean match = false;
 		if (next == null) {
-			if (matchingContext.determineRemaining && nextPos > candidateIndex) {
+			if (matchingContext.determineRemainingPath && nextPos > candidateIndex) {
 				matchingContext.remainingPathIndex = nextPos;
 				match = true;
 			}
 			else {
 				// Needs to be at least one character #SPR15264
 				match = (nextPos == matchingContext.candidateLength && nextPos > candidateIndex);
+				if (!match && matchingContext.isAllowOptionalTrailingSlash()) {
+					match = (nextPos > candidateIndex) &&
+						    (nextPos + 1) == matchingContext.candidateLength && 
+						     matchingContext.candidate[nextPos] == separator;
+				}
 			}
 		}
 		else {

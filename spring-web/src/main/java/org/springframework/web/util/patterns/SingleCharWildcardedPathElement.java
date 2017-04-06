@@ -76,12 +76,19 @@ class SingleCharWildcardedPathElement extends PathElement {
 			}
 		}
 		if (next == null) {
-			if (matchingContext.determineRemaining && nextIfExistsIsSeparator(candidateIndex, matchingContext)) {
+			if (matchingContext.determineRemainingPath && nextIfExistsIsSeparator(candidateIndex, matchingContext)) {
 				matchingContext.remainingPathIndex = candidateIndex;
 				return true;
 			}
 			else {
-				return candidateIndex == matchingContext.candidateLength;
+				if (candidateIndex == matchingContext.candidateLength) {
+					return true;
+				}
+				else {
+					return matchingContext.isAllowOptionalTrailingSlash() &&
+						   (candidateIndex + 1) == matchingContext.candidateLength && 
+						   matchingContext.candidate[candidateIndex] == separator;
+				}
 			}
 		}
 		else {
