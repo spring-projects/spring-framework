@@ -221,7 +221,7 @@ class ReactiveTypeHandler {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Connection timed out for " + this.emitter);
 				}
-				this.subscription.cancel();
+				terminate();
 				this.emitter.complete();
 			});
 			subscription.request(1);
