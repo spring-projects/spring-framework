@@ -28,11 +28,8 @@ import org.springframework.web.util.patterns.PathPattern.MatchingContext;
  */
 class SeparatorPathElement extends PathElement {
 
-	private char separator;
-
 	SeparatorPathElement(int pos, char separator) {
-		super(pos);
-		this.separator = separator;
+		super(pos, separator);
 	}
 
 	/**
@@ -51,7 +48,13 @@ class SeparatorPathElement extends PathElement {
 					candidateIndex++;
 				}
 				if (next == null) {
-					matched = ((candidateIndex + 1) == matchingContext.candidateLength);
+					if (matchingContext.determineRemaining) {
+						matchingContext.remainingPathIndex = candidateIndex + 1;
+						matched = true;
+					}
+					else {
+						matched = ((candidateIndex + 1) == matchingContext.candidateLength);
+					}
 				}
 				else {
 					candidateIndex++;

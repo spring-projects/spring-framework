@@ -39,6 +39,55 @@ import static org.junit.Assert.*;
 public class PathPatternMatcherTests {
 
 	@Test
+	public void pathRemainderBasicCases_spr15336() {
+		// getPathRemaining: Given some pattern and some path, return the bit of the path
+		// that was left over after the pattern part was matched.
+		
+		// Cover all PathElement kinds:
+		assertEquals("/bar", parse("/foo").getPathRemaining("/foo/bar"));
+		assertEquals("/", parse("/foo").getPathRemaining("/foo/"));
+		assertEquals("/bar",parse("/foo*").getPathRemaining("/foo/bar"));
+		assertEquals("/bar", parse("/*").getPathRemaining("/foo/bar"));
+		assertEquals("/bar", parse("/{foo}").getPathRemaining("/foo/bar"));
+		assertNull(parse("/foo").getPathRemaining("/bar/baz"));
+		assertEquals("",parse("/**").getPathRemaining("/foo/bar"));
+		assertEquals("",parse("/{*bar}").getPathRemaining("/foo/bar"));
+		assertEquals("/bar",parse("/a?b/d?e").getPathRemaining("/aab/dde/bar"));
+		assertEquals("/bar",parse("/{abc}abc").getPathRemaining("/xyzabc/bar"));
+		assertEquals("/bar",parse("/*y*").getPathRemaining("/xyzxyz/bar"));
+		assertEquals("",parse("/").getPathRemaining("/"));
+		assertEquals("a",parse("/").getPathRemaining("/a"));
+		assertEquals("a/",parse("/").getPathRemaining("/a/"));
+		assertEquals("/bar",parse("/a{abc}").getPathRemaining("/a/bar"));
+	}
+		
+	@Test
+	public void pathRemainingCornerCases_spr15336() {
+		// No match when the literal path element is a longer form of the segment in the pattern
+		assertNull(parse("/foo").getPathRemaining("/footastic/bar"));
+		assertNull(parse("/f?o").getPathRemaining("/footastic/bar"));
+		assertNull(parse("/f*o*p").getPathRemaining("/flooptastic/bar"));
+		assertNull(parse("/{abc}abc").getPathRemaining("/xyzabcbar/bar"));
+
+		// With a /** on the end have to check if there is any more data post
+		// 'the match' it starts with a separator
+		assertNull(parse("/resource/**").getPathRemaining("/resourceX"));
+		assertEquals("",parse("/resource/**").getPathRemaining("/resource"));
+
+		// Similar to above for the capture-the-rest variant
+		assertNull(parse("/resource/{*foo}").getPathRemaining("/resourceX"));
+		assertEquals("",parse("/resource/{*foo}").getPathRemaining("/resource"));
+
+		assertEquals("/i",parse("/aaa/{bbb}/c?d/e*f/*/g").getPathRemaining("/aaa/b/ccd/ef/x/g/i"));
+		
+		assertNull(parse("/a/b").getPathRemaining(""));
+		assertNull(parse("/a/b").getPathRemaining(null));
+		assertEquals("/a/b",parse("").getPathRemaining("/a/b"));
+		assertEquals("",parse("").getPathRemaining(""));
+		assertNull(parse("").getPathRemaining(null));
+	}
+
+	@Test
 	public void basicMatching() {
 		checkMatches(null, null);
 		checkMatches("", "");

@@ -27,8 +27,8 @@ import org.springframework.web.util.patterns.PathPattern.MatchingContext;
  */
 class WildcardPathElement extends PathElement {
 
-	public WildcardPathElement(int pos) {
-		super(pos);
+	public WildcardPathElement(int pos, char separator) {
+		super(pos, separator);
 	}
 
 	/**
@@ -40,7 +40,13 @@ class WildcardPathElement extends PathElement {
 	public boolean matches(int candidateIndex, MatchingContext matchingContext) {
 		int nextPos = matchingContext.scanAhead(candidateIndex);
 		if (next == null) {
-			return (nextPos == matchingContext.candidateLength);
+			if (matchingContext.determineRemaining) {
+				matchingContext.remainingPathIndex = nextPos;
+				return true;
+			}
+			else {
+				return (nextPos == matchingContext.candidateLength);
+			}
 		}
 		else {
 			if (matchingContext.isMatchStartMatching && nextPos == matchingContext.candidateLength) {

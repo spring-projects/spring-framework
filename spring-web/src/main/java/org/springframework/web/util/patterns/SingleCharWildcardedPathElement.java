@@ -35,8 +35,8 @@ class SingleCharWildcardedPathElement extends PathElement {
 
 	private boolean caseSensitive;
 
-	public SingleCharWildcardedPathElement(int pos, char[] literalText, int questionMarkCount, boolean caseSensitive) {
-		super(pos);
+	public SingleCharWildcardedPathElement(int pos, char[] literalText, int questionMarkCount, boolean caseSensitive, char separator) {
+		super(pos, separator);
 		this.len = literalText.length;
 		this.questionMarkCount = questionMarkCount;
 		this.caseSensitive = caseSensitive;
@@ -76,7 +76,13 @@ class SingleCharWildcardedPathElement extends PathElement {
 			}
 		}
 		if (next == null) {
-			return candidateIndex == matchingContext.candidateLength;
+			if (matchingContext.determineRemaining && nextIfExistsIsSeparator(candidateIndex, matchingContext)) {
+				matchingContext.remainingPathIndex = candidateIndex;
+				return true;
+			}
+			else {
+				return candidateIndex == matchingContext.candidateLength;
+			}
 		}
 		else {
 			if (matchingContext.isMatchStartMatching && candidateIndex == matchingContext.candidateLength) {
