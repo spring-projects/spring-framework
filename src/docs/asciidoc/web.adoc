@@ -4,6 +4,7 @@
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :toc: left
 :toclevels: 2
+ifdef::backend-pdf[:source-highlighter: rouge]
 
 This part of the reference documentation covers Spring Framework's support for the
 presentation tier (and specifically web-based presentation tiers) including support

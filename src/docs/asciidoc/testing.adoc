@@ -5,6 +5,7 @@
 :doc-spring-boot: {doc-root}/spring-boot/docs/current/reference
 :toc: left
 :toclevels: 2
+ifdef::backend-pdf[:source-highlighter: rouge]
 
 The adoption of the test-driven-development (TDD) approach to software
 development is certainly advocated by the Spring team, and so coverage of Spring's

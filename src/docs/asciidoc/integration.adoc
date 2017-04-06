@@ -6,6 +6,7 @@
 :doc-spring-gemfire: {doc-root}/spring-gemfire/docs/current/reference
 :toc: left
 :toclevels: 2
+ifdef::backend-pdf[:source-highlighter: rouge]
 
 This part of the reference documentation covers the Spring Framework's integration with
 a number of Java EE (and related) technologies.

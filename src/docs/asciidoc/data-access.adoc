@@ -4,6 +4,7 @@
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :toc: left
 :toclevels: 2
+ifdef::backend-pdf[:source-highlighter: rouge]
 
 This part of the reference documentation is concerned with data access and the
 interaction between the data access layer and the business or service layer.

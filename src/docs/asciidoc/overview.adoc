@@ -4,6 +4,7 @@
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :toc: left
 :toclevels: 2
+ifdef::backend-pdf[:source-highlighter: rouge]
 
 
 [[overview-getting-started-with-spring]]
