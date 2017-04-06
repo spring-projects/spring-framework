@@ -355,6 +355,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 	@Override
 	public ParameterNameProvider getParameterNameProvider() {
+		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
 		return this.validatorFactory.getParameterNameProvider();
 	}
 

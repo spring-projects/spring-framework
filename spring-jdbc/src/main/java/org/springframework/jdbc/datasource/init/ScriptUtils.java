@@ -199,7 +199,7 @@ public abstract class ScriptUtils {
 			}
 			if (!inSingleQuote && !inDoubleQuote) {
 				if (script.startsWith(separator, i)) {
-					// we've reached the end of the current statement
+					// We've reached the end of the current statement
 					if (sb.length() > 0) {
 						statements.add(sb.toString());
 						sb = new StringBuilder();
@@ -208,32 +208,31 @@ public abstract class ScriptUtils {
 					continue;
 				}
 				else if (script.startsWith(commentPrefix, i)) {
-					// skip over any content from the start of the comment to the EOL
+					// Skip over any content from the start of the comment to the EOL
 					int indexOfNextNewline = script.indexOf("\n", i);
 					if (indexOfNextNewline > i) {
 						i = indexOfNextNewline;
 						continue;
 					}
 					else {
-						// if there's no EOL, we must be at the end
-						// of the script, so stop here.
+						// If there's no EOL, we must be at the end of the script, so stop here.
 						break;
 					}
 				}
 				else if (script.startsWith(blockCommentStartDelimiter, i)) {
-					// skip over any block comments
+					// Skip over any block comments
 					int indexOfCommentEnd = script.indexOf(blockCommentEndDelimiter, i);
 					if (indexOfCommentEnd > i) {
 						i = indexOfCommentEnd + blockCommentEndDelimiter.length() - 1;
 						continue;
 					}
 					else {
-						throw new ScriptParseException(String.format("Missing block comment end delimiter [%s].",
-							blockCommentEndDelimiter), resource);
+						throw new ScriptParseException(
+								"Missing block comment end delimiter: " + blockCommentEndDelimiter, resource);
 					}
 				}
 				else if (c == ' ' || c == '\n' || c == '\t') {
-					// avoid multiple adjacent whitespace characters
+					// Avoid multiple adjacent whitespace characters
 					if (sb.length() > 0 && sb.charAt(sb.length() - 1) != ' ') {
 						c = ' ';
 					}
