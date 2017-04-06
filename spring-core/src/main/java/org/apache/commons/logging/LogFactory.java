@@ -59,17 +59,24 @@ public abstract class LogFactory {
 		ClassLoader cl = LogFactory.class.getClassLoader();
 		try {
 			// Try Log4J 2.x API
-			cl.loadClass("org.apache.logging.log4j.spi.LoggerContext");
+			cl.loadClass("org.apache.logging.log4j.spi.ExtendedLogger");
 			logApi = LogApi.LOG4J;
 		}
 		catch (ClassNotFoundException ex) {
 			try {
-				// Try SLF4J 1.7 API
-				cl.loadClass("org.slf4j.LoggerFactory");
-				logApi = LogApi.SLF4J;
+				// Try SLF4J 1.7 SPI
+				cl.loadClass("org.slf4j.spi.LocationAwareLogger");
+				logApi = LogApi.SLF4J_LAL;
 			}
 			catch (ClassNotFoundException ex2) {
-				// Keep java.util.logging as default
+				try {
+					// Try SLF4J 1.7 API
+					cl.loadClass("org.slf4j.Logger");
+					logApi = LogApi.SLF4J;
+				}
+				catch (ClassNotFoundException ex3) {
+					// Keep java.util.logging as default
+				}
 			}
 		}
 	}
@@ -91,6 +98,8 @@ public abstract class LogFactory {
 		switch (logApi) {
 			case LOG4J:
 				return Log4jDelegate.createLog(name);
+			case SLF4J_LAL:
+				return Slf4jDelegate.createLocationAwareLog(name);
 			case SLF4J:
 				return Slf4jDelegate.createLog(name);
 			default:
@@ -133,7 +142,7 @@ public abstract class LogFactory {
 	}
 
 
-	private enum LogApi {LOG4J, SLF4J, JUL}
+	private enum LogApi {LOG4J, SLF4J_LAL, SLF4J, JUL}
 
 
 	private static class Log4jDelegate {
@@ -146,8 +155,14 @@ public abstract class LogFactory {
 
 	private static class Slf4jDelegate {
 
+		public static Log createLocationAwareLog(String name) {
+			Logger logger = LoggerFactory.getLogger(name);
+			return (logger instanceof LocationAwareLogger ?
+					new Slf4jLocationAwareLog((LocationAwareLogger) logger) : new Slf4jLog<>(logger));
+		}
+
 		public static Log createLog(String name) {
-			return new Slf4jLog(name);
+			return new Slf4jLog<>(LoggerFactory.getLogger(name));
 		}
 	}
 
@@ -258,20 +273,15 @@ public abstract class LogFactory {
 
 
 	@SuppressWarnings("serial")
-	private static class Slf4jLog implements Log, Serializable {
+	private static class Slf4jLog<T extends Logger> implements Log, Serializable {
 
-		private static final String FQCN = Slf4jLog.class.getName();
+		protected final String name;
 
-		private final String name;
+		protected transient T logger;
 
-		private transient Logger logger;
-
-		private transient LocationAwareLogger locLogger;
-
-		public Slf4jLog(String name) {
-			this.name = name;
-			this.logger = LoggerFactory.getLogger(this.name);
-			this.locLogger = (this.logger instanceof LocationAwareLogger ? (LocationAwareLogger) this.logger : null);
+		public Slf4jLog(T logger) {
+			this.name = logger.getName();
+			this.logger = logger;
 		}
 
 		public boolean isDebugEnabled() {
@@ -299,115 +309,118 @@ public abstract class LogFactory {
 		}
 
 		public void debug(Object message) {
-			if (this.locLogger != null) {
-				this.locLogger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, String.valueOf(message), null, null);
-			}
-			else {
-				this.logger.debug(String.valueOf(message));
-			}
+			this.logger.debug(String.valueOf(message));
 		}
 
 		public void debug(Object message, Throwable exception) {
-			if (this.locLogger != null) {
-				this.locLogger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, String.valueOf(message), null, exception);
-			}
-			else {
-				this.logger.debug(String.valueOf(message), exception);
-			}
+			this.logger.debug(String.valueOf(message), exception);
 		}
 
 		public void error(Object message) {
-			if (this.locLogger != null) {
-				this.locLogger.log(null, FQCN, LocationAwareLogger.ERROR_INT, String.valueOf(message), null, null);
-			}
-			else {
-				this.logger.error(String.valueOf(message));
-			}
+			this.logger.error(String.valueOf(message));
 		}
 
 		public void error(Object message, Throwable exception) {
-			if (this.locLogger != null) {
-				this.locLogger.log(null, FQCN, LocationAwareLogger.ERROR_INT, String.valueOf(message), null, exception);
-			}
-			else {
-				this.logger.error(String.valueOf(message), exception);
-			}
+			this.logger.error(String.valueOf(message), exception);
 		}
 
 		public void fatal(Object message) {
-			if (this.locLogger != null) {
-				this.locLogger.log(null, FQCN, LocationAwareLogger.ERROR_INT, String.valueOf(message), null, null);
-			}
-			else {
-				this.logger.error(String.valueOf(message));
-			}
+			this.logger.error(String.valueOf(message));
 		}
 
 		public void fatal(Object message, Throwable exception) {
-			if (this.locLogger != null) {
-				this.locLogger.log(null, FQCN, LocationAwareLogger.ERROR_INT, String.valueOf(message), null, exception);
-			}
-			else {
-				this.logger.error(String.valueOf(message), exception);
-			}
+			this.logger.error(String.valueOf(message), exception);
 		}
 
 		public void info(Object message) {
-			if (this.locLogger != null) {
-				this.locLogger.log(null, FQCN, LocationAwareLogger.INFO_INT, String.valueOf(message), null, null);
-			}
-			else {
-				this.logger.info(String.valueOf(message));
-			}
+			this.logger.info(String.valueOf(message));
 		}
 
 		public void info(Object message, Throwable exception) {
-			if (this.locLogger != null) {
-				this.locLogger.log(null, FQCN, LocationAwareLogger.INFO_INT, String.valueOf(message), null, exception);
-			}
-			else {
-				this.logger.info(String.valueOf(message), exception);
-			}
+			this.logger.info(String.valueOf(message), exception);
 		}
 
 		public void trace(Object message) {
-			if (this.locLogger != null) {
-				this.locLogger.log(null, FQCN, LocationAwareLogger.TRACE_INT, String.valueOf(message), null, null);
-			}
-			else {
-				this.logger.trace(String.valueOf(message));
-			}
+			this.logger.trace(String.valueOf(message));
 		}
 
 		public void trace(Object message, Throwable exception) {
-			if (this.locLogger != null) {
-				this.locLogger.log(null, FQCN, LocationAwareLogger.TRACE_INT, String.valueOf(message), null, exception);
-			}
-			else {
-				this.logger.trace(String.valueOf(message), exception);
-			}
+			this.logger.trace(String.valueOf(message), exception);
 		}
 
 		public void warn(Object message) {
-			if (this.locLogger != null) {
-				this.locLogger.log(null, FQCN, LocationAwareLogger.WARN_INT, String.valueOf(message), null, null);
-			}
-			else {
-				this.logger.warn(String.valueOf(message));
-			}
+			this.logger.warn(String.valueOf(message));
 		}
 
 		public void warn(Object message, Throwable exception) {
-			if (this.locLogger != null) {
-				this.locLogger.log(null, FQCN, LocationAwareLogger.WARN_INT, String.valueOf(message), null, exception);
-			}
-			else {
-				this.logger.warn(String.valueOf(message), exception);
-			}
+			this.logger.warn(String.valueOf(message), exception);
 		}
 
 		protected Object readResolve() {
-			return new Slf4jLog(this.name);
+			return Slf4jDelegate.createLog(this.name);
+		}
+	}
+
+
+	@SuppressWarnings("serial")
+	private static class Slf4jLocationAwareLog extends Slf4jLog<LocationAwareLogger> implements Serializable {
+
+		private static final String FQCN = Slf4jLocationAwareLog.class.getName();
+
+		public Slf4jLocationAwareLog(LocationAwareLogger logger) {
+			super(logger);
+		}
+
+		public void debug(Object message) {
+			this.logger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, String.valueOf(message), null, null);
+		}
+
+		public void debug(Object message, Throwable exception) {
+			this.logger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, String.valueOf(message), null, exception);
+		}
+
+		public void error(Object message) {
+			this.logger.log(null, FQCN, LocationAwareLogger.ERROR_INT, String.valueOf(message), null, null);
+		}
+
+		public void error(Object message, Throwable exception) {
+			this.logger.log(null, FQCN, LocationAwareLogger.ERROR_INT, String.valueOf(message), null, exception);
+		}
+
+		public void fatal(Object message) {
+			this.logger.log(null, FQCN, LocationAwareLogger.ERROR_INT, String.valueOf(message), null, null);
+		}
+
+		public void fatal(Object message, Throwable exception) {
+			this.logger.log(null, FQCN, LocationAwareLogger.ERROR_INT, String.valueOf(message), null, exception);
+		}
+
+		public void info(Object message) {
+			this.logger.log(null, FQCN, LocationAwareLogger.INFO_INT, String.valueOf(message), null, null);
+		}
+
+		public void info(Object message, Throwable exception) {
+			this.logger.log(null, FQCN, LocationAwareLogger.INFO_INT, String.valueOf(message), null, exception);
+		}
+
+		public void trace(Object message) {
+			this.logger.log(null, FQCN, LocationAwareLogger.TRACE_INT, String.valueOf(message), null, null);
+		}
+
+		public void trace(Object message, Throwable exception) {
+			this.logger.log(null, FQCN, LocationAwareLogger.TRACE_INT, String.valueOf(message), null, exception);
+		}
+
+		public void warn(Object message) {
+			this.logger.log(null, FQCN, LocationAwareLogger.WARN_INT, String.valueOf(message), null, null);
+		}
+
+		public void warn(Object message, Throwable exception) {
+			this.logger.log(null, FQCN, LocationAwareLogger.WARN_INT, String.valueOf(message), null, exception);
+		}
+
+		protected Object readResolve() {
+			return Slf4jDelegate.createLocationAwareLog(this.name);
 		}
 	}
 
