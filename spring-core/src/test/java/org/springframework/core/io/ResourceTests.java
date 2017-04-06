@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,8 +133,13 @@ public class ResourceTests {
 		Resource resource = new UrlResource(getClass().getResource("Resource.class"));
 		doTestResource(resource);
 		assertEquals(new UrlResource(getClass().getResource("Resource.class")), resource);
+
 		Resource resource2 = new UrlResource("file:core/io/Resource.class");
 		assertEquals(resource2, new UrlResource("file:core/../core/io/./Resource.class"));
+
+		assertEquals("test.txt", new UrlResource("file:/dir/test.txt?argh").getFilename());
+		assertEquals("test.txt", new UrlResource("file:\\dir\\test.txt?argh").getFilename());
+		assertEquals("test.txt", new UrlResource("file:\\dir/test.txt?argh").getFilename());
 	}
 
 	private void doTestResource(Resource resource) throws IOException {
