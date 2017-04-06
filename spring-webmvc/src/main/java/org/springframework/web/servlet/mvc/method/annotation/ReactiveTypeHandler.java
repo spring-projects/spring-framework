@@ -222,7 +222,7 @@ class ReactiveTypeHandler {
 					logger.debug("Connection timed out for " + this.emitter);
 				}
 				this.subscription.cancel();
-				this.onComplete();
+				this.emitter.complete();
 			});
 			subscription.request(1);
 		}
@@ -248,17 +248,21 @@ class ReactiveTypeHandler {
 
 		private void trySchedule() {
 			if (this.executing.getAndIncrement() == 0) {
+				schedule();
+			}
+		}
+		
+		private void schedule() {
+			try {
+				this.taskExecutor.execute(this);
+			}
+			catch (Throwable ex) {
 				try {
-					this.taskExecutor.execute(this);
+					terminate();
 				}
-				catch (Throwable ex) {
-					try {
-						terminate();
-					}
-					finally {
-						this.executing.decrementAndGet();
-						queue.lazySet(null);
-					}
+				finally {
+					this.executing.decrementAndGet();
+					queue.lazySet(null);
 				}
 			}
 		}
@@ -271,18 +275,6 @@ class ReactiveTypeHandler {
 			}
 				
 			boolean d = terminated;
-			if (d) {
-				Throwable ex = error;
-				if (ex != null) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Publisher error for " + this.emitter, ex);
-					}
-					this.done = true;
-					queue.lazySet(null);
-					emitter.completeWithError(ex);
-					return;
-				}
-			}
 			Object o = queue.get();
 			if (o != null) {
 				queue.lazySet(null);
@@ -295,23 +287,30 @@ class ReactiveTypeHandler {
 						logger.debug("Send error for " + this.emitter, ex);
 					}
 					terminate();
-					emitter.completeWithError(ex);
 					return;
 				}
 			}
 			
 			if (d) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Publishing completed for " + this.emitter);
-				}
 				this.done = true;
-				queue.lazySet(null);
-				this.emitter.complete();
+				Throwable ex = error;
+				error = null;
+				if (ex != null) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Publisher error for " + this.emitter, ex);
+					}
+					emitter.completeWithError(ex);
+				} else {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Publishing completed for " + this.emitter);
+					}
+					this.emitter.complete();
+				}
 				return;
 			}
 			
 			if (executing.decrementAndGet() != 0) {
-				taskExecutor.execute(this);
+				schedule();
 			}
 		}
 
