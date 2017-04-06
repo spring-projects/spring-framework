@@ -19,16 +19,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -178,10 +176,7 @@ class ReactiveTypeHandler {
 	}
 
 
-	private static abstract class AbstractEmitterSubscriber implements Subscriber<Object> {
-
-		private static final Object COMPLETE_SIGNAL = new Object();
-
+	private static abstract class AbstractEmitterSubscriber implements Subscriber<Object>, Runnable {
 
 		private final ResponseBodyEmitter emitter;
 
@@ -189,12 +184,15 @@ class ReactiveTypeHandler {
 
 		private Subscription subscription;
 
-		private final Queue<Object> queue = new ConcurrentLinkedQueue<>();
+		private final AtomicReference<Object> queue = new AtomicReference<Object>();
 
-		private final AtomicBoolean executing = new AtomicBoolean(false);
+		private final AtomicLong executing = new AtomicLong();
 
 		private volatile boolean done;
-
+		
+		private volatile boolean terminated;
+		
+		private Throwable error;
 
 		protected AbstractEmitterSubscriber(ResponseBodyEmitter emitter, TaskExecutor executor) {
 			this.emitter = emitter;
@@ -223,77 +221,73 @@ class ReactiveTypeHandler {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Connection timed out for " + this.emitter);
 				}
-				terminate();
-				this.emitter.complete();
+				this.subscription.cancel();
+				this.onComplete();
 			});
 			subscription.request(1);
 		}
 
 		@Override
 		public final void onNext(Object element) {
-			this.queue.offer(element);
+			this.queue.lazySet(element);
 			trySchedule();
 		}
 
 		@Override
 		public final void onError(Throwable ex) {
-			this.queue.offer(ex);
+			error = ex;
+			terminated = true;
 			trySchedule();
 		}
 
 		@Override
 		public final void onComplete() {
-			this.queue.offer(COMPLETE_SIGNAL);
+			terminated = true;
 			trySchedule();
 		}
 
 		private void trySchedule() {
-			if (this.executing.compareAndSet(false, true)) {
+			if (this.executing.getAndIncrement() == 0) {
 				try {
-					this.taskExecutor.execute(() -> {
-						try {
-							Object signal = this.queue.poll();
-							if (!this.done) {
-								handle(signal);
-							}
-						}
-						finally {
-							this.executing.set(false);
-							if(!this.queue.isEmpty())
-								trySchedule();
-						}
-					});
+					this.taskExecutor.execute(this);
 				}
 				catch (Throwable ex) {
 					try {
 						terminate();
 					}
 					finally {
-						this.executing.set(false);
-						this.queue.clear();
+						this.executing.decrementAndGet();
+						queue.lazySet(null);
 					}
 				}
 			}
 		}
-
-		private void handle(Object signal) {
-			if (signal instanceof Throwable) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Publisher error for " + this.emitter, (Throwable) signal);
-				}
-				this.done = true;
-				this.emitter.completeWithError((Throwable) signal);
+		
+		@Override
+		public void run() {
+			if (done) {
+				queue.lazySet(null);
+				return;
 			}
-			else if (signal == COMPLETE_SIGNAL) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Publishing completed for " + this.emitter);
+				
+			boolean d = terminated;
+			if (d) {
+				Throwable ex = error;
+				if (ex != null) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Publisher error for " + this.emitter, ex);
+					}
+					this.done = true;
+					queue.lazySet(null);
+					emitter.completeWithError(ex);
+					return;
 				}
-				this.done = true;
-				this.emitter.complete();
 			}
-			else {
+			Object o = queue.get();
+			if (o != null) {
+				queue.lazySet(null);
 				try {
-					send(signal);
+					send(o);
 					this.subscription.request(1);
 				}
 				catch (final Throwable ex) {
@@ -301,7 +295,23 @@ class ReactiveTypeHandler {
 						logger.debug("Send error for " + this.emitter, ex);
 					}
 					terminate();
+					emitter.completeWithError(ex);
+					return;
 				}
+			}
+			
+			if (d) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Publishing completed for " + this.emitter);
+				}
+				this.done = true;
+				queue.lazySet(null);
+				this.emitter.complete();
+				return;
+			}
+			
+			if (executing.decrementAndGet() != 0) {
+				taskExecutor.execute(this);
 			}
 		}
 
