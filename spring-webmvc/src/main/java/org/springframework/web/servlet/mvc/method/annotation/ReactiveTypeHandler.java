@@ -184,15 +184,16 @@ class ReactiveTypeHandler {
 
 		private Subscription subscription;
 
-		private final AtomicReference<Object> queue = new AtomicReference<Object>();
+		private final AtomicReference<Object> elementRef = new AtomicReference<>();
+
+		private Throwable error;
+
+		private volatile boolean terminated;
 
 		private final AtomicLong executing = new AtomicLong();
 
 		private volatile boolean done;
-		
-		private volatile boolean terminated;
-		
-		private Throwable error;
+
 
 		protected AbstractEmitterSubscriber(ResponseBodyEmitter emitter, TaskExecutor executor) {
 			this.emitter = emitter;
@@ -229,20 +230,20 @@ class ReactiveTypeHandler {
 
 		@Override
 		public final void onNext(Object element) {
-			this.queue.lazySet(element);
+			this.elementRef.lazySet(element);
 			trySchedule();
 		}
 
 		@Override
 		public final void onError(Throwable ex) {
-			error = ex;
-			terminated = true;
+			this.error = ex;
+			this.terminated = true;
 			trySchedule();
 		}
 
 		@Override
 		public final void onComplete() {
-			terminated = true;
+			this.terminated = true;
 			trySchedule();
 		}
 
@@ -262,24 +263,23 @@ class ReactiveTypeHandler {
 				}
 				finally {
 					this.executing.decrementAndGet();
-					queue.lazySet(null);
+					this.elementRef.lazySet(null);
 				}
 			}
 		}
 		
 		@Override
 		public void run() {
-			if (done) {
-				queue.lazySet(null);
+			if (this.done) {
+				this.elementRef.lazySet(null);
 				return;
 			}
 				
-			boolean d = terminated;
-			Object o = queue.get();
-			if (o != null) {
-				queue.lazySet(null);
+			Object element = this.elementRef.get();
+			if (element != null) {
+				this.elementRef.lazySet(null);
 				try {
-					send(o);
+					send(element);
 					this.subscription.request(1);
 				}
 				catch (final Throwable ex) {
@@ -291,16 +291,17 @@ class ReactiveTypeHandler {
 				}
 			}
 			
-			if (d) {
+			if (this.terminated) {
 				this.done = true;
-				Throwable ex = error;
-				error = null;
+				Throwable ex = this.error;
+				this.error = null;
 				if (ex != null) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Publisher error for " + this.emitter, ex);
 					}
-					emitter.completeWithError(ex);
-				} else {
+					this.emitter.completeWithError(ex);
+				}
+				else {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Publishing completed for " + this.emitter);
 					}
@@ -309,7 +310,7 @@ class ReactiveTypeHandler {
 				return;
 			}
 			
-			if (executing.decrementAndGet() != 0) {
+			if (this.executing.decrementAndGet() != 0) {
 				schedule();
 			}
 		}
