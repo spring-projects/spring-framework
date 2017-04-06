@@ -371,9 +371,9 @@ project("spring-core") {
 		optional("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}")
 		optional("org.reactivestreams:reactive-streams")
 		optional("io.projectreactor:reactor-core")
-		optional "io.reactivex:rxjava:${rxjavaVersion}"
-		optional "io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}"
-		optional "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
+		optional("io.reactivex:rxjava:${rxjavaVersion}")
+		optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
+		optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
 		optional("io.netty:netty-buffer:${nettyVersion}")
 		testCompile("io.projectreactor.addons:reactor-test")
 		testCompile("javax.xml.bind:jaxb-api:${jaxbVersion}")
@@ -524,6 +524,7 @@ project("spring-oxm") {
 		optional("org.codehaus.castor:castor-xml:1.4.1")  {
 			exclude group: 'stax', module: 'stax-api'
 			exclude group: "org.springframework", module: "spring-context"
+			exclude group: "commons-logging", module: "commons-logging"
 		}
 		optional("com.thoughtworks.xstream:xstream:${xstreamVersion}") {
 			exclude group: 'xpp3', module: 'xpp3_min'
@@ -712,7 +713,7 @@ project("spring-web") {
 		}
 		optional("io.reactivex:rxjava:${rxjavaVersion}")
 		optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
-		optional "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
+		optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
 		optional("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		optional("io.undertow:undertow-core:${undertowVersion}")
 		optional("org.jboss.xnio:xnio-api:${xnioVersion}")
@@ -721,8 +722,12 @@ project("spring-web") {
 			exclude group: "stax", module: "stax-api"
 		}
 		optional("com.fasterxml:aalto-xml:1.0.0")
-		optional("org.apache.httpcomponents:httpclient:${httpclientVersion}")
-		optional("org.apache.httpcomponents:httpasyncclient:${httpasyncVersion}")
+		optional("org.apache.httpcomponents:httpclient:${httpclientVersion}") {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
+		optional("org.apache.httpcomponents:httpasyncclient:${httpasyncVersion}") {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
 		optional("io.netty:netty-all:${nettyVersion}")
 		optional("com.squareup.okhttp3:okhttp:${okhttp3Version}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
@@ -778,14 +783,16 @@ project("spring-webflux") {
 	dependencies {
 		compile(project(":spring-core"))
 		compile(project(":spring-web"))
-		compile "org.reactivestreams:reactive-streams"
-		compile "io.projectreactor:reactor-core"
+		compile("org.reactivestreams:reactive-streams")
+		compile("io.projectreactor:reactor-core")
 		optional(project(":spring-context-support"))  // for FreeMarker support
 		provided "javax.servlet:javax.servlet-api:${servletVersion}"
 		optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("org.freemarker:freemarker:${freemarkerVersion}")
-		optional "org.apache.httpcomponents:httpclient:${httpclientVersion}"
+		optional("org.apache.httpcomponents:httpclient:${httpclientVersion}") {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
 		optional('org.webjars:webjars-locator:0.32-1')
 		optional("io.projectreactor.ipc:reactor-netty")
 		optional("io.reactivex:rxnetty-http:${rxnettyVersion}") {
@@ -928,7 +935,9 @@ project("spring-webmvc") {
 		}
 		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("org.hibernate:hibernate-validator:${hibval5Version}")
-		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}")
+		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}") {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
 		testCompile("commons-fileupload:commons-fileupload:${fileuploadVersion}")
 		testCompile("commons-io:commons-io:2.5")
 		testCompile("joda-time:joda-time:${jodaVersion}")
@@ -1034,9 +1043,11 @@ project("spring-test") {
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.hamcrest:hamcrest-core:${hamcrestVersion}")
 		optional("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
-		optional("net.sourceforge.htmlunit:htmlunit:2.25")
-		optional("org.seleniumhq.selenium:htmlunit-driver:2.25")
-		optional("org.seleniumhq.selenium:selenium-java:3.2.0") {
+		optional("net.sourceforge.htmlunit:htmlunit:2.26") {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
+		optional("org.seleniumhq.selenium:htmlunit-driver:2.26")
+		optional("org.seleniumhq.selenium:selenium-java:3.3.1") {
 			exclude group: "io.netty", module: "netty"
 		}
 		optional("org.skyscreamer:jsonassert:1.4.0")
@@ -1064,7 +1075,9 @@ project("spring-test") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}")
+		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}") {
+			exclude group: "commons-logging", module: "commons-logging"
+		}
 		testCompile("javax.cache:cache-api:${cacheApiVersion}")
 		testCompile('de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1')
 		testCompile('io.projectreactor.ipc:reactor-netty')
