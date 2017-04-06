@@ -274,7 +274,10 @@ class ReactiveTypeHandler {
 				this.elementRef.lazySet(null);
 				return;
 			}
-				
+
+			// Check terminal signal before processing element..
+			boolean isTerminated = this.terminated;
+
 			Object element = this.elementRef.get();
 			if (element != null) {
 				this.elementRef.lazySet(null);
@@ -291,7 +294,7 @@ class ReactiveTypeHandler {
 				}
 			}
 			
-			if (this.terminated) {
+			if (isTerminated) {
 				this.done = true;
 				Throwable ex = this.error;
 				this.error = null;
