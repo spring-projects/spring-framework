@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ import org.springframework.util.StringUtils;
  * <h3>Terminology</h3>
  * The terms <em>directly present</em>, <em>indirectly present</em>, and
  * <em>present</em> have the same meanings as defined in the class-level
- * Javadoc for {@link AnnotatedElement} (in Java 8).
+ * javadoc for {@link AnnotatedElement} (in Java 8).
  *
  * <p>An annotation is <em>meta-present</em> on an element if the annotation
  * is declared as a meta-annotation on some other annotation which is
@@ -855,7 +855,7 @@ public abstract class AnnotationUtils {
 	 * <p>If the supplied {@code clazz} is an interface, only the interface
 	 * itself will be checked. In accordance with standard meta-annotation
 	 * semantics in Java, the inheritance hierarchy for interfaces will not
-	 * be traversed. See the {@linkplain java.lang.annotation.Inherited Javadoc}
+	 * be traversed. See the {@linkplain java.lang.annotation.Inherited javadoc}
 	 * for the {@code @Inherited} meta-annotation for further details regarding
 	 * annotation inheritance.
 	 * @param annotationType the annotation type to look for
@@ -907,13 +907,24 @@ public abstract class AnnotationUtils {
 	 * @return {@code true} if the annotation is in the {@code java.lang.annotation} package
 	 */
 	public static boolean isInJavaLangAnnotationPackage(Annotation annotation) {
-		return (annotation != null && isInJavaLangAnnotationPackage(annotation.annotationType().getName()));
+		return (annotation != null && isInJavaLangAnnotationPackage(annotation.annotationType()));
 	}
 
 	/**
 	 * Determine if the {@link Annotation} with the supplied name is defined
 	 * in the core JDK {@code java.lang.annotation} package.
-	 * @param annotationType the name of the annotation type to check (never {@code null} or empty)
+	 * @param annotationType the annotation type to check
+	 * @return {@code true} if the annotation is in the {@code java.lang.annotation} package
+	 * @since 4.3.8
+	 */
+	static boolean isInJavaLangAnnotationPackage(Class<? extends Annotation> annotationType) {
+		return (annotationType != null && isInJavaLangAnnotationPackage(annotationType.getName()));
+	}
+
+	/**
+	 * Determine if the {@link Annotation} with the supplied name is defined
+	 * in the core JDK {@code java.lang.annotation} package.
+	 * @param annotationType the name of the annotation type to check
 	 * @return {@code true} if the annotation is in the {@code java.lang.annotation} package
 	 * @since 4.2
 	 */
@@ -1558,8 +1569,8 @@ public abstract class AnnotationUtils {
 	 * {@linkplain #synthesizeAnnotation(Map, Class, AnnotatedElement)
 	 * synthesized} versions of the maps from the input array.
 	 * @param maps the array of maps of annotation attributes to synthesize
-	 * @param annotationType the type of annotations to synthesize; never
-	 * {@code null}
+	 * @param annotationType the type of annotations to synthesize
+	 * (never {@code null})
 	 * @return a new array of synthesized annotations, or {@code null} if
 	 * the supplied array is {@code null}
 	 * @throws AnnotationConfigurationException if invalid configuration of
@@ -1707,8 +1718,8 @@ public abstract class AnnotationUtils {
 	/**
 	 * Get the name of the overridden attribute configured via
 	 * {@link AliasFor @AliasFor} for the supplied annotation {@code attribute}.
-	 * @param attribute the attribute from which to retrieve the override;
-	 * never {@code null}
+	 * @param attribute the attribute from which to retrieve the override
+	 * (never {@code null})
 	 * @param metaAnnotationType the type of meta-annotation in which the
 	 * overridden attribute is allowed to be declared
 	 * @return the name of the overridden attribute, or {@code null} if not
@@ -1735,8 +1746,8 @@ public abstract class AnnotationUtils {
 	 * match Java's requirements for annotation <em>attributes</em>.
 	 * <p>All methods in the returned list will be
 	 * {@linkplain ReflectionUtils#makeAccessible(Method) made accessible}.
-	 * @param annotationType the type in which to search for attribute methods;
-	 * never {@code null}
+	 * @param annotationType the type in which to search for attribute methods
+	 * (never {@code null})
 	 * @return all annotation attribute methods in the specified annotation
 	 * type (never {@code null}, though potentially <em>empty</em>)
 	 * @since 4.2

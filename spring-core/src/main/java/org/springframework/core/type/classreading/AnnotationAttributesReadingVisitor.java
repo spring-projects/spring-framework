@@ -92,17 +92,18 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 	}
 
 	private void recursivelyCollectMetaAnnotations(Set<Annotation> visited, Annotation annotation) {
-		if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation) && visited.add(annotation)) {
+		Class<? extends Annotation> annotationType = annotation.annotationType();
+		String annotationName = annotationType.getName();
+		if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotationName) && visited.add(annotation)) {
 			try {
 				// Only do attribute scanning for public annotations; we'd run into
 				// IllegalAccessExceptions otherwise, and we don't want to mess with
 				// accessibility in a SecurityManager environment.
-				if (Modifier.isPublic(annotation.annotationType().getModifiers())) {
-					String annotationName = annotation.annotationType().getName();
+				if (Modifier.isPublic(annotationType.getModifiers())) {
 					this.attributesMap.add(annotationName,
 							AnnotationUtils.getAnnotationAttributes(annotation, false, true));
 				}
-				for (Annotation metaMetaAnnotation : annotation.annotationType().getAnnotations()) {
+				for (Annotation metaMetaAnnotation : annotationType.getAnnotations()) {
 					recursivelyCollectMetaAnnotations(visited, metaMetaAnnotation);
 				}
 			}

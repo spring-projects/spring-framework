@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,13 +110,13 @@ public abstract class MetaAnnotationUtils {
 		}
 
 		// Declared on a composed annotation (i.e., as a meta-annotation)?
-		for (Annotation composedAnnotation : clazz.getDeclaredAnnotations()) {
-			if (!AnnotationUtils.isInJavaLangAnnotationPackage(composedAnnotation) && visited.add(composedAnnotation)) {
-				AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(
-						composedAnnotation.annotationType(), visited, annotationType);
+		for (Annotation composedAnn : clazz.getDeclaredAnnotations()) {
+			Class<? extends Annotation> composedType = composedAnn.annotationType();
+			if (!AnnotationUtils.isInJavaLangAnnotationPackage(composedType.getName()) && visited.add(composedAnn)) {
+				AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(composedType, visited, annotationType);
 				if (descriptor != null) {
 					return new AnnotationDescriptor<T>(
-							clazz, descriptor.getDeclaringClass(), composedAnnotation, descriptor.getAnnotation());
+							clazz, descriptor.getDeclaringClass(), composedAnn, descriptor.getAnnotation());
 				}
 			}
 		}
@@ -126,7 +126,7 @@ public abstract class MetaAnnotationUtils {
 			AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(ifc, visited, annotationType);
 			if (descriptor != null) {
 				return new AnnotationDescriptor<T>(clazz, descriptor.getDeclaringClass(),
-					descriptor.getComposedAnnotation(), descriptor.getAnnotation());
+						descriptor.getComposedAnnotation(), descriptor.getAnnotation());
 			}
 		}
 
@@ -203,8 +203,8 @@ public abstract class MetaAnnotationUtils {
 				UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(
 						composedAnnotation.annotationType(), visited, annotationTypes);
 				if (descriptor != null) {
-					return new UntypedAnnotationDescriptor(clazz, descriptor.getDeclaringClass(), composedAnnotation,
-							descriptor.getAnnotation());
+					return new UntypedAnnotationDescriptor(clazz, descriptor.getDeclaringClass(),
+							composedAnnotation, descriptor.getAnnotation());
 				}
 			}
 		}
@@ -214,7 +214,7 @@ public abstract class MetaAnnotationUtils {
 			UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(ifc, visited, annotationTypes);
 			if (descriptor != null) {
 				return new UntypedAnnotationDescriptor(clazz, descriptor.getDeclaringClass(),
-					descriptor.getComposedAnnotation(), descriptor.getAnnotation());
+						descriptor.getComposedAnnotation(), descriptor.getAnnotation());
 			}
 		}
 
@@ -295,8 +295,8 @@ public abstract class MetaAnnotationUtils {
 		public AnnotationDescriptor(Class<?> rootDeclaringClass, Class<?> declaringClass,
 				Annotation composedAnnotation, T annotation) {
 
-			Assert.notNull(rootDeclaringClass, "rootDeclaringClass must not be null");
-			Assert.notNull(annotation, "annotation must not be null");
+			Assert.notNull(rootDeclaringClass, "'rootDeclaringClass' must not be null");
+			Assert.notNull(annotation, "Annotation must not be null");
 			this.rootDeclaringClass = rootDeclaringClass;
 			this.declaringClass = declaringClass;
 			this.composedAnnotation = composedAnnotation;
