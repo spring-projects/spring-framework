@@ -117,12 +117,7 @@ public class HttpMessageWriterView implements View {
 	@SuppressWarnings("unchecked")
 	public Mono<Void> render(Map<String, ?> model, MediaType contentType, ServerWebExchange exchange) {
 		return getObjectToRender(model)
-				.map(value -> {
-					Publisher stream = Mono.justOrEmpty(value);
-					ResolvableType type = ResolvableType.forClass(value.getClass());
-					ServerHttpResponse response = exchange.getResponse();
-					return this.writer.write(stream, type, contentType, response, Collections.emptyMap());
-				})
+				.map(value -> write(value, contentType, exchange))
 				.orElseGet(() -> exchange.getResponse().setComplete());
 	}
 
@@ -156,6 +151,14 @@ public class HttpMessageWriterView implements View {
 		}
 		ResolvableType type = ResolvableType.forInstance(entry.getValue());
 		return getMessageWriter().canWrite(type, null);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> Mono<Void> write(T value, MediaType contentType, ServerWebExchange exchange) {
+		Publisher<T> input = Mono.justOrEmpty(value);
+		ResolvableType elementType = ResolvableType.forClass(value.getClass());
+		return ((HttpMessageWriter<T>) this.writer).write(
+				input, elementType, contentType, exchange.getResponse(), Collections.emptyMap());
 	}
 
 }
