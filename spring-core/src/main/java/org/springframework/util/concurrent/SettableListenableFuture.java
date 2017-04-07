@@ -169,7 +169,9 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 
 		private boolean checkCompletingThread() {
 			boolean check = (this.completingThread == Thread.currentThread());
-			this.completingThread = null;  // only first check actually counts
+			if (check) {
+				this.completingThread = null;  // only first match actually counts
+			}
 			return check;
 		}
 	}
