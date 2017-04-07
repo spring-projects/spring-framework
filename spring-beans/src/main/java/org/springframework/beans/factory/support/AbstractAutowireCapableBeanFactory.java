@@ -73,6 +73,7 @@ import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.ResolvableType;
@@ -145,6 +146,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * Class objects. By default, only the BeanFactory interface is ignored.
 	 */
 	private final Set<Class<?>> ignoredDependencyInterfaces = new HashSet<>();
+
+	/**
+	 * The name of the currently created bean, for implicit dependency registration
+	 * on getBean etc invocations triggered from a user-specified Supplier callback.
+	 */
+	private final NamedThreadLocal<String> currentlyCreatedBean = new NamedThreadLocal<>("Currently created bean");
 
 	/** Cache of unfinished FactoryBean instances: FactoryBean name --> BeanWrapper */
 	private final Map<String, BeanWrapper> factoryBeanInstanceCache = new ConcurrentHashMap<>(16);
@@ -1062,7 +1069,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param beanName the name of the bean
 	 * @param mbd the bean definition for the bean
 	 * @param args explicit arguments to use for constructor or factory method invocation
-	 * @return BeanWrapper for the new instance
+	 * @return a BeanWrapper for the new instance
+	 * @see #obtainFromSupplier
 	 * @see #instantiateUsingFactoryMethod
 	 * @see #autowireConstructor
 	 * @see #instantiateBean
@@ -1078,9 +1086,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		Supplier<?> instanceSupplier = mbd.getInstanceSupplier();
 		if (instanceSupplier != null) {
-			BeanWrapper bw = new BeanWrapperImpl(instanceSupplier.get());
-			initBeanWrapper(bw);
-			return bw;
+			return obtainFromSupplier(instanceSupplier, beanName);
 		}
 
 		if (mbd.getFactoryMethodName() != null)  {
@@ -1120,6 +1126,53 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
+	 * Obtain a bean instance from the given supplier.
+	 * @param instanceSupplier the configured supplier
+	 * @param beanName the corresponding bean name
+	 * @return a BeanWrapper for the new instance
+	 * @since 5.0
+	 * @see #getObjectForBeanInstance
+	 */
+	protected BeanWrapper obtainFromSupplier(Supplier<?> instanceSupplier, String beanName) {
+		String outerBean = this.currentlyCreatedBean.get();
+		this.currentlyCreatedBean.set(beanName);
+		Object instance;
+		try {
+			instance = instanceSupplier.get();
+		}
+		finally {
+			if (outerBean != null) {
+				this.currentlyCreatedBean.set(outerBean);
+			}
+			else {
+				this.currentlyCreatedBean.remove();
+			}
+		}
+		BeanWrapper bw = new BeanWrapperImpl(instance);
+		initBeanWrapper(bw);
+		return bw;
+	}
+
+	/**
+	 * Overridden in order to implicitly register the currently created bean as
+	 * dependent on further beans getting programmatically retrieved during a
+	 * {@link Supplier} callback.
+	 * @since 5.0
+	 * @see #obtainFromSupplier
+	 */
+	@Override
+	protected Object getObjectForBeanInstance(
+			Object beanInstance, String name, String beanName, RootBeanDefinition mbd) {
+
+		String currentlyCreatedBean = this.currentlyCreatedBean.get();
+		if (currentlyCreatedBean != null) {
+			registerDependentBean(beanName, currentlyCreatedBean);
+		}
+
+		return super.getObjectForBeanInstance(beanInstance, name, beanName, mbd);
+	}
+
+	/**
 	 * Determine candidate constructors to use for the given bean, checking all registered
 	 * {@link SmartInstantiationAwareBeanPostProcessor SmartInstantiationAwareBeanPostProcessors}.
 	 * @param beanClass the raw class of the bean
@@ -1149,7 +1202,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * Instantiate the given bean using its default constructor.
 	 * @param beanName the name of the bean
 	 * @param mbd the bean definition for the bean
-	 * @return BeanWrapper for the new instance
+	 * @return a BeanWrapper for the new instance
 	 */
 	protected BeanWrapper instantiateBean(final String beanName, final RootBeanDefinition mbd) {
 		try {
@@ -1184,7 +1237,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param mbd the bean definition for the bean
 	 * @param explicitArgs argument values passed in programmatically via the getBean method,
 	 * or {@code null} if none (-> use constructor argument values from bean definition)
-	 * @return BeanWrapper for the new instance
+	 * @return a BeanWrapper for the new instance
 	 * @see #getBean(String, Object[])
 	 */
 	protected BeanWrapper instantiateUsingFactoryMethod(
@@ -1205,7 +1258,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param ctors the chosen candidate constructors
 	 * @param explicitArgs argument values passed in programmatically via the getBean method,
 	 * or {@code null} if none (-> use constructor argument values from bean definition)
-	 * @return BeanWrapper for the new instance
+	 * @return a BeanWrapper for the new instance
 	 */
 	protected BeanWrapper autowireConstructor(
 			String beanName, RootBeanDefinition mbd, Constructor<?>[] ctors, Object[] explicitArgs) {
