@@ -172,7 +172,8 @@ public abstract class LogFactory {
 
 		private static final String FQCN = Log4jLog.class.getName();
 
-		private static final LoggerContext loggerContext = LogManager.getContext();
+		private static final LoggerContext loggerContext =
+				LogManager.getContext(Log4jLog.class.getClassLoader(), false);
 
 		private final ExtendedLogger logger;
 
