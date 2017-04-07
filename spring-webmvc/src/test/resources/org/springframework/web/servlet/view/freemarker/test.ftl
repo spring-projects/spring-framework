@@ -2,6 +2,7 @@
 test template for FreeMarker macro test class
 -->
 <#import "spring.ftl" as spring />
+<#import "spring-form.ftl" as form />
 
 NAME
 ${command.name}
@@ -10,28 +11,28 @@ AGE
 ${command.age}
 
 MESSAGE
-<@spring.message "hello"/> <@spring.message "world"/>
+<@spring.message code="hello"/> <@spring.message code="world"/>
 
 DEFAULTMESSAGE
-<@spring.messageText "no.such.code", "hi"/> <@spring.messageText "no.such.code", "planet"/>
+<@spring.message code="no.such.code" text="hi"/> <@spring.messageText code="no.such.code" text="planet"/>
 
 MESSAGEARGS
-<@spring.messageArgs "hello", msgArgs/>
+<@spring.message code="hello", args=msgArgs/>
 
 MESSAGEARGSWITHDEFAULTMESSAGE
-<@spring.messageArgsText "no.such.code", msgArgs, "Hi"/>
+<@spring.messageArgsText code="no.such.code" args=msgArgs text="Hi"/>
 
 THEME
-<@spring.theme "hello"/> <@spring.theme "world"/>
+<@spring.theme code="hello"/> <@spring.theme code="world"/>
 
 DEFAULTTHEME
-<@spring.themeText "no.such.code", "hi!"/> <@spring.themeText "no.such.code", "planet!"/>
+<@spring.theme code="no.such.code" text="hi!"/> <@spring.themeText code="no.such.code" text="planet!"/>
 
 THEMEARGS
-<@spring.themeArgs "hello", msgArgs/>
+<@spring.theme code="hello" args=msgArgs/>
 
 THEMEARGSWITHDEFAULTMESSAGE
-<@spring.themeArgsText "no.such.code", msgArgs, "Hi!"/>
+<@spring.theme code="no.such.code" args=msgArgs text="Hi!"/>
 
 URL
 <@spring.url "/aftercontext.html"/>
@@ -39,56 +40,66 @@ URL
 URLPARAMS
 <@spring.url relativeUrl="/aftercontext/{foo}?spam={spam}" foo="bar" spam="bucket"/>
 
-FORM1
-<@spring.formInput "command.name", ""/>
+FORM
+<@form.form modelAttribute="command">
+    FORM1
+    <@form.input path="name" />
 
-FORM2
-<@spring.formInput "command.name", 'class="myCssClass"'/>
+    FORM2
+    <@form.input path="name" class="myCssClass" />
 
-FORM3
-<@spring.formTextarea "command.name", ""/>
+    FORM3
+    <@form.textarea path="name" />
 
-FORM4
-<@spring.formTextarea "command.name", "rows=10 cols=30"/>
+    FORM4
+    <@form.textarea path="name" rows="10" cols="30" />
 
-FORM5
-<@spring.formSingleSelect "command.name", nameOptionMap, ""/>
+    FORM5
+    <@form.select name="name" options=nameOptionMap />
 
-FORM6
-<@spring.formMultiSelect "command.spouses", nameOptionMap, ""/>
+    FORM6
+    <@form.select name="spouses" options=nameOptionMap multiple="true" />
 
-FORM7
-<@spring.formRadioButtons "command.name", nameOptionMap, " ", ""/>
+    FORM7
+    <@form.radio path="name" value="1" />
+    <@form.radio path="name" value="2" />
+    <@form.radio path="name" value="3" />
 
-FORM8
-<@spring.formCheckboxes "command.stringArray", nameOptionMap, " ", ""/>
+    FORM8
+    <@form.checkbox path="name" value="1" />
+    <@form.checkbox path="name" value="2" />
+    <@form.checkbox path="name" value="3" />
 
-FORM9
-<@spring.formPasswordInput "command.name", ""/>
+    FORM9
+    <@form.password path="name" />
 
-FORM10
-<@spring.formHiddenInput "command.name", ""/>
+    FORM10
+    <@form.hidden path="name" />
 
-FORM11
-<@spring.formInput "command.name", "", "text"/>
+    FORM11
+    <@form.input type="text" path="name" />
 
-FORM12
-<@spring.formInput "command.name", "", "hidden"/>
+    FORM12
+    <@form.input type="hidden" path="name" />
 
-FORM13
-<@spring.formInput "command.name", "", "password"/>
+    FORM13
+    <@form.input type="password" path="name" />
 
-FORM14
-<@spring.formSingleSelect "command.name", options, ""/>
+    FORM14
+    <@form.select path="name">
+        <@form.option value="first">First</@form.option>
+        <@form.option value="second">Second</@form.option>
+    </@form.select>
 
-FORM15
-<@spring.formCheckbox "command.name"/>
+    FORM15
+    <@form.checkbox path="name" value="" />
 
-FORM16
-<@spring.formCheckbox "command.jedi"/>
+    FORM16
+    <@form.checkbox path="jedi" value="" />
 
-FORM17
-<@spring.formInput "command.spouses[0].name", ""/>
+    FORM17
+    <@form.input path="spouses[0].name" />
 
-FORM18
-<@spring.formCheckbox "command.spouses[0].jedi" />
+    FORM18
+    <@form.checkbox path="spouses[0].jedi" value="" />
+</@form.form>

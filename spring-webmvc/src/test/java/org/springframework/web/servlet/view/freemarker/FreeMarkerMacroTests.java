@@ -200,6 +200,8 @@ public class FreeMarkerMacroTests {
 		assertEquals("/springtest/aftercontext/bar?spam=bucket", getMacroOutput("URLPARAMS"));
 	}
 
+	// FIXME fix tests with new spring-form.ftl
+
 	@Test
 	public void testForm1() throws Exception {
 		assertEquals("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\"     >", getMacroOutput("FORM1"));
