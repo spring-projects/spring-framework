@@ -282,7 +282,7 @@ public class ResolvableMethod {
 		/**
 		 * Filter on methods with the given name.
 		 */
-		public Builder named(String methodName) {
+		public Builder<T> named(String methodName) {
 			addFilter("methodName=" + methodName, m -> m.getName().equals(methodName));
 			return this;
 		}
@@ -292,7 +292,7 @@ public class ResolvableMethod {
 		 * See {@link MvcAnnotationPredicates}.
 		 */
 		@SafeVarargs
-		public final Builder annot(Predicate<Method>... filters) {
+		public final Builder<T> annot(Predicate<Method>... filters) {
 			this.filters.addAll(Arrays.asList(filters));
 			return this;
 		}
@@ -303,7 +303,7 @@ public class ResolvableMethod {
 		 * @see MvcAnnotationPredicates
 		 */
 		@SafeVarargs
-		public final Builder annotPresent(Class<? extends Annotation>... annotationTypes) {
+		public final Builder<T> annotPresent(Class<? extends Annotation>... annotationTypes) {
 			String message = "annotationPresent=" + Arrays.toString(annotationTypes);
 			addFilter(message, method ->
 					Arrays.stream(annotationTypes).allMatch(annotType ->
@@ -315,7 +315,7 @@ public class ResolvableMethod {
 		 * Filter on methods not annotated with the given annotation type.
 		 */
 		@SafeVarargs
-		public final Builder annotNotPresent(Class<? extends Annotation>... annotationTypes) {
+		public final Builder<T> annotNotPresent(Class<? extends Annotation>... annotationTypes) {
 			String message = "annotationNotPresent=" + Arrays.toString(annotationTypes);
 			addFilter(message, method -> {
 				if (annotationTypes.length != 0) {
@@ -334,7 +334,7 @@ public class ResolvableMethod {
 		 * @param returnType the return type
 		 * @param generics optional array of generic types
 		 */
-		public Builder returning(Class<?> returnType, Class<?>... generics) {
+		public Builder<T> returning(Class<?> returnType, Class<?>... generics) {
 			return returning(toResolvableType(returnType, generics));
 		}
 
@@ -344,7 +344,7 @@ public class ResolvableMethod {
 		 * @param generic at least one generic type
 		 * @param generics optional extra generic types
 		 */
-		public Builder returning(Class<?> returnType, ResolvableType generic, ResolvableType... generics) {
+		public Builder<T> returning(Class<?> returnType, ResolvableType generic, ResolvableType... generics) {
 			return returning(toResolvableType(returnType, generic, generics));
 		}
 
@@ -352,7 +352,7 @@ public class ResolvableMethod {
 		 * Filter on methods returning the given type.
 		 * @param returnType the return type
 		 */
-		public Builder returning(ResolvableType returnType) {
+		public Builder<T> returning(ResolvableType returnType) {
 			String expected = returnType.toString();
 			String message = "returnType=" + expected;
 			addFilter(message, m -> expected.equals(ResolvableType.forMethodReturnType(m).toString()));

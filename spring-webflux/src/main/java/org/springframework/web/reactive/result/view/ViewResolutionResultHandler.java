@@ -157,9 +157,10 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 			}
 			type = result.getReturnType().getGeneric(0).getRawClass();
 		}
-		return (CharSequence.class.isAssignableFrom(type) || View.class.isAssignableFrom(type) ||
+		return (CharSequence.class.isAssignableFrom(type) || Rendering.class.isAssignableFrom(type) ||
 				Model.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) ||
-				Rendering.class.isAssignableFrom(type) || !BeanUtils.isSimpleProperty(type));
+				void.class.equals(type) || View.class.isAssignableFrom(type) ||
+				!BeanUtils.isSimpleProperty(type));
 	}
 
 	private boolean hasModelAnnotation(MethodParameter parameter) {
@@ -210,17 +211,6 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 					if (returnValue == NO_VALUE || Void.class.equals(clazz) || void.class.equals(clazz)) {
 						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
 					}
-					else if (Model.class.isAssignableFrom(clazz)) {
-						model.addAllAttributes(((Model) returnValue).asMap());
-						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
-					}
-					else if (Map.class.isAssignableFrom(clazz)) {
-						model.addAllAttributes((Map<String, ?>) returnValue);
-						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
-					}
-					else if (View.class.isAssignableFrom(clazz)) {
-						viewsMono = Mono.just(Collections.singletonList((View) returnValue));
-					}
 					else if (CharSequence.class.isAssignableFrom(clazz) && !hasModelAnnotation(parameter)) {
 						viewsMono = resolveViews(returnValue.toString(), locale);
 					}
@@ -232,6 +222,17 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 						Object view = render.view().orElse(getDefaultViewName(exchange));
 						viewsMono = (view instanceof String ? resolveViews((String) view, locale) :
 								Mono.just(Collections.singletonList((View) view)));
+					}
+					else if (Model.class.isAssignableFrom(clazz)) {
+						model.addAllAttributes(((Model) returnValue).asMap());
+						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
+					}
+					else if (Map.class.isAssignableFrom(clazz) && !hasModelAnnotation(parameter)) {
+						model.addAllAttributes((Map<String, ?>) returnValue);
+						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
+					}
+					else if (View.class.isAssignableFrom(clazz)) {
+						viewsMono = Mono.just(Collections.singletonList((View) returnValue));
 					}
 					else {
 						String name = getNameForReturnValue(clazz, parameter);

@@ -32,10 +32,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import rx.Completable;
-import rx.Single;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
@@ -55,8 +55,6 @@ import org.springframework.web.server.ServerWebExchange;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
@@ -76,35 +74,43 @@ public class ViewResolutionResultHandlerTests {
 	@Test
 	public void supports() throws Exception {
 
-		testSupports(on(TestController.class).resolveReturnType(String.class));
-		testSupports(on(TestController.class).resolveReturnType(View.class));
-		testSupports(on(TestController.class).resolveReturnType(Mono.class, String.class));
-		testSupports(on(TestController.class).resolveReturnType(Mono.class, View.class));
-		testSupports(on(TestController.class).resolveReturnType(Single.class, String.class));
-		testSupports(on(TestController.class).resolveReturnType(Single.class, View.class));
-		testSupports(on(TestController.class).resolveReturnType(Mono.class, Void.class));
-		testSupports(on(TestController.class).resolveReturnType(Completable.class));
-		testSupports(on(TestController.class).resolveReturnType(Model.class));
-		testSupports(on(TestController.class).resolveReturnType(Map.class));
-		testSupports(on(TestController.class).resolveReturnType(TestBean.class));
-		testSupports(on(TestController.class).resolveReturnType(Rendering.class));
-		testSupports(on(TestController.class).resolveReturnType(Mono.class, Rendering.class));
+		testSupports(on(Handler.class).annotPresent(ModelAttribute.class).resolveReturnType(String.class));
+		testSupports(on(Handler.class).annotNotPresent(ModelAttribute.class).resolveReturnType(String.class));
+		testSupports(on(Handler.class).resolveReturnType(Mono.class, String.class));
 
-		testSupports(on(TestController.class).annotPresent(ModelAttribute.class).resolveReturnType());
+		testSupports(on(Handler.class).resolveReturnType(Rendering.class));
+		testSupports(on(Handler.class).resolveReturnType(Mono.class, Rendering.class));
+
+		testSupports(on(Handler.class).resolveReturnType(View.class));
+		testSupports(on(Handler.class).resolveReturnType(Mono.class, View.class));
+
+		testSupports(on(Handler.class).resolveReturnType(void.class));
+		testSupports(on(Handler.class).resolveReturnType(Mono.class, Void.class));
+		testSupports(on(Handler.class).resolveReturnType(Completable.class));
+
+		testSupports(on(Handler.class).resolveReturnType(Model.class));
+
+		testSupports(on(Handler.class).annotPresent(ModelAttribute.class).resolveReturnType(Map.class));
+		testSupports(on(Handler.class).annotNotPresent(ModelAttribute.class).resolveReturnType(Map.class));
+
+		testSupports(on(Handler.class).resolveReturnType(TestBean.class));
+
+		testSupports(on(Handler.class).annotPresent(ModelAttribute.class).resolveReturnType(Long.class));
+		testDoesNotSupport(on(Handler.class).annotNotPresent(ModelAttribute.class).resolveReturnType(Long.class));
 	}
 
 	private void testSupports(MethodParameter returnType) {
-		ViewResolutionResultHandler resultHandler = resultHandler(mock(ViewResolver.class));
-		HandlerResult handlerResult = new HandlerResult(new Object(), null, returnType, this.bindingContext);
-		assertTrue(resultHandler.supports(handlerResult));
+		testSupports(returnType, true);
 	}
 
-	@Test
-	public void doesNotSupport() throws Exception {
-		MethodParameter returnType = on(TestController.class).resolveReturnType(Integer.class);
+	private void testDoesNotSupport(MethodParameter returnType) {
+		testSupports(returnType, false);
+	}
+
+	private void testSupports(MethodParameter returnType, boolean supports) {
 		ViewResolutionResultHandler resultHandler = resultHandler(mock(ViewResolver.class));
 		HandlerResult handlerResult = new HandlerResult(new Object(), null, returnType, this.bindingContext);
-		assertFalse(resultHandler.supports(handlerResult));
+		assertEquals(supports, resultHandler.supports(handlerResult));
 	}
 
 	@Test
@@ -125,31 +131,45 @@ public class ViewResolutionResultHandlerTests {
 		MethodParameter returnType;
 		ViewResolver resolver = new TestViewResolver("account");
 
-		returnType = on(TestController.class).resolveReturnType(View.class);
+		returnType = on(Handler.class).resolveReturnType(View.class);
 		returnValue = new TestView("account");
 		testHandle("/path", returnType, returnValue, "account: {id=123}");
 
-		returnType = on(TestController.class).resolveReturnType(Mono.class, View.class);
+		returnType = on(Handler.class).resolveReturnType(Mono.class, View.class);
 		returnValue = Mono.just(new TestView("account"));
 		testHandle("/path", returnType, returnValue, "account: {id=123}");
 
-		returnType = on(TestController.class).resolveReturnType(String.class);
+		returnType = on(Handler.class).annotNotPresent(ModelAttribute.class).resolveReturnType(String.class);
 		returnValue = "account";
 		testHandle("/path", returnType, returnValue, "account: {id=123}", resolver);
 
-		returnType = on(TestController.class).resolveReturnType(Mono.class, String.class);
+		returnType = on(Handler.class).annotPresent(ModelAttribute.class).resolveReturnType(String.class);
+		returnValue = "123";
+		testHandle("/account", returnType, returnValue, "account: {id=123, myString=123}", resolver);
+
+		returnType = on(Handler.class).resolveReturnType(Mono.class, String.class);
 		returnValue = Mono.just("account");
 		testHandle("/path", returnType, returnValue, "account: {id=123}", resolver);
 
-		returnType = on(TestController.class).resolveReturnType(Model.class);
+		returnType = on(Handler.class).resolveReturnType(Model.class);
 		returnValue = new ConcurrentModel().addAttribute("name", "Joe");
 		testHandle("/account", returnType, returnValue, "account: {id=123, name=Joe}", resolver);
 
-		returnType = on(TestController.class).resolveReturnType(Map.class);
+		// Work around  caching issue...
+		ResolvableType.clearCache();
+
+		returnType = on(Handler.class).annotNotPresent(ModelAttribute.class).resolveReturnType(Map.class);
 		returnValue = Collections.singletonMap("name", "Joe");
 		testHandle("/account", returnType, returnValue, "account: {id=123, name=Joe}", resolver);
 
-		returnType = on(TestController.class).resolveReturnType(TestBean.class);
+		// Work around  caching issue...
+		ResolvableType.clearCache();
+
+		returnType = on(Handler.class).annotPresent(ModelAttribute.class).resolveReturnType(Map.class);
+		returnValue = Collections.singletonMap("name", "Joe");
+		testHandle("/account", returnType, returnValue, "account: {id=123, myMap={name=Joe}}", resolver);
+
+		returnType = on(Handler.class).resolveReturnType(TestBean.class);
 		returnValue = new TestBean("Joe");
 		String responseBody = "account: {id=123, " +
 				"org.springframework.validation.BindingResult.testBean=" +
@@ -157,10 +177,10 @@ public class ViewResolutionResultHandlerTests {
 				"testBean=TestBean[name=Joe]}";
 		testHandle("/account", returnType, returnValue, responseBody, resolver);
 
-		returnType = on(TestController.class).annotPresent(ModelAttribute.class).resolveReturnType();
-		testHandle("/account", returnType, 99L, "account: {id=123, num=99}", resolver);
+		returnType = on(Handler.class).annotPresent(ModelAttribute.class).resolveReturnType(Long.class);
+		testHandle("/account", returnType, 99L, "account: {id=123, myLong=99}", resolver);
 
-		returnType = on(TestController.class).resolveReturnType(Rendering.class);
+		returnType = on(Handler.class).resolveReturnType(Rendering.class);
 		HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
 		returnValue = Rendering.view("account").modelAttribute("a", "a1").status(status).header("h", "h1").build();
 		String expected = "account: {a=a1, id=123}";
@@ -172,7 +192,7 @@ public class ViewResolutionResultHandlerTests {
 	@Test
 	public void handleWithMultipleResolvers() throws Exception {
 		Object returnValue = "profile";
-		MethodParameter returnType = on(TestController.class).resolveReturnType(String.class);
+		MethodParameter returnType = on(Handler.class).annotNotPresent(ModelAttribute.class).resolveReturnType(String.class);
 		ViewResolver[] resolvers = {new TestViewResolver("account"), new TestViewResolver("profile")};
 
 		testHandle("/account", returnType, returnValue, "profile: {id=123}", resolvers);
@@ -180,10 +200,10 @@ public class ViewResolutionResultHandlerTests {
 
 	@Test
 	public void defaultViewName() throws Exception {
-		testDefaultViewName(null, on(TestController.class).resolveReturnType(String.class));
-		testDefaultViewName(Mono.empty(), on(TestController.class).resolveReturnType(Mono.class, String.class));
-		testDefaultViewName(Mono.empty(), on(TestController.class).resolveReturnType(Mono.class, Void.class));
-		testDefaultViewName(Completable.complete(), on(TestController.class).resolveReturnType(Completable.class));
+		testDefaultViewName(null, on(Handler.class).annotPresent(ModelAttribute.class).resolveReturnType(String.class));
+		testDefaultViewName(Mono.empty(), on(Handler.class).resolveReturnType(Mono.class, String.class));
+		testDefaultViewName(Mono.empty(), on(Handler.class).resolveReturnType(Mono.class, Void.class));
+		testDefaultViewName(Completable.complete(), on(Handler.class).resolveReturnType(Completable.class));
 	}
 
 	private void testDefaultViewName(Object returnValue, MethodParameter returnType) throws URISyntaxException {
@@ -207,7 +227,7 @@ public class ViewResolutionResultHandlerTests {
 	@Test
 	public void unresolvedViewName() throws Exception {
 		String returnValue = "account";
-		MethodParameter returnType = on(TestController.class).resolveReturnType(String.class);
+		MethodParameter returnType = on(Handler.class).annotPresent(ModelAttribute.class).resolveReturnType(String.class);
 		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, this.bindingContext);
 
 		MockServerWebExchange exchange = get("/path").toExchange();
@@ -222,7 +242,7 @@ public class ViewResolutionResultHandlerTests {
 	@Test
 	public void contentNegotiation() throws Exception {
 		TestBean value = new TestBean("Joe");
-		MethodParameter returnType = on(TestController.class).resolveReturnType(TestBean.class);
+		MethodParameter returnType = on(Handler.class).resolveReturnType(TestBean.class);
 		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType, this.bindingContext);
 
 		MockServerWebExchange exchange = get("/account").accept(APPLICATION_JSON).toExchange();
@@ -244,7 +264,7 @@ public class ViewResolutionResultHandlerTests {
 	@Test
 	public void contentNegotiationWith406() throws Exception {
 		TestBean value = new TestBean("Joe");
-		MethodParameter returnType = on(TestController.class).resolveReturnType(TestBean.class);
+		MethodParameter returnType = on(Handler.class).resolveReturnType(TestBean.class);
 		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType, this.bindingContext);
 
 		MockServerWebExchange exchange = get("/account").accept(APPLICATION_JSON).toExchange();
@@ -381,71 +401,32 @@ public class ViewResolutionResultHandlerTests {
 
 
 	@SuppressWarnings("unused")
-	private static class TestController {
+	private static class Handler {
 
-		String string() {
-			return null;
-		}
+		String string() { return null; }
+		Mono<String> monoString() { return null; }
+		@ModelAttribute("myString") String stringWithAnnotation() { return null; }
 
-		View view() {
-			return null;
-		}
+		Rendering rendering() { return null; }
+		Mono<Rendering> monoRendering() { return null; }
 
-		Mono<String> monoString() {
-			return null;
-		}
+		View view() { return null; }
+		Mono<View> monoView() { return null; }
 
-		Mono<View> monoView() {
-			return null;
-		}
+		void voidMethod() { }
+		Mono<Void> monoVoid() { return null; }
+		Completable completable() { return null; }
 
-		Mono<Void> monoVoid() {
-			return null;
-		}
+		Model model() { return null; }
 
-		void voidMethod() {
-		}
+		Map<?,?> map() { return null; }
+		@ModelAttribute("myMap") Map<?,?> mapWithAnnotation() { return null; }
 
-		Single<String> singleString() {
-			return null;
-		}
+		TestBean testBean() { return null; }
 
-		Single<View> singleView() {
-			return null;
-		}
+		Long longValue() { return null; }
+		@ModelAttribute("myLong") Long longModelAttribute() { return null; }
 
-		Completable completable() {
-			return null;
-		}
-
-		Model model() {
-			return null;
-		}
-
-		Map<?,?> map() {
-			return null;
-		}
-
-		TestBean testBean() {
-			return null;
-		}
-
-		Integer integer() {
-			return null;
-		}
-
-		@ModelAttribute("num")
-		Long longAttribute() {
-			return null;
-		}
-
-		Rendering rendering() {
-			return null;
-		}
-
-		Mono<Rendering> monoRendering() {
-			return null;
-		}
 	}
 
 }
