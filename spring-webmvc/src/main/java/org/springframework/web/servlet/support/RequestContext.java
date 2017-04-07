@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.support;
 
+import java.beans.PropertyEditor;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -44,10 +45,13 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.EscapedErrors;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ThemeResolver;
+import org.springframework.web.servlet.tags.form.SelectedValueComparator;
+import org.springframework.web.servlet.tags.form.ValueFormatter;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriTemplate;
 import org.springframework.web.util.UrlPathHelper;
@@ -895,6 +899,122 @@ public class RequestContext {
 	 */
 	public BindStatus getBindStatus(String path, boolean htmlEscape) throws IllegalStateException {
 		return new BindStatus(this, path, htmlEscape);
+	}
+
+	/**
+	 * Get the display value out of the supplied {@code BindStatus} and {@code type}.
+	 * 
+	 * @param bindStatus the bind status
+	 * @param type the field type (text, input etc.)
+	 * @return the display value
+	 */
+	public String getDisplayString(BindStatus bindStatus, String type) {
+		return getDisplayString(bindStatus, type, ifNullTrue(getDefaultHtmlEscape()));
+	}
+
+	/**
+	 * Get the display value out of the supplied {@code BindStatus} and {@code type}.
+	 * 
+	 * @param bindStatus the bind status
+	 * @param type the field type (text, input etc.)
+	 * @param htmlEscape enable/disable HTML escaping of rendered values
+	 * @return the display value
+	 */
+	public String getDisplayString(BindStatus bindStatus, String type, boolean htmlEscape) {
+		String value = ValueFormatter.getDisplayString(bindStatus.getValue(), bindStatus.getEditor(), htmlEscape);
+		return processFieldValue(getPropertyPath(bindStatus), value, type);
+	}
+
+	/**
+	 * Get the display value of the supplied {@code Object}, HTML escaped as required. This version is
+	 * <strong>not</strong> {@link PropertyEditor}-aware.
+	 */
+	public String getDisplayString(Object value) {
+		return getDisplayString(value, ifNullTrue(getDefaultHtmlEscape()));
+	}
+
+	/**
+	 * Get the display value of the supplied {@code Object}, HTML escaped as required. This version is
+	 * <strong>not</strong> {@link PropertyEditor}-aware.
+	 * 
+	 * @param value the value
+	 * @param htmlEscape enable/disable HTML escaping of rendered values
+	 */
+	public String getDisplayString(Object value, boolean htmlEscape) {
+		return ValueFormatter.getDisplayString(value, htmlEscape);
+	}
+
+	/**
+	 * Get the display value of the supplied {@code Object}, HTML escaped as required. If the supplied value is not a
+	 * {@link String} and the supplied {@link PropertyEditor} is not null then the {@link PropertyEditor} is used to
+	 * obtain the display value.
+	 * 
+	 * @param value the value
+	 * @param propertyEditor the {@link PropertyEditor} to obtain the display value
+	 */
+	public String getDisplayString(Object value, PropertyEditor propertyEditor) {
+		return ValueFormatter.getDisplayString(value, propertyEditor, ifNullTrue(getDefaultHtmlEscape()));
+	}
+
+	/**
+	 * Get the display value of the supplied {@code Object}, HTML escaped as required. If the supplied value is not a
+	 * {@link String} and the supplied {@link PropertyEditor} is not null then the {@link PropertyEditor} is used to
+	 * obtain the display value.
+	 * 
+	 * @param value the value
+	 * @param propertyEditor the {@link PropertyEditor} to obtain the display value
+	 * @param htmlEscape enable/disable HTML escaping of rendered values
+	 */
+	public String getDisplayString(Object value, PropertyEditor propertyEditor, boolean htmlEscape) {
+		return getDisplayString(value, propertyEditor, htmlEscape);
+	}
+
+	/**
+	 * Return the default prefix that field marker parameters start with, followed by the field name: e.g.
+	 * "_subscribeToNewsletter" for a field "subscribeToNewsletter".
+	 */
+	public String getFieldMarkerPrefix() {
+		return WebDataBinder.DEFAULT_FIELD_MARKER_PREFIX;
+	}
+
+	/**
+	 * Determine whether the supplied value matched the current bind status value. Delegates to
+	 * {@link SelectedValueComparator#isSelected}.
+	 * 
+	 * @param bindStatus the bind status
+	 * @param value the value to be compared
+	 */
+	public boolean isSelected(BindStatus bindStatus, Object value) {
+		return SelectedValueComparator.isSelected(bindStatus, value);
+	}
+
+	/**
+	 * Process the given form field through a {@link RequestDataValueProcessor} instance if one is configured or
+	 * otherwise returns the same value.
+	 */
+	public final String processFieldValue(String name, String value, String type) {
+		RequestDataValueProcessor processor = this.getRequestDataValueProcessor();
+		HttpServletRequest request = getRequest();
+		if (processor != null && request != null) {
+			value = processor.processFormFieldValue(request, name, value, type);
+		}
+		return value;
+	}
+
+	/**
+	 * Build the property path the supplied {@code BindStatus}, including the nested path but <i>not</i> prefixed with
+	 * the name of the form attribute.
+	 */
+	protected String getPropertyPath(BindStatus bindStatus) {
+		String expression = bindStatus.getExpression();
+		return (expression != null ? expression : "");
+	}
+
+	/**
+	 * Return {@code true} in case the value is {@code null} otherwise the boolean value
+	 */
+	protected boolean ifNullTrue(Boolean value) {
+		return (value == null || value.booleanValue());
 	}
 
 
