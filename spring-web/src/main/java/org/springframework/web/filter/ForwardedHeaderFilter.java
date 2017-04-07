@@ -118,7 +118,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		private final String requestUri;
 
-		private final StringBuffer requestUrl;
+		private final String requestUrl;
 
 		private final Map<String, List<String>> headers;
 
@@ -137,8 +137,8 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			String prefix = getForwardedPrefix(request);
 			this.contextPath = (prefix != null ? prefix : request.getContextPath());
 			this.requestUri = this.contextPath + pathHelper.getPathWithinApplication(request);
-			this.requestUrl = new StringBuffer(this.scheme + "://" + this.host +
-					(port == -1 ? "" : ":" + port) + this.requestUri);
+			this.requestUrl = this.scheme + "://" + this.host +
+					(port == -1 ? "" : ":" + port) + this.requestUri;
 			this.headers = initHeaders(request);
 		}
 
@@ -206,7 +206,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		@Override
 		public StringBuffer getRequestURL() {
-			return this.requestUrl;
+			return new StringBuffer(this.requestUrl);
 		}
 
 		// Override header accessors to not expose forwarded headers
