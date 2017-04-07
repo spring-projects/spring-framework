@@ -15,7 +15,6 @@
  */
 package org.springframework.web.reactive.result.method.annotation;
 
-
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
@@ -48,8 +47,7 @@ import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ControllerMethodResolver}.
@@ -70,8 +68,8 @@ public class ControllerMethodResolverTests {
 		resolvers.addCustomResolver(new CustomSyncArgumentResolver());
 
 		ServerCodecConfigurer codecs = new ServerCodecConfigurer();
-		codecs.customCodec().decoder(new ByteArrayDecoder());
-		codecs.customCodec().decoder(new ByteBufferDecoder());
+		codecs.customCodecs().decoder(new ByteArrayDecoder());
+		codecs.customCodecs().decoder(new ByteBufferDecoder());
 
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
 		applicationContext.registerBean(TestControllerAdvice.class);

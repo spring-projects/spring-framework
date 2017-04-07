@@ -24,12 +24,12 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder;
 /**
  * Helps to configure a list of server-side HTTP message readers and writers
  * with support for built-in defaults and options to register additional custom
- * readers and writers via {@link #customCodec()}.
+ * readers and writers via {@link #customCodecs()}.
  *
  * <p>The built-in defaults include basic data types such as various byte
  * representations, resources, strings, forms, but also others like JAXB2 and
  * Jackson 2 based on classpath detection. There are options to
- * {@link #defaultCodec() override} some of the defaults or to have them
+ * {@link #defaultCodecs() override} some of the defaults or to have them
  * {@link #registerDefaults(boolean) turned off} completely.
  *
  * @author Rossen Stoyanchev
@@ -44,22 +44,22 @@ public class ServerCodecConfigurer extends AbstractCodecConfigurer {
 
 
 	@Override
-	public ServerDefaultCodecConfigurer defaultCodec() {
-		return (ServerDefaultCodecConfigurer) super.defaultCodec();
+	public ServerDefaultCodecConfigurer defaultCodecs() {
+		return (ServerDefaultCodecConfigurer) super.defaultCodecs();
 	}
 
 
 	@Override
 	protected void addDefaultTypedReaders(List<HttpMessageReader<?>> result) {
 		super.addDefaultTypedReaders(result);
-		defaultCodec().addReaderTo(result, FormHttpMessageReader::new);
+		defaultCodecs().addReaderTo(result, FormHttpMessageReader::new);
 	}
 
 
 	@Override
 	protected void addDefaultObjectWriters(List<HttpMessageWriter<?>> result) {
 		super.addDefaultObjectWriters(result);
-		defaultCodec().addServerSentEventWriterTo(result);
+		defaultCodecs().addServerSentEventWriterTo(result);
 	}
 
 

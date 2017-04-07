@@ -39,11 +39,8 @@ import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.core.ResolvableType.forClass;
 
 /**
@@ -100,11 +97,11 @@ public class CodecConfigurerTests {
 		when(customReader1.canRead(ResolvableType.forClass(Object.class), null)).thenReturn(false);
 		when(customReader2.canRead(ResolvableType.forClass(Object.class), null)).thenReturn(true);
 
-		this.configurer.customCodec().decoder(customDecoder1);
-		this.configurer.customCodec().decoder(customDecoder2);
+		this.configurer.customCodecs().decoder(customDecoder1);
+		this.configurer.customCodecs().decoder(customDecoder2);
 
-		this.configurer.customCodec().reader(customReader1);
-		this.configurer.customCodec().reader(customReader2);
+		this.configurer.customCodecs().reader(customReader1);
+		this.configurer.customCodecs().reader(customReader2);
 
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
 
@@ -138,11 +135,11 @@ public class CodecConfigurerTests {
 		when(customWriter1.canWrite(ResolvableType.forClass(Object.class), null)).thenReturn(false);
 		when(customWriter2.canWrite(ResolvableType.forClass(Object.class), null)).thenReturn(true);
 
-		this.configurer.customCodec().encoder(customEncoder1);
-		this.configurer.customCodec().encoder(customEncoder2);
+		this.configurer.customCodecs().encoder(customEncoder1);
+		this.configurer.customCodecs().encoder(customEncoder2);
 
-		this.configurer.customCodec().writer(customWriter1);
-		this.configurer.customCodec().writer(customWriter2);
+		this.configurer.customCodecs().writer(customWriter1);
+		this.configurer.customCodecs().writer(customWriter2);
 
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
 
@@ -176,11 +173,11 @@ public class CodecConfigurerTests {
 		when(customReader1.canRead(ResolvableType.forClass(Object.class), null)).thenReturn(false);
 		when(customReader2.canRead(ResolvableType.forClass(Object.class), null)).thenReturn(true);
 
-		this.configurer.customCodec().decoder(customDecoder1);
-		this.configurer.customCodec().decoder(customDecoder2);
+		this.configurer.customCodecs().decoder(customDecoder1);
+		this.configurer.customCodecs().decoder(customDecoder2);
 
-		this.configurer.customCodec().reader(customReader1);
-		this.configurer.customCodec().reader(customReader2);
+		this.configurer.customCodecs().reader(customReader1);
+		this.configurer.customCodecs().reader(customReader2);
 
 		this.configurer.registerDefaults(false);
 
@@ -208,11 +205,11 @@ public class CodecConfigurerTests {
 		when(customWriter1.canWrite(ResolvableType.forClass(Object.class), null)).thenReturn(false);
 		when(customWriter2.canWrite(ResolvableType.forClass(Object.class), null)).thenReturn(true);
 
-		this.configurer.customCodec().encoder(customEncoder1);
-		this.configurer.customCodec().encoder(customEncoder2);
+		this.configurer.customCodecs().encoder(customEncoder1);
+		this.configurer.customCodecs().encoder(customEncoder2);
 
-		this.configurer.customCodec().writer(customWriter1);
-		this.configurer.customCodec().writer(customWriter2);
+		this.configurer.customCodecs().writer(customWriter1);
+		this.configurer.customCodecs().writer(customWriter2);
 
 		this.configurer.registerDefaults(false);
 
@@ -229,7 +226,7 @@ public class CodecConfigurerTests {
 	public void jackson2DecoderOverride() throws Exception {
 
 		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder();
-		this.configurer.defaultCodec().jackson2Decoder(decoder);
+		this.configurer.defaultCodecs().jackson2Decoder(decoder);
 
 		assertSame(decoder, this.configurer.getReaders().stream()
 				.filter(writer -> writer instanceof DecoderHttpMessageReader)
@@ -243,7 +240,7 @@ public class CodecConfigurerTests {
 	public void jackson2EncoderOverride() throws Exception {
 
 		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
-		this.configurer.defaultCodec().jackson2Encoder(encoder);
+		this.configurer.defaultCodecs().jackson2Encoder(encoder);
 
 		assertSame(encoder, this.configurer.getWriters().stream()
 				.filter(writer -> writer instanceof EncoderHttpMessageWriter)
@@ -257,13 +254,13 @@ public class CodecConfigurerTests {
 	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {
 		HttpMessageReader<?> reader = readers.get(this.index.getAndIncrement());
 		assertEquals(DecoderHttpMessageReader.class, reader.getClass());
-		return ((DecoderHttpMessageReader) reader).getDecoder();
+		return ((DecoderHttpMessageReader<?>) reader).getDecoder();
 	}
 
 	private Encoder<?> getNextEncoder(List<HttpMessageWriter<?>> writers) {
 		HttpMessageWriter<?> writer = writers.get(this.index.getAndIncrement());
 		assertEquals(EncoderHttpMessageWriter.class, writer.getClass());
-		return ((EncoderHttpMessageWriter) writer).getEncoder();
+		return ((EncoderHttpMessageWriter<?>) writer).getEncoder();
 	}
 
 	private void assertStringDecoder(Decoder<?> decoder, boolean textOnly) {
@@ -288,10 +285,12 @@ public class CodecConfigurerTests {
 
 		private static class TestDefaultCodecConfigurer extends DefaultCodecConfigurer {
 
+			@Override
 			protected void addStringReaderTextOnlyTo(List<HttpMessageReader<?>> result) {
 				addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly(true)));
 			}
 
+			@Override
 			protected void addStringReaderTo(List<HttpMessageReader<?>> result) {
 				addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 			}

@@ -74,7 +74,7 @@ public abstract class AbstractCodecConfigurer {
 	/**
 	 * Provide overrides for built-in HTTP message readers or writers.
 	 */
-	public DefaultCodecConfigurer defaultCodec() {
+	public DefaultCodecConfigurer defaultCodecs() {
 		return this.defaultCodecs;
 	}
 
@@ -83,13 +83,13 @@ public abstract class AbstractCodecConfigurer {
 	 * <p>By default this is set to {@code "true"}.
 	 */
 	public void registerDefaults(boolean registerDefaults) {
-		this.defaultCodec().setSuppressed(!registerDefaults);
+		this.defaultCodecs().setSuppressed(!registerDefaults);
 	}
 
 	/**
 	 * Register a custom encoder or decoder.
 	 */
-	public CustomCodecConfigurer customCodec() {
+	public CustomCodecConfigurer customCodecs() {
 		return this.customCodecs;
 	}
 
@@ -102,13 +102,13 @@ public abstract class AbstractCodecConfigurer {
 		List<HttpMessageReader<?>> result = new ArrayList<>();
 
 		addDefaultTypedReaders(result);
-		customCodec().addTypedReadersTo(result);
+		customCodecs().addTypedReadersTo(result);
 
 		addDefaultObjectReaders(result);
-		customCodec().addObjectReadersTo(result);
+		customCodecs().addObjectReadersTo(result);
 
 		// String + "*/*"
-		defaultCodec().addStringReaderTo(result);
+		defaultCodecs().addStringReaderTo(result);
 		return result;
 	}
 
@@ -116,11 +116,11 @@ public abstract class AbstractCodecConfigurer {
 	 * Add built-in, concrete, Java type readers.
 	 */
 	protected void addDefaultTypedReaders(List<HttpMessageReader<?>> result) {
-		defaultCodec().addReaderTo(result, ByteArrayDecoder.class, ByteArrayDecoder::new);
-		defaultCodec().addReaderTo(result, ByteBufferDecoder.class, ByteBufferDecoder::new);
-		defaultCodec().addReaderTo(result, DataBufferDecoder.class, DataBufferDecoder::new);
-		defaultCodec().addReaderTo(result, ResourceDecoder.class, ResourceDecoder::new);
-		defaultCodec().addStringReaderTextOnlyTo(result);
+		defaultCodecs().addReaderTo(result, ByteArrayDecoder.class, ByteArrayDecoder::new);
+		defaultCodecs().addReaderTo(result, ByteBufferDecoder.class, ByteBufferDecoder::new);
+		defaultCodecs().addReaderTo(result, DataBufferDecoder.class, DataBufferDecoder::new);
+		defaultCodecs().addReaderTo(result, ResourceDecoder.class, ResourceDecoder::new);
+		defaultCodecs().addStringReaderTextOnlyTo(result);
 	}
 
 	/**
@@ -128,10 +128,10 @@ public abstract class AbstractCodecConfigurer {
 	 */
 	protected void addDefaultObjectReaders(List<HttpMessageReader<?>> result) {
 		if (jaxb2Present) {
-			defaultCodec().addReaderTo(result, Jaxb2XmlDecoder.class, Jaxb2XmlDecoder::new);
+			defaultCodecs().addReaderTo(result, Jaxb2XmlDecoder.class, Jaxb2XmlDecoder::new);
 		}
 		if (jackson2Present) {
-			defaultCodec().addReaderTo(result, Jackson2JsonDecoder.class, Jackson2JsonDecoder::new);
+			defaultCodecs().addReaderTo(result, Jackson2JsonDecoder.class, Jackson2JsonDecoder::new);
 		}
 	}
 
@@ -143,13 +143,13 @@ public abstract class AbstractCodecConfigurer {
 		List<HttpMessageWriter<?>> result = new ArrayList<>();
 
 		addDefaultTypedWriter(result);
-		customCodec().addTypedWritersTo(result);
+		customCodecs().addTypedWritersTo(result);
 
 		addDefaultObjectWriters(result);
-		customCodec().addObjectWritersTo(result);
+		customCodecs().addObjectWritersTo(result);
 
 		// String + "*/*"
-		defaultCodec().addStringWriterTo(result);
+		defaultCodecs().addStringWriterTo(result);
 		return result;
 	}
 
@@ -157,11 +157,11 @@ public abstract class AbstractCodecConfigurer {
 	 * Add built-in, concrete, Java type readers.
 	 */
 	protected void addDefaultTypedWriter(List<HttpMessageWriter<?>> result) {
-		defaultCodec().addWriterTo(result, ByteArrayEncoder.class, ByteArrayEncoder::new);
-		defaultCodec().addWriterTo(result, ByteBufferEncoder.class, ByteBufferEncoder::new);
-		defaultCodec().addWriterTo(result, DataBufferEncoder.class, DataBufferEncoder::new);
-		defaultCodec().addWriterTo(result, ResourceHttpMessageWriter::new);
-		defaultCodec().addStringWriterTextPlainOnlyTo(result);
+		defaultCodecs().addWriterTo(result, ByteArrayEncoder.class, ByteArrayEncoder::new);
+		defaultCodecs().addWriterTo(result, ByteBufferEncoder.class, ByteBufferEncoder::new);
+		defaultCodecs().addWriterTo(result, DataBufferEncoder.class, DataBufferEncoder::new);
+		defaultCodecs().addWriterTo(result, ResourceHttpMessageWriter::new);
+		defaultCodecs().addStringWriterTextPlainOnlyTo(result);
 	}
 
 	/**
@@ -169,10 +169,10 @@ public abstract class AbstractCodecConfigurer {
 	 */
 	protected void addDefaultObjectWriters(List<HttpMessageWriter<?>> result) {
 		if (jaxb2Present) {
-			defaultCodec().addWriterTo(result, Jaxb2XmlEncoder.class, Jaxb2XmlEncoder::new);
+			defaultCodecs().addWriterTo(result, Jaxb2XmlEncoder.class, Jaxb2XmlEncoder::new);
 		}
 		if (jackson2Present) {
-			defaultCodec().addWriterTo(result, Jackson2JsonEncoder.class, Jackson2JsonEncoder::new);
+			defaultCodecs().addWriterTo(result, Jackson2JsonEncoder.class, Jackson2JsonEncoder::new);
 		}
 	}
 

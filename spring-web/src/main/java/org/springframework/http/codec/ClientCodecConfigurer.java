@@ -24,12 +24,12 @@ import org.springframework.http.codec.json.Jackson2JsonDecoder;
 /**
  * Helps to configure a list of client-side HTTP message readers and writers
  * with support for built-in defaults and options to register additional custom
- * readers and writers via {@link #customCodec()}.
+ * readers and writers via {@link #customCodecs()}.
  *
  * <p>The built-in defaults include basic data types such as various byte
  * representations, resources, strings, forms, but also others like JAXB2 and
  * Jackson 2 based on classpath detection. There are options to
- * {@link #defaultCodec() override} some of the defaults or to have them
+ * {@link #defaultCodecs() override} some of the defaults or to have them
  * {@link #registerDefaults(boolean) turned off} completely.
  *
  * @author Rossen Stoyanchev
@@ -44,21 +44,21 @@ public class ClientCodecConfigurer extends AbstractCodecConfigurer {
 
 
 	@Override
-	public ClientDefaultCodecConfigurer defaultCodec() {
-		return (ClientDefaultCodecConfigurer) super.defaultCodec();
+	public ClientDefaultCodecConfigurer defaultCodecs() {
+		return (ClientDefaultCodecConfigurer) super.defaultCodecs();
 	}
 
 
 	@Override
 	protected void addDefaultTypedWriter(List<HttpMessageWriter<?>> result) {
 		super.addDefaultTypedWriter(result);
-		defaultCodec().addWriterTo(result, FormHttpMessageWriter::new);
+		defaultCodecs().addWriterTo(result, FormHttpMessageWriter::new);
 	}
 
 	@Override
 	protected void addDefaultObjectReaders(List<HttpMessageReader<?>> result) {
 		super.addDefaultObjectReaders(result);
-		defaultCodec().addServerSentEventReaderTo(result);
+		defaultCodecs().addServerSentEventReaderTo(result);
 	}
 
 
@@ -80,10 +80,12 @@ public class ClientCodecConfigurer extends AbstractCodecConfigurer {
 
 		// Internal methods for building a list of default readers or writers...
 
+		@Override
 		protected void addStringReaderTextOnlyTo(List<HttpMessageReader<?>> result) {
 			addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly(false)));
 		}
 
+		@Override
 		protected void addStringReaderTo(List<HttpMessageReader<?>> result) {
 			addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(false)));
 		}

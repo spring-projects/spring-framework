@@ -63,11 +63,7 @@ import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewRes
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
@@ -301,10 +297,10 @@ public class WebFluxConfigurationSupportTests {
 		@Override
 		protected void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
 			configurer.registerDefaults(false);
-			configurer.customCodec().decoder(StringDecoder.textPlainOnly(true));
-			configurer.customCodec().decoder(new Jaxb2XmlDecoder());
-			configurer.customCodec().encoder(CharSequenceEncoder.textPlainOnly());
-			configurer.customCodec().encoder(new Jaxb2XmlEncoder());
+			configurer.customCodecs().decoder(StringDecoder.textPlainOnly(true));
+			configurer.customCodecs().decoder(new Jaxb2XmlDecoder());
+			configurer.customCodecs().encoder(CharSequenceEncoder.textPlainOnly());
+			configurer.customCodecs().encoder(new Jaxb2XmlEncoder());
 		}
 	}
 

@@ -45,10 +45,7 @@ import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.springframework.core.ResolvableType.forClass;
 
 /**
@@ -96,7 +93,7 @@ public class ServerCodecConfigurerTests {
 	public void jackson2EncoderOverride() throws Exception {
 
 		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
-		this.configurer.defaultCodec().jackson2Encoder(encoder);
+		this.configurer.defaultCodecs().jackson2Encoder(encoder);
 
 		assertSame(encoder, this.configurer.getWriters().stream()
 				.filter(writer -> ServerSentEventHttpMessageWriter.class.equals(writer.getClass()))
@@ -110,13 +107,13 @@ public class ServerCodecConfigurerTests {
 	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {
 		HttpMessageReader<?> reader = readers.get(this.index.getAndIncrement());
 		assertEquals(DecoderHttpMessageReader.class, reader.getClass());
-		return ((DecoderHttpMessageReader) reader).getDecoder();
+		return ((DecoderHttpMessageReader<?>) reader).getDecoder();
 	}
 
 	private Encoder<?> getNextEncoder(List<HttpMessageWriter<?>> writers) {
 		HttpMessageWriter<?> writer = writers.get(this.index.getAndIncrement());
 		assertEquals(EncoderHttpMessageWriter.class, writer.getClass());
-		return ((EncoderHttpMessageWriter) writer).getEncoder();
+		return ((EncoderHttpMessageWriter<?>) writer).getEncoder();
 	}
 
 	@SuppressWarnings("unchecked")
