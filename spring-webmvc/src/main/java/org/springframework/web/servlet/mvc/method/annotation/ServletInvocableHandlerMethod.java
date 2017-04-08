@@ -24,7 +24,6 @@ import java.util.concurrent.Callable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -58,11 +57,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 	private static final Method CALLABLE_METHOD = ClassUtils.getMethod(Callable.class, "call");
 
-
-	private HttpStatus responseStatus;
-
-	private String responseReason;
-
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
 
@@ -71,7 +65,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 */
 	public ServletInvocableHandlerMethod(Object handler, Method method) {
 		super(handler, method);
-		initResponseStatus();
 	}
 
 	/**
@@ -79,20 +72,8 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 */
 	public ServletInvocableHandlerMethod(HandlerMethod handlerMethod) {
 		super(handlerMethod);
-		initResponseStatus();
 	}
 
-
-	private void initResponseStatus() {
-		ResponseStatus annotation = getMethodAnnotation(ResponseStatus.class);
-		if (annotation == null) {
-			annotation = AnnotatedElementUtils.findMergedAnnotation(getBeanType(), ResponseStatus.class);
-		}
-		if (annotation != null) {
-			this.responseStatus = annotation.code();
-			this.responseReason = annotation.reason();
-		}
-	}
 
 	/**
 	 * Register {@link HandlerMethodReturnValueHandler} instances to use to
@@ -117,12 +98,12 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		setResponseStatus(webRequest);
 
 		if (returnValue == null) {
-			if (isRequestNotModified(webRequest) || hasResponseStatus() || mavContainer.isRequestHandled()) {
+			if (isRequestNotModified(webRequest) || getResponseStatus() != null || mavContainer.isRequestHandled()) {
 				mavContainer.setRequestHandled(true);
 				return;
 			}
 		}
-		else if (StringUtils.hasText(this.responseReason)) {
+		else if (StringUtils.hasText(getResponseStatusReason())) {
 			mavContainer.setRequestHandled(true);
 			return;
 		}
@@ -144,17 +125,21 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 * Set the response status according to the {@link ResponseStatus} annotation.
 	 */
 	private void setResponseStatus(ServletWebRequest webRequest) throws IOException {
-		if (this.responseStatus == null) {
+		HttpStatus status = getResponseStatus();
+		if (status == null) {
 			return;
 		}
-		if (StringUtils.hasText(this.responseReason)) {
-			webRequest.getResponse().sendError(this.responseStatus.value(), this.responseReason);
+
+		String reason = getResponseStatusReason();
+		if (StringUtils.hasText(reason)) {
+			webRequest.getResponse().sendError(status.value(), reason);
 		}
 		else {
-			webRequest.getResponse().setStatus(this.responseStatus.value());
+			webRequest.getResponse().setStatus(status.value());
 		}
+
 		// To be picked up by RedirectView
-		webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, this.responseStatus);
+		webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, status);
 	}
 
 	/**
@@ -164,13 +149,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 */
 	private boolean isRequestNotModified(ServletWebRequest webRequest) {
 		return webRequest.isNotModified();
-	}
-
-	/**
-	 * Does this method have the response status instruction?
-	 */
-	private boolean hasResponseStatus() {
-		return (this.responseStatus != null);
 	}
 
 	private String getReturnValueHandlingErrorMessage(String message, Object returnValue) {
