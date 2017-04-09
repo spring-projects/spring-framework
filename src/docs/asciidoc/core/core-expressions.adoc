@@ -364,7 +364,7 @@ it on. It can be turned on using the parser configuration process discussed earl
 via a system property when SpEL usage is embedded inside another component. This section
 discusses both of these options.
 
-Is is important to understand that there are a few modes the compiler can operate in, captured
+It is important to understand that there are a few modes the compiler can operate in, captured
 in an enum (`org.springframework.expression.spel.SpelCompilerMode`). The modes are as follows:
 
 - `OFF` - The compiler is switched off; this is the default.
