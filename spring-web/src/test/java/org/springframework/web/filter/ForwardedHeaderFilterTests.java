@@ -88,6 +88,35 @@ public class ForwardedHeaderFilterTests {
 	}
 
 	@Test
+	public void contextPathWithForwardedPrefix() throws Exception {
+		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix");
+		this.request.setContextPath("/mvc-showcase");
+
+		String actual = filterAndGetContextPath();
+		assertEquals("/prefix", actual);
+	}
+
+	@Test
+	public void contextPathWithForwardedPrefixTrailingSlash() throws Exception {
+		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix/");
+		this.request.setContextPath("/mvc-showcase");
+
+		String actual = filterAndGetContextPath();
+		assertEquals("/prefix", actual);
+	}
+
+	@Test
+	public void contextPathPreserveEncoding() throws Exception {
+		this.request.setContextPath("/app%20");
+		this.request.setRequestURI("/app%20/path/");
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+
+		assertEquals("/app%20", actual.getContextPath());
+		assertEquals("/app%20/path/", actual.getRequestURI());
+		assertEquals("http://localhost/app%20/path/", actual.getRequestURL().toString());
+	}
+
+	@Test
 	public void requestUri() throws Exception {
 		this.request.addHeader(X_FORWARDED_PREFIX, "/");
 		this.request.setContextPath("/app");
@@ -229,35 +258,6 @@ public class ForwardedHeaderFilterTests {
 		HttpServletRequest actual = filterAndGetWrappedRequest();
 		actual.getRequestURL().append("?key=value");
 		assertEquals("http://localhost/prefix/mvc-showcase", actual.getRequestURL().toString());
-	}
-
-	@Test
-	public void contextPathWithForwardedPrefix() throws Exception {
-		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix");
-		this.request.setContextPath("/mvc-showcase");
-
-		String actual = filterAndGetContextPath();
-		assertEquals("/prefix", actual);
-	}
-
-	@Test
-	public void contextPathWithForwardedPrefixTrailingSlash() throws Exception {
-		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix/");
-		this.request.setContextPath("/mvc-showcase");
-
-		String actual = filterAndGetContextPath();
-		assertEquals("/prefix", actual);
-	}
-
-	@Test
-	public void contextPathPreserveEncoding() throws Exception {
-		this.request.setContextPath("/app%20");
-		this.request.setRequestURI("/app%20/path/");
-		HttpServletRequest actual = filterAndGetWrappedRequest();
-
-		assertEquals("/app%20", actual.getContextPath());
-		assertEquals("/app%20/path/", actual.getRequestURI());
-		assertEquals("http://localhost/app%20/path/", actual.getRequestURL().toString());
 	}
 
 	@Test
