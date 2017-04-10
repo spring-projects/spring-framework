@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,8 +137,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			String prefix = getForwardedPrefix(request);
 			this.contextPath = (prefix != null ? prefix : request.getContextPath());
 			this.requestUri = this.contextPath + pathHelper.getPathWithinApplication(request);
-			this.requestUrl = this.scheme + "://" + this.host +
-					(port == -1 ? "" : ":" + port) + this.requestUri;
+			this.requestUrl = this.scheme + "://" + this.host + (port == -1 ? "" : ":" + port) + this.requestUri;
 			this.headers = initHeaders(request);
 		}
 
@@ -229,12 +228,12 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		}
 	}
 
+
 	private static class ForwardedHeaderResponseWrapper extends HttpServletResponseWrapper {
 
 		private static final String FOLDER_SEPARATOR = "/";
 
 		private final HttpServletRequest request;
-
 
 		public ForwardedHeaderResponseWrapper(HttpServletResponse response, HttpServletRequest request) {
 			super(response);
@@ -243,7 +242,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		@Override
 		public void sendRedirect(String location) throws IOException {
-
 			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
 
 			// Absolute location
@@ -253,20 +251,15 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			}
 
 			// Network-path reference
-			if(location.startsWith("//")) {
+			if (location.startsWith("//")) {
 				String scheme = this.request.getScheme();
 				super.sendRedirect(builder.scheme(scheme).toUriString());
 				return;
 			}
 
 			// Relative to Servlet container root or to current request
-			String path;
-			if (location.startsWith(FOLDER_SEPARATOR)) {
-				path = location;
-			}
-			else {
-				path = StringUtils.applyRelativePath(this.request.getRequestURI(), location);
-			}
+			String path = (location.startsWith(FOLDER_SEPARATOR) ? location :
+					StringUtils.applyRelativePath(this.request.getRequestURI(), location));
 
 			String result = UriComponentsBuilder
 					.fromHttpRequest(new ServletServerHttpRequest(this.request))

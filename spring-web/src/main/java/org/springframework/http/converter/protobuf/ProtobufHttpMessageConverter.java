@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,17 +50,16 @@ import org.springframework.util.ClassUtils;
  *
  * <p>Other formats can be supported with additional libraries:
  * <ul>
- *     <li>{@code "application/json"} with the official library
- *     {@code "com.google.protobuf:protobuf-java-util"}
- *     <li>{@code "application/json"}, {@code "application/xml"} and {@code "text/html"} (write only)
- *     can be supported with the 3rd party library
- *     {@code "com.googlecode.protobuf-java-format:protobuf-java-format"}
+ * <li>{@code "application/json"} with the official library
+ * {@code "com.google.protobuf:protobuf-java-util"}
+ * <li>{@code "application/json"}, {@code "application/xml"} and {@code "text/html"} (write only)
+ * can be supported with the 3rd party library
+ * {@code "com.googlecode.protobuf-java-format:protobuf-java-format"}
  * </ul>
  *
  * <p>To generate {@code Message} Java classes, you need to install the {@code protoc} binary.
  *
- * <p>Requires Protobuf 2.6 and Protobuf Java Format 1.4, as of Spring 4.3.
- * Supports up to Protobuf 3.0.0.
+ * <p>Requires Protobuf 2.6 or 3.x and Protobuf Java Format 1.4 or higher, as of Spring 5.0.
  *
  * @author Alex Antonov
  * @author Brian Clozel
@@ -83,13 +82,14 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	private static final boolean isProtobufJavaFormatPresent =
 			ClassUtils.isPresent("com.googlecode.protobuf.format.JsonFormat", ProtobufHttpMessageConverter.class.getClassLoader());
 
-	private static final MediaType[] SUPPORTED_MEDIATYPES;
-
-	private final ProtobufFormatsSupport protobufFormatsSupport;
-
 	private static final ConcurrentHashMap<Class<?>, Method> methodCache = new ConcurrentHashMap<>();
 
+	private final ProtobufFormatSupport protobufFormatSupport;
+
 	private final ExtensionRegistry extensionRegistry = ExtensionRegistry.newInstance();
+
+
+	private static final MediaType[] SUPPORTED_MEDIATYPES;
 
 	static {
 		if (isProtobufJavaFormatPresent) {
@@ -104,27 +104,28 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		}
 	}
 
+
 	/**
-	 * Construct a new instance.
+	 * Construct a new {@code ProtobufHttpMessageConverter}.
 	 */
 	public ProtobufHttpMessageConverter() {
 		this(null);
 	}
 
 	/**
-	 * Construct a new instance with an {@link ExtensionRegistryInitializer}
-	 * that allows the registration of message extensions.
+	 * Construct a new {@code ProtobufHttpMessageConverter} with an
+	 * initializer that allows the registration of message extensions.
 	 */
 	public ProtobufHttpMessageConverter(ExtensionRegistryInitializer registryInitializer) {
 		super(SUPPORTED_MEDIATYPES);
 		if (isProtobufJavaFormatPresent) {
-			this.protobufFormatsSupport = new ProtobufJavaFormatSupport();
+			this.protobufFormatSupport = new ProtobufJavaFormatSupport();
 		}
 		else if (isProtobufJavaUtilPresent) {
-			this.protobufFormatsSupport = new ProtobufJavaUtilSupport();
+			this.protobufFormatSupport = new ProtobufJavaUtilSupport();
 		}
 		else {
-			this.protobufFormatsSupport = null;
+			this.protobufFormatSupport = null;
 		}
 		if (registryInitializer != null) {
 			registryInitializer.initializeExtensionRegistry(this.extensionRegistry);
@@ -165,7 +166,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 				TextFormat.merge(reader, this.extensionRegistry, builder);
 			}
 			else if (isProtobufJavaUtilPresent || isProtobufJavaFormatPresent) {
-				this.protobufFormatsSupport.merge(inputMessage.getBody(), charset, contentType,
+				this.protobufFormatSupport.merge(inputMessage.getBody(), charset, contentType,
 						this.extensionRegistry, builder);
 			}
 			return builder.build();
@@ -211,7 +212,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 			outputMessage.getBody().flush();
 		}
 		else if (isProtobufJavaUtilPresent || isProtobufJavaFormatPresent) {
-			this.protobufFormatsSupport.print(message, outputMessage.getBody(), contentType, charset);
+			this.protobufFormatSupport.print(message, outputMessage.getBody(), contentType, charset);
 			outputMessage.getBody().flush();
 		}
 	}
@@ -241,15 +242,17 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		return (Message.Builder) method.invoke(clazz);
 	}
 
-	private interface ProtobufFormatsSupport {
 
-		void merge(InputStream input, Charset cs, MediaType contentType, ExtensionRegistry extensionRegistry,
+	private interface ProtobufFormatSupport {
+
+		void merge(InputStream input, Charset charset, MediaType contentType, ExtensionRegistry extensionRegistry,
 				Message.Builder builder) throws IOException;
 
 		void print(Message message, OutputStream output, MediaType contentType, Charset cs) throws IOException;
 	}
 
-	private class ProtobufJavaUtilSupport implements ProtobufFormatsSupport {
+
+	private class ProtobufJavaUtilSupport implements ProtobufFormatSupport {
 
 		private final com.google.protobuf.util.JsonFormat.Parser parser;
 
@@ -261,16 +264,16 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		}
 
 		@Override
-		public void merge(InputStream input, Charset cs, MediaType contentType,
+		public void merge(InputStream input, Charset charset, MediaType contentType,
 				ExtensionRegistry extensionRegistry, Message.Builder builder) throws IOException {
 
 			if (contentType.isCompatibleWith(MediaType.APPLICATION_JSON)) {
-				InputStreamReader reader = new InputStreamReader(input, cs);
+				InputStreamReader reader = new InputStreamReader(input, charset);
 				this.parser.merge(reader, builder);
 			}
 			else {
-				throw new UnsupportedOperationException("com.googlecode.protobuf:protobuf-java-util does not support "
-						+ contentType.toString() + " format");
+				throw new IOException(
+						"com.googlecode.protobuf:protobuf-java-util does not support " + contentType + " format");
 			}
 		}
 
@@ -280,14 +283,14 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 				this.printer.appendTo(message, new OutputStreamWriter(output, cs));
 			}
 			else {
-				throw new UnsupportedOperationException("com.googlecode.protobuf:protobuf-java-util does not support "
-						+ contentType.toString() + " format");
+				throw new IOException(
+						"com.googlecode.protobuf:protobuf-java-util does not support " + contentType + " format");
 			}
 		}
-
 	}
 
-	private class ProtobufJavaFormatSupport implements ProtobufFormatsSupport {
+
+	private class ProtobufJavaFormatSupport implements ProtobufFormatSupport {
 
 		private final FormatFactory FORMAT_FACTORY;
 
@@ -305,17 +308,17 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		}
 
 		@Override
-		public void merge(InputStream input, Charset cs, MediaType contentType,
+		public void merge(InputStream input, Charset charset, MediaType contentType,
 				ExtensionRegistry extensionRegistry, Message.Builder builder) throws IOException {
+
 			if (contentType.isCompatibleWith(MediaType.APPLICATION_JSON)) {
-				JSON_FORMATTER.merge(input, cs, extensionRegistry, builder);
+				JSON_FORMATTER.merge(input, charset, extensionRegistry, builder);
 			}
 			else if (contentType.isCompatibleWith(MediaType.APPLICATION_XML)) {
-				XML_FORMATTER.merge(input, cs, extensionRegistry, builder);
+				XML_FORMATTER.merge(input, charset, extensionRegistry, builder);
 			}
 			else {
-				throw new UnsupportedOperationException("com.google.protobuf.util does not support "
-						+ contentType.toString() + " format");
+				throw new IOException("com.google.protobuf.util does not support " + contentType + " format");
 			}
 		}
 
@@ -331,8 +334,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 				HTML_FORMATTER.print(message, output, cs);
 			}
 			else {
-				throw new UnsupportedOperationException("com.google.protobuf.util does not support "
-						+ contentType.toString() + " format");
+				throw new IOException("com.google.protobuf.util does not support " + contentType + " format");
 			}
 		}
 	}

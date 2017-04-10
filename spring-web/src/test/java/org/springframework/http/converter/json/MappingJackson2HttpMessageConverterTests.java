@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import org.junit.Assert;
 import org.junit.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -162,7 +161,6 @@ public class MappingJackson2HttpMessageConverterTests {
 	@SuppressWarnings("unchecked")
 	public void readGenerics() throws IOException {
 		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter() {
-
 			@Override
 			protected JavaType getJavaType(Type type, Class<?> contextClass) {
 				if (type instanceof Class && List.class.isAssignableFrom((Class<?>)type)) {
@@ -555,6 +553,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		}
 	}
 
+
 	private static class BeanWithNoDefaultConstructor {
 
 		private final String property1;
@@ -573,7 +572,6 @@ public class MappingJackson2HttpMessageConverterTests {
 		public String getProperty2() {
 			return property2;
 		}
-
 	}
 
 }

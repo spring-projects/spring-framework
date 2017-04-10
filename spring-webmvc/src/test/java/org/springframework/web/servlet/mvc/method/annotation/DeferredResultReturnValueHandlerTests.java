@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.concurrent.CompletableFuture;
@@ -33,10 +34,8 @@ import org.springframework.web.context.request.async.StandardServletAsyncWebRequ
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.web.method.ResolvableMethod.on;
+import static org.junit.Assert.*;
+import static org.springframework.web.method.ResolvableMethod.*;
 
 /**
  * Unit tests for {@link DeferredResultMethodReturnValueHandler}.
@@ -67,7 +66,6 @@ public class DeferredResultReturnValueHandlerTests {
 
 	@Test
 	public void supportsReturnType() throws Exception {
-
 		assertTrue(this.handler.supportsReturnType(
 				on(TestController.class).resolveReturnType(DeferredResult.class, String.class)));
 
@@ -103,7 +101,7 @@ public class DeferredResultReturnValueHandlerTests {
 	}
 
 	@Test
-	public void deferredResultWitError() throws Exception {
+	public void deferredResultWithError() throws Exception {
 		DeferredResult<String> result = new DeferredResult<>();
 		testHandle(result, DeferredResult.class, () -> result.setResult("foo"), "foo");
 	}
@@ -121,6 +119,7 @@ public class DeferredResultReturnValueHandlerTests {
 		IllegalStateException ex = new IllegalStateException();
 		testHandle(future, CompletableFuture.class, () -> future.setException(ex), ex);
 	}
+
 
 	private void testHandle(Object returnValue, Class<?> asyncType,
 			Runnable setResultTask, Object expectedValue) throws Exception {
