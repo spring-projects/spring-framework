@@ -17,7 +17,7 @@
 package org.springframework.http.converter.json;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
+import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gson.reflect.TypeToken;
 import org.junit.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -75,9 +74,9 @@ public class GsonHttpMessageConverterTests {
 		assertEquals("Foo", result.getString());
 		assertEquals(42, result.getNumber());
 		assertEquals(42F, result.getFraction(), 0F);
-		assertArrayEquals(new String[]{"Foo", "Bar"}, result.getArray());
+		assertArrayEquals(new String[] {"Foo", "Bar"}, result.getArray());
 		assertTrue(result.isBool());
-		assertArrayEquals(new byte[]{0x1, 0x2}, result.getBytes());
+		assertArrayEquals(new byte[] {0x1, 0x2}, result.getBytes());
 	}
 
 	@Test
@@ -103,7 +102,7 @@ public class GsonHttpMessageConverterTests {
 		for (int i = 0; i < 2; i++) {
 			bytes[i] = resultBytes.get(i).byteValue();
 		}
-		assertArrayEquals(new byte[]{0x1, 0x2}, bytes);
+		assertArrayEquals(new byte[] {0x1, 0x2}, bytes);
 	}
 
 	@Test
@@ -113,9 +112,9 @@ public class GsonHttpMessageConverterTests {
 		body.setString("Foo");
 		body.setNumber(42);
 		body.setFraction(42F);
-		body.setArray(new String[]{"Foo", "Bar"});
+		body.setArray(new String[] {"Foo", "Bar"});
 		body.setBool(true);
-		body.setBytes(new byte[]{0x1, 0x2});
+		body.setBytes(new byte[] {0x1, 0x2});
 		this.converter.write(body, null, outputMessage);
 		Charset utf8 = StandardCharsets.UTF_8;
 		String result = outputMessage.getBodyAsString(utf8);
@@ -149,25 +148,15 @@ public class GsonHttpMessageConverterTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void readGenerics() throws IOException {
-		GsonHttpMessageConverter converter = new GsonHttpMessageConverter() {
-			@Override
-			protected TypeToken<?> getTypeToken(Type type) {
-				if (type instanceof Class && List.class.isAssignableFrom((Class<?>) type)) {
-					return new TypeToken<ArrayList<MyBean>>() {
-					};
-				}
-				else {
-					return super.getTypeToken(type);
-				}
-			}
-		};
+	public void readGenerics() throws Exception {
+		Field beansList = ListHolder.class.getField("listField");
+
 		String body = "[{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}]";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 
-		List<MyBean> results = (List<MyBean>) converter.read(List.class, inputMessage);
+		List<MyBean> results = (List<MyBean>) converter.read(beansList.getGenericType(), MyBeanListHolder.class, inputMessage);
 		assertEquals(1, results.size());
 		MyBean result = results.get(0);
 		assertEquals("Foo", result.getString());
@@ -180,7 +169,7 @@ public class GsonHttpMessageConverterTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void readParameterizedType() throws IOException {
+	public void readParameterizedType() throws Exception {
 		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<List<MyBean>>() {
 		};
 
@@ -189,7 +178,6 @@ public class GsonHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 
-		GsonHttpMessageConverter converter = new GsonHttpMessageConverter();
 		List<MyBean> results = (List<MyBean>) converter.read(beansList.getType(), null, inputMessage);
 		assertEquals(1, results.size());
 		MyBean result = results.get(0);
@@ -198,7 +186,7 @@ public class GsonHttpMessageConverterTests {
 		assertEquals(42F, result.getFraction(), 0F);
 		assertArrayEquals(new String[] { "Foo", "Bar" }, result.getArray());
 		assertTrue(result.isBool());
-		assertArrayEquals(new byte[] { 0x1, 0x2 }, result.getBytes());
+		assertArrayEquals(new byte[] {0x1, 0x2}, result.getBytes());
 	}
 
 	@Test
@@ -279,6 +267,16 @@ public class GsonHttpMessageConverterTests {
 		public void setArray(String[] array) {
 			this.array = array;
 		}
+	}
+
+
+	public static class ListHolder<E> {
+
+		public List<E> listField;
+	}
+
+
+	public static class MyBeanListHolder extends ListHolder<MyBean> {
 	}
 
 }

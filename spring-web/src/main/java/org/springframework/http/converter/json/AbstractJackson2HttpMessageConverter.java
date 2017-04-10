@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,7 @@
 package org.springframework.http.converter.json;
 
 import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
@@ -40,7 +38,7 @@ import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
-import org.springframework.core.ResolvableType;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
@@ -56,7 +54,7 @@ import org.springframework.util.TypeUtils;
  * Abstract base class for Jackson based and content type independent
  * {@link HttpMessageConverter} implementations.
  *
- * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
+ * <p>Compatible with Jackson 2.9 and higher, as of Spring 5.0.
  *
  * @author Arjen Poutsma
  * @author Keith Donald
@@ -205,12 +203,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 	@Override
-	protected boolean supports(Class<?> clazz) {
-		// should not be called, since we override canRead/Write instead
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
@@ -238,10 +230,11 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
 		}
 		catch (InvalidDefinitionException ex) {
-			throw new HttpMessageNotReadableException("Could not read document: " + ex.getMessage(), ex, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new HttpMessageNotReadableException(
+					"Could not map JSON to target object of " + javaType, ex, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		catch (IOException ex) {
-			throw new HttpMessageNotReadableException("Could not read document: " + ex.getMessage(), ex);
+			throw new HttpMessageNotReadableException("Could not read JSON document: " + ex.getMessage(), ex);
 		}
 	}
 
@@ -293,7 +286,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 		}
 		catch (JsonProcessingException ex) {
-			throw new HttpMessageNotWritableException("Could not write content: " + ex.getMessage(), ex);
+			throw new HttpMessageNotWritableException("Could not write JSON document: " + ex.getMessage(), ex);
 		}
 	}
 
@@ -315,18 +308,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 	/**
 	 * Return the Jackson {@link JavaType} for the specified type and context class.
-	 * <p>The default implementation returns {@code typeFactory.constructType(type, contextClass)},
-	 * but this can be overridden in subclasses, to allow for custom generic collection handling.
-	 * For instance:
-	 * <pre class="code">
-	 * protected JavaType getJavaType(Type type) {
-	 *   if (type instanceof Class && List.class.isAssignableFrom((Class)type)) {
-	 *     return TypeFactory.collectionType(ArrayList.class, MyBean.class);
-	 *   } else {
-	 *     return super.getJavaType(type);
-	 *   }
-	 * }
-	 * </pre>
 	 * @param type the generic type to return the Jackson JavaType for
 	 * @param contextClass a context class for the target type, for example a class
 	 * in which the target type appears in a method signature (can be {@code null})
@@ -334,65 +315,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 */
 	protected JavaType getJavaType(Type type, Class<?> contextClass) {
 		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
-		if (contextClass != null) {
-			ResolvableType resolvedType = ResolvableType.forType(type);
-			if (type instanceof TypeVariable) {
-				ResolvableType resolvedTypeVariable = resolveVariable(
-						(TypeVariable<?>) type, ResolvableType.forClass(contextClass));
-				if (resolvedTypeVariable != ResolvableType.NONE) {
-					return typeFactory.constructType(resolvedTypeVariable.resolve());
-				}
-			}
-			else if (type instanceof ParameterizedType && resolvedType.hasUnresolvableGenerics()) {
-				ParameterizedType parameterizedType = (ParameterizedType) type;
-				Class<?>[] generics = new Class<?>[parameterizedType.getActualTypeArguments().length];
-				Type[] typeArguments = parameterizedType.getActualTypeArguments();
-				for (int i = 0; i < typeArguments.length; i++) {
-					Type typeArgument = typeArguments[i];
-					if (typeArgument instanceof TypeVariable) {
-						ResolvableType resolvedTypeArgument = resolveVariable(
-								(TypeVariable<?>) typeArgument, ResolvableType.forClass(contextClass));
-						if (resolvedTypeArgument != ResolvableType.NONE) {
-							generics[i] = resolvedTypeArgument.resolve();
-						}
-						else {
-							generics[i] = ResolvableType.forType(typeArgument).resolve();
-						}
-					}
-					else {
-						generics[i] = ResolvableType.forType(typeArgument).resolve();
-					}
-				}
-				return typeFactory.constructType(ResolvableType.
-						forClassWithGenerics(resolvedType.getRawClass(), generics).getType());
-			}
-		}
-		return typeFactory.constructType(type);
-	}
-
-	private ResolvableType resolveVariable(TypeVariable<?> typeVariable, ResolvableType contextType) {
-		ResolvableType resolvedType;
-		if (contextType.hasGenerics()) {
-			resolvedType = ResolvableType.forType(typeVariable, contextType);
-			if (resolvedType.resolve() != null) {
-				return resolvedType;
-			}
-		}
-
-		ResolvableType superType = contextType.getSuperType();
-		if (superType != ResolvableType.NONE) {
-			resolvedType = resolveVariable(typeVariable, superType);
-			if (resolvedType.resolve() != null) {
-				return resolvedType;
-			}
-		}
-		for (ResolvableType ifc : contextType.getInterfaces()) {
-			resolvedType = resolveVariable(typeVariable, ifc);
-			if (resolvedType.resolve() != null) {
-				return resolvedType;
-			}
-		}
-		return ResolvableType.NONE;
+		return typeFactory.constructType(GenericTypeResolver.resolveType(type, contextClass));
 	}
 
 	/**

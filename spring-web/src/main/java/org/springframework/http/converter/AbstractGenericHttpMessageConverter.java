@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,13 +59,18 @@ public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHtt
 
 
 	@Override
+	protected boolean supports(Class<?> clazz) {
+		return true;
+	}
+
+	@Override
 	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
-		return canRead(contextClass, mediaType);
+		return canRead(mediaType);
 	}
 
 	@Override
 	public boolean canWrite(Type type, Class<?> clazz, MediaType mediaType) {
-		return canWrite(clazz, mediaType);
+		return canWrite(mediaType);
 	}
 
 	/**
@@ -102,7 +107,6 @@ public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHtt
 		}
 	}
 
-
 	@Override
 	protected void writeInternal(T t, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
@@ -113,7 +117,7 @@ public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHtt
 	/**
 	 * Abstract template method that writes the actual body. Invoked from {@link #write}.
 	 * @param t the object to write to the output message
-	 * @param type the type of object to write, can be {@code null} if not specified.
+	 * @param type the type of object to write (may be {@code null})
 	 * @param outputMessage the HTTP output message to write to
 	 * @throws IOException in case of I/O errors
 	 * @throws HttpMessageNotWritableException in case of conversion errors
