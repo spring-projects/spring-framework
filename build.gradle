@@ -259,6 +259,7 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 		options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
 		options.author = true
 		options.header = project.name
+		options.use = true
 		options.links(project.ext.javadocLinks)
 		options.addStringOption('Xdoclint:none', '-quiet')
 
