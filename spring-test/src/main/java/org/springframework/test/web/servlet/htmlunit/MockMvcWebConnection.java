@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.util.Cookie;
+import org.apache.http.impl.cookie.BasicClientCookie;
 
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
@@ -161,7 +162,7 @@ public final class MockMvcWebConnection implements WebConnection {
 			if (cookie.getDomain() == null) {
 				cookie.setDomain(webRequest.getUrl().getHost());
 			}
-			Cookie toManage = MockWebResponseBuilder.createCookie(cookie);
+			Cookie toManage = createCookie(cookie);
 			Date expires = toManage.getExpires();
 			if (expires == null || expires.after(now)) {
 				cookieManager.addCookie(toManage);
@@ -170,6 +171,23 @@ public final class MockMvcWebConnection implements WebConnection {
 				cookieManager.removeCookie(toManage);
 			}
 		}
+	}
+
+	private static com.gargoylesoftware.htmlunit.util.Cookie createCookie(javax.servlet.http.Cookie cookie) {
+		Date expires = null;
+		if (cookie.getMaxAge() > -1) {
+			expires = new Date(System.currentTimeMillis() + cookie.getMaxAge() * 1000);
+		}
+		BasicClientCookie result = new BasicClientCookie(cookie.getName(), cookie.getValue());
+		result.setDomain(cookie.getDomain());
+		result.setComment(cookie.getComment());
+		result.setExpiryDate(expires);
+		result.setPath(cookie.getPath());
+		result.setSecure(cookie.getSecure());
+		if (cookie.isHttpOnly()) {
+			result.setAttribute("httponly", "true");
+		}
+		return new com.gargoylesoftware.htmlunit.util.Cookie(result);
 	}
 
 	@Override
