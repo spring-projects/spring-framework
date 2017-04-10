@@ -69,7 +69,12 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	}
 
 
-	private final UrlPathHelper pathHelper = new UrlPathHelper();
+	private final UrlPathHelper pathHelper;
+
+	public ForwardedHeaderFilter() {
+		this.pathHelper = new UrlPathHelper();
+		this.pathHelper.setUrlDecode(false);
+	}
 
 
 	@Override
