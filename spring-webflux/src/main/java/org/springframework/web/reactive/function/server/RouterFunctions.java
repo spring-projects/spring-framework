@@ -237,6 +237,9 @@ public abstract class RouterFunctions {
 					.otherwise(ResponseStatusException.class,
 							ex -> {
 								exchange.getResponse().setStatusCode(ex.getStatus());
+								if (ex.getMessage() != null) {
+									logger.error(ex.getMessage());
+								}
 								return Mono.empty();
 							});
 		});

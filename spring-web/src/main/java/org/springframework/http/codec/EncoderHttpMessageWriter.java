@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.reactivestreams.Publisher;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -95,8 +97,9 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 		MediaType contentType = updateContentType(message, mediaType);
 
-		Flux<DataBuffer> body = this.encoder.encode(
-				inputStream, message.bufferFactory(), elementType, contentType, hints);
+		Flux<DataBuffer> body = this.encoder
+				.encode(inputStream, message.bufferFactory(), elementType, contentType, hints)
+				.mapError(this::mapError);
 
 		return isStreamingMediaType(contentType) ?
 				message.writeAndFlushWith(body.map(Flux::just)) :
@@ -133,6 +136,13 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		return this.encoder instanceof HttpMessageEncoder &&
 				((HttpMessageEncoder<?>) this.encoder).getStreamingMediaTypes().stream()
 						.anyMatch(contentType::isCompatibleWith);
+	}
+
+	private Throwable mapError(Throwable ex) {
+		if (ex instanceof ResponseStatusException) {
+			return ex;
+		}
+		return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to encode HTTP message", ex);
 	}
 
 

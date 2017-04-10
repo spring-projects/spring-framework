@@ -22,14 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.core.*;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.Conventions;
-import org.springframework.core.MethodParameter;
-import org.springframework.core.ReactiveAdapter;
-import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
@@ -154,7 +151,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	}
 
 	private ServerWebInputException getReadError(MethodParameter parameter, Throwable ex) {
-		return new ServerWebInputException("Failed to read HTTP message", parameter, ex);
+		return new ServerWebInputException("Failed to read HTTP message", parameter, ex instanceof ResponseStatusException ? ex.getCause() : ex);
 	}
 
 	private ServerWebInputException getRequiredBodyError(MethodParameter parameter) {
