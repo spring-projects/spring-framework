@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,11 +95,15 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 		if (defaultLocale != null && request.getHeader("Accept-Language") == null) {
 			return defaultLocale;
 		}
-		Locale locale = request.getLocale();
-		if (!isSupportedLocale(locale)) {
-			locale = findSupportedLocale(request, locale);
+		Locale requestLocale = request.getLocale();
+		if (isSupportedLocale(requestLocale)) {
+			return requestLocale;
 		}
-		return locale;
+		Locale supportedLocale = findSupportedLocale(request);
+		if (supportedLocale != null) {
+			return supportedLocale;
+		}
+		return (defaultLocale != null ? defaultLocale : requestLocale);
 	}
 
 	private boolean isSupportedLocale(Locale locale) {
@@ -107,7 +111,7 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 		return (supportedLocales.isEmpty() || supportedLocales.contains(locale));
 	}
 
-	private Locale findSupportedLocale(HttpServletRequest request, Locale fallback) {
+	private Locale findSupportedLocale(HttpServletRequest request) {
 		Enumeration<Locale> requestLocales = request.getLocales();
 		while (requestLocales.hasMoreElements()) {
 			Locale locale = requestLocales.nextElement();
@@ -115,7 +119,7 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 				return locale;
 			}
 		}
-		return fallback;
+		return null;
 	}
 
 	@Override
