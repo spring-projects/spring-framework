@@ -22,29 +22,25 @@ import org.springframework.http.MediaType
 import reactor.core.publisher.Mono
 
 /**
- * Provide a routing DSL for [RouterFunctions] and [RouterFunction] in order to be able to
- * write idiomatic Kotlin code as below:
+ * Provide a [RouterFunction] Kotlin DSL in order to be able to write idiomatic Kotlin code as below:
  *
  * ```kotlin
  *
- * @Controller
- * class FooController : RouterFunction<ServerResponse> {
+ * @Configuration
+ * class ApplicationRoutes(val userHandler: UserHandler) {
  *
- * 		override fun route(req: ServerRequest) = route(req) {
- * 			accept(TEXT_HTML).apply {
- * 				(GET("/user/") or GET("/users/")) { findAllView() }
- * 				GET("/user/{login}", this@FooController::findViewById)
+ * 		@Bean
+ * 		fun mainRouter() = router {
+ * 			accept(TEXT_HTML).nest {
+ * 				(GET("/user/") or GET("/users/")).invoke(userHandler::findAllView)
+ * 				GET("/users/{login}", userHandler::findViewById)
  * 			}
- * 			accept(APPLICATION_JSON).apply {
- * 				(GET("/api/user/") or GET("/api/users/")) { findAll() }
- * 				POST("/api/user/", this@FooController::create)
+ * 			accept(APPLICATION_JSON).nest {
+ * 				(GET("/api/user/") or GET("/api/users/")).invoke(userHandler::findAll)
+ * 				POST("/api/users/", userHandler::create)
  * 			}
  * 		}
  *
- * 		fun findAllView() = ...
- * 		fun findViewById(req: ServerRequest) = ...
- * 		fun findAll() = ...
- * 		fun create(req: ServerRequest) =
  * 	}
  * ```
  *
