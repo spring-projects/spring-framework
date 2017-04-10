@@ -735,6 +735,7 @@ project("spring-web") {
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${jackson2Version}")
 		optional("com.google.code.gson:gson:${gsonVersion}")
+		optional("javax.json.bind:javax.json.bind-api:1.0.0-M1")
 		optional("com.rometools:rome:${romeVersion}")
 		optional("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
