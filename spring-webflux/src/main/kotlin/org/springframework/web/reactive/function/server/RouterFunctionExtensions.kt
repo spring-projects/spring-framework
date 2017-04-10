@@ -50,14 +50,14 @@ import reactor.core.publisher.Mono
  * @see <a href="https://youtrack.jetbrains.com/issue/KT-15667">Kotlin issue about supporting ::foo for member functions</a>
  */
 
-typealias Routes = RouterDsl.() -> Unit
+typealias Routes = RouterFunctionDsl.() -> Unit
 
 /**
  * Allow to create easily a [RouterFunction] from [Routes]
  */
-fun router(routes: Routes) = RouterDsl().apply(routes).router()
+fun router(routes: Routes) = RouterFunctionDsl().apply(routes).router()
 
-class RouterDsl {
+class RouterFunctionDsl {
 
 	val routes = mutableListOf<RouterFunction<ServerResponse>>()
 
@@ -76,11 +76,11 @@ class RouterDsl {
 	operator fun RequestPredicate.not(): RequestPredicate = this.negate()
 
 	fun RequestPredicate.nest(r: Routes) {
-		routes += RouterFunctions.nest(this, RouterDsl().apply(r).router())
+		routes += RouterFunctions.nest(this, RouterFunctionDsl().apply(r).router())
 	}
 
 	fun String.nest(r: Routes) {
-		routes += RouterFunctions.nest(path(this), RouterDsl().apply(r).router())
+		routes += RouterFunctions.nest(path(this), RouterFunctionDsl().apply(r).router())
 	}
 
 	operator fun RequestPredicate.invoke(f: (ServerRequest) -> Mono<ServerResponse>) {
