@@ -74,6 +74,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	public ForwardedHeaderFilter() {
 		this.pathHelper = new UrlPathHelper();
 		this.pathHelper.setUrlDecode(false);
+		this.pathHelper.setRemoveSemicolonContent(false);
 	}
 
 
