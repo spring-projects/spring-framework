@@ -138,6 +138,7 @@ public abstract class StringUtils {
 		if (!hasLength(str)) {
 			return false;
 		}
+
 		int strLen = str.length();
 		for (int i = 0; i < strLen; i++) {
 			if (!Character.isWhitespace(str.charAt(i))) {
@@ -172,6 +173,7 @@ public abstract class StringUtils {
 		if (!hasLength(str)) {
 			return false;
 		}
+
 		int strLen = str.length();
 		for (int i = 0; i < strLen; i++) {
 			if (Character.isWhitespace(str.charAt(i))) {
@@ -202,6 +204,7 @@ public abstract class StringUtils {
 		if (!hasLength(str)) {
 			return str;
 		}
+
 		StringBuilder sb = new StringBuilder(str);
 		while (sb.length() > 0 && Character.isWhitespace(sb.charAt(0))) {
 			sb.deleteCharAt(0);
@@ -223,6 +226,7 @@ public abstract class StringUtils {
 		if (!hasLength(str)) {
 			return str;
 		}
+
 		int len = str.length();
 		StringBuilder sb = new StringBuilder(str.length());
 		for (int i = 0; i < len; i++) {
@@ -244,6 +248,7 @@ public abstract class StringUtils {
 		if (!hasLength(str)) {
 			return str;
 		}
+
 		StringBuilder sb = new StringBuilder(str);
 		while (sb.length() > 0 && Character.isWhitespace(sb.charAt(0))) {
 			sb.deleteCharAt(0);
@@ -261,6 +266,7 @@ public abstract class StringUtils {
 		if (!hasLength(str)) {
 			return str;
 		}
+
 		StringBuilder sb = new StringBuilder(str);
 		while (sb.length() > 0 && Character.isWhitespace(sb.charAt(sb.length() - 1))) {
 			sb.deleteCharAt(sb.length() - 1);
@@ -278,6 +284,7 @@ public abstract class StringUtils {
 		if (!hasLength(str)) {
 			return str;
 		}
+
 		StringBuilder sb = new StringBuilder(str);
 		while (sb.length() > 0 && sb.charAt(0) == leadingCharacter) {
 			sb.deleteCharAt(0);
@@ -295,6 +302,7 @@ public abstract class StringUtils {
 		if (!hasLength(str)) {
 			return str;
 		}
+
 		StringBuilder sb = new StringBuilder(str);
 		while (sb.length() > 0 && sb.charAt(sb.length() - 1) == trailingCharacter) {
 			sb.deleteCharAt(sb.length() - 1);
@@ -320,6 +328,7 @@ public abstract class StringUtils {
 		if (str.length() < prefix.length()) {
 			return false;
 		}
+
 		String lcStr = str.substring(0, prefix.length()).toLowerCase();
 		String lcPrefix = prefix.toLowerCase();
 		return lcStr.equals(lcPrefix);
@@ -374,6 +383,7 @@ public abstract class StringUtils {
 		if (!hasLength(str) || !hasLength(sub)) {
 			return 0;
 		}
+
 		int count = 0;
 		int pos = 0;
 		int idx;
@@ -396,10 +406,19 @@ public abstract class StringUtils {
 		if (!hasLength(inString) || !hasLength(oldPattern) || newPattern == null) {
 			return inString;
 		}
-		StringBuilder sb = new StringBuilder();
-		int pos = 0; // our position in the old string
 		int index = inString.indexOf(oldPattern);
-		// the index of an occurrence we've found, or -1
+		if (index == -1) {
+			// no occurrence -> can return input as-is
+			return inString;
+		}
+
+		int capacity = inString.length();
+		if (newPattern.length() > oldPattern.length()) {
+			capacity += 16;
+		}
+		StringBuilder sb = new StringBuilder(capacity);
+
+		int pos = 0;  // our position in the old string
 		int patLen = oldPattern.length();
 		while (index >= 0) {
 			sb.append(inString.substring(pos, index));
@@ -407,8 +426,9 @@ public abstract class StringUtils {
 			pos = index + patLen;
 			index = inString.indexOf(oldPattern, pos);
 		}
+
+		// append any characters to the right of a match
 		sb.append(inString.substring(pos));
-		// remember to append any characters to the right of a match
 		return sb.toString();
 	}
 
@@ -433,7 +453,8 @@ public abstract class StringUtils {
 		if (!hasLength(inString) || !hasLength(charsToDelete)) {
 			return inString;
 		}
-		StringBuilder sb = new StringBuilder();
+
+		StringBuilder sb = new StringBuilder(inString.length());
 		for (int i = 0; i < inString.length(); i++) {
 			char c = inString.charAt(i);
 			if (charsToDelete.indexOf(c) == -1) {
@@ -516,6 +537,7 @@ public abstract class StringUtils {
 		if (!hasLength(str)) {
 			return str;
 		}
+
 		char baseChar = str.charAt(0);
 		char updatedChar;
 		if (capitalize) {
@@ -527,6 +549,7 @@ public abstract class StringUtils {
 		if (baseChar == updatedChar) {
 			return str;
 		}
+
 		char[] chars = str.toCharArray();
 		chars[0] = updatedChar;
 		return new String(chars, 0, chars.length);
@@ -542,6 +565,7 @@ public abstract class StringUtils {
 		if (path == null) {
 			return null;
 		}
+
 		int separatorIndex = path.lastIndexOf(FOLDER_SEPARATOR);
 		return (separatorIndex != -1 ? path.substring(separatorIndex + 1) : path);
 	}
@@ -556,14 +580,17 @@ public abstract class StringUtils {
 		if (path == null) {
 			return null;
 		}
+
 		int extIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
 		if (extIndex == -1) {
 			return null;
 		}
+
 		int folderIndex = path.lastIndexOf(FOLDER_SEPARATOR);
 		if (folderIndex > extIndex) {
 			return null;
 		}
+
 		return path.substring(extIndex + 1);
 	}
 
@@ -578,14 +605,17 @@ public abstract class StringUtils {
 		if (path == null) {
 			return null;
 		}
+
 		int extIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
 		if (extIndex == -1) {
 			return path;
 		}
+
 		int folderIndex = path.lastIndexOf(FOLDER_SEPARATOR);
 		if (folderIndex > extIndex) {
 			return path;
 		}
+
 		return path.substring(0, extIndex);
 	}
 
@@ -701,8 +731,10 @@ public abstract class StringUtils {
 		String[] parts = tokenizeToStringArray(localeString, "_ ", false, false);
 		String language = (parts.length > 0 ? parts[0] : "");
 		String country = (parts.length > 1 ? parts[1] : "");
+
 		validateLocalePart(language);
 		validateLocalePart(country);
+
 		String variant = "";
 		if (parts.length > 2) {
 			// There is definitely a variant, and it is everything after the country
@@ -770,6 +802,7 @@ public abstract class StringUtils {
 		if (ObjectUtils.isEmpty(array)) {
 			return new String[] {str};
 		}
+
 		String[] newArr = new String[array.length + 1];
 		System.arraycopy(array, 0, newArr, 0, array.length);
 		newArr[array.length] = str;
@@ -791,6 +824,7 @@ public abstract class StringUtils {
 		if (ObjectUtils.isEmpty(array2)) {
 			return array1;
 		}
+
 		String[] newArr = new String[array1.length + array2.length];
 		System.arraycopy(array1, 0, newArr, 0, array1.length);
 		System.arraycopy(array2, 0, newArr, array1.length, array2.length);
@@ -814,6 +848,7 @@ public abstract class StringUtils {
 		if (ObjectUtils.isEmpty(array2)) {
 			return array1;
 		}
+
 		List<String> result = new ArrayList<String>();
 		result.addAll(Arrays.asList(array1));
 		for (String str : array2) {
@@ -833,6 +868,7 @@ public abstract class StringUtils {
 		if (ObjectUtils.isEmpty(array)) {
 			return new String[0];
 		}
+
 		Arrays.sort(array);
 		return array;
 	}
@@ -848,6 +884,7 @@ public abstract class StringUtils {
 		if (collection == null) {
 			return null;
 		}
+
 		return collection.toArray(new String[collection.size()]);
 	}
 
@@ -862,6 +899,7 @@ public abstract class StringUtils {
 		if (enumeration == null) {
 			return null;
 		}
+
 		List<String> list = Collections.list(enumeration);
 		return list.toArray(new String[list.size()]);
 	}
@@ -876,6 +914,7 @@ public abstract class StringUtils {
 		if (ObjectUtils.isEmpty(array)) {
 			return new String[0];
 		}
+
 		String[] result = new String[array.length];
 		for (int i = 0; i < array.length; i++) {
 			String element = array[i];
@@ -894,6 +933,7 @@ public abstract class StringUtils {
 		if (ObjectUtils.isEmpty(array)) {
 			return array;
 		}
+
 		Set<String> set = new LinkedHashSet<String>();
 		for (String element : array) {
 			set.add(element);
@@ -918,6 +958,7 @@ public abstract class StringUtils {
 		if (offset < 0) {
 			return null;
 		}
+
 		String beforeDelimiter = toSplit.substring(0, offset);
 		String afterDelimiter = toSplit.substring(offset + delimiter.length());
 		return new String[] {beforeDelimiter, afterDelimiter};
@@ -958,6 +999,7 @@ public abstract class StringUtils {
 		if (ObjectUtils.isEmpty(array)) {
 			return null;
 		}
+
 		Properties result = new Properties();
 		for (String element : array) {
 			if (charsToDelete != null) {
@@ -1018,6 +1060,7 @@ public abstract class StringUtils {
 		if (str == null) {
 			return null;
 		}
+
 		StringTokenizer st = new StringTokenizer(str, delimiters);
 		List<String> tokens = new ArrayList<String>();
 		while (st.hasMoreTokens()) {
@@ -1071,6 +1114,7 @@ public abstract class StringUtils {
 		if (delimiter == null) {
 			return new String[] {str};
 		}
+
 		List<String> result = new ArrayList<String>();
 		if ("".equals(delimiter)) {
 			for (int i = 0; i < str.length(); i++) {
@@ -1132,6 +1176,7 @@ public abstract class StringUtils {
 		if (CollectionUtils.isEmpty(coll)) {
 			return "";
 		}
+
 		StringBuilder sb = new StringBuilder();
 		Iterator<?> it = coll.iterator();
 		while (it.hasNext()) {
@@ -1178,6 +1223,7 @@ public abstract class StringUtils {
 		if (arr.length == 1) {
 			return ObjectUtils.nullSafeToString(arr[0]);
 		}
+
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < arr.length; i++) {
 			if (i > 0) {
