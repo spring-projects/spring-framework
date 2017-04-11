@@ -40,6 +40,7 @@ import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 public class ServletWebSocketHandlerRegistration
 		extends AbstractWebSocketHandlerRegistration<MultiValueMap<HttpRequestHandler, String>> {
 
+
 	public ServletWebSocketHandlerRegistration(TaskScheduler sockJsTaskScheduler) {
 		super(sockJsTaskScheduler);
 	}
@@ -60,10 +61,12 @@ public class ServletWebSocketHandlerRegistration
 
 	@Override
 	protected void addWebSocketHandlerMapping(MultiValueMap<HttpRequestHandler, String> mappings,
-			WebSocketHandler wsHandler, HandshakeHandler handshakeHandler,
+			WebSocketHandler webSocketHandler, HandshakeHandler handshakeHandler,
 			HandshakeInterceptor[] interceptors, String path) {
 
-		WebSocketHttpRequestHandler httpHandler = new WebSocketHttpRequestHandler(wsHandler, handshakeHandler);
+		WebSocketHttpRequestHandler httpHandler =
+				new WebSocketHttpRequestHandler(webSocketHandler, handshakeHandler);
+
 		if (!ObjectUtils.isEmpty(interceptors)) {
 			httpHandler.setHandshakeInterceptors(Arrays.asList(interceptors));
 		}

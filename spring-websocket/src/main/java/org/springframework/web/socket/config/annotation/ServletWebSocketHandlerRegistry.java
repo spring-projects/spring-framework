@@ -41,8 +41,7 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry {
 
-	private final List<ServletWebSocketHandlerRegistration> registrations =
-			new ArrayList<>();
+	private final List<ServletWebSocketHandlerRegistration> registrations = new ArrayList<>(4);
 
 	private TaskScheduler sockJsTaskScheduler;
 
@@ -56,10 +55,10 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 	}
 
 	@Override
-	public WebSocketHandlerRegistration addHandler(WebSocketHandler webSocketHandler, String... paths) {
+	public WebSocketHandlerRegistration addHandler(WebSocketHandler handler, String... paths) {
 		ServletWebSocketHandlerRegistration registration =
 				new ServletWebSocketHandlerRegistration(this.sockJsTaskScheduler);
-		registration.addHandler(webSocketHandler, paths);
+		registration.addHandler(handler, paths);
 		this.registrations.add(registration);
 		return registration;
 	}
