@@ -29,6 +29,7 @@ import org.springframework.http.StreamingHttpOutputMessage;
  * Abstract base class for most {@link GenericHttpMessageConverter} implementations.
  *
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 4.2
  */
 public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHttpMessageConverter<T>
@@ -65,12 +66,12 @@ public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHtt
 
 	@Override
 	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
-		return canRead(mediaType);
+		return (type instanceof Class ? canRead((Class<?>) type, mediaType) : canRead(mediaType));
 	}
 
 	@Override
 	public boolean canWrite(Type type, Class<?> clazz, MediaType mediaType) {
-		return canWrite(mediaType);
+		return canWrite(clazz, mediaType);
 	}
 
 	/**
