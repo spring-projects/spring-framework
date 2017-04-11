@@ -46,8 +46,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.reactive.function.BodyInserter;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -192,7 +191,7 @@ public class DefaultEntityResponseBuilderTests {
 		MockServerWebExchange exchange = MockServerHttpRequest.get("http://localhost").toExchange();
 
 		HandlerStrategies strategies = HandlerStrategies.empty()
-				.messageWriter(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()))
+				.customMessageWriter(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()))
 				.build();
 
 		StepVerifier.create(result)

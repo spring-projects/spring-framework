@@ -22,10 +22,14 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.springframework.context.ApplicationContext;
+import org.springframework.core.codec.Decoder;
+import org.springframework.core.codec.Encoder;
+import org.springframework.http.codec.DecoderHttpMessageReader;
+import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.util.Assert;
+import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
 /**
@@ -69,7 +73,7 @@ public interface HandlerStrategies {
 	 * Supply a function that resolves the locale of a given {@link ServerRequest}.
 	 * @return the locale resolver
 	 */
-	Function<ServerRequest, Optional<Locale>> localeResolver();
+	Supplier<Function<ServerRequest, Optional<Locale>>> localeResolver();
 
 
 	// Static methods
@@ -82,20 +86,6 @@ public interface HandlerStrategies {
 		return builder().build();
 	}
 
-	/**
-	 * Return a new {@code HandlerStrategies} based on the given
-	 * {@linkplain ApplicationContext application context}.
-	 * The returned supplier will search for all {@link HttpMessageReader}, {@link HttpMessageWriter},
-	 * and {@link ViewResolver} instances in the given application context and return them for
-	 * {@link #messageReaders()}, {@link #messageWriters()}, and {@link #viewResolvers()}
-	 * respectively.
-	 * @param applicationContext the application context to base the strategies on
-	 * @return the new {@code HandlerStrategies}
-	 */
-	static HandlerStrategies of(ApplicationContext applicationContext) {
-		return builder(applicationContext).build();
-	}
-
 	// Builder methods
 
 	/**
@@ -105,22 +95,6 @@ public interface HandlerStrategies {
 	static Builder builder() {
 		DefaultHandlerStrategiesBuilder builder = new DefaultHandlerStrategiesBuilder();
 		builder.defaultConfiguration();
-		return builder;
-	}
-
-	/**
-	 * Return a mutable builder based on the given {@linkplain ApplicationContext application context}.
-	 * The returned builder will search for all {@link HttpMessageReader}, {@link HttpMessageWriter},
-	 * and {@link ViewResolver} instances in the given application context and return them for
-	 * {@link #messageReaders()}, {@link #messageWriters()}, and {@link #viewResolvers()}
-	 * respectively.
-	 * @param applicationContext the application context to base the strategies on
-	 * @return the builder
-	 */
-	static Builder builder(ApplicationContext applicationContext) {
-		Assert.notNull(applicationContext, "ApplicationContext must not be null");
-		DefaultHandlerStrategiesBuilder builder = new DefaultHandlerStrategiesBuilder();
-		builder.applicationContext(applicationContext);
 		return builder;
 	}
 
@@ -139,18 +113,60 @@ public interface HandlerStrategies {
 	interface Builder {
 
 		/**
-		 * Add the given message reader to this builder.
-		 * @param messageReader the message reader to add
+		 * Configure the {@code Encoder} to use for Server-Sent Events.
+		 * <p>By default the {@link #jackson2Encoder} override is used for SSE.
+		 * @param encoder the encoder to use
 		 * @return this builder
 		 */
-		Builder messageReader(HttpMessageReader<?> messageReader);
+		Builder serverSentEventEncoder(Encoder<?> encoder);
 
 		/**
-		 * Add the given message writer to this builder.
-		 * @param messageWriter the message writer to add
+		 * Override the default Jackson {@code Decoder}.
+		 * @param decoder the decoder to use
 		 * @return this builder
 		 */
-		Builder messageWriter(HttpMessageWriter<?> messageWriter);
+		Builder jackson2Decoder(Jackson2JsonDecoder decoder);
+
+		/**
+		 * Override the default Jackson {@code Encoder} for JSON.
+		 * @param encoder the encoder to use
+		 * @return this builder
+		 */
+		Builder jackson2Encoder(Jackson2JsonEncoder encoder);
+
+		/**
+		 * Add a custom {@code Decoder} internally wrapped with
+		 * {@link DecoderHttpMessageReader}).
+		 * @param decoder the decoder to add
+		 * @return this builder
+		 */
+		Builder customDecoder(Decoder<?> decoder);
+
+		/**
+		 * Add a custom {@code Encoder}, internally wrapped with
+		 * {@link EncoderHttpMessageWriter}.
+		 * @param encoder the encoder to add
+		 * @return this builder
+		 */
+		Builder customEncoder(Encoder<?> encoder);
+
+		/**
+		 * Add a custom {@link HttpMessageReader}. For readers of type
+		 * {@link DecoderHttpMessageReader} consider using the shortcut
+		 * {@link #customDecoder(Decoder)} instead.
+		 * @param reader the reader to add
+		 * @return this builder
+		 */
+		Builder customMessageReader(HttpMessageReader<?> reader);
+
+		/**
+		 * Add a custom {@link HttpMessageWriter}. For readers of type
+		 * {@link EncoderHttpMessageWriter} consider using the shortcut
+		 * {@link #customEncoder(Encoder)} instead.
+		 * @param writer the writer to add
+		 * @return this builder
+		 */
+		Builder customMessageWriter(HttpMessageWriter<?> writer);
 
 		/**
 		 * Add the given view resolver to this builder.

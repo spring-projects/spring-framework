@@ -179,7 +179,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 							.orElseThrow(() -> new IllegalStateException(
 									"Could not find ServerRequest in exchange attributes"));
 
-			return strategies.localeResolver()
+			return strategies.localeResolver().get()
 					.apply(request)
 					.orElse(Locale.getDefault());
 

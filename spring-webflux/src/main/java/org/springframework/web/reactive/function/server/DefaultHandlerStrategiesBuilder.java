@@ -25,10 +25,13 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.springframework.context.ApplicationContext;
+import org.springframework.core.codec.Decoder;
+import org.springframework.core.codec.Encoder;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
@@ -46,40 +49,68 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 					.map(Locale::forLanguageTag).findFirst();
 
 
-	private final List<HttpMessageReader<?>> messageReaders = new ArrayList<>();
-
-	private final List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
-
+	private final ServerCodecConfigurer codecConfigurer = new ServerCodecConfigurer();
 	private final List<ViewResolver> viewResolvers = new ArrayList<>();
 
 	private Function<ServerRequest, Optional<Locale>> localeResolver;
 
 
-	public void defaultConfiguration() {
-		ServerCodecConfigurer configurer = new ServerCodecConfigurer();
-		configurer.getReaders().forEach(this::messageReader);
-		configurer.getWriters().forEach(this::messageWriter);
-		localeResolver(DEFAULT_LOCALE_RESOLVER);
+
+	public DefaultHandlerStrategiesBuilder() {
+		this.codecConfigurer.registerDefaults(false);
 	}
 
-	public void applicationContext(ApplicationContext applicationContext) {
-		applicationContext.getBeansOfType(HttpMessageReader.class).values().forEach(this::messageReader);
-		applicationContext.getBeansOfType(HttpMessageWriter.class).values().forEach(this::messageWriter);
-		applicationContext.getBeansOfType(ViewResolver.class).values().forEach(this::viewResolver);
+	public void defaultConfiguration() {
+		this.codecConfigurer.registerDefaults(true);
 		localeResolver(DEFAULT_LOCALE_RESOLVER);
 	}
 
 	@Override
-	public HandlerStrategies.Builder messageReader(HttpMessageReader<?> messageReader) {
-		Assert.notNull(messageReader, "'messageReader' must not be null");
-		this.messageReaders.add(messageReader);
+	public HandlerStrategies.Builder serverSentEventEncoder(Encoder<?> encoder) {
+		Assert.notNull(encoder, "'encoder' must not be null");
+		this.codecConfigurer.defaultCodecs().serverSentEventEncoder(encoder);
 		return this;
 	}
 
 	@Override
-	public HandlerStrategies.Builder messageWriter(HttpMessageWriter<?> messageWriter) {
-		Assert.notNull(messageWriter, "'messageWriter' must not be null");
-		this.messageWriters.add(messageWriter);
+	public HandlerStrategies.Builder jackson2Decoder(Jackson2JsonDecoder decoder) {
+		Assert.notNull(decoder, "'decoder' must not be null");
+		this.codecConfigurer.defaultCodecs().jackson2Decoder(decoder);
+		return this;
+	}
+
+	@Override
+	public HandlerStrategies.Builder jackson2Encoder(Jackson2JsonEncoder encoder) {
+		Assert.notNull(encoder, "'encoder' must not be null");
+		this.codecConfigurer.defaultCodecs().jackson2Encoder(encoder);
+		return this;
+	}
+
+	@Override
+	public HandlerStrategies.Builder customDecoder(Decoder<?> decoder) {
+		Assert.notNull(decoder, "'decoder' must not be null");
+		this.codecConfigurer.customCodecs().decoder(decoder);
+		return this;
+	}
+
+	@Override
+	public HandlerStrategies.Builder customEncoder(Encoder<?> encoder) {
+		Assert.notNull(encoder, "'encoder' must not be null");
+		this.codecConfigurer.customCodecs().encoder(encoder);
+		return this;
+	}
+
+	@Override
+	public HandlerStrategies.Builder customMessageReader(HttpMessageReader<?> reader) {
+		Assert.notNull(reader, "'reader' must not be null");
+		this.codecConfigurer.customCodecs().reader(reader);
+		return this;
+	}
+
+	@Override
+	public HandlerStrategies.Builder customMessageWriter(HttpMessageWriter<?> writer) {
+		Assert.notNull(writer, "'writer' must not be null");
+		this.codecConfigurer.customCodecs().writer(writer);
 		return this;
 	}
 
@@ -99,8 +130,8 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 
 	@Override
 	public HandlerStrategies build() {
-		return new DefaultHandlerStrategies(this.messageReaders, this.messageWriters,
-				this.viewResolvers, localeResolver);
+		return new DefaultHandlerStrategies(this.codecConfigurer.getReaders(),
+				this.codecConfigurer.getWriters(), this.viewResolvers, this.localeResolver);
 	}
 
 
@@ -146,8 +177,8 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 		}
 
 		@Override
-		public Function<ServerRequest, Optional<Locale>> localeResolver() {
-			return this.localeResolver;
+		public Supplier<Function<ServerRequest, Optional<Locale>>> localeResolver() {
+			return () -> this.localeResolver;
 		}
 	}
 
