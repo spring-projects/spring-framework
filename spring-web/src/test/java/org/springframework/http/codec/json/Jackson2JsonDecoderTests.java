@@ -33,6 +33,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
+import org.springframework.core.codec.InternalCodecException;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.codec.Pojo;
@@ -158,6 +159,46 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 		StepVerifier.create(mono)
 				.expectNextCount(0)
 				.verifyComplete();
+	}
+
+	@Test
+	public void invalidData() throws Exception {
+		Flux<DataBuffer> source = Flux.just(stringBuffer( "{\"property1\":\"foo\""));
+		ResolvableType elementType = forClass(BeanWithNoDefaultConstructor.class);
+		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, null, emptyMap());
+		StepVerifier.create(flux).expectError(InternalCodecException.class);
+	}
+
+	@Test
+	public void noDefaultConstructor() throws Exception {
+		Flux<DataBuffer> source = Flux.just(stringBuffer( "{\"property1\":\"foo\",\"property2\":\"bar\"}"));
+		ResolvableType elementType = forClass(BeanWithNoDefaultConstructor.class);
+		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, null, emptyMap());
+		StepVerifier
+				.create(flux)
+				.verifyErrorMatches(ex -> ex instanceof CodecException && !(ex instanceof InternalCodecException));
+	}
+
+
+	private static class BeanWithNoDefaultConstructor {
+
+		private final String property1;
+
+		private final String property2;
+
+		public BeanWithNoDefaultConstructor(String property1, String property2) {
+			this.property1 = property1;
+			this.property2 = property2;
+		}
+
+		public String getProperty1() {
+			return property1;
+		}
+
+		public String getProperty2() {
+			return property2;
+		}
+
 	}
 
 }

@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.core.*;
+import org.springframework.core.codec.InternalCodecException;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -150,8 +152,12 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		return Mono.error(new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes));
 	}
 
-	private ServerWebInputException getReadError(MethodParameter parameter, Throwable ex) {
-		return new ServerWebInputException("Failed to read HTTP message", parameter, ex instanceof ResponseStatusException ? ex.getCause() : ex);
+	private ResponseStatusException getReadError(MethodParameter parameter, Throwable ex) {
+		Throwable cause = ex instanceof ResponseStatusException ? ex.getCause() : ex;
+
+		return cause instanceof InternalCodecException ?
+				new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to read HTTP message", cause) :
+				new ServerWebInputException("Failed to read HTTP message", parameter, cause);
 	}
 
 	private ServerWebInputException getRequiredBodyError(MethodParameter parameter) {

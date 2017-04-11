@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.core.codec.CodecException;
+import org.springframework.core.codec.InternalCodecException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
@@ -112,10 +112,10 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 		if (ex instanceof ResponseStatusException) {
 			return ex;
 		}
-		else if (ex instanceof CodecException) {
-			return new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to decode HTTP message", ex);
+		else if (ex instanceof InternalCodecException) {
+			return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to decode HTTP message", ex);
 		}
-		return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to decode HTTP message", ex);
+		return new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to decode HTTP message", ex);
 	}
 
 

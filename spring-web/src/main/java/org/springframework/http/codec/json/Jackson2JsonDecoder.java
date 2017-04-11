@@ -24,6 +24,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -34,6 +35,7 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.codec.HttpMessageDecoder;
+import org.springframework.core.codec.InternalCodecException;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -112,6 +114,9 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 						Object value = reader.readValue(dataBuffer.asInputStream());
 						DataBufferUtils.release(dataBuffer);
 						return value;
+					}
+					catch (InvalidDefinitionException ex) {
+						throw new InternalCodecException("Error while reading the data", ex);
 					}
 					catch (IOException ex) {
 						throw new CodecException("Error while reading the data", ex);
