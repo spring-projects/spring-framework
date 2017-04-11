@@ -17,7 +17,11 @@
 package org.springframework.core;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +36,7 @@ import static org.springframework.util.ReflectionUtils.*;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-@SuppressWarnings({ "unchecked", "rawtypes" })
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class GenericTypeResolverTests {
 
 	@Test
@@ -73,8 +77,66 @@ public class GenericTypeResolverTests {
 	}
 
 	@Test
+	public void testResolveType() {
+		Method intMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerInputMessage", MyInterfaceType.class);
+		MethodParameter intMessageMethodParam = new MethodParameter(intMessageMethod, 0);
+		assertEquals(MyInterfaceType.class,
+				resolveType(intMessageMethodParam.getGenericParameterType(), new HashMap<>()));
+
+		Method intArrMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerArrayInputMessage",
+				MyInterfaceType[].class);
+		MethodParameter intArrMessageMethodParam = new MethodParameter(intArrMessageMethod, 0);
+		assertEquals(MyInterfaceType[].class,
+				resolveType(intArrMessageMethodParam.getGenericParameterType(), new HashMap<>()));
+
+		Method genericArrMessageMethod = findMethod(MySimpleTypeWithMethods.class, "readGenericArrayInputMessage",
+				Object[].class);
+		MethodParameter genericArrMessageMethodParam = new MethodParameter(genericArrMessageMethod, 0);
+		Map<TypeVariable, Type> varMap = getTypeVariableMap(MySimpleTypeWithMethods.class);
+		assertEquals(Integer[].class, resolveType(genericArrMessageMethodParam.getGenericParameterType(), varMap));
+	}
+
+	@Test
 	public void testBoundParameterizedType() {
 		assertEquals(B.class, resolveTypeArgument(TestImpl.class, TestIfc.class));
+	}
+
+	@Test
+	public void testGetTypeVariableMap() throws Exception {
+		Map<TypeVariable, Type> map;
+
+		map = GenericTypeResolver.getTypeVariableMap(MySimpleInterfaceType.class);
+		assertThat(map.toString(), equalTo("{T=class java.lang.String}"));
+
+		map = GenericTypeResolver.getTypeVariableMap(MyCollectionInterfaceType.class);
+		assertThat(map.toString(), equalTo("{T=java.util.Collection<java.lang.String>}"));
+
+		map = GenericTypeResolver.getTypeVariableMap(MyCollectionSuperclassType.class);
+		assertThat(map.toString(), equalTo("{T=java.util.Collection<java.lang.String>}"));
+
+		map = GenericTypeResolver.getTypeVariableMap(MySimpleTypeWithMethods.class);
+		assertThat(map.toString(), equalTo("{T=class java.lang.Integer}"));
+
+		map = GenericTypeResolver.getTypeVariableMap(TopLevelClass.class);
+		assertThat(map.toString(), equalTo("{}"));
+
+		map = GenericTypeResolver.getTypeVariableMap(TypedTopLevelClass.class);
+		assertThat(map.toString(), equalTo("{T=class java.lang.Integer}"));
+
+		map = GenericTypeResolver.getTypeVariableMap(TypedTopLevelClass.TypedNested.class);
+		assertThat(map.size(), equalTo(2));
+		Type t = null;
+		Type x = null;
+		for (Map.Entry<TypeVariable, Type> entry : map.entrySet()) {
+			if (entry.getKey().toString().equals("T")) {
+				t = entry.getValue();
+			}
+			else {
+				x = entry.getValue();
+			}
+		}
+		assertThat(t, equalTo((Type) Integer.class));
+		assertThat(x, equalTo((Type) Long.class));
 	}
 
 	@Test

@@ -21,8 +21,12 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
  * Helper class for resolving generic types against type variables.
@@ -37,6 +41,11 @@ import org.springframework.util.Assert;
  * @since 2.5.2
  */
 public abstract class GenericTypeResolver {
+
+	/** Cache from Class to TypeVariable Map */
+	@SuppressWarnings("rawtypes")
+	private static final Map<Class<?>, Map<TypeVariable, Type>> typeVariableCache = new ConcurrentReferenceHashMap<>();
+
 
 	/**
 	 * Determine the target type for the given generic parameter type.
@@ -194,6 +203,82 @@ public abstract class GenericTypeResolver {
 			}
 		}
 		return ResolvableType.NONE;
+	}
+
+	/**
+	 * Resolve the specified generic type against the given TypeVariable map.
+	 * <p>Used by Spring Data.
+	 * @param genericType the generic type to resolve
+	 * @param map the TypeVariable Map to resolved against
+	 * @return the type if it resolves to a Class, or {@code Object.class} otherwise
+	 */
+	@SuppressWarnings("rawtypes")
+	public static Class<?> resolveType(Type genericType, Map<TypeVariable, Type> map) {
+		return ResolvableType.forType(genericType, new TypeVariableMapVariableResolver(map)).resolve(Object.class);
+	}
+
+	/**
+	 * Build a mapping of {@link TypeVariable#getName TypeVariable names} to
+	 * {@link Class concrete classes} for the specified {@link Class}.
+	 * Searches all super types, enclosing types and interfaces.
+	 * @see #resolveType(Type, Map)
+	 */
+	@SuppressWarnings("rawtypes")
+	public static Map<TypeVariable, Type> getTypeVariableMap(Class<?> clazz) {
+		Map<TypeVariable, Type> typeVariableMap = typeVariableCache.get(clazz);
+		if (typeVariableMap == null) {
+			typeVariableMap = new HashMap<>();
+			buildTypeVariableMap(ResolvableType.forClass(clazz), typeVariableMap);
+			typeVariableCache.put(clazz, Collections.unmodifiableMap(typeVariableMap));
+		}
+		return typeVariableMap;
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static void buildTypeVariableMap(ResolvableType type, Map<TypeVariable, Type> typeVariableMap) {
+		if (type != ResolvableType.NONE) {
+			if (type.getType() instanceof ParameterizedType) {
+				TypeVariable<?>[] variables = type.resolve().getTypeParameters();
+				for (int i = 0; i < variables.length; i++) {
+					ResolvableType generic = type.getGeneric(i);
+					while (generic.getType() instanceof TypeVariable<?>) {
+						generic = generic.resolveType();
+					}
+					if (generic != ResolvableType.NONE) {
+						typeVariableMap.put(variables[i], generic.getType());
+					}
+				}
+			}
+			buildTypeVariableMap(type.getSuperType(), typeVariableMap);
+			for (ResolvableType interfaceType : type.getInterfaces()) {
+				buildTypeVariableMap(interfaceType, typeVariableMap);
+			}
+			if (type.resolve().isMemberClass()) {
+				buildTypeVariableMap(ResolvableType.forClass(type.resolve().getEnclosingClass()), typeVariableMap);
+			}
+		}
+	}
+
+
+	@SuppressWarnings({"serial", "rawtypes"})
+	private static class TypeVariableMapVariableResolver implements ResolvableType.VariableResolver {
+
+		private final Map<TypeVariable, Type> typeVariableMap;
+
+		public TypeVariableMapVariableResolver(Map<TypeVariable, Type> typeVariableMap) {
+			this.typeVariableMap = typeVariableMap;
+		}
+
+		@Override
+		public ResolvableType resolveVariable(TypeVariable<?> variable) {
+			Type type = this.typeVariableMap.get(variable);
+			return (type != null ? ResolvableType.forType(type) : null);
+		}
+
+		@Override
+		public Object getSource() {
+			return this.typeVariableMap;
+		}
 	}
 
 }
