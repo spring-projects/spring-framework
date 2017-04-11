@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,30 +19,58 @@ package org.springframework.web.reactive.accept;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.http.MediaType;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A {@link RequestedContentTypeResolver} that resolves to a fixed list of media types.
+ * {@code RequestedContentTypeResolver} with a fixed list of media types.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class FixedContentTypeResolver implements RequestedContentTypeResolver {
 
+	private static final Log logger = LogFactory.getLog(FixedContentTypeResolver.class);
+
+
 	private final List<MediaType> mediaTypes;
 
 
 	/**
-	 * Create an instance with the given content type.
+	 * Constructor with a single default {@code MediaType}.
 	 */
-	public FixedContentTypeResolver(MediaType mediaTypes) {
-		this.mediaTypes = Collections.singletonList(mediaTypes);
+	public FixedContentTypeResolver(MediaType mediaType) {
+		this(Collections.singletonList(mediaType));
 	}
+
+	/**
+	 * Constructor with an ordered List of default {@code MediaType}'s to return
+	 * for use in applications that support a variety of content types.
+	 * <p>Consider appending {@link MediaType#ALL} at the end if destinations
+	 * are present which do not support any of the other default media types.
+	 */
+	public FixedContentTypeResolver(List<MediaType> mediaTypes) {
+		this.mediaTypes = Collections.unmodifiableList(mediaTypes);
+	}
+
+
+	/**
+	 * Return the configured list of media types.
+	 */
+	public List<MediaType> getContentTypes() {
+		return this.mediaTypes;
+	}
+
 
 
 	@Override
 	public List<MediaType> resolveMediaTypes(ServerWebExchange exchange) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Requested media types: " + this.mediaTypes);
+		}
 		return this.mediaTypes;
 	}
 

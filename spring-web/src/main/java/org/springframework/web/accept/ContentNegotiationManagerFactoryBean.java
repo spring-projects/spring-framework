@@ -238,6 +238,16 @@ public class ContentNegotiationManagerFactoryBean
 	}
 
 	/**
+	 * Set the default content types to use when no content type is requested.
+	 * <p>By default this is not set.
+	 * @see #setDefaultContentTypeStrategy
+	 * @since 5.0
+	 */
+	public void setDefaultContentTypes(List<MediaType> contentTypes) {
+		this.defaultNegotiationStrategy = new FixedContentNegotiationStrategy(contentTypes);
+	}
+
+	/**
 	 * Set a custom {@link ContentNegotiationStrategy} to use to determine
 	 * the content type to use when no content type is requested.
 	 * <p>By default this is not set.
