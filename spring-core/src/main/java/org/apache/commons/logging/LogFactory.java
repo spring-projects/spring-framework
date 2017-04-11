@@ -310,51 +310,71 @@ public abstract class LogFactory {
 		}
 
 		public void debug(Object message) {
-			this.logger.debug(String.valueOf(message));
+			if (message instanceof String || this.logger.isDebugEnabled()) {
+				this.logger.debug(String.valueOf(message));
+			}
 		}
 
 		public void debug(Object message, Throwable exception) {
-			this.logger.debug(String.valueOf(message), exception);
+			if (message instanceof String || this.logger.isDebugEnabled()) {
+				this.logger.debug(String.valueOf(message), exception);
+			}
 		}
 
 		public void error(Object message) {
-			this.logger.error(String.valueOf(message));
+			if (message instanceof String || this.logger.isErrorEnabled()) {
+				this.logger.error(String.valueOf(message));
+			}
 		}
 
 		public void error(Object message, Throwable exception) {
-			this.logger.error(String.valueOf(message), exception);
+			if (message instanceof String || this.logger.isErrorEnabled()) {
+				this.logger.error(String.valueOf(message), exception);
+			}
 		}
 
 		public void fatal(Object message) {
-			this.logger.error(String.valueOf(message));
+			error(message);
 		}
 
 		public void fatal(Object message, Throwable exception) {
-			this.logger.error(String.valueOf(message), exception);
+			error(message, exception);
 		}
 
 		public void info(Object message) {
-			this.logger.info(String.valueOf(message));
+			if (message instanceof String || this.logger.isInfoEnabled()) {
+				this.logger.info(String.valueOf(message));
+			}
 		}
 
 		public void info(Object message, Throwable exception) {
-			this.logger.info(String.valueOf(message), exception);
+			if (message instanceof String || this.logger.isInfoEnabled()) {
+				this.logger.info(String.valueOf(message), exception);
+			}
 		}
 
 		public void trace(Object message) {
-			this.logger.trace(String.valueOf(message));
+			if (message instanceof String || this.logger.isTraceEnabled()) {
+				this.logger.trace(String.valueOf(message));
+			}
 		}
 
 		public void trace(Object message, Throwable exception) {
-			this.logger.trace(String.valueOf(message), exception);
+			if (message instanceof String || this.logger.isTraceEnabled()) {
+				this.logger.trace(String.valueOf(message), exception);
+			}
 		}
 
 		public void warn(Object message) {
-			this.logger.warn(String.valueOf(message));
+			if (message instanceof String || this.logger.isWarnEnabled()) {
+				this.logger.warn(String.valueOf(message));
+			}
 		}
 
 		public void warn(Object message, Throwable exception) {
-			this.logger.warn(String.valueOf(message), exception);
+			if (message instanceof String || this.logger.isWarnEnabled()) {
+				this.logger.warn(String.valueOf(message), exception);
+			}
 		}
 
 		protected Object readResolve() {
@@ -373,51 +393,71 @@ public abstract class LogFactory {
 		}
 
 		public void debug(Object message) {
-			this.logger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, String.valueOf(message), null, null);
+			if (message instanceof String || this.logger.isDebugEnabled()) {
+				this.logger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, String.valueOf(message), null, null);
+			}
 		}
 
 		public void debug(Object message, Throwable exception) {
-			this.logger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, String.valueOf(message), null, exception);
+			if (message instanceof String || this.logger.isDebugEnabled()) {
+				this.logger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, String.valueOf(message), null, exception);
+			}
 		}
 
 		public void error(Object message) {
-			this.logger.log(null, FQCN, LocationAwareLogger.ERROR_INT, String.valueOf(message), null, null);
+			if (message instanceof String || this.logger.isErrorEnabled()) {
+				this.logger.log(null, FQCN, LocationAwareLogger.ERROR_INT, String.valueOf(message), null, null);
+			}
 		}
 
 		public void error(Object message, Throwable exception) {
-			this.logger.log(null, FQCN, LocationAwareLogger.ERROR_INT, String.valueOf(message), null, exception);
+			if (message instanceof String || this.logger.isErrorEnabled()) {
+				this.logger.log(null, FQCN, LocationAwareLogger.ERROR_INT, String.valueOf(message), null, exception);
+			}
 		}
 
 		public void fatal(Object message) {
-			this.logger.log(null, FQCN, LocationAwareLogger.ERROR_INT, String.valueOf(message), null, null);
+			error(message);
 		}
 
 		public void fatal(Object message, Throwable exception) {
-			this.logger.log(null, FQCN, LocationAwareLogger.ERROR_INT, String.valueOf(message), null, exception);
+			error(message, exception);
 		}
 
 		public void info(Object message) {
-			this.logger.log(null, FQCN, LocationAwareLogger.INFO_INT, String.valueOf(message), null, null);
+			if (message instanceof String || this.logger.isInfoEnabled()) {
+				this.logger.log(null, FQCN, LocationAwareLogger.INFO_INT, String.valueOf(message), null, null);
+			}
 		}
 
 		public void info(Object message, Throwable exception) {
-			this.logger.log(null, FQCN, LocationAwareLogger.INFO_INT, String.valueOf(message), null, exception);
+			if (message instanceof String || this.logger.isInfoEnabled()) {
+				this.logger.log(null, FQCN, LocationAwareLogger.INFO_INT, String.valueOf(message), null, exception);
+			}
 		}
 
 		public void trace(Object message) {
-			this.logger.log(null, FQCN, LocationAwareLogger.TRACE_INT, String.valueOf(message), null, null);
+			if (message instanceof String || this.logger.isTraceEnabled()) {
+				this.logger.log(null, FQCN, LocationAwareLogger.TRACE_INT, String.valueOf(message), null, null);
+			}
 		}
 
 		public void trace(Object message, Throwable exception) {
-			this.logger.log(null, FQCN, LocationAwareLogger.TRACE_INT, String.valueOf(message), null, exception);
+			if (message instanceof String || this.logger.isTraceEnabled()) {
+				this.logger.log(null, FQCN, LocationAwareLogger.TRACE_INT, String.valueOf(message), null, exception);
+			}
 		}
 
 		public void warn(Object message) {
-			this.logger.log(null, FQCN, LocationAwareLogger.WARN_INT, String.valueOf(message), null, null);
+			if (message instanceof String || this.logger.isWarnEnabled()) {
+				this.logger.log(null, FQCN, LocationAwareLogger.WARN_INT, String.valueOf(message), null, null);
+			}
 		}
 
 		public void warn(Object message, Throwable exception) {
-			this.logger.log(null, FQCN, LocationAwareLogger.WARN_INT, String.valueOf(message), null, exception);
+			if (message instanceof String || this.logger.isWarnEnabled()) {
+				this.logger.log(null, FQCN, LocationAwareLogger.WARN_INT, String.valueOf(message), null, exception);
+			}
 		}
 
 		protected Object readResolve() {
@@ -479,11 +519,11 @@ public abstract class LogFactory {
 		}
 
 		public void fatal(Object message) {
-			log(java.util.logging.Level.SEVERE, message, null);
+			error(message);
 		}
 
 		public void fatal(Object message, Throwable exception) {
-			log(java.util.logging.Level.SEVERE, message, exception);
+			error(message, exception);
 		}
 
 		public void info(Object message) {
