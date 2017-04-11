@@ -740,6 +740,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public void addPreferredLocale(Locale locale) {
 		Assert.notNull(locale, "Locale must not be null");
 		this.locales.add(0, locale);
+		updateAcceptLanguageHeader();
 	}
 
 	/**
@@ -752,6 +753,13 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		Assert.notEmpty(locales, "Locale list must not be empty");
 		this.locales.clear();
 		this.locales.addAll(locales);
+		updateAcceptLanguageHeader();
+	}
+
+	private void updateAcceptLanguageHeader() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAcceptLanguageAsLocales(this.locales);
+		doAddHeaderValue(HttpHeaders.ACCEPT_LANGUAGE, headers.getFirst(HttpHeaders.ACCEPT_LANGUAGE), true);
 	}
 
 	/**
@@ -951,8 +959,17 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * @see #getDateHeader
 	 */
 	public void addHeader(String name, Object value) {
-		if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name) && !this.headers.containsKey(HttpHeaders.CONTENT_TYPE)) {
+		if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name) &&
+				!this.headers.containsKey(HttpHeaders.CONTENT_TYPE)) {
+
 			setContentType(value.toString());
+		}
+		else if (HttpHeaders.ACCEPT_LANGUAGE.equalsIgnoreCase(name) &&
+				!this.headers.containsKey(HttpHeaders.ACCEPT_LANGUAGE)) {
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.add(HttpHeaders.ACCEPT_LANGUAGE, value.toString());
+			setPreferredLocales(headers.getAcceptLanguageAsLocales());
 		}
 		else {
 			this.cookieHeaderSet = HttpHeaders.COOKIE.equalsIgnoreCase(name);

@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
@@ -353,12 +352,6 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		if (locale == null) {
 			request.addPreferredLocale(Locale.getDefault());
 		}
-		else {
-			String[] tokens = StringUtils.tokenizeToStringArray(locale, ",");
-			for (int i = tokens.length - 1; i >= 0; i--) {
-				request.addPreferredLocale(parseLocale(tokens[i]));
-			}
-		}
 	}
 
 	private void params(MockHttpServletRequest request, UriComponents uriComponents) {
@@ -382,21 +375,6 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		catch (UnsupportedEncodingException ex) {
 			throw new IllegalStateException(ex);
 		}
-	}
-
-	private Locale parseLocale(String locale) {
-		Matcher matcher = LOCALE_PATTERN.matcher(locale);
-		Assert.isTrue(matcher.matches(), () -> "Invalid locale value [" + locale + "]");
-		String language = matcher.group(1);
-		String country = matcher.group(2);
-		if (country == null) {
-			country = "";
-		}
-		String qualifier = matcher.group(3);
-		if (qualifier == null) {
-			qualifier = "";
-		}
-		return new Locale(language, country, qualifier);
 	}
 
 	private void servletPath(MockHttpServletRequest request, String requestPath) {
