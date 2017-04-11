@@ -82,8 +82,8 @@ public class RequestContext {
 		this.model = model;
 		this.messageSource = messageSource;
 
-		Locale acceptLocale = exchange.getRequest().getHeaders().getAcceptLanguageAsLocale();
-		this.locale = acceptLocale != null ? acceptLocale : Locale.getDefault();
+		List<Locale> locales = exchange.getRequest().getHeaders().getAcceptLanguageAsLocales();
+		this.locale = locales.isEmpty() ? Locale.getDefault() : locales.get(0);
 		this.timeZone = TimeZone.getDefault(); // TODO
 
 		this.defaultHtmlEscape = null; // TODO
