@@ -113,7 +113,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	public Mono<HandlerResult> invoke(ServerWebExchange exchange, BindingContext bindingContext,
 			Object... providedArgs) {
 
-		return resolveArguments(exchange, bindingContext, providedArgs).then(args -> {
+		return resolveArguments(exchange, bindingContext, providedArgs).flatMap(args -> {
 			try {
 				Object value = doInvoke(args);
 				HandlerResult result = new HandlerResult(this, value, getReturnType(), bindingContext);

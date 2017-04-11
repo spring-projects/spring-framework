@@ -281,7 +281,7 @@ public class ResourceWebHandler
 					exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
 					return Mono.empty();
 				}))
-				.then(resource -> {
+				.flatMap(resource -> {
 					try {
 						if (HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod())) {
 							exchange.getResponse().getHeaders().add("Allow", "GET,HEAD,OPTIONS");
@@ -378,7 +378,7 @@ public class ResourceWebHandler
 
 		ResourceResolverChain resolveChain = createResolverChain();
 		return resolveChain.resolveResource(exchange, path, getLocations())
-				.then(resource -> {
+				.flatMap(resource -> {
 					ResourceTransformerChain transformerChain = createTransformerChain(resolveChain);
 					return transformerChain.transform(exchange, resource);
 				});

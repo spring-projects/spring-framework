@@ -346,17 +346,17 @@ class DefaultWebClient implements WebClient {
 
 		@Override
 		public <T> Mono<T> bodyToMono(Class<T> bodyType) {
-			return this.responseMono.then(clientResponse -> clientResponse.bodyToMono(bodyType));
+			return this.responseMono.flatMap(clientResponse -> clientResponse.bodyToMono(bodyType));
 		}
 
 		@Override
 		public <T> Flux<T> bodyToFlux(Class<T> elementType) {
-			return this.responseMono.flatMap(clientResponse -> clientResponse.bodyToFlux(elementType));
+			return this.responseMono.flatMapMany(clientResponse -> clientResponse.bodyToFlux(elementType));
 		}
 
 		@Override
 		public <T> Mono<ResponseEntity<T>> bodyToEntity(Class<T> bodyType) {
-			return this.responseMono.then(response ->
+			return this.responseMono.flatMap(response ->
 					response.bodyToMono(bodyType).map(body -> {
 						HttpHeaders headers = response.headers().asHttpHeaders();
 						return new ResponseEntity<>(body, headers, response.statusCode());
@@ -366,7 +366,7 @@ class DefaultWebClient implements WebClient {
 
 		@Override
 		public <T> Mono<ResponseEntity<List<T>>> bodyToEntityList(Class<T> responseType) {
-			return this.responseMono.then(response ->
+			return this.responseMono.flatMap(response ->
 					response.bodyToFlux(responseType).collectList().map(body -> {
 						HttpHeaders headers = response.headers().asHttpHeaders();
 						return new ResponseEntity<>(body, headers, response.statusCode());

@@ -126,8 +126,8 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 				.concatMap(mapping -> mapping.getHandler(exchange))
 				.next()
 				.otherwiseIfEmpty(Mono.error(HANDLER_NOT_FOUND_EXCEPTION))
-				.then(handler -> invokeHandler(exchange, handler))
-				.then(result -> handleResult(exchange, result));
+				.flatMap(handler -> invokeHandler(exchange, handler))
+				.flatMap(result -> handleResult(exchange, result));
 	}
 
 	private Mono<HandlerResult> invokeHandler(ServerWebExchange exchange, Object handler) {
@@ -141,7 +141,7 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
 	private Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 		return getResultHandler(result).handleResult(exchange, result)
-				.otherwise(ex -> result.applyExceptionHandler(ex).then(exceptionResult ->
+				.otherwise(ex -> result.applyExceptionHandler(ex).flatMap(exceptionResult ->
 						getResultHandler(exceptionResult).handleResult(exchange, exceptionResult)));
 	}
 

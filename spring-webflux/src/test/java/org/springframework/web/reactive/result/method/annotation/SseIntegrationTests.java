@@ -77,7 +77,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.uri("/string")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
-				.flatMap(response -> response.bodyToFlux(String.class));
+				.flatMapMany(response -> response.bodyToFlux(String.class));
 
 		StepVerifier.create(result)
 				.expectNext("foo 0")
@@ -92,7 +92,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.uri("/person")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
-				.flatMap(response -> response.bodyToFlux(Person.class));
+				.flatMapMany(response -> response.bodyToFlux(Person.class));
 
 		StepVerifier.create(result)
 				.expectNext(new Person("foo 0"))
@@ -108,7 +108,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
-				.flatMap(response -> response.body(toFlux(type)));
+				.flatMapMany(response -> response.body(toFlux(type)));
 
 		StepVerifier.create(result)
 				.consumeNextWith( event -> {
@@ -135,7 +135,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
-				.flatMap(response -> response.body(toFlux(
+				.flatMapMany(response -> response.body(toFlux(
 						forClassWithGenerics(ServerSentEvent.class, String.class))));
 
 		StepVerifier.create(result)

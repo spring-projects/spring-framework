@@ -194,7 +194,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 
 		return valueMono
 				.otherwiseIfEmpty(exchange.isNotModified() ? Mono.empty() : NO_VALUE_MONO)
-				.then(returnValue -> {
+				.flatMap(returnValue -> {
 
 					Mono<List<View>> viewsMono;
 					Model model = result.getModel();
@@ -242,7 +242,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 
 					updateBindingContext(result.getBindingContext(), exchange);
 
-					return viewsMono.then(views -> render(views, model.asMap(), exchange));
+					return viewsMono.flatMap(views -> render(views, model.asMap(), exchange));
 				});
 	}
 

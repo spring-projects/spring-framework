@@ -82,7 +82,7 @@ public interface HandlerFilterFunction<T extends ServerResponse, R extends Serve
 			Function<ServerRequest, Mono<ServerRequest>> requestProcessor) {
 
 		Assert.notNull(requestProcessor, "'requestProcessor' must not be null");
-		return (request, next) -> requestProcessor.apply(request).then(next::handle);
+		return (request, next) -> requestProcessor.apply(request).flatMap(next::handle);
 	}
 
 	/**
@@ -95,7 +95,7 @@ public interface HandlerFilterFunction<T extends ServerResponse, R extends Serve
 			Function<T, Mono<R>> responseProcessor) {
 
 		Assert.notNull(responseProcessor, "'responseProcessor' must not be null");
-		return (request, next) -> next.handle(request).then(responseProcessor);
+		return (request, next) -> next.handle(request).flatMap(responseProcessor);
 	}
 
 

@@ -170,7 +170,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 					.next()
 					.otherwiseIfEmpty(Mono.error(new IllegalArgumentException("Could not resolve view with name '" +
 							name() +"'")))
-					.then(view -> view.render(model(), contentType, exchange));
+					.flatMap(view -> view.render(model(), contentType, exchange));
 		}
 
 		private Locale resolveLocale(ServerWebExchange exchange, HandlerStrategies strategies) {

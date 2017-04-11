@@ -106,7 +106,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 			ResourceTransformerChain chain) {
 
 		return chain.transform(exchange, inputResource)
-				.then(resource -> {
+				.flatMap(resource -> {
 					String name = resource.getFilename();
 					if (!this.fileExtension.equals(StringUtils.getFilenameExtension(name))) {
 						return Mono.just(resource);
@@ -124,7 +124,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 					return Flux.generate(new LineGenerator(content))
 							.concatMap(info -> processLine(info, exchange, resource, chain))
 							.collect(() -> new LineAggregator(resource, content), LineAggregator::add)
-							.then(aggregator -> Mono.just(aggregator.createResource()));
+							.flatMap(aggregator -> Mono.just(aggregator.createResource()));
 				});
 	}
 

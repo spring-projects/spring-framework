@@ -71,7 +71,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 			ResourceTransformerChain transformerChain) {
 
 		return transformerChain.transform(exchange, resource)
-				.then(newResource -> {
+				.flatMap(newResource -> {
 					String filename = newResource.getFilename();
 					if (!"css".equals(StringUtils.getFilenameExtension(filename)) ||
 							resource instanceof GzipResourceResolver.GzippedResource) {
@@ -115,7 +115,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 								writer.write(chunk);
 								return writer;
 							})
-							.then(writer -> {
+							.flatMap(writer -> {
 								byte[] newContent = writer.toString().getBytes(DEFAULT_CHARSET);
 								return Mono.just(new TransformedResource(resource, newContent));
 							});

@@ -232,8 +232,8 @@ public abstract class RouterFunctions {
 			addAttributes(exchange, request);
 			return routerFunction.route(request)
 					.defaultIfEmpty(notFound())
-					.then(handlerFunction -> wrapException(() -> handlerFunction.handle(request)))
-					.then(response -> wrapException(() -> response.writeTo(exchange, strategies)))
+					.flatMap(handlerFunction -> wrapException(() -> handlerFunction.handle(request)))
+					.flatMap(response -> wrapException(() -> response.writeTo(exchange, strategies)))
 					.otherwise(ResponseStatusException.class,
 							ex -> {
 								exchange.getResponse().setStatusCode(ex.getStatus());

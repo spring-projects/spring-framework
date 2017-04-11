@@ -99,7 +99,7 @@ public class WebClientIntegrationTests {
 				.uri("/greeting?name=Spring")
 				.header("X-Test-Header", "testvalue")
 				.exchange()
-				.then(response -> response.bodyToMono(String.class));
+				.flatMap(response -> response.bodyToMono(String.class));
 
 		StepVerifier.create(result)
 				.expectNext("Hello Spring!")
@@ -123,7 +123,7 @@ public class WebClientIntegrationTests {
 				.uri("/json")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
-				.then(response -> response.bodyToMono(String.class));
+				.flatMap(response -> response.bodyToMono(String.class));
 
 		StepVerifier.create(result)
 				.expectNext(content)
@@ -248,7 +248,7 @@ public class WebClientIntegrationTests {
 				.uri("/pojo")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
-				.then(response -> response.bodyToMono(Pojo.class));
+				.flatMap(response -> response.bodyToMono(Pojo.class));
 
 		StepVerifier.create(result)
 				.consumeNextWith(p -> assertEquals("barbar", p.getBar()))
@@ -270,7 +270,7 @@ public class WebClientIntegrationTests {
 				.uri("/pojos")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
-				.flatMap(response -> response.bodyToFlux(Pojo.class));
+				.flatMapMany(response -> response.bodyToFlux(Pojo.class));
 
 		StepVerifier.create(result)
 				.consumeNextWith(p -> assertThat(p.getBar(), Matchers.is("bar1")))
@@ -296,7 +296,7 @@ public class WebClientIntegrationTests {
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(new Pojo("foofoo", "barbar"))
 				.exchange()
-				.then(response -> response.bodyToMono(Pojo.class));
+				.flatMap(response -> response.bodyToMono(Pojo.class));
 
 		StepVerifier.create(result)
 				.consumeNextWith(p -> assertEquals("BARBAR", p.getBar()))
@@ -321,7 +321,7 @@ public class WebClientIntegrationTests {
 				.uri("/test")
 				.cookie("testkey", "testvalue")
 				.exchange()
-				.then(response -> response.bodyToMono(String.class));
+				.flatMap(response -> response.bodyToMono(String.class));
 
 		StepVerifier.create(result)
 				.expectNext("test")
@@ -365,7 +365,7 @@ public class WebClientIntegrationTests {
 		Mono<String> result = filteredClient.get()
 				.uri("/greeting?name=Spring")
 				.exchange()
-				.then(response -> response.bodyToMono(String.class));
+				.flatMap(response -> response.bodyToMono(String.class));
 
 		StepVerifier.create(result)
 				.expectNext("Hello Spring!")
@@ -390,7 +390,7 @@ public class WebClientIntegrationTests {
 		Mono<String> result = filteredClient.get()
 				.uri("/greeting?name=Spring")
 				.exchange()
-				.then(response -> response.bodyToMono(String.class));
+				.flatMap(response -> response.bodyToMono(String.class));
 
 		StepVerifier.create(result)
 				.expectNext("Hello Spring!")
