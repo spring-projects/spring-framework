@@ -98,8 +98,6 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private final List<Cookie> cookies = new ArrayList<>();
 
-	private boolean cookieHeaderSet;
-
 	private final Map<String, HeaderValueHolder> headers = new LinkedCaseInsensitiveMap<>();
 
 	private int status = HttpServletResponse.SC_OK;
@@ -323,9 +321,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	public void addCookie(Cookie cookie) {
 		Assert.notNull(cookie, "Cookie must not be null");
 		this.cookies.add(cookie);
-		if (!this.cookieHeaderSet) {
-			doAddHeaderValue(HttpHeaders.SET_COOKIE, getCookieHeader(cookie), false);
-		}
+		doAddHeaderValue(HttpHeaders.SET_COOKIE, getCookieHeader(cookie), false);
 	}
 
 	private String getCookieHeader(Cookie cookie) {
@@ -536,13 +532,11 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setHeader(String name, String value) {
-		this.cookieHeaderSet = HttpHeaders.SET_COOKIE.equalsIgnoreCase(name);
 		setHeaderValue(name, value);
 	}
 
 	@Override
 	public void addHeader(String name, String value) {
-		this.cookieHeaderSet = HttpHeaders.SET_COOKIE.equalsIgnoreCase(name);
 		addHeaderValue(name, value);
 	}
 
