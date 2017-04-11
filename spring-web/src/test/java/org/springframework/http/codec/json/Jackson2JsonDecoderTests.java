@@ -21,6 +21,8 @@ import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
 import static org.springframework.core.ResolvableType.forClass;
@@ -163,10 +165,10 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 
 	@Test
 	public void invalidData() throws Exception {
-		Flux<DataBuffer> source = Flux.just(stringBuffer( "{\"property1\":\"foo\""));
-		ResolvableType elementType = forClass(BeanWithNoDefaultConstructor.class);
-		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, null, emptyMap());
-		StepVerifier.create(flux).expectError(InternalCodecException.class);
+		Flux<DataBuffer> source = Flux.just(stringBuffer( "{\"foofoo\": \"foofoo\", \"barbar\": \"barbar\"}"));
+		ResolvableType elementType = forClass(Pojo.class);
+		Flux<Object> flux = new Jackson2JsonDecoder(new ObjectMapper()).decode(source, elementType, null, emptyMap());
+		StepVerifier.create(flux).verifyErrorMatches(ex -> ex instanceof CodecException && !(ex instanceof InternalCodecException));
 	}
 
 	@Test
@@ -176,7 +178,7 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, null, emptyMap());
 		StepVerifier
 				.create(flux)
-				.verifyErrorMatches(ex -> ex instanceof CodecException && !(ex instanceof InternalCodecException));
+				.expectError(InternalCodecException.class);
 	}
 
 
