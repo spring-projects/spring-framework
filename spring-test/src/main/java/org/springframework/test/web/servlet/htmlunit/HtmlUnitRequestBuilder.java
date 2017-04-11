@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -69,9 +68,6 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @see MockMvcWebConnection
  */
 final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
-
-	private static final Pattern LOCALE_PATTERN = Pattern.compile("^\\s*(\\w{2})(?:-(\\w{2}))?(?:;q=(\\d+\\.\\d+))?$");
-
 
 	private final Map<String, MockHttpSession> sessions;
 

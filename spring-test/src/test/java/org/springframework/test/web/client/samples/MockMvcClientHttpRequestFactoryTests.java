@@ -35,7 +35,6 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -43,7 +42,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 
 /**
  * Tests that use a {@link RestTemplate} configured with a
@@ -79,7 +77,8 @@ public class MockMvcClientHttpRequestFactoryTests {
 	@Test
 	@SuppressWarnings("deprecation")
 	public void testAsyncTemplate() throws Exception {
-		AsyncRestTemplate template = new AsyncRestTemplate(new MockMvcClientHttpRequestFactory(this.mockMvc));
+		org.springframework.web.client.AsyncRestTemplate template = new org.springframework.web.client.AsyncRestTemplate(
+				new MockMvcClientHttpRequestFactory(this.mockMvc));
 		ListenableFuture<ResponseEntity<String>> entity = template.getForEntity("/foo", String.class);
 		assertEquals("bar", entity.get().getBody());
 	}
