@@ -70,13 +70,29 @@ public class SockJsServiceRegistration {
 	private SockJsMessageCodec messageCodec;
 
 
+	public SockJsServiceRegistration() {
+	}
+
+	/**
+	 * Deprecated constructor with a TaskScheduler.
+	 *
+	 * @deprecated as of 5.0 a TaskScheduler is not provided upfront, not until
+	 * it is obvious that it is needed; call {@link #getTaskScheduler()} to check
+	 * and then {@link #setTaskScheduler(TaskScheduler)} to set it before a call
+	 * to {@link #createSockJsService()}
+	 */
+	@Deprecated
 	public SockJsServiceRegistration(TaskScheduler defaultTaskScheduler) {
 		this.scheduler = defaultTaskScheduler;
 	}
 
 
-	public SockJsServiceRegistration setTaskScheduler(TaskScheduler taskScheduler) {
-		this.scheduler = taskScheduler;
+	/**
+	 * A scheduler instance to use for scheduling SockJS heart-beats.
+	 */
+	public SockJsServiceRegistration setTaskScheduler(TaskScheduler scheduler) {
+		Assert.notNull(scheduler, "TaskScheduler is required.");
+		this.scheduler = scheduler;
 		return this;
 	}
 
@@ -275,6 +291,13 @@ public class SockJsServiceRegistration {
 			service.setMessageCodec(this.messageCodec);
 		}
 		return service;
+	}
+
+	/**
+	 * Return the TaskScheduler, if configured.
+	 */
+	protected TaskScheduler getTaskScheduler() {
+		return this.scheduler;
 	}
 
 	private TransportHandlingSockJsService createSockJsService() {

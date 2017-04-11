@@ -97,7 +97,8 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 
 	@Override
 	public SockJsServiceRegistration withSockJS() {
-		this.registration = new SockJsServiceRegistration(this.sockJsTaskScheduler);
+		this.registration = new SockJsServiceRegistration();
+		this.registration.setTaskScheduler(this.sockJsTaskScheduler);
 		HandshakeInterceptor[] interceptors = getInterceptors();
 		if (interceptors.length > 0) {
 			this.registration.setInterceptors(interceptors);
