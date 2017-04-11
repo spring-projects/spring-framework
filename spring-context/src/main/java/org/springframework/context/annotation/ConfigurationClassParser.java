@@ -18,6 +18,7 @@ package org.springframework.context.annotation;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -442,7 +443,7 @@ class ConfigurationClassParser {
 				Resource resource = this.resourceLoader.getResource(resolvedLocation);
 				addPropertySource(factory.createPropertySource(name, new EncodedResource(resource, encoding)));
 			}
-			catch (IllegalArgumentException | FileNotFoundException ex) {
+			catch (IllegalArgumentException | FileNotFoundException | UnknownHostException ex) {
 				// Placeholders not resolvable or resource not found when trying to open it
 				if (ignoreResourceNotFound) {
 					if (logger.isInfoEnabled()) {
