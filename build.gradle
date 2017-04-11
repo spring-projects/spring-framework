@@ -1084,6 +1084,9 @@ project("spring-test") {
 		testCompile('de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1')
 		testCompile('io.projectreactor.ipc:reactor-netty')
 		testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+		// Pull in the latest Launcher API so that it overrides whatever
+		// is bundled by default in IntelliJ IDEA.
+		testRuntime("org.junit.platform:junit-platform-launcher:${junitPlatformVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-jul:${log4jVersion}")  // Java Util Logging for JUnit 5
 		testRuntime("org.ehcache:ehcache:${ehcache3Version}")
 		testRuntime("org.terracotta:management-model:2.0.0")
