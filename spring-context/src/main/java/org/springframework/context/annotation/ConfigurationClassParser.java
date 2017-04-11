@@ -18,6 +18,7 @@ package org.springframework.context.annotation;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -444,9 +445,10 @@ class ConfigurationClassParser {
 					throw ex;
 				}
 			}
-			catch (FileNotFoundException ex) {
+			catch (IOException ex) {
 				// Resource not found when trying to open it
-				if (ignoreResourceNotFound) {
+				if (ignoreResourceNotFound &&
+						(ex instanceof FileNotFoundException || ex instanceof UnknownHostException)) {
 					if (logger.isInfoEnabled()) {
 						logger.info("Properties location [" + location + "] not resolvable: " + ex.getMessage());
 					}
@@ -490,6 +492,7 @@ class ConfigurationClassParser {
 		}
 		this.propertySourceNames.add(name);
 	}
+
 
 	/**
 	 * Returns {@code @Import} class, considering all meta-annotations.
