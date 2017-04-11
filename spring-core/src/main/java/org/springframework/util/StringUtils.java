@@ -398,10 +398,12 @@ public abstract class StringUtils {
 		if (!hasLength(inString) || !hasLength(oldPattern) || newPattern == null) {
 			return inString;
 		}
+		int index = inString.indexOf(oldPattern);
+		if (index == -1) {
+			return inString;
+		}
 		StringBuilder sb = new StringBuilder();
 		int pos = 0; // our position in the old string
-		int index = inString.indexOf(oldPattern);
-		// the index of an occurrence we've found, or -1
 		int patLen = oldPattern.length();
 		while (index >= 0) {
 			sb.append(inString.substring(pos, index));
