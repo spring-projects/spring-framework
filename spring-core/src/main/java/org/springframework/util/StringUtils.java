@@ -414,7 +414,12 @@ public abstract class StringUtils {
 			return inString;
 		}
 
-		StringBuilder sb = new StringBuilder(inString.length());
+		int capacity = inString.length();
+		if (newPattern.length() > oldPattern.length()) {
+			capacity += 16;
+		}
+		StringBuilder sb = new StringBuilder(capacity);
+
 		int pos = 0;  // our position in the old string
 		int patLen = oldPattern.length();
 		while (index >= 0) {
@@ -423,6 +428,7 @@ public abstract class StringUtils {
 			pos = index + patLen;
 			index = inString.indexOf(oldPattern, pos);
 		}
+
 		// append any characters to the right of a match
 		sb.append(inString.substring(pos));
 		return sb.toString();
