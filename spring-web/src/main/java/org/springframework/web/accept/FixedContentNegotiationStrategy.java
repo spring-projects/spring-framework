@@ -16,12 +16,11 @@
 
 package org.springframework.web.accept;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.http.MediaType;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -35,23 +34,36 @@ public class FixedContentNegotiationStrategy implements ContentNegotiationStrate
 
 	private static final Log logger = LogFactory.getLog(FixedContentNegotiationStrategy.class);
 
-	private final List<MediaType> contentType;
+	private final List<MediaType> contentTypes;
 
 
 	/**
 	 * Create an instance with the given content type.
 	 */
-	public FixedContentNegotiationStrategy(MediaType contentType) {
-		this.contentType = Collections.singletonList(contentType);
+	public FixedContentNegotiationStrategy(MediaType... contentTypes) {
+		this.contentTypes = Arrays.asList(contentTypes);
+	}
+	
+	/**
+	 * Create an instance with the given content type.
+	 * 
+	 * <p>
+	 * List is ordered in the same manner as a "quality" parameter on incoming requests.
+	 * If destinations which do not support any of the media types provided are present,
+	 * end the list with {@link MediaType#ALL} to allow standard media type determination
+	 */
+	public FixedContentNegotiationStrategy(List<MediaType> contentTypes) {
+		this.contentTypes = contentTypes;
 	}
 
 
 	@Override
 	public List<MediaType> resolveMediaTypes(NativeWebRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Requested media types: " + this.contentType);
+			logger.debug("Requested media types: " + this.contentTypes);
 		}
-		return this.contentType;
+		
+		return this.contentTypes;
 	}
 
 }

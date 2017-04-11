@@ -16,13 +16,13 @@
 
 package org.springframework.web.accept;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockServletContext;
@@ -161,10 +161,10 @@ public class ContentNegotiationManagerFactoryBeanTests {
 
 		assertEquals(Collections.<MediaType>emptyList(), manager.resolveMediaTypes(this.webRequest));
 	}
-
+	
 	@Test
 	public void setDefaultContentType() throws Exception {
-		this.factoryBean.setDefaultContentType(MediaType.APPLICATION_JSON);
+		this.factoryBean.setDefaultContentType(Arrays.asList(MediaType.APPLICATION_JSON));
 		this.factoryBean.afterPropertiesSet();
 		ContentNegotiationManager manager = this.factoryBean.getObject();
 
@@ -174,6 +174,21 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		// SPR-10513
 		this.servletRequest.addHeader("Accept", MediaType.ALL_VALUE);
 		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON),
+				manager.resolveMediaTypes(this.webRequest));
+	}
+	
+	@Test
+	public void setMultipleDefaultContentTypess() throws Exception {
+		this.factoryBean.setDefaultContentType(Arrays.asList(MediaType.APPLICATION_JSON, MediaType.ALL));
+		this.factoryBean.afterPropertiesSet();
+		ContentNegotiationManager manager = this.factoryBean.getObject();
+
+		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON, MediaType.ALL),
+				manager.resolveMediaTypes(this.webRequest));
+
+		// SPR-15367
+		this.servletRequest.addHeader("Accept", MediaType.ALL_VALUE);
+		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON, MediaType.ALL),
 				manager.resolveMediaTypes(this.webRequest));
 	}
 
