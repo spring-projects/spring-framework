@@ -309,6 +309,7 @@ public abstract class AbstractCodecConfigurer {
 		/**
 		 * Add a custom {@code Decoder} internally wrapped with
 		 * {@link DecoderHttpMessageReader}).
+		 * @param decoder the decoder to add
 		 */
 		public void decoder(Decoder<?> decoder) {
 			reader(new DecoderHttpMessageReader<>(decoder));
@@ -317,6 +318,7 @@ public abstract class AbstractCodecConfigurer {
 		/**
 		 * Add a custom {@code Encoder}, internally wrapped with
 		 * {@link EncoderHttpMessageWriter}.
+		 * @param encoder the encoder to add
 		 */
 		public void encoder(Encoder<?> encoder) {
 			writer(new EncoderHttpMessageWriter<>(encoder));
@@ -326,6 +328,7 @@ public abstract class AbstractCodecConfigurer {
 		 * Add a custom {@link HttpMessageReader}. For readers of type
 		 * {@link DecoderHttpMessageReader} consider using the shortcut
 		 * {@link #decoder(Decoder)} instead.
+		 * @param reader the reader to add
 		 */
 		public void reader(HttpMessageReader<?> reader) {
 			boolean canReadToObject = reader.canRead(ResolvableType.forClass(Object.class), null);
@@ -336,6 +339,7 @@ public abstract class AbstractCodecConfigurer {
 		 * Add a custom {@link HttpMessageWriter}. For readers of type
 		 * {@link EncoderHttpMessageWriter} consider using the shortcut
 		 * {@link #encoder(Encoder)} instead.
+		 * @param writer the writer to add
 		 */
 		public void writer(HttpMessageWriter<?> writer) {
 			boolean canWriteObject = writer.canWrite(ResolvableType.forClass(Object.class), null);
