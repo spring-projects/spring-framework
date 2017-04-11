@@ -19,6 +19,7 @@ package org.springframework.web.accept;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -161,35 +162,31 @@ public class ContentNegotiationManagerFactoryBeanTests {
 
 		assertEquals(Collections.<MediaType>emptyList(), manager.resolveMediaTypes(this.webRequest));
 	}
-	
+
 	@Test
 	public void setDefaultContentType() throws Exception {
-		this.factoryBean.setDefaultContentType(Arrays.asList(MediaType.APPLICATION_JSON));
+		this.factoryBean.setDefaultContentType(MediaType.APPLICATION_JSON);
 		this.factoryBean.afterPropertiesSet();
 		ContentNegotiationManager manager = this.factoryBean.getObject();
 
-		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON),
-				manager.resolveMediaTypes(this.webRequest));
+		assertEquals(MediaType.APPLICATION_JSON, manager.resolveMediaTypes(this.webRequest).get(0));
 
 		// SPR-10513
 		this.servletRequest.addHeader("Accept", MediaType.ALL_VALUE);
-		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON),
-				manager.resolveMediaTypes(this.webRequest));
+		assertEquals(MediaType.APPLICATION_JSON, manager.resolveMediaTypes(this.webRequest).get(0));
 	}
-	
-	@Test
-	public void setMultipleDefaultContentTypess() throws Exception {
-		this.factoryBean.setDefaultContentType(Arrays.asList(MediaType.APPLICATION_JSON, MediaType.ALL));
+
+	@Test // SPR-15367
+	public void setDefaultContentTypes() throws Exception {
+		List<MediaType> mediaTypes = Arrays.asList(MediaType.APPLICATION_JSON, MediaType.ALL);
+		this.factoryBean.setDefaultContentTypes(mediaTypes);
 		this.factoryBean.afterPropertiesSet();
 		ContentNegotiationManager manager = this.factoryBean.getObject();
 
-		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON, MediaType.ALL),
-				manager.resolveMediaTypes(this.webRequest));
+		assertEquals(mediaTypes, manager.resolveMediaTypes(this.webRequest));
 
-		// SPR-15367
 		this.servletRequest.addHeader("Accept", MediaType.ALL_VALUE);
-		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON, MediaType.ALL),
-				manager.resolveMediaTypes(this.webRequest));
+		assertEquals(mediaTypes, manager.resolveMediaTypes(this.webRequest));
 	}
 
 	@Test  // SPR-12286

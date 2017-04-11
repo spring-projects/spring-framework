@@ -219,19 +219,18 @@ public class ContentNegotiationConfigurer {
 	}
 
 	/**
-	 * Set the default content type to use when no content type is requested.
-	 * <p>
-	 * Media types are ordered in the same manner as a "quality" parameter on incoming
-	 * requests. If destinations which do not support any of the media types provided are
-	 * present, end the list with {@link MediaType#ALL} to allow standard media type
-	 * determination
-	 * <p>
-	 * By default this is not set.
-	 * 
+	 * Set the default content type(s) to use when no content type is requested
+	 * in order of priority.
+	 *
+	 * <p>If destinations are present that do not support any of the given media
+	 * types, consider appending {@link MediaType#ALL} at the end.
+	 *
+	 * <p>By default this is not set.
+	 *
 	 * @see #defaultContentTypeStrategy
 	 */
 	public ContentNegotiationConfigurer defaultContentType(MediaType... defaultContentTypes) {
-		this.factory.setDefaultContentType(Arrays.asList(defaultContentTypes));
+		this.factory.setDefaultContentTypes(Arrays.asList(defaultContentTypes));
 		return this;
 	}
 
