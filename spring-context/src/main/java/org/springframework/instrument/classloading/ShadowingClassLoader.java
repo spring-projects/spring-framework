@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,14 +60,28 @@ public class ShadowingClassLoader extends DecoratingClassLoader {
 
 
 	/**
-	 * Create a new ShadowingClassLoader, decorating the given ClassLoader.
+	 * Create a new ShadowingClassLoader, decorating the given ClassLoader,
+	 * applying {@link #DEFAULT_EXCLUDED_PACKAGES}.
 	 * @param enclosingClassLoader the ClassLoader to decorate
+	 * @see #ShadowingClassLoader(ClassLoader, boolean)
 	 */
 	public ShadowingClassLoader(ClassLoader enclosingClassLoader) {
+		this(enclosingClassLoader, true);
+	}
+
+	/**
+	 * Create a new ShadowingClassLoader, decorating the given ClassLoader.
+	 * @param enclosingClassLoader the ClassLoader to decorate
+	 * @param defaultExcludes whether to apply {@link #DEFAULT_EXCLUDED_PACKAGES}
+	 * @since 4.3.8
+	 */
+	public ShadowingClassLoader(ClassLoader enclosingClassLoader, boolean defaultExcludes) {
 		Assert.notNull(enclosingClassLoader, "Enclosing ClassLoader must not be null");
 		this.enclosingClassLoader = enclosingClassLoader;
-		for (String excludedPackage : DEFAULT_EXCLUDED_PACKAGES) {
-			excludePackage(excludedPackage);
+		if (defaultExcludes) {
+			for (String excludedPackage : DEFAULT_EXCLUDED_PACKAGES) {
+				excludePackage(excludedPackage);
+			}
 		}
 	}
 
