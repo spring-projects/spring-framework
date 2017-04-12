@@ -16,17 +16,17 @@
 
 package org.springframework.aop.interceptor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
-
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
+import static org.springframework.tests.TestResourceUtils.*;
 
 /**
  * Non-XML tests are in AbstractAopProxyTests
@@ -34,7 +34,7 @@ import org.springframework.tests.sample.beans.TestBean;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class ExposeInvocationInterceptorTests {
+public class ExposeInvocationInterceptorTests {
 
 	private static final Resource CONTEXT =
 		qualifiedResource(ExposeInvocationInterceptorTests.class, "context.xml");

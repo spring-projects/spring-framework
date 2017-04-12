@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.context.annotation;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -26,6 +28,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
@@ -44,22 +47,23 @@ import org.springframework.util.StringUtils;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.1
  * @see ClassPathBeanDefinitionScanner#scan(String...)
  * @see ComponentScanBeanDefinitionParser
  */
 class ComponentScanAnnotationParser {
 
-	private final ResourceLoader resourceLoader;
-
 	private final Environment environment;
 
-	private final BeanDefinitionRegistry registry;
+	private final ResourceLoader resourceLoader;
 
 	private final BeanNameGenerator beanNameGenerator;
 
+	private final BeanDefinitionRegistry registry;
 
-	public ComponentScanAnnotationParser(ResourceLoader resourceLoader, Environment environment,
+
+	public ComponentScanAnnotationParser(Environment environment, ResourceLoader resourceLoader,
 			BeanNameGenerator beanNameGenerator, BeanDefinitionRegistry registry) {
 
 		this.resourceLoader = resourceLoader;
@@ -70,17 +74,14 @@ class ComponentScanAnnotationParser {
 
 
 	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan, final String declaringClass) {
-		ClassPathBeanDefinitionScanner scanner =
-				new ClassPathBeanDefinitionScanner(this.registry, componentScan.getBoolean("useDefaultFilters"));
+		Assert.state(this.environment != null, "Environment must not be null");
+		Assert.state(this.resourceLoader != null, "ResourceLoader must not be null");
 
-		Assert.notNull(this.environment, "Environment must not be null");
-		scanner.setEnvironment(this.environment);
-
-		Assert.notNull(this.resourceLoader, "ResourceLoader must not be null");
-		scanner.setResourceLoader(this.resourceLoader);
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this.registry,
+				componentScan.getBoolean("useDefaultFilters"), this.environment, this.resourceLoader);
 
 		Class<? extends BeanNameGenerator> generatorClass = componentScan.getClass("nameGenerator");
-		boolean useInheritedGenerator = BeanNameGenerator.class.equals(generatorClass);
+		boolean useInheritedGenerator = (BeanNameGenerator.class == generatorClass);
 		scanner.setBeanNameGenerator(useInheritedGenerator ? this.beanNameGenerator :
 				BeanUtils.instantiateClass(generatorClass));
 
@@ -106,21 +107,21 @@ class ComponentScanAnnotationParser {
 			}
 		}
 
-		List<String> basePackages = new ArrayList<String>();
-		for (String pkg : componentScan.getStringArray("value")) {
-			if (StringUtils.hasText(pkg)) {
-				basePackages.add(pkg);
-			}
+		boolean lazyInit = componentScan.getBoolean("lazyInit");
+		if (lazyInit) {
+			scanner.getBeanDefinitionDefaults().setLazyInit(true);
 		}
-		for (String pkg : componentScan.getStringArray("basePackages")) {
-			if (StringUtils.hasText(pkg)) {
-				basePackages.add(pkg);
-			}
+
+		Set<String> basePackages = new LinkedHashSet<>();
+		String[] basePackagesArray = componentScan.getStringArray("basePackages");
+		for (String pkg : basePackagesArray) {
+			String[] tokenized = StringUtils.tokenizeToStringArray(this.environment.resolvePlaceholders(pkg),
+					ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
+			basePackages.addAll(Arrays.asList(tokenized));
 		}
 		for (Class<?> clazz : componentScan.getClassArray("basePackageClasses")) {
 			basePackages.add(ClassUtils.getPackageName(clazz));
 		}
-
 		if (basePackages.isEmpty()) {
 			basePackages.add(ClassUtils.getPackageName(declaringClass));
 		}
@@ -135,14 +136,14 @@ class ComponentScanAnnotationParser {
 	}
 
 	private List<TypeFilter> typeFiltersFor(AnnotationAttributes filterAttributes) {
-		List<TypeFilter> typeFilters = new ArrayList<TypeFilter>();
+		List<TypeFilter> typeFilters = new ArrayList<>();
 		FilterType filterType = filterAttributes.getEnum("type");
 
-		for (Class<?> filterClass : filterAttributes.getClassArray("value")) {
+		for (Class<?> filterClass : filterAttributes.getClassArray("classes")) {
 			switch (filterType) {
 				case ANNOTATION:
 					Assert.isAssignable(Annotation.class, filterClass,
-							"An error occured while processing a @ComponentScan ANNOTATION type filter: ");
+							"@ComponentScan ANNOTATION type filter requires an annotation type");
 					@SuppressWarnings("unchecked")
 					Class<Annotation> annotationType = (Class<Annotation>) filterClass;
 					typeFilters.add(new AnnotationTypeFilter(annotationType));
@@ -152,8 +153,11 @@ class ComponentScanAnnotationParser {
 					break;
 				case CUSTOM:
 					Assert.isAssignable(TypeFilter.class, filterClass,
-							"An error occured while processing a @ComponentScan CUSTOM type filter: ");
-					typeFilters.add(BeanUtils.instantiateClass(filterClass, TypeFilter.class));
+							"@ComponentScan CUSTOM type filter requires a TypeFilter implementation");
+					TypeFilter filter = BeanUtils.instantiateClass(filterClass, TypeFilter.class);
+					ParserStrategyUtils.invokeAwareMethods(
+							filter, this.environment, this.resourceLoader, this.registry);
+					typeFilters.add(filter);
 					break;
 				default:
 					throw new IllegalArgumentException("Filter type not supported with Class value: " + filterType);

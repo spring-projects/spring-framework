@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,22 +18,23 @@ package org.springframework.web.socket.handler;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
- * An exception handling {@link WebSocketHandlerDecorator}. Traps all {@link Throwable}
- * instances that escape from the decorated handler and closes the session with
- * {@link CloseStatus#SERVER_ERROR}.
+ * An exception handling {@link WebSocketHandlerDecorator}.
+ * Traps all {@link Throwable} instances that escape from the decorated
+ * handler and closes the session with {@link CloseStatus#SERVER_ERROR}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class ExceptionWebSocketHandlerDecorator extends WebSocketHandlerDecorator {
 
-	private final Log logger = LogFactory.getLog(ExceptionWebSocketHandlerDecorator.class);
+	private static final Log logger = LogFactory.getLog(ExceptionWebSocketHandlerDecorator.class);
 
 
 	public ExceptionWebSocketHandlerDecorator(WebSocketHandler delegate) {
@@ -48,18 +49,6 @@ public class ExceptionWebSocketHandlerDecorator extends WebSocketHandlerDecorato
 		}
 		catch (Throwable ex) {
 			tryCloseWithError(session, ex, logger);
-		}
-	}
-
-	public static void tryCloseWithError(WebSocketSession session, Throwable exception, Log logger) {
-		logger.error("Closing due to exception for " + session, exception);
-		if (session.isOpen()) {
-			try {
-				session.close(CloseStatus.SERVER_ERROR);
-			}
-			catch (Throwable t) {
-				// ignore
-			}
 		}
 	}
 
@@ -88,8 +77,25 @@ public class ExceptionWebSocketHandlerDecorator extends WebSocketHandlerDecorato
 		try {
 			getDelegate().afterConnectionClosed(session, closeStatus);
 		}
-		catch (Throwable t) {
-			logger.error("Unhandled error for " + this, t);
+		catch (Throwable ex) {
+			if (logger.isErrorEnabled()) {
+				logger.error("Unhandled error for " + this, ex);
+			}
+		}
+	}
+
+
+	public static void tryCloseWithError(WebSocketSession session, Throwable exception, Log logger) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Closing due to exception for " + session, exception);
+		}
+		if (session.isOpen()) {
+			try {
+				session.close(CloseStatus.SERVER_ERROR);
+			}
+			catch (Throwable ex) {
+				// ignore
+			}
 		}
 	}
 

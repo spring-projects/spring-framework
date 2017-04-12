@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.Customer;
 import org.springframework.jdbc.core.JdbcOperations;
@@ -76,7 +76,7 @@ public class NamedParameterJdbcTemplateTests {
 	private PreparedStatement preparedStatement;
 	private ResultSet resultSet;
 	private DatabaseMetaData databaseMetaData;
-	private Map<String, Object> params = new HashMap<String, Object>();
+	private Map<String, Object> params = new HashMap<>();
 	private NamedParameterJdbcTemplate namedParameterTemplate;
 
 	@Before
@@ -242,7 +242,7 @@ public class NamedParameterJdbcTemplateTests {
 
 		params.put("id", new SqlParameterValue(Types.DECIMAL, 1));
 		params.put("country", "UK");
-		final List<Customer> customers = new LinkedList<Customer>();
+		final List<Customer> customers = new LinkedList<>();
 		namedParameterTemplate.query(SELECT_NAMED_PARAMETERS, params, new RowCallbackHandler() {
 			@Override
 			public void processRow(ResultSet rs) throws SQLException {
@@ -269,7 +269,7 @@ public class NamedParameterJdbcTemplateTests {
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
 
-		final List<Customer> customers = new LinkedList<Customer>();
+		final List<Customer> customers = new LinkedList<>();
 		namedParameterTemplate.query(SELECT_NO_PARAMETERS, new RowCallbackHandler() {
 			@Override
 			public void processRow(ResultSet rs) throws SQLException {

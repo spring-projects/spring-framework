@@ -16,11 +16,11 @@
 
 package org.springframework.jms.support;
 
-import static org.junit.Assert.*;
-
 import javax.jms.Session;
 
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link JmsAccessor} class.
@@ -28,9 +28,9 @@ import org.junit.Test;
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class JmsAccessorTests {
+public class JmsAccessorTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testChokesIfConnectionFactoryIsNotSupplied() throws Exception {
 		JmsAccessor accessor = new StubJmsAccessor();
 		accessor.afterPropertiesSet();
@@ -55,7 +55,7 @@ public final class JmsAccessorTests {
 				accessor.getSessionAcknowledgeMode());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetAcknowledgeModeNameChokesIfBadAckModeIsSupplied() throws Exception {
 		new StubJmsAccessor().setSessionAcknowledgeModeName("Tally ho chaps!");
 	}

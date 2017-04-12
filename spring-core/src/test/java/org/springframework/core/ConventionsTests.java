@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,58 +17,68 @@
 package org.springframework.core;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
-import junit.framework.TestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.tests.sample.objects.TestObject;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rob Harrop
+ * @author Sam Brannen
  */
-public class ConventionsTests extends TestCase {
+public class ConventionsTests {
 
-	public void testSimpleObject() {
-		TestObject testObject = new TestObject();
-		assertEquals("Incorrect singular variable name", "testObject", Conventions.getVariableName(testObject));
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
+
+
+	@Test
+	public void simpleObject() {
+		assertEquals("Incorrect singular variable name", "testObject", Conventions.getVariableName(new TestObject()));
 	}
 
-	public void testArray() {
-		TestObject[] testObjects = new TestObject[0];
-		assertEquals("Incorrect plural array form", "testObjectList", Conventions.getVariableName(testObjects));
+	@Test
+	public void array() {
+		assertEquals("Incorrect plural array form", "testObjectList", Conventions.getVariableName(new TestObject[0]));
 	}
 
-	public void testCollections() {
-		List<TestObject> list = new ArrayList<TestObject>();
-		list.add(new TestObject());
+	@Test
+	public void list() {
+		List<TestObject> list = Arrays.asList(new TestObject());
 		assertEquals("Incorrect plural List form", "testObjectList", Conventions.getVariableName(list));
-
-		Set<TestObject> set = new HashSet<TestObject>();
-		set.add(new TestObject());
-		assertEquals("Incorrect plural Set form", "testObjectList", Conventions.getVariableName(set));
-
-		List<?> emptyList = new ArrayList<Object>();
-		try {
-			Conventions.getVariableName(emptyList);
-			fail("Should not be able to generate name for empty collection");
-		}
-		catch(IllegalArgumentException ex) {
-			// success
-		}
 	}
 
-	public void testAttributeNameToPropertyName() throws Exception {
+	@Test
+	public void emptyList() {
+		exception.expect(IllegalArgumentException.class);
+		Conventions.getVariableName(new ArrayList<>());
+	}
+
+	@Test
+	public void set() {
+		assertEquals("Incorrect plural Set form", "testObjectList", Conventions.getVariableName(Collections.singleton(new TestObject())));
+	}
+
+	@Test
+	public void attributeNameToPropertyName() throws Exception {
 		assertEquals("transactionManager", Conventions.attributeNameToPropertyName("transaction-manager"));
 		assertEquals("pointcutRef", Conventions.attributeNameToPropertyName("pointcut-ref"));
 		assertEquals("lookupOnStartup", Conventions.attributeNameToPropertyName("lookup-on-startup"));
 	}
 
-	public void testGetQualifiedAttributeName() throws Exception {
+	@Test
+	public void getQualifiedAttributeName() throws Exception {
 		String baseName = "foo";
 		Class<String> cls = String.class;
 		String desiredResult = "java.lang.String.foo";
 		assertEquals(desiredResult, Conventions.getQualifiedAttributeName(cls, baseName));
 	}
+
 }

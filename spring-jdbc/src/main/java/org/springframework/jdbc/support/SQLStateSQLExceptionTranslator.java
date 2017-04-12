@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.QueryTimeoutException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
 
@@ -44,15 +45,15 @@ import org.springframework.jdbc.BadSqlGrammarException;
  */
 public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLExceptionTranslator {
 
-	private static final Set<String> BAD_SQL_GRAMMAR_CODES = new HashSet<String>(8);
+	private static final Set<String> BAD_SQL_GRAMMAR_CODES = new HashSet<>(8);
 
-	private static final Set<String> DATA_INTEGRITY_VIOLATION_CODES = new HashSet<String>(8);
+	private static final Set<String> DATA_INTEGRITY_VIOLATION_CODES = new HashSet<>(8);
 
-	private static final Set<String> DATA_ACCESS_RESOURCE_FAILURE_CODES = new HashSet<String>(8);
+	private static final Set<String> DATA_ACCESS_RESOURCE_FAILURE_CODES = new HashSet<>(8);
 
-	private static final Set<String> TRANSIENT_DATA_ACCESS_RESOURCE_CODES = new HashSet<String>(8);
+	private static final Set<String> TRANSIENT_DATA_ACCESS_RESOURCE_CODES = new HashSet<>(8);
 
-	private static final Set<String> CONCURRENCY_FAILURE_CODES = new HashSet<String>(4);
+	private static final Set<String> CONCURRENCY_FAILURE_CODES = new HashSet<>(4);
 
 
 	static {
@@ -87,6 +88,7 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 
 	@Override
 	protected DataAccessException doTranslate(String task, String sql, SQLException ex) {
+		// First, the getSQLState check...
 		String sqlState = getSqlState(ex);
 		if (sqlState != null && sqlState.length() >= 2) {
 			String classCode = sqlState.substring(0, 2);
@@ -109,6 +111,14 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 				return new ConcurrencyFailureException(buildMessage(task, sql, ex), ex);
 			}
 		}
+
+		// For MySQL: exception class name indicating a timeout?
+		// (since MySQL doesn't throw the JDBC 4 SQLTimeoutException)
+		if (ex.getClass().getName().contains("Timeout")) {
+			return new QueryTimeoutException(buildMessage(task, sql, ex), ex);
+		}
+
+		// Couldn't resolve anything proper - resort to UncategorizedSQLException.
 		return null;
 	}
 

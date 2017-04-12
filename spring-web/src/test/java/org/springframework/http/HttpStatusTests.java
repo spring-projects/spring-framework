@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
 /** @author Arjen Poutsma */
 public class HttpStatusTests {
 
-	private Map<Integer, String> statusCodes = new LinkedHashMap<Integer, String>();
+	private Map<Integer, String> statusCodes = new LinkedHashMap<>();
 
 	@Before
 	public void createStatusCodes() {
@@ -69,8 +69,8 @@ public class HttpStatusTests {
 		statusCodes.put(410, "GONE");
 		statusCodes.put(411, "LENGTH_REQUIRED");
 		statusCodes.put(412, "PRECONDITION_FAILED");
-		statusCodes.put(413, "REQUEST_ENTITY_TOO_LARGE");
-		statusCodes.put(414, "REQUEST_URI_TOO_LONG");
+		statusCodes.put(413, "PAYLOAD_TOO_LARGE");
+		statusCodes.put(414, "URI_TOO_LONG");
 		statusCodes.put(415, "UNSUPPORTED_MEDIA_TYPE");
 		statusCodes.put(416, "REQUESTED_RANGE_NOT_SATISFIABLE");
 		statusCodes.put(417, "EXPECTATION_FAILED");
@@ -85,6 +85,7 @@ public class HttpStatusTests {
 		statusCodes.put(428, "PRECONDITION_REQUIRED");
 		statusCodes.put(429, "TOO_MANY_REQUESTS");
 		statusCodes.put(431, "REQUEST_HEADER_FIELDS_TOO_LARGE");
+		statusCodes.put(451, "UNAVAILABLE_FOR_LEGAL_REASONS");
 
 		statusCodes.put(500, "INTERNAL_SERVER_ERROR");
 		statusCodes.put(501, "NOT_IMPLEMENTED");
@@ -115,7 +116,7 @@ public class HttpStatusTests {
 
 		for (HttpStatus status : HttpStatus.values()) {
 			int value = status.value();
-			if (value == 302) {
+			if (value == 302 || value == 413 || value == 414) {
 				continue;
 			}
 			assertTrue("Map has no value for [" + value + "]", statusCodes.containsKey(value));

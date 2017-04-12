@@ -20,8 +20,8 @@ import java.net.URI;
 
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.WebSocketHttpHeaders;
+import org.springframework.web.socket.WebSocketSession;
 
 /**
  * Contract for initiating a WebSocket request. As an alternative considering using the

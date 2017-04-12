@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,18 @@ package org.springframework.core.convert;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -38,6 +42,7 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Stephane Nicoll
  * @since 3.0
  */
 @SuppressWarnings("serial")
@@ -45,7 +50,7 @@ public class TypeDescriptor implements Serializable {
 
 	static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
-	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<Class<?>, TypeDescriptor>();
+	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<>(18);
 
 	private static final Class<?>[] CACHED_COMMON_TYPES = {
 			boolean.class, Boolean.class, byte.class, Byte.class, char.class, Character.class,
@@ -63,7 +68,7 @@ public class TypeDescriptor implements Serializable {
 
 	private final ResolvableType resolvableType;
 
-	private final Annotation[] annotations;
+	private final AnnotatedElementAdapter annotatedElement;
 
 
 	/**
@@ -73,15 +78,10 @@ public class TypeDescriptor implements Serializable {
 	 * @param methodParameter the method parameter
 	 */
 	public TypeDescriptor(MethodParameter methodParameter) {
-		Assert.notNull(methodParameter, "MethodParameter must not be null");
-		if (methodParameter.getNestingLevel() != 1) {
-			throw new IllegalArgumentException("MethodParameter argument must have its nestingLevel set to 1");
-		}
 		this.resolvableType = ResolvableType.forMethodParameter(methodParameter);
 		this.type = this.resolvableType.resolve(methodParameter.getParameterType());
-		this.annotations = (methodParameter.getParameterIndex() == -1 ?
-				nullSafeAnnotations(methodParameter.getMethodAnnotations()) :
-				nullSafeAnnotations(methodParameter.getParameterAnnotations()));
+		this.annotatedElement = new AnnotatedElementAdapter(methodParameter.getParameterIndex() == -1 ?
+				methodParameter.getMethodAnnotations() : methodParameter.getParameterAnnotations());
 	}
 
 	/**
@@ -90,10 +90,9 @@ public class TypeDescriptor implements Serializable {
 	 * @param field the field
 	 */
 	public TypeDescriptor(Field field) {
-		Assert.notNull(field, "Field must not be null");
 		this.resolvableType = ResolvableType.forField(field);
 		this.type = this.resolvableType.resolve(field.getType());
-		this.annotations = nullSafeAnnotations(field.getAnnotations());
+		this.annotatedElement = new AnnotatedElementAdapter(field.getAnnotations());
 	}
 
 	/**
@@ -106,7 +105,7 @@ public class TypeDescriptor implements Serializable {
 		Assert.notNull(property, "Property must not be null");
 		this.resolvableType = ResolvableType.forMethodParameter(property.getMethodParameter());
 		this.type = this.resolvableType.resolve(property.getType());
-		this.annotations = nullSafeAnnotations(property.getAnnotations());
+		this.annotatedElement = new AnnotatedElementAdapter(property.getAnnotations());
 	}
 
 	/**
@@ -114,35 +113,33 @@ public class TypeDescriptor implements Serializable {
 	 * constructor is used internally and may also be used by subclasses that support
 	 * non-Java languages with extended type systems.
 	 * @param resolvableType the resolvable type
-	 * @param type the backing type or {@code null} if should be resolved
+	 * @param type the backing type (or {@code null} if it should get resolved)
 	 * @param annotations the type annotations
+	 * @since 4.0
 	 */
 	protected TypeDescriptor(ResolvableType resolvableType, Class<?> type, Annotation[] annotations) {
 		this.resolvableType = resolvableType;
 		this.type = (type != null ? type : resolvableType.resolve(Object.class));
-		this.annotations = nullSafeAnnotations(annotations);
+		this.annotatedElement = new AnnotatedElementAdapter(annotations);
 	}
 
-
-	private Annotation[] nullSafeAnnotations(Annotation[] annotations) {
-		return (annotations != null ? annotations : EMPTY_ANNOTATION_ARRAY);
-	}
 
 	/**
-	 * Variation of {@link #getType()} that accounts for a primitive type by returning its object wrapper type.
-	 * <p>This is useful for conversion service implementations that wish to normalize to object-based types
-	 * and not work with primitive types directly.
+	 * Variation of {@link #getType()} that accounts for a primitive type by
+	 * returning its object wrapper type.
+	 * <p>This is useful for conversion service implementations that wish to
+	 * normalize to object-based types and not work with primitive types directly.
 	 */
 	public Class<?> getObjectType() {
 		return ClassUtils.resolvePrimitiveIfNecessary(getType());
 	}
 
 	/**
-	 * The type of the backing class, method parameter, field, or property described by this TypeDescriptor.
-	 * <p>Returns primitive types as-is.
-	 * <p>See {@link #getObjectType()} for a variation of this operation that resolves primitive types
-	 * to their corresponding Object types if necessary.
-	 * @return the type, or {@code null}
+	 * The type of the backing class, method parameter, field, or property
+	 * described by this TypeDescriptor.
+	 * <p>Returns primitive types as-is. See {@link #getObjectType()} for a
+	 * variation of this operation that resolves primitive types to their
+	 * corresponding Object types if necessary.
 	 * @see #getObjectType()
 	 */
 	public Class<?> getType() {
@@ -151,6 +148,7 @@ public class TypeDescriptor implements Serializable {
 
 	/**
 	 * Return the underlying {@link ResolvableType}.
+	 * @since 4.0
 	 */
 	public ResolvableType getResolvableType() {
 		return this.resolvableType;
@@ -161,9 +159,10 @@ public class TypeDescriptor implements Serializable {
 	 * {@link MethodParameter} or {@link Type} depending on how the {@link TypeDescriptor}
 	 * was constructed. This method is primarily to provide access to additional
 	 * type information or meta-data that alternative JVM languages may provide.
+	 * @since 4.0
 	 */
 	public Object getSource() {
-		return (this.resolvableType == null ? null : this.resolvableType.getSource());
+		return (this.resolvableType != null ? this.resolvableType.getSource() : null);
 	}
 
 	/**
@@ -186,14 +185,14 @@ public class TypeDescriptor implements Serializable {
 		if (value == null) {
 			return this;
 		}
-		ResolvableType narrowed = ResolvableType.forType(value.getClass(), this.resolvableType);
-		return new TypeDescriptor(narrowed, null, this.annotations);
+		ResolvableType narrowed = ResolvableType.forType(value.getClass(), getResolvableType());
+		return new TypeDescriptor(narrowed, value.getClass(), getAnnotations());
 	}
 
 	/**
 	 * Cast this {@link TypeDescriptor} to a superclass or implemented interface
 	 * preserving annotations and nested type context.
-	 * @param superType the super type to cast to (can be {@code null}
+	 * @param superType the super type to cast to (can be {@code null})
 	 * @return a new TypeDescriptor for the up-cast type
 	 * @throws IllegalArgumentException if this type is not assignable to the super-type
 	 * @since 3.2
@@ -203,11 +202,11 @@ public class TypeDescriptor implements Serializable {
 			return null;
 		}
 		Assert.isAssignable(superType, getType());
-		return new TypeDescriptor(this.resolvableType.as(superType), superType, this.annotations);
+		return new TypeDescriptor(getResolvableType().as(superType), superType, getAnnotations());
 	}
 
 	/**
-	 * Returns the name of this type: the fully qualified class name.
+	 * Return the name of this type: the fully qualified class name.
 	 */
 	public String getName() {
 		return ClassUtils.getQualifiedName(getType());
@@ -221,41 +220,43 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * The annotations associated with this type descriptor, if any.
+	 * Return the annotations associated with this type descriptor, if any.
 	 * @return the annotations, or an empty array if none
 	 */
 	public Annotation[] getAnnotations() {
-		return this.annotations;
+		return this.annotatedElement.getAnnotations();
 	}
 
 	/**
 	 * Determine if this type descriptor has the specified annotation.
+	 * <p>As of Spring Framework 4.2, this method supports arbitrary levels
+	 * of meta-annotations.
 	 * @param annotationType the annotation type
 	 * @return <tt>true</tt> if the annotation is present
 	 */
 	public boolean hasAnnotation(Class<? extends Annotation> annotationType) {
-		return getAnnotation(annotationType) != null;
+		if (this.annotatedElement.isEmpty()) {
+			// Shortcut: AnnotatedElementUtils would have to expect AnnotatedElement.getAnnotations()
+			// to return a copy of the array, whereas we can do it more efficiently here.
+			return false;
+		}
+		return AnnotatedElementUtils.isAnnotated(this.annotatedElement, annotationType);
 	}
 
 	/**
-	 * Obtain the annotation associated with this type descriptor of the specified type.
+	 * Obtain the annotation of the specified {@code annotationType} that is on this type descriptor.
+	 * <p>As of Spring Framework 4.2, this method supports arbitrary levels of meta-annotations.
 	 * @param annotationType the annotation type
 	 * @return the annotation, or {@code null} if no such annotation exists on this type descriptor
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
-		for (Annotation annotation : getAnnotations()) {
-			if (annotation.annotationType().equals(annotationType)) {
-				return (T) annotation;
-			}
+		if (this.annotatedElement.isEmpty()) {
+			// Shortcut: AnnotatedElementUtils would have to expect AnnotatedElement.getAnnotations()
+			// to return a copy of the array, whereas we can do it more efficiently here.
+			return null;
 		}
-		for (Annotation metaAnn : getAnnotations()) {
-			T ann = metaAnn.annotationType().getAnnotation(annotationType);
-			if (ann != null) {
-				return ann;
-			}
-		}
-		return null;
+		return AnnotatedElementUtils.getMergedAnnotation(this.annotatedElement, annotationType);
 	}
 
 	/**
@@ -315,6 +316,7 @@ public class TypeDescriptor implements Serializable {
 
 	/**
 	 * If this type is an array, returns the array's component type.
+	 * If this type is a {@code Stream}, returns the stream's component type.
 	 * If this type is a {@link Collection} and it is parameterized, returns the Collection's element type.
 	 * If the Collection is not parameterized, returns {@code null} indicating the element type is not declared.
 	 * @return the array component type or Collection element type, or {@code null} if this type is a
@@ -322,10 +324,13 @@ public class TypeDescriptor implements Serializable {
 	 * @throws IllegalStateException if this type is not a {@code java.util.Collection} or array type
 	 */
 	public TypeDescriptor getElementTypeDescriptor() {
-		if (this.resolvableType.isArray()) {
-			return new TypeDescriptor(this.resolvableType.getComponentType(), null, this.annotations);
+		if (getResolvableType().isArray()) {
+			return new TypeDescriptor(getResolvableType().getComponentType(), null, getAnnotations());
 		}
-		return getRelatedIfResolvable(this, this.resolvableType.asCollection().getGeneric());
+		if (Stream.class.isAssignableFrom(getType())) {
+			return getRelatedIfResolvable(this, getResolvableType().as(Stream.class).getGeneric(0));
+		}
+		return getRelatedIfResolvable(this, getResolvableType().asCollection().getGeneric(0));
 	}
 
 	/**
@@ -366,8 +371,8 @@ public class TypeDescriptor implements Serializable {
 	 * @throws IllegalStateException if this type is not a {@code java.util.Map}
 	 */
 	public TypeDescriptor getMapKeyTypeDescriptor() {
-		Assert.state(isMap(), "Not a java.util.Map");
-		return getRelatedIfResolvable(this, this.resolvableType.asMap().getGeneric(0));
+		Assert.state(isMap(), "Not a [java.util.Map]");
+		return getRelatedIfResolvable(this, getResolvableType().asMap().getGeneric(0));
 	}
 
 	/**
@@ -401,8 +406,8 @@ public class TypeDescriptor implements Serializable {
 	 * @throws IllegalStateException if this type is not a {@code java.util.Map}
 	 */
 	public TypeDescriptor getMapValueTypeDescriptor() {
-		Assert.state(isMap(), "Not a java.util.Map");
-		return getRelatedIfResolvable(this, this.resolvableType.asMap().getGeneric(1));
+		Assert.state(isMap(), "Not a [java.util.Map]");
+		return getRelatedIfResolvable(this, getResolvableType().asMap().getGeneric(1));
 	}
 
 	/**
@@ -426,80 +431,65 @@ public class TypeDescriptor implements Serializable {
 		return narrow(mapValue, getMapValueTypeDescriptor());
 	}
 
-	/**
-	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the
-	 * {@link #getElementTypeDescriptor() elementTypeDescriptor}.
-	 * @deprecated in Spring 3.1 in favor of {@link #getElementTypeDescriptor()}
-	 * @throws IllegalStateException if this type is not a {@code java.util.Collection} or array type
-	 */
-	@Deprecated
-	public Class<?> getElementType() {
-		return getType(getElementTypeDescriptor());
-	}
-
-	/**
-	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the
-	 * {@link #getMapKeyTypeDescriptor() getMapKeyTypeDescriptor}.
-	 * @deprecated in Spring 3.1 in favor of {@link #getMapKeyTypeDescriptor()}
-	 * @throws IllegalStateException if this type is not a {@code java.util.Map}
-	 */
-	@Deprecated
-	public Class<?> getMapKeyType() {
-		return getType(getMapKeyTypeDescriptor());
-	}
-
-	/**
-	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the
-	 * {@link #getMapValueTypeDescriptor() getMapValueTypeDescriptor}.
-	 * @deprecated in Spring 3.1 in favor of {@link #getMapValueTypeDescriptor()}
-	 * @throws IllegalStateException if this type is not a {@code java.util.Map}
-	 */
-	@Deprecated
-	public Class<?> getMapValueType() {
-		return getType(getMapValueTypeDescriptor());
-	}
-
-	private Class<?> getType(TypeDescriptor typeDescriptor) {
-		return (typeDescriptor != null ? typeDescriptor.getType() : null);
-	}
-
 	private TypeDescriptor narrow(Object value, TypeDescriptor typeDescriptor) {
 		if (typeDescriptor != null) {
 			return typeDescriptor.narrow(value);
 		}
-		return (value != null ? new TypeDescriptor(this.resolvableType, value.getClass(), this.annotations) : null);
+		if (value != null) {
+			return narrow(value);
+		}
+		return null;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (!(obj instanceof TypeDescriptor)) {
+		if (!(other instanceof TypeDescriptor)) {
 			return false;
 		}
-		TypeDescriptor other = (TypeDescriptor) obj;
-		if (!ObjectUtils.nullSafeEquals(this.type, other.type)) {
+		TypeDescriptor otherDesc = (TypeDescriptor) other;
+		if (getType() != otherDesc.getType()) {
 			return false;
 		}
-		if (getAnnotations().length != other.getAnnotations().length) {
+		if (!annotationsMatch(otherDesc)) {
 			return false;
-		}
-		for (Annotation ann : getAnnotations()) {
-			if (other.getAnnotation(ann.annotationType()) == null) {
-				return false;
-			}
 		}
 		if (isCollection() || isArray()) {
-			return ObjectUtils.nullSafeEquals(getElementTypeDescriptor(), other.getElementTypeDescriptor());
+			return ObjectUtils.nullSafeEquals(getElementTypeDescriptor(), otherDesc.getElementTypeDescriptor());
 		}
 		else if (isMap()) {
-			return ObjectUtils.nullSafeEquals(getMapKeyTypeDescriptor(), other.getMapKeyTypeDescriptor()) &&
-					ObjectUtils.nullSafeEquals(getMapValueTypeDescriptor(), other.getMapValueTypeDescriptor());
+			return (ObjectUtils.nullSafeEquals(getMapKeyTypeDescriptor(), otherDesc.getMapKeyTypeDescriptor()) &&
+					ObjectUtils.nullSafeEquals(getMapValueTypeDescriptor(), otherDesc.getMapValueTypeDescriptor()));
 		}
 		else {
 			return true;
 		}
+	}
+
+	private boolean annotationsMatch(TypeDescriptor otherDesc) {
+		Annotation[] anns = getAnnotations();
+		Annotation[] otherAnns = otherDesc.getAnnotations();
+		if (anns == otherAnns) {
+			return true;
+		}
+		if (anns.length != otherAnns.length) {
+			return false;
+		}
+		if (anns.length > 0) {
+			for (int i = 0; i < anns.length; i++) {
+				if (!annotationEquals(anns[i], otherAnns[i])) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	private boolean annotationEquals(Annotation ann, Annotation otherAnn) {
+		// Annotation.equals is reflective and pretty slow, so let's check identity and proxy type first.
+		return (ann == otherAnn || (ann.getClass() == otherAnn.getClass() && ann.equals(otherAnn)));
 	}
 
 	@Override
@@ -513,8 +503,22 @@ public class TypeDescriptor implements Serializable {
 		for (Annotation ann : getAnnotations()) {
 			builder.append("@").append(ann.annotationType().getName()).append(' ');
 		}
-		builder.append(this.resolvableType.toString());
+		builder.append(getResolvableType().toString());
 		return builder.toString();
+	}
+
+
+	/**
+	 * Create a new type descriptor for an object.
+	 * <p>Use this factory method to introspect a source object before asking the
+	 * conversion system to convert it to some another type.
+	 * <p>If the provided object is {@code null}, returns {@code null}, else calls
+	 * {@link #valueOf(Class)} to build a TypeDescriptor from the object's class.
+	 * @param source the source object
+	 * @return the type descriptor
+	 */
+	public static TypeDescriptor forObject(Object source) {
+		return (source != null ? valueOf(source.getClass()) : null);
 	}
 
 	/**
@@ -548,9 +552,9 @@ public class TypeDescriptor implements Serializable {
 	 * @return the collection type descriptor
 	 */
 	public static TypeDescriptor collection(Class<?> collectionType, TypeDescriptor elementTypeDescriptor) {
-		Assert.notNull(collectionType, "collectionType must not be null");
+		Assert.notNull(collectionType, "Collection type must not be null");
 		if (!Collection.class.isAssignableFrom(collectionType)) {
-			throw new IllegalArgumentException("collectionType must be a java.util.Collection");
+			throw new IllegalArgumentException("Collection type must be a [java.util.Collection]");
 		}
 		ResolvableType element = (elementTypeDescriptor != null ? elementTypeDescriptor.resolvableType : null);
 		return new TypeDescriptor(ResolvableType.forClassWithGenerics(collectionType, element), null, null);
@@ -571,8 +575,9 @@ public class TypeDescriptor implements Serializable {
 	 * @return the map type descriptor
 	 */
 	public static TypeDescriptor map(Class<?> mapType, TypeDescriptor keyTypeDescriptor, TypeDescriptor valueTypeDescriptor) {
+		Assert.notNull(mapType, "Map type must not be null");
 		if (!Map.class.isAssignableFrom(mapType)) {
-			throw new IllegalArgumentException("mapType must be a java.util.Map");
+			throw new IllegalArgumentException("Map type must be a [java.util.Map]");
 		}
 		ResolvableType key = (keyTypeDescriptor != null ? keyTypeDescriptor.resolvableType : null);
 		ResolvableType value = (valueTypeDescriptor != null ? valueTypeDescriptor.resolvableType : null);
@@ -676,23 +681,10 @@ public class TypeDescriptor implements Serializable {
 		return nested(new TypeDescriptor(property), nestingLevel);
 	}
 
-	/**
-	 * Create a new type descriptor for an object.
-	 * <p>Use this factory method to introspect a source object before asking the
-	 * conversion system to convert it to some another type.
-	 * <p>If the provided object is {@code null}, returns {@code null}, else calls
-	 * {@link #valueOf(Class)} to build a TypeDescriptor from the object's class.
-	 * @param source the source object
-	 * @return the type descriptor
-	 */
-	public static TypeDescriptor forObject(Object source) {
-		return (source != null ? valueOf(source.getClass()) : null);
-	}
-
 	private static TypeDescriptor nested(TypeDescriptor typeDescriptor, int nestingLevel) {
 		ResolvableType nested = typeDescriptor.resolvableType;
 		for (int i = 0; i < nestingLevel; i++) {
-			if (Object.class.equals(nested.getType())) {
+			if (Object.class == nested.getType()) {
 				// Could be a collection type but we don't know about its element type,
 				// so let's just assume there is an element type of type Object...
 			}
@@ -701,8 +693,7 @@ public class TypeDescriptor implements Serializable {
 			}
 		}
 		if (nested == ResolvableType.NONE) {
-			throw new IllegalStateException(
-					"Unable to obtain nested generic from " + typeDescriptor + " at level " + nestingLevel);
+			return null;
 		}
 		return getRelatedIfResolvable(typeDescriptor, nested);
 	}
@@ -711,7 +702,74 @@ public class TypeDescriptor implements Serializable {
 		if (type.resolve() == null) {
 			return null;
 		}
-		return new TypeDescriptor(type, null, source.annotations);
+		return new TypeDescriptor(type, null, source.getAnnotations());
+	}
+
+
+	/**
+	 * Adapter class for exposing a {@code TypeDescriptor}'s annotations as an
+	 * {@link AnnotatedElement}, in particular to {@link AnnotatedElementUtils}.
+	 * @see AnnotatedElementUtils#isAnnotated(AnnotatedElement, Class)
+	 * @see AnnotatedElementUtils#getMergedAnnotation(AnnotatedElement, Class)
+	 */
+	private class AnnotatedElementAdapter implements AnnotatedElement, Serializable {
+
+		private final Annotation[] annotations;
+
+		public AnnotatedElementAdapter(Annotation[] annotations) {
+			this.annotations = annotations;
+		}
+
+		@Override
+		public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
+			for (Annotation annotation : getAnnotations()) {
+				if (annotation.annotationType() == annotationClass) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+			for (Annotation annotation : getAnnotations()) {
+				if (annotation.annotationType() == annotationClass) {
+					return (T) annotation;
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Annotation[] getAnnotations() {
+			return (this.annotations != null ? this.annotations : EMPTY_ANNOTATION_ARRAY);
+		}
+
+		@Override
+		public Annotation[] getDeclaredAnnotations() {
+			return getAnnotations();
+		}
+
+		public boolean isEmpty() {
+			return ObjectUtils.isEmpty(this.annotations);
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			return (this == other || (other instanceof AnnotatedElementAdapter &&
+					Arrays.equals(this.annotations, ((AnnotatedElementAdapter) other).annotations)));
+		}
+
+		@Override
+		public int hashCode() {
+			return Arrays.hashCode(this.annotations);
+		}
+
+		@Override
+		public String toString() {
+			return TypeDescriptor.this.toString();
+		}
 	}
 
 }

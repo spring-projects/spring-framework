@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,14 +74,14 @@ public abstract class RdbmsOperation implements InitializingBean {
 
 	private String sql;
 
-	private final List<SqlParameter> declaredParameters = new LinkedList<SqlParameter>();
+	private final List<SqlParameter> declaredParameters = new LinkedList<>();
 
 	/**
 	 * Has this operation been compiled? Compilation means at
 	 * least checking that a DataSource and sql have been provided,
 	 * but subclasses may also implement their own custom validation.
 	 */
-	private boolean compiled;
+	private volatile boolean compiled;
 
 
 	/**
@@ -210,7 +210,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * Set the column names of the auto-generated keys.
 	 * @see java.sql.Connection#prepareStatement(String, String[])
 	 */
-	public void setGeneratedKeysColumnNames(String[] names) {
+	public void setGeneratedKeysColumnNames(String... names) {
 		if (isCompiled()) {
 			throw new InvalidDataAccessApiUsageException(
 					"The column names for the generated keys must be set before the operation is compiled");
@@ -350,7 +350,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * Is this operation "compiled"? Compilation, as in JDO,
 	 * means that the operation is fully configured, and ready to use.
 	 * The exact meaning of compilation will vary between subclasses.
-	 * @return whether this operation is compiled, and ready to use.
+	 * @return whether this operation is compiled and ready to use
 	 */
 	public boolean isCompiled() {
 		return this.compiled;

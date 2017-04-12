@@ -18,15 +18,14 @@ package org.springframework.aop.aspectj;
 
 import org.junit.Before;
 import org.junit.Test;
+import test.mixin.Lockable;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
-
-import test.mixin.Lockable;
+import org.springframework.tests.sample.beans.ITestBean;
 
 import static org.junit.Assert.*;
 
@@ -34,7 +33,7 @@ import static org.junit.Assert.*;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class DeclareParentsTests {
+public class DeclareParentsTests {
 
 	private ITestBean testBeanProxy;
 

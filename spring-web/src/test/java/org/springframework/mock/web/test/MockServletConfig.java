@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,6 @@ import org.springframework.util.Assert;
 /**
  * Mock implementation of the {@link javax.servlet.ServletConfig} interface.
  *
- * <p>Used for testing the web framework; typically not necessary for
- * testing application controllers.
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 1.0.2
@@ -41,7 +38,7 @@ public class MockServletConfig implements ServletConfig {
 
 	private final String servletName;
 
-	private final Map<String, String> initParameters = new LinkedHashMap<String, String>();
+	private final Map<String, String> initParameters = new LinkedHashMap<>();
 
 
 	/**

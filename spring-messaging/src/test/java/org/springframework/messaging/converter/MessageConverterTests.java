@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -42,13 +42,8 @@ import static org.junit.Assert.*;
  */
 public class MessageConverterTests {
 
-	private TestMessageConverter converter;
+	private TestMessageConverter converter = new TestMessageConverter();
 
-
-	@Before
-	public void setup() {
-		this.converter = new TestMessageConverter();
-	}
 
 	@Test
 	public void supportsTargetClass() {
@@ -105,14 +100,13 @@ public class MessageConverterTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void setStrictContentTypeMatchWithNoSupportedMimeTypes() {
-		Message<String> message = MessageBuilder.withPayload("ABC").build();
 		this.converter = new TestMessageConverter(Collections.<MimeType>emptyList());
 		this.converter.setStrictContentTypeMatch(true);
 	}
 
 	@Test
 	public void toMessageWithHeaders() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
 		MessageHeaders headers = new MessageHeaders(map);
 		Message<?> message = this.converter.toMessage("ABC", headers);
@@ -162,12 +156,12 @@ public class MessageConverterTests {
 		}
 
 		@Override
-		public Object convertFromInternal(Message<?> message, Class<?> targetClass) {
+		protected Object convertFromInternal(Message<?> message, Class<?> targetClass, Object conversionHint) {
 			return "success-from";
 		}
 
 		@Override
-		public Object convertToInternal(Object payload, MessageHeaders headers) {
+		protected Object convertToInternal(Object payload, MessageHeaders headers, Object conversionHint) {
 			return "success-to";
 		}
 	}

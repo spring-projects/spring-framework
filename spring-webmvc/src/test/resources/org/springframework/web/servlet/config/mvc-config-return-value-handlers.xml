@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
@@ -8,7 +8,10 @@
 	<mvc:annotation-driven>
 		<mvc:return-value-handlers>
 			<bean class="org.springframework.web.servlet.config.TestHandlerMethodReturnValueHandler"/>
+			<ref bean="customHandler" />
 		</mvc:return-value-handlers>
 	</mvc:annotation-driven>
+
+	<bean id="customHandler" class="org.springframework.web.servlet.config.TestHandlerMethodReturnValueHandler"/>
 
 </beans>

@@ -17,6 +17,7 @@
 package org.springframework.scheduling.quartz;
 
 import org.quartz.SchedulerContext;
+
 import org.springframework.beans.factory.Aware;
 
 /**

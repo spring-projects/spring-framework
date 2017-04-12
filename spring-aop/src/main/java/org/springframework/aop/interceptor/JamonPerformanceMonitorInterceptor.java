@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,26 @@
 
 package org.springframework.aop.interceptor;
 
+import com.jamonapi.MonKey;
+import com.jamonapi.MonKeyImp;
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
+import com.jamonapi.utils.Misc;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 
 /**
- * Performance monitor interceptor that uses <b>JAMon</b> library
- * to perform the performance measurement on the intercepted method
- * and output the stats.
+ * Performance monitor interceptor that uses <b>JAMon</b> library to perform the
+ * performance measurement on the intercepted method and output the stats.
+ * In addition, it tracks/counts exceptions thrown by the intercepted method.
+ * The stack traces can be viewed in the JAMon web application.
  *
  * <p>This code is inspired by Thierry Templier's blog.
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Steve Souza
  * @since 1.1.3
  * @see com.jamonapi.MonitorFactory
  * @see PerformanceMonitorInterceptor
@@ -103,9 +108,15 @@ public class JamonPerformanceMonitorInterceptor extends AbstractMonitoringInterc
 	@Override
 	protected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
 		String name = createInvocationTraceName(invocation);
-		Monitor monitor = MonitorFactory.start(name);
+		MonKey key = new MonKeyImp(name, name, "ms.");
+
+		Monitor monitor = MonitorFactory.start(key);
 		try {
 			return invocation.proceed();
+		}
+		catch (Throwable ex) {
+			trackException(key, ex);
+			throw ex;
 		}
 		finally {
 			monitor.stop();
@@ -113,6 +124,21 @@ public class JamonPerformanceMonitorInterceptor extends AbstractMonitoringInterc
 				logger.trace("JAMon performance statistics for method [" + name + "]:\n" + monitor);
 			}
 		}
+	}
+
+	/**
+	 * Count the thrown exception and put the stack trace in the details portion of the key.
+	 * This will allow the stack trace to be viewed in the JAMon web application.
+	 */
+	protected void trackException(MonKey key, Throwable ex) {
+		String stackTrace = "stackTrace=" + Misc.getExceptionTrace(ex);
+		key.setDetails(stackTrace);
+
+		// Specific exception counter. Example: java.lang.RuntimeException
+		MonitorFactory.add(new MonKeyImp(ex.getClass().getName(), stackTrace, "Exception"), 1);
+
+		// General exception counter which is a total for all exceptions thrown
+		MonitorFactory.add(new MonKeyImp(MonitorFactory.EXCEPTIONS_LABEL, stackTrace, "Exception"), 1);
 	}
 
 }

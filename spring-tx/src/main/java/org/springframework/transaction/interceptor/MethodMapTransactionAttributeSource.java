@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,10 +59,10 @@ public class MethodMapTransactionAttributeSource
 
 	/** Map from Method to TransactionAttribute */
 	private final Map<Method, TransactionAttribute> transactionAttributeMap =
-			new HashMap<Method, TransactionAttribute>();
+			new HashMap<>();
 
 	/** Map from Method to name pattern used for registration */
-	private final Map<Method, String> methodNameMap = new HashMap<Method, String>();
+	private final Map<Method, String> methodNameMap = new HashMap<>();
 
 
 	/**
@@ -145,7 +145,7 @@ public class MethodMapTransactionAttributeSource
 		String name = clazz.getName() + '.'  + mappedName;
 
 		Method[] methods = clazz.getDeclaredMethods();
-		List<Method> matchingMethods = new ArrayList<Method>();
+		List<Method> matchingMethods = new ArrayList<>();
 		for (Method method : methods) {
 			if (isMatch(method.getName(), mappedName)) {
 				matchingMethods.add(method);

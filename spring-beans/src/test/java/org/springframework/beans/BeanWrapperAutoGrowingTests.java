@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -31,14 +31,16 @@ import static org.junit.Assert.*;
  */
 public class BeanWrapperAutoGrowingTests {
 
-	Bean bean = new Bean();
+	private final Bean bean = new Bean();
 
-	BeanWrapperImpl wrapper = new BeanWrapperImpl(bean);
+	private final BeanWrapperImpl wrapper = new BeanWrapperImpl(bean);
+
 
 	@Before
 	public void setUp() {
 		wrapper.setAutoGrowNestedPaths(true);
 	}
+
 
 	@Test
 	public void getPropertyValueNullValueInNestedPath() {
@@ -51,7 +53,7 @@ public class BeanWrapperAutoGrowingTests {
 		assertEquals("test", bean.getNested().getProp());
 	}
 
-	@Test(expected=NullValueInNestedPathException.class)
+	@Test(expected = NullValueInNestedPathException.class)
 	public void getPropertyValueNullValueInNestedPathNoDefaultConstructor() {
 		wrapper.getPropertyValue("nestedNoConstructor.prop");
 	}
@@ -139,7 +141,7 @@ public class BeanWrapperAutoGrowingTests {
 		assertThat(bean.getMultiList().get(0).get(0), instanceOf(Bean.class));
 	}
 
-	@Test(expected=InvalidPropertyException.class)
+	@Test(expected = InvalidPropertyException.class)
 	public void getPropertyValueAutoGrowListNotParameterized() {
 		wrapper.getPropertyValue("listNotParameterized[0]");
 	}

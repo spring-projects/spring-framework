@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,18 +23,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.ContextLoader;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
-import org.springframework.test.context.support.ContextLoaderUtils;
 
-import static org.springframework.test.context.support.ContextLoaderUtils.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static org.springframework.test.context.support.ContextLoaderUtils.*;
 
 /**
  * Unit tests for {@link ContextLoaderUtils} involving context hierarchies.
@@ -42,7 +41,7 @@ import static org.junit.Assert.*;
  * @author Sam Brannen
  * @since 3.2.2
  */
-public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextLoaderUtilsTests {
+public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConfigurationUtilsTests {
 
 	private void debugConfigAttributes(List<ContextConfigurationAttributes> configAttributesList) {
 		// for (ContextConfigurationAttributes configAttributes : configAttributesList) {
@@ -60,9 +59,13 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextLoad
 		resolveContextHierarchyAttributes(SingleTestClassWithContextConfigurationAndContextHierarchyOnSingleMetaAnnotation.class);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void resolveContextHierarchyAttributesForSingleTestClassWithImplicitSingleLevelContextHierarchy() {
-		resolveContextHierarchyAttributes(BareAnnotations.class);
+		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(BareAnnotations.class);
+		assertEquals(1, hierarchyAttributes.size());
+		List<ContextConfigurationAttributes> configAttributesList = hierarchyAttributes.get(0);
+		assertEquals(1, configAttributesList.size());
+		debugConfigAttributes(configAttributesList);
 	}
 
 	@Test

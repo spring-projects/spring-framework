@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.orm.jpa.support;
 
 import java.io.IOException;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
@@ -38,7 +37,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Servlet 2.3 Filter that binds a JPA EntityManager to the thread for the
+ * Servlet Filter that binds a JPA EntityManager to the thread for the
  * entire processing of the request. Intended for the "Open EntityManager in
  * View" pattern, i.e. to allow for lazy loading in web views despite the
  * original transactions already being completed.
@@ -71,6 +70,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	 * @see #setPersistenceUnitName
 	 */
 	public static final String DEFAULT_ENTITY_MANAGER_FACTORY_BEAN_NAME = "entityManagerFactory";
+
 
 	private String entityManagerFactoryBeanName;
 
@@ -120,10 +120,11 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 		return this.persistenceUnitName;
 	}
 
+
 	/**
-	 * Returns "false" so that the filter may re-bind the opened
-	 * {@code EntityManager} to each asynchronously dispatched thread and postpone
-	 * closing it until the very last asynchronous dispatch.
+	 * Returns "false" so that the filter may re-bind the opened {@code EntityManager}
+	 * to each asynchronously dispatched thread and postpone closing it until the very
+	 * last asynchronous dispatch.
 	 */
 	@Override
 	protected boolean shouldNotFilterAsyncDispatch() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,13 +145,16 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	}
 
 	/**
-	 * Roll back to the savepoint that is held for the transaction.
+	 * Roll back to the savepoint that is held for the transaction
+	 * and release the savepoint right afterwards.
 	 */
 	public void rollbackToHeldSavepoint() throws TransactionException {
 		if (!hasSavepoint()) {
-			throw new TransactionUsageException("No savepoint associated with current transaction");
+			throw new TransactionUsageException(
+					"Cannot roll back to savepoint - no savepoint associated with current transaction");
 		}
 		getSavepointManager().rollbackToSavepoint(getSavepoint());
+		getSavepointManager().releaseSavepoint(getSavepoint());
 		setSavepoint(null);
 	}
 
@@ -160,7 +163,8 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	 */
 	public void releaseHeldSavepoint() throws TransactionException {
 		if (!hasSavepoint()) {
-			throw new TransactionUsageException("No savepoint associated with current transaction");
+			throw new TransactionUsageException(
+					"Cannot release savepoint - no savepoint associated with current transaction");
 		}
 		getSavepointManager().releaseSavepoint(getSavepoint());
 		setSavepoint(null);

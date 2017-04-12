@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
@@ -40,6 +40,8 @@ import org.springframework.tests.sample.beans.GenericIntegerBean;
 import org.springframework.tests.sample.beans.GenericSetOfIntegerBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -49,9 +51,9 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericSet() {
-		GenericBean<?> gb = new GenericBean<Object>();
+		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
-		Set<String> input = new HashSet<String>();
+		Set<String> input = new HashSet<>();
 		input.add("4");
 		input.add("5");
 		bw.setPropertyValue("integerSet", input);
@@ -61,10 +63,10 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericLowerBoundedSet() {
-		GenericBean<?> gb = new GenericBean<Object>();
+		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, true));
-		Set<String> input = new HashSet<String>();
+		Set<String> input = new HashSet<>();
 		input.add("4");
 		input.add("5");
 		bw.setPropertyValue("numberSet", input);
@@ -74,9 +76,9 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericSetWithConversionFailure() {
-		GenericBean<?> gb = new GenericBean<Object>();
+		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
-		Set<TestBean> input = new HashSet<TestBean>();
+		Set<TestBean> input = new HashSet<>();
 		input.add(new TestBean());
 		try {
 			bw.setPropertyValue("integerSet", input);
@@ -89,9 +91,9 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericList() throws MalformedURLException {
-		GenericBean<?> gb = new GenericBean<Object>();
+		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
-		List<String> input = new ArrayList<String>();
+		List<String> input = new ArrayList<>();
 		input.add("http://localhost:8080");
 		input.add("http://localhost:9090");
 		bw.setPropertyValue("resourceList", input);
@@ -101,8 +103,8 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericListElement() throws MalformedURLException {
-		GenericBean<?> gb = new GenericBean<Object>();
-		gb.setResourceList(new ArrayList<Resource>());
+		GenericBean<?> gb = new GenericBean<>();
+		gb.setResourceList(new ArrayList<>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("resourceList[0]", "http://localhost:8080");
 		assertEquals(new UrlResource("http://localhost:8080"), gb.getResourceList().get(0));
@@ -110,9 +112,9 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericMap() {
-		GenericBean<?> gb = new GenericBean<Object>();
+		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
-		Map<String, String> input = new HashMap<String, String>();
+		Map<String, String> input = new HashMap<>();
 		input.put("4", "5");
 		input.put("6", "7");
 		bw.setPropertyValue("shortMap", input);
@@ -122,8 +124,8 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericMapElement() {
-		GenericBean<?> gb = new GenericBean<Object>();
-		gb.setShortMap(new HashMap<Short, Integer>());
+		GenericBean<?> gb = new GenericBean<>();
+		gb.setShortMap(new HashMap<>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("shortMap[4]", "5");
 		assertEquals(new Integer(5), bw.getPropertyValue("shortMap[4]"));
@@ -132,9 +134,9 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericMapWithKeyType() {
-		GenericBean<?> gb = new GenericBean<Object>();
+		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
-		Map<String, String> input = new HashMap<String, String>();
+		Map<String, String> input = new HashMap<>();
 		input.put("4", "5");
 		input.put("6", "7");
 		bw.setPropertyValue("longMap", input);
@@ -144,7 +146,7 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericMapElementWithKeyType() {
-		GenericBean<?> gb = new GenericBean<Object>();
+		GenericBean<?> gb = new GenericBean<>();
 		gb.setLongMap(new HashMap<Long, Integer>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("longMap[4]", "5");
@@ -154,14 +156,14 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericMapWithCollectionValue() {
-		GenericBean<?> gb = new GenericBean<Object>();
+		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
-		Map<String, Collection> input = new HashMap<String, Collection>();
-		HashSet<Integer> value1 = new HashSet<Integer>();
+		Map<String, Collection> input = new HashMap<>();
+		HashSet<Integer> value1 = new HashSet<>();
 		value1.add(new Integer(1));
 		input.put("1", value1);
-		ArrayList<Boolean> value2 = new ArrayList<Boolean>();
+		ArrayList<Boolean> value2 = new ArrayList<>();
 		value2.add(Boolean.TRUE);
 		input.put("2", value2);
 		bw.setPropertyValue("collectionMap", input);
@@ -171,21 +173,33 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericMapElementWithCollectionValue() {
-		GenericBean<?> gb = new GenericBean<Object>();
-		gb.setCollectionMap(new HashMap<Number, Collection<? extends Object>>());
+		GenericBean<?> gb = new GenericBean<>();
+		gb.setCollectionMap(new HashMap<>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
-		HashSet<Integer> value1 = new HashSet<Integer>();
+		HashSet<Integer> value1 = new HashSet<>();
 		value1.add(new Integer(1));
 		bw.setPropertyValue("collectionMap[1]", value1);
 		assertTrue(gb.getCollectionMap().get(new Integer(1)) instanceof HashSet);
 	}
 
 	@Test
+	public void testGenericMapFromProperties() {
+		GenericBean<?> gb = new GenericBean<>();
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		Properties input = new Properties();
+		input.setProperty("4", "5");
+		input.setProperty("6", "7");
+		bw.setPropertyValue("shortMap", input);
+		assertEquals(new Integer(5), gb.getShortMap().get(new Short("4")));
+		assertEquals(new Integer(7), gb.getShortMap().get(new Short("6")));
+	}
+
+	@Test
 	public void testGenericListOfLists() throws MalformedURLException {
-		GenericBean<String> gb = new GenericBean<String>();
-		List<List<Integer>> list = new LinkedList<List<Integer>>();
-		list.add(new LinkedList<Integer>());
+		GenericBean<String> gb = new GenericBean<>();
+		List<List<Integer>> list = new LinkedList<>();
+		list.add(new LinkedList<>());
 		gb.setListOfLists(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfLists[0][0]", new Integer(5));
@@ -195,9 +209,9 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericListOfListsWithElementConversion() throws MalformedURLException {
-		GenericBean<String> gb = new GenericBean<String>();
-		List<List<Integer>> list = new LinkedList<List<Integer>>();
-		list.add(new LinkedList<Integer>());
+		GenericBean<String> gb = new GenericBean<>();
+		List<List<Integer>> list = new LinkedList<>();
+		list.add(new LinkedList<>());
 		gb.setListOfLists(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfLists[0][0]", "5");
@@ -207,8 +221,8 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericListOfArrays() throws MalformedURLException {
-		GenericBean<String> gb = new GenericBean<String>();
-		ArrayList<String[]> list = new ArrayList<String[]>();
+		GenericBean<String> gb = new GenericBean<>();
+		ArrayList<String[]> list = new ArrayList<>();
 		list.add(new String[] {"str1", "str2"});
 		gb.setListOfArrays(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
@@ -219,8 +233,8 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericListOfArraysWithElementConversion() throws MalformedURLException {
-		GenericBean<String> gb = new GenericBean<String>();
-		ArrayList<String[]> list = new ArrayList<String[]>();
+		GenericBean<String> gb = new GenericBean<>();
+		ArrayList<String[]> list = new ArrayList<>();
 		list.add(new String[] {"str1", "str2"});
 		gb.setListOfArrays(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
@@ -232,9 +246,9 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericListOfMaps() throws MalformedURLException {
-		GenericBean<String> gb = new GenericBean<String>();
-		List<Map<Integer, Long>> list = new LinkedList<Map<Integer, Long>>();
-		list.add(new HashMap<Integer, Long>());
+		GenericBean<String> gb = new GenericBean<>();
+		List<Map<Integer, Long>> list = new LinkedList<>();
+		list.add(new HashMap<>());
 		gb.setListOfMaps(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfMaps[0][10]", new Long(5));
@@ -244,9 +258,9 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericListOfMapsWithElementConversion() throws MalformedURLException {
-		GenericBean<String> gb = new GenericBean<String>();
-		List<Map<Integer, Long>> list = new LinkedList<Map<Integer, Long>>();
-		list.add(new HashMap<Integer, Long>());
+		GenericBean<String> gb = new GenericBean<>();
+		List<Map<Integer, Long>> list = new LinkedList<>();
+		list.add(new HashMap<>());
 		gb.setListOfMaps(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfMaps[0][10]", "5");
@@ -256,9 +270,9 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericMapOfMaps() throws MalformedURLException {
-		GenericBean<String> gb = new GenericBean<String>();
-		Map<String, Map<Integer, Long>> map = new HashMap<String, Map<Integer, Long>>();
-		map.put("mykey", new HashMap<Integer, Long>());
+		GenericBean<String> gb = new GenericBean<>();
+		Map<String, Map<Integer, Long>> map = new HashMap<>();
+		map.put("mykey", new HashMap<>());
 		gb.setMapOfMaps(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfMaps[mykey][10]", new Long(5));
@@ -268,9 +282,9 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericMapOfMapsWithElementConversion() throws MalformedURLException {
-		GenericBean<String> gb = new GenericBean<String>();
-		Map<String, Map<Integer, Long>> map = new HashMap<String, Map<Integer, Long>>();
-		map.put("mykey", new HashMap<Integer, Long>());
+		GenericBean<String> gb = new GenericBean<>();
+		Map<String, Map<Integer, Long>> map = new HashMap<>();
+		map.put("mykey", new HashMap<>());
 		gb.setMapOfMaps(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfMaps[mykey][10]", "5");
@@ -280,9 +294,9 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericMapOfLists() throws MalformedURLException {
-		GenericBean<String> gb = new GenericBean<String>();
-		Map<Integer, List<Integer>> map = new HashMap<Integer, List<Integer>>();
-		map.put(new Integer(1), new LinkedList<Integer>());
+		GenericBean<String> gb = new GenericBean<>();
+		Map<Integer, List<Integer>> map = new HashMap<>();
+		map.put(new Integer(1), new LinkedList<>());
 		gb.setMapOfLists(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfLists[1][0]", new Integer(5));
@@ -292,9 +306,9 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericMapOfListsWithElementConversion() throws MalformedURLException {
-		GenericBean<String> gb = new GenericBean<String>();
-		Map<Integer, List<Integer>> map = new HashMap<Integer, List<Integer>>();
-		map.put(new Integer(1), new LinkedList<Integer>());
+		GenericBean<String> gb = new GenericBean<>();
+		Map<Integer, List<Integer>> map = new HashMap<>();
+		map.put(new Integer(1), new LinkedList<>());
 		gb.setMapOfLists(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfLists[1][0]", "5");
@@ -304,7 +318,7 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericTypeNestingMapOfInteger() throws Exception {
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		map.put("testKey", "100");
 
 		NestedGenericCollectionBean gb = new NestedGenericCollectionBean();
@@ -317,7 +331,7 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericTypeNestingMapOfListOfInteger() throws Exception {
-		Map<String, List<String>> map = new HashMap<String, List<String>>();
+		Map<String, List<String>> map = new HashMap<>();
 		List<String> list = Arrays.asList(new String[] {"1", "2", "3"});
 		map.put("testKey", list);
 
@@ -332,8 +346,8 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericTypeNestingListOfMapOfInteger() throws Exception {
-		List<Map<String, String>> list = new LinkedList<Map<String, String>>();
-		Map<String, String> map = new HashMap<String, String>();
+		List<Map<String, String>> list = new LinkedList<>();
+		Map<String, String> map = new HashMap<>();
 		map.put("testKey", "5");
 		list.add(map);
 
@@ -348,7 +362,7 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericTypeNestingMapOfListOfListOfInteger() throws Exception {
-		Map<String, List<List<String>>> map = new HashMap<String, List<List<String>>>();
+		Map<String, List<List<String>>> map = new HashMap<>();
 		List<String> list = Arrays.asList(new String[] {"1", "2", "3"});
 		map.put("testKey", Collections.singletonList(list));
 
@@ -363,10 +377,10 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testComplexGenericMap() {
-		Map<List<String>, List<String>> inputMap = new HashMap<List<String>, List<String>>();
-		List<String> inputKey = new LinkedList<String>();
+		Map<List<String>, List<String>> inputMap = new HashMap<>();
+		List<String> inputKey = new LinkedList<>();
 		inputKey.add("1");
-		List<String> inputValue = new LinkedList<String>();
+		List<String> inputValue = new LinkedList<>();
 		inputValue.add("10");
 		inputMap.put(inputKey, inputValue);
 
@@ -380,10 +394,10 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testComplexGenericMapWithCollectionConversion() {
-		Map<Set<String>, Set<String>> inputMap = new HashMap<Set<String>, Set<String>>();
-		Set<String> inputKey = new HashSet<String>();
+		Map<Set<String>, Set<String>> inputMap = new HashMap<>();
+		Set<String> inputKey = new HashSet<>();
 		inputKey.add("1");
-		Set<String> inputValue = new HashSet<String>();
+		Set<String> inputValue = new HashSet<>();
 		inputValue.add("10");
 			inputMap.put(inputKey, inputValue);
 
@@ -397,7 +411,7 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testComplexGenericIndexedMapEntry() {
-		List<String> inputValue = new LinkedList<String>();
+		List<String> inputValue = new LinkedList<>();
 		inputValue.add("10");
 
 		ComplexMapHolder holder = new ComplexMapHolder();
@@ -410,7 +424,7 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testComplexGenericIndexedMapEntryWithCollectionConversion() {
-		Set<String> inputValue = new HashSet<String>();
+		Set<String> inputValue = new HashSet<>();
 		inputValue.add("10");
 
 		ComplexMapHolder holder = new ComplexMapHolder();
@@ -423,7 +437,7 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testComplexDerivedIndexedMapEntry() {
-		List<String> inputValue = new LinkedList<String>();
+		List<String> inputValue = new LinkedList<>();
 		inputValue.add("10");
 
 		ComplexMapHolder holder = new ComplexMapHolder();
@@ -436,7 +450,7 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testComplexDerivedIndexedMapEntryWithCollectionConversion() {
-		Set<String> inputValue = new HashSet<String>();
+		Set<String> inputValue = new HashSet<>();
 		inputValue.add("10");
 
 		ComplexMapHolder holder = new ComplexMapHolder();
@@ -483,6 +497,29 @@ public class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.setPropertyValue("id", "10");
 		assertEquals(new Long(10), bean.getId());
+	}
+
+	@Test
+	public void testUntypedPropertyWithMapAtRuntime() {
+		class Holder<D> {
+			private final D data;
+			public Holder(D data) {
+				this.data = data;
+			}
+			public D getData() {
+				return this.data;
+			}
+		}
+
+		Map<String, Object> data = new HashMap<>();
+		data.put("x", "y");
+		Holder<Map<String, Object>> context = new Holder<>(data);
+
+		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(context);
+		assertEquals("y", bw.getPropertyValue("data['x']"));
+
+		bw.setPropertyValue("data['message']", "it works!");
+		assertEquals(data.get("message"), "it works!");
 	}
 
 
@@ -549,7 +586,7 @@ public class BeanWrapperGenericsTests {
 
 		private Map<List<Integer>, List<Long>> genericMap;
 
-		private Map<Integer, List<Long>> genericIndexedMap = new HashMap<Integer, List<Long>>();
+		private Map<Integer, List<Long>> genericIndexedMap = new HashMap<>();
 
 		private DerivedMap derivedIndexedMap = new DerivedMap();
 

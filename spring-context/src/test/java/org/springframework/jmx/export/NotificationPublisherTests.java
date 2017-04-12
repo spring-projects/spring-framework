@@ -33,6 +33,7 @@ import javax.management.NotificationListener;
 import javax.management.ReflectionException;
 
 import org.junit.Test;
+
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.export.notification.NotificationPublisher;

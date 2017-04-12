@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,6 @@ package org.springframework.web.socket.client.standard;
 
 import java.util.Arrays;
 import java.util.List;
-
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.ClientEndpointConfig.Configurator;
 import javax.websocket.ContainerProvider;
@@ -29,7 +28,6 @@ import javax.websocket.Extension;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -58,9 +56,9 @@ public class EndpointConnectionManager extends ConnectionManagerSupport implemen
 
 	private WebSocketContainer webSocketContainer = ContainerProvider.getWebSocketContainer();
 
-	private Session session;
-
 	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("EndpointConnectionManager-");
+
+	private volatile Session session;
 
 
 	public EndpointConnectionManager(Endpoint endpoint, String uriTemplate, Object... uriVariables) {
@@ -73,7 +71,7 @@ public class EndpointConnectionManager extends ConnectionManagerSupport implemen
 	public EndpointConnectionManager(Class<? extends Endpoint> endpointClass, String uriTemplate, Object... uriVars) {
 		super(uriTemplate, uriVars);
 		Assert.notNull(endpointClass, "endpointClass must not be null");
-		this.endpointProvider = new BeanCreatingHandlerProvider<Endpoint>(endpointClass);
+		this.endpointProvider = new BeanCreatingHandlerProvider<>(endpointClass);
 		this.endpoint = null;
 	}
 
@@ -107,7 +105,7 @@ public class EndpointConnectionManager extends ConnectionManagerSupport implemen
 	}
 
 	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+	public void setBeanFactory(BeanFactory beanFactory) {
 		if (this.endpointProvider != null) {
 			this.endpointProvider.setBeanFactory(beanFactory);
 		}
@@ -136,14 +134,16 @@ public class EndpointConnectionManager extends ConnectionManagerSupport implemen
 			@Override
 			public void run() {
 				try {
-					logger.info("Connecting to WebSocket at " + getUri());
+					if (logger.isInfoEnabled()) {
+						logger.info("Connecting to WebSocket at " + getUri());
+					}
 					Endpoint endpointToUse = (endpoint != null) ? endpoint : endpointProvider.getHandler();
 					ClientEndpointConfig endpointConfig = configBuilder.build();
 					session = getWebSocketContainer().connectToServer(endpointToUse, endpointConfig, getUri());
-					logger.info("Successfully connected");
+					logger.info("Successfully connected to WebSocket");
 				}
 				catch (Throwable ex) {
-					logger.error("Failed to connect", ex);
+					logger.error("Failed to connect to WebSocket", ex);
 				}
 			}
 		});
@@ -163,7 +163,7 @@ public class EndpointConnectionManager extends ConnectionManagerSupport implemen
 
 	@Override
 	protected boolean isConnected() {
-		return ((this.session != null) && this.session.isOpen());
+		return (this.session != null && this.session.isOpen());
 	}
 
 }

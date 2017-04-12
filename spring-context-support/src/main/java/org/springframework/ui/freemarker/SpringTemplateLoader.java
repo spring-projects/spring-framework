@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
 /**
- * FreeMarker TemplateLoader adapter that loads via a Spring ResourceLoader.
- * Used by FreeMarkerConfigurationFactory for any resource loader path that
- * cannot be resolved to a java.io.File.
+ * FreeMarker {@link TemplateLoader} adapter that loads via a Spring {@link ResourceLoader}.
+ * Used by {@link FreeMarkerConfigurationFactory} for any resource loader path that cannot
+ * be resolved to a {@link java.io.File}.
  *
  * @author Juergen Hoeller
  * @since 14.03.2004
@@ -63,6 +63,7 @@ public class SpringTemplateLoader implements TemplateLoader {
 		}
 	}
 
+
 	@Override
 	public Object findTemplateSource(String name) throws IOException {
 		if (logger.isDebugEnabled()) {
@@ -85,7 +86,6 @@ public class SpringTemplateLoader implements TemplateLoader {
 			throw ex;
 		}
 	}
-
 
 	@Override
 	public long getLastModified(Object templateSource) {

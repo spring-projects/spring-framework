@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,20 +50,20 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 	 * </ol>
 	 */
 	@Override
-	public ConstructorExecutor resolve(EvaluationContext context, String typename, List<TypeDescriptor> argumentTypes)
+	public ConstructorExecutor resolve(EvaluationContext context, String typeName, List<TypeDescriptor> argumentTypes)
 			throws AccessException {
 
 		try {
 			TypeConverter typeConverter = context.getTypeConverter();
-			Class<?> type = context.getTypeLocator().findType(typename);
+			Class<?> type = context.getTypeLocator().findType(typeName);
 			Constructor<?>[] ctors = type.getConstructors();
 
 			Arrays.sort(ctors, new Comparator<Constructor<?>>() {
 				@Override
 				public int compare(Constructor<?> c1, Constructor<?> c2) {
-					int c1pl = c1.getParameterTypes().length;
-					int c2pl = c2.getParameterTypes().length;
-					return (new Integer(c1pl)).compareTo(c2pl);
+					int c1pl = c1.getParameterCount();
+					int c2pl = c2.getParameterCount();
+					return (c1pl < c2pl ? -1 : (c1pl > c2pl ? 1 : 0));
 				}
 			});
 
@@ -72,7 +72,7 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 
 			for (Constructor<?> ctor : ctors) {
 				Class<?>[] paramTypes = ctor.getParameterTypes();
-				List<TypeDescriptor> paramDescriptors = new ArrayList<TypeDescriptor>(paramTypes.length);
+				List<TypeDescriptor> paramDescriptors = new ArrayList<>(paramTypes.length);
 				for (int i = 0; i < paramTypes.length; i++) {
 					paramDescriptors.add(new TypeDescriptor(new MethodParameter(ctor, i)));
 				}

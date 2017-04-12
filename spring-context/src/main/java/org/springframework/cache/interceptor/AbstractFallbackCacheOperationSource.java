@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,25 +27,23 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.MethodClassKey;
 import org.springframework.util.ClassUtils;
 
 /**
- * Abstract implementation of {@link CacheOperation} that caches
- * attributes for methods and implements a fallback policy: 1. specific
- * target method; 2. target class; 3. declaring method; 4. declaring
- * class/interface.
+ * Abstract implementation of {@link CacheOperation} that caches attributes
+ * for methods and implements a fallback policy: 1. specific target method;
+ * 2. target class; 3. declaring method; 4. declaring class/interface.
  *
  * <p>Defaults to using the target class's caching attribute if none is
- * associated with the target method. Any caching attribute associated
- * with the target method completely overrides a class caching attribute.
- * If none found on the target class, the interface that the invoked
- * method has been called through (in case of a JDK proxy) will be
- * checked.
+ * associated with the target method. Any caching attribute associated with
+ * the target method completely overrides a class caching attribute.
+ * If none found on the target class, the interface that the invoked method
+ * has been called through (in case of a JDK proxy) will be checked.
  *
- * <p>This implementation caches attributes by method after they are
- * first used. If it is ever desirable to allow dynamic changing of
- * cacheable attributes (which is very unlikely), caching could be made
- * configurable.
+ * <p>This implementation caches attributes by method after they are first
+ * used. If it is ever desirable to allow dynamic changing of cacheable
+ * attributes (which is very unlikely), caching could be made configurable.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -59,6 +57,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 */
 	private final static Collection<CacheOperation> NULL_CACHING_ATTRIBUTE = Collections.emptyList();
 
+
 	/**
 	 * Logger available to subclasses.
 	 * <p>As this base class is not marked Serializable, the logger will be recreated
@@ -67,12 +66,12 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
-	 * Cache of CacheOperations, keyed by {@link MethodCacheKey} (Method + target Class).
+	 * Cache of CacheOperations, keyed by method on a specific target class.
 	 * <p>As this base class is not marked Serializable, the cache will be recreated
 	 * after serialization - provided that the concrete subclass is Serializable.
 	 */
-	final Map<Object, Collection<CacheOperation>> attributeCache =
-			new ConcurrentHashMap<Object, Collection<CacheOperation>>(1024);
+	private final Map<Object, Collection<CacheOperation>> attributeCache = new ConcurrentHashMap<>(1024);
+
 
 	/**
 	 * Determine the caching attribute for this method invocation.
@@ -84,29 +83,26 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 */
 	@Override
 	public Collection<CacheOperation> getCacheOperations(Method method, Class<?> targetClass) {
-		// First, see if we have a cached value.
+		if (method.getDeclaringClass() == Object.class) {
+			return null;
+		}
+
 		Object cacheKey = getCacheKey(method, targetClass);
 		Collection<CacheOperation> cached = this.attributeCache.get(cacheKey);
+
 		if (cached != null) {
-			if (cached == NULL_CACHING_ATTRIBUTE) {
-				return null;
-			}
-			// Value will either be canonical value indicating there is no caching attribute,
-			// or an actual caching attribute.
-			return cached;
+			return (cached != NULL_CACHING_ATTRIBUTE ? cached : null);
 		}
 		else {
-			// We need to work it out.
 			Collection<CacheOperation> cacheOps = computeCacheOperations(method, targetClass);
-			// Put it in the cache.
-			if (cacheOps == null) {
-				this.attributeCache.put(cacheKey, NULL_CACHING_ATTRIBUTE);
-			}
-			else {
+			if (cacheOps != null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Adding cacheable method '" + method.getName() + "' with attribute: " + cacheOps);
 				}
 				this.attributeCache.put(cacheKey, cacheOps);
+			}
+			else {
+				this.attributeCache.put(cacheKey, NULL_CACHING_ATTRIBUTE);
 			}
 			return cacheOps;
 		}
@@ -121,7 +117,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * @return the cache key (never {@code null})
 	 */
 	protected Object getCacheKey(Method method, Class<?> targetClass) {
-		return new MethodCacheKey(method, targetClass);
+		return new MethodClassKey(method, targetClass);
 	}
 
 	private Collection<CacheOperation> computeCacheOperations(Method method, Class<?> targetClass) {
@@ -144,19 +140,23 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 
 		// Second try is the caching operation on the target class.
 		opDef = findCacheOperations(specificMethod.getDeclaringClass());
-		if (opDef != null) {
+		if (opDef != null && ClassUtils.isUserLevelMethod(method)) {
 			return opDef;
 		}
 
 		if (specificMethod != method) {
-			// Fall back is to look at the original method.
+			// Fallback is to look at the original method.
 			opDef = findCacheOperations(method);
 			if (opDef != null) {
 				return opDef;
 			}
-			// Last fall back is the class of the original method.
-			return findCacheOperations(method.getDeclaringClass());
+			// Last fallback is the class of the original method.
+			opDef = findCacheOperations(method.getDeclaringClass());
+			if (opDef != null && ClassUtils.isUserLevelMethod(method)) {
+				return opDef;
+			}
 		}
+
 		return null;
 	}
 
@@ -186,4 +186,5 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	protected boolean allowPublicMethodsOnly() {
 		return false;
 	}
+
 }

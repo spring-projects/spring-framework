@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 /**
  * Resolves method arguments of type {@link RedirectAttributes}.
  *
- * <p>This resolver must be listed ahead of {@link org.springframework.web.method.annotation.ModelMethodProcessor} and
- * {@link org.springframework.web.method.annotation.MapMethodProcessor}, which support {@link Map} and {@link Model}
- * arguments both of which are "super" types of {@code RedirectAttributes}
- * and would also attempt to resolve a {@code RedirectAttributes} argument.
+ * <p>This resolver must be listed ahead of
+ * {@link org.springframework.web.method.annotation.ModelMethodProcessor} and
+ * {@link org.springframework.web.method.annotation.MapMethodProcessor},
+ * which support {@link Map} and {@link Model} arguments both of which are
+ * "super" types of {@code RedirectAttributes} and would also attempt to
+ * resolve a {@code RedirectAttributes} argument.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -48,13 +50,17 @@ public class RedirectAttributesMethodArgumentResolver implements HandlerMethodAr
 	}
 
 	@Override
-	public Object resolveArgument(
-			MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
-			throws Exception {
+	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
-		DataBinder dataBinder = binderFactory.createBinder(webRequest, null, null);
-		ModelMap redirectAttributes  = new RedirectAttributesModelMap(dataBinder);
+		ModelMap redirectAttributes;
+		if(binderFactory != null) {
+			DataBinder dataBinder = binderFactory.createBinder(webRequest, null, null);
+			redirectAttributes  = new RedirectAttributesModelMap(dataBinder);
+		}
+		else {
+			redirectAttributes  = new RedirectAttributesModelMap();
+		}
 		mavContainer.setRedirectModel(redirectAttributes);
 		return redirectAttributes;
 	}

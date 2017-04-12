@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.util.PatternMatchUtils;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
@@ -42,16 +43,38 @@ import org.springframework.web.servlet.View;
  */
 public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
+	private String[] redirectPatterns;
+
+
+	/**
+	 * Configure one more simple patterns (as described in
+	 * {@link org.springframework.util.PatternMatchUtils#simpleMatch}) to use in order to recognize
+	 * custom redirect prefixes in addition to "redirect:".
+	 * <p>Note that simply configuring this property will not make a custom
+	 * redirect prefix work. There must be a custom View that recognizes the
+	 * prefix as well.
+	 * @since 4.1
+	 */
+	public void setRedirectPatterns(String... redirectPatterns) {
+		this.redirectPatterns = redirectPatterns;
+	}
+
+	/**
+	 * The configured redirect patterns, if any.
+	 */
+	public String[] getRedirectPatterns() {
+		return this.redirectPatterns;
+	}
+
+
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		return ModelAndView.class.isAssignableFrom(returnType.getParameterType());
 	}
 
 	@Override
-	public void handleReturnValue(
-			Object returnValue, MethodParameter returnType,
-			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
-			throws Exception {
+	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		if (returnValue == null) {
 			mavContainer.setRequestHandled(true);
@@ -62,7 +85,7 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 		if (mav.isReference()) {
 			String viewName = mav.getViewName();
 			mavContainer.setViewName(viewName);
-			if (viewName != null && viewName.startsWith("redirect:")) {
+			if (viewName != null && isRedirectViewName(viewName)) {
 				mavContainer.setRedirectModelScenario(true);
 			}
 		}
@@ -75,7 +98,23 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 				}
 			}
 		}
+		mavContainer.setStatus(mav.getStatus());
 		mavContainer.addAllAttributes(mav.getModel());
+	}
+
+	/**
+	 * Whether the given view name is a redirect view reference.
+	 * The default implementation checks the configured redirect patterns and
+	 * also if the view name starts with the "redirect:" prefix.
+	 * @param viewName the view name to check, never {@code null}
+	 * @return "true" if the given view name is recognized as a redirect view
+	 * reference; "false" otherwise.
+	 */
+	protected boolean isRedirectViewName(String viewName) {
+		if (PatternMatchUtils.simpleMatch(this.redirectPatterns, viewName)) {
+			return true;
+		}
+		return viewName.startsWith("redirect:");
 	}
 
 }

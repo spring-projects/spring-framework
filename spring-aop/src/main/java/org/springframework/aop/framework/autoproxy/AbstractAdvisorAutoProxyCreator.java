@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.core.OrderComparator;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
 /**
  * Generic auto proxy creator that builds AOP proxies for specific beans
@@ -54,7 +54,8 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	public void setBeanFactory(BeanFactory beanFactory) {
 		super.setBeanFactory(beanFactory);
 		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
-			throw new IllegalStateException("Cannot use AdvisorAutoProxyCreator without a ConfigurableListableBeanFactory");
+			throw new IllegalArgumentException(
+					"AdvisorAutoProxyCreator requires a ConfigurableListableBeanFactory: " + beanFactory);
 		}
 		initBeanFactory((ConfigurableListableBeanFactory) beanFactory);
 	}
@@ -138,10 +139,11 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @param advisors the source List of Advisors
 	 * @return the sorted List of Advisors
 	 * @see org.springframework.core.Ordered
-	 * @see org.springframework.core.OrderComparator
+	 * @see org.springframework.core.annotation.Order
+	 * @see org.springframework.core.annotation.AnnotationAwareOrderComparator
 	 */
 	protected List<Advisor> sortAdvisors(List<Advisor> advisors) {
-		OrderComparator.sort(advisors);
+		AnnotationAwareOrderComparator.sort(advisors);
 		return advisors;
 	}
 

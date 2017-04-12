@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -33,7 +34,6 @@ import org.springframework.tests.TestGroup;
 import org.springframework.util.StopWatch;
 
 import static org.hamcrest.Matchers.*;
-
 import static org.junit.Assert.*;
 
 /**
@@ -77,7 +77,7 @@ public class MapAccessTests extends AbstractExpressionTests {
 
 	@Test
 	public void testGetValue(){
-		Map<String,String> props1 = new HashMap<String,String>();
+		Map<String,String> props1 = new HashMap<>();
 		props1.put("key1", "value1");
 		props1.put("key2", "value2");
 		props1.put("key3", "value3");
@@ -91,9 +91,8 @@ public class MapAccessTests extends AbstractExpressionTests {
 
 	@Test
 	public void testGetValueFromRootMap() {
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		map.put("key", "value");
-		EvaluationContext context = new StandardEvaluationContext(map);
 
 		ExpressionParser spelExpressionParser = new SpelExpressionParser();
 		Expression expr = spelExpressionParser.parseExpression("#root['key']");
@@ -103,7 +102,7 @@ public class MapAccessTests extends AbstractExpressionTests {
 	@Test
 	public void testGetValuePerformance() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		map.put("key", "value");
 		EvaluationContext context = new StandardEvaluationContext(map);
 
@@ -168,11 +167,11 @@ public class MapAccessTests extends AbstractExpressionTests {
 			this.priority = priority;
 		}
 
-		public Map getProperties() {
+		public Map<String,String> getProperties() {
 			return properties;
 		}
 
-		public void setProperties(Map properties) {
+		public void setProperties(Map<String,String> properties) {
 			this.properties = properties;
 		}
 	}
@@ -198,7 +197,7 @@ public class MapAccessTests extends AbstractExpressionTests {
 		@Override
 		@SuppressWarnings("unchecked")
 		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
-			((Map) target).put(name, newValue);
+			((Map<Object,Object>) target).put(name, newValue);
 		}
 
 		@Override

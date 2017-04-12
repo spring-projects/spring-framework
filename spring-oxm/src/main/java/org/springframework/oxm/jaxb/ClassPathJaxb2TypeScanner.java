@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.oxm.jaxb;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -78,7 +77,7 @@ class ClassPathJaxb2TypeScanner {
 	 */
 	public Class<?>[] scanPackages() throws UncategorizedMappingException {
 		try {
-			List<Class<?>> jaxb2Classes = new ArrayList<Class<?>>();
+			List<Class<?>> jaxb2Classes = new ArrayList<>();
 			for (String packageToScan : this.packagesToScan) {
 				String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 						ClassUtils.convertClassNameToResourcePath(packageToScan) + RESOURCE_PATTERN;
@@ -105,7 +104,7 @@ class ClassPathJaxb2TypeScanner {
 
 	protected boolean isJaxb2Class(MetadataReader reader, MetadataReaderFactory factory) throws IOException {
 		for (TypeFilter filter : JAXB2_TYPE_FILTERS) {
-			if (filter.match(reader, factory)) {
+			if (filter.match(reader, factory) && !reader.getClassMetadata().isInterface() ) {
 				return true;
 			}
 		}

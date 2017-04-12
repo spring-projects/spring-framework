@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
 
 /**
- * Encapsulates information required to create a view controller.
+ * Assist with the registration of a single view controller.
  *
  * @author Rossen Stoyanchev
  * @author Keith Donald
@@ -31,40 +33,49 @@ public class ViewControllerRegistration {
 
 	private final String urlPath;
 
-	private String viewName;
+	private final ParameterizableViewController controller = new ParameterizableViewController();
 
-	/**
-	 * Creates a {@link ViewControllerRegistration} with the given URL path. When a request matches
-	 * to the given URL path this view controller will process it.
-	 */
+
 	public ViewControllerRegistration(String urlPath) {
-		Assert.notNull(urlPath, "A URL path is required to create a view controller.");
+		Assert.notNull(urlPath, "'urlPath' is required.");
 		this.urlPath = urlPath;
 	}
 
+
 	/**
-	 * Sets the view name to use for this view controller. This field is optional. If not specified the
-	 * view controller will return a {@code null} view name, which will be resolved through the configured
-	 * {@link RequestToViewNameTranslator}. By default that means "/foo/bar" would resolve to "foo/bar".
+	 * Set the status code to set on the response. Optional.
+	 *
+	 * <p>If not set the response status will be 200 (OK).
+	 */
+	public ViewControllerRegistration setStatusCode(HttpStatus statusCode) {
+		this.controller.setStatusCode(statusCode);
+		return this;
+	}
+
+	/**
+	 * Set the view name to return. Optional.
+	 *
+	 * <p>If not specified, the view controller will return {@code null} as the
+	 * view name in which case the configured {@link RequestToViewNameTranslator}
+	 * will select the view name. The {@code DefaultRequestToViewNameTranslator}
+	 * for example translates "/foo/bar" to "foo/bar".
+	 *
+	 * @see org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator
 	 */
 	public void setViewName(String viewName) {
-		this.viewName = viewName;
+		this.controller.setViewName(viewName);
 	}
 
-	/**
-	 * Returns the URL path for the view controller.
-	 */
+	protected void setApplicationContext(ApplicationContext applicationContext) {
+		this.controller.setApplicationContext(applicationContext);
+	}
+
 	protected String getUrlPath() {
-		return urlPath;
+		return this.urlPath;
 	}
 
-	/**
-	 * Returns the view controllers.
-	 */
-	protected Object getViewController() {
-		ParameterizableViewController controller = new ParameterizableViewController();
-		controller.setViewName(viewName);
-		return controller;
+	protected ParameterizableViewController getViewController() {
+		return this.controller;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,19 @@ package org.springframework.beans.propertyeditors;
 
 import java.time.ZoneId;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Nicholas Williams
  */
-public class ZoneIdEditorTests extends TestCase {
+public class ZoneIdEditorTests {
 
-	public void testAmericaChicago() {
-		ZoneIdEditor editor = new ZoneIdEditor();
+	private final ZoneIdEditor editor = new ZoneIdEditor();
+
+	@Test
+	public void americaChicago() {
 		editor.setAsText("America/Chicago");
 
 		ZoneId zoneId = (ZoneId) editor.getValue();
@@ -36,8 +40,8 @@ public class ZoneIdEditorTests extends TestCase {
 		assertEquals("The text version is not correct.", "America/Chicago", editor.getAsText());
 	}
 
-	public void testAmericaLosAngeles() {
-		ZoneIdEditor editor = new ZoneIdEditor();
+	@Test
+	public void americaLosAngeles() {
 		editor.setAsText("America/Los_Angeles");
 
 		ZoneId zoneId = (ZoneId) editor.getValue();
@@ -47,16 +51,14 @@ public class ZoneIdEditorTests extends TestCase {
 		assertEquals("The text version is not correct.", "America/Los_Angeles", editor.getAsText());
 	}
 
-	public void testGetNullAsText() {
-		ZoneIdEditor editor = new ZoneIdEditor();
-
+	@Test
+	public void getNullAsText() {
 		assertEquals("The returned value is not correct.", "", editor.getAsText());
 	}
 
-	public void testGetValueAsText() {
-		ZoneIdEditor editor = new ZoneIdEditor();
+	@Test
+	public void getValueAsText() {
 		editor.setValue(ZoneId.of("America/New_York"));
-
 		assertEquals("The text version is not correct.", "America/New_York", editor.getAsText());
 	}
 

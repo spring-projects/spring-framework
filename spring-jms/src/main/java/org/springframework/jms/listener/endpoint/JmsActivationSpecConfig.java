@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,13 @@ public class JmsActivationSpecConfig {
 
 	private boolean pubSubDomain = false;
 
+	private Boolean replyPubSubDomain;
+
 	private boolean subscriptionDurable = false;
 
-	private String durableSubscriptionName;
+	private boolean subscriptionShared = false;
+
+	private String subscriptionName;
 
 	private String clientId;
 
@@ -79,20 +83,56 @@ public class JmsActivationSpecConfig {
 		return this.pubSubDomain;
 	}
 
+	public void setReplyPubSubDomain(boolean replyPubSubDomain) {
+		this.replyPubSubDomain = replyPubSubDomain;
+	}
+
+	public boolean isReplyPubSubDomain() {
+		if (this.replyPubSubDomain != null) {
+			return this.replyPubSubDomain;
+		}
+		else {
+			return isPubSubDomain();
+		}
+	}
+
 	public void setSubscriptionDurable(boolean subscriptionDurable) {
 		this.subscriptionDurable = subscriptionDurable;
+		if (subscriptionDurable) {
+			this.pubSubDomain = true;
+		}
 	}
 
 	public boolean isSubscriptionDurable() {
 		return this.subscriptionDurable;
 	}
 
+	public void setSubscriptionShared(boolean subscriptionShared) {
+		this.subscriptionShared = subscriptionShared;
+		if (subscriptionShared) {
+			this.pubSubDomain = true;
+		}
+	}
+
+	public boolean isSubscriptionShared() {
+		return this.subscriptionShared;
+	}
+
+	public void setSubscriptionName(String subscriptionName) {
+		this.subscriptionName = subscriptionName;
+	}
+
+	public String getSubscriptionName() {
+		return this.subscriptionName;
+	}
+
 	public void setDurableSubscriptionName(String durableSubscriptionName) {
-		this.durableSubscriptionName = durableSubscriptionName;
+		this.subscriptionName = durableSubscriptionName;
+		this.subscriptionDurable = true;
 	}
 
 	public String getDurableSubscriptionName() {
-		return this.durableSubscriptionName;
+		return (this.subscriptionDurable ? this.subscriptionName : null);
 	}
 
 	public void setClientId(String clientId) {
@@ -217,7 +257,7 @@ public class JmsActivationSpecConfig {
 	 * Return the {@link MessageConverter} to use, if any.
 	 */
 	public MessageConverter getMessageConverter() {
-		return messageConverter;
+		return this.messageConverter;
 	}
 
 }

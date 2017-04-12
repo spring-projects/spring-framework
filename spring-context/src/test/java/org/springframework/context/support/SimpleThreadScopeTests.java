@@ -17,6 +17,7 @@
 package org.springframework.context.support;
 
 import org.junit.Test;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.tests.sample.beans.TestBean;
 
@@ -28,8 +29,9 @@ import static org.junit.Assert.*;
  */
 public class SimpleThreadScopeTests {
 
-	private ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
-			"simpleThreadScopeTests.xml", getClass());
+	private final ApplicationContext applicationContext =
+			new ClassPathXmlApplicationContext("simpleThreadScopeTests.xml", getClass());
+
 
 	@Test
 	public void getFromScope() throws Exception {
@@ -45,19 +47,15 @@ public class SimpleThreadScopeTests {
 	public void getMultipleInstances() throws Exception {
 		final TestBean[] beans = new TestBean[2];
 		Thread thread1 = new Thread(new Runnable() {
-
 			@Override
 			public void run() {
-				beans[0] = applicationContext.getBean("threadScopedObject",
-						TestBean.class);
+				beans[0] = applicationContext.getBean("threadScopedObject", TestBean.class);
 			}
 		});
 		Thread thread2 = new Thread(new Runnable() {
-
 			@Override
 			public void run() {
-				beans[1] = applicationContext.getBean("threadScopedObject",
-						TestBean.class);
+				beans[1] = applicationContext.getBean("threadScopedObject", TestBean.class);
 			}
 		});
 		thread1.start();
@@ -67,7 +65,6 @@ public class SimpleThreadScopeTests {
 
 		assertNotNull(beans[0]);
 		assertNotNull(beans[1]);
-
 		assertNotSame(beans[0], beans[1]);
 	}
 

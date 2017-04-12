@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		this.target = target;
 		this.targetClass = targetClass;
 		this.method = BridgeMethodResolver.findBridgedMethod(method);
-		this.arguments = arguments;
+		this.arguments = AopProxyUtils.adaptArgumentsIfNecessary(method, arguments);
 		this.interceptorsAndDynamicMethodMatchers = interceptorsAndDynamicMethodMatchers;
 	}
 
@@ -145,7 +145,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	}
 
 	@Override
-	public void setArguments(Object[] arguments) {
+	public void setArguments(Object... arguments) {
 		this.arguments = arguments;
 	}
 
@@ -219,11 +219,11 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
-	public MethodInvocation invocableClone(Object[] arguments) {
+	public MethodInvocation invocableClone(Object... arguments) {
 		// Force initialization of the user attributes Map,
 		// for having a shared Map reference in the clone.
 		if (this.userAttributes == null) {
-			this.userAttributes = new HashMap<String, Object>();
+			this.userAttributes = new HashMap<>();
 		}
 
 		// Create the MethodInvocation clone.
@@ -243,7 +243,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	public void setUserAttribute(String key, Object value) {
 		if (value != null) {
 			if (this.userAttributes == null) {
-				this.userAttributes = new HashMap<String, Object>();
+				this.userAttributes = new HashMap<>();
 			}
 			this.userAttributes.put(key, value);
 		}
@@ -268,7 +268,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 */
 	public Map<String, Object> getUserAttributes() {
 		if (this.userAttributes == null) {
-			this.userAttributes = new HashMap<String, Object>();
+			this.userAttributes = new HashMap<>();
 		}
 		return this.userAttributes;
 	}

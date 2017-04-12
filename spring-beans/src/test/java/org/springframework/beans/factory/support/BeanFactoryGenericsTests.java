@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.tests.Assume;
@@ -64,7 +65,7 @@ public class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Set<String> input = new HashSet<String>();
+		Set<String> input = new HashSet<>();
 		input.add("4");
 		input.add("5");
 		rbd.getPropertyValues().add("integerSet", input);
@@ -81,7 +82,7 @@ public class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		List<String> input = new ArrayList<String>();
+		List<String> input = new ArrayList<>();
 		input.add("http://localhost:8080");
 		input.add("http://localhost:9090");
 		rbd.getPropertyValues().add("resourceList", input);
@@ -113,7 +114,7 @@ public class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericIntegerBean.class);
 
-		List<Integer> input = new ArrayList<Integer>();
+		List<Integer> input = new ArrayList<>();
 		input.add(1);
 		rbd.getPropertyValues().add("testBeanList", input);
 
@@ -145,7 +146,7 @@ public class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Map<String, String> input = new HashMap<String, String>();
+		Map<String, String> input = new HashMap<>();
 		input.put("4", "5");
 		input.put("6", "7");
 		rbd.getPropertyValues().add("shortMap", input);
@@ -177,7 +178,7 @@ public class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Set<String> input = new HashSet<String>();
+		Set<String> input = new HashSet<>();
 		input.add("4");
 		input.add("5");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
@@ -221,10 +222,10 @@ public class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Set<String> input = new HashSet<String>();
+		Set<String> input = new HashSet<>();
 		input.add("4");
 		input.add("5");
-		List<String> input2 = new ArrayList<String>();
+		List<String> input2 = new ArrayList<>();
 		input2.add("http://localhost:8080");
 		input2.add("http://localhost:9090");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
@@ -278,10 +279,10 @@ public class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Set<String> input = new HashSet<String>();
+		Set<String> input = new HashSet<>();
 		input.add("4");
 		input.add("5");
-		Map<String, String> input2 = new HashMap<String, String>();
+		Map<String, String> input2 = new HashMap<>();
 		input2.put("4", "5");
 		input2.put("6", "7");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
@@ -301,7 +302,7 @@ public class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Map<String, String> input = new HashMap<String, String>();
+		Map<String, String> input = new HashMap<>();
 		input.put("4", "5");
 		input.put("6", "7");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
@@ -320,10 +321,10 @@ public class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Map<String, String> input = new HashMap<String, String>();
+		Map<String, String> input = new HashMap<>();
 		input.put("1", "0");
 		input.put("2", "3");
-		Map<String, String> input2 = new HashMap<String, String>();
+		Map<String, String> input2 = new HashMap<>();
 		input2.put("4", "5");
 		input2.put("6", "7");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
@@ -346,7 +347,7 @@ public class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Map<String, String> input = new HashMap<String, String>();
+		Map<String, String> input = new HashMap<>();
 		input.put("1", "0");
 		input.put("2", "3");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
@@ -369,7 +370,7 @@ public class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Map<Short, Integer> input = new HashMap<Short, Integer>();
+		Map<Short, Integer> input = new HashMap<>();
 		input.put(new Short((short) 1), new Integer(0));
 		input.put(new Short((short) 2), new Integer(3));
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
@@ -389,7 +390,7 @@ public class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Map<String, String> input = new HashMap<String, String>();
+		Map<String, String> input = new HashMap<>();
 		input.put("4", "5");
 		input.put("6", "7");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
@@ -412,11 +413,11 @@ public class BeanFactoryGenericsTests {
 		});
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		Map<String, AbstractCollection<?>> input = new HashMap<String, AbstractCollection<?>>();
-		HashSet<Integer> value1 = new HashSet<Integer>();
+		Map<String, AbstractCollection<?>> input = new HashMap<>();
+		HashSet<Integer> value1 = new HashSet<>();
 		value1.add(new Integer(1));
 		input.put("1", value1);
-		ArrayList<Boolean> value2 = new ArrayList<Boolean>();
+		ArrayList<Boolean> value2 = new ArrayList<>();
 		value2.add(Boolean.TRUE);
 		input.put("2", value2);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(Boolean.TRUE);
@@ -436,7 +437,7 @@ public class BeanFactoryGenericsTests {
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 		rbd.setFactoryMethodName("createInstance");
 
-		Set<String> input = new HashSet<String>();
+		Set<String> input = new HashSet<>();
 		input.add("4");
 		input.add("5");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
@@ -454,10 +455,10 @@ public class BeanFactoryGenericsTests {
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 		rbd.setFactoryMethodName("createInstance");
 
-		Set<String> input = new HashSet<String>();
+		Set<String> input = new HashSet<>();
 		input.add("4");
 		input.add("5");
-		List<String> input2 = new ArrayList<String>();
+		List<String> input2 = new ArrayList<>();
 		input2.add("http://localhost:8080");
 		input2.add("http://localhost:9090");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
@@ -478,10 +479,10 @@ public class BeanFactoryGenericsTests {
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 		rbd.setFactoryMethodName("createInstance");
 
-		Set<String> input = new HashSet<String>();
+		Set<String> input = new HashSet<>();
 		input.add("4");
 		input.add("5");
-		Map<String, String> input2 = new HashMap<String, String>();
+		Map<String, String> input2 = new HashMap<>();
 		input2.put("4", "5");
 		input2.put("6", "7");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
@@ -502,7 +503,7 @@ public class BeanFactoryGenericsTests {
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 		rbd.setFactoryMethodName("createInstance");
 
-		Map<String, String> input = new HashMap<String, String>();
+		Map<String, String> input = new HashMap<>();
 		input.put("4", "5");
 		input.put("6", "7");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
@@ -522,10 +523,10 @@ public class BeanFactoryGenericsTests {
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 		rbd.setFactoryMethodName("createInstance");
 
-		Map<String, String> input = new HashMap<String, String>();
+		Map<String, String> input = new HashMap<>();
 		input.put("1", "0");
 		input.put("2", "3");
-		Map<String, String> input2 = new HashMap<String, String>();
+		Map<String, String> input2 = new HashMap<>();
 		input2.put("4", "5");
 		input2.put("6", "7");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
@@ -546,7 +547,7 @@ public class BeanFactoryGenericsTests {
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 		rbd.setFactoryMethodName("createInstance");
 
-		Map<String, String> input = new HashMap<String, String>();
+		Map<String, String> input = new HashMap<>();
 		input.put("4", "5");
 		input.put("6", "7");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
@@ -570,11 +571,11 @@ public class BeanFactoryGenericsTests {
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 		rbd.setFactoryMethodName("createInstance");
 
-		Map<String, AbstractCollection<?>> input = new HashMap<String, AbstractCollection<?>>();
-		HashSet<Integer> value1 = new HashSet<Integer>();
+		Map<String, AbstractCollection<?>> input = new HashMap<>();
+		HashSet<Integer> value1 = new HashSet<>();
 		value1.add(new Integer(1));
 		input.put("1", value1);
-		ArrayList<Boolean> value2 = new ArrayList<Boolean>();
+		ArrayList<Boolean> value2 = new ArrayList<>();
 		value2.add(Boolean.TRUE);
 		input.put("2", value2);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(Boolean.TRUE);
@@ -770,7 +771,7 @@ public class BeanFactoryGenericsTests {
 	}
 
 	@Test
-	public void testSpr11250() {
+	public void testGenericMatchingWithBeanNameDifferentiation() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
 
@@ -780,8 +781,43 @@ public class BeanFactoryGenericsTests {
 				new RootBeanDefinition(NumberBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR, false));
 
 		NumberBean nb = bf.getBean(NumberBean.class);
-		assertNotNull(nb.getDoubleStore());
-		assertNotNull(nb.getFloatStore());
+		assertSame(bf.getBean("doubleStore"), nb.getDoubleStore());
+		assertSame(bf.getBean("floatStore"), nb.getFloatStore());
+
+		String[] numberStoreNames = bf.getBeanNamesForType(ResolvableType.forClass(NumberStore.class));
+		String[] doubleStoreNames = bf.getBeanNamesForType(ResolvableType.forClassWithGenerics(NumberStore.class, Double.class));
+		String[] floatStoreNames = bf.getBeanNamesForType(ResolvableType.forClassWithGenerics(NumberStore.class, Float.class));
+		assertEquals(2, numberStoreNames.length);
+		assertEquals("doubleStore", numberStoreNames[0]);
+		assertEquals("floatStore", numberStoreNames[1]);
+		assertEquals(0, doubleStoreNames.length);
+		assertEquals(0, floatStoreNames.length);
+	}
+
+	@Test
+	public void testGenericMatchingWithFullTypeDifferentiation() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
+
+		bf.registerBeanDefinition("store1", new RootBeanDefinition(DoubleStore.class));
+		bf.registerBeanDefinition("store2", new RootBeanDefinition(FloatStore.class));
+		bf.registerBeanDefinition("numberBean",
+				new RootBeanDefinition(NumberBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR, false));
+
+		NumberBean nb = bf.getBean(NumberBean.class);
+		assertSame(bf.getBean("store1"), nb.getDoubleStore());
+		assertSame(bf.getBean("store2"), nb.getFloatStore());
+
+		String[] numberStoreNames = bf.getBeanNamesForType(ResolvableType.forClass(NumberStore.class));
+		String[] doubleStoreNames = bf.getBeanNamesForType(ResolvableType.forClassWithGenerics(NumberStore.class, Double.class));
+		String[] floatStoreNames = bf.getBeanNamesForType(ResolvableType.forClassWithGenerics(NumberStore.class, Float.class));
+		assertEquals(2, numberStoreNames.length);
+		assertEquals("store1", numberStoreNames[0]);
+		assertEquals("store2", numberStoreNames[1]);
+		assertEquals(1, doubleStoreNames.length);
+		assertEquals("store1", doubleStoreNames[0]);
+		assertEquals(1, floatStoreNames.length);
+		assertEquals("store2", floatStoreNames[0]);
 	}
 
 
@@ -848,6 +884,14 @@ public class BeanFactoryGenericsTests {
 
 
 	public static class NumberStore<T extends Number> {
+	}
+
+
+	public static class DoubleStore extends NumberStore<Double> {
+	}
+
+
+	public static class FloatStore extends NumberStore<Float> {
 	}
 
 

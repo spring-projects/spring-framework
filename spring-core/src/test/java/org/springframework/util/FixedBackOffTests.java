@@ -16,9 +16,12 @@
 
 package org.springframework.util;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
+import org.springframework.util.backoff.BackOffExecution;
+import org.springframework.util.backoff.FixedBackOff;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll

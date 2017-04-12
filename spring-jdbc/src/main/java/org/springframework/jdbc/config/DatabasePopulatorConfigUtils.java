@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.jdbc.config;
 
 import java.util.List;
 
+import org.w3c.dom.Element;
+
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.TypedStringValue;
@@ -27,10 +29,10 @@ import org.springframework.jdbc.datasource.init.CompositeDatabasePopulator;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
-import org.w3c.dom.Element;
 
 /**
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.1
  */
 class DatabasePopulatorConfigUtils {
@@ -49,7 +51,7 @@ class DatabasePopulatorConfigUtils {
 		boolean ignoreFailedDrops = element.getAttribute("ignore-failures").equals("DROPS");
 		boolean continueOnError = element.getAttribute("ignore-failures").equals("ALL");
 
-		ManagedList<BeanMetadataElement> delegates = new ManagedList<BeanMetadataElement>();
+		ManagedList<BeanMetadataElement> delegates = new ManagedList<>();
 		for (Element scriptElement : scripts) {
 			String executionAttr = scriptElement.getAttribute("execution");
 			if (!StringUtils.hasText(executionAttr)) {
@@ -69,14 +71,27 @@ class DatabasePopulatorConfigUtils {
 			if (StringUtils.hasLength(scriptElement.getAttribute("encoding"))) {
 				delegate.addPropertyValue("sqlScriptEncoding", new TypedStringValue(scriptElement.getAttribute("encoding")));
 			}
-			if (StringUtils.hasLength(scriptElement.getAttribute("separator"))) {
-				delegate.addPropertyValue("separator", new TypedStringValue(scriptElement.getAttribute("separator")));
+			String separator = getSeparator(element, scriptElement);
+			if (separator != null) {
+				delegate.addPropertyValue("separator", new TypedStringValue(separator));
 			}
 			delegates.add(delegate.getBeanDefinition());
 		}
 		builder.addPropertyValue("populators", delegates);
 
 		return builder.getBeanDefinition();
+	}
+
+	private static String getSeparator(Element element, Element scriptElement) {
+		String scriptSeparator = scriptElement.getAttribute("separator");
+		if (StringUtils.hasLength(scriptSeparator)) {
+			return scriptSeparator;
+		}
+		String elementSeparator = element.getAttribute("separator");
+		if (StringUtils.hasLength(elementSeparator)) {
+			return elementSeparator;
+		}
+		return null;
 	}
 
 }

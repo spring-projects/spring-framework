@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,46 +21,23 @@ import org.w3c.dom.Element;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.util.ClassUtils;
 
 /**
- * Parser for the &lt;tx:jta-transaction-manager/&gt; element,
- * autodetecting BEA WebLogic and IBM WebSphere.
+ * Parser for the &lt;tx:jta-transaction-manager/&gt; XML configuration element,
+ * autodetecting WebLogic and WebSphere servers and exposing the corresponding
+ * {@link org.springframework.transaction.jta.JtaTransactionManager} subclass.
  *
  * @author Juergen Hoeller
  * @author Christian Dupuis
  * @since 2.5
+ * @see org.springframework.transaction.jta.WebLogicJtaTransactionManager
+ * @see org.springframework.transaction.jta.WebSphereUowTransactionManager
  */
 public class JtaTransactionManagerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser  {
 
-	private static final String WEBLOGIC_JTA_TRANSACTION_MANAGER_CLASS_NAME =
-			"org.springframework.transaction.jta.WebLogicJtaTransactionManager";
-
-	private static final String WEBSPHERE_TRANSACTION_MANAGER_CLASS_NAME =
-			"org.springframework.transaction.jta.WebSphereUowTransactionManager";
-
-	private static final String JTA_TRANSACTION_MANAGER_CLASS_NAME =
-			"org.springframework.transaction.jta.JtaTransactionManager";
-
-
-	private static final boolean weblogicPresent = ClassUtils.isPresent(
-			"weblogic.transaction.UserTransaction", JtaTransactionManagerBeanDefinitionParser.class.getClassLoader());
-
-	private static final boolean webspherePresent = ClassUtils.isPresent(
-			"com.ibm.wsspi.uow.UOWManager", JtaTransactionManagerBeanDefinitionParser.class.getClassLoader());
-
-
 	@Override
 	protected String getBeanClassName(Element element) {
-		if (weblogicPresent) {
-			return WEBLOGIC_JTA_TRANSACTION_MANAGER_CLASS_NAME;
-		}
-		else if (webspherePresent) {
-			return WEBSPHERE_TRANSACTION_MANAGER_CLASS_NAME;
-		}
-		else {
-			return JTA_TRANSACTION_MANAGER_CLASS_NAME;
-		}
+		return JtaTransactionManagerFactoryBean.resolveJtaTransactionManagerClassName();
 	}
 
 	@Override

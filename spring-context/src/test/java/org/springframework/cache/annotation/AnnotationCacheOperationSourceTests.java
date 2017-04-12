@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,56 +16,49 @@
 
 package org.springframework.cache.annotation;
 
-import static org.junit.Assert.*;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.cache.interceptor.CacheEvictOperation;
 import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.cache.interceptor.CacheableOperation;
-import org.springframework.util.ReflectionUtils;
+import org.springframework.core.annotation.AliasFor;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Costin Leau
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 public class AnnotationCacheOperationSourceTests {
 
 	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
+	public final ExpectedException exception = ExpectedException.none();
 
-	private AnnotationCacheOperationSource source = new AnnotationCacheOperationSource();
+	private final AnnotationCacheOperationSource source = new AnnotationCacheOperationSource();
 
-	private Collection<CacheOperation> getOps(Class<?> target, String name,
-											  int expectedNumberOfOperations) {
-		Collection<CacheOperation> result = getOps(target, name);
-		assertEquals("Wrong number of operation(s) for '"+name+"'",
-				expectedNumberOfOperations, result.size());
-		return result;
-	}
-
-	private Collection<CacheOperation> getOps(Class<?> target, String name) {
-		Method method = ReflectionUtils.findMethod(target, name);
-		return source.getCacheOperations(method, target);
-	}
 
 	@Test
-	public void testSingularAnnotation() throws Exception {
+	public void singularAnnotation() throws Exception {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "singular", 1);
 		assertTrue(ops.iterator().next() instanceof CacheableOperation);
 	}
 
 	@Test
-	public void testMultipleAnnotation() throws Exception {
+	public void multipleAnnotation() throws Exception {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "multiple", 2);
 		Iterator<CacheOperation> it = ops.iterator();
 		assertTrue(it.next() instanceof CacheableOperation);
@@ -73,7 +66,7 @@ public class AnnotationCacheOperationSourceTests {
 	}
 
 	@Test
-	public void testCaching() throws Exception {
+	public void caching() throws Exception {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "caching", 2);
 		Iterator<CacheOperation> it = ops.iterator();
 		assertTrue(it.next() instanceof CacheableOperation);
@@ -81,13 +74,18 @@ public class AnnotationCacheOperationSourceTests {
 	}
 
 	@Test
-	public void testSingularStereotype() throws Exception {
+	public void emptyCaching() throws Exception {
+		getOps(AnnotatedClass.class, "emptyCaching", 0);
+	}
+
+	@Test
+	public void singularStereotype() throws Exception {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "singleStereotype", 1);
 		assertTrue(ops.iterator().next() instanceof CacheEvictOperation);
 	}
 
 	@Test
-	public void testMultipleStereotypes() throws Exception {
+	public void multipleStereotypes() throws Exception {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "multipleStereotype", 3);
 		Iterator<CacheOperation> it = ops.iterator();
 		assertTrue(it.next() instanceof CacheableOperation);
@@ -100,65 +98,99 @@ public class AnnotationCacheOperationSourceTests {
 	}
 
 	@Test
-	public void testCustomKeyGenerator() {
+	public void singleComposedAnnotation() throws Exception {
+		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "singleComposed", 2);
+		Iterator<CacheOperation> it = ops.iterator();
+
+		CacheOperation cacheOperation = it.next();
+		assertThat(cacheOperation, instanceOf(CacheableOperation.class));
+		assertThat(cacheOperation.getCacheNames(), equalTo(Collections.singleton("directly declared")));
+		assertThat(cacheOperation.getKey(), equalTo(""));
+
+		cacheOperation = it.next();
+		assertThat(cacheOperation, instanceOf(CacheableOperation.class));
+		assertThat(cacheOperation.getCacheNames(), equalTo(Collections.singleton("composedCache")));
+		assertThat(cacheOperation.getKey(), equalTo("composedKey"));
+	}
+
+	@Test
+	public void multipleComposedAnnotations() throws Exception {
+		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "multipleComposed", 4);
+		Iterator<CacheOperation> it = ops.iterator();
+
+		CacheOperation cacheOperation = it.next();
+		assertThat(cacheOperation, instanceOf(CacheableOperation.class));
+		assertThat(cacheOperation.getCacheNames(), equalTo(Collections.singleton("directly declared")));
+		assertThat(cacheOperation.getKey(), equalTo(""));
+
+		cacheOperation = it.next();
+		assertThat(cacheOperation, instanceOf(CacheableOperation.class));
+		assertThat(cacheOperation.getCacheNames(), equalTo(Collections.singleton("composedCache")));
+		assertThat(cacheOperation.getKey(), equalTo("composedKey"));
+
+		cacheOperation = it.next();
+		assertThat(cacheOperation, instanceOf(CacheableOperation.class));
+		assertThat(cacheOperation.getCacheNames(), equalTo(Collections.singleton("foo")));
+		assertThat(cacheOperation.getKey(), equalTo(""));
+
+		cacheOperation = it.next();
+		assertThat(cacheOperation, instanceOf(CacheEvictOperation.class));
+		assertThat(cacheOperation.getCacheNames(), equalTo(Collections.singleton("composedCacheEvict")));
+		assertThat(cacheOperation.getKey(), equalTo("composedEvictionKey"));
+	}
+
+	@Test
+	public void customKeyGenerator() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "customKeyGenerator", 1);
 		CacheOperation cacheOperation = ops.iterator().next();
 		assertEquals("Custom key generator not set", "custom", cacheOperation.getKeyGenerator());
 	}
 
 	@Test
-	public void testCustomKeyGeneratorInherited() {
+	public void customKeyGeneratorInherited() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "customKeyGeneratorInherited", 1);
 		CacheOperation cacheOperation = ops.iterator().next();
 		assertEquals("Custom key generator not set", "custom", cacheOperation.getKeyGenerator());
 	}
 
 	@Test
-	public void testKeyAndKeyGeneratorCannotBeSetTogether() {
-		try {
-			getOps(AnnotatedClass.class, "invalidKeyAndKeyGeneratorSet");
-			fail("Should have failed to parse @Cacheable annotation");
-		} catch (IllegalStateException e) {
-			// expected
-		}
+	public void keyAndKeyGeneratorCannotBeSetTogether() {
+		this.exception.expect(IllegalStateException.class);
+		getOps(AnnotatedClass.class, "invalidKeyAndKeyGeneratorSet");
 	}
 
 	@Test
-	public void testCustomCacheManager() {
+	public void customCacheManager() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "customCacheManager", 1);
 		CacheOperation cacheOperation = ops.iterator().next();
 		assertEquals("Custom cache manager not set", "custom", cacheOperation.getCacheManager());
 	}
 
 	@Test
-	public void testCustomCacheManagerInherited() {
+	public void customCacheManagerInherited() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "customCacheManagerInherited", 1);
 		CacheOperation cacheOperation = ops.iterator().next();
 		assertEquals("Custom cache manager not set", "custom", cacheOperation.getCacheManager());
 	}
 
 	@Test
-	public void testCustomCacheResolver() {
+	public void customCacheResolver() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "customCacheResolver", 1);
 		CacheOperation cacheOperation = ops.iterator().next();
 		assertEquals("Custom cache resolver not set", "custom", cacheOperation.getCacheResolver());
 	}
 
 	@Test
-	public void testCustomCacheResolverInherited() {
+	public void customCacheResolverInherited() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "customCacheResolverInherited", 1);
 		CacheOperation cacheOperation = ops.iterator().next();
 		assertEquals("Custom cache resolver not set", "custom", cacheOperation.getCacheResolver());
 	}
 
 	@Test
-	public void testCacheResolverAndCacheManagerCannotBeSetTogether() {
-		try {
-			getOps(AnnotatedClass.class, "invalidCacheResolverAndCacheManagerSet");
-			fail("Should have failed to parse @Cacheable annotation");
-		} catch (IllegalStateException e) {
-			// expected
-		}
+	public void cacheResolverAndCacheManagerCannotBeSetTogether() {
+		this.exception.expect(IllegalStateException.class);
+		getOps(AnnotatedClass.class, "invalidCacheResolverAndCacheManagerSet");
 	}
 
 	@Test
@@ -190,9 +222,12 @@ public class AnnotationCacheOperationSourceTests {
 	}
 
 	@Test
-	public void validateAtLeastOneCacheNameMustBeSet() {
-		thrown.expect(IllegalStateException.class);
-		getOps(AnnotatedClass.class, "noCacheNameSpecified");
+	public void validateNoCacheIsValid() {
+		// Valid as a CacheResolver might return the cache names to use with other info
+		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "noCacheNameSpecified");
+		CacheOperation cacheOperation = ops.iterator().next();
+		assertNotNull("cache names set must not be null", cacheOperation.getCacheNames());
+		assertEquals("no cache names specified", 0, cacheOperation.getCacheNames().size());
 	}
 
 	@Test
@@ -207,6 +242,22 @@ public class AnnotationCacheOperationSourceTests {
 		Collection<CacheOperation> ops = getOps(MultipleCacheConfig.class, "multipleCacheConfig");
 		CacheOperation cacheOperation = ops.iterator().next();
 		assertSharedConfig(cacheOperation, "", "", "", "myCache");
+	}
+
+	@Test
+	public void cacheConfigFromInterface() {
+		assertNull(getOps(InterfaceCacheConfig.class, "interfaceCacheConfig"));
+		Collection<CacheOperation> ops = getOps(CacheConfigIfc.class, "interfaceCacheConfig");
+		CacheOperation cacheOperation = ops.iterator().next();
+		assertSharedConfig(cacheOperation, "", "", "", "myCache");
+	}
+
+	@Test
+	public void cacheAnnotationOverride() {
+		Collection<CacheOperation> ops = getOps(InterfaceCacheConfig.class, "interfaceCacheableOverride");
+		assertSame(1, ops.size());
+		CacheOperation cacheOperation = ops.iterator().next();
+		assertTrue(cacheOperation instanceof CacheableOperation);
 	}
 
 	@Test
@@ -230,19 +281,38 @@ public class AnnotationCacheOperationSourceTests {
 		assertSharedConfig(cacheOperation, "classKeyGenerator", "classCacheManager", "", "classCacheName");
 	}
 
+
+	private Collection<CacheOperation> getOps(Class<?> target, String name, int expectedNumberOfOperations) {
+		Collection<CacheOperation> result = getOps(target, name);
+		assertEquals("Wrong number of operation(s) for '" + name + "'", expectedNumberOfOperations, result.size());
+		return result;
+	}
+
+	private Collection<CacheOperation> getOps(Class<?> target, String name) {
+		try {
+			Method method = target.getMethod(name);
+			return this.source.getCacheOperations(method, target);
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException(ex);
+		}
+	}
+
 	private void assertSharedConfig(CacheOperation actual, String keyGenerator, String cacheManager,
-									String cacheResolver, String... cacheNames) {
+			String cacheResolver, String... cacheNames) {
+
 		assertEquals("Wrong key manager",  keyGenerator, actual.getKeyGenerator());
 		assertEquals("Wrong cache manager", cacheManager, actual.getCacheManager());
 		assertEquals("Wrong cache resolver", cacheResolver, actual.getCacheResolver());
-		for (String cacheName : cacheNames) {
-			assertTrue("Cache '"+cacheName+"' not found (got "+actual.getCacheNames(),
-					actual.getCacheNames().contains(cacheName));
-		}
-		assertEquals("Wrong number of cache name(s)", cacheNames.length, actual.getCacheNames().size());
+		assertEquals("Wrong number of cache names", cacheNames.length, actual.getCacheNames().size());
+		Arrays.stream(cacheNames).forEach(cacheName ->
+				assertTrue("Cache '" + cacheName + "' not found in " + actual.getCacheNames(),
+						actual.getCacheNames().contains(cacheName)));
 	}
 
+
 	private static class AnnotatedClass {
+
 		@Cacheable("test")
 		public void singular() {
 		}
@@ -252,19 +322,23 @@ public class AnnotationCacheOperationSourceTests {
 		public void multiple() {
 		}
 
-		@Caching(cacheable = {@Cacheable("test")}, evict = {@CacheEvict("test")})
+		@Caching(cacheable = @Cacheable("test"), evict = @CacheEvict("test"))
 		public void caching() {
 		}
 
-		@Cacheable(value = "test", keyGenerator = "custom")
+		@Caching
+		public void emptyCaching() {
+		}
+
+		@Cacheable(cacheNames = "test", keyGenerator = "custom")
 		public void customKeyGenerator() {
 		}
 
-		@Cacheable(value = "test", cacheManager = "custom")
+		@Cacheable(cacheNames = "test", cacheManager = "custom")
 		public void customCacheManager() {
 		}
 
-		@Cacheable(value = "test", cacheResolver = "custom")
+		@Cacheable(cacheNames = "test", cacheResolver = "custom")
 		public void customCacheResolver() {
 		}
 
@@ -278,7 +352,19 @@ public class AnnotationCacheOperationSourceTests {
 		public void multipleStereotype() {
 		}
 
-		@Caching(cacheable = {@Cacheable(value = "test", key = "a"), @Cacheable(value = "test", key = "b")})
+		@Cacheable("directly declared")
+		@ComposedCacheable(cacheNames = "composedCache", key = "composedKey")
+		public void singleComposed() {
+		}
+
+		@Cacheable("directly declared")
+		@ComposedCacheable(cacheNames = "composedCache", key = "composedKey")
+		@CacheableFoo
+		@ComposedCacheEvict(cacheNames = "composedCacheEvict", key = "composedEvictionKey")
+		public void multipleComposed() {
+		}
+
+		@Caching(cacheable = { @Cacheable(cacheNames = "test", key = "a"), @Cacheable(cacheNames = "test", key = "b") })
 		public void multipleCaching() {
 		}
 
@@ -286,7 +372,7 @@ public class AnnotationCacheOperationSourceTests {
 		public void customKeyGeneratorInherited() {
 		}
 
-		@Cacheable(value = "test", key = "#root.methodName", keyGenerator = "custom")
+		@Cacheable(cacheNames = "test", key = "#root.methodName", keyGenerator = "custom")
 		public void invalidKeyAndKeyGeneratorSet() {
 		}
 
@@ -298,7 +384,7 @@ public class AnnotationCacheOperationSourceTests {
 		public void customCacheResolverInherited() {
 		}
 
-		@Cacheable(value = "test", cacheManager = "custom", cacheResolver = "custom")
+		@Cacheable(cacheNames = "test", cacheManager = "custom", cacheResolver = "custom")
 		public void invalidCacheResolverAndCacheManagerSet() {
 		}
 
@@ -306,6 +392,7 @@ public class AnnotationCacheOperationSourceTests {
 		public void noCacheNameSpecified() {
 		}
 	}
+
 
 	@CacheConfig(cacheNames = "classCacheName",
 			keyGenerator = "classKeyGenerator",
@@ -329,6 +416,7 @@ public class AnnotationCacheOperationSourceTests {
 		}
 	}
 
+
 	@CacheConfigFoo
 	private static class AnnotatedClassWithCustomDefault {
 
@@ -336,6 +424,7 @@ public class AnnotationCacheOperationSourceTests {
 		public void methodLevelCacheName() {
 		}
 	}
+
 
 	@CacheConfig(cacheNames = "classCacheName",
 			keyGenerator = "classKeyGenerator",
@@ -353,11 +442,11 @@ public class AnnotationCacheOperationSourceTests {
 		@Cacheable
 		public void noCustomization() {
 		}
-
 	}
 
+
 	@CacheConfigFoo
-	@CacheConfig(cacheNames = "myCache") // multiple sources
+	@CacheConfig(cacheNames = "myCache")  // multiple sources
 	private static class MultipleCacheConfig {
 
 		@Cacheable
@@ -365,46 +454,111 @@ public class AnnotationCacheOperationSourceTests {
 		}
 	}
 
+
+	@CacheConfig(cacheNames = "myCache")
+	private interface CacheConfigIfc {
+
+		@Cacheable
+		void interfaceCacheConfig();
+
+		@CachePut
+		void interfaceCacheableOverride();
+	}
+
+
+	private static class InterfaceCacheConfig implements CacheConfigIfc {
+
+		@Override
+		public void interfaceCacheConfig() {
+		}
+
+		@Override
+		@Cacheable
+		public void interfaceCacheableOverride() {
+		}
+	}
+
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	@Cacheable("foo")
 	public @interface CacheableFoo {
 	}
 
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@Cacheable(value = "foo", keyGenerator = "custom")
+	@Cacheable(cacheNames = "foo", keyGenerator = "custom")
 	public @interface CacheableFooCustomKeyGenerator {
 	}
 
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@Cacheable(value = "foo", cacheManager = "custom")
+	@Cacheable(cacheNames = "foo", cacheManager = "custom")
 	public @interface CacheableFooCustomCacheManager {
 	}
 
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@Cacheable(value = "foo", cacheResolver = "custom")
+	@Cacheable(cacheNames = "foo", cacheResolver = "custom")
 	public @interface CacheableFooCustomCacheResolver {
 	}
 
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.METHOD)
-	@CacheEvict(value = "foo")
-	public @interface EvictFoo {
-	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@CacheEvict(value = "bar")
+	@CacheEvict("foo")
+	public @interface EvictFoo {
+	}
+
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@CacheEvict("bar")
 	public @interface EvictBar {
 	}
+
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	@CacheConfig(keyGenerator = "classKeyGenerator",
-			cacheManager = "classCacheManager", cacheResolver = "classCacheResolver")
+			cacheManager = "classCacheManager",
+			cacheResolver = "classCacheResolver")
 	public @interface CacheConfigFoo {
 	}
+
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ElementType.METHOD, ElementType.TYPE})
+	@Cacheable(cacheNames = "shadowed cache name", key = "shadowed key")
+	@interface ComposedCacheable {
+
+		@AliasFor(annotation = Cacheable.class)
+		String[] value() default {};
+
+		@AliasFor(annotation = Cacheable.class)
+		String[] cacheNames() default {};
+
+		@AliasFor(annotation = Cacheable.class)
+		String key() default "";
+	}
+
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ElementType.METHOD, ElementType.TYPE})
+	@CacheEvict(cacheNames = "shadowed cache name", key = "shadowed key")
+	@interface ComposedCacheEvict {
+
+		@AliasFor(annotation = CacheEvict.class)
+		String[] value() default {};
+
+		@AliasFor(annotation = CacheEvict.class)
+		String[] cacheNames() default {};
+
+		@AliasFor(annotation = CacheEvict.class)
+		String key() default "";
+	}
+
 }

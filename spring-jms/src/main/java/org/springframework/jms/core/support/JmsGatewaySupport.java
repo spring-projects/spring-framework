@@ -53,7 +53,6 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	 * Will automatically create a JmsTemplate for the given ConnectionFactory.
 	 * @see #createJmsTemplate
 	 * @see #setConnectionFactory(javax.jms.ConnectionFactory)
-	 * @param connectionFactory
 	 */
 	public final void setConnectionFactory(ConnectionFactory connectionFactory) {
 		this.jmsTemplate = createJmsTemplate(connectionFactory);
@@ -81,7 +80,6 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 
 	/**
 	 * Set the JmsTemplate for the gateway.
-	 * @param jmsTemplate
 	 * @see #setConnectionFactory(javax.jms.ConnectionFactory)
 	 */
 	public final void setJmsTemplate(JmsTemplate jmsTemplate) {

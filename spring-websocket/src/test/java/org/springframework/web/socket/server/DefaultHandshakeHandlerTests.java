@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,15 +25,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 import org.springframework.web.socket.AbstractHttpRequestTests;
-import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.SubProtocolCapable;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.WebSocketHttpHeaders;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link org.springframework.web.socket.server.support.DefaultHandshakeHandler}.
@@ -60,7 +61,7 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 
 		this.handshakeHandler.setSupportedProtocols("stomp", "mqtt");
 
-		when(this.upgradeStrategy.getSupportedVersions()).thenReturn(new String[] { "13" });
+		given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[] {"13"});
 
 		this.servletRequest.setMethod("GET");
 
@@ -79,10 +80,37 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 				"STOMP", Collections.<WebSocketExtension>emptyList(), null, handler, attributes);
 	}
 
+
+	@Test
+	public void supportedExtensions() throws Exception {
+
+		WebSocketExtension extension1 = new WebSocketExtension("ext1");
+		WebSocketExtension extension2 = new WebSocketExtension("ext2");
+
+		given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[] {"13"});
+		given(this.upgradeStrategy.getSupportedExtensions(this.request)).willReturn(Arrays.asList(extension1));
+
+		this.servletRequest.setMethod("GET");
+
+		WebSocketHttpHeaders headers = new WebSocketHttpHeaders(this.request.getHeaders());
+		headers.setUpgrade("WebSocket");
+		headers.setConnection("Upgrade");
+		headers.setSecWebSocketVersion("13");
+		headers.setSecWebSocketKey("82/ZS2YHjEnUN97HLL8tbw==");
+		headers.setSecWebSocketExtensions(Arrays.asList(extension1, extension2));
+
+		WebSocketHandler handler = new TextWebSocketHandler();
+		Map<String, Object> attributes = Collections.<String, Object>emptyMap();
+		this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
+
+		verify(this.upgradeStrategy).upgrade(this.request, this.response, null, Arrays.asList(extension1),
+				null, handler, attributes);
+	}
+
 	@Test
 	public void subProtocolCapableHandler() throws Exception {
 
-		when(this.upgradeStrategy.getSupportedVersions()).thenReturn(new String[]{"13"});
+		given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[]{"13"});
 
 		this.servletRequest.setMethod("GET");
 
@@ -104,7 +132,7 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 	@Test
 	public void subProtocolCapableHandlerNoMatch() throws Exception {
 
-		when(this.upgradeStrategy.getSupportedVersions()).thenReturn(new String[]{"13"});
+		given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[]{"13"});
 
 		this.servletRequest.setMethod("GET");
 

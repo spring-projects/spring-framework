@@ -16,8 +16,6 @@
 
 package org.springframework.scheduling.config;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,6 +23,8 @@ import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Mark Fisher

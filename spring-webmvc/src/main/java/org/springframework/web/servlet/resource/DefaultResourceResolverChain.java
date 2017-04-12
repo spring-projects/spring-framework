@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,12 +18,10 @@ package org.springframework.web.servlet.resource;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
-
 
 /**
  * A default implementation of {@link ResourceResolverChain} for invoking a list
@@ -36,7 +34,7 @@ import org.springframework.util.Assert;
  */
 class DefaultResourceResolverChain implements ResourceResolverChain {
 
-	private final List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
+	private final List<ResourceResolver> resolvers = new ArrayList<>();
 
 	private int index = -1;
 
@@ -54,6 +52,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 		if (resolver == null) {
 			return null;
 		}
+
 		try {
 			return resolver.resolveResource(request, requestPath, locations, this);
 		}
@@ -68,6 +67,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 		if (resolver == null) {
 			return null;
 		}
+
 		try {
 			return resolver.resolveUrlPath(resourcePath, locations, this);
 		}
@@ -77,14 +77,12 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 	}
 
 	private ResourceResolver getNext() {
-
 		Assert.state(this.index <= this.resolvers.size(),
-				"Current index exceeds the number of configured ResourceResolver's");
+				"Current index exceeds the number of configured ResourceResolvers");
 
 		if (this.index == (this.resolvers.size() - 1)) {
 			return null;
 		}
-
 		this.index++;
 		return this.resolvers.get(this.index);
 	}

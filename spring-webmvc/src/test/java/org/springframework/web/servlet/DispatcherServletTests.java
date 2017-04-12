@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,11 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
@@ -33,6 +35,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.DummyEnvironment;
+import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletConfig;
@@ -52,33 +55,33 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.Controller;
-import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.WebUtils;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Sam Brannen
  */
-public class DispatcherServletTests extends TestCase {
+public class DispatcherServletTests {
 
 	private static final String URL_KNOWN_ONLY_PARENT = "/knownOnlyToParent.do";
 
-	private MockServletConfig servletConfig;
+	private final MockServletConfig servletConfig = new MockServletConfig(new MockServletContext(), "simple");
 
 	private DispatcherServlet simpleDispatcherServlet;
 
 	private DispatcherServlet complexDispatcherServlet;
 
-	@Override
-	protected void setUp() throws ServletException {
-		servletConfig = new MockServletConfig(new MockServletContext(), "simple");
-		MockServletConfig complexConfig = new MockServletConfig(servletConfig.getServletContext(), "complex");
+
+	@Before
+	public void setUp() throws ServletException {
+		MockServletConfig complexConfig = new MockServletConfig(getServletContext(), "complex");
 		complexConfig.addInitParameter("publishContext", "false");
 		complexConfig.addInitParameter("class", "notWritable");
 		complexConfig.addInitParameter("unknownParam", "someValue");
@@ -98,14 +101,16 @@ public class DispatcherServletTests extends TestCase {
 		return servletConfig.getServletContext();
 	}
 
-	public void testDispatcherServletGetServletNameDoesNotFailWithoutConfig() {
+	@Test
+	public void dispatcherServletGetServletNameDoesNotFailWithoutConfig() {
 		DispatcherServlet ds = new DispatcherServlet();
 		assertNull(ds.getServletConfig());
 		assertNull(ds.getServletName());
 		assertNull(ds.getServletContext());
 	}
 
-	public void testConfiguredDispatcherServlets() {
+	@Test
+	public void configuredDispatcherServlets() {
 		assertTrue("Correct namespace",
 				("simple" + FrameworkServlet.DEFAULT_NAMESPACE_SUFFIX).equals(simpleDispatcherServlet.getNamespace()));
 		assertTrue("Correct attribute", (FrameworkServlet.SERVLET_CONTEXT_PREFIX + "simple").equals(
@@ -123,7 +128,8 @@ public class DispatcherServletTests extends TestCase {
 		complexDispatcherServlet.destroy();
 	}
 
-	public void testInvalidRequest() throws Exception {
+	@Test
+	public void invalidRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/invalid.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		simpleDispatcherServlet.service(request, response);
@@ -131,7 +137,8 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("correct error code", response.getStatus() == HttpServletResponse.SC_NOT_FOUND);
 	}
 
-	public void testRequestHandledEvent() throws Exception {
+	@Test
+	public void requestHandledEvent() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
@@ -141,7 +148,8 @@ public class DispatcherServletTests extends TestCase {
 		assertEquals(1, listener.counter);
 	}
 
-	public void testPublishEventsOff() throws Exception {
+	@Test
+	public void publishEventsOff() throws Exception {
 		complexDispatcherServlet.setPublishEvents(false);
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -152,7 +160,8 @@ public class DispatcherServletTests extends TestCase {
 		assertEquals(0, listener.counter);
 	}
 
-	public void testParameterizableViewController() throws Exception {
+	@Test
+	public void parameterizableViewController() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/view.do");
 		request.addUserRole("role1");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -160,7 +169,8 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("forwarded to form", "myform.jsp".equals(response.getForwardedUrl()));
 	}
 
-	public void testHandlerInterceptorSuppressesView() throws Exception {
+	@Test
+	public void handlerInterceptorSuppressesView() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/view.do");
 		request.addUserRole("role1");
 		request.addParameter("noView", "true");
@@ -169,16 +179,18 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("Not forwarded", response.getForwardedUrl() == null);
 	}
 
-	public void testLocaleRequest() throws Exception {
+	@Test
+	public void localeRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		simpleDispatcherServlet.service(request, response);
 		assertTrue("Not forwarded", response.getForwardedUrl() == null);
-		assertEquals("98", response.getHeader("Last-Modified"));
+		assertEquals("Wed, 01 Apr 2015 00:00:00 GMT", response.getHeader("Last-Modified"));
 	}
 
-	public void testUnknownRequest() throws Exception {
+	@Test
+	public void unknownRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/unknown.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
@@ -186,7 +198,8 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("Exception exposed", request.getAttribute("exception").getClass().equals(ServletException.class));
 	}
 
-	public void testAnotherLocaleRequest() throws Exception {
+	@Test
+	public void anotherLocaleRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do;abc=def");
 		request.addPreferredLocale(Locale.CANADA);
 		request.addUserRole("role1");
@@ -203,10 +216,11 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue(request.getAttribute("test3") != null);
 		assertTrue(request.getAttribute("test3x") != null);
 		assertTrue(request.getAttribute("test3y") != null);
-		assertEquals("99", response.getHeader("Last-Modified"));
+		assertEquals("Wed, 01 Apr 2015 00:00:01 GMT", response.getHeader("Last-Modified"));
 	}
 
-	public void testExistingMultipartRequest() throws Exception {
+	@Test
+	public void existingMultipartRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do;abc=def");
 		request.addPreferredLocale(Locale.CANADA);
 		request.addUserRole("role1");
@@ -217,10 +231,28 @@ public class DispatcherServletTests extends TestCase {
 		MultipartHttpServletRequest multipartRequest = multipartResolver.resolveMultipart(request);
 		complexDispatcherServlet.service(multipartRequest, response);
 		multipartResolver.cleanupMultipart(multipartRequest);
+		assertNull(request.getAttribute(SimpleMappingExceptionResolver.DEFAULT_EXCEPTION_ATTRIBUTE));
 		assertNotNull(request.getAttribute("cleanedUp"));
 	}
 
-	public void testMultipartResolutionFailed() throws Exception {
+	@Test
+	public void existingMultipartRequestButWrapped() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do;abc=def");
+		request.addPreferredLocale(Locale.CANADA);
+		request.addUserRole("role1");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ComplexWebApplicationContext.MockMultipartResolver multipartResolver =
+				(ComplexWebApplicationContext.MockMultipartResolver) complexDispatcherServlet.getWebApplicationContext()
+						.getBean("multipartResolver");
+		MultipartHttpServletRequest multipartRequest = multipartResolver.resolveMultipart(request);
+		complexDispatcherServlet.service(new HttpServletRequestWrapper(multipartRequest), response);
+		multipartResolver.cleanupMultipart(multipartRequest);
+		assertNull(request.getAttribute(SimpleMappingExceptionResolver.DEFAULT_EXCEPTION_ATTRIBUTE));
+		assertNotNull(request.getAttribute("cleanedUp"));
+	}
+
+	@Test
+	public void multipartResolutionFailed() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do;abc=def");
 		request.addPreferredLocale(Locale.CANADA);
 		request.addUserRole("role1");
@@ -233,7 +265,8 @@ public class DispatcherServletTests extends TestCase {
 				SimpleMappingExceptionResolver.DEFAULT_EXCEPTION_ATTRIBUTE) instanceof MaxUploadSizeExceededException);
 	}
 
-	public void testHandlerInterceptorAbort() throws Exception {
+	@Test
+	public void handlerInterceptorAbort() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addParameter("abort", "true");
 		request.addPreferredLocale(Locale.CANADA);
@@ -249,7 +282,8 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue(request.getAttribute("test2y") == null);
 	}
 
-	public void testModelAndViewDefiningException() throws Exception {
+	@Test
+	public void modelAndViewDefiningException() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
 		request.addUserRole("role1");
@@ -265,7 +299,8 @@ public class DispatcherServletTests extends TestCase {
 		}
 	}
 
-	public void testSimpleMappingExceptionResolverWithSpecificHandler1() throws Exception {
+	@Test
+	public void simpleMappingExceptionResolverWithSpecificHandler1() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
 		request.addUserRole("role1");
@@ -277,7 +312,8 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("Exception exposed", request.getAttribute("exception") instanceof IllegalAccessException);
 	}
 
-	public void testSimpleMappingExceptionResolverWithSpecificHandler2() throws Exception {
+	@Test
+	public void simpleMappingExceptionResolverWithSpecificHandler2() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
 		request.addUserRole("role1");
@@ -289,7 +325,8 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("Exception exposed", request.getAttribute("exception") instanceof ServletException);
 	}
 
-	public void testSimpleMappingExceptionResolverWithAllHandlers1() throws Exception {
+	@Test
+	public void simpleMappingExceptionResolverWithAllHandlers1() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/loc.do");
 		request.addPreferredLocale(Locale.CANADA);
 		request.addUserRole("role1");
@@ -301,7 +338,8 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("Exception exposed", request.getAttribute("exception") instanceof IllegalAccessException);
 	}
 
-	public void testSimpleMappingExceptionResolverWithAllHandlers2() throws Exception {
+	@Test
+	public void simpleMappingExceptionResolverWithAllHandlers2() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/loc.do");
 		request.addPreferredLocale(Locale.CANADA);
 		request.addUserRole("role1");
@@ -313,7 +351,8 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("Exception exposed", request.getAttribute("exception") instanceof ServletException);
 	}
 
-	public void testSimpleMappingExceptionResolverWithDefaultErrorView() throws Exception {
+	@Test
+	public void simpleMappingExceptionResolverWithDefaultErrorView() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
 		request.addUserRole("role1");
@@ -325,7 +364,8 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("Exception exposed", request.getAttribute("exception").getClass().equals(RuntimeException.class));
 	}
 
-	public void testLocaleChangeInterceptor1() throws Exception {
+	@Test
+	public void localeChangeInterceptor1() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.GERMAN);
 		request.addUserRole("role2");
@@ -337,7 +377,8 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("Exception exposed", request.getAttribute("exception").getClass().equals(ServletException.class));
 	}
 
-	public void testLocaleChangeInterceptor2() throws Exception {
+	@Test
+	public void localeChangeInterceptor2() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.GERMAN);
 		request.addUserRole("role2");
@@ -348,7 +389,8 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("Not forwarded", response.getForwardedUrl() == null);
 	}
 
-	public void testThemeChangeInterceptor1() throws Exception {
+	@Test
+	public void themeChangeInterceptor1() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
 		request.addUserRole("role1");
@@ -360,7 +402,8 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("Exception exposed", request.getAttribute("exception").getClass().equals(ServletException.class));
 	}
 
-	public void testThemeChangeInterceptor2() throws Exception {
+	@Test
+	public void themeChangeInterceptor2() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
 		request.addUserRole("role1");
@@ -376,7 +419,8 @@ public class DispatcherServletTests extends TestCase {
 		}
 	}
 
-	public void testNotAuthorized() throws Exception {
+	@Test
+	public void notAuthorized() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -389,7 +433,8 @@ public class DispatcherServletTests extends TestCase {
 		}
 	}
 
-	public void testHeadMethodWithExplicitHandling() throws Exception {
+	@Test
+	public void headMethodWithExplicitHandling() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "HEAD", "/head.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
@@ -401,7 +446,8 @@ public class DispatcherServletTests extends TestCase {
 		assertEquals("", response.getContentAsString());
 	}
 
-	public void testHeadMethodWithNoBodyResponse() throws Exception {
+	@Test
+	public void headMethodWithNoBodyResponse() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "HEAD", "/body.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
@@ -413,7 +459,8 @@ public class DispatcherServletTests extends TestCase {
 		assertEquals("body", response.getContentAsString());
 	}
 
-	public void testNotDetectAllHandlerMappings() throws ServletException, IOException {
+	@Test
+	public void notDetectAllHandlerMappings() throws ServletException, IOException {
 		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
 		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
 		complexDispatcherServlet.setNamespace("test");
@@ -426,7 +473,8 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue(response.getStatus() == HttpServletResponse.SC_NOT_FOUND);
 	}
 
-	public void testHandlerNotMappedWithAutodetect() throws ServletException, IOException {
+	@Test
+	public void handlerNotMappedWithAutodetect() throws ServletException, IOException {
 		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
 		// no parent
 		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
@@ -439,10 +487,11 @@ public class DispatcherServletTests extends TestCase {
 		assertEquals(HttpServletResponse.SC_NOT_FOUND, response.getStatus());
 	}
 
-	public void testDetectHandlerMappingFromParent() throws ServletException, IOException {
+	@Test
+	public void detectHandlerMappingFromParent() throws ServletException, IOException {
 		// create a parent context that includes a mapping
 		StaticWebApplicationContext parent = new StaticWebApplicationContext();
-		parent.setServletContext(servletConfig.getServletContext());
+		parent.setServletContext(getServletContext());
 		parent.registerSingleton("parentHandler", ControllerFromParent.class, new MutablePropertyValues());
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -468,7 +517,8 @@ public class DispatcherServletTests extends TestCase {
 				response.getStatus() == HttpServletResponse.SC_NOT_FOUND);
 	}
 
-	public void testDetectAllHandlerAdapters() throws ServletException, IOException {
+	@Test
+	public void detectAllHandlerAdapters() throws ServletException, IOException {
 		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
 		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
 		complexDispatcherServlet.setNamespace("test");
@@ -484,7 +534,8 @@ public class DispatcherServletTests extends TestCase {
 		complexDispatcherServlet.service(request, response);
 	}
 
-	public void testNotDetectAllHandlerAdapters() throws ServletException, IOException {
+	@Test
+	public void notDetectAllHandlerAdapters() throws ServletException, IOException {
 		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
 		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
 		complexDispatcherServlet.setNamespace("test");
@@ -505,7 +556,8 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("Exception exposed", request.getAttribute("exception").getClass().equals(ServletException.class));
 	}
 
-	public void testNotDetectAllHandlerExceptionResolvers() throws ServletException, IOException {
+	@Test
+	public void notDetectAllHandlerExceptionResolvers() throws ServletException, IOException {
 		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
 		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
 		complexDispatcherServlet.setNamespace("test");
@@ -524,7 +576,8 @@ public class DispatcherServletTests extends TestCase {
 		}
 	}
 
-	public void testNotDetectAllViewResolvers() throws ServletException, IOException {
+	@Test
+	public void notDetectAllViewResolvers() throws ServletException, IOException {
 		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
 		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
 		complexDispatcherServlet.setNamespace("test");
@@ -543,7 +596,8 @@ public class DispatcherServletTests extends TestCase {
 		}
 	}
 
-	public void testThrowExceptionIfNoHandlerFound() throws ServletException, IOException {
+	@Test
+	public void throwExceptionIfNoHandlerFound() throws ServletException, IOException {
 		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
 		complexDispatcherServlet.setContextClass(SimpleWebApplicationContext.class);
 		complexDispatcherServlet.setNamespace("test");
@@ -557,7 +611,19 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue("correct error code", response.getStatus() == HttpServletResponse.SC_NOT_FOUND);
 	}
 
-	public void testCleanupAfterIncludeWithRemove() throws ServletException, IOException {
+	// SPR-12984
+
+	@Test
+	public void noHandlerFoundExceptionMessage() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("foo", "bar");
+		NoHandlerFoundException ex = new NoHandlerFoundException("GET", "/foo", headers);
+		assertTrue(!ex.getMessage().contains("bar"));
+		assertTrue(!ex.toString().contains("bar"));
+	}
+
+	@Test
+	public void cleanupAfterIncludeWithRemove() throws ServletException, IOException {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/main.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -576,7 +642,8 @@ public class DispatcherServletTests extends TestCase {
 		assertNull(request.getAttribute("command"));
 	}
 
-	public void testCleanupAfterIncludeWithRestore() throws ServletException, IOException {
+	@Test
+	public void cleanupAfterIncludeWithRestore() throws ServletException, IOException {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/main.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -595,7 +662,8 @@ public class DispatcherServletTests extends TestCase {
 		assertSame(wac, request.getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE));
 	}
 
-	public void testNoCleanupAfterInclude() throws ServletException, IOException {
+	@Test
+	public void noCleanupAfterInclude() throws ServletException, IOException {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/main.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -615,7 +683,8 @@ public class DispatcherServletTests extends TestCase {
 		assertSame(wac, request.getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE));
 	}
 
-	public void testServletHandlerAdapter() throws Exception {
+	@Test
+	public void servletHandlerAdapter() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/servlet.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
@@ -628,37 +697,8 @@ public class DispatcherServletTests extends TestCase {
 		assertNull(myServlet.getServletConfig());
 	}
 
-	public void testWebApplicationContextLookup() {
-		MockServletContext servletContext = new MockServletContext();
-		MockHttpServletRequest request = new MockHttpServletRequest(servletContext, "GET", "/invalid.do");
-
-		try {
-			RequestContextUtils.getWebApplicationContext(request);
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
-
-		try {
-			RequestContextUtils.getWebApplicationContext(request, servletContext);
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
-
-		servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,
-				new StaticWebApplicationContext());
-		try {
-			RequestContextUtils.getWebApplicationContext(request, servletContext);
-		}
-		catch (IllegalStateException ex) {
-			fail("Should not have thrown IllegalStateException: " + ex.getMessage());
-		}
-	}
-
-	public void testWithNoView() throws Exception {
+	@Test
+	public void withNoView() throws Exception {
 		MockServletContext servletContext = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(servletContext, "GET", "/noview.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -667,7 +707,8 @@ public class DispatcherServletTests extends TestCase {
 		assertEquals("noview.jsp", response.getForwardedUrl());
 	}
 
-	public void testWithNoViewNested() throws Exception {
+	@Test
+	public void withNoViewNested() throws Exception {
 		MockServletContext servletContext = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(servletContext, "GET", "/noview/simple.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -676,7 +717,8 @@ public class DispatcherServletTests extends TestCase {
 		assertEquals("noview/simple.jsp", response.getForwardedUrl());
 	}
 
-	public void testWithNoViewAndSamePath() throws Exception {
+	@Test
+	public void withNoViewAndSamePath() throws Exception {
 		InternalResourceViewResolver vr = (InternalResourceViewResolver) complexDispatcherServlet
 				.getWebApplicationContext().getBean("viewResolver2");
 		vr.setSuffix("");
@@ -694,7 +736,8 @@ public class DispatcherServletTests extends TestCase {
 		}
 	}
 
-	public void testDispatcherServletRefresh() throws ServletException {
+	@Test
+	public void dispatcherServletRefresh() throws ServletException {
 		MockServletContext servletContext = new MockServletContext("org/springframework/web/context");
 		DispatcherServlet servlet = new DispatcherServlet();
 
@@ -724,7 +767,8 @@ public class DispatcherServletTests extends TestCase {
 		servlet.destroy();
 	}
 
-	public void testDispatcherServletContextRefresh() throws ServletException {
+	@Test
+	public void dispatcherServletContextRefresh() throws ServletException {
 		MockServletContext servletContext = new MockServletContext("org/springframework/web/context");
 		DispatcherServlet servlet = new DispatcherServlet();
 
@@ -754,7 +798,8 @@ public class DispatcherServletTests extends TestCase {
 		servlet.destroy();
 	}
 
-	public void testEnvironmentOperations() {
+	@Test
+	public void environmentOperations() {
 		DispatcherServlet servlet = new DispatcherServlet();
 		ConfigurableEnvironment defaultEnv = servlet.getEnvironment();
 		assertThat(defaultEnv, notNullValue());
@@ -778,53 +823,59 @@ public class DispatcherServletTests extends TestCase {
 		assertThat(custom.getEnvironment(), instanceOf(CustomServletEnvironment.class));
 	}
 
-	public void testAllowedOptionsIncludesPatchMethod() throws Exception {
+	@Test
+	public void allowedOptionsIncludesPatchMethod() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "OPTIONS", "/foo");
 		MockHttpServletResponse response = spy(new MockHttpServletResponse());
 		DispatcherServlet servlet = new DispatcherServlet();
+		servlet.setDispatchOptionsRequest(false);
 		servlet.service(request, response);
 		verify(response, never()).getHeader(anyString()); // SPR-10341
 		assertThat(response.getHeader("Allow"), equalTo("GET, HEAD, POST, PUT, DELETE, TRACE, OPTIONS, PATCH"));
 	}
 
-	public void testContextInitializers() throws Exception {
+	@Test
+	public void contextInitializers() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet();
 		servlet.setContextClass(SimpleWebApplicationContext.class);
 		servlet.setContextInitializers(new TestWebContextInitializer(), new OtherWebContextInitializer());
 		servlet.init(servletConfig);
-		assertEquals("true", servletConfig.getServletContext().getAttribute("initialized"));
-		assertEquals("true", servletConfig.getServletContext().getAttribute("otherInitialized"));
+		assertEquals("true", getServletContext().getAttribute("initialized"));
+		assertEquals("true", getServletContext().getAttribute("otherInitialized"));
 	}
 
-	public void testContextInitializerClasses() throws Exception {
+	@Test
+	public void contextInitializerClasses() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet();
 		servlet.setContextClass(SimpleWebApplicationContext.class);
 		servlet.setContextInitializerClasses(
 				TestWebContextInitializer.class.getName() + "," + OtherWebContextInitializer.class.getName());
 		servlet.init(servletConfig);
-		assertEquals("true", servletConfig.getServletContext().getAttribute("initialized"));
-		assertEquals("true", servletConfig.getServletContext().getAttribute("otherInitialized"));
+		assertEquals("true", getServletContext().getAttribute("initialized"));
+		assertEquals("true", getServletContext().getAttribute("otherInitialized"));
 	}
 
-	public void testGlobalInitializerClasses() throws Exception {
+	@Test
+	public void globalInitializerClasses() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet();
 		servlet.setContextClass(SimpleWebApplicationContext.class);
-		servletConfig.getServletContext().setInitParameter(ContextLoader.GLOBAL_INITIALIZER_CLASSES_PARAM,
+		getServletContext().setInitParameter(ContextLoader.GLOBAL_INITIALIZER_CLASSES_PARAM,
 				TestWebContextInitializer.class.getName() + "," + OtherWebContextInitializer.class.getName());
 		servlet.init(servletConfig);
-		assertEquals("true", servletConfig.getServletContext().getAttribute("initialized"));
-		assertEquals("true", servletConfig.getServletContext().getAttribute("otherInitialized"));
+		assertEquals("true", getServletContext().getAttribute("initialized"));
+		assertEquals("true", getServletContext().getAttribute("otherInitialized"));
 	}
 
-	public void testMixedInitializerClasses() throws Exception {
+	@Test
+	public void mixedInitializerClasses() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet();
 		servlet.setContextClass(SimpleWebApplicationContext.class);
-		servletConfig.getServletContext().setInitParameter(ContextLoader.GLOBAL_INITIALIZER_CLASSES_PARAM,
+		getServletContext().setInitParameter(ContextLoader.GLOBAL_INITIALIZER_CLASSES_PARAM,
 				TestWebContextInitializer.class.getName());
 		servlet.setContextInitializerClasses(OtherWebContextInitializer.class.getName());
 		servlet.init(servletConfig);
-		assertEquals("true", servletConfig.getServletContext().getAttribute("initialized"));
-		assertEquals("true", servletConfig.getServletContext().getAttribute("otherInitialized"));
+		assertEquals("true", getServletContext().getAttribute("initialized"));
+		assertEquals("true", getServletContext().getAttribute("otherInitialized"));
 	}
 
 

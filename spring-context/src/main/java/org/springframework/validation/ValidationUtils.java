@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.util.StringUtils;
  */
 public abstract class ValidationUtils {
 
-	private static Log logger = LogFactory.getLog(ValidationUtils.class);
+	private static final Log logger = LogFactory.getLog(ValidationUtils.class);
 
 
 	/**
@@ -126,7 +126,7 @@ public abstract class ValidationUtils {
 	}
 
 	/**
-	 * Reject the given field with the given error codea nd error arguments
+	 * Reject the given field with the given error code and error arguments
 	 * if the value is empty.
 	 * <p>An 'empty' value in this context means either {@code null} or
 	 * the empty string "".

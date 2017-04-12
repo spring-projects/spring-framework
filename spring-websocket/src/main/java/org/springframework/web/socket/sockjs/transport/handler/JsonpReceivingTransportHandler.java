@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -53,9 +54,9 @@ public class JsonpReceivingTransportHandler extends AbstractHttpReceivingTranspo
 
 		super.handleRequestInternal(request, response, wsHandler, sockJsSession);
 		try {
-			response.getBody().write("ok".getBytes("UTF-8"));
+			response.getBody().write("ok".getBytes(StandardCharsets.UTF_8));
 		}
-		catch(IOException ex) {
+		catch (IOException ex) {
 			throw new SockJsException("Failed to write to the response body", sockJsSession.getId(), ex);
 		}
 	}
@@ -64,10 +65,10 @@ public class JsonpReceivingTransportHandler extends AbstractHttpReceivingTranspo
 	protected String[] readMessages(ServerHttpRequest request) throws IOException {
 		SockJsMessageCodec messageCodec = getServiceConfig().getMessageCodec();
 		MediaType contentType = request.getHeaders().getContentType();
-		if ((contentType != null) && MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType)) {
+		if (contentType != null && MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType)) {
 			MultiValueMap<String, String> map = this.formConverter.read(null, request);
 			String d = map.getFirst("d");
-			return (StringUtils.hasText(d)) ? messageCodec.decode(d) : null;
+			return (StringUtils.hasText(d) ? messageCodec.decode(d) : null);
 		}
 		else {
 			return messageCodec.decodeInputStream(request.getBody());

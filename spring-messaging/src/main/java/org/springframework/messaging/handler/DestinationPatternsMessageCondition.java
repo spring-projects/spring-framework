@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public final class DestinationPatternsMessageCondition
-		extends AbstractMessageCondition<DestinationPatternsMessageCondition> {
+public class DestinationPatternsMessageCondition extends AbstractMessageCondition<DestinationPatternsMessageCondition> {
 
 	public static final String LOOKUP_DESTINATION_HEADER = "lookupDestination";
 
@@ -59,37 +58,41 @@ public final class DestinationPatternsMessageCondition
 	}
 
 	/**
-	 * Additional constructor with flags for using suffix pattern (.*) and
-	 * trailing slash matches.
+	 * Alternative constructor accepting a custom PathMatcher.
 	 * @param patterns the URL patterns to use; if 0, the condition will match to every request.
-	 * @param pathMatcher for path matching with patterns
+	 * @param pathMatcher the PathMatcher to use
 	 */
-	public DestinationPatternsMessageCondition(String[] patterns,PathMatcher pathMatcher) {
+	public DestinationPatternsMessageCondition(String[] patterns, PathMatcher pathMatcher) {
 		this(asList(patterns), pathMatcher);
 	}
 
 	private DestinationPatternsMessageCondition(Collection<String> patterns, PathMatcher pathMatcher) {
-		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns));
-		this.pathMatcher = (pathMatcher != null) ? pathMatcher : new AntPathMatcher();
+		this.pathMatcher = (pathMatcher != null ? pathMatcher : new AntPathMatcher());
+		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns, this.pathMatcher));
 	}
+
 
 	private static List<String> asList(String... patterns) {
-		return patterns != null ? Arrays.asList(patterns) : Collections.<String>emptyList();
+		return (patterns != null ? Arrays.asList(patterns) : Collections.emptyList());
 	}
 
-	private static Set<String> prependLeadingSlash(Collection<String> patterns) {
+	private static Set<String> prependLeadingSlash(Collection<String> patterns, PathMatcher pathMatcher) {
 		if (patterns == null) {
 			return Collections.emptySet();
 		}
-		Set<String> result = new LinkedHashSet<String>(patterns.size());
+		boolean slashSeparator = pathMatcher.combine("a", "a").equals("a/a");
+		Set<String> result = new LinkedHashSet<>(patterns.size());
 		for (String pattern : patterns) {
-			if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
-				pattern = "/" + pattern;
+			if (slashSeparator) {
+				if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
+					pattern = "/" + pattern;
+				}
 			}
 			result.add(pattern);
 		}
 		return result;
 	}
+
 
 	public Set<String> getPatterns() {
 		return this.patterns;
@@ -105,19 +108,20 @@ public final class DestinationPatternsMessageCondition
 		return " || ";
 	}
 
+
 	/**
 	 * Returns a new instance with URL patterns from the current instance ("this") and
 	 * the "other" instance as follows:
 	 * <ul>
-	 * 	<li>If there are patterns in both instances, combine the patterns in "this" with
-	 * 		the patterns in "other" using {@link org.springframework.util.PathMatcher#combine(String, String)}.
-	 * 	<li>If only one instance has patterns, use them.
-	 *  <li>If neither instance has patterns, use an empty String (i.e. "").
+	 * <li>If there are patterns in both instances, combine the patterns in "this" with
+	 * the patterns in "other" using {@link org.springframework.util.PathMatcher#combine(String, String)}.
+	 * <li>If only one instance has patterns, use them.
+	 * <li>If neither instance has patterns, use an empty String (i.e. "").
 	 * </ul>
 	 */
 	@Override
 	public DestinationPatternsMessageCondition combine(DestinationPatternsMessageCondition other) {
-		Set<String> result = new LinkedHashSet<String>();
+		Set<String> result = new LinkedHashSet<>();
 		if (!this.patterns.isEmpty() && !other.patterns.isEmpty()) {
 			for (String pattern1 : this.patterns) {
 				for (String pattern2 : other.patterns) {
@@ -157,8 +161,8 @@ public final class DestinationPatternsMessageCondition
 			return this;
 		}
 
-		List<String> matches = new ArrayList<String>();
-		for (String pattern : patterns) {
+		List<String> matches = new ArrayList<>();
+		for (String pattern : this.patterns) {
 			if (pattern.equals(destination) || this.pathMatcher.match(pattern, destination)) {
 				matches.add(pattern);
 			}

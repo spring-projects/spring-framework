@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.springframework.util.Assert;
  * Specialization of {@link MapPropertySource} designed for use with
  * {@linkplain AbstractEnvironment#getSystemEnvironment() system environment variables}.
  * Compensates for constraints in Bash and other shells that do not allow for variables
- * containing the period character; also allows for uppercase variations on property
- * names for more idiomatic shell use.
+ * containing the period character and/or hyphen character; also allows for uppercase
+ * variations on property names for more idiomatic shell use.
  *
  * <p>For example, a call to {@code getProperty("foo.bar")} will attempt to find a value
  * for the original property or any 'equivalent' property, returning the first found:
@@ -35,16 +35,17 @@ import org.springframework.util.Assert;
  * <li>{@code FOO.BAR} - original, with upper case</li>
  * <li>{@code FOO_BAR} - with underscores and upper case</li>
  * </ul>
+ * Any hyphen variant of the above would work as well, or even mix dot/hyphen variants.
  *
- * The same applies for calls to {@link #containsProperty(String)}, which returns
+ * <p>The same applies for calls to {@link #containsProperty(String)}, which returns
  * {@code true} if any of the above properties are present, otherwise {@code false}.
  *
  * <p>This feature is particularly useful when specifying active or default profiles as
- * environment variables. The following is not allowable under Bash
+ * environment variables. The following is not allowable under Bash:
  *
  * <pre class="code">spring.profiles.active=p1 java -classpath ... MyApp</pre>
  *
- * However, the following syntax is permitted and is also more conventional.
+ * However, the following syntax is permitted and is also more conventional:
  *
  * <pre class="code">SPRING_PROFILES_ACTIVE=p1 java -classpath ... MyApp</pre>
  *
@@ -55,6 +56,7 @@ import org.springframework.util.Assert;
  * and all its subclasses.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see StandardEnvironment
  * @see AbstractEnvironment#getSystemEnvironment()
@@ -70,8 +72,9 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 		super(name, source);
 	}
 
+
 	/**
-	 * Return true if a property with the given name or any underscore/uppercase variant
+	 * Return {@code true} if a property with the given name or any underscore/uppercase variant
 	 * thereof exists in this property source.
 	 */
 	@Override
@@ -80,13 +83,11 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>This implementation returns {@code true} if a property with the given name or
+	 * This implementation returns {@code true} if a property with the given name or
 	 * any underscore/uppercase variant thereof exists in this property source.
 	 */
 	@Override
 	public Object getProperty(String name) {
-		Assert.notNull(name, "property name must not be null");
 		String actualName = resolvePropertyName(name);
 		if (logger.isDebugEnabled() && !name.equals(actualName)) {
 			logger.debug(String.format("PropertySource [%s] does not contain '%s', but found equivalent '%s'",
@@ -101,28 +102,51 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	 * found or otherwise the original name. Never returns {@code null}.
 	 */
 	private String resolvePropertyName(String name) {
-		if (super.containsProperty(name)) {
-			return name;
+		Assert.notNull(name, "Property name must not be null");
+		String resolvedName = checkPropertyName(name);
+		if (resolvedName != null) {
+			return resolvedName;
 		}
-
-		String usName = name.replace('.', '_');
-		if (!name.equals(usName) && super.containsProperty(usName)) {
-			return usName;
-		}
-
-		String ucName = name.toUpperCase();
-		if (!name.equals(ucName)) {
-			if (super.containsProperty(ucName)) {
-				return ucName;
-			}
-			else {
-				String usUcName = ucName.replace('.', '_');
-				if (!ucName.equals(usUcName) && super.containsProperty(usUcName)) {
-					return usUcName;
-				}
+		String uppercasedName = name.toUpperCase();
+		if (!name.equals(uppercasedName)) {
+			resolvedName = checkPropertyName(uppercasedName);
+			if (resolvedName != null) {
+				return resolvedName;
 			}
 		}
-
 		return name;
 	}
+
+	private String checkPropertyName(String name) {
+		// Check name as-is
+		if (containsKey(name)) {
+			return name;
+		}
+		// Check name with just dots replaced
+		String noDotName = name.replace('.', '_');
+		if (!name.equals(noDotName) && containsKey(noDotName)) {
+			return noDotName;
+		}
+		// Check name with just hyphens replaced
+		String noHyphenName = name.replace('-', '_');
+		if (!name.equals(noHyphenName) && containsKey(noHyphenName)) {
+			return noHyphenName;
+		}
+		// Check name with dots and hyphens replaced
+		String noDotNoHyphenName = noDotName.replace('-', '_');
+		if (!noDotName.equals(noDotNoHyphenName) && containsKey(noDotNoHyphenName)) {
+			return noDotNoHyphenName;
+		}
+		// Give up
+		return null;
+	}
+
+	private boolean containsKey(String name) {
+		return (isSecurityManagerPresent() ? this.source.keySet().contains(name) : this.source.containsKey(name));
+	}
+
+	protected boolean isSecurityManagerPresent() {
+		return (System.getSecurityManager() != null);
+	}
+
 }

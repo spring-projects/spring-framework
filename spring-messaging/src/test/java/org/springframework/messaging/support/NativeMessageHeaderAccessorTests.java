@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Map;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.messaging.Message;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -63,7 +64,7 @@ public class NativeMessageHeaderAccessorTests {
 		inputNativeHeaders.add("foo", "bar");
 		inputNativeHeaders.add("bar", "baz");
 
-		Map<String, Object> inputHeaders = new HashMap<String, Object>();
+		Map<String, Object> inputHeaders = new HashMap<>();
 		inputHeaders.put("a", "b");
 		inputHeaders.put(NativeMessageHeaderAccessor.NATIVE_HEADERS, inputNativeHeaders);
 
@@ -85,7 +86,6 @@ public class NativeMessageHeaderAccessorTests {
 		Map<String, Object> actual = headerAccessor.toMap();
 		assertEquals(0, actual.size());
 
-		@SuppressWarnings("unchecked")
 		Map<String, List<String>> actualNativeHeaders = headerAccessor.toNativeHeaderMap();
 		assertEquals(Collections.emptyMap(), actualNativeHeaders);
 	}
@@ -97,7 +97,7 @@ public class NativeMessageHeaderAccessorTests {
 		inputNativeHeaders.add("foo", "bar");
 		inputNativeHeaders.add("bar", "baz");
 
-		Map<String, Object> nativeHeaders = new HashMap<String, Object>();
+		Map<String, Object> nativeHeaders = new HashMap<>();
 		nativeHeaders.put("a", "b");
 		nativeHeaders.put(NativeMessageHeaderAccessor.NATIVE_HEADERS, inputNativeHeaders);
 

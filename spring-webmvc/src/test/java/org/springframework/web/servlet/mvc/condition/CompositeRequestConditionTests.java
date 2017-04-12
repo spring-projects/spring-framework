@@ -16,16 +16,15 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import static org.junit.Assert.*;
 
 /**
  * A test fixture for {@link CompositeRequestCondition} tests.
@@ -72,7 +71,7 @@ public class CompositeRequestConditionTests {
 		assertSame(notEmpty, empty.combine(notEmpty));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void combineDifferentLength() {
 		CompositeRequestCondition cond1 = new CompositeRequestCondition(this.param1);
 		CompositeRequestCondition cond2 = new CompositeRequestCondition(this.param1, this.header1);
@@ -131,7 +130,7 @@ public class CompositeRequestConditionTests {
 		assertEquals(1, empty.compareTo(notEmpty, request));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void compareDifferentLength() {
 		CompositeRequestCondition cond1 = new CompositeRequestCondition(this.param1);
 		CompositeRequestCondition cond2 = new CompositeRequestCondition(this.param1, this.header1);

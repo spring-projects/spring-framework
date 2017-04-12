@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,10 @@
 package org.springframework.context.annotation;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
@@ -27,7 +30,8 @@ import org.springframework.aop.scope.ScopedProxyFactoryBean;
 import org.springframework.asm.Type;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.SimpleInstantiationStrategy;
@@ -38,13 +42,18 @@ import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.CallbackFilter;
 import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.cglib.transform.ClassEmitterTransformer;
 import org.springframework.cglib.transform.TransformingClassGenerator;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.objenesis.ObjenesisException;
+import org.springframework.objenesis.SpringObjenesis;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -64,20 +73,21 @@ import org.springframework.util.ReflectionUtils;
  */
 class ConfigurationClassEnhancer {
 
+	// The callbacks to use. Note that these callbacks must be stateless.
 	private static final Callback[] CALLBACKS = new Callback[] {
 			new BeanMethodInterceptor(),
-			new DisposableBeanMethodInterceptor(),
 			new BeanFactoryAwareMethodInterceptor(),
 			NoOp.INSTANCE
 	};
 
 	private static final ConditionalCallbackFilter CALLBACK_FILTER = new ConditionalCallbackFilter(CALLBACKS);
 
-	private static final DefaultGeneratorStrategy GENERATOR_STRATEGY = new BeanFactoryAwareGeneratorStrategy();
-
 	private static final String BEAN_FACTORY_FIELD = "$$beanFactory";
 
+
 	private static final Log logger = LogFactory.getLog(ConfigurationClassEnhancer.class);
+
+	private static final SpringObjenesis objenesis = new SpringObjenesis();
 
 
 	/**
@@ -85,7 +95,7 @@ class ConfigurationClassEnhancer {
 	 * container-aware callbacks capable of respecting scoping and other bean semantics.
 	 * @return the enhanced subclass
 	 */
-	public Class<?> enhance(Class<?> configClass) {
+	public Class<?> enhance(Class<?> configClass, ClassLoader classLoader) {
 		if (EnhancedConfiguration.class.isAssignableFrom(configClass)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Ignoring request to enhance %s as it has " +
@@ -97,7 +107,7 @@ class ConfigurationClassEnhancer {
 			}
 			return configClass;
 		}
-		Class<?> enhancedClass = createClass(newEnhancer(configClass));
+		Class<?> enhancedClass = createClass(newEnhancer(configClass, classLoader));
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Successfully enhanced %s; enhanced class name is: %s",
 					configClass.getName(), enhancedClass.getName()));
@@ -108,13 +118,13 @@ class ConfigurationClassEnhancer {
 	/**
 	 * Creates a new CGLIB {@link Enhancer} instance.
 	 */
-	private Enhancer newEnhancer(Class<?> superclass) {
+	private Enhancer newEnhancer(Class<?> superclass, ClassLoader classLoader) {
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(superclass);
 		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
 		enhancer.setUseFactory(false);
 		enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-		enhancer.setStrategy(GENERATOR_STRATEGY);
+		enhancer.setStrategy(new BeanFactoryAwareGeneratorStrategy(classLoader));
 		enhancer.setCallbackFilter(CALLBACK_FILTER);
 		enhancer.setCallbackTypes(CALLBACK_FILTER.getCallbackTypes());
 		return enhancer;
@@ -135,18 +145,16 @@ class ConfigurationClassEnhancer {
 
 	/**
 	 * Marker interface to be implemented by all @Configuration CGLIB subclasses.
-	 * Facilitates idempotent behavior for {@link ConfigurationClassEnhancer#enhance(Class)}
+	 * Facilitates idempotent behavior for {@link ConfigurationClassEnhancer#enhance}
 	 * through checking to see if candidate classes are already assignable to it, e.g.
 	 * have already been enhanced.
-	 * <p>Also extends {@link DisposableBean} and {@link BeanFactoryAware}, as all
-	 * enhanced {@code @Configuration} classes require access to the {@link BeanFactory}
-	 * that created them and must de-register static CGLIB callbacks on destruction,
-	 * which is handled by the (private) {@code DisposableBeanMethodInterceptor}.
+	 * <p>Also extends {@link BeanFactoryAware}, as all enhanced {@code @Configuration}
+	 * classes require access to the {@link BeanFactory} that created them.
 	 * <p>Note that this interface is intended for framework-internal use only, however
 	 * must remain public in order to allow access to subclasses generated from other
 	 * packages (i.e. user code).
 	 */
-	public interface EnhancedConfiguration extends DisposableBean, BeanFactoryAware {
+	public interface EnhancedConfiguration extends BeanFactoryAware {
 	}
 
 
@@ -154,7 +162,7 @@ class ConfigurationClassEnhancer {
 	 * Conditional {@link Callback}.
 	 * @see ConditionalCallbackFilter
 	 */
-	private static interface ConditionalCallback extends Callback {
+	private interface ConditionalCallback extends Callback {
 
 		boolean isMatch(Method candidateMethod);
 	}
@@ -197,8 +205,16 @@ class ConfigurationClassEnhancer {
 
 	/**
 	 * Custom extension of CGLIB's DefaultGeneratorStrategy, introducing a {@link BeanFactory} field.
+	 * Also exposes the application ClassLoader as thread context ClassLoader for the time of
+	 * class generation (in order for ASM to pick it up when doing common superclass resolution).
 	 */
 	private static class BeanFactoryAwareGeneratorStrategy extends DefaultGeneratorStrategy {
+
+		private final ClassLoader classLoader;
+
+		public BeanFactoryAwareGeneratorStrategy(ClassLoader classLoader) {
+			this.classLoader = classLoader;
+		}
 
 		@Override
 		protected ClassGenerator transform(ClassGenerator cg) throws Exception {
@@ -210,6 +226,37 @@ class ConfigurationClassEnhancer {
 				}
 			};
 			return new TransformingClassGenerator(cg, transformer);
+		}
+
+		@Override
+		public byte[] generate(ClassGenerator cg) throws Exception {
+			if (this.classLoader == null) {
+				return super.generate(cg);
+			}
+
+			Thread currentThread = Thread.currentThread();
+			ClassLoader threadContextClassLoader;
+			try {
+				threadContextClassLoader = currentThread.getContextClassLoader();
+			}
+			catch (Throwable ex) {
+				// Cannot access thread context ClassLoader - falling back...
+				return super.generate(cg);
+			}
+
+			boolean overrideClassLoader = !this.classLoader.equals(threadContextClassLoader);
+			if (overrideClassLoader) {
+				currentThread.setContextClassLoader(this.classLoader);
+			}
+			try {
+				return super.generate(cg);
+			}
+			finally {
+				if (overrideClassLoader) {
+					// Reset original thread context ClassLoader.
+					currentThread.setContextClassLoader(threadContextClassLoader);
+				}
+			}
 		}
 	}
 
@@ -223,13 +270,13 @@ class ConfigurationClassEnhancer {
 
 		@Override
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-			Field field = obj.getClass().getDeclaredField(BEAN_FACTORY_FIELD);
+			Field field = ReflectionUtils.findField(obj.getClass(), BEAN_FACTORY_FIELD);
 			Assert.state(field != null, "Unable to find generated BeanFactory field");
 			field.set(obj, args[0]);
 
-			// Does the actual (non-CGLIB) superclass actually implement BeanFactoryAware?
+			// Does the actual (non-CGLIB) superclass implement BeanFactoryAware?
 			// If so, call its setBeanFactory() method. If not, just exit.
-			if (BeanFactoryAware.class.isAssignableFrom(obj.getClass().getSuperclass())) {
+			if (BeanFactoryAware.class.isAssignableFrom(ClassUtils.getUserClass(obj.getClass().getSuperclass()))) {
 				return proxy.invokeSuper(obj, args);
 			}
 			return null;
@@ -237,10 +284,10 @@ class ConfigurationClassEnhancer {
 
 		@Override
 		public boolean isMatch(Method candidateMethod) {
-			return candidateMethod.getName().equals("setBeanFactory") &&
-					candidateMethod.getParameterTypes().length == 1 &&
-					candidateMethod.getParameterTypes()[0].equals(BeanFactory.class) &&
-					BeanFactoryAware.class.isAssignableFrom(candidateMethod.getDeclaringClass());
+			return (candidateMethod.getName().equals("setBeanFactory") &&
+					candidateMethod.getParameterCount() == 1 &&
+					BeanFactory.class == candidateMethod.getParameterTypes()[0] &&
+					BeanFactoryAware.class.isAssignableFrom(candidateMethod.getDeclaringClass()));
 		}
 	}
 
@@ -256,9 +303,8 @@ class ConfigurationClassEnhancer {
 		/**
 		 * Enhance a {@link Bean @Bean} method to check the supplied BeanFactory for the
 		 * existence of this bean object.
-		 * @throws Throwable as a catch-all for any exception that may be thrown when
-		 * invoking the super implementation of the proxied method i.e., the actual
-		 * {@code @Bean} method.
+		 * @throws Throwable as a catch-all for any exception that may be thrown when invoking the
+		 * super implementation of the proxied method i.e., the actual {@code @Bean} method
 		 */
 		@Override
 		public Object intercept(Object enhancedConfigInstance, Method beanMethod, Object[] beanMethodArgs,
@@ -268,7 +314,7 @@ class ConfigurationClassEnhancer {
 			String beanName = BeanAnnotationHelper.determineBeanNameFor(beanMethod);
 
 			// Determine whether this bean is a scoped-proxy
-			Scope scope = AnnotationUtils.findAnnotation(beanMethod, Scope.class);
+			Scope scope = AnnotatedElementUtils.findMergedAnnotation(beanMethod, Scope.class);
 			if (scope != null && scope.proxyMode() != ScopedProxyMode.NO) {
 				String scopedBeanName = ScopedProxyCreator.getTargetBeanName(beanName);
 				if (beanFactory.isCurrentlyInCreation(scopedBeanName)) {
@@ -287,48 +333,101 @@ class ConfigurationClassEnhancer {
 					factoryContainsBean(beanFactory, beanName)) {
 				Object factoryBean = beanFactory.getBean(BeanFactory.FACTORY_BEAN_PREFIX + beanName);
 				if (factoryBean instanceof ScopedProxyFactoryBean) {
-					// Pass through - scoped proxy factory beans are a special case and should not
-					// be further proxied
+					// Scoped proxy factory beans are a special case and should not be further proxied
 				}
 				else {
 					// It is a candidate FactoryBean - go ahead with enhancement
-					return enhanceFactoryBean(factoryBean.getClass(), beanFactory, beanName);
+					return enhanceFactoryBean(factoryBean, beanMethod.getReturnType(), beanFactory, beanName);
 				}
 			}
 
-			if (isCurrentlyInvokedFactoryMethod(beanMethod) && !beanFactory.containsSingleton(beanName)) {
+			if (isCurrentlyInvokedFactoryMethod(beanMethod)) {
 				// The factory is calling the bean method in order to instantiate and register the bean
 				// (i.e. via a getBean() call) -> invoke the super implementation of the method to actually
 				// create the bean instance.
-				if (BeanFactoryPostProcessor.class.isAssignableFrom(beanMethod.getReturnType())) {
+				if (logger.isWarnEnabled() &&
+						BeanFactoryPostProcessor.class.isAssignableFrom(beanMethod.getReturnType())) {
 					logger.warn(String.format("@Bean method %s.%s is non-static and returns an object " +
-							"assignable to Spring's BeanFactoryPostProcessor interface. This will " +
-							"result in a failure to process annotations such as @Autowired, " +
-							"@Resource and @PostConstruct within the method's declaring " +
-							"@Configuration class. Add the 'static' modifier to this method to avoid " +
-							"these container lifecycle issues; see @Bean Javadoc for complete details",
+									"assignable to Spring's BeanFactoryPostProcessor interface. This will " +
+									"result in a failure to process annotations such as @Autowired, " +
+									"@Resource and @PostConstruct within the method's declaring " +
+									"@Configuration class. Add the 'static' modifier to this method to avoid " +
+									"these container lifecycle issues; see @Bean javadoc for complete details.",
 							beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName()));
 				}
 				return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);
 			}
-			else {
-				// The user (i.e. not the factory) is requesting this bean through a
-				// call to the bean method, direct or indirect. The bean may have already been
-				// marked as 'in creation' in certain autowiring scenarios; if so, temporarily
-				// set the in-creation status to false in order to avoid an exception.
-				boolean alreadyInCreation = beanFactory.isCurrentlyInCreation(beanName);
-				try {
-					if (alreadyInCreation) {
-						beanFactory.setCurrentlyInCreation(beanName, false);
-					}
-					return beanFactory.getBean(beanName);
+
+			return obtainBeanInstanceFromFactory(beanMethod, beanMethodArgs, beanFactory, beanName);
+		}
+
+		private Object obtainBeanInstanceFromFactory(Method beanMethod, Object[] beanMethodArgs,
+				ConfigurableBeanFactory beanFactory, String beanName) {
+
+			// The user (i.e. not the factory) is requesting this bean through a call to
+			// the bean method, direct or indirect. The bean may have already been marked
+			// as 'in creation' in certain autowiring scenarios; if so, temporarily set
+			// the in-creation status to false in order to avoid an exception.
+			boolean alreadyInCreation = beanFactory.isCurrentlyInCreation(beanName);
+			try {
+				if (alreadyInCreation) {
+					beanFactory.setCurrentlyInCreation(beanName, false);
 				}
-				finally {
-					if (alreadyInCreation) {
-						beanFactory.setCurrentlyInCreation(beanName, true);
+				boolean useArgs = !ObjectUtils.isEmpty(beanMethodArgs);
+				if (useArgs && beanFactory.isSingleton(beanName)) {
+					// Stubbed null arguments just for reference purposes,
+					// expecting them to be autowired for regular singleton references?
+					// A safe assumption since @Bean singleton arguments cannot be optional...
+					for (Object arg : beanMethodArgs) {
+						if (arg == null) {
+							useArgs = false;
+							break;
+						}
 					}
+				}
+				Object beanInstance = (useArgs ? beanFactory.getBean(beanName, beanMethodArgs) :
+						beanFactory.getBean(beanName));
+				if (beanInstance != null && !ClassUtils.isAssignableValue(beanMethod.getReturnType(), beanInstance)) {
+					String msg = String.format("@Bean method %s.%s called as a bean reference " +
+								"for type [%s] but overridden by non-compatible bean instance of type [%s].",
+								beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName(),
+								beanMethod.getReturnType().getName(), beanInstance.getClass().getName());
+					try {
+						BeanDefinition beanDefinition = beanFactory.getMergedBeanDefinition(beanName);
+						msg += " Overriding bean of same name declared in: " + beanDefinition.getResourceDescription();
+					}
+					catch (NoSuchBeanDefinitionException ex) {
+						// Ignore - simply no detailed message then.
+					}
+					throw new IllegalStateException(msg);
+				}
+				Method currentlyInvoked = SimpleInstantiationStrategy.getCurrentlyInvokedFactoryMethod();
+				if (currentlyInvoked != null) {
+					String outerBeanName = BeanAnnotationHelper.determineBeanNameFor(currentlyInvoked);
+					beanFactory.registerDependentBean(beanName, outerBeanName);
+				}
+				return beanInstance;
+			}
+			finally {
+				if (alreadyInCreation) {
+					beanFactory.setCurrentlyInCreation(beanName, true);
 				}
 			}
+		}
+
+		@Override
+		public boolean isMatch(Method candidateMethod) {
+			return BeanAnnotationHelper.isBeanAnnotated(candidateMethod);
+		}
+
+		private ConfigurableBeanFactory getBeanFactory(Object enhancedConfigInstance) {
+			Field field = ReflectionUtils.findField(enhancedConfigInstance.getClass(), BEAN_FACTORY_FIELD);
+			Assert.state(field != null, "Unable to find generated bean factory field");
+			Object beanFactory = ReflectionUtils.getField(field, enhancedConfigInstance);
+			Assert.state(beanFactory != null, "BeanFactory has not been injected into @Configuration class");
+			Assert.state(beanFactory instanceof ConfigurableBeanFactory,
+					"Injected BeanFactory is not a ConfigurableBeanFactory");
+			return (ConfigurableBeanFactory) beanFactory;
 		}
 
 		/**
@@ -367,66 +466,102 @@ class ConfigurationClassEnhancer {
 		 * instance directly. If a FactoryBean instance is fetched through the container via &-dereferencing,
 		 * it will not be proxied. This too is aligned with the way XML configuration works.
 		 */
-		private Object enhanceFactoryBean(Class<?> fbClass, final ConfigurableBeanFactory beanFactory,
-				final String beanName) throws InstantiationException, IllegalAccessException {
+		private Object enhanceFactoryBean(final Object factoryBean, Class<?> exposedType,
+				final ConfigurableBeanFactory beanFactory, final String beanName) {
+
+			try {
+				Class<?> clazz = factoryBean.getClass();
+				boolean finalClass = Modifier.isFinal(clazz.getModifiers());
+				boolean finalMethod = Modifier.isFinal(clazz.getMethod("getObject").getModifiers());
+				if (finalClass || finalMethod) {
+					if (exposedType.isInterface()) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Creating interface proxy for FactoryBean '" + beanName + "' of type [" +
+									clazz.getName() + "] for use within another @Bean method because its " +
+									(finalClass ? "implementation class" : "getObject() method") +
+									" is final: Otherwise a getObject() call would not be routed to the factory.");
+						}
+						return createInterfaceProxyForFactoryBean(factoryBean, exposedType, beanFactory, beanName);
+					}
+					else {
+						if (logger.isInfoEnabled()) {
+							logger.info("Unable to proxy FactoryBean '" + beanName + "' of type [" +
+									clazz.getName() + "] for use within another @Bean method because its " +
+									(finalClass ? "implementation class" : "getObject() method") +
+									" is final: A getObject() call will NOT be routed to the factory. " +
+									"Consider declaring the return type as a FactoryBean interface.");
+						}
+						return factoryBean;
+					}
+				}
+			}
+			catch (NoSuchMethodException ex) {
+				// No getObject() method -> shouldn't happen, but as long as nobody is trying to call it...
+			}
+
+			return createCglibProxyForFactoryBean(factoryBean, beanFactory, beanName);
+		}
+
+		private Object createInterfaceProxyForFactoryBean(final Object factoryBean, Class<?> interfaceType,
+				final ConfigurableBeanFactory beanFactory, final String beanName) {
+
+			return Proxy.newProxyInstance(
+					factoryBean.getClass().getClassLoader(), new Class<?>[] {interfaceType},
+					new InvocationHandler() {
+						@Override
+						public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+							if (method.getName().equals("getObject") && args == null) {
+								return beanFactory.getBean(beanName);
+							}
+							return ReflectionUtils.invokeMethod(method, factoryBean, args);
+						}
+					});
+		}
+
+		private Object createCglibProxyForFactoryBean(final Object factoryBean,
+				final ConfigurableBeanFactory beanFactory, final String beanName) {
 
 			Enhancer enhancer = new Enhancer();
-			enhancer.setSuperclass(fbClass);
-			enhancer.setUseFactory(false);
+			enhancer.setSuperclass(factoryBean.getClass());
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-			enhancer.setCallback(new MethodInterceptor() {
+			enhancer.setCallbackType(MethodInterceptor.class);
+
+			// Ideally create enhanced FactoryBean proxy without constructor side effects,
+			// analogous to AOP proxy creation in ObjenesisCglibAopProxy...
+			Class<?> fbClass = enhancer.createClass();
+			Object fbProxy = null;
+
+			if (objenesis.isWorthTrying()) {
+				try {
+					fbProxy = objenesis.newInstance(fbClass, enhancer.getUseCache());
+				}
+				catch (ObjenesisException ex) {
+					logger.debug("Unable to instantiate enhanced FactoryBean using Objenesis, " +
+							"falling back to regular construction", ex);
+				}
+			}
+
+			if (fbProxy == null) {
+				try {
+					fbProxy = ReflectionUtils.accessibleConstructor(fbClass).newInstance();
+				}
+				catch (Throwable ex) {
+					throw new IllegalStateException("Unable to instantiate enhanced FactoryBean using Objenesis, " +
+							"and regular FactoryBean instantiation via default constructor fails as well", ex);
+				}
+			}
+
+			((Factory) fbProxy).setCallback(0, new MethodInterceptor() {
 				@Override
 				public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
 					if (method.getName().equals("getObject") && args.length == 0) {
 						return beanFactory.getBean(beanName);
 					}
-					return proxy.invokeSuper(obj, args);
+					return proxy.invoke(factoryBean, args);
 				}
 			});
-			return enhancer.create();
-		}
 
-		private ConfigurableBeanFactory getBeanFactory(Object enhancedConfigInstance) {
-			Field field = ReflectionUtils.findField(enhancedConfigInstance.getClass(), BEAN_FACTORY_FIELD);
-			Assert.state(field != null, "Unable to find generated bean factory field");
-			Object beanFactory = ReflectionUtils.getField(field, enhancedConfigInstance);
-			Assert.state(beanFactory != null, "BeanFactory has not been injected into @Configuration class");
-			Assert.state(beanFactory instanceof ConfigurableBeanFactory,
-					"Injected BeanFactory is not a ConfigurableBeanFactory");
-			return (ConfigurableBeanFactory) beanFactory;
-		}
-
-		@Override
-		public boolean isMatch(Method candidateMethod) {
-			return BeanAnnotationHelper.isBeanAnnotated(candidateMethod);
-		}
-	}
-
-
-	/**
-	 * Intercepts the invocation of any {@link DisposableBean#destroy()} on @Configuration
-	 * class instances for the purpose of de-registering CGLIB callbacks. This helps avoid
-	 * garbage collection issues. See SPR-7901.
-	 * @see EnhancedConfiguration
-	 */
-	private static class DisposableBeanMethodInterceptor implements MethodInterceptor, ConditionalCallback {
-
-		@Override
-		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-			Enhancer.registerStaticCallbacks(obj.getClass(), null);
-			// Does the actual (non-CGLIB) superclass actually implement DisposableBean?
-			// If so, call its dispose() method. If not, just exit.
-			if (DisposableBean.class.isAssignableFrom(obj.getClass().getSuperclass())) {
-				return proxy.invokeSuper(obj, args);
-			}
-			return null;
-		}
-
-		@Override
-		public boolean isMatch(Method candidateMethod) {
-			return candidateMethod.getName().equals("destroy") &&
-					candidateMethod.getParameterTypes().length == 0 &&
-					DisposableBean.class.isAssignableFrom(candidateMethod.getDeclaringClass());
+			return fbProxy;
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,20 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
  * Concrete implementation of {@link AbstractGenericWebContextLoader} that loads
  * bean definitions from XML resources.
  *
+ * <p>Default resource locations are detected using the suffix
+ * {@code "-context.xml"}.
+ *
  * @author Sam Brannen
  * @since 3.2
+ * @see GenericGroovyXmlWebContextLoader
+ * @see AnnotationConfigWebContextLoader
  */
 public class GenericXmlWebContextLoader extends AbstractGenericWebContextLoader {
 
 	/**
-	 * Loads bean definitions using an {@link XmlBeanDefinitionReader}.
+	 * Load bean definitions into the supplied {@link GenericWebApplicationContext context}
+	 * from the locations in the supplied {@code WebMergedContextConfiguration}, using an
+	 * {@link XmlBeanDefinitionReader}.
 	 * @see AbstractGenericWebContextLoader#loadBeanDefinitions
 	 */
 	@Override
@@ -41,7 +48,8 @@ public class GenericXmlWebContextLoader extends AbstractGenericWebContextLoader 
 	}
 
 	/**
-	 * Returns &quot;{@code -context.xml}&quot;.
+	 * Returns {@code "-context.xml"} in order to support detection of a
+	 * default XML config file.
 	 */
 	@Override
 	protected String getResourceSuffix() {

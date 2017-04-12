@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,22 +16,23 @@
 
 package org.springframework.web.servlet.resource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.core.io.Resource;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StringUtils;
-
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.core.io.Resource;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * A {@link ResourceTransformer} implementation that modifies links in a CSS
@@ -47,19 +48,18 @@ import java.util.Set;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class CssLinkResourceTransformer implements ResourceTransformer {
+public class CssLinkResourceTransformer extends ResourceTransformerSupport {
+
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final Log logger = LogFactory.getLog(CssLinkResourceTransformer.class);
 
-	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
-
-
-	private final List<CssLinkParser> linkParsers = new ArrayList<CssLinkParser>();
+	private final List<LinkParser> linkParsers = new ArrayList<>(2);
 
 
 	public CssLinkResourceTransformer() {
-		this.linkParsers.add(new ImportStatementCssLinkParser());
-		this.linkParsers.add(new UrlFunctionCssLinkParser());
+		this.linkParsers.add(new ImportStatementLinkParser());
+		this.linkParsers.add(new UrlFunctionLinkParser());
 	}
 
 
@@ -70,7 +70,8 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 		resource = transformerChain.transform(request, resource);
 
 		String filename = resource.getFilename();
-		if (!"css".equals(StringUtils.getFilenameExtension(filename))) {
+		if (!"css".equals(StringUtils.getFilenameExtension(filename)) ||
+				resource instanceof GzipResourceResolver.GzippedResource) {
 			return resource;
 		}
 
@@ -81,29 +82,28 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 		byte[] bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
 		String content = new String(bytes, DEFAULT_CHARSET);
 
-		Set<CssLinkInfo> infos = new HashSet<CssLinkInfo>(5);
-		for (CssLinkParser parser : this.linkParsers) {
-			parser.parseLink(content, infos);
+		List<Segment> linkSegments = new ArrayList<>(8);
+		for (LinkParser parser : this.linkParsers) {
+			linkSegments.addAll(parser.parseLink(content));
 		}
 
-		if (infos.isEmpty()) {
+		if (linkSegments.isEmpty()) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("No links found.");
 			}
 			return resource;
 		}
 
-		List<CssLinkInfo> sortedInfos = new ArrayList<CssLinkInfo>(infos);
-		Collections.sort(sortedInfos);
+		Collections.sort(linkSegments);
 
 		int index = 0;
 		StringWriter writer = new StringWriter();
-		for (CssLinkInfo info : sortedInfos) {
-			writer.write(content.substring(index, info.getStart()));
-			String link = content.substring(info.getStart(), info.getEnd());
+		for (Segment linkSegment : linkSegments) {
+			writer.write(content.substring(index, linkSegment.getStart()));
+			String link = content.substring(linkSegment.getStart(), linkSegment.getEnd());
 			String newLink = null;
-			if(!hasScheme(link)) {
-				newLink = transformerChain.getResolverChain().resolveUrlPath(link, Arrays.asList(resource));
+			if (!hasScheme(link)) {
+				newLink = resolveUrlPath(toAbsolutePath(link, request), request, resource, transformerChain);
 			}
 			if (logger.isTraceEnabled()) {
 				if (newLink != null && !link.equals(newLink)) {
@@ -114,7 +114,7 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 				}
 			}
 			writer.write(newLink != null ? newLink : link);
-			index = info.getEnd();
+			index = linkSegment.getEnd();
 		}
 		writer.write(content.substring(index));
 
@@ -123,17 +123,19 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 
 	private boolean hasScheme(String link) {
 		int schemeIndex = link.indexOf(":");
-		return schemeIndex > 0 && !link.substring(0, schemeIndex).contains("/");
+		return (schemeIndex > 0 && !link.substring(0, schemeIndex).contains("/")) || link.indexOf("//") == 0;
 	}
 
 
-	protected static interface CssLinkParser {
+	@FunctionalInterface
+	protected interface LinkParser {
 
-		void parseLink(String content, Set<CssLinkInfo> linkInfos);
+		Set<Segment> parseLink(String content);
 
 	}
 
-	protected static abstract class AbstractCssLinkParser implements CssLinkParser {
+
+	protected static abstract class AbstractLinkParser implements LinkParser {
 
 		/**
 		 * Return the keyword to use to search for links.
@@ -141,7 +143,8 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 		protected abstract String getKeyword();
 
 		@Override
-		public void parseLink(String content, Set<CssLinkInfo> linkInfos) {
+		public Set<Segment> parseLink(String content) {
+			Set<Segment> linksToAdd = new HashSet<>(8);
 			int index = 0;
 			do {
 				index = content.indexOf(getKeyword(), index);
@@ -150,16 +153,18 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 				}
 				index = skipWhitespace(content, index + getKeyword().length());
 				if (content.charAt(index) == '\'') {
-					index = addLink(index, "'", content, linkInfos);
+					index = addLink(index, "'", content, linksToAdd);
 				}
 				else if (content.charAt(index) == '"') {
-					index = addLink(index, "\"", content, linkInfos);
+					index = addLink(index, "\"", content, linksToAdd);
 				}
 				else {
-					index = extractLink(index, content, linkInfos);
+					index = extractLink(index, content, linksToAdd);
 
 				}
-			} while (true);
+			}
+			while (true);
+			return linksToAdd;
 		}
 
 		private int skipWhitespace(String content, int index) {
@@ -172,10 +177,10 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 			}
 		}
 
-		protected int addLink(int index, String endKey, String content, Set<CssLinkInfo> linkInfos) {
+		protected int addLink(int index, String endKey, String content, Set<Segment> linksToAdd) {
 			int start = index + 1;
 			int end = content.indexOf(endKey, start);
-			linkInfos.add(new CssLinkInfo(start, end));
+			linksToAdd.add(new Segment(start, end));
 			return end + endKey.length();
 		}
 
@@ -183,11 +188,12 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 		 * Invoked after a keyword match, after whitespaces removed, and when
 		 * the next char is neither a single nor double quote.
 		 */
-		protected abstract int extractLink(int index, String content, Set<CssLinkInfo> linkInfos);
+		protected abstract int extractLink(int index, String content, Set<Segment> linksToAdd);
 
 	}
 
-	private static class ImportStatementCssLinkParser extends AbstractCssLinkParser {
+
+	private static class ImportStatementLinkParser extends AbstractLinkParser {
 
 		@Override
 		protected String getKeyword() {
@@ -195,7 +201,7 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 		}
 
 		@Override
-		protected int extractLink(int index, String content, Set<CssLinkInfo> linkInfos) {
+		protected int extractLink(int index, String content, Set<Segment> linksToAdd) {
 			if (content.substring(index, index + 4).equals("url(")) {
 				// Ignore, UrlLinkParser will take care
 			}
@@ -206,7 +212,8 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 		}
 	}
 
-	private static class UrlFunctionCssLinkParser extends AbstractCssLinkParser {
+
+	private static class UrlFunctionLinkParser extends AbstractLinkParser {
 
 		@Override
 		protected String getKeyword() {
@@ -214,21 +221,20 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 		}
 
 		@Override
-		protected int extractLink(int index, String content, Set<CssLinkInfo> linkInfos) {
+		protected int extractLink(int index, String content, Set<Segment> linksToAdd) {
 			// A url() function without unquoted
-			return addLink(index - 1, ")", content, linkInfos);
+			return addLink(index - 1, ")", content, linksToAdd);
 		}
 	}
 
 
-	private static class CssLinkInfo implements Comparable<CssLinkInfo> {
+	private static class Segment implements Comparable<Segment> {
 
 		private final int start;
 
 		private final int end;
 
-
-		private CssLinkInfo(int start, int end) {
+		public Segment(int start, int end) {
 			this.start = start;
 			this.end = end;
 		}
@@ -242,7 +248,7 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 		}
 
 		@Override
-		public int compareTo(CssLinkInfo other) {
+		public int compareTo(Segment other) {
 			return (this.start < other.start ? -1 : (this.start == other.start ? 0 : 1));
 		}
 
@@ -251,8 +257,8 @@ public class CssLinkResourceTransformer implements ResourceTransformer {
 			if (this == obj) {
 				return true;
 			}
-			if (obj != null && obj instanceof CssLinkInfo) {
-				CssLinkInfo other = (CssLinkInfo) obj;
+			if (obj != null && obj instanceof Segment) {
+				Segment other = (Segment) obj;
 				return (this.start == other.start && this.end == other.end);
 			}
 			return false;

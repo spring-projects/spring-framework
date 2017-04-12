@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,11 @@
 
 package org.springframework.test.web.servlet.samples.standalone;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
+
 import org.springframework.http.MediaType;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Controller;
@@ -49,6 +39,11 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import org.springframework.web.servlet.view.xml.MarshallingView;
 
+import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+
 /**
  * Tests with view resolution.
  *
@@ -58,10 +53,7 @@ public class ViewResolutionTests {
 
 	@Test
 	public void testJspOnly() throws Exception {
-
-		InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
-		viewResolver.setPrefix("/WEB-INF/");
-		viewResolver.setSuffix(".jsp");
+		InternalResourceViewResolver viewResolver = new InternalResourceViewResolver("/WEB-INF/", ".jsp");
 
 		standaloneSetup(new PersonController()).setViewResolvers(viewResolver).build()
 			.perform(get("/person/Corea"))
@@ -73,7 +65,6 @@ public class ViewResolutionTests {
 
 	@Test
 	public void testJsonOnly() throws Exception {
-
 		standaloneSetup(new PersonController()).setSingleView(new MappingJackson2JsonView()).build()
 			.perform(get("/person/Corea"))
 				.andExpect(status().isOk())
@@ -83,7 +74,6 @@ public class ViewResolutionTests {
 
 	@Test
 	public void testXmlOnly() throws Exception {
-
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setClassesToBeBound(Person.class);
 
@@ -96,11 +86,10 @@ public class ViewResolutionTests {
 
 	@Test
 	public void testContentNegotiation() throws Exception {
-
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setClassesToBeBound(Person.class);
 
-		List<View> viewList = new ArrayList<View>();
+		List<View> viewList = new ArrayList<>();
 		viewList.add(new MappingJackson2JsonView());
 		viewList.add(new MarshallingView(marshaller));
 
@@ -136,7 +125,6 @@ public class ViewResolutionTests {
 
 	@Test
 	public void defaultViewResolver() throws Exception {
-
 		standaloneSetup(new PersonController()).build()
 			.perform(get("/person/Corea"))
 				.andExpect(model().attribute("person", hasProperty("name", equalTo("Corea"))))

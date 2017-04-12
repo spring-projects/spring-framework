@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@
 
 package org.springframework.messaging.core;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +26,11 @@ import org.junit.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.converter.*;
+import org.springframework.messaging.converter.CompositeMessageConverter;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.MessageConversionException;
+import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MimeType;
@@ -137,7 +141,7 @@ public class MessageSendingTemplateTests {
 
 		MessageHeaders actual = this.template.message.getHeaders();
 		assertSame(messageHeaders, actual);
-		assertEquals(new MimeType("text", "plain", Charset.forName("UTF-8")), actual.get(MessageHeaders.CONTENT_TYPE));
+		assertEquals(new MimeType("text", "plain", StandardCharsets.UTF_8), actual.get(MessageHeaders.CONTENT_TYPE));
 		assertEquals("bar", actual.get("foo"));
 	}
 

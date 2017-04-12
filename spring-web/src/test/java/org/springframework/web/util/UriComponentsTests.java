@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,17 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 /**
  * @author Arjen Poutsma
@@ -80,6 +86,34 @@ public class UriComponentsTests {
 		assertEquals("http://example.com/1 2 3 4", uriComponents.toUriString());
 	}
 
+	// SPR-13311
+
+	@Test
+	public void expandWithRegexVar() {
+		String template = "/myurl/{name:[a-z]{1,5}}/show";
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(template).build();
+		uriComponents = uriComponents.expand(Collections.singletonMap("name", "test"));
+		assertEquals("/myurl/test/show", uriComponents.getPath());
+	}
+
+	// SPR-12123
+
+	@Test
+	public void port() {
+		UriComponents uri1 = fromUriString("http://example.com:8080/bar").build();
+		UriComponents uri2 = fromUriString("http://example.com/bar").port(8080).build();
+		UriComponents uri3 = fromUriString("http://example.com/bar").port("{port}").build().expand(8080);
+		UriComponents uri4 = fromUriString("http://example.com/bar").port("808{digit}").build().expand(0);
+		assertEquals(8080, uri1.getPort());
+		assertEquals("http://example.com:8080/bar", uri1.toUriString());
+		assertEquals(8080, uri2.getPort());
+		assertEquals("http://example.com:8080/bar", uri2.toUriString());
+		assertEquals(8080, uri3.getPort());
+		assertEquals("http://example.com:8080/bar", uri3.toUriString());
+		assertEquals(8080, uri4.getPort());
+		assertEquals("http://example.com:8080/bar", uri4.toUriString());
+	}
+
 	@Test(expected = IllegalStateException.class)
 	public void expandEncoded() {
 		UriComponentsBuilder.fromPath("/{foo}").build().encode().expand("bar");
@@ -111,6 +145,16 @@ public class UriComponentsTests {
 		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()));
 		UriComponents readObject = (UriComponents) ois.readObject();
 		assertThat(uriComponents.toString(), equalTo(readObject.toString()));
+	}
+
+	@Test
+	public void copyToUriComponentsBuilder() {
+		UriComponents source = UriComponentsBuilder.fromPath("/foo/bar").pathSegment("ba/z").build();
+		UriComponentsBuilder targetBuilder = UriComponentsBuilder.newInstance();
+		source.copyToUriComponentsBuilder(targetBuilder);
+		UriComponents result = targetBuilder.build().encode();
+		assertEquals("/foo/bar/ba%2Fz", result.getPath());
+		assertEquals(Arrays.asList("foo", "bar", "ba%2Fz"), result.getPathSegments());
 	}
 
 	@Test

@@ -19,9 +19,10 @@ package org.springframework.http.client.support;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma

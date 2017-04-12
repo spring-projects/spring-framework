@@ -19,8 +19,6 @@ package org.springframework.messaging.core;
 import java.util.Map;
 
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.converter.MessageConversionException;
 
 /**
  * An extension of {@link AbstractMessageReceivingTemplate} that adds support for
@@ -28,6 +26,7 @@ import org.springframework.messaging.converter.MessageConversionException;
  *
  * @author Mark Fisher
  * @author Rossen Stoyanchev
+ * @author Stephane Nicoll
  * @since 4.0
  */
 public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceivingTemplate<D>
@@ -76,20 +75,7 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 	public <T> T convertSendAndReceive(D destination, Object request, Map<String, Object> headers,
 			Class<T> targetClass, MessagePostProcessor postProcessor) {
 
-		MessageHeaders messageHeaders = (headers != null ? new MessageHeaders(headers) : null);
-		Message<?> requestMessage = getMessageConverter().toMessage(request, messageHeaders);
-
-		if (requestMessage == null) {
-			String payloadType = (request != null ? request.getClass().getName() : null);
-			Object contentType = (messageHeaders != null ? messageHeaders.get(MessageHeaders.CONTENT_TYPE) : null);
-			throw new MessageConversionException("Unable to convert payload with type '" + payloadType +
-					"', contentType='" + contentType + "', converter=[" + getMessageConverter() + "]");
-		}
-
-		if (postProcessor != null) {
-			requestMessage = postProcessor.postProcessMessage(requestMessage);
-		}
-
+		Message<?> requestMessage = doConvert(request, headers, postProcessor);
 		Message<?> replyMessage = sendAndReceive(destination, requestMessage);
 		return (replyMessage != null ? (T) getMessageConverter().fromMessage(replyMessage, targetClass) : null);
 	}

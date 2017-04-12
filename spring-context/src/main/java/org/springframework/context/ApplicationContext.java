@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,18 +90,22 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 
 	/**
 	 * Expose AutowireCapableBeanFactory functionality for this context.
-	 * <p>This is not typically used by application code, except for the purpose
-	 * of initializing bean instances that live outside the application context,
+	 * <p>This is not typically used by application code, except for the purpose of
+	 * initializing bean instances that live outside of the application context,
 	 * applying the Spring bean lifecycle (fully or partly) to them.
 	 * <p>Alternatively, the internal BeanFactory exposed by the
 	 * {@link ConfigurableApplicationContext} interface offers access to the
-	 * AutowireCapableBeanFactory interface too. The present method mainly
-	 * serves as convenient, specific facility on the ApplicationContext
-	 * interface itself.
+	 * {@link AutowireCapableBeanFactory} interface too. The present method mainly
+	 * serves as a convenient, specific facility on the ApplicationContext interface.
+	 * <p><b>NOTE: As of 4.2, this method will consistently throw IllegalStateException
+	 * after the application context has been closed.</b> In current Spring Framework
+	 * versions, only refreshable application contexts behave that way; as of 4.2,
+	 * all application context implementations will be required to comply.
 	 * @return the AutowireCapableBeanFactory for this context
-	 * @throws IllegalStateException if the context does not support
-	 * the AutowireCapableBeanFactory interface or does not hold an autowire-capable
-	 * bean factory yet (usually if {@code refresh()} has never been called)
+	 * @throws IllegalStateException if the context does not support the
+	 * {@link AutowireCapableBeanFactory} interface, or does not hold an
+	 * autowire-capable bean factory yet (e.g. if {@code refresh()} has
+	 * never been called), or if the context has been closed already
 	 * @see ConfigurableApplicationContext#refresh()
 	 * @see ConfigurableApplicationContext#getBeanFactory()
 	 */

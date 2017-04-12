@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.web.method.support;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.support.BindingAwareModelMap;
@@ -44,9 +47,9 @@ import org.springframework.web.bind.support.SimpleSessionStatus;
  */
 public class ModelAndViewContainer {
 
-	private Object view;
+	private boolean ignoreDefaultModelOnRedirect = false;
 
-	private boolean requestHandled = false;
+	private Object view;
 
 	private final ModelMap defaultModel = new BindingAwareModelMap();
 
@@ -54,14 +57,30 @@ public class ModelAndViewContainer {
 
 	private boolean redirectModelScenario = false;
 
-	private boolean ignoreDefaultModelOnRedirect = false;
+	/* Names of attributes with binding disabled */
+	private final Set<String> bindingDisabledAttributes = new HashSet<>(4);
+
+	private HttpStatus status;
 
 	private final SessionStatus sessionStatus = new SimpleSessionStatus();
 
+	private boolean requestHandled = false;
+
+
 	/**
-	 * Create a new instance.
+	 * By default the content of the "default" model is used both during
+	 * rendering and redirect scenarios. Alternatively controller methods
+	 * can declare an argument of type {@code RedirectAttributes} and use
+	 * it to provide attributes to prepare the redirect URL.
+	 * <p>Setting this flag to {@code true} guarantees the "default" model is
+	 * never used in a redirect scenario even if a RedirectAttributes argument
+	 * is not declared. Setting it to {@code false} means the "default" model
+	 * may be used in a redirect if the controller method doesn't declare a
+	 * RedirectAttributes argument.
+	 * <p>The default setting is {@code false}.
 	 */
-	public ModelAndViewContainer() {
+	public void setIgnoreDefaultModelOnRedirect(boolean ignoreDefaultModelOnRedirect) {
+		this.ignoreDefaultModelOnRedirect = ignoreDefaultModelOnRedirect;
 	}
 
 	/**
@@ -105,52 +124,65 @@ public class ModelAndViewContainer {
 	}
 
 	/**
-	 * Signal a scenario where the request is handled directly.
-	 * <p>A {@link HandlerMethodReturnValueHandler} may use this flag to
-	 * indicate the response has been fully handled and view resolution
-	 * is not required (e.g. {@code @ResponseBody}).
-	 * <p>A {@link HandlerMethodArgumentResolver} may also use this flag
-	 * to indicate the presence of an argument (e.g.
-	 * {@code ServletResponse} or {@code OutputStream}) that may lead to
-	 * a complete response depending on the method return value.
-	 * <p>The default value is {@code true}.
-	 */
-	public void setRequestHandled(boolean requestHandled) {
-		this.requestHandled = requestHandled;
-	}
-
-	/**
-	 * Whether the request is handled directly.
-	 */
-	public boolean isRequestHandled() {
-		return this.requestHandled;
-	}
-
-	/**
-	 * Return the model to use: the "default" or the "redirect" model.
-	 * <p>The default model is used if {@code "redirectModelScenario=false"} or
-	 * if the redirect model is {@code null} (i.e. it wasn't declared as a
-	 * method argument) and {@code ignoreDefaultModelOnRedirect=false}.
+	 * Return the model to use -- either the "default" or the "redirect" model.
+	 * The default model is used if {@code redirectModelScenario=false} or
+	 * there is no redirect model (i.e. RedirectAttributes was not declared as
+	 * a method argument) and {@code ignoreDefaultModelOnRedirect=false}.
 	 */
 	public ModelMap getModel() {
 		if (useDefaultModel()) {
 			return this.defaultModel;
 		}
 		else {
-			return (this.redirectModel != null) ? this.redirectModel : new ModelMap();
+			if (this.redirectModel == null) {
+				this.redirectModel = new ModelMap();
+			}
+			return this.redirectModel;
 		}
+	}
+
+	/**
+	 * Register an attribute for which data binding should not occur, for example
+	 * corresponding to an {@code @ModelAttribute(binding=false)} declaration.
+	 * @param attributeName the name of the attribute
+	 * @since 4.3
+	 */
+	public void setBindingDisabled(String attributeName) {
+		this.bindingDisabledAttributes.add(attributeName);
+	}
+
+	/**
+	 * Whether binding is disabled for the given model attribute.
+	 * @since 4.3
+	 */
+	public boolean isBindingDisabled(String name) {
+		return this.bindingDisabledAttributes.contains(name);
 	}
 
 	/**
 	 * Whether to use the default model or the redirect model.
 	 */
 	private boolean useDefaultModel() {
-		return !this.redirectModelScenario || ((this.redirectModel == null) && !this.ignoreDefaultModelOnRedirect);
+		return (!this.redirectModelScenario || (this.redirectModel == null && !this.ignoreDefaultModelOnRedirect));
+	}
+
+	/**
+	 * Return the "default" model created at instantiation.
+	 * <p>In general it is recommended to use {@link #getModel()} instead which
+	 * returns either the "default" model (template rendering) or the "redirect"
+	 * model (redirect URL preparation). Use of this method may be needed for
+	 * advanced cases when access to the "default" model is needed regardless,
+	 * e.g. to save model attributes specified via {@code @SessionAttributes}.
+	 * @return the default model (never {@code null})
+	 * @since 4.1.4
+	 */
+	public ModelMap getDefaultModel() {
+		return this.defaultModel;
 	}
 
 	/**
 	 * Provide a separate model instance to use in a redirect scenario.
-	 * The provided additional model however is not used used unless
+	 * The provided additional model however is not used unless
 	 * {@link #setRedirectModelScenario(boolean)} gets set to {@code true} to signal
 	 * a redirect scenario.
 	 */
@@ -159,23 +191,11 @@ public class ModelAndViewContainer {
 	}
 
 	/**
-	 * Signal the conditions are in place for using a redirect model.
-	 * Typically that means the controller has returned a redirect instruction.
+	 * Whether the controller has returned a redirect instruction, e.g. a
+	 * "redirect:" prefixed view name, a RedirectView instance, etc.
 	 */
 	public void setRedirectModelScenario(boolean redirectModelScenario) {
 		this.redirectModelScenario = redirectModelScenario;
-	}
-
-	/**
-	 * When set to {@code true} the default model is never used in a redirect
-	 * scenario. So if a redirect model is not available, an empty model is
-	 * used instead.
-	 * <p>When set to {@code false} the default model can be used in a redirect
-	 * scenario if a redirect model is not available.
-	 * <p>The default setting is {@code false}.
-	 */
-	public void setIgnoreDefaultModelOnRedirect(boolean ignoreDefaultModelOnRedirect) {
-		this.ignoreDefaultModelOnRedirect = ignoreDefaultModelOnRedirect;
 	}
 
 	/**
@@ -183,7 +203,42 @@ public class ModelAndViewContainer {
 	 * signal that session processing is complete.
 	 */
 	public SessionStatus getSessionStatus() {
-		return sessionStatus;
+		return this.sessionStatus;
+	}
+
+	/**
+	 * Provide a HTTP status that will be passed on to with the
+	 * {@code ModelAndView} used for view rendering purposes.
+	 * @since 4.3
+	 */
+	public void setStatus(HttpStatus status) {
+		this.status = status;
+	}
+
+	/**
+	 * Return the configured HTTP status, if any.
+	 * @since 4.3
+	 */
+	public HttpStatus getStatus() {
+		return this.status;
+	}
+
+	/**
+	 * Whether the request has been handled fully within the handler, e.g.
+	 * {@code @ResponseBody} method, and therefore view resolution is not
+	 * necessary. This flag can also be set when controller methods declare an
+	 * argument of type {@code ServletResponse} or {@code OutputStream}).
+	 * <p>The default value is {@code false}.
+	 */
+	public void setRequestHandled(boolean requestHandled) {
+		this.requestHandled = requestHandled;
+	}
+
+	/**
+	 * Whether the request has been handled fully within the handler.
+	 */
+	public boolean isRequestHandled() {
+		return this.requestHandled;
 	}
 
 	/**
@@ -242,6 +297,7 @@ public class ModelAndViewContainer {
 	public boolean containsAttribute(String name) {
 		return getModel().containsAttribute(name);
 	}
+
 
 	/**
 	 * Return diagnostic information.

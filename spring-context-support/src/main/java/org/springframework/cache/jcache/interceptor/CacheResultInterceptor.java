@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,8 @@ import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
 import org.springframework.cache.interceptor.CacheResolver;
-import org.springframework.cache.jcache.model.CacheResultOperation;
+import org.springframework.util.ExceptionTypeFilter;
 import org.springframework.util.SerializationUtils;
-import org.springframework.util.filter.ExceptionTypeFilter;
 
 /**
  * Intercept methods annotated with {@link CacheResult}.
@@ -34,18 +33,19 @@ import org.springframework.util.filter.ExceptionTypeFilter;
  * @since 4.1
  */
 @SuppressWarnings("serial")
-public class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheResultOperation, CacheResult> {
+class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheResultOperation, CacheResult> {
 
 	public CacheResultInterceptor(CacheErrorHandler errorHandler) {
 		super(errorHandler);
 	}
 
+
 	@Override
 	protected Object invoke(CacheOperationInvocationContext<CacheResultOperation> context,
 			CacheOperationInvoker invoker) {
-		CacheResultOperation operation = context.getOperation();
 
-		final Object cacheKey = generateKey(context);
+		CacheResultOperation operation = context.getOperation();
+		Object cacheKey = generateKey(context);
 
 		Cache cache = resolveCache(context);
 		Cache exceptionCache = resolveExceptionCache(context);
@@ -60,15 +60,13 @@ public class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheRes
 
 		try {
 			Object invocationResult = invoker.invoke();
-			if (invocationResult != null) {
-				cache.put(cacheKey, invocationResult);
-			}
+			doPut(cache, cacheKey, invocationResult);
 			return invocationResult;
 		}
-		catch (CacheOperationInvoker.ThrowableWrapper t) {
-			Throwable original = t.getOriginal();
+		catch (CacheOperationInvoker.ThrowableWrapper ex) {
+			Throwable original = ex.getOriginal();
 			cacheException(exceptionCache, operation.getExceptionTypeFilter(), cacheKey, original);
-			throw t;
+			throw ex;
 		}
 	}
 
@@ -85,30 +83,27 @@ public class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheRes
 		}
 	}
 
-
-	protected void cacheException(Cache exceptionCache, ExceptionTypeFilter filter,
-			Object cacheKey, Throwable t) {
+	protected void cacheException(Cache exceptionCache, ExceptionTypeFilter filter, Object cacheKey, Throwable ex) {
 		if (exceptionCache == null) {
 			return;
 		}
-		if (filter.match(t.getClass())) {
-			exceptionCache.put(cacheKey, t);
+		if (filter.match(ex.getClass())) {
+			doPut(exceptionCache, cacheKey, ex);
 		}
 	}
-
 
 	private Cache resolveExceptionCache(CacheOperationInvocationContext<CacheResultOperation> context) {
 		CacheResolver exceptionCacheResolver = context.getOperation().getExceptionCacheResolver();
 		if (exceptionCacheResolver != null) {
-			return extractFrom(context.getOperation()
-					.getExceptionCacheResolver().resolveCaches(context));
+			return extractFrom(context.getOperation().getExceptionCacheResolver().resolveCaches(context));
 		}
 		return null;
 	}
 
+
 	/**
 	 * Rewrite the call stack of the specified {@code exception} so that it matches
-	 * the current call stack up-to (included) the specified method invocation.
+	 * the current call stack up to (included) the specified method invocation.
 	 * <p>Clone the specified exception. If the exception is not {@code serializable},
 	 * the original exception is returned. If no common ancestor can be found, returns
 	 * the original exception.
@@ -116,13 +111,14 @@ public class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheRes
 	 * @param exception the exception to merge with the current call stack
 	 * @param className the class name of the common ancestor
 	 * @param methodName the method name of the common ancestor
-	 * @return a clone exception with a rewritten call stack composed of the current
-	 * call stack up to (included) the common ancestor specified by the {@code className} and
+	 * @return a clone exception with a rewritten call stack composed of the current call
+	 * stack up to (included) the common ancestor specified by the {@code className} and
 	 * {@code methodName} arguments, followed by stack trace elements of the specified
 	 * {@code exception} after the common ancestor.
 	 */
-	private static CacheOperationInvoker.ThrowableWrapper rewriteCallStack(Throwable exception,
-			String className, String methodName) {
+	private static CacheOperationInvoker.ThrowableWrapper rewriteCallStack(
+			Throwable exception, String className, String methodName) {
+
 		Throwable clone = cloneException(exception);
 		if (clone == null) {
 			return new CacheOperationInvoker.ThrowableWrapper(exception);
@@ -149,8 +145,8 @@ public class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheRes
 		try {
 			return (T) SerializationUtils.deserialize(SerializationUtils.serialize(exception));
 		}
-		catch (Exception e) {
-			return null; // exception parameter cannot be cloned
+		catch (Exception ex) {
+			return null;  // exception parameter cannot be cloned
 		}
 	}
 

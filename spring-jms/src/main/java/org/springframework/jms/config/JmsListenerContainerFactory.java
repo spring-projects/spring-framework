@@ -33,6 +33,6 @@ public interface JmsListenerContainerFactory<C extends MessageListenerContainer>
 	 * @param endpoint the endpoint to configure
 	 * @return the created container
 	 */
-	C createMessageListenerContainer(JmsListenerEndpoint endpoint);
+	C createListenerContainer(JmsListenerEndpoint endpoint);
 
 }

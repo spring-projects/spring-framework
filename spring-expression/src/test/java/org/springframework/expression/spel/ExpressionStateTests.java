@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,12 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
-
 import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -33,6 +29,8 @@ import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Inventor;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for the expression state object - some features are not yet exploited in the language (eg nested scopes)
@@ -142,7 +140,8 @@ public class ExpressionStateTests extends AbstractExpressionTests {
 		try {
 			state.popActiveContextObject();
 			fail("stack should be empty...");
-		} catch (EmptyStackException ese) {
+		}
+		catch (EmptyStackException ese) {
 			// success
 		}
 
@@ -198,7 +197,7 @@ public class ExpressionStateTests extends AbstractExpressionTests {
 		assertNull(state.lookupLocalVariable("foo"));
 		assertNull(state.lookupLocalVariable("goo"));
 
-		Map<String,Object> m = new HashMap<String,Object>();
+		Map<String,Object> m = new HashMap<>();
 		m.put("foo",34);
 		m.put("goo","abc");
 
@@ -223,7 +222,8 @@ public class ExpressionStateTests extends AbstractExpressionTests {
 		try {
 			state.operate(Operation.ADD,1,2);
 			fail("should have failed");
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			SpelEvaluationException sEx = (SpelEvaluationException)ee;
 			assertEquals(SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES,sEx.getMessageCode());
 		}
@@ -231,7 +231,8 @@ public class ExpressionStateTests extends AbstractExpressionTests {
 		try {
 			state.operate(Operation.ADD,null,null);
 			fail("should have failed");
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			SpelEvaluationException sEx = (SpelEvaluationException)ee;
 			assertEquals(SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES,sEx.getMessageCode());
 		}
@@ -251,7 +252,8 @@ public class ExpressionStateTests extends AbstractExpressionTests {
 		try {
 			state.findType("someMadeUpName");
 			fail("Should have failed to find it");
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			SpelEvaluationException sEx = (SpelEvaluationException)ee;
 			assertEquals(SpelMessage.TYPE_NOT_FOUND,sEx.getMessageCode());
 		}

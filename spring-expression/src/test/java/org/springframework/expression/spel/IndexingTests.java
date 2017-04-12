@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -39,11 +37,14 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import static org.junit.Assert.*;
+
+@SuppressWarnings("rawtypes")
 public class IndexingTests {
 
 	@Test
 	public void indexIntoGenericPropertyContainingMap() {
-		Map<String, String> property = new HashMap<String, String>();
+		Map<String, String> property = new HashMap<>();
 		property.put("foo", "bar");
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -60,8 +61,8 @@ public class IndexingTests {
 
 	@Test
 	public void indexIntoGenericPropertyContainingMapObject() {
-		Map<String, Map<String, String>> property = new HashMap<String, Map<String, String>>();
-		Map<String, String> map =  new HashMap<String, String>();
+		Map<String, Map<String, String>> property = new HashMap<>();
+		Map<String, String> map = new HashMap<>();
 		map.put("foo", "bar");
 		property.put("property", map);
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -109,7 +110,7 @@ public class IndexingTests {
 
 	@Test
 	public void setGenericPropertyContainingMap() {
-		Map<String, String> property = new HashMap<String, String>();
+		Map<String, String> property = new HashMap<>();
 		property.put("foo", "bar");
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -124,7 +125,7 @@ public class IndexingTests {
 
 	@Test
 	public void setPropertyContainingMap() {
-		Map<Integer, Integer> property = new HashMap<Integer, Integer>();
+		Map<Integer, Integer> property = new HashMap<>();
 		property.put(9, 3);
 		this.parameterizedMap = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -153,7 +154,7 @@ public class IndexingTests {
 
 	@Test
 	public void indexIntoGenericPropertyContainingList() {
-		List<String> property = new ArrayList<String>();
+		List<String> property = new ArrayList<>();
 		property.add("bar");
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -166,7 +167,7 @@ public class IndexingTests {
 
 	@Test
 	public void setGenericPropertyContainingList() {
-		List<Integer> property = new ArrayList<Integer>();
+		List<Integer> property = new ArrayList<>();
 		property.add(3);
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -181,7 +182,7 @@ public class IndexingTests {
 
 	@Test
 	public void setGenericPropertyContainingListAutogrow() {
-		List<Integer> property = new ArrayList<Integer>();
+		List<Integer> property = new ArrayList<>();
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Expression expression = parser.parseExpression("property");
@@ -190,14 +191,15 @@ public class IndexingTests {
 		expression = parser.parseExpression("property[0]");
 		try {
 			expression.setValue(this, "4");
-		} catch (EvaluationException e) {
-			assertTrue(e.getMessage().startsWith("EL1053E"));
+		}
+		catch (EvaluationException ex) {
+			assertTrue(ex.getMessage().startsWith("EL1053E"));
 		}
 	}
 
 	@Test
 	public void indexIntoPropertyContainingList() {
-		List<Integer> property = new ArrayList<Integer>();
+		List<Integer> property = new ArrayList<>();
 		property.add(3);
 		this.parameterizedList = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -212,7 +214,7 @@ public class IndexingTests {
 
 	@Test
 	public void indexIntoPropertyContainingListOfList() {
-		List<List<Integer>> property = new ArrayList<List<Integer>>();
+		List<List<Integer>> property = new ArrayList<>();
 		property.add(Arrays.asList(3));
 		this.parameterizedListOfList = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -227,7 +229,7 @@ public class IndexingTests {
 
 	@Test
 	public void setPropertyContainingList() {
-		List<Integer> property = new ArrayList<Integer>();
+		List<Integer> property = new ArrayList<>();
 		property.add(3);
 		this.parameterizedList = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -250,14 +252,15 @@ public class IndexingTests {
 		expression = parser.parseExpression("property[0]");
 		try {
 			assertEquals("bar", expression.getValue(this));
-		} catch (EvaluationException e) {
-			assertTrue(e.getMessage().startsWith("EL1027E"));
+		}
+		catch (EvaluationException ex) {
+			assertTrue(ex.getMessage().startsWith("EL1027E"));
 		}
 	}
 
 	@Test
 	public void indexIntoGenericPropertyContainingGrowingList() {
-		List<String> property = new ArrayList<String>();
+		List<String> property = new ArrayList<>();
 		this.property = property;
 		SpelParserConfiguration configuration = new SpelParserConfiguration(true, true);
 		SpelExpressionParser parser = new SpelExpressionParser(configuration);
@@ -267,14 +270,15 @@ public class IndexingTests {
 		expression = parser.parseExpression("property[0]");
 		try {
 			assertEquals("bar", expression.getValue(this));
-		} catch (EvaluationException e) {
-			assertTrue(e.getMessage().startsWith("EL1053E"));
+		}
+		catch (EvaluationException ex) {
+			assertTrue(ex.getMessage().startsWith("EL1053E"));
 		}
 	}
 
 	@Test
 	public void indexIntoGenericPropertyContainingGrowingList2() {
-		List<String> property2 = new ArrayList<String>();
+		List<String> property2 = new ArrayList<>();
 		this.property2 = property2;
 		SpelParserConfiguration configuration = new SpelParserConfiguration(true, true);
 		SpelExpressionParser parser = new SpelExpressionParser(configuration);
@@ -284,8 +288,9 @@ public class IndexingTests {
 		expression = parser.parseExpression("property2[0]");
 		try {
 			assertEquals("bar", expression.getValue(this));
-		} catch (EvaluationException e) {
-			assertTrue(e.getMessage().startsWith("EL1053E"));
+		}
+		catch (EvaluationException ex) {
+			assertTrue(ex.getMessage().startsWith("EL1053E"));
 		}
 	}
 
@@ -312,6 +317,7 @@ public class IndexingTests {
 		assertEquals("", expression.getValue(this, String.class));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void resolveCollectionElementType() {
 		listNotGeneric = new ArrayList(2);
@@ -339,6 +345,7 @@ public class IndexingTests {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void resolveMapKeyValueTypes() {
 		mapNotGeneric = new HashMap();
@@ -352,6 +359,7 @@ public class IndexingTests {
 	@FieldAnnotation
 	public Map mapNotGeneric;
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testListOfScalar() {
 		listOfScalarNotGeneric = new ArrayList(1);
@@ -364,6 +372,7 @@ public class IndexingTests {
 	public List listOfScalarNotGeneric;
 
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testListsOfMap() {
 		listOfMapsNotGeneric = new ArrayList();

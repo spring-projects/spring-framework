@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.support;
 
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -79,7 +80,7 @@ public class SQLErrorCodes {
 	 * Set this property to specify multiple database names that contains spaces,
 	 * in which case we can not use bean names for lookup.
 	 */
-	public void setDatabaseProductNames(String[] databaseProductNames) {
+	public void setDatabaseProductNames(String... databaseProductNames) {
 		this.databaseProductNames = databaseProductNames;
 	}
 
@@ -99,7 +100,7 @@ public class SQLErrorCodes {
 		return this.useSqlStateForTranslation;
 	}
 
-	public void setBadSqlGrammarCodes(String[] badSqlGrammarCodes) {
+	public void setBadSqlGrammarCodes(String... badSqlGrammarCodes) {
 		this.badSqlGrammarCodes = StringUtils.sortStringArray(badSqlGrammarCodes);
 	}
 
@@ -107,7 +108,7 @@ public class SQLErrorCodes {
 		return this.badSqlGrammarCodes;
 	}
 
-	public void setInvalidResultSetAccessCodes(String[] invalidResultSetAccessCodes) {
+	public void setInvalidResultSetAccessCodes(String... invalidResultSetAccessCodes) {
 		this.invalidResultSetAccessCodes = StringUtils.sortStringArray(invalidResultSetAccessCodes);
 	}
 
@@ -119,11 +120,11 @@ public class SQLErrorCodes {
 		return duplicateKeyCodes;
 	}
 
-	public void setDuplicateKeyCodes(String[] duplicateKeyCodes) {
+	public void setDuplicateKeyCodes(String... duplicateKeyCodes) {
 		this.duplicateKeyCodes = duplicateKeyCodes;
 	}
 
-	public void setDataIntegrityViolationCodes(String[] dataIntegrityViolationCodes) {
+	public void setDataIntegrityViolationCodes(String... dataIntegrityViolationCodes) {
 		this.dataIntegrityViolationCodes = StringUtils.sortStringArray(dataIntegrityViolationCodes);
 	}
 
@@ -131,7 +132,7 @@ public class SQLErrorCodes {
 		return this.dataIntegrityViolationCodes;
 	}
 
-	public void setPermissionDeniedCodes(String[] permissionDeniedCodes) {
+	public void setPermissionDeniedCodes(String... permissionDeniedCodes) {
 		this.permissionDeniedCodes = StringUtils.sortStringArray(permissionDeniedCodes);
 	}
 
@@ -139,7 +140,7 @@ public class SQLErrorCodes {
 		return this.permissionDeniedCodes;
 	}
 
-	public void setDataAccessResourceFailureCodes(String[] dataAccessResourceFailureCodes) {
+	public void setDataAccessResourceFailureCodes(String... dataAccessResourceFailureCodes) {
 		this.dataAccessResourceFailureCodes = StringUtils.sortStringArray(dataAccessResourceFailureCodes);
 	}
 
@@ -147,7 +148,7 @@ public class SQLErrorCodes {
 		return this.dataAccessResourceFailureCodes;
 	}
 
-	public void setTransientDataAccessResourceCodes(String[] transientDataAccessResourceCodes) {
+	public void setTransientDataAccessResourceCodes(String... transientDataAccessResourceCodes) {
 		this.transientDataAccessResourceCodes = StringUtils.sortStringArray(transientDataAccessResourceCodes);
 	}
 
@@ -155,7 +156,7 @@ public class SQLErrorCodes {
 		return this.transientDataAccessResourceCodes;
 	}
 
-	public void setCannotAcquireLockCodes(String[] cannotAcquireLockCodes) {
+	public void setCannotAcquireLockCodes(String... cannotAcquireLockCodes) {
 		this.cannotAcquireLockCodes = StringUtils.sortStringArray(cannotAcquireLockCodes);
 	}
 
@@ -163,7 +164,7 @@ public class SQLErrorCodes {
 		return this.cannotAcquireLockCodes;
 	}
 
-	public void setDeadlockLoserCodes(String[] deadlockLoserCodes) {
+	public void setDeadlockLoserCodes(String... deadlockLoserCodes) {
 		this.deadlockLoserCodes = StringUtils.sortStringArray(deadlockLoserCodes);
 	}
 
@@ -171,7 +172,7 @@ public class SQLErrorCodes {
 		return this.deadlockLoserCodes;
 	}
 
-	public void setCannotSerializeTransactionCodes(String[] cannotSerializeTransactionCodes) {
+	public void setCannotSerializeTransactionCodes(String... cannotSerializeTransactionCodes) {
 		this.cannotSerializeTransactionCodes = StringUtils.sortStringArray(cannotSerializeTransactionCodes);
 	}
 
@@ -179,7 +180,7 @@ public class SQLErrorCodes {
 		return this.cannotSerializeTransactionCodes;
 	}
 
-	public void setCustomTranslations(CustomSQLErrorCodesTranslation[] customTranslations) {
+	public void setCustomTranslations(CustomSQLErrorCodesTranslation... customTranslations) {
 		this.customTranslations = customTranslations;
 	}
 
@@ -190,9 +191,10 @@ public class SQLErrorCodes {
 	public void setCustomSqlExceptionTranslatorClass(Class<? extends SQLExceptionTranslator> customTranslatorClass) {
 		if (customTranslatorClass != null) {
 			try {
-				this.customSqlExceptionTranslator = customTranslatorClass.newInstance();
+				this.customSqlExceptionTranslator =
+						ReflectionUtils.accessibleConstructor(customTranslatorClass).newInstance();
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new IllegalStateException("Unable to instantiate custom translator", ex);
 			}
 		}

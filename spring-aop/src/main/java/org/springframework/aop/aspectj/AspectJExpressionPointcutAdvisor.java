@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.aop.aspectj;
 
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractGenericPointcutAdvisor;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 
 /**
  * Spring AOP Advisor that can be used for any AspectJ pointcut expression.
@@ -26,38 +28,43 @@ import org.springframework.aop.support.AbstractGenericPointcutAdvisor;
  * @since 2.0
  */
 @SuppressWarnings("serial")
-public class AspectJExpressionPointcutAdvisor extends AbstractGenericPointcutAdvisor {
+public class AspectJExpressionPointcutAdvisor extends AbstractGenericPointcutAdvisor implements BeanFactoryAware {
 
 	private final AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
 
 
-	@Override
-	public Pointcut getPointcut() {
-		return this.pointcut;
-	}
-
 	public void setExpression(String expression) {
 		this.pointcut.setExpression(expression);
+	}
+
+	public String getExpression() {
+		return this.pointcut.getExpression();
 	}
 
 	public void setLocation(String location) {
 		this.pointcut.setLocation(location);
 	}
 
-	public void setParameterTypes(Class<?>[] types) {
-		this.pointcut.setParameterTypes(types);
-	}
-
-	public void setParameterNames(String[] names) {
-		this.pointcut.setParameterNames(names);
-	}
-
 	public String getLocation() {
 		return this.pointcut.getLocation();
 	}
 
-	public String getExpression() {
-		return this.pointcut.getExpression();
+	public void setParameterNames(String... names) {
+		this.pointcut.setParameterNames(names);
+	}
+
+	public void setParameterTypes(Class<?>... types) {
+		this.pointcut.setParameterTypes(types);
+	}
+
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.pointcut.setBeanFactory(beanFactory);
+	}
+
+	@Override
+	public Pointcut getPointcut() {
+		return this.pointcut;
 	}
 
 }

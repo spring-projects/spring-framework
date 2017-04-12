@@ -28,7 +28,7 @@ import org.springframework.cache.interceptor.AbstractCacheInvoker;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
-import org.springframework.cache.jcache.model.BaseCacheOperation;
+import org.springframework.util.CollectionUtils;
 
 /**
  * A base interceptor for JSR-107 cache annotations.
@@ -37,17 +37,20 @@ import org.springframework.cache.jcache.model.BaseCacheOperation;
  * @since 4.1
  */
 @SuppressWarnings("serial")
-public abstract class AbstractCacheInterceptor<O extends BaseCacheOperation<A>, A extends Annotation>
+abstract class AbstractCacheInterceptor<O extends AbstractJCacheOperation<A>, A extends Annotation>
 		extends AbstractCacheInvoker implements Serializable {
 
 	protected final Log logger = LogFactory.getLog(getClass());
+
 
 	protected AbstractCacheInterceptor(CacheErrorHandler errorHandler) {
 		super(errorHandler);
 	}
 
-	protected abstract Object invoke(CacheOperationInvocationContext<O> context,
-			CacheOperationInvoker invoker) throws Throwable;
+
+	protected abstract Object invoke(CacheOperationInvocationContext<O> context, CacheOperationInvoker invoker)
+			throws Throwable;
+
 
 	/**
 	 * Resolve the cache to use.
@@ -66,18 +69,18 @@ public abstract class AbstractCacheInterceptor<O extends BaseCacheOperation<A>, 
 	/**
 	 * Convert the collection of caches in a single expected element.
 	 * <p>Throw an {@link IllegalStateException} if the collection holds more than one element
-	 * @return the singe element or {@code null} if the collection is empty
+	 * @return the single element or {@code null} if the collection is empty
 	 */
 	static Cache extractFrom(Collection<? extends Cache> caches) {
-		if (caches == null || caches.size() == 0) {
+		if (CollectionUtils.isEmpty(caches)) {
 			return null;
 		}
 		else if (caches.size() == 1) {
 			return caches.iterator().next();
 		}
 		else {
-			throw new IllegalStateException("Unsupported cache resolution result "
-					+ caches + " JSR-107 only supports a single cache.");
+			throw new IllegalStateException("Unsupported cache resolution result " + caches +
+					": JSR-107 only supports a single cache.");
 		}
 	}
 

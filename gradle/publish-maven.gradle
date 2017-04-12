@@ -29,8 +29,8 @@ def customizePom(pom, gradleProject) {
 			}
 			licenses {
 				license {
-					name "The Apache Software License, Version 2.0"
-					url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+					name "Apache License, Version 2.0"
+					url "http://www.apache.org/licenses/LICENSE-2.0"
 					distribution "repo"
 				}
 			}
@@ -43,7 +43,7 @@ def customizePom(pom, gradleProject) {
 				developer {
 					id = "jhoeller"
 					name = "Juergen Hoeller"
-					email = "jhoeller@gopivotal.com"
+					email = "jhoeller@pivotal.io"
 				}
 			}
 			issueManagement {

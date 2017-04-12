@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,12 @@ import org.springframework.jms.JmsException;
  * {@code receive(..)} methods that mirror various JMS API methods.
  * See the JMS specification and javadocs for details on those methods.
  *
+ * <p>Provides also basic request reply operation using a temporary
+ * queue to collect the reply.
+ *
  * @author Mark Pollack
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 1.1
  * @see JmsTemplate
  * @see javax.jms.Destination
@@ -45,9 +49,6 @@ public interface JmsOperations {
 
 	/**
 	 * Execute the action specified by the given action object within a JMS Session.
-	 * <p>When used with a 1.0.2 provider, you may need to downcast
-	 * to the appropriate domain implementation, either QueueSession or
-	 * TopicSession in the action objects doInJms callback method.
 	 * @param action callback object that exposes the session
 	 * @return the result object from working with the session
 	 * @throws JmsException if there is any problem
@@ -86,9 +87,9 @@ public interface JmsOperations {
 	<T> T execute(String destinationName, ProducerCallback<T> action) throws JmsException;
 
 
-	//-------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------
 	// Convenience methods for sending messages
-	//-------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------
 
 	/**
 	 * Send a message to the default destination.
@@ -118,9 +119,9 @@ public interface JmsOperations {
 	void send(String destinationName, MessageCreator messageCreator) throws JmsException;
 
 
-	//-------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------
 	// Convenience methods for sending auto-converted messages
-	//-------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------
 
 	/**
 	 * Send the given object to the default destination, converting the object
@@ -188,9 +189,9 @@ public interface JmsOperations {
 		throws JmsException;
 
 
-	//-------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------
 	// Convenience methods for receiving messages
-	//-------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------
 
 	/**
 	 * Receive a message synchronously from the default destination, but only
@@ -267,9 +268,9 @@ public interface JmsOperations {
 	Message receiveSelected(String destinationName, String messageSelector) throws JmsException;
 
 
-	//-------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------
 	// Convenience methods for receiving auto-converted messages
-	//-------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------
 
 	/**
 	 * Receive a message synchronously from the default destination, but only
@@ -352,9 +353,57 @@ public interface JmsOperations {
 	Object receiveSelectedAndConvert(String destinationName, String messageSelector) throws JmsException;
 
 
-	//-------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------
+	// Convenience methods for sending messages to and receiving the reply from a destination
+	//---------------------------------------------------------------------------------------
+
+	/**
+	 * Send a request message and receive the reply from a default destination. The
+	 * {@link MessageCreator} callback creates the message given a Session. A temporary
+	 * queue is created as part of this operation and is set in the {@code JMSReplyTO}
+	 * header of the message.
+	 * <p>This will only work with a default destination specified!
+	 * @param messageCreator callback to create a request message
+	 * @return the reply, possibly {@code null} if the message could not be received,
+	 * for example due to a timeout
+	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 4.1
+	 */
+	Message sendAndReceive(MessageCreator messageCreator) throws JmsException;
+
+	/**
+	 * Send a message and receive the reply from the specified destination. The
+	 * {@link MessageCreator} callback creates the message given a Session. A temporary
+	 * queue is created as part of this operation and is set in the {@code JMSReplyTO}
+	 * header of the message.
+	 * @param destination the destination to send this message to
+	 * @param messageCreator callback to create a message
+	 * @return the reply, possibly {@code null} if the message could not be received,
+	 * for example due to a timeout
+	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 4.1
+	 */
+	Message sendAndReceive(Destination destination, MessageCreator messageCreator) throws JmsException;
+
+	/**
+	 * Send a message and receive the reply from the specified destination. The
+	 * {@link MessageCreator} callback creates the message given a Session. A temporary
+	 * queue is created as part of this operation and is set in the {@code JMSReplyTO}
+	 * header of the message.
+	 * @param destinationName the name of the destination to send this message to
+	 * (to be resolved to an actual destination by a DestinationResolver)
+	 * @param messageCreator callback to create a message
+	 * @return the reply, possibly {@code null} if the message could not be received,
+	 * for example due to a timeout
+	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 4.1
+	 */
+	Message sendAndReceive(String destinationName, MessageCreator messageCreator) throws JmsException;
+
+
+	//---------------------------------------------------------------------------------------
 	// Convenience methods for browsing messages
-	//-------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------------
 
 	/**
 	 * Browse messages in the default JMS queue. The callback gives access to the JMS

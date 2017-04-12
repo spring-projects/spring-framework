@@ -16,13 +16,12 @@
 
 package org.springframework.cache.jcache.support;
 
-import static org.mockito.BDDMockito.*;
-
 import java.lang.annotation.Annotation;
-
 import javax.cache.Cache;
 import javax.cache.annotation.CacheInvocationContext;
 import javax.cache.annotation.CacheResolver;
+
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Stephane Nicoll

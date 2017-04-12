@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,22 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.reflect.Method;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.mvc.method.annotation.ViewMethodReturnValueHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.RedirectView;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link ViewMethodReturnValueHandler}.
@@ -47,12 +46,14 @@ public class ViewMethodReturnValueHandlerTests {
 
 	private ServletWebRequest webRequest;
 
+
 	@Before
-	public void setUp() {
+	public void setup() {
 		this.handler = new ViewMethodReturnValueHandler();
 		this.mavContainer = new ModelAndViewContainer();
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
+
 
 	@Test
 	public void supportsReturnType() throws Exception {
@@ -83,6 +84,7 @@ public class ViewMethodReturnValueHandlerTests {
 		Method method = getClass().getDeclaredMethod(methodName);
 		return new MethodParameter(method, -1);
 	}
+
 
 	View view() {
 		return null;

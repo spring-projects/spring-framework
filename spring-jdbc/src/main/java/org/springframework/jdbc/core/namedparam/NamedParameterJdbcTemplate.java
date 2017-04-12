@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,14 +223,14 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	public <T> T queryForObject(String sql, SqlParameterSource paramSource, Class<T> requiredType)
 			throws DataAccessException {
 
-		return queryForObject(sql, paramSource, new SingleColumnRowMapper<T>(requiredType));
+		return queryForObject(sql, paramSource, new SingleColumnRowMapper<>(requiredType));
 	}
 
 	@Override
 	public <T> T queryForObject(String sql, Map<String, ?> paramMap, Class<T> requiredType)
 			throws DataAccessException {
 
-		return queryForObject(sql, paramMap, new SingleColumnRowMapper<T>(requiredType));
+		return queryForObject(sql, paramMap, new SingleColumnRowMapper<>(requiredType));
 	}
 
 	@Override
@@ -244,36 +244,10 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
-	@Deprecated
-	public long queryForLong(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		Number number = queryForObject(sql, paramSource, Long.class);
-		return (number != null ? number.longValue() : 0);
-	}
-
-	@Override
-	@Deprecated
-	public long queryForLong(String sql, Map<String, ?> paramMap) throws DataAccessException {
-		return queryForLong(sql, new MapSqlParameterSource(paramMap));
-	}
-
-	@Override
-	@Deprecated
-	public int queryForInt(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		Number number = queryForObject(sql, paramSource, Integer.class);
-		return (number != null ? number.intValue() : 0);
-	}
-
-	@Override
-	@Deprecated
-	public int queryForInt(String sql, Map<String, ?> paramMap) throws DataAccessException {
-		return queryForInt(sql, new MapSqlParameterSource(paramMap));
-	}
-
-	@Override
 	public <T> List<T> queryForList(String sql, SqlParameterSource paramSource, Class<T> elementType)
 			throws DataAccessException {
 
-		return query(sql, paramSource, new SingleColumnRowMapper<T>(elementType));
+		return query(sql, paramSource, new SingleColumnRowMapper<>(elementType));
 	}
 
 	@Override
@@ -357,7 +331,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	@Override
 	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs) {
-		ParsedSql parsedSql = this.getParsedSql(sql);
+		ParsedSql parsedSql = getParsedSql(sql);
 		return NamedParameterBatchUpdateUtils.executeBatchUpdateWithNamedParameters(parsedSql, batchArgs, getJdbcOperations());
 	}
 

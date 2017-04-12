@@ -16,8 +16,6 @@
 
 package org.springframework.aop.aspectj.autoproxy.benchmark;
 
-import static org.junit.Assert.*;
-
 import java.lang.reflect.Method;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -26,6 +24,7 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.junit.Test;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
@@ -33,9 +32,11 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
-import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.util.StopWatch;
+
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for AspectJ auto proxying. Includes mixing with Spring AOP
@@ -44,7 +45,7 @@ import org.springframework.util.StopWatch;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class BenchmarkTests {
+public class BenchmarkTests {
 
 	private static final Class<?> CLASS = BenchmarkTests.class;
 
@@ -230,7 +231,7 @@ class TraceAfterReturningAdvice implements AfterReturningAdvice {
 			new StaticMethodMatcherPointcut() {
 				@Override
 				public boolean matches(Method method, Class<?> targetClass) {
-					return method.getParameterTypes().length == 1 &&
+					return method.getParameterCount() == 1 &&
 						method.getParameterTypes()[0].equals(Integer.class);
 				}
 			},

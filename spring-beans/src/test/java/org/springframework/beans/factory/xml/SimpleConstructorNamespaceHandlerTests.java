@@ -16,14 +16,15 @@
 
 package org.springframework.beans.factory.xml;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.DummyBean;
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Costin Leau

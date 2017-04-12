@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,6 +90,12 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 		this.destinationResolver = destinationResolver;
 	}
 
+	/**
+	 * Return the {@link DestinationResolver} to use for resolving destinations names.
+	 */
+	public DestinationResolver getDestinationResolver() {
+		return destinationResolver;
+	}
 
 	@Override
 	public ActivationSpec createActivationSpec(ResourceAdapter adapter, JmsActivationSpecConfig config) {
@@ -153,17 +159,19 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 			throw new IllegalArgumentException(
 					"Durable subscriptions not supported by underlying provider: " + this.activationSpecClass.getName());
 		}
-		if (config.getDurableSubscriptionName() != null) {
-			bw.setPropertyValue("subscriptionName", config.getDurableSubscriptionName());
+		if (config.isSubscriptionShared()) {
+			throw new IllegalArgumentException("Shared subscriptions not supported for JCA-driven endpoints");
+		}
+
+		if (config.getSubscriptionName() != null) {
+			bw.setPropertyValue("subscriptionName", config.getSubscriptionName());
 		}
 		if (config.getClientId() != null) {
 			bw.setPropertyValue("clientId", config.getClientId());
 		}
-
 		if (config.getMessageSelector() != null) {
 			bw.setPropertyValue("messageSelector", config.getMessageSelector());
 		}
-
 		applyAcknowledgeMode(bw, config.getAcknowledgeMode());
 	}
 

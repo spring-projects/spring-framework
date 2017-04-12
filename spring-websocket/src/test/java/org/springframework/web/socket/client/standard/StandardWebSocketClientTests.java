@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 
 package org.springframework.web.socket.client.standard;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.Endpoint;
 import javax.websocket.WebSocketContainer;
@@ -32,12 +35,9 @@ import org.mockito.ArgumentCaptor;
 
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
-import org.springframework.web.socket.WebSocketHttpHeaders;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Test fixture for {@link StandardWebSocketClient}.
@@ -66,8 +66,8 @@ public class StandardWebSocketClientTests {
 
 
 	@Test
-	public void localAddress() throws Exception {
-		URI uri = new URI("ws://example.com/abc");
+	public void testGetLocalAddress() throws Exception {
+		URI uri = new URI("ws://localhost/abc");
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
 		assertNotNull(session.getLocalAddress());
@@ -75,70 +75,97 @@ public class StandardWebSocketClientTests {
 	}
 
 	@Test
-	public void localAddressWss() throws Exception {
-		URI uri = new URI("wss://example.com/abc");
+	public void testGetLocalAddressWss() throws Exception {
+		URI uri = new URI("wss://localhost/abc");
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
 		assertNotNull(session.getLocalAddress());
 		assertEquals(443, session.getLocalAddress().getPort());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
-	public void localAddressNoScheme() throws Exception {
-		URI uri = new URI("example.com/abc");
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetLocalAddressNoScheme() throws Exception {
+		URI uri = new URI("localhost/abc");
 		this.wsClient.doHandshake(this.wsHandler, this.headers, uri);
 	}
 
 	@Test
-	public void remoteAddress() throws Exception {
-		URI uri = new URI("wss://example.com/abc");
+	public void testGetRemoteAddress() throws Exception {
+		URI uri = new URI("wss://localhost/abc");
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
 		assertNotNull(session.getRemoteAddress());
-		assertEquals("example.com", session.getRemoteAddress().getHostName());
+		assertEquals("localhost", session.getRemoteAddress().getHostName());
 		assertEquals(443, session.getLocalAddress().getPort());
 	}
 
 	@Test
-	public void headersWebSocketSession() throws Exception {
+	public void handshakeHeaders() throws Exception {
 
-		URI uri = new URI("ws://example.com/abc");
-		List<String> protocols = Arrays.asList("abc");
+		URI uri = new URI("ws://localhost/abc");
+		List<String> protocols = Collections.singletonList("abc");
 		this.headers.setSecWebSocketProtocol(protocols);
 		this.headers.add("foo", "bar");
 
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
-		assertEquals(Collections.singletonMap("foo", Arrays.asList("bar")), session.getHandshakeHeaders());
+		assertEquals(1, session.getHandshakeHeaders().size());
+		assertEquals("bar", session.getHandshakeHeaders().getFirst("foo"));
 	}
 
 	@Test
-	public void headersClientEndpointConfigurator() throws Exception {
+	public void clientEndpointConfig() throws Exception {
 
-		URI uri = new URI("ws://example.com/abc");
-		List<String> protocols = Arrays.asList("abc");
+		URI uri = new URI("ws://localhost/abc");
+		List<String> protocols = Collections.singletonList("abc");
 		this.headers.setSecWebSocketProtocol(protocols);
+
+		this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
+
+		ArgumentCaptor<ClientEndpointConfig> captor = ArgumentCaptor.forClass(ClientEndpointConfig.class);
+		verify(this.wsContainer).connectToServer(any(Endpoint.class), captor.capture(), any(URI.class));
+		ClientEndpointConfig endpointConfig = captor.getValue();
+
+		assertEquals(protocols, endpointConfig.getPreferredSubprotocols());
+	}
+
+	@Test
+	public void clientEndpointConfigWithUserProperties() throws Exception {
+
+		Map<String,Object> userProperties = Collections.singletonMap("foo", "bar");
+
+		URI uri = new URI("ws://localhost/abc");
+		this.wsClient.setUserProperties(userProperties);
+		this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
+
+		ArgumentCaptor<ClientEndpointConfig> captor = ArgumentCaptor.forClass(ClientEndpointConfig.class);
+		verify(this.wsContainer).connectToServer(any(Endpoint.class), captor.capture(), any(URI.class));
+		ClientEndpointConfig endpointConfig = captor.getValue();
+
+		assertEquals(userProperties, endpointConfig.getUserProperties());
+	}
+
+	@Test
+	public void standardWebSocketClientConfiguratorInsertsHandshakeHeaders() throws Exception {
+
+		URI uri = new URI("ws://localhost/abc");
 		this.headers.add("foo", "bar");
 
 		this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
-		ArgumentCaptor<Endpoint> arg1 = ArgumentCaptor.forClass(Endpoint.class);
-		ArgumentCaptor<ClientEndpointConfig> arg2 = ArgumentCaptor.forClass(ClientEndpointConfig.class);
-		ArgumentCaptor<URI> arg3 = ArgumentCaptor.forClass(URI.class);
-		verify(this.wsContainer).connectToServer(arg1.capture(), arg2.capture(), arg3.capture());
+		ArgumentCaptor<ClientEndpointConfig> captor = ArgumentCaptor.forClass(ClientEndpointConfig.class);
+		verify(this.wsContainer).connectToServer(any(Endpoint.class), captor.capture(), any(URI.class));
+		ClientEndpointConfig endpointConfig = captor.getValue();
 
-		ClientEndpointConfig endpointConfig = arg2.getValue();
-		assertEquals(protocols, endpointConfig.getPreferredSubprotocols());
-
-		Map<String, List<String>> map = new HashMap<>();
-		endpointConfig.getConfigurator().beforeRequest(map);
-		assertEquals(Collections.singletonMap("foo", Arrays.asList("bar")), map);
+		Map<String, List<String>> headers = new HashMap<>();
+		endpointConfig.getConfigurator().beforeRequest(headers);
+		assertEquals(1, headers.size());
 	}
 
 	@Test
 	public void taskExecutor() throws Exception {
 
-		URI uri = new URI("ws://example.com/abc");
+		URI uri = new URI("ws://localhost/abc");
 		this.wsClient.setTaskExecutor(new SimpleAsyncTaskExecutor());
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 

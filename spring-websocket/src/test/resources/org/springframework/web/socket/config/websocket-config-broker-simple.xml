@@ -1,27 +1,55 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:websocket="http://www.springframework.org/schema/websocket"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:websocket="http://www.springframework.org/schema/websocket"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
-    <websocket:message-broker application-destination-prefix="/app" user-destination-prefix="/personal">
+	<websocket:message-broker application-destination-prefix="/app"
+							  user-destination-prefix="/personal"
+							  path-matcher="pathMatcher"
+							  path-helper="urlPathHelper">
 
-        <!-- message-size=128*1024, send-buffer-size=1024*1024 -->
-        <websocket:transport message-size="131072" send-timeout="25000" send-buffer-size="1048576" />
+		<!-- message-size=128*1024, send-buffer-size=1024*1024 -->
+		<websocket:transport message-size="131072" send-timeout="25000" send-buffer-size="1048576">
+			<websocket:decorator-factories>
+				<bean class="org.springframework.web.socket.config.TestWebSocketHandlerDecoratorFactory" />
+			</websocket:decorator-factories>
+		</websocket:transport>
 
-        <websocket:stomp-endpoint path=" /foo,/bar">
-            <websocket:handshake-handler ref="myHandler"/>
-        </websocket:stomp-endpoint>
+		<websocket:stomp-endpoint path=" /foo,/bar" allowed-origins="http://mydomain1.com,http://mydomain2.com">
+			<websocket:handshake-handler ref="myHandler"/>
+			<websocket:handshake-interceptors>
+				<bean class="org.springframework.web.socket.config.FooTestInterceptor"/>
+				<ref bean="barTestInterceptor"/>
+			</websocket:handshake-interceptors>
+		</websocket:stomp-endpoint>
 
-        <websocket:stomp-endpoint path="/test,/sockjs">
-            <websocket:handshake-handler ref="myHandler"/>
-            <websocket:sockjs/>
-        </websocket:stomp-endpoint>
+		<websocket:stomp-endpoint path="/test,/sockjs" allowed-origins="http://mydomain3.com,http://mydomain4.com">
+			<websocket:handshake-handler ref="myHandler"/>
+			<websocket:handshake-interceptors>
+				<bean class="org.springframework.web.socket.config.FooTestInterceptor"/>
+				<ref bean="barTestInterceptor"/>
+			</websocket:handshake-interceptors>
+			<websocket:sockjs/>
+		</websocket:stomp-endpoint>
 
-        <websocket:simple-broker prefix="/topic, /queue"/>
+		<websocket:stomp-error-handler ref="errorHandler" />
 
-    </websocket:message-broker>
+		<websocket:simple-broker prefix="/topic, /queue" heartbeat="15000,15000" scheduler="scheduler" />
 
-    <bean id="myHandler" class="org.springframework.web.socket.config.TestHandshakeHandler"/>
+	</websocket:message-broker>
+
+	<bean id="pathMatcher" class="org.springframework.util.AntPathMatcher">
+		<property name="pathSeparator" value="." />
+	</bean>
+
+	<bean id="urlPathHelper" class="org.springframework.web.util.UrlPathHelper">
+		<property name="alwaysUseFullPath" value="true"/>
+	</bean>
+
+	<bean id="myHandler" class="org.springframework.web.socket.config.TestHandshakeHandler"/>
+	<bean id="barTestInterceptor" class="org.springframework.web.socket.config.BarTestInterceptor"/>
+	<bean id="errorHandler" class="org.springframework.web.socket.config.TestStompErrorHandler"/>
+	<bean id="scheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler"/>
 
 </beans>

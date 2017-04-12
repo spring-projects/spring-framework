@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,7 +46,7 @@ public class HandshakeInterceptorChain {
 
 
 	public HandshakeInterceptorChain(List<HandshakeInterceptor> interceptors, WebSocketHandler wsHandler) {
-		this.interceptors = (interceptors != null) ? interceptors : Collections.<HandshakeInterceptor>emptyList();
+		this.interceptors = (interceptors != null ? interceptors : Collections.emptyList());
 		this.wsHandler = wsHandler;
 	}
 
@@ -57,6 +57,9 @@ public class HandshakeInterceptorChain {
 		for (int i = 0; i < this.interceptors.size(); i++) {
 			HandshakeInterceptor interceptor = this.interceptors.get(i);
 			if (!interceptor.beforeHandshake(request, response, this.wsHandler, attributes)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug(interceptor + " returns false from beforeHandshake - precluding handshake");
+				}
 				applyAfterHandshake(request, response, null);
 				return false;
 			}
@@ -72,8 +75,10 @@ public class HandshakeInterceptorChain {
 			try {
 				interceptor.afterHandshake(request, response, this.wsHandler, failure);
 			}
-			catch (Throwable t) {
-				logger.warn("HandshakeInterceptor afterHandshake threw exception " + t);
+			catch (Throwable ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn(interceptor + " threw exception in afterHandshake: " + ex);
+				}
 			}
 		}
 	}

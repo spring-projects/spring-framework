@@ -18,6 +18,7 @@ package org.springframework.aop.aspectj;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.aspectj.AdviceBindingTestAspect.AdviceBindingCollaborator;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
@@ -35,7 +36,7 @@ import static org.mockito.BDDMockito.*;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class BeforeAdviceBindingTests {
+public class BeforeAdviceBindingTests {
 
 	private AdviceBindingCollaborator mockCollaborator;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.cache.jcache.config;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.cache.annotation.AbstractCachingConfiguration;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.jcache.interceptor.DefaultJCacheOperationSource;
 import org.springframework.cache.jcache.interceptor.JCacheOperationSource;
@@ -34,14 +35,16 @@ import org.springframework.context.annotation.Role;
  * @see JCacheConfigurer
  */
 @Configuration
-public class AbstractJCacheConfiguration extends AbstractCachingConfiguration<JCacheConfigurer> {
+public class AbstractJCacheConfiguration extends AbstractCachingConfiguration {
 
 	protected CacheResolver exceptionCacheResolver;
 
 	@Override
-	protected void useCachingConfigurer(JCacheConfigurer config) {
+	protected void useCachingConfigurer(CachingConfigurer config) {
 		super.useCachingConfigurer(config);
-		this.exceptionCacheResolver = config.exceptionCacheResolver();
+		if (config instanceof JCacheConfigurer) {
+			this.exceptionCacheResolver = ((JCacheConfigurer) config).exceptionCacheResolver();
+		}
 	}
 
 	@Bean(name = "jCacheOperationSource")
@@ -49,18 +52,17 @@ public class AbstractJCacheConfiguration extends AbstractCachingConfiguration<JC
 	public JCacheOperationSource cacheOperationSource() {
 		DefaultJCacheOperationSource source = new DefaultJCacheOperationSource();
 		if (this.cacheManager != null) {
-			source.setCacheManager(cacheManager);
+			source.setCacheManager(this.cacheManager);
 		}
-		if (keyGenerator != null) {
-			source.setKeyGenerator(keyGenerator);
+		if (this.keyGenerator != null) {
+			source.setKeyGenerator(this.keyGenerator);
 		}
 		if (this.cacheResolver != null) {
-			source.setCacheResolver(cacheResolver);
+			source.setCacheResolver(this.cacheResolver);
 		}
 		if (this.exceptionCacheResolver != null) {
-			source.setExceptionCacheResolver(exceptionCacheResolver);
+			source.setExceptionCacheResolver(this.exceptionCacheResolver);
 		}
-
 		return source;
 	}
 

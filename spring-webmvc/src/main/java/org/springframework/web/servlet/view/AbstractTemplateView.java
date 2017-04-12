@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,9 @@ import javax.servlet.http.HttpSession;
 import org.springframework.web.servlet.support.RequestContext;
 
 /**
- * Adapter base class for template-based view technologies such as
- * Velocity and FreeMarker, with the ability to use request and session
- * attributes in their model and the option to expose helper objects
- * for Spring's Velocity/FreeMarker macro library.
+ * Adapter base class for template-based view technologies such as FreeMarker,
+ * with the ability to use request and session attributes in their model and
+ * the option to expose helper objects for Spring's FreeMarker macro library.
  *
  * <p>JSP/JSTL and other view technologies automatically have access to the
  * HttpServletRequest object and thereby the request/session attributes
@@ -40,7 +39,6 @@ import org.springframework.web.servlet.support.RequestContext;
  * @author Darren Davison
  * @since 1.0.2
  * @see AbstractTemplateViewResolver
- * @see org.springframework.web.servlet.view.velocity.VelocityView
  * @see org.springframework.web.servlet.view.freemarker.FreeMarkerView
  */
 public abstract class AbstractTemplateView extends AbstractUrlBasedView {
@@ -102,9 +100,9 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 	/**
 	 * Set whether to expose a RequestContext for use by Spring's macro library,
 	 * under the name "springMacroRequestContext". Default is "true".
-	 * <p>Currently needed for Spring's Velocity and FreeMarker default macros.
-	 * Note that this is <i>not</i> required for templates that use HTML
-	 * forms <i>unless</i> you wish to take advantage of the Spring helper macros.
+	 * <p>Currently needed for Spring's FreeMarker default macros.
+	 * Note that this is <i>not</i> required for templates that use HTML forms
+	 * <i>unless</i> you wish to take advantage of the Spring helper macros.
 	 * @see #SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE
 	 */
 	public void setExposeSpringMacroHelpers(boolean exposeSpringMacroHelpers) {
@@ -170,9 +168,9 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 	/**
 	 * Apply this view's content type as specified in the "contentType"
 	 * bean property to the given response.
-	 * <p>When running on Servlet 2.4, only applies the view's contentType
-	 * if no content type has been set on the response before. This allows
-	 * handlers to override the default content type beforehand.
+	 * <p>Only applies the view's contentType if no content type has been
+	 * set on the response before. This allows handlers to override the
+	 * default content type beforehand.
 	 * @param response current HTTP response
 	 * @see #setContentType
 	 */

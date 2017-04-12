@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.http.converter.xml;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -40,10 +39,14 @@ import javax.xml.transform.Source;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
+import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StreamUtils;
 
 /**
  * An {@code HttpMessageConverter} that can read XML collections using JAXB2.
@@ -112,6 +115,15 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 		return false;
 	}
 
+	/**
+	 * Always returns {@code false} since Jaxb2CollectionHttpMessageConverter
+	 * does not convert collections to XML.
+	 */
+	@Override
+	public boolean canWrite(Type type, Class<?> clazz, MediaType mediaType) {
+		return false;
+	}
+
 	@Override
 	protected boolean supports(Class<?> clazz) {
 		// should not be called, since we override canRead/Write
@@ -174,18 +186,17 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	protected T createCollection(Class<?> collectionClass) {
 		if (!collectionClass.isInterface()) {
 			try {
-				return (T) collectionClass.newInstance();
+				return (T) ReflectionUtils.accessibleConstructor(collectionClass).newInstance();
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new IllegalArgumentException(
-						"Could not instantiate collection class [" +
-								collectionClass.getName() + "]: " + ex.getMessage());
+						"Could not instantiate collection class: " + collectionClass.getName(), ex);
 			}
 		}
-		else if (List.class.equals(collectionClass)) {
+		else if (List.class == collectionClass) {
 			return (T) new ArrayList();
 		}
-		else if (SortedSet.class.equals(collectionClass)) {
+		else if (SortedSet.class == collectionClass) {
 			return (T) new TreeSet();
 		}
 		else {
@@ -217,6 +228,13 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	}
 
 	@Override
+	public void write(T t, Type type, MediaType contentType, HttpOutputMessage outputMessage)
+			throws IOException, HttpMessageNotWritableException {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	protected void writeToResult(T t, HttpHeaders headers, Result result) throws IOException {
 		throw new UnsupportedOperationException();
 	}
@@ -229,6 +247,7 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	 */
 	protected XMLInputFactory createXmlInputFactory() {
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+		inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
 		inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
 		inputFactory.setXMLResolver(NO_OP_XML_RESOLVER);
 		return inputFactory;
@@ -238,7 +257,7 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	private static final XMLResolver NO_OP_XML_RESOLVER = new XMLResolver() {
 		@Override
 		public Object resolveEntity(String publicID, String systemID, String base, String ns) {
-			return new ByteArrayInputStream(new byte[0]);
+			return StreamUtils.emptyInput();
 		}
 	};
 

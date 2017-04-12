@@ -6,7 +6,7 @@
 		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd">
 
 	<jdbc:embedded-database id="dataSource" type="HSQL"/>
-	
+
 	<jdbc:initialize-database data-source="dataSource" ignore-failures="DROPS">
 		<jdbc:script location="classpath:org/springframework/jdbc/config/db-drops.sql"/>
 		<jdbc:script location="classpath:org/springframework/jdbc/config/db-schema.sql"/>

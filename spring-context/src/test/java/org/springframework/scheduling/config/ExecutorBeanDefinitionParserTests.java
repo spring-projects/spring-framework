@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,6 +30,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.CustomizableThreadCreator;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Mark Fisher
@@ -47,21 +48,23 @@ public class ExecutorBeanDefinitionParserTests {
 				"executorContext.xml", ExecutorBeanDefinitionParserTests.class);
 	}
 
+
 	@Test
 	public void defaultExecutor() throws Exception {
-		Object executor = this.context.getBean("default");
+		ThreadPoolTaskExecutor executor = this.context.getBean("default", ThreadPoolTaskExecutor.class);
 		assertEquals(1, getCorePoolSize(executor));
 		assertEquals(Integer.MAX_VALUE, getMaxPoolSize(executor));
 		assertEquals(Integer.MAX_VALUE, getQueueCapacity(executor));
 		assertEquals(60, getKeepAliveSeconds(executor));
 		assertEquals(false, getAllowCoreThreadTimeOut(executor));
-		FutureTask<String> task = new FutureTask<String>(new Callable<String>() {
+
+		FutureTask<String> task = new FutureTask<>(new Callable<String>() {
 			@Override
 			public String call() throws Exception {
 				return "foo";
 			}
 		});
-		((ThreadPoolTaskExecutor)executor).execute(task);
+		executor.execute(task);
 		assertEquals("foo", task.get());
 	}
 

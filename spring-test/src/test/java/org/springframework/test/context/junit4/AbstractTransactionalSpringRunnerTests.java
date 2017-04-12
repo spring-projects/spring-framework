@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package org.springframework.test.context.junit4;
 
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+import org.junit.runner.RunWith;
+
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see MethodLevelTransactionalSpringRunnerTests
  * @see Transactional
  */
-@SuppressWarnings("deprecation")
+@RunWith(SpringRunner.class)
 @ContextConfiguration("transactionalTests-context.xml")
 public abstract class AbstractTransactionalSpringRunnerTests {
 
@@ -43,29 +44,20 @@ public abstract class AbstractTransactionalSpringRunnerTests {
 	protected static final String YODA = "yoda";
 
 
-	protected static int clearPersonTable(SimpleJdbcTemplate simpleJdbcTemplate) {
-		return simpleJdbcTemplate.update("DELETE FROM person");
+	protected static int clearPersonTable(JdbcTemplate jdbcTemplate) {
+		return jdbcTemplate.update("DELETE FROM person");
 	}
 
-	protected static void createPersonTable(SimpleJdbcTemplate simpleJdbcTemplate) {
-		try {
-			simpleJdbcTemplate.update("CREATE TABLE person (name VARCHAR(20) NOT NULL, PRIMARY KEY(name))");
-		}
-		catch (DataAccessException dae) {
-			// ignore
-		}
+	protected static int countRowsInPersonTable(JdbcTemplate jdbcTemplate) {
+		return jdbcTemplate.queryForObject("SELECT COUNT(0) FROM person", Integer.class);
 	}
 
-	protected static int countRowsInPersonTable(SimpleJdbcTemplate simpleJdbcTemplate) {
-		return simpleJdbcTemplate.queryForInt("SELECT COUNT(0) FROM person");
+	protected static int addPerson(JdbcTemplate jdbcTemplate, String name) {
+		return jdbcTemplate.update("INSERT INTO person VALUES(?)", name);
 	}
 
-	protected static int addPerson(SimpleJdbcTemplate simpleJdbcTemplate, String name) {
-		return simpleJdbcTemplate.update("INSERT INTO person VALUES(?)", name);
-	}
-
-	protected static int deletePerson(SimpleJdbcTemplate simpleJdbcTemplate, String name) {
-		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
+	protected static int deletePerson(JdbcTemplate jdbcTemplate, String name) {
+		return jdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 
 }

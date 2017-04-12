@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.UUID;
 
@@ -90,6 +91,15 @@ public class StreamUtilsTests {
 		ByteArrayOutputStream out = spy(new ByteArrayOutputStream());
 		StreamUtils.copy(new ByteArrayInputStream(bytes), out);
 		assertThat(out.toByteArray(), equalTo(bytes));
+		verify(out, never()).close();
+	}
+
+	@Test
+	public void copyRange() throws Exception {
+		ByteArrayOutputStream out = spy(new ByteArrayOutputStream());
+		StreamUtils.copyRange(new ByteArrayInputStream(bytes), out, 0, 100);
+		byte[] range = Arrays.copyOfRange(bytes, 0, 101);
+		assertThat(out.toByteArray(), equalTo(range));
 		verify(out, never()).close();
 	}
 

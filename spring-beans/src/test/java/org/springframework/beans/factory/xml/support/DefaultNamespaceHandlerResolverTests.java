@@ -16,12 +16,13 @@
 
 package org.springframework.beans.factory.xml.support;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
 import org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.NamespaceHandler;
 import org.springframework.beans.factory.xml.UtilNamespaceHandler;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit and integration tests for the {@link DefaultNamespaceHandlerResolver} class.
@@ -76,7 +77,7 @@ public class DefaultNamespaceHandlerResolverTests {
 		new DefaultNamespaceHandlerResolver(null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testCtorWithNullClassLoaderArgumentAndNullMappingLocationArgument() throws Exception {
 		new DefaultNamespaceHandlerResolver(null, null);
 	}

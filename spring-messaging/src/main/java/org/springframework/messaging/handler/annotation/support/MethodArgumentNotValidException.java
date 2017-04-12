@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.messaging.handler.annotation.support;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.handler.invocation.MethodArgumentResolutionException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 
@@ -30,52 +31,44 @@ import org.springframework.validation.ObjectError;
  * @since 4.0.1
  */
 @SuppressWarnings("serial")
-public class MethodArgumentNotValidException extends AbstractMethodArgumentResolutionException {
+public class MethodArgumentNotValidException extends MethodArgumentResolutionException {
 
-	private final BindingResult bindingResult;
+	private BindingResult bindingResult;
 
 
 	/**
 	 * Create a new instance with the invalid {@code MethodParameter}.
 	 */
 	public MethodArgumentNotValidException(Message<?> message, MethodParameter parameter) {
-		this(message, parameter, null);
+		super(message, parameter);
 	}
 
 	/**
 	 * Create a new instance with the invalid {@code MethodParameter} and a
 	 * {@link org.springframework.validation.BindingResult}.
 	 */
-	public MethodArgumentNotValidException(Message<?> message, MethodParameter parameter,
-			BindingResult bindingResult) {
-
-		super(message, parameter, getMethodParamMessage(parameter) +
-				getValidationErrorMessage(parameter, bindingResult));
-
+	public MethodArgumentNotValidException(Message<?> message, MethodParameter parameter, BindingResult bindingResult) {
+		super(message, parameter, getValidationErrorMessage(bindingResult));
 		this.bindingResult = bindingResult;
 	}
 
 
 	/**
-	 * Return the BindingResult if the failure is validation-related or {@code null}.
+	 * Return the BindingResult if the failure is validation-related,
+	 * or {@code null} if none.
 	 */
-	public BindingResult getBindingResult() {
+	public final BindingResult getBindingResult() {
 		return this.bindingResult;
 	}
 
 
-	private static String getValidationErrorMessage(MethodParameter parameter, BindingResult bindingResult) {
-		if (bindingResult != null) {
-			StringBuilder sb = new StringBuilder();
-			sb.append(", with ").append(bindingResult.getErrorCount()).append(" error(s): ");
-			for (ObjectError error : bindingResult.getAllErrors()) {
-				sb.append("[").append(error).append("] ");
-			}
-			return sb.toString();
+	private static String getValidationErrorMessage(BindingResult bindingResult) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(bindingResult.getErrorCount()).append(" error(s): ");
+		for (ObjectError error : bindingResult.getAllErrors()) {
+			sb.append("[").append(error).append("] ");
 		}
-		else {
-			return "";
-		}
+		return sb.toString();
 	}
 
 }

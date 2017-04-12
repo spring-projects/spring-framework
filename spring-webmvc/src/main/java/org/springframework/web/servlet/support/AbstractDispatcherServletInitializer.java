@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,12 +25,14 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.core.Conventions;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.AbstractContextLoaderInitializer;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.FrameworkServlet;
 
 /**
  * Base class for {@link org.springframework.web.WebApplicationInitializer}
@@ -51,6 +53,8 @@ import org.springframework.web.servlet.DispatcherServlet;
  * @author Arjen Poutsma
  * @author Chris Beams
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.2
  */
 public abstract class AbstractDispatcherServletInitializer extends AbstractContextLoaderInitializer {
@@ -64,7 +68,6 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException {
 		super.onStartup(servletContext);
-
 		registerDispatcherServlet(servletContext);
 	}
 
@@ -75,19 +78,22 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 * from {@link #createServletApplicationContext()}, and mapping it to the patterns
 	 * returned from {@link #getServletMappings()}.
 	 * <p>Further customization can be achieved by overriding {@link
-	 * #customizeRegistration(ServletRegistration.Dynamic)}.
+	 * #customizeRegistration(ServletRegistration.Dynamic)} or
+	 * {@link #createDispatcherServlet(WebApplicationContext)}.
 	 * @param servletContext the context to register the servlet against
 	 */
 	protected void registerDispatcherServlet(ServletContext servletContext) {
 		String servletName = getServletName();
-		Assert.hasLength(servletName, "getServletName() may not return empty or null");
+		Assert.hasLength(servletName, "getServletName() must not return empty or null");
 
 		WebApplicationContext servletAppContext = createServletApplicationContext();
 		Assert.notNull(servletAppContext,
 				"createServletApplicationContext() did not return an application " +
 				"context for servlet [" + servletName + "]");
 
-		DispatcherServlet dispatcherServlet = new DispatcherServlet(servletAppContext);
+		FrameworkServlet dispatcherServlet = createDispatcherServlet(servletAppContext);
+		dispatcherServlet.setContextInitializers(getServletApplicationContextInitializers());
+
 		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, dispatcherServlet);
 		Assert.notNull(registration,
 				"Failed to register servlet with name '" + servletName + "'." +
@@ -125,6 +131,28 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 * @see #registerDispatcherServlet(ServletContext)
 	 */
 	protected abstract WebApplicationContext createServletApplicationContext();
+
+	/**
+	 * Create a {@link DispatcherServlet} (or other kind of {@link FrameworkServlet}-derived
+	 * dispatcher) with the specified {@link WebApplicationContext}.
+	 * <p>Note: This allows for any {@link FrameworkServlet} subclass as of 4.2.3.
+	 * Previously, it insisted on returning a {@link DispatcherServlet} or subclass thereof.
+	 */
+	protected FrameworkServlet createDispatcherServlet(WebApplicationContext servletAppContext) {
+		return new DispatcherServlet(servletAppContext);
+	}
+
+	/**
+	 * Specify application context initializers to be applied to the servlet-specific
+	 * application context that the {@code DispatcherServlet} is being created with.
+	 * @since 4.2
+	 * @see #createServletApplicationContext()
+	 * @see DispatcherServlet#setContextInitializers
+	 * @see #getRootApplicationContextInitializers()
+	 */
+	protected ApplicationContextInitializer<?>[] getServletApplicationContextInitializers() {
+		return null;
+	}
 
 	/**
 	 * Specify the servlet mapping(s) for the {@code DispatcherServlet} &mdash;
@@ -178,9 +206,9 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	}
 
 	private EnumSet<DispatcherType> getDispatcherTypes() {
-		return isAsyncSupported() ?
-			EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ASYNC) :
-			EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE);
+		return (isAsyncSupported() ?
+				EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ASYNC) :
+				EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE));
 	}
 
 	/**

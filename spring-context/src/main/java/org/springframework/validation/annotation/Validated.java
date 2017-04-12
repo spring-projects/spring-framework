@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,11 @@ import java.lang.annotation.Target;
  * class is supposed to be validated at the method level (acting as a pointcut
  * for the corresponding validation interceptor), but also optionally specifying
  * the validation groups for method-level validation in the annotated class.
- * Can also be used as a meta-annotation on a custom stereotype annotation.
+ * Applying this annotation at the method level allows for overriding the
+ * validation groups for a specific method but does not serve as a pointcut;
+ * a class-level annotation is nevertheless necessary to trigger method validation
+ * for a specific bean to begin with. Can also be used as a meta-annotation on a
+ * custom stereotype annotation or a custom group-specific validated annotation.
  *
  * @author Juergen Hoeller
  * @since 3.1
@@ -44,7 +48,7 @@ import java.lang.annotation.Target;
  * @see org.springframework.validation.beanvalidation.SpringValidatorAdapter
  * @see org.springframework.validation.beanvalidation.MethodValidationPostProcessor
  */
-@Target({ElementType.TYPE, ElementType.PARAMETER})
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Validated {

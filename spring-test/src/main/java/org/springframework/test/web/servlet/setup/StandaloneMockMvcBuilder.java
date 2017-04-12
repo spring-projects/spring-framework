@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Map;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -64,20 +65,20 @@ import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
- * A MockMvcBuilder that accepts {@code @Controller} registrations thus allowing
- * full control over the instantiation and the initialization of controllers and
- * their dependencies similar to plain unit tests, and also making it possible
- * to test one controller at a time.
+ * A {@code MockMvcBuilder} that accepts {@code @Controller} registrations
+ * thus allowing full control over the instantiation and initialization of
+ * controllers and their dependencies similar to plain unit tests, and also
+ * making it possible to test one controller at a time.
  *
  * <p>This builder creates the minimum infrastructure required by the
  * {@link DispatcherServlet} to serve requests with annotated controllers and
- * also provides methods to customize it. The resulting configuration and
- * customizations possible are equivalent to using the MVC Java config except
+ * also provides methods for customization. The resulting configuration and
+ * customization options are equivalent to using MVC Java config except
  * using builder style methods.
  *
  * <p>To configure view resolution, either select a "fixed" view to use for every
- * performed request (see {@link #setSingleView(View)}) or provide a list of
- * {@code ViewResolver}'s, see {@link #setViewResolvers(ViewResolver...)}.
+ * request performed (see {@link #setSingleView(View)}) or provide a list of
+ * {@code ViewResolver}s (see {@link #setViewResolvers(ViewResolver...)}).
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -86,13 +87,15 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private final Object[] controllers;
 
-	private List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+	private List<Object> controllerAdvice;
 
-	private List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+	private List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 
-	private List<HandlerMethodReturnValueHandler> customReturnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
+	private List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<>();
 
-	private final List<MappedInterceptor> mappedInterceptors = new ArrayList<MappedInterceptor>();
+	private List<HandlerMethodReturnValueHandler> customReturnValueHandlers = new ArrayList<>();
+
+	private final List<MappedInterceptor> mappedInterceptors = new ArrayList<>();
 
 	private Validator validator = null;
 
@@ -100,7 +103,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private FormattingConversionService conversionService = null;
 
-	private List<HandlerExceptionResolver> handlerExceptionResolvers = new ArrayList<HandlerExceptionResolver>();
+	private List<HandlerExceptionResolver> handlerExceptionResolvers;
 
 	private Long asyncRequestTimeout;
 
@@ -116,7 +119,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private Boolean removeSemicolonContent;
 
-	private Map<String, String> placeHolderValues = new HashMap<String, String>();
+	private Map<String, String> placeholderValues = new HashMap<>();
 
 
 	/**
@@ -126,6 +129,21 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	protected StandaloneMockMvcBuilder(Object... controllers) {
 		Assert.isTrue(!ObjectUtils.isEmpty(controllers), "At least one controller is required");
 		this.controllers = controllers;
+	}
+
+	/**
+	 * Register one or more
+	 * {@link org.springframework.web.bind.annotation.ControllerAdvice
+	 * ControllerAdvice} instances to be used in tests.
+	 * <p>Normally {@code @ControllerAdvice} are auto-detected as long as they're
+	 * declared as Spring beans. However since the standalone setup does not load
+	 * any Spring configuration they need to be registered explicitly here
+	 * instead much like controllers.
+	 * @since 4.2
+	 */
+	public StandaloneMockMvcBuilder setControllerAdvice(Object... controllerAdvice) {
+		this.controllerAdvice = Arrays.asList(controllerAdvice);
+		return this;
 	}
 
 	/**
@@ -179,8 +197,8 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	/**
 	 * Set a ContentNegotiationManager.
 	 */
-	protected StandaloneMockMvcBuilder setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
-		this.contentNegotiationManager = contentNegotiationManager;
+	public StandaloneMockMvcBuilder setContentNegotiationManager(ContentNegotiationManager manager) {
+		this.contentNegotiationManager = manager;
 		return this;
 	}
 
@@ -299,9 +317,10 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	 * request mappings. This method allows manually provided placeholder values so they
 	 * can be resolved. Alternatively consider creating a test that initializes a
 	 * {@link WebApplicationContext}.
+	 * @since 4.2.8
 	 */
-	public StandaloneMockMvcBuilder addPlaceHolderValue(String name, String value) {
-		this.placeHolderValues.put(name, value);
+	public StandaloneMockMvcBuilder addPlaceholderValue(String name, String value) {
+		this.placeholderValues.put(name, value);
 		return this;
 	}
 
@@ -317,10 +336,14 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private void registerMvcSingletons(StubWebApplicationContext wac) {
 		StandaloneConfiguration config = new StandaloneConfiguration();
+		config.setApplicationContext(wac);
+
+		wac.addBeans(this.controllerAdvice);
 
 		StaticRequestMappingHandlerMapping hm = config.getHandlerMapping();
 		hm.setServletContext(wac.getServletContext());
 		hm.setApplicationContext(wac);
+		hm.afterPropertiesSet();
 		hm.registerHandlers(this.controllers);
 		wac.addBean("requestMappingHandlerMapping", hm);
 
@@ -342,8 +365,8 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	}
 
 	private List<ViewResolver> initViewResolvers(WebApplicationContext wac) {
-		this.viewResolvers = (this.viewResolvers == null) ?
-				Arrays.<ViewResolver>asList(new InternalResourceViewResolver()) : this.viewResolvers;
+		this.viewResolvers = (this.viewResolvers != null ? this.viewResolvers :
+				Collections.<ViewResolver>singletonList(new InternalResourceViewResolver()));
 		for (Object viewResolver : this.viewResolvers) {
 			if (viewResolver instanceof WebApplicationObjectSupport) {
 				((WebApplicationObjectSupport) viewResolver).setApplicationContext(wac);
@@ -358,7 +381,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 		public StaticRequestMappingHandlerMapping getHandlerMapping() {
 			StaticRequestMappingHandlerMapping handlerMapping = new StaticRequestMappingHandlerMapping();
-			handlerMapping.setEmbeddedValueResolver(new StaticStringValueResolver(placeHolderValues));
+			handlerMapping.setEmbeddedValueResolver(new StaticStringValueResolver(placeholderValues));
 			handlerMapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
 			handlerMapping.setUseTrailingSlashMatch(useTrailingSlashPatternMatch);
 			handlerMapping.setOrder(0);
@@ -418,8 +441,8 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 				try {
 					((InitializingBean) mvcValidator).afterPropertiesSet();
 				}
-				catch (Exception e) {
-					throw new BeanInitializationException("Failed to initialize Validator", e);
+				catch (Exception ex) {
+					throw new BeanInitializationException("Failed to initialize Validator", ex);
 				}
 			}
 			return mvcValidator;
@@ -427,7 +450,23 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 		@Override
 		protected void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
-			exceptionResolvers.addAll(StandaloneMockMvcBuilder.this.handlerExceptionResolvers);
+			if (handlerExceptionResolvers == null) {
+				return;
+			}
+			for (HandlerExceptionResolver resolver : handlerExceptionResolvers) {
+				if (resolver instanceof ApplicationContextAware) {
+					((ApplicationContextAware) resolver).setApplicationContext(getApplicationContext());
+				}
+				if (resolver instanceof InitializingBean) {
+					try {
+						((InitializingBean) resolver).afterPropertiesSet();
+					}
+					catch (Exception ex) {
+						throw new IllegalStateException("Failure from afterPropertiesSet", ex);
+					}
+				}
+				exceptionResolvers.add(resolver);
+			}
 		}
 	}
 

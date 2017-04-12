@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,51 +13,67 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet.result;
 
 import org.junit.Test;
+
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.StubMvcResult;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 /**
+ * Unit tests for {@link MockMvcResultMatchers}.
+ *
  * @author Brian Clozel
+ * @author Sam Brannen
  */
 public class MockMvcResultMatchersTests {
 
 	@Test
-	public void testRedirect() throws Exception {
-		MockMvcResultMatchers.redirectedUrl("/resource/1")
-				.match(getRedirectedUrlStubMvcResult("/resource/1"));
+	public void redirect() throws Exception {
+		redirectedUrl("/resource/1").match(getRedirectedUrlStubMvcResult("/resource/1"));
 	}
 
 	@Test
-	public void testRedirectPattern() throws Exception {
-		MockMvcResultMatchers.redirectedUrlPattern("/resource/*")
-				.match(getRedirectedUrlStubMvcResult("/resource/1"));
-	}
-
-	@Test( expected = java.lang.AssertionError.class)
-	public void testFailRedirectPattern() throws Exception {
-		MockMvcResultMatchers.redirectedUrlPattern("/resource/")
-				.match(getRedirectedUrlStubMvcResult("/resource/1"));
+	public void redirectWithUrlTemplate() throws Exception {
+		redirectedUrl("/orders/{orderId}/items/{itemId}", 1, 2).match(getRedirectedUrlStubMvcResult("/orders/1/items/2"));
 	}
 
 	@Test
-	public void testForward() throws Exception {
-		MockMvcResultMatchers.forwardedUrl("/api/resource/1")
-				.match(getForwardedUrlStubMvcResult("/api/resource/1"));
+	public void redirectWithMatchingPattern() throws Exception {
+		redirectedUrlPattern("/resource/*").match(getRedirectedUrlStubMvcResult("/resource/1"));
+	}
+
+	@Test(expected = AssertionError.class)
+	public void redirectWithNonMatchingPattern() throws Exception {
+		redirectedUrlPattern("/resource/").match(getRedirectedUrlStubMvcResult("/resource/1"));
 	}
 
 	@Test
-	public void testForwardEscapedChars() throws Exception {
-		MockMvcResultMatchers.forwardedUrl("/api/resource/1?arg=value")
-				.match(getForwardedUrlStubMvcResult("/api/resource/1?arg=value"));
+	public void forward() throws Exception {
+		forwardedUrl("/api/resource/1").match(getForwardedUrlStubMvcResult("/api/resource/1"));
 	}
 
 	@Test
-	public void testForwardPattern() throws Exception {
-		MockMvcResultMatchers.forwardedUrlPattern("/api/**/?")
-				.match(getForwardedUrlStubMvcResult("/api/resource/1"));
+	public void forwardWithQueryString() throws Exception {
+		forwardedUrl("/api/resource/1?arg=value").match(getForwardedUrlStubMvcResult("/api/resource/1?arg=value"));
+	}
+
+	@Test
+	public void forwardWithUrlTemplate() throws Exception {
+		forwardedUrl("/orders/{orderId}/items/{itemId}", 1, 2).match(getForwardedUrlStubMvcResult("/orders/1/items/2"));
+	}
+
+	@Test
+	public void forwardWithMatchingPattern() throws Exception {
+		forwardedUrlPattern("/api/**/?").match(getForwardedUrlStubMvcResult("/api/resource/1"));
+	}
+
+	@Test(expected = AssertionError.class)
+	public void forwardWithNonMatchingPattern() throws Exception {
+		forwardedUrlPattern("/resource/").match(getForwardedUrlStubMvcResult("/resource/1"));
 	}
 
 	private StubMvcResult getRedirectedUrlStubMvcResult(String redirectUrl) throws Exception {

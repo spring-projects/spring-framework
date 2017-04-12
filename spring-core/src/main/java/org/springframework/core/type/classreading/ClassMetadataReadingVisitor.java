@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 
 	private String[] interfaces;
 
-	private Set<String> memberClassNames = new LinkedHashSet<String>();
+	private Set<String> memberClassNames = new LinkedHashSet<>();
 
 
 	public ClassMetadataReadingVisitor() {
@@ -204,39 +204,38 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 		return this.memberClassNames.toArray(new String[this.memberClassNames.size()]);
 	}
 
-}
 
+	private static class EmptyAnnotationVisitor extends AnnotationVisitor {
 
-class EmptyAnnotationVisitor extends AnnotationVisitor {
+		public EmptyAnnotationVisitor() {
+			super(SpringAsmInfo.ASM_VERSION);
+		}
 
-	public EmptyAnnotationVisitor() {
-		super(SpringAsmInfo.ASM_VERSION);
+		@Override
+		public AnnotationVisitor visitAnnotation(String name, String desc) {
+			return this;
+		}
+
+		@Override
+		public AnnotationVisitor visitArray(String name) {
+			return this;
+		}
 	}
 
-	@Override
-	public AnnotationVisitor visitAnnotation(String name, String desc) {
-		return this;
+
+	private static class EmptyMethodVisitor extends MethodVisitor {
+
+		public EmptyMethodVisitor() {
+			super(SpringAsmInfo.ASM_VERSION);
+		}
 	}
 
-	@Override
-	public AnnotationVisitor visitArray(String name) {
-		return this;
-	}
-}
 
+	private static class EmptyFieldVisitor extends FieldVisitor {
 
-class EmptyMethodVisitor extends MethodVisitor {
-
-	public EmptyMethodVisitor() {
-		super(SpringAsmInfo.ASM_VERSION);
-	}
-}
-
-
-class EmptyFieldVisitor extends FieldVisitor {
-
-	public EmptyFieldVisitor() {
-		super(SpringAsmInfo.ASM_VERSION);
+		public EmptyFieldVisitor() {
+			super(SpringAsmInfo.ASM_VERSION);
+		}
 	}
 
 }

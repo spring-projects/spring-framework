@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,9 +43,9 @@ import org.springframework.util.ClassUtils;
 @SuppressWarnings("serial")
 public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 
-	protected final Set<Class<?>> publishedInterfaces = new HashSet<Class<?>>();
+	protected final Set<Class<?>> publishedInterfaces = new LinkedHashSet<>();
 
-	private transient Map<Method, Boolean> rememberedMethods = new ConcurrentHashMap<Method, Boolean>(32);
+	private transient Map<Method, Boolean> rememberedMethods = new ConcurrentHashMap<>(32);
 
 
 	/**
@@ -118,7 +118,7 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 		// Rely on default serialization; just initialize state after deserialization.
 		ois.defaultReadObject();
 		// Initialize transient fields.
-		this.rememberedMethods = new ConcurrentHashMap<Method, Boolean>(32);
+		this.rememberedMethods = new ConcurrentHashMap<>(32);
 	}
 
 }

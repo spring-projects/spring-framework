@@ -58,7 +58,7 @@ eclipse.classpath.file.whenMerged { classpath ->
 	}
 }
 
-// Allow projects to be used as WPT modules
+// Allow projects to be used as WTP modules
 eclipse.project.natures "org.eclipse.wst.common.project.facet.core.nature"
 
 // Include project specific settings
@@ -85,8 +85,8 @@ task eclipseJdtPrepare(type: Copy) {
 }
 
 task cleanEclipseJdtUi(type: Delete) {
+	delete project.file(".settings/org.eclipse.jdt.core.prefs")
 	delete project.file(".settings/org.eclipse.jdt.ui.prefs")
-	delete project.file("org.eclipse.jdt.core.prefs")
 	delete project.file(".settings/org.eclipse.wst.common.component")
 	delete project.file(".settings/org.eclipse.wst.common.project.facet.core.xml")
 }
@@ -97,7 +97,6 @@ tasks["eclipse"].dependsOn(eclipseSettings, eclipseWstComponent)
 
 
 // Filter 'build' folder
-
 eclipse.project.file.withXml {
 	def node = it.asNode()
 

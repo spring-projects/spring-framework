@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.scheduling.annotation;
 
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AdviceModeImportSelector;
-import org.springframework.context.annotation.AnnotationConfigUtils;
 
 /**
  * Selects which implementation of {@link AbstractAsyncConfiguration} should be used based
@@ -28,9 +27,11 @@ import org.springframework.context.annotation.AnnotationConfigUtils;
  * @since 3.1
  * @see EnableAsync
  * @see ProxyAsyncConfiguration
- * @see AnnotationConfigUtils#ASYNC_EXECUTION_ASPECT_CONFIGURATION_CLASS_NAME
  */
 public class AsyncConfigurationSelector extends AdviceModeImportSelector<EnableAsync> {
+
+	private static final String ASYNC_EXECUTION_ASPECT_CONFIGURATION_CLASS_NAME =
+			"org.springframework.scheduling.aspectj.AspectJAsyncConfiguration";
 
 	/**
 	 * {@inheritDoc}
@@ -43,7 +44,7 @@ public class AsyncConfigurationSelector extends AdviceModeImportSelector<EnableA
 			case PROXY:
 				return new String[] { ProxyAsyncConfiguration.class.getName() };
 			case ASPECTJ:
-				return new String[] { AnnotationConfigUtils.ASYNC_EXECUTION_ASPECT_CONFIGURATION_CLASS_NAME };
+				return new String[] { ASYNC_EXECUTION_ASPECT_CONFIGURATION_CLASS_NAME };
 			default:
 				return null;
 		}

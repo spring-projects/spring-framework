@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,28 +16,26 @@
 
 package org.springframework.messaging.core;
 
+import java.io.Writer;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.GenericMessageConverter;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.support.GenericMessage;
 
-import static org.hamcrest.CoreMatchers.isA;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-
-import java.io.Writer;
 
 /**
  * Unit tests for receiving operations in {@link AbstractMessagingTemplate}.
  *
  * @author Rossen Stoyanchev
- *
  * @see MessageRequestReplyTemplateTests
  */
 public class MessageReceivingTemplateTests {
@@ -104,7 +102,7 @@ public class MessageReceivingTemplateTests {
 	public void receiveAndConvertFailed() {
 		Message<?> expected = new GenericMessage<Object>("not a number test");
 		this.template.setReceiveMessage(expected);
-		this.template.setMessageConverter(new GenericMessageConverter(new DefaultConversionService()));
+		this.template.setMessageConverter(new GenericMessageConverter());
 
 		thrown.expect(MessageConversionException.class);
 		thrown.expectCause(isA(ConversionFailedException.class));
@@ -116,13 +114,13 @@ public class MessageReceivingTemplateTests {
 		Message<?> expected = new GenericMessage<Object>("payload");
 		this.template.setDefaultDestination("home");
 		this.template.setReceiveMessage(expected);
-		this.template.setMessageConverter(new GenericMessageConverter(new DefaultConversionService()));
+		this.template.setMessageConverter(new GenericMessageConverter());
 		try {
 			this.template.receiveAndConvert(Writer.class);
 		}
-		catch (MessageConversionException e) {
-			assertTrue("Invalid exception message '"+e.getMessage()+"'", e.getMessage().contains("payload"));
-			assertSame(expected, e.getFailedMessage());
+		catch (MessageConversionException ex) {
+			assertTrue("Invalid exception message '" + ex.getMessage() + "'", ex.getMessage().contains("payload"));
+			assertSame(expected, ex.getFailedMessage());
 		}
 	}
 
@@ -133,7 +131,6 @@ public class MessageReceivingTemplateTests {
 		private String destination;
 
 		private Message<?> receiveMessage;
-
 
 		private void setReceiveMessage(Message<?> receiveMessage) {
 			this.receiveMessage = receiveMessage;
@@ -154,7 +151,6 @@ public class MessageReceivingTemplateTests {
 			this.destination = destination;
 			return null;
 		}
-
 	}
 
 }

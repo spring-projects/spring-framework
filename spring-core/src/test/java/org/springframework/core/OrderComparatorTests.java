@@ -16,45 +16,92 @@
 
 package org.springframework.core;
 
-import junit.framework.TestCase;
-
 import java.util.Comparator;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for the {@link OrderComparator} class.
  *
  * @author Rick Evans
+ * @author Stephane Nicoll
  */
-public final class OrderComparatorTests extends TestCase {
+public class OrderComparatorTests {
 
-	private Comparator comparator;
+	private final OrderComparator comparator = new OrderComparator();
 
-
-	@Override
-	protected void setUp() throws Exception {
-		this.comparator = new OrderComparator();
-	}
-
-
-	public void testCompareOrderedInstancesBefore() throws Exception {
+	@Test
+	public void compareOrderedInstancesBefore() {
 		assertEquals(-1, this.comparator.compare(
 				new StubOrdered(100), new StubOrdered(2000)));
 	}
 
-	public void testCompareOrderedInstancesSame() throws Exception {
+	@Test
+	public void compareOrderedInstancesSame() {
 		assertEquals(0, this.comparator.compare(
 				new StubOrdered(100), new StubOrdered(100)));
 	}
 
-	public void testCompareOrderedInstancesAfter() throws Exception {
+	@Test
+	public void compareOrderedInstancesAfter() {
 		assertEquals(1, this.comparator.compare(
 				new StubOrdered(982300), new StubOrdered(100)));
 	}
 
-	public void testCompareTwoNonOrderedInstancesEndsUpAsSame() throws Exception {
+	@Test
+	public void compareTwoNonOrderedInstancesEndsUpAsSame() {
 		assertEquals(0, this.comparator.compare(new Object(), new Object()));
 	}
 
+	@Test
+	public void compareWithSimpleSourceProvider() {
+		Comparator<Object> customComparator = this.comparator.withSourceProvider(
+				new TestSourceProvider(5L, new StubOrdered(25)));
+		assertEquals(-1, customComparator.compare(new StubOrdered(10), 5L));
+	}
+
+	@Test
+	public void compareWithSourceProviderArray() {
+		Comparator<Object> customComparator = this.comparator.withSourceProvider(
+				new TestSourceProvider(5L, new Object[] {new StubOrdered(10), new StubOrdered(-25)}));
+		assertEquals(-1, customComparator.compare(5L, new Object()));
+	}
+
+	@Test
+	public void compareWithSourceProviderArrayNoMatch() {
+		Comparator<Object> customComparator = this.comparator.withSourceProvider(
+				new TestSourceProvider(5L, new Object[]{new Object(), new Object()}));
+		assertEquals(0, customComparator.compare(new Object(), 5L));
+	}
+
+	@Test
+	public void compareWithSourceProviderEmpty() {
+		Comparator<Object> customComparator = this.comparator.withSourceProvider(
+				new TestSourceProvider(50L, new Object()));
+		assertEquals(0, customComparator.compare(new Object(), 5L));
+	}
+
+
+	private static final class TestSourceProvider implements OrderComparator.OrderSourceProvider {
+
+		private final Object target;
+		private final Object orderSource;
+
+		public TestSourceProvider(Object target, Object orderSource) {
+			this.target = target;
+			this.orderSource = orderSource;
+		}
+
+		@Override
+		public Object getOrderSource(Object obj) {
+			if (target.equals(obj)) {
+				return orderSource;
+			}
+			return null;
+		}
+	}
 
 	private static final class StubOrdered implements Ordered {
 

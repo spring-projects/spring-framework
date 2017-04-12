@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,23 +26,25 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.ServletContextAware;
 
 /**
- * A FactoryBean for configuring {@link javax.websocket.server.ServerContainer}. Since
- * there is only one {@code ServerContainer} instance accessible under a well-known
- * {@code javax.servlet.ServletContext} attribute, simply declaring this FactoryBean and
- * using its setters allows configuring the {@code ServerContainer} through Spring
- * configuration.
+ * A {@link FactoryBean} for configuring {@link javax.websocket.server.ServerContainer}.
+ * Since there is usually only one {@code ServerContainer} instance accessible under a
+ * well-known {@code javax.servlet.ServletContext} attribute, simply declaring this
+ * FactoryBean and using its setters allows for configuring the {@code ServerContainer}
+ * through Spring configuration.
  *
  * <p>This is useful even if the {@code ServerContainer} is not injected into any other
- * bean. For example, an application can configure a {@link org.springframework.web.socket.server.support.DefaultHandshakeHandler}, a
- * {@link org.springframework.web.socket.sockjs.SockJsService}, or {@link ServerEndpointExporter},
- * and separately declare this FactoryBean in order to customize the properties of the
- * (one and only) {@code ServerContainer} instance.
+ * bean within the Spring application context. For example, an application can configure
+ * a {@link org.springframework.web.socket.server.support.DefaultHandshakeHandler},
+ * a {@link org.springframework.web.socket.sockjs.SockJsService}, or
+ * {@link ServerEndpointExporter}, and separately declare this FactoryBean in order
+ * to customize the properties of the (one and only) {@code ServerContainer} instance.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.0
  */
 public class ServletServerContainerFactoryBean
-		implements FactoryBean<WebSocketContainer>, InitializingBean, ServletContextAware {
+		implements FactoryBean<WebSocketContainer>, ServletContextAware, InitializingBean {
 
 	private Long asyncSendTimeout;
 
@@ -51,6 +53,8 @@ public class ServletServerContainerFactoryBean
 	private Integer maxTextMessageBufferSize;
 
 	private Integer maxBinaryMessageBufferSize;
+
+	private ServletContext servletContext;
 
 	private ServerContainer serverContainer;
 
@@ -89,14 +93,18 @@ public class ServletServerContainerFactoryBean
 
 	@Override
 	public void setServletContext(ServletContext servletContext) {
-		this.serverContainer = (ServerContainer) servletContext.getAttribute("javax.websocket.server.ServerContainer");
+		this.servletContext = servletContext;
 	}
 
 
 	@Override
 	public void afterPropertiesSet() {
-		Assert.state(this.serverContainer != null,
+		Assert.state(this.servletContext != null,
 				"A ServletContext is required to access the javax.websocket.server.ServerContainer instance");
+		this.serverContainer = (ServerContainer) this.servletContext.getAttribute(
+				"javax.websocket.server.ServerContainer");
+		Assert.state(this.serverContainer != null,
+				"Attribute 'javax.websocket.server.ServerContainer' not found in ServletContext");
 
 		if (this.asyncSendTimeout != null) {
 			this.serverContainer.setAsyncSendTimeout(this.asyncSendTimeout);
@@ -120,7 +128,7 @@ public class ServletServerContainerFactoryBean
 
 	@Override
 	public Class<?> getObjectType() {
-		return ServerContainer.class;
+		return (this.serverContainer != null ? this.serverContainer.getClass() : ServerContainer.class);
 	}
 
 	@Override

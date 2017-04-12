@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.web.socket.adapter.jetty;
+
+import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,6 +29,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.api.extensions.Frame;
 import org.eclipse.jetty.websocket.common.OpCode;
+
 import org.springframework.util.Assert;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
@@ -44,7 +47,10 @@ import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator
 @WebSocket
 public class JettyWebSocketHandlerAdapter {
 
+	private static final ByteBuffer EMPTY_PAYLOAD = ByteBuffer.wrap(new byte[0]);
+
 	private static final Log logger = LogFactory.getLog(JettyWebSocketHandlerAdapter.class);
+
 
 	private final WebSocketHandler webSocketHandler;
 
@@ -52,8 +58,8 @@ public class JettyWebSocketHandlerAdapter {
 
 
 	public JettyWebSocketHandlerAdapter(WebSocketHandler webSocketHandler, JettyWebSocketSession wsSession) {
-		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
-		Assert.notNull(wsSession, "wsSession must not be null");
+		Assert.notNull(webSocketHandler, "WebSocketHandler must not be null");
+		Assert.notNull(wsSession, "WebSocketSession must not be null");
 		this.webSocketHandler = webSocketHandler;
 		this.wsSession = wsSession;
 	}
@@ -65,8 +71,8 @@ public class JettyWebSocketHandlerAdapter {
 			this.wsSession.initializeNativeSession(session);
 			this.webSocketHandler.afterConnectionEstablished(this.wsSession);
 		}
-		catch (Throwable t) {
-			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);
+		catch (Throwable ex) {
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 		}
 	}
 
@@ -76,8 +82,8 @@ public class JettyWebSocketHandlerAdapter {
 		try {
 			this.webSocketHandler.handleMessage(this.wsSession, message);
 		}
-		catch (Throwable t) {
-			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);
+		catch (Throwable ex) {
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 		}
 	}
 
@@ -87,20 +93,21 @@ public class JettyWebSocketHandlerAdapter {
 		try {
 			this.webSocketHandler.handleMessage(this.wsSession, message);
 		}
-		catch (Throwable t) {
-			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);
+		catch (Throwable ex) {
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 		}
 	}
 
 	@OnWebSocketFrame
 	public void onWebSocketFrame(Frame frame) {
 		if (OpCode.PONG == frame.getOpCode()) {
-			PongMessage message = new PongMessage(frame.getPayload());
+			ByteBuffer payload = frame.getPayload() != null ? frame.getPayload() : EMPTY_PAYLOAD;
+			PongMessage message = new PongMessage(payload);
 			try {
 				this.webSocketHandler.handleMessage(this.wsSession, message);
 			}
-			catch (Throwable t) {
-				ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);
+			catch (Throwable ex) {
+				ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 			}
 		}
 	}
@@ -111,8 +118,10 @@ public class JettyWebSocketHandlerAdapter {
 		try {
 			this.webSocketHandler.afterConnectionClosed(this.wsSession, closeStatus);
 		}
-		catch (Throwable t) {
-			logger.error("Unhandled error for " + this.wsSession, t);
+		catch (Throwable ex) {
+			if (logger.isErrorEnabled()) {
+				logger.error("Unhandled error for " + this.wsSession, ex);
+			}
 		}
 	}
 
@@ -121,8 +130,8 @@ public class JettyWebSocketHandlerAdapter {
 		try {
 			this.webSocketHandler.handleTransportError(this.wsSession, cause);
 		}
-		catch (Throwable t) {
-			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);
+		catch (Throwable ex) {
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 		}
 	}
 

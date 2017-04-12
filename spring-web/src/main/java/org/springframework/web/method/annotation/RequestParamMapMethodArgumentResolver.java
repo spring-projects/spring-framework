@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,15 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Resolves {@link Map} method arguments annotated with an @{@link RequestParam} where the annotation does not
- * specify a request parameter name. See {@link RequestParamMethodArgumentResolver} for resolving {@link Map}
+ * Resolves {@link Map} method arguments annotated with an @{@link RequestParam}
+ * where the annotation does not specify a request parameter name.
+ * See {@link RequestParamMethodArgumentResolver} for resolving {@link Map}
  * method arguments with a request parameter name.
  *
- * <p>The created {@link Map} contains all request parameter name/value pairs. If the method parameter type
- * is {@link MultiValueMap} instead, the created map contains all request parameters and all there values for
- * cases where request parameters have multiple values.
+ * <p>The created {@link Map} contains all request parameter name/value pairs.
+ * If the method parameter type is {@link MultiValueMap} instead, the created
+ * map contains all request parameters and all there values for cases where
+ * request parameters have multiple values.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -47,26 +49,24 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		RequestParam requestParamAnnot = parameter.getParameterAnnotation(RequestParam.class);
-		if (requestParamAnnot != null) {
+		RequestParam requestParam = parameter.getParameterAnnotation(RequestParam.class);
+		if (requestParam != null) {
 			if (Map.class.isAssignableFrom(parameter.getParameterType())) {
-				return !StringUtils.hasText(requestParamAnnot.value());
+				return !StringUtils.hasText(requestParam.name());
 			}
 		}
 		return false;
 	}
 
 	@Override
-	public Object resolveArgument(
-			MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
-			throws Exception {
+	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
 		Class<?> paramType = parameter.getParameterType();
 
 		Map<String, String[]> parameterMap = webRequest.getParameterMap();
 		if (MultiValueMap.class.isAssignableFrom(paramType)) {
-			MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>(parameterMap.size());
+			MultiValueMap<String, String> result = new LinkedMultiValueMap<>(parameterMap.size());
 			for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
 				for (String value : entry.getValue()) {
 					result.add(entry.getKey(), value);
@@ -75,7 +75,7 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 			return result;
 		}
 		else {
-			Map<String, String> result = new LinkedHashMap<String, String>(parameterMap.size());
+			Map<String, String> result = new LinkedHashMap<>(parameterMap.size());
 			for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
 				if (entry.getValue().length > 0) {
 					result.put(entry.getKey(), entry.getValue()[0]);

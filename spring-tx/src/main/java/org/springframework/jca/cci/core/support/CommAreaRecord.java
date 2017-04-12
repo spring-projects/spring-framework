@@ -19,7 +19,6 @@ package org.springframework.jca.cci.core.support;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import javax.resource.cci.Record;
 import javax.resource.cci.Streamable;
 

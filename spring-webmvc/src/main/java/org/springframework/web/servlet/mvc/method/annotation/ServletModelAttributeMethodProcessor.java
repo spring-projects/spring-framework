@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Collections;
 import java.util.Map;
-
 import javax.servlet.ServletRequest;
 
 import org.springframework.core.MethodParameter;
@@ -36,7 +35,7 @@ import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * A Servlet-specific {@link org.springframework.web.method.annotation.ModelAttributeMethodProcessor} that applies data
+ * A Servlet-specific {@link ModelAttributeMethodProcessor} that applies data
  * binding through a WebDataBinder of type {@link ServletRequestDataBinder}.
  *
  * <p>Also adds a fall-back strategy to instantiate the model attribute from a
@@ -49,36 +48,37 @@ import org.springframework.web.servlet.HandlerMapping;
 public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodProcessor {
 
 	/**
+	 * Class constructor.
 	 * @param annotationNotRequired if "true", non-simple method arguments and
 	 * return values are considered model attributes with or without a
-	 * {@code @ModelAttribute} annotation.
+	 * {@code @ModelAttribute} annotation
 	 */
 	public ServletModelAttributeMethodProcessor(boolean annotationNotRequired) {
 		super(annotationNotRequired);
 	}
+
 
 	/**
 	 * Instantiate the model attribute from a URI template variable or from a
 	 * request parameter if the name matches to the model attribute name and
 	 * if there is an appropriate type conversion strategy. If none of these
 	 * are true delegate back to the base class.
-	 * @see #createAttributeFromRequestValue(String, String, MethodParameter, WebDataBinderFactory, NativeWebRequest)
+	 * @see #createAttributeFromRequestValue
 	 */
 	@Override
-	protected final Object createAttribute(String attributeName,
-										   MethodParameter parameter,
-										   WebDataBinderFactory binderFactory,
-										   NativeWebRequest request) throws Exception {
+	protected final Object createAttribute(String attributeName, MethodParameter methodParam,
+			WebDataBinderFactory binderFactory, NativeWebRequest request) throws Exception {
 
 		String value = getRequestValueForAttribute(attributeName, request);
 		if (value != null) {
-			Object attribute = createAttributeFromRequestValue(value, attributeName, parameter, binderFactory, request);
+			Object attribute = createAttributeFromRequestValue(
+					value, attributeName, methodParam, binderFactory, request);
 			if (attribute != null) {
 				return attribute;
 			}
 		}
 
-		return super.createAttribute(attributeName, parameter, binderFactory, request);
+		return super.createAttribute(attributeName, methodParam, binderFactory, request);
 	}
 
 	/**
@@ -88,27 +88,26 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * a URI variable first and then a request parameter.
 	 * @param attributeName the model attribute name
 	 * @param request the current request
-	 * @return the request value to try to convert or {@code null}
+	 * @return the request value to try to convert, or {@code null} if none
 	 */
 	protected String getRequestValueForAttribute(String attributeName, NativeWebRequest request) {
 		Map<String, String> variables = getUriTemplateVariables(request);
-		if (StringUtils.hasText(variables.get(attributeName))) {
-			return variables.get(attributeName);
+		String variableValue = variables.get(attributeName);
+		if (StringUtils.hasText(variableValue)) {
+			return variableValue;
 		}
-		else if (StringUtils.hasText(request.getParameter(attributeName))) {
-			return request.getParameter(attributeName);
+		String parameterValue = request.getParameter(attributeName);
+		if (StringUtils.hasText(parameterValue)) {
+			return parameterValue;
 		}
-		else {
-			return null;
-		}
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
 	protected final Map<String, String> getUriTemplateVariables(NativeWebRequest request) {
-		Map<String, String> variables =
-			(Map<String, String>) request.getAttribute(
-					HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
-		return (variables != null) ? variables : Collections.<String, String>emptyMap();
+		Map<String, String> variables = (Map<String, String>) request.getAttribute(
+				HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
+		return (variables != null ? variables : Collections.emptyMap());
 	}
 
 	/**
@@ -117,33 +116,33 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * <p>The default implementation converts only if there a registered
 	 * {@link Converter} that can perform the conversion.
 	 * @param sourceValue the source value to create the model attribute from
-	 * @param attributeName the name of the attribute, never {@code null}
-	 * @param parameter the method parameter
+	 * @param attributeName the name of the attribute (never {@code null})
+	 * @param methodParam the method parameter
 	 * @param binderFactory for creating WebDataBinder instance
 	 * @param request the current request
-	 * @return the created model attribute, or {@code null}
+	 * @return the created model attribute, or {@code null} if no suitable
+	 * conversion found
 	 * @throws Exception
 	 */
-	protected Object createAttributeFromRequestValue(String sourceValue,
-												 String attributeName,
-												 MethodParameter parameter,
-												 WebDataBinderFactory binderFactory,
-												 NativeWebRequest request) throws Exception {
+	protected Object createAttributeFromRequestValue(String sourceValue, String attributeName,
+			MethodParameter methodParam, WebDataBinderFactory binderFactory, NativeWebRequest request)
+			throws Exception {
+
 		DataBinder binder = binderFactory.createBinder(request, null, attributeName);
 		ConversionService conversionService = binder.getConversionService();
 		if (conversionService != null) {
 			TypeDescriptor source = TypeDescriptor.valueOf(String.class);
-			TypeDescriptor target = new TypeDescriptor(parameter);
+			TypeDescriptor target = new TypeDescriptor(methodParam);
 			if (conversionService.canConvert(source, target)) {
-				return binder.convertIfNecessary(sourceValue, parameter.getParameterType(), parameter);
+				return binder.convertIfNecessary(sourceValue, methodParam.getParameterType(), methodParam);
 			}
 		}
 		return null;
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>Downcast {@link WebDataBinder} to {@link ServletRequestDataBinder} before binding.
+	 * This implementation downcasts {@link WebDataBinder} to
+	 * {@link ServletRequestDataBinder} before binding.
 	 * @see ServletRequestDataBinderFactory
 	 */
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.format.datetime.joda;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -27,7 +24,11 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.Test;
+
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Phillip Webb
@@ -76,7 +77,9 @@ public class DateTimeFormatterFactoryTests {
 	@Test
 	public void createDateTimeFormatterInOrderOfPropertyPriority() throws Exception {
 		factory.setStyle("SS");
-		assertThat(applyLocale(factory.createDateTimeFormatter()).print(dateTime), is("10/21/09 12:10 PM"));
+		String value = applyLocale(factory.createDateTimeFormatter()).print(dateTime);
+		assertTrue(value.startsWith("10/21/09"));
+		assertTrue(value.endsWith("12:10 PM"));
 
 		factory.setIso(ISO.DATE);
 		assertThat(applyLocale(factory.createDateTimeFormatter()).print(dateTime), is("2009-10-21"));

@@ -34,7 +34,7 @@ public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessag
 
 	@Override
 	public Message<?> receive() {
-		return receive(getRequiredDefaultDestination());
+		return doReceive(getRequiredDefaultDestination());
 	}
 
 	@Override
@@ -42,6 +42,12 @@ public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessag
 		return doReceive(destination);
 	}
 
+	/**
+	 * Actually receive a message from the given destination.
+	 * @param destination the target destination
+	 * @return the received message, possibly {@code null} if the message could not
+	 * be received, for example due to a timeout
+	 */
 	protected abstract Message<?> doReceive(D destination);
 
 
@@ -50,7 +56,6 @@ public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessag
 		return receiveAndConvert(getRequiredDefaultDestination(), targetClass);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T receiveAndConvert(D destination, Class<T> targetClass) {
 		Message<?> message = doReceive(destination);
@@ -62,14 +67,19 @@ public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessag
 		}
 	}
 
+	/**
+	 * Convert from the given message to the given target class.
+	 * @param message the message to convert
+	 * @param targetClass the target class to convert the payload to
+	 * @return the converted payload of the reply message (never {@code null})
+	 */
 	@SuppressWarnings("unchecked")
 	protected <T> T doConvert(Message<?> message, Class<T> targetClass) {
 		MessageConverter messageConverter = getMessageConverter();
 		T value = (T) messageConverter.fromMessage(message, targetClass);
 		if (value == null) {
-			throw new MessageConversionException(message, "Unable to convert payload='"
-					+ message.getPayload() + "' to type='" + targetClass
-					+ "', converter=[" + messageConverter + "]", null);
+			throw new MessageConversionException(message, "Unable to convert payload [" + message.getPayload() +
+					"] to type [" + targetClass + "] using converter [" + messageConverter + "]");
 		}
 		return value;
 	}

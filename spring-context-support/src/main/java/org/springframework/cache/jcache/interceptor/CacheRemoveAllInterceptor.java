@@ -22,7 +22,6 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
-import org.springframework.cache.jcache.model.CacheRemoveAllOperation;
 
 /**
  * Intercept methods annotated with {@link CacheRemoveAll}.
@@ -31,7 +30,7 @@ import org.springframework.cache.jcache.model.CacheRemoveAllOperation;
  * @since 4.1
  */
 @SuppressWarnings("serial")
-public class CacheRemoveAllInterceptor
+class CacheRemoveAllInterceptor
 		extends AbstractCacheInterceptor<CacheRemoveAllOperation, CacheRemoveAll> {
 
 	protected CacheRemoveAllInterceptor(CacheErrorHandler errorHandler) {
@@ -41,9 +40,10 @@ public class CacheRemoveAllInterceptor
 	@Override
 	protected Object invoke(CacheOperationInvocationContext<CacheRemoveAllOperation> context,
 			CacheOperationInvoker invoker) {
+
 		CacheRemoveAllOperation operation = context.getOperation();
 
-		final boolean earlyRemove = operation.isEarlyRemove();
+		boolean earlyRemove = operation.isEarlyRemove();
 
 		if (earlyRemove) {
 			removeAll(context);
@@ -56,12 +56,12 @@ public class CacheRemoveAllInterceptor
 			}
 			return result;
 		}
-		catch (CacheOperationInvoker.ThrowableWrapper t) {
-			Throwable ex = t.getOriginal();
-			if (!earlyRemove && operation.getExceptionTypeFilter().match(ex.getClass())) {
+		catch (CacheOperationInvoker.ThrowableWrapper ex) {
+			Throwable original = ex.getOriginal();
+			if (!earlyRemove && operation.getExceptionTypeFilter().match(original.getClass())) {
 				removeAll(context);
 			}
-			throw t;
+			throw ex;
 		}
 	}
 

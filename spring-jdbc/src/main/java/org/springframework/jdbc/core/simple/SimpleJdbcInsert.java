@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,11 @@ package org.springframework.jdbc.core.simple;
 
 import java.util.Arrays;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
  * A SimpleJdbcInsert is a multi-threaded, reusable object providing easy insert
@@ -33,7 +31,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * name of the table and a Map containing the column names and the column values.
  *
  * <p>The meta data processing is based on the DatabaseMetaData provided by the
- * JDBC driver. As long as the JBDC driver can provide the names of the columns
+ * JDBC driver. As long as the JDBC driver can provide the names of the columns
  * for a specified table than we can rely on this auto-detection feature. If that
  * is not the case, then the column names must be specified explicitly.
  *
@@ -113,13 +111,7 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	@Override
-	public SimpleJdbcInsertOperations useNativeJdbcExtractorForMetaData(NativeJdbcExtractor nativeJdbcExtractor) {
-		setNativeJdbcExtractor(nativeJdbcExtractor);
-		return this;
-	}
-
-	@Override
-	public int execute(Map<String, Object> args) {
+	public int execute(Map<String, ?> args) {
 		return doExecute(args);
 	}
 
@@ -129,7 +121,7 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	@Override
-	public Number executeAndReturnKey(Map<String, Object> args) {
+	public Number executeAndReturnKey(Map<String, ?> args) {
 		return doExecuteAndReturnKey(args);
 	}
 
@@ -139,7 +131,7 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	@Override
-	public KeyHolder executeAndReturnKeyHolder(Map<String, Object> args) {
+	public KeyHolder executeAndReturnKeyHolder(Map<String, ?> args) {
 		return doExecuteAndReturnKeyHolder(args);
 	}
 
@@ -149,12 +141,13 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	@Override
-	public int[] executeBatch(Map<String, Object>[] batch) {
+	@SuppressWarnings("unchecked")
+	public int[] executeBatch(Map<String, ?>... batch) {
 		return doExecuteBatch(batch);
 	}
 
 	@Override
-	public int[] executeBatch(SqlParameterSource[] batch) {
+	public int[] executeBatch(SqlParameterSource... batch) {
 		return doExecuteBatch(batch);
 	}
 

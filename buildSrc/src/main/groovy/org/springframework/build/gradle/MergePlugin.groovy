@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,9 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.maven.Conf2ScopeMapping
 import org.gradle.api.plugins.MavenPlugin
-import org.gradle.api.tasks.*
 import org.gradle.plugins.ide.eclipse.EclipsePlugin
-import org.gradle.plugins.ide.eclipse.model.EclipseClasspath;
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.api.invocation.*
-
 
 /**
  * Gradle plugin that allows projects to merged together. Primarily developed to
@@ -67,22 +64,24 @@ class MergePlugin implements Plugin<Project> {
 		project.plugins.apply(IdeaPlugin)
 
 		MergeModel model = project.extensions.create("merge", MergeModel)
+		model.project = project
 		project.configurations.create("merging")
 		Configuration runtimeMerge = project.configurations.create("runtimeMerge")
 
 		// Ensure the IDE can reference merged projects
-		project.eclipse.classpath.plusConfigurations += [runtimeMerge]
-		project.idea.module.scopes.PROVIDED.plus += runtimeMerge
+		project.eclipse.classpath.plusConfigurations += [ runtimeMerge ]
+		project.idea.module.scopes.PROVIDED.plus += [ runtimeMerge ]
 
 		// Hook to perform the actual merge logic
 		project.afterEvaluate{
-			if(it.merge.into != null) {
+			if (it.merge.into != null) {
 				setup(it)
 			}
+			setupIdeDependencies(it)
 		}
 
 		// Hook to build runtimeMerge dependencies
-		if(!attachedProjectsEvaluated) {
+		if (!attachedProjectsEvaluated) {
 			project.gradle.projectsEvaluated{
 				postProcessProjects(it)
 			}
@@ -102,7 +101,7 @@ class MergePlugin implements Plugin<Project> {
 		// invoking a task will invoke the task with the same name on 'into' project
 		["sourcesJar", "jar", "javadocJar", "javadoc", "install", "artifactoryPublish"].each {
 			def task = project.tasks.findByPath(it)
-			if(task) {
+			if (task) {
 				task.enabled = false
 				task.dependsOn(project.merge.into.tasks.findByPath(it))
 			}
@@ -117,10 +116,20 @@ class MergePlugin implements Plugin<Project> {
 		}
 	}
 
+	private void setupIdeDependencies(Project project) {
+		project.configurations.each { c ->
+			c.dependencies.findAll( { it instanceof org.gradle.api.artifacts.ProjectDependency } ).each { d ->
+				d.dependencyProject.merge.from.each { from ->
+					project.dependencies.add("runtimeMerge", from)
+				}
+			}
+		}
+	}
+
 	private void setupMaven(Project project) {
 		project.configurations.each { configuration ->
 			Conf2ScopeMapping mapping = project.conf2ScopeMappings.getMapping([configuration])
-			if(mapping.scope) {
+			if (mapping.scope) {
 				Configuration intoConfiguration = project.merge.into.configurations.create(
 					project.name + "-" + configuration.name)
 				configuration.excludeRules.each {
@@ -131,12 +140,13 @@ class MergePlugin implements Plugin<Project> {
 				configuration.dependencies.each {
 					def intoCompile = project.merge.into.configurations.getByName("compile")
 					// Protect against changing a compile scope dependency (SPR-10218)
-					if(!intoCompile.dependencies.contains(it)) {
+					if (!intoCompile.dependencies.contains(it)) {
 						intoConfiguration.dependencies.add(it)
 					}
 				}
+				def index = project.parent.childProjects.findIndexOf {p -> p.getValue() == project}
 				project.merge.into.install.repositories.mavenInstaller.pom.scopeMappings.addMapping(
-					mapping.priority + 100, intoConfiguration, mapping.scope)
+					mapping.priority + 100 + index, intoConfiguration, mapping.scope)
 			}
 		}
 	}
@@ -156,5 +166,12 @@ class MergePlugin implements Plugin<Project> {
 }
 
 class MergeModel {
+	Project project;
 	Project into;
+	List<Project> from = [];
+	
+	public void setInto(Project into) {
+		this.into = into;
+		into.merge.from.add(project);
+	}
 }

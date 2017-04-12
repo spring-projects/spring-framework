@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.regex.Pattern;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
@@ -43,13 +44,19 @@ import org.springframework.web.util.UriUtils;
 public abstract class AbstractHttpSendingTransportHandler extends AbstractTransportHandler
 		implements SockJsSessionFactory {
 
+	/**
+	 * Pattern for validating jsonp callback parameter values.
+	 */
+	private static final Pattern CALLBACK_PARAM_PATTERN = Pattern.compile("[0-9A-Za-z_\\.]*");
+
+
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler wsHandler, SockJsSession wsSession) throws SockJsException {
 
 		AbstractHttpSockJsSession sockJsSession = (AbstractHttpSockJsSession) wsSession;
 
-		String protocol = null; // https://github.com/sockjs/sockjs-client/issues/130
+		String protocol = null;  // https://github.com/sockjs/sockjs-client/issues/130
 		sockJsSession.setAcceptedProtocol(protocol);
 
 		// Set content type before writing
@@ -62,11 +69,15 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 			AbstractHttpSockJsSession sockJsSession) throws SockJsException {
 
 		if (sockJsSession.isNew()) {
-			logger.debug("Opening " + getTransportType() + " connection");
+			if (logger.isDebugEnabled()) {
+				logger.debug(request.getMethod() + " " + request.getURI());
+			}
 			sockJsSession.handleInitialRequest(request, response, getFrameFormat(request));
 		}
 		else if (sockJsSession.isClosed()) {
-			logger.debug("Connection already closed (but not removed yet)");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Connection already closed (but not removed yet) for " + sockJsSession);
+			}
 			SockJsFrame frame = SockJsFrame.closeFrameGoAway();
 			try {
 				response.getBody().write(frame.getContentBytes());
@@ -74,38 +85,47 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 			catch (IOException ex) {
 				throw new SockJsException("Failed to send " + frame, sockJsSession.getId(), ex);
 			}
-			return;
 		}
 		else if (!sockJsSession.isActive()) {
-			logger.debug("starting " + getTransportType() + " async request");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Starting " + getTransportType() + " async request.");
+			}
 			sockJsSession.handleSuccessiveRequest(request, response, getFrameFormat(request));
 		}
 		else {
-			logger.debug("another " + getTransportType() + " connection still open: " + sockJsSession);
-			SockJsFrame frame = getFrameFormat(request).format(SockJsFrame.closeFrameAnotherConnectionOpen());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Another " + getTransportType() + " connection still open for " + sockJsSession);
+			}
+			String formattedFrame = getFrameFormat(request).format(SockJsFrame.closeFrameAnotherConnectionOpen());
 			try {
-				response.getBody().write(frame.getContentBytes());
+				response.getBody().write(formattedFrame.getBytes(SockJsFrame.CHARSET));
 			}
 			catch (IOException ex) {
-				throw new SockJsException("Failed to send " + frame, sockJsSession.getId(), ex);
+				throw new SockJsException("Failed to send " + formattedFrame, sockJsSession.getId(), ex);
 			}
 		}
 	}
+
 
 	protected abstract MediaType getContentType();
 
 	protected abstract SockJsFrameFormat getFrameFormat(ServerHttpRequest request);
 
+
 	protected final String getCallbackParam(ServerHttpRequest request) {
 		String query = request.getURI().getQuery();
 		MultiValueMap<String, String> params = UriComponentsBuilder.newInstance().query(query).build().getQueryParams();
 		String value = params.getFirst("c");
-		try {
-			return StringUtils.isEmpty(value) ? null : UriUtils.decode(value, "UTF-8");
+		if (StringUtils.isEmpty(value)) {
+			return null;
 		}
-		catch (UnsupportedEncodingException e) {
+		try {
+			String result = UriUtils.decode(value, "UTF-8");
+			return (CALLBACK_PARAM_PATTERN.matcher(result).matches() ? result : null);
+		}
+		catch (UnsupportedEncodingException ex) {
 			// should never happen
-			throw new SockJsException("Unable to decode callback query parameter", null, e);
+			throw new SockJsException("Unable to decode callback query parameter", null, ex);
 		}
 	}
 

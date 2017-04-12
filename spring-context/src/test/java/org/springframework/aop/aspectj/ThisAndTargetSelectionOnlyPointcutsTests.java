@@ -16,17 +16,18 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-public final class ThisAndTargetSelectionOnlyPointcutsTests {
+public class ThisAndTargetSelectionOnlyPointcutsTests {
 
 	private TestInterface testBean;
 

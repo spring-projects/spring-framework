@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,8 @@ package org.springframework.jms.support.destination;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Queue;
-import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.jms.Topic;
-import javax.jms.TopicSession;
 
 import org.springframework.util.Assert;
 
@@ -30,15 +28,8 @@ import org.springframework.util.Assert;
  * Simple {@link DestinationResolver} implementation resolving destination names
  * as dynamic destinations.
  *
- * <p>This implementation will work on both JMS 1.1 and JMS 1.0.2,
- * because it uses the {@link javax.jms.QueueSession} or {@link javax.jms.TopicSession}
- * methods if possible, falling back to JMS 1.1's generic {@link javax.jms.Session}
- * methods.
- *
  * @author Juergen Hoeller
  * @since 1.1
- * @see javax.jms.QueueSession#createQueue
- * @see javax.jms.TopicSession#createTopic
  * @see javax.jms.Session#createQueue
  * @see javax.jms.Session#createTopic
  */
@@ -78,14 +69,7 @@ public class DynamicDestinationResolver implements DestinationResolver {
 	 * @see Session#createTopic(String)
 	 */
 	protected Topic resolveTopic(Session session, String topicName) throws JMSException {
-		if (session instanceof TopicSession) {
-			// Cast to TopicSession: will work on both JMS 1.1 and 1.0.2
-			return ((TopicSession) session).createTopic(topicName);
-		}
-		else {
-			// Fall back to generic JMS Session: will only work on JMS 1.1
-			return session.createTopic(topicName);
-		}
+		return session.createTopic(topicName);
 	}
 
 	/**
@@ -97,14 +81,7 @@ public class DynamicDestinationResolver implements DestinationResolver {
 	 * @see Session#createQueue(String)
 	 */
 	protected Queue resolveQueue(Session session, String queueName) throws JMSException {
-		if (session instanceof QueueSession) {
-			// Cast to QueueSession: will work on both JMS 1.1 and 1.0.2
-			return ((QueueSession) session).createQueue(queueName);
-		}
-		else {
-			// Fall back to generic JMS Session: will only work on JMS 1.1
-			return session.createQueue(queueName);
-		}
+		return session.createQueue(queueName);
 	}
 
 }

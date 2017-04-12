@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * @author Mark Fisher
  * @since 3.0
  * @see #setPoolSize
+ * @see #setRemoveOnCancelPolicy
  * @see #setThreadFactory
  * @see #setErrorHandler
  */
@@ -56,6 +57,8 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor, TaskScheduler {
 
 	private volatile int poolSize = 1;
+
+	private volatile boolean removeOnCancelPolicy = false;
 
 	private volatile ScheduledExecutorService scheduledExecutor;
 
@@ -76,18 +79,44 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	}
 
 	/**
+	 * Set the remove-on-cancel mode on {@link ScheduledThreadPoolExecutor} (JDK 7+).
+	 * <p>Default is {@code false}. If set to {@code true}, the target executor will be
+	 * switched into remove-on-cancel mode (if possible, with a soft fallback otherwise).
+	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
+	 */
+	public void setRemoveOnCancelPolicy(boolean removeOnCancelPolicy) {
+		this.removeOnCancelPolicy = removeOnCancelPolicy;
+		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
+			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setRemoveOnCancelPolicy(removeOnCancelPolicy);
+		}
+		else if (removeOnCancelPolicy && this.scheduledExecutor != null) {
+			logger.info("Could not apply remove-on-cancel policy - not a Java 7+ ScheduledThreadPoolExecutor");
+		}
+	}
+
+	/**
 	 * Set a custom {@link ErrorHandler} strategy.
 	 */
 	public void setErrorHandler(ErrorHandler errorHandler) {
-		Assert.notNull(errorHandler, "'errorHandler' must not be null");
 		this.errorHandler = errorHandler;
 	}
+
 
 	@Override
 	protected ExecutorService initializeExecutor(
 			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
 		this.scheduledExecutor = createExecutor(this.poolSize, threadFactory, rejectedExecutionHandler);
+
+		if (this.removeOnCancelPolicy) {
+			if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
+				((ScheduledThreadPoolExecutor) this.scheduledExecutor).setRemoveOnCancelPolicy(true);
+			}
+			else {
+				logger.info("Could not apply remove-on-cancel policy - not a Java 7+ ScheduledThreadPoolExecutor");
+			}
+		}
+
 		return this.scheduledExecutor;
 	}
 
@@ -146,6 +175,18 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	}
 
 	/**
+	 * Return the current setting for the remove-on-cancel mode.
+	 * <p>Requires an underlying {@link ScheduledThreadPoolExecutor}.
+	 */
+	public boolean isRemoveOnCancelPolicy() {
+		if (this.scheduledExecutor == null) {
+			// Not initialized yet: return our setting for the time being.
+			return this.removeOnCancelPolicy;
+		}
+		return getScheduledThreadPoolExecutor().getRemoveOnCancelPolicy();
+	}
+
+	/**
 	 * Return the number of currently active threads.
 	 * <p>Requires an underlying {@link ScheduledThreadPoolExecutor}.
 	 * @see #getScheduledThreadPoolExecutor()
@@ -195,7 +236,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		try {
 			Callable<T> taskToUse = task;
 			if (this.errorHandler != null) {
-				taskToUse = new DelegatingErrorHandlingCallable<T>(task, this.errorHandler);
+				taskToUse = new DelegatingErrorHandlingCallable<>(task, this.errorHandler);
 			}
 			return executor.submit(taskToUse);
 		}
@@ -208,7 +249,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	public ListenableFuture<?> submitListenable(Runnable task) {
 		ExecutorService executor = getScheduledExecutor();
 		try {
-			ListenableFutureTask<Object> future = new ListenableFutureTask<Object>(task, null);
+			ListenableFutureTask<Object> future = new ListenableFutureTask<>(task, null);
 			executor.execute(errorHandlingTask(future, false));
 			return future;
 		}
@@ -221,7 +262,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
 		ExecutorService executor = getScheduledExecutor();
 		try {
-			ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+			ListenableFutureTask<T> future = new ListenableFutureTask<>(task);
 			executor.execute(errorHandlingTask(future, false));
 			return future;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,19 +35,20 @@ public class PasswordInputTag extends InputTag {
 
 	/**
 	 * Is the password value to be rendered?
-	 * @return {@code true} if the password value to be rendered.
+	 * @param showPassword {@code true} if the password value is to be rendered
+	 */
+	public void setShowPassword(boolean showPassword) {
+		this.showPassword = showPassword;
+	}
+
+	/**
+	 * Is the password value to be rendered?
+	 * @return {@code true} if the password value to be rendered
 	 */
 	public boolean isShowPassword() {
 		return this.showPassword;
 	}
 
-	/**
-	 * Is the password value to be rendered?
-	 * @param showPassword {@code true} if the password value is to be rendered.
-	 */
-	public void setShowPassword(boolean showPassword) {
-		this.showPassword = showPassword;
-	}
 
 	/**
 	 * Flags "type" as an illegal dynamic attribute.
@@ -75,8 +76,10 @@ public class PasswordInputTag extends InputTag {
 	protected void writeValue(TagWriter tagWriter) throws JspException {
 		if (this.showPassword) {
 			super.writeValue(tagWriter);
-		} else {
+		}
+		else {
 			tagWriter.writeAttribute("value", processFieldValue(getName(), "", getType()));
 		}
 	}
+
 }

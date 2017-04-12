@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,7 @@ import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -33,8 +34,8 @@ import org.springframework.util.ObjectUtils;
  * created to represent a STOMP message received from a STOMP client or message broker.
  * Native message headers are kept in a {@code Map<String, List<String>>} under the key
  * {@link #NATIVE_HEADERS}.
- * <p>
- * This class is not intended for direct use but is rather expected to be used
+ *
+ * <p>This class is not intended for direct use but is rather expected to be used
  * indirectly through protocol-specific sub-classes such as
  * {@link org.springframework.messaging.simp.stomp.StompHeaderAccessor StompHeaderAccessor}.
  * Such sub-classes may provide factory methods to translate message headers from
@@ -59,11 +60,11 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 
 	/**
 	 * A protected constructor to create new headers.
-	 * @param nativeHeaders native headers to create the message with, may be {@code null}
+	 * @param nativeHeaders native headers to create the message with (may be {@code null})
 	 */
 	protected NativeMessageHeaderAccessor(Map<String, List<String>> nativeHeaders) {
 		if (!CollectionUtils.isEmpty(nativeHeaders)) {
-			setHeader(NATIVE_HEADERS, new LinkedMultiValueMap<String, String>(nativeHeaders));
+			setHeader(NATIVE_HEADERS, new LinkedMultiValueMap<>(nativeHeaders));
 		}
 	}
 
@@ -78,7 +79,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 			if (map != null) {
 				// Force removal since setHeader checks for equality
 				removeHeader(NATIVE_HEADERS);
-				setHeader(NATIVE_HEADERS, new LinkedMultiValueMap<String, String>(map));
+				setHeader(NATIVE_HEADERS, new LinkedMultiValueMap<>(map));
 			}
 		}
 	}
@@ -93,7 +94,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	 */
 	public Map<String, List<String>> toNativeHeaderMap() {
 		Map<String, List<String>> map = getNativeHeaders();
-		return (map != null ? new LinkedMultiValueMap<String, String>(map) : Collections.<String, List<String>>emptyMap());
+		return (map != null ? new LinkedMultiValueMap<>(map) : Collections.emptyMap());
 	}
 
 	@Override
@@ -114,7 +115,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	 */
 	public boolean containsNativeHeader(String headerName) {
 		Map<String, List<String>> map = getNativeHeaders();
-		return (map != null ? map.containsKey(headerName) : false);
+		return (map != null && map.containsKey(headerName));
 	}
 
 	/**
@@ -153,10 +154,10 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 			return;
 		}
 		if (map == null) {
-			map = new LinkedMultiValueMap<String, String>(4);
+			map = new LinkedMultiValueMap<>(4);
 			setHeader(NATIVE_HEADERS, map);
 		}
-		List<String> values = new LinkedList<String>();
+		List<String> values = new LinkedList<>();
 		values.add(value);
 		if (!ObjectUtils.nullSafeEquals(values, getHeader(name))) {
 			setModified(true);
@@ -174,16 +175,27 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		}
 		Map<String, List<String>> nativeHeaders = getNativeHeaders();
 		if (nativeHeaders == null) {
-			nativeHeaders = new LinkedMultiValueMap<String, String>(4);
+			nativeHeaders = new LinkedMultiValueMap<>(4);
 			setHeader(NATIVE_HEADERS, nativeHeaders);
 		}
 		List<String> values = nativeHeaders.get(name);
 		if (values == null) {
-			values = new LinkedList<String>();
+			values = new LinkedList<>();
 			nativeHeaders.put(name, values);
 		}
 		values.add(value);
 		setModified(true);
+	}
+
+	public void addNativeHeaders(MultiValueMap<String, String> headers) {
+		if (headers == null) {
+			return;
+		}
+		for (String header : headers.keySet()) {
+			for (String value : headers.get(header)) {
+				addNativeHeader(header, value);
+			}
+		}
 	}
 
 	public List<String> removeNativeHeader(String name) {
@@ -193,6 +205,18 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 			return null;
 		}
 		return nativeHeaders.remove(name);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static String getFirstNativeHeader(String headerName, Map<String, Object> headers) {
+		Map<String, List<String>> map = (Map<String, List<String>>) headers.get(NATIVE_HEADERS);
+		if (map != null) {
+			List<String> values = map.get(headerName);
+			if (values != null) {
+				return values.get(0);
+			}
+		}
+		return null;
 	}
 
 }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,24 +16,21 @@
 
 package org.springframework.messaging.simp;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageBuilder;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.*;
 
 /**
  * Unit tests for
@@ -110,10 +107,20 @@ public class SimpAttributesContextHolderTests {
 	}
 
 	@Test
-	public void setAttributesFromMessageWithMissingHeaders() {
+	public void setAttributesFromMessageWithMissingSessionId() {
 		this.thrown.expect(IllegalStateException.class);
-		this.thrown.expectMessage(startsWith("Message does not contain SiMP session id or attributes"));
+		this.thrown.expectMessage(startsWith("No session id in"));
 		SimpAttributesContextHolder.setAttributesFromMessage(new GenericMessage<Object>(""));
+	}
+
+	@Test
+	public void setAttributesFromMessageWithMissingSessionAttributes() {
+		this.thrown.expect(IllegalStateException.class);
+		this.thrown.expectMessage(startsWith("No session attributes in"));
+		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create();
+		headerAccessor.setSessionId("session1");
+		Message<?> message = MessageBuilder.createMessage("", headerAccessor.getMessageHeaders());
+		SimpAttributesContextHolder.setAttributesFromMessage(message);
 	}
 
 	@Test

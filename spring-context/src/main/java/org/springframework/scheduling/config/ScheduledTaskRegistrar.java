@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,15 @@
 package org.springframework.scheduling.config;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -33,6 +34,7 @@ import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Helper bean for registering tasks with a {@link TaskScheduler}, typically using cron
@@ -46,6 +48,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Tobias Montagna-Hay
  * @since 3.0
  * @see org.springframework.scheduling.annotation.EnableAsync
  * @see org.springframework.scheduling.annotation.SchedulingConfigurer
@@ -64,7 +67,9 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 
 	private List<IntervalTask> fixedDelayTasks;
 
-	private final Set<ScheduledFuture<?>> scheduledFutures = new LinkedHashSet<ScheduledFuture<?>>();
+	private final Map<Task, ScheduledTask> unresolvedTasks = new HashMap<>(16);
+
+	private final Set<ScheduledTask> scheduledTasks = new LinkedHashSet<>(16);
 
 
 	/**
@@ -106,9 +111,9 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 * (typically custom implementations of the {@link Trigger} interface).
 	 */
 	public void setTriggerTasks(Map<Runnable, Trigger> triggerTasks) {
-		this.triggerTasks = new ArrayList<TriggerTask>();
+		this.triggerTasks = new ArrayList<>();
 		for (Map.Entry<Runnable, Trigger> task : triggerTasks.entrySet()) {
-			this.triggerTasks.add(new TriggerTask(task.getKey(), task.getValue()));
+			addTriggerTask(new TriggerTask(task.getKey(), task.getValue()));
 		}
 	}
 
@@ -123,13 +128,23 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
+	 * Get the trigger tasks as an unmodifiable list of {@link TriggerTask} objects.
+	 * @return the list of tasks (never {@code null})
+	 * @since 4.2
+	 */
+	public List<TriggerTask> getTriggerTaskList() {
+		return (this.triggerTasks != null? Collections.unmodifiableList(this.triggerTasks) :
+				Collections.emptyList());
+	}
+
+	/**
 	 * Specify triggered tasks as a Map of Runnables (the tasks) and cron expressions.
 	 * @see CronTrigger
 	 */
 	public void setCronTasks(Map<Runnable, String> cronTasks) {
-		this.cronTasks = new ArrayList<CronTask>();
+		this.cronTasks = new ArrayList<>();
 		for (Map.Entry<Runnable, String> task : cronTasks.entrySet()) {
-			this.addCronTask(task.getKey(), task.getValue());
+			addCronTask(task.getKey(), task.getValue());
 		}
 	}
 
@@ -144,13 +159,23 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
+	 * Get the cron tasks as an unmodifiable list of {@link CronTask} objects.
+	 * @return the list of tasks (never {@code null})
+	 * @since 4.2
+	 */
+	public List<CronTask> getCronTaskList() {
+		return (this.cronTasks != null ? Collections.unmodifiableList(this.cronTasks) :
+				Collections.emptyList());
+	}
+
+	/**
 	 * Specify triggered tasks as a Map of Runnables (the tasks) and fixed-rate values.
 	 * @see TaskScheduler#scheduleAtFixedRate(Runnable, long)
 	 */
 	public void setFixedRateTasks(Map<Runnable, Long> fixedRateTasks) {
-		this.fixedRateTasks = new ArrayList<IntervalTask>();
+		this.fixedRateTasks = new ArrayList<>();
 		for (Map.Entry<Runnable, Long> task : fixedRateTasks.entrySet()) {
-			this.addFixedRateTask(task.getKey(), task.getValue());
+			addFixedRateTask(task.getKey(), task.getValue());
 		}
 	}
 
@@ -165,13 +190,23 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
+	 * Get the fixed-rate tasks as an unmodifiable list of {@link IntervalTask} objects.
+	 * @return the list of tasks (never {@code null})
+	 * @since 4.2
+	 */
+	public List<IntervalTask> getFixedRateTaskList() {
+		return (this.fixedRateTasks != null ? Collections.unmodifiableList(this.fixedRateTasks) :
+				Collections.emptyList());
+	}
+
+	/**
 	 * Specify triggered tasks as a Map of Runnables (the tasks) and fixed-delay values.
 	 * @see TaskScheduler#scheduleWithFixedDelay(Runnable, long)
 	 */
 	public void setFixedDelayTasks(Map<Runnable, Long> fixedDelayTasks) {
-		this.fixedDelayTasks = new ArrayList<IntervalTask>();
+		this.fixedDelayTasks = new ArrayList<>();
 		for (Map.Entry<Runnable, Long> task : fixedDelayTasks.entrySet()) {
-			this.addFixedDelayTask(task.getKey(), task.getValue());
+			addFixedDelayTask(task.getKey(), task.getValue());
 		}
 	}
 
@@ -186,11 +221,22 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
+	 * Get the fixed-delay tasks as an unmodifiable list of {@link IntervalTask} objects.
+	 * @return the list of tasks (never {@code null})
+	 * @since 4.2
+	 */
+	public List<IntervalTask> getFixedDelayTaskList() {
+		return (this.fixedDelayTasks != null ? Collections.unmodifiableList(this.fixedDelayTasks) :
+				Collections.emptyList());
+	}
+
+
+	/**
 	 * Add a Runnable task to be triggered per the given {@link Trigger}.
 	 * @see TaskScheduler#scheduleAtFixedRate(Runnable, long)
 	 */
 	public void addTriggerTask(Runnable task, Trigger trigger) {
-		this.addTriggerTask(new TriggerTask(task, trigger));
+		addTriggerTask(new TriggerTask(task, trigger));
 	}
 
 	/**
@@ -200,7 +246,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public void addTriggerTask(TriggerTask task) {
 		if (this.triggerTasks == null) {
-			this.triggerTasks = new ArrayList<TriggerTask>();
+			this.triggerTasks = new ArrayList<>();
 		}
 		this.triggerTasks.add(task);
 	}
@@ -209,7 +255,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 * Add a Runnable task to be triggered per the given cron expression
 	 */
 	public void addCronTask(Runnable task, String expression) {
-		this.addCronTask(new CronTask(task, expression));
+		addCronTask(new CronTask(task, expression));
 	}
 
 	/**
@@ -218,17 +264,17 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public void addCronTask(CronTask task) {
 		if (this.cronTasks == null) {
-			this.cronTasks = new ArrayList<CronTask>();
+			this.cronTasks = new ArrayList<>();
 		}
 		this.cronTasks.add(task);
 	}
 
 	/**
-	 * Add a Runnable task to be triggered at the given fixed-rate period.
+	 * Add a {@code Runnable} task to be triggered at the given fixed-rate interval.
 	 * @see TaskScheduler#scheduleAtFixedRate(Runnable, long)
 	 */
-	public void addFixedRateTask(Runnable task, long period) {
-		this.addFixedRateTask(new IntervalTask(task, period, 0));
+	public void addFixedRateTask(Runnable task, long interval) {
+		addFixedRateTask(new IntervalTask(task, interval, 0));
 	}
 
 	/**
@@ -238,7 +284,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public void addFixedRateTask(IntervalTask task) {
 		if (this.fixedRateTasks == null) {
-			this.fixedRateTasks = new ArrayList<IntervalTask>();
+			this.fixedRateTasks = new ArrayList<>();
 		}
 		this.fixedRateTasks.add(task);
 	}
@@ -248,7 +294,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 * @see TaskScheduler#scheduleWithFixedDelay(Runnable, long)
 	 */
 	public void addFixedDelayTask(Runnable task, long delay) {
-		this.addFixedDelayTask(new IntervalTask(task, delay, 0));
+		addFixedDelayTask(new IntervalTask(task, delay, 0));
 	}
 
 	/**
@@ -258,20 +304,21 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public void addFixedDelayTask(IntervalTask task) {
 		if (this.fixedDelayTasks == null) {
-			this.fixedDelayTasks = new ArrayList<IntervalTask>();
+			this.fixedDelayTasks = new ArrayList<>();
 		}
 		this.fixedDelayTasks.add(task);
 	}
+
 
 	/**
 	 * Return whether this {@code ScheduledTaskRegistrar} has any tasks registered.
 	 * @since 3.2
 	 */
 	public boolean hasTasks() {
-		return (this.fixedRateTasks != null && !this.fixedRateTasks.isEmpty()) ||
-				(this.fixedDelayTasks != null && !this.fixedDelayTasks.isEmpty()) ||
-				(this.cronTasks != null && !this.cronTasks.isEmpty()) ||
-				(this.triggerTasks != null && !this.triggerTasks.isEmpty());
+		return (!CollectionUtils.isEmpty(this.triggerTasks) ||
+				!CollectionUtils.isEmpty(this.cronTasks) ||
+				!CollectionUtils.isEmpty(this.fixedRateTasks) ||
+				!CollectionUtils.isEmpty(this.fixedDelayTasks));
 	}
 
 
@@ -288,56 +335,155 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 * #setTaskScheduler(TaskScheduler) task scheduler}.
 	 */
 	protected void scheduleTasks() {
-		long now = System.currentTimeMillis();
-
 		if (this.taskScheduler == null) {
 			this.localExecutor = Executors.newSingleThreadScheduledExecutor();
 			this.taskScheduler = new ConcurrentTaskScheduler(this.localExecutor);
 		}
 		if (this.triggerTasks != null) {
-			for (TriggerTask task : triggerTasks) {
-				this.scheduledFutures.add(this.taskScheduler.schedule(
-						task.getRunnable(), task.getTrigger()));
+			for (TriggerTask task : this.triggerTasks) {
+				addScheduledTask(scheduleTriggerTask(task));
 			}
 		}
 		if (this.cronTasks != null) {
-			for (CronTask task : cronTasks) {
-				this.scheduledFutures.add(this.taskScheduler.schedule(
-						task.getRunnable(), task.getTrigger()));
+			for (CronTask task : this.cronTasks) {
+				addScheduledTask(scheduleCronTask(task));
 			}
 		}
 		if (this.fixedRateTasks != null) {
-			for (IntervalTask task : fixedRateTasks) {
-				if (task.getInitialDelay() > 0) {
-					Date startTime = new Date(now + task.getInitialDelay());
-					this.scheduledFutures.add(this.taskScheduler.scheduleAtFixedRate(
-							task.getRunnable(), startTime, task.getInterval()));
-				}
-				else {
-					this.scheduledFutures.add(this.taskScheduler.scheduleAtFixedRate(
-							task.getRunnable(), task.getInterval()));
-				}
+			for (IntervalTask task : this.fixedRateTasks) {
+				addScheduledTask(scheduleFixedRateTask(task));
 			}
 		}
 		if (this.fixedDelayTasks != null) {
-			for (IntervalTask task : fixedDelayTasks) {
-				if (task.getInitialDelay() > 0) {
-					Date startTime = new Date(now + task.getInitialDelay());
-					this.scheduledFutures.add(this.taskScheduler.scheduleWithFixedDelay(
-							task.getRunnable(), startTime, task.getInterval()));
-				}
-				else {
-					this.scheduledFutures.add(this.taskScheduler.scheduleWithFixedDelay(
-							task.getRunnable(), task.getInterval()));
-				}
+			for (IntervalTask task : this.fixedDelayTasks) {
+				addScheduledTask(scheduleFixedDelayTask(task));
 			}
 		}
 	}
 
+	private void addScheduledTask(ScheduledTask task) {
+		if (task != null) {
+			this.scheduledTasks.add(task);
+		}
+	}
+
+
+	/**
+	 * Schedule the specified trigger task, either right away if possible
+	 * or on initialization of the scheduler.
+	 * @return a handle to the scheduled task, allowing to cancel it
+	 * @since 4.3
+	 */
+	public ScheduledTask scheduleTriggerTask(TriggerTask task) {
+		ScheduledTask scheduledTask = this.unresolvedTasks.remove(task);
+		boolean newTask = false;
+		if (scheduledTask == null) {
+			scheduledTask = new ScheduledTask();
+			newTask = true;
+		}
+		if (this.taskScheduler != null) {
+			scheduledTask.future = this.taskScheduler.schedule(task.getRunnable(), task.getTrigger());
+		}
+		else {
+			addTriggerTask(task);
+			this.unresolvedTasks.put(task, scheduledTask);
+		}
+		return (newTask ? scheduledTask : null);
+	}
+
+	/**
+	 * Schedule the specified cron task, either right away if possible
+	 * or on initialization of the scheduler.
+	 * @return a handle to the scheduled task, allowing to cancel it
+	 * (or {@code null} if processing a previously registered task)
+	 * @since 4.3
+	 */
+	public ScheduledTask scheduleCronTask(CronTask task) {
+		ScheduledTask scheduledTask = this.unresolvedTasks.remove(task);
+		boolean newTask = false;
+		if (scheduledTask == null) {
+			scheduledTask = new ScheduledTask();
+			newTask = true;
+		}
+		if (this.taskScheduler != null) {
+			scheduledTask.future = this.taskScheduler.schedule(task.getRunnable(), task.getTrigger());
+		}
+		else {
+			addCronTask(task);
+			this.unresolvedTasks.put(task, scheduledTask);
+		}
+		return (newTask ? scheduledTask : null);
+	}
+
+	/**
+	 * Schedule the specified fixed-rate task, either right away if possible
+	 * or on initialization of the scheduler.
+	 * @return a handle to the scheduled task, allowing to cancel it
+	 * (or {@code null} if processing a previously registered task)
+	 * @since 4.3
+	 */
+	public ScheduledTask scheduleFixedRateTask(IntervalTask task) {
+		ScheduledTask scheduledTask = this.unresolvedTasks.remove(task);
+		boolean newTask = false;
+		if (scheduledTask == null) {
+			scheduledTask = new ScheduledTask();
+			newTask = true;
+		}
+		if (this.taskScheduler != null) {
+			if (task.getInitialDelay() > 0) {
+				Date startTime = new Date(System.currentTimeMillis() + task.getInitialDelay());
+				scheduledTask.future =
+						this.taskScheduler.scheduleAtFixedRate(task.getRunnable(), startTime, task.getInterval());
+			}
+			else {
+				scheduledTask.future =
+						this.taskScheduler.scheduleAtFixedRate(task.getRunnable(), task.getInterval());
+			}
+		}
+		else {
+			addFixedRateTask(task);
+			this.unresolvedTasks.put(task, scheduledTask);
+		}
+		return (newTask ? scheduledTask : null);
+	}
+
+	/**
+	 * Schedule the specified fixed-delay task, either right away if possible
+	 * or on initialization of the scheduler.
+	 * @return a handle to the scheduled task, allowing to cancel it
+	 * (or {@code null} if processing a previously registered task)
+	 * @since 4.3
+	 */
+	public ScheduledTask scheduleFixedDelayTask(IntervalTask task) {
+		ScheduledTask scheduledTask = this.unresolvedTasks.remove(task);
+		boolean newTask = false;
+		if (scheduledTask == null) {
+			scheduledTask = new ScheduledTask();
+			newTask = true;
+		}
+		if (this.taskScheduler != null) {
+			if (task.getInitialDelay() > 0) {
+				Date startTime = new Date(System.currentTimeMillis() + task.getInitialDelay());
+				scheduledTask.future =
+						this.taskScheduler.scheduleWithFixedDelay(task.getRunnable(), startTime, task.getInterval());
+			}
+			else {
+				scheduledTask.future =
+						this.taskScheduler.scheduleWithFixedDelay(task.getRunnable(), task.getInterval());
+			}
+		}
+		else {
+			addFixedDelayTask(task);
+			this.unresolvedTasks.put(task, scheduledTask);
+		}
+		return (newTask ? scheduledTask : null);
+	}
+
+
 	@Override
 	public void destroy() {
-		for (ScheduledFuture<?> future : this.scheduledFutures) {
-			future.cancel(true);
+		for (ScheduledTask task : this.scheduledTasks) {
+			task.cancel();
 		}
 		if (this.localExecutor != null) {
 			this.localExecutor.shutdownNow();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,7 +40,7 @@ import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
 import static org.junit.Assert.*;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
+import static org.springframework.tests.TestResourceUtils.*;
 
 /**
  * @author Guillaume Poirier
@@ -49,7 +48,7 @@ import static org.springframework.tests.TestResourceUtils.qualifiedResource;
  * @author Chris Beams
  * @since 10.03.2004
  */
-public final class ConcurrentBeanFactoryTests {
+public class ConcurrentBeanFactoryTests {
 
 	private static final Log logger = LogFactory.getLog(ConcurrentBeanFactoryTests.class);
 	private static final Resource CONTEXT = qualifiedResource(ConcurrentBeanFactoryTests.class, "context.xml");
@@ -102,7 +101,7 @@ public final class ConcurrentBeanFactoryTests {
 			run.setDaemon(true);
 			set.add(run);
 		}
-		for (Iterator<TestRun> it = new HashSet<TestRun>(set).iterator(); it.hasNext();) {
+		for (Iterator<TestRun> it = new HashSet<>(set).iterator(); it.hasNext();) {
 			TestRun run = it.next();
 			run.start();
 		}

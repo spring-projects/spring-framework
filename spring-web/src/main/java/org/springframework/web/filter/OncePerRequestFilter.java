@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,11 +113,12 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 		}
 	}
 
+
 	private boolean skipDispatch(HttpServletRequest request) {
 		if (isAsyncDispatch(request) && shouldNotFilterAsyncDispatch()) {
 			return true;
 		}
-		if ((request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE) != null) && shouldNotFilterErrorDispatch()) {
+		if (request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE) != null && shouldNotFilterErrorDispatch()) {
 			return true;
 		}
 		return false;
@@ -129,6 +130,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	 * the course of a single request. This method returns {@code true} if the
 	 * filter is currently executing within an asynchronous dispatch.
 	 * @param request the current request
+	 * @since 3.2
 	 * @see WebAsyncManager#hasConcurrentResult()
 	 */
 	protected boolean isAsyncDispatch(HttpServletRequest request) {
@@ -139,6 +141,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	 * Whether request processing is in asynchronous mode meaning that the
 	 * response will not be committed after the current thread is exited.
 	 * @param request the current request
+	 * @since 3.2
 	 * @see WebAsyncManager#isConcurrentHandlingStarted()
 	 */
 	protected boolean isAsyncStarted(HttpServletRequest request) {
@@ -189,6 +192,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	 * invoked during subsequent async dispatches. If "false", the filter will
 	 * be invoked during async dispatches with the same guarantees of being
 	 * invoked only once during a request within a single thread.
+	 * @since 3.2
 	 */
 	protected boolean shouldNotFilterAsyncDispatch() {
 		return true;
@@ -199,10 +203,12 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	 * processes and error mapped in {@code web.xml}. The default return value
 	 * is "true", which means the filter will not be invoked in case of an error
 	 * dispatch.
+	 * @since 3.2
 	 */
 	protected boolean shouldNotFilterErrorDispatch() {
 		return true;
 	}
+
 
 	/**
 	 * Same contract as for {@code doFilter}, but guaranteed to be

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
@@ -44,6 +45,7 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 		super(cs, beanFactory);
 	}
 
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return parameter.hasParameterAnnotation(Header.class);
@@ -56,8 +58,8 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 	}
 
 	@Override
-	protected Object resolveArgumentInternal(MethodParameter parameter, Message<?> message,
-			String name) throws Exception {
+	protected Object resolveArgumentInternal(MethodParameter parameter, Message<?> message, String name)
+			throws Exception {
 
 		Object headerValue = message.getHeaders().get(name);
 		Object nativeHeaderValue = getNativeHeaderValue(message, name);
@@ -71,26 +73,19 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 			}
 		}
 
-		return (headerValue != null) ? headerValue : nativeHeaderValue;
+		return (headerValue != null ? headerValue : nativeHeaderValue);
 	}
 
 	private Object getNativeHeaderValue(Message<?> message, String name) {
-
 		Map<String, List<String>> nativeHeaders = getNativeHeaders(message);
-
 		if (name.startsWith("nativeHeaders.")) {
 			name = name.substring("nativeHeaders.".length());
-			if (logger.isDebugEnabled()) {
-				logger.debug("Looking up native header '" + name + "'");
-			}
 		}
-
-		if ((nativeHeaders == null) || !nativeHeaders.containsKey(name)) {
+		if (nativeHeaders == null || !nativeHeaders.containsKey(name)) {
 			return null;
 		}
-
 		List<?> nativeHeaderValues = nativeHeaders.get(name);
-		return (nativeHeaderValues.size() == 1) ? nativeHeaderValues.get(0) : nativeHeaderValues;
+		return (nativeHeaderValues.size() == 1 ? nativeHeaderValues.get(0) : nativeHeaderValues);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -109,7 +104,7 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 	private static class HeaderNamedValueInfo extends NamedValueInfo {
 
 		private HeaderNamedValueInfo(Header annotation) {
-			super(annotation.value(), annotation.required(), annotation.defaultValue());
+			super(annotation.name(), annotation.required(), annotation.defaultValue());
 		}
 	}
 

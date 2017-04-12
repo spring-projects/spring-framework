@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -75,10 +75,10 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 	public void setUp() throws Exception {
 		servletContext = new MyMockServletContext();
 		initializer = new MyAnnotationConfigDispatcherServletInitializer();
-		servlets = new LinkedHashMap<String, Servlet>(1);
-		servletRegistrations = new LinkedHashMap<String, MockServletRegistration>(1);
-		filters = new LinkedHashMap<String, Filter>(1);
-		filterRegistrations = new LinkedHashMap<String, MockFilterRegistration>();
+		servlets = new LinkedHashMap<>(1);
+		servletRegistrations = new LinkedHashMap<>(1);
+		filters = new LinkedHashMap<>(1);
+		filterRegistrations = new LinkedHashMap<>();
 	}
 
 	@Test
@@ -224,7 +224,7 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 
 		@Override
 		protected Class<?>[] getServletConfigClasses() {
-			return new Class[]{MyConfiguration.class};
+			return new Class<?>[] {MyConfiguration.class};
 		}
 
 		@Override
@@ -254,16 +254,12 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 	}
 
 
-	private static class MyBean {
+	public static class MyBean {
 	}
 
 
 	@Configuration
-	@SuppressWarnings("unused")
-	private static class MyConfiguration {
-
-		public MyConfiguration() {
-		}
+	public static class MyConfiguration {
 
 		@Bean
 		public MyBean bean() {

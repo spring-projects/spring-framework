@@ -16,8 +16,8 @@
 
 package org.springframework.jdbc.support.xml;
 
-import java.io.Writer;
 import java.io.IOException;
+import java.io.Writer;
 
 /**
  * Interface defining handling involved with providing {@code Writer}

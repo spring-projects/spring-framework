@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 
@@ -29,7 +28,6 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.JavaScriptUtils;
 import org.springframework.web.util.TagUtils;
 
@@ -163,7 +161,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 
 	@Override
 	protected final int doStartTagInternal() throws JspException, IOException {
-		this.nestedArguments = new LinkedList<Object>();
+		this.nestedArguments = new LinkedList<>();
 		return EVAL_BODY_INCLUDE;
 	}
 
@@ -182,7 +180,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 			String msg = resolveMessage();
 
 			// HTML and/or JavaScript escape, if demanded.
-			msg = isHtmlEscape() ? HtmlUtils.htmlEscape(msg) : msg;
+			msg = htmlEscape(msg);
 			msg = this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(msg) : msg;
 
 			// Expose as variable, if demanded, else write to the page.
@@ -228,7 +226,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 		if (this.code != null || this.text != null) {
 			// We have a code or default text that we need to resolve.
 			Object[] argumentsArray = resolveArguments(this.arguments);
-			if(!this.nestedArguments.isEmpty()) {
+			if (!this.nestedArguments.isEmpty()) {
 				argumentsArray = appendArguments(argumentsArray,
 						this.nestedArguments.toArray());
 			}
@@ -250,7 +248,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	}
 
 	private Object[] appendArguments(Object[] sourceArguments, Object[] additionalArguments) {
-		if(ObjectUtils.isEmpty(sourceArguments)) {
+		if (ObjectUtils.isEmpty(sourceArguments)) {
 			return additionalArguments;
 		}
 		Object[] arguments = new Object[sourceArguments.length + additionalArguments.length];

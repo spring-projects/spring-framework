@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -30,7 +29,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.HandlerExecutionChain;
-import org.springframework.web.servlet.HandlerMapping;
 
 /**
  * Abstract base class for URL-mapped {@link org.springframework.web.servlet.HandlerMapping}
@@ -51,13 +49,15 @@ import org.springframework.web.servlet.HandlerMapping;
  * @author Arjen Poutsma
  * @since 16.04.2003
  */
-public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
+public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping implements MatchableHandlerMapping {
 
 	private Object rootHandler;
 
+	private boolean useTrailingSlashMatch = false;
+
 	private boolean lazyInitHandlers = false;
 
-	private final Map<String, Object> handlerMap = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> handlerMap = new LinkedHashMap<>();
 
 
 	/**
@@ -75,6 +75,22 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 */
 	public Object getRootHandler() {
 		return this.rootHandler;
+	}
+
+	/**
+	 * Whether to match to URLs irrespective of the presence of a trailing slash.
+	 * If enabled a URL pattern such as "/users" also matches to "/users/".
+	 * <p>The default value is {@code false}.
+	 */
+	public void setUseTrailingSlashMatch(boolean useTrailingSlashMatch) {
+		this.useTrailingSlashMatch = useTrailingSlashMatch;
+	}
+
+	/**
+	 * Whether to match to URLs irrespective of the presence of a trailing slash.
+	 */
+	public boolean useTrailingSlashMatch() {
+		return this.useTrailingSlashMatch;
 	}
 
 	/**
@@ -154,37 +170,53 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			validateHandler(handler, request);
 			return buildPathExposingHandler(handler, urlPath, urlPath, null);
 		}
+
 		// Pattern match?
-		List<String> matchingPatterns = new ArrayList<String>();
+		List<String> matchingPatterns = new ArrayList<>();
 		for (String registeredPattern : this.handlerMap.keySet()) {
 			if (getPathMatcher().match(registeredPattern, urlPath)) {
 				matchingPatterns.add(registeredPattern);
 			}
+			else if (useTrailingSlashMatch()) {
+				if (!registeredPattern.endsWith("/") && getPathMatcher().match(registeredPattern + "/", urlPath)) {
+					matchingPatterns.add(registeredPattern +"/");
+				}
+			}
 		}
-		String bestPatternMatch = null;
+
+		String bestMatch = null;
 		Comparator<String> patternComparator = getPathMatcher().getPatternComparator(urlPath);
 		if (!matchingPatterns.isEmpty()) {
 			Collections.sort(matchingPatterns, patternComparator);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Matching patterns for request [" + urlPath + "] are " + matchingPatterns);
 			}
-			bestPatternMatch = matchingPatterns.get(0);
+			bestMatch = matchingPatterns.get(0);
 		}
-		if (bestPatternMatch != null) {
-			handler = this.handlerMap.get(bestPatternMatch);
+		if (bestMatch != null) {
+			handler = this.handlerMap.get(bestMatch);
+			if (handler == null) {
+				if (bestMatch.endsWith("/")) {
+					handler = this.handlerMap.get(bestMatch.substring(0, bestMatch.length() - 1));
+				}
+				if (handler == null) {
+					throw new IllegalStateException(
+							"Could not find handler for best pattern match [" + bestMatch + "]");
+				}
+			}
 			// Bean name or resolved handler?
 			if (handler instanceof String) {
 				String handlerName = (String) handler;
 				handler = getApplicationContext().getBean(handlerName);
 			}
 			validateHandler(handler, request);
-			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestPatternMatch, urlPath);
+			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestMatch, urlPath);
 
 			// There might be multiple 'best patterns', let's make sure we have the correct URI template variables
 			// for all of them
-			Map<String, String> uriTemplateVariables = new LinkedHashMap<String, String>();
+			Map<String, String> uriTemplateVariables = new LinkedHashMap<>();
 			for (String matchingPattern : matchingPatterns) {
-				if (patternComparator.compare(bestPatternMatch, matchingPattern) == 0) {
+				if (patternComparator.compare(bestMatch, matchingPattern) == 0) {
 					Map<String, String> vars = getPathMatcher().extractUriTemplateVariables(matchingPattern, urlPath);
 					Map<String, String> decodedVars = getUrlPathHelper().decodePathVariables(request, vars);
 					uriTemplateVariables.putAll(decodedVars);
@@ -193,8 +225,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			if (logger.isDebugEnabled()) {
 				logger.debug("URI Template variables for request [" + urlPath + "] are " + uriTemplateVariables);
 			}
-			return buildPathExposingHandler(handler, bestPatternMatch, pathWithinMapping, uriTemplateVariables);
+			return buildPathExposingHandler(handler, bestMatch, pathWithinMapping, uriTemplateVariables);
 		}
+
 		// No handler found...
 		return null;
 	}
@@ -239,8 +272,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @see #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE
 	 */
 	protected void exposePathWithinMapping(String bestMatchingPattern, String pathWithinMapping, HttpServletRequest request) {
-		request.setAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE, bestMatchingPattern);
-		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
+		request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, bestMatchingPattern);
+		request.setAttribute(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
 	}
 
 	/**
@@ -250,7 +283,21 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @see #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE
 	 */
 	protected void exposeUriTemplateVariables(Map<String, String> uriTemplateVariables, HttpServletRequest request) {
-		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
+		request.setAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
+	}
+
+	@Override
+	public RequestMatchResult match(HttpServletRequest request, String pattern) {
+		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
+		if (getPathMatcher().match(pattern, lookupPath)) {
+			return new RequestMatchResult(pattern, lookupPath, getPathMatcher());
+		}
+		else if (useTrailingSlashMatch()) {
+			if (!pattern.endsWith("/") && getPathMatcher().match(pattern + "/", lookupPath)) {
+				return new RequestMatchResult(pattern + "/", lookupPath, getPathMatcher());
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -360,7 +407,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		@Override
 		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 			exposePathWithinMapping(this.bestMatchingPattern, this.pathWithinMapping, request);
-			request.setAttribute(HandlerMapping.INTROSPECT_TYPE_LEVEL_MAPPING, supportsTypeLevelMappings());
+			request.setAttribute(INTROSPECT_TYPE_LEVEL_MAPPING, supportsTypeLevelMappings());
 			return true;
 		}
 

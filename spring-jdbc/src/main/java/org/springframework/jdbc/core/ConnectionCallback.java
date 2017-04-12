@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,25 +37,23 @@ import org.springframework.dao.DataAccessException;
  * @see JdbcTemplate#query
  * @see JdbcTemplate#update
  */
+@FunctionalInterface
 public interface ConnectionCallback<T> {
 
 	/**
 	 * Gets called by {@code JdbcTemplate.execute} with an active JDBC
 	 * Connection. Does not need to care about activating or closing the
 	 * Connection, or handling transactions.
-	 *
 	 * <p>If called without a thread-bound JDBC transaction (initiated by
 	 * DataSourceTransactionManager), the code will simply get executed on the
 	 * JDBC connection with its transactional semantics. If JdbcTemplate is
 	 * configured to use a JTA-aware DataSource, the JDBC Connection and thus
 	 * the callback code will be transactional if a JTA transaction is active.
-	 *
 	 * <p>Allows for returning a result object created within the callback, i.e.
 	 * a domain object or a collection of domain objects. Note that there's special
 	 * support for single step actions: see {@code JdbcTemplate.queryForObject}
 	 * etc. A thrown RuntimeException is treated as application exception:
 	 * it gets propagated to the caller of the template.
-	 *
 	 * @param con active JDBC Connection
 	 * @return a result object, or {@code null} if none
 	 * @throws SQLException if thrown by a JDBC method, to be auto-converted

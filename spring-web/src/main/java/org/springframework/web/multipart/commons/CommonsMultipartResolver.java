@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequ
 import org.springframework.web.util.WebUtils;
 
 /**
- * Servlet-based {@link org.springframework.web.multipart.MultipartResolver} implementation
- * for <a href="http://jakarta.apache.org/commons/fileupload">Jakarta Commons FileUpload</a>
+ * Servlet-based {@link MultipartResolver} implementation for
+ * <a href="http://commons.apache.org/proper/commons-fileupload">Apache Commons FileUpload</a>
  * 1.2 or above.
  *
  * <p>Provides "maxUploadSize", "maxInMemorySize" and "defaultEncoding" settings as
@@ -55,7 +55,6 @@ import org.springframework.web.util.WebUtils;
  * @since 29.09.2003
  * @see #CommonsMultipartResolver(ServletContext)
  * @see #setResolveLazily
- * @see org.springframework.web.portlet.multipart.CommonsPortletMultipartResolver
  * @see org.apache.commons.fileupload.servlet.ServletFileUpload
  * @see org.apache.commons.fileupload.disk.DiskFileItemFactory
  */
@@ -161,8 +160,11 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		catch (FileUploadBase.SizeLimitExceededException ex) {
 			throw new MaxUploadSizeExceededException(fileUpload.getSizeMax(), ex);
 		}
+		catch (FileUploadBase.FileSizeLimitExceededException ex) {
+			throw new MaxUploadSizeExceededException(fileUpload.getFileSizeMax(), ex);
+		}
 		catch (FileUploadException ex) {
-			throw new MultipartException("Could not parse multipart servlet request", ex);
+			throw new MultipartException("Failed to parse multipart servlet request", ex);
 		}
 	}
 

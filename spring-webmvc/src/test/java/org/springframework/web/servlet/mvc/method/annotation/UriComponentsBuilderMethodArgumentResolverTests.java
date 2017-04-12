@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,19 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.reflect.Method;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.servlet.mvc.method.annotation.UriComponentsBuilderMethodArgumentResolver;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link UriComponentsBuilderMethodArgumentResolver}.
@@ -42,26 +39,27 @@ public class UriComponentsBuilderMethodArgumentResolverTests {
 
 	private UriComponentsBuilderMethodArgumentResolver resolver;
 
-	private MethodParameter builderParam;
-
-	private MethodParameter servletBuilderParam;
-
-	private MethodParameter intParam;
-
 	private ServletWebRequest webRequest;
 
 	private MockHttpServletRequest servletRequest;
 
+	private MethodParameter builderParam;
+	private MethodParameter servletBuilderParam;
+	private MethodParameter intParam;
+
+
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.resolver = new UriComponentsBuilderMethodArgumentResolver();
+		this.servletRequest = new MockHttpServletRequest();
+		this.webRequest = new ServletWebRequest(this.servletRequest);
+
 		Method method = this.getClass().getDeclaredMethod("handle", UriComponentsBuilder.class, ServletUriComponentsBuilder.class, int.class);
 		this.builderParam = new MethodParameter(method, 0);
 		this.servletBuilderParam = new MethodParameter(method, 1);
 		this.intParam = new MethodParameter(method, 2);
-		this.servletRequest = new MockHttpServletRequest();
-		this.webRequest = new ServletWebRequest(this.servletRequest);
 	}
+
 
 	@Test
 	public void supportsParameter() throws Exception {

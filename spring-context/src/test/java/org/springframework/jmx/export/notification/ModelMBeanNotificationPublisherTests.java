@@ -16,8 +16,6 @@
 
 package org.springframework.jmx.export.notification;
 
-import static org.junit.Assert.*;
-
 import javax.management.AttributeChangeNotification;
 import javax.management.MBeanException;
 import javax.management.MalformedObjectNameException;
@@ -26,30 +24,33 @@ import javax.management.ObjectName;
 import javax.management.RuntimeOperationsException;
 
 import org.junit.Test;
+
 import org.springframework.jmx.export.SpringModelMBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class ModelMBeanNotificationPublisherTests {
+public class ModelMBeanNotificationPublisherTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testCtorWithNullMBean() throws Exception {
 		new ModelMBeanNotificationPublisher(null, createObjectName(), this);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testCtorWithNullObjectName() throws Exception {
 		new ModelMBeanNotificationPublisher(new SpringModelMBean(), null, this);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testCtorWithNullManagedResource() throws Exception {
 		new ModelMBeanNotificationPublisher(new SpringModelMBean(), createObjectName(), null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSendNullNotification() throws Exception {
 		NotificationPublisher publisher
 				= new ModelMBeanNotificationPublisher(new SpringModelMBean(), createObjectName(), this);

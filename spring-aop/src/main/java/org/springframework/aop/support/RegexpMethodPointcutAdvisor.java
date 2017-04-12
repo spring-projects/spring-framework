@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ public class RegexpMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor 
 	 * @see #setPatterns
 	 */
 	public void setPattern(String pattern) {
-		setPatterns(new String[] {pattern});
+		setPatterns(pattern);
 	}
 
 	/**
@@ -108,7 +108,7 @@ public class RegexpMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor 
 	 * patterns matches, the pointcut matches.
 	 * @see AbstractRegexpMethodPointcut#setPatterns
 	 */
-	public void setPatterns(String[] patterns) {
+	public void setPatterns(String... patterns) {
 		this.patterns = patterns;
 	}
 

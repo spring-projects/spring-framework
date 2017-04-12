@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +34,12 @@ public class CallableMethodReturnValueHandler implements HandlerMethodReturnValu
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		Class<?> paramType = returnType.getParameterType();
-		return Callable.class.isAssignableFrom(paramType);
+		return Callable.class.isAssignableFrom(returnType.getParameterType());
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue,
-			MethodParameter returnType, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest) throws Exception {
+	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		if (returnValue == null) {
 			mavContainer.setRequestHandled(true);

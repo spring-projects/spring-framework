@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
 /**
- * An {@link org.springframework.web.method.annotation.AbstractCookieValueMethodArgumentResolver} that resolves cookie
- * values from an {@link HttpServletRequest}.
+ * An {@link org.springframework.web.method.annotation.AbstractCookieValueMethodArgumentResolver}
+ * that resolves cookie values from an {@link HttpServletRequest}.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -37,20 +37,22 @@ public class ServletCookieValueMethodArgumentResolver extends AbstractCookieValu
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
+
 	public ServletCookieValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
 		super(beanFactory);
 	}
+
 
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
 	}
 
+
 	@Override
-	protected Object resolveName(String cookieName, MethodParameter parameter, NativeWebRequest webRequest)
-			throws Exception {
+	protected Object resolveName(String cookieName, MethodParameter parameter, NativeWebRequest webRequest) throws Exception {
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 		Cookie cookieValue = WebUtils.getCookie(servletRequest, cookieName);
-		if (Cookie.class.isAssignableFrom(parameter.getParameterType())) {
+		if (Cookie.class.isAssignableFrom(parameter.getNestedParameterType())) {
 			return cookieValue;
 		}
 		else if (cookieValue != null) {
@@ -60,4 +62,5 @@ public class ServletCookieValueMethodArgumentResolver extends AbstractCookieValu
 			return null;
 		}
 	}
+
 }

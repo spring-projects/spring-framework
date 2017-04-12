@@ -16,15 +16,16 @@
 
 package org.springframework.test.context.junit4.spr6128;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.hamcrest.core.IsEqual.*;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests to verify claims made in <a

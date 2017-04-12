@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,26 +22,31 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Date;
 
-import junit.framework.TestCase;
-
 import org.junit.Ignore;
+import org.junit.Test;
+
 import org.springframework.tests.sample.objects.TestObject;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Adrian Colyer
  */
-public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
+public class LocalVariableTableParameterNameDiscovererTests {
 
-	private LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
+	private final LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
 
-	public void testMethodParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
+
+	@Test
+	public void methodParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
 		Method getName = TestObject.class.getMethod("getName", new Class[0]);
 		String[] names = discoverer.getParameterNames(getName);
 		assertNotNull("should find method info", names);
 		assertEquals("no argument names", 0, names.length);
 	}
 
-	public void testMethodParameterNameDiscoveryWithArgs() throws NoSuchMethodException {
+	@Test
+	public void methodParameterNameDiscoveryWithArgs() throws NoSuchMethodException {
 		Method setName = TestObject.class.getMethod("setName", new Class[] { String.class });
 		String[] names = discoverer.getParameterNames(setName);
 		assertNotNull("should find method info", names);
@@ -49,14 +54,16 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		assertEquals("name", names[0]);
 	}
 
-	public void testConsParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
+	@Test
+	public void consParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
 		Constructor<TestObject> noArgsCons = TestObject.class.getConstructor(new Class[0]);
 		String[] names = discoverer.getParameterNames(noArgsCons);
 		assertNotNull("should find cons info", names);
 		assertEquals("no argument names", 0, names.length);
 	}
 
-	public void testConsParameterNameDiscoveryArgs() throws NoSuchMethodException {
+	@Test
+	public void consParameterNameDiscoveryArgs() throws NoSuchMethodException {
 		Constructor<TestObject> twoArgCons = TestObject.class.getConstructor(new Class[] { String.class, int.class });
 		String[] names = discoverer.getParameterNames(twoArgCons);
 		assertNotNull("should find cons info", names);
@@ -65,14 +72,16 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		assertEquals("age", names[1]);
 	}
 
-	public void testStaticMethodParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
+	@Test
+	public void staticMethodParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
 		Method m = getClass().getMethod("staticMethodNoLocalVars", new Class[0]);
 		String[] names = discoverer.getParameterNames(m);
 		assertNotNull("should find method info", names);
 		assertEquals("no argument names", 0, names.length);
 	}
 
-	public void testOverloadedStaticMethod() throws Exception {
+	@Test
+	public void overloadedStaticMethod() throws Exception {
 		Class<? extends LocalVariableTableParameterNameDiscovererTests> clazz = this.getClass();
 
 		Method m1 = clazz.getMethod("staticMethod", new Class[] { Long.TYPE, Long.TYPE });
@@ -91,7 +100,8 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		assertEquals("z", names[2]);
 	}
 
-	public void testOverloadedStaticMethodInInnerClass() throws Exception {
+	@Test
+	public void overloadedStaticMethodInInnerClass() throws Exception {
 		Class<InnerClass> clazz = InnerClass.class;
 
 		Method m1 = clazz.getMethod("staticMethod", new Class[] { Long.TYPE });
@@ -108,7 +118,8 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		assertEquals("y", names[1]);
 	}
 
-	public void testOverloadedMethod() throws Exception {
+	@Test
+	public void overloadedMethod() throws Exception {
 		Class<? extends LocalVariableTableParameterNameDiscovererTests> clazz = this.getClass();
 
 		Method m1 = clazz.getMethod("instanceMethod", new Class[] { Double.TYPE, Double.TYPE });
@@ -127,7 +138,8 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		assertEquals("z", names[2]);
 	}
 
-	public void testOverloadedMethodInInnerClass() throws Exception {
+	@Test
+	public void overloadedMethodInInnerClass() throws Exception {
 		Class<InnerClass> clazz = InnerClass.class;
 
 		Method m1 = clazz.getMethod("instanceMethod", new Class[] { String.class });
@@ -144,8 +156,9 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		assertEquals("bb", names[1]);
 	}
 
-	public void testGenerifiedClass() throws Exception {
-		Class<?> clazz = (Class<?>)GenerifiedClass.class;
+	@Test
+	public void generifiedClass() throws Exception {
+		Class<?> clazz = GenerifiedClass.class;
 
 		Constructor<?> ctor = clazz.getDeclaredConstructor(Object.class);
 		String[] names = discoverer.getParameterNames(ctor);
@@ -188,16 +201,11 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		m = clazz.getMethod("getDate");
 		names = discoverer.getParameterNames(m);
 		assertEquals(0, names.length);
-
-		//System.in.read();
 	}
 
-	/**
-	 * Ignored because Ubuntu packages OpenJDK with debug symbols enabled.
-	 * See SPR-8078.
-	 */
-	@Ignore
-	public void ignore_testClassesWithoutDebugSymbols() throws Exception {
+	@Ignore("Ignored because Ubuntu packages OpenJDK with debug symbols enabled. See SPR-8078.")
+	@Test
+	public void classesWithoutDebugSymbols() throws Exception {
 		// JDK classes don't have debug information (usually)
 		Class<Component> clazz = Component.class;
 		String methodName = "list";
@@ -213,8 +221,6 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		m = clazz.getMethod(methodName, PrintStream.class, int.class);
 		names = discoverer.getParameterNames(m);
 		assertNull(names);
-
-		//System.in.read();
 	}
 
 	public static void staticMethodNoLocalVars() {

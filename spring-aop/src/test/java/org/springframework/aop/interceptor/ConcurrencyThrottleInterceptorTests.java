@@ -16,11 +16,10 @@
 
 package org.springframework.aop.interceptor;
 
-import static org.junit.Assert.assertEquals;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
+
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.tests.sample.beans.DerivedTestBean;
@@ -28,12 +27,14 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 06.04.2004
  */
-public final class ConcurrencyThrottleInterceptorTests {
+public class ConcurrencyThrottleInterceptorTests {
 
 	protected static final Log logger = LogFactory.getLog(ConcurrencyThrottleInterceptorTests.class);
 

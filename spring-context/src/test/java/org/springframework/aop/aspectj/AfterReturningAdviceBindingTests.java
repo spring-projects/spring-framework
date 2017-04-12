@@ -18,6 +18,7 @@ package org.springframework.aop.aspectj;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.aspectj.AfterReturningAdviceBindingTestAspect.AfterReturningAdviceBindingCollaborator;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
@@ -36,7 +37,7 @@ import static org.mockito.BDDMockito.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class AfterReturningAdviceBindingTests {
+public class AfterReturningAdviceBindingTests {
 
 	private AfterReturningAdviceBindingTestAspect afterAdviceAspect;
 

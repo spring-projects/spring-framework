@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,8 @@
 
 package org.springframework.test.web.servlet.result;
 
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
-import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
-
 import org.hamcrest.Matcher;
+
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.ui.ModelMap;
@@ -28,15 +25,18 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
+import static org.hamcrest.MatcherAssert.*;
+import static org.springframework.test.util.AssertionErrors.*;
+
 /**
- * Factory for assertions on the model. An instance of this class is
- * typically accessed via {@link MockMvcResultMatchers#model()}.
+ * Factory for assertions on the model.
+ * <p>An instance of this class is typically accessed via
+ * {@link MockMvcResultMatchers#model}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
  */
 public class ModelResultMatchers {
-
 
 	/**
 	 * Protected constructor.
@@ -44,6 +44,7 @@ public class ModelResultMatchers {
 	 */
 	protected ModelResultMatchers() {
 	}
+
 
 	/**
 	 * Assert a model attribute value with the given Hamcrest {@link Matcher}.
@@ -160,9 +161,52 @@ public class ModelResultMatchers {
 				BindingResult result = getBindingResult(mav, name);
 				assertTrue("No errors for attribute: [" + name + "]", result.hasErrors());
 				for (final String fieldName : fieldNames) {
-					assertTrue("No errors for field: [" + fieldName + "] of attribute [" + name + "]",
-							result.hasFieldErrors(fieldName));
+					boolean hasFieldErrors = result.hasFieldErrors(fieldName);
+					assertTrue("No errors for field: [" + fieldName + "] of attribute [" + name + "]", hasFieldErrors);
 				}
+			}
+		};
+	}
+
+	/**
+	 * Assert a field error code for a model attribute using exact String match.
+	 * @since 4.1
+	 */
+	public ResultMatcher attributeHasFieldErrorCode(final String name, final String fieldName, final String error) {
+		return new ResultMatcher() {
+			public void match(MvcResult mvcResult) throws Exception {
+				ModelAndView mav = getModelAndView(mvcResult);
+				BindingResult result = getBindingResult(mav, name);
+				assertTrue("No errors for attribute: [" + name + "]", result.hasErrors());
+
+				boolean hasFieldErrors = result.hasFieldErrors(fieldName);
+				assertTrue("No errors for field: [" + fieldName + "] of attribute [" + name + "]", hasFieldErrors);
+
+				String code = result.getFieldError(fieldName).getCode();
+				assertTrue("Expected error code '" + error + "' but got '" + code + "'", code.equals(error));
+			}
+		};
+	}
+
+	/**
+	 * Assert a field error code for a model attribute using a {@link org.hamcrest.Matcher}.
+	 * @since 4.1
+	 */
+	public <T> ResultMatcher attributeHasFieldErrorCode(final String name, final String fieldName,
+			final Matcher<? super String> matcher) {
+
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult mvcResult) throws Exception {
+				ModelAndView mav = getModelAndView(mvcResult);
+				BindingResult result = getBindingResult(mav, name);
+				assertTrue("No errors for attribute: [" + name + "]", result.hasErrors());
+
+				boolean hasFieldErrors = result.hasFieldErrors(fieldName);
+				assertTrue("No errors for field: [" + fieldName + "] of attribute [" + name + "]", hasFieldErrors);
+
+				String code = result.getFieldError(fieldName).getCode();
+				assertThat("Field name '" + fieldName + "' of attribute '" + name + "'", code, matcher);
 			}
 		};
 	}

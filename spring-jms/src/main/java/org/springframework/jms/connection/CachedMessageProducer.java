@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,7 @@
 
 package org.springframework.jms.connection;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import javax.jms.CompletionListener;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -29,9 +26,6 @@ import javax.jms.QueueSender;
 import javax.jms.Topic;
 import javax.jms.TopicPublisher;
 
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
-
 /**
  * JMS MessageProducer decorator that adapts calls to a shared MessageProducer
  * instance underneath, managing QoS settings locally within the decorator.
@@ -40,34 +34,6 @@ import org.springframework.util.ReflectionUtils;
  * @since 2.5.3
  */
 class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublisher {
-
-	private static final Method setDeliveryDelayMethod =
-			ClassUtils.getMethodIfAvailable(MessageProducer.class, "setDeliveryDelay", long.class);
-
-	private static final Method getDeliveryDelayMethod =
-			ClassUtils.getMethodIfAvailable(MessageProducer.class, "getDeliveryDelay");
-
-	private static Class<?> completionListenerClass;
-
-	private static Method sendWithCompletionListenerMethod;
-
-	private static Method sendWithDestinationAndCompletionListenerMethod;
-
-	static {
-		try {
-			completionListenerClass = ClassUtils.forName(
-					"javax.jms.CompletionListener", CachedMessageProducer.class.getClassLoader());
-			sendWithCompletionListenerMethod = MessageProducer.class.getMethod(
-					"send", Message.class, int.class, int.class, long.class, completionListenerClass);
-			sendWithDestinationAndCompletionListenerMethod = MessageProducer.class.getMethod(
-					"send", Destination.class, Message.class, int.class, int.class, long.class, completionListenerClass);
-		}
-		catch (Exception ex) {
-			// No JMS 2.0 API available
-			completionListenerClass = null;
-		}
-	}
-
 
 	private final MessageProducer target;
 
@@ -118,15 +84,15 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 		return this.target.getDisableMessageTimestamp();
 	}
 
-	public void setDeliveryDelay(long deliveryDelay) {
+	public void setDeliveryDelay(long deliveryDelay) throws JMSException {
 		if (this.originalDeliveryDelay == null) {
-			this.originalDeliveryDelay = (Long) ReflectionUtils.invokeMethod(getDeliveryDelayMethod, this.target);
+			this.originalDeliveryDelay = this.target.getDeliveryDelay();
 		}
-		ReflectionUtils.invokeMethod(setDeliveryDelayMethod, this.target, deliveryDelay);
+		this.target.setDeliveryDelay(deliveryDelay);
 	}
 
-	public long getDeliveryDelay() {
-		return (Long) ReflectionUtils.invokeMethod(getDeliveryDelayMethod, this.target);
+	public long getDeliveryDelay() throws JMSException {
+		return this.target.getDeliveryDelay();
 	}
 
 	@Override
@@ -195,6 +161,31 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 	}
 
 	@Override
+	public void send(Message message, CompletionListener completionListener) throws JMSException {
+		this.target.send(message, this.deliveryMode, this.priority, this.timeToLive, completionListener);
+	}
+
+	@Override
+	public void send(Message message, int deliveryMode, int priority, long timeToLive,
+			CompletionListener completionListener) throws JMSException {
+
+		this.target.send(message, deliveryMode, priority, timeToLive, completionListener);
+	}
+
+	@Override
+	public void send(Destination destination, Message message, CompletionListener completionListener) throws JMSException {
+		this.target.send(destination, message, this.deliveryMode, this.priority, this.timeToLive, completionListener);
+	}
+
+	@Override
+	public void send(Destination destination, Message message, int deliveryMode, int priority,
+			long timeToLive, CompletionListener completionListener) throws JMSException {
+
+		this.target.send(destination, message, deliveryMode, priority, timeToLive, completionListener);
+
+	}
+
+	@Override
 	public void send(Queue queue, Message message) throws JMSException {
 		this.target.send(queue, message, this.deliveryMode, this.priority, this.timeToLive);
 	}
@@ -236,7 +227,7 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 			this.originalDisableMessageTimestamp = null;
 		}
 		if (this.originalDeliveryDelay != null) {
-			ReflectionUtils.invokeMethod(setDeliveryDelayMethod, this.target, this.originalDeliveryDelay);
+			this.target.setDeliveryDelay(this.originalDeliveryDelay);
 			this.originalDeliveryDelay = null;
 		}
 	}
@@ -244,52 +235,6 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 	@Override
 	public String toString() {
 		return "Cached JMS MessageProducer: " + this.target;
-	}
-
-
-	/**
-	 * Build a dynamic proxy that reflectively adapts to JMS 2.0 API methods, if necessary.
-	 * Otherwise simply return this CachedMessageProducer instance itself.
-	 */
-	public MessageProducer getProxyIfNecessary() {
-		if (completionListenerClass != null) {
-			return (MessageProducer) Proxy.newProxyInstance(CachedMessageProducer.class.getClassLoader(),
-					new Class<?>[] {MessageProducer.class, QueueSender.class, TopicPublisher.class},
-					new Jms2MessageProducerInvocationHandler());
-		}
-		else {
-			return this;
-		}
-	}
-
-
-	/**
-	 * Reflective InvocationHandler which adapts to JMS 2.0 API methods that we
-	 * cannot statically compile against while preserving JMS 1.1 compatibility
-	 * (due to the new {@code javax.jms.CompletionListener} type in the signatures).
-	 */
-	private class Jms2MessageProducerInvocationHandler implements InvocationHandler {
-
-		@Override
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			try {
-				if (method.getName().equals("send") && args != null &&
-						completionListenerClass.equals(method.getParameterTypes()[args.length - 1])) {
-					if (args.length == 2) {
-						return sendWithCompletionListenerMethod.invoke(
-								target, args[0], deliveryMode, priority, timeToLive, args[1]);
-					}
-					else if (args.length == 3) {
-						return sendWithDestinationAndCompletionListenerMethod.invoke(
-								target, args[0], args[1], deliveryMode, priority, timeToLive, args[2]);
-					}
-				}
-				return method.invoke(target, args);
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
-			}
-		}
 	}
 
 }

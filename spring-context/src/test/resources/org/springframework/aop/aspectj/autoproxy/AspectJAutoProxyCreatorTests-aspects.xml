@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+	<!--
+	<bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator" />
+	-->
+
+	<aop:aspectj-autoproxy/>
+
+	<bean class="org.springframework.aop.aspectj.autoproxy.MultiplyReturnValue">
+		<property name="multiple" value="2"/>
+	</bean>
+
+	<bean class="org.springframework.aop.aspectj.autoproxy.DummyAspect"/>
+
+	<bean class="org.springframework.aop.aspectj.autoproxy.DummyAspectWithParameter"/>
+
+	<bean id="adrianParent" abstract="true">
+		<property name="name" value="adrian"/>
+	</bean>
+
+	<bean id="adrian" class="org.springframework.tests.sample.beans.TestBean" parent="adrianParent">
+		<property name="age" value="34"/>
+	</bean>
+
+	<bean id="adrian2Parent" class="org.springframework.tests.sample.beans.TestBean" abstract="true">
+		<property name="name" value="adrian"/>
+	</bean>
+
+	<bean id="factoryBean" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject" ref="adrian"/>
+		<property name="targetMethod" value="toString"/>
+	</bean>
+
+</beans>

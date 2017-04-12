@@ -24,6 +24,7 @@ import java.util.UUID;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.IdGenerator;
@@ -215,7 +216,7 @@ public class MessageBuilderTests {
 	@Test
 	public void testBuildMultipleMessages() {
 		MessageHeaderAccessor headerAccessor = new MessageHeaderAccessor();
-		MessageBuilder messageBuilder = MessageBuilder.withPayload("payload").setHeaders(headerAccessor);
+		MessageBuilder<?> messageBuilder = MessageBuilder.withPayload("payload").setHeaders(headerAccessor);
 
 		headerAccessor.setHeader("foo", "bar1");
 		Message<?> message1 = messageBuilder.build();

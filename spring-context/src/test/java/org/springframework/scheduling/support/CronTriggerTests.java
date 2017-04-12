@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,9 +53,9 @@ public class CronTriggerTests {
 		this.timeZone = timeZone;
 	}
 
-	@Parameters
+	@Parameters(name = "date [{0}], time zone [{1}]")
 	public static List<Object[]> getParameters() {
-		List<Object[]> list = new ArrayList<Object[]>();
+		List<Object[]> list = new ArrayList<>();
 		list.add(new Object[] { new Date(), TimeZone.getTimeZone("PST") });
 		list.add(new Object[] { new Date(), TimeZone.getTimeZone("CET") });
 		return list;

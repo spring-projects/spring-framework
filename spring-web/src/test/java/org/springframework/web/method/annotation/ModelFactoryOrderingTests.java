@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,19 @@
 
 package org.springframework.web.method.annotation;
 
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
+
+import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -34,19 +43,11 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests verifying {@code @ModelAttribute} method inter-dependencies.
@@ -118,8 +119,8 @@ public class ModelFactoryOrderingTests {
 		WebDataBinderFactory dataBinderFactory = new DefaultDataBinderFactory(null);
 
 		Class<?> type = controller.getClass();
-		Set<Method> methods = HandlerMethodSelector.selectMethods(type, METHOD_FILTER);
-		List<InvocableHandlerMethod> modelMethods = new ArrayList<InvocableHandlerMethod>();
+		Set<Method> methods = MethodIntrospector.selectMethods(type, METHOD_FILTER);
+		List<InvocableHandlerMethod> modelMethods = new ArrayList<>();
 		for (Method method : methods) {
 			InvocableHandlerMethod modelMethod = new InvocableHandlerMethod(controller, method);
 			modelMethod.setHandlerMethodArgumentResolvers(resolvers);
@@ -167,7 +168,6 @@ public class ModelFactoryOrderingTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private static class StraightLineDependencyController extends AbstractController {
 
 		@ModelAttribute
@@ -207,7 +207,6 @@ public class ModelFactoryOrderingTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private static class TreeDependencyController extends AbstractController {
 
 		@ModelAttribute
@@ -246,7 +245,6 @@ public class ModelFactoryOrderingTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private static class InvertedTreeDependencyController extends AbstractController {
 
 		@ModelAttribute
@@ -286,7 +284,6 @@ public class ModelFactoryOrderingTests {
 
 	}
 
-	@SuppressWarnings("unused")
 	private static class UnresolvedDependencyController extends AbstractController {
 
 		@ModelAttribute

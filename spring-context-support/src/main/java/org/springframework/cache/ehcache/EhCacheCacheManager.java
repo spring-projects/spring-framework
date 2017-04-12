@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import net.sf.ehcache.Status;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.transaction.AbstractTransactionSupportingCacheManager;
-import org.springframework.util.Assert;
 
 /**
  * CacheManager backed by an EhCache {@link net.sf.ehcache.CacheManager}.
@@ -69,27 +68,34 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 		return this.cacheManager;
 	}
 
+	@Override
+	public void afterPropertiesSet() {
+		if (getCacheManager() == null) {
+			setCacheManager(EhCacheManagerUtils.buildCacheManager());
+		}
+		super.afterPropertiesSet();
+	}
+
 
 	@Override
 	protected Collection<Cache> loadCaches() {
-		net.sf.ehcache.CacheManager cacheManager = getCacheManager();
-		Assert.notNull(cacheManager, "A backing EhCache CacheManager is required");
-		Status status = cacheManager.getStatus();
-		Assert.isTrue(Status.STATUS_ALIVE.equals(status),
-				"An 'alive' EhCache CacheManager is required - current cache is " + status.toString());
+		Status status = getCacheManager().getStatus();
+		if (!Status.STATUS_ALIVE.equals(status)) {
+			throw new IllegalStateException(
+					"An 'alive' EhCache CacheManager is required - current cache is " + status.toString());
+		}
 
-		String[] names = cacheManager.getCacheNames();
-		Collection<Cache> caches = new LinkedHashSet<Cache>(names.length);
+		String[] names = getCacheManager().getCacheNames();
+		Collection<Cache> caches = new LinkedHashSet<>(names.length);
 		for (String name : names) {
-			caches.add(new EhCacheCache(cacheManager.getEhcache(name)));
+			caches.add(new EhCacheCache(getCacheManager().getEhcache(name)));
 		}
 		return caches;
 	}
 
 	@Override
 	protected Cache getMissingCache(String name) {
-		// check the EhCache cache again
-		// (in case the cache was added at runtime)
+		// Check the EhCache cache again (in case the cache was added at runtime)
 		Ehcache ehcache = getCacheManager().getEhcache(name);
 		if (ehcache != null) {
 			return new EhCacheCache(ehcache);

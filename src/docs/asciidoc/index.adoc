@@ -1,0 +1,36 @@
+= Spring Framework Reference Documentation
+The Spring Framework team and contributors https://github.com/spring-projects/spring-framework/graphs/contributors
+:doc-root: https://docs.spring.io
+:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
+
+
+The Spring Framework is a lightweight solution and a potential one-stop-shop for
+building your enterprise-ready applications. However, Spring is modular, allowing you to
+use only those parts that you need, without having to bring in the rest. You can use the
+IoC container, with any web framework on top, but you can also use only the
+<<data-access.adoc#orm-hibernate,Hibernate integration code>> or the
+<<data-access.adoc#jdbc-introduction,JDBC abstraction layer>>. The Spring Framework supports declarative
+transaction management, remote access to your logic through RMI or web services, and various
+options for persisting your data.
+It offers full-featured web frameworks such as <<web.adoc#mvc-introduction,Spring MVC>>
+and <<web.adoc#web-reactive, Spring WebFlux>>; and it enables you to
+integrate <<core.adoc#aop-introduction,AOP>> transparently into your software.
+
+This document is a reference guide to Spring Framework features. Questions on the
+Framework itself should be asked on StackOverflow (see https://spring.io/questions[]).
+
+This reference document provides the following sections:
+
+* <<overview.adoc#spring-introduction,Overview of the Spring Framework>>
+
+* <<core.adoc#spring-core,Core concepts such as IoC and AOP>>
+
+* <<testing.adoc#testing,Testing with Spring>>
+
+* <<data-access.adoc#spring-data-tier,Data access and transaction management>>
+
+* <<web.adoc#spring-web,Web frameworks>>
+
+* <<integration.adoc#spring-integration,Integration with other technologies>>
+
+* <<appendix.adoc#spring-appendices,Appendix>>

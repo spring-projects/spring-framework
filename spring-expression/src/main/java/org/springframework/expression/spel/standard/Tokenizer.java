@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.List;
 import org.springframework.expression.spel.InternalParseException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelParseException;
-import org.springframework.util.Assert;
 
 /**
  * Lex some input data into a stream of tokens that can then be parsed.
@@ -73,12 +72,12 @@ class Tokenizer {
 
 	int max;
 
-	List<Token> tokens = new ArrayList<Token>();
+	List<Token> tokens = new ArrayList<>();
 
 
-	public Tokenizer(String inputdata) {
-		this.expressionString = inputdata;
-		this.toProcess = (inputdata + "\0").toCharArray();
+	public Tokenizer(String inputData) {
+		this.expressionString = inputData;
+		this.toProcess = (inputData + "\0").toCharArray();
 		this.max = this.toProcess.length;
 		this.pos = 0;
 		process();
@@ -182,12 +181,12 @@ class Tokenizer {
 						}
 						break;
 					case '&':
-						if (!isTwoCharToken(TokenKind.SYMBOLIC_AND)) {
-							throw new InternalParseException(new SpelParseException(
-									this.expressionString, this.pos, SpelMessage.MISSING_CHARACTER,
-									"&"));
+						if (isTwoCharToken(TokenKind.SYMBOLIC_AND)) {
+							pushPairToken(TokenKind.SYMBOLIC_AND);
 						}
-						pushPairToken(TokenKind.SYMBOLIC_AND);
+						else {
+							pushCharToken(TokenKind.FACTORY_BEAN_REF);
+						}
 						break;
 					case '|':
 						if (!isTwoCharToken(TokenKind.SYMBOLIC_OR)) {
@@ -266,11 +265,9 @@ class Tokenizer {
 						break;
 					case '\\':
 						throw new InternalParseException(
-								new SpelParseException(this.expressionString, this.pos,
-										SpelMessage.UNEXPECTED_ESCAPE_CHAR));
+								new SpelParseException(this.expressionString, this.pos, SpelMessage.UNEXPECTED_ESCAPE_CHAR));
 					default:
-						throw new IllegalStateException("Cannot handle ("
-								+ Integer.valueOf(ch) + ") '" + ch + "'");
+						throw new IllegalStateException("Cannot handle (" + Integer.valueOf(ch) + ") '" + ch + "'");
 				}
 			}
 		}
@@ -297,8 +294,8 @@ class Tokenizer {
 				}
 			}
 			if (ch == 0) {
-				throw new InternalParseException(new SpelParseException(this.expressionString,
-						start, SpelMessage.NON_TERMINATING_QUOTED_STRING));
+				throw new InternalParseException(new SpelParseException(this.expressionString, start,
+						SpelMessage.NON_TERMINATING_QUOTED_STRING));
 			}
 		}
 		this.pos++;
@@ -524,9 +521,9 @@ class Tokenizer {
 	 * Check if this might be a two character token.
 	 */
 	private boolean isTwoCharToken(TokenKind kind) {
-		Assert.isTrue(kind.tokenChars.length == 2);
-		Assert.isTrue(this.toProcess[this.pos] == kind.tokenChars[0]);
-		return this.toProcess[this.pos + 1] == kind.tokenChars[1];
+		return (kind.tokenChars.length == 2 &&
+				this.toProcess[this.pos] == kind.tokenChars[0] &&
+				this.toProcess[this.pos + 1] == kind.tokenChars[1]);
 	}
 
 	/**
@@ -595,4 +592,5 @@ class Tokenizer {
 		}
 		return (FLAGS[ch] & IS_HEXDIGIT) != 0;
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -217,11 +217,6 @@ class StaxStreamXMLReader extends AbstractStaxXMLReader {
 	}
 
 	private void handleCharacters() throws SAXException {
-		if (getContentHandler() != null && this.reader.isWhiteSpace()) {
-			getContentHandler().ignorableWhitespace(this.reader.getTextCharacters(),
-					this.reader.getTextStart(), this.reader.getTextLength());
-			return;
-		}
 		if (XMLStreamConstants.CDATA == this.reader.getEventType() && getLexicalHandler() != null) {
 			getLexicalHandler().startCDATA();
 		}

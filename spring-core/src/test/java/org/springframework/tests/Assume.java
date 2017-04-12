@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,10 @@
 
 package org.springframework.tests;
 
-import java.awt.GraphicsEnvironment;
-import java.lang.reflect.Method;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
-import org.junit.internal.AssumptionViolatedException;
-
-import org.springframework.util.ClassUtils;
+import org.junit.AssumptionViolatedException;
 
 import static org.junit.Assume.*;
 
@@ -32,81 +28,60 @@ import static org.junit.Assume.*;
  * conditions hold {@code true}. If the assumption fails, it means the test should be
  * skipped.
  *
- * <p>For example, if a set of tests require at least JDK 1.7 it can use
- * {@code Assume#atLeast(JavaVersion.JAVA_17)} as shown below:
+ * <p>Tests can be categorized into {@link TestGroup}s. Active groups are enabled using
+ * the 'testGroups' system property, usually activated from the gradle command line:
  *
  * <pre class="code">
- * public void MyTests {
- *
- *   &#064;BeforeClass
- *   public static void assumptions() {
- *       Assume.atLeast(JavaVersion.JAVA_17);
- *   }
- *
- *   // ... all the test methods that require at least JDK 1.7
- * }
- * </pre>
- *
- * If only a single test requires at least JDK 1.7 it can use the
- * {@code Assume#atLeast(JavaVersion.JAVA_17)} as shown below:
- *
- * <pre class="code">
- * public void MyTests {
- *
- *   &#064;Test
- *   public void requiresJdk17 {
- *       Assume.atLeast(JavaVersion.JAVA_17);
- *       // ... perform the actual test
- *   }
- * }
- * </pre>
- *
- * In addition to assumptions based on the JDK version, tests can be categorized into
- * {@link TestGroup}s. Active groups are enabled using the 'testGroups' system property,
- * usually activated from the gradle command line:
- * <pre>
  * gradle test -PtestGroups="performance"
  * </pre>
  *
- * Groups can be specified as a comma separated list of values, or using the pseudo group
+ * <p>Groups can be specified as a comma separated list of values, or using the pseudo group
  * 'all'. See {@link TestGroup} for a list of valid groups.
  *
  * @author Rob Winch
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.2
- * @see #atLeast(JavaVersion)
  * @see #group(TestGroup)
+ * @see #group(TestGroup, Executable)
  */
 public abstract class Assume {
 
-	private static final Set<TestGroup> GROUPS = TestGroup.parse(System.getProperty("testGroups"));
+	static final String TEST_GROUPS_SYSTEM_PROPERTY = "testGroups";
 
 
 	/**
-	 * Assume a minimum {@link JavaVersion} is running.
-	 * @param version the minimum version for the test to run
+	 * Assume that a particular {@link TestGroup} has been specified.
+	 * @param group the group that must be specified
+	 * @throws AssumptionViolatedException if the assumption fails
 	 */
-	public static void atLeast(JavaVersion version) {
-		if (!JavaVersion.runningVersion().isAtLeast(version)) {
-			throw new AssumptionViolatedException("Requires JDK " + version + " but running "
-					+ JavaVersion.runningVersion());
+	public static void group(TestGroup group) {
+		Set<TestGroup> testGroups = loadTestGroups();
+		if (!testGroups.contains(group)) {
+			throw new AssumptionViolatedException("Requires unspecified group " + group + " from " + testGroups);
 		}
 	}
 
 	/**
-	 * Assume that a particular {@link TestGroup} has been specified.
-	 * @param group the group that must be specified.
+	 * Assume that a particular {@link TestGroup} has been specified before
+	 * executing the supplied {@link Executable}.
+	 * <p>If the assumption fails, the executable will not be executed, but
+	 * no {@link AssumptionViolatedException} will be thrown.
+	 * @param group the group that must be specified
+	 * @param executable the executable to execute if the test group is active
+	 * @since 4.2
 	 */
-	public static void group(TestGroup group) {
-		if (!GROUPS.contains(group)) {
-			throw new AssumptionViolatedException("Requires unspecified group " + group
-					+ " from " + GROUPS);
+	public static void group(TestGroup group, Executable executable) throws Exception {
+		Set<TestGroup> testGroups = loadTestGroups();
+		if (testGroups.contains(group)) {
+			executable.execute();
 		}
 	}
 
 	/**
 	 * Assume that the specified log is not set to Trace or Debug.
 	 * @param log the log to test
+	 * @throws AssumptionViolatedException if the assumption fails
 	 */
 	public static void notLogging(Log log) {
 		assumeFalse(log.isTraceEnabled());
@@ -114,20 +89,28 @@ public abstract class Assume {
 	}
 
 	/**
-	 * Assume that we can load fonts (https://java.net/jira/browse/MACOSX_PORT-355)
+	 * Load test groups dynamically instead of during static
+	 * initialization in order to avoid a {@link NoClassDefFoundError}
+	 * being thrown while attempting to load the {@code Assume} class.
 	 */
-	public static void canLoadNativeDirFonts() {
+	private static Set<TestGroup> loadTestGroups() {
 		try {
-			GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-			Class<?> parserClass = ClassUtils.forName(
-					"net.sf.jasperreports.engine.util.JRStyledTextParser", Assume.class.getClassLoader());
-			Method method = parserClass.getMethod("getInstance");
-			method.setAccessible(true);
-			method.invoke(null);
+			return TestGroup.parse(System.getProperty(TEST_GROUPS_SYSTEM_PROPERTY));
 		}
-		catch (Throwable ex) {
-			throw new AssumptionViolatedException("Requires GraphicsEnvironment that can load fonts", ex);
+		catch (Exception ex) {
+			throw new IllegalStateException("Failed to parse '" + TEST_GROUPS_SYSTEM_PROPERTY
+					+ "' system property: " + ex.getMessage(), ex);
 		}
+	}
+
+
+	/**
+	 * @since 4.2
+	 */
+	@FunctionalInterface
+	public interface Executable {
+
+		void execute() throws Exception;
 	}
 
 }

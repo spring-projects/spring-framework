@@ -18,6 +18,7 @@ package org.springframework.expression.spel;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.ast.MethodReference;

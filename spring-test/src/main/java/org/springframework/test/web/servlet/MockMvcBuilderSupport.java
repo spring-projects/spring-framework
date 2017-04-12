@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.test.web.servlet;
 
 import java.util.List;
-
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -36,6 +35,7 @@ import org.springframework.web.context.WebApplicationContext;
  *
  * @author Rossen Stoyanchev
  * @author Rob Winch
+ * @author Stephane Nicoll
  * @since 3.2
  */
 public abstract class MockMvcBuilderSupport {
@@ -43,12 +43,16 @@ public abstract class MockMvcBuilderSupport {
 	protected final MockMvc createMockMvc(Filter[] filters, MockServletConfig servletConfig,
 			WebApplicationContext webAppContext, RequestBuilder defaultRequestBuilder,
 			List<ResultMatcher> globalResultMatchers, List<ResultHandler> globalResultHandlers,
-			Boolean dispatchOptions) {
+			List<DispatcherServletCustomizer> dispatcherServletCustomizers) {
 
 		ServletContext servletContext = webAppContext.getServletContext();
 
 		TestDispatcherServlet dispatcherServlet = new TestDispatcherServlet(webAppContext);
-		dispatcherServlet.setDispatchOptionsRequest(dispatchOptions);
+		if (dispatcherServletCustomizers != null) {
+			for (DispatcherServletCustomizer customizers : dispatcherServletCustomizers) {
+				customizers.customize(dispatcherServlet);
+			}
+		}
 		try {
 			dispatcherServlet.init(servletConfig);
 		}

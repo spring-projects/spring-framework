@@ -84,7 +84,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * Indicates whether or not the '{@code select}' tag allows
 	 * multiple-selections.
 	 */
-	private Object multiple = Boolean.FALSE;
+	private Object multiple;
 
 	/**
 	 * The {@link TagWriter} instance that the output is being written.
@@ -249,9 +249,9 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 
 	private boolean isMultiple() throws JspException {
 		Object multiple = getMultiple();
-		if (multiple != null && (Boolean.TRUE.equals(multiple) ||
-				Boolean.parseBoolean(multiple.toString()) || "multiple".equals(multiple))) {
-			return true;
+		if (multiple != null) {
+			String stringValue = multiple.toString();
+			return ("multiple".equalsIgnoreCase(stringValue) || Boolean.parseBoolean(stringValue));
 		}
 		return forceMultiple();
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.expression.spel.ast;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -38,11 +37,13 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Andy Clement
  * @author Mark Fisher
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class Projection extends SpelNodeImpl {
 
 	private final boolean nullSafe;
+
 
 	public Projection(boolean nullSafe, int pos, SpelNodeImpl expression) {
 		super(pos, expression);
@@ -67,26 +68,29 @@ public class Projection extends SpelNodeImpl {
 		// before calling the specified operation. This special context object
 		// has two fields 'key' and 'value' that refer to the map entries key
 		// and value, and they can be referenced in the operation
-		// eg. {'a':'y','b':'n'}.!{value=='y'?key:null}" == ['a', null]
+		// eg. {'a':'y','b':'n'}.![value=='y'?key:null]" == ['a', null]
 		if (operand instanceof Map) {
 			Map<?, ?> mapData = (Map<?, ?>) operand;
-			List<Object> result = new ArrayList<Object>();
+			List<Object> result = new ArrayList<>();
 			for (Map.Entry<?, ?> entry : mapData.entrySet()) {
 				try {
 					state.pushActiveContextObject(new TypedValue(entry));
+					state.enterScope();
 					result.add(this.children[0].getValueInternal(state).getValue());
 				}
 				finally {
 					state.popActiveContextObject();
+					state.exitScope();
 				}
 			}
-			return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this); // TODO unable to build correct type descriptor
+			return new ValueRef.TypedValueHolderValueRef(new TypedValue(result), this);  // TODO unable to build correct type descriptor
 		}
 
-		if (operand instanceof Collection || operandIsArray) {
-			Collection<?> data = (operand instanceof Collection ? (Collection<?>) operand :
-					Arrays.asList(ObjectUtils.toObjectArray(operand)));
-			List<Object> result = new ArrayList<Object>();
+		if (operand instanceof Iterable || operandIsArray) {
+			Iterable<?> data = (operand instanceof Iterable ?
+					(Iterable<?>) operand : Arrays.asList(ObjectUtils.toObjectArray(operand)));
+
+			List<Object> result = new ArrayList<>();
 			int idx = 0;
 			Class<?> arrayElementType = null;
 			for (Object element : data) {
@@ -105,6 +109,7 @@ public class Projection extends SpelNodeImpl {
 				}
 				idx++;
 			}
+
 			if (operandIsArray) {
 				if (arrayElementType == null) {
 					arrayElementType = Object.class;
@@ -113,25 +118,24 @@ public class Projection extends SpelNodeImpl {
 				System.arraycopy(result.toArray(), 0, resultArray, 0, result.size());
 				return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultArray),this);
 			}
+
 			return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
 		}
 
-		if (operand==null) {
+		if (operand == null) {
 			if (this.nullSafe) {
-				return ValueRef.NullValueRef.instance;
+				return ValueRef.NullValueRef.INSTANCE;
 			}
-			throw new SpelEvaluationException(getStartPosition(),
-					SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE, "null");
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE, "null");
 		}
 
-		throw new SpelEvaluationException(getStartPosition(),
-				SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE, operand.getClass().getName());
+		throw new SpelEvaluationException(getStartPosition(), SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE,
+				operand.getClass().getName());
 	}
 
 	@Override
 	public String toStringAST() {
-		StringBuilder sb = new StringBuilder();
-		return sb.append("![").append(getChild(0).toStringAST()).append("]").toString();
+		return "![" + getChild(0).toStringAST() + "]";
 	}
 
 	private Class<?> determineCommonType(Class<?> oldType, Class<?> newType) {

@@ -27,6 +27,7 @@ import java.sql.Timestamp;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.jdbc.InvalidResultSetAccessException;
 
 import static org.junit.Assert.*;
@@ -204,7 +205,8 @@ public class ResultSetWrappingRowSetTests {
 		if (arg instanceof String) {
 			given(rset.findColumn((String) arg)).willReturn(1);
 			given(rsetMethod.invoke(rset, 1)).willReturn(ret).willThrow(new SQLException("test"));
-		} else {
+		}
+		else {
 			given(rsetMethod.invoke(rset, arg)).willReturn(ret).willThrow(new SQLException("test"));
 		}
 		rowsetMethod.invoke(rowset, arg);

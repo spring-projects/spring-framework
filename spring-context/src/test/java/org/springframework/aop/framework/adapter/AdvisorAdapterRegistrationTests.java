@@ -16,8 +16,6 @@
 
 package org.springframework.aop.framework.adapter;
 
-import static org.junit.Assert.*;
-
 import java.io.Serializable;
 
 import org.aopalliance.aop.Advice;
@@ -26,11 +24,14 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.BeforeAdvice;
 import org.springframework.aop.framework.Advised;
-import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.tests.sample.beans.ITestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * TestCase for AdvisorAdapterRegistrationManager mechanism.
@@ -38,7 +39,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Dmitriy Kopylenko
  * @author Chris Beams
  */
-public final class AdvisorAdapterRegistrationTests {
+public class AdvisorAdapterRegistrationTests {
 
 	@Before
 	@After

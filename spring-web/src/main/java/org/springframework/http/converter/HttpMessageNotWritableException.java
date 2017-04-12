@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,8 @@
 package org.springframework.http.converter;
 
 /**
- * Thrown by {@link org.springframework.http.converter.HttpMessageConverter} implementations when the
- * {@link org.springframework.http.converter.HttpMessageConverter#write(Object, org.springframework.http.MediaType,
- * org.springframework.http.HttpOutputMessage) write} method fails.
+ * Thrown by {@link HttpMessageConverter} implementations when the
+ * {@link HttpMessageConverter#write} method fails.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -29,7 +28,6 @@ public class HttpMessageNotWritableException extends HttpMessageConversionExcept
 
 	/**
 	 * Create a new HttpMessageNotWritableException.
-	 *
 	 * @param msg the detail message
 	 */
 	public HttpMessageNotWritableException(String msg) {
@@ -38,11 +36,11 @@ public class HttpMessageNotWritableException extends HttpMessageConversionExcept
 
 	/**
 	 * Create a new HttpMessageNotWritableException.
-	 *
 	 * @param msg the detail message
 	 * @param cause the root cause (if any)
 	 */
 	public HttpMessageNotWritableException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,6 @@ import org.springframework.util.Assert;
 /**
  * Mock implementation of the {@link javax.servlet.RequestDispatcher} interface.
  *
- * <p>Used for testing the web framework; typically not necessary for
- * testing application controllers.
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -50,7 +47,7 @@ public class MockRequestDispatcher implements RequestDispatcher {
 	 * particular path or given by a particular name
 	 */
 	public MockRequestDispatcher(String resource) {
-		Assert.notNull(resource, "resource must not be null");
+		Assert.notNull(resource, "Resource must not be null");
 		this.resource = resource;
 	}
 
@@ -59,9 +56,7 @@ public class MockRequestDispatcher implements RequestDispatcher {
 	public void forward(ServletRequest request, ServletResponse response) {
 		Assert.notNull(request, "Request must not be null");
 		Assert.notNull(response, "Response must not be null");
-		if (response.isCommitted()) {
-			throw new IllegalStateException("Cannot perform forward - response is already committed");
-		}
+		Assert.state(!response.isCommitted(), "Cannot perform forward - response is already committed");
 		getMockHttpServletResponse(response).setForwardedUrl(this.resource);
 		if (logger.isDebugEnabled()) {
 			logger.debug("MockRequestDispatcher: forwarding to [" + this.resource + "]");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.beans.factory.config;
+
+import java.util.Iterator;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -104,6 +106,32 @@ public interface ConfigurableListableBeanFactory
 	 * defined in this factory
 	 */
 	BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException;
+
+	/**
+	 * Return a unified view over all bean names managed by this factory.
+	 * <p>Includes bean definition names as well as names of manually registered
+	 * singleton instances, with bean definition names consistently coming first,
+	 * analogous to how type/annotation specific retrieval of bean names works.
+	 * @return the composite iterator for the bean names view
+	 * @since 4.1.2
+	 * @see #containsBeanDefinition
+	 * @see #registerSingleton
+	 * @see #getBeanNamesForType
+	 * @see #getBeanNamesForAnnotation
+	 */
+	Iterator<String> getBeanNamesIterator();
+
+	/**
+	 * Clear the merged bean definition cache, removing entries for beans
+	 * which are not considered eligible for full metadata caching yet.
+	 * <p>Typically triggered after changes to the original bean definitions,
+	 * e.g. after applying a {@link BeanFactoryPostProcessor}. Note that metadata
+	 * for beans which have already been created at this point will be kept around.
+	 * @since 4.2
+	 * @see #getBeanDefinition
+	 * @see #getMergedBeanDefinition
+	 */
+	void clearMetadataCache();
 
 	/**
 	 * Freeze all bean definitions, signalling that the registered bean definitions

@@ -16,16 +16,17 @@
 
 package org.springframework.core.type;
 
-import static org.junit.Assert.*;
-
 import java.lang.annotation.Inherited;
 
 import org.junit.Test;
+
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.stereotype.Component;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Ramnivas Laddad

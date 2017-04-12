@@ -82,7 +82,7 @@ public class ServletContextAwareProcessor implements BeanPostProcessor {
 	 * has been registered.
 	 */
 	protected ServletContext getServletContext() {
-		if(this.servletContext == null && getServletConfig() != null) {
+		if (this.servletContext == null && getServletConfig() != null) {
 			return getServletConfig().getServletContext();
 		}
 		return this.servletContext;

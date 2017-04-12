@@ -18,7 +18,6 @@ package org.springframework.ejb.access;
 
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
-
 import javax.ejb.CreateException;
 import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;
@@ -26,6 +25,7 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 
 import org.junit.Test;
+
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.remoting.RemoteAccessException;

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
+import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
@@ -56,23 +57,26 @@ import org.springframework.web.socket.sockjs.support.AbstractSockJsService;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 4.0
  */
-public class TransportHandlingSockJsService extends AbstractSockJsService implements SockJsServiceConfig {
+public class TransportHandlingSockJsService extends AbstractSockJsService implements SockJsServiceConfig, Lifecycle {
 
 	private static final boolean jackson2Present = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", TransportHandlingSockJsService.class.getClassLoader());
 
 
-	private final Map<TransportType, TransportHandler> handlers = new HashMap<TransportType, TransportHandler>();
+	private final Map<TransportType, TransportHandler> handlers = new HashMap<>();
 
 	private SockJsMessageCodec messageCodec;
 
-	private final List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
+	private final List<HandshakeInterceptor> interceptors = new ArrayList<>();
 
-	private final Map<String, SockJsSession> sessions = new ConcurrentHashMap<String, SockJsSession>();
+	private final Map<String, SockJsSession> sessions = new ConcurrentHashMap<>();
 
 	private ScheduledFuture<?> sessionCleanupTask;
+
+	private boolean running;
 
 
 	/**
@@ -128,7 +132,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 	public SockJsMessageCodec getMessageCodec() {
 		Assert.state(this.messageCodec != null, "A SockJsMessageCodec is required but not available: " +
-				"Add Jackson 2 to the classpath, or configure a custom SockJsMessageCodec.");
+				"Add Jackson to the classpath, or configure a custom SockJsMessageCodec.");
 		return this.messageCodec;
 	}
 
@@ -146,7 +150,37 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 	 * Return the configured WebSocket handshake request interceptors.
 	 */
 	public List<HandshakeInterceptor> getHandshakeInterceptors() {
-		return Collections.unmodifiableList(this.interceptors);
+		return this.interceptors;
+	}
+
+
+	@Override
+	public void start() {
+		if (!isRunning()) {
+			this.running = true;
+			for (TransportHandler handler : this.handlers.values()) {
+				if (handler instanceof Lifecycle) {
+					((Lifecycle) handler).start();
+				}
+			}
+		}
+	}
+
+	@Override
+	public void stop() {
+		if (isRunning()) {
+			this.running = false;
+			for (TransportHandler handler : this.handlers.values()) {
+				if (handler instanceof Lifecycle) {
+					((Lifecycle) handler).stop();
+				}
+			}
+		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
 	}
 
 
@@ -156,7 +190,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 		TransportHandler transportHandler = this.handlers.get(TransportType.WEBSOCKET);
 		if (!(transportHandler instanceof HandshakeHandler)) {
-			logger.warn("No handler for raw WebSocket messages");
+			logger.error("No handler configured for raw WebSocket messages");
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
 		}
@@ -165,7 +199,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		HandshakeFailureException failure = null;
 
 		try {
-			Map<String, Object> attributes = new HashMap<String, Object>();
+			Map<String, Object> attributes = new HashMap<>();
 			if (!chain.applyBeforeHandshake(request, response, attributes)) {
 				return;
 			}
@@ -178,7 +212,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		catch (Throwable ex) {
 			failure = new HandshakeFailureException("Uncaught failure for request " + request.getURI(), ex);
 		}
-		finally {
+			finally {
 			if (failure != null) {
 				chain.applyAfterHandshake(request, response, failure);
 				throw failure;
@@ -192,8 +226,8 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 		TransportType transportType = TransportType.fromValue(transport);
 		if (transportType == null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Unknown transport type: " + transportType);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Unknown transport type for " + request.getURI());
 			}
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
@@ -201,35 +235,38 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 		TransportHandler transportHandler = this.handlers.get(transportType);
 		if (transportHandler == null) {
-			logger.debug("Transport handler not found");
+			if (logger.isWarnEnabled()) {
+				logger.warn("No TransportHandler for " + request.getURI());
+			}
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
 		}
 
-		HttpMethod supportedMethod = transportType.getHttpMethod();
-		if (!supportedMethod.equals(request.getMethod())) {
-			if (HttpMethod.OPTIONS.equals(request.getMethod()) && transportType.supportsCors()) {
-				response.setStatusCode(HttpStatus.NO_CONTENT);
-				addCorsHeaders(request, response, HttpMethod.OPTIONS, supportedMethod);
-				addCacheHeaders(response);
-			}
-			else if (transportType.supportsCors()) {
-				sendMethodNotAllowed(response, supportedMethod, HttpMethod.OPTIONS);
-			}
-			else {
-				sendMethodNotAllowed(response, supportedMethod);
-			}
-			return;
-		}
-
-		HandshakeInterceptorChain chain = new HandshakeInterceptorChain(this.interceptors, handler);
 		SockJsException failure = null;
+		HandshakeInterceptorChain chain = new HandshakeInterceptorChain(this.interceptors, handler);
 
 		try {
+			HttpMethod supportedMethod = transportType.getHttpMethod();
+			if (supportedMethod != request.getMethod()) {
+				if (HttpMethod.OPTIONS == request.getMethod() && transportType.supportsCors()) {
+					if (checkOrigin(request, response, HttpMethod.OPTIONS, supportedMethod)) {
+						response.setStatusCode(HttpStatus.NO_CONTENT);
+						addCacheHeaders(response);
+					}
+				}
+				else if (transportType.supportsCors()) {
+					sendMethodNotAllowed(response, supportedMethod, HttpMethod.OPTIONS);
+				}
+				else {
+					sendMethodNotAllowed(response, supportedMethod);
+				}
+				return;
+			}
+
 			SockJsSession session = this.sessions.get(sessionId);
 			if (session == null) {
 				if (transportHandler instanceof SockJsSessionFactory) {
-					Map<String, Object> attributes = new HashMap<String, Object>();
+					Map<String, Object> attributes = new HashMap<>();
 					if (!chain.applyBeforeHandshake(request, response, attributes)) {
 						return;
 					}
@@ -238,7 +275,25 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 				}
 				else {
 					response.setStatusCode(HttpStatus.NOT_FOUND);
-					logger.warn("Session not found");
+					if (logger.isDebugEnabled()) {
+						logger.debug("Session not found, sessionId=" + sessionId +
+								". The session may have been closed " +
+								"(e.g. missed heart-beat) while a message was coming in.");
+					}
+					return;
+				}
+			}
+			else {
+				if (session.getPrincipal() != null) {
+					if (!session.getPrincipal().equals(request.getPrincipal())) {
+						logger.debug("The user for the session does not match the user for the request.");
+						response.setStatusCode(HttpStatus.NOT_FOUND);
+						return;
+					}
+				}
+				if (!transportHandler.checkSessionType(session)) {
+					logger.debug("Session type does not match the transport type for the request.");
+					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
 				}
 			}
@@ -248,10 +303,15 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			}
 
 			if (transportType.supportsCors()) {
-				addCorsHeaders(request, response);
+				if (!checkOrigin(request, response)) {
+					return;
+				}
 			}
 
+
 			transportHandler.handleRequest(request, response, handler, session);
+
+
 			chain.applyAfterHandshake(request, response, null);
 		}
 		catch (SockJsException ex) {
@@ -268,6 +328,25 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		}
 	}
 
+	@Override
+	protected boolean validateRequest(String serverId, String sessionId, String transport) {
+		if (!super.validateRequest(serverId, sessionId, transport)) {
+			return false;
+		}
+
+		if (!this.allowedOrigins.contains("*")) {
+			TransportType transportType = TransportType.fromValue(transport);
+			if (transportType == null || !transportType.supportsOrigin()) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Origin check enabled but transport '" + transport + "' does not support it.");
+				}
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	private SockJsSession createSockJsSession(String sessionId, SockJsSessionFactory sessionFactory,
 			WebSocketHandler handler, Map<String, Object> attributes) {
 
@@ -275,22 +354,15 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		if (session != null) {
 			return session;
 		}
-
 		if (this.sessionCleanupTask == null) {
 			scheduleSessionTask();
 		}
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Creating new session with session id \"" + sessionId + "\"");
-		}
 		session = sessionFactory.createSession(sessionId, handler, attributes);
 		this.sessions.put(sessionId, session);
-
 		return session;
 	}
 
 	private void scheduleSessionTask() {
-
 		synchronized (this.sessions) {
 			if (this.sessionCleanupTask != null) {
 				return;
@@ -298,28 +370,22 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			this.sessionCleanupTask = getTaskScheduler().scheduleAtFixedRate(new Runnable() {
 				@Override
 				public void run() {
-					try {
-						int count = sessions.size();
-						if (logger.isTraceEnabled() && (count != 0)) {
-							logger.trace("Checking " + count + " session(s) for timeouts [" + getName() + "]");
-						}
-						for (SockJsSession session : sessions.values()) {
+					List<String> removedIds = new ArrayList<>();
+					for (SockJsSession session : sessions.values()) {
+						try {
 							if (session.getTimeSinceLastActive() > getDisconnectDelay()) {
-								if (logger.isTraceEnabled()) {
-									logger.trace("Removing " + session + " for [" + getName() + "]");
-								}
-								session.close();
 								sessions.remove(session.getId());
+								removedIds.add(session.getId());
+								session.close();
 							}
 						}
-						if (logger.isTraceEnabled() && count > 0) {
-							logger.trace(sessions.size() + " remaining session(s) [" + getName() + "]");
+						catch (Throwable ex) {
+							// Could be part of normal workflow (e.g. browser tab closed)
+							logger.debug("Failed to close " + session, ex);
 						}
 					}
-					catch (Throwable ex) {
-						if (logger.isErrorEnabled()) {
-							logger.error("Failed to complete session timeout checks for [" + getName() + "]", ex);
-						}
+					if (logger.isDebugEnabled() && !removedIds.isEmpty()) {
+						logger.debug("Closed " + removedIds.size() + " sessions: " + removedIds);
 					}
 				}
 			}, getDisconnectDelay());

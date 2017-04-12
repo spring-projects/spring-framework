@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.MethodClassKey;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Abstract implementation of {@link TransactionAttributeSource} that caches
@@ -65,11 +65,11 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
-	 * Cache of TransactionAttributes, keyed by DefaultCacheKey (Method + target Class).
+	 * Cache of TransactionAttributes, keyed by method on a specific target class.
 	 * <p>As this base class is not marked Serializable, the cache will be recreated
 	 * after serialization - provided that the concrete subclass is Serializable.
 	 */
-	final Map<Object, TransactionAttribute> attributeCache = new ConcurrentHashMap<Object, TransactionAttribute>(1024);
+	private final Map<Object, TransactionAttribute> attributeCache = new ConcurrentHashMap<>(1024);
 
 
 	/**
@@ -82,6 +82,10 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 */
 	@Override
 	public TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass) {
+		if (method.getDeclaringClass() == Object.class) {
+			return null;
+		}
+
 		// First, see if we have a cached value.
 		Object cacheKey = getCacheKey(method, targetClass);
 		Object cached = this.attributeCache.get(cacheKey);
@@ -97,20 +101,22 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 		}
 		else {
 			// We need to work it out.
-			TransactionAttribute txAtt = computeTransactionAttribute(method, targetClass);
+			TransactionAttribute txAttr = computeTransactionAttribute(method, targetClass);
 			// Put it in the cache.
-			if (txAtt == null) {
+			if (txAttr == null) {
 				this.attributeCache.put(cacheKey, NULL_TRANSACTION_ATTRIBUTE);
 			}
 			else {
-				if (logger.isDebugEnabled()) {
-					Class<?> classToLog = (targetClass != null ? targetClass : method.getDeclaringClass());
-					logger.debug("Adding transactional method '" + classToLog.getSimpleName() + "." +
-							method.getName() + "' with attribute: " + txAtt);
+				String methodIdentification = ClassUtils.getQualifiedMethodName(method, targetClass);
+				if (txAttr instanceof DefaultTransactionAttribute) {
+					((DefaultTransactionAttribute) txAttr).setDescriptor(methodIdentification);
 				}
-				this.attributeCache.put(cacheKey, txAtt);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Adding transactional method '" + methodIdentification + "' with attribute: " + txAttr);
+				}
+				this.attributeCache.put(cacheKey, txAttr);
 			}
-			return txAtt;
+			return txAttr;
 		}
 	}
 
@@ -123,15 +129,17 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * @return the cache key (never {@code null})
 	 */
 	protected Object getCacheKey(Method method, Class<?> targetClass) {
-		return new DefaultCacheKey(method, targetClass);
+		return new MethodClassKey(method, targetClass);
 	}
 
 	/**
 	 * Same signature as {@link #getTransactionAttribute}, but doesn't cache the result.
 	 * {@link #getTransactionAttribute} is effectively a caching decorator for this method.
+	 * <p>As of 4.1.8, this method can be overridden.
+	 * @since 4.1.8
 	 * @see #getTransactionAttribute
 	 */
-	private TransactionAttribute computeTransactionAttribute(Method method, Class<?> targetClass) {
+	protected TransactionAttribute computeTransactionAttribute(Method method, Class<?> targetClass) {
 		// Don't allow no-public methods as required.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
 			return null;
@@ -146,26 +154,30 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 		specificMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
 
 		// First try is the method in the target class.
-		TransactionAttribute txAtt = findTransactionAttribute(specificMethod);
-		if (txAtt != null) {
-			return txAtt;
+		TransactionAttribute txAttr = findTransactionAttribute(specificMethod);
+		if (txAttr != null) {
+			return txAttr;
 		}
 
 		// Second try is the transaction attribute on the target class.
-		txAtt = findTransactionAttribute(specificMethod.getDeclaringClass());
-		if (txAtt != null) {
-			return txAtt;
+		txAttr = findTransactionAttribute(specificMethod.getDeclaringClass());
+		if (txAttr != null && ClassUtils.isUserLevelMethod(method)) {
+			return txAttr;
 		}
 
 		if (specificMethod != method) {
 			// Fallback is to look at the original method.
-			txAtt = findTransactionAttribute(method);
-			if (txAtt != null) {
-				return txAtt;
+			txAttr = findTransactionAttribute(method);
+			if (txAttr != null) {
+				return txAttr;
 			}
 			// Last fallback is the class of the original method.
-			return findTransactionAttribute(method.getDeclaringClass());
+			txAttr = findTransactionAttribute(method.getDeclaringClass());
+			if (txAttr != null && ClassUtils.isUserLevelMethod(method)) {
+				return txAttr;
+			}
 		}
+
 		return null;
 	}
 
@@ -195,40 +207,6 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 */
 	protected boolean allowPublicMethodsOnly() {
 		return false;
-	}
-
-
-	/**
-	 * Default cache key for the TransactionAttribute cache.
-	 */
-	private static class DefaultCacheKey {
-
-		private final Method method;
-
-		private final Class<?> targetClass;
-
-		public DefaultCacheKey(Method method, Class<?> targetClass) {
-			this.method = method;
-			this.targetClass = targetClass;
-		}
-
-		@Override
-		public boolean equals(Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof DefaultCacheKey)) {
-				return false;
-			}
-			DefaultCacheKey otherKey = (DefaultCacheKey) other;
-			return (this.method.equals(otherKey.method) &&
-					ObjectUtils.nullSafeEquals(this.targetClass, otherKey.targetClass));
-		}
-
-		@Override
-		public int hashCode() {
-			return this.method.hashCode();
-		}
 	}
 
 }

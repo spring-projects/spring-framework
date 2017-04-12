@@ -16,11 +16,11 @@
 
 package org.springframework.util.comparator;
 
-import static org.junit.Assert.*;
-
 import java.util.Comparator;
 
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link NullSafeComparator}.

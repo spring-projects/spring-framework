@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParserContext;
+import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeConverter;
@@ -58,12 +59,12 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 
 	private String expressionSuffix = DEFAULT_EXPRESSION_SUFFIX;
 
-	private ExpressionParser expressionParser = new SpelExpressionParser();
+	private ExpressionParser expressionParser;
 
-	private final Map<String, Expression> expressionCache = new ConcurrentHashMap<String, Expression>(256);
+	private final Map<String, Expression> expressionCache = new ConcurrentHashMap<>(256);
 
 	private final Map<BeanExpressionContext, StandardEvaluationContext> evaluationCache =
-			new ConcurrentHashMap<BeanExpressionContext, StandardEvaluationContext>(8);
+			new ConcurrentHashMap<>(8);
 
 	private final ParserContext beanExpressionParserContext = new ParserContext() {
 		@Override
@@ -79,6 +80,23 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 			return expressionSuffix;
 		}
 	};
+
+
+	/**
+	 * Create a new {@code StandardBeanExpressionResolver} with default settings.
+	 */
+	public StandardBeanExpressionResolver() {
+		this.expressionParser = new SpelExpressionParser();
+	}
+
+	/**
+	 * Create a new {@code StandardBeanExpressionResolver} with the given bean class loader,
+	 * using it as the basis for expression compilation.
+	 * @param beanClassLoader the factory's bean class loader
+	 */
+	public StandardBeanExpressionResolver(ClassLoader beanClassLoader) {
+		this.expressionParser = new SpelExpressionParser(new SpelParserConfiguration(null, beanClassLoader));
+	}
 
 
 	/**

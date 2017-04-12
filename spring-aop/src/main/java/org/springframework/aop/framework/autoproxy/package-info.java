@@ -1,6 +1,4 @@
-
 /**
- *
  * Bean post-processors for use in ApplicationContexts to simplify AOP usage
  * by automatically creating AOP proxies without the need to use a ProxyFactoryBean.
  *
@@ -10,7 +8,5 @@
  * <p><b>NB</b>: Automatic auto-proxying is not supported for BeanFactory implementations,
  * as post-processors beans are only automatically detected in application contexts.
  * Post-processors can be explicitly registered on a ConfigurableBeanFactory instead.
- *
  */
 package org.springframework.aop.framework.autoproxy;
-

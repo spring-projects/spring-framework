@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
@@ -43,13 +44,13 @@ public class CollectionUtilsTests {
 		assertTrue(CollectionUtils.isEmpty((Set<Object>) null));
 		assertTrue(CollectionUtils.isEmpty((Map<String, String>) null));
 		assertTrue(CollectionUtils.isEmpty(new HashMap<String, String>()));
-		assertTrue(CollectionUtils.isEmpty(new HashSet<Object>()));
+		assertTrue(CollectionUtils.isEmpty(new HashSet<>()));
 
-		List<Object> list = new LinkedList<Object>();
+		List<Object> list = new LinkedList<>();
 		list.add(new Object());
 		assertFalse(CollectionUtils.isEmpty(list));
 
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		map.put("foo", "bar");
 		assertFalse(CollectionUtils.isEmpty(map));
 	}
@@ -57,7 +58,7 @@ public class CollectionUtilsTests {
 	@Test
 	public void testMergeArrayIntoCollection() {
 		Object[] arr = new Object[] {"value1", "value2"};
-		List<Comparable<?>> list = new LinkedList<Comparable<?>>();
+		List<Comparable<?>> list = new LinkedList<>();
 		list.add("value3");
 
 		CollectionUtils.mergeArrayIntoCollection(arr, list);
@@ -69,7 +70,7 @@ public class CollectionUtilsTests {
 	@Test
 	public void testMergePrimitiveArrayIntoCollection() {
 		int[] arr = new int[] {1, 2};
-		List<Comparable<?>> list = new LinkedList<Comparable<?>>();
+		List<Comparable<?>> list = new LinkedList<>();
 		list.add(new Integer(3));
 
 		CollectionUtils.mergeArrayIntoCollection(arr, list);
@@ -86,7 +87,7 @@ public class CollectionUtilsTests {
 		props.setProperty("prop2", "value2");
 		props.put("prop3", new Integer(3));
 
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		map.put("prop4", "value4");
 
 		CollectionUtils.mergePropertiesIntoMap(props, map);
@@ -103,23 +104,23 @@ public class CollectionUtilsTests {
 		assertFalse(CollectionUtils.contains(new LinkedList<String>().iterator(), "myElement"));
 		assertFalse(CollectionUtils.contains(new Hashtable<String, Object>().keys(), "myElement"));
 
-		List<String> list = new LinkedList<String>();
+		List<String> list = new LinkedList<>();
 		list.add("myElement");
 		assertTrue(CollectionUtils.contains(list.iterator(), "myElement"));
 
-		Hashtable<String, String> ht = new Hashtable<String, String>();
+		Hashtable<String, String> ht = new Hashtable<>();
 		ht.put("myElement", "myValue");
 		assertTrue(CollectionUtils.contains(ht.keys(), "myElement"));
 	}
 
 	@Test
 	public void testContainsAny() throws Exception {
-		List<String> source = new ArrayList<String>();
+		List<String> source = new ArrayList<>();
 		source.add("abc");
 		source.add("def");
 		source.add("ghi");
 
-		List<String> candidates = new ArrayList<String>();
+		List<String> candidates = new ArrayList<>();
 		candidates.add("xyz");
 		candidates.add("def");
 		candidates.add("abc");
@@ -139,7 +140,7 @@ public class CollectionUtilsTests {
 
 	@Test
 	public void testContainsInstanceWithInstancesThatAreEqualButDistinct() throws Exception {
-		List<Instance> list = new ArrayList<Instance>();
+		List<Instance> list = new ArrayList<>();
 		list.add(new Instance("fiona"));
 		assertFalse("Must return false if instance is not in the supplied Collection argument",
 				CollectionUtils.containsInstance(list, new Instance("fiona")));
@@ -147,7 +148,7 @@ public class CollectionUtilsTests {
 
 	@Test
 	public void testContainsInstanceWithSameInstance() throws Exception {
-		List<Instance> list = new ArrayList<Instance>();
+		List<Instance> list = new ArrayList<>();
 		list.add(new Instance("apple"));
 		Instance instance = new Instance("fiona");
 		list.add(instance);
@@ -157,7 +158,7 @@ public class CollectionUtilsTests {
 
 	@Test
 	public void testContainsInstanceWithNullInstance() throws Exception {
-		List<Instance> list = new ArrayList<Instance>();
+		List<Instance> list = new ArrayList<>();
 		list.add(new Instance("apple"));
 		list.add(new Instance("fiona"));
 		assertFalse("Must return false if null instance is supplied",
@@ -166,12 +167,12 @@ public class CollectionUtilsTests {
 
 	@Test
 	public void testFindFirstMatch() throws Exception {
-		List<String> source = new ArrayList<String>();
+		List<String> source = new ArrayList<>();
 		source.add("abc");
 		source.add("def");
 		source.add("ghi");
 
-		List<String> candidates = new ArrayList<String>();
+		List<String> candidates = new ArrayList<>();
 		candidates.add("xyz");
 		candidates.add("def");
 		candidates.add("abc");
@@ -181,35 +182,35 @@ public class CollectionUtilsTests {
 
 	@Test
 	public void testHasUniqueObject() {
-		List<String> list = new LinkedList<String>();
+		List<String> list = new LinkedList<>();
 		list.add("myElement");
 		list.add("myOtherElement");
 		assertFalse(CollectionUtils.hasUniqueObject(list));
 
-		list = new LinkedList<String>();
+		list = new LinkedList<>();
 		list.add("myElement");
 		assertTrue(CollectionUtils.hasUniqueObject(list));
 
-		list = new LinkedList<String>();
+		list = new LinkedList<>();
 		list.add("myElement");
 		list.add(null);
 		assertFalse(CollectionUtils.hasUniqueObject(list));
 
-		list = new LinkedList<String>();
+		list = new LinkedList<>();
 		list.add(null);
 		list.add("myElement");
 		assertFalse(CollectionUtils.hasUniqueObject(list));
 
-		list = new LinkedList<String>();
+		list = new LinkedList<>();
 		list.add(null);
 		list.add(null);
 		assertTrue(CollectionUtils.hasUniqueObject(list));
 
-		list = new LinkedList<String>();
+		list = new LinkedList<>();
 		list.add(null);
 		assertTrue(CollectionUtils.hasUniqueObject(list));
 
-		list = new LinkedList<String>();
+		list = new LinkedList<>();
 		assertFalse(CollectionUtils.hasUniqueObject(list));
 	}
 

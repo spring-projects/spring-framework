@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,18 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.Collection;
 import java.util.Set;
 
 import org.junit.Test;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests set value expressions.
@@ -41,6 +38,7 @@ import org.springframework.expression.spel.testresources.PlaceOfBirth;
 public class SetValueTests extends AbstractExpressionTests {
 
 	private final static boolean DEBUG = false;
+
 
 	@Test
 	public void testSetProperty() {
@@ -77,6 +75,57 @@ public class SetValueTests extends AbstractExpressionTests {
 		setValue("arrayContainer.longs[1]", 3L);
 		setValue("arrayContainer.bytes[1]", (byte) 3);
 		setValue("arrayContainer.chars[1]", (char) 3);
+	}
+
+	@Test
+	public void testIsWritableForInvalidExpressions_SPR10610() {
+		Expression e = null;
+		StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
+
+		// PROPERTYORFIELDREFERENCE
+		// Non existent field (or property):
+		e = parser.parseExpression("arrayContainer.wibble");
+		assertFalse("Should not be writable!",e.isWritable(lContext));
+
+		e = parser.parseExpression("arrayContainer.wibble.foo");
+		try {
+			assertFalse("Should not be writable!",e.isWritable(lContext));
+			fail("Should have had an error because wibble does not really exist");
+		}
+		catch (SpelEvaluationException see) {
+//			org.springframework.expression.spel.SpelEvaluationException: EL1008E:(pos 15): Property or field 'wibble' cannot be found on object of type 'org.springframework.expression.spel.testresources.ArrayContainer' - maybe not public?
+//					at org.springframework.expression.spel.ast.PropertyOrFieldReference.readProperty(PropertyOrFieldReference.java:225)
+			// success!
+		}
+
+		// VARIABLE
+		// the variable does not exist (but that is OK, we should be writable)
+		e = parser.parseExpression("#madeup1");
+		assertTrue("Should be writable!",e.isWritable(lContext));
+
+		e = parser.parseExpression("#madeup2.bar"); // compound expression
+		assertFalse("Should not be writable!",e.isWritable(lContext));
+
+		// INDEXER
+		// non existent indexer (wibble made up)
+		e = parser.parseExpression("arrayContainer.wibble[99]");
+		try {
+			assertFalse("Should not be writable!",e.isWritable(lContext));
+			fail("Should have had an error because wibble does not really exist");
+		}
+		catch (SpelEvaluationException see) {
+			// success!
+		}
+
+		// non existent indexer (index via a string)
+		e = parser.parseExpression("arrayContainer.ints['abc']");
+		try {
+			assertFalse("Should not be writable!",e.isWritable(lContext));
+			fail("Should have had an error because wibble does not really exist");
+		}
+		catch (SpelEvaluationException see) {
+			// success!
+		}
 	}
 
 	@Test
@@ -202,10 +251,12 @@ public class SetValueTests extends AbstractExpressionTests {
 			StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
 			e.setValue(lContext, value);
 			fail("expected an error");
-		} catch (ParseException pe) {
+		}
+		catch (ParseException pe) {
 			pe.printStackTrace();
 			fail("Unexpected Exception: " + pe.getMessage());
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			// success!
 		}
 	}
@@ -223,10 +274,12 @@ public class SetValueTests extends AbstractExpressionTests {
 			assertTrue("Expression is not writeable but should be", e.isWritable(lContext));
 			e.setValue(lContext, value);
 			assertEquals("Retrieved value was not equal to set value", value, e.getValue(lContext,value.getClass()));
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			ee.printStackTrace();
 			fail("Unexpected Exception: " + ee.getMessage());
-		} catch (ParseException pe) {
+		}
+		catch (ParseException pe) {
 			pe.printStackTrace();
 			fail("Unexpected Exception: " + pe.getMessage());
 		}
@@ -254,12 +307,15 @@ public class SetValueTests extends AbstractExpressionTests {
 				fail("Not the same: ["+a+"] type="+a.getClass()+"  ["+b+"] type="+b.getClass());
 //				assertEquals("Retrieved value was not equal to set value", expectedValue, e.getValue(lContext));
 			}
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			ee.printStackTrace();
 			fail("Unexpected Exception: " + ee.getMessage());
-		} catch (ParseException pe) {
+		}
+		catch (ParseException pe) {
 			pe.printStackTrace();
 			fail("Unexpected Exception: " + pe.getMessage());
 		}
 	}
+
 }

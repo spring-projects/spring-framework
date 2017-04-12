@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,12 @@
  */
 package org.springframework.web.socket.config.annotation;
 
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
 
 /**
  * Configure the processing of messages received from and sent to WebSocket clients.
@@ -29,6 +35,9 @@ public class WebSocketTransportRegistration {
 	private Integer sendTimeLimit;
 
 	private Integer sendBufferSizeLimit;
+
+	private final List<WebSocketHandlerDecoratorFactory> decoratorFactories =
+			new ArrayList<>(2);
 
 
 	/**
@@ -147,4 +156,35 @@ public class WebSocketTransportRegistration {
 	protected Integer getSendBufferSizeLimit() {
 		return this.sendBufferSizeLimit;
 	}
+
+	/**
+	 * Configure one or more factories to decorate the handler used to process
+	 * WebSocket messages. This may be useful in some advanced use cases, for
+	 * example to allow Spring Security to forcibly close the WebSocket session
+	 * when the corresponding HTTP session expires.
+	 * @since 4.1.2
+	 */
+	public WebSocketTransportRegistration setDecoratorFactories(WebSocketHandlerDecoratorFactory... factories) {
+		if (factories != null) {
+			this.decoratorFactories.addAll(Arrays.asList(factories));
+		}
+		return this;
+	}
+
+	/**
+	 * Add a factory that to decorate the handler used to process WebSocket
+	 * messages. This may be useful for some advanced use cases, for example
+	 * to allow Spring Security to forcibly close the WebSocket session when
+	 * the corresponding HTTP session expires.
+	 * @since 4.1.2
+	 */
+	public WebSocketTransportRegistration addDecoratorFactory(WebSocketHandlerDecoratorFactory factory) {
+		this.decoratorFactories.add(factory);
+		return this;
+	}
+
+	protected List<WebSocketHandlerDecoratorFactory> getDecoratorFactories() {
+		return this.decoratorFactories;
+	}
+
 }

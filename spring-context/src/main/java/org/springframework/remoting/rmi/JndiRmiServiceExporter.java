@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,7 @@ import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Properties;
-
 import javax.naming.NamingException;
-import javax.rmi.PortableRemoteObject;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -118,7 +116,6 @@ public class JndiRmiServiceExporter extends RmiBasedExporter implements Initiali
 
 		// Initialize and cache exported object.
 		this.exportedObject = getObjectToExport();
-		PortableRemoteObject.exportObject(this.exportedObject);
 
 		rebind();
 	}
@@ -144,7 +141,6 @@ public class JndiRmiServiceExporter extends RmiBasedExporter implements Initiali
 			logger.info("Unbinding RMI service from JNDI location [" + this.jndiName + "]");
 		}
 		this.jndiTemplate.unbind(this.jndiName);
-		PortableRemoteObject.unexportObject(this.exportedObject);
 	}
 
 }

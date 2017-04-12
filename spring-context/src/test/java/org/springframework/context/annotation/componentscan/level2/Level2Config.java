@@ -16,10 +16,10 @@
 
 package org.springframework.context.annotation.componentscan.level2;
 
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.tests.sample.beans.TestBean;
 
 @Configuration
 @ComponentScan("org.springframework.context.annotation.componentscan.level3")

@@ -16,17 +16,18 @@
 
 package org.springframework.aop.target.dynamic;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
  * @author Chris Beams
  */
-public final class RefreshableTargetSourceTests {
+public class RefreshableTargetSourceTests {
 
 	/**
 	 * Test what happens when checking for refresh but not refreshing object.

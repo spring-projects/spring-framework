@@ -18,6 +18,7 @@ package org.springframework.test.context.web;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.MergedContextConfiguration;
@@ -50,6 +51,8 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
  * @see #processContextConfiguration(ContextConfigurationAttributes)
  * @see #detectDefaultConfigurationClasses(Class)
  * @see #loadBeanDefinitions(GenericWebApplicationContext, WebMergedContextConfiguration)
+ * @see GenericXmlWebContextLoader
+ * @see GenericGroovyXmlWebContextLoader
  */
 public class AnnotationConfigWebContextLoader extends AbstractGenericWebContextLoader {
 

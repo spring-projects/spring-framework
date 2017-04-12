@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  *
  * <p>Serializes remote invocation objects and deserializes remote invocation
  * result objects. Uses Java serialization just like RMI, but provides the
- * same ease of setup as Caucho's HTTP-based Hessian and Burlap protocols.
+ * same ease of setup as Caucho's HTTP-based Hessian protocol.
  *
  * <P>HTTP invoker is a very extensible and customizable protocol.
  * It supports the RemoteInvocationFactory mechanism, like RMI invoker,
@@ -46,13 +46,18 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  * a security context). Furthermore, it allows to customize request
  * execution via the {@link HttpInvokerRequestExecutor} strategy.
  *
- * <p>Can use the JDK's {@link java.rmi.server.RMIClassLoader} to load
- * classes from a given {@link #setCodebaseUrl codebase}, performing
- * on-demand dynamic code download from a remote location. The codebase
- * can consist of multiple URLs, separated by spaces. Note that
- * RMIClassLoader requires a SecurityManager to be set, analogous to
- * when using dynamic class download with standard RMI!
+ * <p>Can use the JDK's {@link java.rmi.server.RMIClassLoader} to load classes
+ * from a given {@link #setCodebaseUrl codebase}, performing on-demand dynamic
+ * code download from a remote location. The codebase can consist of multiple
+ * URLs, separated by spaces. Note that RMIClassLoader requires a SecurityManager
+ * to be set, analogous to when using dynamic class download with standard RMI!
  * (See the RMI documentation for details.)
+ *
+ * <p><b>WARNING: Be aware of vulnerabilities due to unsafe Java deserialization:
+ * Manipulated input streams could lead to unwanted code execution on the server
+ * during the deserialization step. As a consequence, do not expose HTTP invoker
+ * endpoints to untrusted clients but rather just between your own services.</b>
+ * In general, we strongly recommend any other message format (e.g. JSON) instead.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -139,13 +144,16 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 		}
 
 		RemoteInvocation invocation = createRemoteInvocation(methodInvocation);
-		RemoteInvocationResult result = null;
+		RemoteInvocationResult result;
+
 		try {
 			result = executeRequest(invocation, methodInvocation);
 		}
 		catch (Throwable ex) {
-			throw convertHttpInvokerAccessException(ex);
+			RemoteAccessException rae = convertHttpInvokerAccessException(ex);
+			throw (rae != null ? rae : ex);
 		}
+
 		try {
 			return recreateRemoteInvocationResult(result);
 		}
@@ -161,7 +169,7 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	}
 
 	/**
-	 * Execute the given remote invocation via the HttpInvokerRequestExecutor.
+	 * Execute the given remote invocation via the {@link HttpInvokerRequestExecutor}.
 	 * <p>This implementation delegates to {@link #executeRequest(RemoteInvocation)}.
 	 * Can be overridden to react to the specific original MethodInvocation.
 	 * @param invocation the RemoteInvocation to execute
@@ -177,7 +185,7 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	}
 
 	/**
-	 * Execute the given remote invocation via the HttpInvokerRequestExecutor.
+	 * Execute the given remote invocation via the {@link HttpInvokerRequestExecutor}.
 	 * <p>Can be overridden in subclasses to pass a different configuration object
 	 * to the executor. Alternatively, add further configuration properties in a
 	 * subclass of this accessor: By default, the accessor passed itself as
@@ -196,9 +204,10 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 
 	/**
 	 * Convert the given HTTP invoker access exception to an appropriate
-	 * Spring RemoteAccessException.
+	 * Spring {@link RemoteAccessException}.
 	 * @param ex the exception to convert
-	 * @return the RemoteAccessException to throw
+	 * @return the RemoteAccessException to throw, or {@code null} to have the
+	 * original exception propagated to the caller
 	 */
 	protected RemoteAccessException convertHttpInvokerAccessException(Throwable ex) {
 		if (ex instanceof ConnectException) {
@@ -212,8 +221,13 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 					"Could not deserialize result from HTTP invoker remote service [" + getServiceUrl() + "]", ex);
 		}
 
-		return new RemoteAccessException(
+		if (ex instanceof Exception) {
+			return new RemoteAccessException(
 					"Could not access HTTP invoker remote service at [" + getServiceUrl() + "]", ex);
+		}
+
+		// For any other Throwable, e.g. OutOfMemoryError: let it get propagated as-is.
+		return null;
 	}
 
 }

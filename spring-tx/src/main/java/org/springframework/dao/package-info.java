@@ -1,6 +1,4 @@
-
 /**
- *
  * Exception hierarchy enabling sophisticated error handling independent
  * of the data access approach in use. For example, when DAOs and data
  * access frameworks use the exceptions in this package (and custom
@@ -14,7 +12,5 @@
  * <p>The classes in this package are discussed in Chapter 9 of
  * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
  * by Rod Johnson (Wrox, 2002).
- *
  */
 package org.springframework.dao;
-

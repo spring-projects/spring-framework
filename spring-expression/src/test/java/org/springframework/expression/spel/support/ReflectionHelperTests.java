@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,6 @@ import org.springframework.expression.ParseException;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.AbstractExpressionTests;
-import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelUtilities;
 import org.springframework.expression.spel.ast.FormatHelper;
 import org.springframework.expression.spel.standard.SpelExpression;
@@ -50,6 +48,7 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 	public void testFormatHelperForClassName() {
 		assertEquals("java.lang.String",FormatHelper.formatClassNameForMessage(String.class));
 		assertEquals("java.lang.String[]",FormatHelper.formatClassNameForMessage(new String[1].getClass()));
+		assertEquals("java.lang.String[][]",FormatHelper.formatClassNameForMessage(new String[1][1].getClass()));
 		assertEquals("int[]",FormatHelper.formatClassNameForMessage(new int[1].getClass()));
 		assertEquals("int[][]",FormatHelper.formatClassNameForMessage(new int[1][2].getClass()));
 		assertEquals("null",FormatHelper.formatClassNameForMessage(null));
@@ -97,9 +96,20 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 
 	@Test
 	public void testTypedValue() {
-		TypedValue tValue = new TypedValue("hello");
-		assertEquals(String.class,tValue.getTypeDescriptor().getType());
-		assertEquals("TypedValue: 'hello' of [java.lang.String]",tValue.toString());
+		TypedValue tv1 = new TypedValue("hello");
+		TypedValue tv2 = new TypedValue("hello");
+		TypedValue tv3 = new TypedValue("bye");
+		assertEquals(String.class, tv1.getTypeDescriptor().getType());
+		assertEquals("TypedValue: 'hello' of [java.lang.String]", tv1.toString());
+		assertEquals(tv1, tv2);
+		assertEquals(tv2, tv1);
+		assertNotEquals(tv1, tv3);
+		assertNotEquals(tv2, tv3);
+		assertNotEquals(tv3, tv1);
+		assertNotEquals(tv3, tv2);
+		assertEquals(tv1.hashCode(), tv2.hashCode());
+		assertNotEquals(tv1.hashCode(), tv3.hashCode());
+		assertNotEquals(tv2.hashCode(), tv3.hashCode());
 	}
 
 	@Test
@@ -252,16 +262,6 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		args = new Object[] {3};
 		ReflectionHelper.convertAllArguments(tc, args, twoArg);
 		checkArguments(args,"3");
-
-		// missing converter
-		args = new Object[] {3, false, 3.0f};
-		try {
-			ReflectionHelper.convertAllArguments(null, args, twoArg);
-			fail("Should have failed because no converter supplied");
-		}
-		catch (SpelEvaluationException se) {
-			assertEquals(SpelMessage.TYPE_CONVERSION_ERROR,se.getMessageCode());
-		}
 
 		// null value
 		args = new Object[] {3, null, 3.0f};
@@ -536,7 +536,7 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 	}
 
 	private List<TypeDescriptor> getTypeDescriptors(Class<?>... types) {
-		List<TypeDescriptor> typeDescriptors = new ArrayList<TypeDescriptor>(types.length);
+		List<TypeDescriptor> typeDescriptors = new ArrayList<>(types.length);
 		for (Class<?> type : types) {
 			typeDescriptors.add(TypeDescriptor.valueOf(type));
 		}

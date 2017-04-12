@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -108,7 +108,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 			return Collections.emptyList();
 		}
 		else {
-			List<WebSocketExtension> result = new ArrayList<WebSocketExtension>(values.size());
+			List<WebSocketExtension> result = new ArrayList<>(values.size());
 			for (String value : values) {
 				result.addAll(WebSocketExtension.parseExtensions(value));
 			}
@@ -121,8 +121,8 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * @param extensions the values for the header
 	 */
 	public void setSecWebSocketExtensions(List<WebSocketExtension> extensions) {
-		List<String> result = new ArrayList<String>(extensions.size());
-		for(WebSocketExtension extension : extensions) {
+		List<String> result = new ArrayList<>(extensions.size());
+		for (WebSocketExtension extension : extensions) {
 			result.add(extension.toString());
 		}
 		set(SEC_WEBSOCKET_EXTENSIONS, toCommaDelimitedString(result));
@@ -172,7 +172,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 			return Collections.emptyList();
 		}
 		else if (values.size() == 1) {
-			return getFirstValueAsList(SEC_WEBSOCKET_PROTOCOL);
+			return getValuesAsList(SEC_WEBSOCKET_PROTOCOL);
 		}
 		else {
 			return values;

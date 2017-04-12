@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ import static java.lang.String.*;
  * @see Assume#group(TestGroup)
  * @author Phillip Webb
  * @author Chris Beams
+ * @author Sam Brannen
  */
 public enum TestGroup {
-
 
 	/**
 	 * Tests that take a considerable amount of time to run. Any test lasting longer than
@@ -59,47 +59,47 @@ public enum TestGroup {
 	/**
 	 * Tests that should only be run on the continuous integration server.
 	 */
-	CI,
+	CI;
 
-	/**
-	 * Tests that require custom compilation beyond that of the standard JDK. This helps to
-	 * allow running tests that will otherwise fail when using JDK >  1.8 b88. See
-	 * <a href="https://jira.spring.io/browse/SPR-10558">SPR-10558</a>
-	 */
-	CUSTOM_COMPILATION;
 
 	/**
 	 * Parse the specified comma separated string of groups.
 	 * @param value the comma separated string of groups
 	 * @return a set of groups
+	 * @throws IllegalArgumentException if any specified group name is not a
+	 * valid {@link TestGroup}
 	 */
-	public static Set<TestGroup> parse(String value) {
-		if (value == null || "".equals(value)) {
+	public static Set<TestGroup> parse(String value) throws IllegalArgumentException {
+		if (!StringUtils.hasText(value)) {
 			return Collections.emptySet();
 		}
+		String originalValue = value;
+		value = value.trim();
 		if ("ALL".equalsIgnoreCase(value)) {
 			return EnumSet.allOf(TestGroup.class);
 		}
 		if (value.toUpperCase().startsWith("ALL-")) {
-			Set<TestGroup> groups = new HashSet<TestGroup>(EnumSet.allOf(TestGroup.class));
-			groups.removeAll(parseGroups(value.substring(4)));
+			Set<TestGroup> groups = EnumSet.allOf(TestGroup.class);
+			groups.removeAll(parseGroups(originalValue, value.substring(4)));
 			return groups;
 		}
-		return parseGroups(value);
+		return parseGroups(originalValue, value);
 	}
 
-	private static Set<TestGroup> parseGroups(String value) {
-		Set<TestGroup> groups = new HashSet<TestGroup>();
+	private static Set<TestGroup> parseGroups(String originalValue, String value) throws IllegalArgumentException {
+		Set<TestGroup> groups = new HashSet<>();
 		for (String group : value.split(",")) {
 			try {
 				groups.add(valueOf(group.trim().toUpperCase()));
-			} catch (IllegalArgumentException e) {
+			}
+			catch (IllegalArgumentException ex) {
 				throw new IllegalArgumentException(format(
 						"Unable to find test group '%s' when parsing testGroups value: '%s'. " +
-						"Available groups include: [%s]", group.trim(), value,
+						"Available groups include: [%s]", group.trim(), originalValue,
 						StringUtils.arrayToCommaDelimitedString(TestGroup.values())));
 			}
 		}
 		return groups;
 	}
+
 }

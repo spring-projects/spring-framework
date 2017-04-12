@@ -16,11 +16,11 @@
 
 package org.springframework.core.annotation;
 
-import static org.junit.Assert.*;
-
 import javax.annotation.Priority;
 
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -50,12 +50,12 @@ public class OrderUtilsTests {
 
 	@Test
 	public void getPriorityValueNoAnnotation() {
-		assertNull(OrderUtils.getPriorityValue(SimpleOrder.class));
+		assertNull(OrderUtils.getPriority(SimpleOrder.class));
 	}
 
 	@Test
 	public void getPriorityValue() {
-		assertEquals(Integer.valueOf(55), OrderUtils.getPriorityValue(OrderAndPriority.class));
+		assertEquals(Integer.valueOf(55), OrderUtils.getPriority(OrderAndPriority.class));
 	}
 
 	@Order(50)

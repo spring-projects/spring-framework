@@ -16,16 +16,15 @@
 
 package org.springframework.test.context.testng;
 
-import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNotSame;
-import static org.testng.Assert.assertSame;
+import org.testng.annotations.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContextManager;
-import org.testng.annotations.Test;
+
+import static org.springframework.test.transaction.TransactionTestUtils.*;
+import static org.testng.Assert.*;
 
 /**
  * <p>

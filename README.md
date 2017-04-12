@@ -1,30 +1,33 @@
 ## Spring Framework
 The Spring Framework provides a comprehensive programming and configuration
-model for modern Java-based enterprise applications - on any kind of deployment
+model for modern Java-based enterprise applications -- on any kind of deployment
 platform. A key element of Spring is infrastructural support at the application
 level: Spring focuses on the "plumbing" of enterprise applications so that teams
 can focus on application-level business logic, without unnecessary ties to
 specific deployment environments.
 
-The framework also serves as the foundation for [Spring Integration][], [Spring
-Batch][] and the rest of the Spring [family of projects][]. Browse the repositories
-under the [Spring organization][] on GitHub for a full list.
+The framework also serves as the foundation for [Spring Integration][], [Spring Batch][]
+and the rest of the Spring [family of projects][]. Browse the repositories under
+the [Spring organization][] on GitHub for a full list.
+
+## Code of Conduct
+This project adheres to the Contributor Covenant [code of conduct](CODE_OF_CONDUCT.adoc).
+By participating, you  are expected to uphold this code. Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
 
 ## Downloading Artifacts
 See [downloading Spring artifacts][] for Maven repository information. Unable to
-use Maven or other transitive dependency management tools? See [building a
-distribution with dependencies][].
+use Maven or other transitive dependency management tools?
+See [building a distribution with dependencies][].
 
 ## Documentation
 See the current [Javadoc][] and [reference docs][].
 
 ## Getting Support
-Check out the [Spring forums][] and the [spring][spring tag] and
-[spring-mvc][spring-mvc tag] tags on [Stack Overflow][]. [Commercial support][]
+Check out the [spring][spring tags] tags on [Stack Overflow][]. [Commercial support][]
 is available too.
 
 ## Issue Tracking
-Report issues via the [Spring Framework JIRA]. Understand our issue management
+Report issues via the [Spring Framework JIRA][]. Understand our issue management
 process by reading about [the lifecycle of an issue][]. Think you've found a
 bug? Please consider submitting a reproduction project via the
 [spring-framework-issues][] GitHub repository. The [readme][] there provides
@@ -37,7 +40,7 @@ a cross-platform, self-contained bootstrap mechanism for the build.
 
 ### Prerequisites
 
-[Git][] and [OpenJDK 8 early access build 100 or later][JDK8 build]
+[Git][] and [JDK 8 update 20 or later][JDK8 build]
 
 Be sure that your `JAVA_HOME` environment variable points to the `jdk1.8.0` folder
 extracted from the JDK download.
@@ -77,9 +80,7 @@ The Spring Framework is released under version 2.0 of the [Apache License][].
 [building a distribution with dependencies]: https://github.com/spring-projects/spring-framework/wiki/Building-a-distribution-with-dependencies
 [Javadoc]: http://docs.spring.io/spring-framework/docs/current/javadoc-api/
 [reference docs]: http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/
-[Spring forums]: http://forum.spring.io/
-[spring tag]: http://stackoverflow.com/questions/tagged/spring
-[spring-mvc tag]: http://stackoverflow.com/questions/tagged/spring-mvc
+[spring tags]: http://spring.io/questions
 [Stack Overflow]: http://stackoverflow.com/faq
 [Commercial support]: http://spring.io/services
 [Spring Framework JIRA]: https://jira.spring.io/browse/SPR
@@ -89,13 +90,13 @@ The Spring Framework is released under version 2.0 of the [Apache License][].
 [Gradle]: http://gradle.org
 [`./gradlew`]: http://vimeo.com/34436402
 [Git]: http://help.github.com/set-up-git-redirect
-[JDK8 build]: http://jdk8.java.net/download.html
+[JDK8 build]: http://www.oracle.com/technetwork/java/javase/downloads
 [Gradle build and release FAQ]: https://github.com/spring-projects/spring-framework/wiki/Gradle-build-and-release-FAQ
-[Pull requests]: http://help.github.com/send-pull-requests
+[Pull requests]: https://help.github.com/categories/collaborating-on-projects-using-issues-and-pull-requests/
 [contributor guidelines]: https://github.com/spring-projects/spring-framework/blob/master/CONTRIBUTING.md
 [@SpringFramework]: https://twitter.com/springframework
 [@SpringCentral]: https://twitter.com/springcentral
-[team members]: https://twitter.com/springframework/team/members
+[team members]: https://twitter.com/springframework/lists/team/members
 [The Spring Blog]: http://spring.io/blog/
 [news feed]: http://spring.io/blog/category/news
 [Apache License]: http://www.apache.org/licenses/LICENSE-2.0

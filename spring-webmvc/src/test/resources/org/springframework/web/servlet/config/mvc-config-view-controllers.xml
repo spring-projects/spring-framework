@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
 	<mvc:annotation-driven/>
 
 	<mvc:view-controller path="/foo"/>
-
 	<mvc:view-controller path="/bar" view-name="baz"/>
-
 	<mvc:view-controller path="/" view-name="root"/>
+
+	<mvc:redirect-view-controller path="/old" redirect-url="/new"
+			context-relative="false" status-code="308" keep-query-params="true"/>
+
+	<mvc:status-controller path="/bad" status-code="404"/>
 
 	<mvc:interceptors>
 		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>

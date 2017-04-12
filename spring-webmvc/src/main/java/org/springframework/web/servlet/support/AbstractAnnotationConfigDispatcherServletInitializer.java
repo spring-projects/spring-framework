@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,9 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
  * and {@link #getServletConfigClasses()} as well as {@link #getServletMappings()}.
  * Further template and customization methods are provided by
  * {@link AbstractDispatcherServletInitializer}.
+ *
+ * <p>This is the preferred approach for applications that use Java-based
+ * Spring configuration.
  *
  * @author Arjen Poutsma
  * @author Chris Beams
@@ -87,8 +90,8 @@ public abstract class AbstractAnnotationConfigDispatcherServletInitializer
 	 * and/or {@link org.springframework.stereotype.Component @Component} classes to be
 	 * provided to the {@linkplain #createServletApplicationContext() dispatcher servlet
 	 * application context}.
-	 * @return the configuration classes for the dispatcher servlet application context
-	 * (may not be empty or {@code null})
+	 * @return the configuration classes for the dispatcher servlet application context or
+	 * {@code null} if all configuration is specified through root config classes.
 	 */
 	protected abstract Class<?>[] getServletConfigClasses();
 

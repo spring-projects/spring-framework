@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,18 +23,18 @@ import org.springframework.cache.Cache;
 /**
  * Determine the {@link Cache} instance(s) to use for an intercepted method invocation.
  *
- * <p>Implementations MUST be thread-safe.
+ * <p>Implementations must be thread-safe.
  *
  * @author Stephane Nicoll
  * @since 4.1
  */
+@FunctionalInterface
 public interface CacheResolver {
 
 	/**
 	 * Return the cache(s) to use for the specified invocation.
-	 *
 	 * @param context the context of the particular invocation
-	 * @return the cache(s) to use (never null)
+	 * @return the cache(s) to use (never {@code null})
 	 */
 	Collection<? extends Cache> resolveCaches(CacheOperationInvocationContext<?> context);
 

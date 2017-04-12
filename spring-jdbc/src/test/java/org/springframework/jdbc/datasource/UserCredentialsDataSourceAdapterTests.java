@@ -18,7 +18,6 @@ package org.springframework.jdbc.datasource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
 
 import org.junit.Test;

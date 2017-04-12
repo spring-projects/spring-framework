@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.junit.Assert.*;
-
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.junit.Test;
+
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.aop.framework.Advised;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * Test for correct application of the bean() PCD for &#64;AspectJ-based aspects.
@@ -34,10 +35,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class BeanNamePointcutAtAspectTests {
+public class BeanNamePointcutAtAspectTests {
 
 	private ITestBean testBean1;
+
 	private ITestBean testBean3;
+
 	private CounterAspect counterAspect;
 
 
@@ -45,7 +48,8 @@ public final class BeanNamePointcutAtAspectTests {
 	@SuppressWarnings("resource")
 	public void setUp() {
 		ClassPathXmlApplicationContext ctx =
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+
 		counterAspect = (CounterAspect) ctx.getBean("counterAspect");
 		testBean1 = (ITestBean) ctx.getBean("testBean1");
 		testBean3 = (ITestBean) ctx.getBean("testBean3");
@@ -54,15 +58,17 @@ public final class BeanNamePointcutAtAspectTests {
 	@Test
 	public void testMatchingBeanName() {
 		assertTrue("Expected a proxy", testBean1 instanceof Advised);
+
 		// Call two methods to test for SPR-3953-like condition
 		testBean1.setAge(20);
 		testBean1.setName("");
-		assertEquals(2 /*TODO: make this 3 when upgrading to AspectJ 1.6.0 and advice in CounterAspect are uncommented*/, counterAspect.count);
+		assertEquals(2, counterAspect.count);
 	}
 
 	@Test
 	public void testNonMatchingBeanName() {
 		assertFalse("Didn't expect a proxy", testBean3 instanceof Advised);
+
 		testBean3.setAge(20);
 		assertEquals(0, counterAspect.count);
 	}

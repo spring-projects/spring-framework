@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.OperatorOverloader;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.standard.SpelExpression;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * Test providing operator support
@@ -31,29 +32,6 @@ import org.springframework.expression.spel.standard.SpelExpression;
  * @author Andy Clement
  */
 public class OperatorOverloaderTests extends AbstractExpressionTests {
-
-	static class StringAndBooleanAddition implements OperatorOverloader {
-
-		@Override
-		public Object operate(Operation operation, Object leftOperand, Object rightOperand) throws EvaluationException {
-			if (operation==Operation.ADD) {
-				return ((String)leftOperand)+((Boolean)rightOperand).toString();
-			} else {
-				return leftOperand;
-			}
-		}
-
-		@Override
-		public boolean overridesOperation(Operation operation, Object leftOperand, Object rightOperand)
-				throws EvaluationException {
-			if (leftOperand instanceof String && rightOperand instanceof Boolean) {
-				return true;
-			}
-			return false;
-
-		}
-
-	}
 
 	@Test
 	public void testSimpleOperations() throws Exception {
@@ -72,4 +50,28 @@ public class OperatorOverloaderTests extends AbstractExpressionTests {
 		expr = (SpelExpression)parser.parseExpression("'abc'+null");
 		assertEquals("abcnull",expr.getValue(eContext));
 	}
+
+
+	static class StringAndBooleanAddition implements OperatorOverloader {
+
+		@Override
+		public Object operate(Operation operation, Object leftOperand, Object rightOperand) throws EvaluationException {
+			if (operation==Operation.ADD) {
+				return ((String)leftOperand)+((Boolean)rightOperand).toString();
+			}
+			else {
+				return leftOperand;
+			}
+		}
+
+		@Override
+		public boolean overridesOperation(Operation operation, Object leftOperand, Object rightOperand) throws EvaluationException {
+			if (leftOperand instanceof String && rightOperand instanceof Boolean) {
+				return true;
+			}
+			return false;
+
+		}
+	}
+
 }

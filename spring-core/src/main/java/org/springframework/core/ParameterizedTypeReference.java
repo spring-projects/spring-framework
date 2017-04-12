@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,9 +47,9 @@ public abstract class ParameterizedTypeReference<T> {
 	protected ParameterizedTypeReference() {
 		Class<?> parameterizedTypeReferenceSubclass = findParameterizedTypeReferenceSubclass(getClass());
 		Type type = parameterizedTypeReferenceSubclass.getGenericSuperclass();
-		Assert.isInstanceOf(ParameterizedType.class, type);
+		Assert.isInstanceOf(ParameterizedType.class, type, "Type must be a parameterized type");
 		ParameterizedType parameterizedType = (ParameterizedType) type;
-		Assert.isTrue(parameterizedType.getActualTypeArguments().length == 1);
+		Assert.isTrue(parameterizedType.getActualTypeArguments().length == 1, "Number of type arguments must be 1");
 		this.type = parameterizedType.getActualTypeArguments()[0];
 	}
 
@@ -77,10 +77,10 @@ public abstract class ParameterizedTypeReference<T> {
 
 	private static Class<?> findParameterizedTypeReferenceSubclass(Class<?> child) {
 		Class<?> parent = child.getSuperclass();
-		if (Object.class.equals(parent)) {
+		if (Object.class == parent) {
 			throw new IllegalStateException("Expected ParameterizedTypeReference superclass");
 		}
-		else if (ParameterizedTypeReference.class.equals(parent)) {
+		else if (ParameterizedTypeReference.class == parent) {
 			return child;
 		}
 		else {

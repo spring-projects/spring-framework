@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
-import org.springframework.core.GenericCollectionTypeResolver;
+import org.springframework.core.ResolvableType;
 
 /**
  * Simple factory for shared Map instances. Allows for central setup
@@ -82,13 +82,14 @@ public class MapFactoryBean extends AbstractFactoryBean<Map<Object, Object>> {
 			result = BeanUtils.instantiateClass(this.targetMapClass);
 		}
 		else {
-			result = new LinkedHashMap<Object, Object>(this.sourceMap.size());
+			result = new LinkedHashMap<>(this.sourceMap.size());
 		}
 		Class<?> keyType = null;
 		Class<?> valueType = null;
 		if (this.targetMapClass != null) {
-			keyType = GenericCollectionTypeResolver.getMapKeyType(this.targetMapClass);
-			valueType = GenericCollectionTypeResolver.getMapValueType(this.targetMapClass);
+			ResolvableType mapType = ResolvableType.forClass(this.targetMapClass).asMap();
+			keyType = mapType.resolveGeneric(0);
+			valueType = mapType.resolveGeneric(1);
 		}
 		if (keyType != null || valueType != null) {
 			TypeConverter converter = getBeanTypeConverter();

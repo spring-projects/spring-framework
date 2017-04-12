@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  */
 public class UriUtilsTests {
 
 	private static final String ENC = "UTF-8";
-
 
 
 	@Test
@@ -106,61 +106,21 @@ public class UriUtilsTests {
 	}
 
 	@Test
-	@Deprecated
-	public void encodeUri() throws UnsupportedEncodingException {
-		assertEquals("Invalid encoded URI", "http://www.ietf.org/rfc/rfc3986.txt",
-				UriUtils.encodeUri("http://www.ietf.org/rfc/rfc3986.txt", ENC));
-		assertEquals("Invalid encoded URI", "https://www.ietf.org/rfc/rfc3986.txt",
-				UriUtils.encodeUri("https://www.ietf.org/rfc/rfc3986.txt", ENC));
-		assertEquals("Invalid encoded URI", "http://www.google.com/?q=Z%C3%BCrich",
-				UriUtils.encodeUri("http://www.google.com/?q=Z\u00fcrich", ENC));
-		assertEquals("Invalid encoded URI",
-				"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar#and(java.util.BitSet)",
-				UriUtils.encodeUri(
-						"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar#and(java.util.BitSet)",
-						ENC));
-		assertEquals("Invalid encoded URI", "http://java.sun.com/j2se/1.3/",
-				UriUtils.encodeUri("http://java.sun.com/j2se/1.3/", ENC));
-		assertEquals("Invalid encoded URI", "docs/guide/collections/designfaq.html#28",
-				UriUtils.encodeUri("docs/guide/collections/designfaq.html#28", ENC));
-		assertEquals("Invalid encoded URI", "../../../demo/jfc/SwingSet2/src/SwingSet2.java",
-				UriUtils.encodeUri("../../../demo/jfc/SwingSet2/src/SwingSet2.java", ENC));
-		assertEquals("Invalid encoded URI", "file:///~/calendar", UriUtils.encodeUri("file:///~/calendar", ENC));
-		assertEquals("Invalid encoded URI", "http://example.com/query=foo@bar",
-				UriUtils.encodeUri("http://example.com/query=foo@bar", ENC));
-
-		// SPR-8974
-		assertEquals("http://example.org?format=json&url=http://another.com?foo=bar",
-				UriUtils.encodeUri("http://example.org?format=json&url=http://another.com?foo=bar", ENC));
-	}
-
-	@Test
-	@Deprecated
-	public void encodeHttpUrl() throws UnsupportedEncodingException {
-		assertEquals("Invalid encoded HTTP URL", "http://www.ietf.org/rfc/rfc3986.txt",
-				UriUtils.encodeHttpUrl("http://www.ietf.org/rfc/rfc3986.txt", ENC));
-		assertEquals("Invalid encoded URI", "https://www.ietf.org/rfc/rfc3986.txt",
-				UriUtils.encodeHttpUrl("https://www.ietf.org/rfc/rfc3986.txt", ENC));
-		assertEquals("Invalid encoded HTTP URL", "http://www.google.com/?q=Z%C3%BCrich",
-				UriUtils.encodeHttpUrl("http://www.google.com/?q=Z\u00fcrich", ENC));
-		assertEquals("Invalid encoded HTTP URL", "http://ws.geonames.org/searchJSON?q=T%C5%8Dky%C5%8D&style=FULL&maxRows=300",
-				UriUtils.encodeHttpUrl("http://ws.geonames.org/searchJSON?q=T\u014dky\u014d&style=FULL&maxRows=300", ENC));
-		assertEquals("Invalid encoded HTTP URL",
-				"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar",
-				UriUtils.encodeHttpUrl(
-						"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar", ENC));
-		assertEquals("Invalid encoded HTTP URL", "http://search.twitter.com/search.atom?q=%23avatar",
-				UriUtils.encodeHttpUrl("http://search.twitter.com/search.atom?q=#avatar", ENC));
-		assertEquals("Invalid encoded HTTP URL", "http://java.sun.com/j2se/1.3/",
-				UriUtils.encodeHttpUrl("http://java.sun.com/j2se/1.3/", ENC));
-		assertEquals("Invalid encoded HTTP URL", "http://example.com/query=foo@bar",
-				UriUtils.encodeHttpUrl("http://example.com/query=foo@bar", ENC));
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	@Deprecated
-	public void encodeHttpUrlMail() throws UnsupportedEncodingException {
-		UriUtils.encodeHttpUrl("mailto:java-net@java.sun.com", ENC);
+	public void extractFileExtension() {
+		assertEquals("html", UriUtils.extractFileExtension("index.html"));
+		assertEquals("html", UriUtils.extractFileExtension("/index.html"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html#/a"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html#/path/a"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html#/path/a.do"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html?param=a"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html?param=/path/a"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html?param=/path/a.do"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html?param=/path/a#/path/a"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html?param=/path/a.do#/path/a.do"));
+		assertEquals("html", UriUtils.extractFileExtension("/products;q=11/view.html?param=/path/a.do"));
+		assertEquals("html", UriUtils.extractFileExtension("/products;q=11/view.html;r=22?param=/path/a.do"));
+		assertEquals("html", UriUtils.extractFileExtension("/products;q=11/view.html;r=22;s=33?param=/path/a.do"));
 	}
 
 }

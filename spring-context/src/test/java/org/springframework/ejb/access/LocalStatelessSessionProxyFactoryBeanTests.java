@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,13 @@
 package org.springframework.ejb.access;
 
 import java.lang.reflect.Proxy;
-
 import javax.ejb.CreateException;
 import javax.ejb.EJBLocalHome;
 import javax.ejb.EJBLocalObject;
 import javax.naming.NamingException;
 
 import org.junit.Test;
+
 import org.springframework.jndi.JndiTemplate;
 
 import static org.junit.Assert.*;
@@ -182,19 +182,19 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 	}
 
 
-	public static interface MyHome extends EJBLocalHome {
+	public interface MyHome extends EJBLocalHome {
 
 		MyBusinessMethods create() throws CreateException;
 	}
 
 
-	public static interface MyBusinessMethods  {
+	public interface MyBusinessMethods  {
 
 		int getValue();
 	}
 
 
-	public static interface MyEjb extends EJBLocalObject, MyBusinessMethods {
+	public interface MyEjb extends EJBLocalObject, MyBusinessMethods {
 	}
 
 }

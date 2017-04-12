@@ -1,4 +1,3 @@
-
 /**
  * This package contains classes used to determine the requested the media types in a request.
  *
@@ -14,4 +13,3 @@
  * ore more of the above strategies in a specific order.
  */
 package org.springframework.web.accept;
-

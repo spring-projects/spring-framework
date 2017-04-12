@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,18 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NoHttpResponseException;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.Configurable;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.remoting.support.RemoteInvocationResult;
@@ -44,13 +54,13 @@ import org.springframework.util.StringUtils;
  * instance, potentially with authentication, HTTP connection pooling, etc.
  * Also designed for easy subclassing, providing specific template methods.
  *
- * <p>As of Spring 3.2, this request executor requires Apache HttpComponents 4.2 or higher.
+ * <p>As of Spring 4.1, this request executor requires Apache HttpComponents 4.3 or higher.
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.1
  * @see org.springframework.remoting.httpinvoker.SimpleHttpInvokerRequestExecutor
  */
-@SuppressWarnings("deprecation")
 public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvokerRequestExecutor {
 
 	private static final int DEFAULT_MAX_TOTAL_CONNECTIONS = 100;
@@ -59,7 +69,10 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 
 	private static final int DEFAULT_READ_TIMEOUT_MILLISECONDS = (60 * 1000);
 
+
 	private HttpClient httpClient;
+
+	private RequestConfig requestConfig;
 
 
 	/**
@@ -67,17 +80,8 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 * {@link HttpClient} that uses a default {@code org.apache.http.impl.conn.PoolingClientConnectionManager}.
 	 */
 	public HttpComponentsHttpInvokerRequestExecutor() {
-		org.apache.http.conn.scheme.SchemeRegistry schemeRegistry = new org.apache.http.conn.scheme.SchemeRegistry();
-		schemeRegistry.register(new org.apache.http.conn.scheme.Scheme("http", 80, org.apache.http.conn.scheme.PlainSocketFactory.getSocketFactory()));
-		schemeRegistry.register(new org.apache.http.conn.scheme.Scheme("https", 443, org.apache.http.conn.ssl.SSLSocketFactory.getSocketFactory()));
-
-		org.apache.http.impl.conn.PoolingClientConnectionManager connectionManager =
-				new org.apache.http.impl.conn.PoolingClientConnectionManager(schemeRegistry);
-		connectionManager.setMaxTotal(DEFAULT_MAX_TOTAL_CONNECTIONS);
-		connectionManager.setDefaultMaxPerRoute(DEFAULT_MAX_CONNECTIONS_PER_ROUTE);
-
-		this.httpClient = new org.apache.http.impl.client.DefaultHttpClient(connectionManager);
-		setReadTimeout(DEFAULT_READ_TIMEOUT_MILLISECONDS);
+		this(createDefaultHttpClient(), RequestConfig.custom()
+				.setSocketTimeout(DEFAULT_READ_TIMEOUT_MILLISECONDS).build());
 	}
 
 	/**
@@ -86,7 +90,26 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 * @param httpClient the HttpClient instance to use for this request executor
 	 */
 	public HttpComponentsHttpInvokerRequestExecutor(HttpClient httpClient) {
+		this(httpClient, null);
+	}
+
+	private HttpComponentsHttpInvokerRequestExecutor(HttpClient httpClient, RequestConfig requestConfig) {
 		this.httpClient = httpClient;
+		this.requestConfig = requestConfig;
+	}
+
+
+	private static HttpClient createDefaultHttpClient() {
+		Registry<ConnectionSocketFactory> schemeRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+				.register("http", PlainConnectionSocketFactory.getSocketFactory())
+				.register("https", SSLConnectionSocketFactory.getSocketFactory())
+				.build();
+
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(schemeRegistry);
+		connectionManager.setMaxTotal(DEFAULT_MAX_TOTAL_CONNECTIONS);
+		connectionManager.setDefaultMaxPerRoute(DEFAULT_MAX_CONNECTIONS_PER_ROUTE);
+
+		return HttpClientBuilder.create().setConnectionManager(connectionManager).build();
 	}
 
 
@@ -107,22 +130,45 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	/**
 	 * Set the connection timeout for the underlying HttpClient.
 	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Additional properties can be configured by specifying a
+	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
 	 * @param timeout the timeout value in milliseconds
+	 * @see RequestConfig#getConnectTimeout()
 	 */
 	public void setConnectTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-		getHttpClient().getParams().setIntParameter(org.apache.http.params.CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
+		this.requestConfig = cloneRequestConfig().setConnectTimeout(timeout).build();
+	}
+
+	/**
+	 * Set the timeout in milliseconds used when requesting a connection from the connection
+	 * manager using the underlying HttpClient.
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Additional properties can be configured by specifying a
+	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
+	 * @param connectionRequestTimeout the timeout value to request a connection in milliseconds
+	 * @see RequestConfig#getConnectionRequestTimeout()
+	 */
+	public void setConnectionRequestTimeout(int connectionRequestTimeout) {
+		this.requestConfig = cloneRequestConfig().setConnectionRequestTimeout(connectionRequestTimeout).build();
 	}
 
 	/**
 	 * Set the socket read timeout for the underlying HttpClient.
 	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Additional properties can be configured by specifying a
+	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
 	 * @param timeout the timeout value in milliseconds
 	 * @see #DEFAULT_READ_TIMEOUT_MILLISECONDS
+	 * @see RequestConfig#getSocketTimeout()
 	 */
 	public void setReadTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-		getHttpClient().getParams().setIntParameter(org.apache.http.params.CoreConnectionPNames.SO_TIMEOUT, timeout);
+		this.requestConfig = cloneRequestConfig().setSocketTimeout(timeout).build();
+	}
+
+	private RequestConfig.Builder cloneRequestConfig() {
+		return (this.requestConfig != null ? RequestConfig.copy(this.requestConfig) : RequestConfig.custom());
 	}
 
 
@@ -165,6 +211,10 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 */
 	protected HttpPost createHttpPost(HttpInvokerClientConfiguration config) throws IOException {
 		HttpPost httpPost = new HttpPost(config.getServiceUrl());
+		RequestConfig requestConfig = createRequestConfig(config);
+		if (requestConfig != null) {
+			httpPost.setConfig(requestConfig);
+		}
 		LocaleContext localeContext = LocaleContextHolder.getLocaleContext();
 		if (localeContext != null) {
 			Locale locale = localeContext.getLocale();
@@ -176,6 +226,45 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 			httpPost.addHeader(HTTP_HEADER_ACCEPT_ENCODING, ENCODING_GZIP);
 		}
 		return httpPost;
+	}
+
+	/**
+	 * Create a {@link RequestConfig} for the given configuration. Can return {@code null}
+	 * to indicate that no custom request config should be set and the defaults of the
+	 * {@link HttpClient} should be used.
+	 * <p>The default implementation tries to merge the defaults of the client with the
+	 * local customizations of the instance, if any.
+	 * @param config the HTTP invoker configuration that specifies the
+	 * target service
+	 * @return the RequestConfig to use
+	 */
+	protected RequestConfig createRequestConfig(HttpInvokerClientConfiguration config) {
+		HttpClient client = getHttpClient();
+		if (client instanceof Configurable) {
+			RequestConfig clientRequestConfig = ((Configurable) client).getConfig();
+			return mergeRequestConfig(clientRequestConfig);
+		}
+		return this.requestConfig;
+	}
+
+	private RequestConfig mergeRequestConfig(RequestConfig defaultRequestConfig) {
+		if (this.requestConfig == null) { // nothing to merge
+			return defaultRequestConfig;
+		}
+		RequestConfig.Builder builder = RequestConfig.copy(defaultRequestConfig);
+		int connectTimeout = this.requestConfig.getConnectTimeout();
+		if (connectTimeout >= 0) {
+			builder.setConnectTimeout(connectTimeout);
+		}
+		int connectionRequestTimeout = this.requestConfig.getConnectionRequestTimeout();
+		if (connectionRequestTimeout >= 0) {
+			builder.setConnectionRequestTimeout(connectionRequestTimeout);
+		}
+		int socketTimeout = this.requestConfig.getSocketTimeout();
+		if (socketTimeout >= 0) {
+			builder.setSocketTimeout(socketTimeout);
+		}
+		return builder.build();
 	}
 
 	/**

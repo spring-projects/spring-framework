@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.io.HessianRemoteResolver;
 import com.caucho.hessian.io.SerializerFactory;
 import com.caucho.hessian.server.HessianSkeleton;
-
 import org.apache.commons.logging.Log;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.support.RemoteExporter;
 import org.springframework.util.Assert;
@@ -182,7 +182,7 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 				major = isToUse.read();
 				minor = isToUse.read();
 				if (major != 0x02) {
-					throw new IOException("Version " + major + "." + minor + " is not understood");
+					throw new IOException("Version " + major + '.' + minor + " is not understood");
 				}
 				in = new Hessian2Input(isToUse);
 				out = new Hessian2Output(osToUse);

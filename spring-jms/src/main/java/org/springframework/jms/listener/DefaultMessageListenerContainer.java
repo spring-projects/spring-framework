@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,16 +34,16 @@ import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
-import org.springframework.util.BackOff;
-import org.springframework.util.BackOffExecution;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.FixedBackOff;
+import org.springframework.util.backoff.BackOff;
+import org.springframework.util.backoff.BackOffExecution;
+import org.springframework.util.backoff.FixedBackOff;
 
 /**
  * Message listener container variant that uses plain JMS client APIs, specifically
  * a loop of {@code MessageConsumer.receive()} calls that also allow for
  * transactional reception of messages (registering them with XA transactions).
- * Designed to work in a native JMS environment as well as in a J2EE environment,
+ * Designed to work in a native JMS environment as well as in a Java EE environment,
  * with only minimal differences in configuration.
  *
  * <p>This is a simple but nevertheless powerful form of message listener container.
@@ -60,7 +60,7 @@ import org.springframework.util.FixedBackOff;
  * abstraction. By default, the specified number of invoker tasks will be created
  * on startup, according to the {@link #setConcurrentConsumers "concurrentConsumers"}
  * setting. Specify an alternative {@code TaskExecutor} to integrate with an existing
- * thread pool facility (such as a J2EE server's), for example using a
+ * thread pool facility (such as a Java EE server's), for example using a
  * {@link org.springframework.scheduling.commonj.WorkManagerTaskExecutor CommonJ WorkManager}.
  * With a native JMS setup, each of those listener threads is going to use a
  * cached JMS {@code Session} and {@code MessageConsumer} (only refreshed in case
@@ -71,11 +71,11 @@ import org.springframework.util.FixedBackOff;
  * {@link org.springframework.transaction.PlatformTransactionManager} into the
  * {@link #setTransactionManager "transactionManager"} property. This will usually
  * be a {@link org.springframework.transaction.jta.JtaTransactionManager} in a
- * J2EE environment, in combination with a JTA-aware JMS {@code ConnectionFactory}
- * obtained from JNDI (check your J2EE server's documentation). Note that this
+ * Java EE environment, in combination with a JTA-aware JMS {@code ConnectionFactory}
+ * obtained from JNDI (check your Java EE server's documentation). Note that this
  * listener container will automatically reobtain all JMS handles for each transaction
  * in case an external transaction manager is specified, for compatibility with
- * all J2EE servers (in particular JBoss). This non-caching behavior can be
+ * all Java EE servers (in particular JBoss). This non-caching behavior can be
  * overridden through the {@link #setCacheLevel "cacheLevel"} /
  * {@link #setCacheLevelName "cacheLevelName"} property, enforcing caching of
  * the {@code Connection} (or also {@code Session} and {@code MessageConsumer})
@@ -107,9 +107,11 @@ import org.springframework.util.FixedBackOff;
  * <p><b>It is strongly recommended to either set {@link #setSessionTransacted
  * "sessionTransacted"} to "true" or specify an external {@link #setTransactionManager
  * "transactionManager"}.</b> See the {@link AbstractMessageListenerContainer}
- * javadoc for details on acknowledge modes and native transaction options,
- * as well as the {@link AbstractPollingMessageListenerContainer} javadoc
- * for details on configuring an external transaction manager.
+ * javadoc for details on acknowledge modes and native transaction options, as
+ * well as the {@link AbstractPollingMessageListenerContainer} javadoc for details
+ * on configuring an external transaction manager. Note that for the default
+ * "AUTO_ACKNOWLEDGE" mode, this container applies automatic message acknowledgment
+ * before listener execution, with no redelivery in case of an exception.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -173,7 +175,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	private Executor taskExecutor;
 
-	private BackOff backOff = createDefaultBackOff(DEFAULT_RECOVERY_INTERVAL);
+	private BackOff backOff = new FixedBackOff(DEFAULT_RECOVERY_INTERVAL, Long.MAX_VALUE);
 
 	private int cacheLevel = CACHE_AUTO;
 
@@ -187,13 +189,15 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	private int idleTaskExecutionLimit = 1;
 
-	private final Set<AsyncMessageListenerInvoker> scheduledInvokers = new HashSet<AsyncMessageListenerInvoker>();
+	private final Set<AsyncMessageListenerInvoker> scheduledInvokers = new HashSet<>();
 
 	private int activeInvokerCount = 0;
 
 	private int registeredWithDestination = 0;
 
 	private volatile boolean recovering = false;
+
+	private volatile boolean interrupted = false;
 
 	private Runnable stopCallback;
 
@@ -209,7 +213,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * of concurrent consumers.
 	 * <p>Specify an alternative {@code TaskExecutor} for integration with an existing
 	 * thread pool. Note that this really only adds value if the threads are
-	 * managed in a specific fashion, for example within a J2EE environment.
+	 * managed in a specific fashion, for example within a Java EE environment.
 	 * A plain thread pool does not add much value, as this listener container
 	 * will occupy a number of threads for its entire lifetime.
 	 * @see #setConcurrentConsumers
@@ -227,6 +231,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * attempt to recover.
 	 * <p>The {@link #setRecoveryInterval(long) recovery interval} is ignored
 	 * when this property is set.
+	 * @since 4.1
 	 */
 	public void setBackOff(BackOff backOff) {
 		this.backOff = backOff;
@@ -242,7 +247,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #handleListenerSetupFailure
 	 */
 	public void setRecoveryInterval(long recoveryInterval) {
-		this.backOff = createDefaultBackOff(recoveryInterval);
+		this.backOff = new FixedBackOff(recoveryInterval, Long.MAX_VALUE);
 	}
 
 	/**
@@ -262,11 +267,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * <p>Default is {@link #CACHE_NONE} if an external transaction manager has been specified
 	 * (to reobtain all resources freshly within the scope of the external transaction),
 	 * and {@link #CACHE_CONSUMER} otherwise (operating with local JMS resources).
-	 * <p>Some JavaEE servers only register their JMS resources with an ongoing XA
+	 * <p>Some Java EE servers only register their JMS resources with an ongoing XA
 	 * transaction in case of a freshly obtained JMS {@code Connection} and {@code Session},
 	 * which is why this listener container by default does not cache any of those.
-	 * However, depending on how smart your JavaEE server is with respect to the caching
-	 * of transactional resource, consider switching this setting to at least
+	 * However, depending on the rules of your server with respect to the caching
+	 * of transactional resources, consider switching this setting to at least
 	 * {@link #CACHE_CONNECTION} or {@link #CACHE_SESSION} even in conjunction with an
 	 * external transaction manager.
 	 * @see #CACHE_NONE
@@ -295,6 +300,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * ({@link #setConcurrentConsumers}) and will slowly scale up to the maximum number
 	 * of consumers {@link #setMaxConcurrentConsumers} in case of increasing load.
 	 */
+	@Override
 	public void setConcurrency(String concurrency) {
 		try {
 			int separatorIndex = concurrency.indexOf('-');
@@ -560,7 +566,13 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 						logger.debug("Still waiting for shutdown of " + this.activeInvokerCount +
 								" message listener invokers");
 					}
-					this.lifecycleMonitor.wait();
+					long timeout = getReceiveTimeout();
+					if (timeout > 0) {
+						this.lifecycleMonitor.wait(timeout);
+					}
+					else {
+						this.lifecycleMonitor.wait();
+					}
 				}
 				// Clear remaining scheduled invokers, possibly left over as paused tasks...
 				for (AsyncMessageListenerInvoker scheduledInvoker : this.scheduledInvokers) {
@@ -602,6 +614,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	@Override
 	public void stop(Runnable callback) throws JmsException {
 		synchronized (this.lifecycleMonitor) {
+			if (!isRunning() || this.stopCallback != null) {
+				// Not started, already stopped, or previous stop attempt in progress
+				// -> return immediately, no stop process to control anymore.
+				callback.run();
+				return;
+			}
 			this.stopCallback = callback;
 		}
 		stop();
@@ -883,6 +901,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		}
 		finally {
 			this.recovering = false;
+			this.interrupted = false;
 		}
 	}
 
@@ -899,7 +918,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #stop()
 	 */
 	protected void refreshConnectionUntilSuccessful() {
-		BackOffExecution execution = backOff.start();
+		BackOffExecution execution = this.backOff.start();
 		while (isRunning()) {
 			try {
 				if (sharedConnectionEnabled()) {
@@ -932,7 +951,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				StringBuilder msg = new StringBuilder();
 				msg.append("Stopping container for destination '")
 						.append(getDestinationDescription())
-						.append("' - back off policy does not allow ").append("for further attempts.");
+						.append("': back-off policy does not allow ").append("for further attempts.");
 				logger.error(msg.toString());
 				stop();
 			}
@@ -959,30 +978,36 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * Apply the next back off time using the specified {@link BackOffExecution}.
-	 * <p>Return {@code true} if the back off period has been applied and a new
+	 * Apply the next back-off time using the specified {@link BackOffExecution}.
+	 * <p>Return {@code true} if the back-off period has been applied and a new
 	 * attempt to recover should be made, {@code false} if no further attempt
 	 * should be made.
+	 * @since 4.1
 	 */
 	protected boolean applyBackOffTime(BackOffExecution execution) {
+		if (this.recovering && this.interrupted) {
+			// Interrupted right before and still failing... give up.
+			return false;
+		}
 		long interval = execution.nextBackOff();
 		if (interval == BackOffExecution.STOP) {
 			return false;
 		}
 		else {
 			try {
-				Thread.sleep(interval);
+				synchronized (this.lifecycleMonitor) {
+					this.lifecycleMonitor.wait(interval);
+				}
 			}
 			catch (InterruptedException interEx) {
 				// Re-interrupt current thread, to allow other threads to react.
 				Thread.currentThread().interrupt();
+				if (this.recovering) {
+					this.interrupted = true;
+				}
 			}
+			return true;
 		}
-		return true;
-	}
-
-	private FixedBackOff createDefaultBackOff(long interval) {
-		return new FixedBackOff(interval, Long.MAX_VALUE);
 	}
 
 	/**
@@ -1039,6 +1064,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 			catch (Throwable ex) {
 				clearResources();
+				if (!this.lastMessageSucceeded) {
+					// We failed more than once in a row or on startup -
+					// wait before first recovery attempt.
+					waitBeforeRecoveryAttempt();
+				}
 				this.lastMessageSucceeded = false;
 				boolean alreadyRecovered = false;
 				synchronized (recoveryMonitor) {
@@ -1188,6 +1218,17 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 			this.consumer = null;
 			this.session = null;
+		}
+
+		/**
+		 * Apply the back-off time once. In a regular scenario, the back-off is only applied if we
+		 * failed to recover with the broker. This additional wait period avoids a burst retry
+		 * scenario when the broker is actually up but something else if failing (i.e. listener
+		 * specific).
+		 */
+		private void waitBeforeRecoveryAttempt() {
+			BackOffExecution execution = DefaultMessageListenerContainer.this.backOff.start();
+			applyBackOffTime(execution);
 		}
 
 		@Override

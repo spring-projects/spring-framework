@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.beans.factory.aspectj;
 import java.io.Serializable;
 
 import org.aspectj.lang.annotation.control.CodeGenerationHint;
-import org.springframework.beans.BeansException;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
@@ -29,12 +29,12 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.wiring.BeanConfigurerSupport;
 
 /**
- * Concrete aspect that uses the {@link Configurable}
- * annotation to identify which classes need autowiring.
+ * Concrete aspect that uses the {@link Configurable} annotation to identify
+ * which classes need autowiring.
  *
- * <p>The bean name to look up will be taken from the
- * {@code &#64;Configurable} annotation if specified, otherwise the
- * default bean name to look up will be the FQN of the class being configured.
+ * <p>The bean name to look up will be taken from the {@code &#64;Configurable}
+ * annotation if specified, otherwise the default bean name to look up will be
+ * the fully qualified name of the class being configured.
  *
  * @author Rod Johnson
  * @author Ramnivas Laddad
@@ -44,48 +44,47 @@ import org.springframework.beans.factory.wiring.BeanConfigurerSupport;
  * @see org.springframework.beans.factory.annotation.Configurable
  * @see org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver
  */
-public aspect AnnotationBeanConfigurerAspect
-		extends AbstractInterfaceDrivenDependencyInjectionAspect
+public aspect AnnotationBeanConfigurerAspect extends AbstractInterfaceDrivenDependencyInjectionAspect
 		implements BeanFactoryAware, InitializingBean, DisposableBean {
 
 	private BeanConfigurerSupport beanConfigurerSupport = new BeanConfigurerSupport();
+
+
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanConfigurerSupport.setBeanWiringInfoResolver(new AnnotationBeanWiringInfoResolver());
+		this.beanConfigurerSupport.setBeanFactory(beanFactory);
+	}
+
+	public void afterPropertiesSet() {
+		this.beanConfigurerSupport.afterPropertiesSet();
+	}
+
+	public void configureBean(Object bean) {
+		this.beanConfigurerSupport.configureBean(bean);
+	}
+
+	public void destroy() {
+		this.beanConfigurerSupport.destroy();
+	}
+
 
 	public pointcut inConfigurableBean() : @this(Configurable);
 
 	public pointcut preConstructionConfiguration() : preConstructionConfigurationSupport(*);
 
-	declare parents: @Configurable * implements ConfigurableObject;
-
-	public void configureBean(Object bean) {
-		beanConfigurerSupport.configureBean(bean);
-	}
-
-
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		beanConfigurerSupport.setBeanFactory(beanFactory);
-		beanConfigurerSupport.setBeanWiringInfoResolver(new AnnotationBeanWiringInfoResolver());
-	}
-
-	public void afterPropertiesSet() throws Exception {
-		beanConfigurerSupport.afterPropertiesSet();
-	}
-
-	public void destroy() throws Exception {
-		beanConfigurerSupport.destroy();
-	}
-
-
 	/*
 	 * An intermediary to match preConstructionConfiguration signature (that doesn't expose the annotation object)
 	 */
 	@CodeGenerationHint(ifNameSuffix="bb0")
-	private pointcut preConstructionConfigurationSupport(Configurable c) : @this(c) && if(c.preConstruction());
+	private pointcut preConstructionConfigurationSupport(Configurable c) : @this(c) && if (c.preConstruction());
+
+
+	declare parents: @Configurable * implements ConfigurableObject;
 
 	/*
 	 * This declaration shouldn't be needed,
 	 * except for an AspectJ bug (https://bugs.eclipse.org/bugs/show_bug.cgi?id=214559)
 	 */
-	declare parents: @Configurable Serializable+
-		implements ConfigurableDeserializationSupport;
+	declare parents: @Configurable Serializable+ implements ConfigurableDeserializationSupport;
 
 }

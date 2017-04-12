@@ -16,9 +16,9 @@
 
 package org.springframework.cache.config;
 
-import org.springframework.cache.interceptor.KeyGenerator;
-
 import java.lang.reflect.Method;
+
+import org.springframework.cache.interceptor.KeyGenerator;
 
 /**
  * A custom {@link KeyGenerator} that exposes the algorithm used to compute the key
@@ -26,7 +26,7 @@ import java.lang.reflect.Method;
  *
  * @author Stephane Nicoll
  */
-final class SomeCustomKeyGenerator implements KeyGenerator {
+public class SomeCustomKeyGenerator implements KeyGenerator {
 
     @Override
     public Object generate(Object target, Method method, Object... params) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,14 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
-
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.TestExecutionListeners;
@@ -35,84 +32,76 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.junit.Assert.*;
+import static org.springframework.test.transaction.TransactionTestUtils.*;
+
 /**
- * <p>
  * JUnit 4 based integration test which verifies support of Spring's
  * {@link Transactional &#64;Transactional}, {@link TestExecutionListeners
  * &#64;TestExecutionListeners}, and {@link ContextConfiguration
  * &#64;ContextConfiguration} annotations in conjunction with the
- * {@link SpringJUnit4ClassRunner} and the following
+ * {@link SpringRunner} and the following
  * {@link TestExecutionListener TestExecutionListeners}:
- * </p>
+ *
  * <ul>
  * <li>{@link DependencyInjectionTestExecutionListener}</li>
  * <li>{@link DirtiesContextTestExecutionListener}</li>
  * <li>{@link TransactionalTestExecutionListener}</li>
  * </ul>
- * <p>
- * This class specifically tests usage of {@code @Transactional} defined at the
- * <strong>method level</strong>. In contrast to
- * {@link ClassLevelTransactionalSpringRunnerTests}, this class omits usage of
- * {@code @NotTransactional}.
- * </p>
+ *
+ * <p>This class specifically tests usage of {@code @Transactional} defined
+ * at the <strong>method level</strong>.
  *
  * @author Sam Brannen
  * @since 2.5
  * @see ClassLevelTransactionalSpringRunnerTests
  */
-@SuppressWarnings("deprecation")
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
 @TestExecutionListeners({ DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
 	TransactionalTestExecutionListener.class })
 public class MethodLevelTransactionalSpringRunnerTests extends AbstractTransactionalSpringRunnerTests {
 
-	protected static SimpleJdbcTemplate simpleJdbcTemplate;
+	protected static JdbcTemplate jdbcTemplate;
 
+
+	@Autowired
+	@Qualifier("dataSource2")
+	public void setDataSource(DataSource dataSource) {
+		jdbcTemplate = new JdbcTemplate(dataSource);
+	}
 
 	@AfterClass
 	public static void verifyFinalTestData() {
 		assertEquals("Verifying the final number of rows in the person table after all tests.", 4,
-			countRowsInPersonTable(simpleJdbcTemplate));
+			countRowsInPersonTable(jdbcTemplate));
 	}
 
 	@Before
 	public void verifyInitialTestData() {
-		clearPersonTable(simpleJdbcTemplate);
-		assertEquals("Adding bob", 1, addPerson(simpleJdbcTemplate, BOB));
+		clearPersonTable(jdbcTemplate);
+		assertEquals("Adding bob", 1, addPerson(jdbcTemplate, BOB));
 		assertEquals("Verifying the initial number of rows in the person table.", 1,
-			countRowsInPersonTable(simpleJdbcTemplate));
+			countRowsInPersonTable(jdbcTemplate));
 	}
 
 	@Test
 	@Transactional("transactionManager2")
 	public void modifyTestDataWithinTransaction() {
 		assertInTransaction(true);
-		assertEquals("Deleting bob", 1, deletePerson(simpleJdbcTemplate, BOB));
-		assertEquals("Adding jane", 1, addPerson(simpleJdbcTemplate, JANE));
-		assertEquals("Adding sue", 1, addPerson(simpleJdbcTemplate, SUE));
+		assertEquals("Deleting bob", 1, deletePerson(jdbcTemplate, BOB));
+		assertEquals("Adding jane", 1, addPerson(jdbcTemplate, JANE));
+		assertEquals("Adding sue", 1, addPerson(jdbcTemplate, SUE));
 		assertEquals("Verifying the number of rows in the person table within a transaction.", 2,
-			countRowsInPersonTable(simpleJdbcTemplate));
+			countRowsInPersonTable(jdbcTemplate));
 	}
 
 	@Test
 	public void modifyTestDataWithoutTransaction() {
 		assertInTransaction(false);
-		assertEquals("Adding luke", 1, addPerson(simpleJdbcTemplate, LUKE));
-		assertEquals("Adding leia", 1, addPerson(simpleJdbcTemplate, LEIA));
-		assertEquals("Adding yoda", 1, addPerson(simpleJdbcTemplate, YODA));
+		assertEquals("Adding luke", 1, addPerson(jdbcTemplate, LUKE));
+		assertEquals("Adding leia", 1, addPerson(jdbcTemplate, LEIA));
+		assertEquals("Adding yoda", 1, addPerson(jdbcTemplate, YODA));
 		assertEquals("Verifying the number of rows in the person table without a transaction.", 4,
-			countRowsInPersonTable(simpleJdbcTemplate));
-	}
-
-
-	public static class DatabaseSetup {
-
-		@Resource
-		public void setDataSource2(DataSource dataSource) {
-			simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
-			createPersonTable(simpleJdbcTemplate);
-		}
+			countRowsInPersonTable(jdbcTemplate));
 	}
 
 }

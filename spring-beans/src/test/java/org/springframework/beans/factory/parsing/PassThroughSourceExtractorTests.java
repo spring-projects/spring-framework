@@ -16,9 +16,9 @@
 
 package org.springframework.beans.factory.parsing;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link PassThroughSourceExtractor}.
@@ -26,7 +26,7 @@ import org.junit.Test;
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class PassThroughSourceExtractorTests {
+public class PassThroughSourceExtractorTests {
 
 	@Test
 	public void testPassThroughContract() throws Exception {

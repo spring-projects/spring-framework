@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,11 @@
 package org.springframework.core.io.support;
 
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 
 /**
  * Utility class for determining whether a given URL is a resource
- * location that can be loaded via a ResourcePatternResolver.
+ * location that can be loaded via a {@link ResourcePatternResolver}.
  *
  * <p>Callers will usually assume that a location is a relative path
  * if the {@link #isUrl(String)} method returns {@code false}.
@@ -59,7 +58,6 @@ public abstract class ResourcePatternUtils {
 	 * @see PathMatchingResourcePatternResolver
 	 */
 	public static ResourcePatternResolver getResourcePatternResolver(ResourceLoader resourceLoader) {
-		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		if (resourceLoader instanceof ResourcePatternResolver) {
 			return (ResourcePatternResolver) resourceLoader;
 		}

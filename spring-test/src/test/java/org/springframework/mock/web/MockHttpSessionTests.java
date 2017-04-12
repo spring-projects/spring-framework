@@ -16,9 +16,9 @@
 
 package org.springframework.mock.web;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link MockHttpSession}.

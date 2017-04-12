@@ -36,6 +36,10 @@ public class MessageConversionException extends MessagingException {
 		super(description, cause);
 	}
 
+	public MessageConversionException(Message<?> failedMessage, String description) {
+		super(failedMessage, description);
+	}
+
 	public MessageConversionException(Message<?> failedMessage, String description, Throwable cause) {
 		super(failedMessage, description, cause);
 	}

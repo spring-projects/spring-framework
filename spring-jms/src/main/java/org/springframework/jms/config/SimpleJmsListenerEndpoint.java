@@ -31,17 +31,23 @@ public class SimpleJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 
 	private MessageListener messageListener;
 
+
+	/**
+	 * Set the {@link MessageListener} to invoke when a message matching
+	 * the endpoint is received.
+	 */
+	public void setMessageListener(MessageListener messageListener) {
+		this.messageListener = messageListener;
+	}
+
 	/**
 	 * Return the {@link MessageListener} to invoke when a message matching
 	 * the endpoint is received.
 	 */
 	public MessageListener getMessageListener() {
-		return messageListener;
+		return this.messageListener;
 	}
 
-	public void setMessageListener(MessageListener messageListener) {
-		this.messageListener = messageListener;
-	}
 
 	@Override
 	protected MessageListener createMessageListener(MessageListenerContainer container) {
@@ -51,9 +57,7 @@ public class SimpleJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	@Override
 	protected StringBuilder getEndpointDescription() {
 		return super.getEndpointDescription()
-				.append(" | messageListener='")
-				.append(this.messageListener)
-				.append("'");
+				.append(" | messageListener='").append(this.messageListener).append("'");
 	}
 
 }

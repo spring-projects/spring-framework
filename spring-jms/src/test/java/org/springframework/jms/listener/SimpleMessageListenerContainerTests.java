@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.jms.listener;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.ExceptionListener;
@@ -30,6 +29,7 @@ import javax.jms.Session;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.StubQueue;
@@ -75,13 +75,13 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 				container.isPubSubNoLocal());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSettingConcurrentConsumersToZeroIsNotAllowed() throws Exception {
 		container.setConcurrentConsumers(0);
 		container.afterPropertiesSet();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSettingConcurrentConsumersToANegativeValueIsNotAllowed() throws Exception {
 		container.setConcurrentConsumers(-198);
 		container.afterPropertiesSet();
@@ -170,7 +170,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		final ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
 		given(connectionFactory.createConnection()).willReturn(connection);
 
-		final Set<String> failure = new HashSet<String>(1);
+		final Set<String> failure = new HashSet<>(1);
 
 		this.container.setConnectionFactory(connectionFactory);
 		this.container.setDestinationName(DESTINATION_NAME);

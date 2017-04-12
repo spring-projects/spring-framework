@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,7 @@
 
 package org.springframework.core.env;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * A {@link PropertySource} implementation capable of interrogating its
@@ -33,7 +30,7 @@ import org.springframework.util.Assert;
  * consider caching the result of {@link #getPropertyNames()} to fully exploit this
  * performance opportunity.
  *
- * Most framework-provided {@code PropertySource} implementations are enumerable;
+ * <p>Most framework-provided {@code PropertySource} implementations are enumerable;
  * a counter-example would be {@code JndiPropertySource} where, due to the
  * nature of JNDI it is not possible to determine all possible property names at
  * any given time; rather it is only possible to try to access a property
@@ -41,25 +38,19 @@ import org.springframework.util.Assert;
  * or not.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public abstract class EnumerablePropertySource<T> extends PropertySource<T> {
-
-	protected static final String[] EMPTY_NAMES_ARRAY = new String[0];
-
-	protected final Log logger = LogFactory.getLog(getClass());
-
 
 	public EnumerablePropertySource(String name, T source) {
 		super(name, source);
 	}
 
+	protected EnumerablePropertySource(String name) {
+		super(name);
+	}
 
-	/**
-	 * Return the names of all properties contained by the
-	 * {@linkplain #getSource() source} object (never {@code null}).
-	 */
-	public abstract String[] getPropertyNames();
 
 	/**
 	 * Return whether this {@code PropertySource} contains a property with the given name.
@@ -69,19 +60,13 @@ public abstract class EnumerablePropertySource<T> extends PropertySource<T> {
 	 */
 	@Override
 	public boolean containsProperty(String name) {
-		Assert.notNull(name, "Property name must not be null");
-		for (String candidate : getPropertyNames()) {
-			if (candidate.equals(name)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("PropertySource [%s] contains '%s'", getName(), name));
-				}
-				return true;
-			}
-		}
-		if (logger.isTraceEnabled()) {
-			logger.trace(String.format("PropertySource [%s] does not contain '%s'", getName(), name));
-		}
-		return false;
+		return ObjectUtils.containsElement(getPropertyNames(), name);
 	}
+
+	/**
+	 * Return the names of all properties contained by the
+	 * {@linkplain #getSource() source} object (never {@code null}).
+	 */
+	public abstract String[] getPropertyNames();
 
 }

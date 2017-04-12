@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -36,18 +35,19 @@ import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.IdGenerator;
 
 /**
- * The headers for a {@link Message}
- * <p>
- * <b>IMPORTANT</b>: This class is immutable. Any mutating operation such as
+ * The headers for a {@link Message}.
+ *
+ * <p><b>IMPORTANT</b>: This class is immutable. Any mutating operation such as
  * {@code put(..)}, {@code putAll(..)} and others will throw
  * {@link UnsupportedOperationException}.
  * <p>Subclasses do have access to the raw headers, however, via {@link #getRawHeaders()}.
- * <p>
- * One way to create message headers is to use the
+ *
+ * <p>One way to create message headers is to use the
  * {@link org.springframework.messaging.support.MessageBuilder MessageBuilder}:
  * <pre class="code">
  * MessageBuilder.withPayload("foo").setHeader("key1", "value1").setHeader("key2", "value2");
  * </pre>
+ *
  * A second option is to create {@link org.springframework.messaging.support.GenericMessage}
  * passing a payload as {@link Object} and headers as a {@link Map java.util.Map}:
  * <pre class="code">
@@ -56,27 +56,21 @@ import org.springframework.util.IdGenerator;
  * headers.put("key2", "value2");
  * new GenericMessage("foo", headers);
  * </pre>
+ *
  * A third option is to use {@link org.springframework.messaging.support.MessageHeaderAccessor}
- * or one of its sub-classes to create specific categories of headers.
+ * or one of its subclasses to create specific categories of headers.
  *
  * @author Arjen Poutsma
  * @author Mark Fisher
  * @author Gary Russell
+ * @author Juergen Hoeller
  * @since 4.0
  * @see org.springframework.messaging.support.MessageBuilder
  * @see org.springframework.messaging.support.MessageHeaderAccessor
  */
 public class MessageHeaders implements Map<String, Object>, Serializable {
 
-	private static final long serialVersionUID = 7035068984263400920L;
-
-	private static final Log logger = LogFactory.getLog(MessageHeaders.class);
-
 	public static final UUID ID_VALUE_NONE = new UUID(0,0);
-
-	private static volatile IdGenerator idGenerator = null;
-
-	private static final IdGenerator defaultIdGenerator = new AlternativeJdkIdGenerator();
 
 	/**
 	 * The key for the Message ID. This is an automatically generated UUID and
@@ -88,11 +82,20 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	public static final String TIMESTAMP = "timestamp";
 
+	public static final String CONTENT_TYPE = "contentType";
+
 	public static final String REPLY_CHANNEL = "replyChannel";
 
 	public static final String ERROR_CHANNEL = "errorChannel";
 
-	public static final String CONTENT_TYPE = "contentType";
+
+	private static final long serialVersionUID = 7035068984263400920L;
+
+	private static final Log logger = LogFactory.getLog(MessageHeaders.class);
+
+	private static final IdGenerator defaultIdGenerator = new AlternativeJdkIdGenerator();
+
+	private static volatile IdGenerator idGenerator = null;
 
 
 	private final Map<String, Object> headers;
@@ -101,7 +104,6 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	/**
 	 * Construct a {@link MessageHeaders} with the given headers. An {@link #ID} and
 	 * {@link #TIMESTAMP} headers will also be added, overriding any existing values.
-	 *
 	 * @param headers a map with headers to add
 	 */
 	public MessageHeaders(Map<String, Object> headers) {
@@ -110,14 +112,12 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	/**
 	 * Constructor providing control over the ID and TIMESTAMP header values.
-	 *
 	 * @param headers a map with headers to add
 	 * @param id the {@link #ID} header value
 	 * @param timestamp the {@link #TIMESTAMP} header value
 	 */
 	protected MessageHeaders(Map<String, Object> headers, UUID id, Long timestamp) {
-
-		this.headers = (headers != null) ? new HashMap<String, Object>(headers) : new HashMap<String, Object>();
+		this.headers = (headers != null ? new HashMap<>(headers) : new HashMap<String, Object>());
 
 		if (id == null) {
 			this.headers.put(ID, getIdGenerator().generateId());
@@ -140,30 +140,46 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 		}
 	}
 
+	/**
+	 * Copy constructor which allows for ignoring certain entries.
+	 * Used for serialization without non-serializable entries.
+	 * @param original the MessageHeaders to copy
+	 * @param keysToIgnore the keys of the entries to ignore
+	 */
+	private MessageHeaders(MessageHeaders original, Set<String> keysToIgnore) {
+		this.headers = new HashMap<>(original.headers.size() - keysToIgnore.size());
+		for (Map.Entry<String, Object> entry : original.headers.entrySet()) {
+			if (!keysToIgnore.contains(entry.getKey())) {
+				this.headers.put(entry.getKey(), entry.getValue());
+			}
+		}
+	}
+
 
 	protected Map<String, Object> getRawHeaders() {
 		return this.headers;
 	}
 
 	protected static IdGenerator getIdGenerator() {
-		return ((idGenerator != null) ? idGenerator : defaultIdGenerator);
+		return (idGenerator != null ? idGenerator : defaultIdGenerator);
 	}
 
 	public UUID getId() {
-		return this.get(ID, UUID.class);
+		return get(ID, UUID.class);
 	}
 
 	public Long getTimestamp() {
-		return this.get(TIMESTAMP, Long.class);
+		return get(TIMESTAMP, Long.class);
 	}
 
 	public Object getReplyChannel() {
-		return this.get(REPLY_CHANNEL);
+		return get(REPLY_CHANNEL);
 	}
 
 	public Object getErrorChannel() {
-		return this.get(ERROR_CHANNEL);
+		return get(ERROR_CHANNEL);
 	}
+
 
 	@SuppressWarnings("unchecked")
 	public <T> T get(Object key, Class<T> type) {
@@ -178,31 +194,8 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 		return (T) value;
 	}
 
-	@Override
-	public int hashCode() {
-		return this.headers.hashCode();
-	}
 
-	@Override
-	public boolean equals(Object object) {
-		if (this == object) {
-			return true;
-		}
-		if (object != null && object instanceof MessageHeaders) {
-			MessageHeaders other = (MessageHeaders) object;
-			return this.headers.equals(other.headers);
-		}
-		return false;
-	}
-
-	@Override
-	public String toString() {
-		return this.headers.toString();
-	}
-
-	/*
-	 * Map implementation
-	 */
+	// Delegating Map implementation
 
 	public boolean containsKey(Object key) {
 		return this.headers.containsKey(key);
@@ -213,7 +206,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	}
 
 	public Set<Map.Entry<String, Object>> entrySet() {
-		return Collections.unmodifiableSet(this.headers.entrySet());
+		return Collections.unmodifiableMap(this.headers).entrySet();
 	}
 
 	public Object get(Object key) {
@@ -236,56 +229,86 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 		return Collections.unmodifiableCollection(this.headers.values());
 	}
 
-	// Unsupported operations
+
+	// Unsupported Map operations
 
 	/**
-	 * Since MessageHeaders are immutable, the call to this method will result in {@link UnsupportedOperationException}.
+	 * Since MessageHeaders are immutable, the call to this method
+	 * will result in {@link UnsupportedOperationException}.
 	 */
 	public Object put(String key, Object value) {
 		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
 
 	/**
-	 * Since MessageHeaders are immutable, the call to this method will result in {@link UnsupportedOperationException}.
+	 * Since MessageHeaders are immutable, the call to this method
+	 * will result in {@link UnsupportedOperationException}.
 	 */
-	public void putAll(Map<? extends String, ? extends Object> t) {
+	public void putAll(Map<? extends String, ? extends Object> map) {
 		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
 
 	/**
-	 * Since MessageHeaders are immutable, the call to this method will result in {@link UnsupportedOperationException}.
+	 * Since MessageHeaders are immutable, the call to this method
+	 * will result in {@link UnsupportedOperationException}.
 	 */
 	public Object remove(Object key) {
 		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
 
 	/**
-	 * Since MessageHeaders are immutable, the call to this method will result in {@link UnsupportedOperationException}.
+	 * Since MessageHeaders are immutable, the call to this method
+	 * will result in {@link UnsupportedOperationException}.
 	 */
 	public void clear() {
 		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
 
+
 	// Serialization methods
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
-		List<String> keysToRemove = new ArrayList<String>();
+		Set<String> keysToIgnore = new HashSet<>();
 		for (Map.Entry<String, Object> entry : this.headers.entrySet()) {
 			if (!(entry.getValue() instanceof Serializable)) {
-				keysToRemove.add(entry.getKey());
+				keysToIgnore.add(entry.getKey());
 			}
 		}
-		for (String key : keysToRemove) {
-			if (logger.isInfoEnabled()) {
-				logger.info("removing non-serializable header: " + key);
-			}
-			this.headers.remove(key);
+
+		if (keysToIgnore.isEmpty()) {
+			// All entries are serializable -> serialize the regular MessageHeaders instance
+			out.defaultWriteObject();
 		}
-		out.defaultWriteObject();
+		else {
+			// Some non-serializable entries -> serialize a temporary MessageHeaders copy
+			if (logger.isDebugEnabled()) {
+				logger.debug("Ignoring non-serializable message headers: " + keysToIgnore);
+			}
+			out.writeObject(new MessageHeaders(this, keysToIgnore));
+		}
 	}
 
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
+	}
+
+
+	// equals, hashCode, toString
+
+	@Override
+	public boolean equals(Object other) {
+		return (this == other ||
+				(other instanceof MessageHeaders && this.headers.equals(((MessageHeaders) other).headers)));
+	}
+
+	@Override
+	public int hashCode() {
+		return this.headers.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return this.headers.toString();
 	}
 
 }

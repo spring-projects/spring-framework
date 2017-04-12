@@ -16,12 +16,12 @@
 
 package org.springframework.instrument.classloading;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.util.Enumeration;
 
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson

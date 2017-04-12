@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,10 @@ public interface AdvisorChainFactory {
 	 * for the given advisor chain configuration.
 	 * @param config the AOP configuration in the form of an Advised object
 	 * @param method the proxied method
-	 * @param targetClass the target class
+	 * @param targetClass the target class (may be {@code null} to indicate a proxy without
+	 * target object, in which case the method's declaring class is the next best option)
 	 * @return List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
 	 */
-	List<Object> getInterceptorsAndDynamicInterceptionAdvice(
-			Advised config, Method method, Class<?> targetClass);
+	List<Object> getInterceptorsAndDynamicInterceptionAdvice(Advised config, Method method, Class<?> targetClass);
 
 }

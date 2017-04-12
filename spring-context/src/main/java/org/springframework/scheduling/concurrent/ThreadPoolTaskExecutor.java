@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.core.task.TaskDecorator;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
@@ -78,9 +79,11 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 
 	private int keepAliveSeconds = 60;
 
+	private int queueCapacity = Integer.MAX_VALUE;
+
 	private boolean allowCoreThreadTimeOut = false;
 
-	private int queueCapacity = Integer.MAX_VALUE;
+	private TaskDecorator taskDecorator;
 
 	private ThreadPoolExecutor threadPoolExecutor;
 
@@ -155,17 +158,6 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	}
 
 	/**
-	 * Specify whether to allow core threads to time out. This enables dynamic
-	 * growing and shrinking even in combination with a non-zero queue (since
-	 * the max pool size will only grow once the queue is full).
-	 * <p>Default is "false".
-	 * @see java.util.concurrent.ThreadPoolExecutor#allowCoreThreadTimeOut(boolean)
-	 */
-	public void setAllowCoreThreadTimeOut(boolean allowCoreThreadTimeOut) {
-		this.allowCoreThreadTimeOut = allowCoreThreadTimeOut;
-	}
-
-	/**
 	 * Set the capacity for the ThreadPoolExecutor's BlockingQueue.
 	 * Default is {@code Integer.MAX_VALUE}.
 	 * <p>Any positive value will lead to a LinkedBlockingQueue instance;
@@ -177,15 +169,62 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 		this.queueCapacity = queueCapacity;
 	}
 
+	/**
+	 * Specify whether to allow core threads to time out. This enables dynamic
+	 * growing and shrinking even in combination with a non-zero queue (since
+	 * the max pool size will only grow once the queue is full).
+	 * <p>Default is "false".
+	 * @see java.util.concurrent.ThreadPoolExecutor#allowCoreThreadTimeOut(boolean)
+	 */
+	public void setAllowCoreThreadTimeOut(boolean allowCoreThreadTimeOut) {
+		this.allowCoreThreadTimeOut = allowCoreThreadTimeOut;
+	}
 
+	/**
+	 * Specify a custom {@link TaskDecorator} to be applied to any {@link Runnable}
+	 * about to be executed.
+	 * <p>Note that such a decorator is not necessarily being applied to the
+	 * user-supplied {@code Runnable}/{@code Callable} but rather to the actual
+	 * execution callback (which may be a wrapper around the user-supplied task).
+	 * <p>The primary use case is to set some execution context around the task's
+	 * invocation, or to provide some monitoring/statistics for task execution.
+	 * @since 4.3
+	 */
+	public void setTaskDecorator(TaskDecorator taskDecorator) {
+		this.taskDecorator = taskDecorator;
+	}
+
+
+	/**
+	 * Note: This method exposes an {@link ExecutorService} to its base class
+	 * but stores the actual {@link ThreadPoolExecutor} handle internally.
+	 * Do not override this method for replacing the executor, rather just for
+	 * decorating its {@code ExecutorService} handle or storing custom state.
+	 */
 	@Override
 	protected ExecutorService initializeExecutor(
 			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
 		BlockingQueue<Runnable> queue = createQueue(this.queueCapacity);
-		ThreadPoolExecutor executor  = new ThreadPoolExecutor(
-				this.corePoolSize, this.maxPoolSize, this.keepAliveSeconds, TimeUnit.SECONDS,
-				queue, threadFactory, rejectedExecutionHandler);
+
+		ThreadPoolExecutor executor;
+		if (this.taskDecorator != null) {
+			executor = new ThreadPoolExecutor(
+					this.corePoolSize, this.maxPoolSize, this.keepAliveSeconds, TimeUnit.SECONDS,
+					queue, threadFactory, rejectedExecutionHandler) {
+				@Override
+				public void execute(Runnable command) {
+					super.execute(taskDecorator.decorate(command));
+				}
+			};
+		}
+		else {
+			executor = new ThreadPoolExecutor(
+					this.corePoolSize, this.maxPoolSize, this.keepAliveSeconds, TimeUnit.SECONDS,
+					queue, threadFactory, rejectedExecutionHandler);
+
+		}
+
 		if (this.allowCoreThreadTimeOut) {
 			executor.allowCoreThreadTimeOut(true);
 		}
@@ -205,10 +244,10 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	 */
 	protected BlockingQueue<Runnable> createQueue(int queueCapacity) {
 		if (queueCapacity > 0) {
-			return new LinkedBlockingQueue<Runnable>(queueCapacity);
+			return new LinkedBlockingQueue<>(queueCapacity);
 		}
 		else {
-			return new SynchronousQueue<Runnable>();
+			return new SynchronousQueue<>();
 		}
 	}
 
@@ -289,7 +328,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	public ListenableFuture<?> submitListenable(Runnable task) {
 		ExecutorService executor = getThreadPoolExecutor();
 		try {
-			ListenableFutureTask<Object> future = new ListenableFutureTask<Object>(task, null);
+			ListenableFutureTask<Object> future = new ListenableFutureTask<>(task, null);
 			executor.execute(future);
 			return future;
 		}
@@ -302,7 +341,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
 		ExecutorService executor = getThreadPoolExecutor();
 		try {
-			ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+			ListenableFutureTask<T> future = new ListenableFutureTask<>(task);
 			executor.execute(future);
 			return future;
 		}

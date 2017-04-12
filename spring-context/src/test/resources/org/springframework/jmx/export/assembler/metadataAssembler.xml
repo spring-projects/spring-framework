@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean class="org.springframework.jmx.export.MBeanExporter" autowire="byName">
+		<property name="beans">
+			<map>
+				<entry key="bean:name=testBean3">
+					<ref bean="testBean"/>
+				</entry>
+			</map>
+		</property>
+		<property name="assembler">
+			<ref bean="metadataAssembler"/>
+		</property>
+	</bean>
+
+	<bean id="testBean" class="org.springframework.jmx.JmxTestBean">
+		<property name="name">
+			<value>TEST</value>
+		</property>
+		<property name="age">
+			<value>100</value>
+		</property>
+	</bean>
+
+	<bean id="metadataAssembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
+		<property name="attributeSource">
+			<bean class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource">
+				<property name="attributes">
+					<bean class="org.springframework.metadata.commons.CommonsAttributes"/>
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+</beans>

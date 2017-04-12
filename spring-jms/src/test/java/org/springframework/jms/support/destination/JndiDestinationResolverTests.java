@@ -21,6 +21,7 @@ import javax.jms.Session;
 import javax.naming.NamingException;
 
 import org.junit.Test;
+
 import org.springframework.jms.StubTopic;
 
 import static org.junit.Assert.*;

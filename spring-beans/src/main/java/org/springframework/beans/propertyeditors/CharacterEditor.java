@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,11 +57,10 @@ public class CharacterEditor extends PropertyEditorSupport {
 
 	/**
 	 * Create a new CharacterEditor instance.
-	 * <p>The "allowEmpty" parameter controls whether an empty String is
-	 * to be allowed in parsing, i.e. be interpreted as the {@code null}
-	 * value when {@link #setAsText(String) text is being converted}. If
-	 * {@code false}, an {@link IllegalArgumentException} will be thrown
-	 * at that time.
+	 * <p>The "allowEmpty" parameter controls whether an empty String is to be
+	 * allowed in parsing, i.e. be interpreted as the {@code null} value when
+	 * {@link #setAsText(String) text is being converted}. If {@code false},
+	 * an {@link IllegalArgumentException} will be thrown at that time.
 	 * @param allowEmpty if empty strings are to be allowed
 	 */
 	public CharacterEditor(boolean allowEmpty) {
@@ -81,12 +80,12 @@ public class CharacterEditor extends PropertyEditorSupport {
 		else if (isUnicodeCharacterSequence(text)) {
 			setAsUnicode(text);
 		}
-		else if (text.length() != 1) {
-			throw new IllegalArgumentException("String [" + text + "] with length " +
-					text.length() + " cannot be converted to char type");
+		else if (text.length() == 1) {
+			setValue(Character.valueOf(text.charAt(0)));
 		}
 		else {
-			setValue(new Character(text.charAt(0)));
+			throw new IllegalArgumentException("String [" + text + "] with length " +
+					text.length() + " cannot be converted to char type: neither Unicode nor single character");
 		}
 	}
 
@@ -103,7 +102,7 @@ public class CharacterEditor extends PropertyEditorSupport {
 
 	private void setAsUnicode(String text) {
 		int code = Integer.parseInt(text.substring(UNICODE_PREFIX.length()), 16);
-		setValue(new Character((char) code));
+		setValue(Character.valueOf((char) code));
 	}
 
 }

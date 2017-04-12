@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,10 @@ import java.util.Map;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
-import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 
@@ -35,7 +34,7 @@ import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StreamingSockJsSession extends AbstractHttpSockJsSession {
+public abstract class StreamingSockJsSession extends AbstractHttpSockJsSession {
 
 	private int byteCount;
 
@@ -47,58 +46,49 @@ public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 	}
 
 
+	/**
+	 * Get the prelude to write to the response before any other data.
+	 * @since 4.2
+	 */
+	protected abstract byte[] getPrelude(ServerHttpRequest request);
+
+
 	@Override
-	public void handleInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
-			SockJsFrameFormat frameFormat) throws SockJsException {
+	protected void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
+			boolean initialRequest) throws IOException {
 
-		super.handleInitialRequest(request, response, frameFormat);
+		byte[] prelude = getPrelude(request);
+		Assert.state(prelude != null, "Prelude expected");
+		response.getBody().write(prelude);
+		response.flush();
 
-		// the WebSocketHandler delegate may have closed the session
-		if (!isClosed()) {
-			super.startAsyncRequest();
+		if (initialRequest) {
+			writeFrame(SockJsFrame.openFrame());
 		}
+		flushCache();
 	}
 
 	@Override
 	protected void flushCache() throws SockJsTransportFailureException {
-		cancelHeartbeat();
-
-		do {
+		while (!getMessageCache().isEmpty()) {
 			String message = getMessageCache().poll();
 			SockJsMessageCodec messageCodec = getSockJsServiceConfig().getMessageCodec();
 			SockJsFrame frame = SockJsFrame.messageFrame(messageCodec, message);
 			writeFrame(frame);
 
-			this.byteCount += frame.getContentBytes().length + 1;
+			this.byteCount += (frame.getContentBytes().length + 1);
 			if (logger.isTraceEnabled()) {
-				logger.trace(this.byteCount + " bytes written so far, "
-						+ getMessageCache().size() + " more messages not flushed");
+				logger.trace(this.byteCount + " bytes written so far, " +
+						getMessageCache().size() + " more messages not flushed");
 			}
 			if (this.byteCount >= getSockJsServiceConfig().getStreamBytesLimit()) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Streamed bytes limit reached. Recycling current request");
-				}
+				logger.trace("Streamed bytes limit reached, recycling current request");
 				resetRequest();
+				this.byteCount = 0;
 				break;
 			}
-		} while (!getMessageCache().isEmpty());
-
+		}
 		scheduleHeartbeat();
 	}
 
-	@Override
-	protected void resetRequest() {
-		super.resetRequest();
-		this.byteCount = 0;
-	}
-
-	@Override
-	protected void writeFrameInternal(SockJsFrame frame) throws IOException {
-		if (isActive()) {
-			super.writeFrameInternal(frame);
-			getResponse().flush();
-		}
-	}
-
 }
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,28 +18,40 @@ package org.springframework.util;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.junit.Rule;
 import org.junit.Test;
-
-import org.springframework.core.task.TaskRejectedException;
+import org.junit.rules.ExpectedException;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static org.springframework.util.ObjectUtils.*;
 
 /**
+ * Unit tests for {@link ObjectUtils}.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rick Evans
+ * @author Sam Brannen
  */
 public class ObjectUtilsTests {
 
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
+
 	@Test
-	public void testIsCheckedException() {
+	public void isCheckedException() {
 		assertTrue(ObjectUtils.isCheckedException(new Exception()));
 		assertTrue(ObjectUtils.isCheckedException(new SQLException()));
 
 		assertFalse(ObjectUtils.isCheckedException(new RuntimeException()));
-		assertFalse(ObjectUtils.isCheckedException(new TaskRejectedException("")));
+		assertFalse(ObjectUtils.isCheckedException(new IllegalArgumentException("")));
 
 		// Any Throwable other than RuntimeException and Error
 		// has to be considered checked according to the JLS.
@@ -47,7 +59,7 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testIsCompatibleWithThrowsClause() {
+	public void isCompatibleWithThrowsClause() {
 		Class<?>[] empty = new Class[0];
 		Class<?>[] exception = new Class[] {Exception.class};
 		Class<?>[] sqlAndIO = new Class[] {SQLException.class, IOException.class};
@@ -79,7 +91,59 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testToObjectArray() {
+	public void isEmptyNull() {
+		assertTrue(isEmpty(null));
+	}
+
+	@Test
+	public void isEmptyArray() {
+		assertTrue(isEmpty(new char[0]));
+		assertTrue(isEmpty(new Object[0]));
+		assertTrue(isEmpty(new Integer[0]));
+
+		assertFalse(isEmpty(new int[] { 42 }));
+		assertFalse(isEmpty(new Integer[] { new Integer(42) }));
+	}
+
+	@Test
+	public void isEmptyCollection() {
+		assertTrue(isEmpty(Collections.emptyList()));
+		assertTrue(isEmpty(Collections.emptySet()));
+
+		Set<String> set = new HashSet<>();
+		set.add("foo");
+		assertFalse(isEmpty(set));
+		assertFalse(isEmpty(Arrays.asList("foo")));
+	}
+
+	@Test
+	public void isEmptyMap() {
+		assertTrue(isEmpty(Collections.emptyMap()));
+
+		HashMap<String, Object> map = new HashMap<>();
+		map.put("foo", 42L);
+		assertFalse(isEmpty(map));
+	}
+
+	@Test
+	public void isEmptyCharSequence() {
+		assertTrue(isEmpty(new StringBuilder()));
+		assertTrue(isEmpty(""));
+
+		assertFalse(isEmpty(new StringBuilder("foo")));
+		assertFalse(isEmpty("   "));
+		assertFalse(isEmpty("\t"));
+		assertFalse(isEmpty("foo"));
+	}
+
+	@Test
+	public void isEmptyUnsupportedObjectType() {
+		assertFalse(isEmpty(42L));
+		assertFalse(isEmpty(new Object()));
+	}
+
+	@Test
+	public void toObjectArray() {
 		int[] a = new int[] {1, 2, 3, 4, 5};
 		Integer[] wrapper = (Integer[]) ObjectUtils.toObjectArray(a);
 		assertTrue(wrapper.length == 5);
@@ -89,37 +153,33 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testToObjectArrayWithNull() {
+	public void toObjectArrayWithNull() {
 		Object[] objects = ObjectUtils.toObjectArray(null);
 		assertNotNull(objects);
 		assertEquals(0, objects.length);
 	}
 
 	@Test
-	public void testToObjectArrayWithEmptyPrimitiveArray() {
+	public void toObjectArrayWithEmptyPrimitiveArray() {
 		Object[] objects = ObjectUtils.toObjectArray(new byte[] {});
 		assertNotNull(objects);
 		assertEquals(0, objects.length);
 	}
 
 	@Test
-	public void testToObjectArrayWithNonArrayType() {
-		try {
-			ObjectUtils.toObjectArray("Not an []");
-			fail("Must have thrown an IllegalArgumentException by this point.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+	public void toObjectArrayWithNonArrayType() {
+		exception.expect(IllegalArgumentException.class);
+		ObjectUtils.toObjectArray("Not an []");
 	}
 
 	@Test
-	public void testToObjectArrayWithNonPrimitiveArray() {
+	public void toObjectArrayWithNonPrimitiveArray() {
 		String[] source = new String[] {"Bingo"};
 		assertArrayEquals(source, ObjectUtils.toObjectArray(source));
 	}
 
 	@Test
-	public void testAddObjectToArraySunnyDay() {
+	public void addObjectToArraySunnyDay() {
 		String[] array = new String[] {"foo", "bar"};
 		String newElement = "baz";
 		Object[] newArray = ObjectUtils.addObjectToArray(array, newElement);
@@ -128,7 +188,7 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testAddObjectToArrayWhenEmpty() {
+	public void addObjectToArrayWhenEmpty() {
 		String[] array = new String[0];
 		String newElement = "foo";
 		String[] newArray = ObjectUtils.addObjectToArray(array, newElement);
@@ -137,7 +197,7 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testAddObjectToSingleNonNullElementArray() {
+	public void addObjectToSingleNonNullElementArray() {
 		String existingElement = "foo";
 		String[] array = new String[] {existingElement};
 		String newElement = "bar";
@@ -148,7 +208,7 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testAddObjectToSingleNullElementArray() {
+	public void addObjectToSingleNullElementArray() {
 		String[] array = new String[] {null};
 		String newElement = "bar";
 		String[] newArray = ObjectUtils.addObjectToArray(array, newElement);
@@ -158,7 +218,7 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testAddObjectToNullArray() throws Exception {
+	public void addObjectToNullArray() throws Exception {
 		String newElement = "foo";
 		String[] newArray = ObjectUtils.addObjectToArray(null, newElement);
 		assertEquals(1, newArray.length);
@@ -166,53 +226,58 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testAddNullObjectToNullArray() throws Exception {
+	public void addNullObjectToNullArray() throws Exception {
 		Object[] newArray = ObjectUtils.addObjectToArray(null, null);
 		assertEquals(1, newArray.length);
 		assertEquals(null, newArray[0]);
 	}
 
 	@Test
-	public void testNullSafeEqualsWithArrays() throws Exception {
+	public void nullSafeEqualsWithArrays() throws Exception {
 		assertTrue(ObjectUtils.nullSafeEquals(new String[] {"a", "b", "c"}, new String[] {"a", "b", "c"}));
 		assertTrue(ObjectUtils.nullSafeEquals(new int[] {1, 2, 3}, new int[] {1, 2, 3}));
 	}
 
 	@Test
-	public void testHashCodeWithBooleanFalse() {
+	@Deprecated
+	public void hashCodeWithBooleanFalse() {
 		int expected = Boolean.FALSE.hashCode();
 		assertEquals(expected, ObjectUtils.hashCode(false));
 	}
 
 	@Test
-	public void testHashCodeWithBooleanTrue() {
+	@Deprecated
+	public void hashCodeWithBooleanTrue() {
 		int expected = Boolean.TRUE.hashCode();
 		assertEquals(expected, ObjectUtils.hashCode(true));
 	}
 
 	@Test
-	public void testHashCodeWithDouble() {
+	@Deprecated
+	public void hashCodeWithDouble() {
 		double dbl = 9830.43;
 		int expected = (new Double(dbl)).hashCode();
 		assertEquals(expected, ObjectUtils.hashCode(dbl));
 	}
 
 	@Test
-	public void testHashCodeWithFloat() {
+	@Deprecated
+	public void hashCodeWithFloat() {
 		float flt = 34.8f;
 		int expected = (new Float(flt)).hashCode();
 		assertEquals(expected, ObjectUtils.hashCode(flt));
 	}
 
 	@Test
-	public void testHashCodeWithLong() {
+	@Deprecated
+	public void hashCodeWithLong() {
 		long lng = 883l;
 		int expected = (new Long(lng)).hashCode();
 		assertEquals(expected, ObjectUtils.hashCode(lng));
 	}
 
 	@Test
-	public void testIdentityToString() {
+	public void identityToString() {
 		Object obj = new Object();
 		String expected = obj.getClass().getName() + "@" + ObjectUtils.getIdentityHexString(obj);
 		String actual = ObjectUtils.identityToString(obj);
@@ -220,112 +285,112 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testIdentityToStringWithNullObject() {
+	public void identityToStringWithNullObject() {
 		assertEquals("", ObjectUtils.identityToString(null));
 	}
 
 	@Test
-	public void testIsArrayOfPrimitivesWithBooleanArray() {
+	public void isArrayOfPrimitivesWithBooleanArray() {
 		assertTrue(ClassUtils.isPrimitiveArray(boolean[].class));
 	}
 
 	@Test
-	public void testIsArrayOfPrimitivesWithObjectArray() {
+	public void isArrayOfPrimitivesWithObjectArray() {
 		assertFalse(ClassUtils.isPrimitiveArray(Object[].class));
 	}
 
 	@Test
-	public void testIsArrayOfPrimitivesWithNonArray() {
+	public void isArrayOfPrimitivesWithNonArray() {
 		assertFalse(ClassUtils.isPrimitiveArray(String.class));
 	}
 
 	@Test
-	public void testIsPrimitiveOrWrapperWithBooleanPrimitiveClass() {
+	public void isPrimitiveOrWrapperWithBooleanPrimitiveClass() {
 		assertTrue(ClassUtils.isPrimitiveOrWrapper(boolean.class));
 	}
 
 	@Test
-	public void testIsPrimitiveOrWrapperWithBooleanWrapperClass() {
+	public void isPrimitiveOrWrapperWithBooleanWrapperClass() {
 		assertTrue(ClassUtils.isPrimitiveOrWrapper(Boolean.class));
 	}
 
 	@Test
-	public void testIsPrimitiveOrWrapperWithBytePrimitiveClass() {
+	public void isPrimitiveOrWrapperWithBytePrimitiveClass() {
 		assertTrue(ClassUtils.isPrimitiveOrWrapper(byte.class));
 	}
 
 	@Test
-	public void testIsPrimitiveOrWrapperWithByteWrapperClass() {
+	public void isPrimitiveOrWrapperWithByteWrapperClass() {
 		assertTrue(ClassUtils.isPrimitiveOrWrapper(Byte.class));
 	}
 
 	@Test
-	public void testIsPrimitiveOrWrapperWithCharacterClass() {
+	public void isPrimitiveOrWrapperWithCharacterClass() {
 		assertTrue(ClassUtils.isPrimitiveOrWrapper(Character.class));
 	}
 
 	@Test
-	public void testIsPrimitiveOrWrapperWithCharClass() {
+	public void isPrimitiveOrWrapperWithCharClass() {
 		assertTrue(ClassUtils.isPrimitiveOrWrapper(char.class));
 	}
 
 	@Test
-	public void testIsPrimitiveOrWrapperWithDoublePrimitiveClass() {
+	public void isPrimitiveOrWrapperWithDoublePrimitiveClass() {
 		assertTrue(ClassUtils.isPrimitiveOrWrapper(double.class));
 	}
 
 	@Test
-	public void testIsPrimitiveOrWrapperWithDoubleWrapperClass() {
+	public void isPrimitiveOrWrapperWithDoubleWrapperClass() {
 		assertTrue(ClassUtils.isPrimitiveOrWrapper(Double.class));
 	}
 
 	@Test
-	public void testIsPrimitiveOrWrapperWithFloatPrimitiveClass() {
+	public void isPrimitiveOrWrapperWithFloatPrimitiveClass() {
 		assertTrue(ClassUtils.isPrimitiveOrWrapper(float.class));
 	}
 
 	@Test
-	public void testIsPrimitiveOrWrapperWithFloatWrapperClass() {
+	public void isPrimitiveOrWrapperWithFloatWrapperClass() {
 		assertTrue(ClassUtils.isPrimitiveOrWrapper(Float.class));
 	}
 
 	@Test
-	public void testIsPrimitiveOrWrapperWithIntClass() {
+	public void isPrimitiveOrWrapperWithIntClass() {
 		assertTrue(ClassUtils.isPrimitiveOrWrapper(int.class));
 	}
 
 	@Test
-	public void testIsPrimitiveOrWrapperWithIntegerClass() {
+	public void isPrimitiveOrWrapperWithIntegerClass() {
 		assertTrue(ClassUtils.isPrimitiveOrWrapper(Integer.class));
 	}
 
 	@Test
-	public void testIsPrimitiveOrWrapperWithLongPrimitiveClass() {
+	public void isPrimitiveOrWrapperWithLongPrimitiveClass() {
 		assertTrue(ClassUtils.isPrimitiveOrWrapper(long.class));
 	}
 
 	@Test
-	public void testIsPrimitiveOrWrapperWithLongWrapperClass() {
+	public void isPrimitiveOrWrapperWithLongWrapperClass() {
 		assertTrue(ClassUtils.isPrimitiveOrWrapper(Long.class));
 	}
 
 	@Test
-	public void testIsPrimitiveOrWrapperWithNonPrimitiveOrWrapperClass() {
+	public void isPrimitiveOrWrapperWithNonPrimitiveOrWrapperClass() {
 		assertFalse(ClassUtils.isPrimitiveOrWrapper(Object.class));
 	}
 
 	@Test
-	public void testIsPrimitiveOrWrapperWithShortPrimitiveClass() {
+	public void isPrimitiveOrWrapperWithShortPrimitiveClass() {
 		assertTrue(ClassUtils.isPrimitiveOrWrapper(short.class));
 	}
 
 	@Test
-	public void testIsPrimitiveOrWrapperWithShortWrapperClass() {
+	public void isPrimitiveOrWrapperWithShortWrapperClass() {
 		assertTrue(ClassUtils.isPrimitiveOrWrapper(Short.class));
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithBooleanArray() {
+	public void nullSafeHashCodeWithBooleanArray() {
 		int expected = 31 * 7 + Boolean.TRUE.hashCode();
 		expected = 31 * expected + Boolean.FALSE.hashCode();
 
@@ -336,12 +401,12 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithBooleanArrayEqualToNull() {
+	public void nullSafeHashCodeWithBooleanArrayEqualToNull() {
 		assertEquals(0, ObjectUtils.nullSafeHashCode((boolean[]) null));
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithByteArray() {
+	public void nullSafeHashCodeWithByteArray() {
 		int expected = 31 * 7 + 8;
 		expected = 31 * expected + 10;
 
@@ -352,12 +417,12 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithByteArrayEqualToNull() {
+	public void nullSafeHashCodeWithByteArrayEqualToNull() {
 		assertEquals(0, ObjectUtils.nullSafeHashCode((byte[]) null));
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithCharArray() {
+	public void nullSafeHashCodeWithCharArray() {
 		int expected = 31 * 7 + 'a';
 		expected = 31 * expected + 'E';
 
@@ -368,12 +433,12 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithCharArrayEqualToNull() {
+	public void nullSafeHashCodeWithCharArrayEqualToNull() {
 		assertEquals(0, ObjectUtils.nullSafeHashCode((char[]) null));
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithDoubleArray() {
+	public void nullSafeHashCodeWithDoubleArray() {
 		long bits = Double.doubleToLongBits(8449.65);
 		int expected = 31 * 7 + (int) (bits ^ (bits >>> 32));
 		bits = Double.doubleToLongBits(9944.923);
@@ -386,12 +451,12 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithDoubleArrayEqualToNull() {
+	public void nullSafeHashCodeWithDoubleArrayEqualToNull() {
 		assertEquals(0, ObjectUtils.nullSafeHashCode((double[]) null));
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithFloatArray() {
+	public void nullSafeHashCodeWithFloatArray() {
 		int expected = 31 * 7 + Float.floatToIntBits(9.6f);
 		expected = 31 * expected + Float.floatToIntBits(7.4f);
 
@@ -402,12 +467,12 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithFloatArrayEqualToNull() {
+	public void nullSafeHashCodeWithFloatArrayEqualToNull() {
 		assertEquals(0, ObjectUtils.nullSafeHashCode((float[]) null));
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithIntArray() {
+	public void nullSafeHashCodeWithIntArray() {
 		int expected = 31 * 7 + 884;
 		expected = 31 * expected + 340;
 
@@ -418,12 +483,12 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithIntArrayEqualToNull() {
+	public void nullSafeHashCodeWithIntArrayEqualToNull() {
 		assertEquals(0, ObjectUtils.nullSafeHashCode((int[]) null));
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithLongArray() {
+	public void nullSafeHashCodeWithLongArray() {
 		long lng = 7993l;
 		int expected = 31 * 7 + (int) (lng ^ (lng >>> 32));
 		lng = 84320l;
@@ -436,18 +501,18 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithLongArrayEqualToNull() {
+	public void nullSafeHashCodeWithLongArrayEqualToNull() {
 		assertEquals(0, ObjectUtils.nullSafeHashCode((long[]) null));
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithObject() {
+	public void nullSafeHashCodeWithObject() {
 		String str = "Luke";
 		assertEquals(str.hashCode(), ObjectUtils.nullSafeHashCode(str));
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithObjectArray() {
+	public void nullSafeHashCodeWithObjectArray() {
 		int expected = 31 * 7 + "Leia".hashCode();
 		expected = 31 * expected + "Han".hashCode();
 
@@ -458,80 +523,80 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithObjectArrayEqualToNull() {
+	public void nullSafeHashCodeWithObjectArrayEqualToNull() {
 		assertEquals(0, ObjectUtils.nullSafeHashCode((Object[]) null));
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithObjectBeingBooleanArray() {
+	public void nullSafeHashCodeWithObjectBeingBooleanArray() {
 		Object array = new boolean[] {true, false};
 		int expected = ObjectUtils.nullSafeHashCode((boolean[]) array);
 		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithObjectBeingByteArray() {
+	public void nullSafeHashCodeWithObjectBeingByteArray() {
 		Object array = new byte[] {6, 39};
 		int expected = ObjectUtils.nullSafeHashCode((byte[]) array);
 		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithObjectBeingCharArray() {
+	public void nullSafeHashCodeWithObjectBeingCharArray() {
 		Object array = new char[] {'l', 'M'};
 		int expected = ObjectUtils.nullSafeHashCode((char[]) array);
 		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithObjectBeingDoubleArray() {
+	public void nullSafeHashCodeWithObjectBeingDoubleArray() {
 		Object array = new double[] {68930.993, 9022.009};
 		int expected = ObjectUtils.nullSafeHashCode((double[]) array);
 		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithObjectBeingFloatArray() {
+	public void nullSafeHashCodeWithObjectBeingFloatArray() {
 		Object array = new float[] {9.9f, 9.54f};
 		int expected = ObjectUtils.nullSafeHashCode((float[]) array);
 		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithObjectBeingIntArray() {
+	public void nullSafeHashCodeWithObjectBeingIntArray() {
 		Object array = new int[] {89, 32};
 		int expected = ObjectUtils.nullSafeHashCode((int[]) array);
 		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithObjectBeingLongArray() {
+	public void nullSafeHashCodeWithObjectBeingLongArray() {
 		Object array = new long[] {4389, 320};
 		int expected = ObjectUtils.nullSafeHashCode((long[]) array);
 		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithObjectBeingObjectArray() {
+	public void nullSafeHashCodeWithObjectBeingObjectArray() {
 		Object array = new Object[] {"Luke", "Anakin"};
 		int expected = ObjectUtils.nullSafeHashCode((Object[]) array);
 		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithObjectBeingShortArray() {
+	public void nullSafeHashCodeWithObjectBeingShortArray() {
 		Object array = new short[] {5, 3};
 		int expected = ObjectUtils.nullSafeHashCode((short[]) array);
 		assertEqualHashCodes(expected, array);
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithObjectEqualToNull() {
+	public void nullSafeHashCodeWithObjectEqualToNull() {
 		assertEquals(0, ObjectUtils.nullSafeHashCode((Object) null));
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithShortArray() {
+	public void nullSafeHashCodeWithShortArray() {
 		int expected = 31 * 7 + 70;
 		expected = 31 * expected + 8;
 
@@ -542,187 +607,187 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testNullSafeHashCodeWithShortArrayEqualToNull() {
+	public void nullSafeHashCodeWithShortArrayEqualToNull() {
 		assertEquals(0, ObjectUtils.nullSafeHashCode((short[]) null));
 	}
 
 	@Test
-	public void testNullSafeToStringWithBooleanArray() {
+	public void nullSafeToStringWithBooleanArray() {
 		boolean[] array = {true, false};
 		assertEquals("{true, false}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithBooleanArrayBeingEmpty() {
+	public void nullSafeToStringWithBooleanArrayBeingEmpty() {
 		boolean[] array = {};
 		assertEquals("{}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithBooleanArrayEqualToNull() {
+	public void nullSafeToStringWithBooleanArrayEqualToNull() {
 		assertEquals("null", ObjectUtils.nullSafeToString((boolean[]) null));
 	}
 
 	@Test
-	public void testNullSafeToStringWithByteArray() {
+	public void nullSafeToStringWithByteArray() {
 		byte[] array = {5, 8};
 		assertEquals("{5, 8}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithByteArrayBeingEmpty() {
+	public void nullSafeToStringWithByteArrayBeingEmpty() {
 		byte[] array = {};
 		assertEquals("{}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithByteArrayEqualToNull() {
+	public void nullSafeToStringWithByteArrayEqualToNull() {
 		assertEquals("null", ObjectUtils.nullSafeToString((byte[]) null));
 	}
 
 	@Test
-	public void testNullSafeToStringWithCharArray() {
+	public void nullSafeToStringWithCharArray() {
 		char[] array = {'A', 'B'};
 		assertEquals("{'A', 'B'}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithCharArrayBeingEmpty() {
+	public void nullSafeToStringWithCharArrayBeingEmpty() {
 		char[] array = {};
 		assertEquals("{}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithCharArrayEqualToNull() {
+	public void nullSafeToStringWithCharArrayEqualToNull() {
 		assertEquals("null", ObjectUtils.nullSafeToString((char[]) null));
 	}
 
 	@Test
-	public void testNullSafeToStringWithDoubleArray() {
+	public void nullSafeToStringWithDoubleArray() {
 		double[] array = {8594.93, 8594023.95};
 		assertEquals("{8594.93, 8594023.95}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithDoubleArrayBeingEmpty() {
+	public void nullSafeToStringWithDoubleArrayBeingEmpty() {
 		double[] array = {};
 		assertEquals("{}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithDoubleArrayEqualToNull() {
+	public void nullSafeToStringWithDoubleArrayEqualToNull() {
 		assertEquals("null", ObjectUtils.nullSafeToString((double[]) null));
 	}
 
 	@Test
-	public void testNullSafeToStringWithFloatArray() {
+	public void nullSafeToStringWithFloatArray() {
 		float[] array = {8.6f, 43.8f};
 		assertEquals("{8.6, 43.8}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithFloatArrayBeingEmpty() {
+	public void nullSafeToStringWithFloatArrayBeingEmpty() {
 		float[] array = {};
 		assertEquals("{}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithFloatArrayEqualToNull() {
+	public void nullSafeToStringWithFloatArrayEqualToNull() {
 		assertEquals("null", ObjectUtils.nullSafeToString((float[]) null));
 	}
 
 	@Test
-	public void testNullSafeToStringWithIntArray() {
+	public void nullSafeToStringWithIntArray() {
 		int[] array = {9, 64};
 		assertEquals("{9, 64}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithIntArrayBeingEmpty() {
+	public void nullSafeToStringWithIntArrayBeingEmpty() {
 		int[] array = {};
 		assertEquals("{}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithIntArrayEqualToNull() {
+	public void nullSafeToStringWithIntArrayEqualToNull() {
 		assertEquals("null", ObjectUtils.nullSafeToString((int[]) null));
 	}
 
 	@Test
-	public void testNullSafeToStringWithLongArray() {
+	public void nullSafeToStringWithLongArray() {
 		long[] array = {434l, 23423l};
 		assertEquals("{434, 23423}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithLongArrayBeingEmpty() {
+	public void nullSafeToStringWithLongArrayBeingEmpty() {
 		long[] array = {};
 		assertEquals("{}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithLongArrayEqualToNull() {
+	public void nullSafeToStringWithLongArrayEqualToNull() {
 		assertEquals("null", ObjectUtils.nullSafeToString((long[]) null));
 	}
 
 	@Test
-	public void testNullSafeToStringWithPlainOldString() {
+	public void nullSafeToStringWithPlainOldString() {
 		assertEquals("I shoh love tha taste of mangoes", ObjectUtils.nullSafeToString("I shoh love tha taste of mangoes"));
 	}
 
 	@Test
-	public void testNullSafeToStringWithObjectArray() {
+	public void nullSafeToStringWithObjectArray() {
 		Object[] array = {"Han", new Long(43)};
 		assertEquals("{Han, 43}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithObjectArrayBeingEmpty() {
+	public void nullSafeToStringWithObjectArrayBeingEmpty() {
 		Object[] array = {};
 		assertEquals("{}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithObjectArrayEqualToNull() {
+	public void nullSafeToStringWithObjectArrayEqualToNull() {
 		assertEquals("null", ObjectUtils.nullSafeToString((Object[]) null));
 	}
 
 	@Test
-	public void testNullSafeToStringWithShortArray() {
+	public void nullSafeToStringWithShortArray() {
 		short[] array = {7, 9};
 		assertEquals("{7, 9}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithShortArrayBeingEmpty() {
+	public void nullSafeToStringWithShortArrayBeingEmpty() {
 		short[] array = {};
 		assertEquals("{}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithShortArrayEqualToNull() {
+	public void nullSafeToStringWithShortArrayEqualToNull() {
 		assertEquals("null", ObjectUtils.nullSafeToString((short[]) null));
 	}
 
 	@Test
-	public void testNullSafeToStringWithStringArray() {
+	public void nullSafeToStringWithStringArray() {
 		String[] array = {"Luke", "Anakin"};
 		assertEquals("{Luke, Anakin}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithStringArrayBeingEmpty() {
+	public void nullSafeToStringWithStringArrayBeingEmpty() {
 		String[] array = {};
 		assertEquals("{}", ObjectUtils.nullSafeToString(array));
 	}
 
 	@Test
-	public void testNullSafeToStringWithStringArrayEqualToNull() {
+	public void nullSafeToStringWithStringArrayEqualToNull() {
 		assertEquals("null", ObjectUtils.nullSafeToString((String[]) null));
 	}
 
 	@Test
-	public void testContainsConstant() {
+	public void containsConstant() {
 		assertThat(ObjectUtils.containsConstant(Tropes.values(), "FOO"), is(true));
 		assertThat(ObjectUtils.containsConstant(Tropes.values(), "foo"), is(true));
 		assertThat(ObjectUtils.containsConstant(Tropes.values(), "BaR"), is(true));
@@ -737,18 +802,13 @@ public class ObjectUtilsTests {
 	}
 
 	@Test
-	public void testCaseInsensitiveValueOf() {
+	public void caseInsensitiveValueOf() {
 		assertThat(ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "foo"), is(Tropes.FOO));
 		assertThat(ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "BAR"), is(Tropes.BAR));
-		try {
-			ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "bogus");
-			fail("expected IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(),
-					is("constant [bogus] does not exist in enum type " +
-					"org.springframework.util.ObjectUtilsTests$Tropes"));
-		}
+
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(is("constant [bogus] does not exist in enum type org.springframework.util.ObjectUtilsTests$Tropes"));
+		ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "bogus");
 	}
 
 	private void assertEqualHashCodes(int expected, Object array) {

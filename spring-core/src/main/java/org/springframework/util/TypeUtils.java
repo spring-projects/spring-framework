@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
-
-import org.springframework.util.ClassUtils;
 
 /**
  * Utility to work with Java 5 generic type parameters.
@@ -46,15 +44,15 @@ public abstract class TypeUtils {
 		Assert.notNull(rhsType, "Right-hand side type must not be null");
 
 		// all types are assignable to themselves and to class Object
-		if (lhsType.equals(rhsType) || lhsType.equals(Object.class)) {
+		if (lhsType.equals(rhsType) || Object.class == lhsType) {
 			return true;
 		}
 
-		if (lhsType instanceof Class<?>) {
+		if (lhsType instanceof Class) {
 			Class<?> lhsClass = (Class<?>) lhsType;
 
 			// just comparing two classes
-			if (rhsType instanceof Class<?>) {
+			if (rhsType instanceof Class) {
 				return ClassUtils.isAssignable(lhsClass, (Class<?>) rhsType);
 			}
 
@@ -62,7 +60,7 @@ public abstract class TypeUtils {
 				Type rhsRaw = ((ParameterizedType) rhsType).getRawType();
 
 				// a parameterized type is always assignable to its raw class type
-				if (rhsRaw instanceof Class<?>) {
+				if (rhsRaw instanceof Class) {
 					return ClassUtils.isAssignable(lhsClass, (Class<?>) rhsRaw);
 				}
 			}
@@ -75,10 +73,10 @@ public abstract class TypeUtils {
 
 		// parameterized types are only assignable to other parameterized types and class types
 		if (lhsType instanceof ParameterizedType) {
-			if (rhsType instanceof Class<?>) {
+			if (rhsType instanceof Class) {
 				Type lhsRaw = ((ParameterizedType) lhsType).getRawType();
 
-				if (lhsRaw instanceof Class<?>) {
+				if (lhsRaw instanceof Class) {
 					return ClassUtils.isAssignable((Class<?>) lhsRaw, (Class<?>) rhsType);
 				}
 			}
@@ -90,7 +88,7 @@ public abstract class TypeUtils {
 		if (lhsType instanceof GenericArrayType) {
 			Type lhsComponent = ((GenericArrayType) lhsType).getGenericComponentType();
 
-			if (rhsType instanceof Class<?>) {
+			if (rhsType instanceof Class) {
 				Class<?> rhsClass = (Class<?>) rhsType;
 
 				if (rhsClass.isArray()) {

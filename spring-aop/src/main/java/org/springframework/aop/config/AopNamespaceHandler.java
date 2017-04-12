@@ -24,7 +24,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  * {@code NamespaceHandler} for the {@code aop} namespace.
  *
  * <p>Provides a {@link org.springframework.beans.factory.xml.BeanDefinitionParser} for the
- * {@code &lt;aop:config&gt;} tag. A {@code config} tag can include nested
+ * {@code <aop:config>} tag. A {@code config} tag can include nested
  * {@code pointcut}, {@code advisor} and {@code aspect} tags.
  *
  * <p>The {@code pointcut} tag allows for creation of named

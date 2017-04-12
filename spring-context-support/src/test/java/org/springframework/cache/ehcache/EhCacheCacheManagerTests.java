@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.Configuration;
 import org.junit.After;
 import org.junit.Before;
+
 import org.springframework.cache.transaction.AbstractTransactionSupportingCacheManagerTests;
 
 /**
@@ -29,8 +30,11 @@ import org.springframework.cache.transaction.AbstractTransactionSupportingCacheM
 public class EhCacheCacheManagerTests extends AbstractTransactionSupportingCacheManagerTests<EhCacheCacheManager> {
 
 	private CacheManager nativeCacheManager;
+
 	private EhCacheCacheManager cacheManager;
+
 	private EhCacheCacheManager transactionalCacheManager;
+
 
 	@Before
 	public void setup() {
@@ -57,7 +61,8 @@ public class EhCacheCacheManagerTests extends AbstractTransactionSupportingCache
 	protected EhCacheCacheManager getCacheManager(boolean transactionAware) {
 		if (transactionAware) {
 			return transactionalCacheManager;
-		} else {
+		}
+		else {
 			return cacheManager;
 		}
 	}
@@ -76,4 +81,5 @@ public class EhCacheCacheManagerTests extends AbstractTransactionSupportingCache
 	protected void removeNativeCache(String cacheName) {
 		nativeCacheManager.removeCache(cacheName);
 	}
+
 }

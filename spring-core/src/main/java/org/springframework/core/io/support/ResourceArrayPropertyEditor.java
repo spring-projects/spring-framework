@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,30 +76,6 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 
 	/**
 	 * Create a new ResourceArrayPropertyEditor with the given {@link ResourcePatternResolver}
-	 * and a {@link StandardEnvironment}.
-	 * @param resourcePatternResolver the ResourcePatternResolver to use
-	 * @deprecated as of 3.1 in favor of {@link #ResourceArrayPropertyEditor(ResourcePatternResolver, PropertyResolver)}
-	 */
-	@Deprecated
-	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver) {
-		this(resourcePatternResolver, null, true);
-	}
-
-	/**
-	 * Create a new ResourceArrayPropertyEditor with the given {@link ResourcePatternResolver}
-	 * and a {@link StandardEnvironment}.
-	 * @param resourcePatternResolver the ResourcePatternResolver to use
-	 * @param ignoreUnresolvablePlaceholders whether to ignore unresolvable placeholders
-	 * if no corresponding system property could be found
-	 * @deprecated as of 3.1 in favor of {@link #ResourceArrayPropertyEditor(ResourcePatternResolver, PropertyResolver, boolean)}
-	 */
-	@Deprecated
-	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver, boolean ignoreUnresolvablePlaceholders) {
-		this(resourcePatternResolver, null, ignoreUnresolvablePlaceholders);
-	}
-
-	/**
-	 * Create a new ResourceArrayPropertyEditor with the given {@link ResourcePatternResolver}
 	 * and {@link PropertyResolver} (typically an {@link Environment}).
 	 * @param resourcePatternResolver the ResourcePatternResolver to use
 	 * @param propertyResolver the PropertyResolver to use
@@ -149,7 +125,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	public void setValue(Object value) throws IllegalArgumentException {
 		if (value instanceof Collection || (value instanceof Object[] && !(value instanceof Resource[]))) {
 			Collection<?> input = (value instanceof Collection ? (Collection<?>) value : Arrays.asList((Object[]) value));
-			List<Resource> merged = new ArrayList<Resource>();
+			List<Resource> merged = new ArrayList<>();
 			for (Object element : input) {
 				if (element instanceof String) {
 					// A location pattern: resolve it into a Resource array.

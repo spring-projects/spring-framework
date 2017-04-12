@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,9 @@
 
 package org.springframework.expression.spel.standard;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.EvaluationException;
 import org.springframework.expression.ExpressionException;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.SpelMessage;
@@ -31,13 +28,16 @@ import org.springframework.expression.spel.ast.OpAnd;
 import org.springframework.expression.spel.ast.OpOr;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Andy Clement
+ * @author Juergen Hoeller
  */
 public class SpelParserTests {
 
 	@Test
-	public void theMostBasic() throws EvaluationException, ParseException {
+	public void theMostBasic() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		SpelExpression expr = parser.parseRaw("2");
 		assertNotNull(expr);
@@ -48,7 +48,7 @@ public class SpelParserTests {
 	}
 
 	@Test
-	public void valueType() throws Exception {
+	public void valueType() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		EvaluationContext ctx = new StandardEvaluationContext();
 		Class<?> c = parser.parseRaw("2").getValueType();
@@ -64,7 +64,7 @@ public class SpelParserTests {
 	}
 
 	@Test
-	public void whitespace() throws EvaluationException, ParseException {
+	public void whitespace() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		SpelExpression expr = parser.parseRaw("2      +    3");
 		assertEquals(5, expr.getValue());
@@ -77,7 +77,7 @@ public class SpelParserTests {
 	}
 
 	@Test
-	public void arithmeticPlus1() throws EvaluationException, ParseException {
+	public void arithmeticPlus1() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		SpelExpression expr = parser.parseRaw("2+2");
 		assertNotNull(expr);
@@ -86,14 +86,14 @@ public class SpelParserTests {
 	}
 
 	@Test
-	public void arithmeticPlus2() throws EvaluationException, ParseException {
+	public void arithmeticPlus2() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		SpelExpression expr = parser.parseRaw("37+41");
 		assertEquals(78, expr.getValue());
 	}
 
 	@Test
-	public void arithmeticMultiply1() throws EvaluationException, ParseException {
+	public void arithmeticMultiply1() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		SpelExpression expr = parser.parseRaw("2*3");
 		assertNotNull(expr);
@@ -103,116 +103,127 @@ public class SpelParserTests {
 	}
 
 	@Test
-	public void arithmeticPrecedence1() throws EvaluationException, ParseException {
+	public void arithmeticPrecedence1() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		SpelExpression expr = parser.parseRaw("2*3+5");
 		assertEquals(11, expr.getValue());
 	}
 
 	@Test
-	public void generalExpressions() throws Exception {
-
+	public void generalExpressions() {
 		try {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("new String");
 			fail();
-		} catch (ParseException e) {
-			assertTrue(e instanceof SpelParseException);
-			SpelParseException spe = (SpelParseException) e;
+		}
+		catch (ParseException ex) {
+			assertTrue(ex instanceof SpelParseException);
+			SpelParseException spe = (SpelParseException) ex;
 			assertEquals(SpelMessage.MISSING_CONSTRUCTOR_ARGS, spe.getMessageCode());
 			assertEquals(10, spe.getPosition());
+			assertTrue(ex.getMessage().contains(ex.getExpressionString()));
 		}
 
 		try {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("new String(3,");
 			fail();
-		} catch (ParseException e) {
-			assertTrue(e instanceof SpelParseException);
-			SpelParseException spe = (SpelParseException) e;
+		}
+		catch (ParseException ex) {
+			assertTrue(ex instanceof SpelParseException);
+			SpelParseException spe = (SpelParseException) ex;
 			assertEquals(SpelMessage.RUN_OUT_OF_ARGUMENTS, spe.getMessageCode());
 			assertEquals(10, spe.getPosition());
+			assertTrue(ex.getMessage().contains(ex.getExpressionString()));
 		}
 
 		try {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("new String(3");
 			fail();
-		} catch (ParseException e) {
-			assertTrue(e instanceof SpelParseException);
-			SpelParseException spe = (SpelParseException) e;
+		}
+		catch (ParseException ex) {
+			assertTrue(ex instanceof SpelParseException);
+			SpelParseException spe = (SpelParseException) ex;
 			assertEquals(SpelMessage.RUN_OUT_OF_ARGUMENTS, spe.getMessageCode());
 			assertEquals(10, spe.getPosition());
+			assertTrue(ex.getMessage().contains(ex.getExpressionString()));
 		}
 
 		try {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("new String(");
 			fail();
-		} catch (ParseException e) {
-			assertTrue(e instanceof SpelParseException);
-			SpelParseException spe = (SpelParseException) e;
+		}
+		catch (ParseException ex) {
+			assertTrue(ex instanceof SpelParseException);
+			SpelParseException spe = (SpelParseException) ex;
 			assertEquals(SpelMessage.RUN_OUT_OF_ARGUMENTS, spe.getMessageCode());
 			assertEquals(10, spe.getPosition());
+			assertTrue(ex.getMessage().contains(ex.getExpressionString()));
 		}
 
 		try {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("\"abc");
 			fail();
-		} catch (ParseException e) {
-			assertTrue(e instanceof SpelParseException);
-			SpelParseException spe = (SpelParseException) e;
+		}
+		catch (ParseException ex) {
+			assertTrue(ex instanceof SpelParseException);
+			SpelParseException spe = (SpelParseException) ex;
 			assertEquals(SpelMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING, spe.getMessageCode());
 			assertEquals(0, spe.getPosition());
+			assertTrue(ex.getMessage().contains(ex.getExpressionString()));
 		}
 
 		try {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("'abc");
 			fail();
-		} catch (ParseException e) {
-			assertTrue(e instanceof SpelParseException);
-			SpelParseException spe = (SpelParseException) e;
+		}
+		catch (ParseException ex) {
+			assertTrue(ex instanceof SpelParseException);
+			SpelParseException spe = (SpelParseException) ex;
 			assertEquals(SpelMessage.NON_TERMINATING_QUOTED_STRING, spe.getMessageCode());
 			assertEquals(0, spe.getPosition());
+			assertTrue(ex.getMessage().contains(ex.getExpressionString()));
 		}
 
 	}
 
 	@Test
-	public void arithmeticPrecedence2() throws EvaluationException, ParseException {
+	public void arithmeticPrecedence2() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		SpelExpression expr = parser.parseRaw("2+3*5");
 		assertEquals(17, expr.getValue());
 	}
 
 	@Test
-	public void arithmeticPrecedence3() throws EvaluationException, ParseException {
+	public void arithmeticPrecedence3() {
 		SpelExpression expr = new SpelExpressionParser().parseRaw("3+10/2");
 		assertEquals(8, expr.getValue());
 	}
 
 	@Test
-	public void arithmeticPrecedence4() throws EvaluationException, ParseException {
+	public void arithmeticPrecedence4() {
 		SpelExpression expr = new SpelExpressionParser().parseRaw("10/2+3");
 		assertEquals(8, expr.getValue());
 	}
 
 	@Test
-	public void arithmeticPrecedence5() throws EvaluationException, ParseException {
+	public void arithmeticPrecedence5() {
 		SpelExpression expr = new SpelExpressionParser().parseRaw("(4+10)/2");
 		assertEquals(7, expr.getValue());
 	}
 
 	@Test
-	public void arithmeticPrecedence6() throws EvaluationException, ParseException {
+	public void arithmeticPrecedence6() {
 		SpelExpression expr = new SpelExpressionParser().parseRaw("(3+2)*2");
 		assertEquals(10, expr.getValue());
 	}
 
 	@Test
-	public void booleanOperators() throws EvaluationException, ParseException {
+	public void booleanOperators() {
 		SpelExpression expr = new SpelExpressionParser().parseRaw("true");
 		assertEquals(Boolean.TRUE, expr.getValue(Boolean.class));
 		expr = new SpelExpressionParser().parseRaw("false");
@@ -230,7 +241,7 @@ public class SpelParserTests {
 	}
 
 	@Test
-	public void booleanOperators_symbolic_spr9614() throws EvaluationException, ParseException {
+	public void booleanOperators_symbolic_spr9614() {
 		SpelExpression expr = new SpelExpressionParser().parseRaw("true");
 		assertEquals(Boolean.TRUE, expr.getValue(Boolean.class));
 		expr = new SpelExpressionParser().parseRaw("false");
@@ -248,7 +259,7 @@ public class SpelParserTests {
 	}
 
 	@Test
-	public void stringLiterals() throws EvaluationException, ParseException {
+	public void stringLiterals() {
 		SpelExpression expr = new SpelExpressionParser().parseRaw("'howdy'");
 		assertEquals("howdy", expr.getValue());
 		expr = new SpelExpressionParser().parseRaw("'hello '' world'");
@@ -256,13 +267,13 @@ public class SpelParserTests {
 	}
 
 	@Test
-	public void stringLiterals2() throws EvaluationException, ParseException {
+	public void stringLiterals2() {
 		SpelExpression expr = new SpelExpressionParser().parseRaw("'howdy'.substring(0,2)");
 		assertEquals("ho", expr.getValue());
 	}
 
 	@Test
-	public void testStringLiterals_DoubleQuotes_spr9620() throws Exception {
+	public void testStringLiterals_DoubleQuotes_spr9620() {
 		SpelExpression expr = new SpelExpressionParser().parseRaw("\"double quote: \"\".\"");
 		assertEquals("double quote: \".", expr.getValue());
 		expr = new SpelExpressionParser().parseRaw("\"hello \"\" world\"");
@@ -270,18 +281,19 @@ public class SpelParserTests {
 	}
 
 	@Test
-	public void testStringLiterals_DoubleQuotes_spr9620_2() throws Exception {
+	public void testStringLiterals_DoubleQuotes_spr9620_2() {
 		try {
 			new SpelExpressionParser().parseRaw("\"double quote: \\\"\\\".\"");
 			fail("Should have failed");
-		} catch (SpelParseException spe) {
+		}
+		catch (SpelParseException spe) {
 			assertEquals(17, spe.getPosition());
 			assertEquals(SpelMessage.UNEXPECTED_ESCAPE_CHAR, spe.getMessageCode());
 		}
 	}
 
 	@Test
-	public void positionalInformation() throws EvaluationException, ParseException {
+	public void positionalInformation() {
 		SpelExpression expr = new SpelExpressionParser().parseRaw("true and true or false");
 		SpelNode rootAst = expr.getAST();
 		OpOr operatorOr = (OpOr) rootAst;
@@ -328,14 +340,14 @@ public class SpelParserTests {
 	public void token() {
 		Token token = new Token(TokenKind.NOT, 0, 3);
 		assertEquals(TokenKind.NOT, token.kind);
-		assertEquals(0, token.startpos);
-		assertEquals(3, token.endpos);
+		assertEquals(0, token.startPos);
+		assertEquals(3, token.endPos);
 		assertEquals("[NOT(!)](0,3)", token.toString());
 
 		token = new Token(TokenKind.LITERAL_STRING, "abc".toCharArray(), 0, 3);
 		assertEquals(TokenKind.LITERAL_STRING, token.kind);
-		assertEquals(0, token.startpos);
-		assertEquals(3, token.endpos);
+		assertEquals(0, token.startPos);
+		assertEquals(3, token.endPos);
 		assertEquals("[LITERAL_STRING:abc](0,3)", token.toString());
 	}
 
@@ -348,13 +360,13 @@ public class SpelParserTests {
 
 		exprEx = new ExpressionException("wibble", "test");
 		assertEquals("test", exprEx.getSimpleMessage());
-		assertEquals("Expression 'wibble': test", exprEx.toDetailedString());
-		assertEquals("Expression 'wibble': test", exprEx.getMessage());
+		assertEquals("Expression [wibble]: test", exprEx.toDetailedString());
+		assertEquals("Expression [wibble]: test", exprEx.getMessage());
 
 		exprEx = new ExpressionException("wibble", 3, "test");
 		assertEquals("test", exprEx.getSimpleMessage());
-		assertEquals("Expression 'wibble' @ 3: test", exprEx.toDetailedString());
-		assertEquals("Expression 'wibble' @ 3: test", exprEx.getMessage());
+		assertEquals("Expression [wibble] @3: test", exprEx.toDetailedString());
+		assertEquals("Expression [wibble] @3: test", exprEx.getMessage());
 	}
 
 	@Test
@@ -394,16 +406,17 @@ public class SpelParserTests {
 		checkNumber("1e+3", 1e3d, Double.class);
 	}
 
+
 	private void checkNumber(String expression, Object value, Class<?> type) {
 		try {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			SpelExpression expr = parser.parseRaw(expression);
-			Object o = expr.getValue();
-			assertEquals(value, o);
-			assertEquals(type, o.getClass());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
+			Object exprVal = expr.getValue();
+			assertEquals(value, exprVal);
+			assertEquals(type, exprVal.getClass());
+		}
+		catch (Exception ex) {
+			fail(ex.getMessage());
 		}
 	}
 
@@ -412,9 +425,10 @@ public class SpelParserTests {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw(expression);
 			fail();
-		} catch (ParseException e) {
-			assertTrue(e instanceof SpelParseException);
-			SpelParseException spe = (SpelParseException) e;
+		}
+		catch (ParseException ex) {
+			assertTrue(ex instanceof SpelParseException);
+			SpelParseException spe = (SpelParseException) ex;
 			assertEquals(expectedMessage, spe.getMessageCode());
 		}
 	}

@@ -16,10 +16,11 @@
 
 package org.springframework.validation;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ValidationUtils}.
@@ -31,14 +32,14 @@ import org.springframework.tests.sample.beans.TestBean;
  */
 public class ValidationUtilsTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testInvokeValidatorWithNullValidator() throws Exception {
 		TestBean tb = new TestBean();
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
 		ValidationUtils.invokeValidator(null, tb, errors);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testInvokeValidatorWithNullErrors() throws Exception {
 		TestBean tb = new TestBean();
 		ValidationUtils.invokeValidator(new EmptyValidator(), tb, null);

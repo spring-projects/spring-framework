@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javax.management.ObjectName;
 
 import org.junit.After;
 import org.junit.Before;
+
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
@@ -34,30 +35,43 @@ import static org.junit.Assert.*;
 /**
  * <strong>Note:</strong> certain tests throughout this hierarchy require the presence of
  * the {@code jmxremote_optional.jar} in your classpath. For this reason, these tests are
- * run only if {@link TestGroup#JMXMP} is enabled. If you wish to run these tests, follow
- * the instructions in the TestGroup class to enable JMXMP tests. If you run into the
- * <em>"Unsupported protocol: jmxmp"</em> error, you will need to download the
- * <a href="http://www.oracle.com/technetwork/java/javase/tech/download-jsp-141676.html">
- * JMX Remote API 1.0.1_04 Reference Implementation</a> from Oracle and extract
+ * run only if {@link TestGroup#JMXMP} is enabled.
+ *
+ * <p>If you wish to run these tests, follow the instructions in the TestGroup class to
+ * enable JMXMP tests (i.e., set the following Java system property:
+ * {@code -DtestGroups=jmxmp}).
+ *
+ * <p>If you run into the <em>"Unsupported protocol: jmxmp"</em> error, you will need to
+ * download the <a href="http://www.oracle.com/technetwork/java/javase/tech/download-jsp-141676.html">JMX
+ * Remote API 1.0.1_04 Reference Implementation</a> from Oracle and extract
  * {@code jmxremote_optional.jar} into your classpath, for example in the {@code lib/ext}
  * folder of your JVM.
- * See also <a href="https://issuetracker.springsource.com/browse/EBR-349">EBR-349</a>.
+ *
+ * <p>See also:
+ * <ul>
+ * <li>
+ * <li><a href="https://jira.spring.io/browse/SPR-8093">SPR-8093</a></li>
+ * <li><a href="https://issuetracker.springsource.com/browse/EBR-349">EBR-349</a></li>
+ * </ul>
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Chris Beams
+ * @author Stephane Nicoll
  */
 public abstract class AbstractMBeanServerTests {
 
 	protected MBeanServer server;
+
 
 	@Before
 	public final void setUp() throws Exception {
 		this.server = MBeanServerFactory.createMBeanServer();
 		try {
 			onSetUp();
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			releaseServer();
 			throw ex;
 		}
@@ -94,13 +108,10 @@ public abstract class AbstractMBeanServerTests {
 
 	/**
 	 * Start the specified {@link MBeanExporter}.
-	 *
-	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-	 * @see org.springframework.context.Lifecycle#start()
 	 */
 	protected void start(MBeanExporter exporter) {
 		exporter.afterPropertiesSet();
-		exporter.start();
+		exporter.afterSingletonsInstantiated();
 	}
 
 	protected void assertIsRegistered(String message, ObjectName objectName) {

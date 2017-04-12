@@ -16,23 +16,24 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import static org.junit.Assert.assertEquals;
-
 import java.lang.reflect.Method;
 
 import org.junit.Test;
+
 import org.springframework.aop.MethodBeforeAdvice;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
  * @author Dave Syer
  * @author Chris Beams
  */
-public final class BeanNameAutoProxyCreatorInitTests {
+public class BeanNameAutoProxyCreatorInitTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testIgnoreAdvisorThatIsCurrentlyCreation() {
 		ClassPathXmlApplicationContext ctx =
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());

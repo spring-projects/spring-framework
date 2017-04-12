@@ -16,9 +16,6 @@
 
 package org.springframework.messaging.converter;
 
-import static org.hamcrest.Matchers.isA;
-import static org.junit.Assert.*;
-
 import java.util.Locale;
 
 import org.junit.Rule;
@@ -30,6 +27,9 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  *

@@ -16,19 +16,20 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import static org.junit.Assert.assertEquals;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class AnnotationPointcutTests {
+public class AnnotationPointcutTests {
 
 	private AnnotatedTestBean testBean;
 

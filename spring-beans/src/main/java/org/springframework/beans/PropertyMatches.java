@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,32 +17,37 @@
 package org.springframework.beans;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Helper class for calculating bean property matches, according to.
- * Used by BeanWrapperImpl to suggest alternatives for an invalid property name.
+ * Helper class for calculating property matches, according to a configurable
+ * distance. Provide the list of potential matches and an easy way to generate
+ * an error message. Works for both java bean properties and fields.
+ *
+ * <p>Mainly for use within the framework and in particular the binding facility.
  *
  * @author Alef Arendsen
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 2.0
  * @see #forProperty(String, Class)
+ * @see #forField(String, Class)
  */
-final class PropertyMatches {
-
-	//---------------------------------------------------------------------
-	// Static section
-	//---------------------------------------------------------------------
+public abstract class PropertyMatches {
 
 	/** Default maximum property distance: 2 */
 	public static final int DEFAULT_MAX_DISTANCE = 2;
 
+
+	// Static factory methods
 
 	/**
 	 * Create PropertyMatches for the given bean property.
@@ -60,13 +65,30 @@ final class PropertyMatches {
 	 * @param maxDistance the maximum property distance allowed for matches
 	 */
 	public static PropertyMatches forProperty(String propertyName, Class<?> beanClass, int maxDistance) {
-		return new PropertyMatches(propertyName, beanClass, maxDistance);
+		return new BeanPropertyMatches(propertyName, beanClass, maxDistance);
+	}
+
+	/**
+	 * Create PropertyMatches for the given field property.
+	 * @param propertyName the name of the field to find possible matches for
+	 * @param beanClass the bean class to search for matches
+	 */
+	public static PropertyMatches forField(String propertyName, Class<?> beanClass) {
+		return forField(propertyName, beanClass, DEFAULT_MAX_DISTANCE);
+	}
+
+	/**
+	 * Create PropertyMatches for the given field property.
+	 * @param propertyName the name of the field to find possible matches for
+	 * @param beanClass the bean class to search for matches
+	 * @param maxDistance the maximum property distance allowed for matches
+	 */
+	public static PropertyMatches forField(String propertyName, Class<?> beanClass, int maxDistance) {
+		return new FieldPropertyMatches(propertyName, beanClass, maxDistance);
 	}
 
 
-	//---------------------------------------------------------------------
-	// Instance section
-	//---------------------------------------------------------------------
+	// Instance state
 
 	private final String propertyName;
 
@@ -74,72 +96,50 @@ final class PropertyMatches {
 
 
 	/**
-	 * Create a new PropertyMatches instance for the given property.
+	 * Create a new PropertyMatches instance for the given property and possible matches.
 	 */
-	private PropertyMatches(String propertyName, Class<?> beanClass, int maxDistance) {
+	private PropertyMatches(String propertyName, String[] possibleMatches) {
 		this.propertyName = propertyName;
-		this.possibleMatches = calculateMatches(BeanUtils.getPropertyDescriptors(beanClass), maxDistance);
+		this.possibleMatches = possibleMatches;
 	}
 
+
+	/**
+	 * Return the name of the requested property.
+	 */
+	public String getPropertyName() {
+		return this.propertyName;
+	}
 
 	/**
 	 * Return the calculated possible matches.
 	 */
 	public String[] getPossibleMatches() {
-		return possibleMatches;
+		return this.possibleMatches;
 	}
 
 	/**
 	 * Build an error message for the given invalid property name,
 	 * indicating the possible property matches.
 	 */
-	public String buildErrorMessage() {
-		StringBuilder msg = new StringBuilder();
-		msg.append("Bean property '");
-		msg.append(this.propertyName);
-		msg.append("' is not writable or has an invalid setter method. ");
-
-		if (ObjectUtils.isEmpty(this.possibleMatches)) {
-			msg.append("Does the parameter type of the setter match the return type of the getter?");
-		}
-		else {
-			msg.append("Did you mean ");
-			for (int i = 0; i < this.possibleMatches.length; i++) {
-				msg.append('\'');
-				msg.append(this.possibleMatches[i]);
-				if (i < this.possibleMatches.length - 2) {
-					msg.append("', ");
-				}
-				else if (i == this.possibleMatches.length - 2){
-					msg.append("', or ");
-				}
-	 		}
-			msg.append("'?");
-		}
-		return msg.toString();
-	}
+	public abstract String buildErrorMessage();
 
 
-	/**
-	 * Generate possible property alternatives for the given property and
-	 * class. Internally uses the {@code getStringDistance} method, which
-	 * in turn uses the Levenshtein algorithm to determine the distance between
-	 * two Strings.
-	 * @param propertyDescriptors the JavaBeans property descriptors to search
-	 * @param maxDistance the maximum distance to accept
-	 */
-	private String[] calculateMatches(PropertyDescriptor[] propertyDescriptors, int maxDistance) {
-		List<String> candidates = new ArrayList<String>();
-		for (PropertyDescriptor pd : propertyDescriptors) {
-			if (pd.getWriteMethod() != null) {
-				String possibleAlternative = pd.getName();
-				if (calculateStringDistance(this.propertyName, possibleAlternative) <= maxDistance) {
-					candidates.add(possibleAlternative);
-				}
+	// Implementation support for subclasses
+
+	protected void appendHintMessage(StringBuilder msg) {
+		msg.append("Did you mean ");
+		for (int i = 0; i < this.possibleMatches.length; i++) {
+			msg.append('\'');
+			msg.append(this.possibleMatches[i]);
+			if (i < this.possibleMatches.length - 2) {
+				msg.append("', ");
+			}
+			else if (i == this.possibleMatches.length - 2) {
+				msg.append("', or ");
 			}
 		}
-		Collections.sort(candidates);
-		return StringUtils.toStringArray(candidates);
+		msg.append("'?");
 	}
 
 	/**
@@ -149,11 +149,11 @@ final class PropertyMatches {
 	 * @param s2 the second String
 	 * @return the distance value
 	 */
-	private int calculateStringDistance(String s1, String s2) {
-		if (s1.length() == 0) {
+	private static int calculateStringDistance(String s1, String s2) {
+		if (s1.isEmpty()) {
 			return s2.length();
 		}
-		if (s2.length() == 0) {
+		if (s2.isEmpty()) {
 			return s1.length();
 		}
 		int d[][] = new int[s1.length() + 1][s2.length() + 1];
@@ -172,7 +172,8 @@ final class PropertyMatches {
 				char t_j = s2.charAt(j - 1);
 				if (s_i == t_j) {
 					cost = 0;
-				} else {
+				}
+				else {
 					cost = 1;
 				}
 				d[i][j] = Math.min(Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1),
@@ -181,6 +182,96 @@ final class PropertyMatches {
 		}
 
 		return d[s1.length()][s2.length()];
+	}
+
+
+	// Concrete subclasses
+
+	private static class BeanPropertyMatches extends PropertyMatches {
+
+		public BeanPropertyMatches(String propertyName, Class<?> beanClass, int maxDistance) {
+			super(propertyName, calculateMatches(propertyName,
+					BeanUtils.getPropertyDescriptors(beanClass), maxDistance));
+		}
+
+		/**
+		 * Generate possible property alternatives for the given property and
+		 * class. Internally uses the {@code getStringDistance} method, which
+		 * in turn uses the Levenshtein algorithm to determine the distance between
+		 * two Strings.
+		 * @param propertyDescriptors the JavaBeans property descriptors to search
+		 * @param maxDistance the maximum distance to accept
+		 */
+		private static String[] calculateMatches(String propertyName, PropertyDescriptor[] propertyDescriptors, int maxDistance) {
+			List<String> candidates = new ArrayList<>();
+			for (PropertyDescriptor pd : propertyDescriptors) {
+				if (pd.getWriteMethod() != null) {
+					String possibleAlternative = pd.getName();
+					if (calculateStringDistance(propertyName, possibleAlternative) <= maxDistance) {
+						candidates.add(possibleAlternative);
+					}
+				}
+			}
+			Collections.sort(candidates);
+			return StringUtils.toStringArray(candidates);
+		}
+
+
+		@Override
+		public String buildErrorMessage() {
+			String propertyName = getPropertyName();
+			String[] possibleMatches = getPossibleMatches();
+			StringBuilder msg = new StringBuilder();
+			msg.append("Bean property '");
+			msg.append(propertyName);
+			msg.append("' is not writable or has an invalid setter method. ");
+
+			if (ObjectUtils.isEmpty(possibleMatches)) {
+				msg.append("Does the parameter type of the setter match the return type of the getter?");
+			}
+			else {
+				appendHintMessage(msg);
+			}
+			return msg.toString();
+		}
+	}
+
+
+	private static class FieldPropertyMatches extends PropertyMatches {
+
+		public FieldPropertyMatches(String propertyName, Class<?> beanClass, int maxDistance) {
+			super(propertyName, calculateMatches(propertyName, beanClass, maxDistance));
+		}
+
+		private static String[] calculateMatches(final String propertyName, Class<?> beanClass, final int maxDistance) {
+			final List<String> candidates = new ArrayList<>();
+			ReflectionUtils.doWithFields(beanClass, new ReflectionUtils.FieldCallback() {
+				@Override
+				public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
+					String possibleAlternative = field.getName();
+					if (calculateStringDistance(propertyName, possibleAlternative) <= maxDistance) {
+						candidates.add(possibleAlternative);
+					}
+				}
+			});
+			Collections.sort(candidates);
+			return StringUtils.toStringArray(candidates);
+		}
+
+		@Override
+		public String buildErrorMessage() {
+			String propertyName = getPropertyName();
+			String[] possibleMatches = getPossibleMatches();
+			StringBuilder msg = new StringBuilder();
+			msg.append("Bean property '");
+			msg.append(propertyName);
+			msg.append("' has no matching field. ");
+
+			if (!ObjectUtils.isEmpty(possibleMatches)) {
+				appendHintMessage(msg);
+			}
+			return msg.toString();
+		}
 	}
 
 }

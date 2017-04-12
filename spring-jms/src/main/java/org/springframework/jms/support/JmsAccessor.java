@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * Default is "false".
 	 * <p>Note that within a JTA transaction, the parameters passed to
 	 * {@code create(Queue/Topic)Session(boolean transacted, int acknowledgeMode)}
-	 * method are not taken into account. Depending on the J2EE transaction context,
+	 * method are not taken into account. Depending on the Java EE transaction context,
 	 * the container makes its own decisions on these values. Analogously, these
 	 * parameters are not taken into account within a locally managed transaction
 	 * either, since the accessor operates on an existing JMS Session in this case.
@@ -109,7 +109,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * Set the JMS acknowledgement mode by the name of the corresponding constant
 	 * in the JMS {@link Session} interface, e.g. "CLIENT_ACKNOWLEDGE".
 	 * <p>If you want to use vendor-specific extensions to the acknowledgment mode,
-	 * use {@link #setSessionAcknowledgeModeName(String)} instead.
+	 * use {@link #setSessionAcknowledgeMode(int)} instead.
 	 * @param constantName the name of the {@link Session} acknowledge mode constant
 	 * @see javax.jms.Session#AUTO_ACKNOWLEDGE
 	 * @see javax.jms.Session#CLIENT_ACKNOWLEDGE
@@ -125,8 +125,8 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * {@link Session} to send a message.
 	 * <p>Default is {@link Session#AUTO_ACKNOWLEDGE}.
 	 * <p>Vendor-specific extensions to the acknowledgment mode can be set here as well.
-	 * <p>Note that that inside an EJB the parameters to
-	 * create(Queue/Topic)Session(boolean transacted, int acknowledgeMode) method
+	 * <p>Note that inside an EJB, the parameters to the
+	 * {@code create(Queue/Topic)Session(boolean transacted, int acknowledgeMode)} method
 	 * are not taken into account. Depending on the transaction context in the EJB,
 	 * the container makes its own decisions on these values. See section 17.3.5
 	 * of the EJB spec.
@@ -168,11 +168,6 @@ public abstract class JmsAccessor implements InitializingBean {
 	protected JmsException convertJmsAccessException(JMSException ex) {
 		return JmsUtils.convertJmsAccessException(ex);
 	}
-
-
-	//-------------------------------------------------------------------------
-	// JMS 1.1 factory methods, potentially overridden for JMS 1.0.2
-	//-------------------------------------------------------------------------
 
 	/**
 	 * Create a JMS Connection via this template's ConnectionFactory.

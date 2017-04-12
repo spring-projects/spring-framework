@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.EncodedResource;
 
@@ -33,8 +34,9 @@ import static org.springframework.jdbc.datasource.init.ScriptUtils.*;
  * @author Sam Brannen
  * @author Phillip Webb
  * @author Chris Baldwin
- * @see ScriptUtilsIntegrationTests
+ * @author Nicolas Debeissat
  * @since 4.0.3
+ * @see ScriptUtilsIntegrationTests
  */
 public class ScriptUtilsUnitTests {
 
@@ -48,7 +50,7 @@ public class ScriptUtilsUnitTests {
 		String cleanedStatement3 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
 		char delim = ';';
 		String script = rawStatement1 + delim + rawStatement2 + delim + rawStatement3 + delim;
-		List<String> statements = new ArrayList<String>();
+		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, delim, statements);
 		assertEquals("wrong number of statements", 3, statements.size());
 		assertEquals("statement 1 not split correctly", cleanedStatement1, statements.get(0));
@@ -63,7 +65,7 @@ public class ScriptUtilsUnitTests {
 		String statement3 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
 		char delim = '\n';
 		String script = statement1 + delim + statement2 + delim + statement3 + delim;
-		List<String> statements = new ArrayList<String>();
+		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, delim, statements);
 		assertEquals("wrong number of statements", 3, statements.size());
 		assertEquals("statement 1 not split correctly", statement1, statements.get(0));
@@ -77,20 +79,30 @@ public class ScriptUtilsUnitTests {
 		String statement2 = "do something else";
 		char delim = '\n';
 		String script = statement1 + delim + statement2 + delim;
-		List<String> statements = new ArrayList<String>();
+		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, DEFAULT_STATEMENT_SEPARATOR, statements);
 		assertEquals("wrong number of statements", 1, statements.size());
 		assertEquals("script should have been 'stripped' but not actually 'split'", script.replace('\n', ' '),
 			statements.get(0));
 	}
 
-	/**
-	 * See <a href="https://jira.spring.io/browse/SPR-11560">SPR-11560</a>
-	 */
-	@Test
+	@Test  // SPR-13218
+	public void splitScriptWithSingleQuotesNestedInsideDoubleQuotes() throws Exception {
+		String statement1 = "select '1' as \"Dogbert's owner's\" from dual";
+		String statement2 = "select '2' as \"Dilbert's\" from dual";
+		char delim = ';';
+		String script = statement1 + delim + statement2 + delim;
+		List<String> statements = new ArrayList<>();
+		splitSqlScript(script, ';', statements);
+		assertEquals("wrong number of statements", 2, statements.size());
+		assertEquals("statement 1 not split correctly", statement1, statements.get(0));
+		assertEquals("statement 2 not split correctly", statement2, statements.get(1));
+	}
+
+	@Test  // SPR-11560
 	public void readAndSplitScriptWithMultipleNewlinesAsSeparator() throws Exception {
 		String script = readScript("db-test-data-multi-newline.sql");
-		List<String> statements = new ArrayList<String>();
+		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, "\n\n", statements);
 
 		String statement1 = "insert into T_TEST (NAME) values ('Keith')";
@@ -104,7 +116,7 @@ public class ScriptUtilsUnitTests {
 	@Test
 	public void readAndSplitScriptContainingComments() throws Exception {
 		String script = readScript("test-data-with-comments.sql");
-		List<String> statements = new ArrayList<String>();
+		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, ';', statements);
 
 		String statement1 = "insert into customer (id, name) values (1, 'Rod; Johnson'), (2, 'Adrian Collier')";
@@ -120,13 +132,10 @@ public class ScriptUtilsUnitTests {
 		assertEquals("statement 4 not split correctly", statement4, statements.get(3));
 	}
 
-	/**
-	 * See <a href="https://jira.spring.io/browse/SPR-10330">SPR-10330</a>
-	 */
-	@Test
+	@Test  // SPR-10330
 	public void readAndSplitScriptContainingCommentsWithLeadingTabs() throws Exception {
 		String script = readScript("test-data-with-comments-and-leading-tabs.sql");
-		List<String> statements = new ArrayList<String>();
+		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, ';', statements);
 
 		String statement1 = "insert into customer (id, name) values (1, 'Sam Brannen')";
@@ -139,13 +148,10 @@ public class ScriptUtilsUnitTests {
 		assertEquals("statement 3 not split correctly", statement3, statements.get(2));
 	}
 
-	/**
-	 * See <a href="https://jira.spring.io/browse/SPR-9531">SPR-9531</a>
-	 */
-	@Test
+	@Test  // SPR-9531
 	public void readAndSplitScriptContainingMuliLineComments() throws Exception {
 		String script = readScript("test-data-with-multi-line-comments.sql");
-		List<String> statements = new ArrayList<String>();
+		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, ';', statements);
 
 		String statement1 = "INSERT INTO users(first_name, last_name) VALUES('Juergen', 'Hoeller')";
@@ -158,10 +164,12 @@ public class ScriptUtilsUnitTests {
 
 	@Test
 	public void containsDelimiters() {
-		assertTrue("test with ';' is wrong", !containsSqlScriptDelimiters("select 1\n select ';'", ";"));
-		assertTrue("test with delimiter ; is wrong", containsSqlScriptDelimiters("select 1; select 2", ";"));
-		assertTrue("test with '\\n' is wrong", !containsSqlScriptDelimiters("select 1; select '\\n\n';", "\n"));
-		assertTrue("test with delimiter \\n is wrong", containsSqlScriptDelimiters("select 1\n select 2", "\n"));
+		assertFalse(containsSqlScriptDelimiters("select 1\n select ';'", ";"));
+		assertTrue(containsSqlScriptDelimiters("select 1; select 2", ";"));
+		assertFalse(containsSqlScriptDelimiters("select 1; select '\\n\n';", "\n"));
+		assertTrue(containsSqlScriptDelimiters("select 1\n select 2", "\n"));
+		assertFalse(containsSqlScriptDelimiters("select 1\n select 2", "\n\n"));
+		assertTrue(containsSqlScriptDelimiters("select 1\n\n select 2", "\n\n"));
 	}
 
 	private String readScript(String path) throws Exception {

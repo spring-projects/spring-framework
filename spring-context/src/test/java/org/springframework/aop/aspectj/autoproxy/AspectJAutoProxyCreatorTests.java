@@ -16,12 +16,6 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import static java.lang.String.format;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
@@ -33,6 +27,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.junit.Test;
+
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
@@ -40,18 +35,12 @@ import org.springframework.aop.config.AopConfigUtils;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
-import org.springframework.tests.sample.beans.INestedTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.NestedTestBean;
 import org.springframework.beans.PropertyValue;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
@@ -59,7 +48,16 @@ import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+import org.springframework.tests.sample.beans.INestedTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.NestedTestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.StopWatch;
+
+import static java.lang.String.format;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for AspectJ auto-proxying. Includes mixing with Spring AOP Advisors
@@ -70,7 +68,7 @@ import org.springframework.util.StopWatch;
  * @author Chris Beams
  * @author Sam Brannen
  */
-public final class AspectJAutoProxyCreatorTests {
+public class AspectJAutoProxyCreatorTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
@@ -515,11 +513,13 @@ class RetryAspect {
 				try {
 					o = jp.proceed();
 					this.commitCalls++;
-				} catch (RetryableException e) {
-					this.rollbackCalls++;
-					throw e;
 				}
-			} catch (RetryableException re) {
+				catch (RetryableException re) {
+					this.rollbackCalls++;
+					throw re;
+				}
+			}
+			catch (RetryableException re) {
 				retry = true;
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
-import org.springframework.core.GenericCollectionTypeResolver;
+import org.springframework.core.ResolvableType;
 
 /**
  * Simple factory for shared Set instances. Allows for central setup
@@ -82,11 +82,11 @@ public class SetFactoryBean extends AbstractFactoryBean<Set<Object>> {
 			result = BeanUtils.instantiateClass(this.targetSetClass);
 		}
 		else {
-			result = new LinkedHashSet<Object>(this.sourceSet.size());
+			result = new LinkedHashSet<>(this.sourceSet.size());
 		}
 		Class<?> valueType = null;
 		if (this.targetSetClass != null) {
-			valueType = GenericCollectionTypeResolver.getCollectionType(this.targetSetClass);
+			valueType = ResolvableType.forClass(this.targetSetClass).asCollection().resolveGeneric();
 		}
 		if (valueType != null) {
 			TypeConverter converter = getBeanTypeConverter();

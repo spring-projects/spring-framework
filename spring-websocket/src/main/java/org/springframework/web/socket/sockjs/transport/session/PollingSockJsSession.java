@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,11 @@
 
 package org.springframework.web.socket.sockjs.transport.session;
 
+import java.io.IOException;
 import java.util.Map;
-import java.util.Queue;
 
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
@@ -41,12 +43,26 @@ public class PollingSockJsSession extends AbstractHttpSockJsSession {
 
 
 	@Override
-	protected void flushCache() throws SockJsTransportFailureException {
-		cancelHeartbeat();
-		Queue<String> messageCache = getMessageCache();
-		String[] messages = messageCache.toArray(new String[messageCache.size()]);
-		messageCache.clear();
+	protected void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
+			boolean initialRequest) throws IOException {
 
+		if (initialRequest) {
+			writeFrame(SockJsFrame.openFrame());
+		}
+		else if (!getMessageCache().isEmpty()) {
+			flushCache();
+		}
+		else {
+			scheduleHeartbeat();
+		}
+	}
+
+	@Override
+	protected void flushCache() throws SockJsTransportFailureException {
+		String[] messages = new String[getMessageCache().size()];
+		for (int i = 0; i < messages.length; i++) {
+			messages[i] = getMessageCache().poll();
+		}
 		SockJsMessageCodec messageCodec = getSockJsServiceConfig().getMessageCodec();
 		SockJsFrame frame = SockJsFrame.messageFrame(messageCodec, messages);
 		writeFrame(frame);
@@ -59,4 +75,3 @@ public class PollingSockJsSession extends AbstractHttpSockJsSession {
 	}
 
 }
-

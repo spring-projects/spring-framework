@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.jms;
 
 import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
@@ -45,6 +44,8 @@ public class StubTextMessage implements TextMessage {
 
 	private String type;
 
+	private long deliveryTime;
+
 	private long timestamp = 0L;
 
 	private long expiration = 0L;
@@ -53,7 +54,7 @@ public class StubTextMessage implements TextMessage {
 
 	private boolean redelivered;
 
-	private ConcurrentHashMap<String, Object> properties = new ConcurrentHashMap<String, Object>();
+	private ConcurrentHashMap<String, Object> properties = new ConcurrentHashMap<>();
 
 
 	public StubTextMessage() {
@@ -153,6 +154,11 @@ public class StubTextMessage implements TextMessage {
 		return this.type;
 	}
 
+	@Override
+	public long getJMSDeliveryTime() throws JMSException {
+		return this.deliveryTime;
+	}
+
 	public long getLongProperty(String name) throws JMSException {
 		Object value = this.properties.get(name);
 		return (value instanceof Long) ? ((Long) value).longValue() : 0;
@@ -244,6 +250,11 @@ public class StubTextMessage implements TextMessage {
 		this.type = type;
 	}
 
+	@Override
+	public void setJMSDeliveryTime(long deliveryTime) throws JMSException {
+		this.deliveryTime = deliveryTime;
+	}
+
 	public void setLongProperty(String name, long value) throws JMSException {
 		this.properties.put(name, value);
 	}
@@ -260,5 +271,14 @@ public class StubTextMessage implements TextMessage {
 		this.properties.put(name, value);
 	}
 
-}
+	@Override
+	public <T> T getBody(Class<T> c) throws JMSException {
+		return null;
+	}
 
+	@Override
+	public boolean isBodyAssignableTo(Class c) throws JMSException {
+		return false;
+	}
+
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@ package org.springframework.messaging.converter;
 
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * An extension of the {@link SimpleMessageConverter} that uses a
@@ -37,26 +39,39 @@ public class GenericMessageConverter extends SimpleMessageConverter {
 
 	private final ConversionService conversionService;
 
+
 	/**
-	 * Create a new instance with the {@link ConversionService} to use.
+	 * Create a new instance with a default {@link ConversionService}.
+	 */
+	public GenericMessageConverter() {
+		this.conversionService = DefaultConversionService.getSharedInstance();
+	}
+
+	/**
+	 * Create a new instance with the given {@link ConversionService}.
 	 */
 	public GenericMessageConverter(ConversionService conversionService) {
 		Assert.notNull(conversionService, "ConversionService must not be null");
 		this.conversionService = conversionService;
 	}
 
+
 	@Override
 	public Object fromMessage(Message<?> message, Class<?> targetClass) {
 		Object payload = message.getPayload();
-		if (conversionService.canConvert(payload.getClass(), targetClass)) {
+		if (targetClass == null) {
+			return payload;
+		}
+		if (payload != null && this.conversionService.canConvert(payload.getClass(), targetClass)) {
 			try {
-				return conversionService.convert(payload, targetClass);
+				return this.conversionService.convert(payload, targetClass);
 			}
-			catch (ConversionException e) {
-				throw new MessageConversionException(message, "Failed to convert message payload '"
-						+ payload + "' to '" + targetClass.getName() + "'", e);
+			catch (ConversionException ex) {
+				throw new MessageConversionException(message, "Failed to convert message payload '" +
+						payload + "' to '" + targetClass.getName() + "'", ex);
 			}
 		}
-		return null;
+		return (ClassUtils.isAssignableValue(targetClass, payload) ? payload : null);
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,12 @@
 package org.springframework.http.server;
 
 import java.net.URI;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -39,11 +40,13 @@ public class ServletServerHttpRequestTests {
 
 	private MockHttpServletRequest mockRequest;
 
+
 	@Before
 	public void create() throws Exception {
 		mockRequest = new MockHttpServletRequest();
 		request = new ServletServerHttpRequest(mockRequest);
 	}
+
 
 	@Test
 	public void getMethod() throws Exception {
@@ -61,12 +64,24 @@ public class ServletServerHttpRequestTests {
 		assertEquals("Invalid uri", uri, request.getURI());
 	}
 
+	@Test  // SPR-13876
+	public void getUriWithEncoding() throws Exception {
+        URI uri = new URI("https://example.com/%E4%B8%AD%E6%96%87" +
+				"?redirect=https%3A%2F%2Fgithub.com%2Fspring-projects%2Fspring-framework");
+        mockRequest.setScheme(uri.getScheme());
+        mockRequest.setServerName(uri.getHost());
+        mockRequest.setServerPort(uri.getPort());
+        mockRequest.setRequestURI(uri.getRawPath());
+        mockRequest.setQueryString(uri.getRawQuery());
+        assertEquals("Invalid uri", uri, request.getURI());
+    }
+
 	@Test
 	public void getHeaders() throws Exception {
 		String headerName = "MyHeader";
 		String headerValue1 = "value1";
-		mockRequest.addHeader(headerName, headerValue1);
 		String headerValue2 = "value2";
+		mockRequest.addHeader(headerName, headerValue1);
 		mockRequest.addHeader(headerName, headerValue2);
 		mockRequest.setContentType("text/plain");
 		mockRequest.setCharacterEncoding("UTF-8");
@@ -78,8 +93,28 @@ public class ServletServerHttpRequestTests {
 		assertEquals("Invalid header values returned", 2, headerValues.size());
 		assertTrue("Invalid header values returned", headerValues.contains(headerValue1));
 		assertTrue("Invalid header values returned", headerValues.contains(headerValue2));
-		assertEquals("Invalid Content-Type", new MediaType("text", "plain", Charset.forName("UTF-8")),
+		assertEquals("Invalid Content-Type", new MediaType("text", "plain", StandardCharsets.UTF_8),
 				headers.getContentType());
+	}
+
+	@Test
+	public void getHeadersWithEmptyContentTypeAndEncoding() throws Exception {
+		String headerName = "MyHeader";
+		String headerValue1 = "value1";
+		String headerValue2 = "value2";
+		mockRequest.addHeader(headerName, headerValue1);
+		mockRequest.addHeader(headerName, headerValue2);
+		mockRequest.setContentType("");
+		mockRequest.setCharacterEncoding("");
+
+		HttpHeaders headers = request.getHeaders();
+		assertNotNull("No HttpHeaders returned", headers);
+		assertTrue("Invalid headers returned", headers.containsKey(headerName));
+		List<String> headerValues = headers.get(headerName);
+		assertEquals("Invalid header values returned", 2, headerValues.size());
+		assertTrue("Invalid header values returned", headerValues.contains(headerValue1));
+		assertTrue("Invalid header values returned", headerValues.contains(headerValue2));
+		assertNull(headers.getContentType());
 	}
 
 	@Test

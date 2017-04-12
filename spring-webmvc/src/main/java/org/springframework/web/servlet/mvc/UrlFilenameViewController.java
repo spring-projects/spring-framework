@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,12 @@ import org.springframework.web.servlet.HandlerMapping;
  * <p>Can optionally prepend a {@link #setPrefix prefix} and/or append a
  * {@link #setSuffix suffix} to build the viewname from the URL filename.
  *
- * <p>Find below some examples:
- *
+ * <p>Find some examples below:
  * <ol>
- *   <li>{@code "/index" -> "index"}</li>
- *   <li>{@code "/index.html" -> "index"}</li>
- *   <li>{@code "/index.html"} + prefix {@code "pre_"} and suffix {@code "_suf" -> "pre_index_suf"}</li>
- *   <li>{@code "/products/view.html" -> "products/view"}</li>
+ * <li>{@code "/index" -> "index"}</li>
+ * <li>{@code "/index.html" -> "index"}</li>
+ * <li>{@code "/index.html"} + prefix {@code "pre_"} and suffix {@code "_suf" -> "pre_index_suf"}</li>
+ * <li>{@code "/products/view.html" -> "products/view"}</li>
  * </ol>
  *
  * <p>Thanks to David Barri for suggesting prefix/suffix support!
@@ -54,7 +53,7 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 	private String suffix = "";
 
 	/** Request URL path String --> view name String */
-	private final Map<String, String> viewNameCache = new ConcurrentHashMap<String, String>(256);
+	private final Map<String, String> viewNameCache = new ConcurrentHashMap<>(256);
 
 
 	/**

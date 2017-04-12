@@ -24,7 +24,6 @@ import java.util.Properties;
 import org.junit.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.TestBean;
@@ -325,17 +324,18 @@ public class FactoryMethodTests {
 	}
 
 	@Test
-	public void testCannotSpecifyFactoryMethodArgumentsOnSingleton() {
+	public void testCanSpecifyFactoryMethodArgumentsOnSingleton() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
-		try {
-			xbf.getBean("testBeanOnly", new TestBean());
-			fail("Shouldn't allow args to be passed to a singleton");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// OK
-		}
+
+		// First getBean call triggers actual creation of the singleton bean
+		TestBean tb = new TestBean();
+		FactoryMethods fm1 = (FactoryMethods) xbf.getBean("testBeanOnly", tb);
+		assertSame(tb, fm1.getTestBean());
+		FactoryMethods fm2 = (FactoryMethods) xbf.getBean("testBeanOnly", new TestBean());
+		assertSame(fm1, fm2);
+		assertSame(tb, fm2.getTestBean());
 	}
 
 	@Test
@@ -343,14 +343,13 @@ public class FactoryMethodTests {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
-		xbf.getBean("testBeanOnly");
-		try {
-			xbf.getBean("testBeanOnly", new TestBean());
-			fail("Shouldn't allow args to be passed to a singleton");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// OK
-		}
+
+		// First getBean call triggers actual creation of the singleton bean
+		FactoryMethods fm1 = (FactoryMethods) xbf.getBean("testBeanOnly");
+		TestBean tb = fm1.getTestBean();
+		FactoryMethods fm2 = (FactoryMethods) xbf.getBean("testBeanOnly", new TestBean());
+		assertSame(fm1, fm2);
+		assertSame(tb, fm2.getTestBean());
 	}
 
 	@Test
@@ -386,7 +385,6 @@ public class FactoryMethodTests {
 		assertEquals("someuser", session.getProperty("mail.smtp.user"));
 		assertEquals("somepw", session.getProperty("mail.smtp.password"));
 	}
-
 }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,73 +20,55 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.Collections;
-
 import javax.servlet.http.Part;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 
+
 /**
- * Mock implementation of the {@link Part} interface.
+ * Mock implementation of {@code javax.servlet.http.Part}.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
- * @see MockHttpServletRequest
  */
 public class MockPart implements Part {
 
-	private static final String CONTENT_TYPE = "Content-Type";
-
 	private final String name;
 
-	private String contentType;
+	private final String filename;
 
 	private final byte[] content;
 
+	private final HttpHeaders headers = new HttpHeaders();
+
+
 	/**
-	 * Create a new MockPart with the given content.
-	 * @param name the name of the part
-	 * @param content the content for the part
+	 * Constructor for a part with byte[] content only.
 	 */
 	public MockPart(String name, byte[] content) {
-		this(name, "", content);
+		this(name, null, content);
 	}
 
 	/**
-	 * Create a new MockPart with the given content.
-	 * @param name the name of the part
-	 * @param contentStream the content of the part as stream
-	 * @throws IOException if reading from the stream failed
+	 * Constructor for a part with a filename.
 	 */
-	public MockPart(String name, InputStream contentStream) throws IOException {
-		this(name, "", FileCopyUtils.copyToByteArray(contentStream));
+	public MockPart(String name, String filename, InputStream content) throws IOException {
+		this(name, filename, FileCopyUtils.copyToByteArray(content));
 	}
 
 	/**
-	 * Create a new MockPart with the given content.
-	 * @param name the name of the file
-	 * @param contentType the content type (if known)
-	 * @param content the content of the file
+	 * Constructor for a part with byte[] content only.
+	 * @see #getHeaders()
 	 */
-	public MockPart(String name, String contentType, byte[] content) {
+	private MockPart(String name, String filename, byte[] content) {
 		Assert.hasLength(name, "Name must not be null");
 		this.name = name;
-		this.contentType = contentType;
+		this.filename = filename;
 		this.content = (content != null ? content : new byte[0]);
-	}
-
-	/**
-	 * Create a new MockPart with the given content.
-	 * @param name the name of the file
-	 * @param contentType the content type (if known)
-	 * @param contentStream the content of the part as stream
-	 * @throws IOException if reading from the stream failed
-	 */
-	public MockPart(String name, String contentType, InputStream contentStream)
-			throws IOException {
-
-		this(name, contentType, FileCopyUtils.copyToByteArray(contentStream));
+		this.headers.setContentDispositionFormData(name, filename);
 	}
 
 
@@ -96,8 +78,14 @@ public class MockPart implements Part {
 	}
 
 	@Override
+	public String getSubmittedFileName() {
+		return this.filename;
+	}
+
+	@Override
 	public String getContentType() {
-		return this.contentType;
+		MediaType contentType = this.headers.getContentType();
+		return (contentType != null ? contentType.toString() : null);
 	}
 
 	@Override
@@ -112,27 +100,24 @@ public class MockPart implements Part {
 
 	@Override
 	public String getHeader(String name) {
-		if (CONTENT_TYPE.equalsIgnoreCase(name)) {
-			return this.contentType;
-		}
-		else {
-			return null;
-		}
+		return this.headers.getFirst(name);
 	}
 
 	@Override
 	public Collection<String> getHeaders(String name) {
-		if (CONTENT_TYPE.equalsIgnoreCase(name)) {
-			return Collections.singleton(this.contentType);
-		}
-		else {
-			return null;
-		}
+		return this.headers.get(name);
 	}
 
 	@Override
 	public Collection<String> getHeaderNames() {
-		return Collections.singleton(CONTENT_TYPE);
+		return this.headers.keySet();
+	}
+
+	/**
+	 * Return the {@link HttpHeaders} backing header related accessor methods.
+	 */
+	public HttpHeaders getHeaders() {
+		return this.headers;
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import java.util.concurrent.Callable;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.util.Assert;
-import org.springframework.web.context.request.async.WebAsyncTask;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
+import org.springframework.web.context.request.async.WebAsyncTask;
 
 /**
  * Helps with configuring options for asynchronous request processing.
@@ -41,10 +41,10 @@ public class AsyncSupportConfigurer {
 	private Long timeout;
 
 	private final List<CallableProcessingInterceptor> callableInterceptors =
-			new ArrayList<CallableProcessingInterceptor>();
+			new ArrayList<>();
 
 	private final List<DeferredResultProcessingInterceptor> deferredResultInterceptors =
-			new ArrayList<DeferredResultProcessingInterceptor>();
+			new ArrayList<>();
 
 
 	/**
@@ -55,6 +55,11 @@ public class AsyncSupportConfigurer {
 	 * <p>By default a {@link SimpleAsyncTaskExecutor} instance is used, and it's
 	 * highly recommended to change that default in production since the simple
 	 * executor does not re-use threads.
+	 *
+	 * <p>As of 5.0 this executor is also used when a controller returns a reactive
+	 * type that does streaming (e.g. "text/event-stream" or
+	 * "application/stream+json") for the blocking writes to the
+	 * {@link javax.servlet.ServletOutputStream}.
 	 *
 	 * @param taskExecutor the task executor instance to use by default
 	 */

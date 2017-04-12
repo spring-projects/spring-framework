@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,10 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.DefaultDependencyComparator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.event.DefaultEventListenerFactory;
+import org.springframework.context.event.EventListenerMethodProcessor;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -96,114 +97,6 @@ public class AnnotationConfigUtils {
 			"org.springframework.context.annotation.internalCommonAnnotationProcessor";
 
 	/**
-	 * The bean name of the internally managed Scheduled annotation processor.
-	 */
-	public static final String SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME =
-			"org.springframework.context.annotation.internalScheduledAnnotationProcessor";
-
-	/**
-	 * The bean name of the internally managed Async annotation processor.
-	 */
-	public static final String ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME =
-			"org.springframework.context.annotation.internalAsyncAnnotationProcessor";
-
-	/**
-	 * The bean name of the internally managed AspectJ async execution aspect.
-	 */
-	public static final String ASYNC_EXECUTION_ASPECT_BEAN_NAME =
-			"org.springframework.scheduling.config.internalAsyncExecutionAspect";
-
-	/**
-	 * The class name of the AspectJ async execution aspect.
-	 */
-	public static final String ASYNC_EXECUTION_ASPECT_CLASS_NAME =
-			"org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspect";
-
-	/**
-	 * The name of the AspectJ async execution aspect @{@code Configuration} class.
-	 */
-	public static final String ASYNC_EXECUTION_ASPECT_CONFIGURATION_CLASS_NAME =
-			"org.springframework.scheduling.aspectj.AspectJAsyncConfiguration";
-
-	/**
-	 * The bean name of the internally managed cache advisor.
-	 */
-	public static final String CACHE_ADVISOR_BEAN_NAME =
-			"org.springframework.cache.config.internalCacheAdvisor";
-
-	/**
-	 * The bean name of the internally managed cache aspect.
-	 */
-	public static final String CACHE_ASPECT_BEAN_NAME =
-			"org.springframework.cache.config.internalCacheAspect";
-
-	/**
-	 * The class name of the AspectJ caching aspect.
-	 */
-	public static final String CACHE_ASPECT_CLASS_NAME =
-			"org.springframework.cache.aspectj.AnnotationCacheAspect";
-
-	/**
-	 * The name of the AspectJ caching aspect @{@code Configuration} class.
-	 */
-	public static final String CACHE_ASPECT_CONFIGURATION_CLASS_NAME =
-			"org.springframework.cache.aspectj.AspectJCachingConfiguration";
-
-	/**
-	 * The bean name of the internally managed JSR-107 cache advisor.
-	 */
-	public static final String JCACHE_ADVISOR_BEAN_NAME =
-			"org.springframework.cache.config.internalJCacheAdvisor";
-
-	/**
-	 * The class name of the JSR-107 cache operation source.
-	 */
-	public static final String JCACHE_OPERATION_SOURCE_CLASS
-			= "org.springframework.cache.jcache.interceptor.DefaultJCacheOperationSource";
-
-	/**
-	 * The class name of the JSR-107 cache interceptor.
-	 */
-	public static final String JCACHE_INTERCEPTOR_CLASS =
-			"org.springframework.cache.jcache.interceptor.JCacheInterceptor";
-
-	/**
-	 * The class name of the JSR-107 cache advisor factory.
-	 */
-	public static final String JCACHE_ADVISOR_FACTORY_CLASS =
-			"org.springframework.cache.jcache.interceptor.BeanFactoryJCacheOperationSourceAdvisor";
-
-	/**
-	 * The bean name of the internally managed JSR-107 cache aspect.
-	 */
-	public static final String JCACHE_ASPECT_BEAN_NAME =
-			"org.springframework.cache.config.internalJCacheAspect";
-
-	/**
-	 * The class name of the AspectJ JSR-107 cache aspect.
-	 */
-	public static final String JCACHE_ASPECT_CLASS_NAME =
-			"org.springframework.cache.aspectj.JCacheCacheAspect";
-
-	/**
-	 * The name of the AspectJ JSR-107 cache aspect @{@code Configuration} class.
-	 */
-	public static final String JCACHE_ASPECT_CONFIGURATION_CLASS_NAME =
-			"org.springframework.cache.aspectj.AspectJJCacheConfiguration";
-
-	/**
-	 * The bean name of the internally managed jms listener annotation processor.
-	 */
-	public static final String JMS_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME =
-			"org.springframework.jms.config.internalJmsListenerAnnotationProcessor";
-
-	/**
-	 * The bean name of the internally managed jms listener endpoint registry.
-	 */
-	public static final String JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME =
-			"org.springframework.jms.config.internalJmsListenerEndpointRegistry";
-
-	/**
 	 * The bean name of the internally managed JPA annotation processor.
 	 */
 	public static final String PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME =
@@ -213,6 +106,17 @@ public class AnnotationConfigUtils {
 	private static final String PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME =
 			"org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor";
 
+	/**
+	 * The bean name of the internally managed @EventListener annotation processor.
+	 */
+	public static final String EVENT_LISTENER_PROCESSOR_BEAN_NAME =
+			"org.springframework.context.event.internalEventListenerProcessor";
+
+	/**
+	 * The bean name of the internally managed EventListenerFactory.
+	 */
+	public static final String EVENT_LISTENER_FACTORY_BEAN_NAME =
+			"org.springframework.context.event.internalEventListenerFactory";
 
 	private static final boolean jsr250Present =
 			ClassUtils.isPresent("javax.annotation.Resource", AnnotationConfigUtils.class.getClassLoader());
@@ -244,14 +148,14 @@ public class AnnotationConfigUtils {
 		DefaultListableBeanFactory beanFactory = unwrapDefaultListableBeanFactory(registry);
 		if (beanFactory != null) {
 			if (!(beanFactory.getDependencyComparator() instanceof AnnotationAwareOrderComparator)) {
-				beanFactory.setDependencyComparator(DefaultDependencyComparator.INSTANCE);
+				beanFactory.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 			}
 			if (!(beanFactory.getAutowireCandidateResolver() instanceof ContextAnnotationAutowireCandidateResolver)) {
 				beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
 			}
 		}
 
-		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<BeanDefinitionHolder>(4);
+		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(4);
 
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
@@ -293,6 +197,17 @@ public class AnnotationConfigUtils {
 			beanDefs.add(registerPostProcessor(registry, def, PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
+		if (!registry.containsBeanDefinition(EVENT_LISTENER_PROCESSOR_BEAN_NAME)) {
+			RootBeanDefinition def = new RootBeanDefinition(EventListenerMethodProcessor.class);
+			def.setSource(source);
+			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_PROCESSOR_BEAN_NAME));
+		}
+		if (!registry.containsBeanDefinition(EVENT_LISTENER_FACTORY_BEAN_NAME)) {
+			RootBeanDefinition def = new RootBeanDefinition(DefaultEventListenerFactory.class);
+			def.setSource(source);
+			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_FACTORY_BEAN_NAME));
+		}
+
 		return beanDefs;
 	}
 
@@ -324,7 +239,7 @@ public class AnnotationConfigUtils {
 		if (metadata.isAnnotated(Lazy.class.getName())) {
 			abd.setLazyInit(attributesFor(metadata, Lazy.class).getBoolean("value"));
 		}
-		else if (abd.getMetadata().isAnnotated(Lazy.class.getName())) {
+		else if (abd.getMetadata() != metadata && abd.getMetadata().isAnnotated(Lazy.class.getName())) {
 			abd.setLazyInit(attributesFor(abd.getMetadata(), Lazy.class).getBoolean("value"));
 		}
 
@@ -367,14 +282,15 @@ public class AnnotationConfigUtils {
 
 	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
 			Class<?> containerClass, Class<?> annotationClass) {
+
 		return attributesForRepeatable(metadata, containerClass.getName(), annotationClass.getName());
 	}
 
 	@SuppressWarnings("unchecked")
 	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
 			String containerClassName, String annotationClassName) {
-		Set<AnnotationAttributes> result = new LinkedHashSet<AnnotationAttributes>();
 
+		Set<AnnotationAttributes> result = new LinkedHashSet<>();
 		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName, false));
 
 		Map<String, Object> container = metadata.getAnnotationAttributes(containerClassName, false);
@@ -386,8 +302,7 @@ public class AnnotationConfigUtils {
 		return Collections.unmodifiableSet(result);
 	}
 
-	private static void addAttributesIfNotNull(Set<AnnotationAttributes> result,
-			Map<String, Object> attributes) {
+	private static void addAttributesIfNotNull(Set<AnnotationAttributes> result, Map<String, Object> attributes) {
 		if (attributes != null) {
 			result.add(AnnotationAttributes.fromMap(attributes));
 		}

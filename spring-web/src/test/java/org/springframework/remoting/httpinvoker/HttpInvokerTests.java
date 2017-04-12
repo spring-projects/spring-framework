@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInvocation;
 
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.junit.Test;
+
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -45,18 +44,24 @@ import org.springframework.remoting.support.DefaultRemoteInvocationExecutor;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationFactory;
 import org.springframework.remoting.support.RemoteInvocationResult;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
  * @since 09.08.2004
  */
-public class HttpInvokerTests extends TestCase {
+public class HttpInvokerTests {
 
-	public void testHttpInvokerProxyFactoryBeanAndServiceExporter() throws Throwable {
+	@Test
+	public void httpInvokerProxyFactoryBeanAndServiceExporter() throws Throwable {
 		doTestHttpInvokerProxyFactoryBeanAndServiceExporter(false);
 	}
 
-	public void testHttpInvokerProxyFactoryBeanAndServiceExporterWithExplicitClassLoader() throws Throwable {
+	@Test
+	public void httpInvokerProxyFactoryBeanAndServiceExporterWithExplicitClassLoader() throws Throwable {
 		doTestHttpInvokerProxyFactoryBeanAndServiceExporter(true);
 	}
 
@@ -126,7 +131,8 @@ public class HttpInvokerTests extends TestCase {
 		}
 	}
 
-	public void testHttpInvokerProxyFactoryBeanAndServiceExporterWithIOException() throws Exception {
+	@Test
+	public void httpInvokerProxyFactoryBeanAndServiceExporterWithIOException() throws Exception {
 		TestBean target = new TestBean("myname", 99);
 
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter();
@@ -158,7 +164,8 @@ public class HttpInvokerTests extends TestCase {
 		}
 	}
 
-	public void testHttpInvokerProxyFactoryBeanAndServiceExporterWithGzipCompression() throws Throwable {
+	@Test
+	public void httpInvokerProxyFactoryBeanAndServiceExporterWithGzipCompression() throws Throwable {
 		TestBean target = new TestBean("myname", 99);
 
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter() {
@@ -242,7 +249,8 @@ public class HttpInvokerTests extends TestCase {
 		}
 	}
 
-	public void testHttpInvokerProxyFactoryBeanAndServiceExporterWithWrappedInvocations() throws Throwable {
+	@Test
+	public void httpInvokerProxyFactoryBeanAndServiceExporterWithWrappedInvocations() throws Throwable {
 		TestBean target = new TestBean("myname", 99);
 
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter() {
@@ -321,7 +329,8 @@ public class HttpInvokerTests extends TestCase {
 		}
 	}
 
-	public void testHttpInvokerProxyFactoryBeanAndServiceExporterWithInvocationAttributes() throws Exception {
+	@Test
+	public void httpInvokerProxyFactoryBeanAndServiceExporterWithInvocationAttributes() throws Exception {
 		TestBean target = new TestBean("myname", 99);
 
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter();
@@ -383,7 +392,8 @@ public class HttpInvokerTests extends TestCase {
 		assertEquals(99, proxy.getAge());
 	}
 
-	public void testHttpInvokerProxyFactoryBeanAndServiceExporterWithCustomInvocationObject() throws Exception {
+	@Test
+	public void httpInvokerProxyFactoryBeanAndServiceExporterWithCustomInvocationObject() throws Exception {
 		TestBean target = new TestBean("myname", 99);
 
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter();
@@ -434,7 +444,8 @@ public class HttpInvokerTests extends TestCase {
 		assertEquals(99, proxy.getAge());
 	}
 
-	public void testHttpInvokerWithSpecialLocalMethods() throws Exception {
+	@Test
+	public void httpInvokerWithSpecialLocalMethods() throws Exception {
 		String serviceUrl = "http://myurl";
 		HttpInvokerProxyFactoryBean pfb = new HttpInvokerProxyFactoryBean();
 		pfb.setServiceInterface(ITestBean.class);

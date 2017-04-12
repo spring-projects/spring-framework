@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,11 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.SystemPropertyUtils;
 
@@ -38,7 +41,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	protected ConfigurableConversionService conversionService = new DefaultConversionService();
+	private volatile ConfigurableConversionService conversionService;
 
 	private PropertyPlaceholderHelper nonStrictHelper;
 
@@ -52,35 +55,83 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	private String valueSeparator = SystemPropertyUtils.VALUE_SEPARATOR;
 
-	private final Set<String> requiredProperties = new LinkedHashSet<String>();
+	private final Set<String> requiredProperties = new LinkedHashSet<>();
 
 
 	@Override
 	public ConfigurableConversionService getConversionService() {
-		return this.conversionService;
+		// Need to provide an independent DefaultConversionService, not the
+		// shared DefaultConversionService used by PropertySourcesPropertyResolver.
+		if (this.conversionService == null) {
+			synchronized (this) {
+				if (this.conversionService == null) {
+					this.conversionService = new DefaultConversionService();
+				}
+			}
+		}
+		return conversionService;
 	}
 
 	@Override
 	public void setConversionService(ConfigurableConversionService conversionService) {
+		Assert.notNull(conversionService, "ConversionService must not be null");
 		this.conversionService = conversionService;
 	}
 
+	/**
+	 * Set the prefix that placeholders replaced by this resolver must begin with.
+	 * <p>The default is "${".
+	 * @see org.springframework.util.SystemPropertyUtils#PLACEHOLDER_PREFIX
+	 */
 	@Override
-	public String getProperty(String key, String defaultValue) {
-		String value = getProperty(key);
-		return (value != null ? value : defaultValue);
+	public void setPlaceholderPrefix(String placeholderPrefix) {
+		Assert.notNull(placeholderPrefix, "'placeholderPrefix' must not be null");
+		this.placeholderPrefix = placeholderPrefix;
 	}
 
+	/**
+	 * Set the suffix that placeholders replaced by this resolver must end with.
+	 * <p>The default is "}".
+	 * @see org.springframework.util.SystemPropertyUtils#PLACEHOLDER_SUFFIX
+	 */
 	@Override
-	public <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
-		T value = getProperty(key, targetType);
-		return (value != null ? value : defaultValue);
+	public void setPlaceholderSuffix(String placeholderSuffix) {
+		Assert.notNull(placeholderSuffix, "'placeholderSuffix' must not be null");
+		this.placeholderSuffix = placeholderSuffix;
+	}
+
+	/**
+	 * Specify the separating character between the placeholders replaced by this
+	 * resolver and their associated default value, or {@code null} if no such
+	 * special character should be processed as a value separator.
+	 * <p>The default is ":".
+	 * @see org.springframework.util.SystemPropertyUtils#VALUE_SEPARATOR
+	 */
+	@Override
+	public void setValueSeparator(String valueSeparator) {
+		this.valueSeparator = valueSeparator;
+	}
+
+	/**
+	 * Set whether to throw an exception when encountering an unresolvable placeholder
+	 * nested within the value of a given property. A {@code false} value indicates strict
+	 * resolution, i.e. that an exception will be thrown. A {@code true} value indicates
+	 * that unresolvable nested placeholders should be passed through in their unresolved
+	 * ${...} form.
+	 * <p>The default is {@code false}.
+	 * @since 3.2
+	 */
+	@Override
+	public void setIgnoreUnresolvableNestedPlaceholders(boolean ignoreUnresolvableNestedPlaceholders) {
+		this.ignoreUnresolvableNestedPlaceholders = ignoreUnresolvableNestedPlaceholders;
 	}
 
 	@Override
 	public void setRequiredProperties(String... requiredProperties) {
-		for (String key : requiredProperties) {
-			this.requiredProperties.add(key);
+		if (requiredProperties != null) {
+			for (String key : requiredProperties) {
+				this.requiredProperties.add(key);
+			}
 		}
 	}
 
@@ -95,6 +146,28 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 		if (!ex.getMissingRequiredProperties().isEmpty()) {
 			throw ex;
 		}
+	}
+
+	@Override
+	public boolean containsProperty(String key) {
+		return (getProperty(key) != null);
+	}
+
+	@Override
+	public String getProperty(String key) {
+		return getProperty(key, String.class);
+	}
+
+	@Override
+	public String getProperty(String key, String defaultValue) {
+		String value = getProperty(key);
+		return (value != null ? value : defaultValue);
+	}
+
+	@Override
+	public <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
+		T value = getProperty(key, targetType);
+		return (value != null ? value : defaultValue);
 	}
 
 	@Override
@@ -115,33 +188,6 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 		return value;
 	}
 
-	/**
-	 * {@inheritDoc} The default is "${".
-	 * @see org.springframework.util.SystemPropertyUtils#PLACEHOLDER_PREFIX
-	 */
-	@Override
-	public void setPlaceholderPrefix(String placeholderPrefix) {
-		this.placeholderPrefix = placeholderPrefix;
-	}
-
-	/**
-	 * {@inheritDoc} The default is "}".
-	 * @see org.springframework.util.SystemPropertyUtils#PLACEHOLDER_SUFFIX
-	 */
-	@Override
-	public void setPlaceholderSuffix(String placeholderSuffix) {
-		this.placeholderSuffix = placeholderSuffix;
-	}
-
-	/**
-	 * {@inheritDoc} The default is ":".
-	 * @see org.springframework.util.SystemPropertyUtils#VALUE_SEPARATOR
-	 */
-	@Override
-	public void setValueSeparator(String valueSeparator) {
-		this.valueSeparator = valueSeparator;
-	}
-
 	@Override
 	public String resolvePlaceholders(String text) {
 		if (this.nonStrictHelper == null) {
@@ -159,16 +205,6 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>The default value for this implementation is {@code false}.
-	 * @since 3.2
-	 */
-	@Override
-	public void setIgnoreUnresolvableNestedPlaceholders(boolean ignoreUnresolvableNestedPlaceholders) {
-		this.ignoreUnresolvableNestedPlaceholders = ignoreUnresolvableNestedPlaceholders;
-	}
-
-	/**
 	 * Resolve placeholders within the given string, deferring to the value of
 	 * {@link #setIgnoreUnresolvableNestedPlaceholders} to determine whether any
 	 * unresolvable placeholders should raise an exception or be ignored.
@@ -181,8 +217,8 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	 * @see #setIgnoreUnresolvableNestedPlaceholders
 	 */
 	protected String resolveNestedPlaceholders(String value) {
-		return this.ignoreUnresolvableNestedPlaceholders ?
-				resolvePlaceholders(value) : resolveRequiredPlaceholders(value);
+		return (this.ignoreUnresolvableNestedPlaceholders ?
+				resolvePlaceholders(value) : resolveRequiredPlaceholders(value));
 	}
 
 	private PropertyPlaceholderHelper createPlaceholderHelper(boolean ignoreUnresolvablePlaceholders) {
@@ -198,6 +234,32 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 			}
 		});
 	}
+
+	/**
+	 * Convert the given value to the specified target type, if necessary.
+	 * @param value the original property value
+	 * @param targetType the specified target type for property retrieval
+	 * @return the converted value, or the original value if no conversion
+	 * is necessary
+	 * @since 4.3.5
+	 */
+	@SuppressWarnings("unchecked")
+	protected <T> T convertValueIfNecessary(Object value, Class<T> targetType) {
+		if (targetType == null) {
+			return (T) value;
+		}
+		ConversionService conversionServiceToUse = this.conversionService;
+		if (conversionServiceToUse == null) {
+			// Avoid initialization of shared DefaultConversionService if
+			// no standard type conversion is needed in the first place...
+			if (ClassUtils.isAssignableValue(targetType, value)) {
+				return (T) value;
+			}
+			conversionServiceToUse = DefaultConversionService.getSharedInstance();
+		}
+		return conversionServiceToUse.convert(value, targetType);
+	}
+
 
 	/**
 	 * Retrieve the specified property as a raw String,

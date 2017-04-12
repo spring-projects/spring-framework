@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 
 package org.springframework.jms.config;
-
 
 import javax.jms.ConnectionFactory;
 
@@ -53,9 +52,18 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 
 	private Boolean pubSubDomain;
 
+	private Boolean replyPubSubDomain;
+
 	private Boolean subscriptionDurable;
 
+	private Boolean subscriptionShared;
+
 	private String clientId;
+
+	private Integer phase;
+
+	private Boolean autoStartup;
+
 
 	/**
 	 * @see AbstractMessageListenerContainer#setConnectionFactory(ConnectionFactory)
@@ -107,10 +115,24 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	}
 
 	/**
+	 * @see AbstractMessageListenerContainer#setReplyPubSubDomain(boolean)
+	 */
+	public void setReplyPubSubDomain(Boolean replyPubSubDomain) {
+		this.replyPubSubDomain = replyPubSubDomain;
+	}
+
+	/**
 	 * @see AbstractMessageListenerContainer#setSubscriptionDurable(boolean)
 	 */
 	public void setSubscriptionDurable(Boolean subscriptionDurable) {
 		this.subscriptionDurable = subscriptionDurable;
+	}
+
+	/**
+	 * @see AbstractMessageListenerContainer#setSubscriptionShared(boolean)
+	 */
+	public void setSubscriptionShared(Boolean subscriptionShared) {
+		this.subscriptionShared = subscriptionShared;
 	}
 
 	/**
@@ -121,12 +143,21 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	}
 
 	/**
-	 * Create an empty container instance.
+	 * @see AbstractMessageListenerContainer#setPhase(int)
 	 */
-	protected abstract C createContainerInstance();
+	public void setPhase(int phase) {
+		this.phase = phase;
+	}
+
+	/**
+	 * @see AbstractMessageListenerContainer#setAutoStartup(boolean)
+	 */
+	public void setAutoStartup(boolean autoStartup) {
+		this.autoStartup = autoStartup;
+	}
 
 	@Override
-	public C createMessageListenerContainer(JmsListenerEndpoint endpoint) {
+	public C createListenerContainer(JmsListenerEndpoint endpoint) {
 		C instance = createContainerInstance();
 
 		if (this.connectionFactory != null) {
@@ -141,30 +172,44 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 		if (this.messageConverter != null) {
 			instance.setMessageConverter(this.messageConverter);
 		}
-
 		if (this.sessionTransacted != null) {
 			instance.setSessionTransacted(this.sessionTransacted);
 		}
 		if (this.sessionAcknowledgeMode != null) {
 			instance.setSessionAcknowledgeMode(this.sessionAcknowledgeMode);
 		}
-
 		if (this.pubSubDomain != null) {
 			instance.setPubSubDomain(this.pubSubDomain);
+		}
+		if (this.replyPubSubDomain != null) {
+			instance.setReplyPubSubDomain(this.replyPubSubDomain);
 		}
 		if (this.subscriptionDurable != null) {
 			instance.setSubscriptionDurable(this.subscriptionDurable);
 		}
+		if (this.subscriptionShared != null) {
+			instance.setSubscriptionShared(this.subscriptionShared);
+		}
 		if (this.clientId != null) {
 			instance.setClientId(this.clientId);
 		}
+		if (this.phase != null) {
+			instance.setPhase(this.phase);
+		}
+		if (this.autoStartup != null) {
+			instance.setAutoStartup(this.autoStartup);
+		}
 
-		endpoint.setupMessageContainer(instance);
-
+		endpoint.setupListenerContainer(instance);
 		initializeContainer(instance);
 
 		return instance;
 	}
+
+	/**
+	 * Create an empty container instance.
+	 */
+	protected abstract C createContainerInstance();
 
 	/**
 	 * Further initialize the specified container.
@@ -172,7 +217,6 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	 * configuration if necessary.
 	 */
 	protected void initializeContainer(C instance) {
-
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,14 @@
 
 package org.springframework.web.servlet.support;
 
+import static org.junit.Assert.*;
+
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -28,11 +32,9 @@ import org.junit.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.util.WebUtils;
 
-import static org.junit.Assert.*;
 
 /**
  * Test fixture for testing {@link AbstractFlashMapManager} methods.
@@ -47,6 +49,7 @@ public class FlashMapManagerTests {
 
 	private MockHttpServletResponse response;
 
+
 	@Before
 	public void setup() {
 		this.flashMapManager = new TestFlashMapManager();
@@ -54,13 +57,14 @@ public class FlashMapManagerTests {
 		this.response = new MockHttpServletResponse();
 	}
 
+
 	@Test
 	public void retrieveAndUpdateMatchByPath() {
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("key", "value");
 		flashMap.setTargetRequestPath("/path");
 
-		this.flashMapManager.setFlashMaps(flashMap);
+		this.flashMapManager.setFlashMaps(Arrays.asList(flashMap));
 
 		this.request.setRequestURI("/path");
 		FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(this.request, this.response);
@@ -76,7 +80,7 @@ public class FlashMapManagerTests {
 		flashMap.put("key", "value");
 		flashMap.setTargetRequestPath("/accounts");
 
-		this.flashMapManager.setFlashMaps(flashMap);
+		this.flashMapManager.setFlashMaps(Arrays.asList(flashMap));
 
 		this.request.setAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE, "/accounts");
 		this.request.setRequestURI("/mvc/accounts");
@@ -92,7 +96,7 @@ public class FlashMapManagerTests {
 		flashMap.put("key", "value");
 		flashMap.setTargetRequestPath("/path");
 
-		this.flashMapManager.setFlashMaps(flashMap);
+		this.flashMapManager.setFlashMaps(Arrays.asList(flashMap));
 
 		this.request.setRequestURI("/path/");
 		FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(this.request, this.response);
@@ -107,21 +111,21 @@ public class FlashMapManagerTests {
 		flashMap.put("key", "value");
 		flashMap.addTargetRequestParam("number", "one");
 
-		this.flashMapManager.setFlashMaps(flashMap);
+		this.flashMapManager.setFlashMaps(Arrays.asList(flashMap));
 
-		this.request.setParameter("number", (String) null);
+		this.request.setQueryString("number=");
 		FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(this.request, this.response);
 
 		assertNull(inputFlashMap);
 		assertEquals("FlashMap should not have been removed", 1, this.flashMapManager.getFlashMaps().size());
 
-		this.request.setParameter("number", "two");
+		this.request.setQueryString("number=two");
 		inputFlashMap = this.flashMapManager.retrieveAndUpdate(this.request, this.response);
 
 		assertNull(inputFlashMap);
 		assertEquals("FlashMap should not have been removed", 1, this.flashMapManager.getFlashMaps().size());
 
-		this.request.setParameter("number", "one");
+		this.request.setQueryString("number=one");
 		inputFlashMap = this.flashMapManager.retrieveAndUpdate(this.request, this.response);
 
 		assertEquals(flashMap, inputFlashMap);
@@ -137,15 +141,15 @@ public class FlashMapManagerTests {
 		flashMap.addTargetRequestParam("id", "1");
 		flashMap.addTargetRequestParam("id", "2");
 
-		this.flashMapManager.setFlashMaps(flashMap);
+		this.flashMapManager.setFlashMaps(Arrays.asList(flashMap));
 
-		this.request.setParameter("id", "1");
+		this.request.setQueryString("id=1");
 		FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(this.request, this.response);
 
 		assertNull(inputFlashMap);
 		assertEquals("FlashMap should not have been removed", 1, this.flashMapManager.getFlashMaps().size());
 
-		this.request.addParameter("id", "2");
+		this.request.setQueryString("id=1&id=2");
 		inputFlashMap = this.flashMapManager.retrieveAndUpdate(this.request, this.response);
 
 		assertEquals(flashMap, inputFlashMap);
@@ -165,7 +169,7 @@ public class FlashMapManagerTests {
 		flashMapTwo.put("key2", "value2");
 		flashMapTwo.setTargetRequestPath("/one/two");
 
-		this.flashMapManager.setFlashMaps(emptyFlashMap, flashMapOne, flashMapTwo);
+		this.flashMapManager.setFlashMaps(Arrays.asList(emptyFlashMap, flashMapOne, flashMapTwo));
 
 		this.request.setRequestURI("/one/two");
 		FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(this.request, this.response);
@@ -176,8 +180,8 @@ public class FlashMapManagerTests {
 
 	@Test
 	public void retrieveAndUpdateRemoveExpired() throws InterruptedException {
-		List<FlashMap> flashMaps = new ArrayList<FlashMap>();
-		for (int i=0; i < 5; i++) {
+		List<FlashMap> flashMaps = new ArrayList<>();
+		for (int i = 0; i < 5; i++) {
 			FlashMap expiredFlashMap = new FlashMap();
 			expiredFlashMap.startExpirationPeriod(-1);
 			flashMaps.add(expiredFlashMap);
@@ -264,20 +268,54 @@ public class FlashMapManagerTests {
 
 	@Test
 	public void saveOutputFlashMapDecodeParameters() throws Exception {
-		this.request.setCharacterEncoding("UTF-8");
 
 		FlashMap flashMap = new FlashMap();
-		flashMap.put("anyKey", "anyValue");
-
-		flashMap.addTargetRequestParam("key", "%D0%90%D0%90");
-		flashMap.addTargetRequestParam("key", "%D0%91%D0%91");
-		flashMap.addTargetRequestParam("key", "%D0%92%D0%92");
+		flashMap.put("key", "value");
+		flashMap.setTargetRequestPath("/path");
+		flashMap.addTargetRequestParam("param", "%D0%90%D0%90");
+		flashMap.addTargetRequestParam("param", "%D0%91%D0%91");
+		flashMap.addTargetRequestParam("param", "%D0%92%D0%92");
 		flashMap.addTargetRequestParam("%3A%2F%3F%23%5B%5D%40", "value");
+
+		this.request.setCharacterEncoding("UTF-8");
 		this.flashMapManager.saveOutputFlashMap(flashMap, this.request, this.response);
 
-		MultiValueMap<String,String> targetRequestParams = flashMap.getTargetRequestParams();
-		assertEquals(Arrays.asList("\u0410\u0410", "\u0411\u0411", "\u0412\u0412"), targetRequestParams.get("key"));
-		assertEquals(Arrays.asList("value"), targetRequestParams.get(":/?#[]@"));
+		MockHttpServletRequest requestAfterRedirect = new MockHttpServletRequest("GET", "/path");
+		requestAfterRedirect.setQueryString("param=%D0%90%D0%90&param=%D0%91%D0%91&param=%D0%92%D0%92&%3A%2F%3F%23%5B%5D%40=value");
+		requestAfterRedirect.addParameter("param", "\u0410\u0410");
+		requestAfterRedirect.addParameter("param", "\u0411\u0411");
+		requestAfterRedirect.addParameter("param", "\u0412\u0412");
+		requestAfterRedirect.addParameter(":/?#[]@", "value");
+
+		flashMap = this.flashMapManager.retrieveAndUpdate(requestAfterRedirect, new MockHttpServletResponse());
+		assertNotNull(flashMap);
+		assertEquals(1, flashMap.size());
+		assertEquals("value", flashMap.get("key"));
+	}
+
+	// SPR-12569
+
+	@Test
+	public void flashAttributesWithQueryParamsWithSpace() throws Exception {
+
+		String encodedValue = URLEncoder.encode("1 2", "UTF-8");
+
+		FlashMap flashMap = new FlashMap();
+		flashMap.put("key", "value");
+		flashMap.setTargetRequestPath("/path");
+		flashMap.addTargetRequestParam("param", encodedValue);
+
+		this.request.setCharacterEncoding("UTF-8");
+		this.flashMapManager.saveOutputFlashMap(flashMap, this.request, this.response);
+
+		MockHttpServletRequest requestAfterRedirect = new MockHttpServletRequest("GET", "/path");
+		requestAfterRedirect.setQueryString("param=" + encodedValue);
+		requestAfterRedirect.addParameter("param", "1 2");
+
+		flashMap = this.flashMapManager.retrieveAndUpdate(requestAfterRedirect, new MockHttpServletResponse());
+		assertNotNull(flashMap);
+		assertEquals(1, flashMap.size());
+		assertEquals("value", flashMap.get("key"));
 	}
 
 
@@ -285,17 +323,15 @@ public class FlashMapManagerTests {
 
 		private List<FlashMap> flashMaps;
 
+
+		public void setFlashMaps(List<FlashMap> flashMaps) {
+			this.flashMaps = new CopyOnWriteArrayList<>(flashMaps);
+		}
+
 		public List<FlashMap> getFlashMaps() {
 			return this.flashMaps;
 		}
 
-		public void setFlashMaps(FlashMap... flashMaps) {
-			setFlashMaps(Arrays.asList(flashMaps));
-		}
-
-		public void setFlashMaps(List<FlashMap> flashMaps) {
-			this.flashMaps = new CopyOnWriteArrayList<FlashMap>(flashMaps);
-		}
 
 		@Override
 		protected List<FlashMap> retrieveFlashMaps(HttpServletRequest request) {
@@ -303,8 +339,8 @@ public class FlashMapManagerTests {
 		}
 
 		@Override
-		protected void updateFlashMaps(List<FlashMap> flashMaps, HttpServletRequest request, HttpServletResponse response) {
-			this.flashMaps = flashMaps;
+		protected void updateFlashMaps(List<FlashMap> maps, HttpServletRequest request, HttpServletResponse response) {
+			this.flashMaps = maps;
 		}
 	}
 

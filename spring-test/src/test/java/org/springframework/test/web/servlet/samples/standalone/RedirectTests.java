@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,11 @@
 
 package org.springframework.test.web.servlet.samples.standalone;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
-
 import javax.validation.Valid;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,29 +31,47 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+
 /**
  * Redirect scenarios including saving and retrieving flash attributes.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  */
 public class RedirectTests {
 
 	private MockMvc mockMvc;
+
 
 	@Before
 	public void setup() {
 		this.mockMvc = standaloneSetup(new PersonController()).build();
 	}
 
+
 	@Test
 	public void save() throws Exception {
 		this.mockMvc.perform(post("/persons").param("name", "Andy"))
-			.andExpect(status().isMovedTemporarily())
+			.andExpect(status().isFound())
 			.andExpect(redirectedUrl("/persons/Joe"))
 			.andExpect(model().size(1))
 			.andExpect(model().attributeExists("name"))
 			.andExpect(flash().attributeCount(1))
 			.andExpect(flash().attribute("message", "success!"));
+	}
+
+	@Test
+	public void saveSpecial() throws Exception {
+		this.mockMvc.perform(post("/people").param("name", "Andy"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/persons/Joe"))
+				.andExpect(model().size(1))
+				.andExpect(model().attributeExists("name"))
+				.andExpect(flash().attributeCount(1))
+				.andExpect(flash().attribute("message", "success!"));
 	}
 
 	@Test
@@ -67,6 +82,16 @@ public class RedirectTests {
 			.andExpect(model().size(1))
 			.andExpect(model().attributeExists("person"))
 			.andExpect(flash().attributeCount(0));
+	}
+
+	@Test
+	public void saveSpecialWithErrors() throws Exception {
+		this.mockMvc.perform(post("/people"))
+				.andExpect(status().isOk())
+				.andExpect(forwardedUrl("persons/add"))
+				.andExpect(model().size(1))
+				.andExpect(model().attributeExists("person"))
+				.andExpect(flash().attributeCount(0));
 	}
 
 	@Test
@@ -99,5 +124,16 @@ public class RedirectTests {
 			redirectAttrs.addFlashAttribute("message", "success!");
 			return "redirect:/persons/{name}";
 		}
+
+		@RequestMapping(value="/people", method=RequestMethod.POST)
+		public Object saveSpecial(@Valid Person person, Errors errors, RedirectAttributes redirectAttrs) {
+			if (errors.hasErrors()) {
+				return "persons/add";
+			}
+			redirectAttrs.addAttribute("name", "Joe");
+			redirectAttrs.addFlashAttribute("message", "success!");
+			return new StringBuilder("redirect:").append("/persons").append("/{name}");
+		}
 	}
+
 }

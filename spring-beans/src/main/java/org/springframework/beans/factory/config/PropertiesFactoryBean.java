@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ public class PropertiesFactoryBean extends PropertiesLoaderSupport
 	 * <p>Invoked on initialization of this FactoryBean in case of a
 	 * shared singleton; else, on each {@link #getObject()} call.
 	 * @return the object returned by this factory
-	 * @throws IOException if an exception occured during properties loading
+	 * @throws IOException if an exception occurred during properties loading
 	 * @see #mergeProperties()
 	 */
 	protected Properties createProperties() throws IOException {

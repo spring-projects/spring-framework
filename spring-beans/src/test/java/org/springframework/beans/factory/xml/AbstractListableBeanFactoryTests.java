@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,14 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.junit.Test;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
@@ -39,7 +43,8 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	/**
 	 * Subclasses can override this.
 	 */
-	public void testCount() {
+	@Test
+	public void count() {
 		assertCount(13);
 	}
 
@@ -48,7 +53,7 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 		assertTrue("We should have " + count + " beans, not " + defnames.length, defnames.length == count);
 	}
 
-	public void assertTestBeanCount(int count) {
+	protected void assertTestBeanCount(int count) {
 		String[] defNames = getListableBeanFactory().getBeanNamesForType(TestBean.class, true, false);
 		assertTrue("We should have " + count + " beans for class org.springframework.tests.sample.beans.TestBean, not " +
 				defNames.length, defNames.length == count);
@@ -60,7 +65,8 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 				names.length == countIncludingFactoryBeans);
 	}
 
-	public void testGetDefinitionsForNoSuchClass() {
+	@Test
+	public void getDefinitionsForNoSuchClass() {
 		String[] defnames = getListableBeanFactory().getBeanNamesForType(String.class);
 		assertTrue("No string definitions", defnames.length == 0);
 	}
@@ -69,7 +75,8 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	 * Check that count refers to factory class, not bean class. (We don't know
 	 * what type factories may return, and it may even change over time.)
 	 */
-	public void testGetCountForFactoryClass() {
+	@Test
+	public void getCountForFactoryClass() {
 		assertTrue("Should have 2 factories, not " +
 				getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length,
 				getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length == 2);
@@ -79,7 +86,8 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 				getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length == 2);
 	}
 
-	public void testContainsBeanDefinition() {
+	@Test
+	public void containsBeanDefinition() {
 		assertTrue(getListableBeanFactory().containsBeanDefinition("rod"));
 		assertTrue(getListableBeanFactory().containsBeanDefinition("roderick"));
 	}

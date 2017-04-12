@@ -9,7 +9,10 @@
 		<mvc:argument-resolvers>
 			<bean class="org.springframework.web.servlet.config.TestWebArgumentResolver"/>
 			<bean class="org.springframework.web.servlet.config.TestHandlerMethodArgumentResolver"/>
+            <ref bean="customArgumentResolver" />
 		</mvc:argument-resolvers>
 	</mvc:annotation-driven>
+
+    <bean id="customArgumentResolver" class="org.springframework.web.servlet.config.TestHandlerMethodArgumentResolver"/>
 
 </beans>

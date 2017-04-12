@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,26 @@
 
 package org.springframework.beans.factory.parsing;
 
-import static org.junit.Assert.*;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
+import static org.springframework.tests.TestResourceUtils.*;
 
 /**
  * @author Rob Harrop
  * @author Chris Beams
  * @since 2.0
  */
-public final class CustomProblemReporterTests {
+public class CustomProblemReporterTests {
 
 	private static final Resource CONTEXT = qualifiedResource(CustomProblemReporterTests.class, "context.xml");
 
@@ -65,9 +66,9 @@ public final class CustomProblemReporterTests {
 
 	private static class CollatingProblemReporter implements ProblemReporter {
 
-		private List<Problem> errors = new ArrayList<Problem>();
+		private List<Problem> errors = new ArrayList<>();
 
-		private List<Problem> warnings = new ArrayList<Problem>();
+		private List<Problem> warnings = new ArrayList<>();
 
 
 		@Override

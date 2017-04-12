@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@ public class SqlParameter {
 
 	/** Used for types that are user-named like: STRUCT, DISTINCT, JAVA_OBJECT, named array types */
 	private String typeName;
-
 
 	/** The scale to apply in case of a NUMERIC or DECIMAL type, if any */
 	private Integer scale;
@@ -126,7 +125,7 @@ public class SqlParameter {
 
 
 	/**
-	 * Return the name of the parameter.
+	 * Return the name of the parameter, or {@code null} if anonymous.
 	 */
 	public String getName() {
 		return this.name;
@@ -177,8 +176,8 @@ public class SqlParameter {
 	 * Convert a list of JDBC types, as defined in {@code java.sql.Types},
 	 * to a List of SqlParameter objects as used in this package.
 	 */
-	public static List<SqlParameter> sqlTypesToAnonymousParameterList(int[] types) {
-		List<SqlParameter> result = new LinkedList<SqlParameter>();
+	public static List<SqlParameter> sqlTypesToAnonymousParameterList(int... types) {
+		List<SqlParameter> result = new LinkedList<>();
 		if (types != null) {
 			for (int type : types) {
 				result.add(new SqlParameter(type));

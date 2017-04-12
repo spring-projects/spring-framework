@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.jdbc.core.namedparam;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.jdbc.core.SqlParameterValue;
@@ -29,8 +29,8 @@ import org.springframework.util.Assert;
  * <p>This class is intended for passing in a simple Map of parameter values
  * to the methods of the {@link NamedParameterJdbcTemplate} class.
  *
- * <p>The {@code addValue} methods on this class will make adding several
- * values easier. The methods return a reference to the {@link MapSqlParameterSource}
+ * <p>The {@code addValue} methods on this class will make adding several values
+ * easier. The methods return a reference to the {@link MapSqlParameterSource}
  * itself, so you can chain several method calls together within a single statement.
  *
  * @author Thomas Risberg
@@ -43,7 +43,7 @@ import org.springframework.util.Assert;
  */
 public class MapSqlParameterSource extends AbstractSqlParameterSource {
 
-	private final Map<String, Object> values = new HashMap<String, Object>();
+	private final Map<String, Object> values = new LinkedHashMap<>();
 
 
 	/**

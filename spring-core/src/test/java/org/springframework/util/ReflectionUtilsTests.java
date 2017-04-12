@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.hamcrest.Matchers;
-
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -33,7 +32,7 @@ import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.tests.sample.objects.TestObject;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -67,8 +66,8 @@ public class ReflectionUtilsTests {
 
 	@Test
 	public void setField() {
-		final TestObjectSubclassWithNewField testBean = new TestObjectSubclassWithNewField();
-		final Field field = ReflectionUtils.findField(TestObjectSubclassWithNewField.class, "name", String.class);
+		TestObjectSubclassWithNewField testBean = new TestObjectSubclassWithNewField();
+		Field field = ReflectionUtils.findField(TestObjectSubclassWithNewField.class, "name", String.class);
 
 		ReflectionUtils.makeAccessible(field);
 
@@ -80,13 +79,6 @@ public class ReflectionUtilsTests {
 		assertNull(testBean.getName());
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void setFieldIllegal() {
-		final TestObjectSubclassWithNewField testBean = new TestObjectSubclassWithNewField();
-		final Field field = ReflectionUtils.findField(TestObjectSubclassWithNewField.class, "name", String.class);
-		ReflectionUtils.setField(field, testBean, "FooBar");
-	}
-
 	@Test
 	public void invokeMethod() throws Exception {
 		String rob = "Rob Harrop";
@@ -95,65 +87,50 @@ public class ReflectionUtilsTests {
 		bean.setName(rob);
 
 		Method getName = TestObject.class.getMethod("getName", (Class[]) null);
-		Method setName = TestObject.class.getMethod("setName", new Class[] { String.class });
+		Method setName = TestObject.class.getMethod("setName", String.class);
 
 		Object name = ReflectionUtils.invokeMethod(getName, bean);
 		assertEquals("Incorrect name returned", rob, name);
 
 		String juergen = "Juergen Hoeller";
-		ReflectionUtils.invokeMethod(setName, bean, new Object[] { juergen });
+		ReflectionUtils.invokeMethod(setName, bean, juergen);
 		assertEquals("Incorrect name set", juergen, bean.getName());
 	}
 
 	@Test
 	public void declaresException() throws Exception {
-		Method remoteExMethod = A.class.getDeclaredMethod("foo", new Class[] { Integer.class });
+		Method remoteExMethod = A.class.getDeclaredMethod("foo", Integer.class);
 		assertTrue(ReflectionUtils.declaresException(remoteExMethod, RemoteException.class));
 		assertTrue(ReflectionUtils.declaresException(remoteExMethod, ConnectException.class));
 		assertFalse(ReflectionUtils.declaresException(remoteExMethod, NoSuchMethodException.class));
 		assertFalse(ReflectionUtils.declaresException(remoteExMethod, Exception.class));
 
-		Method illegalExMethod = B.class.getDeclaredMethod("bar", new Class[] { String.class });
+		Method illegalExMethod = B.class.getDeclaredMethod("bar", String.class);
 		assertTrue(ReflectionUtils.declaresException(illegalExMethod, IllegalArgumentException.class));
 		assertTrue(ReflectionUtils.declaresException(illegalExMethod, NumberFormatException.class));
 		assertFalse(ReflectionUtils.declaresException(illegalExMethod, IllegalStateException.class));
 		assertFalse(ReflectionUtils.declaresException(illegalExMethod, Exception.class));
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void copySrcToDestinationOfIncorrectClass() {
 		TestObject src = new TestObject();
 		String dest = new String();
-		try {
-			ReflectionUtils.shallowCopyFieldState(src, dest);
-			fail();
-		} catch (IllegalArgumentException ex) {
-			// Ok
-		}
+		ReflectionUtils.shallowCopyFieldState(src, dest);
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void rejectsNullSrc() {
 		TestObject src = null;
 		String dest = new String();
-		try {
-			ReflectionUtils.shallowCopyFieldState(src, dest);
-			fail();
-		} catch (IllegalArgumentException ex) {
-			// Ok
-		}
+		ReflectionUtils.shallowCopyFieldState(src, dest);
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void rejectsNullDest() {
 		TestObject src = new TestObject();
 		String dest = null;
-		try {
-			ReflectionUtils.shallowCopyFieldState(src, dest);
-			fail();
-		} catch (IllegalArgumentException ex) {
-			// Ok
-		}
+		ReflectionUtils.shallowCopyFieldState(src, dest);
 	}
 
 	@Test
@@ -385,9 +362,9 @@ public class ReflectionUtilsTests {
 
 	private static class ListSavingMethodCallback implements ReflectionUtils.MethodCallback {
 
-		private List<String> methodNames = new LinkedList<String>();
+		private List<String> methodNames = new LinkedList<>();
 
-		private List<Method> methods = new LinkedList<Method>();
+		private List<Method> methods = new LinkedList<>();
 
 		@Override
 		public void doWith(Method m) throws IllegalArgumentException, IllegalAccessException {

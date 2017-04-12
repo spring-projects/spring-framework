@@ -18,6 +18,7 @@ package org.springframework.test.context.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
@@ -49,6 +50,8 @@ import org.springframework.util.ObjectUtils;
  * @see #processContextConfiguration(ContextConfigurationAttributes)
  * @see #detectDefaultConfigurationClasses(Class)
  * @see #loadBeanDefinitions(GenericApplicationContext, MergedContextConfiguration)
+ * @see GenericXmlContextLoader
+ * @see GenericGroovyXmlContextLoader
  */
 public class AnnotationConfigContextLoader extends AbstractGenericContextLoader {
 

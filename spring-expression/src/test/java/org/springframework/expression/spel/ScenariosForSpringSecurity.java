@@ -16,14 +16,11 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.lang.reflect.Method;
 import java.util.List;
 
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -38,6 +35,8 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.ReflectionHelper;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+
+import static org.junit.Assert.*;
 
 ///CLOVER:OFF
 /**
@@ -62,7 +61,8 @@ public class ScenariosForSpringSecurity extends AbstractExpressionTests {
 			value = expr.getValue(ctx,Boolean.class);
 			assertTrue(value);
 
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			ee.printStackTrace();
 			fail("Unexpected SpelException: " + ee.getMessage());
 		}
@@ -161,10 +161,10 @@ public class ScenariosForSpringSecurity extends AbstractExpressionTests {
 		public String[] getRoles() { return new String[]{"NONE"}; }
 
 		public boolean hasAnyRole(String... roles) {
-			if (roles==null) return true;
+			if (roles == null) return true;
 			String[] myRoles = getRoles();
-			for (int i=0;i<myRoles.length;i++) {
-				for (int j=0;j<roles.length;j++) {
+			for (int i = 0; i < myRoles.length; i++) {
+				for (int j = 0; j < roles.length; j++) {
 					if (myRoles[i].equals(roles[j])) return true;
 				}
 			}

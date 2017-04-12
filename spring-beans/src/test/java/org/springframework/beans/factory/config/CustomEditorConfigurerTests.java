@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.MutablePropertyValues;
@@ -36,12 +35,14 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 31.07.2004
  */
-public final class CustomEditorConfigurerTests {
+public class CustomEditorConfigurerTests {
 
 	@Test
 	public void testCustomEditorConfigurerWithPropertyEditorRegistrar() throws ParseException {
@@ -78,7 +79,7 @@ public final class CustomEditorConfigurerTests {
 	public void testCustomEditorConfigurerWithEditorAsClass() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
-		Map<Class<?>, Class<? extends PropertyEditor>> editors = new HashMap<Class<?>, Class<? extends PropertyEditor>>();
+		Map<Class<?>, Class<? extends PropertyEditor>> editors = new HashMap<>();
 		editors.put(Date.class, MyDateEditor.class);
 		cec.setCustomEditors(editors);
 		cec.postProcessBeanFactory(bf);
@@ -98,7 +99,7 @@ public final class CustomEditorConfigurerTests {
 	public void testCustomEditorConfigurerWithRequiredTypeArray() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
-		Map<Class<?>, Class<? extends PropertyEditor>> editors = new HashMap<Class<?>, Class<? extends PropertyEditor>>();
+		Map<Class<?>, Class<? extends PropertyEditor>> editors = new HashMap<>();
 		editors.put(String[].class, MyTestEditor.class);
 		cec.setCustomEditors(editors);
 		cec.postProcessBeanFactory(bf);

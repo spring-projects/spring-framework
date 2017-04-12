@@ -19,7 +19,6 @@ package org.springframework.web.servlet.tags.form;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-
 import javax.servlet.jsp.JspException;
 
 import org.springframework.beans.BeanWrapper;
@@ -150,7 +149,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 	/**
 	 * Set the HTML element used to enclose the
 	 * '{@code input type="checkbox/radio"}' tag.
-	 * <p>Defaults to an HTML '{@code &lt;span/&gt;}' tag.
+	 * <p>Defaults to an HTML '{@code <span/>}' tag.
 	 */
 	public void setElement(String element) {
 		Assert.hasText(element, "'element' cannot be null or blank");

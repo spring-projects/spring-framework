@@ -16,15 +16,16 @@
 
 package org.springframework.web.accept;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.http.MediaType;
 import org.springframework.web.context.request.NativeWebRequest;
+
+import static org.junit.Assert.*;
 
 /**
  * A test fixture with a test sub-class of AbstractMappingContentNegotiationStrategy.

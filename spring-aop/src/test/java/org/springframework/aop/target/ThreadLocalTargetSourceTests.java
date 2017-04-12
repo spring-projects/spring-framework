@@ -16,18 +16,17 @@
 
 package org.springframework.aop.target;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
-
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.SideEffectBean;
+
+import static org.junit.Assert.*;
+import static org.springframework.tests.TestResourceUtils.*;
 
 /**
  * @author Rod Johnson
@@ -155,7 +154,8 @@ public class ThreadLocalTargetSourceTests {
 		// try second time
 		try {
 			source.getTarget();
-		} catch(NullPointerException ex) {
+		}
+		catch (NullPointerException ex) {
 			fail("Should not throw NPE");
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.sql.Connection;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.junit.Test;
@@ -58,7 +57,7 @@ public class GenericStoredProcedureTests {
 		given(connection.prepareCall("{call " + "add_invoice" + "(?, ?, ?)}")).willReturn(callableStatement);
 
 		StoredProcedure adder = (StoredProcedure) bf.getBean("genericProcedure");
-		Map<String, Object> in = new HashMap<String, Object>(2);
+		Map<String, Object> in = new HashMap<>(2);
 		in.put("amount", 1106);
 		in.put("custid", 3);
 		Map<String, Object> out = adder.execute(in);

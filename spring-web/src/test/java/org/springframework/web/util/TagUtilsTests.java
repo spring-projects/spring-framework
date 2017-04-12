@@ -20,8 +20,9 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link TagUtils} class.
@@ -29,7 +30,7 @@ import org.junit.Test;
  * @author Alef Arendsen
  * @author Rick Evans
  */
-public final class TagUtilsTests {
+public class TagUtilsTests {
 
 	@Test
 	public void getScopeSunnyDay() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,19 @@
 
 package org.springframework.jms.config;
 
-import static org.junit.Assert.*;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
+
+import static org.junit.Assert.*;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class JmsListenerEndpointRegistrarTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	private final JmsListenerEndpointRegistrar registrar = new JmsListenerEndpointRegistrar();
 
@@ -40,11 +36,17 @@ public class JmsListenerEndpointRegistrarTests {
 
 	private final JmsListenerContainerTestFactory containerFactory = new JmsListenerContainerTestFactory();
 
+
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
+
+
 	@Before
 	public void setup() {
 		registrar.setEndpointRegistry(registry);
-		registrar.setApplicationContext(new StaticApplicationContext());
+		registrar.setBeanFactory(new StaticListableBeanFactory());
 	}
+
 
 	@Test
 	public void registerNullEndpoint() {
@@ -59,14 +61,24 @@ public class JmsListenerEndpointRegistrarTests {
 	}
 
 	@Test
+	public void registerEmptyEndpointId() {
+		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
+		endpoint.setId("");
+
+		thrown.expect(IllegalArgumentException.class);
+		registrar.registerEndpoint(endpoint, containerFactory);
+	}
+
+	@Test
 	public void registerNullContainerFactoryIsAllowed() throws Exception {
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 		endpoint.setId("some id");
 		registrar.setContainerFactory(containerFactory);
 		registrar.registerEndpoint(endpoint, null);
 		registrar.afterPropertiesSet();
-		assertNotNull("Container not created", registry.getContainer("some id"));
-		assertEquals(1, registry.getContainers().size());
+		assertNotNull("Container not created", registry.getListenerContainer("some id"));
+		assertEquals(1, registry.getListenerContainers().size());
+		assertEquals("some id", registry.getListenerContainerIds().iterator().next());
 	}
 
 	@Test
@@ -87,8 +99,9 @@ public class JmsListenerEndpointRegistrarTests {
 		registrar.setContainerFactory(containerFactory);
 		registrar.registerEndpoint(endpoint);
 		registrar.afterPropertiesSet();
-		assertNotNull("Container not created", registry.getContainer("myEndpoint"));
-		assertEquals(1, registry.getContainers().size());
+		assertNotNull("Container not created", registry.getListenerContainer("myEndpoint"));
+		assertEquals(1, registry.getListenerContainers().size());
+		assertEquals("myEndpoint", registry.getListenerContainerIds().iterator().next());
 	}
 
 }

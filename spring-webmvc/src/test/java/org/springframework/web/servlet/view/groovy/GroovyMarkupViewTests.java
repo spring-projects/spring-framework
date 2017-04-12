@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,16 @@
  */
 package org.springframework.web.servlet.view.groovy;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
-
-import java.io.IOException;
 import java.io.Reader;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.ServletContext;
 
 import groovy.text.Template;
 import groovy.text.TemplateEngine;
 import groovy.text.markup.MarkupTemplateEngine;
 import groovy.text.markup.TemplateConfiguration;
-import org.codehaus.groovy.control.CompilationFailedException;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +40,9 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+
 /**
  * @author Brian Clozel
  */
@@ -59,6 +54,7 @@ public class GroovyMarkupViewTests {
 
 	private ServletContext servletContext;
 
+
 	@Before
 	public void setup() {
 		this.webAppContext = mock(WebApplicationContext.class);
@@ -66,11 +62,12 @@ public class GroovyMarkupViewTests {
 		this.servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.webAppContext);
 	}
 
+
 	@Test
 	public void missingGroovyMarkupConfig() throws Exception {
 		GroovyMarkupView view = new GroovyMarkupView();
 		given(this.webAppContext.getBeansOfType(GroovyMarkupConfig.class, true, false))
-				.willReturn(new HashMap<String, GroovyMarkupConfig>());
+				.willReturn(new HashMap<>());
 
 		view.setUrl("sampleView");
 		try {
@@ -84,7 +81,6 @@ public class GroovyMarkupViewTests {
 
 	@Test
 	public void customTemplateEngine() throws Exception {
-
 		GroovyMarkupView view = new GroovyMarkupView();
 		view.setTemplateEngine(new TestTemplateEngine());
 		view.setApplicationContext(this.webAppContext);
@@ -97,9 +93,7 @@ public class GroovyMarkupViewTests {
 
 	@Test
 	public void detectTemplateEngine() throws Exception {
-
 		GroovyMarkupView view = new GroovyMarkupView();
-
 		view.setTemplateEngine(new TestTemplateEngine());
 		view.setApplicationContext(this.webAppContext);
 
@@ -111,35 +105,30 @@ public class GroovyMarkupViewTests {
 
 	@Test
 	public void checkResource() throws Exception {
-
 		GroovyMarkupView view = createViewWithUrl("test.tpl");
 		assertTrue(view.checkResource(Locale.US));
 	}
 
 	@Test
 	public void checkMissingResource() throws Exception {
-
 		GroovyMarkupView view = createViewWithUrl("missing.tpl");
 		assertFalse(view.checkResource(Locale.US));
 	}
 
 	@Test
 	public void checkI18nResource() throws Exception {
-
 		GroovyMarkupView view = createViewWithUrl("i18n.tpl");
 		assertTrue(view.checkResource(Locale.FRENCH));
 	}
 
 	@Test
 	public void checkI18nResourceMissingLocale() throws Exception {
-
 		GroovyMarkupView view = createViewWithUrl("i18n.tpl");
 		assertTrue(view.checkResource(Locale.CHINESE));
 	}
 
 	@Test
 	public void renderMarkupTemplate() throws Exception {
-
 		Map<String, Object> model = new HashMap<>();
 		model.put("name", "Spring");
 		MockHttpServletResponse response = renderViewWithModel("test.tpl", model, Locale.US);
@@ -157,7 +146,7 @@ public class GroovyMarkupViewTests {
 		assertEquals("<p>Include German</p><p>Hallo Spring</p>", response.getContentAsString());
 
 		response = renderViewWithModel("i18n.tpl", model, new Locale("es"));
-		assertEquals("<p>Include Default</p><p>¡hola Spring</p>", response.getContentAsString());
+		assertEquals("<p>Include Default</p><p>Hola Spring</p>", response.getContentAsString());
 	}
 
 	@Test
@@ -168,29 +157,29 @@ public class GroovyMarkupViewTests {
 				response.getContentAsString());
 	}
 
-	private MockHttpServletResponse renderViewWithModel(String viewUrl, Map<String, Object> model, Locale locale) throws Exception {
 
+	private MockHttpServletResponse renderViewWithModel(String viewUrl, Map<String, Object> model, Locale locale) throws Exception {
 		GroovyMarkupView view = createViewWithUrl(viewUrl);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.setPreferredLocales(Arrays.asList(locale));
+		request.addPreferredLocale(locale);
 		LocaleContextHolder.setLocale(locale);
 		view.renderMergedTemplateModel(model, request, response);
 		return response;
 	}
 
 	private GroovyMarkupView createViewWithUrl(String viewUrl) throws Exception {
-
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(GroovyMarkupConfiguration.class);
 		ctx.refresh();
 
 		GroovyMarkupView view = new GroovyMarkupView();
-		view.setApplicationContext(ctx);
 		view.setUrl(viewUrl);
+		view.setApplicationContext(ctx);
 		view.afterPropertiesSet();
 		return view;
 	}
+
 
 	public class TestTemplateEngine extends MarkupTemplateEngine {
 
@@ -199,10 +188,11 @@ public class GroovyMarkupViewTests {
 		}
 
 		@Override
-		public Template createTemplate(Reader reader) throws CompilationFailedException, ClassNotFoundException, IOException {
+		public Template createTemplate(Reader reader) {
 			return null;
 		}
 	}
+
 
 	@Configuration
 	static class GroovyMarkupConfiguration {
@@ -214,4 +204,5 @@ public class GroovyMarkupViewTests {
 			return configurer;
 		}
 	}
+
 }

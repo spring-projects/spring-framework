@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,12 +57,13 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.CollectionFactory;
-import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link org.aopalliance.intercept.MethodInterceptor} that routes calls to an
@@ -121,7 +122,7 @@ public class MBeanClientInterceptor
 
 	private Map<MethodCacheKey, MBeanOperationInfo> allowedOperations;
 
-	private final Map<Method, String[]> signatureCache = new HashMap<Method, String[]>();
+	private final Map<Method, String[]> signatureCache = new HashMap<>();
 
 	private final Object preparationMonitor = new Object();
 
@@ -263,20 +264,13 @@ public class MBeanClientInterceptor
 			}
 			this.invocationHandler = null;
 			if (this.useStrictCasing) {
-				// Use the JDK's own MBeanServerInvocationHandler,
-				// in particular for native MXBean support on Java 6.
-				if (JmxUtils.isMXBeanSupportAvailable()) {
-					this.invocationHandler =
-							new MBeanServerInvocationHandler(this.serverToUse, this.objectName,
-									(this.managementInterface != null && JMX.isMXBeanInterface(this.managementInterface)));
-				}
-				else {
-					this.invocationHandler = new MBeanServerInvocationHandler(this.serverToUse, this.objectName);
-				}
+				// Use the JDK's own MBeanServerInvocationHandler, in particular for native MXBean support.
+				this.invocationHandler = new MBeanServerInvocationHandler(this.serverToUse, this.objectName,
+						(this.managementInterface != null && JMX.isMXBeanInterface(this.managementInterface)));
 			}
 			else {
-				// Non-strict casing can only be achieved through custom
-				// invocation handling. Only partial MXBean support available!
+				// Non-strict casing can only be achieved through custom invocation handling.
+				// Only partial MXBean support available!
 				retrieveMBeanInfo();
 			}
 		}
@@ -291,13 +285,13 @@ public class MBeanClientInterceptor
 			MBeanInfo info = this.serverToUse.getMBeanInfo(this.objectName);
 
 			MBeanAttributeInfo[] attributeInfo = info.getAttributes();
-			this.allowedAttributes = new HashMap<String, MBeanAttributeInfo>(attributeInfo.length);
+			this.allowedAttributes = new HashMap<>(attributeInfo.length);
 			for (MBeanAttributeInfo infoEle : attributeInfo) {
 				this.allowedAttributes.put(infoEle.getName(), infoEle);
 			}
 
 			MBeanOperationInfo[] operationInfo = info.getOperations();
-			this.allowedOperations = new HashMap<MethodCacheKey, MBeanOperationInfo>(operationInfo.length);
+			this.allowedOperations = new HashMap<>(operationInfo.length);
 			for (MBeanOperationInfo infoEle : operationInfo) {
 				Class<?>[] paramTypes = JmxUtils.parameterInfoToTypes(infoEle.getSignature(), this.beanClassLoader);
 				this.allowedOperations.put(new MethodCacheKey(infoEle.getName(), paramTypes), infoEle);
@@ -552,7 +546,8 @@ public class MBeanClientInterceptor
 					return convertDataArrayToTargetArray(array, targetClass);
 				}
 				else if (Collection.class.isAssignableFrom(targetClass)) {
-					Class<?> elementType = GenericCollectionTypeResolver.getCollectionParameterType(parameter);
+					Class<?> elementType =
+							ResolvableType.forMethodParameter(parameter).asCollection().resolveGeneric();
 					if (elementType != null) {
 						return convertDataArrayToTargetCollection(array, targetClass, elementType);
 					}
@@ -568,7 +563,8 @@ public class MBeanClientInterceptor
 					return convertDataArrayToTargetArray(array, targetClass);
 				}
 				else if (Collection.class.isAssignableFrom(targetClass)) {
-					Class<?> elementType = GenericCollectionTypeResolver.getCollectionParameterType(parameter);
+					Class<?> elementType =
+							ResolvableType.forMethodParameter(parameter).asCollection().resolveGeneric();
 					if (elementType != null) {
 						return convertDataArrayToTargetCollection(array, targetClass, elementType);
 					}
@@ -611,11 +607,12 @@ public class MBeanClientInterceptor
 		this.connector.close();
 	}
 
+
 	/**
 	 * Simple wrapper class around a method name and its signature.
 	 * Used as the key when caching methods.
 	 */
-	private static class MethodCacheKey {
+	private static final class MethodCacheKey implements Comparable<MethodCacheKey> {
 
 		private final String name;
 
@@ -634,7 +631,7 @@ public class MBeanClientInterceptor
 
 		@Override
 		public boolean equals(Object other) {
-			if (other == this) {
+			if (this == other) {
 				return true;
 			}
 			MethodCacheKey otherKey = (MethodCacheKey) other;
@@ -644,6 +641,32 @@ public class MBeanClientInterceptor
 		@Override
 		public int hashCode() {
 			return this.name.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return this.name + "(" + StringUtils.arrayToCommaDelimitedString(this.parameterTypes) + ")";
+		}
+
+		@Override
+		public int compareTo(MethodCacheKey other) {
+			int result = this.name.compareTo(other.name);
+			if (result != 0) {
+				return result;
+			}
+			if (this.parameterTypes.length < other.parameterTypes.length) {
+				return -1;
+			}
+			if (this.parameterTypes.length > other.parameterTypes.length) {
+				return 1;
+			}
+			for (int i = 0; i < this.parameterTypes.length; i++) {
+				result = this.parameterTypes[i].getName().compareTo(other.parameterTypes[i].getName());
+				if (result != 0) {
+					return result;
+				}
+			}
+			return 0;
 		}
 	}
 

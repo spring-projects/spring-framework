@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.http.server;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
@@ -37,6 +36,7 @@ public class ServletServerHttpAsyncRequestControl implements ServerHttpAsyncRequ
 
 	private static long NO_TIMEOUT_VALUE = Long.MIN_VALUE;
 
+
 	private final ServletServerHttpRequest request;
 
 	private final ServletServerHttpResponse response;
@@ -52,7 +52,6 @@ public class ServletServerHttpAsyncRequestControl implements ServerHttpAsyncRequ
 	 * respectively.
 	 */
 	public ServletServerHttpAsyncRequestControl(ServletServerHttpRequest request, ServletServerHttpResponse response) {
-
 		Assert.notNull(request, "request is required");
 		Assert.notNull(response, "response is required");
 
@@ -69,7 +68,7 @@ public class ServletServerHttpAsyncRequestControl implements ServerHttpAsyncRequ
 
 	@Override
 	public boolean isStarted() {
-		return ((this.asyncContext != null) && this.request.getServletRequest().isAsyncStarted());
+		return (this.asyncContext != null && this.request.getServletRequest().isAsyncStarted());
 	}
 
 	@Override
@@ -84,9 +83,7 @@ public class ServletServerHttpAsyncRequestControl implements ServerHttpAsyncRequ
 
 	@Override
 	public void start(long timeout) {
-
 		Assert.state(!isCompleted(), "Async processing has already completed");
-
 		if (isStarted()) {
 			return;
 		}
@@ -109,6 +106,7 @@ public class ServletServerHttpAsyncRequestControl implements ServerHttpAsyncRequ
 		}
 	}
 
+
 	// ---------------------------------------------------------------------
 	// Implementation of AsyncListener methods
 	// ---------------------------------------------------------------------
@@ -120,12 +118,15 @@ public class ServletServerHttpAsyncRequestControl implements ServerHttpAsyncRequ
 	}
 
 	@Override
-	public void onStartAsync(AsyncEvent event) throws IOException { }
+	public void onStartAsync(AsyncEvent event) throws IOException {
+	}
 
 	@Override
-	public void onError(AsyncEvent event) throws IOException { }
+	public void onError(AsyncEvent event) throws IOException {
+	}
 
 	@Override
-	public void onTimeout(AsyncEvent event) throws IOException { }
+	public void onTimeout(AsyncEvent event) throws IOException {
+	}
 
 }

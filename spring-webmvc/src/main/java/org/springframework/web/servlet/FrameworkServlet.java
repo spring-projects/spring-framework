@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.servlet;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -41,11 +42,10 @@ import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.util.Assert;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ConfigurableWebEnvironment;
 import org.springframework.web.context.ContextLoader;
@@ -60,6 +60,7 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.ServletRequestHandledEvent;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
+import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.WebUtils;
 
@@ -177,8 +178,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	private String contextConfigLocation;
 
 	/** Actual ApplicationContextInitializer instances to apply to the context */
-	private final ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
-			new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
+	private final List<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
+			new ArrayList<>();
 
 	/** Comma-delimited ApplicationContextInitializer class names set through init param */
 	private String contextInitializerClasses;
@@ -359,13 +360,15 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	/**
 	 * Specify which {@link ApplicationContextInitializer} instances should be used
 	 * to initialize the application context used by this {@code FrameworkServlet}.
-	 * @see #configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext)
-	 * @see #applyInitializers(ConfigurableApplicationContext)
+	 * @see #configureAndRefreshWebApplicationContext
+	 * @see #applyInitializers
 	 */
 	@SuppressWarnings("unchecked")
-	public void setContextInitializers(ApplicationContextInitializer<? extends ConfigurableApplicationContext>... contextInitializers) {
-		for (ApplicationContextInitializer<? extends ConfigurableApplicationContext> initializer : contextInitializers) {
-			this.contextInitializers.add((ApplicationContextInitializer<ConfigurableApplicationContext>) initializer);
+	public void setContextInitializers(ApplicationContextInitializer<?>... initializers) {
+		if (initializers != null) {
+			for (ApplicationContextInitializer<?> initializer : initializers) {
+				this.contextInitializers.add((ApplicationContextInitializer<ConfigurableApplicationContext>) initializer);
+			}
 		}
 	}
 
@@ -418,9 +421,11 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	/**
 	 * Set whether this servlet should dispatch an HTTP OPTIONS request to
 	 * the {@link #doService} method.
-	 * <p>Default is "false", applying {@link javax.servlet.http.HttpServlet}'s
-	 * default behavior (i.e. enumerating all standard HTTP request methods
-	 * as a response to the OPTIONS request).
+	 * <p>Default in the {@code FrameworkServlet} is "false", applying
+	 * {@link javax.servlet.http.HttpServlet}'s default behavior (i.e.enumerating
+	 * all standard HTTP request methods as a response to the OPTIONS request).
+	 * Note however that as of 4.3 the {@code DispatcherServlet} sets this
+	 * property to "true" by default due to its built-in support for OPTIONS.
 	 * <p>Turn this flag on if you prefer OPTIONS requests to go through the
 	 * regular dispatching chain, just like other HTTP requests. This usually
 	 * means that your controllers will receive those requests; make sure
@@ -636,7 +641,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			else {
 				// Generate default id...
 				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
-						ObjectUtils.getDisplayString(getServletContext().getContextPath()) + "/" + getServletName());
+						ObjectUtils.getDisplayString(getServletContext().getContextPath()) + '/' + getServletName());
 			}
 		}
 
@@ -728,17 +733,17 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			Class<?> initializerClass = ClassUtils.forName(className, wac.getClassLoader());
 			Class<?> initializerContextClass =
 					GenericTypeResolver.resolveTypeArgument(initializerClass, ApplicationContextInitializer.class);
-			if (initializerContextClass != null) {
-				Assert.isAssignable(initializerContextClass, wac.getClass(), String.format(
-						"Could not add context initializer [%s] since its generic parameter [%s] " +
+			if (initializerContextClass != null && !initializerContextClass.isInstance(wac)) {
+				throw new ApplicationContextException(String.format(
+						"Could not apply context initializer [%s] since its generic parameter [%s] " +
 						"is not assignable from the type of application context used by this " +
-						"framework servlet [%s]: ", initializerClass.getName(), initializerContextClass.getName(),
+						"framework servlet: [%s]", initializerClass.getName(), initializerContextClass.getName(),
 						wac.getClass().getName()));
 			}
 			return BeanUtils.instantiateClass(initializerClass, ApplicationContextInitializer.class);
 		}
-		catch (Exception ex) {
-			throw new IllegalArgumentException(String.format("Could not instantiate class [%s] specified " +
+		catch (ClassNotFoundException ex) {
+			throw new ApplicationContextException(String.format("Could not load class [%s] specified " +
 					"via 'contextInitializerClasses' init-param", className), ex);
 		}
 	}
@@ -822,15 +827,14 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 
 	/**
-	 * Override the parent class implementation in order to intercept PATCH
-	 * requests.
+	 * Override the parent class implementation in order to intercept PATCH requests.
 	 */
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		String method = request.getMethod();
-		if (method.equalsIgnoreCase(RequestMethod.PATCH.name())) {
+		HttpMethod httpMethod = HttpMethod.resolve(request.getMethod());
+		if (HttpMethod.PATCH == httpMethod || httpMethod == null) {
 			processRequest(request, response);
 		}
 		else {
@@ -895,7 +899,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	protected void doOptions(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		if (this.dispatchOptionsRequest) {
+		if (this.dispatchOptionsRequest || CorsUtils.isPreFlightRequest(request)) {
 			processRequest(request, response);
 			if (response.containsHeader("Allow")) {
 				// Proper OPTIONS response coming from a handler - we're done.
@@ -903,13 +907,12 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			}
 		}
 
-		// Use response wrapper for Servlet 2.5 compatibility where
-		// the getHeader() method does not exist
+		// Use response wrapper in order to always add PATCH to the allowed methods
 		super.doOptions(request, new HttpServletResponseWrapper(response) {
 			@Override
 			public void setHeader(String name, String value) {
 				if ("Allow".equals(name)) {
-					value = (StringUtils.hasLength(value) ? value + ", " : "") + RequestMethod.PATCH.name();
+					value = (StringUtils.hasLength(value) ? value + ", " : "") + HttpMethod.PATCH.name();
 				}
 				super.setHeader(name, value);
 			}
@@ -993,7 +996,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 				}
 			}
 
-			publishRequestHandledEvent(request, startTime, failureCause);
+			publishRequestHandledEvent(request, response, startTime, failureCause);
 		}
 	}
 
@@ -1054,7 +1057,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		}
 	}
 
-	private void publishRequestHandledEvent(HttpServletRequest request, long startTime, Throwable failureCause) {
+	private void publishRequestHandledEvent(
+			HttpServletRequest request, HttpServletResponse response, long startTime, Throwable failureCause) {
+
 		if (this.publishEvents) {
 			// Whether or not we succeeded, publish an event.
 			long processingTime = System.currentTimeMillis() - startTime;
@@ -1063,7 +1068,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 							request.getRequestURI(), request.getRemoteAddr(),
 							request.getMethod(), getServletConfig().getServletName(),
 							WebUtils.getSessionId(request), getUsernameForRequest(request),
-							processingTime, failureCause));
+							processingTime, failureCause, response.getStatus()));
 		}
 	}
 

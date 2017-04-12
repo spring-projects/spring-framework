@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.util.ObjectUtils;
  * @since 3.0
  */
 @SuppressWarnings("serial")
-public final class ConversionFailedException extends ConversionException {
+public class ConversionFailedException extends ConversionException {
 
 	private final TypeDescriptor sourceType;
 
@@ -43,7 +43,8 @@ public final class ConversionFailedException extends ConversionException {
 	 * @param cause the cause of the conversion failure
 	 */
 	public ConversionFailedException(TypeDescriptor sourceType, TypeDescriptor targetType, Object value, Throwable cause) {
-		super("Failed to convert from type " + sourceType + " to type " + targetType + " for value '" + ObjectUtils.nullSafeToString(value) + "'", cause);
+		super("Failed to convert from type [" + sourceType + "] to type [" + targetType +
+				"] for value '" + ObjectUtils.nullSafeToString(value) + "'", cause);
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 		this.value = value;

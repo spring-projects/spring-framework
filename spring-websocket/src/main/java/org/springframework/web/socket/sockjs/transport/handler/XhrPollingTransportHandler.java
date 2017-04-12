@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import org.springframework.http.MediaType;
@@ -23,6 +24,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
+import org.springframework.web.socket.sockjs.transport.SockJsSession;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSession;
@@ -42,7 +44,7 @@ public class XhrPollingTransportHandler extends AbstractHttpSendingTransportHand
 
 	@Override
 	protected MediaType getContentType() {
-		return new MediaType("application", "javascript", UTF8_CHARSET);
+		return new MediaType("application", "javascript", StandardCharsets.UTF_8);
 	}
 
 	@Override
@@ -51,8 +53,13 @@ public class XhrPollingTransportHandler extends AbstractHttpSendingTransportHand
 	}
 
 	@Override
-	public PollingSockJsSession createSession(String sessionId, WebSocketHandler handler,
-			Map<String, Object> attributes) {
+	public boolean checkSessionType(SockJsSession session) {
+		return session instanceof PollingSockJsSession;
+	}
+
+	@Override
+	public PollingSockJsSession createSession(
+			String sessionId, WebSocketHandler handler, Map<String, Object> attributes) {
 
 		return new PollingSockJsSession(sessionId, getServiceConfig(), handler, attributes);
 	}

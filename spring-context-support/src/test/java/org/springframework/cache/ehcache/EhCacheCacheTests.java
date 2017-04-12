@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.cache.ehcache;
 
-import static org.junit.Assert.*;
-
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
@@ -26,9 +24,12 @@ import net.sf.ehcache.config.Configuration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.cache.AbstractCacheTests;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Costin Leau
@@ -65,27 +66,6 @@ public class EhCacheCacheTests extends AbstractCacheTests<EhCacheCache> {
 	protected Ehcache getNativeCache() {
 		return nativeCache;
 	}
-	@Test
-	public void testCachePut() throws Exception {
-		Object key = "enescu";
-		Object value = "george";
-
-		assertNull(cache.get(key));
-		assertNull(cache.get(key, String.class));
-		assertNull(cache.get(key, Object.class));
-
-		cache.put(key, value);
-		assertEquals(value, cache.get(key).get());
-		assertEquals(value, cache.get(key, String.class));
-		assertEquals(value, cache.get(key, Object.class));
-		assertEquals(value, cache.get(key, null));
-
-		cache.put(key, null);
-		assertNotNull(cache.get(key));
-		assertNull(cache.get(key).get());
-		assertNull(cache.get(key, String.class));
-		assertNull(cache.get(key, Object.class));
-	}
 
 	@Test
 	public void testExpiredElements() throws Exception {
@@ -102,4 +82,5 @@ public class EhCacheCacheTests extends AbstractCacheTests<EhCacheCache> {
 		Thread.sleep(5 * 1000);
 		assertNull(cache.get(key));
 	}
+
 }

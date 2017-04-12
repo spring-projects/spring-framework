@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,18 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.sun.syndication.feed.WireFeed;
-import com.sun.syndication.io.WireFeedOutput;
+import com.rometools.rome.feed.WireFeed;
+import com.rometools.rome.io.WireFeedOutput;
 
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.view.AbstractView;
 
 /**
- * Abstract base class for Atom and RSS Feed views, using java.net's
- * <a href="https://rome.dev.java.net/">ROME</a> package.
+ * Abstract base class for Atom and RSS Feed views, using the
+ * <a href="https://github.com/rometools/rome">ROME</a> package.
+ *
+ * <p>><b>NOTE: As of Spring 4.1, this is based on the {@code com.rometools}
+ * variant of ROME, version 1.5. Please upgrade your build dependency.</b>
  *
  * <p>Application-specific view classes will typically extend from either
  * {@link AbstractRssFeedView} or {@link AbstractAtomFeedView} instead of from this class.

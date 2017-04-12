@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet;
 
 import java.util.Locale;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -52,8 +51,8 @@ import javax.servlet.http.HttpServletResponse;
 public interface LocaleResolver {
 
 	/**
-	 * Resolve the current locale via the given request. Can return a default locale as
-	 * fallback in any case.
+	 * Resolve the current locale via the given request.
+	 * Can return a default locale as fallback in any case.
 	 * @param request the request to resolve the locale for
 	 * @return the current locale (never {@code null})
 	 */
@@ -64,8 +63,8 @@ public interface LocaleResolver {
 	 * @param request the request to be used for locale modification
 	 * @param response the response to be used for locale modification
 	 * @param locale the new locale, or {@code null} to clear the locale
-	 * @throws UnsupportedOperationException if the LocaleResolver implementation does not
-	 * support dynamic changing of the locale
+	 * @throws UnsupportedOperationException if the LocaleResolver
+	 * implementation does not support dynamic changing of the locale
 	 */
 	void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale);
 

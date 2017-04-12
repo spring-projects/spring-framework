@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<bean id="rod1" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
+		<constructor-arg><ref bean="kerry2"/></constructor-arg>
+	</bean>
+
+	<bean id="rod2" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
+		<constructor-arg index="1" ref="kerry1"/>
+		<constructor-arg index="0" ref="kerry2"/>
+		<constructor-arg><ref bean="other"/></constructor-arg>
+	</bean>
+
+	<bean id="rod2Accessor" class="org.springframework.tests.sample.beans.TestBean" lazy-init="true">
+		<property name="friends">
+			<list>
+				<ref bean="rod2"/>
+			</list>
+		</property>
+		<property name="touchy" value="."/>
+	</bean>
+
+	<bean id="rod3" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean"
+			autowire="constructor">
+		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
+		<constructor-arg index="1"><ref bean="kerry2"/></constructor-arg>
+	</bean>
+
+	<bean id="rod4" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean"
+			autowire="constructor">
+		<constructor-arg index="0">
+			<description>wife</description>
+			<ref bean="kerry2"/>
+		</constructor-arg>
+		<constructor-arg><ref bean="kerry2"/></constructor-arg>
+	</bean>
+
+	<bean id="rod5" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean">
+		<constructor-arg index="1">
+			<description>wife</description>
+			<ref bean="kerry1"/>
+		</constructor-arg>
+		<constructor-arg index="3">
+			<description>
+				magic int value: 99 is the number of aliens who can dance on the tip of pin
+			</description>
+			<value>99</value>
+		</constructor-arg>
+		<constructor-arg><ref bean="other"/></constructor-arg>
+		<constructor-arg index="4"><value>myname</value></constructor-arg>
+		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
+	</bean>
+
+	<bean id="rod6" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean"
+			init-method="init" destroy-method="destroy">
+		<constructor-arg index="1"><ref bean="kerry1"/></constructor-arg>
+		<constructor-arg><ref bean="other"/></constructor-arg>
+		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
+	</bean>
+
+	<bean id="rod7" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean" scope="prototype">
+		<constructor-arg index="1"><ref bean="kerry1"/></constructor-arg>
+		<constructor-arg><ref bean="other"/></constructor-arg>
+		<constructor-arg><ref bean="other"/></constructor-arg>
+		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
+	</bean>
+
+	<bean id="rod8" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean" scope="prototype">
+		<constructor-arg index="2"><ref bean="other"/></constructor-arg>
+		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
+	</bean>
+
+	<bean id="rod9" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" scope="prototype">
+		<constructor-arg type="int"><value>99</value></constructor-arg>
+	</bean>
+
+	<bean id="rod10" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" scope="prototype">
+		<constructor-arg index="0" type="java.lang.String"><null/></constructor-arg>
+	</bean>
+
+	<bean id="rod11" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" scope="prototype">
+		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
+	</bean>
+
+	<bean id="rod12" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
+		<constructor-arg index="0"><ref bean="kerry1"/></constructor-arg>
+	</bean>
+
+	<bean id="rod13" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
+		<constructor-arg index="0"><ref bean="kerry1"/></constructor-arg>
+		<constructor-arg index="1"><ref bean="kerry2"/></constructor-arg>
+	</bean>
+
+	<bean id="rod14" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
+		<constructor-arg><ref bean="kerry1"/></constructor-arg>
+		<constructor-arg><ref bean="kerry2"/></constructor-arg>
+	</bean>
+
+	<bean id="rod15" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
+		<constructor-arg><ref bean="kerry2"/></constructor-arg>
+		<constructor-arg><ref bean="kerry1"/></constructor-arg>
+	</bean>
+
+	<bean id="rod16" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
+		<constructor-arg name="otherSpouse"><ref bean="kerry1"/></constructor-arg>
+		<constructor-arg name="spouse"><ref bean="kerry2"/></constructor-arg>
+		<constructor-arg><value>29</value></constructor-arg>
+	</bean>
+
+	<bean id="rod17" parent="rod16">
+		<constructor-arg name="otherSpouse"><ref bean="kerry2"/></constructor-arg>
+		<constructor-arg name="spouse"><ref bean="kerry1"/></constructor-arg>
+	</bean>
+
+	<bean id="rod18" class="org.springframework.beans.factory.xml.SimpleConstructorArgBean" scope="prototype">
+	</bean>
+
+	<bean id="kerry1" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name">
+			<value>Kerry1</value>
+		</property>
+		<property name="age">
+			<value>33</value>
+		</property>
+	</bean>
+
+	<bean id="kerry2" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="name">
+			<value>Kerry2</value>
+		</property>
+		<property name="age">
+			<value>32</value>
+		</property>
+	</bean>
+
+	<bean id="other" class="org.springframework.tests.sample.beans.IndexedTestBean"/>
+
+	<bean id="file" class="java.io.File">
+		<constructor-arg><value>/test</value></constructor-arg>
+	</bean>
+
+	<bean id="beanWithBoolean" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" scope="prototype">
+		<constructor-arg type="boolean" value="true"/>
+	</bean>
+
+	<bean id="beanWithBoolean2" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" scope="prototype">
+		<constructor-arg value="true"/>
+	</bean>
+
+	<bean id="beanWithBooleanAndString" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" scope="prototype">
+		<constructor-arg type="boolean"><value>true</value></constructor-arg>
+		<constructor-arg><value>A String</value></constructor-arg>
+	</bean>
+
+	<bean id="beanWithBooleanAndString2" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" scope="prototype">
+		<constructor-arg value="A String"/>
+		<constructor-arg value="true"/>
+	</bean>
+
+	<bean id="Boolean" class="java.lang.Boolean">
+		<constructor-arg value="false"/>
+	</bean>
+
+	<bean id="nan" class="java.lang.Double" factory-method="valueOf">
+		<constructor-arg value="NaN" type="double"/>
+	</bean>
+
+	<bean id="beanWithDoubleBoolean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoubleBooleanConstructorBean" autowire="constructor" scope="prototype" factory-method="create">
+		<constructor-arg type="java.lang.Boolean"><value>true</value></constructor-arg>
+	</bean>
+
+	<bean id="beanWithDoubleBooleanAndIndex" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoubleBooleanConstructorBean" autowire="constructor" scope="prototype">
+		<constructor-arg index="1"><value>true</value></constructor-arg>
+	</bean>
+
+	<bean id="beanWithDoubleBooleanNoType" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoubleBooleanConstructorBean" scope="prototype">
+		<constructor-arg index="0"><value>false</value></constructor-arg>
+		<constructor-arg index="1"><value>true</value></constructor-arg>
+	</bean>
+
+	<bean id="beanWithDoubleBooleanNoTypeFactoryMethod" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoubleBooleanConstructorBean" scope="prototype" factory-method="create">
+		<constructor-arg index="0"><value>false</value></constructor-arg>
+		<constructor-arg index="1"><value>true</value></constructor-arg>
+	</bean>
+
+	<bean id="lenientDependencyTestBean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$LenientDependencyTestBean" scope="prototype">
+		<constructor-arg>
+			<bean class="org.springframework.tests.sample.beans.DerivedTestBean"/>
+		</constructor-arg>
+	</bean>
+
+	<bean id="lenientDependencyTestBeanFactoryMethod" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$LenientDependencyTestBean" scope="prototype" factory-method="create">
+		<constructor-arg>
+			<bean class="org.springframework.tests.sample.beans.DerivedTestBean"/>
+		</constructor-arg>
+	</bean>
+
+	<bean id="string" class="java.lang.String" autowire-candidate="false">
+		<constructor-arg><value type="java.lang.String">test</value></constructor-arg>
+	</bean>
+
+	<bean id="stringConstructor" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$StringConstructorTestBean" scope="prototype">
+		<constructor-arg value="test"/>
+	</bean>
+
+	<bean id="constructorArray" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$ConstructorArrayTestBean" scope="prototype">
+		<constructor-arg type="int[]">
+			<array value-type="int">
+				<value>1</value>
+			</array>
+		</constructor-arg>
+	</bean>
+
+	<bean id="indexedConstructorArray" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$ConstructorArrayTestBean" scope="prototype">
+		<constructor-arg index="0" type="int[]">
+			<array value-type="int">
+				<value>1</value>
+			</array>
+		</constructor-arg>
+	</bean>
+
+	<bean id="constructorArrayNoType" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$ConstructorArrayTestBean" scope="prototype">
+		<constructor-arg>
+			<array value-type="java.lang.String"/>
+		</constructor-arg>
+	</bean>
+
+	<bean id="constructorUnresolvableName" class="java.util.concurrent.atomic.AtomicInteger" scope="prototype">
+		<constructor-arg name="initialValue" value="1"/>
+	</bean>
+
+	<bean id="constructorUnresolvableNameWithIndex" class="java.util.concurrent.atomic.AtomicInteger" scope="prototype">
+		<constructor-arg index="0" name="initialValue" value="1"/>
+	</bean>
+
+</beans>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
 /**
- * Stores registrations of view controllers. A view controller does nothing more than return a specified
- * view name. It saves you from having to write a controller when you want to forward the request straight
- * through to a view such as a JSP.
+ * Assists with the registration of simple automated controllers pre-configured
+ * with status code and/or a view.
  *
  * @author Rossen Stoyanchev
  * @author Keith Donald
@@ -36,40 +36,88 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
  */
 public class ViewControllerRegistry {
 
-	private final List<ViewControllerRegistration> registrations = new ArrayList<ViewControllerRegistration>();
+	private final List<ViewControllerRegistration> registrations = new ArrayList<>(4);
+
+	private final List<RedirectViewControllerRegistration> redirectRegistrations =
+			new ArrayList<>(10);
 
 	private int order = 1;
 
+	private ApplicationContext applicationContext;
+
+
+	/**
+	 * Map a view controller to the given URL path (or pattern) in order to render
+	 * a response with a pre-configured status code and view.
+	 * <p>Patterns like {@code "/admin/**"} or {@code "/articles/{articlename:\\w+}"}
+	 * are allowed. See {@link org.springframework.util.AntPathMatcher} for more details on the
+	 * syntax.
+	 */
 	public ViewControllerRegistration addViewController(String urlPath) {
 		ViewControllerRegistration registration = new ViewControllerRegistration(urlPath);
-		registrations.add(registration);
+		registration.setApplicationContext(this.applicationContext);
+		this.registrations.add(registration);
 		return registration;
 	}
 
 	/**
-	 * Specify the order to use for ViewControllers mappings relative to other {@link HandlerMapping}s
-	 * configured in the Spring MVC application context. The default value for view controllers is 1,
-	 * which is 1 higher than the value used for annotated controllers.
+	 * Map a view controller to the given URL path (or pattern) in order to redirect
+	 * to another URL. By default the redirect URL is expected to be relative to
+	 * the current ServletContext, i.e. as relative to the web application root.
+	 * @since 4.1
+	 */
+	public RedirectViewControllerRegistration addRedirectViewController(String urlPath, String redirectUrl) {
+		RedirectViewControllerRegistration registration = new RedirectViewControllerRegistration(urlPath, redirectUrl);
+		registration.setApplicationContext(this.applicationContext);
+		this.redirectRegistrations.add(registration);
+		return registration;
+	}
+
+	/**
+	 * Map a simple controller to the given URL path (or pattern) in order to
+	 * set the response status to the given code without rendering a body.
+	 * @since 4.1
+	 */
+	public void addStatusController(String urlPath, HttpStatus statusCode) {
+		ViewControllerRegistration registration = new ViewControllerRegistration(urlPath);
+		registration.setApplicationContext(this.applicationContext);
+		registration.setStatusCode(statusCode);
+		registration.getViewController().setStatusOnly(true);
+		this.registrations.add(registration);
+	}
+
+	/**
+	 * Specify the order to use for the {@code HandlerMapping} used to map view
+	 * controllers relative to other handler mappings configured in Spring MVC.
+	 * <p>By default this is set to 1, i.e. right after annotated controllers,
+	 * which are ordered at 0.
 	 */
 	public void setOrder(int order) {
 		this.order = order;
 	}
 
+	protected void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
+
 	/**
-	 * Returns a handler mapping with the mapped ViewControllers; or {@code null} in case of no registrations.
+	 * Return the {@code HandlerMapping} that contains the registered view
+	 * controller mappings, or {@code null} for no registrations.
 	 */
 	protected AbstractHandlerMapping getHandlerMapping() {
-		if (registrations.isEmpty()) {
+		if (this.registrations.isEmpty() && this.redirectRegistrations.isEmpty()) {
 			return null;
 		}
-
-		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
-		for (ViewControllerRegistration registration : registrations) {
+		Map<String, Object> urlMap = new LinkedHashMap<>();
+		for (ViewControllerRegistration registration : this.registrations) {
 			urlMap.put(registration.getUrlPath(), registration.getViewController());
 		}
-
+		for (RedirectViewControllerRegistration registration : this.redirectRegistrations) {
+			urlMap.put(registration.getUrlPath(), registration.getViewController());
+		}
 		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
-		handlerMapping.setOrder(order);
+		handlerMapping.setOrder(this.order);
 		handlerMapping.setUrlMap(urlMap);
 		return handlerMapping;
 	}

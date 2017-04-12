@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,8 +68,8 @@ public abstract class WebApplicationContextUtils {
 
 
 	/**
-	 * Find the root WebApplicationContext for this web application, which is
-	 * typically loaded via {@link org.springframework.web.context.ContextLoaderListener}.
+	 * Find the root {@code WebApplicationContext} for this web app, typically
+	 * loaded via {@link org.springframework.web.context.ContextLoaderListener}.
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param sc ServletContext to find the web application context for
@@ -77,9 +77,7 @@ public abstract class WebApplicationContextUtils {
 	 * @throws IllegalStateException if the root WebApplicationContext could not be found
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
-	public static WebApplicationContext getRequiredWebApplicationContext(ServletContext sc)
-			throws IllegalStateException {
-
+	public static WebApplicationContext getRequiredWebApplicationContext(ServletContext sc) throws IllegalStateException {
 		WebApplicationContext wac = getWebApplicationContext(sc);
 		if (wac == null) {
 			throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
@@ -88,8 +86,8 @@ public abstract class WebApplicationContextUtils {
 	}
 
 	/**
-	 * Find the root WebApplicationContext for this web application, which is
-	 * typically loaded via {@link org.springframework.web.context.ContextLoaderListener}.
+	 * Find the root {@code WebApplicationContext} for this web app, typically
+	 * loaded via {@link org.springframework.web.context.ContextLoaderListener}.
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param sc ServletContext to find the web application context for
@@ -101,7 +99,7 @@ public abstract class WebApplicationContextUtils {
 	}
 
 	/**
-	 * Find a custom WebApplicationContext for this web application.
+	 * Find a custom {@code WebApplicationContext} for this web app.
 	 * @param sc ServletContext to find the web application context for
 	 * @param attrName the name of the ServletContext attribute to look for
 	 * @return the desired WebApplicationContext for this web app, or {@code null} if none
@@ -127,6 +125,40 @@ public abstract class WebApplicationContextUtils {
 		return (WebApplicationContext) attr;
 	}
 
+	/**
+	 * Find a unique {@code WebApplicationContext} for this web app: either the
+	 * root web app context (preferred) or a unique {@code WebApplicationContext}
+	 * among the registered {@code ServletContext} attributes (typically coming
+	 * from a single {@code DispatcherServlet} in the current web application).
+	 * <p>Note that {@code DispatcherServlet}'s exposure of its context can be
+	 * controlled through its {@code publishContext} property, which is {@code true}
+	 * by default but can be selectively switched to only publish a single context
+	 * despite multiple {@code DispatcherServlet} registrations in the web app.
+	 * @param sc ServletContext to find the web application context for
+	 * @return the desired WebApplicationContext for this web app, or {@code null} if none
+	 * @since 4.2
+	 * @see #getWebApplicationContext(ServletContext)
+	 * @see ServletContext#getAttributeNames()
+	 */
+	public static WebApplicationContext findWebApplicationContext(ServletContext sc) {
+		WebApplicationContext wac = getWebApplicationContext(sc);
+		if (wac == null) {
+			Enumeration<String> attrNames = sc.getAttributeNames();
+			while (attrNames.hasMoreElements()) {
+				String attrName = attrNames.nextElement();
+				Object attrValue = sc.getAttribute(attrName);
+				if (attrValue instanceof WebApplicationContext) {
+					if (wac != null) {
+						throw new IllegalStateException("No unique WebApplicationContext found: more than one " +
+								"DispatcherServlet registered with publishContext=true?");
+					}
+					wac = (WebApplicationContext) attrValue;
+				}
+			}
+		}
+		return wac;
+	}
+
 
 	/**
 	 * Register web-specific scopes ("request", "session", "globalSession")
@@ -145,8 +177,7 @@ public abstract class WebApplicationContextUtils {
 	 */
 	public static void registerWebApplicationScopes(ConfigurableListableBeanFactory beanFactory, ServletContext sc) {
 		beanFactory.registerScope(WebApplicationContext.SCOPE_REQUEST, new RequestScope());
-		beanFactory.registerScope(WebApplicationContext.SCOPE_SESSION, new SessionScope(false));
-		beanFactory.registerScope(WebApplicationContext.SCOPE_GLOBAL_SESSION, new SessionScope(true));
+		beanFactory.registerScope(WebApplicationContext.SCOPE_SESSION, new SessionScope());
 		if (sc != null) {
 			ServletContextScope appScope = new ServletContextScope(sc);
 			beanFactory.registerScope(WebApplicationContext.SCOPE_APPLICATION, appScope);
@@ -177,34 +208,34 @@ public abstract class WebApplicationContextUtils {
 	 * Register web-specific environment beans ("contextParameters", "contextAttributes")
 	 * with the given BeanFactory, as used by the WebApplicationContext.
 	 * @param bf the BeanFactory to configure
-	 * @param sc the ServletContext that we're running within
-	 * @param config the ServletConfig of the containing Portlet
+	 * @param servletContext the ServletContext that we're running within
+	 * @param servletConfig the ServletConfig of the containing Portlet
 	 */
 	public static void registerEnvironmentBeans(
-			ConfigurableListableBeanFactory bf, ServletContext sc, ServletConfig config) {
+			ConfigurableListableBeanFactory bf, ServletContext servletContext, ServletConfig servletConfig) {
 
-		if (sc != null && !bf.containsBean(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME)) {
-			bf.registerSingleton(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME, sc);
+		if (servletContext != null && !bf.containsBean(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME)) {
+			bf.registerSingleton(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME, servletContext);
 		}
 
-		if (config != null && !bf.containsBean(ConfigurableWebApplicationContext.SERVLET_CONFIG_BEAN_NAME)) {
-			bf.registerSingleton(ConfigurableWebApplicationContext.SERVLET_CONFIG_BEAN_NAME, config);
+		if (servletConfig != null && !bf.containsBean(ConfigurableWebApplicationContext.SERVLET_CONFIG_BEAN_NAME)) {
+			bf.registerSingleton(ConfigurableWebApplicationContext.SERVLET_CONFIG_BEAN_NAME, servletConfig);
 		}
 
 		if (!bf.containsBean(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME)) {
-			Map<String, String> parameterMap = new HashMap<String, String>();
-			if (sc != null) {
-				Enumeration<?> paramNameEnum = sc.getInitParameterNames();
+			Map<String, String> parameterMap = new HashMap<>();
+			if (servletContext != null) {
+				Enumeration<?> paramNameEnum = servletContext.getInitParameterNames();
 				while (paramNameEnum.hasMoreElements()) {
 					String paramName = (String) paramNameEnum.nextElement();
-					parameterMap.put(paramName, sc.getInitParameter(paramName));
+					parameterMap.put(paramName, servletContext.getInitParameter(paramName));
 				}
 			}
-			if (config != null) {
-				Enumeration<?> paramNameEnum = config.getInitParameterNames();
+			if (servletConfig != null) {
+				Enumeration<?> paramNameEnum = servletConfig.getInitParameterNames();
 				while (paramNameEnum.hasMoreElements()) {
 					String paramName = (String) paramNameEnum.nextElement();
-					parameterMap.put(paramName, config.getInitParameter(paramName));
+					parameterMap.put(paramName, servletConfig.getInitParameter(paramName));
 				}
 			}
 			bf.registerSingleton(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME,
@@ -212,12 +243,12 @@ public abstract class WebApplicationContextUtils {
 		}
 
 		if (!bf.containsBean(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME)) {
-			Map<String, Object> attributeMap = new HashMap<String, Object>();
-			if (sc != null) {
-				Enumeration<?> attrNameEnum = sc.getAttributeNames();
+			Map<String, Object> attributeMap = new HashMap<>();
+			if (servletContext != null) {
+				Enumeration<?> attrNameEnum = servletContext.getAttributeNames();
 				while (attrNameEnum.hasMoreElements()) {
 					String attrName = (String) attrNameEnum.nextElement();
-					attributeMap.put(attrName, sc.getAttribute(attrName));
+					attributeMap.put(attrName, servletContext.getAttribute(attrName));
 				}
 			}
 			bf.registerSingleton(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME,
@@ -231,9 +262,7 @@ public abstract class WebApplicationContextUtils {
 	 * {@link ServletConfig} parameter.
 	 * @see #initServletPropertySources(MutablePropertySources, ServletContext, ServletConfig)
 	 */
-	public static void initServletPropertySources(
-			MutablePropertySources propertySources, ServletContext servletContext) {
-
+	public static void initServletPropertySources(MutablePropertySources propertySources, ServletContext servletContext) {
 		initServletPropertySources(propertySources, servletContext, null);
 	}
 
@@ -258,7 +287,7 @@ public abstract class WebApplicationContextUtils {
 	public static void initServletPropertySources(
 			MutablePropertySources propertySources, ServletContext servletContext, ServletConfig servletConfig) {
 
-		Assert.notNull(propertySources, "propertySources must not be null");
+		Assert.notNull(propertySources, "'propertySources' must not be null");
 		if (servletContext != null && propertySources.contains(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME) &&
 				propertySources.get(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME) instanceof StubPropertySource) {
 			propertySources.replace(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME,

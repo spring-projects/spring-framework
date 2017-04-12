@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,10 +52,6 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 
 	private Boolean alwaysInclude;
 
-	private Boolean exposeContextBeansAsAttributes;
-
-	private String[] exposedContextBeanNames;
-
 
 	/**
 	 * Sets the default {@link #setViewClass view class} to {@link #requiredViewClass}:
@@ -64,11 +60,25 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 	 */
 	public InternalResourceViewResolver() {
 		Class<?> viewClass = requiredViewClass();
-		if (viewClass.equals(InternalResourceView.class) && jstlPresent) {
+		if (InternalResourceView.class == viewClass && jstlPresent) {
 			viewClass = JstlView.class;
 		}
 		setViewClass(viewClass);
 	}
+
+	/**
+	 * A convenience constructor that allows for specifying {@link #setPrefix prefix}
+	 * and {@link #setSuffix suffix} as constructor arguments.
+	 * @param prefix the prefix that gets prepended to view names when building a URL
+	 * @param suffix the suffix that gets appended to view names when building a URL
+	 * @since 4.3
+	 */
+	public InternalResourceViewResolver(String prefix, String suffix) {
+		this();
+		setPrefix(prefix);
+		setSuffix(suffix);
+	}
+
 
 	/**
 	 * This resolver requires {@link InternalResourceView}.
@@ -78,7 +88,6 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 		return InternalResourceView.class;
 	}
 
-
 	/**
 	 * Specify whether to always include the view rather than forward to it.
 	 * <p>Default is "false". Switch this flag on to enforce the use of a
@@ -86,30 +95,7 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 	 * @see InternalResourceView#setAlwaysInclude
 	 */
 	public void setAlwaysInclude(boolean alwaysInclude) {
-		this.alwaysInclude = Boolean.valueOf(alwaysInclude);
-	}
-
-	/**
-	 * Set whether to make all Spring beans in the application context accessible
-	 * as request attributes, through lazy checking once an attribute gets accessed.
-	 * <p>This will make all such beans accessible in plain {@code ${...}}
-	 * expressions in a JSP 2.0 page, as well as in JSTL's {@code c:out}
-	 * value expressions.
-	 * <p>Default is "false".
-	 * @see InternalResourceView#setExposeContextBeansAsAttributes
-	 */
-	public void setExposeContextBeansAsAttributes(boolean exposeContextBeansAsAttributes) {
-		this.exposeContextBeansAsAttributes = exposeContextBeansAsAttributes;
-	}
-
-	/**
-	 * Specify the names of beans in the context which are supposed to be exposed.
-	 * If this is non-null, only the specified beans are eligible for exposure as
-	 * attributes.
-	 * @see InternalResourceView#setExposedContextBeanNames
-	 */
-	public void setExposedContextBeanNames(String[] exposedContextBeanNames) {
-		this.exposedContextBeanNames = exposedContextBeanNames;
+		this.alwaysInclude = alwaysInclude;
 	}
 
 
@@ -118,12 +104,6 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 		InternalResourceView view = (InternalResourceView) super.buildView(viewName);
 		if (this.alwaysInclude != null) {
 			view.setAlwaysInclude(this.alwaysInclude);
-		}
-		if (this.exposeContextBeansAsAttributes != null) {
-			view.setExposeContextBeansAsAttributes(this.exposeContextBeansAsAttributes);
-		}
-		if (this.exposedContextBeanNames != null) {
-			view.setExposedContextBeanNames(this.exposedContextBeanNames);
 		}
 		view.setPreventDispatchLoop(true);
 		return view;

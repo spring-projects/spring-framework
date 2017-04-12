@@ -17,12 +17,8 @@
 package org.springframework.cache.jcache.interceptor;
 
 import java.lang.annotation.Annotation;
-
 import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheKeyInvocationContext;
-
-import org.springframework.cache.jcache.model.BaseKeyCacheOperation;
-import org.springframework.cache.jcache.model.CachePutOperation;
 
 /**
  * The default {@link CacheKeyInvocationContext} implementation.
@@ -30,14 +26,14 @@ import org.springframework.cache.jcache.model.CachePutOperation;
  * @author Stephane Nicoll
  * @since 4.1
  */
-public class DefaultCacheKeyInvocationContext<A extends Annotation>
+class DefaultCacheKeyInvocationContext<A extends Annotation>
 		extends DefaultCacheInvocationContext<A> implements CacheKeyInvocationContext<A> {
 
 	private final CacheInvocationParameter[] keyParameters;
 
 	private final CacheInvocationParameter valueParameter;
 
-	public DefaultCacheKeyInvocationContext(BaseKeyCacheOperation<A> operation,
+	public DefaultCacheKeyInvocationContext(AbstractJCacheKeyOperation<A> operation,
 			Object target, Object[] args) {
 		super(operation, target, args);
 		this.keyParameters = operation.getKeyParameters(args);

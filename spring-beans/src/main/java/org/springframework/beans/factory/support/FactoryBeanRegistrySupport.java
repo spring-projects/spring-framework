@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanRegistry {
 
 	/** Cache of singleton objects created by FactoryBeans: FactoryBean name --> object */
-	private final Map<String, Object> factoryBeanObjectCache = new ConcurrentHashMap<String, Object>(16);
+	private final Map<String, Object> factoryBeanObjectCache = new ConcurrentHashMap<>(16);
 
 
 	/**
@@ -90,7 +90,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * Obtain an object to expose from the given FactoryBean.
 	 * @param factory the FactoryBean instance
 	 * @param beanName the name of the bean
-	 * @param shouldPostProcess whether the bean is subject for post-processing
+	 * @param shouldPostProcess whether the bean is subject to post-processing
 	 * @return the object obtained from the FactoryBean
 	 * @throws BeanCreationException if FactoryBean object creation failed
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
@@ -100,14 +100,40 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 			synchronized (getSingletonMutex()) {
 				Object object = this.factoryBeanObjectCache.get(beanName);
 				if (object == null) {
-					object = doGetObjectFromFactoryBean(factory, beanName, shouldPostProcess);
-					this.factoryBeanObjectCache.put(beanName, (object != null ? object : NULL_OBJECT));
+					object = doGetObjectFromFactoryBean(factory, beanName);
+					// Only post-process and store if not put there already during getObject() call above
+					// (e.g. because of circular reference processing triggered by custom getBean calls)
+					Object alreadyThere = this.factoryBeanObjectCache.get(beanName);
+					if (alreadyThere != null) {
+						object = alreadyThere;
+					}
+					else {
+						if (object != null && shouldPostProcess) {
+							try {
+								object = postProcessObjectFromFactoryBean(object, beanName);
+							}
+							catch (Throwable ex) {
+								throw new BeanCreationException(beanName,
+										"Post-processing of FactoryBean's singleton object failed", ex);
+							}
+						}
+						this.factoryBeanObjectCache.put(beanName, (object != null ? object : NULL_OBJECT));
+					}
 				}
 				return (object != NULL_OBJECT ? object : null);
 			}
 		}
 		else {
-			return doGetObjectFromFactoryBean(factory, beanName, shouldPostProcess);
+			Object object = doGetObjectFromFactoryBean(factory, beanName);
+			if (object != null && shouldPostProcess) {
+				try {
+					object = postProcessObjectFromFactoryBean(object, beanName);
+				}
+				catch (Throwable ex) {
+					throw new BeanCreationException(beanName, "Post-processing of FactoryBean's object failed", ex);
+				}
+			}
+			return object;
 		}
 	}
 
@@ -115,13 +141,11 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * Obtain an object to expose from the given FactoryBean.
 	 * @param factory the FactoryBean instance
 	 * @param beanName the name of the bean
-	 * @param shouldPostProcess whether the bean is subject for post-processing
 	 * @return the object obtained from the FactoryBean
 	 * @throws BeanCreationException if FactoryBean object creation failed
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
-	private Object doGetObjectFromFactoryBean(
-			final FactoryBean<?> factory, final String beanName, final boolean shouldPostProcess)
+	private Object doGetObjectFromFactoryBean(final FactoryBean<?> factory, final String beanName)
 			throws BeanCreationException {
 
 		Object object;
@@ -151,23 +175,12 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 			throw new BeanCreationException(beanName, "FactoryBean threw exception on object creation", ex);
 		}
 
-
 		// Do not accept a null value for a FactoryBean that's not fully
 		// initialized yet: Many FactoryBeans just return null then.
 		if (object == null && isSingletonCurrentlyInCreation(beanName)) {
 			throw new BeanCurrentlyInCreationException(
 					beanName, "FactoryBean which is currently in creation returned null from getObject");
 		}
-
-		if (object != null && shouldPostProcess) {
-			try {
-				object = postProcessObjectFromFactoryBean(object, beanName);
-			}
-			catch (Throwable ex) {
-				throw new BeanCreationException(beanName, "Post-processing of the FactoryBean's object failed", ex);
-			}
-		}
-
 		return object;
 	}
 

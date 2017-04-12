@@ -16,12 +16,13 @@
 
 package org.springframework.context.support;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.context.ApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald

@@ -16,16 +16,17 @@
 
 package org.springframework.jdbc.core.namedparam;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import org.springframework.jdbc.core.SqlParameterValue;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rick Evans
  * @author Arjen Poutsma
  */
-public final class MapSqlParameterSourceTests {
+public class MapSqlParameterSourceTests {
 
 	@Test
 	public void nullParameterValuesPassedToCtorIsOk() throws Exception {

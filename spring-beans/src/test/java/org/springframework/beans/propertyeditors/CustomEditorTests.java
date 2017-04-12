@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.beans.propertyeditors;
-
-import static org.junit.Assert.*;
 
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorSupport;
@@ -39,6 +37,7 @@ import java.util.Vector;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
+
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
@@ -50,6 +49,8 @@ import org.springframework.tests.sample.beans.IndexedTestBean;
 import org.springframework.tests.sample.beans.NumberTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.junit.Assert.*;
+
 /**
  * Unit tests for the various PropertyEditors in Spring.
  *
@@ -58,7 +59,6 @@ import org.springframework.tests.sample.beans.TestBean;
  * @author Rob Harrop
  * @author Arjen Poutsma
  * @author Chris Beams
- *
  * @since 10.06.2003
  */
 public class CustomEditorTests {
@@ -301,8 +301,8 @@ public class CustomEditorTests {
 
 	@Test
 	public void testCustomBooleanEditorWithSpecialTrueAndFalseStrings() throws Exception {
-		final String trueString = "pechorin";
-		final String falseString = "nash";
+		String trueString = "pechorin";
+		String falseString = "nash";
 
 		CustomBooleanEditor editor = new CustomBooleanEditor(trueString, falseString, false);
 
@@ -319,6 +319,14 @@ public class CustomEditorTests {
 		editor.setAsText(falseString.toUpperCase());
 		assertFalse(((Boolean) editor.getValue()).booleanValue());
 		assertEquals(falseString, editor.getAsText());
+
+		try {
+			editor.setAsText(null);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
 	}
 
 	@Test
@@ -422,7 +430,7 @@ public class CustomEditorTests {
 		assertTrue("Correct bigDecimal value", new BigDecimal("4.5").equals(tb.getBigDecimal()));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testCustomNumberEditorCtorWithNullNumberType() throws Exception {
 		new CustomNumberEditor(null, true);
 	}
@@ -477,7 +485,8 @@ public class CustomEditorTests {
 			CustomNumberEditor editor = new CustomNumberEditor(Short.class, true);
 			editor.setAsText(String.valueOf(Short.MAX_VALUE + 1));
 			fail(Short.MAX_VALUE + 1 + " is greater than max value");
-		} catch (NumberFormatException ex) {
+		}
+		catch (NumberFormatException ex) {
 			// expected
 		}
 	}
@@ -542,7 +551,7 @@ public class CustomEditorTests {
 		assertNull(cb.getMyCharacter());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testCharacterEditorSetAsTextWithStringLongerThanOneCharacter() throws Exception {
 		PropertyEditor charEditor = new CharacterEditor(false);
 		charEditor.setAsText("ColdWaterCanyon");
@@ -561,7 +570,7 @@ public class CustomEditorTests {
 		assertEquals(" ", charEditor.getAsText());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testCharacterEditorSetAsTextWithNullNotAllowingEmptyAsNull() throws Exception {
 		PropertyEditor charEditor = new CharacterEditor(false);
 		charEditor.setAsText(null);
@@ -582,7 +591,7 @@ public class CustomEditorTests {
 		assertEquals("", classEditor.getAsText());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testClassEditorWithNonExistentClass() throws Exception {
 		PropertyEditor classEditor = new ClassEditor();
 		classEditor.setAsText("hairdresser.on.Fire");
@@ -684,26 +693,40 @@ public class CustomEditorTests {
 	@Test
 	public void testCustomBooleanEditor() {
 		CustomBooleanEditor editor = new CustomBooleanEditor(false);
+
 		editor.setAsText("true");
 		assertEquals(Boolean.TRUE, editor.getValue());
 		assertEquals("true", editor.getAsText());
+
 		editor.setAsText("false");
 		assertEquals(Boolean.FALSE, editor.getValue());
 		assertEquals("false", editor.getAsText());
+
 		editor.setValue(null);
 		assertEquals(null, editor.getValue());
 		assertEquals("", editor.getAsText());
+
+		try {
+			editor.setAsText(null);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
 	}
 
 	@Test
 	public void testCustomBooleanEditorWithEmptyAsNull() {
 		CustomBooleanEditor editor = new CustomBooleanEditor(true);
+
 		editor.setAsText("true");
 		assertEquals(Boolean.TRUE, editor.getValue());
 		assertEquals("true", editor.getAsText());
+
 		editor.setAsText("false");
 		assertEquals(Boolean.FALSE, editor.getValue());
 		assertEquals("false", editor.getAsText());
+
 		editor.setValue(null);
 		assertEquals(null, editor.getValue());
 		assertEquals("", editor.getAsText());
@@ -749,7 +772,7 @@ public class CustomEditorTests {
 		}
 		catch (IllegalArgumentException ex) {
 			// expected
-			assertTrue(ex.getMessage().indexOf("10") != -1);
+			assertTrue(ex.getMessage().contains("10"));
 		}
 	}
 
@@ -1339,7 +1362,7 @@ public class CustomEditorTests {
 		bw.registerCustomEditor(List.class, "list", new PropertyEditorSupport() {
 			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
-				List<TestBean> result = new ArrayList<TestBean>();
+				List<TestBean> result = new ArrayList<>();
 				result.add(new TestBean("list" + text, 99));
 				setValue(result);
 			}
@@ -1374,7 +1397,7 @@ public class CustomEditorTests {
 		PropertyEditor pe = new CustomNumberEditor(Integer.class, true);
 		bw.registerCustomEditor(null, "list.age", pe);
 		TestBean tb = new TestBean();
-		bw.setPropertyValue("list", new ArrayList<Object>());
+		bw.setPropertyValue("list", new ArrayList<>());
 		bw.setPropertyValue("list[0]", tb);
 		assertEquals(tb, bean.getList().get(0));
 		assertEquals(pe, bw.findCustomEditor(int.class, "list.age"));

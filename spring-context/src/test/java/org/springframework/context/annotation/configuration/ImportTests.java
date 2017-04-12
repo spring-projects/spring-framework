@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,27 @@
 
 package org.springframework.context.annotation.configuration;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
 import org.junit.Test;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 
-import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * System tests for {@link Import} annotation support.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 public class ImportTests {
 
@@ -51,6 +53,11 @@ public class ImportTests {
 	private void assertBeanDefinitionCount(int expectedCount, Class<?>... classes) {
 		DefaultListableBeanFactory beanFactory = processConfigurationClasses(classes);
 		assertThat(beanFactory.getBeanDefinitionCount(), equalTo(expectedCount));
+		beanFactory.preInstantiateSingletons();
+		for (Class<?> clazz : classes) {
+			beanFactory.getBean(clazz);
+		}
+
 	}
 
 	@Test
@@ -117,7 +124,6 @@ public class ImportTests {
 	public void testImportAnnotationWithTwoLevelRecursion() {
 		int configClasses = 2;
 		int beansInClasses = 3;
-
 		assertBeanDefinitionCount((configClasses + beansInClasses), AppConfig.class);
 	}
 
@@ -148,10 +154,9 @@ public class ImportTests {
 
 	@Test
 	public void testImportAnnotationWithThreeLevelRecursion() {
-		int configClasses = 3;
+		int configClasses = 4;
 		int beansInClasses = 5;
-
-		assertBeanDefinitionCount((configClasses + beansInClasses), FirstLevel.class);
+		assertBeanDefinitionCount(configClasses + beansInClasses, FirstLevel.class);
 	}
 
 	// ------------------------------------------------------------------------
@@ -160,9 +165,7 @@ public class ImportTests {
 	public void testImportAnnotationWithMultipleArguments() {
 		int configClasses = 3;
 		int beansInClasses = 3;
-
-		assertBeanDefinitionCount((configClasses + beansInClasses),
-				WithMultipleArgumentsToImportAnnotation.class);
+		assertBeanDefinitionCount((configClasses + beansInClasses), WithMultipleArgumentsToImportAnnotation.class);
 	}
 
 
@@ -178,7 +181,7 @@ public class ImportTests {
 	}
 
 	@Configuration
-	@Import( { Foo1.class, Foo2.class })
+	@Import({Foo1.class, Foo2.class})
 	static class WithMultipleArgumentsThatWillCauseDuplication {
 	}
 
@@ -204,7 +207,6 @@ public class ImportTests {
 	public void testImportAnnotationOnInnerClasses() {
 		int configClasses = 2;
 		int beansInClasses = 2;
-
 		assertBeanDefinitionCount((configClasses + beansInClasses), OuterConfig.InnerConfig.class);
 	}
 
@@ -245,7 +247,7 @@ public class ImportTests {
 	}
 
 	@Configuration
-	@Import(ThirdLevel.class)
+	@Import({ThirdLevel.class, InitBean.class})
 	static class SecondLevel {
 		@Bean
 		public TestBean n() {
@@ -254,7 +256,12 @@ public class ImportTests {
 	}
 
 	@Configuration
+	@DependsOn("org.springframework.context.annotation.configuration.ImportTests$InitBean")
 	static class ThirdLevel {
+		public ThirdLevel() {
+			assertTrue(InitBean.initialized);
+		}
+
 		@Bean
 		public ITestBean thirdLevelA() {
 			return new TestBean();
@@ -271,8 +278,16 @@ public class ImportTests {
 		}
 	}
 
+	static class InitBean {
+		public static boolean initialized = false;
+
+		public InitBean() {
+			initialized = true;
+		}
+	}
+
 	@Configuration
-	@Import( { LeftConfig.class, RightConfig.class })
+	@Import({LeftConfig.class, RightConfig.class})
 	static class WithMultipleArgumentsToImportAnnotation {
 		@Bean
 		public TestBean m() {
@@ -298,9 +313,11 @@ public class ImportTests {
 
 	// ------------------------------------------------------------------------
 
-	@Test(expected=BeanDefinitionParsingException.class)
-	public void testImportNonConfigurationAnnotationClassCausesError() {
-		processConfigurationClasses(ConfigAnnotated.class);
+	@Test
+	public void testImportNonConfigurationAnnotationClass() {
+		int configClasses = 2;
+		int beansInClasses = 0;
+		assertBeanDefinitionCount((configClasses + beansInClasses), ConfigAnnotated.class);
 	}
 
 	@Configuration

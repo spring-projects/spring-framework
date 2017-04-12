@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,12 +16,12 @@
 
 package org.springframework.messaging.simp;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.AbstractMessageCondition;
 import org.springframework.util.Assert;
-
-import java.util.Arrays;
-import java.util.Collection;
 
 /**
  * A message condition that checks the message type.
@@ -57,7 +57,7 @@ public class SimpMessageTypeMessageCondition extends AbstractMessageCondition<Si
 
 	@Override
 	protected Collection<?> getContent() {
-		return Arrays.asList(messageType);
+		return Arrays.asList(this.messageType);
 	}
 
 	@Override
@@ -72,12 +72,10 @@ public class SimpMessageTypeMessageCondition extends AbstractMessageCondition<Si
 
 	@Override
 	public SimpMessageTypeMessageCondition getMatchingCondition(Message<?> message) {
-
 		Object actualMessageType = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
 		if (actualMessageType == null) {
 			return null;
 		}
-
 		return this;
 	}
 
@@ -97,4 +95,5 @@ public class SimpMessageTypeMessageCondition extends AbstractMessageCondition<Si
 		}
 		return 0;
 	}
+
 }

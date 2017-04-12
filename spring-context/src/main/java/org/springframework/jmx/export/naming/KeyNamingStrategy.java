@@ -18,7 +18,6 @@ package org.springframework.jmx.export.naming;
 
 import java.io.IOException;
 import java.util.Properties;
-
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -71,7 +70,7 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 
 	/**
 	 * Stores the result of merging the {@code mappings} {@code Properties}
-	 * with the the properties stored in the resources defined by {@code mappingLocations}.
+	 * with the properties stored in the resources defined by {@code mappingLocations}.
 	 */
 	private Properties mergedMappings;
 

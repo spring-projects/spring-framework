@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,12 +48,12 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	}
 
 	private ParamsRequestCondition(Collection<ParamExpression> conditions) {
-		this.expressions = Collections.unmodifiableSet(new LinkedHashSet<ParamExpression>(conditions));
+		this.expressions = Collections.unmodifiableSet(new LinkedHashSet<>(conditions));
 	}
 
 
 	private static Collection<ParamExpression> parseExpressions(String... params) {
-		Set<ParamExpression> expressions = new LinkedHashSet<ParamExpression>();
+		Set<ParamExpression> expressions = new LinkedHashSet<>();
 		if (params != null) {
 			for (String param : params) {
 				expressions.add(new ParamExpression(param));
@@ -67,7 +67,7 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 * Return the contained request parameter expressions.
 	 */
 	public Set<NameValueExpression<String>> getExpressions() {
-		return new LinkedHashSet<NameValueExpression<String>>(this.expressions);
+		return new LinkedHashSet<>(this.expressions);
 	}
 
 	@Override
@@ -86,7 +86,7 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 */
 	@Override
 	public ParamsRequestCondition combine(ParamsRequestCondition other) {
-		Set<ParamExpression> set = new LinkedHashSet<ParamExpression>(this.expressions);
+		Set<ParamExpression> set = new LinkedHashSet<>(this.expressions);
 		set.addAll(other.expressions);
 		return new ParamsRequestCondition(set);
 	}
@@ -129,6 +129,11 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 
 		ParamExpression(String expression) {
 			super(expression);
+		}
+
+		@Override
+		protected boolean isCaseSensitiveName() {
+			return true;
 		}
 
 		@Override

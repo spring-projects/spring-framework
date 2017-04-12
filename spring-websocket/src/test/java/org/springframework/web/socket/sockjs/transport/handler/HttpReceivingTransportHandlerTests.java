@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,8 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
-import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.MediaType;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.TextMessage;
@@ -28,7 +28,7 @@ import org.springframework.web.socket.sockjs.transport.session.StubSockJsService
 import org.springframework.web.socket.sockjs.transport.session.TestHttpSockJsSession;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link AbstractHttpReceivingTransportHandler} and sub-classes
@@ -36,14 +36,7 @@ import static org.mockito.Mockito.*;
  *
  * @author Rossen Stoyanchev
  */
-public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTests {
-
-
-	@Override
-	@Before
-	public void setUp() {
-		super.setUp();
-	}
+public class HttpReceivingTransportHandlerTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void readMessagesXhr() throws Exception {
@@ -72,9 +65,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 		assertEquals("ok", this.servletResponse.getContentAsString());
 	}
 
-	// SPR-10621
-
-	@Test
+	@Test  // SPR-10621
 	public void readMessagesJsonpFormEncodedWithEncoding() throws Exception {
 		this.servletRequest.setContent("d=[\"x\"]".getBytes("UTF-8"));
 		this.servletRequest.setContentType("application/x-www-form-urlencoded;charset=UTF-8");
@@ -93,7 +84,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 		handleRequestAndExpectFailure();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void readMessagesNoSession() throws Exception {
 		WebSocketHandler webSocketHandler = mock(WebSocketHandler.class);
 		new XhrReceivingTransportHandler().handleRequest(this.request, this.response, webSocketHandler, null);
@@ -101,16 +92,14 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 
 	@Test
 	public void delegateMessageException() throws Exception {
-
 		StubSockJsServiceConfig sockJsConfig = new StubSockJsServiceConfig();
-
 		this.servletRequest.setContent("[\"x\"]".getBytes("UTF-8"));
 
 		WebSocketHandler wsHandler = mock(WebSocketHandler.class);
 		TestHttpSockJsSession session = new TestHttpSockJsSession("1", sockJsConfig, wsHandler, null);
 		session.delegateConnectionEstablished();
 
-		doThrow(new Exception()).when(wsHandler).handleMessage(session, new TextMessage("x"));
+		willThrow(new Exception()).given(wsHandler).handleMessage(session, new TextMessage("x"));
 
 		try {
 			XhrReceivingTransportHandler transportHandler = new XhrReceivingTransportHandler();
@@ -125,7 +114,6 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 
 
 	private void handleRequest(AbstractHttpReceivingTransportHandler transportHandler) throws Exception {
-
 		WebSocketHandler wsHandler = mock(WebSocketHandler.class);
 		AbstractSockJsSession session = new TestHttpSockJsSession("1", new StubSockJsServiceConfig(), wsHandler, null);
 
@@ -137,7 +125,6 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 	}
 
 	private void handleRequestAndExpectFailure() throws Exception {
-
 		resetResponse();
 
 		WebSocketHandler wsHandler = mock(WebSocketHandler.class);

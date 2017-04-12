@@ -16,12 +16,12 @@
 
 package org.springframework.instrument.classloading;
 
-import static org.junit.Assert.*;
-
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the {@link ReflectiveLoadTimeWeaver} class.
@@ -29,14 +29,14 @@ import org.junit.Test;
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class ReflectiveLoadTimeWeaverTests {
+public class ReflectiveLoadTimeWeaverTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testCtorWithNullClassLoader() {
 		new ReflectiveLoadTimeWeaver(null);
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void testCtorWithClassLoaderThatDoesNotExposeAnAddTransformerMethod() {
 		new ReflectiveLoadTimeWeaver(getClass().getClassLoader());
 	}
@@ -54,7 +54,7 @@ public final class ReflectiveLoadTimeWeaverTests {
 		assertEquals(1, classLoader.getNumTimesGetThrowawayClassLoaderCalled());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testAddTransformerWithNullTransformer() {
 		new ReflectiveLoadTimeWeaver(new JustAddTransformerClassLoader()).addTransformer(null);
 	}

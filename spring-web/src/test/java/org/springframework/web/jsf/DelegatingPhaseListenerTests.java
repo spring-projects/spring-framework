@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,36 +21,33 @@ import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  */
-public class DelegatingPhaseListenerTests extends TestCase {
+public class DelegatingPhaseListenerTests {
 
-	private MockFacesContext facesContext;
-	private StaticListableBeanFactory beanFactory;
-	private DelegatingPhaseListenerMulticaster delPhaseListener;
+	private final MockFacesContext facesContext = new MockFacesContext();
 
-	@Override
+	private final StaticListableBeanFactory beanFactory = new StaticListableBeanFactory();
+
 	@SuppressWarnings("serial")
-	protected void setUp() {
-		facesContext = new MockFacesContext();
-		beanFactory = new StaticListableBeanFactory();
+	private final DelegatingPhaseListenerMulticaster delPhaseListener = new DelegatingPhaseListenerMulticaster() {
+		@Override
+		protected ListableBeanFactory getBeanFactory(FacesContext facesContext) {
+			return beanFactory;
+		}
+	};
 
-		delPhaseListener = new DelegatingPhaseListenerMulticaster() {
-			@Override
-			protected ListableBeanFactory getBeanFactory(FacesContext facesContext) {
-				return beanFactory;
-			}
-		};
-	}
-
-	public void testBeforeAndAfterPhaseWithSingleTarget() {
+	@Test
+	public void beforeAndAfterPhaseWithSingleTarget() {
 		TestListener target = new TestListener();
 		beanFactory.addBean("testListener", target);
 
@@ -64,7 +61,8 @@ public class DelegatingPhaseListenerTests extends TestCase {
 		assertTrue(target.afterCalled);
 	}
 
-	public void testBeforeAndAfterPhaseWithMultipleTargets() {
+	@Test
+	public void beforeAndAfterPhaseWithMultipleTargets() {
 		TestListener target1 = new TestListener();
 		TestListener target2 = new TestListener();
 		beanFactory.addBean("testListener1", target1);

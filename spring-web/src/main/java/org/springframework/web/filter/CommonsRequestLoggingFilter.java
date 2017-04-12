@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
  * (and optionally the query string) to the Commons Log.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 1.2.5
  * @see #setIncludeQueryString
  * @see #setBeforeMessagePrefix
@@ -33,14 +34,17 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class CommonsRequestLoggingFilter extends AbstractRequestLoggingFilter {
 
+	@Override
+	protected boolean shouldLog(HttpServletRequest request) {
+		return logger.isDebugEnabled();
+	}
+
 	/**
 	 * Writes a log message before the request is processed.
 	 */
 	@Override
 	protected void beforeRequest(HttpServletRequest request, String message) {
-		if (logger.isDebugEnabled()) {
-			logger.debug(message);
-		}
+		logger.debug(message);
 	}
 
 	/**
@@ -48,9 +52,7 @@ public class CommonsRequestLoggingFilter extends AbstractRequestLoggingFilter {
 	 */
 	@Override
 	protected void afterRequest(HttpServletRequest request, String message) {
-		if (logger.isDebugEnabled()) {
-			logger.debug(message);
-		}
+		logger.debug(message);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,24 @@ package org.springframework.validation.beanvalidation;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.validation.Configuration;
 import javax.validation.ConstraintValidatorFactory;
 import javax.validation.MessageInterpolator;
+import javax.validation.ParameterNameProvider;
 import javax.validation.TraversableResolver;
 import javax.validation.Validation;
+import javax.validation.ValidationProviderResolver;
 import javax.validation.Validator;
 import javax.validation.ValidatorContext;
 import javax.validation.ValidatorFactory;
+import javax.validation.bootstrap.GenericBootstrap;
+import javax.validation.bootstrap.ProviderSpecificBootstrap;
 
 import org.hibernate.validator.messageinterpolation.ResourceBundleMessageInterpolator;
 
@@ -46,14 +48,13 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * This is the central class for {@code javax.validation} (JSR-303) setup
- * in a Spring application context: It bootstraps a {@code javax.validation.ValidationFactory}
- * and exposes it through the Spring {@link org.springframework.validation.Validator} interface
+ * This is the central class for {@code javax.validation} (JSR-303) setup in a Spring
+ * application context: It bootstraps a {@code javax.validation.ValidationFactory} and
+ * exposes it through the Spring {@link org.springframework.validation.Validator} interface
  * as well as through the JSR-303 {@link javax.validation.Validator} interface and the
  * {@link javax.validation.ValidatorFactory} interface itself.
  *
@@ -63,14 +64,8 @@ import org.springframework.util.ReflectionUtils;
  * you will almost always use the default Validator anyway. This can also be injected directly
  * into any target dependency of type {@link org.springframework.validation.Validator}!
  *
- * <p><b>As of Spring 4.0, this class supports Bean Validation 1.0 and 1.1, with special support
- * for Hibernate Validator 4.3 and 5.x</b> (see {@link #setValidationMessageSource}).
- *
- * <p>Note that Bean Validation 1.1's {@code #forExecutables} method isn't supported: We do not
- * expect that method to be called by application code; consider {@link MethodValidationInterceptor}
- * instead. If you really need programmatic {@code #forExecutables} access, inject this class as
- * a {@link ValidatorFactory} and call {@link #getValidator()} on it, then {@code #forExecutables}
- * on the returned native {@link Validator} reference instead of directly on this class.
+ * <p><b>As of Spring 5.0, this class requires Bean Validation 1.1, with special support
+ * for Hibernate Validator 5.x</b> (see {@link #setValidationMessageSource}).
  *
  * <p>This class is also being used by Spring's MVC configuration namespace, in case of the
  * {@code javax.validation} API being present but no explicit Validator having been configured.
@@ -85,12 +80,10 @@ import org.springframework.util.ReflectionUtils;
 public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		implements ValidatorFactory, ApplicationContextAware, InitializingBean, DisposableBean {
 
-	// Bean Validation 1.1 close() method available?
-	private static final Method closeMethod = ClassUtils.getMethodIfAvailable(ValidatorFactory.class, "close");
-
-
 	@SuppressWarnings("rawtypes")
 	private Class providerClass;
+
+	private ValidationProviderResolver validationProviderResolver;
 
 	private MessageInterpolator messageInterpolator;
 
@@ -102,7 +95,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 	private Resource[] mappingLocations;
 
-	private final Map<String, String> validationPropertyMap = new HashMap<String, String>();
+	private final Map<String, String> validationPropertyMap = new HashMap<>();
 
 	private ApplicationContext applicationContext;
 
@@ -118,6 +111,15 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	@SuppressWarnings("rawtypes")
 	public void setProviderClass(Class providerClass) {
 		this.providerClass = providerClass;
+	}
+
+	/**
+	 * Specify a JSR-303 {@link ValidationProviderResolver} for bootstrapping the
+	 * provider of choice, as an alternative to {@code META-INF} driven resolution.
+	 * @since 4.3
+	 */
+	public void setValidationProviderResolver(ValidationProviderResolver validationProviderResolver) {
+		this.validationProviderResolver = validationProviderResolver;
 	}
 
 	/**
@@ -216,11 +218,34 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 
 	@Override
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void afterPropertiesSet() {
-		@SuppressWarnings({"rawtypes", "unchecked"})
-		Configuration<?> configuration = (this.providerClass != null ?
-				Validation.byProvider(this.providerClass).configure() :
-				Validation.byDefaultProvider().configure());
+		Configuration<?> configuration;
+		if (this.providerClass != null) {
+			ProviderSpecificBootstrap bootstrap = Validation.byProvider(this.providerClass);
+			if (this.validationProviderResolver != null) {
+				bootstrap = bootstrap.providerResolver(this.validationProviderResolver);
+			}
+			configuration = bootstrap.configure();
+		}
+		else {
+			GenericBootstrap bootstrap = Validation.byDefaultProvider();
+			if (this.validationProviderResolver != null) {
+				bootstrap = bootstrap.providerResolver(this.validationProviderResolver);
+			}
+			configuration = bootstrap.configure();
+		}
+
+		// Try Hibernate Validator 5.2's externalClassLoader(ClassLoader) method
+		if (this.applicationContext != null) {
+			try {
+				Method eclMethod = configuration.getClass().getMethod("externalClassLoader", ClassLoader.class);
+				ReflectionUtils.invokeMethod(eclMethod, configuration, this.applicationContext.getClassLoader());
+			}
+			catch (NoSuchMethodException ex) {
+				// Ignore - no Hibernate Validator 5.2+ or similar provider
+			}
+		}
 
 		MessageInterpolator targetInterpolator = this.messageInterpolator;
 		if (targetInterpolator == null) {
@@ -268,55 +293,23 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	}
 
 	private void configureParameterNameProviderIfPossible(Configuration<?> configuration) {
-		try {
-			Class<?> parameterNameProviderClass =
-					ClassUtils.forName("javax.validation.ParameterNameProvider", getClass().getClassLoader());
-			Method parameterNameProviderMethod =
-					Configuration.class.getMethod("parameterNameProvider", parameterNameProviderClass);
-			final Object defaultProvider = ReflectionUtils.invokeMethod(
-					Configuration.class.getMethod("getDefaultParameterNameProvider"), configuration);
-			final ParameterNameDiscoverer discoverer = this.parameterNameDiscoverer;
-			Object parameterNameProvider = Proxy.newProxyInstance(getClass().getClassLoader(),
-					new Class<?>[] {parameterNameProviderClass}, new InvocationHandler() {
-				@Override
-				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-					if (method.getName().equals("getParameterNames")) {
-						String[] result = null;
-						if (args[0] instanceof Constructor) {
-							result = discoverer.getParameterNames((Constructor<?>) args[0]);
-						}
-						else if (args[0] instanceof Method) {
-							result = discoverer.getParameterNames((Method) args[0]);
-						}
-						if (result != null) {
-							return Arrays.asList(result);
-						}
-						else {
-							try {
-								return method.invoke(defaultProvider, args);
-							}
-							catch (InvocationTargetException ex) {
-								throw ex.getTargetException();
-							}
-						}
-					}
-					else {
-						// toString, equals, hashCode
-						try {
-							return method.invoke(this, args);
-						}
-						catch (InvocationTargetException ex) {
-							throw ex.getTargetException();
-						}
-					}
-				}
-			});
-			ReflectionUtils.invokeMethod(parameterNameProviderMethod, configuration, parameterNameProvider);
-
-		}
-		catch (Exception ex) {
-			// Bean Validation 1.1 API not available - simply not applying the ParameterNameDiscoverer
-		}
+		// TODO: inner class
+		final ParameterNameDiscoverer discoverer = this.parameterNameDiscoverer;
+		final ParameterNameProvider defaultProvider = configuration.getDefaultParameterNameProvider();
+		configuration.parameterNameProvider(new ParameterNameProvider() {
+			@Override
+			public List<String> getParameterNames(Constructor<?> constructor) {
+				String[] paramNames = discoverer.getParameterNames(constructor);
+				return (paramNames != null ? Arrays.asList(paramNames) :
+						defaultProvider.getParameterNames(constructor));
+			}
+			@Override
+			public List<String> getParameterNames(Method method) {
+				String[] paramNames = discoverer.getParameterNames(method);
+				return (paramNames != null ? Arrays.asList(paramNames) :
+						defaultProvider.getParameterNames(method));
+			}
+		});
 	}
 
 	/**
@@ -360,9 +353,15 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		return this.validatorFactory.getConstraintValidatorFactory();
 	}
 
+	@Override
+	public ParameterNameProvider getParameterNameProvider() {
+		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
+		return this.validatorFactory.getParameterNameProvider();
+	}
+
 	public void close() {
-		if (closeMethod != null && this.validatorFactory != null) {
-			ReflectionUtils.invokeMethod(closeMethod, this.validatorFactory);
+		if (this.validatorFactory != null) {
+			this.validatorFactory.close();
 		}
 	}
 

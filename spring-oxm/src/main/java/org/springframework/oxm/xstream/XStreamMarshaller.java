@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import com.thoughtworks.xstream.converters.ConverterRegistry;
 import com.thoughtworks.xstream.converters.DataHolder;
 import com.thoughtworks.xstream.converters.SingleValueConverter;
 import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
+import com.thoughtworks.xstream.core.ClassLoaderReference;
 import com.thoughtworks.xstream.core.DefaultConverterLookup;
 import com.thoughtworks.xstream.core.util.CompositeClassLoader;
 import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
@@ -78,7 +79,6 @@ import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.oxm.UnmarshallingFailureException;
 import org.springframework.oxm.XmlMappingException;
 import org.springframework.oxm.support.AbstractMarshaller;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -104,7 +104,7 @@ import org.springframework.util.xml.StaxUtils;
  * Therefore, it has limited namespace support. As such, it is rather unsuitable for
  * usage within Web Services.
  *
- * <p>This marshaller requires XStream 1.4 or higher, as of Spring 4.0.
+ * <p>This marshaller requires XStream 1.4.5 or higher, as of Spring 4.3.
  * Note that {@link XStream} construction has been reworked in 4.0, with the
  * stream driver and the class loader getting passed into XStream itself now.
  *
@@ -113,7 +113,7 @@ import org.springframework.util.xml.StaxUtils;
  * @author Juergen Hoeller
  * @since 3.0
  */
-public class XStreamMarshaller extends AbstractMarshaller implements InitializingBean, BeanClassLoaderAware {
+public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLoaderAware, InitializingBean {
 
 	/**
 	 * The default encoding used for stream access: UTF-8.
@@ -129,7 +129,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	private Mapper mapper;
 
-	private Class<?>[] mapperWrappers;
+	private Class<? extends MapperWrapper>[] mapperWrappers;
 
 	private ConverterLookup converterLookup = new DefaultConverterLookup();
 
@@ -209,7 +209,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * of type {@link Mapper} or {@link MapperWrapper}.
 	 * @since 4.0
 	 */
-	public void setMapperWrappers(Class<?>... mapperWrappers) {
+	@SuppressWarnings("unchecked")
+	public void setMapperWrappers(Class<? extends MapperWrapper>... mapperWrappers) {
 		this.mapperWrappers = mapperWrappers;
 	}
 
@@ -300,10 +301,10 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	/**
 	 * Set the types to use XML attributes for. The given map can contain
-	 * either {@code &lt;String, Class&gt;} pairs, in which case
+	 * either {@code <String, Class>} pairs, in which case
 	 * {@link XStream#useAttributeFor(String, Class)} is called.
-	 * Alternatively, the map can contain {@code &lt;Class, String&gt;}
-	 * or {@code &lt;Class, List&lt;String&gt;&gt;} pairs, which results
+	 * Alternatively, the map can contain {@code <Class, String>}
+	 * or {@code <Class, List<String>>} pairs, which results
 	 * in {@link XStream#useAttributeFor(Class, String)} calls.
 	 */
 	public void setUseAttributeFor(Map<?, ?> useAttributeFor) {
@@ -405,19 +406,15 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * standard constructors or creating a custom subclass.
 	 * @return the {@code XStream} instance
 	 */
-	@SuppressWarnings("deprecation")
 	protected XStream constructXStream() {
-		// The referenced XStream constructor has been deprecated as of 1.4.5.
-		// We're preserving this call for broader XStream 1.4.x compatibility.
-		return new XStream(this.reflectionProvider, getDefaultDriver(),
-				this.beanClassLoader, this.mapper, this.converterLookup, this.converterRegistry) {
+		return new XStream(this.reflectionProvider, getDefaultDriver(), new ClassLoaderReference(this.beanClassLoader),
+				this.mapper, this.converterLookup, this.converterRegistry) {
 			@Override
 			protected MapperWrapper wrapMapper(MapperWrapper next) {
 				MapperWrapper mapperToWrap = next;
 				if (mapperWrappers != null) {
-					for (Class<?> mapperWrapper : mapperWrappers) {
-						Assert.isAssignable(MapperWrapper.class, mapperWrapper);
-						Constructor<?> ctor;
+					for (Class<? extends MapperWrapper> mapperWrapper : mapperWrappers) {
+						Constructor<? extends MapperWrapper> ctor;
 						try {
 							ctor = mapperWrapper.getConstructor(Mapper.class);
 						}
@@ -430,9 +427,9 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 							}
 						}
 						try {
-							mapperToWrap = (MapperWrapper) ctor.newInstance(mapperToWrap);
+							mapperToWrap = ctor.newInstance(mapperToWrap);
 						}
-						catch (Exception ex) {
+						catch (Throwable ex) {
 							throw new IllegalStateException("Failed to construct MapperWrapper: " + mapperWrapper);
 						}
 					}
@@ -570,7 +567,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	private Map<String, Class<?>> toClassMap(Map<String, ?> map) throws ClassNotFoundException {
-		Map<String, Class<?>> result = new LinkedHashMap<String, Class<?>>(map.size());
+		Map<String, Class<?>> result = new LinkedHashMap<>(map.size());
 		for (Map.Entry<String, ?> entry : map.entrySet()) {
 			String key = entry.getKey();
 			Object value = entry.getValue();

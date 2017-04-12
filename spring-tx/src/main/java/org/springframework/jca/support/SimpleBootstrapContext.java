@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,15 @@
 package org.springframework.jca.support;
 
 import java.util.Timer;
-
 import javax.resource.spi.BootstrapContext;
 import javax.resource.spi.UnavailableException;
 import javax.resource.spi.XATerminator;
+import javax.resource.spi.work.WorkContext;
 import javax.resource.spi.work.WorkManager;
+import javax.transaction.TransactionSynchronizationRegistry;
 
 /**
- * Simple implementation of the JCA 1.5 {@link javax.resource.spi.BootstrapContext}
+ * Simple implementation of the JCA 1.7 {@link javax.resource.spi.BootstrapContext}
  * interface, used for bootstrapping a JCA ResourceAdapter in a local environment.
  *
  * <p>Delegates to the given WorkManager and XATerminator, if any. Creates simple
@@ -40,6 +41,8 @@ public class SimpleBootstrapContext implements BootstrapContext {
 	private WorkManager workManager;
 
 	private XATerminator xaTerminator;
+
+	private TransactionSynchronizationRegistry transactionSynchronizationRegistry;
 
 
 	/**
@@ -61,6 +64,23 @@ public class SimpleBootstrapContext implements BootstrapContext {
 		this.xaTerminator = xaTerminator;
 	}
 
+	/**
+	 * Create a new SimpleBootstrapContext for the given WorkManager, XATerminator
+	 * and TransactionSynchronizationRegistry.
+	 * @param workManager the JCA WorkManager to use (may be {@code null})
+	 * @param xaTerminator the JCA XATerminator to use (may be {@code null})
+	 * @param transactionSynchronizationRegistry the TransactionSynchronizationRegistry
+	 * to use (may be {@code null})
+	 * @since 5.0
+	 */
+	public SimpleBootstrapContext(WorkManager workManager, XATerminator xaTerminator,
+			TransactionSynchronizationRegistry transactionSynchronizationRegistry) {
+
+		this.workManager = workManager;
+		this.xaTerminator = xaTerminator;
+		this.transactionSynchronizationRegistry = transactionSynchronizationRegistry;
+	}
+
 
 	@Override
 	public WorkManager getWorkManager() {
@@ -78,6 +98,16 @@ public class SimpleBootstrapContext implements BootstrapContext {
 	@Override
 	public Timer createTimer() throws UnavailableException {
 		return new Timer();
+	}
+
+	@Override
+	public boolean isContextSupported(Class<? extends WorkContext> workContextClass) {
+		return false;
+	}
+
+	@Override
+	public TransactionSynchronizationRegistry getTransactionSynchronizationRegistry() {
+		return this.transactionSynchronizationRegistry;
 	}
 
 }

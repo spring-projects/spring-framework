@@ -26,7 +26,6 @@ import java.nio.ByteBuffer;
  */
 public final class PongMessage extends AbstractWebSocketMessage<ByteBuffer> {
 
-
 	/**
 	 * Create a new pong message with an empty payload.
 	 */
@@ -45,12 +44,12 @@ public final class PongMessage extends AbstractWebSocketMessage<ByteBuffer> {
 
 	@Override
 	public int getPayloadLength() {
-		return (getPayload() != null) ? getPayload().remaining() : 0;
+		return (getPayload() != null ? getPayload().remaining() : 0);
 	}
 
 	@Override
 	protected String toStringPayload() {
-		return (getPayload() != null) ? getPayload().toString() : null;
+		return (getPayload() != null ? getPayload().toString() : null);
 	}
 
 }

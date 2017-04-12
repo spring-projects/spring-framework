@@ -16,8 +16,6 @@
 
 package org.springframework.cache.jcache.config;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 import org.springframework.cache.interceptor.CacheErrorHandler;
@@ -26,6 +24,8 @@ import org.springframework.cache.jcache.interceptor.JCacheInterceptor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll
@@ -44,7 +44,7 @@ public class JCacheNamespaceDrivenTests extends AbstractJCacheAnnotationTests {
 				"/org/springframework/cache/jcache/config/jCacheNamespaceDriven-resolver.xml");
 
 		DefaultJCacheOperationSource ci = context.getBean(DefaultJCacheOperationSource.class);
-		assertSame(context.getBean("cacheResolver"), ci.getDefaultCacheResolver());
+		assertSame(context.getBean("cacheResolver"), ci.getCacheResolver());
 		context.close();
 	}
 

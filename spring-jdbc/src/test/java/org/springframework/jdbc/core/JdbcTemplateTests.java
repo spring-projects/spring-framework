@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,13 +31,13 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -45,11 +45,10 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.SQLWarningException;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.core.support.AbstractInterruptibleBatchPreparedStatementSetter;
+import org.springframework.jdbc.datasource.ConnectionProxy;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
-import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
-import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractorAdapter;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import static org.hamcrest.Matchers.*;
@@ -67,16 +66,23 @@ import static org.springframework.tests.Matchers.*;
  */
 public class JdbcTemplateTests {
 
+	private Connection connection;
+
+	private DataSource dataSource;
+
+	private PreparedStatement preparedStatement;
+
+	private Statement statement;
+
+	private ResultSet resultSet;
+
+	private JdbcTemplate template;
+
+	private CallableStatement callableStatement;
+
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private Connection connection;
-	private DataSource dataSource;
-	private PreparedStatement preparedStatement;
-	private Statement statement;
-	private ResultSet resultSet;
-	private JdbcTemplate template;
-	private CallableStatement callableStatement;
 
 	@Before
 	public void setup() throws Exception {
@@ -97,6 +103,7 @@ public class JdbcTemplateTests {
 		given(this.connection.prepareCall(anyString())).willReturn(this.callableStatement);
 		given(this.callableStatement.getResultSet()).willReturn(this.resultSet);
 	}
+
 
 	@Test
 	public void testBeanProperties() throws Exception {
@@ -143,10 +150,9 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testStringsWithStaticSql() throws Exception {
-		doTestStrings(false, null, null, null, null, new JdbcTemplateCallback() {
+		doTestStrings(null, null, null, null, new JdbcTemplateCallback() {
 			@Override
-			public void doInJdbcTemplate(JdbcTemplate template, String sql,
-					RowCallbackHandler rch) {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, rch);
 			}
 		});
@@ -154,10 +160,9 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testStringsWithStaticSqlAndFetchSizeAndMaxRows() throws Exception {
-		doTestStrings(false, 10, 20, 30, null, new JdbcTemplateCallback() {
+		doTestStrings(10, 20, 30, null, new JdbcTemplateCallback() {
 			@Override
-			public void doInJdbcTemplate(JdbcTemplate template, String sql,
-					RowCallbackHandler rch) {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, rch);
 			}
 		});
@@ -165,10 +170,9 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testStringsWithEmptyPreparedStatementSetter() throws Exception {
-		doTestStrings(true, null, null, null, null, new JdbcTemplateCallback() {
+		doTestStrings(null, null, null, null, new JdbcTemplateCallback() {
 			@Override
-			public void doInJdbcTemplate(JdbcTemplate template, String sql,
-					RowCallbackHandler rch) {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, (PreparedStatementSetter) null, rch);
 			}
 		});
@@ -177,10 +181,9 @@ public class JdbcTemplateTests {
 	@Test
 	public void testStringsWithPreparedStatementSetter() throws Exception {
 		final Integer argument = 99;
-		doTestStrings(true, null, null, null, argument, new JdbcTemplateCallback() {
+		doTestStrings(null, null, null, argument, new JdbcTemplateCallback() {
 			@Override
-			public void doInJdbcTemplate(JdbcTemplate template, String sql,
-					RowCallbackHandler rch) {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, new PreparedStatementSetter() {
 					@Override
 					public void setValues(PreparedStatement ps) throws SQLException {
@@ -193,10 +196,9 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testStringsWithEmptyPreparedStatementArgs() throws Exception {
-		doTestStrings(true, null, null, null, null, new JdbcTemplateCallback() {
+		doTestStrings(null, null, null, null, new JdbcTemplateCallback() {
 			@Override
-			public void doInJdbcTemplate(JdbcTemplate template, String sql,
-					RowCallbackHandler rch) {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, (Object[]) null, rch);
 			}
 		});
@@ -205,26 +207,22 @@ public class JdbcTemplateTests {
 	@Test
 	public void testStringsWithPreparedStatementArgs() throws Exception {
 		final Integer argument = 99;
-		doTestStrings(true, null, null, null, argument, new JdbcTemplateCallback() {
+		doTestStrings(null, null, null, argument, new JdbcTemplateCallback() {
 			@Override
-			public void doInJdbcTemplate(JdbcTemplate template, String sql,
-					RowCallbackHandler rch) {
+			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, new Object[] { argument }, rch);
 			}
 		});
 	}
 
-	private void doTestStrings(
-			boolean usePreparedStatement,
-			Integer fetchSize, Integer maxRows, Integer queryTimeout, Object argument,
-			JdbcTemplateCallback jdbcTemplateCallback)
-			throws Exception {
+	private void doTestStrings(Integer fetchSize, Integer maxRows, Integer queryTimeout,
+			Object argument, JdbcTemplateCallback jdbcTemplateCallback) throws Exception {
 
 		String sql = "SELECT FORENAME FROM CUSTMR";
 		String[] results = { "rod", "gary", " portia" };
 
 		class StringHandler implements RowCallbackHandler {
-			private List<String> list = new LinkedList<String>();
+			private List<String> list = new LinkedList<>();
 			@Override
 			public void processRow(ResultSet rs) throws SQLException {
 				this.list.add(rs.getString(1));
@@ -297,11 +295,11 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testConnectionCallback() throws Exception {
-		this.template.setNativeJdbcExtractor(new PlainNativeJdbcExtractor());
 		String result = this.template.execute(new ConnectionCallback<String>() {
 			@Override
 			public String doInConnection(Connection con) {
-				assertSame(JdbcTemplateTests.this.connection, con);
+				assertTrue(con instanceof ConnectionProxy);
+				assertSame(JdbcTemplateTests.this.connection, ((ConnectionProxy) con).getTargetConnection());
 				return "test";
 			}
 		});
@@ -317,7 +315,6 @@ public class JdbcTemplateTests {
 				ps.setFetchSize(10);
 				ps.setMaxRows(20);
 				ps.close();
-				assertSame(JdbcTemplateTests.this.connection, new PlainNativeJdbcExtractor().getNativeConnection(con));
 				return "test";
 			}
 		});
@@ -740,9 +737,8 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testBatchUpdateWithListOfObjectArrays() throws Exception {
-
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
-		final List<Object[]> ids = new ArrayList<Object[]>();
+		final List<Object[]> ids = new ArrayList<>();
 		ids.add(new Object[] {100});
 		ids.add(new Object[] {200});
 		final int[] rowsAffected = new int[] { 1, 2 };
@@ -768,7 +764,7 @@ public class JdbcTemplateTests {
 	@Test
 	public void testBatchUpdateWithListOfObjectArraysPlusTypeInfo() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
-		final List<Object[]> ids = new ArrayList<Object[]>();
+		final List<Object[]> ids = new ArrayList<>();
 		ids.add(new Object[] {100});
 		ids.add(new Object[] {200});
 		final int[] sqlTypes = new int[] {Types.NUMERIC};
@@ -851,13 +847,15 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitializedViaBeanProperty()
-			throws Exception {
+			throws SQLException {
+
 		doTestCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(true);
 	}
 
 	@Test
 	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitializedInAfterPropertiesSet()
-			throws Exception {
+			throws SQLException {
+
 		doTestCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(false);
 	}
 
@@ -867,6 +865,7 @@ public class JdbcTemplateTests {
 	 */
 	private void doTestCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(boolean beanProperty)
 			throws SQLException {
+
 		SQLException sqlException = new SQLException("foo", "07xxx");
 		this.dataSource = mock(DataSource.class);
 		given(this.dataSource.getConnection()).willThrow(sqlException);
@@ -1097,105 +1096,6 @@ public class JdbcTemplateTests {
 	}
 
 	@Test
-	public void testNativeJdbcExtractorInvoked() throws Exception {
-
-		final Statement statement2 = mock(Statement.class);
-		given(statement2.executeQuery(anyString())).willReturn(this.resultSet);
-
-		final PreparedStatement preparedStatement2 = mock(PreparedStatement.class);
-		given(preparedStatement2.executeQuery()).willReturn(this.resultSet);
-
-		final ResultSet returnResultSet = mock(ResultSet.class);
-		given(returnResultSet.next()).willReturn(false);
-
-		final CallableStatement callableStatement = mock(CallableStatement.class);
-		final CallableStatement callableStatement2 = mock(CallableStatement.class);
-		given(callableStatement2.execute()).willReturn(true);
-		given(callableStatement2.getUpdateCount()).willReturn(-1);
-		given(callableStatement2.getResultSet()).willReturn(returnResultSet);
-		given(callableStatement2.getUpdateCount()).willReturn(-1);
-
-		given(this.connection.createStatement()).willReturn(this.statement);
-
-		this.template.setNativeJdbcExtractor(new NativeJdbcExtractor() {
-			@Override
-			public boolean isNativeConnectionNecessaryForNativeStatements() {
-				return false;
-			}
-			@Override
-			public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
-				return false;
-			}
-			@Override
-			public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
-				return false;
-			}
-			@Override
-			public Connection getNativeConnection(Connection con) {
-				return con;
-			}
-			@Override
-			public Connection getNativeConnectionFromStatement(Statement stmt) throws SQLException {
-				return stmt.getConnection();
-			}
-			@Override
-			public Statement getNativeStatement(Statement stmt) {
-				assertTrue(stmt == JdbcTemplateTests.this.statement);
-				return statement2;
-			}
-			@Override
-			public PreparedStatement getNativePreparedStatement(PreparedStatement ps) {
-				assertTrue(ps == JdbcTemplateTests.this.preparedStatement);
-				return preparedStatement2;
-			}
-			@Override
-			public CallableStatement getNativeCallableStatement(CallableStatement cs) {
-				assertTrue(cs == callableStatement);
-				return callableStatement2;
-			}
-			@Override
-			public ResultSet getNativeResultSet(ResultSet rs) {
-				return rs;
-			}
-		});
-
-		this.template.query("my query", new ResultSetExtractor<Object>() {
-			@Override
-			public Object extractData(ResultSet rs2) {
-				assertEquals(JdbcTemplateTests.this.resultSet, rs2);
-				return null;
-			}
-		});
-
-		this.template.query(new PreparedStatementCreator() {
-			@Override
-			public PreparedStatement createPreparedStatement(Connection conn) {
-				return JdbcTemplateTests.this.preparedStatement;
-			}
-		}, new ResultSetExtractor<Object>() {
-			@Override
-			public Object extractData(ResultSet rs2) {
-				assertEquals(JdbcTemplateTests.this.resultSet, rs2);
-				return null;
-			}
-		});
-
-		this.template.call(new CallableStatementCreator() {
-			@Override
-			public CallableStatement createCallableStatement(Connection con) {
-				return callableStatement;
-			}
-		}, new ArrayList<SqlParameter>());
-
-		verify(this.resultSet, times(2)).close();
-		verify(this.statement).close();
-		verify(this.preparedStatement).close();
-		verify(returnResultSet).close();
-		verify(callableStatement).close();
-		verify(this.connection, atLeastOnce()).close();
-	}
-
-	@Test
 	public void testStaticResultSetClosed() throws Exception {
 		ResultSet resultSet2 = mock(ResultSet.class);
 		reset(this.preparedStatement);
@@ -1246,7 +1146,7 @@ public class JdbcTemplateTests {
 		given(this.callableStatement.execute()).willReturn(true);
 		given(this.callableStatement.getUpdateCount()).willReturn(-1);
 
-		List<SqlParameter> params = new ArrayList<SqlParameter>();
+		List<SqlParameter> params = new ArrayList<>();
 		params.add(new SqlReturnResultSet("", new RowCallbackHandler() {
 			@Override
 			public void processRow(ResultSet rs) {
@@ -1286,7 +1186,7 @@ public class JdbcTemplateTests {
 		assertTrue("now it should have been set to case insensitive",
 				this.template.isResultsMapCaseInsensitive());
 
-		List<SqlParameter> params = new ArrayList<SqlParameter>();
+		List<SqlParameter> params = new ArrayList<>();
 		params.add(new SqlOutParameter("a", 12));
 
 		Map<String, Object> out = this.template.call(new CallableStatementCreator() {
@@ -1311,16 +1211,8 @@ public class JdbcTemplateTests {
 		given(this.connection.getMetaData()).willReturn(databaseMetaData);
 	}
 
-	private static class PlainNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
-		@Override
-		protected Connection doGetNativeConnection(Connection connection) throws SQLException {
-			return connection;
-		}
-	}
-
-
-	private static interface JdbcTemplateCallback {
+	private interface JdbcTemplateCallback {
 
 		void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch);
 	}
@@ -1329,6 +1221,7 @@ public class JdbcTemplateTests {
 	private static class Dispatcher implements PreparedStatementCreator, SqlProvider {
 
 		private int id;
+
 		private String sql;
 
 		public Dispatcher(int id, String sql) {
@@ -1348,4 +1241,5 @@ public class JdbcTemplateTests {
 			return this.sql;
 		}
 	}
+
 }

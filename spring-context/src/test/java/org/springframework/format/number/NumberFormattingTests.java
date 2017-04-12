@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.format.number;
 
-import static org.junit.Assert.assertEquals;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
@@ -25,6 +23,7 @@ import java.util.Locale;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -34,15 +33,18 @@ import org.springframework.format.support.FormattingConversionService;
 import org.springframework.util.StringValueResolver;
 import org.springframework.validation.DataBinder;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Keith Donald
  * @author Juergen Hoeller
  */
 public class NumberFormattingTests {
 
-	private FormattingConversionService conversionService = new FormattingConversionService();
+	private final FormattingConversionService conversionService = new FormattingConversionService();
 
 	private DataBinder binder;
+
 
 	@Before
 	public void setUp() {
@@ -52,12 +54,13 @@ public class NumberFormattingTests {
 			public String resolveStringValue(String strVal) {
 				if ("${pattern}".equals(strVal)) {
 					return "#,##.00";
-				} else {
+				}
+				else {
 					return strVal;
 				}
 			}
 		});
-		conversionService.addFormatterForFieldType(Number.class, new NumberFormatter());
+		conversionService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		conversionService.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());
 		LocaleContextHolder.setLocale(Locale.US);
 		binder = new DataBinder(new TestBean());
@@ -68,6 +71,7 @@ public class NumberFormattingTests {
 	public void tearDown() {
 		LocaleContextHolder.setLocale(null);
 	}
+
 
 	@Test
 	public void testDefaultNumberFormatting() {
@@ -171,6 +175,7 @@ public class NumberFormattingTests {
 		assertEquals("1,25.00,2,35.00", binder.getBindingResult().getFieldValue("patternList2"));
 	}
 
+
 	@SuppressWarnings("unused")
 	private static class TestBean {
 
@@ -260,7 +265,6 @@ public class NumberFormattingTests {
 		public void setPatternList2(List<BigDecimal> patternList2) {
 			this.patternList2 = patternList2;
 		}
-
 	}
 
 }

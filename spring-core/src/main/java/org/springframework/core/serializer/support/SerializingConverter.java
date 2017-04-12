@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,8 @@ import org.springframework.core.serializer.Serializer;
 import org.springframework.util.Assert;
 
 /**
- * A {@link Converter} that delegates to a {@link org.springframework.core.serializer.Serializer}
+ * A {@link Converter} that delegates to a
+ * {@link org.springframework.core.serializer.Serializer}
  * to convert an object to a byte array.
  *
  * @author Gary Russell
@@ -37,14 +38,14 @@ public class SerializingConverter implements Converter<Object, byte[]> {
 
 
 	/**
-	 * Create a default SerializingConverter that uses standard Java serialization.
+	 * Create a default {@code SerializingConverter} that uses standard Java serialization.
 	 */
 	public SerializingConverter() {
 		this.serializer = new DefaultSerializer();
 	}
 
 	/**
-	 * Create a SerializingConverter that delegates to the provided {@link Serializer}
+	 * Create a {@code SerializingConverter} that delegates to the provided {@link Serializer}.
 	 */
 	public SerializingConverter(Serializer<Object> serializer) {
 		Assert.notNull(serializer, "Serializer must not be null");
@@ -57,7 +58,7 @@ public class SerializingConverter implements Converter<Object, byte[]> {
 	 */
 	@Override
 	public byte[] convert(Object source) {
-		ByteArrayOutputStream byteStream = new ByteArrayOutputStream(256);
+		ByteArrayOutputStream byteStream = new ByteArrayOutputStream(1024);
 		try  {
 			this.serializer.serialize(source, byteStream);
 			return byteStream.toByteArray();

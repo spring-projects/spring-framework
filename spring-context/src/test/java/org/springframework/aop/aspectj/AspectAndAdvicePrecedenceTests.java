@@ -16,24 +16,25 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.junit.Assert.fail;
-
 import java.lang.reflect.Method;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.MethodBeforeAdvice;
-import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.Ordered;
+import org.springframework.tests.sample.beans.ITestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public final class AspectAndAdvicePrecedenceTests {
+public class AspectAndAdvicePrecedenceTests {
 
 	private PrecedenceTestAspect highPrecedenceAspect;
 
@@ -185,7 +186,9 @@ class PrecedenceTestAspect implements BeanNameAware, Ordered {
 		try {
 			ret = ((Integer)pjp.proceed()).intValue();
 		}
-		catch(Throwable t) { throw new RuntimeException(t); }
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+		}
 		this.collaborator.aroundAdviceOne(this.name);
 		return ret;
 	}
@@ -196,7 +199,9 @@ class PrecedenceTestAspect implements BeanNameAware, Ordered {
 		try {
 			ret = ((Integer)pjp.proceed()).intValue();
 		}
-		catch(Throwable t) {throw new RuntimeException(t);}
+		catch (Throwable t) {
+			throw new RuntimeException(t);
+		}
 		this.collaborator.aroundAdviceTwo(this.name);
 		return ret;
 	}

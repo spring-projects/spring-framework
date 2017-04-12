@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,8 @@ public class MaxUploadSizeExceededException extends MultipartException {
 
 	/**
 	 * Constructor for MaxUploadSizeExceededException.
-	 * @param maxUploadSize the maximum upload size allowed
+	 * @param maxUploadSize the maximum upload size allowed,
+	 * or -1 if the size limit isn't known
 	 */
 	public MaxUploadSizeExceededException(long maxUploadSize) {
 		this(maxUploadSize, null);
@@ -39,20 +40,22 @@ public class MaxUploadSizeExceededException extends MultipartException {
 
 	/**
 	 * Constructor for MaxUploadSizeExceededException.
-	 * @param maxUploadSize the maximum upload size allowed
+	 * @param maxUploadSize the maximum upload size allowed,
+	 * or -1 if the size limit isn't known
 	 * @param ex root cause from multipart parsing API in use
 	 */
 	public MaxUploadSizeExceededException(long maxUploadSize, Throwable ex) {
-		super("Maximum upload size of " + maxUploadSize + " bytes exceeded", ex);
+		super("Maximum upload size " + (maxUploadSize >= 0 ? "of " + maxUploadSize + " bytes " : "") + "exceeded", ex);
 		this.maxUploadSize = maxUploadSize;
 	}
 
 
 	/**
-	 * Return the maximum upload size allowed.
+	 * Return the maximum upload size allowed,
+	 * or -1 if the size limit isn't known.
 	 */
 	public long getMaxUploadSize() {
-		return maxUploadSize;
+		return this.maxUploadSize;
 	}
 
 }

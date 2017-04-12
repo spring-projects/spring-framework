@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,20 +23,16 @@ import javax.servlet.ServletContextListener;
  * Bootstrap listener to start up and shut down Spring's root {@link WebApplicationContext}.
  * Simply delegates to {@link ContextLoader} as well as to {@link ContextCleanupListener}.
  *
- * <p>This listener should be registered after
- * {@link org.springframework.web.util.Log4jConfigListener}
- * in {@code web.xml}, if the latter is used.
- *
  * <p>As of Spring 3.1, {@code ContextLoaderListener} supports injecting the root web
  * application context via the {@link #ContextLoaderListener(WebApplicationContext)}
- * constructor, allowing for programmatic configuration in Servlet 3.0+ environments. See
- * {@link org.springframework.web.WebApplicationInitializer} for usage examples.
+ * constructor, allowing for programmatic configuration in Servlet 3.0+ environments.
+ * See {@link org.springframework.web.WebApplicationInitializer} for usage examples.
  *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 17.02.2003
+ * @see #setContextInitializers
  * @see org.springframework.web.WebApplicationInitializer
- * @see org.springframework.web.util.Log4jConfigListener
  */
 public class ContextLoaderListener extends ContextLoader implements ServletContextListener {
 
@@ -97,6 +93,7 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	public ContextLoaderListener(WebApplicationContext context) {
 		super(context);
 	}
+
 
 	/**
 	 * Initialize the root web application context.

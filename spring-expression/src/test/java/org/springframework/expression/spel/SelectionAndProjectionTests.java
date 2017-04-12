@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +25,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.junit.Test;
+
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -34,9 +33,12 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Mark Fisher
  * @author Sam Brannen
+ * @author Juergen Hoeller
  */
 public class SelectionAndProjectionTests {
 
@@ -104,6 +106,21 @@ public class SelectionAndProjectionTests {
 		Object value = expression.getValue(context);
 		assertTrue(value instanceof Integer);
 		assertEquals(4, value);
+	}
+
+	@Test
+	public void selectionWithIterable() throws Exception {
+		Expression expression = new SpelExpressionParser().parseRaw("integers.?[#this<5]");
+		EvaluationContext context = new StandardEvaluationContext(new IterableTestBean());
+		Object value = expression.getValue(context);
+		assertTrue(value instanceof List);
+		List<?> list = (List<?>) value;
+		assertEquals(5, list.size());
+		assertEquals(0, list.get(0));
+		assertEquals(1, list.get(1));
+		assertEquals(2, list.get(2));
+		assertEquals(3, list.get(3));
+		assertEquals(4, list.get(4));
 	}
 
 	@Test
@@ -243,6 +260,20 @@ public class SelectionAndProjectionTests {
 	}
 
 	@Test
+	public void projectionWithIterable() throws Exception {
+		Expression expression = new SpelExpressionParser().parseRaw("#testList.![wrapper.value]");
+		EvaluationContext context = new StandardEvaluationContext();
+		context.setVariable("testList", IntegerTestBean.createIterable());
+		Object value = expression.getValue(context);
+		assertTrue(value instanceof List);
+		List<?> list = (List<?>) value;
+		assertEquals(3, list.size());
+		assertEquals(5, list.get(0));
+		assertEquals(6, list.get(1));
+		assertEquals(7, list.get(2));
+	}
+
+	@Test
 	public void projectionWithArray() throws Exception {
 		Expression expression = new SpelExpressionParser().parseRaw("#testArray.![wrapper.value]");
 		EvaluationContext context = new StandardEvaluationContext();
@@ -258,27 +289,10 @@ public class SelectionAndProjectionTests {
 		assertEquals(new Integer(7), array[2]);
 	}
 
-	static class MapTestBean {
-
-		private final Map<String, String> colors = new TreeMap<String, String>();
-
-		MapTestBean() {
-			// colors.put("black", "schwarz");
-			colors.put("red", "rot");
-			colors.put("brown", "braun");
-			colors.put("blue", "blau");
-			colors.put("yellow", "gelb");
-			colors.put("beige", "beige");
-		}
-
-		public Map<String, String> getColors() {
-			return colors;
-		}
-	}
 
 	static class ListTestBean {
 
-		private final List<Integer> integers = new ArrayList<Integer>();
+		private final List<Integer> integers = new ArrayList<>();
 
 		ListTestBean() {
 			for (int i = 0; i < 10; i++) {
@@ -291,9 +305,10 @@ public class SelectionAndProjectionTests {
 		}
 	}
 
+
 	static class SetTestBean {
 
-		private final Set<Integer> integers = new LinkedHashSet<Integer>();
+		private final Set<Integer> integers = new LinkedHashSet<>();
 
 		SetTestBean() {
 			for (int i = 0; i < 10; i++) {
@@ -305,6 +320,28 @@ public class SelectionAndProjectionTests {
 			return integers;
 		}
 	}
+
+
+	static class IterableTestBean {
+
+		private final Set<Integer> integers = new LinkedHashSet<>();
+
+		IterableTestBean() {
+			for (int i = 0; i < 10; i++) {
+				integers.add(i);
+			}
+		}
+
+		public Iterable<Integer> getIntegers() {
+			return new Iterable<Integer>() {
+				@Override
+				public Iterator<Integer> iterator() {
+					return integers.iterator();
+				}
+			};
+		}
+	}
+
 
 	static class ArrayTestBean {
 
@@ -328,6 +365,26 @@ public class SelectionAndProjectionTests {
 		}
 	}
 
+
+	static class MapTestBean {
+
+		private final Map<String, String> colors = new TreeMap<>();
+
+		MapTestBean() {
+			// colors.put("black", "schwarz");
+			colors.put("red", "rot");
+			colors.put("brown", "braun");
+			colors.put("blue", "blau");
+			colors.put("yellow", "gelb");
+			colors.put("beige", "beige");
+		}
+
+		public Map<String, String> getColors() {
+			return colors;
+		}
+	}
+
+
 	static class IntegerTestBean {
 
 		private final IntegerWrapper wrapper;
@@ -341,7 +398,7 @@ public class SelectionAndProjectionTests {
 		}
 
 		static List<IntegerTestBean> createList() {
-			List<IntegerTestBean> list = new ArrayList<IntegerTestBean>();
+			List<IntegerTestBean> list = new ArrayList<>();
 			for (int i = 0; i < 3; i++) {
 				list.add(new IntegerTestBean(i + 5));
 			}
@@ -349,11 +406,21 @@ public class SelectionAndProjectionTests {
 		}
 
 		static Set<IntegerTestBean> createSet() {
-			Set<IntegerTestBean> set = new LinkedHashSet<IntegerTestBean>();
+			Set<IntegerTestBean> set = new LinkedHashSet<>();
 			for (int i = 0; i < 3; i++) {
 				set.add(new IntegerTestBean(i + 5));
 			}
 			return set;
+		}
+
+		static Iterable<IntegerTestBean> createIterable() {
+			final Set<IntegerTestBean> set = createSet();
+			return new Iterable<IntegerTestBean>() {
+				@Override
+				public Iterator<IntegerTestBean> iterator() {
+					return set.iterator();
+				}
+			};
 		}
 
 		static IntegerTestBean[] createArray() {
@@ -361,13 +428,15 @@ public class SelectionAndProjectionTests {
 			for (int i = 0; i < 3; i++) {
 				if (i == 1) {
 					array[i] = new IntegerTestBean(5.9f);
-				} else {
+				}
+				else {
 					array[i] = new IntegerTestBean(i + 5);
 				}
 			}
 			return array;
 		}
 	}
+
 
 	static class IntegerWrapper {
 

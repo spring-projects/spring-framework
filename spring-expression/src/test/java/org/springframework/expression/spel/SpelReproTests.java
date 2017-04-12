@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,17 @@ package org.springframework.expression.spel;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -225,7 +228,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	public void SPR5804() throws Exception {
-		Map<String, String> m = new HashMap<String, String>();
+		Map<String, String> m = new HashMap<>();
 		m.put("foo", "bar");
 		StandardEvaluationContext eContext = new StandardEvaluationContext(m); // root is a map instance
 		eContext.addPropertyAccessor(new MapAccessor());
@@ -547,7 +550,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		public String floo = "bar";
 
 		public XX() {
-			m = new HashMap<String, String>();
+			m = new HashMap<>();
 			m.put("$foo", "wibble");
 			m.put("bar", "siddle");
 		}
@@ -576,7 +579,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	static class Holder {
 
-		public Map<String, String> map = new HashMap<String, String>();
+		public Map<String, String> map = new HashMap<>();
 	}
 
 
@@ -717,6 +720,9 @@ public class SpelReproTests extends AbstractExpressionTests {
 			else if (beanName.equals("foo.bar")) {
 				return "trouble";
 			}
+			else if (beanName.equals("&foo")) {
+				return "foo factory";
+			}
 			else if (beanName.equals("goo")) {
 				throw new AccessException("DONT ASK ME ABOUT GOO");
 			}
@@ -777,9 +783,9 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	public void mapOfMap_SPR7244() throws Exception {
-		Map<String, Object> map = new LinkedHashMap<String, Object>();
+		Map<String, Object> map = new LinkedHashMap<>();
 		map.put("uri", "http:");
-		Map<String, String> nameMap = new LinkedHashMap<String, String>();
+		Map<String, String> nameMap = new LinkedHashMap<>();
 		nameMap.put("givenName", "Arthur");
 		map.put("value", nameMap);
 
@@ -843,11 +849,11 @@ public class SpelReproTests extends AbstractExpressionTests {
 		public Map<String, String> ms;
 
 		C() {
-			ls = new ArrayList<String>();
+			ls = new ArrayList<>();
 			ls.add("abc");
 			ls.add("def");
 			as = new String[] { "abc", "def" };
-			ms = new HashMap<String, String>();
+			ms = new HashMap<>();
 			ms.put("abc", "xyz");
 			ms.put("def", "pqr");
 		}
@@ -871,7 +877,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	public void greaterThanWithNulls_SPR7840() throws Exception {
-		List<D> list = new ArrayList<D>();
+		List<D> list = new ArrayList<>();
 		list.add(new D("aaa"));
 		list.add(new D("bbb"));
 		list.add(new D(null));
@@ -931,7 +937,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		EvaluationContext emptyEvalContext = new StandardEvaluationContext();
 
-		List<TypeDescriptor> args = new ArrayList<TypeDescriptor>();
+		List<TypeDescriptor> args = new ArrayList<>();
 		args.add(TypeDescriptor.forObject(new Integer(42)));
 
 		ConversionPriority1 target = new ConversionPriority1();
@@ -971,7 +977,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		WideningPrimitiveConversion target = new WideningPrimitiveConversion();
 		EvaluationContext emptyEvalContext = new StandardEvaluationContext();
 
-		List<TypeDescriptor> args = new ArrayList<TypeDescriptor>();
+		List<TypeDescriptor> args = new ArrayList<>();
 		args.add(TypeDescriptor.forObject(INTEGER_VALUE));
 
 		MethodExecutor me = new ReflectiveMethodResolver(true).resolve(emptyEvalContext, target, "getX", args);
@@ -984,10 +990,10 @@ public class SpelReproTests extends AbstractExpressionTests {
 	@Test
 	public void varargsAndPrimitives_SPR8174() throws Exception {
 		EvaluationContext emptyEvalContext = new StandardEvaluationContext();
-		List<TypeDescriptor> args = new ArrayList<TypeDescriptor>();
+		List<TypeDescriptor> args = new ArrayList<>();
 
 		args.add(TypeDescriptor.forObject(34L));
-		ReflectionUtil<Integer> ru = new ReflectionUtil<Integer>();
+		ReflectionUtil<Integer> ru = new ReflectionUtil<>();
 		MethodExecutor me = new ReflectiveMethodResolver().resolve(emptyEvalContext, ru, "methodToCall", args);
 
 		args.set(0, TypeDescriptor.forObject(23));
@@ -1107,7 +1113,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 			public int DIV = 1;
 			public int div = 3;
 
-			public Map<String, String> m = new HashMap<String, String>();
+			public Map<String, String> m = new HashMap<>();
 
 			Reserver() {
 				m.put("NE", "xyz");
@@ -1206,7 +1212,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		@Override
 		public Class<?>[] getSpecificTargetClasses() {
-			return new Class[] { ContextObject.class };
+			return new Class<?>[] {ContextObject.class};
 		}
 
 		@Override
@@ -1223,10 +1229,10 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	class ContextObject {
 
-		public Map<String, String> firstContext = new HashMap<String, String>();
-		public Map<String, String> secondContext = new HashMap<String, String>();
-		public Map<String, String> thirdContext = new HashMap<String, String>();
-		public Map<String, String> fourthContext = new HashMap<String, String>();
+		public Map<String, String> firstContext = new HashMap<>();
+		public Map<String, String> secondContext = new HashMap<>();
+		public Map<String, String> thirdContext = new HashMap<>();
+		public Map<String, String> fourthContext = new HashMap<>();
 
 		public ContextObject() {
 			firstContext.put("shouldBeFirst", "first");
@@ -1270,13 +1276,13 @@ public class SpelReproTests extends AbstractExpressionTests {
 	public void customStaticFunctions_SPR9038() {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		List<MethodResolver> methodResolvers = new ArrayList<MethodResolver>();
+		List<MethodResolver> methodResolvers = new ArrayList<>();
 		methodResolvers.add(new ReflectiveMethodResolver() {
 			@Override
 			protected Method[] getMethods(Class<?> type) {
 				try {
 					return new Method[] {
-							Integer.class.getDeclaredMethod("parseInt", new Class[] { String.class, Integer.TYPE }) };
+							Integer.class.getDeclaredMethod("parseInt", new Class<?>[] {String.class, Integer.TYPE})};
 				}
 				catch (NoSuchMethodException ex) {
 					return new Method[0];
@@ -1657,15 +1663,15 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	public void SPR10146_malformedExpressions() throws Exception {
-		doTestSpr10146("/foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146("*foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146("%foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146("<foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146(">foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146("&&foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146("||foo", "EL1070E:(pos 0): Problem parsing left operand");
-		doTestSpr10146("&foo", "EL1069E:(pos 0): missing expected character '&'");
-		doTestSpr10146("|foo", "EL1069E:(pos 0): missing expected character '|'");
+		doTestSpr10146("/foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146("*foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146("%foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146("<foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146(">foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146("&&foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146("||foo", "EL1070E: Problem parsing left operand");
+		doTestSpr10146("&foo", "EL1069E: missing expected character '&'");
+		doTestSpr10146("|foo", "EL1069E: missing expected character '|'");
 	}
 
 	private void doTestSpr10146(String expression, String expectedMessage) {
@@ -1696,7 +1702,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	@Test
 	public void SPR10328() throws Exception {
 		thrown.expect(SpelParseException.class);
-		thrown.expectMessage("EL1071E:(pos 2): A required selection expression has not been specified");
+		thrown.expectMessage("EL1071E: A required selection expression has not been specified");
 		Expression exp = parser.parseExpression("$[]");
 		exp.getValue(Arrays.asList("foo", "bar", "baz"));
 	}
@@ -1796,7 +1802,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	public void SPR9194() {
 		TestClass2 one = new TestClass2("abc");
 		TestClass2 two = new TestClass2("abc");
-		Map<String, TestClass2> map = new HashMap<String, TestClass2>();
+		Map<String, TestClass2> map = new HashMap<>();
 		map.put("one", one);
 		map.put("two", two);
 
@@ -1807,7 +1813,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	public void SPR11348() {
-		Collection<String> coll = new LinkedHashSet<String>();
+		Collection<String> coll = new LinkedHashSet<>();
 		coll.add("one");
 		coll.add("two");
 		coll = Collections.unmodifiableCollection(coll);
@@ -1854,10 +1860,272 @@ public class SpelReproTests extends AbstractExpressionTests {
 		assertEquals(1, exp.getValue(sec));
 	}
 
+	@Test
+	public void SPR9735() {
+		Item item = new Item();
+		item.setName("parent");
 
-	private static enum ABC { A, B, C }
+		Item item1 = new Item();
+		item1.setName("child1");
 
-	private static enum XYZ { X, Y, Z }
+		Item item2 = new Item();
+		item2.setName("child2");
+
+		item.add(item1);
+		item.add(item2);
+
+		ExpressionParser parser = new SpelExpressionParser();
+		EvaluationContext context = new StandardEvaluationContext();
+		Expression exp = parser.parseExpression("#item[0].name");
+		context.setVariable("item", item);
+
+		assertEquals("child1", exp.getValue(context));
+	}
+
+	@Test
+	public void SPR12502() {
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expression = parser.parseExpression("#root.getClass().getName()");
+		assertEquals(UnnamedUser.class.getName(), expression.getValue(new UnnamedUser()));
+		assertEquals(NamedUser.class.getName(), expression.getValue(new NamedUser()));
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void SPR12522() {
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expression = parser.parseExpression("T(java.util.Arrays).asList('')");
+		Object value = expression.getValue();
+		assertTrue(value instanceof List);
+		assertTrue(((List) value).isEmpty());
+	}
+
+	@Test
+	public void SPR12803() {
+		StandardEvaluationContext sec = new StandardEvaluationContext();
+		sec.setVariable("iterable", Collections.emptyList());
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expression = parser.parseExpression("T(org.springframework.expression.spel.SpelReproTests.FooLists).newArrayList(#iterable)");
+		assertTrue(expression.getValue(sec) instanceof ArrayList);
+	}
+
+	@Test
+	public void SPR12808() {
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expression = parser.parseExpression("T(org.springframework.expression.spel.SpelReproTests.DistanceEnforcer).from(#no)");
+		StandardEvaluationContext sec = new StandardEvaluationContext();
+		sec.setVariable("no", new Integer(1));
+		assertTrue(expression.getValue(sec).toString().startsWith("Integer"));
+		sec = new StandardEvaluationContext();
+		sec.setVariable("no", new Float(1.0));
+		assertTrue(expression.getValue(sec).toString().startsWith("Number"));
+		sec = new StandardEvaluationContext();
+		sec.setVariable("no", "1.0");
+		assertTrue(expression.getValue(sec).toString().startsWith("Object"));
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void SPR13055() throws Exception {
+		List<Map<String, Object>> myPayload = new ArrayList<>();
+
+		Map<String, Object> v1 = new HashMap<>();
+		Map<String, Object> v2 = new HashMap<>();
+
+		v1.put("test11", "test11");
+		v1.put("test12", "test12");
+		v2.put("test21", "test21");
+		v2.put("test22", "test22");
+
+		myPayload.add(v1);
+		myPayload.add(v2);
+
+		EvaluationContext context = new StandardEvaluationContext(myPayload);
+
+		ExpressionParser parser = new SpelExpressionParser();
+
+		String ex = "#root.![T(org.springframework.util.StringUtils).collectionToCommaDelimitedString(#this.values())]";
+		List res = parser.parseExpression(ex).getValue(context, List.class);
+		assertEquals("[test12,test11, test22,test21]", res.toString());
+
+		res = parser.parseExpression("#root.![#this.values()]").getValue(context,
+				List.class);
+		assertEquals("[[test12, test11], [test22, test21]]", res.toString());
+
+		res = parser.parseExpression("#root.![values()]").getValue(context, List.class);
+		assertEquals("[[test12, test11], [test22, test21]]", res.toString());
+	}
+
+	@Test
+	public void AccessingFactoryBean_spr9511() {
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		context.setBeanResolver(new MyBeanResolver());
+		Expression expr = new SpelExpressionParser().parseRaw("@foo");
+		assertEquals("custard", expr.getValue(context));
+		expr = new SpelExpressionParser().parseRaw("&foo");
+		assertEquals("foo factory",expr.getValue(context));
+
+		try {
+			expr = new SpelExpressionParser().parseRaw("&@foo");
+			fail("Illegal syntax, error expected");
+		}
+		catch (SpelParseException spe) {
+			assertEquals(SpelMessage.INVALID_BEAN_REFERENCE,spe.getMessageCode());
+			assertEquals(0,spe.getPosition());
+		}
+
+		try {
+			expr = new SpelExpressionParser().parseRaw("@&foo");
+			fail("Illegal syntax, error expected");
+		}
+		catch (SpelParseException spe) {
+			assertEquals(SpelMessage.INVALID_BEAN_REFERENCE,spe.getMessageCode());
+			assertEquals(0,spe.getPosition());
+		}
+	}
+
+	@Test
+	public void SPR12035() {
+		ExpressionParser parser = new SpelExpressionParser();
+
+		Expression expression1 = parser.parseExpression("list.?[ value>2 ].size()!=0");
+		assertTrue(expression1.getValue(new BeanClass(new ListOf(1.1), new ListOf(2.2)),
+				Boolean.class));
+
+		Expression expression2 = parser.parseExpression("list.?[ T(java.lang.Math).abs(value) > 2 ].size()!=0");
+		assertTrue(expression2.getValue(new BeanClass(new ListOf(1.1), new ListOf(-2.2)),
+				Boolean.class));
+	}
+
+	static class CCC {
+		public boolean method(Object o) {
+			System.out.println(o);
+			return false;
+		}
+	}
+
+	@Test
+	public void SPR13055_maps() {
+		EvaluationContext context = new StandardEvaluationContext();
+		ExpressionParser parser = new SpelExpressionParser();
+
+		Expression ex = parser.parseExpression("{'a':'y','b':'n'}.![value=='y'?key:null]");
+		assertEquals("[a, null]", ex.getValue(context).toString());
+
+		ex = parser.parseExpression("{2:4,3:6}.![T(java.lang.Math).abs(#this.key) + 5]");
+		assertEquals("[7, 8]", ex.getValue(context).toString());
+
+		ex = parser.parseExpression("{2:4,3:6}.![T(java.lang.Math).abs(#this.value) + 5]");
+		assertEquals("[9, 11]", ex.getValue(context).toString());
+	}
+
+	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void SPR10417() {
+		List list1 = new ArrayList();
+		list1.add("a");
+		list1.add("b");
+		list1.add("x");
+		List list2 = new ArrayList();
+		list2.add("c");
+		list2.add("x");
+		EvaluationContext context = new StandardEvaluationContext();
+		context.setVariable("list1", list1);
+		context.setVariable("list2", list2);
+
+		// #this should be the element from list1
+		Expression ex = parser.parseExpression("#list1.?[#list2.contains(#this)]");
+		Object result = ex.getValue(context);
+		assertEquals("[x]", result.toString());
+
+		// toString() should be called on the element from list1
+		ex = parser.parseExpression("#list1.?[#list2.contains(toString())]");
+		result = ex.getValue(context);
+		assertEquals("[x]", result.toString());
+
+		List list3 = new ArrayList();
+		list3.add(1);
+		list3.add(2);
+		list3.add(3);
+		list3.add(4);
+
+		context = new StandardEvaluationContext();
+		context.setVariable("list3", list3);
+		ex = parser.parseExpression("#list3.?[#this > 2]");
+		result = ex.getValue(context);
+		assertEquals("[3, 4]", result.toString());
+
+		ex = parser.parseExpression("#list3.?[#this >= T(java.lang.Math).abs(T(java.lang.Math).abs(#this))]");
+		result = ex.getValue(context);
+		assertEquals("[1, 2, 3, 4]", result.toString());
+	}
+
+	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void SPR10417_maps() {
+		Map map1 = new HashMap();
+		map1.put("A", 65);
+		map1.put("B", 66);
+		map1.put("X", 66);
+		Map map2 = new HashMap();
+		map2.put("X", 66);
+
+		EvaluationContext context = new StandardEvaluationContext();
+		context.setVariable("map1", map1);
+		context.setVariable("map2", map2);
+
+		// #this should be the element from list1
+		Expression ex = parser.parseExpression("#map1.?[#map2.containsKey(#this.getKey())]");
+		Object result = ex.getValue(context);
+		assertEquals("{X=66}", result.toString());
+
+		ex = parser.parseExpression("#map1.?[#map2.containsKey(key)]");
+		result = ex.getValue(context);
+		assertEquals("{X=66}", result.toString());
+	}
+
+	@Test
+	public void SPR13918() {
+		EvaluationContext context = new StandardEvaluationContext();
+		context.setVariable("encoding", "UTF-8");
+
+		Expression ex = parser.parseExpression("T(java.nio.charset.Charset).forName(#encoding)");
+		Object result = ex.getValue(context);
+		assertEquals(StandardCharsets.UTF_8, result);
+	}
+
+
+	public static class ListOf {
+
+		private final double value;
+
+		public ListOf(double v) {
+			this.value = v;
+		}
+
+		public double getValue() {
+			return value;
+		}
+	}
+
+
+	public static class BeanClass {
+
+		private final List<ListOf> list;
+
+		public BeanClass(ListOf... list) {
+			this.list = Arrays.asList(list);
+		}
+
+		public List<ListOf> getList() {
+			return list;
+		}
+	}
+
+
+	private enum ABC { A, B, C }
+
+	private enum XYZ { X, Y, Z }
 
 
 	public static class BooleanHolder {
@@ -1866,27 +2134,27 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		private boolean primitiveProperty = true;
 
-		public Boolean isSimpleProperty() {
-			return simpleProperty;
-		}
-
 		public void setSimpleProperty(Boolean simpleProperty) {
 			this.simpleProperty = simpleProperty;
 		}
 
-		public boolean isPrimitiveProperty() {
-			return primitiveProperty;
+		public Boolean isSimpleProperty() {
+			return this.simpleProperty;
 		}
 
 		public void setPrimitiveProperty(boolean primitiveProperty) {
 			this.primitiveProperty = primitiveProperty;
 		}
+
+		public boolean isPrimitiveProperty() {
+			return this.primitiveProperty;
+		}
 	}
 
 
-	private static interface GenericInterface<T extends Number> {
+	private interface GenericInterface<T extends Number> {
 
-		public T getProperty();
+		T getProperty();
 	}
 
 
@@ -1911,9 +2179,9 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 
-	public static interface StaticFinal {
+	public interface StaticFinal {
 
-		public static final String VALUE = "interfaceValue";
+		String VALUE = "interfaceValue";
 	}
 
 
@@ -1933,12 +2201,12 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		private String name = "name";
 
-		public String getName() {
-			return name;
-		}
-
 		public void setName(String name) {
 			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
 		}
 	}
 
@@ -1951,25 +2219,22 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 
-	static class TestClass2 { // SPR-9194
+	static class TestClass2 {  // SPR-9194
 
 		String string;
-
 
 		public TestClass2(String string) {
 			this.string = string;
 		}
 
-		@Override
-		public int hashCode() {
-			return 0;
+		public boolean equals(Object other) {
+			return (this == other || (other instanceof TestClass2 &&
+					this.string.equals(((TestClass2) other).string)));
 		}
 
-		public boolean equals(Object o) {
-			if (o instanceof TestClass2) {
-				return string.equals(((TestClass2) o).string);
-			}
-			return false;
+		@Override
+		public int hashCode() {
+			return this.string.hashCode();
 		}
 	}
 
@@ -1983,20 +2248,191 @@ public class SpelReproTests extends AbstractExpressionTests {
 		}
 
 		public int parameter() {
-			return counter.incrementAndGet();
+			return this.counter.incrementAndGet();
 		}
 
 		@Override
 		public Object resolve(EvaluationContext context, String beanName) throws AccessException {
-			return beanName.equals("bean") ? this : null;
+			return (beanName.equals("bean") ? this : null);
 		}
 	}
 
 
-	@SuppressWarnings({ "rawtypes", "serial" })
+	@SuppressWarnings({"rawtypes", "serial"})
 	public static class MapWithConstant extends HashMap {
 
 		public static final int X = 1;
+	}
+
+
+	public class Item implements List<Item> {
+
+		private String name;
+
+		private List<Item> children = new ArrayList<>();
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		@Override
+		public int size() {
+			return this.children.size();
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return this.children.isEmpty();
+		}
+
+		@Override
+		public boolean contains(Object o) {
+			return this.children.contains(o);
+		}
+
+		@Override
+		public Iterator<Item> iterator() {
+			return this.children.iterator();
+		}
+
+		@Override
+		public Object[] toArray() {
+			return this.children.toArray();
+		}
+
+		@Override
+		public <T> T[] toArray(T[] a) {
+			return this.children.toArray(a);
+		}
+
+		@Override
+		public boolean add(Item e) {
+			return this.children.add(e);
+		}
+
+		@Override
+		public boolean remove(Object o) {
+			return this.children.remove(o);
+		}
+
+		@Override
+		public boolean containsAll(Collection<?> c) {
+			return this.children.containsAll(c);
+		}
+
+		@Override
+		public boolean addAll(Collection<? extends Item> c) {
+			return this.children.addAll(c);
+		}
+
+		@Override
+		public boolean addAll(int index, Collection<? extends Item> c) {
+			return this.children.addAll(index, c);
+		}
+
+		@Override
+		public boolean removeAll(Collection<?> c) {
+			return this.children.removeAll(c);
+		}
+
+		@Override
+		public boolean retainAll(Collection<?> c) {
+			return this.children.retainAll(c);
+		}
+
+		@Override
+		public void clear() {
+			this.children.clear();
+		}
+
+		@Override
+		public Item get(int index) {
+			return this.children.get(index);
+		}
+
+		@Override
+		public Item set(int index, Item element) {
+			return this.children.set(index, element);
+		}
+
+		@Override
+		public void add(int index, Item element) {
+			this.children.add(index, element);
+		}
+
+		@Override
+		public Item remove(int index) {
+			return this.children.remove(index);
+		}
+
+		@Override
+		public int indexOf(Object o) {
+			return this.children.indexOf(o);
+		}
+
+		@Override
+		public int lastIndexOf(Object o) {
+			return this.children.lastIndexOf(o);
+		}
+
+		@Override
+		public ListIterator<Item> listIterator() {
+			return this.children.listIterator();
+		}
+
+		@Override
+		public ListIterator<Item> listIterator(int index) {
+			return this.children.listIterator(index);
+		}
+
+		@Override
+		public List<Item> subList(int fromIndex, int toIndex) {
+			return this.children.subList(fromIndex, toIndex);
+		}
+	}
+
+
+	public static class UnnamedUser {
+	}
+
+
+	public static class NamedUser {
+
+		public String getName() {
+			return "foo";
+		}
+	}
+
+
+	public static class FooLists {
+
+		public static <T> List<T> newArrayList(Iterable<T> iterable) {
+			return new ArrayList<>();
+		}
+
+		public static <T> List<T> newArrayList(Object... elements) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+
+	public static class DistanceEnforcer {
+
+		public static String from(Number no) {
+			return "Number:" + no.toString();
+		}
+
+		public static String from(Integer no) {
+			return "Integer:" + no.toString();
+		}
+
+		public static String from(Object no) {
+			return "Object:" + no.toString();
+		}
 	}
 
 }

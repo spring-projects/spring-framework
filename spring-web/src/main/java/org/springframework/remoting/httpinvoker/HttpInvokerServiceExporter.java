@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.remoting.httpinvoker;
 
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -40,12 +41,18 @@ import org.springframework.web.util.NestedServletException;
  *
  * <p>Deserializes remote invocation objects and serializes remote invocation
  * result objects. Uses Java serialization just like RMI, but provides the
- * same ease of setup as Caucho's HTTP-based Hessian and Burlap protocols.
+ * same ease of setup as Caucho's HTTP-based Hessian protocol.
  *
  * <p><b>HTTP invoker is the recommended protocol for Java-to-Java remoting.</b>
- * It is more powerful and more extensible than Hessian and Burlap, at the
- * expense of being tied to Java. Nevertheless, it is as easy to set up as
- * Hessian and Burlap, which is its main advantage compared to RMI.
+ * It is more powerful and more extensible than Hessian, at the expense of
+ * being tied to Java. Nevertheless, it is as easy to set up as Hessian,
+ * which is its main advantage compared to RMI.
+ *
+ * <p><b>WARNING: Be aware of vulnerabilities due to unsafe Java deserialization:
+ * Manipulated input streams could lead to unwanted code execution on the server
+ * during the deserialization step. As a consequence, do not expose HTTP invoker
+ * endpoints to untrusted clients but rather just between your own services.</b>
+ * In general, we strongly recommend any other message format (e.g. JSON) instead.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -53,10 +60,8 @@ import org.springframework.web.util.NestedServletException;
  * @see HttpInvokerProxyFactoryBean
  * @see org.springframework.remoting.rmi.RmiServiceExporter
  * @see org.springframework.remoting.caucho.HessianServiceExporter
- * @see org.springframework.remoting.caucho.BurlapServiceExporter
  */
-public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExporter
-		implements HttpRequestHandler {
+public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExporter implements HttpRequestHandler {
 
 	/**
 	 * Reads a remote invocation from the request, executes it,
@@ -81,10 +86,8 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 
 	/**
 	 * Read a RemoteInvocation from the given HTTP request.
-	 * <p>Delegates to
-	 * {@link #readRemoteInvocation(javax.servlet.http.HttpServletRequest, java.io.InputStream)}
-	 * with the
-	 * {@link javax.servlet.ServletRequest#getInputStream() servlet request's input stream}.
+	 * <p>Delegates to {@link #readRemoteInvocation(HttpServletRequest, InputStream)} with
+	 * the {@link HttpServletRequest#getInputStream() servlet request's input stream}.
 	 * @param request current HTTP request
 	 * @return the RemoteInvocation object
 	 * @throws IOException in case of I/O failure
@@ -169,7 +172,8 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 			HttpServletRequest request, HttpServletResponse response, RemoteInvocationResult result, OutputStream os)
 			throws IOException {
 
-		ObjectOutputStream oos = createObjectOutputStream(decorateOutputStream(request, response, os));
+		ObjectOutputStream oos =
+				createObjectOutputStream(new FlushGuardedOutputStream(decorateOutputStream(request, response, os)));
 		try {
 			doWriteRemoteInvocationResult(result, oos);
 		}
@@ -193,6 +197,28 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 			HttpServletRequest request, HttpServletResponse response, OutputStream os) throws IOException {
 
 		return os;
+	}
+
+
+	/**
+	 * Decorate an {@code OutputStream} to guard against {@code flush()} calls,
+	 * which are turned into no-ops.
+	 * <p>Because {@link ObjectOutputStream#close()} will in fact flush/drain
+	 * the underlying stream twice, this {@link FilterOutputStream} will
+	 * guard against individual flush calls. Multiple flush calls can lead
+	 * to performance issues, since writes aren't gathered as they should be.
+	 * @see <a href="https://jira.spring.io/browse/SPR-14040">SPR-14040</a>
+	 */
+	private static class FlushGuardedOutputStream extends FilterOutputStream {
+
+		public FlushGuardedOutputStream(OutputStream out) {
+			super(out);
+		}
+
+		@Override
+		public void flush() throws IOException {
+			// Do nothing on flush
+		}
 	}
 
 }

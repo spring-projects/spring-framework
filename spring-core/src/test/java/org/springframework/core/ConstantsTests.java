@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ package org.springframework.core;
 import java.util.Locale;
 import java.util.Set;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
@@ -27,9 +29,10 @@ import junit.framework.TestCase;
  * @author Rick Evans
  * @since 28.04.2003
  */
-public class ConstantsTests extends TestCase {
+public class ConstantsTests {
 
-	public void testConstants() {
+	@Test
+	public void constants() {
 		Constants c = new Constants(A.class);
 		assertEquals(A.class.getName(), c.getClassName());
 		assertEquals(9, c.getSize());
@@ -42,7 +45,7 @@ public class ConstantsTests extends TestCase {
 			c.asNumber("bogus");
 			fail("Can't get bogus field");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 
 		assertTrue(c.asString("S1").equals(A.S1));
@@ -50,11 +53,12 @@ public class ConstantsTests extends TestCase {
 			c.asNumber("S1");
 			fail("Wrong type");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 	}
 
-	public void testGetNames() {
+	@Test
+	public void getNames() {
 		Constants c = new Constants(A.class);
 
 		Set<?> names = c.getNames("");
@@ -72,7 +76,8 @@ public class ConstantsTests extends TestCase {
 		assertTrue(names.contains("DOG"));
 	}
 
-	public void testGetValues() {
+	@Test
+	public void getValues() {
 		Constants c = new Constants(A.class);
 
 		Set<?> values = c.getValues("");
@@ -96,7 +101,8 @@ public class ConstantsTests extends TestCase {
 		assertTrue(values.contains(new Integer(2)));
 	}
 
-	public void testGetValuesInTurkey() {
+	@Test
+	public void getValuesInTurkey() {
 		Locale oldLocale = Locale.getDefault();
 		Locale.setDefault(new Locale("tr", ""));
 		try {
@@ -127,7 +133,8 @@ public class ConstantsTests extends TestCase {
 		}
 	}
 
-	public void testSuffixAccess() {
+	@Test
+	public void suffixAccess() {
 		Constants c = new Constants(A.class);
 
 		Set<?> names = c.getNamesForSuffix("_PROPERTY");
@@ -141,7 +148,8 @@ public class ConstantsTests extends TestCase {
 		assertTrue(values.contains(new Integer(4)));
 	}
 
-	public void testToCode() {
+	@Test
+	public void toCode() {
 		Constants c = new Constants(A.class);
 
 		assertEquals(c.toCode(new Integer(0), ""), "DOG");
@@ -162,13 +170,13 @@ public class ConstantsTests extends TestCase {
 			c.toCode("bogus", "bogus");
 			fail("Should have thrown ConstantException");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 		try {
 			c.toCode("bogus", null);
 			fail("Should have thrown ConstantException");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 
 		assertEquals(c.toCodeForProperty(new Integer(1), "myProperty"), "MY_PROPERTY_NO");
@@ -177,7 +185,7 @@ public class ConstantsTests extends TestCase {
 			c.toCodeForProperty("bogus", "bogus");
 			fail("Should have thrown ConstantException");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 
 		assertEquals(c.toCodeForSuffix(new Integer(0), ""), "DOG");
@@ -198,35 +206,39 @@ public class ConstantsTests extends TestCase {
 			c.toCodeForSuffix("bogus", "bogus");
 			fail("Should have thrown ConstantException");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 		try {
 			c.toCodeForSuffix("bogus", null);
 			fail("Should have thrown ConstantException");
 		}
-		catch (ConstantException expected) {
+		catch (Constants.ConstantException expected) {
 		}
 	}
 
-	public void testGetValuesWithNullPrefix() throws Exception {
+	@Test
+	public void getValuesWithNullPrefix() throws Exception {
 		Constants c = new Constants(A.class);
 		Set<?> values = c.getValues(null);
 		assertEquals("Must have returned *all* public static final values", 7, values.size());
 	}
 
-	public void testGetValuesWithEmptyStringPrefix() throws Exception {
+	@Test
+	public void getValuesWithEmptyStringPrefix() throws Exception {
 		Constants c = new Constants(A.class);
 		Set<Object> values = c.getValues("");
 		assertEquals("Must have returned *all* public static final values", 7, values.size());
 	}
 
-	public void testGetValuesWithWhitespacedStringPrefix() throws Exception {
+	@Test
+	public void getValuesWithWhitespacedStringPrefix() throws Exception {
 		Constants c = new Constants(A.class);
 		Set<?> values = c.getValues(" ");
 		assertEquals("Must have returned *all* public static final values", 7, values.size());
 	}
 
-	public void testWithClassThatExposesNoConstants() throws Exception {
+	@Test
+	public void withClassThatExposesNoConstants() throws Exception {
 		Constants c = new Constants(NoConstants.class);
 		assertEquals(0, c.getSize());
 		final Set<?> values = c.getValues("");
@@ -234,7 +246,8 @@ public class ConstantsTests extends TestCase {
 		assertEquals(0, values.size());
 	}
 
-	public void testCtorWithNullClass() throws Exception {
+	@Test
+	public void ctorWithNullClass() throws Exception {
 		try {
 			new Constants(null);
 			fail("Must have thrown IllegalArgumentException");

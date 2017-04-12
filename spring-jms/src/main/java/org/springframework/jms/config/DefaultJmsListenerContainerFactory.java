@@ -20,15 +20,14 @@ import java.util.concurrent.Executor;
 
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.util.BackOff;
+import org.springframework.util.backoff.BackOff;
 
 /**
- * A {@link JmsListenerContainerFactory} implementation to build regular
+ * A {@link JmsListenerContainerFactory} implementation to build a regular
  * {@link DefaultMessageListenerContainer}.
  *
- * <p>This should be the default for most users and a good transition
- * paths for those that are used to build such container definition
- * manually.
+ * <p>This should be the default for most users and a good transition paths
+ * for those that are used to build such container definition manually.
  *
  * @author Stephane Nicoll
  * @since 4.1
@@ -54,68 +53,70 @@ public class DefaultJmsListenerContainerFactory
 
 	private BackOff backOff;
 
+
 	/**
-	 * @see DefaultMessageListenerContainer#setTaskExecutor(java.util.concurrent.Executor)
+	 * @see DefaultMessageListenerContainer#setTaskExecutor
 	 */
 	public void setTaskExecutor(Executor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
 	/**
-	 * @see DefaultMessageListenerContainer#setTransactionManager(PlatformTransactionManager)
+	 * @see DefaultMessageListenerContainer#setTransactionManager
 	 */
 	public void setTransactionManager(PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
 	}
 
 	/**
-	 * @see DefaultMessageListenerContainer#setCacheLevel(int)
+	 * @see DefaultMessageListenerContainer#setCacheLevel
 	 */
 	public void setCacheLevel(Integer cacheLevel) {
 		this.cacheLevel = cacheLevel;
 	}
 
 	/**
-	 * @see DefaultMessageListenerContainer#setCacheLevelName(String)
+	 * @see DefaultMessageListenerContainer#setCacheLevelName
 	 */
 	public void setCacheLevelName(String cacheLevelName) {
 		this.cacheLevelName = cacheLevelName;
 	}
 
 	/**
-	 * @see DefaultMessageListenerContainer#setConcurrency(String)
+	 * @see DefaultMessageListenerContainer#setConcurrency
 	 */
 	public void setConcurrency(String concurrency) {
 		this.concurrency = concurrency;
 	}
 
 	/**
-	 * @see DefaultMessageListenerContainer#setMaxMessagesPerTask(int)
+	 * @see DefaultMessageListenerContainer#setMaxMessagesPerTask
 	 */
 	public void setMaxMessagesPerTask(Integer maxMessagesPerTask) {
 		this.maxMessagesPerTask = maxMessagesPerTask;
 	}
 
 	/**
-	 * @see DefaultMessageListenerContainer#setReceiveTimeout(long)
+	 * @see DefaultMessageListenerContainer#setReceiveTimeout
 	 */
 	public void setReceiveTimeout(Long receiveTimeout) {
 		this.receiveTimeout = receiveTimeout;
 	}
 
 	/**
-	 * @see DefaultMessageListenerContainer#setRecoveryInterval(long)
+	 * @see DefaultMessageListenerContainer#setRecoveryInterval
 	 */
 	public void setRecoveryInterval(Long recoveryInterval) {
 		this.recoveryInterval = recoveryInterval;
 	}
 
 	/**
-	 * @see DefaultMessageListenerContainer#setBackOff(BackOff)
+	 * @see DefaultMessageListenerContainer#setBackOff
 	 */
 	public void setBackOff(BackOff backOff) {
 		this.backOff = backOff;
 	}
+
 
 	@Override
 	protected DefaultMessageListenerContainer createContainerInstance() {
@@ -151,7 +152,7 @@ public class DefaultJmsListenerContainerFactory
 		if (this.backOff != null) {
 			container.setBackOff(this.backOff);
 			if (this.recoveryInterval != null) {
-				logger.warn("Ignoring recovery interval value as a BackOff instance is set.");
+				logger.warn("Ignoring recovery interval in DefaultJmsListenerContainerFactory in favor of BackOff");
 			}
 		}
 		else if (this.recoveryInterval != null) {

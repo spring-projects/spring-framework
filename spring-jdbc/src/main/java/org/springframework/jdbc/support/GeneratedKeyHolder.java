@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 	 * Create a new GeneratedKeyHolder with a default list.
 	 */
 	public GeneratedKeyHolder() {
-		this.keyList = new LinkedList<Map<String, Object>>();
+		this.keyList = new LinkedList<>();
 	}
 
 	/**

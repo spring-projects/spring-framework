@@ -16,21 +16,21 @@
 
 package org.springframework.aop.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-
 import org.junit.Test;
+
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class ControlFlowPointcutTests {
+public class ControlFlowPointcutTests {
 
 	@Test
 	public void testMatches() {

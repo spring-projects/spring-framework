@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,82 +19,150 @@ package org.springframework.web.servlet.mvc;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
- * <p>Trivial controller that always returns a named view. The view
- * can be configured using an exposed configuration property. This
- * controller offers an alternative to sending a request straight to a view
- * such as a JSP. The advantage here is that the client is not exposed to
- * the concrete view technology but rather just to the controller URL;
- * the concrete view will be determined by the ViewResolver.
- *
- * <p>An alternative to the ParameterizableViewController is a
- * {@link org.springframework.web.servlet.mvc.multiaction.MultiActionController MultiActionController},
- * which can define a variety of handler methods that just return a plain
- * ModelAndView instance for a given view name.
- *
- * <p><b><a name="workflow">Workflow
- * (<a href="AbstractController.html#workflow">and that defined by superclass</a>):</b><br>
- * <ol>
- *  <li>Request is received by the controller</li>
- *  <li>call to {@link #handleRequestInternal handleRequestInternal} which
- *      just returns the view, named by the configuration property
- *      {@code viewName}. Nothing more, nothing less</li>
- * </ol>
- * </p>
- *
- * <p><b><a name="config">Exposed configuration properties</a>
- * (<a href="AbstractController.html#config">and those defined by superclass</a>):</b><br>
- * <table border="1">
- *  <tr>
- *      <td><b>name</b></td>
- *      <td><b>default</b></td>
- *      <td><b>description</b></td>
- *  </tr>
- *  <tr>
- *      <td>viewName</td>
- *      <td><i>null</i></td>
- *      <td>the name of the view the viewResolver will use to forward to
- *          (if this property is not set, a null view name will be returned
- *          directing the caller to calculate the view name from the current request)</td>
- *  </tr>
- * </table>
- * </p>
+ * Trivial controller that always returns a pre-configured view and optionally
+ * sets the response status code. The view and status can be configured using
+ * the provided configuration properties.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Keith Donald
+ * @author Rossen Stoyanchev
  */
 public class ParameterizableViewController extends AbstractController {
 
-	private String viewName;
+	private Object view;
 
+	private HttpStatus statusCode;
+
+	private boolean statusOnly;
+
+
+	public ParameterizableViewController() {
+		super(false);
+		setSupportedMethods(HttpMethod.GET.name(), HttpMethod.HEAD.name());
+	}
 
 	/**
-	 * Set the name of the view to delegate to.
+	 * Set a view name for the ModelAndView to return, to be resolved by the
+	 * DispatcherServlet via a ViewResolver. Will override any pre-existing
+	 * view name or View.
 	 */
 	public void setViewName(String viewName) {
-		this.viewName = viewName;
+		this.view = viewName;
 	}
 
 	/**
-	 * Return the name of the view to delegate to.
+	 * Return the name of the view to delegate to, or {@code null} if using a
+	 * View instance.
 	 */
 	public String getViewName() {
-		return this.viewName;
+		return (this.view instanceof String ? (String) this.view : null);
 	}
+
+	/**
+	 * Set a View object for the ModelAndView to return.
+	 * Will override any pre-existing view name or View.
+	 * @since 4.1
+	 */
+	public void setView(View view) {
+		this.view = view;
+	}
+
+	/**
+	 * Return the View object, or {@code null} if we are using a view name
+	 * to be resolved by the DispatcherServlet via a ViewResolver.
+	 * @since 4.1
+	 */
+	public View getView() {
+		return (this.view instanceof View ? (View) this.view : null);
+	}
+
+	/**
+	 * Configure the HTTP status code that this controller should set on the
+	 * response.
+	 * <p>When a "redirect:" prefixed view name is configured, there is no need
+	 * to set this property since RedirectView will do that. However this property
+	 * may still be used to override the 3xx status code of {@code RedirectView}.
+	 * For full control over redirecting provide a {@code RedirectView} instance.
+	 * <p>If the status code is 204 and no view is configured, the request is
+	 * fully handled within the controller.
+	 * @since 4.1
+	 */
+	public void setStatusCode(HttpStatus statusCode) {
+		this.statusCode = statusCode;
+	}
+
+	/**
+	 * Return the configured HTTP status code or {@code null}.
+	 * @since 4.1
+	 */
+	public HttpStatus getStatusCode() {
+		return this.statusCode;
+	}
+
+
+	/**
+	 * The property can be used to indicate the request is considered fully
+	 * handled within the controller and that no view should be used for rendering.
+	 * Useful in combination with {@link #setStatusCode}.
+	 * <p>By default this is set to {@code false}.
+	 * @since 4.1
+	 */
+	public void setStatusOnly(boolean statusOnly) {
+		this.statusOnly = statusOnly;
+	}
+
+	/**
+	 * Whether the request is fully handled within the controller.
+	 */
+	public boolean isStatusOnly() {
+		return this.statusOnly;
+	}
+
 
 	/**
 	 * Return a ModelAndView object with the specified view name.
-	 * The content of {@link RequestContextUtils#getInputFlashMap} is also added to the model.
+	 * <p>The content of the {@link RequestContextUtils#getInputFlashMap
+	 * "input" FlashMap} is also added to the model.
 	 * @see #getViewName()
 	 */
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
-		return new ModelAndView(getViewName(), RequestContextUtils.getInputFlashMap(request));
+
+		String viewName = getViewName();
+
+		if (getStatusCode() != null) {
+			if (getStatusCode().is3xxRedirection()) {
+				request.setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, getStatusCode());
+				viewName = (viewName != null && !viewName.startsWith("redirect:") ? "redirect:" + viewName : viewName);
+			}
+			else {
+				response.setStatus(getStatusCode().value());
+				if (isStatusOnly() || (getStatusCode().equals(HttpStatus.NO_CONTENT) && getViewName() == null)) {
+					return null;
+				}
+			}
+		}
+
+		ModelAndView modelAndView = new ModelAndView();
+		modelAndView.addAllObjects(RequestContextUtils.getInputFlashMap(request));
+
+		if (getViewName() != null) {
+			modelAndView.setViewName(viewName);
+		}
+		else {
+			modelAndView.setView(getView());
+		}
+
+		return (isStatusOnly() ? null : modelAndView);
 	}
 
 }

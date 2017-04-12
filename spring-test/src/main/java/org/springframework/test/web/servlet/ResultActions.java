@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ package org.springframework.test.web.servlet;
  * request.
  *
  * <p>See static factory methods in
- * {@code org.springframework.test.web.server.result.MockMvcResultMatchers}
- * {@code org.springframework.test.web.server.result.MockMvcResultHandlers}
+ * {@link org.springframework.test.web.servlet.result.MockMvcResultMatchers} and
+ * {@link org.springframework.test.web.servlet.result.MockMvcResultHandlers}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -30,17 +30,19 @@ package org.springframework.test.web.servlet;
 public interface ResultActions {
 
 	/**
-	 * Provide an expectation. For example:
+	 * Perform an expectation.
+	 *
+	 * <h4>Example</h4>
 	 * <pre class="code">
 	 * static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*
 	 *
 	 * mockMvc.perform(get("/person/1"))
-	 *   .andExpect(status.isOk())
+	 *   .andExpect(status().isOk())
 	 *   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 	 *   .andExpect(jsonPath("$.person.name").value("Jason"));
 	 *
 	 * mockMvc.perform(post("/form"))
-	 *   .andExpect(status.isOk())
+	 *   .andExpect(status().isOk())
 	 *   .andExpect(redirectedUrl("/person/1"))
 	 *   .andExpect(model().size(1))
 	 *   .andExpect(model().attributeExists("person"))
@@ -51,7 +53,9 @@ public interface ResultActions {
 	ResultActions andExpect(ResultMatcher matcher) throws Exception;
 
 	/**
-	 * Provide a general action. For example:
+	 * Perform a general action.
+	 *
+	 * <h4>Example</h4>
 	 * <pre class="code">
 	 * static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*
 	 *

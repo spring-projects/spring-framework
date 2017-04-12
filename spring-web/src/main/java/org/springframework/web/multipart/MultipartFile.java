@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.springframework.core.io.InputStreamSource;
+
 /**
  * A representation of an uploaded file received in a multipart request.
  *
  * <p>The file contents are either stored in memory or temporarily on disk.
  * In either case, the user is responsible for copying file contents to a
- * session-level or persistent store as and if desired. The temporary storages
+ * session-level or persistent store as and if desired. The temporary storage
  * will be cleared at the end of request processing.
  *
  * @author Juergen Hoeller
@@ -34,7 +36,7 @@ import java.io.InputStream;
  * @see org.springframework.web.multipart.MultipartHttpServletRequest
  * @see org.springframework.web.multipart.MultipartResolver
  */
-public interface MultipartFile {
+public interface MultipartFile extends InputStreamSource {
 
 	/**
 	 * Return the name of the parameter in the multipart form.
@@ -46,9 +48,10 @@ public interface MultipartFile {
 	 * Return the original filename in the client's filesystem.
 	 * <p>This may contain path information depending on the browser used,
 	 * but it typically will not with any other than Opera.
-	 * @return the original filename, or the empty String if no file
-	 * has been chosen in the multipart form, or {@code null}
-	 * if not defined or not available
+	 * @return the original filename, or the empty String if no file has been chosen
+	 * in the multipart form, or {@code null} if not defined or not available
+	 * @see org.apache.commons.fileupload.FileItem#getName()
+	 * @see org.springframework.web.multipart.commons.CommonsMultipartFile#setPreserveFilename
 	 */
 	String getOriginalFilename();
 
@@ -80,24 +83,32 @@ public interface MultipartFile {
 
 	/**
 	 * Return an InputStream to read the contents of the file from.
-	 * The user is responsible for closing the stream.
+	 * <p>The user is responsible for closing the returned stream.
 	 * @return the contents of the file as stream, or an empty stream if empty
 	 * @throws IOException in case of access errors (if the temporary store fails)
 	 */
+	@Override
 	InputStream getInputStream() throws IOException;
 
 	/**
 	 * Transfer the received file to the given destination file.
 	 * <p>This may either move the file in the filesystem, copy the file in the
-	 * filesystem, or save memory-held contents to the destination file.
-	 * If the destination file already exists, it will be deleted first.
-	 * <p>If the file has been moved in the filesystem, this operation cannot
-	 * be invoked again. Therefore, call this method just once to be able to
-	 * work with any storage mechanism.
-	 * @param dest the destination file
+	 * filesystem, or save memory-held contents to the destination file. If the
+	 * destination file already exists, it will be deleted first.
+	 * <p>If the target file has been moved in the filesystem, this operation
+	 * cannot be invoked again afterwards. Therefore, call this method just once
+	 * in order to work with any storage mechanism.
+	 * <p><b>NOTE:</b> Depending on the underlying provider, temporary storage
+	 * may be container-dependent, including the base directory for relative
+	 * destinations specified here (e.g. with Servlet 3.0 multipart handling).
+	 * For absolute destinations, the target file may get renamed/moved from its
+	 * temporary location or newly copied, even if a temporary copy already exists.
+	 * @param dest the destination file (typically absolute)
 	 * @throws IOException in case of reading or writing errors
 	 * @throws IllegalStateException if the file has already been moved
 	 * in the filesystem and is not available anymore for another transfer
+	 * @see org.apache.commons.fileupload.FileItem#write(File)
+	 * @see javax.servlet.http.Part#write(String)
 	 */
 	void transferTo(File dest) throws IOException, IllegalStateException;
 

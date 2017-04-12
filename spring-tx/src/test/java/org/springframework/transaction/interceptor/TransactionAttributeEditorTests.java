@@ -17,12 +17,13 @@
 package org.springframework.transaction.interceptor;
 
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 
 import org.junit.Test;
+
 import org.springframework.transaction.TransactionDefinition;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests to check conversion from String to TransactionAttribute.
@@ -61,7 +62,7 @@ public class TransactionAttributeEditorTests {
 		assertTrue(!ta.isReadOnly());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidPropagationCodeOnly() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		// should have failed with bogus propagation code
@@ -78,7 +79,7 @@ public class TransactionAttributeEditorTests {
 		assertTrue(ta.getIsolationLevel() == TransactionDefinition.ISOLATION_READ_UNCOMMITTED);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testValidPropagationAndIsolationCodesAndInvalidRollbackRule() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		// should fail with bogus rollback rule

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
  * {@link FactoryBean} that exposes a shared JPA {@link javax.persistence.EntityManager}
  * reference for a given EntityManagerFactory. Typically used for an EntityManagerFactory
  * created by {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean},
- * as direct alternative to a JNDI lookup for a Java EE 5 server's EntityManager reference.
+ * as direct alternative to a JNDI lookup for a Java EE server's EntityManager reference.
  *
  * <p>The shared EntityManager will behave just like an EntityManager fetched from an
  * application server's JNDI environment, as defined by the JPA specification.
@@ -68,7 +68,6 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 	 */
 	public void setEntityManagerInterface(Class<? extends EntityManager> entityManagerInterface) {
 		Assert.notNull(entityManagerInterface, "'entityManagerInterface' must not be null");
-		Assert.isAssignable(EntityManager.class, entityManagerInterface);
 		this.entityManagerInterface = entityManagerInterface;
 	}
 

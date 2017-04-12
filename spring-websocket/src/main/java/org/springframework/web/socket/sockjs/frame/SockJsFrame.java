@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,70 +17,102 @@
 package org.springframework.web.socket.sockjs.frame;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.util.Assert;
 
 /**
- * Represents a SockJS frame and provides factory methods for creating SockJS frames.
+ * Represents a SockJS frame. Provides factory methods to create SockJS frames.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class SockJsFrame {
 
-	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
+	public static final Charset CHARSET = StandardCharsets.UTF_8;
 
-	private static final SockJsFrame openFrame = new SockJsFrame("o");
+	private static final SockJsFrame OPEN_FRAME = new SockJsFrame("o");
 
-	private static final SockJsFrame heartbeatFrame = new SockJsFrame("h");
+	private static final SockJsFrame HEARTBEAT_FRAME = new SockJsFrame("h");
 
-	private static final SockJsFrame closeGoAwayFrame = closeFrame(3000, "Go away!");
+	private static final SockJsFrame CLOSE_GO_AWAY_FRAME = closeFrame(3000, "Go away!");
 
-	private static final SockJsFrame closeAnotherConnectionOpenFrame = closeFrame(2010, "Another connection still open");
+	private static final SockJsFrame CLOSE_ANOTHER_CONNECTION_OPEN_FRAME =
+			closeFrame(2010, "Another connection still open");
 
 
-	public static SockJsFrame openFrame() {
-		return openFrame;
-	}
-
-	public static SockJsFrame heartbeatFrame() {
-		return heartbeatFrame;
-	}
-
-	public static SockJsFrame messageFrame(SockJsMessageCodec codec, String... messages) {
-		String encoded = codec.encode(messages);
-		return new SockJsFrame(encoded);
-	}
-
-	public static SockJsFrame closeFrameGoAway() {
-		return closeGoAwayFrame;
-	}
-
-	public static SockJsFrame closeFrameAnotherConnectionOpen() {
-		return closeAnotherConnectionOpenFrame;
-	}
-
-	public static SockJsFrame closeFrame(int code, String reason) {
-		return new SockJsFrame("c[" + code + ",\"" + reason + "\"]");
-	}
-
+	private final SockJsFrameType type;
 
 	private final String content;
 
 
+	/**
+	 * Create a new instance frame with the given frame content.
+	 * @param content the content (must be a non-empty and represent a valid SockJS frame)
+	 */
 	public SockJsFrame(String content) {
-		Assert.notNull("Content must not be null");
-		this.content = content;
+		Assert.hasText(content, "Content must not be empty");
+		if ("o".equals(content)) {
+			this.type = SockJsFrameType.OPEN;
+			this.content = content;
+		}
+		else if ("h".equals(content)) {
+			this.type = SockJsFrameType.HEARTBEAT;
+			this.content = content;
+		}
+		else if (content.charAt(0) == 'a') {
+			this.type = SockJsFrameType.MESSAGE;
+			this.content = (content.length() > 1 ? content : "a[]");
+		}
+		else if (content.charAt(0) == 'm') {
+			this.type = SockJsFrameType.MESSAGE;
+			this.content = (content.length() > 1 ? content : "null");
+		}
+		else if (content.charAt(0) == 'c') {
+			this.type = SockJsFrameType.CLOSE;
+			this.content = (content.length() > 1 ? content : "c[]");
+		}
+		else {
+			throw new IllegalArgumentException("Unexpected SockJS frame type in content \"" + content + "\"");
+		}
 	}
 
 
+	/**
+	 * Return the SockJS frame type.
+	 */
+	public SockJsFrameType getType() {
+		return this.type;
+	}
+
+	/**
+	 * Return the SockJS frame content (never {@code null}).
+	 */
 	public String getContent() {
 		return this.content;
 	}
 
+	/**
+	 * Return the SockJS frame content as a byte array.
+	 */
 	public byte[] getContentBytes() {
-		return this.content.getBytes(UTF8_CHARSET);
+		return this.content.getBytes(CHARSET);
 	}
+
+	/**
+	 * Return data contained in a SockJS "message" and "close" frames. Otherwise
+	 * for SockJS "open" and "close" frames, which do not contain data, return
+	 * {@code null}.
+	 */
+	public String getFrameData() {
+		if (getType() == SockJsFrameType.OPEN || getType() == SockJsFrameType.HEARTBEAT) {
+			return null;
+		}
+		else {
+			return getContent().substring(1);
+		}
+	}
+
 
 	@Override
 	public boolean equals(Object other) {
@@ -90,7 +122,8 @@ public class SockJsFrame {
 		if (!(other instanceof SockJsFrame)) {
 			return false;
 		}
-		return this.content.equals(((SockJsFrame) other).content);
+		SockJsFrame otherFrame = (SockJsFrame) other;
+		return (this.type.equals(otherFrame.type) && this.content.equals(otherFrame.content));
 	}
 
 	@Override
@@ -105,6 +138,32 @@ public class SockJsFrame {
 			result = result.substring(0, 80) + "...(truncated)";
 		}
 		return "SockJsFrame content='" + result.replace("\n", "\\n").replace("\r", "\\r") + "'";
+	}
+
+
+	public static SockJsFrame openFrame() {
+		return OPEN_FRAME;
+	}
+
+	public static SockJsFrame heartbeatFrame() {
+		return HEARTBEAT_FRAME;
+	}
+
+	public static SockJsFrame messageFrame(SockJsMessageCodec codec, String... messages) {
+		String encoded = codec.encode(messages);
+		return new SockJsFrame(encoded);
+	}
+
+	public static SockJsFrame closeFrameGoAway() {
+		return CLOSE_GO_AWAY_FRAME;
+	}
+
+	public static SockJsFrame closeFrameAnotherConnectionOpen() {
+		return CLOSE_ANOTHER_CONNECTION_OPEN_FRAME;
+	}
+
+	public static SockJsFrame closeFrame(int code, String reason) {
+		return new SockJsFrame("c[" + code + ",\"" + reason + "\"]");
 	}
 
 }

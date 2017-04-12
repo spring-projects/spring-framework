@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
-
 import javax.cache.annotation.CacheInvocationContext;
 import javax.cache.annotation.CacheInvocationParameter;
 
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
-import org.springframework.cache.jcache.model.JCacheOperation;
 
 /**
  * The default {@link CacheOperationInvocationContext} implementation used
@@ -35,7 +33,7 @@ import org.springframework.cache.jcache.model.JCacheOperation;
  * @author Stephane Nicoll
  * @since 4.1
  */
-public class DefaultCacheInvocationContext<A extends Annotation>
+class DefaultCacheInvocationContext<A extends Annotation>
 		implements CacheInvocationContext<A>, CacheOperationInvocationContext<JCacheOperation<A>> {
 
 	private final JCacheOperation<A> operation;
@@ -46,67 +44,70 @@ public class DefaultCacheInvocationContext<A extends Annotation>
 
 	private final CacheInvocationParameter[] allParameters;
 
-	public DefaultCacheInvocationContext(JCacheOperation<A> operation,
-			Object target, Object[] args) {
+
+	public DefaultCacheInvocationContext(JCacheOperation<A> operation, Object target, Object[] args) {
 		this.operation = operation;
 		this.target = target;
 		this.args = args;
 		this.allParameters = operation.getAllParameters(args);
 	}
 
+
 	@Override
 	public JCacheOperation<A> getOperation() {
-		return operation;
+		return this.operation;
 	}
 
 	@Override
 	public Method getMethod() {
-		return operation.getMethod();
+		return this.operation.getMethod();
 	}
 
 	@Override
 	public Object[] getArgs() {
-		return args.clone();
+		return this.args.clone();
 	}
 
 	@Override
 	public Set<Annotation> getAnnotations() {
-		return operation.getAnnotations();
+		return this.operation.getAnnotations();
 	}
 
 	@Override
 	public A getCacheAnnotation() {
-		return operation.getCacheAnnotation();
+		return this.operation.getCacheAnnotation();
 	}
 
 	@Override
 	public String getCacheName() {
-		return operation.getCacheName();
+		return this.operation.getCacheName();
 	}
 
 	@Override
 	public Object getTarget() {
-		return target;
+		return this.target;
 	}
 
 	@Override
 	public CacheInvocationParameter[] getAllParameters() {
-		return allParameters.clone();
+		return this.allParameters.clone();
 	}
 
 	@Override
 	public <T> T unwrap(Class<T> cls) {
-		throw new IllegalArgumentException("Could not unwrap to '" + cls.getName() + "'");
+		throw new IllegalArgumentException("Cannot unwrap to " + cls);
 	}
+
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("CacheInvocationContext{");
-		sb.append("operation=").append(operation);
-		sb.append(", target=").append(target);
-		sb.append(", args=").append(Arrays.toString(args));
-		sb.append(", allParameters=").append(Arrays.toString(allParameters));
+		StringBuilder sb = new StringBuilder("CacheInvocationContext{");
+		sb.append("operation=").append(this.operation);
+		sb.append(", target=").append(this.target);
+		sb.append(", args=").append(Arrays.toString(this.args));
+		sb.append(", allParameters=").append(Arrays.toString(this.allParameters));
 		sb.append('}');
 		return sb.toString();
 	}
+
 }

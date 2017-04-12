@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.beans.BeanWrapper;
 
 /**
  * Default implementation of the {@link JmsActivationSpecFactory} interface.
- * Supports the standard JMS properties as defined by the JMS 1.5 specification,
+ * Supports the standard JMS properties as defined by the JCA 1.5 specification,
  * as well as Spring's extended "maxConcurrency" and "prefetchSize" settings
  * through autodetection of well-known vendor-specific provider properties.
  *
@@ -158,7 +158,7 @@ public class DefaultJmsActivationSpecFactory extends StandardJmsActivationSpecFa
 				// JORAM
 				bw.setPropertyValue("maxMessages", Integer.toString(config.getPrefetchSize()));
 			}
-			else if(bw.isWritableProperty("maxBatchSize")){
+			else if (bw.isWritableProperty("maxBatchSize")){
 				// WebSphere
 				bw.setPropertyValue("maxBatchSize", Integer.toString(config.getPrefetchSize()));
 			}

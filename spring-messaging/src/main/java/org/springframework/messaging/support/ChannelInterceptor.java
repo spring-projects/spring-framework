@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.messaging.MessageChannel;
  * {@link MessageChannel}.
  *
  * @author Mark Fisher
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface ChannelInterceptor {
@@ -32,7 +33,7 @@ public interface ChannelInterceptor {
 	/**
 	 * Invoked before the Message is actually sent to the channel.
 	 * This allows for modification of the Message if necessary.
-	 * If this method returns <code>null</code>, then the actual
+	 * If this method returns {@code null} then the actual
 	 * send invocation will not occur.
 	 */
 	Message<?> preSend(Message<?> message, MessageChannel channel);
@@ -42,6 +43,15 @@ public interface ChannelInterceptor {
 	 * value argument represents the return value of that invocation.
 	 */
 	void postSend(Message<?> message, MessageChannel channel, boolean sent);
+
+	/**
+	 * Invoked after the completion of a send regardless of any exception that
+	 * have been raised thus allowing for proper resource cleanup.
+	 * <p>Note that this will be invoked only if {@link #preSend} successfully
+	 * completed and returned a Message, i.e. it did not return {@code null}.
+	 * @since 4.1
+	 */
+	void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, Exception ex);
 
 	/**
 	 * Invoked as soon as receive is called and before a Message is
@@ -56,5 +66,14 @@ public interface ChannelInterceptor {
 	 * necessary. This only applies to PollableChannels.
 	 */
 	Message<?> postReceive(Message<?> message, MessageChannel channel);
+
+	/**
+	 * Invoked after the completion of a receive regardless of any exception that
+	 * have been raised thus allowing for proper resource cleanup.
+	 * <p>Note that this will be invoked only if {@link #preReceive} successfully
+	 * completed and returned {@code true}.
+	 * @since 4.1
+	 */
+	void afterReceiveCompletion(Message<?> message, MessageChannel channel, Exception ex);
 
 }

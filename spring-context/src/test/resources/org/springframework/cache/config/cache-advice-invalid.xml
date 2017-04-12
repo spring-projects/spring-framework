@@ -7,7 +7,7 @@
 	<import resource="cache-advice.xml"/>
 
 	<cache:advice id="cacheAdviceInvalid" cache-manager="cacheManager">
-		<cache:caching cache="default">
+		<cache:caching cache="testCache">
 			<cache:cacheable method="someFakeMethod" key="#root.methodName" key-generator="unknownBeanName"/>
 		</cache:caching>
 	</cache:advice>

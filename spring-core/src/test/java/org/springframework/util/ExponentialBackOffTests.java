@@ -16,11 +16,14 @@
 
 package org.springframework.util;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import org.springframework.util.backoff.BackOffExecution;
+import org.springframework.util.backoff.ExponentialBackOff;
+
+import static org.junit.Assert.*;
 
 /**
  *

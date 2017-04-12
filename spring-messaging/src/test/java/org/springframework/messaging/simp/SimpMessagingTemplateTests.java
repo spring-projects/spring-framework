@@ -16,8 +16,15 @@
 
 package org.springframework.messaging.simp;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.StubMessageChannel;
@@ -28,14 +35,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.LinkedMultiValueMap;
 
-import java.util.*;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link org.springframework.messaging.simp.SimpMessagingTemplate}.
@@ -116,6 +116,25 @@ public class SimpMessagingTemplateTests {
 		assertNotNull(headerAccessor);
 		assertEquals("value", headerAccessor.toMap().get("key"));
 		assertNull(headerAccessor.getNativeHeader("key"));
+	}
+
+	// SPR-11868
+
+	@Test
+	public void convertAndSendWithCustomDestinationPrefix() {
+		this.messagingTemplate.setUserDestinationPrefix("/prefix");
+		this.messagingTemplate.convertAndSendToUser("joe", "/queue/foo", "data");
+		List<Message<byte[]>> messages = this.messageChannel.getMessages();
+
+		assertEquals(1, messages.size());
+
+		Message<byte[]> message = messages.get(0);
+		SimpMessageHeaderAccessor headerAccessor =
+				MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
+
+		assertNotNull(headerAccessor);
+		assertEquals(SimpMessageType.MESSAGE, headerAccessor.getMessageType());
+		assertEquals("/prefix/joe/queue/foo", headerAccessor.getDestination());
 	}
 
 	@Test

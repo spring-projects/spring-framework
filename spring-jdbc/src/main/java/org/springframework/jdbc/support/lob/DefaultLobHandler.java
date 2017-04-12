@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,13 @@ import org.apache.commons.logging.LogFactory;
  * Invokes the direct accessor methods that {@code java.sql.ResultSet}
  * and {@code java.sql.PreparedStatement} offer.
  *
+ * <p>By default, incoming streams are going to be passed to the appropriate
+ * {@code setBinary/Ascii/CharacterStream} method on the JDBC driver's
+ * {@link PreparedStatement}. If the specified content length is negative,
+ * this handler will use the JDBC 4.0 variants of the set-stream methods
+ * without a length parameter; otherwise, it will pass the specified length
+ * on to the driver.
+ *
  * <p>This LobHandler should work for any JDBC driver that is JDBC compliant
  * in terms of the spec's suggestions regarding simple BLOB and CLOB handling.
  * This does not apply to Oracle 9i's drivers at all; as of Oracle 10g,
@@ -53,9 +60,8 @@ import org.apache.commons.logging.LogFactory;
  * argument directly. Consider switching the {@link #setStreamAsLob "streamAsLob"}
  * property to "true" when operating against a fully compliant JDBC 4.0 driver.
  *
- * <p>Finally, primarily as a direct equivalent to {@link OracleLobHandler},
- * this LobHandler also supports the creation of temporary BLOB/CLOB objects.
- * Consider switching the {@link #setCreateTemporaryLob "createTemporaryLob"}
+ * <p>Finally, this LobHandler also supports the creation of temporary BLOB/CLOB
+ * objects. Consider switching the {@link #setCreateTemporaryLob "createTemporaryLob"}
  * property to "true" when "streamAsLob" happens to run into LOB size limitations.
  *
  * <p>See the {@link LobHandler} interface javadoc for a summary of recommendations.
@@ -200,7 +206,6 @@ public class DefaultLobHandler extends AbstractLobHandler {
 	}
 
 	@Override
-	@SuppressWarnings("resource")
 	public LobCreator getLobCreator() {
 		return (this.createTemporaryLob ? new TemporaryLobCreator() : new DefaultLobCreator());
 	}
@@ -248,7 +253,12 @@ public class DefaultLobHandler extends AbstractLobHandler {
 
 			if (streamAsLob) {
 				if (binaryStream != null) {
-					ps.setBlob(paramIndex, binaryStream, contentLength);
+					if (contentLength >= 0) {
+						ps.setBlob(paramIndex, binaryStream, contentLength);
+					}
+					else {
+						ps.setBlob(paramIndex, binaryStream);
+					}
 				}
 				else {
 					ps.setBlob(paramIndex, (Blob) null);
@@ -262,8 +272,11 @@ public class DefaultLobHandler extends AbstractLobHandler {
 					ps.setBlob(paramIndex, (Blob) null);
 				}
 			}
-			else {
+			else if (contentLength >= 0) {
 				ps.setBinaryStream(paramIndex, binaryStream, contentLength);
+			}
+			else {
+				ps.setBinaryStream(paramIndex, binaryStream);
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug(binaryStream != null ? "Set binary stream for BLOB with length " + contentLength :
@@ -308,7 +321,13 @@ public class DefaultLobHandler extends AbstractLobHandler {
 			if (streamAsLob) {
 				if (asciiStream != null) {
 					try {
-						ps.setClob(paramIndex, new InputStreamReader(asciiStream, "US-ASCII"), contentLength);
+						Reader reader = new InputStreamReader(asciiStream, "US-ASCII");
+						if (contentLength >= 0) {
+							ps.setClob(paramIndex, reader, contentLength);
+						}
+						else {
+							ps.setClob(paramIndex, reader);
+						}
 					}
 					catch (UnsupportedEncodingException ex) {
 						throw new SQLException("US-ASCII encoding not supported: " + ex);
@@ -326,8 +345,11 @@ public class DefaultLobHandler extends AbstractLobHandler {
 					ps.setClob(paramIndex, (Clob) null);
 				}
 			}
-			else {
+			else if (contentLength >= 0) {
 				ps.setAsciiStream(paramIndex, asciiStream, contentLength);
+			}
+			else {
+				ps.setAsciiStream(paramIndex, asciiStream);
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug(asciiStream != null ? "Set ASCII stream for CLOB with length " + contentLength :
@@ -342,7 +364,12 @@ public class DefaultLobHandler extends AbstractLobHandler {
 
 			if (streamAsLob) {
 				if (characterStream != null) {
-					ps.setClob(paramIndex, characterStream, contentLength);
+					if (contentLength >= 0) {
+						ps.setClob(paramIndex, characterStream, contentLength);
+					}
+					else {
+						ps.setClob(paramIndex, characterStream);
+					}
 				}
 				else {
 					ps.setClob(paramIndex, (Clob) null);
@@ -356,8 +383,11 @@ public class DefaultLobHandler extends AbstractLobHandler {
 					ps.setClob(paramIndex, (Clob) null);
 				}
 			}
-			else {
+			else if (contentLength >= 0) {
 				ps.setCharacterStream(paramIndex, characterStream, contentLength);
+			}
+			else {
+				ps.setCharacterStream(paramIndex, characterStream);
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug(characterStream != null ? "Set character stream for CLOB with length " + contentLength :

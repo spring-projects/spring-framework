@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,14 +16,18 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.SubProtocolCapable;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.WebSocketServerSockJsSession;
 
@@ -42,17 +46,19 @@ import org.springframework.web.socket.sockjs.transport.session.WebSocketServerSo
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SockJsWebSocketHandler extends TextWebSocketHandler {
+public class SockJsWebSocketHandler extends TextWebSocketHandler implements SubProtocolCapable {
 
 	private final SockJsServiceConfig sockJsServiceConfig;
 
 	private final WebSocketServerSockJsSession sockJsSession;
 
+	private final List<String> subProtocols;
+
 	private final AtomicInteger sessionCount = new AtomicInteger(0);
 
 
-	public SockJsWebSocketHandler(SockJsServiceConfig serviceConfig,
-			WebSocketHandler webSocketHandler, WebSocketServerSockJsSession sockJsSession) {
+	public SockJsWebSocketHandler(SockJsServiceConfig serviceConfig, WebSocketHandler webSocketHandler,
+			WebSocketServerSockJsSession sockJsSession) {
 
 		Assert.notNull(serviceConfig, "serviceConfig must not be null");
 		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
@@ -60,6 +66,15 @@ public class SockJsWebSocketHandler extends TextWebSocketHandler {
 
 		this.sockJsServiceConfig = serviceConfig;
 		this.sockJsSession = sockJsSession;
+
+		webSocketHandler = WebSocketHandlerDecorator.unwrap(webSocketHandler);
+		this.subProtocols = ((webSocketHandler instanceof SubProtocolCapable) ?
+				new ArrayList<>(((SubProtocolCapable) webSocketHandler).getSubProtocols()) : null);
+	}
+
+	@Override
+	public List<String> getSubProtocols() {
+		return this.subProtocols;
 	}
 
 	protected SockJsServiceConfig getSockJsConfig() {

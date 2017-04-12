@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,9 +17,10 @@
 package org.springframework.messaging.simp.annotation.support;
 
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -27,10 +28,12 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.core.MessageSendingOperations;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -43,25 +46,28 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MimeType;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link SubscriptionMethodReturnValueHandler}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class SubscriptionMethodReturnValueHandlerTests {
 
-	public static final MimeType MIME_TYPE = new MimeType("text", "plain", Charset.forName("UTF-8"));
+	public static final MimeType MIME_TYPE = new MimeType("text", "plain", StandardCharsets.UTF_8);
 
 	private static final String PAYLOAD = "payload";
 
 
 	private SubscriptionMethodReturnValueHandler handler;
 
+	private SubscriptionMethodReturnValueHandler jsonHandler;
+
 	@Mock private MessageChannel messageChannel;
 
-	@Captor ArgumentCaptor<Message<?>> messageCaptor;
+	@Captor private ArgumentCaptor<Message<?>> messageCaptor;
 
 	private MethodParameter subscribeEventReturnType;
 
@@ -69,17 +75,20 @@ public class SubscriptionMethodReturnValueHandlerTests {
 
 	private MethodParameter messageMappingReturnType;
 
+	private MethodParameter subscribeEventJsonViewReturnType;
+
 
 	@Before
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void setup() throws Exception {
-
 		MockitoAnnotations.initMocks(this);
 
 		SimpMessagingTemplate messagingTemplate = new SimpMessagingTemplate(this.messageChannel);
 		messagingTemplate.setMessageConverter(new StringMessageConverter());
-
 		this.handler = new SubscriptionMethodReturnValueHandler(messagingTemplate);
+
+		SimpMessagingTemplate jsonMessagingTemplate = new SimpMessagingTemplate(this.messageChannel);
+		jsonMessagingTemplate.setMessageConverter(new MappingJackson2MessageConverter());
+		this.jsonHandler = new SubscriptionMethodReturnValueHandler(jsonMessagingTemplate);
 
 		Method method = this.getClass().getDeclaredMethod("getData");
 		this.subscribeEventReturnType = new MethodParameter(method, -1);
@@ -89,6 +98,9 @@ public class SubscriptionMethodReturnValueHandlerTests {
 
 		method = this.getClass().getDeclaredMethod("handle");
 		this.messageMappingReturnType = new MethodParameter(method, -1);
+
+		method = this.getClass().getDeclaredMethod("getJsonView");
+		this.subscribeEventJsonViewReturnType = new MethodParameter(method, -1);
 	}
 
 
@@ -101,8 +113,7 @@ public class SubscriptionMethodReturnValueHandlerTests {
 
 	@Test
 	public void testMessageSentToChannel() throws Exception {
-
-		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
 		String subscriptionId = "subs1";
@@ -123,12 +134,12 @@ public class SubscriptionMethodReturnValueHandlerTests {
 		assertEquals(subscriptionId, headerAccessor.getSubscriptionId());
 		assertEquals(destination, headerAccessor.getDestination());
 		assertEquals(MIME_TYPE, headerAccessor.getContentType());
+		assertEquals(this.subscribeEventReturnType, headerAccessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testHeadersPassedToMessagingTemplate() throws Exception {
-
 		String sessionId = "sess1";
 		String subscriptionId = "subs1";
 		String destination = "/dest";
@@ -149,6 +160,25 @@ public class SubscriptionMethodReturnValueHandlerTests {
 		assertTrue(headerAccessor.isMutable());
 		assertEquals(sessionId, headerAccessor.getSessionId());
 		assertEquals(subscriptionId, headerAccessor.getSubscriptionId());
+		assertEquals(this.subscribeEventReturnType, headerAccessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
+	}
+
+	@Test
+	public void testJsonView() throws Exception {
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
+
+		String sessionId = "sess1";
+		String subscriptionId = "subs1";
+		String destination = "/dest";
+		Message<?> inputMessage = createInputMessage(sessionId, subscriptionId, destination, null);
+
+		this.jsonHandler.handleReturnValue(getJsonView(), this.subscribeEventJsonViewReturnType, inputMessage);
+
+		verify(this.messageChannel).send(this.messageCaptor.capture());
+		Message<?> message = this.messageCaptor.getValue();
+		assertNotNull(message);
+
+		assertEquals("{\"withView1\":\"with\"}", new String((byte[]) message.getPayload(), StandardCharsets.UTF_8));
 	}
 
 
@@ -162,22 +192,69 @@ public class SubscriptionMethodReturnValueHandlerTests {
 	}
 
 
-	@SuppressWarnings("unused")
 	@SubscribeMapping("/data") // not needed for the tests but here for completeness
 	private String getData() {
 		return PAYLOAD;
 	}
 
-	@SuppressWarnings("unused")
 	@SubscribeMapping("/data") // not needed for the tests but here for completeness
 	@SendTo("/sendToDest")
 	private String getDataAndSendTo() {
 		return PAYLOAD;
 	}
 
-	@SuppressWarnings("unused")
 	@MessageMapping("/handle")	// not needed for the tests but here for completeness
 	public String handle() {
 		return PAYLOAD;
 	}
+
+	@SubscribeMapping("/jsonview")	// not needed for the tests but here for completeness
+	@JsonView(MyJacksonView1.class)
+	public JacksonViewBean getJsonView() {
+		JacksonViewBean payload = new JacksonViewBean();
+		payload.setWithView1("with");
+		payload.setWithView2("with");
+		payload.setWithoutView("without");
+		return payload;
+	}
+
+
+	private interface MyJacksonView1 {};
+	private interface MyJacksonView2 {};
+
+	private static class JacksonViewBean {
+
+		@JsonView(MyJacksonView1.class)
+		private String withView1;
+
+		@JsonView(MyJacksonView2.class)
+		private String withView2;
+
+		private String withoutView;
+
+		public String getWithView1() {
+			return withView1;
+		}
+
+		public void setWithView1(String withView1) {
+			this.withView1 = withView1;
+		}
+
+		public String getWithView2() {
+			return withView2;
+		}
+
+		public void setWithView2(String withView2) {
+			this.withView2 = withView2;
+		}
+
+		public String getWithoutView() {
+			return withoutView;
+		}
+
+		public void setWithoutView(String withoutView) {
+			this.withoutView = withoutView;
+		}
+	}
+
 }

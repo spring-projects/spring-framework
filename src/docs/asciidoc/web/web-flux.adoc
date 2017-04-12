@@ -1,0 +1,393 @@
+[[web-reactive]]
+= WebFlux framework
+
+This section provides basic information on the reactive programming
+support for Web applications in Spring Framework 5.
+
+
+[[web-reactive-intro]]
+== Introduction
+
+
+[[web-reactive-programming]]
+=== What is Reactive Programming?
+
+In plain terms reactive programming is about non-blocking applications that are asynchronous
+and event-driven and require a small number of threads to scale vertically (i.e. within the
+JVM) rather than horizontally (i.e. through clustering).
+
+A key aspect of reactive applications is the concept of backpressure which is
+a mechanism to ensure producers don't overwhelm consumers. For example in a pipeline
+of reactive components extending from the database to the HTTP response when the
+HTTP connection is too slow the data repository can also slow down or stop completely
+until network capacity frees up.
+
+Reactive programming also leads to a major shift from imperative to declarative async
+composition of logic. It is comparable to writing blocking code vs using the
+`CompletableFuture` from Java 8 to compose follow-up actions via lambda expressions.
+
+For a longer introduction check the blog series
+https://spring.io/blog/2016/06/07/notes-on-reactive-programming-part-i-the-reactive-landscape["Notes on Reactive Programming"]
+by Dave Syer.
+
+
+[[web-reactive-api]]
+=== Reactive API and Building Blocks
+
+Spring Framework 5 embraces
+https://github.com/reactive-streams/reactive-streams-jvm#reactive-streams[Reactive Streams]
+as the contract for communicating backpressure across async components and
+libraries. Reactive Streams is a specification created through industry collaboration that
+has also been adopted in Java 9 as `java.util.concurrent.Flow`.
+
+The Spring Framework uses https://projectreactor.io/[Reactor] internally for its own
+reactive support. Reactor is a Reactive Streams implementation that further extends the
+basic Reactive Streams `Publisher` contract with the `Flux` and `Mono` composable API
+types to provide declarative operations on data sequences of `0..N` and `0..1`.
+
+The Spring Framework exposes `Flux` and `Mono` in many of its own reactive APIs.
+At the application level however, as always, Spring provides choice and fully supports
+the use of RxJava. For more on reactive types check the post
+https://spring.io/blog/2016/04/19/understanding-reactive-types["Understanding Reactive Types"]
+by Sebastien Deleuze.
+
+
+[[web-reactive-feature-overview]]
+== Spring WebFlux Module
+
+Spring Framework 5 includes a new `spring-webflux` module. The module contains support
+for reactive HTTP and WebSocket clients as well as for reactive server web applications
+including REST, HTML browser, and WebSocket style interactions.
+
+[[web-reactive-server]]
+=== Server Side
+
+On the server-side WebFlux supports 2 distinct programming models:
+
+* Annotation-based with `@Controller` and the other annotations supported also with Spring MVC
+* Functional, Java 8 lambda style routing and handling
+
+Both programming models are executed on the same reactive foundation that adapts
+non-blocking HTTP runtimes to the Reactive Streams API. The diagram
+below shows the server-side stack including traditional, Servlet-based
+Spring MVC on the left from the `spring-webmvc` module and also the
+reactive stack on the right from the `spring-webflux` module.
+
+image::images/webflux-overview.png[width=720]
+
+WebFlux can run on Servlet containers with support for the
+Servlet 3.1 Non-Blocking IO API as well as on other async runtimes such as
+Netty and Undertow. Each runtime is adapted to a reactive
+`ServerHttpRequest` and `ServerHttpResponse` exposing the body of the
+request and response as `Flux<DataBuffer>`, rather than
+`InputStream` and `OutputStream`, with reactive backpressure.
+REST-style JSON and XML serialization and deserialization is supported on top
+as a `Flux<Object>`, and so is HTML view rendering and Server-Sent Events.
+
+[[web-reactive-server-annotation]]
+==== Annotation-based Programming Model
+
+The same `@Controller` programming model and the same annotations used in Spring MVC
+are also supported in WebFlux. The main difference is that the underlying core,
+framework contracts -- i.e. `HandlerMapping`, `HandlerAdapter`, are
+non-blocking and operate on the reactive `ServerHttpRequest` and `ServerHttpResponse`
+rather than on the `HttpServletRequest` and `HttpServletResponse`.
+Below is an example with a reactive controller:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@RestController
+public class PersonController {
+
+	private final PersonRepository repository;
+
+	public PersonController(PersonRepository repository) {
+		this.repository = repository;
+	}
+
+	@PostMapping("/person")
+	Mono<Void> create(@RequestBody Publisher<Person> personStream) {
+		return this.repository.save(personStream).then();
+	}
+
+	@GetMapping("/person")
+	Flux<Person> list() {
+		return this.repository.findAll();
+	}
+
+	@GetMapping("/person/{id}")
+	Mono<Person> findById(@PathVariable String id) {
+		return this.repository.findOne(id);
+	}
+}
+----
+
+[[web-reactive-server-functional]]
+==== Functional Programming Model
+
+include::web-flux-functional.adoc[leveloffset=+1]
+
+
+[[web-reactive-client]]
+=== Client Side
+
+WebFlux includes a functional, reactive `WebClient` that offers a fully
+non-blocking and reactive alternative to the `RestTemplate`. It exposes network
+input and output as a reactive `ClientHttpRequest` and `ClientHttpResponse` where
+the body of the request and response is a `Flux<DataBuffer>` rather than an
+`InputStream` and `OutputStream`. In addition it supports the same reactive JSON, XML,
+and SSE serialization mechanism as on the server side so you can work with typed objects.
+Below is an example of using the `WebClient` which requires a `ClientHttpConnector`
+implementation to plug in a specific HTTP client such as Reactor Netty:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+WebClient client = WebClient.create("http://example.com");
+
+Mono<Account> account = client.get()
+		.url("/accounts/{id}", 1L)
+		.accept(APPLICATION_JSON)
+		.exchange(request)
+		.then(response -> response.bodyToMono(Account.class));
+----
+
+
+[NOTE]
+====
+The `AsyncRestTemplate` also supports non-blocking interactions. The main difference
+is it can't support non-blocking streaming, like for example
+https://dev.twitter.com/streaming/overview[Twitter one], because fundamentally it's
+still based and relies on `InputStream` and `OutputStream`.
+====
+
+
+[[web-reactive-http-body]]
+=== Request and Response Body Conversion
+
+The `spring-core` module provides reactive `Encoder` and `Decoder` contracts
+that enable the serialization of a `Flux` of bytes to and from typed objects.
+The `spring-web` module adds JSON (Jackson) and XML (JAXB) implementations for use in
+web applications as well as others for SSE streaming and zero-copy file transfer.
+
+The following Reactive APIs are supported:
+
+* Reactor 3.x is supported out of the box
+* RxJava 2.x is supported when `io.reactivex.rxjava2:rxjava` dependency is on the classpath
+* RxJava 1.x is supported when both `io.reactivex:rxjava` and `io.reactivex:rxjava-reactive-streams` (https://github.com/ReactiveX/RxJavaReactiveStreams[adapter between RxJava and Reactive Streams]) dependencies are on the classpath
+
+For example the request body can be one of the following way and it will be decoded
+automatically in both the annotation and the functional programming models:
+
+* `Account account` -- the account is deserialized without blocking before the controller is invoked.
+* `Mono<Account> account` -- the controller can use the `Mono` to declare logic to be executed after the account is deserialized.
+* `Single<Account> account` -- same as with `Mono` but using RxJava
+* `Flux<Account> accounts` -- input streaming scenario.
+* `Observable<Account> accounts` -- input streaming with RxJava.
+
+The response body can be one of the following:
+
+* `Mono<Account>` -- serialize without blocking the given Account when the `Mono` completes.
+* `Single<Account>` -- same but using RxJava.
+* `Flux<Account>` -- streaming scenario, possibly SSE depending on the requested content type.
+* `Observable<Account>` -- same but using RxJava `Observable` type.
+* `Flowable<Account>` -- same but using RxJava 2 `Flowable` type.
+* `Publisher<Account>` or `Flow.Publisher<Account>` -- any type implementing Reactive Streams `Publisher` is supported.
+* `Flux<ServerSentEvent>` -- SSE streaming.
+* `Mono<Void>` -- request handling completes when the `Mono` completes.
+* `Account` -- serialize without blocking the given Account; implies a synchronous, non-blocking controller method.
+* `void` -- specific to the annotation-based programming model, request handling completes
+when the method returns; implies a synchronous, non-blocking controller method.
+
+When using stream types like `Flux` or `Observable`, the media type specified in the
+request/response or at mapping/routing level is used to determine how the data should be serialized
+and flushed. For example a REST endpoint that returns a `Flux<Account>` will be serialized by
+default as following:
+
+* `application/json`: a `Flux<Account>` is handled as an asynchronous collection and
+  serialized as a JSON array with an explicit flush when the `complete` event is emitted.
+* `application/stream+json`: a `Flux<Account>` will be handled as a stream of `Account` elements
+  serialized as individual JSON object separated by new lines and explicitly flushed after
+  each element. The `WebClient` supports JSON stream decoding so this is a good use case
+  for server to server use case.
+* `text/event-stream`: a `Flux<Account>` or `Flux<ServerSentEvent<Account>>` will be handled as
+  a stream of `Account` or  `ServerSentEvent` elements serialized as individual SSE elements
+  using by default JSON for data encoding and explicit flush after each element. This
+  is well suited for exposing a stream to browser clients. `WebClient` supports
+  reading SSE streams as well.
+
+
+[[web-reactive-websocket-support]]
+=== Reactive WebSocket Support
+
+WebFlux includes reactive WebSocket client and server support.
+Both client and server are supported on the Java WebSocket API
+(JSR-356), Jetty, Undertow, Reactor Netty, and RxNetty.
+
+On the server side, declare a `WebSocketHandlerAdapter` and then simply add
+mappings to `WebSocketHandler`-based endpoints:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Bean
+public HandlerMapping webSocketMapping() {
+	Map<String, WebSocketHandler> map = new HashMap<>();
+	map.put("/foo", new FooWebSocketHandler());
+	map.put("/bar", new BarWebSocketHandler());
+
+	SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
+	mapping.setUrlMap(map);
+	return mapping;
+}
+
+@Bean
+public WebSocketHandlerAdapter handlerAdapter() {
+	return new WebSocketHandlerAdapter();
+}
+----
+
+On the client side create a `WebSocketClient` for one of the supported libraries
+listed above:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+WebSocketClient client = new ReactorNettyWebSocketClient();
+client.execute("ws://localhost:8080/echo"), session -> {... }).blockMillis(5000);
+----
+
+[[web-reactive-tests]]
+=== Testing
+
+The `spring-test` module includes a `WebTestClient` that can be used to test
+WebFlux server endpoints with or without a running server.
+
+Tests without a running server are comparable to `MockMvc` from Spring MVC
+where mock request and response are used instead of connecting over the network
+using a socket. The `WebTestClient` however can also perform tests against a
+running server.
+
+For more see
+https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/reactive/server/samples[sample tests]
+in the framework.
+
+
+
+[[web-reactive-getting-started]]
+== Getting Started
+
+
+[[web-reactive-getting-started-boot]]
+=== Spring Boot Starter
+
+The
+https://github.com/bclozel/spring-boot-web-reactive#spring-boot-web-reactive-starter[Spring Boot Web Reactive starter]
+available via http://start.spring.io is the fastest way to get started.
+It does all that's necessary so you to start writing `@Controller` classes
+just like with Spring MVC. Simply go to http://start.spring.io, choose
+version 2.0.0.BUILD-SNAPSHOT, and type reactive in the dependencies box.
+By default the starter runs with Tomcat but the dependencies can be changed as usual with Spring Boot to switch to a different runtime.
+See the
+https://github.com/bclozel/spring-boot-web-reactive#spring-boot-web-reactive-starter[starter]
+page for more details and instruction
+
+This starter also supports the functional web API and will detect automatically `RouterFunction`
+beans. Your Spring Boot WebFlux application should use the `RouterFunction` *or* the
+`RequestMapping` approach, it is currently not possible to mix them in the same application.
+
+[[web-reactive-getting-started-manual]]
+=== Manual Bootstrapping
+
+This section outlines the steps to get up and running manually.
+
+For dependencies start with `spring-webflux` and `spring-context`.
+Then add `jackson-databind` and `io.netty:netty-buffer`
+(temporarily see https://jira.spring.io/browse/SPR-14528[SPR-14528]) for JSON support.
+Lastly add the dependencies for one of the supported runtimes:
+
+* Tomcat -- `org.apache.tomcat.embed:tomcat-embed-core`
+* Jetty -- `org.eclipse.jetty:jetty-server` and `org.eclipse.jetty:jetty-servlet`
+* Reactor Netty -- `io.projectreactor.ipc:reactor-netty`
+* RxNetty -- `io.reactivex:rxnetty-common` and `io.reactivex:rxnetty-http`
+* Undertow -- `io.undertow:undertow-core`
+
+For the **annotation-based programming model** bootstrap with:
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+ApplicationContext context = new AnnotationConfigApplicationContext(DelegatingWebFluxConfiguration.class);  // (1)
+HttpHandler handler = DispatcherHandler.toHttpHandler(context);  // (2)
+----
+
+The above loads default Spring Web framework configuration (1), then creates a
+`DispatcherHandler`, the main class driving request processing (2), and adapts
+it to `HttpHandler` -- the lowest level Spring abstraction for reactive HTTP request handling.
+
+For the **functional programming model** bootstrap as follows:
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+ApplicationContext context = new AnnotationConfigApplicationContext(); // (1)
+context.registerBean(FooBean.class, () -> new FooBeanImpl()); // (2)
+context.registerBean(BarBean.class); // (3)
+
+HttpHandler handler = WebHttpHandlerBuilder
+		.webHandler(RouterFunctions.toHttpHandler(...))
+		.applicationContext(context)
+		.build(); // (4)
+----
+
+The above creates an `AnnotationConfigApplicationContext` instance (1) that can take advantage
+of the new functional bean registration API (2) to register beans using a Java 8 `Supplier`
+or just by specifying its class (3). The `HttpHandler` is created using `WebHttpHandlerBuilder` (4).
+
+The `HttpHandler` can then be installed in one of the supported runtimes:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+// Tomcat and Jetty (also see notes below)
+HttpServlet servlet = new ServletHttpHandlerAdapter(handler);
+...
+
+// Reactor Netty
+ReactorHttpHandlerAdapter adapter = new ReactorHttpHandlerAdapter(handler);
+HttpServer.create(host, port).newHandler(adapter).block();
+
+// RxNetty
+RxNettyHttpHandlerAdapter adapter = new RxNettyHttpHandlerAdapter(handler);
+HttpServer server = HttpServer.newServer(new InetSocketAddress(host, port));
+server.startAndAwait(adapter);
+
+// Undertow
+UndertowHttpHandlerAdapter adapter = new UndertowHttpHandlerAdapter(handler);
+Undertow server = Undertow.builder().addHttpListener(port, host).setHandler(adapter).build();
+server.start();
+----
+
+[NOTE]
+====
+For Servlet containers especially with WAR deployment you can use the
+`AbstractAnnotationConfigDispatcherHandlerInitializer` which as a
+`WebApplicationInitializer` and is auto-detected by Servlet containers.
+It takes care of registering the `ServletHttpHandlerAdapter` as shown above.
+You will need to implement one abstract method in order to point to your
+Spring configuration.
+====
+
+[[web-reactive-getting-started-examples]]
+=== Examples
+
+You will find code examples useful to build reactive Web application in the following projects:
+
+* https://github.com/bclozel/spring-boot-web-reactive[Spring Boot Web Reactive Starter]: sources of the reactive starter available at http://start.spring.io
+* https://github.com/poutsma/web-function-sample[Functional programming model sample]
+* https://github.com/sdeleuze/spring-reactive-playground[Spring Reactive Playground]: playground for most Spring Web reactive features
+* https://github.com/reactor/projectreactor.io/tree/spring-functional[Reactor website]: the `spring-functional` branch is a Spring 5 functional, Java 8 lambda-style application
+* https://github.com/bclozel/spring-reactive-university[Spring Reactive University session]: live-coded project from https://www.youtube.com/watch?v=Cj4foJzPF80[this Devoxx BE 2106 university talk]
+* https://github.com/thymeleaf/thymeleafsandbox-biglist-reactive[Reactive Thymeleaf Sandbox]
+* https://github.com/mix-it/mixit/[Mix-it 2017 website]: Kotlin + Reactive + Functional web and bean registration API application
+* https://github.com/simonbasle/reactor-by-example[Reactor by example]: code snippets coming from this https://www.infoq.com/articles/reactor-by-example[InfoQ article]
+* https://github.com/spring-projects/spring-framework/tree/master/spring-webflux/src/test/java/org/springframework/web/reactive/result/method/annotation[Spring integration tests]: various features tested with Reactor https://projectreactor.io/docs/test/release/api/index.html?reactor/test/StepVerifier.html[`StepVerifier`]

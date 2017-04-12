@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,77 +16,73 @@
 
 package org.springframework.util.concurrent;
 
-import org.springframework.util.Assert;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicReference;
+
+import org.springframework.util.Assert;
 
 /**
- * A {@link org.springframework.util.concurrent.ListenableFuture ListenableFuture}
- * whose value can be set via {@link #set(Object)} or
- * {@link #setException(Throwable)}. It may also be cancelled.
+ * A {@link ListenableFuture} whose value can be set via {@link #set(Object)}
+ * or {@link #setException(Throwable)}. It may also get cancelled.
  *
  * <p>Inspired by {@code com.google.common.util.concurrent.SettableFuture}.
  *
  * @author Mattias Severson
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.1
  */
 public class SettableListenableFuture<T> implements ListenableFuture<T> {
 
-	private final SettableTask<T> settableTask;
+	private static final Callable<Object> DUMMY_CALLABLE = new Callable<Object>() {
+		@Override
+		public Object call() throws Exception {
+			throw new IllegalStateException("Should never be called");
+		}
+	};
 
-	private final ListenableFutureTask<T> listenableFuture;
 
+	private final SettableTask<T> settableTask = new SettableTask<>();
 
-	public SettableListenableFuture() {
-		this.settableTask = new SettableTask<T>();
-		this.listenableFuture = new ListenableFutureTask<T>(this.settableTask);
-	}
 
 	/**
-	 * Set the value of this future. This method will return {@code true} if
-	 * the value was set successfully, or {@code false} if the future has already
-	 * been set or cancelled.
-	 * @param value the value that will be set.
-	 * @return {@code true} if the value was successfully set, else {@code false}.
+	 * Set the value of this future. This method will return {@code true} if the
+	 * value was set successfully, or {@code false} if the future has already been
+	 * set or cancelled.
+	 * @param value the value that will be set
+	 * @return {@code true} if the value was successfully set, else {@code false}
 	 */
 	public boolean set(T value) {
-		boolean success = this.settableTask.setValue(value);
-		if (success) {
-			this.listenableFuture.run();
-		}
-		return success;
+		return this.settableTask.setResultValue(value);
 	}
 
 	/**
-	 * Set the exception of this future. This method will return {@code true} if
-	 * the exception was set successfully, or {@code false} if the future has already
-	 * been set or cancelled.
-	 * @param exception the value that will be set.
-	 * @return {@code true} if the exception was successfully set, else {@code false}.
+	 * Set the exception of this future. This method will return {@code true} if the
+	 * exception was set successfully, or {@code false} if the future has already been
+	 * set or cancelled.
+	 * @param exception the value that will be set
+	 * @return {@code true} if the exception was successfully set, else {@code false}
 	 */
 	public boolean setException(Throwable exception) {
-		Assert.notNull(exception, "'exception' must not be null");
-		boolean success = this.settableTask.setException(exception);
-		if (success) {
-			this.listenableFuture.run();
-		}
-		return success;
+		Assert.notNull(exception, "Exception must not be null");
+		return this.settableTask.setExceptionResult(exception);
 	}
 
 	@Override
 	public void addCallback(ListenableFutureCallback<? super T> callback) {
-		this.listenableFuture.addCallback(callback);
+		this.settableTask.addCallback(callback);
+	}
+
+	@Override
+	public void addCallback(SuccessCallback<? super T> successCallback, FailureCallback failureCallback) {
+		this.settableTask.addCallback(successCallback, failureCallback);
 	}
 
 	@Override
 	public boolean cancel(boolean mayInterruptIfRunning) {
-		this.settableTask.setCancelled();
-		boolean cancelled = this.listenableFuture.cancel(mayInterruptIfRunning);
+		boolean cancelled = this.settableTask.cancel(mayInterruptIfRunning);
 		if (cancelled && mayInterruptIfRunning) {
 			interruptTask();
 		}
@@ -95,87 +91,88 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 
 	@Override
 	public boolean isCancelled() {
-		return this.listenableFuture.isCancelled();
+		return this.settableTask.isCancelled();
 	}
 
 	@Override
 	public boolean isDone() {
-		return this.listenableFuture.isDone();
+		return this.settableTask.isDone();
 	}
 
 	/**
 	 * Retrieve the value.
-	 * <p>Will return the value if it has been set via {@link #set(Object)},
-	 * throw an {@link java.util.concurrent.ExecutionException} if it has been
-	 * set via {@link #setException(Throwable)} or  throw a
-	 * {@link java.util.concurrent.CancellationException} if it has been cancelled.
-	 * @return The value associated with this future.
+	 * <p>This method returns the value if it has been set via {@link #set(Object)},
+	 * throws an {@link java.util.concurrent.ExecutionException} if an exception has
+	 * been set via {@link #setException(Throwable)}, or throws a
+	 * {@link java.util.concurrent.CancellationException} if the future has been cancelled.
+	 * @return the value associated with this future
 	 */
 	@Override
 	public T get() throws InterruptedException, ExecutionException {
-		return this.listenableFuture.get();
+		return this.settableTask.get();
 	}
 
 	/**
 	 * Retrieve the value.
-	 * <p>Will return the value if it has been set via {@link #set(Object)},
-	 * throw an {@link java.util.concurrent.ExecutionException} if it has been
-	 * set via {@link #setException(Throwable)} or  throw a
-	 * {@link java.util.concurrent.CancellationException} if it has been cancelled.
-	 * @param timeout the maximum time to wait.
-	 * @param unit the time unit of the timeout argument.
-	 * @return The value associated with this future.
+	 * <p>This method returns the value if it has been set via {@link #set(Object)},
+	 * throws an {@link java.util.concurrent.ExecutionException} if an exception has
+	 * been set via {@link #setException(Throwable)}, or throws a
+	 * {@link java.util.concurrent.CancellationException} if the future has been cancelled.
+	 * @param timeout the maximum time to wait
+	 * @param unit the unit of the timeout argument
+	 * @return the value associated with this future
 	 */
 	@Override
 	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-		return this.listenableFuture.get(timeout, unit);
+		return this.settableTask.get(timeout, unit);
 	}
 
 	/**
 	 * Subclasses can override this method to implement interruption of the future's
 	 * computation. The method is invoked automatically by a successful call to
 	 * {@link #cancel(boolean) cancel(true)}.
-	 *
-	 * <p>The default implementation does nothing.
+	 * <p>The default implementation is empty.
 	 */
 	protected void interruptTask() {
 	}
 
 
-	private static class SettableTask<T> implements Callable<T> {
+	private static class SettableTask<T> extends ListenableFutureTask<T> {
 
-		private static final String NO_VALUE = SettableListenableFuture.class.getName() + ".NO_VALUE";
-
-		private final AtomicReference<Object> value = new AtomicReference<Object>(NO_VALUE);
-
-		private volatile boolean cancelled = false;
-
-
-		public boolean setValue(T value) {
-			if (this.cancelled) {
-				return false;
-			}
-			return this.value.compareAndSet(NO_VALUE, value);
-		}
-
-		public boolean setException(Throwable exception) {
-			if (this.cancelled) {
-				return false;
-			}
-			return this.value.compareAndSet(NO_VALUE, exception);
-		}
-
-		public void setCancelled() {
-			this.cancelled = true;
-		}
+		private volatile Thread completingThread;
 
 		@SuppressWarnings("unchecked")
+		public SettableTask() {
+			super((Callable<T>) DUMMY_CALLABLE);
+		}
+
+		public boolean setResultValue(T value) {
+			set(value);
+			return checkCompletingThread();
+		}
+
+		public boolean setExceptionResult(Throwable exception) {
+			setException(exception);
+			return checkCompletingThread();
+		}
+
 		@Override
-		public T call() throws Exception {
-			if (value.get() instanceof Exception) {
-				throw (Exception) value.get();
+		protected void done() {
+			if (!isCancelled()) {
+				// Implicitly invoked by set/setException: store current thread for
+				// determining whether the given result has actually triggered completion
+				// (since FutureTask.set/setException unfortunately don't expose that)
+				this.completingThread = Thread.currentThread();
 			}
-			return (T) value.get();
+			super.done();
+		}
+
+		private boolean checkCompletingThread() {
+			boolean check = (this.completingThread == Thread.currentThread());
+			if (check) {
+				this.completingThread = null;  // only first match actually counts
+			}
+			return check;
 		}
 	}
 

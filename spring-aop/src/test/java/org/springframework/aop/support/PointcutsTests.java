@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,21 @@
 
 package org.springframework.aop.support;
 
-import static org.junit.Assert.*;
-
 import java.lang.reflect.Method;
 
 import org.junit.Test;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.Pointcut;
-
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class PointcutsTests {
+public class PointcutsTests {
 
 	public static Method TEST_BEAN_SET_AGE;
 	public static Method TEST_BEAN_GET_AGE;
@@ -39,10 +39,10 @@ public final class PointcutsTests {
 
 	static {
 		try {
-			TEST_BEAN_SET_AGE = TestBean.class.getMethod("setAge", new Class[] { int.class });
-			TEST_BEAN_GET_AGE = TestBean.class.getMethod("getAge", (Class[]) null);
-			TEST_BEAN_GET_NAME = TestBean.class.getMethod("getName", (Class[]) null);
-			TEST_BEAN_ABSQUATULATE = TestBean.class.getMethod("absquatulate", (Class[]) null);
+			TEST_BEAN_SET_AGE = TestBean.class.getMethod("setAge", int.class);
+			TEST_BEAN_GET_AGE = TestBean.class.getMethod("getAge");
+			TEST_BEAN_GET_NAME = TestBean.class.getMethod("getName");
+			TEST_BEAN_ABSQUATULATE = TestBean.class.getMethod("absquatulate");
 		}
 		catch (Exception ex) {
 			throw new RuntimeException("Shouldn't happen: error in test suite");
@@ -125,22 +125,22 @@ public final class PointcutsTests {
 
 	@Test
 	public void testTrue() {
-		assertTrue(Pointcuts.matches(Pointcut.TRUE, TEST_BEAN_SET_AGE, TestBean.class, new Object[] { new Integer(6)}));
-		assertTrue(Pointcuts.matches(Pointcut.TRUE, TEST_BEAN_GET_AGE, TestBean.class, null));
-		assertTrue(Pointcuts.matches(Pointcut.TRUE, TEST_BEAN_ABSQUATULATE, TestBean.class, null));
-		assertTrue(Pointcuts.matches(Pointcut.TRUE, TEST_BEAN_SET_AGE, TestBean.class, new Object[] { new Integer(6)}));
-		assertTrue(Pointcuts.matches(Pointcut.TRUE, TEST_BEAN_GET_AGE, TestBean.class, null));
-		assertTrue(Pointcuts.matches(Pointcut.TRUE, TEST_BEAN_ABSQUATULATE, TestBean.class, null));
+		assertTrue(Pointcuts.matches(Pointcut.TRUE, TEST_BEAN_SET_AGE, TestBean.class, new Integer(6)));
+		assertTrue(Pointcuts.matches(Pointcut.TRUE, TEST_BEAN_GET_AGE, TestBean.class));
+		assertTrue(Pointcuts.matches(Pointcut.TRUE, TEST_BEAN_ABSQUATULATE, TestBean.class));
+		assertTrue(Pointcuts.matches(Pointcut.TRUE, TEST_BEAN_SET_AGE, TestBean.class, new Integer(6)));
+		assertTrue(Pointcuts.matches(Pointcut.TRUE, TEST_BEAN_GET_AGE, TestBean.class));
+		assertTrue(Pointcuts.matches(Pointcut.TRUE, TEST_BEAN_ABSQUATULATE, TestBean.class));
 	}
 
 	@Test
 	public void testMatches() {
-		assertTrue(Pointcuts.matches(allClassSetterPointcut, TEST_BEAN_SET_AGE, TestBean.class, new Object[] { new Integer(6)}));
-		assertFalse(Pointcuts.matches(allClassSetterPointcut, TEST_BEAN_GET_AGE, TestBean.class, null));
-		assertFalse(Pointcuts.matches(allClassSetterPointcut, TEST_BEAN_ABSQUATULATE, TestBean.class, null));
-		assertFalse(Pointcuts.matches(allClassGetterPointcut, TEST_BEAN_SET_AGE, TestBean.class, new Object[] { new Integer(6)}));
-		assertTrue(Pointcuts.matches(allClassGetterPointcut, TEST_BEAN_GET_AGE, TestBean.class, null));
-		assertFalse(Pointcuts.matches(allClassGetterPointcut, TEST_BEAN_ABSQUATULATE, TestBean.class, null));
+		assertTrue(Pointcuts.matches(allClassSetterPointcut, TEST_BEAN_SET_AGE, TestBean.class, new Integer(6)));
+		assertFalse(Pointcuts.matches(allClassSetterPointcut, TEST_BEAN_GET_AGE, TestBean.class));
+		assertFalse(Pointcuts.matches(allClassSetterPointcut, TEST_BEAN_ABSQUATULATE, TestBean.class));
+		assertFalse(Pointcuts.matches(allClassGetterPointcut, TEST_BEAN_SET_AGE, TestBean.class, new Integer(6)));
+		assertTrue(Pointcuts.matches(allClassGetterPointcut, TEST_BEAN_GET_AGE, TestBean.class));
+		assertFalse(Pointcuts.matches(allClassGetterPointcut, TEST_BEAN_ABSQUATULATE, TestBean.class));
 	}
 
 	/**
@@ -149,29 +149,29 @@ public final class PointcutsTests {
 	@Test
 	public void testUnionOfSettersAndGetters() {
 		Pointcut union = Pointcuts.union(allClassGetterPointcut, allClassSetterPointcut);
-		assertTrue(Pointcuts.matches(union, TEST_BEAN_SET_AGE, TestBean.class, new Object[] { new Integer(6)}));
-		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_AGE, TestBean.class, null));
-		assertFalse(Pointcuts.matches(union, TEST_BEAN_ABSQUATULATE, TestBean.class, null));
+		assertTrue(Pointcuts.matches(union, TEST_BEAN_SET_AGE, TestBean.class, new Integer(6)));
+		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_AGE, TestBean.class));
+		assertFalse(Pointcuts.matches(union, TEST_BEAN_ABSQUATULATE, TestBean.class));
 	}
 
 	@Test
 	public void testUnionOfSpecificGetters() {
 		Pointcut union = Pointcuts.union(allClassGetAgePointcut, allClassGetNamePointcut);
-		assertFalse(Pointcuts.matches(union, TEST_BEAN_SET_AGE, TestBean.class, new Object[] { new Integer(6)}));
-		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_AGE, TestBean.class, null));
-		assertFalse(Pointcuts.matches(allClassGetAgePointcut, TEST_BEAN_GET_NAME, TestBean.class, null));
-		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_NAME, TestBean.class, null));
-		assertFalse(Pointcuts.matches(union, TEST_BEAN_ABSQUATULATE, TestBean.class, null));
+		assertFalse(Pointcuts.matches(union, TEST_BEAN_SET_AGE, TestBean.class, new Integer(6)));
+		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_AGE, TestBean.class));
+		assertFalse(Pointcuts.matches(allClassGetAgePointcut, TEST_BEAN_GET_NAME, TestBean.class));
+		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_NAME, TestBean.class));
+		assertFalse(Pointcuts.matches(union, TEST_BEAN_ABSQUATULATE, TestBean.class));
 
 		// Union with all setters
 		union = Pointcuts.union(union, allClassSetterPointcut);
-		assertTrue(Pointcuts.matches(union, TEST_BEAN_SET_AGE, TestBean.class, new Object[] { new Integer(6)}));
-		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_AGE, TestBean.class, null));
-		assertFalse(Pointcuts.matches(allClassGetAgePointcut, TEST_BEAN_GET_NAME, TestBean.class, null));
-		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_NAME, TestBean.class, null));
-		assertFalse(Pointcuts.matches(union, TEST_BEAN_ABSQUATULATE, TestBean.class, null));
+		assertTrue(Pointcuts.matches(union, TEST_BEAN_SET_AGE, TestBean.class, new Integer(6)));
+		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_AGE, TestBean.class));
+		assertFalse(Pointcuts.matches(allClassGetAgePointcut, TEST_BEAN_GET_NAME, TestBean.class));
+		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_NAME, TestBean.class));
+		assertFalse(Pointcuts.matches(union, TEST_BEAN_ABSQUATULATE, TestBean.class));
 
-		assertTrue(Pointcuts.matches(union, TEST_BEAN_SET_AGE, TestBean.class, new Object[] { new Integer(6)}));
+		assertTrue(Pointcuts.matches(union, TEST_BEAN_SET_AGE, TestBean.class, new Integer(6)));
 	}
 
 	/**
@@ -180,16 +180,16 @@ public final class PointcutsTests {
 	 */
 	@Test
 	public void testUnionOfAllSettersAndSubclassSetters() {
-		assertFalse(Pointcuts.matches(myTestBeanSetterPointcut, TEST_BEAN_SET_AGE, TestBean.class, new Object[] { new Integer(6)}));
-		assertTrue(Pointcuts.matches(myTestBeanSetterPointcut, TEST_BEAN_SET_AGE, MyTestBean.class, new Object[] { new Integer(6)}));
-		assertFalse(Pointcuts.matches(myTestBeanSetterPointcut, TEST_BEAN_GET_AGE, TestBean.class, null));
+		assertFalse(Pointcuts.matches(myTestBeanSetterPointcut, TEST_BEAN_SET_AGE, TestBean.class, new Integer(6)));
+		assertTrue(Pointcuts.matches(myTestBeanSetterPointcut, TEST_BEAN_SET_AGE, MyTestBean.class, new Integer(6)));
+		assertFalse(Pointcuts.matches(myTestBeanSetterPointcut, TEST_BEAN_GET_AGE, TestBean.class));
 
 		Pointcut union = Pointcuts.union(myTestBeanSetterPointcut, allClassGetterPointcut);
-		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_AGE, TestBean.class, null));
-		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_AGE, MyTestBean.class, null));
+		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_AGE, TestBean.class));
+		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_AGE, MyTestBean.class));
 		// Still doesn't match superclass setter
-		assertTrue(Pointcuts.matches(union, TEST_BEAN_SET_AGE, MyTestBean.class, new Object[] { new Integer(6)}));
-		assertFalse(Pointcuts.matches(union, TEST_BEAN_SET_AGE, TestBean.class, new Object[] { new Integer(6)}));
+		assertTrue(Pointcuts.matches(union, TEST_BEAN_SET_AGE, MyTestBean.class, new Integer(6)));
+		assertFalse(Pointcuts.matches(union, TEST_BEAN_SET_AGE, TestBean.class, new Integer(6)));
 	}
 
 	/**
@@ -198,44 +198,44 @@ public final class PointcutsTests {
 	 */
 	@Test
 	public void testIntersectionOfSpecificGettersAndSubclassGetters() {
-		assertTrue(Pointcuts.matches(allClassGetAgePointcut, TEST_BEAN_GET_AGE, TestBean.class, null));
-		assertTrue(Pointcuts.matches(allClassGetAgePointcut, TEST_BEAN_GET_AGE, MyTestBean.class, null));
-		assertFalse(Pointcuts.matches(myTestBeanGetterPointcut, TEST_BEAN_GET_NAME, TestBean.class, null));
-		assertFalse(Pointcuts.matches(myTestBeanGetterPointcut, TEST_BEAN_GET_AGE, TestBean.class, null));
-		assertTrue(Pointcuts.matches(myTestBeanGetterPointcut, TEST_BEAN_GET_NAME, MyTestBean.class, null));
-		assertTrue(Pointcuts.matches(myTestBeanGetterPointcut, TEST_BEAN_GET_AGE, MyTestBean.class, null));
+		assertTrue(Pointcuts.matches(allClassGetAgePointcut, TEST_BEAN_GET_AGE, TestBean.class));
+		assertTrue(Pointcuts.matches(allClassGetAgePointcut, TEST_BEAN_GET_AGE, MyTestBean.class));
+		assertFalse(Pointcuts.matches(myTestBeanGetterPointcut, TEST_BEAN_GET_NAME, TestBean.class));
+		assertFalse(Pointcuts.matches(myTestBeanGetterPointcut, TEST_BEAN_GET_AGE, TestBean.class));
+		assertTrue(Pointcuts.matches(myTestBeanGetterPointcut, TEST_BEAN_GET_NAME, MyTestBean.class));
+		assertTrue(Pointcuts.matches(myTestBeanGetterPointcut, TEST_BEAN_GET_AGE, MyTestBean.class));
 
 		Pointcut intersection = Pointcuts.intersection(allClassGetAgePointcut, myTestBeanGetterPointcut);
-		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_NAME, TestBean.class, null));
-		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_AGE, TestBean.class, null));
-		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_NAME, MyTestBean.class, null));
-		assertTrue(Pointcuts.matches(intersection, TEST_BEAN_GET_AGE, MyTestBean.class, null));
+		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_NAME, TestBean.class));
+		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_AGE, TestBean.class));
+		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_NAME, MyTestBean.class));
+		assertTrue(Pointcuts.matches(intersection, TEST_BEAN_GET_AGE, MyTestBean.class));
 		// Matches subclass of MyTestBean
-		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_NAME, MyTestBeanSubclass.class, null));
-		assertTrue(Pointcuts.matches(intersection, TEST_BEAN_GET_AGE, MyTestBeanSubclass.class, null));
+		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_NAME, MyTestBeanSubclass.class));
+		assertTrue(Pointcuts.matches(intersection, TEST_BEAN_GET_AGE, MyTestBeanSubclass.class));
 
 		// Now intersection with MyTestBeanSubclass getters should eliminate MyTestBean target
 		intersection = Pointcuts.intersection(intersection, myTestBeanSubclassGetterPointcut);
-		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_NAME, TestBean.class, null));
-		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_AGE, TestBean.class, null));
-		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_NAME, MyTestBean.class, null));
-		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_AGE, MyTestBean.class, null));
+		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_NAME, TestBean.class));
+		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_AGE, TestBean.class));
+		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_NAME, MyTestBean.class));
+		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_AGE, MyTestBean.class));
 		// Still matches subclass of MyTestBean
-		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_NAME, MyTestBeanSubclass.class, null));
-		assertTrue(Pointcuts.matches(intersection, TEST_BEAN_GET_AGE, MyTestBeanSubclass.class, null));
+		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_NAME, MyTestBeanSubclass.class));
+		assertTrue(Pointcuts.matches(intersection, TEST_BEAN_GET_AGE, MyTestBeanSubclass.class));
 
 		// Now union with all TestBean methods
 		Pointcut union = Pointcuts.union(intersection, allTestBeanMethodsPointcut);
-		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_NAME, TestBean.class, null));
-		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_AGE, TestBean.class, null));
-		assertFalse(Pointcuts.matches(union, TEST_BEAN_GET_NAME, MyTestBean.class, null));
-		assertFalse(Pointcuts.matches(union, TEST_BEAN_GET_AGE, MyTestBean.class, null));
+		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_NAME, TestBean.class));
+		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_AGE, TestBean.class));
+		assertFalse(Pointcuts.matches(union, TEST_BEAN_GET_NAME, MyTestBean.class));
+		assertFalse(Pointcuts.matches(union, TEST_BEAN_GET_AGE, MyTestBean.class));
 		// Still matches subclass of MyTestBean
-		assertFalse(Pointcuts.matches(union, TEST_BEAN_GET_NAME, MyTestBeanSubclass.class, null));
-		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_AGE, MyTestBeanSubclass.class, null));
+		assertFalse(Pointcuts.matches(union, TEST_BEAN_GET_NAME, MyTestBeanSubclass.class));
+		assertTrue(Pointcuts.matches(union, TEST_BEAN_GET_AGE, MyTestBeanSubclass.class));
 
-		assertTrue(Pointcuts.matches(union, TEST_BEAN_ABSQUATULATE, TestBean.class, null));
-		assertFalse(Pointcuts.matches(union, TEST_BEAN_ABSQUATULATE, MyTestBean.class, null));
+		assertTrue(Pointcuts.matches(union, TEST_BEAN_ABSQUATULATE, TestBean.class));
+		assertFalse(Pointcuts.matches(union, TEST_BEAN_ABSQUATULATE, MyTestBean.class));
 	}
 
 
@@ -245,9 +245,9 @@ public final class PointcutsTests {
 	@Test
 	public void testSimpleIntersection() {
 		Pointcut intersection = Pointcuts.intersection(allClassGetterPointcut, allClassSetterPointcut);
-		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_SET_AGE, TestBean.class, new Object[] { new Integer(6)}));
-		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_AGE, TestBean.class, null));
-		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_ABSQUATULATE, TestBean.class, null));
+		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_SET_AGE, TestBean.class, new Integer(6)));
+		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_GET_AGE, TestBean.class));
+		assertFalse(Pointcuts.matches(intersection, TEST_BEAN_ABSQUATULATE, TestBean.class));
 	}
 
 }

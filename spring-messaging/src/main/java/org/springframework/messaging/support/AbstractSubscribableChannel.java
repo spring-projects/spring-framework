@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,12 +16,12 @@
 
 package org.springframework.messaging.support;
 
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.SubscribableChannel;
-
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.SubscribableChannel;
 
 /**
  * Abstract base class for {@link SubscribableChannel} implementations.
@@ -31,7 +31,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public abstract class AbstractSubscribableChannel extends AbstractMessageChannel implements SubscribableChannel {
 
-	private final Set<MessageHandler> handlers = new CopyOnWriteArraySet<MessageHandler>();
+	private final Set<MessageHandler> handlers = new CopyOnWriteArraySet<>();
 
 
 	public Set<MessageHandler> getSubscribers() {
@@ -47,7 +47,7 @@ public abstract class AbstractSubscribableChannel extends AbstractMessageChannel
 		boolean result = this.handlers.add(handler);
 		if (result) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("[" + getBeanName() + "] subscribed " + handler);
+				logger.debug(getBeanName() + " added " + handler);
 			}
 		}
 		return result;
@@ -58,7 +58,7 @@ public abstract class AbstractSubscribableChannel extends AbstractMessageChannel
 		boolean result = this.handlers.remove(handler);
 		if (result) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("[" + getBeanName() + "] unsubscribed " + handler);
+				logger.debug(getBeanName() + " removed " + handler);
 			}
 		}
 		return result;

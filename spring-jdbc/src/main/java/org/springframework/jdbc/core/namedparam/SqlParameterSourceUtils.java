@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.jdbc.core.namedparam;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.springframework.jdbc.core.SqlParameterValue;
 
 /**
@@ -86,7 +87,7 @@ public class SqlParameterSourceUtils {
 	 * @return the Map that can be used for case insensitive matching of parameter names
 	 */
 	public static Map<String, String> extractCaseInsensitiveParameterNames(SqlParameterSource parameterSource) {
-		Map<String, String> caseInsensitiveParameterNames = new HashMap<String, String>();
+		Map<String, String> caseInsensitiveParameterNames = new HashMap<>();
 		if (parameterSource instanceof BeanPropertySqlParameterSource) {
 			String[] propertyNames = ((BeanPropertySqlParameterSource)parameterSource).getReadablePropertyNames();
 			for (int i = 0; i < propertyNames.length; i++) {

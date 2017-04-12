@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
@@ -33,6 +32,7 @@ import javax.transaction.UserTransaction;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jdbc.datasource.lookup.BeanFactoryDataSourceLookup;
 import org.springframework.jdbc.datasource.lookup.IsolationLevelDataSourceRouter;
@@ -292,13 +292,14 @@ public class DataSourceJtaTransactionTests {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 		verify(userTransaction, times(6)).begin();
 		verify(transactionManager, times(5)).resume(transaction);
-		if(rollback) {
+		if (rollback) {
 			verify(userTransaction, times(5)).commit();
 			verify(userTransaction).rollback();
-		} else {
+		}
+		else {
 			verify(userTransaction, times(6)).commit();
 		}
-		if(accessAfterResume && !openOuterConnection) {
+		if (accessAfterResume && !openOuterConnection) {
 			verify(connection, times(7)).close();
 		}
 		else {
@@ -528,7 +529,7 @@ public class DataSourceJtaTransactionTests {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		verify(userTransaction).begin();
-		if(suspendException) {
+		if (suspendException) {
 			verify(userTransaction).rollback();
 		}
 
@@ -671,7 +672,7 @@ given(		userTransaction.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, St
 		given(dataSource2.getConnection()).willReturn(connection2);
 
 		final IsolationLevelDataSourceRouter dsToUse = new IsolationLevelDataSourceRouter();
-		Map<Object, Object> targetDataSources = new HashMap<Object, Object>();
+		Map<Object, Object> targetDataSources = new HashMap<>();
 		if (dataSourceLookup) {
 			targetDataSources.put("ISOLATION_REPEATABLE_READ", "ds2");
 			dsToUse.setDefaultTargetDataSource("ds1");

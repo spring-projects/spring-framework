@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
@@ -33,14 +31,15 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
- * standard J2SE facilities to execute streaming requests. Created via the {@link
+ * standard Java facilities to execute streaming requests. Created via the {@link
  * org.springframework.http.client.SimpleClientHttpRequestFactory}.
  *
  * @author Arjen Poutsma
- * @see org.springframework.http.client.SimpleClientHttpRequestFactory#createRequest(java.net.URI,
- *      org.springframework.http.HttpMethod)
  * @since 3.0
+ * @see org.springframework.http.client.SimpleClientHttpRequestFactory#createRequest
+ * @deprecated as of Spring 5.0, with no direct replacement
  */
+@Deprecated
 final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHttpRequest {
 
 	private final HttpURLConnection connection;
@@ -53,17 +52,20 @@ final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHtt
 
 	private final AsyncListenableTaskExecutor taskExecutor;
 
+
 	SimpleStreamingAsyncClientHttpRequest(HttpURLConnection connection, int chunkSize,
 			boolean outputStreaming, AsyncListenableTaskExecutor taskExecutor) {
+
 		this.connection = connection;
 		this.chunkSize = chunkSize;
 		this.outputStreaming = outputStreaming;
 		this.taskExecutor = taskExecutor;
 	}
 
+
 	@Override
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.connection.getRequestMethod());
+		return HttpMethod.resolve(this.connection.getRequestMethod());
 	}
 
 	@Override
@@ -89,26 +91,16 @@ final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHtt
 					this.connection.setChunkedStreamingMode(this.chunkSize);
 				}
 			}
-			writeHeaders(headers);
+			SimpleBufferingClientHttpRequest.addHeaders(this.connection, headers);
 			this.connection.connect();
 			this.body = this.connection.getOutputStream();
 		}
 		return StreamUtils.nonClosing(this.body);
 	}
 
-	private void writeHeaders(HttpHeaders headers) {
-		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-			String headerName = entry.getKey();
-			for (String headerValue : entry.getValue()) {
-				this.connection.addRequestProperty(headerName, headerValue);
-			}
-		}
-	}
-
 	@Override
-	protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers)
-			throws IOException {
-		return taskExecutor.submitListenable(new Callable<ClientHttpResponse>() {
+	protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers) throws IOException {
+		return this.taskExecutor.submitListenable(new Callable<ClientHttpResponse>() {
 			@Override
 			public ClientHttpResponse call() throws Exception {
 				try {
@@ -116,8 +108,10 @@ final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHtt
 						body.close();
 					}
 					else {
-						writeHeaders(headers);
+						SimpleBufferingClientHttpRequest.addHeaders(connection, headers);
 						connection.connect();
+						// Immediately trigger the request in a no-output scenario as well
+						connection.getResponseCode();
 					}
 				}
 				catch (IOException ex) {

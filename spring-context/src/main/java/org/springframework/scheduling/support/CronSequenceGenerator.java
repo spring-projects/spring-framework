@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,8 @@ import java.util.TimeZone;
 import org.springframework.util.StringUtils;
 
 /**
- * Date sequence generator for a <a href="http://www.manpagez.com/man/5/crontab/">Crontab pattern</a>,
+ * Date sequence generator for a
+ * <a href="http://www.manpagez.com/man/5/crontab/">Crontab pattern</a>,
  * allowing clients to specify a pattern that the sequence matches.
  *
  * <p>The pattern is a list of six single space-separated fields: representing
@@ -41,7 +42,8 @@ import org.springframework.util.StringUtils;
  * <li>"0 0 * * * *" = the top of every hour of every day.</li>
  * <li>"*&#47;10 * * * * *" = every ten seconds.</li>
  * <li>"0 0 8-10 * * *" = 8, 9 and 10 o'clock of every day.</li>
- * <li>"0 0/30 8-10 * * *" = 8:00, 8:30, 9:00, 9:30 and 10 o'clock every day.</li>
+ * <li>"0 0 6,19 * * *" = 6:00 AM and 7:00 PM every day.</li>
+ * <li>"0 0/30 8-10 * * *" = 8:00, 8:30, 9:00, 9:30, 10:00 and 10:30 every day.</li>
  * <li>"0 0 9-17 * * MON-FRI" = on the hour nine-to-five weekdays</li>
  * <li>"0 0 0 25 12 ?" = every Christmas Day at midnight</li>
  * </ul>
@@ -53,21 +55,21 @@ import org.springframework.util.StringUtils;
  */
 public class CronSequenceGenerator {
 
-	private final BitSet seconds = new BitSet(60);
-
-	private final BitSet minutes = new BitSet(60);
-
-	private final BitSet hours = new BitSet(24);
-
-	private final BitSet daysOfWeek = new BitSet(7);
-
-	private final BitSet daysOfMonth = new BitSet(31);
-
-	private final BitSet months = new BitSet(12);
-
 	private final String expression;
 
 	private final TimeZone timeZone;
+
+	private final BitSet months = new BitSet(12);
+
+	private final BitSet daysOfMonth = new BitSet(31);
+
+	private final BitSet daysOfWeek = new BitSet(7);
+
+	private final BitSet hours = new BitSet(24);
+
+	private final BitSet minutes = new BitSet(60);
+
+	private final BitSet seconds = new BitSet(60);
 
 
 	/**
@@ -96,6 +98,14 @@ public class CronSequenceGenerator {
 
 
 	/**
+	 * Return the cron pattern that this sequence generator has been built for.
+	 */
+	String getExpression() {
+		return this.expression;
+	}
+
+
+	/**
 	 * Get the next {@link Date} in the sequence matching the Cron pattern and
 	 * after the value provided. The return value will have a whole number of
 	 * seconds, and will be after the input value.
@@ -106,7 +116,7 @@ public class CronSequenceGenerator {
 		/*
 		The plan:
 
-		1 Round up to the next whole second
+		1 Start with whole second (rounding up if necessary)
 
 		2 If seconds match move on, otherwise find the next match:
 		2.1 If next match is in the next minute then roll forwards
@@ -118,8 +128,6 @@ public class CronSequenceGenerator {
 		4 If hour matches move on, otherwise find the next match
 		4.1 If next match is in the next day then roll forwards,
 		4.2 Reset the minutes and seconds and go to 2
-
-		...
 		*/
 
 		Calendar calendar = new GregorianCalendar();
@@ -141,7 +149,7 @@ public class CronSequenceGenerator {
 	}
 
 	private void doNext(Calendar calendar, int dot) {
-		List<Integer> resets = new ArrayList<Integer>();
+		List<Integer> resets = new ArrayList<>();
 
 		int second = calendar.get(Calendar.SECOND);
 		List<Integer> emptyList = Collections.emptyList();
@@ -253,7 +261,7 @@ public class CronSequenceGenerator {
 	 */
 	private void parse(String expression) throws IllegalArgumentException {
 		String[] fields = StringUtils.tokenizeToStringArray(expression, " ");
-		if (fields.length != 6) {
+		if (!areValidCronFields(fields)) {
 			throw new IllegalArgumentException(String.format(
 					"Cron expression must consist of 6 fields (found %d in \"%s\")", fields.length, expression));
 		}
@@ -271,9 +279,9 @@ public class CronSequenceGenerator {
 	}
 
 	/**
-	 * Replace the values in the commaSeparatedList (case insensitive) with
-	 * their index in the list.
-	 * @return a new string with the values from the list replaced
+	 * Replace the values in the comma-separated list (case insensitive)
+	 * with their index in the list.
+	 * @return a new String with the values from the list replaced
 	 */
 	private String replaceOrdinals(String value, String commaSeparatedList) {
 		String[] list = StringUtils.commaDelimitedListToStringArray(commaSeparatedList);
@@ -332,6 +340,10 @@ public class CronSequenceGenerator {
 					range[1] = max - 1;
 				}
 				int delta = Integer.valueOf(split[1]);
+				if (delta <= 0) {
+					throw new IllegalArgumentException("Incrementer delta must be 1 or higher: '" +
+							field + "' in expression \"" + this.expression + "\"");
+				}
 				for (int i = range[0]; i <= range[1]; i += delta) {
 					bits.set(i);
 				}
@@ -366,28 +378,50 @@ public class CronSequenceGenerator {
 			throw new IllegalArgumentException("Range less than minimum (" + min + "): '" +
 					field + "' in expression \"" + this.expression + "\"");
 		}
+		if (result[0] > result[1]) {
+			throw new IllegalArgumentException("Invalid inverted range: '" + field +
+					"' in expression \"" + this.expression + "\"");
+		}
 		return result;
 	}
 
-	String getExpression() {
-		return this.expression;
+
+	/**
+	 * Determine whether the specified expression represents a valid cron pattern.
+	 * <p>Specifically, this method verifies that the expression contains six
+	 * fields separated by single spaces.
+	 * @param expression the expression to evaluate
+	 * @return {@code true} if the given expression is a valid cron expression
+	 * @since 4.3
+	 */
+	public static boolean isValidExpression(String expression) {
+		String[] fields = StringUtils.tokenizeToStringArray(expression, " ");
+		return areValidCronFields(fields);
 	}
 
+	private static boolean areValidCronFields(String[] fields) {
+		return (fields != null && fields.length == 6);
+	}
+
+
 	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof CronSequenceGenerator)) {
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof CronSequenceGenerator)) {
 			return false;
 		}
-		CronSequenceGenerator cron = (CronSequenceGenerator) obj;
-		return cron.months.equals(this.months) && cron.daysOfMonth.equals(this.daysOfMonth)
-				&& cron.daysOfWeek.equals(this.daysOfWeek) && cron.hours.equals(this.hours)
-				&& cron.minutes.equals(this.minutes) && cron.seconds.equals(this.seconds);
+		CronSequenceGenerator otherCron = (CronSequenceGenerator) other;
+		return (this.months.equals(otherCron.months) && this.daysOfMonth.equals(otherCron.daysOfMonth) &&
+				this.daysOfWeek.equals(otherCron.daysOfWeek) && this.hours.equals(otherCron.hours) &&
+				this.minutes.equals(otherCron.minutes) && this.seconds.equals(otherCron.seconds));
 	}
 
 	@Override
 	public int hashCode() {
-		return 37 + 17 * this.months.hashCode() + 29 * this.daysOfMonth.hashCode() + 37 * this.daysOfWeek.hashCode()
-				+ 41 * this.hours.hashCode() + 53 * this.minutes.hashCode() + 61 * this.seconds.hashCode();
+		return (17 * this.months.hashCode() + 29 * this.daysOfMonth.hashCode() + 37 * this.daysOfWeek.hashCode() +
+				41 * this.hours.hashCode() + 53 * this.minutes.hashCode() + 61 * this.seconds.hashCode());
 	}
 
 	@Override

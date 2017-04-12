@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,19 @@
 package org.springframework.test.web.servlet.result;
 
 import java.util.Map;
-
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
+import org.w3c.dom.Node;
+
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.XpathExpectationsHelper;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
-import org.w3c.dom.Node;
 
 /**
- * Factory for response content {@code ResultMatcher}'s using an XPath
- * expression. An instance of this class is typically accessed via
+ * Factory for assertions on the response content using XPath expressions.
+ * <p>An instance of this class is typically accessed via
  * {@link MockMvcResultMatchers#xpath}.
  *
  * @author Rossen Stoyanchev
@@ -43,13 +44,10 @@ public class XpathResultMatchers {
 	 * Protected constructor, not for direct instantiation. Use
 	 * {@link MockMvcResultMatchers#xpath(String, Object...)} or
 	 * {@link MockMvcResultMatchers#xpath(String, Map, Object...)}.
-	 *
 	 * @param expression the XPath expression
 	 * @param namespaces XML namespaces referenced in the XPath expression, or {@code null}
 	 * @param args arguments to parameterize the XPath expression with using the
 	 * formatting specifiers defined in {@link String#format(String, Object...)}
-	 *
-	 * @throws XPathExpressionException
 	 */
 	protected XpathResultMatchers(String expression, Map<String, String> namespaces, Object ... args)
 			throws XPathExpressionException {
@@ -65,10 +63,17 @@ public class XpathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
-				xpathHelper.assertNode(content, matcher);
+				MockHttpServletResponse response = result.getResponse();
+				xpathHelper.assertNode(response.getContentAsByteArray(), getDefinedEncoding(response), matcher);
 			}
 		};
+	}
+
+	/**
+	 * Get the response encoding if explicitly defined in the response, {code null} otherwise.
+	 */
+	private String getDefinedEncoding(MockHttpServletResponse response) {
+		return response.isCharset() ? response.getCharacterEncoding() : null;
 	}
 
 	/**
@@ -78,8 +83,8 @@ public class XpathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
-				xpathHelper.exists(content);
+				MockHttpServletResponse response = result.getResponse();
+				xpathHelper.exists(response.getContentAsByteArray(), getDefinedEncoding(response));
 			}
 		};
 	}
@@ -91,8 +96,8 @@ public class XpathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
-				xpathHelper.doesNotExist(content);
+				MockHttpServletResponse response = result.getResponse();
+				xpathHelper.doesNotExist(response.getContentAsByteArray(), getDefinedEncoding(response));
 			}
 		};
 	}
@@ -105,8 +110,8 @@ public class XpathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
-				xpathHelper.assertNodeCount(content, matcher);
+				MockHttpServletResponse response = result.getResponse();
+				xpathHelper.assertNodeCount(response.getContentAsByteArray(), getDefinedEncoding(response), matcher);
 			}
 		};
 	}
@@ -118,8 +123,8 @@ public class XpathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
-				xpathHelper.assertNodeCount(content, expectedCount);
+				MockHttpServletResponse response = result.getResponse();
+				xpathHelper.assertNodeCount(response.getContentAsByteArray(), getDefinedEncoding(response), expectedCount);
 			}
 		};
 	}
@@ -132,8 +137,8 @@ public class XpathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
-				xpathHelper.assertString(content, matcher);
+				MockHttpServletResponse response = result.getResponse();
+				xpathHelper.assertString(response.getContentAsByteArray(), getDefinedEncoding(response), matcher);
 			}
 		};
 	}
@@ -145,8 +150,8 @@ public class XpathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
-				xpathHelper.assertString(content, expectedValue);
+				MockHttpServletResponse response = result.getResponse();
+				xpathHelper.assertString(response.getContentAsByteArray(), getDefinedEncoding(response), expectedValue);
 			}
 		};
 	}
@@ -159,8 +164,8 @@ public class XpathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
-				xpathHelper.assertNumber(content, matcher);
+				MockHttpServletResponse response = result.getResponse();
+				xpathHelper.assertNumber(response.getContentAsByteArray(), getDefinedEncoding(response), matcher);
 			}
 		};
 	}
@@ -172,8 +177,8 @@ public class XpathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
-				xpathHelper.assertNumber(content, expectedValue);
+				MockHttpServletResponse response = result.getResponse();
+				xpathHelper.assertNumber(response.getContentAsByteArray(), getDefinedEncoding(response), expectedValue);
 			}
 		};
 	}
@@ -185,8 +190,8 @@ public class XpathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
-				xpathHelper.assertBoolean(content, value);
+				MockHttpServletResponse response = result.getResponse();
+				xpathHelper.assertBoolean(response.getContentAsByteArray(), getDefinedEncoding(response), value);
 			}
 		};
 	}

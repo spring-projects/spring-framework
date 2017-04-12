@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,10 +33,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * An implementation of {@link org.springframework.messaging.simp.SimpMessageSendingOperations}.
+ * An implementation of
+ * {@link org.springframework.messaging.simp.SimpMessageSendingOperations}.
  *
  * <p>Also provides methods for sending messages to a user. See
- * {@link org.springframework.messaging.simp.user.UserDestinationResolver UserDestinationResolver}
+ * {@link org.springframework.messaging.simp.user.UserDestinationResolver
+ * UserDestinationResolver}
  * for more on user destinations.
  *
  * @author Rossen Stoyanchev
@@ -47,16 +49,16 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 	private final MessageChannel messageChannel;
 
-	private String userDestinationPrefix = "/user/";
-
-	private MessageHeaderInitializer headerInitializer;
+	private String destinationPrefix = "/user/";
 
 	private volatile long sendTimeout = -1;
+
+	private MessageHeaderInitializer headerInitializer;
 
 
 	/**
 	 * Create a new {@link SimpMessagingTemplate} instance.
-	 * @param messageChannel the message channel (must not be {@code null})
+	 * @param messageChannel the message channel (never {@code null})
 	 */
 	public SimpMessagingTemplate(MessageChannel messageChannel) {
 		Assert.notNull(messageChannel, "MessageChannel must not be null");
@@ -77,15 +79,30 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 * @see org.springframework.messaging.simp.user.UserDestinationMessageHandler
 	 */
 	public void setUserDestinationPrefix(String prefix) {
-		Assert.notNull(prefix, "UserDestinationPrefix must not be null");
-		this.userDestinationPrefix = prefix;
+		Assert.hasText(prefix, "User destination prefix must not be empty");
+		this.destinationPrefix = (prefix.endsWith("/") ? prefix : prefix + "/");
+
 	}
 
 	/**
 	 * Return the configured user destination prefix.
 	 */
 	public String getUserDestinationPrefix() {
-		return this.userDestinationPrefix;
+		return this.destinationPrefix;
+	}
+
+	/**
+	 * Specify the timeout value to use for send operations (in milliseconds).
+	 */
+	public void setSendTimeout(long sendTimeout) {
+		this.sendTimeout = sendTimeout;
+	}
+
+	/**
+	 * Return the configured send timeout (in milliseconds).
+	 */
+	public long getSendTimeout() {
+		return this.sendTimeout;
 	}
 
 	/**
@@ -104,20 +121,6 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 		return this.headerInitializer;
 	}
 
-	/**
-	 * Specify the timeout value to use for send operations (in milliseconds).
-	 */
-	public void setSendTimeout(long sendTimeout) {
-		this.sendTimeout = sendTimeout;
-	}
-
-	/**
-	 * Return the configured send timeout (in milliseconds).
-	 */
-	public long getSendTimeout() {
-		return this.sendTimeout;
-	}
-
 
 	/**
 	 * If the headers of the given message already contain a
@@ -132,7 +135,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 */
 	@Override
 	public void send(Message<?> message) {
-		Assert.notNull(message, "'message' is required");
+		Assert.notNull(message, "Message is required");
 		String destination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
 		if (destination != null) {
 			sendInternal(message);
@@ -141,7 +144,6 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 		doSend(getRequiredDefaultDestination(), message);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void doSend(String destination, Message<?> message) {
 		Assert.notNull(destination, "Destination must not be null");
@@ -176,7 +178,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 	private void sendInternal(Message<?> message) {
 		String destination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
-		Assert.notNull(destination);
+		Assert.notNull(destination, "Destination header required");
 
 		long timeout = this.sendTimeout;
 		boolean sent = (timeout >= 0 ? this.messageChannel.send(message, timeout) : this.messageChannel.send(message));
@@ -219,7 +221,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 		Assert.notNull(user, "User must not be null");
 		user = StringUtils.replace(user, "/", "%2F");
-		super.convertAndSend(this.userDestinationPrefix + user + destination, payload, headers, postProcessor);
+		super.convertAndSend(this.destinationPrefix + user + destination, payload, headers, postProcessor);
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,7 @@ public abstract class ExtendedEntityManagerCreator {
 	 * transactions (according to the JPA 2.1 SynchronizationType rules)
 	 * @return an application-managed EntityManager that can join transactions
 	 * but does not participate in them automatically
+	 * @since 4.0
 	 */
 	public static EntityManager createApplicationManagedEntityManager(
 			EntityManager rawEntityManager, EntityManagerFactoryInfo emfInfo, boolean synchronizedWithTransaction) {
@@ -156,6 +157,7 @@ public abstract class ExtendedEntityManagerCreator {
 	 * @return a container-managed EntityManager that expects container-driven lifecycle
 	 * management but may opt out of automatic transaction synchronization
 	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+	 * @since 4.0
 	 */
 	public static EntityManager createContainerManagedEntityManager(
 			EntityManagerFactory emf, Map<?, ?> properties, boolean synchronizedWithTransaction) {
@@ -219,7 +221,7 @@ public abstract class ExtendedEntityManagerCreator {
 			boolean containerManaged, boolean synchronizedWithTransaction) {
 
 		Assert.notNull(rawEm, "EntityManager must not be null");
-		Set<Class<?>> ifcs = new LinkedHashSet<Class<?>>();
+		Set<Class<?>> ifcs = new LinkedHashSet<>();
 		if (emIfc != null) {
 			ifcs.add(emIfc);
 		}
@@ -294,7 +296,10 @@ public abstract class ExtendedEntityManagerCreator {
 			else if (method.getName().equals("unwrap")) {
 				// Handle JPA 2.0 unwrap method - could be a proxy match.
 				Class<?> targetClass = (Class<?>) args[0];
-				if (targetClass == null || targetClass.isInstance(proxy)) {
+				if (targetClass == null) {
+					return this.target;
+				}
+				else if (targetClass.isInstance(proxy)) {
 					return proxy;
 				}
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,16 +82,16 @@ import org.springframework.util.CollectionUtils;
  * this instance needs to be aware of the DataSource ({@link #setDataSource}).
  * The given DataSource should obviously match the one used by the given
  * EntityManagerFactory. This transaction manager will autodetect the DataSource
- * used as known connection factory of the EntityManagerFactory, so you usually
+ * used as the connection factory of the EntityManagerFactory, so you usually
  * don't need to explicitly specify the "dataSource" property.
  *
- * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC 3.0
- * Savepoints. The {@link #setNestedTransactionAllowed} "nestedTransactionAllowed"}
- * flag defaults to "false", though, as nested transactions will just apply to the
- * JDBC Connection, not to the JPA EntityManager and its cached objects.
- * You can manually set the flag to "true" if you want to use nested transactions
- * for JDBC access code which participates in JPA transactions (provided that your
- * JDBC driver supports Savepoints). <i>Note that JPA itself does not support
+ * <p>This transaction manager supports nested transactions via JDBC 3.0 Savepoints.
+ * The {@link #setNestedTransactionAllowed "nestedTransactionAllowed"} flag defaults
+ * to {@code false} though, since nested transactions will just apply to the JDBC
+ * Connection, not to the JPA EntityManager and its cached entity objects and related
+ * context. You can manually set the flag to {@code true} if you want to use nested
+ * transactions for JDBC access code which participates in JPA transactions (provided
+ * that your JDBC driver supports Savepoints). <i>Note that JPA itself does not support
  * nested transactions! Hence, do not expect JPA access code to semantically
  * participate in a nested transaction.</i>
  *
@@ -115,7 +115,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 	private String persistenceUnitName;
 
-	private final Map<String, Object> jpaPropertyMap = new HashMap<String, Object>();
+	private final Map<String, Object> jpaPropertyMap = new HashMap<>();
 
 	private DataSource dataSource;
 
@@ -124,7 +124,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 	/**
 	 * Create a new JpaTransactionManager instance.
-	 * A EntityManagerFactory has to be set to be able to use it.
+	 * <p>An EntityManagerFactory has to be set to be able to use it.
 	 * @see #setEntityManagerFactory
 	 */
 	public JpaTransactionManager() {
@@ -145,7 +145,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Set the EntityManagerFactory that this instance should manage transactions for.
 	 * <p>Alternatively, specify the persistence unit name of the target EntityManagerFactory.
-	 * By default, a default EntityManagerFactory will be retrieved through finding a
+	 * By default, a default EntityManagerFactory will be retrieved by finding a
 	 * single unique bean of type EntityManagerFactory in the containing BeanFactory.
 	 * @see #setPersistenceUnitName
 	 */
@@ -165,7 +165,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * <p>This is an alternative to specifying the EntityManagerFactory by direct reference,
 	 * resolving it by its persistence unit name instead. If no EntityManagerFactory and
 	 * no persistence unit name have been specified, a default EntityManagerFactory will
-	 * be retrieved through finding a single unique bean of type EntityManagerFactory.
+	 * be retrieved by finding a single unique bean of type EntityManagerFactory.
 	 * @see #setEntityManagerFactory
 	 */
 	public void setPersistenceUnitName(String persistenceUnitName) {
@@ -215,7 +215,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * Set the JDBC DataSource that this instance should manage transactions for.
 	 * The DataSource should match the one used by the JPA EntityManagerFactory:
 	 * for example, you could specify the same JNDI DataSource for both.
-	 * <p>If the EntityManagerFactory uses a known DataSource as connection factory,
+	 * <p>If the EntityManagerFactory uses a known DataSource as its connection factory,
 	 * the DataSource will be autodetected: You can still explicitly specify the
 	 * DataSource, but you don't need to in this case.
 	 * <p>A transactional JDBC Connection for this DataSource will be provided to
@@ -331,8 +331,8 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 				TransactionSynchronizationManager.getResource(getEntityManagerFactory());
 		if (emHolder != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Found thread-bound EntityManager [" +
-						emHolder.getEntityManager() + "] for JPA transaction");
+				logger.debug("Found thread-bound EntityManager [" + emHolder.getEntityManager() +
+						"] for JPA transaction");
 			}
 			txObject.setEntityManagerHolder(emHolder, false);
 		}
@@ -400,15 +400,16 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 						conHolder.setTimeoutInSeconds(timeoutToUse);
 					}
 					if (logger.isDebugEnabled()) {
-						logger.debug("Exposing JPA transaction as JDBC transaction [" + conHolder.getConnectionHandle() + "]");
+						logger.debug("Exposing JPA transaction as JDBC transaction [" +
+								conHolder.getConnectionHandle() + "]");
 					}
 					TransactionSynchronizationManager.bindResource(getDataSource(), conHolder);
 					txObject.setConnectionHolder(conHolder);
 				}
 				else {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Not exposing JPA transaction [" + em + "] as JDBC transaction because JpaDialect [" +
-								getJpaDialect() + "] does not support JDBC Connection retrieval");
+						logger.debug("Not exposing JPA transaction [" + em + "] as JDBC transaction because " +
+								"JpaDialect [" + getJpaDialect() + "] does not support JDBC Connection retrieval");
 					}
 				}
 			}
@@ -467,6 +468,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			finally {
 				EntityManagerFactoryUtils.closeEntityManager(em);
 			}
+			txObject.setEntityManagerHolder(null, false);
 		}
 	}
 
@@ -675,12 +677,17 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 		@Override
 		public Object createSavepoint() throws TransactionException {
+			if (this.entityManagerHolder.isRollbackOnly()) {
+				throw new CannotCreateTransactionException(
+						"Cannot create savepoint for transaction which is already marked as rollback-only");
+			}
 			return getSavepointManager().createSavepoint();
 		}
 
 		@Override
 		public void rollbackToSavepoint(Object savepoint) throws TransactionException {
 			getSavepointManager().rollbackToSavepoint(savepoint);
+			this.entityManagerHolder.resetRollbackOnly();
 		}
 
 		@Override

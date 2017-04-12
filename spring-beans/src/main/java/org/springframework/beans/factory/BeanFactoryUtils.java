@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -24,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
+import org.springframework.core.ResolvableType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -126,6 +126,39 @@ public abstract class BeanFactoryUtils {
 		return beanNamesForTypeIncludingAncestors(lbf, Object.class);
 	}
 
+	/**
+	 * Get all bean names for the given type, including those defined in ancestor
+	 * factories. Will return unique names in case of overridden bean definitions.
+	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
+	 * will get initialized. If the object created by the FactoryBean doesn't match,
+	 * the raw FactoryBean itself will be matched against the type.
+	 * <p>This version of {@code beanNamesForTypeIncludingAncestors} automatically
+	 * includes prototypes and FactoryBeans.
+	 * @param lbf the bean factory
+	 * @param type the type that beans must match (as a {@code ResolvableType})
+	 * @return the array of matching bean names, or an empty array if none
+	 * @since 4.2
+	 */
+	public static String[] beanNamesForTypeIncludingAncestors(ListableBeanFactory lbf, ResolvableType type) {
+		Assert.notNull(lbf, "ListableBeanFactory must not be null");
+		String[] result = lbf.getBeanNamesForType(type);
+		if (lbf instanceof HierarchicalBeanFactory) {
+			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
+			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
+				String[] parentResult = beanNamesForTypeIncludingAncestors(
+						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
+				List<String> resultList = new ArrayList<>();
+				resultList.addAll(Arrays.asList(result));
+				for (String beanName : parentResult) {
+					if (!resultList.contains(beanName) && !hbf.containsLocalBean(beanName)) {
+						resultList.add(beanName);
+					}
+				}
+				result = StringUtils.toStringArray(resultList);
+			}
+		}
+		return result;
+	}
 
 	/**
 	 * Get all bean names for the given type, including those defined in ancestor
@@ -136,7 +169,7 @@ public abstract class BeanFactoryUtils {
 	 * <p>This version of {@code beanNamesForTypeIncludingAncestors} automatically
 	 * includes prototypes and FactoryBeans.
 	 * @param lbf the bean factory
-	 * @param type the type that beans must match
+	 * @param type the type that beans must match (as a {@code Class})
 	 * @return the array of matching bean names, or an empty array if none
 	 */
 	public static String[] beanNamesForTypeIncludingAncestors(ListableBeanFactory lbf, Class<?> type) {
@@ -147,7 +180,7 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
-				List<String> resultList = new ArrayList<String>();
+				List<String> resultList = new ArrayList<>();
 				resultList.addAll(Arrays.asList(result));
 				for (String beanName : parentResult) {
 					if (!resultList.contains(beanName) && !hbf.containsLocalBean(beanName)) {
@@ -190,7 +223,7 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includeNonSingletons, allowEagerInit);
-				List<String> resultList = new ArrayList<String>();
+				List<String> resultList = new ArrayList<>();
 				resultList.addAll(Arrays.asList(result));
 				for (String beanName : parentResult) {
 					if (!resultList.contains(beanName) && !hbf.containsLocalBean(beanName)) {
@@ -224,7 +257,7 @@ public abstract class BeanFactoryUtils {
 			throws BeansException {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
-		Map<String, T> result = new LinkedHashMap<String, T>(4);
+		Map<String, T> result = new LinkedHashMap<>(4);
 		result.putAll(lbf.getBeansOfType(type));
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
@@ -273,7 +306,7 @@ public abstract class BeanFactoryUtils {
 			throws BeansException {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
-		Map<String, T> result = new LinkedHashMap<String, T>(4);
+		Map<String, T> result = new LinkedHashMap<>(4);
 		result.putAll(lbf.getBeansOfType(type, includeNonSingletons, allowEagerInit));
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;

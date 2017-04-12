@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class JodaDateTimeFormatAnnotationFormatterFactory extends EmbeddedValueR
 		// (if we did not do this, the default byType rules for LocalDate, LocalTime,
 		// and LocalDateTime would take precedence over the annotation rule, which
 		// is not what we want)
-		Set<Class<?>> fieldTypes = new HashSet<Class<?>>(8);
+		Set<Class<?>> fieldTypes = new HashSet<>(8);
 		fieldTypes.add(ReadableInstant.class);
 		fieldTypes.add(LocalDate.class);
 		fieldTypes.add(LocalTime.class);
@@ -92,13 +92,13 @@ public class JodaDateTimeFormatAnnotationFormatterFactory extends EmbeddedValueR
 
 	@Override
 	public Parser<?> getParser(DateTimeFormat annotation, Class<?> fieldType) {
-		if (LocalDate.class.equals(fieldType)) {
+		if (LocalDate.class == fieldType) {
 			return new LocalDateParser(getFormatter(annotation, fieldType));
 		}
-		else if (LocalTime.class.equals(fieldType)) {
+		else if (LocalTime.class == fieldType) {
 			return new LocalTimeParser(getFormatter(annotation, fieldType));
 		}
-		else if (LocalDateTime.class.equals(fieldType)) {
+		else if (LocalDateTime.class == fieldType) {
 			return new LocalDateTimeParser(getFormatter(annotation, fieldType));
 		}
 		else {

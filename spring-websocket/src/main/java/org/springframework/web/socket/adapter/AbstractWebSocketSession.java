@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,16 +40,15 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSession {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected static final Log logger = LogFactory.getLog(NativeWebSocketSession.class);
+
+	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
 	private T nativeSession;
-
-	private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
 
 
 	/**
 	 * Create a new instance and associate the given attributes with it.
-	 *
 	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket
 	 * session; the provided attributes are copied, the original map is not used.
 	 */
@@ -82,7 +81,7 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 	}
 
 	public void initializeNativeSession(T session) {
-		Assert.notNull(session, "session must not be null");
+		Assert.notNull(session, "WebSocket session must not be null");
 		this.nativeSession = session;
 	}
 
@@ -92,9 +91,7 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	@Override
 	public final void sendMessage(WebSocketMessage<?> message) throws IOException {
-
 		checkNativeSessionInitialized();
-		Assert.isTrue(isOpen(), "Cannot send message after connection closed.");
 
 		if (logger.isTraceEnabled()) {
 			logger.trace("Sending " + message + ", " + this);
@@ -125,6 +122,7 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	protected abstract void sendPongMessage(PongMessage message) throws IOException;
 
+
 	@Override
 	public final void close() throws IOException {
 		close(CloseStatus.NORMAL);
@@ -144,7 +142,12 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	@Override
 	public String toString() {
-		return "WebSocket session id=" + getId();
+		if (this.nativeSession != null) {
+			return getClass().getSimpleName() + "[id=" + getId() + ", uri=" + getUri() + "]";
+		}
+		else {
+			return getClass().getSimpleName() + "[nativeSession=null]";
+		}
 	}
 
 }

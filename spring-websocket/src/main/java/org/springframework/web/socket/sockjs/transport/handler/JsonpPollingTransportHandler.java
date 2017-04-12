@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,7 @@ import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
+import org.springframework.web.socket.sockjs.transport.SockJsSession;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSession;
@@ -49,12 +51,17 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 
 	@Override
 	protected MediaType getContentType() {
-		return new MediaType("application", "javascript", UTF8_CHARSET);
+		return new MediaType("application", "javascript", StandardCharsets.UTF_8);
 	}
 
 	@Override
-	public PollingSockJsSession createSession(String sessionId, WebSocketHandler handler,
-			Map<String, Object> attributes) {
+	public boolean checkSessionType(SockJsSession session) {
+		return session instanceof PollingSockJsSession;
+	}
+
+	@Override
+	public PollingSockJsSession createSession(
+			String sessionId, WebSocketHandler handler, Map<String, Object> attributes) {
 
 		return new PollingSockJsSession(sessionId, getServiceConfig(), handler, attributes);
 	}
@@ -65,9 +72,9 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 
 		try {
 			String callback = getCallbackParam(request);
-			if (! StringUtils.hasText(callback)) {
+			if (!StringUtils.hasText(callback)) {
 				response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-				response.getBody().write("\"callback\" parameter required".getBytes("UTF-8"));
+				response.getBody().write("\"callback\" parameter required".getBytes(StandardCharsets.UTF_8));
 				return;
 			}
 		}
@@ -81,10 +88,10 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 
 	@Override
 	protected SockJsFrameFormat getFrameFormat(ServerHttpRequest request) {
-		// we already validated the parameter above...
+		// We already validated the parameter above...
 		String callback = getCallbackParam(request);
 
-		return new DefaultSockJsFrameFormat(callback + "(\"%s\");\r\n") {
+		return new DefaultSockJsFrameFormat("/**/" + callback + "(\"%s\");\r\n") {
 			@Override
 			protected String preProcessContent(String content) {
 				return JavaScriptUtils.javaScriptEscape(content);

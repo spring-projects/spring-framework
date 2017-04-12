@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,9 @@ import java.util.Locale;
 import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
 
 /**
- * Convenience subclass of
- * {@link org.springframework.web.servlet.view.AbstractTemplateViewResolver}
- * that supports {@link GroovyMarkupView} (i.e. Groovy XML/XHTML markup templates)
- * and custom subclasses of it.
+ * Convenience subclass of @link AbstractTemplateViewResolver} that supports
+ * {@link GroovyMarkupView} (i.e. Groovy XML/XHTML markup templates) and
+ * custom subclasses of it.
  *
  * <p>The view class for all views created by this resolver can be specified
  * via the {@link #setViewClass(Class)} property.
@@ -34,14 +33,30 @@ import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
  * View object if a template is actually found.
  *
  * @author Brian Clozel
- * @see GroovyMarkupConfigurer
  * @since 4.1
+ * @see GroovyMarkupConfigurer
  */
 public class GroovyMarkupViewResolver extends AbstractTemplateViewResolver {
 
-
+	/**
+	 * Sets the default {@link #setViewClass view class} to {@link #requiredViewClass}:
+	 * by default {@link GroovyMarkupView}.
+	 */
 	public GroovyMarkupViewResolver() {
-		this.setViewClass(requiredViewClass());
+		setViewClass(requiredViewClass());
+	}
+
+	/**
+	 * A convenience constructor that allows for specifying {@link #setPrefix prefix}
+	 * and {@link #setSuffix suffix} as constructor arguments.
+	 * @param prefix the prefix that gets prepended to view names when building a URL
+	 * @param suffix the suffix that gets appended to view names when building a URL
+	 * @since 4.3
+	 */
+	public GroovyMarkupViewResolver(String prefix, String suffix) {
+		this();
+		setPrefix(prefix);
+		setSuffix(suffix);
 	}
 
 
@@ -55,7 +70,7 @@ public class GroovyMarkupViewResolver extends AbstractTemplateViewResolver {
 	 */
 	@Override
 	protected Object getCacheKey(String viewName, Locale locale) {
-		return viewName + "_" + locale;
+		return viewName + '_' + locale;
 	}
 
 }

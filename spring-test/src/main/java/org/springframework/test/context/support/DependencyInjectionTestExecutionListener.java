@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,10 +49,18 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 * <p>Permissible values include {@link Boolean#TRUE} and {@link Boolean#FALSE}.
 	 */
 	public static final String REINJECT_DEPENDENCIES_ATTRIBUTE = Conventions.getQualifiedAttributeName(
-			DependencyInjectionTestExecutionListener.class, "reinjectDependencies");
+		DependencyInjectionTestExecutionListener.class, "reinjectDependencies");
 
 	private static final Log logger = LogFactory.getLog(DependencyInjectionTestExecutionListener.class);
 
+
+	/**
+	 * Returns {@code 2000}.
+	 */
+	@Override
+	public final int getOrder() {
+		return 2000;
+	}
 
 	/**
 	 * Performs dependency injection on the

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,9 @@
  */
 package org.springframework.test.web.client.samples;
 
-import static org.junit.Assert.assertTrue;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
-
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
@@ -29,6 +25,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
+
+import static org.junit.Assert.assertTrue;
+import static org.springframework.test.web.client.ExpectedCount.manyTimes;
+import static org.springframework.test.web.client.ExpectedCount.never;
+import static org.springframework.test.web.client.ExpectedCount.once;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 /**
  * Examples to demonstrate writing client-side REST tests with Spring MVC Test.
@@ -47,7 +51,7 @@ public class SampleTests {
 	@Before
 	public void setup() {
 		this.restTemplate = new RestTemplate();
-		this.mockServer = MockRestServiceServer.createServer(this.restTemplate);
+		this.mockServer = MockRestServiceServer.bindTo(this.restTemplate).ignoreExpectOrder(true).build();
 	}
 
 	@Test
@@ -59,12 +63,64 @@ public class SampleTests {
 			.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
 		@SuppressWarnings("unused")
-		Person ludwig = restTemplate.getForObject("/composers/{id}", Person.class, 42);
+		Person ludwig = this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
 
-		// person.getName().equals("Ludwig van Beethoven")
-		// person.getDouble().equals(1.6035)
+		// We are only validating the request. The response is mocked out.
+		// hotel.getId() == 42
+		// hotel.getName().equals("Holiday Inn")
 
 		this.mockServer.verify();
+	}
+
+	@Test
+	public void performGetManyTimes() throws Exception {
+
+		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
+
+		this.mockServer.expect(manyTimes(), requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
+				.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
+
+		@SuppressWarnings("unused")
+		Person ludwig = this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
+
+		// We are only validating the request. The response is mocked out.
+		// hotel.getId() == 42
+		// hotel.getName().equals("Holiday Inn")
+
+		this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
+		this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
+		this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
+
+		this.mockServer.verify();
+	}
+
+	@Test
+	public void expectNever() throws Exception {
+
+		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
+
+		this.mockServer.expect(once(), requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
+				.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
+		this.mockServer.expect(never(), requestTo("/composers/43")).andExpect(method(HttpMethod.GET))
+				.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
+
+		this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
+
+		this.mockServer.verify();
+	}
+
+	@Test(expected = AssertionError.class)
+	public void expectNeverViolated() throws Exception {
+
+		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
+
+		this.mockServer.expect(once(), requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
+				.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
+		this.mockServer.expect(never(), requestTo("/composers/43")).andExpect(method(HttpMethod.GET))
+				.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
+
+		this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
+		this.restTemplate.getForObject("/composers/{id}", Person.class, 43);
 	}
 
 	@Test
@@ -76,7 +132,7 @@ public class SampleTests {
 			.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
 		@SuppressWarnings("unused")
-		Person ludwig = restTemplate.getForObject("/composers/{id}", Person.class, 42);
+		Person ludwig = this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
 
 		// hotel.getId() == 42
 		// hotel.getName().equals("Holiday Inn")
@@ -100,17 +156,18 @@ public class SampleTests {
 			.andRespond(withSuccess("8", MediaType.TEXT_PLAIN));
 
 		@SuppressWarnings("unused")
-		String result = this.restTemplate.getForObject("/number", String.class);
-		// result == "1"
+		String result1 = this.restTemplate.getForObject("/number", String.class);
+		// result1 == "1"
 
-		result = this.restTemplate.getForObject("/number", String.class);
+		@SuppressWarnings("unused")
+		String result2 = this.restTemplate.getForObject("/number", String.class);
 		// result == "2"
 
 		try {
 			this.mockServer.verify();
 		}
 		catch (AssertionError error) {
-			assertTrue(error.getMessage(), error.getMessage().contains("2 out of 4 were executed"));
+			assertTrue(error.getMessage(), error.getMessage().contains("2 unsatisfied expectation(s)"));
 		}
 	}
 }

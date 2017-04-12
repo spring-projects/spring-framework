@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,11 +23,12 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link HandshakeInterceptorChain}.
@@ -56,15 +57,15 @@ public class HandshakeInterceptorChainTests extends AbstractHttpRequestTests {
 		i3 = mock(HandshakeInterceptor.class);
 		interceptors = Arrays.asList(i1, i2, i3);
 		wsHandler = mock(WebSocketHandler.class);
-		attributes = new HashMap<String, Object>();
+		attributes = new HashMap<>();
 	}
 
 
 	@Test
 	public void success() throws Exception {
-		when(i1.beforeHandshake(request, response, wsHandler, attributes)).thenReturn(true);
-		when(i2.beforeHandshake(request, response, wsHandler, attributes)).thenReturn(true);
-		when(i3.beforeHandshake(request, response, wsHandler, attributes)).thenReturn(true);
+		given(i1.beforeHandshake(request, response, wsHandler, attributes)).willReturn(true);
+		given(i2.beforeHandshake(request, response, wsHandler, attributes)).willReturn(true);
+		given(i3.beforeHandshake(request, response, wsHandler, attributes)).willReturn(true);
 
 		HandshakeInterceptorChain chain = new HandshakeInterceptorChain(interceptors, wsHandler);
 		chain.applyBeforeHandshake(request, response, attributes);
@@ -77,8 +78,8 @@ public class HandshakeInterceptorChainTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void applyBeforeHandshakeWithFalseReturnValue() throws Exception {
-		when(i1.beforeHandshake(request, response, wsHandler, attributes)).thenReturn(true);
-		when(i2.beforeHandshake(request, response, wsHandler, attributes)).thenReturn(false);
+		given(i1.beforeHandshake(request, response, wsHandler, attributes)).willReturn(true);
+		given(i2.beforeHandshake(request, response, wsHandler, attributes)).willReturn(false);
 
 		HandshakeInterceptorChain chain = new HandshakeInterceptorChain(interceptors, wsHandler);
 		chain.applyBeforeHandshake(request, response, attributes);

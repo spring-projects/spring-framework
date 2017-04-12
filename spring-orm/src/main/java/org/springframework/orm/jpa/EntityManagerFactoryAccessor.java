@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Base class for any class that needs to access an EntityManagerFactory,
- * usually in order to obtain an EntityManager. Defines common properties.
+ * Base class for any class that needs to access a JPA {@link EntityManagerFactory},
+ * usually in order to obtain a JPA {@link EntityManager}. Defines common properties.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -49,7 +49,7 @@ public abstract class EntityManagerFactoryAccessor implements BeanFactoryAware {
 
 	private String persistenceUnitName;
 
-	private final Map<String, Object> jpaPropertyMap = new HashMap<String, Object>();
+	private final Map<String, Object> jpaPropertyMap = new HashMap<>();
 
 
 	/**

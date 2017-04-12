@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package org.springframework.orm.jpa.vendor;
 
+import java.lang.reflect.Method;
 import javax.persistence.EntityManagerFactory;
 
 import org.hibernate.SessionFactory;
-import org.hibernate.ejb.HibernateEntityManagerFactory;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.orm.jpa.EntityManagerFactoryAccessor;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Simple {@code FactoryBean} that exposes the underlying {@link SessionFactory}
@@ -42,8 +43,14 @@ public class HibernateJpaSessionFactoryBean extends EntityManagerFactoryAccessor
 	@Override
 	public SessionFactory getObject() {
 		EntityManagerFactory emf = getEntityManagerFactory();
-		Assert.isInstanceOf(HibernateEntityManagerFactory.class, emf);
-		return ((HibernateEntityManagerFactory) emf).getSessionFactory();
+		Assert.state(emf != null, "EntityManagerFactory must not be null");
+		try {
+			Method getSessionFactory = emf.getClass().getMethod("getSessionFactory");
+			return (SessionFactory) ReflectionUtils.invokeMethod(getSessionFactory, emf);
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException("No compatible Hibernate EntityManagerFactory found: " + ex);
+		}
 	}
 
 	@Override

@@ -17,6 +17,7 @@
 package org.springframework.context.annotation.configuration.spr8955;
 
 import org.junit.Test;
+
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**

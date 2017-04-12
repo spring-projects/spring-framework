@@ -17,8 +17,8 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -34,19 +34,32 @@ public class LookupOverride extends MethodOverride {
 
 	private final String beanName;
 
+	private Method method;
+
 
 	/**
 	 * Construct a new LookupOverride.
-	 * @param methodName the name of the method to override.
-	 * This method must have no arguments.
-	 * @param beanName the name of the bean in the current BeanFactory
-	 * that the overridden method should return
+	 * @param methodName the name of the method to override
+	 * @param beanName the name of the bean in the current {@code BeanFactory}
+	 * that the overridden method should return (may be {@code null})
 	 */
 	public LookupOverride(String methodName, String beanName) {
 		super(methodName);
-		Assert.notNull(beanName, "Bean name must not be null");
 		this.beanName = beanName;
 	}
+
+	/**
+	 * Construct a new LookupOverride.
+	 * @param method the method to override
+	 * @param beanName the name of the bean in the current {@code BeanFactory}
+	 * that the overridden method should return (may be {@code null})
+	 */
+	public LookupOverride(Method method, String beanName) {
+		super(method.getName());
+		this.method = method;
+		this.beanName = beanName;
+	}
+
 
 	/**
 	 * Return the name of the bean that should be returned by this method.
@@ -56,27 +69,43 @@ public class LookupOverride extends MethodOverride {
 	}
 
 	/**
-	 * Match the method of the given name, with no parameters.
+	 * Match the specified method by {@link Method} reference or method name.
+	 * <p>For backwards compatibility reasons, in a scenario with overloaded
+	 * non-abstract methods of the given name, only the no-arg variant of a
+	 * method will be turned into a container-driven lookup method.
+	 * <p>In case of a provided {@link Method}, only straight matches will
+	 * be considered, usually demarcated by the {@code @Lookup} annotation.
 	 */
 	@Override
 	public boolean matches(Method method) {
-		return (method.getName().equals(getMethodName()) && method.getParameterTypes().length == 0);
+		if (this.method != null) {
+			return method.equals(this.method);
+		}
+		else {
+			return (method.getName().equals(getMethodName()) && (!isOverloaded() ||
+					Modifier.isAbstract(method.getModifiers()) || method.getParameterCount() == 0));
+		}
 	}
 
-	@Override
-	public String toString() {
-		return "LookupOverride for method '" + getMethodName() + "'; will return bean '" + this.beanName + "'";
-	}
 
 	@Override
 	public boolean equals(Object other) {
-		return (other instanceof LookupOverride && super.equals(other) &&
-				ObjectUtils.nullSafeEquals(this.beanName, ((LookupOverride) other).beanName));
+		if (!(other instanceof LookupOverride) || !super.equals(other)) {
+			return false;
+		}
+		LookupOverride that = (LookupOverride) other;
+		return (ObjectUtils.nullSafeEquals(this.method, that.method) &&
+				ObjectUtils.nullSafeEquals(this.beanName, that.beanName));
 	}
 
 	@Override
 	public int hashCode() {
 		return (29 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.beanName));
+	}
+
+	@Override
+	public String toString() {
+		return "LookupOverride for method '" + getMethodName() + "'";
 	}
 
 }

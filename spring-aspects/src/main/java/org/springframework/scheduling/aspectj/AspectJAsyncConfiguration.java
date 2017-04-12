@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,19 @@
 package org.springframework.scheduling.aspectj;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
 import org.springframework.scheduling.annotation.AbstractAsyncConfiguration;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.config.TaskManagementConfigUtils;
 
 /**
  * {@code @Configuration} class that registers the Spring infrastructure beans necessary
  * to enable AspectJ-based asynchronous method execution.
  *
  * @author Chris Beams
+ * @author Stephane Nicoll
  * @since 3.1
  * @see EnableAsync
  * @see org.springframework.scheduling.annotation.AsyncConfigurationSelector
@@ -37,12 +38,15 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @Configuration
 public class AspectJAsyncConfiguration extends AbstractAsyncConfiguration {
 
-	@Bean(name=AnnotationConfigUtils.ASYNC_EXECUTION_ASPECT_BEAN_NAME)
+	@Bean(name = TaskManagementConfigUtils.ASYNC_EXECUTION_ASPECT_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public AnnotationAsyncExecutionAspect asyncAdvisor() {
 		AnnotationAsyncExecutionAspect asyncAspect = AnnotationAsyncExecutionAspect.aspectOf();
 		if (this.executor != null) {
 			asyncAspect.setExecutor(this.executor);
+		}
+		if (this.exceptionHandler != null) {
+			asyncAspect.setExceptionHandler(this.exceptionHandler);
 		}
 		return asyncAspect;
 	}

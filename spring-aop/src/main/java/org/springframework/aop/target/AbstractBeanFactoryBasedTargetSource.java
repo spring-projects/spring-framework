@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -46,10 +45,9 @@ import org.springframework.util.ObjectUtils;
  * @see LazyInitTargetSource
  * @see PrototypeTargetSource
  * @see ThreadLocalTargetSource
- * @see CommonsPoolTargetSource
+ * @see CommonsPool2TargetSource
  */
-public abstract class AbstractBeanFactoryBasedTargetSource
-		implements TargetSource, BeanFactoryAware, Serializable {
+public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSource, BeanFactoryAware, Serializable {
 
 	/** use serialVersionUID from Spring 1.2.7 for interoperability */
 	private static final long serialVersionUID = -4721607536018568393L;
@@ -108,7 +106,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (this.targetBeanName == null) {
-			throw new IllegalStateException("Property'targetBeanName' is required");
+			throw new IllegalStateException("Property 'targetBeanName' is required");
 		}
 		this.beanFactory = beanFactory;
 	}
@@ -167,7 +165,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 		if (this == other) {
 			return true;
 		}
-		if (other == null || !getClass().equals(other.getClass())) {
+		if (other == null || getClass() != other.getClass()) {
 			return false;
 		}
 		AbstractBeanFactoryBasedTargetSource otherTargetSource = (AbstractBeanFactoryBasedTargetSource) other;
@@ -185,8 +183,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(ClassUtils.getShortName(getClass()));
+		StringBuilder sb = new StringBuilder(getClass().getSimpleName());
 		sb.append(" for target bean '").append(this.targetBeanName).append("'");
 		if (this.targetClass != null) {
 			sb.append(" of type [").append(this.targetClass.getName()).append("]");

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,9 +47,9 @@ public class AnnotatedEndpointConnectionManager extends ConnectionManagerSupport
 
 	private WebSocketContainer webSocketContainer = ContainerProvider.getWebSocketContainer();
 
-	private Session session;
-
 	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("AnnotatedEndpointConnectionManager-");
+
+	private volatile Session session;
 
 
 	public AnnotatedEndpointConnectionManager(Object endpoint, String uriTemplate, Object... uriVariables) {
@@ -60,7 +60,7 @@ public class AnnotatedEndpointConnectionManager extends ConnectionManagerSupport
 
 	public AnnotatedEndpointConnectionManager(Class<?> endpointClass, String uriTemplate, Object... uriVariables) {
 		super(uriTemplate, uriVariables);
-		this.endpointProvider = new BeanCreatingHandlerProvider<Object>(endpointClass);
+		this.endpointProvider = new BeanCreatingHandlerProvider<>(endpointClass);
 		this.endpoint = null;
 	}
 
@@ -96,19 +96,22 @@ public class AnnotatedEndpointConnectionManager extends ConnectionManagerSupport
 		return this.taskExecutor;
 	}
 
+
 	@Override
 	protected void openConnection() {
 		this.taskExecutor.execute(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					logger.info("Connecting to WebSocket at " + getUri());
+					if (logger.isInfoEnabled()) {
+						logger.info("Connecting to WebSocket at " + getUri());
+					}
 					Object endpointToUse = (endpoint != null) ? endpoint : endpointProvider.getHandler();
 					session = webSocketContainer.connectToServer(endpointToUse, getUri());
-					logger.info("Successfully connected");
+					logger.info("Successfully connected to WebSocket");
 				}
 				catch (Throwable ex) {
-					logger.error("Failed to connect", ex);
+					logger.error("Failed to connect to WebSocket", ex);
 				}
 			}
 		});
@@ -128,7 +131,7 @@ public class AnnotatedEndpointConnectionManager extends ConnectionManagerSupport
 
 	@Override
 	protected boolean isConnected() {
-		return ((this.session != null) && this.session.isOpen());
+		return (this.session != null && this.session.isOpen());
 	}
 
 }

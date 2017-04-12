@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,15 +28,15 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.SocketUtils;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.jetty.JettyWebSocketHandlerAdapter;
 import org.springframework.web.socket.adapter.jetty.JettyWebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-import org.springframework.web.socket.WebSocketHttpHeaders;
 
 import static org.junit.Assert.*;
 
@@ -58,15 +58,13 @@ public class JettyWebSocketClientTests {
 	@Before
 	public void setup() throws Exception {
 
-		int port = SocketUtils.findAvailableTcpPort();
-
-		this.server = new TestJettyWebSocketServer(port, new TextWebSocketHandler());
+		this.server = new TestJettyWebSocketServer(new TextWebSocketHandler());
 		this.server.start();
 
 		this.client = new JettyWebSocketClient();
 		this.client.start();
 
-		this.wsUrl = "ws://localhost:" + port + "/test";
+		this.wsUrl = "ws://localhost:" + this.server.getPort() + "/test";
 	}
 
 	@After
@@ -108,11 +106,11 @@ public class JettyWebSocketClientTests {
 		private final Server server;
 
 
-		public TestJettyWebSocketServer(int port, final WebSocketHandler webSocketHandler) {
+		public TestJettyWebSocketServer(final WebSocketHandler webSocketHandler) {
 
 			this.server = new Server();
 			ServerConnector connector = new ServerConnector(this.server);
-			connector.setPort(port);
+			connector.setPort(0);
 
 			this.server.addConnector(connector);
 			this.server.setHandler(new org.eclipse.jetty.websocket.server.WebSocketHandler() {
@@ -138,6 +136,10 @@ public class JettyWebSocketClientTests {
 
 		public void stop() throws Exception {
 			this.server.stop();
+		}
+
+		public int getPort() {
+			return ((ServerConnector) this.server.getConnectors()[0]).getLocalPort();
 		}
 	}
 

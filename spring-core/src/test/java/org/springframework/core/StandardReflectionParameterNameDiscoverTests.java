@@ -15,14 +15,15 @@
  */
 package org.springframework.core;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.util.ReflectionUtils;
-
 import java.lang.reflect.Method;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.Before;
+import org.junit.Test;
+
+import org.springframework.util.ReflectionUtils;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
 
 /**
  * Tests for StandardReflectionParameterNameDiscoverer

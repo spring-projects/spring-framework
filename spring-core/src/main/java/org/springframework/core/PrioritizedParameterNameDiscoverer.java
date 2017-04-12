@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * ParameterNameDiscoverer implementation that tries several ParameterNameDiscoverers
- * in succession. Those added first in the {@code addDiscoverer} method have
- * highest priority. If one returns {@code null}, the next will be tried.
+ * {@link ParameterNameDiscoverer} implementation that tries several discoverer
+ * delegates in succession. Those added first in the {@code addDiscoverer} method
+ * have highest priority. If one returns {@code null}, the next will be tried.
  *
- * <p>The default behavior is always to return {@code null}
- * if no discoverer matches.
+ * <p>The default behavior is to return {@code null} if no discoverer matches.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -35,13 +34,12 @@ import java.util.List;
  */
 public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscoverer {
 
-	private final List<ParameterNameDiscoverer> parameterNameDiscoverers =
-			new LinkedList<ParameterNameDiscoverer>();
+	private final List<ParameterNameDiscoverer> parameterNameDiscoverers = new LinkedList<>();
 
 
 	/**
-	 * Add a further ParameterNameDiscoverer to the list of discoverers
-	 * that this PrioritizedParameterNameDiscoverer checks.
+	 * Add a further {@link ParameterNameDiscoverer} delegate to the list of
+	 * discoverers that this {@code PrioritizedParameterNameDiscoverer} checks.
 	 */
 	public void addDiscoverer(ParameterNameDiscoverer pnd) {
 		this.parameterNameDiscoverers.add(pnd);

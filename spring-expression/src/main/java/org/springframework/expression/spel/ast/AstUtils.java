@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.expression.spel.ast;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.expression.PropertyAccessor;
@@ -27,7 +28,7 @@ import org.springframework.expression.PropertyAccessor;
  * @author Andy Clement
  * @since 3.0.2
  */
-public class AstUtils {
+public abstract class AstUtils {
 
 	/**
 	 * Determines the set of property resolvers that should be used to try and access a
@@ -36,28 +37,29 @@ public class AstUtils {
 	 * target type (as opposed to 'general' resolvers that could work for any type) are
 	 * placed at the start of the list. In addition, there are specific resolvers that
 	 * exactly name the class in question and resolvers that name a specific class but it
-	 * is a supertype of the class we have. These are put at the end of the specific
-	 * resolvers set and will be tried after exactly matching accessors but before generic
-	 * accessors.
+	 * is a supertype of the class we have. These are put at the end of the specific resolvers
+	 * set and will be tried after exactly matching accessors but before generic accessors.
 	 * @param targetType the type upon which property access is being attempted
 	 * @return a list of resolvers that should be tried in order to access the property
 	 */
-	public static List<PropertyAccessor> getPropertyAccessorsToTry(Class<?> targetType, List<PropertyAccessor> propertyAccessors) {
-		List<PropertyAccessor> specificAccessors = new ArrayList<PropertyAccessor>();
-		List<PropertyAccessor> generalAccessors = new ArrayList<PropertyAccessor>();
+	public static List<PropertyAccessor> getPropertyAccessorsToTry(
+			Class<?> targetType, List<PropertyAccessor> propertyAccessors) {
+
+		List<PropertyAccessor> specificAccessors = new ArrayList<>();
+		List<PropertyAccessor> generalAccessors = new ArrayList<>();
 		for (PropertyAccessor resolver : propertyAccessors) {
 			Class<?>[] targets = resolver.getSpecificTargetClasses();
-			if (targets == null) { // generic resolver that says it can be used for any type
+			if (targets == null) {  // generic resolver that says it can be used for any type
 				generalAccessors.add(resolver);
 			}
 			else {
 				if (targetType != null) {
 					int pos = 0;
 					for (Class<?> clazz : targets) {
-						if (clazz == targetType) { // put exact matches on the front to be tried first?
+						if (clazz == targetType) {  // put exact matches on the front to be tried first?
 							specificAccessors.add(pos++, resolver);
 						}
-						else if (clazz.isAssignableFrom(targetType)) { // put supertype matches at the end of the
+						else if (clazz.isAssignableFrom(targetType)) {  // put supertype matches at the end of the
 							// specificAccessor list
 							generalAccessors.add(resolver);
 						}
@@ -65,9 +67,10 @@ public class AstUtils {
 				}
 			}
 		}
-		List<PropertyAccessor> resolvers = new ArrayList<PropertyAccessor>();
+		List<PropertyAccessor> resolvers = new LinkedList<>();
 		resolvers.addAll(specificAccessors);
 		resolvers.addAll(generalAccessors);
 		return resolvers;
 	}
+
 }

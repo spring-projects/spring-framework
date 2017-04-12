@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
 
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockPageContext;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * @author Rob Harrop
@@ -40,7 +40,7 @@ public abstract class AbstractFormTagTests extends AbstractHtmlElementTagTests {
 
 	@Override
 	protected void extendPageContext(MockPageContext pageContext) throws JspException {
-		this.formTag.setCommandName(COMMAND_NAME);
+		this.formTag.setModelAttribute(COMMAND_NAME);
 		this.formTag.setAction("myAction");
 		this.formTag.setPageContext(pageContext);
 		this.formTag.doStartTag();

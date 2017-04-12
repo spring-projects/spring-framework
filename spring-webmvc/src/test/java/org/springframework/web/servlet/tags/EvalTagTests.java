@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,22 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.jsp.tagext.Tag;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.annotation.NumberFormat.Style;
-import org.springframework.format.number.PercentFormatter;
+import org.springframework.format.number.PercentStyleFormatter;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockPageContext;
 import org.springframework.web.servlet.DispatcherServlet;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
@@ -42,8 +46,8 @@ public class EvalTagTests extends AbstractTagTests {
 
 	private MockPageContext context;
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		context = createPageContext();
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
 		factory.afterPropertiesSet();
@@ -53,7 +57,8 @@ public class EvalTagTests extends AbstractTagTests {
 		tag.setPageContext(context);
 	}
 
-	public void testPrintScopedAttributeResult() throws Exception {
+	@Test
+	public void printScopedAttributeResult() throws Exception {
 		tag.setExpression("bean.method()");
 		int action = tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
@@ -62,7 +67,8 @@ public class EvalTagTests extends AbstractTagTests {
 		assertEquals("foo", ((MockHttpServletResponse) context.getResponse()).getContentAsString());
 	}
 
-	public void testPrintNullAsEmptyString() throws Exception {
+	@Test
+	public void printNullAsEmptyString() throws Exception {
 		tag.setExpression("bean.null");
 		int action = tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
@@ -71,8 +77,9 @@ public class EvalTagTests extends AbstractTagTests {
 		assertEquals("", ((MockHttpServletResponse) context.getResponse()).getContentAsString());
 	}
 
-	public void testPrintFormattedScopedAttributeResult() throws Exception {
-		PercentFormatter formatter = new PercentFormatter();
+	@Test
+	public void printFormattedScopedAttributeResult() throws Exception {
+		PercentStyleFormatter formatter = new PercentStyleFormatter();
 		tag.setExpression("bean.formattable");
 		int action = tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
@@ -82,7 +89,8 @@ public class EvalTagTests extends AbstractTagTests {
 				((MockHttpServletResponse) context.getResponse()).getContentAsString());
 	}
 
-	public void testPrintHtmlEscapedAttributeResult() throws Exception {
+	@Test
+	public void printHtmlEscapedAttributeResult() throws Exception {
 		tag.setExpression("bean.html()");
 		tag.setHtmlEscape(true);
 		int action = tag.doStartTag();
@@ -92,17 +100,20 @@ public class EvalTagTests extends AbstractTagTests {
 		assertEquals("&lt;p&gt;", ((MockHttpServletResponse) context.getResponse()).getContentAsString());
 	}
 
-	public void testPrintJavaScriptEscapedAttributeResult() throws Exception {
+	@Test
+	public void printJavaScriptEscapedAttributeResult() throws Exception {
 		tag.setExpression("bean.js()");
 		tag.setJavaScriptEscape(true);
 		int action = tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
 		action = tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, action);
-		assertEquals("function foo() { alert(\\\"hi\\\") }", ((MockHttpServletResponse)context.getResponse()).getContentAsString());
+		assertEquals("function foo() { alert(\\\"hi\\\") }",
+				((MockHttpServletResponse)context.getResponse()).getContentAsString());
 	}
 
-	public void testSetFormattedScopedAttributeResult() throws Exception {
+	@Test
+	public void setFormattedScopedAttributeResult() throws Exception {
 		tag.setExpression("bean.formattable");
 		tag.setVar("foo");
 		int action = tag.doStartTag();
@@ -113,7 +124,8 @@ public class EvalTagTests extends AbstractTagTests {
 	}
 
 	// SPR-6923
-	public void testNestedPropertyWithAttributeName() throws Exception {
+	@Test
+	public void nestedPropertyWithAttributeName() throws Exception {
 		tag.setExpression("bean.bean");
 		tag.setVar("foo");
 		int action = tag.doStartTag();
@@ -123,7 +135,8 @@ public class EvalTagTests extends AbstractTagTests {
 		assertEquals("not the bean object", context.getAttribute("foo"));
 	}
 
-	public void testAccessUsingBeanSyntax() throws Exception {
+	@Test
+	public void accessUsingBeanSyntax() throws Exception {
 		GenericApplicationContext wac = (GenericApplicationContext)
 				context.getRequest().getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		wac.getDefaultListableBeanFactory().registerSingleton("bean2", context.getRequest().getAttribute("bean"));
@@ -136,8 +149,9 @@ public class EvalTagTests extends AbstractTagTests {
 		assertEquals("not the bean object", context.getAttribute("foo"));
 	}
 
-	public void testEnvironmentAccess() throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
+	@Test
+	public void environmentAccess() throws Exception {
+		Map<String, Object> map = new HashMap<>();
 		map.put("key.foo", "value.foo");
 		GenericApplicationContext wac = (GenericApplicationContext)
 		context.getRequest().getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
@@ -151,7 +165,8 @@ public class EvalTagTests extends AbstractTagTests {
 		assertEquals("value.foo", ((MockHttpServletResponse) context.getResponse()).getContentAsString());
 	}
 
-	public void testMapAccess() throws Exception {
+	@Test
+	public void mapAccess() throws Exception {
 		tag.setExpression("bean.map.key");
 		int action = tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
@@ -190,7 +205,7 @@ public class EvalTagTests extends AbstractTagTests {
 		}
 
 		public Map<String, Object> getMap() {
-			Map<String, Object> map = new HashMap<String, Object>();
+			Map<String, Object> map = new HashMap<>();
 			map.put("key", "value");
 			return map;
 		}

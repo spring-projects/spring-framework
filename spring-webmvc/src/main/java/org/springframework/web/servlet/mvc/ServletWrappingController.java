@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -78,13 +79,11 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Juergen Hoeller
  * @since 1.1.1
  * @see ServletForwardingController
- * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor
- * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter
  */
 public class ServletWrappingController extends AbstractController
 		implements BeanNameAware, InitializingBean, DisposableBean {
 
-	private Class<?> servletClass;
+	private Class<? extends Servlet> servletClass;
 
 	private String servletName;
 
@@ -95,12 +94,17 @@ public class ServletWrappingController extends AbstractController
 	private Servlet servletInstance;
 
 
+	public ServletWrappingController() {
+		super(false);
+	}
+
+
 	/**
 	 * Set the class of the servlet to wrap.
 	 * Needs to implement {@code javax.servlet.Servlet}.
 	 * @see javax.servlet.Servlet
 	 */
-	public void setServletClass(Class<?> servletClass) {
+	public void setServletClass(Class<? extends Servlet> servletClass) {
 		this.servletClass = servletClass;
 	}
 
@@ -133,27 +137,23 @@ public class ServletWrappingController extends AbstractController
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (this.servletClass == null) {
-			throw new IllegalArgumentException("servletClass is required");
-		}
-		if (!Servlet.class.isAssignableFrom(this.servletClass)) {
-			throw new IllegalArgumentException("servletClass [" + this.servletClass.getName() +
-				"] needs to implement interface [javax.servlet.Servlet]");
+			throw new IllegalArgumentException("'servletClass' is required");
 		}
 		if (this.servletName == null) {
 			this.servletName = this.beanName;
 		}
-		this.servletInstance = (Servlet) this.servletClass.newInstance();
+		this.servletInstance = ReflectionUtils.accessibleConstructor(this.servletClass).newInstance();
 		this.servletInstance.init(new DelegatingServletConfig());
 	}
 
 
 	/**
-	 * Invoke the the wrapped Servlet instance.
+	 * Invoke the wrapped Servlet instance.
 	 * @see javax.servlet.Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
 	 */
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
-		throws Exception {
+			throws Exception {
 
 		this.servletInstance.service(request, response);
 		return null;

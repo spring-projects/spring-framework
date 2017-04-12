@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,22 +22,30 @@ import java.net.URI;
 import org.springframework.http.HttpMethod;
 
 /**
- * Wrapper for a {@link ClientHttpRequestFactory} that buffers all outgoing and incoming streams in memory.
+ * Wrapper for a {@link ClientHttpRequestFactory} that buffers
+ * all outgoing and incoming streams in memory.
  *
- * <p>Using this wrapper allows for multiple reads of the {@linkplain ClientHttpResponse#getBody() response body}.
+ * <p>Using this wrapper allows for multiple reads of the
+ * @linkplain ClientHttpResponse#getBody() response body}.
  *
  * @author Arjen Poutsma
  * @since 3.1
  */
 public class BufferingClientHttpRequestFactory extends AbstractClientHttpRequestFactoryWrapper {
 
+	/**
+	 * Create a buffering wrapper for the given {@link ClientHttpRequestFactory}.
+	 * @param requestFactory the target request factory to wrap
+	 */
 	public BufferingClientHttpRequestFactory(ClientHttpRequestFactory requestFactory) {
 		super(requestFactory);
 	}
 
+
 	@Override
 	protected ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod, ClientHttpRequestFactory requestFactory)
 			throws IOException {
+
 		ClientHttpRequest request = requestFactory.createRequest(uri, httpMethod);
 		if (shouldBuffer(uri, httpMethod)) {
 			return new BufferingClientHttpRequestWrapper(request);
@@ -48,11 +56,10 @@ public class BufferingClientHttpRequestFactory extends AbstractClientHttpRequest
 	}
 
 	/**
-	 * Indicates whether the request/response exchange for the given URI and method should be buffered in memory.
-	 *
-	 * <p>Default implementation returns {@code true} for all URIs and methods. Subclasses can override this method to
-	 * change this behavior.
-	 *
+	 * Indicates whether the request/response exchange for the given URI and method
+	 * should be buffered in memory.
+	 * <p>The default implementation returns {@code true} for all URIs and methods.
+	 * Subclasses can override this method to change this behavior.
 	 * @param uri the URI
 	 * @param httpMethod the method
 	 * @return {@code true} if the exchange should be buffered; {@code false} otherwise
@@ -60,4 +67,5 @@ public class BufferingClientHttpRequestFactory extends AbstractClientHttpRequest
 	protected boolean shouldBuffer(URI uri, HttpMethod httpMethod) {
 		return true;
 	}
+
 }

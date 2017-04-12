@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,32 @@
 
 package org.springframework.web.servlet.handler;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.util.PathMatcher;
 import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Holds information about a HandlerInterceptor mapped to a path into the application.
- * Provides a method to match a request path to the mapped path patterns.
+ * Contains and delegates calls to a {@link HandlerInterceptor} along with
+ * include (and optionally exclude) path patterns to which the interceptor should apply.
+ * Also provides matching logic to test if the interceptor applies to a given request path.
+ *
+ * <p>A MappedInterceptor can be registered directly with any
+ * {@link org.springframework.web.servlet.handler.AbstractHandlerMethodMapping
+ * AbstractHandlerMethodMapping}. Furthermore, beans of type MappedInterceptor
+ * are automatically detected by {@code AbstractHandlerMethodMapping} (including
+ * ancestor ApplicationContext's) which effectively means the interceptor is
+ * registered "globally" with all handler mappings.
  *
  * @author Keith Donald
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 3.0
  */
-public final class MappedInterceptor {
+public final class MappedInterceptor implements HandlerInterceptor {
 
 	private final String[] includePatterns;
 
@@ -112,6 +125,21 @@ public final class MappedInterceptor {
 	 */
 	public HandlerInterceptor getInterceptor() {
 		return this.interceptor;
+	}
+
+	@Override
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+		return this.interceptor.preHandle(request, response, handler);
+	}
+
+	@Override
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+		this.interceptor.postHandle(request, response, handler, modelAndView);
+	}
+
+	@Override
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+		this.interceptor.afterCompletion(request, response, handler, ex);
 	}
 
 	/**

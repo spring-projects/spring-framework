@@ -16,15 +16,14 @@
 
 package org.springframework.web.method.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.reflect.Method;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link HandlerMethodArgumentResolverComposite}.
@@ -73,7 +72,7 @@ public class HandlerMethodArgumentResolverCompositeTests {
 		assertEquals("Didn't use the first registered resolver", Integer.valueOf(1), resolvedValue);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void noSuitableArgumentResolver() throws Exception {
 		this.resolvers.resolveArgument(paramStr, null, null, null);
 	}

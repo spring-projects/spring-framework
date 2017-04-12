@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  * <p>This class can be implemented by application developers, although this is not
  * necessary, as {@link org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping}
- * and {@link org.springframework.web.servlet.handler.SimpleUrlHandlerMapping}
+ * and {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping}
  * are included in the framework. The former is the default if no
  * HandlerMapping bean is registered in the application context.
  *
@@ -49,7 +49,7 @@ import javax.servlet.http.HttpServletRequest;
  * @see org.springframework.core.Ordered
  * @see org.springframework.web.servlet.handler.AbstractHandlerMapping
  * @see org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping
- * @see org.springframework.web.servlet.handler.SimpleUrlHandlerMapping
+ * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
  */
 public interface HandlerMapping {
 

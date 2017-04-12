@@ -46,20 +46,24 @@ public class SchedulerAccessorBean extends SchedulerAccessor implements BeanFact
 
 
 	/**
-	 * Specify the Quartz Scheduler to operate on via its scheduler name in the Spring
+	 * Specify the Quartz {@link Scheduler} to operate on via its scheduler name in the Spring
 	 * application context or also in the Quartz {@link org.quartz.impl.SchedulerRepository}.
 	 * <p>Schedulers can be registered in the repository through custom bootstrapping,
 	 * e.g. via the {@link org.quartz.impl.StdSchedulerFactory} or
 	 * {@link org.quartz.impl.DirectSchedulerFactory} factory classes.
 	 * However, in general, it's preferable to use Spring's {@link SchedulerFactoryBean}
 	 * which includes the job/trigger/listener capabilities of this accessor as well.
+	 * <p>If not specified, this accessor will try to retrieve a default {@link Scheduler}
+	 * bean from the containing application context.
 	 */
 	public void setSchedulerName(String schedulerName) {
 		this.schedulerName = schedulerName;
 	}
 
 	/**
-	 * Specify the Quartz Scheduler instance to operate on.
+	 * Specify the Quartz {@link Scheduler} instance to operate on.
+	 * <p>If not specified, this accessor will try to retrieve a default {@link Scheduler}
+	 * bean from the containing application context.
 	 */
 	public void setScheduler(Scheduler scheduler) {
 		this.scheduler = scheduler;
@@ -82,12 +86,7 @@ public class SchedulerAccessorBean extends SchedulerAccessor implements BeanFact
 	@Override
 	public void afterPropertiesSet() throws SchedulerException {
 		if (this.scheduler == null) {
-			if (this.schedulerName != null) {
-				this.scheduler = findScheduler(this.schedulerName);
-			}
-			else {
-				throw new IllegalStateException("No Scheduler specified");
-			}
+			this.scheduler = (this.schedulerName != null ? findScheduler(this.schedulerName) : findDefaultScheduler());
 		}
 		registerListeners();
 		registerJobsAndTriggers();
@@ -109,6 +108,16 @@ public class SchedulerAccessorBean extends SchedulerAccessor implements BeanFact
 			throw new IllegalStateException("No Scheduler named '" + schedulerName + "' found");
 		}
 		return schedulerInRepo;
+	}
+
+	protected Scheduler findDefaultScheduler() {
+		if (this.beanFactory != null) {
+			return this.beanFactory.getBean(Scheduler.class);
+		}
+		else {
+			throw new IllegalStateException(
+					"No Scheduler specified, and cannot find a default Scheduler without a BeanFactory");
+		}
 	}
 
 }

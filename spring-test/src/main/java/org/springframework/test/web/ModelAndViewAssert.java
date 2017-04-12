@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.test.web;
 
-import static org.springframework.test.util.AssertionErrors.*;
-
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -27,6 +25,8 @@ import java.util.Set;
 
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.ModelAndView;
+
+import static org.springframework.test.util.AssertionErrors.*;
 
 /**
  * A collection of assertions intended to simplify testing scenarios dealing
@@ -200,7 +200,7 @@ public abstract class ModelAndViewAssert {
 	private static void appendNonMatchingSetsErrorMessage(Set<String> assertionSet, Set<String> incorrectSet,
 			StringBuilder sb) {
 
-		Set<String> tempSet = new HashSet<String>();
+		Set<String> tempSet = new HashSet<>();
 		tempSet.addAll(incorrectSet);
 		tempSet.removeAll(assertionSet);
 
@@ -213,7 +213,7 @@ public abstract class ModelAndViewAssert {
 			}
 		}
 
-		tempSet = new HashSet<String>();
+		tempSet = new HashSet<>();
 		tempSet.addAll(assertionSet);
 		tempSet.removeAll(incorrectSet);
 

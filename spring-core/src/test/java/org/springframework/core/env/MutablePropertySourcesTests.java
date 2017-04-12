@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,15 @@
 package org.springframework.core.env;
 
 import org.junit.Test;
+
 import org.springframework.mock.env.MockPropertySource;
 
-import static java.lang.String.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static org.springframework.core.env.MutablePropertySources.*;
 
 /**
- * Unit tests for {@link MutablePropertySources}
- *
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 public class MutablePropertySourcesTests {
 
@@ -105,9 +103,9 @@ public class MutablePropertySourcesTests {
 		try {
 			sources.addAfter(bogusPS, new MockPropertySource("h"));
 			fail("expected non-existent PropertySource exception");
-		} catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(),
-					equalTo(format(NON_EXISTENT_PROPERTY_SOURCE_MESSAGE, bogusPS)));
+		}
+		catch (IllegalArgumentException ex) {
+			assertTrue(ex.getMessage().contains("does not exist"));
 		}
 
 		sources.addFirst(new MockPropertySource("a"));
@@ -127,25 +125,25 @@ public class MutablePropertySourcesTests {
 		try {
 			sources.replace(bogusPS, new MockPropertySource("bogus-replaced"));
 			fail("expected non-existent PropertySource exception");
-		} catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(),
-					equalTo(format(NON_EXISTENT_PROPERTY_SOURCE_MESSAGE, bogusPS)));
+		}
+		catch (IllegalArgumentException ex) {
+			assertTrue(ex.getMessage().contains("does not exist"));
 		}
 
 		try {
 			sources.addBefore("b", new MockPropertySource("b"));
 			fail("expected exception");
-		} catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(),
-					equalTo(format(ILLEGAL_RELATIVE_ADDITION_MESSAGE, "b")));
+		}
+		catch (IllegalArgumentException ex) {
+			assertTrue(ex.getMessage().contains("cannot be added relative to itself"));
 		}
 
 		try {
 			sources.addAfter("b", new MockPropertySource("b"));
 			fail("expected exception");
-		} catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(),
-					equalTo(format(ILLEGAL_RELATIVE_ADDITION_MESSAGE, "b")));
+		}
+		catch (IllegalArgumentException ex) {
+			assertTrue(ex.getMessage().contains("cannot be added relative to itself"));
 		}
 	}
 

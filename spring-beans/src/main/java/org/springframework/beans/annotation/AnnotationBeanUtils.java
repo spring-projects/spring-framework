@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,12 +59,12 @@ public abstract class AnnotationBeanUtils {
 	 * @see org.springframework.beans.BeanWrapper
 	 */
 	public static void copyPropertiesToBean(Annotation ann, Object bean, StringValueResolver valueResolver, String... excludedProperties) {
-		Set<String> excluded =  new HashSet<String>(Arrays.asList(excludedProperties));
+		Set<String> excluded = new HashSet<>(Arrays.asList(excludedProperties));
 		Method[] annotationProperties = ann.annotationType().getDeclaredMethods();
 		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(bean);
 		for (Method annotationProperty : annotationProperties) {
 			String propertyName = annotationProperty.getName();
-			if ((!excluded.contains(propertyName)) && bw.isWritableProperty(propertyName)) {
+			if (!excluded.contains(propertyName) && bw.isWritableProperty(propertyName)) {
 				Object value = ReflectionUtils.invokeMethod(annotationProperty, ann);
 				if (valueResolver != null && value instanceof String) {
 					value = valueResolver.resolveStringValue((String) value);

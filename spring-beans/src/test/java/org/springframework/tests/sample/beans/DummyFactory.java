@@ -24,7 +24,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * Simple factory to allow testing of FactoryBean support in AbstractBeanFactory.

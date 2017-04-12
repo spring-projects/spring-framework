@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,11 +17,11 @@
 package org.springframework.util;
 
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import javax.net.ServerSocketFactory;
 
 /**
@@ -35,9 +35,10 @@ import javax.net.ServerSocketFactory;
  * @author Ben Hale
  * @author Arjen Poutsma
  * @author Gunnar Hillert
+ * @author Gary Russell
  * @since 4.0
  */
-public abstract class SocketUtils {
+public class SocketUtils {
 
 	/**
 	 * The default minimum value for port ranges used when finding an available
@@ -58,25 +59,18 @@ public abstract class SocketUtils {
 	/**
 	 * Although {@code SocketUtils} consists solely of static utility methods,
 	 * this constructor is intentionally {@code public}.
-	 *
 	 * <h4>Rationale</h4>
-	 *
 	 * <p>Static methods from this class may be invoked from within XML
 	 * configuration files using the Spring Expression Language (SpEL) and the
 	 * following syntax.
-	 *
 	 * <pre><code>&lt;bean id="bean1" ... p:port="#{T(org.springframework.util.SocketUtils).findAvailableTcpPort(12000)}" /&gt;</code></pre>
-	 *
 	 * If this constructor were {@code private}, you would be required to supply
 	 * the fully qualified class name to SpEL's {@code T()} function for each usage.
 	 * Thus, the fact that this constructor is {@code public} allows you to reduce
 	 * boilerplate configuration with SpEL as can be seen in the following example.
-	 *
 	 * <pre><code>&lt;bean id="socketUtils" class="org.springframework.util.SocketUtils" /&gt;
-	 *
-	 *&lt;bean id="bean1" ... p:port="#{socketUtils.findAvailableTcpPort(12000)}" /&gt;
-	 *
-	 *&lt;bean id="bean2" ... p:port="#{socketUtils.findAvailableTcpPort(30000)}" /&gt;</code></pre>
+	 * &lt;bean id="bean1" ... p:port="#{socketUtils.findAvailableTcpPort(12000)}" /&gt;
+	 * &lt;bean id="bean2" ... p:port="#{socketUtils.findAvailableTcpPort(30000)}" /&gt;</code></pre>
 	 */
 	public SocketUtils() {
 		/* no-op */
@@ -198,14 +192,14 @@ public abstract class SocketUtils {
 	}
 
 
-	private static enum SocketType {
+	private enum SocketType {
 
 		TCP {
-
 			@Override
 			protected boolean isPortAvailable(int port) {
 				try {
-					ServerSocket serverSocket = ServerSocketFactory.getDefault().createServerSocket(port);
+					ServerSocket serverSocket = ServerSocketFactory.getDefault().createServerSocket(
+							port, 1, InetAddress.getByName("localhost"));
 					serverSocket.close();
 					return true;
 				}
@@ -216,11 +210,10 @@ public abstract class SocketUtils {
 		},
 
 		UDP {
-
 			@Override
 			protected boolean isPortAvailable(int port) {
 				try {
-					DatagramSocket socket = new DatagramSocket(port);
+					DatagramSocket socket = new DatagramSocket(port, InetAddress.getByName("localhost"));
 					socket.close();
 					return true;
 				}
@@ -245,7 +238,7 @@ public abstract class SocketUtils {
 		 */
 		private int findRandomPort(int minPort, int maxPort) {
 			int portRange = maxPort - minPort;
-			return minPort + random.nextInt(portRange);
+			return minPort + random.nextInt(portRange + 1);
 		}
 
 		/**
@@ -258,7 +251,7 @@ public abstract class SocketUtils {
 		 */
 		int findAvailablePort(int minPort, int maxPort) {
 			Assert.isTrue(minPort > 0, "'minPort' must be greater than 0");
-			Assert.isTrue(maxPort > minPort, "'maxPort' must be greater than 'minPort'");
+			Assert.isTrue(maxPort >= minPort, "'maxPort' must be greater than or equals 'minPort'");
 			Assert.isTrue(maxPort <= PORT_RANGE_MAX, "'maxPort' must be less than or equal to " + PORT_RANGE_MAX);
 
 			int portRange = maxPort - minPort;
@@ -267,11 +260,12 @@ public abstract class SocketUtils {
 			do {
 				if (++searchCounter > portRange) {
 					throw new IllegalStateException(String.format(
-						"Could not find an available %s port in the range [%d, %d] after %d attempts", name(), minPort,
-						maxPort, searchCounter));
+							"Could not find an available %s port in the range [%d, %d] after %d attempts",
+							name(), minPort, maxPort, searchCounter));
 				}
 				candidatePort = findRandomPort(minPort, maxPort);
-			} while (!isPortAvailable(candidatePort));
+			}
+			while (!isPortAvailable(candidatePort));
 
 			return candidatePort;
 		}
@@ -291,18 +285,18 @@ public abstract class SocketUtils {
 			Assert.isTrue(maxPort <= PORT_RANGE_MAX, "'maxPort' must be less than or equal to " + PORT_RANGE_MAX);
 			Assert.isTrue(numRequested > 0, "'numRequested' must be greater than 0");
 			Assert.isTrue((maxPort - minPort) >= numRequested,
-				"'numRequested' must not be greater than 'maxPort' - 'minPort'");
+					"'numRequested' must not be greater than 'maxPort' - 'minPort'");
 
-			final SortedSet<Integer> availablePorts = new TreeSet<Integer>();
+			SortedSet<Integer> availablePorts = new TreeSet<>();
 			int attemptCount = 0;
-			while ((++attemptCount <= numRequested + 100) && (availablePorts.size() < numRequested)) {
+			while ((++attemptCount <= numRequested + 100) && availablePorts.size() < numRequested) {
 				availablePorts.add(findAvailablePort(minPort, maxPort));
 			}
 
 			if (availablePorts.size() != numRequested) {
 				throw new IllegalStateException(String.format(
-					"Could not find %d available %s ports in the range [%d, %d]", numRequested, name(), minPort,
-					maxPort));
+						"Could not find %d available %s ports in the range [%d, %d]",
+						numRequested, name(), minPort, maxPort));
 			}
 
 			return availablePorts;

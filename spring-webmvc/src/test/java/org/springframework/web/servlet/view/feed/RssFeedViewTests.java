@@ -1,5 +1,5 @@
 /*
- * Copyright ${YEAR} the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,47 +16,40 @@
 
 package org.springframework.web.servlet.view.feed;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.rometools.rome.feed.rss.Channel;
+import com.rometools.rome.feed.rss.Description;
+import com.rometools.rome.feed.rss.Item;
 
-import com.sun.syndication.feed.rss.Channel;
-import com.sun.syndication.feed.rss.Description;
-import com.sun.syndication.feed.rss.Item;
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.custommonkey.xmlunit.XMLUnit.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 /**
  * @author Arjen Poutsma
  */
 public class RssFeedViewTests {
 
-	private AbstractRssFeedView view;
+	private final AbstractRssFeedView view = new MyRssFeedView();
 
-	@Before
-	public void createView() throws Exception {
-		view = new MyRssFeedView();
-		setIgnoreWhitespace(true);
-
-	}
 
 	@Test
 	public void render() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		Map<String, String> model = new LinkedHashMap<String, String>();
+		Map<String, String> model = new LinkedHashMap<>();
 		model.put("2", "This is entry 2");
 		model.put("1", "This is entry 1");
 
@@ -66,24 +59,23 @@ public class RssFeedViewTests {
 				"<channel><title>Test Feed</title><link>http://example.com</link><description>Test feed description</description>" +
 				"<item><title>2</title><description>This is entry 2</description></item>" +
 				"<item><title>1</title><description>This is entry 1</description></item>" + "</channel></rss>";
-		assertXMLEqual(expected, response.getContentAsString());
+		assertThat(response.getContentAsString(), isSimilarTo(expected).ignoreWhitespace());
 	}
+
 
 	private static class MyRssFeedView extends AbstractRssFeedView {
 
 		@Override
-		protected void buildFeedMetadata(Map model, Channel channel, HttpServletRequest request) {
+		protected void buildFeedMetadata(Map<String, Object> model, Channel channel, HttpServletRequest request) {
 			channel.setTitle("Test Feed");
 			channel.setDescription("Test feed description");
 			channel.setLink("http://example.com");
 		}
 
 		@Override
-		protected List<Item> buildFeedItems(Map model, HttpServletRequest request, HttpServletResponse response)
-				throws Exception {
-			List<Item> items = new ArrayList<Item>();
-			for (Iterator iterator = model.keySet().iterator(); iterator.hasNext();) {
-				String name = (String) iterator.next();
+		protected List<Item> buildFeedItems(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+			List<Item> items = new ArrayList<>();
+			for (String name : model.keySet()) {
 				Item item = new Item();
 				item.setTitle(name);
 				Description description = new Description();
@@ -94,4 +86,5 @@ public class RssFeedViewTests {
 			return items;
 		}
 	}
+
 }

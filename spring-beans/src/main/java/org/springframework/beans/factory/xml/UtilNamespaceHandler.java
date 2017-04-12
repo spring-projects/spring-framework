@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,12 +120,14 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 
 		@Override
 		protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
-			String listClass = element.getAttribute("list-class");
 			List<Object> parsedList = parserContext.getDelegate().parseListElement(element, builder.getRawBeanDefinition());
 			builder.addPropertyValue("sourceList", parsedList);
+
+			String listClass = element.getAttribute("list-class");
 			if (StringUtils.hasText(listClass)) {
 				builder.addPropertyValue("targetListClass", listClass);
 			}
+
 			String scope = element.getAttribute(SCOPE_ATTRIBUTE);
 			if (StringUtils.hasLength(scope)) {
 				builder.setScope(scope);
@@ -143,12 +145,14 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 
 		@Override
 		protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
-			String setClass = element.getAttribute("set-class");
 			Set<Object> parsedSet = parserContext.getDelegate().parseSetElement(element, builder.getRawBeanDefinition());
 			builder.addPropertyValue("sourceSet", parsedSet);
+
+			String setClass = element.getAttribute("set-class");
 			if (StringUtils.hasText(setClass)) {
 				builder.addPropertyValue("targetSetClass", setClass);
 			}
+
 			String scope = element.getAttribute(SCOPE_ATTRIBUTE);
 			if (StringUtils.hasLength(scope)) {
 				builder.setScope(scope);
@@ -166,12 +170,14 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 
 		@Override
 		protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
-			String mapClass = element.getAttribute("map-class");
 			Map<Object, Object> parsedMap = parserContext.getDelegate().parseMapElement(element, builder.getRawBeanDefinition());
 			builder.addPropertyValue("sourceMap", parsedMap);
+
+			String mapClass = element.getAttribute("map-class");
 			if (StringUtils.hasText(mapClass)) {
 				builder.addPropertyValue("targetMapClass", mapClass);
 			}
+
 			String scope = element.getAttribute(SCOPE_ATTRIBUTE);
 			if (StringUtils.hasLength(scope)) {
 				builder.setScope(scope);
@@ -180,7 +186,7 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 	}
 
 
-	private static class PropertiesBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
+	private static class PropertiesBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 		@Override
 		protected Class<?> getBeanClass(Element element) {
@@ -188,15 +194,23 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 		}
 
 		@Override
-		protected boolean isEligibleAttribute(String attributeName) {
-			return super.isEligibleAttribute(attributeName) && !SCOPE_ATTRIBUTE.equals(attributeName);
-		}
-
-		@Override
 		protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
-			super.doParse(element, parserContext, builder);
 			Properties parsedProps = parserContext.getDelegate().parsePropsElement(element);
 			builder.addPropertyValue("properties", parsedProps);
+
+			String location = element.getAttribute("location");
+			if (StringUtils.hasLength(location)) {
+				location = parserContext.getReaderContext().getEnvironment().resolvePlaceholders(location);
+				String[] locations = StringUtils.commaDelimitedListToStringArray(location);
+				builder.addPropertyValue("locations", locations);
+			}
+
+			builder.addPropertyValue("ignoreResourceNotFound",
+					Boolean.valueOf(element.getAttribute("ignore-resource-not-found")));
+
+			builder.addPropertyValue("localOverride",
+					Boolean.valueOf(element.getAttribute("local-override")));
+
 			String scope = element.getAttribute(SCOPE_ATTRIBUTE);
 			if (StringUtils.hasLength(scope)) {
 				builder.setScope(scope);

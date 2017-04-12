@@ -16,21 +16,22 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.Serializable;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public final class DeclarationOrderIndependenceTests {
+public class DeclarationOrderIndependenceTests {
 
 	private TopsyTurvyAspect aspect;
 

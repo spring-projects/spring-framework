@@ -16,7 +16,6 @@
 
 package org.springframework.context.annotation4;
 
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +23,7 @@ import org.springframework.context.annotation.BeanAge;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * Class used to test the functionality of factory method bean definitions
@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
  * @author Juergen Hoeller
  */
 @Component
-public final class FactoryMethodComponent {
+public class FactoryMethodComponent {
 
 	private int i;
 

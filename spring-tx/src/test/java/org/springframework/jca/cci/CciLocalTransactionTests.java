@@ -25,6 +25,7 @@ import javax.resource.cci.LocalTransaction;
 import javax.resource.cci.Record;
 
 import org.junit.Test;
+
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.jca.cci.connection.CciLocalTransactionManager;
 import org.springframework.jca.cci.core.CciTemplate;

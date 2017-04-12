@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import example.profilescan.ProfileAnnotatedComponent;
+import example.scannable.AutowiredQualifierFooService;
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -29,9 +32,6 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
-
-import example.profilescan.ProfileAnnotatedComponent;
-import example.scannable.AutowiredQualifierFooService;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -48,13 +48,33 @@ public class ComponentScanParserTests {
 		return new ClassPathXmlApplicationContext(path, getClass());
 	}
 
+
 	@Test
-	public void aspectJTypeFilter() {
+	public void aspectjTypeFilter() {
 		ClassPathXmlApplicationContext context = loadContext("aspectjTypeFilterTests.xml");
 		assertTrue(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("stubFooDao"));
 		assertFalse(context.containsBean("scopedProxyTestBean"));
 		context.close();
+	}
+
+	@Test
+	public void aspectjTypeFilterWithPlaceholders() {
+		System.setProperty("basePackage", "example.scannable, test");
+		System.setProperty("scanInclude", "example.scannable.FooService+");
+		System.setProperty("scanExclude", "example..Scoped*Test*");
+		try {
+			ClassPathXmlApplicationContext context = loadContext("aspectjTypeFilterTestsWithPlaceholders.xml");
+			assertTrue(context.containsBean("fooServiceImpl"));
+			assertTrue(context.containsBean("stubFooDao"));
+			assertFalse(context.containsBean("scopedProxyTestBean"));
+			context.close();
+		}
+		finally {
+			System.clearProperty("basePackage");
+			System.clearProperty("scanInclude");
+			System.clearProperty("scanExclude");
+		}
 	}
 
 	@Test
@@ -125,10 +145,11 @@ public class ComponentScanParserTests {
 	}
 
 
-	@Target({ ElementType.TYPE, ElementType.FIELD })
+	@Target({ElementType.TYPE, ElementType.FIELD})
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface CustomAnnotation {
+	public @interface CustomAnnotation {
 	}
+
 
 	/**
 	 * Intentionally spelling "custom" with a "k" since there are numerous
@@ -140,11 +161,11 @@ public class ComponentScanParserTests {
 		@CustomAnnotation
 		private KustomAnnotationDependencyBean dependency;
 
-
 		public KustomAnnotationDependencyBean getDependency() {
 			return this.dependency;
 		}
 	}
+
 
 	/**
 	 * Intentionally spelling "custom" with a "k" since there are numerous
@@ -153,6 +174,7 @@ public class ComponentScanParserTests {
 	@CustomAnnotation
 	public static class KustomAnnotationDependencyBean {
 	}
+
 
 	public static class CustomTypeFilter implements TypeFilter {
 

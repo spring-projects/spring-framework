@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,7 @@
 package org.springframework.messaging.support;
 
 /**
- * Callback interface for initializing a
- * {@link org.springframework.messaging.support.MessageHeaderAccessor MessageHeaderAccessor}.
+ * Callback interface for initializing a {@link MessageHeaderAccessor}.
  *
  * @author Rossen Stoyanchev
  * @since 4.1
@@ -27,8 +26,7 @@ public interface MessageHeaderInitializer {
 
 	/**
 	 * Initialize the given {@code MessageHeaderAccessor}.
-	 *
-	 * @param headerAccessor the instance to initialize
+	 * @param headerAccessor the MessageHeaderAccessor to initialize
 	 */
 	void initHeaders(MessageHeaderAccessor headerAccessor);
 

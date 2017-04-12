@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,142 +16,133 @@
 
 package org.springframework.beans;
 
-import org.springframework.core.convert.ConversionException;
-import org.springframework.core.convert.ConverterNotFoundException;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
-
-import java.beans.PropertyChangeEvent;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.core.ResolvableType;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.util.ReflectionUtils;
+
 /**
- * {@link PropertyAccessor} implementation that directly accesses instance fields.
- * Allows for direct binding to fields instead of going through JavaBean setters.
+ * {@link ConfigurablePropertyAccessor} implementation that directly accesses
+ * instance fields. Allows for direct binding to fields instead of going through
+ * JavaBean setters.
  *
- * <p>This implementation just supports fields in the actual target object.
- * It is not able to traverse nested fields.
+ * <p>As of Spring 4.2, the vast majority of the {@link BeanWrapper} features have
+ * been merged to {@link AbstractPropertyAccessor}, which means that property
+ * traversal as well as collections and map access is now supported here as well.
  *
  * <p>A DirectFieldAccessor's default for the "extractOldValueForEditor" setting
  * is "true", since a field can always be read without side effects.
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 2.0
  * @see #setExtractOldValueForEditor
  * @see BeanWrapper
  * @see org.springframework.validation.DirectFieldBindingResult
  * @see org.springframework.validation.DataBinder#initDirectFieldAccess()
  */
-public class DirectFieldAccessor extends AbstractPropertyAccessor {
+public class DirectFieldAccessor extends AbstractNestablePropertyAccessor {
 
-	private final Object target;
-
-	private final Map<String, Field> fieldMap = new HashMap<String, Field>();
+	private final Map<String, FieldPropertyHandler> fieldMap = new HashMap<>();
 
 
 	/**
-	 * Create a new DirectFieldAccessor for the given target object.
-	 * @param target the target object to access
+	 * Create a new DirectFieldAccessor for the given object.
+	 * @param object object wrapped by this DirectFieldAccessor
 	 */
-	public DirectFieldAccessor(final Object target) {
-		Assert.notNull(target, "Target object must not be null");
-		this.target = target;
-		ReflectionUtils.doWithFields(this.target.getClass(), new ReflectionUtils.FieldCallback() {
-			@Override
-			public void doWith(Field field) {
-				if (fieldMap.containsKey(field.getName())) {
-					// ignore superclass declarations of fields already found in a subclass
-				}
-				else {
-					fieldMap.put(field.getName(), field);
-				}
+	public DirectFieldAccessor(Object object) {
+		super(object);
+	}
+
+	/**
+	 * Create a new DirectFieldAccessor for the given object,
+	 * registering a nested path that the object is in.
+	 * @param object object wrapped by this DirectFieldAccessor
+	 * @param nestedPath the nested path of the object
+	 * @param parent the containing DirectFieldAccessor (must not be {@code null})
+	 */
+	protected DirectFieldAccessor(Object object, String nestedPath, DirectFieldAccessor parent) {
+		super(object, nestedPath, parent);
+	}
+
+
+	@Override
+	protected FieldPropertyHandler getLocalPropertyHandler(String propertyName) {
+		FieldPropertyHandler propertyHandler = this.fieldMap.get(propertyName);
+		if (propertyHandler == null) {
+			Field field = ReflectionUtils.findField(getWrappedClass(), propertyName);
+			if (field != null) {
+				propertyHandler = new FieldPropertyHandler(field);
 			}
-		});
-		this.typeConverterDelegate = new TypeConverterDelegate(this, target);
-		registerDefaultEditors();
-		setExtractOldValueForEditor(true);
-	}
-
-
-	@Override
-	public boolean isReadableProperty(String propertyName) throws BeansException {
-		return this.fieldMap.containsKey(propertyName);
+			this.fieldMap.put(propertyName, propertyHandler);
+		}
+		return propertyHandler;
 	}
 
 	@Override
-	public boolean isWritableProperty(String propertyName) throws BeansException {
-		return this.fieldMap.containsKey(propertyName);
+	protected DirectFieldAccessor newNestedPropertyAccessor(Object object, String nestedPath) {
+		return new DirectFieldAccessor(object, nestedPath, this);
 	}
 
 	@Override
-	public Class<?> getPropertyType(String propertyName) throws BeansException {
-		Field field = this.fieldMap.get(propertyName);
-		if (field != null) {
-			return field.getType();
-		}
-		return null;
+	protected NotWritablePropertyException createNotWritablePropertyException(String propertyName) {
+		PropertyMatches matches = PropertyMatches.forField(propertyName, getRootClass());
+		throw new NotWritablePropertyException(
+				getRootClass(), getNestedPath() + propertyName,
+				matches.buildErrorMessage(), matches.getPossibleMatches());
 	}
 
-	@Override
-	public TypeDescriptor getPropertyTypeDescriptor(String propertyName) throws BeansException {
-		Field field = this.fieldMap.get(propertyName);
-		if (field != null) {
-			return new TypeDescriptor(field);
-		}
-		return null;
-	}
 
-	@Override
-	public Object getPropertyValue(String propertyName) throws BeansException {
-		Field field = this.fieldMap.get(propertyName);
-		if (field == null) {
-			throw new NotReadablePropertyException(
-					this.target.getClass(), propertyName, "Field '" + propertyName + "' does not exist");
-		}
-		try {
-			ReflectionUtils.makeAccessible(field);
-			return field.get(this.target);
-		}
-		catch (IllegalAccessException ex) {
-			throw new InvalidPropertyException(this.target.getClass(), propertyName, "Field is not accessible", ex);
-		}
-	}
+	private class FieldPropertyHandler extends PropertyHandler {
 
-	@Override
-	public void setPropertyValue(String propertyName, Object newValue) throws BeansException {
-		Field field = this.fieldMap.get(propertyName);
-		if (field == null) {
-			throw new NotWritablePropertyException(
-					this.target.getClass(), propertyName, "Field '" + propertyName + "' does not exist");
+		private final Field field;
+
+		public FieldPropertyHandler(Field field) {
+			super(field.getType(), true, true);
+			this.field = field;
 		}
-		Object oldValue = null;
-		try {
-			ReflectionUtils.makeAccessible(field);
-			oldValue = field.get(this.target);
-			Object convertedValue = this.typeConverterDelegate.convertIfNecessary(
-					field.getName(), oldValue, newValue, field.getType(), new TypeDescriptor(field));
-			field.set(this.target, convertedValue);
+
+		@Override
+		public TypeDescriptor toTypeDescriptor() {
+			return new TypeDescriptor(this.field);
 		}
-		catch (ConverterNotFoundException ex) {
-			PropertyChangeEvent pce = new PropertyChangeEvent(this.target, propertyName, oldValue, newValue);
-			throw new ConversionNotSupportedException(pce, field.getType(), ex);
+
+		@Override
+		public ResolvableType getResolvableType() {
+			return ResolvableType.forField(this.field);
 		}
-		catch (ConversionException ex) {
-			PropertyChangeEvent pce = new PropertyChangeEvent(this.target, propertyName, oldValue, newValue);
-			throw new TypeMismatchException(pce, field.getType(), ex);
+
+		@Override
+		public TypeDescriptor nested(int level) {
+			return TypeDescriptor.nested(this.field, level);
 		}
-		catch (IllegalStateException ex) {
-			PropertyChangeEvent pce = new PropertyChangeEvent(this.target, propertyName, oldValue, newValue);
-			throw new ConversionNotSupportedException(pce, field.getType(), ex);
+
+		@Override
+		public Object getValue() throws Exception {
+			try {
+				ReflectionUtils.makeAccessible(this.field);
+				return this.field.get(getWrappedInstance());
+			}
+
+			catch (IllegalAccessException ex) {
+				throw new InvalidPropertyException(getWrappedClass(),
+						this.field.getName(), "Field is not accessible", ex);
+			}
 		}
-		catch (IllegalArgumentException ex) {
-			PropertyChangeEvent pce = new PropertyChangeEvent(this.target, propertyName, oldValue, newValue);
-			throw new TypeMismatchException(pce, field.getType(), ex);
-		}
-		catch (IllegalAccessException ex) {
-			throw new InvalidPropertyException(this.target.getClass(), propertyName, "Field is not accessible", ex);
+
+		@Override
+		public void setValue(Object object, Object value) throws Exception {
+			try {
+				ReflectionUtils.makeAccessible(this.field);
+				this.field.set(object, value);
+			}
+			catch (IllegalAccessException ex) {
+				throw new InvalidPropertyException(getWrappedClass(), this.field.getName(),
+						"Field is not accessible", ex);
+			}
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.config;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
@@ -61,6 +62,20 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClas
 		this.scopes = scopes;
 	}
 
+	/**
+	 * Add the given scope to this configurer's map of scopes.
+	 * @param scopeName the name of the scope
+	 * @param scope the scope implementation
+	 * @since 4.1.1
+	 */
+	public void addScope(String scopeName, Scope scope) {
+		if (this.scopes == null) {
+			this.scopes = new LinkedHashMap<>(1);
+		}
+		this.scopes.put(scopeName, scope);
+	}
+
+
 	public void setOrder(int order) {
 		this.order = order;
 	}
@@ -87,12 +102,12 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClas
 				}
 				else if (value instanceof Class) {
 					Class<?> scopeClass = (Class<?>) value;
-					Assert.isAssignable(Scope.class, scopeClass);
+					Assert.isAssignable(Scope.class, scopeClass, "Invalid scope class");
 					beanFactory.registerScope(scopeKey, (Scope) BeanUtils.instantiateClass(scopeClass));
 				}
 				else if (value instanceof String) {
 					Class<?> scopeClass = ClassUtils.resolveClassName((String) value, this.beanClassLoader);
-					Assert.isAssignable(Scope.class, scopeClass);
+					Assert.isAssignable(Scope.class, scopeClass, "Invalid scope class");
 					beanFactory.registerScope(scopeKey, (Scope) BeanUtils.instantiateClass(scopeClass));
 				}
 				else {

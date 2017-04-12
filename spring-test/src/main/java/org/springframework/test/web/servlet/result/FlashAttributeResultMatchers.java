@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,23 @@
 
 package org.springframework.test.web.servlet.result;
 
-import static org.springframework.test.util.AssertionErrors.*;
-import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
-
 import org.hamcrest.Matcher;
+
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
+import static org.hamcrest.MatcherAssert.*;
+import static org.springframework.test.util.AssertionErrors.*;
+
 /**
- * Factory for "output" flash attribute assertions. An instance of this class is
- * typically accessed via {@link MockMvcResultMatchers#flash()}.
+ * Factory for "output" flash attribute assertions.
+ * <p>An instance of this class is typically accessed via
+ * {@link MockMvcResultMatchers#flash}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
  */
 public class FlashAttributeResultMatchers {
-
 
 	/**
 	 * Protected constructor.
@@ -39,6 +40,7 @@ public class FlashAttributeResultMatchers {
 	 */
 	protected FlashAttributeResultMatchers() {
 	}
+
 
 	/**
 	 * Assert a flash attribute's value with the given Hamcrest {@link Matcher}.

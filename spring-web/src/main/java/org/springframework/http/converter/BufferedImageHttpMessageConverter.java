@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import javax.imageio.stream.MemoryCacheImageOutputStream;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -66,7 +67,7 @@ import org.springframework.util.StringUtils;
  */
 public class BufferedImageHttpMessageConverter implements HttpMessageConverter<BufferedImage> {
 
-	private final List<MediaType> readableMediaTypes = new ArrayList<MediaType>();
+	private final List<MediaType> readableMediaTypes = new ArrayList<>();
 
 	private MediaType defaultContentType;
 
@@ -127,7 +128,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
-		return (BufferedImage.class.equals(clazz) && isReadable(mediaType));
+		return (BufferedImage.class == clazz && isReadable(mediaType));
 	}
 
 	private boolean isReadable(MediaType mediaType) {
@@ -140,7 +141,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 
 	@Override
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
-		return (BufferedImage.class.equals(clazz) && isWritable(mediaType));
+		return (BufferedImage.class == clazz && isWritable(mediaType));
 	}
 
 	private boolean isWritable(MediaType mediaType) {
@@ -203,24 +204,48 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	}
 
 	@Override
-	public void write(BufferedImage image, MediaType contentType, HttpOutputMessage outputMessage)
+	public void write(final BufferedImage image, final MediaType contentType,
+			final HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
+		final MediaType selectedContentType = getContentType(contentType);
+		outputMessage.getHeaders().setContentType(selectedContentType);
+
+		if (outputMessage instanceof StreamingHttpOutputMessage) {
+			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
+			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
+				@Override
+				public void writeTo(OutputStream outputStream) throws IOException {
+					writeInternal(image, selectedContentType, outputStream);
+				}
+			});
+		}
+		else {
+			writeInternal(image, selectedContentType, outputMessage.getBody());
+		}
+	}
+
+	private MediaType getContentType(MediaType contentType) {
 		if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
 			contentType = getDefaultContentType();
 		}
-		Assert.notNull(contentType,
-				"Count not determine Content-Type, set one using the 'defaultContentType' property");
-		outputMessage.getHeaders().setContentType(contentType);
+		Assert.notNull(contentType, "Could not select Content-Type. " +
+				"Please specify one through the 'defaultContentType' property.");
+		return contentType;
+	}
+
+	private void writeInternal(BufferedImage image, MediaType contentType, OutputStream body)
+			throws IOException, HttpMessageNotWritableException {
+
 		ImageOutputStream imageOutputStream = null;
 		ImageWriter imageWriter = null;
 		try {
-			imageOutputStream = createImageOutputStream(outputMessage.getBody());
 			Iterator<ImageWriter> imageWriters = ImageIO.getImageWritersByMIMEType(contentType.toString());
 			if (imageWriters.hasNext()) {
 				imageWriter = imageWriters.next();
 				ImageWriteParam iwp = imageWriter.getDefaultWriteParam();
 				process(iwp);
+				imageOutputStream = createImageOutputStream(body);
 				imageWriter.setOutput(imageOutputStream);
 				imageWriter.write(null, new IIOImage(image, null, null), iwp);
 			}

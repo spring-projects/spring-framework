@@ -16,9 +16,9 @@
 
 package org.springframework.beans;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link MutablePropertyValues}.
@@ -26,7 +26,7 @@ import org.junit.Test;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class MutablePropertyValuesTests extends AbstractPropertyValuesTests {
+public class MutablePropertyValuesTests extends AbstractPropertyValuesTests {
 
 	@Test
 	public void testValid() throws Exception {

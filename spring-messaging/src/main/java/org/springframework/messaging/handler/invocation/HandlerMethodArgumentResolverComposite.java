@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
@@ -34,17 +32,49 @@ import org.springframework.util.Assert;
  * for faster lookups.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgumentResolver {
 
-	protected final Log logger = LogFactory.getLog(getClass());
-
-	private final List<HandlerMethodArgumentResolver> argumentResolvers = new LinkedList<HandlerMethodArgumentResolver>();
+	private final List<HandlerMethodArgumentResolver> argumentResolvers = new LinkedList<>();
 
 	private final Map<MethodParameter, HandlerMethodArgumentResolver> argumentResolverCache =
-			new ConcurrentHashMap<MethodParameter, HandlerMethodArgumentResolver>(256);
+			new ConcurrentHashMap<>(256);
 
+
+	/**
+	 * Add the given {@link HandlerMethodArgumentResolver}.
+	 */
+	public HandlerMethodArgumentResolverComposite addResolver(HandlerMethodArgumentResolver argumentResolver) {
+		this.argumentResolvers.add(argumentResolver);
+		return this;
+	}
+
+	/**
+	 * Add the given {@link HandlerMethodArgumentResolver}s.
+	 * @since 4.3
+	 */
+	public HandlerMethodArgumentResolverComposite addResolvers(HandlerMethodArgumentResolver... resolvers) {
+		if (resolvers != null) {
+			for (HandlerMethodArgumentResolver resolver : resolvers) {
+				this.argumentResolvers.add(resolver);
+			}
+		}
+		return this;
+	}
+
+	/**
+	 * Add the given {@link HandlerMethodArgumentResolver}s.
+	 */
+	public HandlerMethodArgumentResolverComposite addResolvers(List<? extends HandlerMethodArgumentResolver> argumentResolvers) {
+		if (argumentResolvers != null) {
+			for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
+				this.argumentResolvers.add(resolver);
+			}
+		}
+		return this;
+	}
 
 	/**
 	 * Return a read-only list with the contained resolvers, or an empty list.
@@ -59,6 +89,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	public void clear() {
 		this.argumentResolvers.clear();
 	}
+
 
 	/**
 	 * Whether the given {@linkplain MethodParameter method parameter} is supported by any registered
@@ -96,26 +127,6 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 			}
 		}
 		return result;
-	}
-
-	/**
-	 * Add the given {@link HandlerMethodArgumentResolver}.
-	 */
-	public HandlerMethodArgumentResolverComposite addResolver(HandlerMethodArgumentResolver argumentResolver) {
-		this.argumentResolvers.add(argumentResolver);
-		return this;
-	}
-
-	/**
-	 * Add the given {@link HandlerMethodArgumentResolver}s.
-	 */
-	public HandlerMethodArgumentResolverComposite addResolvers(List<? extends HandlerMethodArgumentResolver> argumentResolvers) {
-		if (argumentResolvers != null) {
-			for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
-				this.argumentResolvers.add(resolver);
-			}
-		}
-		return this;
 	}
 
 }

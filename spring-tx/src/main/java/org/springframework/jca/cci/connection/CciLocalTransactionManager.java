@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,14 +40,14 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * <p>Application code is required to retrieve the CCI Connection via
  * {@link ConnectionFactoryUtils#getConnection(ConnectionFactory)} instead of a standard
- * J2EE-style {@link ConnectionFactory#getConnection()} call. Spring classes such as
+ * Java EE-style {@link ConnectionFactory#getConnection()} call. Spring classes such as
  * {@link org.springframework.jca.cci.core.CciTemplate} use this strategy implicitly.
  * If not used in combination with this transaction manager, the
  * {@link ConnectionFactoryUtils} lookup strategy behaves exactly like the native
  * DataSource lookup; it can thus be used in a portable fashion.
  *
  * <p>Alternatively, you can allow application code to work with the standard
- * J2EE lookup pattern {@link ConnectionFactory#getConnection()}, for example
+ * Java EE lookup pattern {@link ConnectionFactory#getConnection()}, for example
  * for legacy code that is not aware of Spring at all. In that case, define a
  * {@link TransactionAwareConnectionFactoryProxy} for your target ConnectionFactory,
  * which will automatically participate in Spring-managed transactions.
@@ -126,7 +126,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	protected Object doGetTransaction() {
 		CciLocalTransactionObject txObject = new CciLocalTransactionObject();
 		ConnectionHolder conHolder =
-			(ConnectionHolder) TransactionSynchronizationManager.getResource(getConnectionFactory());
+				(ConnectionHolder) TransactionSynchronizationManager.getResource(getConnectionFactory());
 		txObject.setConnectionHolder(conHolder);
 		return txObject;
 	}
@@ -159,7 +159,6 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 			}
 			TransactionSynchronizationManager.bindResource(getConnectionFactory(), txObject.getConnectionHolder());
 		}
-
 		catch (NotSupportedException ex) {
 			ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory());
 			throw new CannotCreateTransactionException("CCI Connection does not support local transactions", ex);
@@ -268,7 +267,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 		}
 
 		public ConnectionHolder getConnectionHolder() {
-			return connectionHolder;
+			return this.connectionHolder;
 		}
 	}
 

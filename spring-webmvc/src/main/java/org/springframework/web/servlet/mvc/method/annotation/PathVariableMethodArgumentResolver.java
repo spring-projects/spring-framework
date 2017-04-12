@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +33,6 @@ import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver;
-import org.springframework.web.method.annotation.RequestParamMapMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.method.support.UriComponentsContributor;
 import org.springframework.web.servlet.HandlerMapping;
@@ -42,25 +42,22 @@ import org.springframework.web.util.UriComponentsBuilder;
 /**
  * Resolves method arguments annotated with an @{@link PathVariable}.
  *
- * <p>An @{@link PathVariable} is a named value that gets resolved from a URI
- * template variable. It is always required and does not have a default value
- * to fall back on. See the base class
+ * <p>An @{@link PathVariable} is a named value that gets resolved from a URI template variable.
+ * It is always required and does not have a default value to fall back on. See the base class
  * {@link org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver}
  * for more information on how named values are processed.
  *
- * <p>If the method parameter type is {@link Map}, the name specified in the
- * annotation is used to resolve the URI variable String value. The value is
- * then converted to a {@link Map} via type conversion assuming a suitable
- * {@link Converter} or {@link PropertyEditor} has been registered.
- * Or if the annotation does not specify name the
- * {@link RequestParamMapMethodArgumentResolver} is used instead to provide
- * access to all URI variables in a map.
+ * <p>If the method parameter type is {@link Map}, the name specified in the annotation is used
+ * to resolve the URI variable String value. The value is then converted to a {@link Map} via
+ * type conversion, assuming a suitable {@link Converter} or {@link PropertyEditor} has been
+ * registered.
  *
- * <p>A {@link WebDataBinder} is invoked to apply type conversion to resolved
- * path variable values that don't yet match the method parameter type.
+ * <p>A {@link WebDataBinder} is invoked to apply type conversion to resolved path variable
+ * values that don't yet match the method parameter type.
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver
@@ -69,16 +66,12 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	private static final TypeDescriptor STRING_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
 
 
-	public PathVariableMethodArgumentResolver() {
-	}
-
-
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		if (!parameter.hasParameterAnnotation(PathVariable.class)) {
 			return false;
 		}
-		if (Map.class.isAssignableFrom(parameter.getParameterType())) {
+		if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
 			String paramName = parameter.getParameterAnnotation(PathVariable.class).value();
 			return StringUtils.hasText(paramName);
 		}
@@ -94,17 +87,14 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	@Override
 	@SuppressWarnings("unchecked")
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
-		Map<String, String> uriTemplateVars =
-			(Map<String, String>) request.getAttribute(
-					HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
-		return (uriTemplateVars != null) ? uriTemplateVars.get(name) : null;
+		Map<String, String> uriTemplateVars = (Map<String, String>) request.getAttribute(
+				HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
+		return (uriTemplateVars != null ? uriTemplateVars.get(name) : null);
 	}
 
 	@Override
-	protected void handleMissingValue(String name, MethodParameter param) throws ServletRequestBindingException {
-		String paramType = param.getParameterType().getName();
-		throw new ServletRequestBindingException(
-				"Missing URI template variable '" + name + "' for method parameter type [" + paramType + "]");
+	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
+		throw new MissingPathVariableException(name, parameter);
 	}
 
 	@Override
@@ -116,23 +106,23 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 		int scope = RequestAttributes.SCOPE_REQUEST;
 		Map<String, Object> pathVars = (Map<String, Object>) request.getAttribute(key, scope);
 		if (pathVars == null) {
-			pathVars = new HashMap<String, Object>();
+			pathVars = new HashMap<>();
 			request.setAttribute(key, pathVars, scope);
 		}
 		pathVars.put(name, arg);
 	}
 
 	@Override
-	public void contributeMethodArgument(MethodParameter param, Object value,
-			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService cs) {
+	public void contributeMethodArgument(MethodParameter parameter, Object value,
+			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService conversionService) {
 
-		if (Map.class.isAssignableFrom(param.getParameterType())) {
+		if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
 			return;
 		}
 
-		PathVariable annot = param.getParameterAnnotation(PathVariable.class);
-		String name = (StringUtils.isEmpty(annot.value()) ? param.getParameterName() : annot.value());
-		value = formatUriValue(cs, new TypeDescriptor(param), value);
+		PathVariable ann = parameter.getParameterAnnotation(PathVariable.class);
+		String name = (ann != null && !StringUtils.isEmpty(ann.value()) ? ann.value() : parameter.getParameterName());
+		value = formatUriValue(conversionService, new TypeDescriptor(parameter.nestedIfOptional()), value);
 		uriVariables.put(name, value);
 	}
 
@@ -155,7 +145,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	private static class PathVariableNamedValueInfo extends NamedValueInfo {
 
 		public PathVariableNamedValueInfo(PathVariable annotation) {
-			super(annotation.value(), true, ValueConstants.DEFAULT_NONE);
+			super(annotation.name(), annotation.required(), ValueConstants.DEFAULT_NONE);
 		}
 	}
 

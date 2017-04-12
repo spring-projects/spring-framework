@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class InjectionMetadata {
 
-	private final Log logger = LogFactory.getLog(InjectionMetadata.class);
+	private static final Log logger = LogFactory.getLog(InjectionMetadata.class);
 
 	private final Class<?> targetClass;
 
@@ -60,8 +60,9 @@ public class InjectionMetadata {
 		this.injectedElements = elements;
 	}
 
+
 	public void checkConfigMembers(RootBeanDefinition beanDefinition) {
-		Set<InjectedElement> checkedElements = new LinkedHashSet<InjectedElement>(this.injectedElements.size());
+		Set<InjectedElement> checkedElements = new LinkedHashSet<>(this.injectedElements.size());
 		for (InjectedElement element : this.injectedElements) {
 			Member member = element.getMember();
 			if (!beanDefinition.isExternallyManagedConfigMember(member)) {
@@ -82,16 +83,29 @@ public class InjectionMetadata {
 			boolean debug = logger.isDebugEnabled();
 			for (InjectedElement element : elementsToIterate) {
 				if (debug) {
-					logger.debug("Processing injected method of bean '" + beanName + "': " + element);
+					logger.debug("Processing injected element of bean '" + beanName + "': " + element);
 				}
 				element.inject(target, beanName, pvs);
 			}
 		}
 	}
 
+	/**
+	 * @since 3.2.13
+	 */
+	public void clear(PropertyValues pvs) {
+		Collection<InjectedElement> elementsToIterate =
+				(this.checkedElements != null ? this.checkedElements : this.injectedElements);
+		if (!elementsToIterate.isEmpty()) {
+			for (InjectedElement element : elementsToIterate) {
+				element.clearPropertySkipping(pvs);
+			}
+		}
+	}
+
 
 	public static boolean needsRefresh(InjectionMetadata metadata, Class<?> clazz) {
-		return (metadata == null || !metadata.targetClass.equals(clazz));
+		return (metadata == null || metadata.targetClass != clazz);
 	}
 
 
@@ -170,7 +184,7 @@ public class InjectionMetadata {
 		}
 
 		/**
-		 * Checks whether this injector's property needs to be skipped due to
+		 * Check whether this injector's property needs to be skipped due to
 		 * an explicit property value having been specified. Also marks the
 		 * affected property as processed for other processors to ignore it.
 		 */
@@ -198,6 +212,20 @@ public class InjectionMetadata {
 				}
 				this.skip = false;
 				return false;
+			}
+		}
+
+		/**
+		 * @since 3.2.13
+		 */
+		protected void clearPropertySkipping(PropertyValues pvs) {
+			if (pvs == null) {
+				return;
+			}
+			synchronized (pvs) {
+				if (Boolean.FALSE.equals(this.skip) && this.pd != null && pvs instanceof MutablePropertyValues) {
+					((MutablePropertyValues) pvs).clearProcessedProperty(this.pd.getName());
+				}
 			}
 		}
 

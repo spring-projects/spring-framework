@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
 /**
- * {@link ClientHttpRequestFactory} implementation that uses standard J2SE facilities.
+ * {@link ClientHttpRequestFactory} implementation that uses standard JDK facilities.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -36,8 +36,8 @@ import org.springframework.util.Assert;
  * @see java.net.HttpURLConnection
  * @see HttpComponentsClientHttpRequestFactory
  */
-public class SimpleClientHttpRequestFactory
-		implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory {
+@SuppressWarnings("deprecation")
+public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory {
 
 	private static final int DEFAULT_CHUNK_SIZE = 4096;
 
@@ -65,13 +65,15 @@ public class SimpleClientHttpRequestFactory
 	}
 
 	/**
-	 * Indicates whether this request factory should buffer the {@linkplain ClientHttpRequest#getBody() request body}
-	 * internally.
-	 * <p>Default is {@code true}. When sending large amounts of data via POST or PUT, it is recommended
-	 * to change this property to {@code false}, so as not to run out of memory. This will result in a
-	 * {@link ClientHttpRequest} that either streams directly to the underlying {@link HttpURLConnection}
-	 * (if the {@link org.springframework.http.HttpHeaders#getContentLength() Content-Length} is known in advance),
-	 * or that will use "Chunked transfer encoding" (if the {@code Content-Length} is not known in advance).
+	 * Indicate whether this request factory should buffer the
+	 * {@linkplain ClientHttpRequest#getBody() request body} internally.
+	 * <p>Default is {@code true}. When sending large amounts of data via POST or PUT,
+	 * it is recommended to change this property to {@code false}, so as not to run
+	 * out of memory. This will result in a {@link ClientHttpRequest} that either
+	 * streams directly to the underlying {@link HttpURLConnection} (if the
+	 * {@link org.springframework.http.HttpHeaders#getContentLength() Content-Length}
+	 * is known in advance), or that will use "Chunked transfer encoding"
+	 * (if the {@code Content-Length} is not known in advance).
 	 * @see #setChunkSize(int)
 	 * @see HttpURLConnection#setFixedLengthStreamingMode(int)
 	 */
@@ -80,9 +82,11 @@ public class SimpleClientHttpRequestFactory
 	}
 
 	/**
-	 * Sets the number of bytes to write in each chunk when not buffering request bodies locally.
-	 * <p>Note that this parameter is only used when {@link #setBufferRequestBody(boolean) bufferRequestBody} is set
-	 * to {@code false}, and the {@link org.springframework.http.HttpHeaders#getContentLength() Content-Length}
+	 * Set the number of bytes to write in each chunk when not buffering request
+	 * bodies locally.
+	 * <p>Note that this parameter is only used when
+	 * {@link #setBufferRequestBody(boolean) bufferRequestBody} is set to {@code false},
+	 * and the {@link org.springframework.http.HttpHeaders#getContentLength() Content-Length}
 	 * is not known in advance.
 	 * @see #setBufferRequestBody(boolean)
 	 */
@@ -111,14 +115,12 @@ public class SimpleClientHttpRequestFactory
 	}
 
 	/**
-	 * Set if the underlying URLConnection can be set to 'output streaming' mode. When
-	 * output streaming is enabled, authentication and redirection cannot be handled
-	 * automatically. If output streaming is disabled the
-	 * {@link HttpURLConnection#setFixedLengthStreamingMode(int)
-	 * setFixedLengthStreamingMode} and
-	 * {@link HttpURLConnection#setChunkedStreamingMode(int) setChunkedStreamingMode}
-	 * methods of the underlying connection will never be called.
-	 * <p>Default is {@code true}.
+	 * Set if the underlying URLConnection can be set to 'output streaming' mode.
+	 * Default is {@code true}.
+	 * <p>When output streaming is enabled, authentication and redirection cannot be handled automatically.
+	 * If output streaming is disabled, the {@link HttpURLConnection#setFixedLengthStreamingMode} and
+	 * {@link HttpURLConnection#setChunkedStreamingMode} methods of the underlying connection will never
+	 * be called.
 	 * @param outputStreaming if output streaming is enabled
 	 */
 	public void setOutputStreaming(boolean outputStreaming) {
@@ -126,19 +128,20 @@ public class SimpleClientHttpRequestFactory
 	}
 
 	/**
-	 * Sets the task executor for this request factory. Setting this property is required
-	 * for {@linkplain #createAsyncRequest(URI, HttpMethod) creating asynchronous
-	 * request}.
+	 * Set the task executor for this request factory. Setting this property is required
+	 * for {@linkplain #createAsyncRequest(URI, HttpMethod) creating asynchronous requests}.
 	 * @param taskExecutor the task executor
 	 */
 	public void setTaskExecutor(AsyncListenableTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
+
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpURLConnection connection = openConnection(uri.toURL(), this.proxy);
 		prepareConnection(connection, httpMethod.name());
+
 		if (this.bufferRequestBody) {
 			return new SimpleBufferingClientHttpRequest(connection, this.outputStreaming);
 		}
@@ -149,22 +152,22 @@ public class SimpleClientHttpRequestFactory
 
 	/**
 	 * {@inheritDoc}
-	 * <p>Setting the {@link #setTaskExecutor(org.springframework.core.task.AsyncListenableTaskExecutor) taskExecutor} property
-	 * is required before calling this method.
+	 * <p>Setting the {@link #setTaskExecutor taskExecutor} property is required before calling this method.
 	 */
 	@Override
-	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod)
-			throws IOException {
-		Assert.state(this.taskExecutor != null, "Asynchronous execution requires an " +
-				"AsyncTaskExecutor to be set");
+	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) throws IOException {
+		Assert.state(this.taskExecutor != null, "Asynchronous execution requires TaskExecutor to be set");
+
 		HttpURLConnection connection = openConnection(uri.toURL(), this.proxy);
 		prepareConnection(connection, httpMethod.name());
+
 		if (this.bufferRequestBody) {
-			return new SimpleBufferingAsyncClientHttpRequest(connection, this.outputStreaming, this.taskExecutor);
+			return new SimpleBufferingAsyncClientHttpRequest(
+					connection, this.outputStreaming, this.taskExecutor);
 		}
 		else {
-			return new SimpleStreamingAsyncClientHttpRequest(connection, this.chunkSize,
-					this.outputStreaming, this.taskExecutor);
+			return new SimpleStreamingAsyncClientHttpRequest(
+					connection, this.chunkSize, this.outputStreaming, this.taskExecutor);
 		}
 	}
 
@@ -179,7 +182,9 @@ public class SimpleClientHttpRequestFactory
 	 */
 	protected HttpURLConnection openConnection(URL url, Proxy proxy) throws IOException {
 		URLConnection urlConnection = (proxy != null ? url.openConnection(proxy) : url.openConnection());
-		Assert.isInstanceOf(HttpURLConnection.class, urlConnection);
+		if (!HttpURLConnection.class.isInstance(urlConnection)) {
+			throw new IllegalStateException("HttpURLConnection required for [" + url + "] but got: " + urlConnection);
+		}
 		return (HttpURLConnection) urlConnection;
 	}
 
@@ -197,19 +202,24 @@ public class SimpleClientHttpRequestFactory
 		if (this.readTimeout >= 0) {
 			connection.setReadTimeout(this.readTimeout);
 		}
+
 		connection.setDoInput(true);
+
 		if ("GET".equals(httpMethod)) {
 			connection.setInstanceFollowRedirects(true);
 		}
 		else {
 			connection.setInstanceFollowRedirects(false);
 		}
-		if ("PUT".equals(httpMethod) || "POST".equals(httpMethod) || "PATCH".equals(httpMethod)) {
+
+		if ("POST".equals(httpMethod) || "PUT".equals(httpMethod) ||
+				"PATCH".equals(httpMethod) || "DELETE".equals(httpMethod)) {
 			connection.setDoOutput(true);
 		}
 		else {
 			connection.setDoOutput(false);
 		}
+
 		connection.setRequestMethod(httpMethod);
 	}
 

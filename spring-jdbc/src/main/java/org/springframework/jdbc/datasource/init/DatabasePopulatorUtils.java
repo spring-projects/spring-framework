@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.jdbc.datasource.init;
 
 import java.sql.Connection;
-
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -41,8 +40,8 @@ public abstract class DatabasePopulatorUtils {
 	 * @throws DataAccessException if an error occurs, specifically a {@link ScriptException}
 	 */
 	public static void execute(DatabasePopulator populator, DataSource dataSource) throws DataAccessException {
-		Assert.notNull(populator, "DatabasePopulator must be provided");
-		Assert.notNull(dataSource, "DataSource must be provided");
+		Assert.notNull(populator, "DatabasePopulator must not be null");
+		Assert.notNull(dataSource, "DataSource must not be null");
 		try {
 			Connection connection = DataSourceUtils.getConnection(dataSource);
 			try {
@@ -54,11 +53,10 @@ public abstract class DatabasePopulatorUtils {
 				}
 			}
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			if (ex instanceof ScriptException) {
 				throw (ScriptException) ex;
 			}
-
 			throw new UncategorizedScriptException("Failed to execute database script", ex);
 		}
 	}

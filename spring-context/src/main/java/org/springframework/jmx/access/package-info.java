@@ -1,8 +1,4 @@
-
 /**
- *
- * Provides support for accessing remote MBean resources. Requires JMX 1.2 or above.
- *
+ * Provides support for accessing remote MBean resources.
  */
 package org.springframework.jmx.access;
-

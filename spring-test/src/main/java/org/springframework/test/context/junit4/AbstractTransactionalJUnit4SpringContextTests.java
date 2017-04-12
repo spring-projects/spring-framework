@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,13 +49,31 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>Concrete subclasses must fulfill the same requirements outlined in
  * {@link AbstractJUnit4SpringContextTests}.
  *
- * <p>Note: this class serves only as a convenience for extension. If you do not
- * wish for your test classes to be tied to a Spring-specific class hierarchy,
- * you may configure your own custom test classes by using
- * {@link SpringJUnit4ClassRunner}, {@link ContextConfiguration
- * &#064;ContextConfiguration}, {@link TestExecutionListeners
- * &#064;TestExecutionListeners}, {@link Transactional &#064;Transactional},
- * etc.
+ * <p>The following {@link org.springframework.test.context.TestExecutionListener
+ * TestExecutionListeners} are configured by default:
+ *
+ * <ul>
+ * <li>{@link org.springframework.test.context.web.ServletTestExecutionListener}
+ * <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener}
+ * <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener}
+ * <li>{@link org.springframework.test.context.transaction.TransactionalTestExecutionListener}
+ * <li>{@link org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener}
+ * </ul>
+ *
+ * <p>This class serves only as a convenience for extension.
+ * <ul>
+ * <li>If you do not wish for your test classes to be tied to a Spring-specific
+ * class hierarchy, you may configure your own custom test classes by using
+ * {@link SpringRunner}, {@link ContextConfiguration @ContextConfiguration},
+ * {@link TestExecutionListeners @TestExecutionListeners}, etc.</li>
+ * <li>If you wish to extend this class and use a runner other than the
+ * {@link SpringRunner}, as of Spring Framework 4.2 you can use
+ * {@link org.springframework.test.context.junit4.rules.SpringClassRule SpringClassRule} and
+ * {@link org.springframework.test.context.junit4.rules.SpringMethodRule SpringMethodRule}
+ * and specify your runner of choice via {@link org.junit.runner.RunWith @RunWith(...)}.</li>
+ * </ul>
+ *
+ * <p><strong>NOTE:</strong> As of Spring Framework 4.3, this class requires JUnit 4.12 or higher.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -65,15 +83,15 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.context.TestExecutionListeners
  * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
  * @see org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener
- * @see org.springframework.test.context.transaction.TransactionConfiguration
  * @see org.springframework.transaction.annotation.Transactional
+ * @see org.springframework.test.annotation.Commit
  * @see org.springframework.test.annotation.Rollback
  * @see org.springframework.test.context.transaction.BeforeTransaction
  * @see org.springframework.test.context.transaction.AfterTransaction
  * @see org.springframework.test.jdbc.JdbcTestUtils
  * @see org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
  */
-@TestExecutionListeners({ TransactionalTestExecutionListener.class, SqlScriptsTestExecutionListener.class })
+@TestExecutionListeners({TransactionalTestExecutionListener.class, SqlScriptsTestExecutionListener.class})
 @Transactional
 public abstract class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit4SpringContextTests {
 

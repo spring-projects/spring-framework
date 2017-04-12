@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ProtocolResolver;
 
 /**
  * SPI interface to be implemented by most if not all application contexts.
@@ -53,6 +54,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * Name of the ConversionService bean in the factory.
 	 * If none is supplied, default conversion rules apply.
 	 * @see org.springframework.core.convert.ConversionService
+	 * @since 3.0
 	 */
 	String CONVERSION_SERVICE_BEAN_NAME = "conversionService";
 
@@ -60,12 +62,14 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * Name of the LoadTimeWeaver bean in the factory. If such a bean is supplied,
 	 * the context will use a temporary ClassLoader for type matching, in order
 	 * to allow the LoadTimeWeaver to process all actual bean classes.
+	 * @since 2.5
 	 * @see org.springframework.instrument.classloading.LoadTimeWeaver
 	 */
 	String LOAD_TIME_WEAVER_BEAN_NAME = "loadTimeWeaver";
 
 	/**
 	 * Name of the {@link Environment} bean in the factory.
+	 * @since 3.1
 	 */
 	String ENVIRONMENT_BEAN_NAME = "environment";
 
@@ -84,6 +88,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 
 	/**
 	 * Set the unique id of this application context.
+	 * @since 3.0
 	 */
 	void setId(String id);
 
@@ -99,6 +104,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 
 	/**
 	 * Return the Environment for this application context in configurable form.
+	 * @since 3.1
 	 */
 	@Override
 	ConfigurableEnvironment getEnvironment();
@@ -106,6 +112,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	/**
 	 * Set the {@code Environment} for this application context.
 	 * @param environment the new environment
+	 * @since 3.1
 	 */
 	void setEnvironment(ConfigurableEnvironment environment);
 
@@ -113,9 +120,9 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * Add a new BeanFactoryPostProcessor that will get applied to the internal
 	 * bean factory of this application context on refresh, before any of the
 	 * bean definitions get evaluated. To be invoked during context configuration.
-	 * @param beanFactoryPostProcessor the factory processor to register
+	 * @param postProcessor the factory processor to register
 	 */
-	void addBeanFactoryPostProcessor(BeanFactoryPostProcessor beanFactoryPostProcessor);
+	void addBeanFactoryPostProcessor(BeanFactoryPostProcessor postProcessor);
 
 	/**
 	 * Add a new ApplicationListener that will be notified on context events
@@ -128,6 +135,15 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @see org.springframework.context.event.ContextClosedEvent
 	 */
 	void addApplicationListener(ApplicationListener<?> listener);
+
+	/**
+	 * Register the given protocol resolver with this application context,
+	 * allowing for additional resource protocols to be handled.
+	 * <p>Any such resolver will be invoked ahead of this context's standard
+	 * resolution rules. It may therefore also override any default rules.
+	 * @since 4.3
+	 */
+	void addProtocolResolver(ProtocolResolver resolver);
 
 	/**
 	 * Load or refresh the persistent representation of the configuration,

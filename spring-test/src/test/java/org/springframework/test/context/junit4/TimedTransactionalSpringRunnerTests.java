@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import static org.springframework.test.transaction.TransactionTestUtils.*;
 
 /**
  * JUnit 4 based integration test which verifies support of Spring's
@@ -35,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Sam Brannen
  * @since 2.5
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration("transactionalTests-context.xml")
 @Transactional
 public class TimedTransactionalSpringRunnerTests {

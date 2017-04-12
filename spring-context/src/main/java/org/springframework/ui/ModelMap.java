@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,16 +27,14 @@ import org.springframework.util.Assert;
  * Implementation of {@link java.util.Map} for use when building model data for use
  * with UI tools. Supports chained calls and generation of model attribute names.
  *
- * <p>This class serves as generic model holder for both Servlet and Portlet MVC,
- * but is not tied to either of those. Check out the {@link Model} interface for
- * a Java-5-based interface variant that serves the same purpose.
+ * <p>This class serves as generic model holder for Servlet MVC but is not tied to it.
+ * Check out the {@link Model} interface for an interface variant.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
  * @see Conventions#getVariableName
  * @see org.springframework.web.servlet.ModelAndView
- * @see org.springframework.web.portlet.ModelAndView
  */
 @SuppressWarnings("serial")
 public class ModelMap extends LinkedHashMap<String, Object> {
@@ -127,9 +125,10 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	 */
 	public ModelMap mergeAttributes(Map<String, ?> attributes) {
 		if (attributes != null) {
-			for (String key : attributes.keySet()) {
+			for (Map.Entry<String, ?> entry : attributes.entrySet()) {
+				String key = entry.getKey();
 				if (!containsKey(key)) {
-					put(key, attributes.get(key));
+					put(key, entry.getValue());
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,42 +47,45 @@ public class RequestHeaderMapMethodArgumentResolver implements HandlerMethodArgu
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return parameter.hasParameterAnnotation(RequestHeader.class)
-				&& Map.class.isAssignableFrom(parameter.getParameterType());
+		return (parameter.hasParameterAnnotation(RequestHeader.class) &&
+				Map.class.isAssignableFrom(parameter.getParameterType()));
 	}
 
 	@Override
-	public Object resolveArgument(
-			MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
-			throws Exception {
+	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
 		Class<?> paramType = parameter.getParameterType();
-
 		if (MultiValueMap.class.isAssignableFrom(paramType)) {
 			MultiValueMap<String, String> result;
 			if (HttpHeaders.class.isAssignableFrom(paramType)) {
 				result = new HttpHeaders();
 			}
 			else {
-				result = new LinkedMultiValueMap<String, String>();
+				result = new LinkedMultiValueMap<>();
 			}
 			for (Iterator<String> iterator = webRequest.getHeaderNames(); iterator.hasNext();) {
 				String headerName = iterator.next();
-				for (String headerValue : webRequest.getHeaderValues(headerName)) {
-					result.add(headerName, headerValue);
+				String[] headerValues = webRequest.getHeaderValues(headerName);
+				if (headerValues != null) {
+					for (String headerValue : headerValues) {
+						result.add(headerName, headerValue);
+					}
 				}
 			}
 			return result;
 		}
 		else {
-			Map<String, String> result = new LinkedHashMap<String, String>();
+			Map<String, String> result = new LinkedHashMap<>();
 			for (Iterator<String> iterator = webRequest.getHeaderNames(); iterator.hasNext();) {
 				String headerName = iterator.next();
 				String headerValue = webRequest.getHeader(headerName);
-				result.put(headerName, headerValue);
+				if (headerValue != null) {
+					result.put(headerName, headerValue);
+				}
 			}
 			return result;
 		}
 	}
+
 }

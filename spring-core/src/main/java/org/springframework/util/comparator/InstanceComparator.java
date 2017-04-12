@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,27 +27,26 @@ import org.springframework.util.Assert;
  *
  * <p>Only the specified {@code instanceOrder} classes are considered during comparison.
  * If two objects are both instances of the ordered type this comparator will return a
- * {@code 0}. Consider combining with a {@link CompoundComparator} if additional sorting
- * is required.
+ * {@code 0}. Consider combining with {@link Comparator#thenComparing(Comparator)}
+ * if additional sorting is required.
  *
  * @author Phillip Webb
- * @param <T> The type of objects being compared
- * @see CompoundComparator
  * @since 3.2
+ * @see Comparator#thenComparing(Comparator)
+ * @param <T> the type of objects being compared
  */
 public class InstanceComparator<T> implements Comparator<T> {
 
-	private Class<?>[] instanceOrder;
+	private final Class<?>[] instanceOrder;
 
 
 	/**
 	 * Create a new {@link InstanceComparator} instance.
-	 *
 	 * @param instanceOrder the ordered list of classes that should be used when comparing
-	 * objects. Classes earlier in the list will be be given a higher priority.
+	 * objects. Classes earlier in the list will be given a higher priority.
 	 */
 	public InstanceComparator(Class<?>... instanceOrder) {
-		Assert.notNull(instanceOrder, "InstanceOrder must not be null");
+		Assert.notNull(instanceOrder, "'instanceOrder' array must not be null");
 		this.instanceOrder = instanceOrder;
 	}
 
@@ -60,14 +59,14 @@ public class InstanceComparator<T> implements Comparator<T> {
 	}
 
 	private int getOrder(T object) {
-		if(object != null) {
-			for (int i = 0; i < instanceOrder.length; i++) {
-				if (instanceOrder[i].isInstance(object)) {
+		if (object != null) {
+			for (int i = 0; i < this.instanceOrder.length; i++) {
+				if (this.instanceOrder[i].isInstance(object)) {
 					return i;
 				}
 			}
 		}
-		return instanceOrder.length;
+		return this.instanceOrder.length;
 	}
 
 }

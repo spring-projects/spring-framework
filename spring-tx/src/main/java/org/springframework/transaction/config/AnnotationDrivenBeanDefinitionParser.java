@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.transaction.event.TransactionalEventListenerFactory;
 import org.springframework.transaction.interceptor.BeanFactoryTransactionAttributeSourceAdvisor;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 
@@ -44,28 +45,10 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Chris Beams
+ * @author Stephane Nicoll
  * @since 2.0
  */
 class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
-
-	/**
-	 * The bean name of the internally managed transaction advisor (mode="proxy").
-	 * @deprecated as of Spring 3.1 in favor of
-	 * {@link TransactionManagementConfigUtils#TRANSACTION_ADVISOR_BEAN_NAME}
-	 */
-	@Deprecated
-	public static final String TRANSACTION_ADVISOR_BEAN_NAME =
-			TransactionManagementConfigUtils.TRANSACTION_ADVISOR_BEAN_NAME;
-
-	/**
-	 * The bean name of the internally managed transaction aspect (mode="aspectj").
-	 * @deprecated as of Spring 3.1 in favor of
-	 * {@link TransactionManagementConfigUtils#TRANSACTION_ASPECT_BEAN_NAME}
-	 */
-	@Deprecated
-	public static final String TRANSACTION_ASPECT_BEAN_NAME =
-			TransactionManagementConfigUtils.TRANSACTION_ASPECT_BEAN_NAME;
-
 
 	/**
 	 * Parses the {@code <tx:annotation-driven/>} tag. Will
@@ -74,6 +57,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	 */
 	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		registerTransactionalEventListenerFactory(parserContext);
 		String mode = element.getAttribute("mode");
 		if ("aspectj".equals(mode)) {
 			// mode="aspectj"
@@ -101,6 +85,13 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	private static void registerTransactionManager(Element element, BeanDefinition def) {
 		def.getPropertyValues().add("transactionManagerBeanName",
 				TxNamespaceHandler.getTransactionManagerName(element));
+	}
+
+	private void registerTransactionalEventListenerFactory(ParserContext parserContext) {
+		RootBeanDefinition def = new RootBeanDefinition();
+		def.setBeanClass(TransactionalEventListenerFactory.class);
+		parserContext.registerBeanComponent(new BeanComponentDefinition(def,
+				TransactionManagementConfigUtils.TRANSACTIONAL_EVENT_LISTENER_FACTORY_BEAN_NAME));
 	}
 
 

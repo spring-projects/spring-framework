@@ -250,7 +250,7 @@ public class BeanMethodPolymorphismTests {
 			return "regular";
 		}
 
-		@Bean
+		@Bean @Lazy
 		String aString(Integer dependency) {
 			return "overloaded" + dependency;
 		}

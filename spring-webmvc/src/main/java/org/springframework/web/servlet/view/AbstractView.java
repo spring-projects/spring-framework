@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,13 @@ package org.springframework.web.servlet.view;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -30,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.context.support.ContextExposingHttpServletRequest;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContext;
@@ -68,11 +72,13 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	private String requestContextAttribute;
 
-	/** Map of static attributes, keyed by attribute name (String) */
-	private final Map<String, Object> staticAttributes = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> staticAttributes = new LinkedHashMap<>();
 
-	/** Whether or not the view should add path variables in the model */
 	private boolean exposePathVariables = true;
+
+	private boolean exposeContextBeansAsAttributes = false;
+
+	private Set<String> exposedContextBeanNames;
 
 
 	/**
@@ -227,7 +233,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	}
 
 	/**
-	 * Whether to add path variables in the model or not.
+	 * Specify whether to add path variables to the model or not.
 	 * <p>Path variables are commonly bound to URI template variables through the {@code @PathVariable}
 	 * annotation. They're are effectively URI template variables with type conversion applied to
 	 * them to derive typed Object values. Such values are frequently needed in views for
@@ -235,17 +241,47 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * <p>Path variables added to the model override static attributes (see {@link #setAttributes(Properties)})
 	 * but not attributes already present in the model.
 	 * <p>By default this flag is set to {@code true}. Concrete view types can override this.
-	 * @param exposePathVariables {@code true} to expose path variables, and {@code false} otherwise.
+	 * @param exposePathVariables {@code true} to expose path variables, and {@code false} otherwise
 	 */
 	public void setExposePathVariables(boolean exposePathVariables) {
 		this.exposePathVariables = exposePathVariables;
 	}
 
 	/**
-	 * Returns the value of the flag indicating whether path variables should be added to the model or not.
+	 * Return whether to add path variables to the model or not.
 	 */
 	public boolean isExposePathVariables() {
 		return this.exposePathVariables;
+	}
+
+	/**
+	 * Set whether to make all Spring beans in the application context accessible
+	 * as request attributes, through lazy checking once an attribute gets accessed.
+	 * <p>This will make all such beans accessible in plain {@code ${...}}
+	 * expressions in a JSP 2.0 page, as well as in JSTL's {@code c:out}
+	 * value expressions.
+	 * <p>Default is "false". Switch this flag on to transparently expose all
+	 * Spring beans in the request attribute namespace.
+	 * <p><b>NOTE:</b> Context beans will override any custom request or session
+	 * attributes of the same name that have been manually added. However, model
+	 * attributes (as explicitly exposed to this view) of the same name will
+	 * always override context beans.
+	 * @see #getRequestToExpose
+	 */
+	public void setExposeContextBeansAsAttributes(boolean exposeContextBeansAsAttributes) {
+		this.exposeContextBeansAsAttributes = exposeContextBeansAsAttributes;
+	}
+
+	/**
+	 * Specify the names of beans in the context which are supposed to be exposed.
+	 * If this is non-null, only the specified beans are eligible for exposure as
+	 * attributes.
+	 * <p>If you'd like to expose all Spring beans in the application context, switch
+	 * the {@link #setExposeContextBeansAsAttributes "exposeContextBeansAsAttributes"}
+	 * flag on but do not list specific bean names for this property.
+	 */
+	public void setExposedContextBeanNames(String... exposedContextBeanNames) {
+		this.exposedContextBeanNames = new HashSet<>(Arrays.asList(exposedContextBeanNames));
 	}
 
 
@@ -264,7 +300,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 		Map<String, Object> mergedModel = createMergedOutputModel(model, request, response);
 		prepareResponse(request, response);
-		renderMergedOutputModel(mergedModel, request, response);
+		renderMergedOutputModel(mergedModel, getRequestToExpose(request), response);
 	}
 
 	/**
@@ -276,13 +312,14 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 		@SuppressWarnings("unchecked")
 		Map<String, Object> pathVars = (this.exposePathVariables ?
-			(Map<String, Object>) request.getAttribute(View.PATH_VARIABLES) : null);
+				(Map<String, Object>) request.getAttribute(View.PATH_VARIABLES) : null);
 
 		// Consolidate static and dynamic model attributes.
 		int size = this.staticAttributes.size();
-		size += (model != null) ? model.size() : 0;
-		size += (pathVars != null) ? pathVars.size() : 0;
-		Map<String, Object> mergedModel = new LinkedHashMap<String, Object>(size);
+		size += (model != null ? model.size() : 0);
+		size += (pathVars != null ? pathVars.size() : 0);
+
+		Map<String, Object> mergedModel = new LinkedHashMap<>(size);
 		mergedModel.putAll(this.staticAttributes);
 		if (pathVars != null) {
 			mergedModel.putAll(pathVars);
@@ -301,7 +338,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	/**
 	 * Create a RequestContext to expose under the specified attribute name.
-	 * <p>Default implementation creates a standard RequestContext instance for the
+	 * <p>The default implementation creates a standard RequestContext instance for the
 	 * given request and model. Can be overridden in subclasses for custom instances.
 	 * @param request current HTTP request
 	 * @param model combined output Map (never {@code null}),
@@ -342,6 +379,24 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 */
 	protected boolean generatesDownloadContent() {
 		return false;
+	}
+
+	/**
+	 * Get the request handle to expose to {@link #renderMergedOutputModel}, i.e. to the view.
+	 * <p>The default implementation wraps the original request for exposure of Spring beans
+	 * as request attributes (if demanded).
+	 * @param originalRequest the original servlet request as provided by the engine
+	 * @return the wrapped request, or the original request if no wrapping is necessary
+	 * @see #setExposeContextBeansAsAttributes
+	 * @see #setExposedContextBeanNames
+	 * @see org.springframework.web.context.support.ContextExposingHttpServletRequest
+	 */
+	protected HttpServletRequest getRequestToExpose(HttpServletRequest originalRequest) {
+		if (this.exposeContextBeansAsAttributes || this.exposedContextBeanNames != null) {
+			return new ContextExposingHttpServletRequest(
+					originalRequest, getWebApplicationContext(), this.exposedContextBeanNames);
+		}
+		return originalRequest;
 	}
 
 	/**
