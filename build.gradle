@@ -72,6 +72,7 @@ configure(allprojects) { project ->
 	ext.jspVersion             = "2.3.2-b02"
 	ext.jtaVersion             = "1.2"
 	ext.junitVersion           = "4.12"
+	ext.junitVintageVersion    = "4.12.0-M4"
 	ext.junitJupiterVersion    = '5.0.0-M4'
 	ext.junitPlatformVersion   = '1.0.0-M4'
 	ext.log4jVersion           = '2.8.2'
@@ -1086,9 +1087,10 @@ project("spring-test") {
 		testCompile('de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1')
 		testCompile('io.projectreactor.ipc:reactor-netty')
 		testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
-		// Pull in the latest Launcher API so that it overrides whatever
-		// is bundled by default in IntelliJ IDEA.
+		// Pull in the latest Launcher API and the Vintage engine so
+		// that we can run JUnit 4 tests in IntelliJ IDEA.
 		testRuntime("org.junit.platform:junit-platform-launcher:${junitPlatformVersion}")
+		testRuntime("org.junit.vintage:junit-vintage-engine:${junitVintageVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-jul:${log4jVersion}")  // Java Util Logging for JUnit 5
 		testRuntime("org.ehcache:ehcache:${ehcache3Version}")
 		testRuntime("org.terracotta:management-model:2.0.0")
