@@ -150,7 +150,7 @@ Mono<Account> account = client.get()
 		.url("/accounts/{id}", 1L)
 		.accept(APPLICATION_JSON)
 		.exchange(request)
-		.then(response -> response.bodyToMono(Account.class));
+		.flatMap(response -> response.bodyToMono(Account.class));
 ----
 
 
