@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class NamedParameterUtilsTests {
 
 	@Test
 	public void convertParamMapToArray() {
-		Map<String, String> paramMap = new HashMap<String, String>();
+		Map<String, String> paramMap = new HashMap<>();
 		paramMap.put("a", "a");
 		paramMap.put("b", "b");
 		paramMap.put("c", "c");
@@ -184,6 +184,26 @@ public class NamedParameterUtilsTests {
 	public void parseSqlStatementWithPostgresContainedOperator() throws Exception {
 		String expectedSql = "select 'first name' from artists where info->'stat'->'albums' = ?? ? and '[\"1\",\"2\",\"3\"]'::jsonb ?? '4'";
 		String sql = "select 'first name' from artists where info->'stat'->'albums' = ?? :album and '[\"1\",\"2\",\"3\"]'::jsonb ?? '4'";
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		assertEquals(1, parsedSql.getTotalParameterCount());
+		assertEquals(expectedSql, NamedParameterUtils.substituteNamedParameters(parsedSql, null));
+	}
+
+	@Test  // SPR-15382
+	public void parseSqlStatementWithPostgresAnyArrayStringsExistsOperator() throws Exception {
+		String expectedSql = "select '[\"3\", \"11\"]'::jsonb ?| '{1,3,11,12,17}'::text[]";
+		String sql = "select '[\"3\", \"11\"]'::jsonb ?| '{1,3,11,12,17}'::text[]";
+
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		assertEquals(0, parsedSql.getTotalParameterCount());
+		assertEquals(expectedSql, NamedParameterUtils.substituteNamedParameters(parsedSql, null));
+	}
+
+	@Test  // SPR-15382
+	public void parseSqlStatementWithPostgresAllArrayStringsExistsOperator() throws Exception {
+		String expectedSql = "select '[\"3\", \"11\"]'::jsonb ?& '{1,3,11,12,17}'::text[] AND ? = 'Back in Black'";
+		String sql = "select '[\"3\", \"11\"]'::jsonb ?& '{1,3,11,12,17}'::text[] AND :album = 'Back in Black'";
+
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
 		assertEquals(1, parsedSql.getTotalParameterCount());
 		assertEquals(expectedSql, NamedParameterUtils.substituteNamedParameters(parsedSql, null));
