@@ -276,7 +276,7 @@ public class ResourceWebHandler
 	public Mono<Void> handle(ServerWebExchange exchange) {
 
 		return getResource(exchange)
-				.otherwiseIfEmpty(Mono.defer(() -> {
+				.switchIfEmpty(Mono.defer(() -> {
 					logger.trace("No matching resource found - returning 404");
 					exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
 					return Mono.empty();

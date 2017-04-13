@@ -168,7 +168,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 			return Flux.fromStream(viewResolverStream)
 					.concatMap(viewResolver -> viewResolver.resolveViewName(name(), locale))
 					.next()
-					.otherwiseIfEmpty(Mono.error(new IllegalArgumentException("Could not resolve view with name '" +
+					.switchIfEmpty(Mono.error(new IllegalArgumentException("Could not resolve view with name '" +
 							name() +"'")))
 					.flatMap(view -> view.render(model(), contentType, exchange));
 		}

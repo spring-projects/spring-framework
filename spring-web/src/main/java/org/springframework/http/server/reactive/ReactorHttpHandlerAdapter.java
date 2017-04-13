@@ -57,7 +57,7 @@ public class ReactorHttpHandlerAdapter
 		ReactorServerHttpResponse resp = new ReactorServerHttpResponse(response, bufferFactory);
 
 		return this.httpHandler.handle(req, resp)
-				.otherwise(ex -> {
+				.switchOnError(ex -> {
 					logger.error("Could not complete request", ex);
 					response.status(HttpResponseStatus.INTERNAL_SERVER_ERROR);
 					return Mono.empty();

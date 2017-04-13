@@ -96,7 +96,7 @@ public class ServerHttpResponseTests {
 	public void writeWithError() throws Exception {
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		IllegalStateException error = new IllegalStateException("boo");
-		response.writeWith(Flux.error(error)).otherwise(ex -> Mono.empty()).block();
+		response.writeWith(Flux.error(error)).switchOnError(ex -> Mono.empty()).block();
 
 		assertFalse(response.statusCodeWritten);
 		assertFalse(response.headersWritten);

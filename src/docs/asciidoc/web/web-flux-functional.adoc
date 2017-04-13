@@ -95,7 +95,7 @@ public class PersonHandler {
 		Mono<Person> personMono = this.repository.getPerson(personId);
 		return personMono
 				.then(person -> ServerResponse.ok().contentType(APPLICATION_JSON).body(fromObject(person)))
-				.otherwiseIfEmpty(notFound);
+				.switchIfEmpty(notFound);
 	}
 }
 ----

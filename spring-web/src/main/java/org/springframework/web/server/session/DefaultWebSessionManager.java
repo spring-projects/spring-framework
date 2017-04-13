@@ -105,7 +105,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 						.concatMap(this.sessionStore::retrieveSession)
 						.next()
 						.flatMap(session -> validateSession(exchange, session))
-						.otherwiseIfEmpty(createSession(exchange))
+						.switchIfEmpty(createSession(exchange))
 						.map(session -> extendSession(exchange, session)));
 	}
 

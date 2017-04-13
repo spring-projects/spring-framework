@@ -193,7 +193,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 		}
 
 		return valueMono
-				.otherwiseIfEmpty(exchange.isNotModified() ? Mono.empty() : NO_VALUE_MONO)
+				.switchIfEmpty(exchange.isNotModified() ? Mono.empty() : NO_VALUE_MONO)
 				.flatMap(returnValue -> {
 
 					Mono<List<View>> viewsMono;

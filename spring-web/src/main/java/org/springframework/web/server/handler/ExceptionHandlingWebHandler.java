@@ -99,7 +99,7 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 		}
 
 		for (WebExceptionHandler handler : this.exceptionHandlers) {
-			completion = completion.otherwise(ex -> handler.handle(exchange, ex));
+			completion = completion.switchOnError(ex -> handler.handle(exchange, ex));
 		}
 
 		return completion;

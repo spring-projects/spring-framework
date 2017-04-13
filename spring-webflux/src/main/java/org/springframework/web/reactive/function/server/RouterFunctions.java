@@ -234,7 +234,7 @@ public abstract class RouterFunctions {
 					.defaultIfEmpty(notFound())
 					.flatMap(handlerFunction -> wrapException(() -> handlerFunction.handle(request)))
 					.flatMap(response -> wrapException(() -> response.writeTo(exchange, strategies)))
-					.otherwise(ResponseStatusException.class,
+					.switchOnError(ResponseStatusException.class,
 							ex -> {
 								exchange.getResponse().setStatusCode(ex.getStatus());
 								if (ex.getMessage() != null) {

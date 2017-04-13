@@ -75,7 +75,7 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		return chain.resolveResource(exchange, requestPath, locations)
-				.otherwiseIfEmpty(Mono.defer(() -> {
+				.switchIfEmpty(Mono.defer(() -> {
 					String webJarsResourcePath = findWebJarResourcePath(requestPath);
 					if (webJarsResourcePath != null) {
 						return chain.resolveResource(exchange, webJarsResourcePath, locations);
@@ -91,7 +91,7 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		return chain.resolveUrlPath(resourceUrlPath, locations)
-				.otherwiseIfEmpty(Mono.defer(() -> {
+				.switchIfEmpty(Mono.defer(() -> {
 					String webJarResourcePath = findWebJarResourcePath(resourceUrlPath);
 					if (webJarResourcePath != null) {
 						return chain.resolveUrlPath(webJarResourcePath, locations);

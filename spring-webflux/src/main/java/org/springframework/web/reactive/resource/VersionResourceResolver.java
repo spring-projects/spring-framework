@@ -159,7 +159,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		return chain.resolveResource(exchange, requestPath, locations)
-				.otherwiseIfEmpty(Mono.defer(() ->
+				.switchIfEmpty(Mono.defer(() ->
 						resolveVersionedResource(exchange, requestPath, locations, chain)));
 	}
 
