@@ -40,9 +40,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static java.time.Duration.*;
+import static java.time.Duration.ofMillis;
 import static org.hamcrest.CoreMatchers.endsWith;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 
 /**
@@ -62,7 +63,7 @@ public class ResponseEntityTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
-				.expectBody(Person.class).value().isEqualTo(new Person("John"));
+				.expectBody(Person.class).isEqualTo(new Person("John"));
 	}
 
 	@Test
@@ -75,7 +76,7 @@ public class ResponseEntityTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
-				.expectBody(Person.class).list().isEqualTo(expected);
+				.expectBodyList(Person.class).isEqualTo(expected);
 	}
 
 	@Test
@@ -89,8 +90,7 @@ public class ResponseEntityTests {
 		this.client.get().uri("/persons?map=true")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody()
-				.map(String.class, Person.class).isEqualTo(map);
+				.expectBody(forClassWithGenerics(Map.class, String.class, Person.class)).isEqualTo(map);
 	}
 
 	@Test
@@ -102,8 +102,7 @@ public class ResponseEntityTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectHeader().contentType(TEXT_EVENT_STREAM)
-				.expectBody(Person.class)
-				.returnResult();
+				.returnResult(Person.class);
 
 		StepVerifier.create(result.getResponseBody())
 				.expectNext(new Person("N0"), new Person("N1"), new Person("N2"))
@@ -126,6 +125,7 @@ public class ResponseEntityTests {
 
 	@RestController
 	@RequestMapping("/persons")
+	@SuppressWarnings("unused")
 	static class PersonController {
 
 		@GetMapping("/{name}")

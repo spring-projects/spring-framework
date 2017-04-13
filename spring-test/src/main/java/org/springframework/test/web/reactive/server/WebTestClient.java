@@ -491,177 +491,110 @@ public interface WebTestClient {
 	interface ResponseSpec {
 
 		/**
-		 * Assertions on the response status.
+		 * Declare expectations on the response status.
 		 */
 		StatusAssertions expectStatus();
 
 		/**
-		 * Assertions on the headers of the response.
+		 * Declared expectations on the headers of the response.
 		 */
 		HeaderAssertions expectHeader();
 
 		/**
-		 * Assertions on the body of the response extracted to one or more
-		 * representations of the given type.
+		 * Declare expectations on the response body decoded to {@code <B>}.
+		 * @param bodyType the expected body type
 		 */
-		TypeBodySpec expectBody(Class<?> elementType);
+		<B> BodySpec<B, ?> expectBody(Class<B> bodyType);
 
 		/**
-		 * Variant of {@link #expectBody(Class)} for use with generic types.
+		 * Variant of {@link #expectBody(Class)} for a body type with generics.
 		 */
-		TypeBodySpec expectBody(ResolvableType elementType);
+		<B> BodySpec<B, ?> expectBody(ResolvableType bodyType);
 
 		/**
-		 * Other assertions on the response body -- isEmpty, map, etc.
+		 * Declare expectations on the response body decoded to {@code List<E>}.
+		 * @param elementType the expected List element type
 		 */
-		BodySpec expectBody();
+		<E> ListBodySpec<E> expectBodyList(Class<E> elementType);
 
+		/**
+		 * Variant of {@link #expectBodyList(Class)} for element types with generics.
+		 */
+		<E> ListBodySpec<E> expectBodyList(ResolvableType elementType);
+
+		/**
+		 * Declare expectations on the response body content.
+		 */
+		BodyContentSpec expectBody();
+
+		/**
+		 * Return the exchange result with the body decoded to {@code Flux<T>}.
+		 * Use this option for infinite streams and consume the stream with
+		 * the {@code StepVerifier} from the Reactor Add-Ons.
+		 *
+		 * @see <a href="https://github.com/reactor/reactor-addons">
+		 *     https://github.com/reactor/reactor-addons</a>
+		 */
+		<T> FluxExchangeResult<T> returnResult(Class<T> elementType);
+
+		/**
+		 * Variant of {@link #returnResult(Class)} for element types with generics.
+		 */
+		<T> FluxExchangeResult<T> returnResult(ResolvableType elementType);
 	}
 
 	/**
-	 * Specification for extracting entities from the response body.
+	 * Specification for asserting a response body decoded to a single Object.
 	 */
-	interface TypeBodySpec {
-
-		/**
-		 * Extract a single representations from the response.
-		 */
-		SingleValueBodySpec value();
-
-		/**
-		 * Extract a list of representations from the response.
-		 */
-		ListBodySpec list();
-
-		/**
-		 * Extract a list of representations consuming the first N elements.
-		 */
-		ListBodySpec list(int elementCount);
-
-		/**
-		 * Return request and response details for the exchange incluidng the
-		 * response body decoded as {@code Flux<T>} where {@code <T>} is the
-		 * expected element type. The returned {@code Flux} may for example be
-		 * verified with the Reactor {@code StepVerifier}.
-		 */
-		<T> FluxExchangeResult<T> returnResult();
-	}
-
-	/**
-	 * Specification to assert a single value extracted from the response body.
-	 */
-	interface SingleValueBodySpec {
+	interface BodySpec<B, S extends BodySpec<B, S>> {
 
 		/**
 		 * Assert the extracted body is equal to the given value.
 		 */
-		<T> EntityExchangeResult<T> isEqualTo(T expected);
+		<T extends S> T isEqualTo(B expected);
 
 		/**
-		 * Return request and response details for the exchange including the
-		 * extracted response body.
+		 * Return the exchange result with the decoded body.
 		 */
-		<T> EntityExchangeResult<T> returnResult();
+		EntityExchangeResult<B> returnResult();
+
 	}
 
 	/**
-	 * Specification to assert a list of values extracted from the response.
+	 * Specification for asserting a response body decoded to a List.
 	 */
-	interface ListBodySpec {
-
-		/**
-		 * Assert the extracted body is equal to the given list.
-		 */
-		<T> EntityExchangeResult<List<T>> isEqualTo(List<T> expected);
+	interface ListBodySpec<E> extends BodySpec<List<E>, ListBodySpec<E>> {
 
 		/**
 		 * Assert the extracted list of values is of the given size.
 		 * @param size the expected size
 		 */
-		ListBodySpec hasSize(int size);
+		ListBodySpec<E> hasSize(int size);
 
 		/**
 		 * Assert the extracted list of values contains the given elements.
 		 * @param elements the elements to check
 		 */
-		ListBodySpec contains(Object... elements);
+		@SuppressWarnings("unchecked")
+		ListBodySpec<E> contains(E... elements);
 
 		/**
 		 * Assert the extracted list of values doesn't contain the given elements.
 		 * @param elements the elements to check
 		 */
-		ListBodySpec doesNotContain(Object... elements);
+		@SuppressWarnings("unchecked")
+		ListBodySpec<E> doesNotContain(E... elements);
 
-		/**
-		 * Return request and response details for the exchange including the
-		 * extracted response body.
-		 */
-		<T> EntityExchangeResult<List<T>> returnResult();
 	}
 
-	/**
-	 * Specification to apply additional assertions on the response body.
-	 */
-	interface BodySpec {
+	interface BodyContentSpec {
 
 		/**
 		 * Consume the body and verify it is empty.
-		 * @return request and response details from the exchange
+		 * @return the exchange result
 		 */
 		EntityExchangeResult<Void> isEmpty();
 
-		/**
-		 * Extract the response body as a Map with the given key and value type.
-		 */
-		MapBodySpec map(Class<?> keyType, Class<?> valueType);
-
-		/**
-		 * Variant of {@link #map(Class, Class)} for use with generic types.
-		 */
-		MapBodySpec map(ResolvableType keyType, ResolvableType valueType);
-
-	}
-
-	/**
-	 * Specification to assert response the body extracted as a map.
-	 */
-	interface MapBodySpec {
-
-		/**
-		 * Assert the extracted map is equal to the given list of elements.
-		 */
-		<K, V> EntityExchangeResult<Map<K, V>> isEqualTo(Map<K, V> expected);
-
-		/**
-		 * Assert the extracted map has the given size.
-		 * @param size the expected size
-		 */
-		MapBodySpec hasSize(int size);
-
-		/**
-		 * Assert the extracted map contains the given key value pair.
-		 * @param key the key to check
-		 * @param value the value to check
-		 */
-		MapBodySpec contains(Object key, Object value);
-
-		/**
-		 * Assert the extracted map contains the given keys.
-		 * @param keys the keys to check
-		 */
-		MapBodySpec containsKeys(Object... keys);
-
-		/**
-		 * Assert the extracted map contains the given values.
-		 * @param values the keys to check
-		 */
-		MapBodySpec containsValues(Object... values);
-
-		/**
-		 * Return request and response details for the exchange including the
-		 * extracted response body.
-		 */
-		<K, V> EntityExchangeResult<Map<K, V>> returnResult();
 	}
 
 }

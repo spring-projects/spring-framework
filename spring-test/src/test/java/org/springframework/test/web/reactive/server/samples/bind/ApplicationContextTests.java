@@ -63,7 +63,7 @@ public class ApplicationContextTests {
 		this.client.get().uri("/principal")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value().isEqualTo("Hello Mr. Pablo!");
+				.expectBody(String.class).isEqualTo("Hello Mr. Pablo!");
 	}
 
 	@Test
@@ -72,7 +72,7 @@ public class ApplicationContextTests {
 				.get().uri("/principal")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value().isEqualTo("Hello Mr. Giovanni!");
+				.expectBody(String.class).isEqualTo("Hello Mr. Giovanni!");
 	}
 
 	@Test
@@ -83,7 +83,7 @@ public class ApplicationContextTests {
 				.get().uri("/attributes")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value().isEqualTo("foo+bar");
+				.expectBody(String.class).isEqualTo("foo+bar");
 	}
 
 
