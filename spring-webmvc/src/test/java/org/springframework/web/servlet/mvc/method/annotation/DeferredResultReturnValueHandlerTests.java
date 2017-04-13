@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
@@ -34,13 +35,11 @@ import org.springframework.web.context.request.async.StandardServletAsyncWebRequ
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link DeferredResultMethodReturnValueHandler}.
+ *
  * @author Rossen Stoyanchev
  */
 public class DeferredResultReturnValueHandlerTests {
@@ -53,7 +52,7 @@ public class DeferredResultReturnValueHandlerTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.handler = new DeferredResultMethodReturnValueHandler();
 		this.request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();

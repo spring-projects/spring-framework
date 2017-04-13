@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,10 +187,9 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 			try {
 				return (T) collectionClass.newInstance();
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new IllegalArgumentException(
-						"Could not instantiate collection class [" +
-								collectionClass.getName() + "]: " + ex.getMessage());
+						"Could not instantiate collection class: " + collectionClass.getName(), ex);
 			}
 		}
 		else if (List.class == collectionClass) {
@@ -230,6 +229,7 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	@Override
 	public void write(T t, Type type, MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
+
 		throw new UnsupportedOperationException();
 	}
 

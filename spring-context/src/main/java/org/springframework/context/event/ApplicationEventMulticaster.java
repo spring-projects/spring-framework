@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,6 +79,7 @@ public interface ApplicationEventMulticaster {
 	 * based on the {@code event} instance.
 	 * @param event the event to multicast
 	 * @param eventType the type of event (can be null)
+	 * @since 4.2
 	 */
 	void multicastEvent(ApplicationEvent event, ResolvableType eventType);
 
