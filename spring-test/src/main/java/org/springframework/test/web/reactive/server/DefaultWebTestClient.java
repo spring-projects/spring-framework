@@ -23,7 +23,9 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -32,13 +34,14 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -47,9 +50,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.UriBuilder;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
-import static org.springframework.web.reactive.function.BodyExtractors.toDataBuffers;
 import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
 import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
@@ -292,6 +295,7 @@ class DefaultWebTestClient implements WebTestClient {
 			ExchangeResult exchangeResult = wiretapConnector.claimRequest(this.requestId);
 			return new DefaultResponseSpec(exchangeResult, clientResponse, getTimeout());
 		}
+
 	}
 
 
@@ -326,11 +330,12 @@ class DefaultWebTestClient implements WebTestClient {
 			return new FluxExchangeResult<>(this, body, this.timeout);
 		}
 
-		public EntityExchangeResult<Void> decodeToEmpty() {
-			DataBuffer buffer = this.response.body(toDataBuffers()).blockFirst(this.timeout);
-			assertWithDiagnostics(() -> assertTrue("Expected empty body", buffer == null));
-			return new EntityExchangeResult<>(this, null);
+		public EntityExchangeResult<byte[]> decodeToByteArray() {
+			ByteArrayResource resource = this.response.body(toMono(ByteArrayResource.class)).block(this.timeout);
+			byte[] body = (resource != null ? resource.getByteArray() : null);
+			return new EntityExchangeResult<>(this, body);
 		}
+
 	}
 
 
@@ -375,7 +380,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public BodyContentSpec expectBody() {
-			return new DefaultBodyContentSpec(this.result);
+			return new DefaultBodyContentSpec(this.result.decodeToByteArray());
 		}
 
 		@Override
@@ -387,6 +392,7 @@ class DefaultWebTestClient implements WebTestClient {
 		public <T> FluxExchangeResult<T> returnResult(ResolvableType elementType) {
 			return this.result.decodeToFlux(elementType);
 		}
+
 	}
 
 
@@ -406,8 +412,15 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public <T extends S> T isEqualTo(B expected) {
-			Object actual = this.result.getResponseBody();
+			B actual = this.result.getResponseBody();
 			this.result.assertWithDiagnostics(() -> assertEquals("Response body", expected, actual));
+			return self();
+		}
+
+		@Override
+		public <T extends S> T consumeWith(Consumer<B> consumer) {
+			B actual = this.result.getResponseBody();
+			this.result.assertWithDiagnostics(() -> consumer.accept(actual));
 			return self();
 		}
 
@@ -420,6 +433,7 @@ class DefaultWebTestClient implements WebTestClient {
 		public EntityExchangeResult<B> returnResult() {
 			return this.result;
 		}
+
 	}
 
 
@@ -465,23 +479,55 @@ class DefaultWebTestClient implements WebTestClient {
 		public EntityExchangeResult<List<E>> returnResult() {
 			return getResult();
 		}
+
 	}
 
 
 	private static class DefaultBodyContentSpec implements BodyContentSpec {
 
-		private final UndecodedExchangeResult result;
+		private final EntityExchangeResult<byte[]> result;
+
+		private final boolean isEmpty;
 
 
-		DefaultBodyContentSpec(UndecodedExchangeResult result) {
+		DefaultBodyContentSpec(EntityExchangeResult<byte[]> result) {
 			this.result = result;
+			this.isEmpty = (result.getResponseBody() == null);
 		}
 
 
 		@Override
 		public EntityExchangeResult<Void> isEmpty() {
-			return this.result.decodeToEmpty();
+			this.result.assertWithDiagnostics(() -> assertTrue("Expected empty body", this.isEmpty));
+			return new EntityExchangeResult<>(this.result, null);
 		}
+
+		@Override
+		public BodyContentSpec consumeAsStringWith(Consumer<String> consumer) {
+			this.result.assertWithDiagnostics(() -> consumer.accept(getBodyAsString()));
+			return this;
+		}
+
+		private String getBodyAsString() {
+			if (this.isEmpty) {
+				return null;
+			}
+			MediaType mediaType = this.result.getResponseHeaders().getContentType();
+			Charset charset = Optional.ofNullable(mediaType).map(MimeType::getCharset).orElse(UTF_8);
+			return new String(this.result.getResponseBody(), charset);
+		}
+
+		@Override
+		public BodyContentSpec consumeWith(Consumer<byte[]> consumer) {
+			this.result.assertWithDiagnostics(() -> consumer.accept(this.result.getResponseBody()));
+			return this;
+		}
+
+		@Override
+		public EntityExchangeResult<byte[]> returnResult() {
+			return this.result;
+		}
+
 	}
 
 }

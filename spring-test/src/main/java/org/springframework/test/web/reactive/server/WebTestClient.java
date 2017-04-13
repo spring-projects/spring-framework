@@ -486,7 +486,7 @@ public interface WebTestClient {
 	}
 
 	/**
-	 * Specification for processing the response and applying expectations.
+	 * Spec for declaring expectations on the response.
 	 */
 	interface ResponseSpec {
 
@@ -544,7 +544,7 @@ public interface WebTestClient {
 	}
 
 	/**
-	 * Specification for asserting a response body decoded to a single Object.
+	 * Spec for expectations on the response body decoded to a single Object.
 	 */
 	interface BodySpec<B, S extends BodySpec<B, S>> {
 
@@ -554,6 +554,11 @@ public interface WebTestClient {
 		<T extends S> T isEqualTo(B expected);
 
 		/**
+		 * Assert the extracted body with the given {@link Consumer}.
+		 */
+		<T extends S> T consumeWith(Consumer<B> consumer);
+
+		/**
 		 * Return the exchange result with the decoded body.
 		 */
 		EntityExchangeResult<B> returnResult();
@@ -561,7 +566,7 @@ public interface WebTestClient {
 	}
 
 	/**
-	 * Specification for asserting a response body decoded to a List.
+	 * Spec for expectations on the response body decoded to a List.
 	 */
 	interface ListBodySpec<E> extends BodySpec<List<E>, ListBodySpec<E>> {
 
@@ -587,6 +592,9 @@ public interface WebTestClient {
 
 	}
 
+	/**
+	 * Spec for expectations on the response body content.
+	 */
 	interface BodyContentSpec {
 
 		/**
@@ -594,6 +602,27 @@ public interface WebTestClient {
 		 * @return the exchange result
 		 */
 		EntityExchangeResult<Void> isEmpty();
+
+		/**
+		 * Assert the response body content converted to a String with the given
+		 * {@link Consumer}. The String is created with the {@link Charset} from
+		 * the "content-type" response header or {@code UTF-8} otherwise.
+		 * @param consumer the consumer for the response body; the input String
+		 * may be {@code null} if there was no response body.
+		 */
+		BodyContentSpec consumeAsStringWith(Consumer<String> consumer);
+
+		/**
+		 * Assert the response body content with the given {@link Consumer}.
+		 * @param consumer the consumer for the response body; the input
+		 * {@code byte[]} may be {@code null} if there was no response body.
+		 */
+		BodyContentSpec consumeWith(Consumer<byte[]> consumer);
+
+		/**
+		 * Return the exchange result with body content as {@code byte[]}.
+		 */
+		EntityExchangeResult<byte[]> returnResult();
 
 	}
 

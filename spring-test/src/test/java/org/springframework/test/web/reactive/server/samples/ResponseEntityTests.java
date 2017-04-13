@@ -42,9 +42,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static java.time.Duration.ofMillis;
 import static org.hamcrest.CoreMatchers.endsWith;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
+
 
 /**
  * Annotated controllers accepting and returning typed Objects.
@@ -64,6 +66,15 @@ public class ResponseEntityTests {
 				.expectStatus().isOk()
 				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
 				.expectBody(Person.class).isEqualTo(new Person("John"));
+	}
+
+	@Test
+	public void entityWithConsumer() throws Exception {
+		this.client.get().uri("/persons/John")
+				.exchange()
+				.expectStatus().isOk()
+				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.expectBody(Person.class).consumeWith(p -> assertEquals(new Person("John"), p));
 	}
 
 	@Test

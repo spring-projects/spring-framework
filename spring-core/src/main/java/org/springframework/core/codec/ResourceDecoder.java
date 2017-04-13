@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,13 @@ public class ResourceDecoder extends AbstractDecoder<Resource> {
 	public Flux<Resource> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Map<String, Object> hints) {
 
+		return Flux.from(decodeToMono(inputStream, elementType, mimeType, hints));
+	}
+
+	@Override
+	public Mono<Resource> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+			MimeType mimeType, Map<String, Object> hints) {
+
 		Class<?> clazz = elementType.getRawClass();
 
 		Mono<byte[]> byteArray = Flux.from(inputStream).
@@ -70,13 +77,13 @@ public class ResourceDecoder extends AbstractDecoder<Resource> {
 
 
 		if (InputStreamResource.class.equals(clazz)) {
-			return Flux.from(byteArray.map(ByteArrayInputStream::new).map(InputStreamResource::new));
+			return Mono.from(byteArray.map(ByteArrayInputStream::new).map(InputStreamResource::new));
 		}
 		else if (clazz.isAssignableFrom(ByteArrayResource.class)) {
-			return Flux.from(byteArray.map(ByteArrayResource::new));
+			return Mono.from(byteArray.map(ByteArrayResource::new));
 		}
 		else {
-			return Flux.error(new IllegalStateException("Unsupported resource class: " + clazz));
+			return Mono.error(new IllegalStateException("Unsupported resource class: " + clazz));
 		}
 	}
 

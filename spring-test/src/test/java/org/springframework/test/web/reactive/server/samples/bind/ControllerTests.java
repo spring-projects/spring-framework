@@ -29,6 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * Bind to annotated controllers.
  *
@@ -44,11 +46,19 @@ public class ControllerTests {
 
 
 	@Test
-	public void basic() throws Exception {
+	public void bodyContent() throws Exception {
 		this.client.get().uri("/principal")
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody(String.class).isEqualTo("Hello Mr. Pablo!");
+	}
+
+	@Test
+	public void bodyContentWithConsumer() throws Exception {
+		this.client.get().uri("/principal")
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody().consumeAsStringWith(body -> assertEquals("Hello Mr. Pablo!", body));
 	}
 
 	@Test
