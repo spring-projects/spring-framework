@@ -8331,7 +8331,8 @@ supported wrapper so the previous example can be rewritten as follows:
 	public Optional<Book> findBook(String name)
 ----
 
-Note that `result` still refers to `Book` and not `Optional`. Also, we are using the safe navigation operator here to accommodate the fact that the `Optional` maybe empty.
+Note that `result` still refers to `Book` and not `Optional`. As it might be `null`, we
+should use the safe navigation operator.
 
 [[cache-spel-context]]
 ===== Available caching SpEL evaluation context
