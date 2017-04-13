@@ -60,8 +60,7 @@ public abstract class AbstractApplicationEventMulticaster
 
 	private final ListenerRetriever defaultRetriever = new ListenerRetriever(false);
 
-	final Map<ListenerCacheKey, ListenerRetriever> retrieverCache =
-			new ConcurrentHashMap<>(64);
+	final Map<ListenerCacheKey, ListenerRetriever> retrieverCache = new ConcurrentHashMap<>(64);
 
 	private ClassLoader beanClassLoader;
 

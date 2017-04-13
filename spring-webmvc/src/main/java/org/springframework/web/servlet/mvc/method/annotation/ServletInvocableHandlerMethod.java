@@ -249,13 +249,10 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		public ConcurrentResultMethodParameter(Object returnValue) {
 			super(-1);
 			this.returnValue = returnValue;
-
 			ResolvableType candidateReturnType =
 					ResolvableType.forType(super.getGenericParameterType()).getGeneric(0);
-
-			this.returnType = returnValue instanceof ReactiveTypeHandler.CollectedValuesList ?
-					ResolvableType.forClassWithGenerics(List.class, candidateReturnType) :
-					candidateReturnType;
+			this.returnType = (returnValue instanceof ReactiveTypeHandler.CollectedValuesList ?
+					ResolvableType.forClassWithGenerics(List.class, candidateReturnType) : candidateReturnType);
 		}
 
 		public ConcurrentResultMethodParameter(ConcurrentResultMethodParameter original) {
