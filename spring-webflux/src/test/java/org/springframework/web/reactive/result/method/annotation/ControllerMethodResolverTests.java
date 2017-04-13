@@ -67,7 +67,7 @@ public class ControllerMethodResolverTests {
 		resolvers.addCustomResolver(new CustomArgumentResolver());
 		resolvers.addCustomResolver(new CustomSyncArgumentResolver());
 
-		ServerCodecConfigurer codecs = new ServerCodecConfigurer();
+		ServerCodecConfigurer codecs = ServerCodecConfigurer.create();
 		codecs.customCodecs().decoder(new ByteArrayDecoder());
 		codecs.customCodecs().decoder(new ByteBufferDecoder());
 

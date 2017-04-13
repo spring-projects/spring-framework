@@ -18,18 +18,14 @@ package org.springframework.web.reactive.function.server;
 
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.springframework.core.codec.Decoder;
-import org.springframework.core.codec.Encoder;
-import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
 /**
@@ -113,60 +109,20 @@ public interface HandlerStrategies {
 	interface Builder {
 
 		/**
-		 * Configure the {@code Encoder} to use for Server-Sent Events.
-		 * <p>By default the {@link #jackson2Encoder} override is used for SSE.
-		 * @param encoder the encoder to use
+		 * Customize the list of default server-side HTTP message readers and writers.
+		 * @param consumer the consumer to customize the default codecs
 		 * @return this builder
+		 * @see #customCodecs(Consumer)
 		 */
-		Builder serverSentEventEncoder(Encoder<?> encoder);
+		Builder defaultCodecs(Consumer<ServerCodecConfigurer.ServerDefaultCodecsConfigurer> consumer);
 
 		/**
-		 * Override the default Jackson {@code Decoder}.
-		 * @param decoder the decoder to use
+		 * Customize the list of custom server-side HTTP message readers and writers.
+		 * @param consumer the consumer to customize the custom codecs
 		 * @return this builder
+		 * @see #defaultCodecs(Consumer)
 		 */
-		Builder jackson2Decoder(Jackson2JsonDecoder decoder);
-
-		/**
-		 * Override the default Jackson {@code Encoder} for JSON.
-		 * @param encoder the encoder to use
-		 * @return this builder
-		 */
-		Builder jackson2Encoder(Jackson2JsonEncoder encoder);
-
-		/**
-		 * Add a custom {@code Decoder} internally wrapped with
-		 * {@link DecoderHttpMessageReader}).
-		 * @param decoder the decoder to add
-		 * @return this builder
-		 */
-		Builder customDecoder(Decoder<?> decoder);
-
-		/**
-		 * Add a custom {@code Encoder}, internally wrapped with
-		 * {@link EncoderHttpMessageWriter}.
-		 * @param encoder the encoder to add
-		 * @return this builder
-		 */
-		Builder customEncoder(Encoder<?> encoder);
-
-		/**
-		 * Add a custom {@link HttpMessageReader}. For readers of type
-		 * {@link DecoderHttpMessageReader} consider using the shortcut
-		 * {@link #customDecoder(Decoder)} instead.
-		 * @param reader the reader to add
-		 * @return this builder
-		 */
-		Builder customMessageReader(HttpMessageReader<?> reader);
-
-		/**
-		 * Add a custom {@link HttpMessageWriter}. For readers of type
-		 * {@link EncoderHttpMessageWriter} consider using the shortcut
-		 * {@link #customEncoder(Encoder)} instead.
-		 * @param writer the writer to add
-		 * @return this builder
-		 */
-		Builder customMessageWriter(HttpMessageWriter<?> writer);
+		Builder customCodecs(Consumer<ServerCodecConfigurer.CustomCodecsConfigurer> consumer);
 
 		/**
 		 * Add the given view resolver to this builder.

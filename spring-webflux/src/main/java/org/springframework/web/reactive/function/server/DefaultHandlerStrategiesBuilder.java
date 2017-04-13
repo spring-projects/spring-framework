@@ -21,17 +21,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.springframework.core.codec.Decoder;
-import org.springframework.core.codec.Encoder;
+import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
@@ -49,7 +47,8 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 					.map(Locale::forLanguageTag).findFirst();
 
 
-	private final ServerCodecConfigurer codecConfigurer = new ServerCodecConfigurer();
+	private final ServerCodecConfigurer codecConfigurer = ServerCodecConfigurer.create();
+
 	private final List<ViewResolver> viewResolvers = new ArrayList<>();
 
 	private Function<ServerRequest, Optional<Locale>> localeResolver;
@@ -66,51 +65,18 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 	}
 
 	@Override
-	public HandlerStrategies.Builder serverSentEventEncoder(Encoder<?> encoder) {
-		Assert.notNull(encoder, "'encoder' must not be null");
-		this.codecConfigurer.defaultCodecs().serverSentEventEncoder(encoder);
+	public HandlerStrategies.Builder defaultCodecs(
+			Consumer<ServerCodecConfigurer.ServerDefaultCodecsConfigurer> consumer) {
+		Assert.notNull(consumer, "'consumer' must not be null");
+		consumer.accept(this.codecConfigurer.defaultCodecs());
 		return this;
 	}
 
 	@Override
-	public HandlerStrategies.Builder jackson2Decoder(Jackson2JsonDecoder decoder) {
-		Assert.notNull(decoder, "'decoder' must not be null");
-		this.codecConfigurer.defaultCodecs().jackson2Decoder(decoder);
-		return this;
-	}
-
-	@Override
-	public HandlerStrategies.Builder jackson2Encoder(Jackson2JsonEncoder encoder) {
-		Assert.notNull(encoder, "'encoder' must not be null");
-		this.codecConfigurer.defaultCodecs().jackson2Encoder(encoder);
-		return this;
-	}
-
-	@Override
-	public HandlerStrategies.Builder customDecoder(Decoder<?> decoder) {
-		Assert.notNull(decoder, "'decoder' must not be null");
-		this.codecConfigurer.customCodecs().decoder(decoder);
-		return this;
-	}
-
-	@Override
-	public HandlerStrategies.Builder customEncoder(Encoder<?> encoder) {
-		Assert.notNull(encoder, "'encoder' must not be null");
-		this.codecConfigurer.customCodecs().encoder(encoder);
-		return this;
-	}
-
-	@Override
-	public HandlerStrategies.Builder customMessageReader(HttpMessageReader<?> reader) {
-		Assert.notNull(reader, "'reader' must not be null");
-		this.codecConfigurer.customCodecs().reader(reader);
-		return this;
-	}
-
-	@Override
-	public HandlerStrategies.Builder customMessageWriter(HttpMessageWriter<?> writer) {
-		Assert.notNull(writer, "'writer' must not be null");
-		this.codecConfigurer.customCodecs().writer(writer);
+	public HandlerStrategies.Builder customCodecs(
+			Consumer<CodecConfigurer.CustomCodecsConfigurer> consumer) {
+		Assert.notNull(consumer, "'consumer' must not be null");
+		consumer.accept(this.codecConfigurer.customCodecs());
 		return this;
 	}
 

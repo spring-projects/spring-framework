@@ -191,7 +191,7 @@ public class DefaultEntityResponseBuilderTests {
 		MockServerWebExchange exchange = MockServerHttpRequest.get("http://localhost").toExchange();
 
 		HandlerStrategies strategies = HandlerStrategies.empty()
-				.customMessageWriter(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()))
+				.customCodecs(configurer -> configurer.writer(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes())))
 				.build();
 
 		StepVerifier.create(result)

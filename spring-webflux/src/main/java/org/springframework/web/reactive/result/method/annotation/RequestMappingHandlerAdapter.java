@@ -146,7 +146,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	public void afterPropertiesSet() throws Exception {
 
 		if (this.messageCodecConfigurer == null) {
-			this.messageCodecConfigurer = new ServerCodecConfigurer();
+			this.messageCodecConfigurer = ServerCodecConfigurer.create();
 		}
 
 		if (this.argumentResolverConfigurer == null) {

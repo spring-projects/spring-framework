@@ -70,6 +70,13 @@ import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
  */
 public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
+	static final boolean jackson2Present =
+			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
+					WebFluxConfigurationSupport.class.getClassLoader()) &&
+					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
+							WebFluxConfigurationSupport.class.getClassLoader());
+
+
 	private Map<String, CorsConfiguration> corsConfigurations;
 
 	private PathMatchConfigurer pathMatchConfigurer;
@@ -148,7 +155,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 */
 	protected Map<String, MediaType> getDefaultMediaTypeMappings() {
 		Map<String, MediaType> map = new HashMap<>();
-		if (ServerCodecConfigurer.jackson2Present) {
+		if (jackson2Present) {
 			map.put("json", MediaType.APPLICATION_JSON);
 		}
 		return map;
@@ -266,7 +273,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 */
 	protected final ServerCodecConfigurer getMessageCodecsConfigurer() {
 		if (this.messageCodecsConfigurer == null) {
-			this.messageCodecsConfigurer = new ServerCodecConfigurer();
+			this.messageCodecsConfigurer = ServerCodecConfigurer.create();
 			configureHttpMessageCodecs(this.getMessageCodecsConfigurer());
 		}
 		return this.messageCodecsConfigurer;
