@@ -44,12 +44,12 @@ import static org.mockito.Mockito.*;
 import static org.springframework.core.ResolvableType.forClass;
 
 /**
- * Unit tests for {@link ServerCodecConfigurer}.
+ * Unit tests for {@link org.springframework.http.codec.DefaultCodecConfigurer.AbstractDefaultCodecsConfigurer}.
  * @author Rossen Stoyanchev
  */
 public class CodecConfigurerTests {
 
-	private final TestCodecConfigurer configurer = new TestCodecConfigurer();
+	private final CodecConfigurer configurer = new DefaultCodecConfigurer(new TestDefaultCodecConfigurer());
 
 	private final AtomicInteger index = new AtomicInteger(0);
 
@@ -276,14 +276,9 @@ public class CodecConfigurerTests {
 	}
 
 
-	private static class TestCodecConfigurer extends AbstractCodecConfigurer {
-
-		private TestCodecConfigurer() {
-			super(new TestDefaultCodecConfigurer());
-		}
 
 
-		private static class TestDefaultCodecConfigurer extends DefaultCodecConfigurer {
+		private static class TestDefaultCodecConfigurer extends DefaultCodecConfigurer.AbstractDefaultCodecsConfigurer {
 
 			@Override
 			protected void addStringReaderTextOnlyTo(List<HttpMessageReader<?>> result) {
@@ -295,6 +290,5 @@ public class CodecConfigurerTests {
 				addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 			}
 		}
-	}
 
 }

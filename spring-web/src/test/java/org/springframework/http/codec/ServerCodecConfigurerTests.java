@@ -54,7 +54,7 @@ import static org.springframework.core.ResolvableType.forClass;
  */
 public class ServerCodecConfigurerTests {
 
-	private final ServerCodecConfigurer configurer = new ServerCodecConfigurer();
+	private final ServerCodecConfigurer configurer = new DefaultServerCodecConfigurer();
 
 	private final AtomicInteger index = new AtomicInteger(0);
 

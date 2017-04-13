@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.codec;
 
-import java.util.List;
-
 import org.springframework.core.codec.Encoder;
-import org.springframework.core.codec.StringDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
 
 /**
  * Helps to configure a list of server-side HTTP message readers and writers
@@ -35,72 +32,37 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ServerCodecConfigurer extends AbstractCodecConfigurer {
+public interface ServerCodecConfigurer extends CodecConfigurer {
 
-
-	public ServerCodecConfigurer() {
-		super(new ServerDefaultCodecConfigurer());
-	}
-
-
+	/**
+	 * {@inheritDoc}
+	 * <p>Overriden to return {@link ServerDefaultCodecsConfigurer}.
+	 */
 	@Override
-	public ServerDefaultCodecConfigurer defaultCodecs() {
-		return (ServerDefaultCodecConfigurer) super.defaultCodecs();
-	}
+	ServerDefaultCodecsConfigurer defaultCodecs();
 
 
-	@Override
-	protected void addDefaultTypedReaders(List<HttpMessageReader<?>> result) {
-		super.addDefaultTypedReaders(result);
-		defaultCodecs().addReaderTo(result, FormHttpMessageReader::new);
-	}
-
-
-	@Override
-	protected void addDefaultObjectWriters(List<HttpMessageWriter<?>> result) {
-		super.addDefaultObjectWriters(result);
-		defaultCodecs().addServerSentEventWriterTo(result);
+	/**
+	 * Creates a new instance of the {@code ServerCodecConfigurer}.
+	 * @return the created instance
+	 */
+	static ServerCodecConfigurer create() {
+		return new DefaultServerCodecConfigurer();
 	}
 
 
 	/**
-	 * Extension of {@code DefaultCodecConfigurer} with extra server options.
+	 * Extension of {@link DefaultCodecConfigurer} with extra server options.
 	 */
-	public static class ServerDefaultCodecConfigurer extends DefaultCodecConfigurer {
+	interface ServerDefaultCodecsConfigurer extends DefaultCodecsConfigurer {
 
 		/**
 		 * Configure the {@code Encoder} to use for Server-Sent Events.
 		 * <p>By default the {@link #jackson2Encoder} override is used for SSE.
 		 * @param encoder the encoder to use
 		 */
-		public void serverSentEventEncoder(Encoder<?> encoder) {
-			HttpMessageWriter<?> writer = new ServerSentEventHttpMessageWriter(encoder);
-			getWriters().put(ServerSentEventHttpMessageWriter.class, writer);
-		}
+		void serverSentEventEncoder(Encoder<?> encoder);
 
-
-		// Internal methods for building a list of default readers or writers...
-
-		@Override
-		protected void addStringReaderTextOnlyTo(List<HttpMessageReader<?>> result) {
-			addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly(true)));
-		}
-
-		@Override
-		protected void addStringReaderTo(List<HttpMessageReader<?>> result) {
-			addReaderTo(result, () -> new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-		}
-
-		private void addServerSentEventWriterTo(List<HttpMessageWriter<?>> result) {
-			addWriterTo(result, () -> findWriter(ServerSentEventHttpMessageWriter.class, () -> {
-				Encoder<?> encoder = null;
-				if (jackson2Present) {
-					encoder = findEncoderWriter(
-							Jackson2JsonEncoder.class, Jackson2JsonEncoder::new).getEncoder();
-				}
-				return new ServerSentEventHttpMessageWriter(encoder);
-			}));
-		}
 	}
 
 }

@@ -53,7 +53,7 @@ import static org.springframework.core.ResolvableType.forClass;
  */
 public class ClientCodecConfigurerTests {
 
-	private final ClientCodecConfigurer configurer = new ClientCodecConfigurer();
+	private final ClientCodecConfigurer configurer = new DefaultClientCodecConfigurer();
 
 	private final AtomicInteger index = new AtomicInteger(0);
 
