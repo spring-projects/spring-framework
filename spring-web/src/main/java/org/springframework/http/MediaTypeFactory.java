@@ -43,11 +43,8 @@ public class MediaTypeFactory {
 
 	private static final String MIME_TYPES_FILE_NAME = "/org/springframework/http/mime.types";
 
-	private static final MultiValueMap<String, MediaType> fileExtensionToMediaTypes;
+	private static final MultiValueMap<String, MediaType> fileExtensionToMediaTypes = parseMimeTypes();
 
-	static {
-		fileExtensionToMediaTypes = parseMimeTypes();
-	}
 
 	/**
 	 * Parse the {@code mime.types} file found in the resources. Format is:
@@ -65,9 +62,7 @@ public class MediaTypeFactory {
 		InputStream is = null;
 		try {
 			is = MediaTypeFactory.class.getResourceAsStream(MIME_TYPES_FILE_NAME);
-			BufferedReader reader =
-					new BufferedReader(new InputStreamReader(is, StandardCharsets.US_ASCII));
-
+			BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.US_ASCII));
 			MultiValueMap<String, MediaType> result = new LinkedMultiValueMap<>();
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -76,7 +71,6 @@ public class MediaTypeFactory {
 				}
 				String[] tokens = StringUtils.tokenizeToStringArray(line, " \t\n\r\f");
 				MediaType mediaType = MediaType.parseMediaType(tokens[0]);
-
 				for (int i = 1; i < tokens.length; i++) {
 					String fileExtension = tokens[i].toLowerCase(Locale.ENGLISH);
 					result.add(fileExtension, mediaType);
