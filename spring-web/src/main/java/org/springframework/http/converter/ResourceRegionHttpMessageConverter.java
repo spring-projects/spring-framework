@@ -51,31 +51,6 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 
 
 	@Override
-	protected boolean supports(Class<?> clazz) {
-		// should not be called as we override canRead/canWrite
-		return false;
-	}
-
-	@Override
-	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
-		return false;
-	}
-
-	@Override
-	public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
-			throws IOException, HttpMessageNotReadableException {
-
-		return null;
-	}
-
-	@Override
-	protected ResourceRegion readInternal(Class<?> clazz, HttpInputMessage inputMessage)
-			throws IOException, HttpMessageNotReadableException {
-
-		return null;
-	}
-
-	@Override
 	@SuppressWarnings("unchecked")
 	protected MediaType getDefaultContentType(Object object) {
 		if (jafPresent) {
@@ -93,6 +68,30 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	}
 
 	@Override
+	public boolean canRead(Class<?> clazz, MediaType mediaType) {
+		return false;
+	}
+
+	@Override
+	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
+		return false;
+	}
+
+	@Override
+	public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
+			throws IOException, HttpMessageNotReadableException {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	protected ResourceRegion readInternal(Class<?> clazz, HttpInputMessage inputMessage)
+			throws IOException, HttpMessageNotReadableException {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
 		return canWrite(clazz, null, mediaType);
 	}
@@ -100,7 +99,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	@Override
 	public boolean canWrite(Type type, Class<?> clazz, MediaType mediaType) {
 		if (!(type instanceof ParameterizedType)) {
-			return ResourceRegion.class.isAssignableFrom((Class) type);
+			return ResourceRegion.class.isAssignableFrom((Class<?>) type);
 		}
 		ParameterizedType parameterizedType = (ParameterizedType) type;
 		if (!(parameterizedType.getRawType() instanceof Class)) {
@@ -139,6 +138,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 			}
 		}
 	}
+
 
 	protected void writeResourceRegion(ResourceRegion region, HttpOutputMessage outputMessage) throws IOException {
 		Assert.notNull(region, "ResourceRegion must not be null");
@@ -196,8 +196,6 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		println(out);
 		print(out, "--" + boundaryString + "--");
 	}
-
-
 
 	private static void println(OutputStream os) throws IOException {
 		os.write('\r');

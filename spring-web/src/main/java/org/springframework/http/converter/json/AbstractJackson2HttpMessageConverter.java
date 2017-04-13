@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -204,12 +204,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 	@Override
-	protected boolean supports(Class<?> clazz) {
-		// should not be called, since we override canRead/Write instead
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
@@ -237,7 +231,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
 		}
 		catch (IOException ex) {
-			throw new HttpMessageNotReadableException("Could not read document: " + ex.getMessage(), ex);
+			throw new HttpMessageNotReadableException("Could not read JSON document: " + ex.getMessage(), ex);
 		}
 	}
 
@@ -289,7 +283,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 		}
 		catch (JsonProcessingException ex) {
-			throw new HttpMessageNotWritableException("Could not write content: " + ex.getMessage(), ex);
+			throw new HttpMessageNotWritableException("Could not write JSON document: " + ex.getMessage(), ex);
 		}
 	}
 

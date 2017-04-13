@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,34 +114,20 @@ public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverte
 
 
 	@Override
-	public boolean canRead(Class<?> clazz, MediaType mediaType) {
-		return canRead(mediaType);
-	}
-
-	@Override
-	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
-		return canWrite(mediaType);
-	}
-
-	@Override
-	protected boolean supports(Class<?> clazz) {
-		// should not be called, since we override canRead/Write instead
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
-			throws IOException, HttpMessageNotReadableException {
-
-		TypeToken<?> token = getTypeToken(clazz);
-		return readTypeToken(token, inputMessage);
-	}
-
-	@Override
+	@SuppressWarnings("deprecation")
 	public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
 		TypeToken<?> token = getTypeToken(type);
+		return readTypeToken(token, inputMessage);
+	}
+
+	@Override
+	@SuppressWarnings("deprecation")
+	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
+			throws IOException, HttpMessageNotReadableException {
+
+		TypeToken<?> token = getTypeToken(clazz);
 		return readTypeToken(token, inputMessage);
 	}
 
@@ -162,7 +148,9 @@ public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverte
 	 * </pre>
 	 * @param type the type for which to return the TypeToken
 	 * @return the type token
+	 * @deprecated as of Spring Framework 4.3.8, in favor of signature-based resolution
 	 */
+	@Deprecated
 	protected TypeToken<?> getTypeToken(Type type) {
 		return TypeToken.get(type);
 	}
@@ -173,7 +161,7 @@ public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverte
 			return this.gson.fromJson(json, token.getType());
 		}
 		catch (JsonParseException ex) {
-			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
+			throw new HttpMessageNotReadableException("Could not read JSON document: " + ex.getMessage(), ex);
 		}
 	}
 
@@ -203,7 +191,7 @@ public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverte
 			writer.close();
 		}
 		catch (JsonIOException ex) {
-			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
+			throw new HttpMessageNotWritableException("Could not write JSON document: " + ex.getMessage(), ex);
 		}
 	}
 
