@@ -8327,11 +8327,12 @@ supported wrapper so the previous example can be rewritten as follows:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(cacheNames="book", condition="#name.length() < 32", **unless="#result.hardback"**)
+	@Cacheable(cacheNames="book", condition="#name.length() < 32", **unless="#result?.hardback"**)
 	public Optional<Book> findBook(String name)
 ----
 
-Note that `result` still refers to `Book` and not `Optional`.
+Note that `result` still refers to `Book` and not `Optional`. As it might be `null`, we
+should use the safe navigation operator.
 
 [[cache-spel-context]]
 ===== Available caching SpEL evaluation context
