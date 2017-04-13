@@ -146,7 +146,6 @@ public class ReactiveTypeHandlerTests {
 
 		EmitterProcessor<String> emitter = EmitterProcessor.create();
 		testDeferredResultSubscriber(emitter, Flux.class, () -> {
-			emitter.connect();
 			emitter.onNext("foo");
 			emitter.onNext("bar");
 			emitter.onNext("baz");
@@ -233,7 +232,6 @@ public class ReactiveTypeHandlerTests {
 		EmitterHandler emitterHandler = new EmitterHandler();
 		sseEmitter.initialize(emitterHandler);
 
-		processor.connect();
 		processor.onNext("foo");
 		processor.onNext("bar");
 		processor.onNext("baz");
@@ -253,7 +251,6 @@ public class ReactiveTypeHandlerTests {
 		EmitterHandler emitterHandler = new EmitterHandler();
 		sseEmitter.initialize(emitterHandler);
 
-		processor.connect();
 		processor.onNext(ServerSentEvent.builder("foo").id("1").build());
 		processor.onNext(ServerSentEvent.builder("bar").id("2").build());
 		processor.onNext(ServerSentEvent.builder("baz").id("3").build());
@@ -277,7 +274,6 @@ public class ReactiveTypeHandlerTests {
 		ServletServerHttpResponse message = new ServletServerHttpResponse(this.servletResponse);
 		emitter.extendResponse(message);
 
-		processor.connect();
 		processor.onNext("[\"foo\",\"bar\"]");
 		processor.onNext("[\"bar\",\"baz\"]");
 		processor.onComplete();
@@ -295,7 +291,6 @@ public class ReactiveTypeHandlerTests {
 		EmitterHandler emitterHandler = new EmitterHandler();
 		emitter.initialize(emitterHandler);
 
-		processor.connect();
 		processor.onNext("The quick");
 		processor.onNext(" brown fox jumps over ");
 		processor.onNext("the lazy dog");
