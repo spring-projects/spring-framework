@@ -40,6 +40,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
@@ -500,6 +501,24 @@ class DefaultWebTestClient implements WebTestClient {
 		public EntityExchangeResult<Void> isEmpty() {
 			this.result.assertWithDiagnostics(() -> assertTrue("Expected empty body", this.isEmpty));
 			return new EntityExchangeResult<>(this.result, null);
+		}
+
+		@Override
+		public BodyContentSpec json(String json) {
+			this.result.assertWithDiagnostics(() -> {
+				try {
+					new JsonExpectationsHelper().assertJsonEqual(json, getBodyAsString());
+				}
+				catch (Exception ex) {
+					throw new AssertionError("JSON parsing error", ex);
+				}
+			});
+			return this;
+		}
+
+		@Override
+		public JsonPathAssertions jsonPath(String expression, Object... args) {
+			return new JsonPathAssertions(this, expression, args);
 		}
 
 		@Override

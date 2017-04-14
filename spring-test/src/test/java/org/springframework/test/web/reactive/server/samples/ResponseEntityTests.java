@@ -22,8 +22,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -166,38 +164,6 @@ public class ResponseEntityTests {
 		@PostMapping
 		ResponseEntity<String> savePerson(@RequestBody Person person) {
 			return ResponseEntity.created(URI.create("/persons/" + person.getName())).build();
-		}
-	}
-
-	static class Person {
-
-		private final String name;
-
-		@JsonCreator
-		public Person(@JsonProperty("name") String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return this.name;
-		}
-
-		@Override
-		public boolean equals(Object other) {
-			if (this == other) return true;
-			if (other == null || getClass() != other.getClass()) return false;
-			Person person = (Person) other;
-			return getName().equals(person.getName());
-		}
-
-		@Override
-		public int hashCode() {
-			return getName().hashCode();
-		}
-
-		@Override
-		public String toString() {
-			return "Person[name='" + name + "']";
 		}
 	}
 

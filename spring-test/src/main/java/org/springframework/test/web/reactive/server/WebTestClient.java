@@ -598,10 +598,30 @@ public interface WebTestClient {
 	interface BodyContentSpec {
 
 		/**
-		 * Consume the body and verify it is empty.
-		 * @return the exchange result
+		 * Assert the response body is empty and return the exchange result.
 		 */
 		EntityExchangeResult<Void> isEmpty();
+
+		/**
+		 * Parse the expected and actual response content as JSON and perform a
+		 * "lenient" comparison verifying the same attribute-value pairs.
+		 * <p>Use of this option requires the
+		 * <a href="http://jsonassert.skyscreamer.org/">JSONassert<a/> library
+		 * on to be on the classpath.
+		 * @param expectedJson the expected JSON content.
+		 */
+		BodyContentSpec json(String expectedJson);
+
+		/**
+		 * Access to response body assertions using a
+		 * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expression
+		 * to inspect a specific subset of the body.
+		 * <p>The JSON path expression can be a parameterized string using
+		 * formatting specifiers as defined in {@link String#format}.
+		 * @param expression the JsonPath expression
+		 * @param args arguments to parameterize the expression
+		 */
+		JsonPathAssertions jsonPath(String expression, Object... args);
 
 		/**
 		 * Assert the response body content converted to a String with the given
