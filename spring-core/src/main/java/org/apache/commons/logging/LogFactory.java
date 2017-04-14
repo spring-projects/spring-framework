@@ -17,6 +17,7 @@
 package org.apache.commons.logging;
 
 import java.io.Serializable;
+import java.util.logging.LogRecord;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -28,13 +29,14 @@ import org.slf4j.spi.LocationAwareLogger;
 
 /**
  * A minimal incarnation of Apache Commons Logging's {@code LogFactory} API,
- * providing just the two common static {@link Log} lookup methods.
- * This should be source and binary compatible with all common use of the
- * Commons Logging API (i.e. {@code LogFactory.getLog(Class/String)} setup).
+ * providing just the common {@link Log} lookup methods. This is inspired
+ * by the JCL-over-SLF4J bridge and should be source as well as binary
+ * compatible with all common use of the Commons Logging API (in particular:
+ * with {@code LogFactory.getLog(Class/String)} field initializers).
  *
- * <p>This implementation does not support any of Commons Logging's flexible
- * configuration. It rather only checks for the presence of the Log4J 2.x API
- * and the SLF4J 1.7 API in the framework classpath, falling back to
+ * <p>This implementation does not support Commons Logging's original provider
+ * detection. It rather only checks for the presence of the Log4j 2.x API
+ * and the SLF4J 1.7 API in the Spring Framework classpath, falling back to
  * {@code java.util.logging} if none of the two is available. In that sense,
  * it works as a replacement for the Log4j 2 Commons Logging bridge as well as
  * the JCL-over-SLF4J bridge, both of which become irrelevant for Spring-based
@@ -42,11 +44,18 @@ import org.slf4j.spi.LocationAwareLogger;
  * Commons Logging API jar anymore either). Furthermore, for simple setups
  * without an external logging provider, Spring does not require any extra jar
  * on the classpath anymore since this embedded log factory automatically
- * switches to {@code java.util.logging} in such a scenario.
+ * delegates to {@code java.util.logging} in such a scenario.
  *
  * <p><b>Note that this Commons Logging variant is only meant to be used for
- * framework logging purposes, both in the core framework and in extensions.</b>
- * For applications, prefer direct use of Log4J or SLF4J or {@code java.util.logging}.
+ * infrastructure logging purposes in the core framework and in extensions.</b>
+ * It also serves as a common bridge for third-party libraries using the
+ * Commons Logging API, e.g. Apache HttpClient, Castor and HtmlUnit, bringing
+ * them into the same consistent arrangement without any extra bridge jars.
+ *
+ * <p><b>For logging need in application code, prefer direct use of Log4j 2.x
+ * or SLF4J or {@code java.util.logging}.</b> Simply put Log4j 2.x or Logback
+ * (or another SLF4J provider) onto your classpath, without any extra bridges,
+ * and let the framework auto-adapt to your choice.
  *
  * @author Juergen Hoeller
  * @since 5.0
@@ -58,11 +67,11 @@ public abstract class LogFactory {
 	static {
 		ClassLoader cl = LogFactory.class.getClassLoader();
 		try {
-			// Try Log4J 2.x API
+			// Try Log4j 2.x API
 			cl.loadClass("org.apache.logging.log4j.spi.ExtendedLogger");
 			logApi = LogApi.LOG4J;
 		}
-		catch (ClassNotFoundException ex) {
+		catch (ClassNotFoundException ex1) {
 			try {
 				// Try SLF4J 1.7 SPI
 				cl.loadClass("org.slf4j.spi.LocationAwareLogger");
@@ -103,7 +112,13 @@ public abstract class LogFactory {
 			case SLF4J:
 				return Slf4jDelegate.createLog(name);
 			default:
-				return new JavaUtilLog(name);
+				// Defensively use lazy-initializing delegate class here as well since the
+				// java.logging module is not present by default on JDK 9. We are requiring
+				// its presence if neither Log4j nor SLF4J is available; however, in the
+				// case of Log4j or SLF4J, we are trying to prevent early initialization
+				// of the JavaUtilLog adapter - e.g. by a JVM in debug mode - when eagerly
+				// trying to parse the bytecode for all the cases of this switch clause.
+				return JavaUtilDelegate.createLog(name);
 		}
 	}
 
@@ -167,6 +182,14 @@ public abstract class LogFactory {
 	}
 
 
+	private static class JavaUtilDelegate {
+
+		public static Log createLog(String name) {
+			return new JavaUtilLog(name);
+		}
+	}
+
+
 	@SuppressWarnings("serial")
 	private static class Log4jLog implements Log, Serializable {
 
@@ -182,8 +205,8 @@ public abstract class LogFactory {
 		}
 
 		@Override
-		public boolean isDebugEnabled() {
-			return logger.isEnabled(Level.DEBUG, null, null);
+		public boolean isFatalEnabled() {
+			return logger.isEnabled(Level.FATAL, null, null);
 		}
 
 		@Override
@@ -192,8 +215,8 @@ public abstract class LogFactory {
 		}
 
 		@Override
-		public boolean isFatalEnabled() {
-			return logger.isEnabled(Level.FATAL, null, null);
+		public boolean isWarnEnabled() {
+			return logger.isEnabled(Level.WARN, null, null);
 		}
 
 		@Override
@@ -202,33 +225,13 @@ public abstract class LogFactory {
 		}
 
 		@Override
+		public boolean isDebugEnabled() {
+			return logger.isEnabled(Level.DEBUG, null, null);
+		}
+
+		@Override
 		public boolean isTraceEnabled() {
 			return logger.isEnabled(Level.TRACE, null, null);
-		}
-
-		@Override
-		public boolean isWarnEnabled() {
-			return logger.isEnabled(Level.WARN, null, null);
-		}
-
-		@Override
-		public void debug(Object message) {
-			logger.logIfEnabled(FQCN, Level.DEBUG, null, message, null);
-		}
-
-		@Override
-		public void debug(Object message, Throwable exception) {
-			logger.logIfEnabled(FQCN, Level.DEBUG, null, message, exception);
-		}
-
-		@Override
-		public void error(Object message) {
-			logger.logIfEnabled(FQCN, Level.ERROR, null, message, null);
-		}
-
-		@Override
-		public void error(Object message, Throwable exception) {
-			logger.logIfEnabled(FQCN, Level.ERROR, null, message, exception);
 		}
 
 		@Override
@@ -242,23 +245,13 @@ public abstract class LogFactory {
 		}
 
 		@Override
-		public void info(Object message) {
-			logger.logIfEnabled(FQCN, Level.INFO, null, message, null);
+		public void error(Object message) {
+			logger.logIfEnabled(FQCN, Level.ERROR, null, message, null);
 		}
 
 		@Override
-		public void info(Object message, Throwable exception) {
-			logger.logIfEnabled(FQCN, Level.INFO, null, message, exception);
-		}
-
-		@Override
-		public void trace(Object message) {
-			logger.logIfEnabled(FQCN, Level.TRACE, null, message, null);
-		}
-
-		@Override
-		public void trace(Object message, Throwable exception) {
-			logger.logIfEnabled(FQCN, Level.TRACE, null, message, exception);
+		public void error(Object message, Throwable exception) {
+			logger.logIfEnabled(FQCN, Level.ERROR, null, message, exception);
 		}
 
 		@Override
@@ -269,6 +262,36 @@ public abstract class LogFactory {
 		@Override
 		public void warn(Object message, Throwable exception) {
 			logger.logIfEnabled(FQCN, Level.WARN, null, message, exception);
+		}
+
+		@Override
+		public void info(Object message) {
+			logger.logIfEnabled(FQCN, Level.INFO, null, message, null);
+		}
+
+		@Override
+		public void info(Object message, Throwable exception) {
+			logger.logIfEnabled(FQCN, Level.INFO, null, message, exception);
+		}
+
+		@Override
+		public void debug(Object message) {
+			logger.logIfEnabled(FQCN, Level.DEBUG, null, message, null);
+		}
+
+		@Override
+		public void debug(Object message, Throwable exception) {
+			logger.logIfEnabled(FQCN, Level.DEBUG, null, message, exception);
+		}
+
+		@Override
+		public void trace(Object message) {
+			logger.logIfEnabled(FQCN, Level.TRACE, null, message, null);
+		}
+
+		@Override
+		public void trace(Object message, Throwable exception) {
+			logger.logIfEnabled(FQCN, Level.TRACE, null, message, exception);
 		}
 	}
 
@@ -285,40 +308,36 @@ public abstract class LogFactory {
 			this.logger = logger;
 		}
 
-		public boolean isDebugEnabled() {
-			return this.logger.isDebugEnabled();
+		public boolean isFatalEnabled() {
+			return isErrorEnabled();
 		}
 
 		public boolean isErrorEnabled() {
 			return this.logger.isErrorEnabled();
 		}
 
-		public boolean isFatalEnabled() {
-			return this.logger.isErrorEnabled();
+		public boolean isWarnEnabled() {
+			return this.logger.isWarnEnabled();
 		}
 
 		public boolean isInfoEnabled() {
 			return this.logger.isInfoEnabled();
 		}
 
+		public boolean isDebugEnabled() {
+			return this.logger.isDebugEnabled();
+		}
+
 		public boolean isTraceEnabled() {
 			return this.logger.isTraceEnabled();
 		}
 
-		public boolean isWarnEnabled() {
-			return this.logger.isWarnEnabled();
+		public void fatal(Object message) {
+			error(message);
 		}
 
-		public void debug(Object message) {
-			if (message instanceof String || this.logger.isDebugEnabled()) {
-				this.logger.debug(String.valueOf(message));
-			}
-		}
-
-		public void debug(Object message, Throwable exception) {
-			if (message instanceof String || this.logger.isDebugEnabled()) {
-				this.logger.debug(String.valueOf(message), exception);
-			}
+		public void fatal(Object message, Throwable exception) {
+			error(message, exception);
 		}
 
 		public void error(Object message) {
@@ -333,12 +352,16 @@ public abstract class LogFactory {
 			}
 		}
 
-		public void fatal(Object message) {
-			error(message);
+		public void warn(Object message) {
+			if (message instanceof String || this.logger.isWarnEnabled()) {
+				this.logger.warn(String.valueOf(message));
+			}
 		}
 
-		public void fatal(Object message, Throwable exception) {
-			error(message, exception);
+		public void warn(Object message, Throwable exception) {
+			if (message instanceof String || this.logger.isWarnEnabled()) {
+				this.logger.warn(String.valueOf(message), exception);
+			}
 		}
 
 		public void info(Object message) {
@@ -353,6 +376,18 @@ public abstract class LogFactory {
 			}
 		}
 
+		public void debug(Object message) {
+			if (message instanceof String || this.logger.isDebugEnabled()) {
+				this.logger.debug(String.valueOf(message));
+			}
+		}
+
+		public void debug(Object message, Throwable exception) {
+			if (message instanceof String || this.logger.isDebugEnabled()) {
+				this.logger.debug(String.valueOf(message), exception);
+			}
+		}
+
 		public void trace(Object message) {
 			if (message instanceof String || this.logger.isTraceEnabled()) {
 				this.logger.trace(String.valueOf(message));
@@ -362,18 +397,6 @@ public abstract class LogFactory {
 		public void trace(Object message, Throwable exception) {
 			if (message instanceof String || this.logger.isTraceEnabled()) {
 				this.logger.trace(String.valueOf(message), exception);
-			}
-		}
-
-		public void warn(Object message) {
-			if (message instanceof String || this.logger.isWarnEnabled()) {
-				this.logger.warn(String.valueOf(message));
-			}
-		}
-
-		public void warn(Object message, Throwable exception) {
-			if (message instanceof String || this.logger.isWarnEnabled()) {
-				this.logger.warn(String.valueOf(message), exception);
 			}
 		}
 
@@ -392,16 +415,12 @@ public abstract class LogFactory {
 			super(logger);
 		}
 
-		public void debug(Object message) {
-			if (message instanceof String || this.logger.isDebugEnabled()) {
-				this.logger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, String.valueOf(message), null, null);
-			}
+		public void fatal(Object message) {
+			error(message);
 		}
 
-		public void debug(Object message, Throwable exception) {
-			if (message instanceof String || this.logger.isDebugEnabled()) {
-				this.logger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, String.valueOf(message), null, exception);
-			}
+		public void fatal(Object message, Throwable exception) {
+			error(message, exception);
 		}
 
 		public void error(Object message) {
@@ -416,12 +435,16 @@ public abstract class LogFactory {
 			}
 		}
 
-		public void fatal(Object message) {
-			error(message);
+		public void warn(Object message) {
+			if (message instanceof String || this.logger.isWarnEnabled()) {
+				this.logger.log(null, FQCN, LocationAwareLogger.WARN_INT, String.valueOf(message), null, null);
+			}
 		}
 
-		public void fatal(Object message, Throwable exception) {
-			error(message, exception);
+		public void warn(Object message, Throwable exception) {
+			if (message instanceof String || this.logger.isWarnEnabled()) {
+				this.logger.log(null, FQCN, LocationAwareLogger.WARN_INT, String.valueOf(message), null, exception);
+			}
 		}
 
 		public void info(Object message) {
@@ -436,6 +459,18 @@ public abstract class LogFactory {
 			}
 		}
 
+		public void debug(Object message) {
+			if (message instanceof String || this.logger.isDebugEnabled()) {
+				this.logger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, String.valueOf(message), null, null);
+			}
+		}
+
+		public void debug(Object message, Throwable exception) {
+			if (message instanceof String || this.logger.isDebugEnabled()) {
+				this.logger.log(null, FQCN, LocationAwareLogger.DEBUG_INT, String.valueOf(message), null, exception);
+			}
+		}
+
 		public void trace(Object message) {
 			if (message instanceof String || this.logger.isTraceEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.TRACE_INT, String.valueOf(message), null, null);
@@ -445,18 +480,6 @@ public abstract class LogFactory {
 		public void trace(Object message, Throwable exception) {
 			if (message instanceof String || this.logger.isTraceEnabled()) {
 				this.logger.log(null, FQCN, LocationAwareLogger.TRACE_INT, String.valueOf(message), null, exception);
-			}
-		}
-
-		public void warn(Object message) {
-			if (message instanceof String || this.logger.isWarnEnabled()) {
-				this.logger.log(null, FQCN, LocationAwareLogger.WARN_INT, String.valueOf(message), null, null);
-			}
-		}
-
-		public void warn(Object message, Throwable exception) {
-			if (message instanceof String || this.logger.isWarnEnabled()) {
-				this.logger.log(null, FQCN, LocationAwareLogger.WARN_INT, String.valueOf(message), null, exception);
 			}
 		}
 
@@ -478,44 +501,28 @@ public abstract class LogFactory {
 			this.logger = java.util.logging.Logger.getLogger(name);
 		}
 
-		public boolean isDebugEnabled() {
-			return this.logger.isLoggable(java.util.logging.Level.FINE);
+		public boolean isFatalEnabled() {
+			return isErrorEnabled();
 		}
 
 		public boolean isErrorEnabled() {
 			return this.logger.isLoggable(java.util.logging.Level.SEVERE);
 		}
 
-		public boolean isFatalEnabled() {
-			return this.logger.isLoggable(java.util.logging.Level.SEVERE);
+		public boolean isWarnEnabled() {
+			return this.logger.isLoggable(java.util.logging.Level.WARNING);
 		}
 
 		public boolean isInfoEnabled() {
 			return this.logger.isLoggable(java.util.logging.Level.INFO);
 		}
 
+		public boolean isDebugEnabled() {
+			return this.logger.isLoggable(java.util.logging.Level.FINE);
+		}
+
 		public boolean isTraceEnabled() {
 			return this.logger.isLoggable(java.util.logging.Level.FINEST);
-		}
-
-		public boolean isWarnEnabled() {
-			return this.logger.isLoggable(java.util.logging.Level.WARNING);
-		}
-
-		public void debug(Object message) {
-			log(java.util.logging.Level.FINE, message, null);
-		}
-
-		public void debug(Object message, Throwable exception) {
-			log(java.util.logging.Level.FINE, message, exception);
-		}
-
-		public void error(Object message) {
-			log(java.util.logging.Level.SEVERE, message, null);
-		}
-
-		public void error(Object message, Throwable exception) {
-			log(java.util.logging.Level.SEVERE, message, exception);
 		}
 
 		public void fatal(Object message) {
@@ -526,20 +533,12 @@ public abstract class LogFactory {
 			error(message, exception);
 		}
 
-		public void info(Object message) {
-			log(java.util.logging.Level.INFO, message, null);
+		public void error(Object message) {
+			log(java.util.logging.Level.SEVERE, message, null);
 		}
 
-		public void info(Object message, Throwable exception) {
-			log(java.util.logging.Level.INFO, message, exception);
-		}
-
-		public void trace(Object message) {
-			log(java.util.logging.Level.FINEST, message, null);
-		}
-
-		public void trace(Object message, Throwable exception) {
-			log(java.util.logging.Level.FINEST, message, exception);
+		public void error(Object message, Throwable exception) {
+			log(java.util.logging.Level.SEVERE, message, exception);
 		}
 
 		public void warn(Object message) {
@@ -550,13 +549,43 @@ public abstract class LogFactory {
 			log(java.util.logging.Level.WARNING, message, exception);
 		}
 
+		public void info(Object message) {
+			log(java.util.logging.Level.INFO, message, null);
+		}
+
+		public void info(Object message, Throwable exception) {
+			log(java.util.logging.Level.INFO, message, exception);
+		}
+
+		public void debug(Object message) {
+			log(java.util.logging.Level.FINE, message, null);
+		}
+
+		public void debug(Object message, Throwable exception) {
+			log(java.util.logging.Level.FINE, message, exception);
+		}
+
+		public void trace(Object message) {
+			log(java.util.logging.Level.FINEST, message, null);
+		}
+
+		public void trace(Object message, Throwable exception) {
+			log(java.util.logging.Level.FINEST, message, exception);
+		}
+
 		private void log(java.util.logging.Level level, Object message, Throwable exception) {
 			if (logger.isLoggable(level)) {
-				LocationResolvingLogRecord rec = new LocationResolvingLogRecord(level, String.valueOf(message));
-				rec.setLoggerName(this.name);
-				rec.setResourceBundleName(logger.getResourceBundleName());
-				rec.setResourceBundle(logger.getResourceBundle());
-				rec.setThrown(exception);
+				LogRecord rec;
+				if (message instanceof LogRecord) {
+					rec = (LogRecord) message;
+				}
+				else {
+					rec = new LocationResolvingLogRecord(level, String.valueOf(message));
+					rec.setLoggerName(this.name);
+					rec.setResourceBundleName(logger.getResourceBundleName());
+					rec.setResourceBundle(logger.getResourceBundle());
+					rec.setThrown(exception);
+				}
 				logger.log(rec);
 			}
 		}
@@ -568,7 +597,7 @@ public abstract class LogFactory {
 
 
 	@SuppressWarnings("serial")
-	private static class LocationResolvingLogRecord extends java.util.logging.LogRecord {
+	private static class LocationResolvingLogRecord extends LogRecord {
 
 		private static final String FQCN = JavaUtilLog.class.getName();
 
@@ -622,8 +651,9 @@ public abstract class LogFactory {
 			setSourceMethodName(sourceMethodName);
 		}
 
+		@SuppressWarnings("deprecation")  // setMillis is deprecated in JDK 9
 		protected Object writeReplace() {
-			java.util.logging.LogRecord serialized = new java.util.logging.LogRecord(getLevel(), getMessage());
+			LogRecord serialized = new LogRecord(getLevel(), getMessage());
 			serialized.setLoggerName(getLoggerName());
 			serialized.setResourceBundle(getResourceBundle());
 			serialized.setResourceBundleName(getResourceBundleName());
