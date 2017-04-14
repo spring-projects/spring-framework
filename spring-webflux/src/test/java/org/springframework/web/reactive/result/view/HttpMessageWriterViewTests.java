@@ -67,11 +67,11 @@ public class HttpMessageWriterViewTests {
 	@Test
 	public void singleMatch() throws Exception {
 		this.view.setModelKeys(Collections.singleton("foo2"));
-		this.model.addAttribute("foo1", "bar1");
-		this.model.addAttribute("foo2", "bar2");
-		this.model.addAttribute("foo3", "bar3");
+		this.model.addAttribute("foo1", Collections.singleton("bar1"));
+		this.model.addAttribute("foo2", Collections.singleton("bar2"));
+		this.model.addAttribute("foo3", Collections.singleton("bar3"));
 
-		assertEquals("\"bar2\"", doRender());
+		assertEquals("[\"bar2\"]", doRender());
 	}
 
 	@Test
@@ -94,11 +94,11 @@ public class HttpMessageWriterViewTests {
 	@Test
 	public void multipleMatches() throws Exception {
 		this.view.setModelKeys(new HashSet<>(Arrays.asList("foo1", "foo2")));
-		this.model.addAttribute("foo1", "bar1");
-		this.model.addAttribute("foo2", "bar2");
-		this.model.addAttribute("foo3", "bar3");
+		this.model.addAttribute("foo1", Collections.singleton("bar1"));
+		this.model.addAttribute("foo2", Collections.singleton("bar2"));
+		this.model.addAttribute("foo3", Collections.singleton("bar3"));
 
-		assertEquals("{\"foo1\":\"bar1\",\"foo2\":\"bar2\"}", doRender());
+		assertEquals("{\"foo1\":[\"bar1\"],\"foo2\":[\"bar2\"]}", doRender());
 	}
 
 	@Test

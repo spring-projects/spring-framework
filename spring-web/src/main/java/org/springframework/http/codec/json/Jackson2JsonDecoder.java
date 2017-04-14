@@ -69,7 +69,7 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 	@Override
 	public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
 		JavaType javaType = this.objectMapper.getTypeFactory().constructType(elementType.getType());
-		// Skip String (CharSequenceDecoder + "*/*" comes after)
+		// Skip String: CharSequenceDecoder + "*/*" comes after
 		return (!CharSequence.class.isAssignableFrom(elementType.resolve(Object.class)) &&
 				this.objectMapper.canDeserialize(javaType) && supportsMimeType(mimeType));
 	}

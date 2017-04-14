@@ -15,17 +15,22 @@
  */
 package org.springframework.test.web.reactive.server.samples;
 
+import java.net.URI;
+
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Sample tests asserting JSON response content.
+ * Samples of tests with serialized JSON content.
  *
  * @author Rossen Stoyanchev
  */
@@ -55,6 +60,16 @@ public class JsonContentTests {
 				.jsonPath("$[2].name").isEqualTo("John");
 	}
 
+	@Test
+	public void postJsonContent() throws Exception {
+		this.client.post().uri("/persons")
+				.contentType(MediaType.APPLICATION_JSON_UTF8)
+				.body("{\"name\":\"John\"}")
+				.exchange()
+				.expectStatus().isCreated()
+				.expectBody().isEmpty();
+	}
+
 
 	@RestController
 	@SuppressWarnings("unused")
@@ -63,6 +78,11 @@ public class JsonContentTests {
 		@GetMapping("/persons")
 		Flux<Person> getPersons() {
 			return Flux.just(new Person("Jane"), new Person("Jason"), new Person("John"));
+		}
+
+		@PostMapping
+		ResponseEntity<String> savePerson(@RequestBody Person person) {
+			return ResponseEntity.created(URI.create("/persons/" + person.getName())).build();
 		}
 	}
 
