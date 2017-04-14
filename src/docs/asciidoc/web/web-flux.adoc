@@ -283,19 +283,17 @@ in the framework.
 === Spring Boot Starter
 
 The
-https://github.com/bclozel/spring-boot-web-reactive#spring-boot-web-reactive-starter[Spring Boot Web Reactive starter]
-available via http://start.spring.io is the fastest way to get started.
+Spring Boot WebFlux starter available via http://start.spring.io is the fastest way to get started.
 It does all that's necessary so you to start writing `@Controller` classes
 just like with Spring MVC. Simply go to http://start.spring.io, choose
 version 2.0.0.BUILD-SNAPSHOT, and type reactive in the dependencies box.
-By default the starter runs with Tomcat but the dependencies can be changed as usual with Spring Boot to switch to a different runtime.
-See the
-https://github.com/bclozel/spring-boot-web-reactive#spring-boot-web-reactive-starter[starter]
-page for more details and instruction
+By default the starter runs with Reactor Netty but the dependencies can be changed as usual
+with Spring Boot to switch to a different runtime.
+See the Spring Boot reference documentation page for more details and instruction.
 
 This starter also supports the functional web API and will detect automatically `RouterFunction`
 beans. Your Spring Boot WebFlux application should use the `RouterFunction` *or* the
-`RequestMapping` approach, it is currently not possible to mix them in the same application.
+`RequestMapping` approach, it is not possible to mix them in the same application.
 
 [[web-reactive-getting-started-manual]]
 === Manual Bootstrapping
@@ -376,7 +374,6 @@ Spring configuration.
 
 You will find code examples useful to build reactive Web application in the following projects:
 
-* https://github.com/bclozel/spring-boot-web-reactive[Spring Boot Web Reactive Starter]: sources of the reactive starter available at http://start.spring.io
 * https://github.com/poutsma/web-function-sample[Functional programming model sample]
 * https://github.com/sdeleuze/spring-reactive-playground[Spring Reactive Playground]: playground for most Spring Web reactive features
 * https://github.com/reactor/projectreactor.io/tree/spring-functional[Reactor website]: the `spring-functional` branch is a Spring 5 functional, Java 8 lambda-style application
