@@ -120,13 +120,13 @@ class DefaultServerRequest implements ServerRequest {
 	@Override
 	public <T> Mono<T> bodyToMono(Class<? extends T> elementClass) {
 		Mono<T> mono = body(BodyExtractors.toMono(elementClass));
-		return mono.mapError(UnsupportedMediaTypeException.class, ERROR_MAPPER);
+		return mono.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER);
 	}
 
 	@Override
 	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
 		Flux<T> flux = body(BodyExtractors.toFlux(elementClass));
-		return flux.mapError(UnsupportedMediaTypeException.class, ERROR_MAPPER);
+		return flux.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER);
 	}
 
 	@Override

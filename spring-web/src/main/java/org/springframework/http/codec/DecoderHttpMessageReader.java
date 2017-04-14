@@ -90,7 +90,7 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 		MediaType contentType = getContentType(message);
 		return this.decoder
 				.decode(message.getBody(), elementType, contentType, hints)
-				.mapError(this::mapError);
+				.onErrorMap(this::mapError);
 	}
 
 	@Override
@@ -100,7 +100,7 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 		MediaType contentType = getContentType(message);
 		return this.decoder
 				.decodeToMono(message.getBody(), elementType, contentType, hints)
-				.mapError(this::mapError);
+				.onErrorMap(this::mapError);
 	}
 
 	private MediaType getContentType(HttpMessage inputMessage) {

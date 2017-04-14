@@ -141,7 +141,7 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
 	private Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 		return getResultHandler(result).handleResult(exchange, result)
-				.switchOnError(ex -> result.applyExceptionHandler(ex).flatMap(exceptionResult ->
+				.onErrorResume(ex -> result.applyExceptionHandler(ex).flatMap(exceptionResult ->
 						getResultHandler(exceptionResult).handleResult(exchange, exceptionResult)));
 	}
 

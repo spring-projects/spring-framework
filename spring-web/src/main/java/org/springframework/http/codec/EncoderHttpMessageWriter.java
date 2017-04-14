@@ -99,7 +99,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 		Flux<DataBuffer> body = this.encoder
 				.encode(inputStream, message.bufferFactory(), elementType, contentType, hints)
-				.mapError(this::mapError);
+				.onErrorMap(this::mapError);
 
 		return isStreamingMediaType(contentType) ?
 				message.writeAndFlushWith(body.map(Flux::just)) :

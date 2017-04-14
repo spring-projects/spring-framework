@@ -189,7 +189,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 				.then(() -> this.methodResolver.getRequestMappingMethod(handlerMethod)
 						.invoke(exchange, bindingContext)
 						.doOnNext(result -> result.setExceptionHandler(exceptionHandler))
-						.switchOnError(exceptionHandler));
+						.onErrorResume(exceptionHandler));
 	}
 
 	private Mono<HandlerResult> handleException(Throwable ex, HandlerMethod handlerMethod,
