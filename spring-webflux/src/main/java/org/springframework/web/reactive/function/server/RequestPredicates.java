@@ -42,6 +42,7 @@ import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.patterns.PathPattern;
 import org.springframework.web.util.patterns.PathPatternParser;
+import org.springframework.web.util.patterns.PathRemainingMatchInfo;
 
 /**
  * Implementations of {@link RequestPredicate} that implement various useful
@@ -353,7 +354,8 @@ public abstract class RequestPredicates {
 
 		@Override
 		public Optional<ServerRequest> nest(ServerRequest request) {
-			String remainingPath = this.pattern.getPathRemaining(request.path());
+			PathRemainingMatchInfo info = this.pattern.getPathRemaining(request.path());
+			String remainingPath = (info == null ? null : info.getPathRemaining());
 			return Optional.ofNullable(remainingPath)
 					.map(path -> !path.startsWith("/") ? "/" + path : path)
 					.map(path -> {

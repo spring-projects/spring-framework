@@ -151,35 +151,37 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * For a given path return the remaining piece that is not covered by this PathPattern.
 	 * 
 	 * @param path a path that may or may not match this path pattern
-	 * @return the remaining path after as much has been consumed as possible by this pattern, 
-	 * result can be the empty string if the path is entirely consumed or it will be null
-	 * if the path does not match
+	 * @return a {@link PathRemainingMatchInfo} describing the match result or null if the path does not match
+	 * this pattern
 	 */
-	public String getPathRemaining(String path) {
+	public PathRemainingMatchInfo getPathRemaining(String path) {
 		if (head == null) {
 			if (path == null) {
-				return path;
+				return new PathRemainingMatchInfo(path);
 			}
 			else {
-				return hasLength(path)?path:"";				
+				return new PathRemainingMatchInfo(hasLength(path)?path:"");
 			}
 		}
 		else if (!hasLength(path)) {
 			return null;
 		}
-		MatchingContext matchingContext = new MatchingContext(path, false);
+		MatchingContext matchingContext = new MatchingContext(path, true);
 		matchingContext.setMatchAllowExtraPath();
 		boolean matches = head.matches(0, matchingContext);
 		if (!matches) {
 			return null;
 		}
 		else {
+			PathRemainingMatchInfo info;
 			if (matchingContext.remainingPathIndex == path.length()) {
-				return "";
+				info = new PathRemainingMatchInfo("", matchingContext.getExtractedVariables());
 			}
 			else {
-				return path.substring(matchingContext.remainingPathIndex);
+				info = new PathRemainingMatchInfo(path.substring(matchingContext.remainingPathIndex),
+						 matchingContext.getExtractedVariables());
 			}
+			return info;
 		}
 	}
 
@@ -200,8 +202,9 @@ public class PathPattern implements Comparable<PathPattern> {
 	}
 
 	/**
-	 * @param path a path to match against this pattern
+	 * @param path a path that matches this pattern from which to extract variables
 	 * @return a map of extracted variables - an empty map if no variables extracted. 
+	 * @throws IllegalStateException if the path does not match the pattern
 	 */
 	public Map<String, String> matchAndExtract(String path) {
 		MatchingContext matchingContext = new MatchingContext(path, true);
