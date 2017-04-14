@@ -38,7 +38,8 @@ import org.springframework.util.Assert;
 
 /**
  * Adapt {@link ServerHttpResponse} to the RxNetty {@link HttpServerResponse}.
- *
+ * For internal use within the framework.
+ * 
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
  * @author Sebastien Deleuze

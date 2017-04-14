@@ -46,7 +46,7 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  *
  * <p>Additionally, this class can {@linkplain #toHttpHandler(RouterFunction) transform} a
  * {@code RouterFunction} into an {@code HttpHandler}, which can be run in Servlet 3.1+,
- * Reactor, RxNetty, or Undertow.
+ * Reactor, or Undertow.
  * And it can {@linkplain #toHandlerMapping(RouterFunction, HandlerStrategies) transform} a
  * {@code RouterFunction} into an {@code HandlerMapping}, which can be run in a
  * {@code DispatcherHandler}.
@@ -188,8 +188,6 @@ public abstract class RouterFunctions {
 	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter},</li>
 	 * <li>Reactor using the
 	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter},</li>
-	 * <li>RxNetty using the
-	 * {@link org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter}, or </li>
 	 * <li>Undertow using the
 	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}.</li>
 	 * </ul>
@@ -212,8 +210,6 @@ public abstract class RouterFunctions {
 	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter},</li>
 	 * <li>Reactor using the
 	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter},</li>
-	 * <li>RxNetty using the
-	 * {@link org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter}, or </li>
 	 * <li>Undertow using the
 	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}.</li>
 	 * </ul>

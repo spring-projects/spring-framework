@@ -39,6 +39,7 @@ import org.springframework.util.MultiValueMap;
 
 /**
  * Adapt {@link ServerHttpRequest} to the RxNetty {@link HttpServerRequest}.
+ * For internal use within the framework.
  *
  * @author Rossen Stoyanchev
  * @author Stephane Maldini

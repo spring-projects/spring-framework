@@ -67,10 +67,6 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 			"reactor.ipc.netty.http.server.HttpServerResponse",
 			HandshakeWebSocketService.class.getClassLoader());
 
-	private static final boolean rxNettyPresent = ClassUtils.isPresent(
-			"io.reactivex.netty.protocol.http.server.HttpServerResponse",
-			HandshakeWebSocketService.class.getClassLoader());
-
 	private static final boolean undertowPresent = ClassUtils.isPresent(
 			"io.undertow.websockets.WebSocketProtocolHandshakeHandler",
 			HandshakeWebSocketService.class.getClassLoader());
@@ -111,9 +107,6 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		}
 		else if (reactorNettyPresent) {
 			className = "ReactorNettyRequestUpgradeStrategy";
-		}
-		else if (rxNettyPresent) {
-			className = "RxNettyRequestUpgradeStrategy";
 		}
 		else if (undertowPresent) {
 			className = "UndertowRequestUpgradeStrategy";

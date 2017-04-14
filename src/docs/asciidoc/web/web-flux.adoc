@@ -223,7 +223,7 @@ default as following:
 
 WebFlux includes reactive WebSocket client and server support.
 Both client and server are supported on the Java WebSocket API
-(JSR-356), Jetty, Undertow, Reactor Netty, and RxNetty.
+(JSR-356), Jetty, Undertow, and Reactor Netty.
 
 On the server side, declare a `WebSocketHandlerAdapter` and then simply add
 mappings to `WebSocketHandler`-based endpoints:
@@ -310,7 +310,6 @@ Lastly add the dependencies for one of the supported runtimes:
 * Tomcat -- `org.apache.tomcat.embed:tomcat-embed-core`
 * Jetty -- `org.eclipse.jetty:jetty-server` and `org.eclipse.jetty:jetty-servlet`
 * Reactor Netty -- `io.projectreactor.ipc:reactor-netty`
-* RxNetty -- `io.reactivex:rxnetty-common` and `io.reactivex:rxnetty-http`
 * Undertow -- `io.undertow:undertow-core`
 
 For the **annotation-based programming model** bootstrap with:
@@ -355,11 +354,6 @@ HttpServlet servlet = new ServletHttpHandlerAdapter(handler);
 // Reactor Netty
 ReactorHttpHandlerAdapter adapter = new ReactorHttpHandlerAdapter(handler);
 HttpServer.create(host, port).newHandler(adapter).block();
-
-// RxNetty
-RxNettyHttpHandlerAdapter adapter = new RxNettyHttpHandlerAdapter(handler);
-HttpServer server = HttpServer.newServer(new InetSocketAddress(host, port));
-server.startAndAwait(adapter);
 
 // Undertow
 UndertowHttpHandlerAdapter adapter = new UndertowHttpHandlerAdapter(handler);

@@ -712,9 +712,6 @@ project("spring-web") {
 		optional("org.reactivestreams:reactive-streams")
 		optional("io.projectreactor:reactor-core")
 		optional("io.projectreactor.ipc:reactor-netty")
-		optional("io.reactivex:rxnetty-http:${rxnettyVersion}") {
-			exclude group: 'io.reactivex', module: 'rxjava'
-		}
 		optional("io.reactivex:rxjava:${rxjavaVersion}")
 		optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
 		optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
@@ -766,6 +763,9 @@ project("spring-web") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
 		testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
+		testCompile("io.reactivex:rxnetty-http:${rxnettyVersion}") {
+			exclude group: 'io.reactivex', module: 'rxjava'
+		}
 		testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
@@ -800,9 +800,6 @@ project("spring-webflux") {
 		}
 		optional('org.webjars:webjars-locator:0.32-1')
 		optional("io.projectreactor.ipc:reactor-netty")
-		optional("io.reactivex:rxnetty-http:${rxnettyVersion}") {
-			exclude group: 'io.reactivex', module: 'rxjava'
-		}
 		optional("io.reactivex:rxjava:${rxjavaVersion}")
 		optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
 		optional("javax.websocket:javax.websocket-api:${websocketVersion}")
@@ -828,6 +825,9 @@ project("spring-webflux") {
 		testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 		testCompile("io.undertow:undertow-core:${undertowVersion}")
 		testCompile("org.jboss.xnio:xnio-api:${xnioVersion}")
+		testCompile("io.reactivex:rxnetty-http:${rxnettyVersion}") {
+			exclude group: 'io.reactivex', module: 'rxjava'
+		}
 		testCompile("com.fasterxml:aalto-xml:1.0.0")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")

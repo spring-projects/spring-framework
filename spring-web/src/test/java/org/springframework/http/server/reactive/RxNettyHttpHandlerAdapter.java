@@ -36,6 +36,7 @@ import rx.RxReactiveStreams;
 
 /**
  * Adapt {@link HttpHandler} to the RxNetty {@link RequestHandler}.
+ * For internal use within the framework.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
