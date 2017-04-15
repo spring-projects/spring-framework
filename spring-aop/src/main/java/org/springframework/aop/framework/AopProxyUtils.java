@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,25 @@ import org.springframework.util.ObjectUtils;
 public abstract class AopProxyUtils {
 
 	/**
+	 * Obtain the singleton target object behind the given proxy, if any.
+	 * @param candidate the (potential) proxy to check
+	 * @return the singleton target object managed in a {@link SingletonTargetSource},
+	 * or {@code null} in any other case (not a proxy, not an existing singleton target)
+	 * @since 4.3.8
+	 * @see Advised#getTargetSource()
+	 * @see SingletonTargetSource#getTarget()
+	 */
+	public static Object getSingletonTarget(Object candidate) {
+		if (candidate instanceof Advised) {
+			TargetSource targetSource = ((Advised) candidate).getTargetSource();
+			if (targetSource instanceof SingletonTargetSource) {
+				return ((SingletonTargetSource) targetSource).getTarget();
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Determine the ultimate target class of the given bean instance, traversing
 	 * not only a top-level proxy but any number of nested proxies as well &mdash;
 	 * as long as possible without side effects, that is, just for singleton targets.
@@ -59,14 +78,7 @@ public abstract class AopProxyUtils {
 		Class<?> result = null;
 		while (current instanceof TargetClassAware) {
 			result = ((TargetClassAware) current).getTargetClass();
-			Object nested = null;
-			if (current instanceof Advised) {
-				TargetSource targetSource = ((Advised) current).getTargetSource();
-				if (targetSource instanceof SingletonTargetSource) {
-					nested = ((SingletonTargetSource) targetSource).getTarget();
-				}
-			}
-			current = nested;
+			current = getSingletonTarget(current);
 		}
 		if (result == null) {
 			result = (AopUtils.isCglibProxy(candidate) ? candidate.getClass().getSuperclass() : candidate.getClass());
