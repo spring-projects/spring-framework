@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -99,6 +100,12 @@ public abstract class AbstractApplicationEventMulticaster
 	@Override
 	public void addApplicationListener(ApplicationListener<?> listener) {
 		synchronized (this.retrievalMutex) {
+			// Explicitly remove target for a proxy, if registered already,
+			// in order to avoid double invocations of the same listener.
+			Object singletonTarget = AopProxyUtils.getSingletonTarget(listener);
+			if (singletonTarget instanceof ApplicationListener) {
+				this.defaultRetriever.applicationListeners.remove(singletonTarget);
+			}
 			this.defaultRetriever.applicationListeners.add(listener);
 			this.retrieverCache.clear();
 		}
