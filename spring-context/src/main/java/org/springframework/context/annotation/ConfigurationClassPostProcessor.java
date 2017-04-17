@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -287,11 +287,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		});
 
 		// Detect any custom bean name generation strategy supplied through the enclosing application context
-		SingletonBeanRegistry singletonRegistry = null;
+		SingletonBeanRegistry sbr = null;
 		if (registry instanceof SingletonBeanRegistry) {
-			singletonRegistry = (SingletonBeanRegistry) registry;
-			if (!this.localBeanNameGeneratorSet && singletonRegistry.containsSingleton(CONFIGURATION_BEAN_NAME_GENERATOR)) {
-				BeanNameGenerator generator = (BeanNameGenerator) singletonRegistry.getSingleton(CONFIGURATION_BEAN_NAME_GENERATOR);
+			sbr = (SingletonBeanRegistry) registry;
+			if (!this.localBeanNameGeneratorSet && sbr.containsSingleton(CONFIGURATION_BEAN_NAME_GENERATOR)) {
+				BeanNameGenerator generator = (BeanNameGenerator) sbr.getSingleton(CONFIGURATION_BEAN_NAME_GENERATOR);
 				this.componentScanBeanNameGenerator = generator;
 				this.importBeanNameGenerator = generator;
 			}
@@ -330,10 +330,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				}
 				for (String candidateName : newCandidateNames) {
 					if (!oldCandidateNames.contains(candidateName)) {
-						BeanDefinition beanDef = registry.getBeanDefinition(candidateName);
-						if (ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory) &&
-								!alreadyParsedClasses.contains(beanDef.getBeanClassName())) {
-							candidates.add(new BeanDefinitionHolder(beanDef, candidateName));
+						BeanDefinition bd = registry.getBeanDefinition(candidateName);
+						if (ConfigurationClassUtils.checkConfigurationClassCandidate(bd, this.metadataReaderFactory) &&
+								!alreadyParsedClasses.contains(bd.getBeanClassName())) {
+							candidates.add(new BeanDefinitionHolder(bd, candidateName));
 						}
 					}
 				}
@@ -343,9 +343,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		while (!candidates.isEmpty());
 
 		// Register the ImportRegistry as a bean in order to support ImportAware @Configuration classes
-		if (singletonRegistry != null) {
-			if (!singletonRegistry.containsSingleton(IMPORT_REGISTRY_BEAN_NAME)) {
-				singletonRegistry.registerSingleton(IMPORT_REGISTRY_BEAN_NAME, parser.getImportRegistry());
+		if (sbr != null) {
+			if (!sbr.containsSingleton(IMPORT_REGISTRY_BEAN_NAME)) {
+				sbr.registerSingleton(IMPORT_REGISTRY_BEAN_NAME, parser.getImportRegistry());
 			}
 		}
 
@@ -417,7 +417,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		@Override
-		public PropertyValues postProcessPropertyValues(PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
+		public PropertyValues postProcessPropertyValues(
+				PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
+
 			// Inject the BeanFactory before AutowiredAnnotationBeanPostProcessor's
 			// postProcessPropertyValues method attempts to autowire other configuration beans.
 			if (bean instanceof EnhancedConfiguration) {
@@ -429,8 +431,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName)  {
 			if (bean instanceof ImportAware) {
-				ImportRegistry importRegistry = this.beanFactory.getBean(IMPORT_REGISTRY_BEAN_NAME, ImportRegistry.class);
-				AnnotationMetadata importingClass = importRegistry.getImportingClassFor(bean.getClass().getSuperclass().getName());
+				ImportRegistry ir = this.beanFactory.getBean(IMPORT_REGISTRY_BEAN_NAME, ImportRegistry.class);
+				AnnotationMetadata importingClass = ir.getImportingClassFor(bean.getClass().getSuperclass().getName());
 				if (importingClass != null) {
 					((ImportAware) bean).setImportMetadata(importingClass);
 				}

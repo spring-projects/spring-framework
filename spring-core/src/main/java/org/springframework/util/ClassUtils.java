@@ -1053,10 +1053,10 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Return all interfaces that the given instance implements as array,
+	 * Return all interfaces that the given instance implements as an array,
 	 * including ones implemented by superclasses.
 	 * @param instance the instance to analyze for interfaces
-	 * @return all interfaces that the given instance implements as array
+	 * @return all interfaces that the given instance implements as an array
 	 */
 	public static Class<?>[] getAllInterfaces(Object instance) {
 		Assert.notNull(instance, "Instance must not be null");
@@ -1064,24 +1064,24 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Return all interfaces that the given class implements as array,
+	 * Return all interfaces that the given class implements as an array,
 	 * including ones implemented by superclasses.
 	 * <p>If the class itself is an interface, it gets returned as sole interface.
 	 * @param clazz the class to analyze for interfaces
-	 * @return all interfaces that the given object implements as array
+	 * @return all interfaces that the given object implements as an array
 	 */
 	public static Class<?>[] getAllInterfacesForClass(Class<?> clazz) {
 		return getAllInterfacesForClass(clazz, null);
 	}
 
 	/**
-	 * Return all interfaces that the given class implements as array,
+	 * Return all interfaces that the given class implements as an array,
 	 * including ones implemented by superclasses.
 	 * <p>If the class itself is an interface, it gets returned as sole interface.
 	 * @param clazz the class to analyze for interfaces
 	 * @param classLoader the ClassLoader that the interfaces need to be visible in
 	 * (may be {@code null} when accepting all declared interfaces)
-	 * @return all interfaces that the given object implements as array
+	 * @return all interfaces that the given object implements as an array
 	 */
 	public static Class<?>[] getAllInterfacesForClass(Class<?> clazz, ClassLoader classLoader) {
 		Set<Class<?>> ifcs = getAllInterfacesForClassAsSet(clazz, classLoader);
@@ -1089,10 +1089,10 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Return all interfaces that the given instance implements as Set,
+	 * Return all interfaces that the given instance implements as a Set,
 	 * including ones implemented by superclasses.
 	 * @param instance the instance to analyze for interfaces
-	 * @return all interfaces that the given instance implements as Set
+	 * @return all interfaces that the given instance implements as a Set
 	 */
 	public static Set<Class<?>> getAllInterfacesAsSet(Object instance) {
 		Assert.notNull(instance, "Instance must not be null");
@@ -1100,24 +1100,24 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Return all interfaces that the given class implements as Set,
+	 * Return all interfaces that the given class implements as a Set,
 	 * including ones implemented by superclasses.
 	 * <p>If the class itself is an interface, it gets returned as sole interface.
 	 * @param clazz the class to analyze for interfaces
-	 * @return all interfaces that the given object implements as Set
+	 * @return all interfaces that the given object implements as a Set
 	 */
 	public static Set<Class<?>> getAllInterfacesForClassAsSet(Class<?> clazz) {
 		return getAllInterfacesForClassAsSet(clazz, null);
 	}
 
 	/**
-	 * Return all interfaces that the given class implements as Set,
+	 * Return all interfaces that the given class implements as a Set,
 	 * including ones implemented by superclasses.
 	 * <p>If the class itself is an interface, it gets returned as sole interface.
 	 * @param clazz the class to analyze for interfaces
 	 * @param classLoader the ClassLoader that the interfaces need to be visible in
 	 * (may be {@code null} when accepting all declared interfaces)
-	 * @return all interfaces that the given object implements as Set
+	 * @return all interfaces that the given object implements as a Set
 	 */
 	public static Set<Class<?>> getAllInterfacesForClassAsSet(Class<?> clazz, ClassLoader classLoader) {
 		Assert.notNull(clazz, "Class must not be null");
