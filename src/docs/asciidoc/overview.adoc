@@ -7,6 +7,8 @@
 ifdef::backend-pdf[:source-highlighter: rouge]
 
 
+
+
 [[overview-getting-started-with-spring]]
 == Getting Started with Spring
 This reference guide provides detailed information about the Spring Framework.
@@ -47,7 +49,6 @@ Examples of how you, as an application developer, can benefit from the Spring pl
 
 
 
-
 [[overview-dependency-injection]]
 === Dependency Injection and Inversion of Control
 
@@ -85,9 +86,8 @@ Injection__.
 
 
 
-
 [[overview-modules]]
-=== Modules
+=== Framework Modules
 The Spring Framework consists of features organized into about 20 modules. These modules
 are grouped into Core Container, Data Access/Integration, Web, AOP (Aspect Oriented
 Programming), Instrumentation, Messaging, and Test, as shown in the following diagram.
@@ -264,7 +264,6 @@ stateless session beans for use in scalable, fail-safe web applications that mig
 declarative security.
 
 
-
 [[dependency-management]]
 ==== Dependency Management and Naming Conventions
 Dependency management and dependency injection are different things. To get those nice
@@ -307,9 +306,8 @@ So the first thing you need to decide is how to manage your dependencies: we gen
 recommend the use of an automated system like Maven, Gradle or Ivy, but you can also do
 it manually by downloading all the jars yourself.
 
-You will find bellow the list of Spring artifacts. For a more complete description of each
-modules, see <<overview-modules>>.
-
+Below you will find the list of Spring artifacts. For a more complete description of
+each module, see <<overview-modules>>.
 
 .Spring Framework Artifacts
 |===
@@ -357,7 +355,7 @@ modules, see <<overview-modules>>.
 
 |org.springframework
 |spring-jms
-|JMS support package, including helper classes to send and receive JMS messages
+|JMS support package, including helper classes to send/receive JMS messages
 
 |org.springframework
 |spring-messaging
@@ -381,18 +379,16 @@ modules, see <<overview-modules>>.
 
 |org.springframework
 |spring-web
-|Web support packages, including client and web remoting
+|Foundational web support, including web client and web-based remoting
 
 |org.springframework
 |spring-webmvc
-|REST Web Services and model-view-controller implementation for web applications
+|HTTP-based Model-View-Controller and REST endpoints for Servlet stacks
 
 |org.springframework
 |spring-websocket
-|WebSocket and SockJS implementations, including STOMP support
+|WebSocket and SockJS infrastructure, including STOMP messaging support
 |===
-
-
 
 [[overview-spring-dependencies]]
 ===== Spring Dependencies and Depending on Spring
@@ -408,7 +404,6 @@ Spring, first with Maven and then with Gradle and finally using Ivy. In all case
 anything is unclear, refer to the documentation of your dependency management system, or
 look at some sample code - Spring itself uses Gradle to manage dependencies when it is
 building, and our samples mostly use Gradle or Maven.
-
 
 [[overview-maven-dependency-management]]
 ===== Maven Dependency Management
@@ -478,7 +473,6 @@ And for snapshots:
 	</repositories>
 ----
 
-
 [[overview-maven-bom]]
 ===== Maven "Bill Of Materials" Dependency =====
 It is possible to accidentally mix different versions of Spring JARs when using Maven.
@@ -525,7 +519,6 @@ attribute when depending on Spring Framework artifacts:
 	<dependencies>
 ----
 
-
 [[overview-gradle-dependency-management]]
 ===== Gradle Dependency Management
 To use the Spring repository with the http://www.gradle.org/[Gradle] build system,
@@ -553,7 +546,6 @@ usual Gradle way:
 		testCompile("org.springframework:spring-test:{spring-version}")
 	}
 ----
-
 
 [[overview-ivy-dependency-management]]
 ===== Ivy Dependency Management
@@ -585,7 +577,6 @@ Once configured, you can add dependencies in the usual way. For example (in `ivy
 		name="spring-core" rev="{spring-version}" conf="compile->runtime"/>
 ----
 
-
 [[overview-distribution-zip]]
 ===== Distribution Zip Files
 Although using a build system that supports dependency management is the recommended
@@ -601,7 +592,6 @@ subfolder for the version that you want. Distribution files end `-dist.zip`, for
 +spring-framework-{spring-version}-RELEASE-dist.zip+. Distributions are also published
 for http://repo.spring.io/milestone/org/springframework/spring[milestones] and
 http://repo.spring.io/snapshot/org/springframework/spring[snapshots].
-
 
 
 [[overview-logging]]
@@ -638,11 +628,10 @@ Apache HttpClient, Castor, HtmlUnit) in order to pick up Spring's JCL bridge ins
 
 A custom `LogFactory` implementation at the Commons Logging level will NOT get picked
 up since Spring's bridge does not support custom `commons-logging.properties' setup.
-For any other log provider, please set up corresponding SLF4J or JUL bridges (which
+For any other log provider, please set up a corresponding SLF4J or JUL bridge (which
 you are very likely going to need for other libraries such as Hibernate anyway).
 Note that Log4j 1.x has reached its end-of-life; please migrate to Log4j 2.x.
 ====
-
 
 [[overview-logging-log4j]]
 ===== Using Log4j 2.x
@@ -704,7 +693,6 @@ Here is an example `log4j2.xml` for logging to the console:
 	</Configuration>
 ----
 
-
 [[overview-logging-slf4j]]
 ===== Using SLF4J with Logback
 
@@ -732,12 +720,11 @@ matters that they eventually delegate to the same log provider. So while Spring 
 go to Log4j directly, other libraries may go through the SLF4J binding for Log4j,
 or analogously for JUL.
 
-
 [[overview-logging-jul]]
 ===== Using JUL (java.util.logging)
 
 Spring will delegate to `java.util.logging` by default, provided that no Log4j or
-SLF4J API is detected in the classpath. So there is no special dependency to set up:
+SLF4J API is detected on the classpath. So there is no special dependency to set up:
 just use Spring with no external dependency for log output to `java.util.logging`,
 either in a standalone application (with a custom or default JUL setup at the JDK
 level) or with an application server's log system (and its system-wide JUL setup).
@@ -746,7 +733,6 @@ Note that the `java.logging` module is NOT present by default on JDK 9, since it
 not included in `java.base`. This works fine when using Spring with Log4j or SLF4J
 since the JUL API is not referenced in such a scenario. However, when choosing to
 use JUL as a default log provider, remember to activate the `java.logging` module.
-
 
 [[overview-logging-websphere]]
 ===== Commons Logging on WebSphere
