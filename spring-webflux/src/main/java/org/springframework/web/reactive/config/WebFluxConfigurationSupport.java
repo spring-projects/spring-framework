@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.config;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +49,7 @@ import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.reactive.result.SimpleHandlerAdapter;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
@@ -70,6 +69,13 @@ import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
  * @since 5.0
  */
 public class WebFluxConfigurationSupport implements ApplicationContextAware {
+
+	static final boolean jackson2Present =
+			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
+					WebFluxConfigurationSupport.class.getClassLoader()) &&
+					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
+							WebFluxConfigurationSupport.class.getClassLoader());
+
 
 	private Map<String, CorsConfiguration> corsConfigurations;
 
@@ -149,7 +155,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 */
 	protected Map<String, MediaType> getDefaultMediaTypeMappings() {
 		Map<String, MediaType> map = new HashMap<>();
-		if (ServerCodecConfigurer.jackson2Present) {
+		if (jackson2Present) {
 			map.put("json", MediaType.APPLICATION_JSON);
 		}
 		return map;
@@ -236,15 +242,13 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	@Bean
 	public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
 		RequestMappingHandlerAdapter adapter = createRequestMappingHandlerAdapter();
-		adapter.setMessageReaders(getMessageCodecsConfigurer().getReaders());
+		adapter.setMessageCodecConfigurer(getMessageCodecsConfigurer());
 		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
 		adapter.setReactiveAdapterRegistry(webFluxAdapterRegistry());
 
-		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
-		addArgumentResolvers(resolvers);
-		if (!resolvers.isEmpty()) {
-			adapter.setCustomArgumentResolvers(resolvers);
-		}
+		ArgumentResolverConfigurer configurer = new ArgumentResolverConfigurer();
+		configureArgumentResolvers(configurer);
+		adapter.setArgumentResolverConfigurer(configurer);
 
 		return adapter;
 	}
@@ -257,9 +261,9 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	/**
-	 * Provide custom argument resolvers without overriding the built-in ones.
+	 * Configure resolvers for custom controller method arguments.
 	 */
-	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+	protected void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
 	}
 
 	/**
@@ -269,7 +273,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 */
 	protected final ServerCodecConfigurer getMessageCodecsConfigurer() {
 		if (this.messageCodecsConfigurer == null) {
-			this.messageCodecsConfigurer = new ServerCodecConfigurer();
+			this.messageCodecsConfigurer = ServerCodecConfigurer.create();
 			configureHttpMessageCodecs(this.getMessageCodecsConfigurer());
 		}
 		return this.messageCodecsConfigurer;

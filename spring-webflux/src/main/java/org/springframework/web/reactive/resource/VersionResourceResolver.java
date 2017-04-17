@@ -159,7 +159,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		return chain.resolveResource(exchange, requestPath, locations)
-				.otherwiseIfEmpty(Mono.defer(() ->
+				.switchIfEmpty(Mono.defer(() ->
 						resolveVersionedResource(exchange, requestPath, locations, chain)));
 	}
 
@@ -185,7 +185,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		}
 
 		return chain.resolveResource(exchange, simplePath, locations)
-				.then(baseResource -> {
+				.flatMap(baseResource -> {
 					String actualVersion = versionStrategy.getResourceVersion(baseResource);
 					if (candidateVersion.equals(actualVersion)) {
 						if (logger.isTraceEnabled()) {
@@ -208,7 +208,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		return chain.resolveUrlPath(resourceUrlPath, locations)
-				.then(baseUrl -> {
+				.flatMap(baseUrl -> {
 					if (StringUtils.hasText(baseUrl)) {
 						VersionStrategy versionStrategy = getStrategyForPath(resourceUrlPath);
 						if (versionStrategy == null) {

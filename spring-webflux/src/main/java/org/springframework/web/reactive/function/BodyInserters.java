@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.function;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,6 +33,7 @@ import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
@@ -120,10 +122,18 @@ public abstract class BodyInserters {
 	public static <T extends Resource> BodyInserter<T, ReactiveHttpOutputMessage> fromResource(T resource) {
 		Assert.notNull(resource, "'resource' must not be null");
 		return (outputMessage, context) -> {
-					HttpMessageWriter<Resource> messageWriter = resourceHttpMessageWriter(context);
-					return messageWriter.write(Mono.just(resource), RESOURCE_TYPE, null,
-							outputMessage, context.hints());
-				};
+			Mono<T> inputStream = Mono.just(resource);
+			HttpMessageWriter<Resource> messageWriter = resourceHttpMessageWriter(context);
+			Optional<ServerHttpRequest> serverRequest = context.serverRequest();
+			if (serverRequest.isPresent() && outputMessage instanceof ServerHttpResponse) {
+				return messageWriter.write(inputStream, RESOURCE_TYPE, RESOURCE_TYPE, null,
+						serverRequest.get(), (ServerHttpResponse) outputMessage, context.hints());
+			}
+			else {
+				return messageWriter.write(inputStream, RESOURCE_TYPE, null,
+						outputMessage, context.hints());
+			}
+		};
 	}
 
 	private static HttpMessageWriter<Resource> resourceHttpMessageWriter(BodyInserter.Context context) {
@@ -149,11 +159,15 @@ public abstract class BodyInserters {
 			S eventsPublisher) {
 
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
-		return (response, context) -> {
+		return (serverResponse, context) -> {
 			HttpMessageWriter<ServerSentEvent<T>> messageWriter =
 					findMessageWriter(context, SERVER_SIDE_EVENT_TYPE, MediaType.TEXT_EVENT_STREAM);
-			return messageWriter.write(eventsPublisher, SERVER_SIDE_EVENT_TYPE,
-					MediaType.TEXT_EVENT_STREAM, response, context.hints());
+			return context.serverRequest()
+					.map(serverRequest -> messageWriter.write(eventsPublisher, SERVER_SIDE_EVENT_TYPE,
+							SERVER_SIDE_EVENT_TYPE, MediaType.TEXT_EVENT_STREAM, serverRequest,
+							serverResponse, context.hints()))
+					.orElseGet(() -> messageWriter.write(eventsPublisher, SERVER_SIDE_EVENT_TYPE,
+							MediaType.TEXT_EVENT_STREAM, serverResponse, context.hints()));
 		};
 	}
 
@@ -196,12 +210,15 @@ public abstract class BodyInserters {
 
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
 		Assert.notNull(eventType, "'eventType' must not be null");
-		return (outputMessage, context) -> {
+		return (serverResponse, context) -> {
 			HttpMessageWriter<T> messageWriter =
 					findMessageWriter(context, SERVER_SIDE_EVENT_TYPE, MediaType.TEXT_EVENT_STREAM);
-			return messageWriter.write(eventsPublisher, eventType,
-					MediaType.TEXT_EVENT_STREAM, outputMessage, context.hints());
-
+			return context.serverRequest()
+					.map(serverRequest -> messageWriter.write(eventsPublisher, eventType,
+							eventType, MediaType.TEXT_EVENT_STREAM, serverRequest,
+							serverResponse, context.hints()))
+					.orElseGet(() -> messageWriter.write(eventsPublisher, eventType,
+							MediaType.TEXT_EVENT_STREAM, serverResponse, context.hints()));
 		};
 	}
 
@@ -211,6 +228,9 @@ public abstract class BodyInserters {
 	 * @param formData the form data to write to the output message
 	 * @return a {@code BodyInserter} that writes form data
 	 */
+	// Note that the returned BodyInserter is parameterized to ClientHttpRequest, not
+	// ReactiveHttpOutputMessage like other methods, since sending form data only typically happens
+	// on the server-side
 	public static BodyInserter<MultiValueMap<String, String>, ClientHttpRequest> fromFormData(
 			MultiValueMap<String, String> formData) {
 
@@ -241,15 +261,24 @@ public abstract class BodyInserters {
 	private static <T, P extends Publisher<?>, M extends ReactiveHttpOutputMessage> BodyInserter<T, M> bodyInserterFor(
 			P body, ResolvableType bodyType) {
 
-		return (m, context) -> {
-			MediaType contentType = m.getHeaders().getContentType();
+		return (outputMessage, context) -> {
+			MediaType contentType = outputMessage.getHeaders().getContentType();
 			Supplier<Stream<HttpMessageWriter<?>>> messageWriters = context.messageWriters();
 			return messageWriters.get()
 					.filter(messageWriter -> messageWriter.canWrite(bodyType, contentType))
 					.findFirst()
 					.map(BodyInserters::cast)
-					.map(messageWriter -> messageWriter
-							.write(body, bodyType, contentType, m, context.hints()))
+					.map(messageWriter -> {
+						Optional<ServerHttpRequest> serverRequest = context.serverRequest();
+						if (serverRequest.isPresent() && outputMessage instanceof ServerHttpResponse) {
+							return messageWriter.write(body, bodyType, bodyType, contentType,
+									serverRequest.get(), (ServerHttpResponse) outputMessage,
+									context.hints());
+						} else {
+							return messageWriter.write(body, bodyType, contentType, outputMessage,
+											context.hints());
+						}
+					})
 					.orElseGet(() -> {
 						List<MediaType> supportedMediaTypes = messageWriters.get()
 								.flatMap(reader -> reader.getWritableMediaTypes().stream())

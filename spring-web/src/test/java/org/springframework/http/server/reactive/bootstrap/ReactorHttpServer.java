@@ -18,7 +18,6 @@ package org.springframework.http.server.reactive.bootstrap;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import reactor.core.Loopback;
 import reactor.ipc.netty.NettyContext;
 
 import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
@@ -26,7 +25,7 @@ import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
 /**
  * @author Stephane Maldini
  */
-public class ReactorHttpServer extends AbstractHttpServer implements Loopback {
+public class ReactorHttpServer extends AbstractHttpServer {
 
 	private ReactorHttpHandlerAdapter reactorHandler;
 
@@ -43,16 +42,6 @@ public class ReactorHttpServer extends AbstractHttpServer implements Loopback {
 
 	private ReactorHttpHandlerAdapter createHttpHandlerAdapter() {
 		return new ReactorHttpHandlerAdapter(resolveHttpHandler());
-	}
-
-	@Override
-	public Object connectedInput() {
-		return this.reactorServer;
-	}
-
-	@Override
-	public Object connectedOutput() {
-		return this.reactorServer;
 	}
 
 	@Override

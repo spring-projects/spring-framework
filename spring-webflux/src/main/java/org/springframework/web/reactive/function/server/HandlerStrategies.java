@@ -18,14 +18,14 @@ package org.springframework.web.reactive.function.server;
 
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.springframework.context.ApplicationContext;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.util.Assert;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
 /**
@@ -69,7 +69,7 @@ public interface HandlerStrategies {
 	 * Supply a function that resolves the locale of a given {@link ServerRequest}.
 	 * @return the locale resolver
 	 */
-	Function<ServerRequest, Optional<Locale>> localeResolver();
+	Supplier<Function<ServerRequest, Optional<Locale>>> localeResolver();
 
 
 	// Static methods
@@ -82,20 +82,6 @@ public interface HandlerStrategies {
 		return builder().build();
 	}
 
-	/**
-	 * Return a new {@code HandlerStrategies} based on the given
-	 * {@linkplain ApplicationContext application context}.
-	 * The returned supplier will search for all {@link HttpMessageReader}, {@link HttpMessageWriter},
-	 * and {@link ViewResolver} instances in the given application context and return them for
-	 * {@link #messageReaders()}, {@link #messageWriters()}, and {@link #viewResolvers()}
-	 * respectively.
-	 * @param applicationContext the application context to base the strategies on
-	 * @return the new {@code HandlerStrategies}
-	 */
-	static HandlerStrategies of(ApplicationContext applicationContext) {
-		return builder(applicationContext).build();
-	}
-
 	// Builder methods
 
 	/**
@@ -105,22 +91,6 @@ public interface HandlerStrategies {
 	static Builder builder() {
 		DefaultHandlerStrategiesBuilder builder = new DefaultHandlerStrategiesBuilder();
 		builder.defaultConfiguration();
-		return builder;
-	}
-
-	/**
-	 * Return a mutable builder based on the given {@linkplain ApplicationContext application context}.
-	 * The returned builder will search for all {@link HttpMessageReader}, {@link HttpMessageWriter},
-	 * and {@link ViewResolver} instances in the given application context and return them for
-	 * {@link #messageReaders()}, {@link #messageWriters()}, and {@link #viewResolvers()}
-	 * respectively.
-	 * @param applicationContext the application context to base the strategies on
-	 * @return the builder
-	 */
-	static Builder builder(ApplicationContext applicationContext) {
-		Assert.notNull(applicationContext, "ApplicationContext must not be null");
-		DefaultHandlerStrategiesBuilder builder = new DefaultHandlerStrategiesBuilder();
-		builder.applicationContext(applicationContext);
 		return builder;
 	}
 
@@ -139,18 +109,20 @@ public interface HandlerStrategies {
 	interface Builder {
 
 		/**
-		 * Add the given message reader to this builder.
-		 * @param messageReader the message reader to add
+		 * Customize the list of default server-side HTTP message readers and writers.
+		 * @param consumer the consumer to customize the default codecs
 		 * @return this builder
+		 * @see #customCodecs(Consumer)
 		 */
-		Builder messageReader(HttpMessageReader<?> messageReader);
+		Builder defaultCodecs(Consumer<ServerCodecConfigurer.ServerDefaultCodecsConfigurer> consumer);
 
 		/**
-		 * Add the given message writer to this builder.
-		 * @param messageWriter the message writer to add
+		 * Customize the list of custom server-side HTTP message readers and writers.
+		 * @param consumer the consumer to customize the custom codecs
 		 * @return this builder
+		 * @see #defaultCodecs(Consumer)
 		 */
-		Builder messageWriter(HttpMessageWriter<?> messageWriter);
+		Builder customCodecs(Consumer<ServerCodecConfigurer.CustomCodecsConfigurer> consumer);
 
 		/**
 		 * Add the given view resolver to this builder.

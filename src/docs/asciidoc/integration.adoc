@@ -6,6 +6,7 @@
 :doc-spring-gemfire: {doc-root}/spring-gemfire/docs/current/reference
 :toc: left
 :toclevels: 2
+ifdef::backend-pdf[:source-highlighter: rouge]
 
 This part of the reference documentation covers the Spring Framework's integration with
 a number of Java EE (and related) technologies.
@@ -8303,7 +8304,7 @@ if the argument `name` has a length shorter than 32:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(cacheNames="book", **condition="#name.length < 32"**)
+	@Cacheable(cacheNames="book", **condition="#name.length() < 32"**)
 	public Book findBook(String name)
 ----
 
@@ -8315,7 +8316,7 @@ only want to cache paperback books:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(cacheNames="book", condition="#name.length < 32", **unless="#result.hardback"**)
+	@Cacheable(cacheNames="book", condition="#name.length() < 32", **unless="#result.hardback"**)
 	public Book findBook(String name)
 ----
 
@@ -8326,11 +8327,12 @@ supported wrapper so the previous example can be rewritten as follows:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(cacheNames="book", condition="#name.length < 32", **unless="#result.hardback"**)
+	@Cacheable(cacheNames="book", condition="#name.length() < 32", **unless="#result?.hardback"**)
 	public Optional<Book> findBook(String name)
 ----
 
-Note that `result` still refers to `Book` and not `Optional`.
+Note that `result` still refers to `Book` and not `Optional`. As it might be `null`, we
+should use the safe navigation operator.
 
 [[cache-spel-context]]
 ===== Available caching SpEL evaluation context

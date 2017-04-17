@@ -55,7 +55,7 @@ public class ResourceHandlerFunctionTests {
 
 		Mono<ServerResponse> responseMono = this.handlerFunction.handle(request);
 
-		Mono<Void> result = responseMono.then(response -> {
+		Mono<Void> result = responseMono.flatMap(response -> {
 					assertEquals(HttpStatus.OK, response.statusCode());
 					/*
 					TODO: enable when ServerEntityResponse is reintroduced
@@ -94,7 +94,7 @@ public class ResourceHandlerFunctionTests {
 
 		Mono<ServerResponse> response = this.handlerFunction.handle(request);
 
-		Mono<Void> result = response.then(res -> {
+		Mono<Void> result = response.flatMap(res -> {
 			assertEquals(HttpStatus.OK, res.statusCode());
 			return res.writeTo(exchange, HandlerStrategies.withDefaults());
 		});
@@ -114,7 +114,7 @@ public class ResourceHandlerFunctionTests {
 		ServerRequest request = new DefaultServerRequest(exchange, HandlerStrategies.withDefaults());
 
 		Mono<ServerResponse> responseMono = this.handlerFunction.handle(request);
-		Mono<Void> result = responseMono.then(response -> {
+		Mono<Void> result = responseMono.flatMap(response -> {
 			assertEquals(HttpStatus.OK, response.statusCode());
 			assertEquals(EnumSet.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS),
 					response.headers().getAllow());

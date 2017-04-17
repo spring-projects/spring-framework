@@ -86,7 +86,7 @@ class ModelInitializer {
 					.map(object -> (HandlerResult) object)
 					.map(handlerResult -> handleResult(handlerResult, bindingContext))
 					.collect(Collectors.toList());
-		}).then(completionList -> Mono.when(completionList));
+		}).flatMap(completionList -> Mono.when(completionList));
 	}
 
 	private Mono<Void> handleResult(HandlerResult handlerResult, BindingContext bindingContext) {

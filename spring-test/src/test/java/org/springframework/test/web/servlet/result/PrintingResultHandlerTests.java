@@ -19,8 +19,8 @@ package org.springframework.test.web.servlet.result;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.Cookie;
 
 import org.junit.Test;
@@ -40,7 +40,8 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link PrintingResultHandler}.
@@ -114,10 +115,18 @@ public class PrintingResultHandlerTests {
 
 		this.handler.handle(this.mvcResult);
 
+		// Manually validate cookie values since maxAge changes...
+		List<String> cookieValues = this.response.getHeaders("Set-Cookie");
+		assertEquals(2, cookieValues.size());
+		assertEquals("cookie=cookieValue", cookieValues.get(0));
+		assertTrue("Actual: " + cookieValues.get(1), cookieValues.get(1).startsWith(
+				"enigma=42;Path=/crumbs;Domain=.example.com;Max-Age=1234;Expires="));
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("header", "headerValue");
 		headers.setContentType(MediaType.TEXT_PLAIN);
 		headers.setLocation(new URI("/redirectFoo"));
+		headers.put("Set-Cookie", cookieValues);
 
 		String heading = "MockHttpServletResponse";
 		assertValue(heading, "Status", this.response.getStatus());

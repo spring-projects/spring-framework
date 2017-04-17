@@ -34,8 +34,13 @@ import java.util.TimeZone;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link org.springframework.http.HttpHeaders}.
@@ -436,11 +441,10 @@ public class HttpHeadersTests {
 				new Locale.LanguageRange("*", 0.5)
 		);
 		assertEquals(expectedRanges, headers.getAcceptLanguage());
+		assertEquals(Locale.forLanguageTag("fr-ch"), headers.getAcceptLanguageAsLocales().get(0));
 
-		assertEquals(Locale.forLanguageTag("fr-ch"), headers.getAcceptLanguageAsLocale());
-
-		headers.setAcceptLanguageAsLocale(Locale.FRANCE);
-		assertEquals(Locale.FRANCE, headers.getAcceptLanguageAsLocale());
+		headers.setAcceptLanguageAsLocales(Collections.singletonList(Locale.FRANCE));
+		assertEquals(Locale.FRANCE, headers.getAcceptLanguageAsLocales().get(0));
 	}
 
 	@Test

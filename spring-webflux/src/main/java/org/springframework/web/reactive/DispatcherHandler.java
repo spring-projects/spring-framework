@@ -125,9 +125,9 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 		return Flux.fromIterable(this.handlerMappings)
 				.concatMap(mapping -> mapping.getHandler(exchange))
 				.next()
-				.otherwiseIfEmpty(Mono.error(HANDLER_NOT_FOUND_EXCEPTION))
-				.then(handler -> invokeHandler(exchange, handler))
-				.then(result -> handleResult(exchange, result));
+				.switchIfEmpty(Mono.error(HANDLER_NOT_FOUND_EXCEPTION))
+				.flatMap(handler -> invokeHandler(exchange, handler))
+				.flatMap(result -> handleResult(exchange, result));
 	}
 
 	private Mono<HandlerResult> invokeHandler(ServerWebExchange exchange, Object handler) {
@@ -141,7 +141,7 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
 	private Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 		return getResultHandler(result).handleResult(exchange, result)
-				.otherwise(ex -> result.applyExceptionHandler(ex).then(exceptionResult ->
+				.onErrorResume(ex -> result.applyExceptionHandler(ex).flatMap(exceptionResult ->
 						getResultHandler(exceptionResult).handleResult(exchange, exceptionResult)));
 	}
 
@@ -183,7 +183,6 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	 * @see HttpWebHandlerAdapter
 	 * @see org.springframework.http.server.reactive.ServletHttpHandlerAdapter
 	 * @see org.springframework.http.server.reactive.ReactorHttpHandlerAdapter
-	 * @see org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter
 	 * @see org.springframework.http.server.reactive.UndertowHttpHandlerAdapter
 	 */
 	public static HttpHandler toHttpHandler(ApplicationContext context) {

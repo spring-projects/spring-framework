@@ -148,6 +148,42 @@ public class PathPattern implements Comparable<PathPattern> {
 	}
 
 	/**
+	 * For a given path return the remaining piece that is not covered by this PathPattern.
+	 * 
+	 * @param path a path that may or may not match this path pattern
+	 * @return the remaining path after as much has been consumed as possible by this pattern, 
+	 * result can be the empty string if the path is entirely consumed or it will be null
+	 * if the path does not match
+	 */
+	public String getPathRemaining(String path) {
+		if (head == null) {
+			if (path == null) {
+				return path;
+			}
+			else {
+				return hasLength(path)?path:"";				
+			}
+		}
+		else if (!hasLength(path)) {
+			return null;
+		}
+		MatchingContext matchingContext = new MatchingContext(path, false);
+		matchingContext.setMatchAllowExtraPath();
+		boolean matches = head.matches(0, matchingContext);
+		if (!matches) {
+			return null;
+		}
+		else {
+			if (matchingContext.remainingPathIndex == path.length()) {
+				return "";
+			}
+			else {
+				return path.substring(matchingContext.remainingPathIndex);
+			}
+		}
+	}
+
+	/**
 	 * @param path the path to check against the pattern
 	 * @return true if the pattern matches as much of the path as is supplied
 	 */
@@ -384,12 +420,26 @@ public class PathPattern implements Comparable<PathPattern> {
 
 		private Map<String, String> extractedVariables;
 
-		public boolean extractingVariables;
+		boolean extractingVariables;
+		
+		boolean determineRemaining = false;
+		
+		// if determineRemaining is true, this is set to the position in
+		// the candidate where the pattern finished matching - i.e. it
+		// points to the remaining path that wasn't consumed
+		int remainingPathIndex;
 
 		public MatchingContext(String path, boolean extractVariables) {
 			candidate = path.toCharArray();
 			candidateLength = candidate.length;
 			this.extractingVariables = extractVariables;
+		}
+
+		/**
+		 * 
+		 */
+		public void setMatchAllowExtraPath() {
+			determineRemaining = true;
 		}
 
 		public void setMatchStartMatching(boolean b) {

@@ -52,7 +52,7 @@ public class RouterFunctionTests {
 		this.testClient.get().uri("/test")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value().isEqualTo("It works!");
+				.expectBody(String.class).isEqualTo("It works!");
 	}
 
 }

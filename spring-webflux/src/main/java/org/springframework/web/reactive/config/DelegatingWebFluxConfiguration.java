@@ -26,7 +26,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 
 /**
  * A subclass of {@code WebFluxConfigurationSupport} that detects and delegates
@@ -70,8 +70,8 @@ public class DelegatingWebFluxConfiguration extends WebFluxConfigurationSupport 
 	}
 
 	@Override
-	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-		this.configurers.addArgumentResolvers(resolvers);
+	protected void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
+		this.configurers.configureArgumentResolvers(configurer);
 	}
 
 	@Override

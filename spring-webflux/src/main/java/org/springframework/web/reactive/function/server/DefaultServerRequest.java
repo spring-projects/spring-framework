@@ -38,6 +38,7 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyExtractors;
@@ -103,6 +104,12 @@ class DefaultServerRequest implements ServerRequest {
 					public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
 						return DefaultServerRequest.this.strategies.messageReaders();
 					}
+
+					@Override
+					public Optional<ServerHttpResponse> serverResponse() {
+						return Optional.of(exchange().getResponse());
+					}
+
 					@Override
 					public Map<String, Object> hints() {
 						return hints;
@@ -113,13 +120,13 @@ class DefaultServerRequest implements ServerRequest {
 	@Override
 	public <T> Mono<T> bodyToMono(Class<? extends T> elementClass) {
 		Mono<T> mono = body(BodyExtractors.toMono(elementClass));
-		return mono.mapError(UnsupportedMediaTypeException.class, ERROR_MAPPER);
+		return mono.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER);
 	}
 
 	@Override
 	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
 		Flux<T> flux = body(BodyExtractors.toFlux(elementClass));
-		return flux.mapError(UnsupportedMediaTypeException.class, ERROR_MAPPER);
+		return flux.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER);
 	}
 
 	@Override

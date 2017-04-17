@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.client;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -30,6 +31,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -188,6 +190,12 @@ class DefaultClientRequestBuilder implements ClientRequest.Builder {
 				public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
 					return strategies.messageWriters();
 				}
+
+				@Override
+				public Optional<ServerHttpRequest> serverRequest() {
+					return Optional.empty();
+				}
+
 				@Override
 				public Map<String, Object> hints() {
 					return Collections.emptyMap();

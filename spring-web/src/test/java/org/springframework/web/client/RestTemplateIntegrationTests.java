@@ -71,6 +71,7 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 	@Parameter
 	public ClientHttpRequestFactory clientHttpRequestFactory;
 
+	@SuppressWarnings("deprecation")
 	@Parameters
 	public static Iterable<? extends ClientHttpRequestFactory> data() {
 		return Arrays.asList(

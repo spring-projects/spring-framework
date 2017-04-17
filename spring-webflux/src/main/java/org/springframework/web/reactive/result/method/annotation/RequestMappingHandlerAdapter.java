@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -25,18 +24,10 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.codec.ByteArrayDecoder;
-import org.springframework.core.codec.ByteBufferDecoder;
-import org.springframework.core.codec.DataBufferDecoder;
-import org.springframework.core.codec.ResourceDecoder;
-import org.springframework.core.codec.StringDecoder;
-import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.support.WebBindingInitializer;
@@ -44,7 +35,6 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -59,13 +49,13 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	private static final Log logger = LogFactory.getLog(RequestMappingHandlerAdapter.class);
 
 
-	private final List<HttpMessageReader<?>> messageReaders = new ArrayList<>(32);
+	private ServerCodecConfigurer messageCodecConfigurer;
 
 	private WebBindingInitializer webBindingInitializer;
 
-	private ReactiveAdapterRegistry reactiveAdapterRegistry = new ReactiveAdapterRegistry();
+	private ArgumentResolverConfigurer argumentResolverConfigurer;
 
-	private final List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<>(8);
+	private ReactiveAdapterRegistry reactiveAdapterRegistry;
 
 	private ConfigurableApplicationContext applicationContext;
 
@@ -74,32 +64,19 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	private ModelInitializer modelInitializer;
 
 
-	public RequestMappingHandlerAdapter() {
-		this.messageReaders.add(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
-		this.messageReaders.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
-		this.messageReaders.add(new DecoderHttpMessageReader<>(new DataBufferDecoder()));
-		this.messageReaders.add(new DecoderHttpMessageReader<>(new ResourceDecoder()));
-		this.messageReaders.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
-	}
-
-
 	/**
 	 * Configure HTTP message readers to de-serialize the request body with.
-	 * <p>By default only basic data types such as bytes and text are registered.
-	 * Consider using {@link ServerCodecConfigurer} to configure a richer list
-	 * including JSON encoding .
-	 * @see ServerCodecConfigurer
+	 * <p>By default this is set to {@link ServerCodecConfigurer} with defaults.
 	 */
-	public void setMessageReaders(List<HttpMessageReader<?>> messageReaders) {
-		this.messageReaders.clear();
-		this.messageReaders.addAll(messageReaders);
+	public void setMessageCodecConfigurer(ServerCodecConfigurer configurer) {
+		this.messageCodecConfigurer = configurer;
 	}
 
 	/**
-	 * Return the configured HTTP message readers.
+	 * Return the configurer for HTTP message readers.
 	 */
-	public List<HttpMessageReader<?>> getMessageReaders() {
-		return this.messageReaders;
+	public ServerCodecConfigurer getMessageCodecConfigurer() {
+		return this.messageCodecConfigurer;
 	}
 
 	/**
@@ -115,6 +92,21 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	 */
 	public WebBindingInitializer getWebBindingInitializer() {
 		return this.webBindingInitializer;
+	}
+
+	/**
+	 * Configure resolvers for controller method arguments.
+	 */
+	public void setArgumentResolverConfigurer(ArgumentResolverConfigurer configurer) {
+		Assert.notNull(configurer, "ArgumentResolverConfigurer is required");
+		this.argumentResolverConfigurer = configurer;
+	}
+
+	/**
+	 * Return the configured resolvers for controller method arguments.
+	 */
+	public ArgumentResolverConfigurer getArgumentResolverConfigurer() {
+		return this.argumentResolverConfigurer;
 	}
 
 	/**
@@ -134,21 +126,6 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	}
 
 	/**
-	 * Configure resolvers for custom controller method arguments.
-	 */
-	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-		this.customArgumentResolvers.clear();
-		this.customArgumentResolvers.addAll(resolvers);
-	}
-
-	/**
-	 * Return the configured custom argument resolvers.
-	 */
-	public List<HandlerMethodArgumentResolver> getCustomArgumentResolvers() {
-		return this.customArgumentResolvers;
-	}
-
-	/**
 	 * A {@link ConfigurableApplicationContext} is expected for resolving
 	 * expressions in method argument default values as well as for
 	 * detecting {@code @ControllerAdvice} beans.
@@ -164,18 +141,26 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 		return this.applicationContext;
 	}
 
-	public ConfigurableBeanFactory getBeanFactory() {
-		return this.applicationContext.getBeanFactory();
-	}
-
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
 
-		this.methodResolver = new ControllerMethodResolver(getCustomArgumentResolvers(),
-				getMessageReaders(), getReactiveAdapterRegistry(), getApplicationContext());
+		if (this.messageCodecConfigurer == null) {
+			this.messageCodecConfigurer = ServerCodecConfigurer.create();
+		}
 
-		this.modelInitializer = new ModelInitializer(getReactiveAdapterRegistry());
+		if (this.argumentResolverConfigurer == null) {
+			this.argumentResolverConfigurer = new ArgumentResolverConfigurer();
+		}
+
+		if (this.reactiveAdapterRegistry == null) {
+			this.reactiveAdapterRegistry = new ReactiveAdapterRegistry();
+		}
+
+		this.methodResolver = new ControllerMethodResolver(this.argumentResolverConfigurer,
+				this.messageCodecConfigurer, this.reactiveAdapterRegistry, this.applicationContext);
+
+		this.modelInitializer = new ModelInitializer(this.reactiveAdapterRegistry);
 	}
 
 
@@ -204,7 +189,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 				.then(() -> this.methodResolver.getRequestMappingMethod(handlerMethod)
 						.invoke(exchange, bindingContext)
 						.doOnNext(result -> result.setExceptionHandler(exceptionHandler))
-						.otherwise(exceptionHandler));
+						.onErrorResume(exceptionHandler));
 	}
 
 	private Mono<HandlerResult> handleException(Throwable ex, HandlerMethod handlerMethod,

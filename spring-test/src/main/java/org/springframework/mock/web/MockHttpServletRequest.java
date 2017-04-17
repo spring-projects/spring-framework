@@ -27,6 +27,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -55,6 +56,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -86,10 +88,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private static final String HTTP = "http";
 
 	private static final String HTTPS = "https";
-
-	private static final String CONTENT_TYPE_HEADER = "Content-Type";
-
-	private static final String HOST_HEADER = "Host";
 
 	private static final String CHARSET_PREFIX = "charset=";
 
@@ -387,7 +385,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 					StringUtils.hasLength(this.characterEncoding)) {
 				sb.append(";").append(CHARSET_PREFIX).append(this.characterEncoding);
 			}
-			doAddHeaderValue(CONTENT_TYPE_HEADER, sb.toString(), true);
+			doAddHeaderValue(HttpHeaders.CONTENT_TYPE, sb.toString(), true);
 		}
 	}
 
@@ -633,7 +631,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public String getServerName() {
-		String host = getHeader(HOST_HEADER);
+		String host = getHeader(HttpHeaders.HOST);
 		if (host != null) {
 			host = host.trim();
 			if (host.startsWith("[")) {
@@ -655,7 +653,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public int getServerPort() {
-		String host = getHeader(HOST_HEADER);
+		String host = getHeader(HttpHeaders.HOST);
 		if (host != null) {
 			host = host.trim();
 			int idx;
@@ -739,6 +737,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public void addPreferredLocale(Locale locale) {
 		Assert.notNull(locale, "Locale must not be null");
 		this.locales.add(0, locale);
+		updateAcceptLanguageHeader();
 	}
 
 	/**
@@ -751,6 +750,13 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		Assert.notEmpty(locales, "Locale list must not be empty");
 		this.locales.clear();
 		this.locales.addAll(locales);
+		updateAcceptLanguageHeader();
+	}
+
+	private void updateAcceptLanguageHeader() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAcceptLanguageAsLocales(this.locales);
+		doAddHeaderValue(HttpHeaders.ACCEPT_LANGUAGE, headers.getFirst(HttpHeaders.ACCEPT_LANGUAGE), true);
 	}
 
 	/**
@@ -922,6 +928,12 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public void setCookies(Cookie... cookies) {
 		this.cookies = cookies;
+		this.headers.remove(HttpHeaders.COOKIE);
+		if (cookies != null) {
+			Arrays.stream(cookies)
+					.map(c -> c.getName() + '=' + (c.getValue() == null ? "" : c.getValue()))
+					.forEach(value -> doAddHeaderValue(HttpHeaders.COOKIE, value, false));
+		}
 	}
 
 	@Override
@@ -945,8 +957,17 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * @see #getDateHeader
 	 */
 	public void addHeader(String name, Object value) {
-		if (CONTENT_TYPE_HEADER.equalsIgnoreCase(name) && !this.headers.containsKey(CONTENT_TYPE_HEADER)) {
+		if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name) &&
+				!this.headers.containsKey(HttpHeaders.CONTENT_TYPE)) {
+
 			setContentType(value.toString());
+		}
+		else if (HttpHeaders.ACCEPT_LANGUAGE.equalsIgnoreCase(name) &&
+				!this.headers.containsKey(HttpHeaders.ACCEPT_LANGUAGE)) {
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.add(HttpHeaders.ACCEPT_LANGUAGE, value.toString());
+			setPreferredLocales(headers.getAcceptLanguageAsLocales());
 		}
 		else {
 			doAddHeaderValue(name, value, false);

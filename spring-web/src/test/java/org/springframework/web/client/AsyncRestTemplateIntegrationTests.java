@@ -61,6 +61,7 @@ import static org.junit.Assert.fail;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  */
+@SuppressWarnings("deprecation")
 public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTestCase {
 
 	private final AsyncRestTemplate template = new AsyncRestTemplate(

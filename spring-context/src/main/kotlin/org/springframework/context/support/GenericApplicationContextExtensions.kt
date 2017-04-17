@@ -12,9 +12,8 @@ import kotlin.reflect.KClass
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun <T : Any> GenericApplicationContext.registerBean(beanClass: KClass<T>,
-		vararg customizers: BeanDefinitionCustomizer) {
-				registerBean(beanClass.java, *customizers)
+fun <T : Any> GenericApplicationContext.registerBean(beanClass: KClass<T>, vararg customizers: BeanDefinitionCustomizer) {
+	registerBean(beanClass.java, *customizers)
 }
 
 /**
@@ -24,7 +23,7 @@ fun <T : Any> GenericApplicationContext.registerBean(beanClass: KClass<T>,
  * @since 5.0
  */
 inline fun <reified T : Any> GenericApplicationContext.registerBean(vararg customizers: BeanDefinitionCustomizer) {
-				registerBean(T::class.java, *customizers)
+	registerBean(T::class.java, *customizers)
 }
 
 /**
@@ -33,9 +32,8 @@ inline fun <reified T : Any> GenericApplicationContext.registerBean(vararg custo
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun <T : Any> GenericApplicationContext.registerBean(beanName: String, beanClass: KClass<T>,
-		vararg customizers: BeanDefinitionCustomizer) {
-				registerBean(beanName, beanClass.java, *customizers)
+fun <T : Any> GenericApplicationContext.registerBean(beanName: String, beanClass: KClass<T>, vararg customizers: BeanDefinitionCustomizer) {
+	registerBean(beanName, beanClass.java, *customizers)
 }
 
 /**
@@ -45,7 +43,7 @@ fun <T : Any> GenericApplicationContext.registerBean(beanName: String, beanClass
  * @since 5.0
  */
 inline fun <reified T : Any> GenericApplicationContext.registerBean(beanName: String, vararg customizers: BeanDefinitionCustomizer) {
-				registerBean(beanName, T::class.java, *customizers)
+	registerBean(beanName, T::class.java, *customizers)
 }
 
 /**
@@ -56,7 +54,7 @@ inline fun <reified T : Any> GenericApplicationContext.registerBean(beanName: St
  */
 inline fun <reified T : Any> GenericApplicationContext.registerBean(
 		vararg customizers: BeanDefinitionCustomizer, crossinline function: (ApplicationContext) -> T) {
-				registerBean(T::class.java, Supplier { function.invoke(this) }, *customizers)
+	registerBean(T::class.java, Supplier { function.invoke(this) }, *customizers)
 }
 
 /**
@@ -67,7 +65,7 @@ inline fun <reified T : Any> GenericApplicationContext.registerBean(
  */
 inline fun <reified T : Any> GenericApplicationContext.registerBean(name: String,
 		vararg customizers: BeanDefinitionCustomizer, crossinline function: (ApplicationContext) -> T) {
-				registerBean(name, T::class.java, Supplier { function.invoke(this) }, *customizers)
+	registerBean(name, T::class.java, Supplier { function.invoke(this) }, *customizers)
 }
 
 /**
@@ -76,5 +74,5 @@ inline fun <reified T : Any> GenericApplicationContext.registerBean(name: String
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun GenericApplicationContext(configure: GenericApplicationContext.()->Unit) = GenericApplicationContext().apply(configure)
+fun GenericApplicationContext(configure: GenericApplicationContext.() -> Unit) = GenericApplicationContext().apply(configure)
 

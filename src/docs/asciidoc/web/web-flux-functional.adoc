@@ -94,8 +94,8 @@ public class PersonHandler {
 		Mono<ServerResponse> notFound = ServerResponse.notFound().build();
 		Mono<Person> personMono = this.repository.getPerson(personId);
 		return personMono
-				.then(person -> ServerResponse.ok().contentType(APPLICATION_JSON).body(fromObject(person)))
-				.otherwiseIfEmpty(notFound);
+				.flatMap(person -> ServerResponse.ok().contentType(APPLICATION_JSON).body(fromObject(person)))
+				.switchIfEmpty(notFound);
 	}
 }
 ----
@@ -177,7 +177,7 @@ Now there is just one piece of the puzzle missing: running a router function in 
 You can convert a router function into a `HttpHandler` by using
 `RouterFunctions.toHttpHandler(RouterFunction)`.
 The `HttpHandler` allows you to run on a wide variety of reactive runtimes: Reactor Netty,
-RxNetty, Servlet 3.1+, and Undertow.
+Servlet 3.1+, and Undertow.
 Here is how we run a router function in Reactor Netty, for instance:
 
 [source,java,indent=0]

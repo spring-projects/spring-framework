@@ -63,7 +63,7 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 				.uri("/string")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
-				.flatMap(response -> response.body(toFlux(String.class)));
+				.flatMapMany(response -> response.body(toFlux(String.class)));
 
 		StepVerifier.create(result)
 				.expectNext("foo 0")
@@ -78,7 +78,7 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 				.uri("/person")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
-				.flatMap(response -> response.body(toFlux(Person.class)));
+				.flatMapMany(response -> response.body(toFlux(Person.class)));
 
 		StepVerifier.create(result)
 				.expectNext(new Person("foo 0"))
@@ -93,7 +93,7 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
-				.flatMap(response -> response.body(toFlux(
+				.flatMapMany(response -> response.body(toFlux(
 						forClassWithGenerics(ServerSentEvent.class, String.class))));
 
 		StepVerifier.create(result)

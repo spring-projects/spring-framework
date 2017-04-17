@@ -16,6 +16,8 @@
 
 package org.springframework.test.web.servlet.htmlunit.webdriver;
 
+import java.io.IOException;
+
 import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import org.junit.Before;
@@ -25,6 +27,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openqa.selenium.WebDriverException;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.*;
@@ -52,8 +55,9 @@ public class WebConnectionHtmlUnitDriverTests {
 
 	@Before
 	public void setup() throws Exception {
-		when(this.connection.getResponse(any(WebRequest.class))).thenThrow(new InternalError(""));
+		when(this.connection.getResponse(any(WebRequest.class))).thenThrow(new IOException(""));
 	}
+
 
 	@Test
 	public void getWebConnectionDefaultNotNull() {
@@ -71,7 +75,7 @@ public class WebConnectionHtmlUnitDriverTests {
 		this.driver.setWebConnection(this.connection);
 		assertThat(this.driver.getWebConnection(), equalTo(this.connection));
 
-		this.exception.expect(InternalError.class);
+		this.exception.expect(WebDriverException.class);
 		this.driver.get("https://example.com");
 	}
 

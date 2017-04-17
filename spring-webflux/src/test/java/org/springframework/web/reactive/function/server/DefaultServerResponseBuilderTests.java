@@ -273,7 +273,7 @@ public class DefaultServerResponseBuilderTests {
 		when(exchange.getResponse()).thenReturn(response);
 		HandlerStrategies strategies = mock(HandlerStrategies.class);
 
-		result.then(res -> res.writeTo(exchange, strategies)).block();
+		result.flatMap(res -> res.writeTo(exchange, strategies)).block();
 
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
 		assertEquals("MyValue", response.getHeaders().getFirst("MyKey"));
@@ -290,7 +290,7 @@ public class DefaultServerResponseBuilderTests {
 		when(exchange.getResponse()).thenReturn(response);
 		HandlerStrategies strategies = mock(HandlerStrategies.class);
 
-		result.then(res -> res.writeTo(exchange, strategies)).block();
+		result.flatMap(res -> res.writeTo(exchange, strategies)).block();
 
 		StepVerifier.create(response.getBody()).expectComplete().verify();
 	}

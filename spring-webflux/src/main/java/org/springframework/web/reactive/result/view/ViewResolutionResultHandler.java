@@ -55,13 +55,13 @@ import org.springframework.web.server.support.HttpRequestPathHelper;
  * {@code HandlerResultHandler} that encapsulates the view resolution algorithm
  * supporting the following return types:
  * <ul>
- *     <li>String-based view name
- *     <li>Reference to a {@link View}
- *     <li>{@link Model}
- *     <li>{@link Map}
- *     <li>Return types annotated with {@code @ModelAttribute}
- *     <li>{@link BeanUtils#isSimpleProperty Non-simple} return types are
- *     treated as a model attribute
+ *     <li>{@link Void} or no value -- default view name</li>
+ *     <li>{@link String} -- view name unless {@code @ModelAttribute}-annotated
+ *     <li>{@link View} -- View to render with
+ *     <li>{@link Model} -- attributes to add to the model
+ *     <li>{@link Map} -- attributes to add to the model
+ *     <li>{@link ModelAttribute @ModelAttribute} -- attribute for the model
+ *     <li>Non-simple value -- attribute for the model
  * </ul>
  *
  * <p>A String-based view name is resolved through the configured
@@ -71,8 +71,9 @@ import org.springframework.web.server.support.HttpRequestPathHelper;
  *
  * <p>By default this resolver is ordered at {@link Ordered#LOWEST_PRECEDENCE}
  * and generally needs to be late in the order since it interprets any String
- * return value as a view name while others may interpret the same otherwise
- * based on annotations (e.g. for {@code @ResponseBody}).
+ * return value as a view name or any non-simple value type as a model attribute
+ * while other result handlers may interpret the same otherwise based on the
+ * presence of annotations, e.g. for {@code @ResponseBody}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -156,8 +157,9 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 			}
 			type = result.getReturnType().getGeneric(0).getRawClass();
 		}
-		return (CharSequence.class.isAssignableFrom(type) || View.class.isAssignableFrom(type) ||
+		return (CharSequence.class.isAssignableFrom(type) || Rendering.class.isAssignableFrom(type) ||
 				Model.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) ||
+				void.class.equals(type) || View.class.isAssignableFrom(type) ||
 				!BeanUtils.isSimpleProperty(type));
 	}
 
@@ -174,11 +176,16 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 		ReactiveAdapter adapter = getAdapter(result);
 
 		if (adapter != null) {
-			Assert.isTrue(!adapter.isMultiValue(), "Only single-value async return type supported.");
+			Assert.isTrue(!adapter.isMultiValue(), "Multi-value " +
+					"reactive types not supported in view resolution: " + result.getReturnType());
+
 			valueMono = result.getReturnValue()
-					.map(value -> Mono.from(adapter.toPublisher(value))).orElse(Mono.empty());
+					.map(value -> Mono.from(adapter.toPublisher(value)))
+					.orElse(Mono.empty());
+
 			valueType = adapter.isNoValue() ?
-					ResolvableType.forClass(Void.class) : result.getReturnType().getGeneric(0);
+					ResolvableType.forClass(Void.class) :
+					result.getReturnType().getGeneric(0);
 		}
 		else {
 			valueMono = Mono.justOrEmpty(result.getReturnValue());
@@ -186,15 +193,15 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 		}
 
 		return valueMono
-				.otherwiseIfEmpty(exchange.isNotModified() ? Mono.empty() : NO_VALUE_MONO)
-				.then(returnValue -> {
+				.switchIfEmpty(exchange.isNotModified() ? Mono.empty() : NO_VALUE_MONO)
+				.flatMap(returnValue -> {
 
 					Mono<List<View>> viewsMono;
 					Model model = result.getModel();
 					MethodParameter parameter = result.getReturnTypeSource();
 
-					Locale acceptLocale = exchange.getRequest().getHeaders().getAcceptLanguageAsLocale();
-					Locale locale = acceptLocale != null ? acceptLocale : Locale.getDefault();
+					List<Locale> locales = exchange.getRequest().getHeaders().getAcceptLanguageAsLocales();
+					Locale locale = locales.isEmpty() ? Locale.getDefault() : locales.get(0);
 
 					Class<?> clazz = valueType.getRawClass();
 					if (clazz == null) {
@@ -204,19 +211,28 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 					if (returnValue == NO_VALUE || Void.class.equals(clazz) || void.class.equals(clazz)) {
 						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
 					}
+					else if (CharSequence.class.isAssignableFrom(clazz) && !hasModelAnnotation(parameter)) {
+						viewsMono = resolveViews(returnValue.toString(), locale);
+					}
+					else if (Rendering.class.isAssignableFrom(clazz)) {
+						Rendering render = (Rendering) returnValue;
+						render.status().ifPresent(exchange.getResponse()::setStatusCode);
+						exchange.getResponse().getHeaders().putAll(render.headers());
+						model.addAllAttributes(render.modelAttributes());
+						Object view = render.view().orElse(getDefaultViewName(exchange));
+						viewsMono = (view instanceof String ? resolveViews((String) view, locale) :
+								Mono.just(Collections.singletonList((View) view)));
+					}
 					else if (Model.class.isAssignableFrom(clazz)) {
 						model.addAllAttributes(((Model) returnValue).asMap());
 						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
 					}
-					else if (Map.class.isAssignableFrom(clazz)) {
+					else if (Map.class.isAssignableFrom(clazz) && !hasModelAnnotation(parameter)) {
 						model.addAllAttributes((Map<String, ?>) returnValue);
 						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
 					}
 					else if (View.class.isAssignableFrom(clazz)) {
 						viewsMono = Mono.just(Collections.singletonList((View) returnValue));
-					}
-					else if (CharSequence.class.isAssignableFrom(clazz) && !hasModelAnnotation(parameter)) {
-						viewsMono = resolveViews(returnValue.toString(), locale);
 					}
 					else {
 						String name = getNameForReturnValue(clazz, parameter);
@@ -224,10 +240,9 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
 					}
 
-					return resolveAsyncAttributes(model.asMap())
-							.doOnSuccess(aVoid -> addBindingResult(result.getBindingContext(), exchange))
-							.then(viewsMono)
-							.then(views -> render(views, model.asMap(), exchange));
+					updateBindingContext(result.getBindingContext(), exchange);
+
+					return viewsMono.flatMap(views -> render(views, model.asMap(), exchange));
 				});
 	}
 
@@ -260,11 +275,6 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 				});
 	}
 
-	/**
-	 * Return the name of a model attribute return value based on the method
-	 * {@code @ModelAttribute} annotation, if present, or derived from the type
-	 * of the return value otherwise.
-	 */
 	private String getNameForReturnValue(Class<?> returnValueType, MethodParameter returnType) {
 		ModelAttribute annotation = returnType.getMethodAnnotation(ModelAttribute.class);
 		if (annotation != null && StringUtils.hasText(annotation.value())) {
@@ -274,46 +284,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 		return ClassUtils.getShortNameAsProperty(returnValueType);
 	}
 
-	private Mono<Void> resolveAsyncAttributes(Map<String, Object> model) {
-
-		List<String> names = new ArrayList<>();
-		List<Mono<?>> valueMonos = new ArrayList<>();
-
-		for (Map.Entry<String, ?> entry : model.entrySet()) {
-			ReactiveAdapter adapter = getAdapterRegistry().getAdapter(null, entry.getValue());
-			if (adapter != null) {
-				names.add(entry.getKey());
-				if (adapter.isMultiValue()) {
-					Flux<Object> value = Flux.from(adapter.toPublisher(entry.getValue()));
-					valueMonos.add(value.collectList().defaultIfEmpty(Collections.emptyList()));
-				}
-				else {
-					Mono<Object> value = Mono.from(adapter.toPublisher(entry.getValue()));
-					valueMonos.add(value.defaultIfEmpty(NO_VALUE));
-				}
-			}
-		}
-
-		if (names.isEmpty()) {
-			return Mono.empty();
-		}
-
-		return Mono.when(valueMonos,
-				values -> {
-					for (int i=0; i < values.length; i++) {
-						if (values[i] != NO_VALUE) {
-							model.put(names.get(i), values[i]);
-						}
-						else {
-							model.remove(names.get(i));
-						}
-					}
-					return NO_VALUE;
-				})
-				.then();
-	}
-
-	private void addBindingResult(BindingContext context, ServerWebExchange exchange) {
+	private void updateBindingContext(BindingContext context, ServerWebExchange exchange) {
 		Map<String, Object> model = context.getModel().asMap();
 		model.keySet().stream()
 				.filter(name -> isBindingCandidate(name, model.get(name)))

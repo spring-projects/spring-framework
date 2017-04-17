@@ -63,7 +63,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 		Mono<String> result = this.webClient.get()
 				.uri("/write-and-flush")
 				.exchange()
-				.flatMap(response -> response.body(BodyExtractors.toFlux(String.class)))
+				.flatMapMany(response -> response.body(BodyExtractors.toFlux(String.class)))
 				.takeUntil(s -> s.endsWith("data1"))
 				.reduce((s1, s2) -> s1 + s2);
 
@@ -78,7 +78,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 		Mono<String> result = this.webClient.get()
 				.uri("/write-and-complete")
 				.exchange()
-				.flatMap(response -> response.bodyToFlux(String.class))
+				.flatMapMany(response -> response.bodyToFlux(String.class))
 				.reduce((s1, s2) -> s1 + s2);
 
 		StepVerifier.create(result)
@@ -92,7 +92,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 		Flux<String> result = this.webClient.get()
 				.uri("/write-and-never-complete")
 				.exchange()
-				.flatMap(response -> response.bodyToFlux(String.class));
+				.flatMapMany(response -> response.bodyToFlux(String.class));
 
 		StepVerifier.create(result)
 				.expectNextMatches(s -> s.startsWith("0123456789"))

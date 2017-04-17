@@ -7416,6 +7416,9 @@ jdbc.password=
 	}
 ----
 
+
+
+
 [[beans-environment]]
 == Environment abstraction
 
@@ -7436,6 +7439,8 @@ variables, JNDI, servlet context parameters, ad-hoc Properties objects, Maps, an
 on. The role of the `Environment` object with relation to properties is to provide the
 user with a convenient service interface for configuring property sources and resolving
 properties from them.
+
+
 
 [[beans-definition-profiles]]
 === Bean definition profiles
@@ -7563,6 +7568,18 @@ of creating a custom _composed annotation_. The following example defines a cust
 	}
 ----
 
+[TIP]
+====
+If a `@Configuration` class is marked with `@Profile`, all of the `@Bean` methods and
+`@Import` annotations associated with that class will be bypassed unless one or more of
+the specified profiles are active. If a `@Component` or `@Configuration` class is marked
+with `@Profile({"p1", "p2"})`, that class will not be registered/processed unless
+profiles 'p1' and/or 'p2' have been activated. If a given profile is prefixed with the
+NOT operator (`!`), the annotated element will be registered if the profile is **not**
+active. For example, given `@Profile({"p1", "!p2"})`, registration will occur if profile
+'p1' is active or if profile 'p2' is not active.
+====
+
 `@Profile` can also be declared at the method level to include only one particular bean
 of a configuration class:
 
@@ -7591,20 +7608,19 @@ of a configuration class:
 	}
 ----
 
-[TIP]
+[NOTE]
 ====
-If a `@Configuration` class is marked with `@Profile`, all of the `@Bean` methods and
-`@Import` annotations associated with that class will be bypassed unless one or more of
-the specified profiles are active. If a `@Component` or `@Configuration` class is marked
-with `@Profile({"p1", "p2"})`, that class will not be registered/processed unless
-profiles 'p1' and/or 'p2' have been activated. If a given profile is prefixed with the
-NOT operator (`!`), the annotated element will be registered if the profile is **not**
-active. For example, given `@Profile({"p1", "!p2"})`, registration will occur if profile
-'p1' is active or if profile 'p2' is not active.
+With `@Profile` on `@Bean` methods, a special scenario may apply: In the case of
+overloaded `@Bean` methods, all `@Profile` declarations from all applicable factory
+methods for the same bean will be merged; as a consequence, they all need to match
+for the bean to become registered. `@Profile` can therefore not be used to select
+a particular overloaded method over another; resolution between overloaded factory
+methods only follows Spring's constructor resolution algorithm.
 ====
 
+
 [[beans-definition-profiles-xml]]
-=== XML bean definition profiles
+==== XML bean definition profiles
 
 The XML counterpart is the `profile` attribute of the `<beans>` element. Our sample
 configuration above can be rewritten in two XML files as follows:

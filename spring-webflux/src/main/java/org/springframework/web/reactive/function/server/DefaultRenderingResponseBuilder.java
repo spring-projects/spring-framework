@@ -168,9 +168,9 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 			return Flux.fromStream(viewResolverStream)
 					.concatMap(viewResolver -> viewResolver.resolveViewName(name(), locale))
 					.next()
-					.otherwiseIfEmpty(Mono.error(new IllegalArgumentException("Could not resolve view with name '" +
+					.switchIfEmpty(Mono.error(new IllegalArgumentException("Could not resolve view with name '" +
 							name() +"'")))
-					.then(view -> view.render(model(), contentType, exchange));
+					.flatMap(view -> view.render(model(), contentType, exchange));
 		}
 
 		private Locale resolveLocale(ServerWebExchange exchange, HandlerStrategies strategies) {
@@ -179,7 +179,7 @@ class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 							.orElseThrow(() -> new IllegalStateException(
 									"Could not find ServerRequest in exchange attributes"));
 
-			return strategies.localeResolver()
+			return strategies.localeResolver().get()
 					.apply(request)
 					.orElse(Locale.getDefault());
 

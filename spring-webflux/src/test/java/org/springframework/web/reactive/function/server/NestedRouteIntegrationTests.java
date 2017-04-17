@@ -18,6 +18,7 @@ package org.springframework.web.reactive.function.server;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
@@ -25,9 +26,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.BodyInserters.*;
-import static org.springframework.web.reactive.function.server.RequestPredicates.*;
-import static org.springframework.web.reactive.function.server.RouterFunctions.*;
+import static org.springframework.web.reactive.function.BodyInserters.fromObject;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RequestPredicates.path;
+import static org.springframework.web.reactive.function.server.RouterFunctions.nest;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
  * @author Arjen Poutsma
@@ -40,9 +43,12 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 	@Override
 	protected RouterFunction<?> routerFunction() {
 		NestedHandler nestedHandler = new NestedHandler();
-		return nest(pathPrefix("/foo"),
+		return nest(path("/foo/"),
 				route(GET("/bar"), nestedHandler::bar)
-				.andRoute(GET("/baz"), nestedHandler::baz));
+						.andRoute(GET("/baz"), nestedHandler::baz))
+				.andNest(GET("/{foo}"),
+						nest(GET("/{bar}"),
+								route(GET("/{baz}"), nestedHandler::variables)));
 	}
 
 
@@ -56,13 +62,22 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 	}
 
 	@Test
-	@Ignore
 	public void baz() throws Exception {
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/foo/baz", String.class);
 
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		assertEquals("baz", result.getBody());
+	}
+
+	@Test
+	@Ignore("SPR-15419")
+	public void variables() throws Exception {
+		ResponseEntity<String> result =
+				restTemplate.getForEntity("http://localhost:" + port + "/1/2/3", String.class);
+
+		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertEquals("1-2-3", result.getBody());
 	}
 
 
@@ -74,6 +89,13 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 
 		public Mono<ServerResponse> baz(ServerRequest request) {
 			return ServerResponse.ok().body(fromObject("baz"));
+		}
+
+		public Mono<ServerResponse> variables(ServerRequest request) {
+			Flux<String> responseBody =
+					Flux.just(request.pathVariable("foo"), "-", request.pathVariable("bar"), "-",
+							request.pathVariable("baz"));
+			return ServerResponse.ok().body(responseBody, String.class);
 		}
 	}
 

@@ -10,7 +10,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Publisher<S>, reified S : Any> fromPublisher(publisher: T) : BodyInserter<T, ReactiveHttpOutputMessage> =
+inline fun <reified T : Publisher<S>, reified S : Any> fromPublisher(publisher: T): BodyInserter<T, ReactiveHttpOutputMessage> =
 		BodyInserters.fromPublisher(publisher, S::class.java)
 
 /**
@@ -19,5 +19,5 @@ inline fun <reified T : Publisher<S>, reified S : Any> fromPublisher(publisher: 
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Publisher<S>, reified S : Any> fromServerSentEvents(publisher: T) : BodyInserter<T, ServerHttpResponse> =
+inline fun <reified T : Publisher<S>, reified S : Any> fromServerSentEvents(publisher: T): BodyInserter<T, ServerHttpResponse> =
 		BodyInserters.fromServerSentEvents(publisher, S::class.java)

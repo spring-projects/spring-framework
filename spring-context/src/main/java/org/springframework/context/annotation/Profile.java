@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,11 +57,18 @@ import org.springframework.core.env.ConfigurableEnvironment;
  *
  * <p>If a given profile is prefixed with the NOT operator ({@code !}), the annotated
  * component will be registered if the profile is <em>not</em> active &mdash; for example,
- * given {@code @Profile({"p1", "!p2"})}, registration will occur if profile 'p1' is active or
- * if profile 'p2' is <em>not</em> active.
+ * given {@code @Profile({"p1", "!p2"})}, registration will occur if profile 'p1' is active
+ * or if profile 'p2' is <em>not</em> active.
  *
  * <p>If the {@code @Profile} annotation is omitted, registration will occur regardless
  * of which (if any) profiles are active.
+ *
+ * <p><b>NOTE:</b> With {@code @Profile} on {@code @Bean} methods, a special scenario may
+ * apply: In the case of overloaded {@code @Bean} methods, all {@code @Profile} declarations
+ * from all applicable factory methods for the same bean will be merged; as a consequence,
+ * they all need to match for the bean to become registered. {@code @Profile} can therefore
+ * not be used to select a particular overloaded method over another; resolution between
+ * overloaded factory methods only follows Spring's constructor resolution algorithm.
  *
  * <p>When defining Spring beans via XML, the {@code "profile"} attribute of the
  * {@code <beans>} element may be used. See the documentation in the
@@ -78,8 +85,8 @@ import org.springframework.core.env.ConfigurableEnvironment;
  * @see Conditional
  * @see org.springframework.test.context.ActiveProfiles
  */
-@Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Conditional(ProfileCondition.class)
 public @interface Profile {

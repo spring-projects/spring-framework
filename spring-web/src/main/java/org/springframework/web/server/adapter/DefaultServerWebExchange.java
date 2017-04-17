@@ -106,7 +106,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 			if (MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType)) {
 				return FORM_READER
 						.readMono(FORM_DATA_VALUE_TYPE, request, Collections.emptyMap())
-						.otherwiseIfEmpty(EMPTY_FORM_DATA)
+						.switchIfEmpty(EMPTY_FORM_DATA)
 						.cache();
 			}
 		}

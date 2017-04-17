@@ -21,6 +21,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.codec.InternalCodecException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -85,7 +88,9 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 			Map<String, Object> hints) {
 
 		MediaType contentType = getContentType(message);
-		return this.decoder.decode(message.getBody(), elementType, contentType, hints);
+		return this.decoder
+				.decode(message.getBody(), elementType, contentType, hints)
+				.onErrorMap(this::mapError);
 	}
 
 	@Override
@@ -93,12 +98,24 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 			Map<String, Object> hints) {
 
 		MediaType contentType = getContentType(message);
-		return this.decoder.decodeToMono(message.getBody(), elementType, contentType, hints);
+		return this.decoder
+				.decodeToMono(message.getBody(), elementType, contentType, hints)
+				.onErrorMap(this::mapError);
 	}
 
 	private MediaType getContentType(HttpMessage inputMessage) {
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		return (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
+	}
+
+	private Throwable mapError(Throwable ex) {
+		if (ex instanceof ResponseStatusException) {
+			return ex;
+		}
+		else if (ex instanceof InternalCodecException) {
+			return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to decode HTTP message", ex);
+		}
+		return new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to decode HTTP message", ex);
 	}
 
 

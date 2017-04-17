@@ -13,82 +13,55 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.codec;
 
-import java.util.List;
-
 import org.springframework.core.codec.Decoder;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
 
 /**
  * Helps to configure a list of client-side HTTP message readers and writers
  * with support for built-in defaults and options to register additional custom
- * readers and writers via {@link #customCodec()}.
+ * readers and writers via {@link #customCodecs()}.
  *
  * <p>The built-in defaults include basic data types such as various byte
  * representations, resources, strings, forms, but also others like JAXB2 and
  * Jackson 2 based on classpath detection. There are options to
- * {@link #defaultCodec() override} some of the defaults or to have them
+ * {@link #defaultCodecs() override} some of the defaults or to have them
  * {@link #registerDefaults(boolean) turned off} completely.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ClientCodecConfigurer extends AbstractCodecConfigurer {
+public interface ClientCodecConfigurer extends CodecConfigurer {
 
-
-	public ClientCodecConfigurer() {
-		super(new ClientDefaultCodecConfigurer());
-	}
-
-
+	/**
+	 * {@inheritDoc}
+	 * <p>Overriden to return {@link ClientDefaultCodecsConfigurer}.
+	 */
 	@Override
-	public ClientDefaultCodecConfigurer defaultCodec() {
-		return (ClientDefaultCodecConfigurer) super.defaultCodec();
-	}
-
-
-	@Override
-	protected void addDefaultTypedWriter(List<HttpMessageWriter<?>> result) {
-		super.addDefaultTypedWriter(result);
-		defaultCodec().addWriterTo(result, FormHttpMessageWriter::new);
-	}
-
-	@Override
-	protected void addDefaultObjectReaders(List<HttpMessageReader<?>> result) {
-		super.addDefaultObjectReaders(result);
-		defaultCodec().addServerSentEventReaderTo(result);
-	}
+	ClientDefaultCodecsConfigurer defaultCodecs();
 
 
 	/**
-	 * Extension of {@code DefaultCodecConfigurer} with extra client options.
+	 * Creates a new instance of the {@code ClientCodecConfigurer}.
+	 * @return the created instance
 	 */
-	public static class ClientDefaultCodecConfigurer extends DefaultCodecConfigurer {
+	static ClientCodecConfigurer create() {
+		return new DefaultClientCodecConfigurer();
+	}
+
+	/**
+	 * Extension of {@link DefaultCodecConfigurer} with extra client options.
+	 */
+	interface ClientDefaultCodecsConfigurer extends DefaultCodecsConfigurer {
 
 		/**
 		 * Configure the {@code Decoder} to use for Server-Sent Events.
 		 * <p>By default the {@link #jackson2Decoder} override is used for SSE.
 		 * @param decoder the decoder to use
 		 */
-		public void serverSentEventDecoder(Decoder<?> decoder) {
-			HttpMessageReader<?> reader = new ServerSentEventHttpMessageReader(decoder);
-			getReaders().put(ServerSentEventHttpMessageReader.class, reader);
-		}
-
-
-		// Internal methods for building a list of default readers or writers...
-
-		private void addServerSentEventReaderTo(List<HttpMessageReader<?>> result) {
-			addReaderTo(result, () -> findReader(ServerSentEventHttpMessageReader.class, () -> {
-				Decoder<?> decoder = null;
-				if (jackson2Present) {
-					decoder = findDecoderReader(
-							Jackson2JsonDecoder.class, Jackson2JsonDecoder::new).getDecoder();
-				}
-				return new ServerSentEventHttpMessageReader(decoder);
-			}));
-		}
+		void serverSentEventDecoder(Decoder<?> decoder);
 	}
+
 
 }

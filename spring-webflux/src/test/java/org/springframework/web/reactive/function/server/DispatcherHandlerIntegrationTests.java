@@ -49,7 +49,7 @@ import org.springframework.web.reactive.function.server.support.ServerResponseRe
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 import static org.springframework.web.reactive.function.BodyInserters.fromPublisher;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
@@ -141,8 +141,8 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 						}
 
 						@Override
-						public Function<ServerRequest, Optional<Locale>> localeResolver() {
-							return DefaultHandlerStrategiesBuilder.DEFAULT_LOCALE_RESOLVER;
+						public Supplier<Function<ServerRequest, Optional<Locale>>> localeResolver() {
+							return () -> DefaultHandlerStrategiesBuilder.DEFAULT_LOCALE_RESOLVER;
 						}
 					});
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.web.socket.config.annotation;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
@@ -33,8 +35,7 @@ import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
-import java.util.ArrayList;
-import java.util.List;
+
 /**
  * An abstract base class for configuring STOMP over WebSocket/SockJS endpoints.
  *
@@ -55,7 +56,7 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 
 	private final List<String> allowedOrigins = new ArrayList<>();
 
-	private StompSockJsServiceRegistration registration;
+	private SockJsServiceRegistration registration;
 
 
 	public WebMvcStompWebSocketEndpointRegistration(String[] paths, WebSocketHandler webSocketHandler,
@@ -68,6 +69,7 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 		this.webSocketHandler = webSocketHandler;
 		this.sockJsTaskScheduler = sockJsTaskScheduler;
 	}
+
 
 	@Override
 	public StompWebSocketEndpointRegistration setHandshakeHandler(HandshakeHandler handshakeHandler) {
@@ -95,17 +97,19 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 
 	@Override
 	public SockJsServiceRegistration withSockJS() {
-		this.registration = new StompSockJsServiceRegistration(this.sockJsTaskScheduler);
+		this.registration = new SockJsServiceRegistration();
+		this.registration.setTaskScheduler(this.sockJsTaskScheduler);
 		HandshakeInterceptor[] interceptors = getInterceptors();
 		if (interceptors.length > 0) {
 			this.registration.setInterceptors(interceptors);
 		}
 		if (this.handshakeHandler != null) {
-			WebSocketTransportHandler transportHandler = new WebSocketTransportHandler(this.handshakeHandler);
-			this.registration.setTransportHandlerOverrides(transportHandler);
+			WebSocketTransportHandler handler = new WebSocketTransportHandler(this.handshakeHandler);
+			this.registration.setTransportHandlerOverrides(handler);
 		}
 		if (!this.allowedOrigins.isEmpty()) {
-			this.registration.setAllowedOrigins(this.allowedOrigins.toArray(new String[this.allowedOrigins.size()]));
+			this.registration.setAllowedOrigins(
+					this.allowedOrigins.toArray(new String[this.allowedOrigins.size()]));
 		}
 		return this.registration;
 	}
@@ -144,18 +148,6 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 			}
 		}
 		return mappings;
-	}
-
-
-	private static class StompSockJsServiceRegistration extends SockJsServiceRegistration {
-
-		public StompSockJsServiceRegistration(TaskScheduler defaultTaskScheduler) {
-			super(defaultTaskScheduler);
-		}
-
-		protected SockJsService getSockJsService() {
-			return super.getSockJsService();
-		}
 	}
 
 }

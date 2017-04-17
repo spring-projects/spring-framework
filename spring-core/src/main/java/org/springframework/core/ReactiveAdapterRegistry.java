@@ -28,6 +28,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import rx.RxReactiveStreams;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 import static org.springframework.core.ReactiveTypeDescriptor.*;
@@ -52,7 +53,7 @@ public class ReactiveAdapterRegistry {
 	private static final boolean rxJava1Present =
 			ClassUtils.isPresent("rx.Observable", ReactiveAdapterRegistry.class.getClassLoader());
 
-	private static final boolean rxJava1Adapter =
+	private static final boolean rxReactiveStreamsPresent =
 			ClassUtils.isPresent("rx.RxReactiveStreams", ReactiveAdapterRegistry.class.getClassLoader());
 
 	private static final boolean rxJava2Present =
@@ -69,12 +70,22 @@ public class ReactiveAdapterRegistry {
 		if (reactorPresent) {
 			new ReactorRegistrar().registerAdapters(this);
 		}
-		if (rxJava1Present && rxJava1Adapter) {
+		if (rxJava1Present && rxReactiveStreamsPresent) {
 			new RxJava1Registrar().registerAdapters(this);
 		}
 		if (rxJava2Present) {
 			new RxJava2Registrar().registerAdapters(this);
 		}
+	}
+
+
+	/**
+	 * Whether the registry has any adapters which would be the case if any of
+	 * Reactor, RxJava 2, or RxJava 1 (+ RxJava Reactive Streams bridge) are
+	 * present on the classpath.
+	 */
+	public boolean hasAdapters() {
+		return !this.adapters.isEmpty();
 	}
 
 
@@ -110,8 +121,16 @@ public class ReactiveAdapterRegistry {
 	 * (i.e. to adapt from; may be {@code null} if the reactive type is specified)
 	 */
 	public ReactiveAdapter getAdapter(Class<?> reactiveType, Object source) {
+
 		Object sourceToUse = (source instanceof Optional ? ((Optional<?>) source).orElse(null) : source);
 		Class<?> clazz = (sourceToUse != null ? sourceToUse.getClass() : reactiveType);
+		if (clazz == null) {
+			return null;
+		}
+
+		Assert.isTrue(!rxJava1Present || rxReactiveStreamsPresent || !clazz.getName().startsWith("rx."),
+				"For RxJava 1.x adapter support please add " +
+						"\"io.reactivex:rxjava-reactive-streams\": " + clazz.getName());
 
 		return this.adapters.stream()
 				.filter(adapter -> adapter.getReactiveType() == clazz)

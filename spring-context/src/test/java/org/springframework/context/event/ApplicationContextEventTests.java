@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.context.event;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -184,6 +186,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		smc.multicastEvent(new MyEvent(this));
 		smc.multicastEvent(new MyOtherEvent(this));
+		assertEquals(2, listener1.seenEvents.size());
 	}
 
 	@Test
@@ -197,6 +200,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		smc.multicastEvent(new MyEvent(this));
 		smc.multicastEvent(new MyOtherEvent(this));
+		assertEquals(2, listener1.seenEvents.size());
 	}
 
 	@Test
@@ -213,6 +217,26 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		smc.multicastEvent(new MyEvent(this));
 		smc.multicastEvent(new MyOtherEvent(this));
+		assertEquals(2, listener1.seenEvents.size());
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void proxiedListenersMixedWithTargetListeners() {
+		MyOrderedListener1 listener1 = new MyOrderedListener1();
+		MyOrderedListener2 listener2 = new MyOrderedListener2(listener1);
+		ApplicationListener<ApplicationEvent> proxy1 = (ApplicationListener<ApplicationEvent>) new ProxyFactory(listener1).getProxy();
+		ApplicationListener<ApplicationEvent> proxy2 = (ApplicationListener<ApplicationEvent>) new ProxyFactory(listener2).getProxy();
+
+		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
+		smc.addApplicationListener(listener1);
+		smc.addApplicationListener(listener2);
+		smc.addApplicationListener(proxy1);
+		smc.addApplicationListener(proxy2);
+
+		smc.multicastEvent(new MyEvent(this));
+		smc.multicastEvent(new MyOtherEvent(this));
+		assertEquals(2, listener1.seenEvents.size());
 	}
 
 	@Test
@@ -459,7 +483,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 	public static class MyOrderedListener1 implements ApplicationListener<ApplicationEvent>, Ordered {
 
-		public final Set<ApplicationEvent> seenEvents = new HashSet<>();
+		public final List<ApplicationEvent> seenEvents = new LinkedList<>();
 
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {

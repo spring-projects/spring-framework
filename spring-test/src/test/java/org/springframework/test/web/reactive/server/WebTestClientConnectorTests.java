@@ -32,6 +32,7 @@ import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunctions;
 
+import static java.time.Duration.*;
 import static org.junit.Assert.*;
 
 /**
@@ -53,7 +54,7 @@ public class WebTestClientConnectorTests {
 
 		WiretapConnector wiretapConnector = new WiretapConnector(connector);
 		ExchangeFunction function = ExchangeFunctions.create(wiretapConnector);
-		function.exchange(clientRequest).blockMillis(0);
+		function.exchange(clientRequest).block(ofMillis(0));
 
 		ExchangeResult actual = wiretapConnector.claimRequest("1");
 		assertNotNull(actual);

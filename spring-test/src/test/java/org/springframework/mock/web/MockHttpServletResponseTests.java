@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,12 @@ package org.springframework.mock.web;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.util.WebUtils;
 
 import static org.junit.Assert.*;
@@ -153,6 +155,22 @@ public class MockHttpServletResponseTests {
 		assertNotNull(responseHeaders);
 		assertEquals(1, responseHeaders.size());
 		assertEquals("HTTP header casing not being preserved", headerName, responseHeaders.iterator().next());
+	}
+
+	@Test
+	public void cookies() {
+		Cookie cookie = new Cookie("foo", "bar");
+		cookie.setPath("/path");
+		cookie.setDomain("example.com");
+		cookie.setMaxAge(0);
+		cookie.setSecure(true);
+		cookie.setHttpOnly(true);
+
+		response.addCookie(cookie);
+
+		assertEquals("foo=bar;Path=/path;Domain=example.com;" +
+				"Max-Age=0;Expires=Thu, 01 Jan 1970 00:00:00 GMT;" +
+				"Secure;HttpOnly", response.getHeader(HttpHeaders.SET_COOKIE));
 	}
 
 	@Test

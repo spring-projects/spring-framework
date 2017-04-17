@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.function.server;
 
+import java.util.Optional;
+
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -82,7 +84,7 @@ public class RouterFunctionsTests {
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
-		when(requestPredicate.test(request)).thenReturn(true);
+		when(requestPredicate.nest(request)).thenReturn(Optional.of(request));
 
 		RouterFunction<ServerResponse> result = RouterFunctions.nest(requestPredicate, routerFunction);
 		assertNotNull(result);
@@ -101,7 +103,7 @@ public class RouterFunctionsTests {
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
-		when(requestPredicate.test(request)).thenReturn(false);
+		when(requestPredicate.nest(request)).thenReturn(Optional.empty());
 
 		RouterFunction<ServerResponse> result = RouterFunctions.nest(requestPredicate, routerFunction);
 		assertNotNull(result);

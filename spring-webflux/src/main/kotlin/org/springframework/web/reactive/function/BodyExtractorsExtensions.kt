@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Any> toMono() : BodyExtractor<Mono<T>, ReactiveHttpInputMessage> =
+inline fun <reified T : Any> toMono(): BodyExtractor<Mono<T>, ReactiveHttpInputMessage> =
 		BodyExtractors.toMono(T::class.java)
 
 /**
@@ -20,7 +20,7 @@ inline fun <reified T : Any> toMono() : BodyExtractor<Mono<T>, ReactiveHttpInput
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun <T : Any> toMono(elementClass: KClass<T>) : BodyExtractor<Mono<T>, ReactiveHttpInputMessage> =
+fun <T : Any> toMono(elementClass: KClass<T>): BodyExtractor<Mono<T>, ReactiveHttpInputMessage> =
 		BodyExtractors.toMono(elementClass.java)
 
 /**
@@ -29,7 +29,7 @@ fun <T : Any> toMono(elementClass: KClass<T>) : BodyExtractor<Mono<T>, ReactiveH
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Any> toFlux() : BodyExtractor<Flux<T>, ReactiveHttpInputMessage> =
+inline fun <reified T : Any> toFlux(): BodyExtractor<Flux<T>, ReactiveHttpInputMessage> =
 		BodyExtractors.toFlux(T::class.java)
 
 /**
@@ -38,5 +38,5 @@ inline fun <reified T : Any> toFlux() : BodyExtractor<Flux<T>, ReactiveHttpInput
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun <T : Any> toFlux(elementClass: KClass<T>) : BodyExtractor<Flux<T>, ReactiveHttpInputMessage> =
+fun <T : Any> toFlux(elementClass: KClass<T>): BodyExtractor<Flux<T>, ReactiveHttpInputMessage> =
 		BodyExtractors.toFlux(elementClass.java)

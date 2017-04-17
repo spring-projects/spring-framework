@@ -15,9 +15,7 @@
  */
 package org.springframework.web.reactive.result.method.annotation;
 
-
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,8 +30,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -50,8 +47,7 @@ import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ControllerMethodResolver}.
@@ -67,19 +63,20 @@ public class ControllerMethodResolverTests {
 	@Before
 	public void setUp() throws Exception {
 
-		List<HandlerMethodArgumentResolver> customResolvers =
-				Arrays.asList(new CustomArgumentResolver(), new CustomSyncArgumentResolver());
+		ArgumentResolverConfigurer resolvers = new ArgumentResolverConfigurer();
+		resolvers.addCustomResolver(new CustomArgumentResolver());
+		resolvers.addCustomResolver(new CustomSyncArgumentResolver());
 
-		List<HttpMessageReader<?>> messageReaders = Arrays.asList(
-				new DecoderHttpMessageReader<>(new ByteArrayDecoder()),
-				new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
+		ServerCodecConfigurer codecs = ServerCodecConfigurer.create();
+		codecs.customCodecs().decoder(new ByteArrayDecoder());
+		codecs.customCodecs().decoder(new ByteBufferDecoder());
 
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
 		applicationContext.registerBean(TestControllerAdvice.class);
 		applicationContext.refresh();
 
 		this.methodResolver = new ControllerMethodResolver(
-				customResolvers, messageReaders, new ReactiveAdapterRegistry(), applicationContext);
+				resolvers, codecs, new ReactiveAdapterRegistry(), applicationContext);
 
 		Method method = ResolvableMethod.on(TestController.class).mockCall(TestController::handle).method();
 		this.handlerMethod = new HandlerMethod(new TestController(), method);

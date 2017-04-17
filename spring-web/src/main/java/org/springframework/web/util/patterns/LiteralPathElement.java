@@ -32,8 +32,8 @@ class LiteralPathElement extends PathElement {
 
 	private boolean caseSensitive;
 
-	public LiteralPathElement(int pos, char[] literalText, boolean caseSensitive) {
-		super(pos);
+	public LiteralPathElement(int pos, char[] literalText, boolean caseSensitive, char separator) {
+		super(pos, separator);
 		this.len = literalText.length;
 		this.caseSensitive = caseSensitive;
 		if (caseSensitive) {
@@ -69,7 +69,13 @@ class LiteralPathElement extends PathElement {
 			}
 		}
 		if (next == null) {
-			return candidateIndex == matchingContext.candidateLength;
+			if (matchingContext.determineRemaining && nextIfExistsIsSeparator(candidateIndex, matchingContext)) {
+				matchingContext.remainingPathIndex = candidateIndex;
+				return true;
+			}
+			else {
+				return candidateIndex == matchingContext.candidateLength;
+			}
 		}
 		else {
 			if (matchingContext.isMatchStartMatching && candidateIndex == matchingContext.candidateLength) {

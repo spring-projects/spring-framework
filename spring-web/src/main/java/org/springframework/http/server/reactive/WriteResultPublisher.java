@@ -116,9 +116,9 @@ class WriteResultPublisher implements Publisher<Void> {
 			@Override
 			void subscribe(WriteResultPublisher publisher, Subscriber<? super Void> subscriber) {
 				Assert.notNull(subscriber, "Subscriber must not be null");
+				publisher.subscriber = subscriber;
 				if (publisher.changeState(this, SUBSCRIBED)) {
 					Subscription subscription = new ResponseBodyWriteResultSubscription(publisher);
-					publisher.subscriber = subscriber;
 					subscriber.onSubscribe(subscription);
 					if (publisher.publisherCompleted) {
 						publisher.publishComplete();

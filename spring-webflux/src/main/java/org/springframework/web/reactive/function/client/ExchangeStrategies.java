@@ -16,15 +16,13 @@
 
 package org.springframework.web.reactive.function.client;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.codec.Decoder;
-import org.springframework.core.codec.Encoder;
+import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.util.Assert;
 
 /**
  * Defines the strategies for invoking {@link ExchangeFunction}s. An instance of
@@ -66,48 +64,6 @@ public interface ExchangeStrategies {
 		return builder().build();
 	}
 
-	/**
-	 * Return a new {@code ExchangeStrategies} based on the given
-	 * {@linkplain ApplicationContext application context}.
-	 * The returned supplier will search for all {@link HttpMessageReader}, and
-	 * {@link HttpMessageWriter} instances in the given application context and return
-	 * them for {@link #messageReaders()}, and {@link #messageWriters()} respectively.
-	 * @param applicationContext the application context to base the strategies on
-	 * @return the new {@code ExchangeStrategies}
-	 */
-	static ExchangeStrategies of(ApplicationContext applicationContext) {
-		return builder(applicationContext).build();
-	}
-
-	/**
-	 * Return a new {@code ExchangeStrategies} described by the given supplier functions.
-	 * All provided supplier function parameters can be {@code null} to indicate an empty
-	 * stream is to be returned.
-	 * @param messageReaders the supplier function for {@link HttpMessageReader} instances
-	 * (can be {@code null})
-	 * @param messageWriters the supplier function for {@link HttpMessageWriter} instances
-	 * (can be {@code null})
-	 * @return the new {@code ExchangeStrategies}
-	 */
-	static ExchangeStrategies of(Supplier<Stream<HttpMessageReader<?>>> messageReaders,
-			Supplier<Stream<HttpMessageWriter<?>>> messageWriters) {
-
-		return new ExchangeStrategies() {
-			@Override
-			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-				return checkForNull(messageReaders);
-			}
-			@Override
-			public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
-				return checkForNull(messageWriters);
-			}
-			private <T> Supplier<Stream<T>> checkForNull(Supplier<Stream<T>> supplier) {
-				return supplier != null ? supplier : Stream::empty;
-			}
-		};
-	}
-
-
 	// Builder methods
 
 	/**
@@ -117,21 +73,6 @@ public interface ExchangeStrategies {
 	static Builder builder() {
 		DefaultExchangeStrategiesBuilder builder = new DefaultExchangeStrategiesBuilder();
 		builder.defaultConfiguration();
-		return builder;
-	}
-
-	/**
-	 * Return a mutable builder based on the given {@linkplain ApplicationContext application context}.
-	 * The returned builder will search for all {@link HttpMessageReader}, and
-	 * {@link HttpMessageWriter} instances in the given application context and return them for
-	 * {@link #messageReaders()}, and {@link #messageWriters()}.
-	 * @param applicationContext the application context to base the strategies on
-	 * @return the builder
-	 */
-	static Builder builder(ApplicationContext applicationContext) {
-		Assert.notNull(applicationContext, "ApplicationContext must not be null");
-		DefaultExchangeStrategiesBuilder builder = new DefaultExchangeStrategiesBuilder();
-		builder.applicationContext(applicationContext);
 		return builder;
 	}
 
@@ -150,34 +91,20 @@ public interface ExchangeStrategies {
 	interface Builder {
 
 		/**
-		 * Add the given message reader to this builder.
-		 * @param messageReader the message reader to add
+		 * Customize the list of default client-side HTTP message readers and writers.
+		 * @param consumer the consumer to customize the default codecs
 		 * @return this builder
+		 * @see #customCodecs(Consumer)
 		 */
-		Builder messageReader(HttpMessageReader<?> messageReader);
+		Builder defaultCodecs(Consumer<ClientCodecConfigurer.ClientDefaultCodecsConfigurer> consumer);
 
 		/**
-		 * Add the given decoder to this builder. This is a convenient alternative to adding a
-		 * {@link org.springframework.http.codec.DecoderHttpMessageReader} that wraps the given decoder.
-		 * @param decoder the decoder to add
+		 * Customize the list of custom client-side HTTP message readers and writers.
+		 * @param consumer the consumer to customize the custom codecs
 		 * @return this builder
+		 * @see #defaultCodecs(Consumer)
 		 */
-		Builder decoder(Decoder<?> decoder);
-
-		/**
-		 * Add the given message writer to this builder.
-		 * @param messageWriter the message writer to add
-		 * @return this builder
-		 */
-		Builder messageWriter(HttpMessageWriter<?> messageWriter);
-
-		/**
-		 * Add the given encoder to this builder. This is a convenient alternative to adding a
-		 * {@link org.springframework.http.codec.EncoderHttpMessageWriter} that wraps the given encoder.
-		 * @param encoder the encoder to add
-		 * @return this builder
-		 */
-		Builder encoder(Encoder<?> encoder);
+		Builder customCodecs(Consumer<ClientCodecConfigurer.CustomCodecsConfigurer> consumer);
 
 		/**
 		 * Builds the {@link ExchangeStrategies}.

@@ -21,6 +21,7 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.Exceptions;
 import reactor.core.publisher.MonoSource;
 import reactor.core.publisher.Operators;
 
@@ -56,7 +57,7 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 
 
 	@SuppressWarnings("deprecation")
-	private class WriteWithBarrier extends Operators.SubscriberAdapter<T, Void> implements Publisher<T> {
+	private class WriteWithBarrier extends SubscriberAdapter<T, Void> implements Publisher<T> {
 
 		/**
 		 * We've at at least one emission, we've called the write function, the write
@@ -206,6 +207,134 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 					}
 					super.doRequest(n);
 				}
+			}
+		}
+	}
+
+	// TODO Remove this copy of Reactor 3.0.x Operators.SubscriberAdapter
+	private static class SubscriberAdapter<I, O> implements Subscriber<I>, Subscription {
+
+		protected final Subscriber<? super O> subscriber;
+
+		protected Subscription subscription;
+
+		public SubscriberAdapter(Subscriber<? super O> subscriber) {
+			this.subscriber = subscriber;
+		}
+
+		public Subscriber<? super O> downstream() {
+			return subscriber;
+		}
+
+		@Override
+		public final void cancel() {
+			try {
+				doCancel();
+			} catch (Throwable throwable) {
+				doOnSubscriberError(Operators.onOperatorError(subscription, throwable));
+			}
+		}
+
+		@Override
+		public final void onComplete() {
+			try {
+				doComplete();
+			} catch (Throwable throwable) {
+				doOnSubscriberError(Operators.onOperatorError(throwable));
+			}
+		}
+
+		@Override
+		public final void onError(Throwable t) {
+			if (t == null) {
+				throw Exceptions.argumentIsNullException();
+			}
+			doError(t);
+		}
+
+		@Override
+		public final void onNext(I i) {
+			if (i == null) {
+				throw Exceptions.argumentIsNullException();
+			}
+			try {
+				doNext(i);
+			}
+			catch (Throwable throwable) {
+				doOnSubscriberError(Operators.onOperatorError(subscription, throwable, i));
+			}
+		}
+
+		@Override
+		public final void onSubscribe(Subscription s) {
+			if (Operators.validate(subscription, s)) {
+				try {
+					subscription = s;
+					doOnSubscribe(s);
+				}
+				catch (Throwable throwable) {
+					doOnSubscriberError(Operators.onOperatorError(s, throwable));
+				}
+			}
+		}
+
+		@Override
+		public final void request(long n) {
+			try {
+				Operators.checkRequest(n);
+				doRequest(n);
+			} catch (Throwable throwable) {
+				doCancel();
+				doOnSubscriberError(Operators.onOperatorError(throwable));
+			}
+		}
+
+		@Override
+		public String toString() {
+			return getClass().getSimpleName();
+		}
+
+		/**
+		 * Hook for further processing of onSubscribe's Subscription.
+		 * @param subscription the subscription to optionally process
+		 */
+		protected void doOnSubscribe(Subscription subscription) {
+			subscriber.onSubscribe(this);
+		}
+
+		public Subscription upstream() {
+			return subscription;
+		}
+
+		@SuppressWarnings("unchecked")
+		protected void doNext(I i) {
+			subscriber.onNext((O) i);
+		}
+
+		protected void doError(Throwable throwable) {
+			subscriber.onError(throwable);
+		}
+
+		protected void doOnSubscriberError(Throwable throwable){
+			subscriber.onError(throwable);
+		}
+
+		protected void doComplete() {
+			subscriber.onComplete();
+		}
+
+		protected void doRequest(long n) {
+			Subscription s = this.subscription;
+			if (s != null) {
+				s.request(n);
+			}
+		}
+
+		protected void doCancel() {
+			Subscription s = this.subscription;
+			if (s != null) {
+				this.subscription = null;
+				s.cancel();
 			}
 		}
 	}

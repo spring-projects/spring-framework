@@ -22,11 +22,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.http.MediaType;
@@ -40,9 +37,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static java.time.Duration.ofMillis;
 import static org.hamcrest.CoreMatchers.endsWith;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
+
 
 /**
  * Annotated controllers accepting and returning typed Objects.
@@ -61,7 +62,16 @@ public class ResponseEntityTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
-				.expectBody(Person.class).value().isEqualTo(new Person("John"));
+				.expectBody(Person.class).isEqualTo(new Person("John"));
+	}
+
+	@Test
+	public void entityWithConsumer() throws Exception {
+		this.client.get().uri("/persons/John")
+				.exchange()
+				.expectStatus().isOk()
+				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.expectBody(Person.class).consumeWith(p -> assertEquals(new Person("John"), p));
 	}
 
 	@Test
@@ -74,7 +84,7 @@ public class ResponseEntityTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
-				.expectBody(Person.class).list().isEqualTo(expected);
+				.expectBodyList(Person.class).isEqualTo(expected);
 	}
 
 	@Test
@@ -88,8 +98,7 @@ public class ResponseEntityTests {
 		this.client.get().uri("/persons?map=true")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody()
-				.map(String.class, Person.class).isEqualTo(map);
+				.expectBody(forClassWithGenerics(Map.class, String.class, Person.class)).isEqualTo(map);
 	}
 
 	@Test
@@ -101,8 +110,7 @@ public class ResponseEntityTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectHeader().contentType(TEXT_EVENT_STREAM)
-				.expectBody(Person.class)
-				.returnResult();
+				.returnResult(Person.class);
 
 		StepVerifier.create(result.getResponseBody())
 				.expectNext(new Person("N0"), new Person("N1"), new Person("N2"))
@@ -115,7 +123,7 @@ public class ResponseEntityTests {
 	@Test
 	public void postEntity() throws Exception {
 		this.client.post().uri("/persons")
-				.body(Mono.just(new Person("John")), Person.class)
+				.body(new Person("John"))
 				.exchange()
 				.expectStatus().isCreated()
 				.expectHeader().valueEquals("location", "/persons/John")
@@ -125,6 +133,7 @@ public class ResponseEntityTests {
 
 	@RestController
 	@RequestMapping("/persons")
+	@SuppressWarnings("unused")
 	static class PersonController {
 
 		@GetMapping("/{name}")
@@ -148,44 +157,12 @@ public class ResponseEntityTests {
 
 		@GetMapping(produces = "text/event-stream")
 		Flux<Person> getPersonStream() {
-			return Flux.intervalMillis(100).onBackpressureBuffer(10).map(index -> new Person("N" + index));
+			return Flux.interval(ofMillis(100)).onBackpressureBuffer(10).map(index -> new Person("N" + index));
 		}
 
 		@PostMapping
 		ResponseEntity<String> savePerson(@RequestBody Person person) {
 			return ResponseEntity.created(URI.create("/persons/" + person.getName())).build();
-		}
-	}
-
-	static class Person {
-
-		private final String name;
-
-		@JsonCreator
-		public Person(@JsonProperty("name") String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return this.name;
-		}
-
-		@Override
-		public boolean equals(Object other) {
-			if (this == other) return true;
-			if (other == null || getClass() != other.getClass()) return false;
-			Person person = (Person) other;
-			return getName().equals(person.getName());
-		}
-
-		@Override
-		public int hashCode() {
-			return getName().hashCode();
-		}
-
-		@Override
-		public String toString() {
-			return "Person[name='" + name + "']";
 		}
 	}
 

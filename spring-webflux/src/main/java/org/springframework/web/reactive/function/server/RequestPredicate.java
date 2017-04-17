@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.function.server;
 
+import java.util.Optional;
+
 import org.springframework.util.Assert;
 
 /**
@@ -47,20 +49,7 @@ public interface RequestPredicate {
 	 */
 	default RequestPredicate and(RequestPredicate other) {
 		Assert.notNull(other, "'other' must not be null");
-		return new RequestPredicate() {
-			@Override
-			public boolean test(ServerRequest t) {
-				return RequestPredicate.this.test(t) && other.test(t);
-			}
-			@Override
-			public ServerRequest nestRequest(ServerRequest request) {
-				return other.nestRequest(RequestPredicate.this.nestRequest(request));
-			}
-			@Override
-			public String toString() {
-				return String.format("(%s && %s)", RequestPredicate.this, other);
-			}
-		};
+		return new RequestPredicates.AndRequestPredicate(this, other);
 	}
 
 	/**
@@ -80,41 +69,22 @@ public interface RequestPredicate {
 	 */
 	default RequestPredicate or(RequestPredicate other) {
 		Assert.notNull(other, "'other' must not be null");
-		return new RequestPredicate() {
-			@Override
-			public boolean test(ServerRequest t) {
-				return RequestPredicate.this.test(t) || other.test(t);
-			}
-			@Override
-			public ServerRequest nestRequest(ServerRequest request) {
-				if (RequestPredicate.this.test(request)) {
-					return RequestPredicate.this.nestRequest(request);
-				}
-				else if (other.test(request)) {
-					return other.nestRequest(request);
-				}
-				else {
-					throw new IllegalStateException("Neither " + RequestPredicate.this.toString() +
-							" nor " + other + "matches");
-				}
-			}
-			@Override
-			public String toString() {
-				return String.format("(%s || %s)", RequestPredicate.this, other);
-			}
-		};
+		return new RequestPredicates.OrRequestPredicate(this, other);
 	}
 
 	/**
 	 * Transform the given request into a request used for a nested route. For instance,
-	 * a path-based predicate can return a {@code ServerRequest} with a nested path.
-	 * <p>The default implementation returns the given path.
+	 * a path-based predicate can return a {@code ServerRequest} with a the path remaining after a
+	 * match.
+	 * <p>The default implementation returns an {@code Optional} wrapping the given path if
+	 * {@link #test(ServerRequest)} evaluates to {@code true}; or {@link Optional#empty()} if it
+	 * evaluates to {@code false}.
 	 * @param request the request to be nested
 	 * @return the nested request
 	 * @see RouterFunctions#nest(RequestPredicate, RouterFunction)
 	 */
-	default ServerRequest nestRequest(ServerRequest request) {
-		return request;
+	default Optional<ServerRequest> nest(ServerRequest request) {
+		return test(request) ? Optional.of(request) : Optional.empty();
 	}
 
 }

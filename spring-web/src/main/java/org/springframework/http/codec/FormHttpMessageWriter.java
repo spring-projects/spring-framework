@@ -97,7 +97,7 @@ public class FormHttpMessageWriter implements HttpMessageWriter<MultiValueMap<St
 				.from(inputStream)
 				.single()
 				.map(form -> generateForm(form, charset))
-				.then(value -> {
+				.flatMap(value -> {
 					ByteBuffer byteBuffer = charset.encode(value);
 					DataBuffer buffer = message.bufferFactory().wrap(byteBuffer);
 					message.getHeaders().setContentLength(byteBuffer.remaining());

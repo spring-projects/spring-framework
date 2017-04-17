@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client;
 
 import java.net.URI;
@@ -24,7 +25,6 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.mock.http.client.MockAsyncClientHttpRequest;
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.http.HttpMethod.GET;
@@ -122,9 +122,10 @@ public class UnorderedRequestExpectationManagerTests {
 	}
 
 
+	@SuppressWarnings("deprecation")
 	private ClientHttpRequest createRequest(HttpMethod method, String url) {
 		try {
-			return new MockAsyncClientHttpRequest(method,  new URI(url));
+			return new org.springframework.mock.http.client.MockAsyncClientHttpRequest(method,  new URI(url));
 		}
 		catch (URISyntaxException ex) {
 			throw new IllegalStateException(ex);

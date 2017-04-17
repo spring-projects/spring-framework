@@ -146,7 +146,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 				.doOnNext(updateConnectMono(connectMono))
 				.doOnError(updateConnectMono(connectMono))
 				.doOnError(handler::afterConnectFailure)    // report all connect failures to the handler
-				.then(NettyContext::onClose)                // post-connect issues
+				.flatMap(NettyContext::onClose)                // post-connect issues
 				.retryWhen(reconnectFunction(strategy))
 				.repeatWhen(reconnectFunction(strategy))
 				.subscribe();

@@ -33,6 +33,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.StreamUtils;
 
 import static org.junit.Assert.*;
@@ -251,12 +252,14 @@ public class MockHttpServletRequestTests {
 		request.setCookies(cookie1, cookie2);
 
 		Cookie[] cookies = request.getCookies();
+		List<String> cookieHeaders = Collections.list(request.getHeaders("Cookie"));
 
 		assertEquals(2, cookies.length);
 		assertEquals("foo", cookies[0].getName());
 		assertEquals("bar", cookies[0].getValue());
 		assertEquals("baz", cookies[1].getName());
 		assertEquals("qux", cookies[1].getValue());
+		assertEquals(Arrays.asList("foo=bar", "baz=qux"), cookieHeaders);
 	}
 
 	@Test
@@ -295,6 +298,16 @@ public class MockHttpServletRequestTests {
 		List<Locale> preferredLocales = Arrays.asList(Locale.ITALY, Locale.CHINA);
 		request.setPreferredLocales(preferredLocales);
 		assertEqualEnumerations(Collections.enumeration(preferredLocales), request.getLocales());
+		assertEquals("it-it, zh-cn", request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
+	}
+
+	@Test
+	public void preferredLocalesFromAcceptLanguageHeader() {
+		String headerValue = "fr-ch, fr;q=0.9, en-*;q=0.8, de;q=0.7, *;q=0.5";
+		request.addHeader("Accept-Language", headerValue);
+		List<Locale> actual = Collections.list(request.getLocales());
+		assertEquals(Arrays.asList(Locale.forLanguageTag("fr-ch"), Locale.forLanguageTag("fr"),
+				Locale.forLanguageTag("en"), Locale.forLanguageTag("de")), actual);
 	}
 
 	@Test

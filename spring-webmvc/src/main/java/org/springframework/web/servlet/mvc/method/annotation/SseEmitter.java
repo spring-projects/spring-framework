@@ -25,6 +25,7 @@ import java.util.Set;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -126,6 +127,11 @@ public class SseEmitter extends ResponseBodyEmitter {
 				super.send(entry.getData(), entry.getMediaType());
 			}
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "SseEmitter@" + ObjectUtils.getIdentityHexString(this);
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,15 +177,15 @@ public class StringUtilsTests {
 
 		// Non match: no change
 		s = StringUtils.replace(inString, "qwoeiruqopwieurpoqwieur", newPattern);
-		assertTrue("Replace non matched is equal", s.equals(inString));
+		assertSame("Replace non-matched is returned as-is", inString, s);
 
 		// Null new pattern: should ignore
 		s = StringUtils.replace(inString, oldPattern, null);
-		assertTrue("Replace non matched is equal", s.equals(inString));
+		assertSame("Replace non-matched is returned as-is", inString, s);
 
 		// Null old pattern: should ignore
 		s = StringUtils.replace(inString, null, newPattern);
-		assertTrue("Replace non matched is equal", s.equals(inString));
+		assertSame("Replace non-matched is returned as-is", inString, s);
 	}
 
 	@Test

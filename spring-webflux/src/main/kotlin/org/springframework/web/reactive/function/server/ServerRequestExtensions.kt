@@ -1,5 +1,7 @@
 package org.springframework.web.reactive.function.server
 
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 import kotlin.reflect.KClass
 
 
@@ -9,7 +11,7 @@ import kotlin.reflect.KClass
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun <T : Any> ServerRequest.bodyToMono(type: KClass<T>) = bodyToMono(type.java)
+fun <T : Any> ServerRequest.bodyToMono(type: KClass<T>): Mono<T> = bodyToMono(type.java)
 
 /**
  * Extension for [ServerRequest.bodyToMono] providing a `bodyToMono<Foo>()` variant.
@@ -17,7 +19,7 @@ fun <T : Any> ServerRequest.bodyToMono(type: KClass<T>) = bodyToMono(type.java)
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Any> ServerRequest.bodyToMono() = bodyToMono(T::class.java)
+inline fun <reified T : Any> ServerRequest.bodyToMono(): Mono<T> = bodyToMono(T::class.java)
 
 /**
  * Extension for [ServerRequest.bodyToFlux] providing a [KClass] based variant.
@@ -25,7 +27,7 @@ inline fun <reified T : Any> ServerRequest.bodyToMono() = bodyToMono(T::class.ja
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun <T : Any> ServerRequest.bodyToFlux(type: KClass<T>) = bodyToFlux(type.java)
+fun <T : Any> ServerRequest.bodyToFlux(type: KClass<T>): Flux<T> = bodyToFlux(type.java)
 
 /**
  * Extension for [ServerRequest.bodyToFlux] providing a `bodyToFlux<Foo>()` variant.
@@ -33,4 +35,4 @@ fun <T : Any> ServerRequest.bodyToFlux(type: KClass<T>) = bodyToFlux(type.java)
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Any> ServerRequest.bodyToFlux() = bodyToFlux(T::class.java)
+inline fun <reified T : Any> ServerRequest.bodyToFlux(): Flux<T> = bodyToFlux(T::class.java)

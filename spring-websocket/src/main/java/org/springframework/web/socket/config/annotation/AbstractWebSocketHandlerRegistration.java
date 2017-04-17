@@ -43,8 +43,6 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
  */
 public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSocketHandlerRegistration {
 
-	private final TaskScheduler sockJsTaskScheduler;
-
 	private final MultiValueMap<WebSocketHandler, String> handlerMap = new LinkedMultiValueMap<>();
 
 	private HandshakeHandler handshakeHandler;
@@ -55,9 +53,21 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 
 	private SockJsServiceRegistration sockJsServiceRegistration;
 
+	private TaskScheduler scheduler;
 
+
+	public AbstractWebSocketHandlerRegistration() {
+	}
+
+	/**
+	 * Deprecated constructor with a TaskScheduler.
+	 *
+	 * @deprecated as of 5.0 a TaskScheduler is not provided upfront, not until
+	 * it is obvious that it is needed, see {@link #getSockJsServiceRegistration()}.
+	 */
+	@Deprecated
 	public AbstractWebSocketHandlerRegistration(TaskScheduler defaultTaskScheduler) {
-		this.sockJsTaskScheduler = defaultTaskScheduler;
+		this.scheduler = defaultTaskScheduler;
 	}
 
 
@@ -98,7 +108,10 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 
 	@Override
 	public SockJsServiceRegistration withSockJS() {
-		this.sockJsServiceRegistration = new SockJsServiceRegistration(this.sockJsTaskScheduler);
+		this.sockJsServiceRegistration = new SockJsServiceRegistration();
+		if (this.scheduler != null) {
+			this.sockJsServiceRegistration.setTaskScheduler(this.scheduler);
+		}
 		HandshakeInterceptor[] interceptors = getInterceptors();
 		if (interceptors.length > 0) {
 			this.sockJsServiceRegistration.setInterceptors(interceptors);
@@ -119,6 +132,16 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 		interceptors.addAll(this.interceptors);
 		interceptors.add(new OriginHandshakeInterceptor(this.allowedOrigins));
 		return interceptors.toArray(new HandshakeInterceptor[interceptors.size()]);
+	}
+
+	/**
+	 * Expose the {@code SockJsServiceRegistration} -- if SockJS is enabled or
+	 * {@code null} otherwise -- so that it can be configured with a TaskScheduler
+	 * if the application did not provide one. This should be done prior to
+	 * calling {@link #getMappings()}.
+	 */
+	protected SockJsServiceRegistration getSockJsServiceRegistration() {
+		return this.sockJsServiceRegistration;
 	}
 
 	protected final M getMappings() {

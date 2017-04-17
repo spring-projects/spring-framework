@@ -4,6 +4,7 @@
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :toc: left
 :toclevels: 2
+ifdef::backend-pdf[:source-highlighter: rouge]
 
 
 [[overview-getting-started-with-spring]]
@@ -40,9 +41,9 @@ Examples of how you, as an application developer, can benefit from the Spring pl
 
 * Make a Java method execute in a database transaction without having to deal with
   transaction APIs.
-* Make a local Java method a remote procedure without having to deal with remote APIs.
-* Make a local Java method a management operation without having to deal with JMX APIs.
-* Make a local Java method a message handler without having to deal with JMS APIs.
+* Make a local Java method an HTTP endpoint without having to deal with the Servlet API.
+* Make a local Java method a message handler without having to deal with the JMS API.
+* Make a local Java method a management operation without having to deal with the JMX API.
 
 
 
@@ -605,164 +606,55 @@ http://repo.spring.io/snapshot/org/springframework/spring[snapshots].
 
 [[overview-logging]]
 ==== Logging
-Logging is a very important dependency for Spring because __a)__ it is the only mandatory
-external dependency, __b)__ everyone likes to see some output from the tools they are
-using, and __c)__ Spring integrates with lots of other tools all of which have also made
-a choice of logging dependency. One of the goals of an application developer is often to
-have unified logging configured in a central place for the whole application, including
-all external components. This is more difficult than it might have been since there are so
-many choices of logging framework.
+Spring's logging setup has been revised for Spring 5: It is still based on the Apache
+Commons Logging API, also known as Jakarta Commons Logging (JCL). However, `spring-core`
+includes an embedded variant of Commons Logging now, with a Spring-specific `LogFactory`
+which automatically bridges to https://logging.apache.org/log4j/2.x/[Log4j 2],
+http://www.slf4j.org[SLF4J], or the JDK's own `java.util.logging` (JUL). This
+implementation acts like the JCL-over-SLF4J bridge but with a range of dynamically
+detected providers, analogous to JBoss Logging's common targets (as used by Hibernate).
 
-The mandatory logging dependency in Spring is the Jakarta Commons Logging API (JCL). We
-compile against JCL and we also make JCL `Log` objects visible for classes that extend
-the Spring Framework. It's important to users that all versions of Spring use the same
-logging library: migration is easy because backwards compatibility is preserved even
-with applications that extend Spring. The way we do this is to make one of the modules
-in Spring depend explicitly on `commons-logging` (the canonical implementation of JCL),
-and then make all the other modules depend on that at compile time. If you are using
-Maven for example, and wondering where you picked up the dependency on
-`commons-logging`, then it is from Spring and specifically from the central module
-called `spring-core`.
+As a benefit, there is no need for external bridges like JCL-over-SLF4J anymore,
+and correspondingly no need for a manual exclude of the standard Commons Logging jar
+from `spring-core` dependencies. Instead, it all just works in Spring's autodetection
+style at runtime: Simply put Log4j 2.x or SLF4J on your classpath, without any extra
+bridge jars, or rely on default logging through JUL (with a customizable JUL setup).
+And nicely aligned, default Hibernate setup will choose the same common log targets.
 
-The nice thing about `commons-logging` is that you don't need anything else to make your
-application work. It has a runtime discovery algorithm that looks for other logging
-frameworks in well known places on the classpath and uses one that it thinks is
-appropriate (or you can tell it which one if you need to). If nothing else is available
-you get pretty nice looking logs just from the JDK (java.util.logging or JUL for short).
-You should find that your Spring application works and logs happily to the console out
-of the box in most situations, and that's important.
+If both Log4j and SLF4J are present, the Log4j API will be used preferably (since it
+directly matches JCL's signatures and natively supports a 'fatal' log level as well as
+lazily resolved message objects), analogous to JBoss Logging's provider preferences.
+Log4j may nevertheless be configured to delegate to SLF4J, or SLF4J may be configured
+to delegate to Log4j: Please check the instructions on their websites on how to arrive
+at a consistent outcome in such a mixed scenario.
 
+[TIP]
+====
+As of Spring 5, drop any references to external Commons Logging bridges and also any
+manual exclude of the standard Commons Logging jar from your existing `spring-core`
+dependency setup. Your Log4j or SLF4J or JUL setup will keep working without changes.
+Note that you may still need a `commons-logging` exclude for other libraries (e.g.
+Apache HttpClient, Castor, HtmlUnit) in order to pick up Spring's JCL bridge instead.
 
-[[overview-not-using-commons-logging]]
-===== Not Using Commons Logging
-Unfortunately, the runtime discovery algorithm in `commons-logging`, while convenient
-for the end-user, is problematic. If we could turn back the clock and start Spring now
-as a new project it would use a different logging dependency. The first choice would
-probably be the Simple Logging Facade for Java ( http://www.slf4j.org[SLF4J]), which is
-also used by a lot of other tools that people use with Spring inside their applications.
-
-There are basically two ways to switch off `commons-logging`:
-
-. Exclude the dependency from the `spring-core` module (as it is the only module that
-  explicitly depends on `commons-logging`)
-. Depend on a special `commons-logging` dependency that replaces the library with
-  an empty jar (more details can be found in the
-  http://slf4j.org/faq.html#excludingJCL[SLF4J FAQ])
-
-To exclude commons-logging, add the following to your `dependencyManagement` section:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes,attributes"]
-----
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-core</artifactId>
-			<version>{spring-version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-	</dependencies>
-----
-
-Now this application is probably broken because there is no implementation of the JCL
-API on the classpath, so to fix it a new one has to be provided. In the next section we
-show you how to provide an alternative implementation of JCL using SLF4J as an example.
-
-
-[[overview-logging-slf4j]]
-===== Using SLF4J
-SLF4J is a cleaner dependency and more efficient at runtime than `commons-logging`
-because it uses compile-time bindings instead of runtime discovery of the other logging
-frameworks it integrates. This also means that you have to be more explicit about what
-you want to happen at runtime, and declare it or configure it accordingly. SLF4J
-provides bindings to many common logging frameworks, so you can usually choose one that
-you already use, and bind to that for configuration and management.
-
-SLF4J provides bindings to many common logging frameworks, including JCL, and it also
-does the reverse: bridges between other logging frameworks and itself. So to use SLF4J
-with Spring you need to replace the `commons-logging` dependency with the SLF4J-JCL
-bridge. Once you have done that then logging calls from within Spring will be translated
-into logging calls to the SLF4J API, so if other libraries in your application use that
-API, then you have a single place to configure and manage logging.
-
-A common choice might be to bridge Spring to SLF4J, and then provide explicit binding
-from SLF4J to Log4j. You need to supply several dependencies (and exclude the existing
-`commons-logging`): the bridge, the SLF4J implementation for Log4j, and the Log4j
-implementation itself. In Maven you would do that like this:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes,attributes"]
-----
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-core</artifactId>
-			<version>{spring-version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>jcl-over-slf4j</artifactId>
-			<version>1.7.22</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
-			<version>2.7</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-api</artifactId>
-			<version>2.7</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-			<version>2.7</version>
-		</dependency>
-	</dependencies>
-----
-
-That might seem like a lot of dependencies just to get some logging. Well it is, but it
-__is__ optional, and it should behave better than the vanilla `commons-logging` with
-respect to classloader issues, notably if you are in a strict container like an OSGi
-platform. Allegedly there is also a performance benefit because the bindings are at
-compile-time not runtime.
-
-A more common choice amongst SLF4J users, which uses fewer steps and generates fewer
-dependencies, is to bind directly to http://logback.qos.ch[Logback]. This removes the
-extra binding step because Logback implements SLF4J directly, so you only need to depend
-on two libraries not four ( `jcl-over-slf4j` and `logback`). If you do that you might
-also need to exclude the slf4j-api dependency from other external dependencies (not
-Spring), because you only want one version of that API on the classpath.
+A custom `LogFactory` implementation at the Commons Logging level will NOT get picked
+up since Spring's bridge does not support custom `commons-logging.properties' setup.
+For any other log provider, please set up corresponding SLF4J or JUL bridges (which
+you are very likely going to need for other libraries such as Hibernate anyway).
+Note that Log4j 1.x has reached its end-of-life; please migrate to Log4j 2.x.
+====
 
 
 [[overview-logging-log4j]]
-===== Using Log4j
+===== Using Log4j 2.x
 
-NOTE: Log4j 1.x is EOL and the following applies to Log4j 2
+http://logging.apache.org/log4j[Log4j 2] established itself as a fresh rewrite of
+the original Log4j project (1.x is EOL now). As of Spring 5, the embedded logging
+bridge will automatically delegate to Log4j 2.x when available on the classpath.
 
-Many people use http://logging.apache.org/log4j[Log4j] as a logging framework for
-configuration and management purposes. It's efficient and well-established, and in fact
-it's what we use at runtime when we build and test Spring. Spring also provides some
-utilities for configuring and initializing Log4j, so it has an optional compile-time
-dependency on Log4j in some modules.
-
-To use Log4j with JCL, all you need to do is put Log4j on the classpath and provide
-it with a configuration file (`log4j2.xml`, `log4j2.properties`, or other
+So to use Log4j with Spring, all you need to do is put Log4j on the classpath and
+provide it with a configuration file (`log4j2.xml`, `log4j2.properties`, or other
 http://logging.apache.org/log4j/2.x/manual/configuration.html[supported configuration
-formats]). For Maven users, the minimal dependencies needed are:
-
+formats]). For Maven users, the minimal dependency needed is:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes,attributes"]
@@ -771,17 +663,13 @@ formats]). For Maven users, the minimal dependencies needed are:
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>2.7</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-jcl</artifactId>
-			<version>2.7</version>
+			<version>2.8.2</version>
 		</dependency>
 	</dependencies>
 ----
 
-If you also wish to use SLF4J, the following dependencies are also needed:
+If you also wish to enable SLF4J to delegate to Log4j, e.g. for other libraries
+which use SLF4J by default, the following dependency is also needed:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes,attributes"]
@@ -790,7 +678,7 @@ If you also wish to use SLF4J, the following dependencies are also needed:
 	  <dependency>
 		<groupId>org.apache.logging.log4j</groupId>
 		<artifactId>log4j-slf4j-impl</artifactId>
-		<version>2.7</version>
+		<version>2.8.2</version>
 	  </dependency>
 	</dependencies>
 ----
@@ -816,25 +704,68 @@ Here is an example `log4j2.xml` for logging to the console:
 	</Configuration>
 ----
 
-[[overview-native-jcl]]
-====== Runtime Containers with Native JCL
-Many people run their Spring applications in a container that itself provides an
-implementation of JCL. IBM Websphere Application Server (WAS) is the archetype. This
-often causes problems, and unfortunately there is no silver bullet solution; simply
-excluding `commons-logging` from your application is not enough in most situations.
 
-To be clear about this: the problems reported are usually not with JCL per se, or even
-with `commons-logging`: rather they are to do with binding `commons-logging` to another
-framework (often Log4j). This can fail because `commons-logging` changed the way they do
-the runtime discovery in between the older versions (1.0) found in some containers and
-the modern versions that most people use now (1.1). Spring does not use any unusual
-parts of the JCL API, so nothing breaks there, but as soon as Spring or your application
-tries to do any logging you can find that the bindings to Log4j are not working.
+[[overview-logging-slf4j]]
+===== Using SLF4J with Logback
 
-In such cases with WAS the easiest thing to do is to invert the class loader hierarchy
-(IBM calls it "parent last") so that the application controls the JCL dependency, not
-the container. That option isn't always open, but there are plenty of other suggestions
-in the public domain for alternative approaches, and your mileage may vary depending on
-the exact version and feature set of the container.
+The Simple Logging Facade for Java (http://www.slf4j.org[SLF4J]) is a popular API
+used by other libraries commonly used with Spring. It is typically used with
+https://logback.qos.ch/[Logback] which is a native implementation of the SLF4J API
+and therefore autodetected by Spring when added to the application classpath:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes,attributes"]
+----
+	<dependencies>
+		<dependency>
+    		<groupId>ch.qos.logback</groupId>
+    		<artifactId>logback-classic</artifactId>
+    		<version>1.2.2</version>
+		</dependency>
+	</dependencies>
+----
+
+Alternatively, you may also configure SLF4J to delegate to Log4j (see above) or to
+JUL, in particular for other libraries which use SLF4J by default. Note that it is
+not important for all libraries to go through the same logging facade; it only
+matters that they eventually delegate to the same log provider. So while Spring may
+go to Log4j directly, other libraries may go through the SLF4J binding for Log4j,
+or analogously for JUL.
 
 
+[[overview-logging-jul]]
+===== Using JUL (java.util.logging)
+
+Spring will delegate to `java.util.logging` by default, provided that no Log4j or
+SLF4J API is detected in the classpath. So there is no special dependency to set up:
+just use Spring with no external dependency for log output to `java.util.logging`,
+either in a standalone application (with a custom or default JUL setup at the JDK
+level) or with an application server's log system (and its system-wide JUL setup).
+
+Note that the `java.logging` module is NOT present by default on JDK 9, since it is
+not included in `java.base`. This works fine when using Spring with Log4j or SLF4J
+since the JUL API is not referenced in such a scenario. However, when choosing to
+use JUL as a default log provider, remember to activate the `java.logging` module.
+
+
+[[overview-logging-websphere]]
+===== Commons Logging on WebSphere
+Spring applications may run on a container that itself provides an implementation of
+JCL, e.g. IBM's WebSphere Application Server (WAS). This does not cause issues per se
+but leads to two different scenarios that need to be understood:
+
+In a "parent first" ClassLoader delegation model (the default on WAS), applications
+will always pick up the server-provided version of Commons Logging, delegating to the
+WAS logging subsystem (which is actually based on JUL). An application-provided variant
+of JCL, whether Spring 5's or the JCL-over-SLF4J bridge, will effectively be ignored,
+along with any locally included log provider.
+
+With a "parent last" delegation model (the default in a regular Servlet container but
+an explicit configuration option on WAS), an application-provided Commons Logging
+variant will be picked up, enabling you to set up a locally included log provider,
+e.g. Log4j or Logback, within your application. In case of no local log provider,
+Spring (like regular Commons Logging) will delegate to JUL by default, effectively
+logging to WebSphere's logging subsystem like in the "parent first" scenario.
+
+All in all, we recommend deploying Spring applications in the "parent last" model
+since it naturally allows for local providers as well as the server's log subsystem.

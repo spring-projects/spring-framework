@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,14 +67,14 @@ public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> 
 
 	/**
 	 * Indicates whether the given class can be written by this converter.
-	 * This method should perform the same checks than
+	 * <p>This method should perform the same checks than
 	 * {@link HttpMessageConverter#canWrite(Class, MediaType)} with additional ones
 	 * related to the generic type.
-	 * @param type the (potentially generic) type to test for writability, can be
-	 * {@code null} if not specified.
+	 * @param type the (potentially generic) type to test for writability
+	 * (can be {@code null} if not specified)
 	 * @param clazz the source object class to test for writability
-	 * @param mediaType the media type to write, can be {@code null} if not specified.
-	 * Typically the value of an {@code Accept} header.
+	 * @param mediaType the media type to write (can be {@code null} if not specified);
+	 * typically the value of an {@code Accept} header.
 	 * @return {@code true} if writable; {@code false} otherwise
 	 * @since 4.2
 	 */

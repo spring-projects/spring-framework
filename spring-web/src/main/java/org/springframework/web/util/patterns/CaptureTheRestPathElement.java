@@ -28,17 +28,14 @@ class CaptureTheRestPathElement extends PathElement {
 
 	private String variableName;
 
-	private char separator;
-
 	/**
-	 * @param pos
+	 * @param pos position of the path element within the path pattern text
 	 * @param captureDescriptor a character array containing contents like '{' '*' 'a' 'b' '}'
-	 * @param separator the separator ahead of this construct
+	 * @param separator the separator used in the path pattern
 	 */
 	CaptureTheRestPathElement(int pos, char[] captureDescriptor, char separator) {
-		super(pos);
+		super(pos, separator);
 		variableName = new String(captureDescriptor, 2, captureDescriptor.length - 3);
-		this.separator = separator;
 	}
 
 	@Override
@@ -55,6 +52,10 @@ class CaptureTheRestPathElement extends PathElement {
 		while ((candidateIndex + 1) < matchingContext.candidateLength &&
 				matchingContext.candidate[candidateIndex + 1] == separator) {
 			candidateIndex++;
+		}
+		if (matchingContext.determineRemaining) {
+			matchingContext.remainingPathIndex = matchingContext.candidateLength;
+			return true;
 		}
 		if (matchingContext.extractingVariables) {
 			matchingContext.set(variableName, new String(matchingContext.candidate, candidateIndex,

@@ -36,6 +36,7 @@ import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebHandler;
 
+import static java.time.Duration.*;
 import static org.junit.Assert.*;
 
 /**
@@ -55,9 +56,9 @@ public class WebHttpHandlerBuilderTests {
 
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		httpHandler.handle(request, response).blockMillis(5000);
+		httpHandler.handle(request, response).block(ofMillis(5000));
 
-		assertEquals("FilterB::FilterA", response.getBodyAsString().blockMillis(5000));
+		assertEquals("FilterB::FilterA", response.getBodyAsString().block(ofMillis(5000)));
 	}
 
 	@Test  // SPR-15074
@@ -70,9 +71,9 @@ public class WebHttpHandlerBuilderTests {
 
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		httpHandler.handle(request, response).blockMillis(5000);
+		httpHandler.handle(request, response).block(ofMillis(5000));
 
-		assertEquals("ExceptionHandlerB", response.getBodyAsString().blockMillis(5000));
+		assertEquals("ExceptionHandlerB", response.getBodyAsString().block(ofMillis(5000)));
 	}
 
 	@Test
@@ -85,9 +86,9 @@ public class WebHttpHandlerBuilderTests {
 
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		httpHandler.handle(request, response).blockMillis(5000);
+		httpHandler.handle(request, response).block(ofMillis(5000));
 
-		assertEquals("handled", response.getBodyAsString().blockMillis(5000));
+		assertEquals("handled", response.getBodyAsString().block(ofMillis(5000)));
 	}
 
 

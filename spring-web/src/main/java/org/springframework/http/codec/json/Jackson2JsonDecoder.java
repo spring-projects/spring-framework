@@ -24,6 +24,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -34,6 +35,7 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.codec.HttpMessageDecoder;
+import org.springframework.core.codec.InternalCodecException;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -41,7 +43,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
- * Decode a byte stream into JSON and convert to Object's with Jackson 2.6+.
+ * Decode a byte stream into JSON and convert to Object's with Jackson 2.9.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
@@ -66,10 +68,10 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
-		JavaType javaType = this.mapper.getTypeFactory().constructType(elementType.getType());
-		// Skip String (CharSequenceDecoder + "*/*" comes after)
-		return !CharSequence.class.isAssignableFrom(elementType.resolve(Object.class)) &&
-				this.mapper.canDeserialize(javaType) && supportsMimeType(mimeType);
+		JavaType javaType = this.objectMapper.getTypeFactory().constructType(elementType.getType());
+		// Skip String: CharSequenceDecoder + "*/*" comes after
+		return (!CharSequence.class.isAssignableFrom(elementType.resolve(Object.class)) &&
+				this.objectMapper.canDeserialize(javaType) && supportsMimeType(mimeType));
 	}
 
 
@@ -102,9 +104,9 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 		JavaType javaType = getJavaType(elementType.getType(), contextClass);
 		Class<?> jsonView = (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT);
 
-		ObjectReader reader = jsonView != null ?
-				this.mapper.readerWithView(jsonView).forType(javaType) :
-				this.mapper.readerFor(javaType);
+		ObjectReader reader = (jsonView != null ?
+				this.objectMapper.readerWithView(jsonView).forType(javaType) :
+				this.objectMapper.readerFor(javaType));
 
 		return objectDecoder.decode(inputStream, elementType, mimeType, hints)
 				.map(dataBuffer -> {
@@ -112,6 +114,9 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 						Object value = reader.readValue(dataBuffer.asInputStream());
 						DataBufferUtils.release(dataBuffer);
 						return value;
+					}
+					catch (InvalidDefinitionException ex) {
+						throw new InternalCodecException("Error while reading the data", ex);
 					}
 					catch (IOException ex) {
 						throw new CodecException("Error while reading the data", ex);

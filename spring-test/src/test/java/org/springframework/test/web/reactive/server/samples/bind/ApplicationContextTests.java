@@ -34,6 +34,8 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * Binding to server infrastructure declared in a Spring ApplicationContext.
  *
@@ -58,12 +60,21 @@ public class ApplicationContextTests {
 				.build();
 	}
 
+
 	@Test
-	public void basic() throws Exception {
+	public void bodyContent() throws Exception {
 		this.client.get().uri("/principal")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value().isEqualTo("Hello Mr. Pablo!");
+				.expectBody(String.class).isEqualTo("Hello Mr. Pablo!");
+	}
+
+	@Test
+	public void bodyContentWithConsumer() throws Exception {
+		this.client.get().uri("/principal")
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody().consumeAsStringWith(body -> assertEquals("Hello Mr. Pablo!", body));
 	}
 
 	@Test
@@ -72,7 +83,7 @@ public class ApplicationContextTests {
 				.get().uri("/principal")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value().isEqualTo("Hello Mr. Giovanni!");
+				.expectBody(String.class).isEqualTo("Hello Mr. Giovanni!");
 	}
 
 	@Test
@@ -83,7 +94,7 @@ public class ApplicationContextTests {
 				.get().uri("/attributes")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value().isEqualTo("foo+bar");
+				.expectBody(String.class).isEqualTo("foo+bar");
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import org.junit.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
@@ -160,7 +161,6 @@ public class MappingJackson2HttpMessageConverterTests {
 	@SuppressWarnings("unchecked")
 	public void readGenerics() throws IOException {
 		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter() {
-
 			@Override
 			protected JavaType getJavaType(Type type, Class<?> contextClass) {
 				if (type instanceof Class && List.class.isAssignableFrom((Class<?>)type)) {
@@ -380,6 +380,22 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertTrue(result.contains("\"number\":123"));
 	}
 
+	@Test
+	public void readWithNoDefaultConstructor() throws Exception {
+		String body = "{\"property1\":\"foo\",\"property2\":\"bar\"}";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
+		try {
+			converter.read(BeanWithNoDefaultConstructor.class, inputMessage);
+		}
+		catch (HttpMessageNotReadableException ex) {
+			assertTrue(ex.getErrorStatus().isPresent());
+			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getErrorStatus().get());
+			return;
+		}
+		fail();
+	}
+
 
 	interface MyInterface {
 
@@ -534,6 +550,27 @@ public class MappingJackson2HttpMessageConverterTests {
 
 		public void setProperty2(String property2) {
 			this.property2 = property2;
+		}
+	}
+
+
+	private static class BeanWithNoDefaultConstructor {
+
+		private final String property1;
+
+		private final String property2;
+
+		public BeanWithNoDefaultConstructor(String property1, String property2) {
+			this.property1 = property1;
+			this.property2 = property2;
+		}
+
+		public String getProperty1() {
+			return property1;
+		}
+
+		public String getProperty2() {
+			return property2;
 		}
 	}
 

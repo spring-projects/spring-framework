@@ -22,7 +22,6 @@ import java.net.URI;
 import java.util.Optional;
 
 import org.junit.Test;
-import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -37,7 +36,6 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.config.ViewResolverRegistry;
@@ -126,9 +124,7 @@ public class RequestMappingViewResolutionIntegrationTests extends AbstractReques
 	private static class TestController {
 
 		@GetMapping("/html")
-		public String getHtmlPage(@RequestParam Optional<String> name, Model model,
-				ServerWebExchange exchange) {
-
+		public String getHtmlPage(Optional<String> name, Model model, ServerWebExchange exchange) {
 			if (exchange.checkNotModified("deadb33f8badf00d")) {
 				return null;
 			}
@@ -137,8 +133,8 @@ public class RequestMappingViewResolutionIntegrationTests extends AbstractReques
 		}
 
 		@GetMapping("/redirect")
-		public Mono<String> redirect() {
-			return Mono.just("redirect:/");
+		public String redirect() {
+			return "redirect:/";
 		}
 	}
 

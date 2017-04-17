@@ -110,7 +110,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			bodyParameter = result.getReturnTypeSource().nested();
 		}
 
-		return returnValueMono.then(returnValue -> {
+		return returnValueMono.flatMap(returnValue -> {
 			Assert.isInstanceOf(HttpEntity.class, returnValue, "HttpEntity expected");
 			HttpEntity<?> httpEntity = (HttpEntity<?>) returnValue;
 

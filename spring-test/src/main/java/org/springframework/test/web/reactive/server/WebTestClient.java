@@ -458,7 +458,7 @@ public interface WebTestClient {
 		/**
 		 * Set the body of the request to the given {@code BodyInserter}.
 		 * @param inserter the inserter
-		 * @param <T> the body type, or the the element type (for a stream)
+		 * @param <T> the body type or the element type (for a stream)
 		 * @return spec for decoding the response
 		 * @see org.springframework.web.reactive.function.BodyInserters
 		 */
@@ -486,182 +486,164 @@ public interface WebTestClient {
 	}
 
 	/**
-	 * Specification for processing the response and applying expectations.
+	 * Spec for declaring expectations on the response.
 	 */
 	interface ResponseSpec {
 
 		/**
-		 * Assertions on the response status.
+		 * Declare expectations on the response status.
 		 */
 		StatusAssertions expectStatus();
 
 		/**
-		 * Assertions on the headers of the response.
+		 * Declared expectations on the headers of the response.
 		 */
 		HeaderAssertions expectHeader();
 
 		/**
-		 * Assertions on the body of the response extracted to one or more
-		 * representations of the given type.
+		 * Declare expectations on the response body decoded to {@code <B>}.
+		 * @param bodyType the expected body type
 		 */
-		TypeBodySpec expectBody(Class<?> elementType);
+		<B> BodySpec<B, ?> expectBody(Class<B> bodyType);
 
 		/**
-		 * Variant of {@link #expectBody(Class)} for use with generic types.
+		 * Variant of {@link #expectBody(Class)} for a body type with generics.
 		 */
-		TypeBodySpec expectBody(ResolvableType elementType);
+		<B> BodySpec<B, ?> expectBody(ResolvableType bodyType);
 
 		/**
-		 * Other assertions on the response body -- isEmpty, map, etc.
+		 * Declare expectations on the response body decoded to {@code List<E>}.
+		 * @param elementType the expected List element type
 		 */
-		BodySpec expectBody();
+		<E> ListBodySpec<E> expectBodyList(Class<E> elementType);
 
+		/**
+		 * Variant of {@link #expectBodyList(Class)} for element types with generics.
+		 */
+		<E> ListBodySpec<E> expectBodyList(ResolvableType elementType);
+
+		/**
+		 * Declare expectations on the response body content.
+		 */
+		BodyContentSpec expectBody();
+
+		/**
+		 * Return the exchange result with the body decoded to {@code Flux<T>}.
+		 * Use this option for infinite streams and consume the stream with
+		 * the {@code StepVerifier} from the Reactor Add-Ons.
+		 *
+		 * @see <a href="https://github.com/reactor/reactor-addons">
+		 *     https://github.com/reactor/reactor-addons</a>
+		 */
+		<T> FluxExchangeResult<T> returnResult(Class<T> elementType);
+
+		/**
+		 * Variant of {@link #returnResult(Class)} for element types with generics.
+		 */
+		<T> FluxExchangeResult<T> returnResult(ResolvableType elementType);
 	}
 
 	/**
-	 * Specification for extracting entities from the response body.
+	 * Spec for expectations on the response body decoded to a single Object.
 	 */
-	interface TypeBodySpec {
-
-		/**
-		 * Extract a single representations from the response.
-		 */
-		SingleValueBodySpec value();
-
-		/**
-		 * Extract a list of representations from the response.
-		 */
-		ListBodySpec list();
-
-		/**
-		 * Extract a list of representations consuming the first N elements.
-		 */
-		ListBodySpec list(int elementCount);
-
-		/**
-		 * Return request and response details for the exchange incluidng the
-		 * response body decoded as {@code Flux<T>} where {@code <T>} is the
-		 * expected element type. The returned {@code Flux} may for example be
-		 * verified with the Reactor {@code StepVerifier}.
-		 */
-		<T> FluxExchangeResult<T> returnResult();
-	}
-
-	/**
-	 * Specification to assert a single value extracted from the response body.
-	 */
-	interface SingleValueBodySpec {
+	interface BodySpec<B, S extends BodySpec<B, S>> {
 
 		/**
 		 * Assert the extracted body is equal to the given value.
 		 */
-		<T> EntityExchangeResult<T> isEqualTo(T expected);
+		<T extends S> T isEqualTo(B expected);
 
 		/**
-		 * Return request and response details for the exchange including the
-		 * extracted response body.
+		 * Assert the extracted body with the given {@link Consumer}.
 		 */
-		<T> EntityExchangeResult<T> returnResult();
+		<T extends S> T consumeWith(Consumer<B> consumer);
+
+		/**
+		 * Return the exchange result with the decoded body.
+		 */
+		EntityExchangeResult<B> returnResult();
+
 	}
 
 	/**
-	 * Specification to assert a list of values extracted from the response.
+	 * Spec for expectations on the response body decoded to a List.
 	 */
-	interface ListBodySpec {
-
-		/**
-		 * Assert the extracted body is equal to the given list.
-		 */
-		<T> EntityExchangeResult<List<T>> isEqualTo(List<T> expected);
+	interface ListBodySpec<E> extends BodySpec<List<E>, ListBodySpec<E>> {
 
 		/**
 		 * Assert the extracted list of values is of the given size.
 		 * @param size the expected size
 		 */
-		ListBodySpec hasSize(int size);
+		ListBodySpec<E> hasSize(int size);
 
 		/**
 		 * Assert the extracted list of values contains the given elements.
 		 * @param elements the elements to check
 		 */
-		ListBodySpec contains(Object... elements);
+		@SuppressWarnings("unchecked")
+		ListBodySpec<E> contains(E... elements);
 
 		/**
 		 * Assert the extracted list of values doesn't contain the given elements.
 		 * @param elements the elements to check
 		 */
-		ListBodySpec doesNotContain(Object... elements);
+		@SuppressWarnings("unchecked")
+		ListBodySpec<E> doesNotContain(E... elements);
 
-		/**
-		 * Return request and response details for the exchange including the
-		 * extracted response body.
-		 */
-		<T> EntityExchangeResult<List<T>> returnResult();
 	}
 
 	/**
-	 * Specification to apply additional assertions on the response body.
+	 * Spec for expectations on the response body content.
 	 */
-	interface BodySpec {
+	interface BodyContentSpec {
 
 		/**
-		 * Consume the body and verify it is empty.
-		 * @return request and response details from the exchange
+		 * Assert the response body is empty and return the exchange result.
 		 */
 		EntityExchangeResult<Void> isEmpty();
 
 		/**
-		 * Extract the response body as a Map with the given key and value type.
+		 * Parse the expected and actual response content as JSON and perform a
+		 * "lenient" comparison verifying the same attribute-value pairs.
+		 * <p>Use of this option requires the
+		 * <a href="http://jsonassert.skyscreamer.org/">JSONassert<a/> library
+		 * on to be on the classpath.
+		 * @param expectedJson the expected JSON content.
 		 */
-		MapBodySpec map(Class<?> keyType, Class<?> valueType);
+		BodyContentSpec json(String expectedJson);
 
 		/**
-		 * Variant of {@link #map(Class, Class)} for use with generic types.
+		 * Access to response body assertions using a
+		 * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expression
+		 * to inspect a specific subset of the body.
+		 * <p>The JSON path expression can be a parameterized string using
+		 * formatting specifiers as defined in {@link String#format}.
+		 * @param expression the JsonPath expression
+		 * @param args arguments to parameterize the expression
 		 */
-		MapBodySpec map(ResolvableType keyType, ResolvableType valueType);
-
-	}
-
-	/**
-	 * Specification to assert response the body extracted as a map.
-	 */
-	interface MapBodySpec {
+		JsonPathAssertions jsonPath(String expression, Object... args);
 
 		/**
-		 * Assert the extracted map is equal to the given list of elements.
+		 * Assert the response body content converted to a String with the given
+		 * {@link Consumer}. The String is created with the {@link Charset} from
+		 * the "content-type" response header or {@code UTF-8} otherwise.
+		 * @param consumer the consumer for the response body; the input String
+		 * may be {@code null} if there was no response body.
 		 */
-		<K, V> EntityExchangeResult<Map<K, V>> isEqualTo(Map<K, V> expected);
+		BodyContentSpec consumeAsStringWith(Consumer<String> consumer);
 
 		/**
-		 * Assert the extracted map has the given size.
-		 * @param size the expected size
+		 * Assert the response body content with the given {@link Consumer}.
+		 * @param consumer the consumer for the response body; the input
+		 * {@code byte[]} may be {@code null} if there was no response body.
 		 */
-		MapBodySpec hasSize(int size);
+		BodyContentSpec consumeWith(Consumer<byte[]> consumer);
 
 		/**
-		 * Assert the extracted map contains the given key value pair.
-		 * @param key the key to check
-		 * @param value the value to check
+		 * Return the exchange result with body content as {@code byte[]}.
 		 */
-		MapBodySpec contains(Object key, Object value);
+		EntityExchangeResult<byte[]> returnResult();
 
-		/**
-		 * Assert the extracted map contains the given keys.
-		 * @param keys the keys to check
-		 */
-		MapBodySpec containsKeys(Object... keys);
-
-		/**
-		 * Assert the extracted map contains the given values.
-		 * @param values the keys to check
-		 */
-		MapBodySpec containsValues(Object... values);
-
-		/**
-		 * Return request and response details for the exchange including the
-		 * extracted response body.
-		 */
-		<K, V> EntityExchangeResult<Map<K, V>> returnResult();
 	}
 
 }

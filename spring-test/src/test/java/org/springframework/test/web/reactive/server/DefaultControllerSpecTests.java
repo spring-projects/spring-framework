@@ -38,7 +38,7 @@ public class DefaultControllerSpecTests {
 				.get().uri("/")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value().isEqualTo("Success");
+				.expectBody(String.class).isEqualTo("Success");
 	}
 
 	@Test
@@ -49,7 +49,7 @@ public class DefaultControllerSpecTests {
 				.get().uri("/exception")
 				.exchange()
 				.expectStatus().isBadRequest()
-				.expectBody(String.class).value().isEqualTo("Handled exception");
+				.expectBody(String.class).isEqualTo("Handled exception");
 	}
 
 

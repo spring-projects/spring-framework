@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -30,6 +31,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.client.MockMvcClientHttpRequestFactory;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -38,8 +40,8 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import static org.junit.Assert.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Tests that use a {@link RestTemplate} configured with a
@@ -57,19 +59,28 @@ public class MockMvcClientHttpRequestFactoryTests {
 	@Autowired
 	private WebApplicationContext wac;
 
-	private RestTemplate restTemplate;
+	private MockMvc mockMvc;
 
 
 	@Before
 	public void setup() {
-		MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).alwaysExpect(status().isOk()).build();
-		this.restTemplate = new RestTemplate(new MockMvcClientHttpRequestFactory(mockMvc));
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).alwaysExpect(status().isOk()).build();
 	}
 
 	@Test
 	public void test() throws Exception {
-		String result = this.restTemplate.getForObject("/foo", String.class);
+		RestTemplate template = new RestTemplate(new MockMvcClientHttpRequestFactory(this.mockMvc));
+		String result = template.getForObject("/foo", String.class);
 		assertEquals("bar", result);
+	}
+
+	@Test
+	@SuppressWarnings("deprecation")
+	public void testAsyncTemplate() throws Exception {
+		org.springframework.web.client.AsyncRestTemplate template = new org.springframework.web.client.AsyncRestTemplate(
+				new MockMvcClientHttpRequestFactory(this.mockMvc));
+		ListenableFuture<ResponseEntity<String>> entity = template.getForEntity("/foo", String.class);
+		assertEquals("bar", entity.get().getBody());
 	}
 
 

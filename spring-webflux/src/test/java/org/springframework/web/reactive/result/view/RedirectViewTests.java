@@ -61,7 +61,7 @@ public class RedirectViewTests {
 	public void defaultStatusCode() {
 		String url = "http://url.somewhere.com";
 		RedirectView view = new RedirectView(url);
-		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange);
+		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange).block();
 		assertEquals(HttpStatus.SEE_OTHER, this.exchange.getResponse().getStatusCode());
 		assertEquals(URI.create(url), this.exchange.getResponse().getHeaders().getLocation());
 	}
@@ -70,7 +70,7 @@ public class RedirectViewTests {
 	public void customStatusCode() {
 		String url = "http://url.somewhere.com";
 		RedirectView view = new RedirectView(url, HttpStatus.FOUND);
-		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange);
+		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange).block();
 		assertEquals(HttpStatus.FOUND, this.exchange.getResponse().getStatusCode());
 		assertEquals(URI.create(url), this.exchange.getResponse().getHeaders().getLocation());
 	}
@@ -79,7 +79,7 @@ public class RedirectViewTests {
 	public void contextRelative() {
 		String url = "/test.html";
 		RedirectView view = new RedirectView(url);
-		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange);
+		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange).block();
 		assertEquals(URI.create("/context/test.html"), this.exchange.getResponse().getHeaders().getLocation());
 	}
 
@@ -87,7 +87,7 @@ public class RedirectViewTests {
 	public void contextRelativeQueryParam() {
 		String url = "/test.html?id=1";
 		RedirectView view = new RedirectView(url);
-		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange);
+		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange).block();
 		assertEquals(URI.create("/context/test.html?id=1"), this.exchange.getResponse().getHeaders().getLocation());
 	}
 
@@ -111,7 +111,7 @@ public class RedirectViewTests {
 		String url = "http://url.somewhere.com?foo={foo}";
 		Map<String, String> model = Collections.singletonMap("foo", "bar");
 		RedirectView view = new RedirectView(url);
-		view.render(model, MediaType.TEXT_HTML, this.exchange);
+		view.render(model, MediaType.TEXT_HTML, this.exchange).block();
 		assertEquals(URI.create("http://url.somewhere.com?foo=bar"), this.exchange.getResponse().getHeaders().getLocation());
 	}
 
@@ -121,7 +121,7 @@ public class RedirectViewTests {
 		Map<String, String> attributes = Collections.singletonMap("foo", "bar");
 		this.exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, attributes);
 		RedirectView view = new RedirectView(url);
-		view.render(new HashMap<>(), MediaType.TEXT_HTML, exchange);
+		view.render(new HashMap<>(), MediaType.TEXT_HTML, exchange).block();
 		assertEquals(URI.create("http://url.somewhere.com?foo=bar"), this.exchange.getResponse().getHeaders().getLocation());
 	}
 
@@ -130,7 +130,7 @@ public class RedirectViewTests {
 		RedirectView view = new RedirectView("http://url.somewhere.com?foo=bar#bazz");
 		view.setPropagateQuery(true);
 		this.exchange = MockServerHttpRequest.get("http://url.somewhere.com?a=b&c=d").toExchange();
-		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange);
+		view.render(new HashMap<>(), MediaType.TEXT_HTML, this.exchange).block();
 		assertEquals(HttpStatus.SEE_OTHER, this.exchange.getResponse().getStatusCode());
 		assertEquals(URI.create("http://url.somewhere.com?foo=bar&a=b&c=d#bazz"),
 				this.exchange.getResponse().getHeaders().getLocation());

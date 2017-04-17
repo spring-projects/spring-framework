@@ -29,7 +29,6 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.Operators;
 import reactor.core.publisher.Signal;
 
 import static org.junit.Assert.assertEquals;
@@ -142,37 +141,41 @@ public class ChannelSendOperatorTests {
 
 
 		public Publisher<Void> send(Publisher<String> publisher) {
-			return subscriber -> {
-				Executors.newSingleThreadScheduledExecutor().schedule(() -> publisher.subscribe(new WriteSubscriber(subscriber)),
-						50, TimeUnit.MILLISECONDS);
-			};
+			return subscriber -> Executors.newSingleThreadScheduledExecutor().schedule(() ->
+							publisher.subscribe(new WriteSubscriber(subscriber)),50, TimeUnit.MILLISECONDS);
 		}
 
-		private class WriteSubscriber extends Operators.SubscriberAdapter<String, Void> {
+
+		private class WriteSubscriber implements Subscriber<String> {
+
+			private Subscription subscription;
+
+			private final Subscriber<? super Void> subscriber;
 
 			public WriteSubscriber(Subscriber<? super Void> subscriber) {
-				super(subscriber);
+				this.subscriber = subscriber;
 			}
 
 			@Override
-			protected void doOnSubscribe(Subscription subscription) {
-				subscription.request(1);
+			public void onSubscribe(Subscription subscription) {
+				this.subscription = subscription;
+				this.subscription.request(1);
 			}
 
 			@Override
-			public void doNext(String item) {
+			public void onNext(String item) {
 				items.add(item);
 				this.subscription.request(1);
 			}
 
 			@Override
-			public void doError(Throwable ex) {
+			public void onError(Throwable ex) {
 				error = ex;
 				this.subscriber.onError(ex);
 			}
 
 			@Override
-			public void doComplete() {
+			public void onComplete() {
 				completed = true;
 				this.subscriber.onComplete();
 			}

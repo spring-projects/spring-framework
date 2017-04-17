@@ -40,8 +40,20 @@ import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 public class ServletWebSocketHandlerRegistration
 		extends AbstractWebSocketHandlerRegistration<MultiValueMap<HttpRequestHandler, String>> {
 
-	public ServletWebSocketHandlerRegistration(TaskScheduler sockJsTaskScheduler) {
-		super(sockJsTaskScheduler);
+
+	public ServletWebSocketHandlerRegistration() {
+	}
+
+	/**
+	 * Deprecated constructor with a TaskScheduler for SockJS use.
+	 *
+	 * @deprecated as of 5.0 a TaskScheduler is not provided upfront, not until
+	 * it is obvious that it is needed, see {@link #getSockJsServiceRegistration()}.
+	 */
+	@Deprecated
+	@SuppressWarnings("deprecated")
+	public ServletWebSocketHandlerRegistration(TaskScheduler scheduler) {
+		super(scheduler);
 	}
 
 
@@ -60,10 +72,12 @@ public class ServletWebSocketHandlerRegistration
 
 	@Override
 	protected void addWebSocketHandlerMapping(MultiValueMap<HttpRequestHandler, String> mappings,
-			WebSocketHandler wsHandler, HandshakeHandler handshakeHandler,
+			WebSocketHandler webSocketHandler, HandshakeHandler handshakeHandler,
 			HandshakeInterceptor[] interceptors, String path) {
 
-		WebSocketHttpRequestHandler httpHandler = new WebSocketHttpRequestHandler(wsHandler, handshakeHandler);
+		WebSocketHttpRequestHandler httpHandler =
+				new WebSocketHttpRequestHandler(webSocketHandler, handshakeHandler);
+
 		if (!ObjectUtils.isEmpty(interceptors)) {
 			httpHandler.setHandshakeInterceptors(Arrays.asList(interceptors));
 		}

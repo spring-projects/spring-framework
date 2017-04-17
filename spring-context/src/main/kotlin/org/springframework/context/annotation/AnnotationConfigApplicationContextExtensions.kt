@@ -7,5 +7,5 @@ package org.springframework.context.annotation
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun AnnotationConfigApplicationContext(configure: AnnotationConfigApplicationContext.()->Unit) =
+fun AnnotationConfigApplicationContext(configure: AnnotationConfigApplicationContext.() -> Unit) =
 		AnnotationConfigApplicationContext().apply(configure)

@@ -82,7 +82,8 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueSyncAr
 			return true;
 		}
 		else if (this.useDefaultResolution) {
-			return checkParameterTypeNoReactiveWrapper(param, BeanUtils::isSimpleProperty);
+			return checkParameterTypeNoReactiveWrapper(param, BeanUtils::isSimpleProperty) ||
+					BeanUtils.isSimpleProperty(param.nestedIfOptional().getNestedParameterType());
 		}
 		return false;
 	}

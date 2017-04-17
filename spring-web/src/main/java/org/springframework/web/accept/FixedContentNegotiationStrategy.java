@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -35,23 +36,43 @@ public class FixedContentNegotiationStrategy implements ContentNegotiationStrate
 
 	private static final Log logger = LogFactory.getLog(FixedContentNegotiationStrategy.class);
 
-	private final List<MediaType> contentType;
+	private final List<MediaType> contentTypes;
 
 
 	/**
-	 * Create an instance with the given content type.
+	 * Constructor with a single default {@code MediaType}.
 	 */
 	public FixedContentNegotiationStrategy(MediaType contentType) {
-		this.contentType = Collections.singletonList(contentType);
+		this(Collections.singletonList(contentType));
+	}
+
+	/**
+	 * Constructor with an ordered List of default {@code MediaType}'s to return
+	 * for use in applications that support a variety of content types.
+	 * <p>Consider appending {@link MediaType#ALL} at the end if destinations
+	 * are present which do not support any of the other default media types.
+	 * @since 5.0
+	 */
+	public FixedContentNegotiationStrategy(List<MediaType> contentTypes) {
+		Assert.notNull(contentTypes, "'contentTypes' must not be null");
+		this.contentTypes = Collections.unmodifiableList(contentTypes);
+	}
+
+
+	/**
+	 * Return the configured list of media types.
+	 */
+	public List<MediaType> getContentTypes() {
+		return this.contentTypes;
 	}
 
 
 	@Override
 	public List<MediaType> resolveMediaTypes(NativeWebRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Requested media types: " + this.contentType);
+			logger.debug("Requested media types: " + this.contentTypes);
 		}
-		return this.contentType;
+		return this.contentTypes;
 	}
 
 }

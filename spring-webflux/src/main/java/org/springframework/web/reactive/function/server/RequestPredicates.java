@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -280,22 +281,6 @@ public abstract class RequestPredicates {
 	}
 
 	/**
-	 * Return a {@code RequestPredicate} that tests the beginning of the request path against the
-	 * given path pattern. This predicate is effectively identical to a
-	 * {@linkplain #path(String) standard path predicate} with path {@code pathPrefixPattern + "/**"}.
-	 * @param pathPrefixPattern the pattern to match against the start of the request path
-	 * @return a predicate that matches if the given predicate matches against the beginning of
-	 * the request's path
-	 */
-	public static RequestPredicate pathPrefix(String pathPrefixPattern) {
-		Assert.notNull(pathPrefixPattern, "'pathPrefixPattern' must not be null");
-		if (!pathPrefixPattern.endsWith("/**")) {
-			pathPrefixPattern += "/**";
-		}
-		return path(pathPrefixPattern);
-	}
-
-	/**
 	 * Return a {@code RequestPredicate} that tests the request's query parameter of the given name
 	 * against the given predicate.
 	 * @param name the name of the query parameter to test against
@@ -358,8 +343,7 @@ public abstract class RequestPredicates {
 			boolean match = this.pattern.matches(path);
 			traceMatch("Pattern", this.pattern.getPatternString(), path, match);
 			if (match) {
-				Map<String, String> uriTemplateVariables = this.pattern.matchAndExtract(path);
-				request.attributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
+				mergeTemplateVariables(request);
 				return true;
 			}
 			else {
@@ -368,16 +352,26 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
-		public ServerRequest nestRequest(ServerRequest request) {
-			String requestPath = request.path();
-			String subPath = this.pattern.extractPathWithinPattern(requestPath);
-			if (!subPath.startsWith("/")) {
-				subPath = "/" + subPath;
+		public Optional<ServerRequest> nest(ServerRequest request) {
+			String remainingPath = this.pattern.getPathRemaining(request.path());
+			return Optional.ofNullable(remainingPath)
+					.map(path -> !path.startsWith("/") ? "/" + path : path)
+					.map(path -> {
+						// TODO: re-enable when SPR-15419 has been fixed.
+						// mergeTemplateVariables(request);
+						return new SubPathServerRequestWrapper(request, path);
+					});
+		}
+
+		private void mergeTemplateVariables(ServerRequest request) {
+			Map<String, String> newVariables = this.pattern.matchAndExtract(request.path());
+			if (!newVariables.isEmpty()) {
+				Map<String, String> oldVariables = request.pathVariables();
+				Map<String, String> variables = new LinkedHashMap<>(oldVariables);
+				variables.putAll(newVariables);
+				request.attributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+						Collections.unmodifiableMap(variables));
 			}
-			if (requestPath.endsWith("/") && !subPath.endsWith("/")) {
-				subPath += "/";
-			}
-			return new SubPathServerRequestWrapper(request, subPath);
 		}
 
 		@Override
@@ -407,12 +401,71 @@ public abstract class RequestPredicates {
 		}
 	}
 
+	static class AndRequestPredicate implements RequestPredicate {
+
+		private final RequestPredicate left;
+
+		private final RequestPredicate right;
+
+		public AndRequestPredicate(RequestPredicate left, RequestPredicate right) {
+			this.left = left;
+			this.right = right;
+		}
+
+		@Override
+		public boolean test(ServerRequest t) {
+			return this.left.test(t) && this.right.test(t);
+		}
+
+		@Override
+		public Optional<ServerRequest> nest(ServerRequest request) {
+			return this.left.nest(request).flatMap(this.right::nest);
+		}
+
+		@Override
+		public String toString() {
+			return String.format("(%s && %s)", this.left, this.right);
+		}
+	}
+
+	static class OrRequestPredicate implements RequestPredicate {
+
+		private final RequestPredicate left;
+
+		private final RequestPredicate right;
+
+		public OrRequestPredicate(RequestPredicate left, RequestPredicate right) {
+			this.left = left;
+			this.right = right;
+		}
+		@Override
+		public boolean test(ServerRequest t) {
+			return this.left.test(t) || this.right.test(t);
+		}
+
+		@Override
+		public Optional<ServerRequest> nest(ServerRequest request) {
+			Optional<ServerRequest> leftResult = this.left.nest(request);
+			if (leftResult.isPresent()) {
+				return leftResult;
+			}
+			else {
+				return this.right.nest(request);
+			}
+		}
+
+		@Override
+		public String toString() {
+			return String.format("(%s || %s)", this.left, this.right);
+		}
+	}
 
 	private static class SubPathServerRequestWrapper implements ServerRequest {
 
 		private final ServerRequest request;
 
 		private final String subPath;
+
 
 		public SubPathServerRequestWrapper(ServerRequest request, String subPath) {
 			this.request = request;

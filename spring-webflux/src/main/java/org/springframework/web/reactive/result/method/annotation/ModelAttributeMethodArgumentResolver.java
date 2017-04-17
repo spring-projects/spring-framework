@@ -117,7 +117,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		MonoProcessor<BindingResult> bindingResultMono = MonoProcessor.create();
 		model.put(BindingResult.MODEL_KEY_PREFIX + name, bindingResultMono);
 
-		return valueMono.then(value -> {
+		return valueMono.flatMap(value -> {
 			WebExchangeDataBinder binder = context.createDataBinder(exchange, value, name);
 			return binder.bind(exchange)
 					.doOnError(bindingResultMono::onError)
@@ -188,7 +188,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		}
 
 		// A single data class constructor -> resolve constructor arguments from request parameters.
-		return exchange.getRequestParams().then(requestParams -> {
+		return exchange.getRequestParams().flatMap(requestParams -> {
 			ConstructorProperties cp = ctor.getAnnotation(ConstructorProperties.class);
 			String[] paramNames = (cp != null ? cp.value() : parameterNameDiscoverer.getParameterNames(ctor));
 			Assert.state(paramNames != null, () -> "Cannot resolve parameter names for constructor " + ctor);

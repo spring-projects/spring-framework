@@ -52,7 +52,13 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 		ResolvableType pojoType = ResolvableType.forClass(Pojo.class);
 		assertTrue(this.encoder.canEncode(pojoType, APPLICATION_JSON));
 		assertTrue(this.encoder.canEncode(pojoType, null));
-		assertFalse(this.encoder.canEncode(pojoType, APPLICATION_XML));
+	}
+
+	@Test
+	public void canNotEncode() {
+		assertFalse(this.encoder.canEncode(ResolvableType.forClass(String.class), null));
+		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Pojo.class), APPLICATION_XML));
+
 		ResolvableType sseType = ResolvableType.forClass(ServerSentEvent.class);
 		assertFalse(this.encoder.canEncode(sseType, APPLICATION_JSON));
 	}

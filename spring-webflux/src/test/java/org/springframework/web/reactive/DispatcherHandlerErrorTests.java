@@ -102,7 +102,7 @@ public class DispatcherHandlerErrorTests {
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
 		StepVerifier.create(publisher)
-				.consumeErrorWith(error -> assertSame(EXCEPTION, error))
+				.consumeErrorWith(error -> assertSame(EXCEPTION, error.getCause()))
 				.verify();
 	}
 

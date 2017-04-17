@@ -164,23 +164,6 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void pathPrefix() throws Exception {
-		RequestPredicate predicate = RequestPredicates.pathPrefix("/foo");
-
-		URI uri = URI.create("http://localhost/foo/bar");
-		MockServerRequest request = MockServerRequest.builder().uri(uri).build();
-		assertTrue(predicate.test(request));
-
-		uri = URI.create("http://localhost/foo");
-		request = MockServerRequest.builder().uri(uri).build();
-		assertTrue(predicate.test(request));
-
-		uri = URI.create("http://localhost/bar");
-		request = MockServerRequest.builder().uri(uri).build();
-		assertFalse(predicate.test(request));
-	}
-
-	@Test
 	public void queryParam() throws Exception {
 		MockServerRequest request = MockServerRequest.builder().queryParam("foo", "bar").build();
 		RequestPredicate predicate = RequestPredicates.queryParam("foo", s -> s.equals("bar"));

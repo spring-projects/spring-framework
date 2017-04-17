@@ -39,7 +39,8 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 /**
  * Spring {@link WebSocketSession} implementation that adapts to the RxNetty
  * {@link io.reactivex.netty.protocol.http.ws.WebSocketConnection}.
- *
+ * For internal use within the framework.
+ * 
  * @author Rossen Stoyanchev
  * @since 5.0
  */

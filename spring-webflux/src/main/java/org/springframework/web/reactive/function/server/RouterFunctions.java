@@ -28,7 +28,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.reactive.function.server.support.*;
+import org.springframework.web.reactive.function.server.support.HandlerFunctionAdapter;
+import org.springframework.web.reactive.function.server.support.ServerResponseResultHandler;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
@@ -45,7 +46,7 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  *
  * <p>Additionally, this class can {@linkplain #toHttpHandler(RouterFunction) transform} a
  * {@code RouterFunction} into an {@code HttpHandler}, which can be run in Servlet 3.1+,
- * Reactor, RxNetty, or Undertow.
+ * Reactor, or Undertow.
  * And it can {@linkplain #toHandlerMapping(RouterFunction, HandlerStrategies) transform} a
  * {@code RouterFunction} into an {@code HandlerMapping}, which can be run in a
  * {@code DispatcherHandler}.
@@ -136,19 +137,17 @@ public abstract class RouterFunctions {
 		Assert.notNull(predicate, "'predicate' must not be null");
 		Assert.notNull(routerFunction, "'routerFunction' must not be null");
 
-		return request -> {
-			if (predicate.test(request)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Nested predicate \"%s\" matches against \"%s\"",
-							predicate, request));
-				}
-				ServerRequest subRequest = predicate.nestRequest(request);
-				return routerFunction.route(subRequest);
-			}
-			else {
-				return Mono.empty();
-			}
-		};
+		return request -> predicate.nest(request)
+				.map(nestedRequest -> {
+							if (logger.isDebugEnabled()) {
+								logger.debug(
+										String.format("Nested predicate \"%s\" matches against \"%s\"",
+												predicate, request));
+							}
+							return routerFunction.route(nestedRequest);
+						}
+				)
+				.orElseGet(Mono::empty);
 	}
 
 	/**
@@ -189,8 +188,6 @@ public abstract class RouterFunctions {
 	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter},</li>
 	 * <li>Reactor using the
 	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter},</li>
-	 * <li>RxNetty using the
-	 * {@link org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter}, or </li>
 	 * <li>Undertow using the
 	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}.</li>
 	 * </ul>
@@ -213,8 +210,6 @@ public abstract class RouterFunctions {
 	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter},</li>
 	 * <li>Reactor using the
 	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter},</li>
-	 * <li>RxNetty using the
-	 * {@link org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter}, or </li>
 	 * <li>Undertow using the
 	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}.</li>
 	 * </ul>
@@ -233,11 +228,14 @@ public abstract class RouterFunctions {
 			addAttributes(exchange, request);
 			return routerFunction.route(request)
 					.defaultIfEmpty(notFound())
-					.then(handlerFunction -> wrapException(() -> handlerFunction.handle(request)))
-					.then(response -> wrapException(() -> response.writeTo(exchange, strategies)))
-					.otherwise(ResponseStatusException.class,
+					.flatMap(handlerFunction -> wrapException(() -> handlerFunction.handle(request)))
+					.flatMap(response -> wrapException(() -> response.writeTo(exchange, strategies)))
+					.onErrorResume(ResponseStatusException.class,
 							ex -> {
 								exchange.getResponse().setStatusCode(ex.getStatus());
+								if (ex.getMessage() != null) {
+									logger.error(ex.getMessage());
+								}
 								return Mono.empty();
 							});
 		});

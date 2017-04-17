@@ -85,7 +85,7 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 
 		if (inputStream instanceof Mono) {
 			return ((Mono<? extends ResourceRegion>) inputStream)
-					.flatMap(region -> writeResourceRegion(region, bufferFactory));
+					.flatMapMany(region -> writeResourceRegion(region, bufferFactory));
 		}
 		else {
 			Assert.notNull(hints, "'hints' must not be null");

@@ -36,8 +36,8 @@ class CaptureVariablePathElement extends PathElement {
 	 * @param pos the position in the pattern of this capture element
 	 * @param captureDescriptor is of the form {AAAAA[:pattern]}
 	 */
-	CaptureVariablePathElement(int pos, char[] captureDescriptor, boolean caseSensitive) {
-		super(pos);
+	CaptureVariablePathElement(int pos, char[] captureDescriptor, boolean caseSensitive, char separator) {
+		super(pos, separator);
 		int colon = -1;
 		for (int i = 0; i < captureDescriptor.length; i++) {
 			if (captureDescriptor[i] == ':') {
@@ -80,8 +80,14 @@ class CaptureVariablePathElement extends PathElement {
 		}
 		boolean match = false;
 		if (next == null) {
-			// Needs to be at least one character #SPR15264
-			match = (nextPos == matchingContext.candidateLength && nextPos > candidateIndex);
+			if (matchingContext.determineRemaining && nextPos > candidateIndex) {
+				matchingContext.remainingPathIndex = nextPos;
+				match = true;
+			}
+			else {
+				// Needs to be at least one character #SPR15264
+				match = (nextPos == matchingContext.candidateLength && nextPos > candidateIndex);
+			}
 		}
 		else {
 			if (matchingContext.isMatchStartMatching && nextPos == matchingContext.candidateLength) {

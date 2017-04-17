@@ -16,6 +16,8 @@
 
 package org.springframework.web.server.handler;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.web.server.ResponseStatusException;
@@ -26,14 +28,20 @@ import org.springframework.web.server.WebExceptionHandler;
  * Handle {@link ResponseStatusException} by setting the response status.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public class ResponseStatusExceptionHandler implements WebExceptionHandler {
+
+	private static final Log logger = LogFactory.getLog(ResponseStatusExceptionHandler.class);
 
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
 		if (ex instanceof ResponseStatusException) {
 			exchange.getResponse().setStatusCode(((ResponseStatusException) ex).getStatus());
+			if (ex.getMessage() != null) {
+				logger.error(ex.getMessage());
+			}
 			return Mono.empty();
 		}
 		return Mono.error(ex);

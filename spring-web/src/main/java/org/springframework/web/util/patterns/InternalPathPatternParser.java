@@ -318,7 +318,7 @@ public class InternalPathPatternParser {
 				else {
 					// It is a full capture of this element (possibly with constraint), for example: /foo/{abc}/
 					try {
-						newPE = new CaptureVariablePathElement(pathElementStart, pathElementText, caseSensitive);
+						newPE = new CaptureVariablePathElement(pathElementStart, pathElementText, caseSensitive, separator);
 					}
 					catch (PatternSyntaxException pse) {
 						throw new PatternParseException(pse, findRegexStart(pathPatternData, pathElementStart)
@@ -333,7 +333,7 @@ public class InternalPathPatternParser {
 							PatternMessage.CAPTURE_ALL_IS_STANDALONE_CONSTRUCT);
 				}
 				RegexPathElement newRegexSection = new RegexPathElement(pathElementStart, pathElementText,
-						caseSensitive, pathPatternData);
+						caseSensitive, pathPatternData, separator);
 				for (String variableName : newRegexSection.getVariableNames()) {
 					recordCapturedVariable(pathElementStart, variableName);
 				}
@@ -343,18 +343,18 @@ public class InternalPathPatternParser {
 		else {
 			if (wildcard) {
 				if (pos - 1 == pathElementStart) {
-					newPE = new WildcardPathElement(pathElementStart);
+					newPE = new WildcardPathElement(pathElementStart, separator);
 				}
 				else {
-					newPE = new RegexPathElement(pathElementStart, pathElementText, caseSensitive, pathPatternData);
+					newPE = new RegexPathElement(pathElementStart, pathElementText, caseSensitive, pathPatternData, separator);
 				}
 			}
 			else if (singleCharWildcardCount != 0) {
 				newPE = new SingleCharWildcardedPathElement(pathElementStart, pathElementText,
-						singleCharWildcardCount, caseSensitive);
+						singleCharWildcardCount, caseSensitive, separator);
 			}
 			else {
-				newPE = new LiteralPathElement(pathElementStart, pathElementText, caseSensitive);
+				newPE = new LiteralPathElement(pathElementStart, pathElementText, caseSensitive, separator);
 			}
 		}
 		return newPE;

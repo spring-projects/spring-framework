@@ -82,8 +82,8 @@ public class RequestContext {
 		this.model = model;
 		this.messageSource = messageSource;
 
-		Locale acceptLocale = exchange.getRequest().getHeaders().getAcceptLanguageAsLocale();
-		this.locale = acceptLocale != null ? acceptLocale : Locale.getDefault();
+		List<Locale> locales = exchange.getRequest().getHeaders().getAcceptLanguageAsLocales();
+		this.locale = locales.isEmpty() ? Locale.getDefault() : locales.get(0);
 		this.timeZone = TimeZone.getDefault(); // TODO
 
 		this.defaultHtmlEscape = null; // TODO
@@ -175,7 +175,7 @@ public class RequestContext {
 	}
 
 	/**
-	 * Return the context path of the the current web application. This is
+	 * Return the context path of the current web application. This is
 	 * useful for building links to other resources within the application.
 	 * <p>Delegates to {@link ServerHttpRequest#getContextPath()}.
 	 */

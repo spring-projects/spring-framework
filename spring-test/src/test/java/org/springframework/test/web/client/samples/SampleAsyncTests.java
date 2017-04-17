@@ -42,6 +42,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * @author Rossen Stoyanchev
  * @since 4.1
  */
+@SuppressWarnings("deprecation")
 public class SampleAsyncTests {
 
 	private final AsyncRestTemplate restTemplate = new AsyncRestTemplate();

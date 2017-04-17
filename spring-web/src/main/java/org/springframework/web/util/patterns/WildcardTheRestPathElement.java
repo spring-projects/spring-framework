@@ -27,11 +27,8 @@ import org.springframework.web.util.patterns.PathPattern.MatchingContext;
  */
 class WildcardTheRestPathElement extends PathElement {
 
-	private char separator;
-
 	WildcardTheRestPathElement(int pos, char separator) {
-		super(pos);
-		this.separator = separator;
+		super(pos, separator);
 	}
 
 	@Override
@@ -40,6 +37,9 @@ class WildcardTheRestPathElement extends PathElement {
 		if (candidateIndex < matchingContext.candidateLength &&
 				matchingContext.candidate[candidateIndex] != separator) {
 			return false;
+		}
+		if (matchingContext.determineRemaining) {
+			matchingContext.remainingPathIndex = matchingContext.candidateLength;
 		}
 		return true;
 	}

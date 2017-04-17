@@ -18,13 +18,13 @@ package org.springframework.web.reactive.result.view;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.ReactiveAdapter;
+import org.springframework.core.ReactiveAdapterRegistry;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
@@ -48,8 +48,12 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 	/** Logger that is available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	private static final Object NO_VALUE = new Object();
+
 
 	private final List<MediaType> mediaTypes = new ArrayList<>(4);
+
+	private final ReactiveAdapterRegistry adapterRegistry;
 
 	private Charset defaultCharset = StandardCharsets.UTF_8;
 
@@ -59,7 +63,12 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 
 
 	public AbstractView() {
+		this(new ReactiveAdapterRegistry());
+	}
+
+	public AbstractView(ReactiveAdapterRegistry registry) {
 		this.mediaTypes.add(ViewResolverSupport.DEFAULT_CONTENT_TYPE);
+		this.adapterRegistry = registry;
 	}
 
 
@@ -146,14 +155,13 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 			exchange.getResponse().getHeaders().setContentType(contentType);
 		}
 
-		Map<String, Object> mergedModel = getModelAttributes(model, exchange);
-
-		// Expose RequestContext?
-		if (this.requestContextAttribute != null) {
-			mergedModel.put(this.requestContextAttribute, createRequestContext(exchange, mergedModel));
-		}
-
-		return renderInternal(mergedModel, contentType, exchange);
+		return getModelAttributes(model, exchange).flatMap(mergedModel -> {
+			// Expose RequestContext?
+			if (this.requestContextAttribute != null) {
+				mergedModel.put(this.requestContextAttribute, createRequestContext(exchange, mergedModel));
+			}
+			return renderInternal(mergedModel, contentType, exchange);
+		});
 	}
 
 	/**
@@ -161,7 +169,7 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 	 * <p>The default implementation creates a combined output Map that includes
 	 * model as well as static attributes with the former taking precedence.
 	 */
-	protected Map<String, Object> getModelAttributes(Map<String, ?> model, ServerWebExchange exchange) {
+	protected Mono<Map<String, Object>> getModelAttributes(Map<String, ?> model, ServerWebExchange exchange) {
 		int size = (model != null ? model.size() : 0);
 
 		Map<String, Object> attributes = new LinkedHashMap<>(size);
@@ -169,7 +177,55 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 			attributes.putAll(model);
 		}
 
-		return attributes;
+		return resolveAsyncAttributes(attributes).then(Mono.just(attributes));
+	}
+
+	/**
+	 * By default, resolve async attributes supported by the {@link ReactiveAdapterRegistry} to their blocking counterparts.
+	 * <p>View implementations capable of taking advantage of reactive types can override this method if needed.
+	 * @return {@code Mono} to represent when the async attributes have been resolved
+	 */
+	protected Mono<Void> resolveAsyncAttributes(Map<String, Object> model) {
+
+		List<String> names = new ArrayList<>();
+		List<Mono<?>> valueMonos = new ArrayList<>();
+
+		for (Map.Entry<String, ?> entry : model.entrySet()) {
+			Object value =  entry.getValue();
+			if (value == null) {
+				continue;
+			}
+			ReactiveAdapter adapter = this.adapterRegistry.getAdapter(null, value);
+			if (adapter != null) {
+				names.add(entry.getKey());
+				if (adapter.isMultiValue()) {
+					Flux<Object> fluxValue = Flux.from(adapter.toPublisher(value));
+					valueMonos.add(fluxValue.collectList().defaultIfEmpty(Collections.emptyList()));
+				}
+				else {
+					Mono<Object> monoValue = Mono.from(adapter.toPublisher(value));
+					valueMonos.add(monoValue.defaultIfEmpty(NO_VALUE));
+				}
+			}
+		}
+
+		if (names.isEmpty()) {
+			return Mono.empty();
+		}
+
+		return Mono.when(valueMonos,
+				values -> {
+					for (int i=0; i < values.length; i++) {
+						if (values[i] != NO_VALUE) {
+							model.put(names.get(i), values[i]);
+						}
+						else {
+							model.remove(names.get(i));
+						}
+					}
+					return NO_VALUE;
+				})
+				.then();
 	}
 
 	/**

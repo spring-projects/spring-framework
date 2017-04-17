@@ -103,7 +103,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 					handleResolvedValue(arg, namedValueInfo.name, parameter, model, exchange);
 					return arg;
 				})
-				.otherwiseIfEmpty(getDefaultValue(
+				.switchIfEmpty(getDefaultValue(
 						namedValueInfo, parameter, bindingContext, model, exchange));
 	}
 

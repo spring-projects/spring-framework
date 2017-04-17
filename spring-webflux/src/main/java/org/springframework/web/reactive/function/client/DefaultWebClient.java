@@ -22,15 +22,18 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -325,6 +328,50 @@ class DefaultWebClient implements WebClient {
 				return result;
 			}
 		}
+
+		@Override
+		public ResponseSpec retrieve() {
+			return new DefaultResponseSpec(exchange());
+		}
 	}
 
+	private static class DefaultResponseSpec implements ResponseSpec {
+
+		private final Mono<ClientResponse> responseMono;
+
+
+		DefaultResponseSpec(Mono<ClientResponse> responseMono) {
+			this.responseMono = responseMono;
+		}
+
+		@Override
+		public <T> Mono<T> bodyToMono(Class<T> bodyType) {
+			return this.responseMono.flatMap(clientResponse -> clientResponse.bodyToMono(bodyType));
+		}
+
+		@Override
+		public <T> Flux<T> bodyToFlux(Class<T> elementType) {
+			return this.responseMono.flatMapMany(clientResponse -> clientResponse.bodyToFlux(elementType));
+		}
+
+		@Override
+		public <T> Mono<ResponseEntity<T>> bodyToEntity(Class<T> bodyType) {
+			return this.responseMono.flatMap(response ->
+					response.bodyToMono(bodyType).map(body -> {
+						HttpHeaders headers = response.headers().asHttpHeaders();
+						return new ResponseEntity<>(body, headers, response.statusCode());
+					})
+			);
+		}
+
+		@Override
+		public <T> Mono<ResponseEntity<List<T>>> bodyToEntityList(Class<T> responseType) {
+			return this.responseMono.flatMap(response ->
+					response.bodyToFlux(responseType).collectList().map(body -> {
+						HttpHeaders headers = response.headers().asHttpHeaders();
+						return new ResponseEntity<>(body, headers, response.statusCode());
+					})
+			);
+		}
+	}
 }

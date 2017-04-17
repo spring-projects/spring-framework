@@ -45,13 +45,20 @@ abstract class PathElement {
 	 * The previous path element in the chain
 	 */
 	protected PathElement prev;
+	
+	/**
+	 * The separator used in this path pattern
+	 */
+	protected char separator;
 
 	/**
 	 * Create a new path element.
 	 * @param pos the position where this path element starts in the pattern data
+	 * @param separator the separator in use in the path pattern
 	 */
-	PathElement(int pos) {
+	PathElement(int pos, char separator) {
 		this.pos = pos;
+		this.separator = separator;
 	}
 
 	/**
@@ -87,5 +94,13 @@ abstract class PathElement {
 	 */
 	public int getScore() {
 		return 0;
+	}
+
+	/**
+	 * @return true if there is no next character, or if there is then it is a separator
+	 */
+	protected boolean nextIfExistsIsSeparator(int nextIndex, MatchingContext matchingContext) {
+		return (nextIndex >= matchingContext.candidateLength ||
+				matchingContext.candidate[nextIndex] == separator);
 	}
 }

@@ -48,8 +48,8 @@ class RegexPathElement extends PathElement {
 
 	private int wildcardCount;
 
-	RegexPathElement(int pos, char[] regex, boolean caseSensitive, char[] completePattern) {
-		super(pos);
+	RegexPathElement(int pos, char[] regex, boolean caseSensitive, char[] completePattern, char separator) {
+		super(pos, separator);
 		this.regex = regex;
 		this.caseSensitive = caseSensitive;
 		buildPattern(regex, completePattern);
@@ -124,10 +124,17 @@ class RegexPathElement extends PathElement {
 		boolean matches = m.matches();
 		if (matches) {
 			if (next == null) {
-				// No more pattern, is there more data?
-				// If pattern is capturing variables there must be some actual data to bind to them
-				matches = (p == matchingContext.candidateLength && 
-						   ((this.variableNames.size() == 0) ? true : p > candidateIndex));
+				if (matchingContext.determineRemaining && 
+					((this.variableNames.size() == 0) ? true : p > candidateIndex)) {
+					matchingContext.remainingPathIndex = p;
+					matches = true;
+				}
+				else {
+					// No more pattern, is there more data?
+					// If pattern is capturing variables there must be some actual data to bind to them
+					matches = (p == matchingContext.candidateLength && 
+							   ((this.variableNames.size() == 0) ? true : p > candidateIndex));
+				}
 			}
 			else {
 				if (matchingContext.isMatchStartMatching && p == matchingContext.candidateLength) {

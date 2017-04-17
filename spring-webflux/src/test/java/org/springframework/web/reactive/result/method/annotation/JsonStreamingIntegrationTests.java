@@ -71,7 +71,7 @@ public class JsonStreamingIntegrationTests extends AbstractHttpHandlerIntegratio
 				.uri("/stream")
 				.accept(APPLICATION_STREAM_JSON)
 				.exchange()
-				.flatMap(response -> response.bodyToFlux(Person.class));
+				.flatMapMany(response -> response.bodyToFlux(Person.class));
 
 		StepVerifier.create(result)
 				.expectNext(new Person("foo 0"))

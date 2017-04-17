@@ -15,11 +15,17 @@
  */
 package org.springframework.http.codec;
 
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
+import reactor.core.publisher.Flux;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteArrayEncoder;
 import org.springframework.core.codec.ByteBufferDecoder;
@@ -31,6 +37,7 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
@@ -38,10 +45,7 @@ import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.springframework.core.ResolvableType.forClass;
 
 /**
@@ -50,7 +54,7 @@ import static org.springframework.core.ResolvableType.forClass;
  */
 public class ServerCodecConfigurerTests {
 
-	private final ServerCodecConfigurer configurer = new ServerCodecConfigurer();
+	private final ServerCodecConfigurer configurer = new DefaultServerCodecConfigurer();
 
 	private final AtomicInteger index = new AtomicInteger(0);
 
@@ -89,7 +93,7 @@ public class ServerCodecConfigurerTests {
 	public void jackson2EncoderOverride() throws Exception {
 
 		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
-		this.configurer.defaultCodec().jackson2Encoder(encoder);
+		this.configurer.defaultCodecs().jackson2Encoder(encoder);
 
 		assertSame(encoder, this.configurer.getWriters().stream()
 				.filter(writer -> ServerSentEventHttpMessageWriter.class.equals(writer.getClass()))
@@ -103,19 +107,26 @@ public class ServerCodecConfigurerTests {
 	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {
 		HttpMessageReader<?> reader = readers.get(this.index.getAndIncrement());
 		assertEquals(DecoderHttpMessageReader.class, reader.getClass());
-		return ((DecoderHttpMessageReader) reader).getDecoder();
+		return ((DecoderHttpMessageReader<?>) reader).getDecoder();
 	}
 
 	private Encoder<?> getNextEncoder(List<HttpMessageWriter<?>> writers) {
 		HttpMessageWriter<?> writer = writers.get(this.index.getAndIncrement());
 		assertEquals(EncoderHttpMessageWriter.class, writer.getClass());
-		return ((EncoderHttpMessageWriter) writer).getEncoder();
+		return ((EncoderHttpMessageWriter<?>) writer).getEncoder();
 	}
 
+	@SuppressWarnings("unchecked")
 	private void assertStringDecoder(Decoder<?> decoder, boolean textOnly) {
 		assertEquals(StringDecoder.class, decoder.getClass());
 		assertTrue(decoder.canDecode(forClass(String.class), MimeTypeUtils.TEXT_PLAIN));
 		assertEquals(!textOnly, decoder.canDecode(forClass(String.class), MediaType.TEXT_EVENT_STREAM));
+
+		Flux<String> flux = (Flux<String>) decoder.decode(
+				Flux.just(new DefaultDataBufferFactory().wrap("line1\nline2".getBytes(StandardCharsets.UTF_8))),
+				ResolvableType.forClass(String.class), MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap());
+
+		assertEquals(Arrays.asList("line1\n", "line2"), flux.collectList().block(Duration.ZERO));
 	}
 
 	private void assertStringEncoder(Encoder<?> encoder, boolean textOnly) {

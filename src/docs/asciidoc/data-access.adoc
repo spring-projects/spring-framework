@@ -4,6 +4,7 @@
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :toc: left
 :toclevels: 2
+ifdef::backend-pdf[:source-highlighter: rouge]
 
 This part of the reference documentation is concerned with data access and the
 interaction between the data access layer and the business or service layer.
@@ -2088,7 +2089,7 @@ The exception hierarchy that Spring provides can be seen below. (Please note tha
 class hierarchy detailed in the image shows only a subset of the entire
 `DataAccessException` hierarchy.)
 
-image::images/DataAccessException.gif[]
+image::images/DataAccessException.png[]
 
 
 

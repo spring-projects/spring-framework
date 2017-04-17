@@ -63,13 +63,15 @@ import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewRes
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.*;
-import static org.springframework.http.MediaType.*;
+import static org.junit.Assert.*;
+import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
+import static org.springframework.http.MediaType.APPLICATION_XML;
+import static org.springframework.http.MediaType.IMAGE_PNG;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 /**
  * Unit tests for {@link WebFluxConfigurationSupport}.
@@ -124,7 +126,7 @@ public class WebFluxConfigurationSupportTests {
 		RequestMappingHandlerAdapter adapter = context.getBean(name, RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
 
-		List<HttpMessageReader<?>> readers = adapter.getMessageReaders();
+		List<HttpMessageReader<?>> readers = adapter.getMessageCodecConfigurer().getReaders();
 		assertEquals(9, readers.size());
 
 		assertHasMessageReader(readers, forClass(byte[].class), APPLICATION_OCTET_STREAM);
@@ -158,7 +160,7 @@ public class WebFluxConfigurationSupportTests {
 		RequestMappingHandlerAdapter adapter = context.getBean(name, RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
 
-		List<HttpMessageReader<?>> messageReaders = adapter.getMessageReaders();
+		List<HttpMessageReader<?>> messageReaders = adapter.getMessageCodecConfigurer().getReaders();
 		assertEquals(2, messageReaders.size());
 
 		assertHasMessageReader(messageReaders, forClass(String.class), TEXT_PLAIN);
@@ -295,10 +297,10 @@ public class WebFluxConfigurationSupportTests {
 		@Override
 		protected void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
 			configurer.registerDefaults(false);
-			configurer.customCodec().decoder(StringDecoder.textPlainOnly(true));
-			configurer.customCodec().decoder(new Jaxb2XmlDecoder());
-			configurer.customCodec().encoder(CharSequenceEncoder.textPlainOnly());
-			configurer.customCodec().encoder(new Jaxb2XmlEncoder());
+			configurer.customCodecs().decoder(StringDecoder.textPlainOnly(true));
+			configurer.customCodecs().decoder(new Jaxb2XmlDecoder());
+			configurer.customCodecs().encoder(CharSequenceEncoder.textPlainOnly());
+			configurer.customCodecs().encoder(new Jaxb2XmlEncoder());
 		}
 	}
 

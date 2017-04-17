@@ -52,7 +52,7 @@ import org.springframework.util.MimeType;
 
 /**
  * Encode from an {@code Object} stream to a byte stream of JSON objects,
- * using Jackson 2.6+.
+ * using Jackson 2.9.
  *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
@@ -105,7 +105,9 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpMes
 	@Override
 	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
 		Class<?> clazz = elementType.getRawClass();
-		return this.mapper.canSerialize(clazz) && supportsMimeType(mimeType);
+		// Skip String: StringDecoder + "*/*" comes after
+		return (!String.class.isAssignableFrom(elementType.resolve(Object.class)) &&
+				this.objectMapper.canSerialize(clazz) && supportsMimeType(mimeType));
 	}
 
 	@Override
@@ -137,14 +139,15 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpMes
 	private DataBuffer encodeValue(Object value, MimeType mimeType, DataBufferFactory bufferFactory,
 			ResolvableType elementType, Map<String, Object> hints) {
 
-		TypeFactory typeFactory = this.mapper.getTypeFactory();
+		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
 		JavaType javaType = typeFactory.constructType(elementType.getType());
 		if (elementType.isInstance(value)) {
 			javaType = getJavaType(elementType.getType(), null);
 		}
 
 		Class<?> jsonView = (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT);
-		ObjectWriter writer = jsonView != null ? this.mapper.writerWithView(jsonView): this.mapper.writer();
+		ObjectWriter writer = (jsonView != null ?
+				this.objectMapper.writerWithView(jsonView) : this.objectMapper.writer());
 
 		if (javaType != null && javaType.isContainerType()) {
 			writer = writer.forType(javaType);

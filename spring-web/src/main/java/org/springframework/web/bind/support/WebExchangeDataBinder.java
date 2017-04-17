@@ -72,7 +72,7 @@ public class WebExchangeDataBinder extends WebDataBinder {
 				.map(this::getParamsToBind)
 				.doOnNext(values -> values.putAll(getMultipartFiles(exchange)))
 				.doOnNext(values -> values.putAll(getExtraValuesToBind(exchange)))
-				.then(values -> {
+				.flatMap(values -> {
 					doBind(new MutablePropertyValues(values));
 					return Mono.empty();
 				});

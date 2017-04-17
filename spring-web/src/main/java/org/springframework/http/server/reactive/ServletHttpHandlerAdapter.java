@@ -18,6 +18,8 @@ package org.springframework.http.server.reactive;
 
 import java.io.IOException;
 import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletRequest;
@@ -106,6 +108,8 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		ServerHttpRequest httpRequest = createRequest(((HttpServletRequest) request), asyncContext);
 		ServerHttpResponse httpResponse = createResponse(((HttpServletResponse) response), asyncContext);
 
+		asyncContext.addListener(TIMEOUT_HANDLER);
+
 		HandlerResultSubscriber subscriber = new HandlerResultSubscriber(asyncContext);
 		this.httpHandler.handle(httpRequest, httpResponse).subscribe(subscriber);
 	}
@@ -122,6 +126,23 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		return new ServletServerHttpResponse(
 				response, context, getDataBufferFactory(), getBufferSize());
+	}
+
+	/**
+	 * We cannot combine TIMEOUT_HANDLER and HandlerResultSubscriber due to:
+	 * https://issues.jboss.org/browse/WFLY-8515
+	 */
+	private static void runIfAsyncNotComplete(AsyncContext asyncContext, Runnable task) {
+		try {
+			if (asyncContext.getRequest().isAsyncStarted()) {
+				task.run();
+			}
+		}
+		catch (IllegalStateException ex) {
+			// Ignore:
+			// AsyncContext recycled and should not be used
+			// e.g. TIMEOUT_LISTENER (above) may have completed the AsyncContext
+		}
 	}
 
 
@@ -146,13 +167,40 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	}
 
 
+	private final static AsyncListener TIMEOUT_HANDLER = new AsyncListener() {
+
+		@Override
+		public void onTimeout(AsyncEvent event) throws IOException {
+			AsyncContext context = event.getAsyncContext();
+			runIfAsyncNotComplete(context, context::complete);
+		}
+
+		@Override
+		public void onError(AsyncEvent event) throws IOException {
+			AsyncContext context = event.getAsyncContext();
+			runIfAsyncNotComplete(context, context::complete);
+		}
+
+		@Override
+		public void onStartAsync(AsyncEvent event) throws IOException {
+			// No-op
+		}
+
+		@Override
+		public void onComplete(AsyncEvent event) throws IOException {
+			// No-op
+		}
+	};
+
 	private class HandlerResultSubscriber implements Subscriber<Void> {
 
 		private final AsyncContext asyncContext;
 
-		public HandlerResultSubscriber(AsyncContext asyncContext) {
+
+		HandlerResultSubscriber(AsyncContext asyncContext) {
 			this.asyncContext = asyncContext;
 		}
+
 
 		@Override
 		public void onSubscribe(Subscription subscription) {
@@ -166,16 +214,20 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		@Override
 		public void onError(Throwable ex) {
-			logger.error("Could not complete request", ex);
-			HttpServletResponse response = (HttpServletResponse) this.asyncContext.getResponse();
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			this.asyncContext.complete();
+			runIfAsyncNotComplete(this.asyncContext, () -> {
+				logger.error("Could not complete request", ex);
+				HttpServletResponse response = (HttpServletResponse) this.asyncContext.getResponse();
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				this.asyncContext.complete();
+			});
 		}
 
 		@Override
 		public void onComplete() {
-			logger.debug("Successfully completed request");
-			this.asyncContext.complete();
+			runIfAsyncNotComplete(this.asyncContext, () -> {
+				logger.debug("Successfully completed request");
+				this.asyncContext.complete();
+			});
 		}
 	}
 

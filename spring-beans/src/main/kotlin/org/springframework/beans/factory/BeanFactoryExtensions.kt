@@ -9,7 +9,7 @@ import kotlin.reflect.KClass
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun <T : Any> BeanFactory.getBean(requiredType: KClass<T>) = getBean(requiredType.java)
+fun <T : Any> BeanFactory.getBean(requiredType: KClass<T>): T = getBean(requiredType.java)
 
 /**
  * Extension for [BeanFactory.getBean] providing a `getBean<Foo>()` variant.
@@ -17,7 +17,7 @@ fun <T : Any> BeanFactory.getBean(requiredType: KClass<T>) = getBean(requiredTyp
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Any> BeanFactory.getBean() = getBean(T::class.java)
+inline fun <reified T : Any> BeanFactory.getBean(): T = getBean(T::class.java)
 
 /**
  * Extension for [BeanFactory.getBean] providing a [KClass] based variant.
@@ -26,7 +26,7 @@ inline fun <reified T : Any> BeanFactory.getBean() = getBean(T::class.java)
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun <T : Any> BeanFactory.getBean(name: String, requiredType: KClass<T>) =
+fun <T : Any> BeanFactory.getBean(name: String, requiredType: KClass<T>): T =
 		getBean(name, requiredType.java)
 
 /**
@@ -37,7 +37,7 @@ fun <T : Any> BeanFactory.getBean(name: String, requiredType: KClass<T>) =
  * @since 5.0
  */
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
-inline fun <reified T : Any> BeanFactory.getBean(name: String) =
+inline fun <reified T : Any> BeanFactory.getBean(name: String): T =
 		getBean(name, T::class.java)
 
 /**
@@ -47,7 +47,7 @@ inline fun <reified T : Any> BeanFactory.getBean(name: String) =
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun <T : Any> BeanFactory.getBean(requiredType: KClass<T>, vararg args:Any) =
+fun <T : Any> BeanFactory.getBean(requiredType: KClass<T>, vararg args:Any): T =
 		getBean(requiredType.java, *args)
 
 /**
@@ -57,5 +57,5 @@ fun <T : Any> BeanFactory.getBean(requiredType: KClass<T>, vararg args:Any) =
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Any> BeanFactory.getBean(vararg args:Any) =
+inline fun <reified T : Any> BeanFactory.getBean(vararg args:Any): T =
 		getBean(T::class.java, *args)

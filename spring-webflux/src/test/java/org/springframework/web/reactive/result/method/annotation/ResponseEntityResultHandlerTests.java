@@ -291,7 +291,7 @@ public class ResponseEntityResultHandlerTests {
 		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
 
 		assertEquals(HttpStatus.OK, exchange.getResponse().getStatusCode());
-		assertResponseBody(exchange, "\"body\"");
+		assertResponseBody(exchange, "body");
 	}
 
 	@Test // SPR-14877

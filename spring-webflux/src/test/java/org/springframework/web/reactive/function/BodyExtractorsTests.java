@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -46,11 +47,12 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
-import static org.springframework.http.codec.json.Jackson2CodecSupport.*;
+import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
 
 /**
  * @author Arjen Poutsma
@@ -77,6 +79,12 @@ public class BodyExtractorsTests {
 			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
 				return messageReaders::stream;
 			}
+
+			@Override
+			public Optional<ServerHttpResponse> serverResponse() {
+				return Optional.empty();
+			}
+
 			@Override
 			public Map<String, Object> hints() {
 				return hints;
@@ -194,6 +202,12 @@ public class BodyExtractorsTests {
 			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
 				return Stream::empty;
 			}
+
+			@Override
+			public Optional<ServerHttpResponse> serverResponse() {
+				return Optional.empty();
+			}
+
 			@Override
 			public Map<String, Object> hints() {
 				return Collections.emptyMap();
