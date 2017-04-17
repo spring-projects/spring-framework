@@ -231,7 +231,7 @@ import org.springframework.stereotype.Component;
  * indicate they should be processed only if a given profile or profiles are <em>active</em>:
  *
  * <pre class="code">
- * &#064;Profile("embedded")
+ * &#064;Profile("development")
  * &#064;Configuration
  * public class EmbeddedDatabaseConfig {
  *
@@ -249,6 +249,22 @@ import org.springframework.stereotype.Component;
  *     public DataSource dataSource() {
  *         // instantiate, configure and return production DataSource
  *     }
+ * }</pre>
+ *
+ * Alternatively, you may also declare profile conditions at the {@code @Bean} method level,
+ * e.g. for alternative bean variants within the same configuration class:
+ *
+ * <pre class="code">
+ * &#064;Configuration
+ * public class ProfileDatabaseConfig {
+ *
+ *     &#064;Bean("dataSource")
+ *     &#064;Profile("development")
+ *     public DataSource embeddedDatabase() { ... }
+ *
+ *     &#064;Bean("dataSource")
+ *     &#064;Profile("production")
+ *     public DataSource productionDatabase() { ... }
  * }</pre>
  *
  * See the {@link Profile @Profile} and {@link org.springframework.core.env.Environment}
