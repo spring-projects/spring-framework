@@ -7516,7 +7516,7 @@ can rewrite the `dataSource` configuration as follows:
 [subs="verbatim,quotes"]
 ----
 	@Configuration
-	**@Profile("dev")**
+	**@Profile("development")**
 	public class StandaloneDataConfig {
 
 		@Bean
@@ -7581,7 +7581,7 @@ active. For example, given `@Profile({"p1", "!p2"})`, registration will occur if
 ====
 
 `@Profile` can also be declared at the method level to include only one particular bean
-of a configuration class:
+of a configuration class, e.g. for alternative variants of a particular bean:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -7589,9 +7589,9 @@ of a configuration class:
 	@Configuration
 	public class AppConfig {
 
-		@Bean
-		**@Profile("dev")**
-		public DataSource devDataSource() {
+		@Bean("dataSource")
+		**@Profile("development")**
+		public DataSource standaloneDataSource() {
 			return new EmbeddedDatabaseBuilder()
 				.setType(EmbeddedDatabaseType.HSQL)
 				.addScript("classpath:com/bank/config/sql/schema.sql")
@@ -7599,9 +7599,9 @@ of a configuration class:
 				.build();
 		}
 
-		@Bean
+		@Bean("dataSource")
 		**@Profile("production")**
-		public DataSource productionDataSource() throws Exception {
+		public DataSource jndiDataSource() throws Exception {
 			Context ctx = new InitialContext();
 			return (DataSource) ctx.lookup("java:comp/env/jdbc/datasource");
 		}
@@ -7611,11 +7611,20 @@ of a configuration class:
 [NOTE]
 ====
 With `@Profile` on `@Bean` methods, a special scenario may apply: In the case of
-overloaded `@Bean` methods, all `@Profile` declarations from all applicable factory
-methods for the same bean will be merged; as a consequence, they all need to match
-for the bean to become registered. `@Profile` can therefore not be used to select
-a particular overloaded method over another; resolution between overloaded factory
-methods only follows Spring's constructor resolution algorithm.
+overloaded `@Bean` methods of the same Java method name (analogous to constructor
+overloading), an `@Profile` condition needs to be consistently declared on all
+overloaded methods. If the conditions are inconsistent, only the condition on the
+first declaration among the overloaded methods will matter. `@Profile` can therefore
+not be used to select an overloaded method with a particular argument signature over
+another; resolution between all factory methods for the same bean follows Spring's
+constructor resolution algorithm at creation time.
+
+If you would like to define alternative beans with different profile conditions,
+use distinct Java method names pointing to the same bean name via the `@Bean` name
+attribute, as indicated in the example above. If the argument signatures are all
+the same (e.g. all of the variants have no-arg factory methods), this is the only
+way to represent such an arrangement in a valid Java class in the first place
+(since there can only be one method of a particular name and argument signature).
 ====
 
 
@@ -7628,7 +7637,7 @@ configuration above can be rewritten in two XML files as follows:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<beans profile="dev"
+	<beans profile="development"
 		xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:jdbc="http://www.springframework.org/schema/jdbc"
@@ -7667,7 +7676,7 @@ It is also possible to avoid that split and nest `<beans/>` elements within the 
 
 		<!-- other bean definitions -->
 
-		<beans profile="dev">
+		<beans profile="development">
 			<jdbc:embedded-database id="dataSource">
 				<jdbc:script location="classpath:com/bank/config/sql/schema.sql"/>
 				<jdbc:script location="classpath:com/bank/config/sql/test-data.sql"/>
@@ -7701,7 +7710,7 @@ it programmatically against the `Environment` API which is available via an
 [subs="verbatim,quotes"]
 ----
 	AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-	ctx.getEnvironment().setActiveProfiles("dev");
+	ctx.getEnvironment().setActiveProfiles("development");
 	ctx.register(SomeConfig.class, StandaloneDataConfig.class, JndiDataConfig.class);
 	ctx.refresh();
 ----

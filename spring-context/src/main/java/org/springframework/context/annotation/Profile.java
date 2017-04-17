@@ -64,11 +64,16 @@ import org.springframework.core.env.ConfigurableEnvironment;
  * of which (if any) profiles are active.
  *
  * <p><b>NOTE:</b> With {@code @Profile} on {@code @Bean} methods, a special scenario may
- * apply: In the case of overloaded {@code @Bean} methods, all {@code @Profile} declarations
- * from all applicable factory methods for the same bean will be merged; as a consequence,
- * they all need to match for the bean to become registered. {@code @Profile} can therefore
- * not be used to select a particular overloaded method over another; resolution between
- * overloaded factory methods only follows Spring's constructor resolution algorithm.
+ * apply: In the case of overloaded {@code @Bean} methods of the same Java method name
+ * (analogous to constructor overloading), an {@code @Profile} condition needs to be
+ * consistently declared on all overloaded methods. If the conditions are inconsistent,
+ * only the condition on the first declaration among the overloaded methods will matter.
+ * {@code @Profile} can therefore not be used to select an overloaded method with a
+ * particular argument signature over another; resolution between all factory methods
+ * for the same bean follows Spring's constructor resolution algorithm at creation time.
+ * <b>Use distinct Java method names pointing to the same {@link @Bean#name bean name}
+ * if you'd like to define alternative beans with different profile conditions</b>;
+ * see {@code ProfileDatabaseConfig} in {@link Configuration @Configuration}'s javadoc.
  *
  * <p>When defining Spring beans via XML, the {@code "profile"} attribute of the
  * {@code <beans>} element may be used. See the documentation in the
