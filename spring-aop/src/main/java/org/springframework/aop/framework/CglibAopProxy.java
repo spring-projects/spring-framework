@@ -23,6 +23,7 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.aopalliance.aop.Advice;
@@ -55,9 +56,6 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * CGLIB-based {@link AopProxy} implementation for the Spring AOP framework.
- *
- * <p>Formerly named {@code Cglib2AopProxy}, as of Spring 3.2, this class depends on
- * Spring's own internally repackaged version of CGLIB 3.</i>.
  *
  * <p>Objects of this type should be obtained through proxy factories,
  * configured by an {@link AdvisedSupport} object. This class is internal
@@ -241,10 +239,11 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 * validates it if not.
 	 */
 	private void validateClassIfNecessary(Class<?> proxySuperClass, ClassLoader proxyClassLoader) {
-		if (logger.isInfoEnabled()) {
+		if (logger.isWarnEnabled()) {
 			synchronized (validatedClasses) {
 				if (!validatedClasses.containsKey(proxySuperClass)) {
-					doValidateClass(proxySuperClass, proxyClassLoader);
+					doValidateClass(proxySuperClass, proxyClassLoader,
+							ClassUtils.getAllInterfacesForClassAsSet(proxySuperClass));
 					validatedClasses.put(proxySuperClass, Boolean.TRUE);
 				}
 			}
@@ -255,30 +254,35 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 * Checks for final methods on the given {@code Class}, as well as package-visible
 	 * methods across ClassLoaders, and writes warnings to the log for each one found.
 	 */
-	private void doValidateClass(Class<?> proxySuperClass, ClassLoader proxyClassLoader) {
+	private void doValidateClass(Class<?> proxySuperClass, ClassLoader proxyClassLoader, Set<Class<?>> ifcs) {
 		if (proxySuperClass != Object.class) {
 			Method[] methods = proxySuperClass.getDeclaredMethods();
 			for (Method method : methods) {
 				int mod = method.getModifiers();
 				if (!Modifier.isStatic(mod)) {
 					if (Modifier.isFinal(mod)) {
-						logger.info("Unable to proxy method [" + method + "] because it is final: " +
-								"All calls to this method via a proxy will NOT be routed to the target instance.");
+						if (implementsInterface(method, ifcs)) {
+							logger.warn("Unable to proxy interface-implmenting method [" + method + "] because " +
+									"it is marked as final: Consider using interface-based proxies instead!");
+						}
+						logger.info("Final method [" + method + "] cannot get proxied via CGLIB: " +
+								"Calls to this method will NOT be routed to the target instance and " +
+								"might lead to NPEs against uninitialized fields in the proxy instance.");
 					}
 					else if (!Modifier.isPublic(mod) && !Modifier.isProtected(mod) && !Modifier.isPrivate(mod) &&
 							proxyClassLoader != null && proxySuperClass.getClassLoader() != proxyClassLoader) {
-						logger.info("Unable to proxy method [" + method + "] because it is package-visible " +
-								"across different ClassLoaders: All calls to this method via a proxy will " +
-								"NOT be routed to the target instance.");
+						logger.info("Method [" + method + "] is package-visible across different ClassLoaders " +
+								"and cannot get proxied via CGLIB: Declare this method as public or protected " +
+								"if you need to support invocations through the proxy.");
 					}
 				}
 			}
-			doValidateClass(proxySuperClass.getSuperclass(), proxyClassLoader);
+			doValidateClass(proxySuperClass.getSuperclass(), proxyClassLoader, ifcs);
 		}
 	}
 
 	private Callback[] getCallbacks(Class<?> rootClass) throws Exception {
-		// Parameters used for optimisation choices...
+		// Parameters used for optimization choices...
 		boolean exposeProxy = this.advised.isExposeProxy();
 		boolean isFrozen = this.advised.isFrozen();
 		boolean isStatic = this.advised.getTargetSource().isStatic();
@@ -317,14 +321,14 @@ class CglibAopProxy implements AopProxy, Serializable {
 		Callback[] callbacks;
 
 		// If the target is a static one and the advice chain is frozen,
-		// then we can make some optimisations by sending the AOP calls
+		// then we can make some optimizations by sending the AOP calls
 		// direct to the target using the fixed chain for that method.
 		if (isStatic && isFrozen) {
 			Method[] methods = rootClass.getMethods();
 			Callback[] fixedCallbacks = new Callback[methods.length];
 			this.fixedInterceptorMap = new HashMap<String, Integer>(methods.length);
 
-			// TODO: small memory optimisation here (can skip creation for methods with no advice)
+			// TODO: small memory optimization here (can skip creation for methods with no advice)
 			for (int x = 0; x < methods.length; x++) {
 				List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(methods[x], rootClass);
 				fixedCallbacks[x] = new FixedChainStaticTargetInterceptor(
@@ -345,6 +349,31 @@ class CglibAopProxy implements AopProxy, Serializable {
 		return callbacks;
 	}
 
+
+	@Override
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof CglibAopProxy &&
+				AopProxyUtils.equalsInProxy(this.advised, ((CglibAopProxy) other).advised)));
+	}
+
+	@Override
+	public int hashCode() {
+		return CglibAopProxy.class.hashCode() * 13 + this.advised.getTargetSource().hashCode();
+	}
+
+
+	/**
+	 * Check whether the given method is declared on any of the given interfaces.
+	 */
+	private static boolean implementsInterface(Method method, Set<Class<?>> ifcs) {
+		for (Class<?> ifc : ifcs) {
+			if (ClassUtils.hasMethod(ifc, method.getName(), method.getParameterTypes())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Process a return value. Wraps a return of {@code this} if necessary to be the
 	 * {@code proxy} and also verifies that {@code null} is not returned as a primitive.
@@ -363,18 +392,6 @@ class CglibAopProxy implements AopProxy, Serializable {
 					"Null return value from advice does not match primitive return type for: " + method);
 		}
 		return retVal;
-	}
-
-
-	@Override
-	public boolean equals(Object other) {
-		return (this == other || (other instanceof CglibAopProxy &&
-				AopProxyUtils.equalsInProxy(this.advised, ((CglibAopProxy) other).advised)));
-	}
-
-	@Override
-	public int hashCode() {
-		return CglibAopProxy.class.hashCode() * 13 + this.advised.getTargetSource().hashCode();
 	}
 
 
@@ -823,51 +840,42 @@ class CglibAopProxy implements AopProxy, Serializable {
 				// Else use the AOP_PROXY.
 				if (isStatic && isFrozen && this.fixedInterceptorMap.containsKey(key)) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Method has advice and optimisations are enabled: " + method);
+						logger.debug("Method has advice and optimizations are enabled: " + method);
 					}
-					// We know that we are optimising so we can use the FixedStaticChainInterceptors.
+					// We know that we are optimizing so we can use the FixedStaticChainInterceptors.
 					int index = this.fixedInterceptorMap.get(key);
 					return (index + this.fixedInterceptorOffset);
 				}
 				else {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Unable to apply any optimisations to advised method: " + method);
+						logger.debug("Unable to apply any optimizations to advised method: " + method);
 					}
 					return AOP_PROXY;
 				}
 			}
 			else {
-				// See if the return type of the method is outside the class hierarchy
-				// of the target type. If so we know it never needs to have return type
-				// massage and can use a dispatcher.
-				// If the proxy is being exposed, then must use the interceptor the
-				// correct one is already configured. If the target is not static, then
-				// cannot use a dispatcher because the target cannot be released.
+				// See if the return type of the method is outside the class hierarchy of the target type.
+				// If so we know it never needs to have return type massage and can use a dispatcher.
+				// If the proxy is being exposed, then must use the interceptor the correct one is already
+				// configured. If the target is not static, then we cannot use a dispatcher because the
+				// target needs to be explicitly released after the invocation.
 				if (exposeProxy || !isStatic) {
 					return INVOKE_TARGET;
 				}
 				Class<?> returnType = method.getReturnType();
-				if (targetClass == returnType) {
+				if (returnType.isAssignableFrom(targetClass)) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Method " + method +
-								"has return type same as target type (may return this) - using INVOKE_TARGET");
+						logger.debug("Method return type is assignable from target type and " +
+								"may therefore return 'this' - using INVOKE_TARGET: " + method);
 					}
 					return INVOKE_TARGET;
-				}
-				else if (returnType.isPrimitive() || !returnType.isAssignableFrom(targetClass)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Method " + method +
-								" has return type that ensures this cannot be returned- using DISPATCH_TARGET");
-					}
-					return DISPATCH_TARGET;
 				}
 				else {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Method " + method +
-								"has return type that is assignable from the target type (may return this) - " +
-								"using INVOKE_TARGET");
+						logger.debug("Method return type ensures 'this' cannot be returned - " +
+								"using DISPATCH_TARGET: " + method);
 					}
-					return INVOKE_TARGET;
+					return DISPATCH_TARGET;
 				}
 			}
 		}
