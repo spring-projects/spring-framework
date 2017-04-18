@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.connection.SingleConnectionFactory;
 import org.springframework.jms.connection.TransactionAwareConnectionFactoryProxy;
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.JndiDestinationResolver;
 import org.springframework.jndi.JndiTemplate;
@@ -81,12 +82,7 @@ public class JmsTemplateTests {
 
 	private Destination queue;
 
-	private int deliveryMode = DeliveryMode.PERSISTENT;
-
-	private int priority = 9;
-
-	private int timeToLive = 10000;
-
+	private QosSettings qosSettings = new QosSettings(DeliveryMode.PERSISTENT, 9, 10000);
 
 	/**
 	 * Create the mock objects for testing.
@@ -373,10 +369,7 @@ public class JmsTemplateTests {
 		given(session.createTextMessage("just testing")).willReturn(textMessage);
 
 		if (!ignoreQOS) {
-			template.setExplicitQosEnabled(true);
-			template.setDeliveryMode(deliveryMode);
-			template.setPriority(priority);
-			template.setTimeToLive(timeToLive);
+			template.setQosSettings(qosSettings);
 		}
 
 		if (useDefaultDestination) {
@@ -419,7 +412,8 @@ public class JmsTemplateTests {
 			verify(messageProducer).send(textMessage);
 		}
 		else {
-			verify(messageProducer).send(textMessage, deliveryMode, priority, timeToLive);
+			verify(messageProducer).send(textMessage, qosSettings.getDeliveryMode(),
+					qosSettings.getPriority(), qosSettings.getTimeToLive());
 		}
 		verify(messageProducer).close();
 		verify(session).close();
