@@ -56,6 +56,9 @@ public abstract class Conventions {
 				Serializable.class, Externalizable.class, Cloneable.class, Comparable.class)));
 	}
 
+	private static final ReactiveAdapterRegistry reactiveAdapterRegistry =
+			new ReactiveAdapterRegistry();
+
 
 	/**
 	 * Determine the conventional variable name for the supplied {@code Object}
@@ -112,6 +115,7 @@ public abstract class Conventions {
 		Assert.notNull(parameter, "MethodParameter must not be null");
 		Class<?> valueClass;
 		boolean pluralize = false;
+		String reactiveSuffix = "";
 
 		if (parameter.getParameterType().isArray()) {
 			valueClass = parameter.getParameterType().getComponentType();
@@ -127,10 +131,16 @@ public abstract class Conventions {
 		}
 		else {
 			valueClass = parameter.getParameterType();
+
+			ReactiveAdapter adapter = reactiveAdapterRegistry.getAdapter(valueClass);
+			if (adapter != null && !adapter.getDescriptor().isNoValue()) {
+				reactiveSuffix = ClassUtils.getShortName(valueClass);
+				valueClass = parameter.nested().getNestedParameterType();
+			}
 		}
 
 		String name = ClassUtils.getShortNameAsProperty(valueClass);
-		return (pluralize ? pluralize(name) : name);
+		return (pluralize ? pluralize(name) : name + reactiveSuffix);
 	}
 
 	/**
@@ -179,6 +189,7 @@ public abstract class Conventions {
 
 		Class<?> valueClass;
 		boolean pluralize = false;
+		String reactiveSuffix = "";
 
 		if (resolvedType.isArray()) {
 			valueClass = resolvedType.getComponentType();
@@ -203,10 +214,16 @@ public abstract class Conventions {
 		}
 		else {
 			valueClass = resolvedType;
+
+			ReactiveAdapter adapter = reactiveAdapterRegistry.getAdapter(valueClass);
+			if (adapter != null && !adapter.getDescriptor().isNoValue()) {
+				reactiveSuffix = ClassUtils.getShortName(valueClass);
+				valueClass = ResolvableType.forMethodReturnType(method).getGeneric(0).resolve();
+			}
 		}
 
 		String name = ClassUtils.getShortNameAsProperty(valueClass);
-		return (pluralize ? pluralize(name) : name);
+		return (pluralize ? pluralize(name) : name + reactiveSuffix);
 	}
 
 	/**
