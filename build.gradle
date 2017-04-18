@@ -1,5 +1,5 @@
 buildscript {
-	ext.kotlinVersion = '1.1.2-eap-69'
+	ext.kotlinVersion = '1.1.2-eap-73'
 	repositories {
 		maven { url "https://repo.spring.io/plugins-release" }
 		maven { url "https://dl.bintray.com/kotlin/kotlin-eap-1.1" }
