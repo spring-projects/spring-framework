@@ -52,23 +52,26 @@ public abstract class Conventions {
 	private static final Set<Class<?>> IGNORED_INTERFACES;
 
 	static {
-		IGNORED_INTERFACES = Collections.unmodifiableSet(new HashSet<>(
-				Arrays.asList(Serializable.class, Externalizable.class, Cloneable.class, Comparable.class)));
+		IGNORED_INTERFACES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+				Serializable.class, Externalizable.class, Cloneable.class, Comparable.class)));
 	}
 
 
 	/**
-	 * Determine the conventional variable name for the supplied
-	 * {@code Object} based on its concrete type. The convention
-	 * used is to return the uncapitalized short name of the {@code Class},
-	 * according to JavaBeans property naming rules: So,
-	 * {@code com.myapp.Product} becomes {@code product};
-	 * {@code com.myapp.MyProduct} becomes {@code myProduct};
-	 * {@code com.myapp.UKProduct} becomes {@code UKProduct}.
-	 * <p>For arrays, we use the pluralized version of the array component type.
-	 * For {@code Collection}s we attempt to 'peek ahead' in the
-	 * {@code Collection} to determine the component type and
-	 * return the pluralized version of that component type.
+	 * Determine the conventional variable name for the supplied {@code Object}
+	 * based on its concrete type. The convention used is to return the
+	 * un-capitalized short name of the {@code Class}, according to JavaBeans
+	 * property naming rules.
+	 *
+	 * <p>For example:<br>
+	 * {@code com.myapp.Product} becomes {@code "product"}<br>
+	 * {@code com.myapp.MyProduct} becomes {@code "myProduct"}<br>
+	 * {@code com.myapp.UKProduct} becomes {@code "UKProduct"}<br>
+	 *
+	 * <p>For arrays the pluralized version of the array component type is used.
+	 * For {@code Collection}s an attempt is made to 'peek ahead' to determine
+	 * the component type and return its pluralized version.
+	 *
 	 * @param value the value to generate a variable name for
 	 * @return the generated variable name
 	 */
@@ -84,7 +87,8 @@ public abstract class Conventions {
 		else if (value instanceof Collection) {
 			Collection<?> collection = (Collection<?>) value;
 			if (collection.isEmpty()) {
-				throw new IllegalArgumentException("Cannot generate variable name for an empty Collection");
+				throw new IllegalArgumentException(
+						"Cannot generate variable name for an empty Collection");
 			}
 			Object valueToCheck = peekAhead(collection);
 			valueClass = getClassForValue(valueToCheck);
@@ -99,9 +103,9 @@ public abstract class Conventions {
 	}
 
 	/**
-	 * Determine the conventional variable name for the supplied parameter,
-	 * taking the generic collection type (if any) into account.
-	 * @param parameter the method or constructor parameter to generate a variable name for
+	 * Determine the conventional variable name for the given parameter taking
+	 * the generic collection type, if any, into account.
+	 * @param parameter the method or constructor parameter
 	 * @return the generated variable name
 	 */
 	public static String getVariableNameForParameter(MethodParameter parameter) {
@@ -130,8 +134,8 @@ public abstract class Conventions {
 	}
 
 	/**
-	 * Determine the conventional variable name for the return type of the supplied method,
-	 * taking the generic collection type (if any) into account.
+	 * Determine the conventional variable name for the return type of the
+	 * given method, taking the generic collection type, if any, into account.
 	 * @param method the method to generate a variable name for
 	 * @return the generated variable name
 	 */
@@ -140,10 +144,10 @@ public abstract class Conventions {
 	}
 
 	/**
-	 * Determine the conventional variable name for the return type of the supplied method,
-	 * taking the generic collection type (if any) into account, falling back to the
-	 * given return value if the method declaration is not specific enough (i.e. in case of
-	 * the return type being declared as {@code Object} or as untyped collection).
+	 * Determine the conventional variable name for the return type of the given
+	 * method, taking the generic collection type, if any, into account, falling
+	 * back on the given actual return value if the method declaration is not
+	 * specific enough, e.g. {@code Object} return type or untyped collection.
 	 * @param method the method to generate a variable name for
 	 * @param value the return value (may be {@code null} if not available)
 	 * @return the generated variable name
@@ -153,10 +157,10 @@ public abstract class Conventions {
 	}
 
 	/**
-	 * Determine the conventional variable name for the return type of the supplied method,
-	 * taking the generic collection type (if any) into account, falling back to the
-	 * given return value if the method declaration is not specific enough (i.e. in case of
-	 * the return type being declared as {@code Object} or as untyped collection).
+	 * Determine the conventional variable name for the return type of the given
+	 * method, taking the generic collection type, if any, into account, falling
+	 * back on the given return value if the method declaration is not specific
+	 * enough, e.g. {@code Object} return type or untyped collection.
 	 * @param method the method to generate a variable name for
 	 * @param resolvedType the resolved return type of the method
 	 * @param value the return value (may be {@code null} if not available)
@@ -167,7 +171,8 @@ public abstract class Conventions {
 
 		if (Object.class == resolvedType) {
 			if (value == null) {
-				throw new IllegalArgumentException("Cannot generate variable name for an Object return type with null value");
+				throw new IllegalArgumentException(
+						"Cannot generate variable name for an Object return type with null value");
 			}
 			return getVariableName(value);
 		}
@@ -183,13 +188,13 @@ public abstract class Conventions {
 			valueClass = ResolvableType.forMethodReturnType(method).asCollection().resolveGeneric();
 			if (valueClass == null) {
 				if (!(value instanceof Collection)) {
-					throw new IllegalArgumentException(
-							"Cannot generate variable name for non-typed Collection return type and a non-Collection value");
+					throw new IllegalArgumentException("Cannot generate variable name " +
+							"for non-typed Collection return type and a non-Collection value");
 				}
 				Collection<?> collection = (Collection<?>) value;
 				if (collection.isEmpty()) {
-					throw new IllegalArgumentException(
-							"Cannot generate variable name for non-typed Collection return type and an empty Collection value");
+					throw new IllegalArgumentException("Cannot generate variable name " +
+							"for non-typed Collection return type and an empty Collection value");
 				}
 				Object valueToCheck = peekAhead(collection);
 				valueClass = getClassForValue(valueToCheck);
@@ -205,9 +210,9 @@ public abstract class Conventions {
 	}
 
 	/**
-	 * Convert {@code String}s in attribute name format (lowercase, hyphens separating words)
-	 * into property name format (camel-cased). For example, {@code transaction-manager} is
-	 * converted into {@code transactionManager}.
+	 * Convert {@code String}s in attribute name format (e.g. lowercase, hyphens
+	 * separating words) into property name format (camel-case). For example
+	 * {@code transaction-manager} becomes {@code "transactionManager"}.
 	 */
 	public static String attributeNameToPropertyName(String attributeName) {
 		Assert.notNull(attributeName, "'attributeName' must not be null");
@@ -234,9 +239,9 @@ public abstract class Conventions {
 	}
 
 	/**
-	 * Return an attribute name qualified by the supplied enclosing {@link Class}. For example,
-	 * the attribute name '{@code foo}' qualified by {@link Class} '{@code com.myapp.SomeClass}'
-	 * would be '{@code com.myapp.SomeClass.foo}'
+	 * Return an attribute name qualified by the given enclosing {@link Class}.
+	 * For example the attribute name '{@code foo}' qualified by {@link Class}
+	 * '{@code com.myapp.SomeClass}' would be '{@code com.myapp.SomeClass.foo}'
 	 */
 	public static String getQualifiedAttributeName(Class<?> enclosingClass, String attributeName) {
 		Assert.notNull(enclosingClass, "'enclosingClass' must not be null");
@@ -246,11 +251,10 @@ public abstract class Conventions {
 
 
 	/**
-	 * Determines the class to use for naming a variable that contains
-	 * the given value.
-	 * <p>Will return the class of the given value, except when
-	 * encountering a JDK proxy, in which case it will determine
-	 * the 'primary' interface implemented by that proxy.
+	 * Determine the class to use for naming a variable containing the given value.
+	 * <p>Will return the class of the given value, except when encountering a
+	 * JDK proxy, in which case it will determine the 'primary' interface
+	 * implemented by that proxy.
 	 * @param value the value to check
 	 * @return the class to use for naming a variable
 	 */
@@ -280,7 +284,7 @@ public abstract class Conventions {
 	}
 
 	/**
-	 * Retrieves the {@code Class} of an element in the {@code Collection}.
+	 * Retrieve the {@code Class} of an element in the {@code Collection}.
 	 * The exact element for which the {@code Class} is retrieved will depend
 	 * on the concrete {@code Collection} implementation.
 	 */
