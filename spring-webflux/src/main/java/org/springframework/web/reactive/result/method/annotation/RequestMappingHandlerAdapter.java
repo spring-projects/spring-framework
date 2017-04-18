@@ -186,10 +186,10 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 
 		return this.modelInitializer
 				.initModel(bindingContext, modelAttributeMethods, exchange)
-				.then(() -> this.methodResolver.getRequestMappingMethod(handlerMethod)
+				.then(Mono.defer(() -> this.methodResolver.getRequestMappingMethod(handlerMethod)
 						.invoke(exchange, bindingContext)
 						.doOnNext(result -> result.setExceptionHandler(exceptionHandler))
-						.onErrorResume(exceptionHandler));
+						.onErrorResume(exceptionHandler)));
 	}
 
 	private Mono<HandlerResult> handleException(Throwable ex, HandlerMethod handlerMethod,

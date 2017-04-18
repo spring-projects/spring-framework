@@ -263,7 +263,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		try {
 			// Ensure form data is parsed for "params" conditions...
 			return exchange.getRequestParams()
-					.then(() -> {
+					.then(Mono.defer(() -> {
 						HandlerMethod handlerMethod = null;
 						try {
 							handlerMethod = lookupHandlerMethod(lookupPath, exchange);
@@ -283,7 +283,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 							handlerMethod = handlerMethod.createWithResolvedBean();
 						}
 						return Mono.justOrEmpty(handlerMethod);
-					});
+					}));
 		}
 		finally {
 			this.mappingRegistry.releaseReadLock();
