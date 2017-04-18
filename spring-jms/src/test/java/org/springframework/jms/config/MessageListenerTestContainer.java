@@ -52,39 +52,39 @@ public class MessageListenerTestContainer implements MessageListenerContainer, I
 	}
 
 	public JmsListenerEndpoint getEndpoint() {
-		return endpoint;
+		return this.endpoint;
 	}
 
 	public boolean isStarted() {
-		return startInvoked && initializationInvoked;
+		return this.startInvoked && this.initializationInvoked;
 	}
 
 	public boolean isStopped() {
-		return stopInvoked && destroyInvoked;
+		return this.stopInvoked && this.destroyInvoked;
 	}
 
 	@Override
 	public void start() throws JmsException {
-		if (!initializationInvoked) {
+		if (!this.initializationInvoked) {
 			throw new IllegalStateException("afterPropertiesSet should have been invoked before start on " + this);
 		}
-		if (startInvoked) {
+		if (this.startInvoked) {
 			throw new IllegalStateException("Start already invoked on " + this);
 		}
-		startInvoked = true;
+		this.startInvoked = true;
 	}
 
 	@Override
 	public void stop() throws JmsException {
-		if (stopInvoked) {
+		if (this.stopInvoked) {
 			throw new IllegalStateException("Stop already invoked on " + this);
 		}
-		stopInvoked = true;
+		this.stopInvoked = true;
 	}
 
 	@Override
 	public boolean isRunning() {
-		return startInvoked && !stopInvoked;
+		return this.startInvoked && !this.stopInvoked;
 	}
 
 	@Override
@@ -99,7 +99,7 @@ public class MessageListenerTestContainer implements MessageListenerContainer, I
 
 	@Override
 	public void stop(Runnable callback) {
-		stopInvoked = true;
+		this.stopInvoked = true;
 		callback.run();
 	}
 
@@ -134,25 +134,25 @@ public class MessageListenerTestContainer implements MessageListenerContainer, I
 
 	@Override
 	public void afterPropertiesSet() {
-		initializationInvoked = true;
+		this.initializationInvoked = true;
 	}
 
 	@Override
 	public void destroy() {
-		if (!stopInvoked) {
+		if (!this.stopInvoked) {
 			throw new IllegalStateException("Stop should have been invoked before " + "destroy on " + this);
 		}
-		destroyInvoked = true;
+		this.destroyInvoked = true;
 	}
 
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("TestContainer{");
-		sb.append("endpoint=").append(endpoint);
-		sb.append(", startInvoked=").append(startInvoked);
-		sb.append(", initializationInvoked=").append(initializationInvoked);
-		sb.append(", stopInvoked=").append(stopInvoked);
-		sb.append(", destroyInvoked=").append(destroyInvoked);
+		sb.append("endpoint=").append(this.endpoint);
+		sb.append(", startInvoked=").append(this.startInvoked);
+		sb.append(", initializationInvoked=").append(this.initializationInvoked);
+		sb.append(", stopInvoked=").append(this.stopInvoked);
+		sb.append(", destroyInvoked=").append(this.destroyInvoked);
 		sb.append('}');
 		return sb.toString();
 	}

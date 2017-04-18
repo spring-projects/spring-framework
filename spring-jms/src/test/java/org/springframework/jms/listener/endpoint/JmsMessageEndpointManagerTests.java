@@ -80,7 +80,7 @@ public class JmsMessageEndpointManagerTests {
 	public void isPubSubDomainWithNoConfig() {
 		JmsMessageEndpointManager endpoint = new JmsMessageEndpointManager();
 
-		thrown.expect(IllegalStateException.class); // far from ideal
+		this.thrown.expect(IllegalStateException.class); // far from ideal
 		endpoint.isPubSubDomain();
 	}
 
@@ -88,7 +88,7 @@ public class JmsMessageEndpointManagerTests {
 	public void isReplyPubSubDomainWithNoConfig() {
 		JmsMessageEndpointManager endpoint = new JmsMessageEndpointManager();
 
-		thrown.expect(IllegalStateException.class); // far from ideal
+		this.thrown.expect(IllegalStateException.class); // far from ideal
 		endpoint.isReplyPubSubDomain();
 	}
 
