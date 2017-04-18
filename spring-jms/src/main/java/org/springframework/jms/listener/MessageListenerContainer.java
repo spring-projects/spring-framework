@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.jms.listener;
 
 import org.springframework.context.SmartLifecycle;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 
@@ -61,5 +62,12 @@ public interface MessageListenerContainer extends SmartLifecycle {
 	 * <p>By default, the value is identical to {@link #isPubSubDomain()}.
 	 */
 	boolean isReplyPubSubDomain();
+
+	/**
+	 * Return the {@link QosSettings} to use when sending a reply or {@code null}
+	 * if the broker's defaults should be used.
+	 * @since 5.0
+	 */
+	QosSettings getReplyQosSettings();
 
 }

@@ -2793,6 +2793,29 @@ example can be rewritten as follows:
 	}
 ----
 
+Finally if you need to specify some QoS values for the response such as the priority or
+the time to live, you can configure the `JmsListenerContainerFactory` accordingly:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableJms
+	public class AppConfig {
+
+		@Bean
+		public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
+			DefaultJmsListenerContainerFactory factory =
+					new DefaultJmsListenerContainerFactory();
+			factory.setConnectionFactory(connectionFactory());
+			QosSettings replyQosSettings = new ReplyQosSettings();
+			replyQosSettings.setPriority(2);
+			replyQosSettings.setTimeToLive(10000);
+			factory.setReplyQosSettings(replyQosSettings);
+			return factory;
+		}
+	}
+----
 
 
 [[jms-namespace]]

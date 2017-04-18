@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 import org.springframework.jms.listener.endpoint.JmsActivationSpecConfig;
 import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
 import org.springframework.jms.listener.endpoint.StubJmsActivationSpecFactory;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
@@ -158,6 +159,7 @@ public class JmsListenerContainerFactoryTests {
 		factory.setSessionAcknowledgeMode(Session.DUPS_OK_ACKNOWLEDGE);
 		factory.setPubSubDomain(true);
 		factory.setReplyPubSubDomain(true);
+		factory.setReplyQosSettings(new QosSettings(1, 7, 5000));
 		factory.setSubscriptionDurable(true);
 		factory.setClientId("client-1234");
 		factory.setAutoStartup(false);
@@ -171,6 +173,7 @@ public class JmsListenerContainerFactoryTests {
 		assertEquals(Session.DUPS_OK_ACKNOWLEDGE, container.getSessionAcknowledgeMode());
 		assertEquals(true, container.isPubSubDomain());
 		assertEquals(true, container.isReplyPubSubDomain());
+		assertEquals(new QosSettings(1, 7, 5000), container.getReplyQosSettings());
 		assertEquals(true, container.isSubscriptionDurable());
 		assertEquals("client-1234", container.getClientId());
 		assertEquals(false, container.isAutoStartup());
@@ -182,6 +185,7 @@ public class JmsListenerContainerFactoryTests {
 		factory.setMessageConverter(messageConverter);
 		factory.setAcknowledgeMode(Session.DUPS_OK_ACKNOWLEDGE);
 		factory.setPubSubDomain(true);
+		factory.setReplyQosSettings(new QosSettings(1, 7, 5000));
 		factory.setSubscriptionDurable(true);
 		factory.setClientId("client-1234");
 	}
@@ -193,6 +197,7 @@ public class JmsListenerContainerFactoryTests {
 		assertNotNull(config);
 		assertEquals(Session.DUPS_OK_ACKNOWLEDGE, config.getAcknowledgeMode());
 		assertEquals(true, config.isPubSubDomain());
+		assertEquals(new QosSettings(1, 7, 5000), container.getReplyQosSettings());
 		assertEquals(true, config.isSubscriptionDurable());
 		assertEquals("client-1234", config.getClientId());
 	}

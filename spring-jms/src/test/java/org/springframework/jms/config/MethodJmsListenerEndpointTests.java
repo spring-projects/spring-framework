@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
 import org.springframework.jms.listener.adapter.ReplyFailureException;
 import org.springframework.jms.support.JmsHeaders;
 import org.springframework.jms.support.JmsMessageHeaderAccessor;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.messaging.Message;
@@ -315,8 +316,37 @@ public class MethodJmsListenerEndpointTests {
 		assertDefaultListenerMethodInvocation();
 	}
 
+	@Test
+	public void processAndReplyWithCustomReplyQosSettings() throws JMSException {
+		String methodName = "processAndReplyWithSendTo";
+		SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+		QosSettings replyQosSettings = new QosSettings(1, 6, 6000);
+		container.setReplyQosSettings(replyQosSettings);
+		MessagingMessageListenerAdapter listener = createInstance(this.factory,
+				getListenerMethod(methodName, String.class), container);
+		processAndReplyWithSendTo(listener, "replyDestination", false, replyQosSettings);
+		assertListenerMethodInvocation(this.sample, methodName);
+	}
+
+	@Test
+	public void processAndReplyWithNullReplyQosSettings() throws JMSException {
+		String methodName = "processAndReplyWithSendTo";
+		SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+		container.setReplyQosSettings(null);
+		MessagingMessageListenerAdapter listener = createInstance(this.factory,
+				getListenerMethod(methodName, String.class), container);
+		processAndReplyWithSendTo(listener, "replyDestination", false);
+		assertListenerMethodInvocation(this.sample, methodName);
+	}
+
 	private void processAndReplyWithSendTo(MessagingMessageListenerAdapter listener,
 			String replyDestinationName, boolean pubSubDomain) throws JMSException {
+		processAndReplyWithSendTo(listener, replyDestinationName, pubSubDomain, null);
+	}
+
+	private void processAndReplyWithSendTo(MessagingMessageListenerAdapter listener,
+			String replyDestinationName, boolean pubSubDomain,
+			QosSettings replyQosSettings) throws JMSException {
 		String body = "echo text";
 		String correlationId = "link-1234";
 		Destination replyDestination = new Destination() {};
@@ -338,7 +368,13 @@ public class MethodJmsListenerEndpointTests {
 
 		verify(destinationResolver).resolveDestinationName(session, replyDestinationName, pubSubDomain);
 		verify(reply).setJMSCorrelationID(correlationId);
-		verify(queueSender).send(reply);
+		if (replyQosSettings != null) {
+			verify(queueSender).send(reply, replyQosSettings.getDeliveryMode(),
+					replyQosSettings.getPriority(), replyQosSettings.getTimeToLive());
+		}
+		else {
+			verify(queueSender).send(reply);
+		}
 		verify(queueSender).close();
 	}
 

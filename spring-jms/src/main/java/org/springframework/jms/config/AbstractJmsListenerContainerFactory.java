@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.util.ErrorHandler;
@@ -53,6 +54,8 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	private Boolean pubSubDomain;
 
 	private Boolean replyPubSubDomain;
+
+	private QosSettings replyQosSettings;
 
 	private Boolean subscriptionDurable;
 
@@ -122,6 +125,13 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	}
 
 	/**
+	 * @see AbstractMessageListenerContainer#setReplyQosSettings(QosSettings)
+	 */
+	public void setReplyQosSettings(QosSettings replyQosSettings) {
+		this.replyQosSettings = replyQosSettings;
+	}
+
+	/**
 	 * @see AbstractMessageListenerContainer#setSubscriptionDurable(boolean)
 	 */
 	public void setSubscriptionDurable(Boolean subscriptionDurable) {
@@ -183,6 +193,9 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 		}
 		if (this.replyPubSubDomain != null) {
 			instance.setReplyPubSubDomain(this.replyPubSubDomain);
+		}
+		if (this.replyQosSettings != null) {
+			instance.setReplyQosSettings(this.replyQosSettings);
 		}
 		if (this.subscriptionDurable != null) {
 			instance.setSubscriptionDurable(this.subscriptionDurable);

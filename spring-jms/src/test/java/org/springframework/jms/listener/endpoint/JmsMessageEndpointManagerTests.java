@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.jms.listener.endpoint;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import org.springframework.jms.support.QosSettings;
 
 import static org.junit.Assert.*;
 
@@ -62,6 +64,19 @@ public class JmsMessageEndpointManagerTests {
 	}
 
 	@Test
+	public void customReplyQosSettings() {
+		JmsMessageEndpointManager endpoint = new JmsMessageEndpointManager();
+		JmsActivationSpecConfig config = new JmsActivationSpecConfig();
+		QosSettings settings = new QosSettings(1, 3, 5);
+		config.setReplyQosSettings(settings);
+		endpoint.setActivationSpecConfig(config);
+		assertNotNull(endpoint.getReplyQosSettings());
+		assertEquals(1, endpoint.getReplyQosSettings().getDeliveryMode());
+		assertEquals(3, endpoint.getReplyQosSettings().getPriority());
+		assertEquals(5, endpoint.getReplyQosSettings().getTimeToLive());
+	}
+
+	@Test
 	public void isPubSubDomainWithNoConfig() {
 		JmsMessageEndpointManager endpoint = new JmsMessageEndpointManager();
 
@@ -75,6 +90,14 @@ public class JmsMessageEndpointManagerTests {
 
 		thrown.expect(IllegalStateException.class); // far from ideal
 		endpoint.isReplyPubSubDomain();
+	}
+
+	@Test
+	public void getReplyQosSettingsWithNoConfig() {
+		JmsMessageEndpointManager endpoint = new JmsMessageEndpointManager();
+
+		this.thrown.expect(IllegalStateException.class); // far from ideal
+		endpoint.getReplyQosSettings();
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.jms.listener.endpoint;
 import javax.jms.Session;
 
 import org.springframework.core.Constants;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 
 /**
@@ -47,6 +48,8 @@ public class JmsActivationSpecConfig {
 	private boolean pubSubDomain = false;
 
 	private Boolean replyPubSubDomain;
+
+	private QosSettings replyQosSettings;
 
 	private boolean subscriptionDurable = false;
 
@@ -94,6 +97,14 @@ public class JmsActivationSpecConfig {
 		else {
 			return isPubSubDomain();
 		}
+	}
+
+	public void setReplyQosSettings(QosSettings replyQosSettings) {
+		this.replyQosSettings = replyQosSettings;
+	}
+
+	public QosSettings getReplyQosSettings() {
+		return this.replyQosSettings;
 	}
 
 	public void setSubscriptionDurable(boolean subscriptionDurable) {

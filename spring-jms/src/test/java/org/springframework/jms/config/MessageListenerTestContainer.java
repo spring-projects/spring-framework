@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.listener.MessageListenerContainer;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 
@@ -124,6 +125,11 @@ public class MessageListenerTestContainer implements MessageListenerContainer, I
 	@Override
 	public boolean isReplyPubSubDomain() {
 		return isPubSubDomain();
+	}
+
+	@Override
+	public QosSettings getReplyQosSettings() {
+		return null;
 	}
 
 	@Override
