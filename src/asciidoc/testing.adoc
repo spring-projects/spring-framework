@@ -4561,7 +4561,7 @@ public class CreateMessagePage {
 ----
 
 Formerly, this pattern is known as the
-https://code.google.com/p/selenium/wiki/PageObjects[Page Object Pattern]. While we can
+https://github.com/SeleniumHQ/selenium/wiki/PageObjects[Page Object Pattern]. While we can
 certainly do this with HtmlUnit, WebDriver provides some tools that we will explore in the
 following sections to make this pattern much easier to implement.
 
@@ -4665,15 +4665,15 @@ location.
 
 <2> The next thing you will notice is that we have a member variable for each of the
 parts of the HTML page that we are interested in. These are of type `WebElement`.
-``WebDriver``'s https://code.google.com/p/selenium/wiki/PageFactory[PageFactory] allows
+``WebDriver``'s https://github.com/SeleniumHQ/selenium/wiki/PageFactory[PageFactory] allows
 us to remove a lot of code from the HtmlUnit version of `CreateMessagePage` by
 automatically resolving each `WebElement`. The
-http://selenium.googlecode.com/git/docs/api/java/org/openqa/selenium/support/PageFactory.html#initElements-org.openqa.selenium.WebDriver-java.lang.Class-[PageFactory#initElements(WebDriver,Class<T>)]
+https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/support/PageFactory.html#initElements-org.openqa.selenium.WebDriver-java.lang.Class-[PageFactory#initElements(WebDriver,Class<T>)]
 method will automatically resolve each `WebElement` by using the field name and looking it
 up by the `id` or `name` of the element within the HTML page.
 
 <3> We can use the
-https://code.google.com/p/selenium/wiki/PageFactory#Making_the_Example_Work_Using_Annotations[@FindBy annotation]
+https://github.com/SeleniumHQ/selenium/wiki/PageFactory#making-the-example-work-using-annotations[@FindBy annotation]
 to override the default lookup behavior. Our example demonstrates how to use the `@FindBy`
 annotation to look up our submit button using a css selector, *input[type=submit]*.
 
@@ -4716,7 +4716,7 @@ public void destroy() {
 ----
 
 For additional information on using WebDriver, refer to the Selenium
-https://code.google.com/p/selenium/wiki/GettingStarted[WebDriver documentation].
+https://github.com/SeleniumHQ/selenium/wiki/Getting-Started[WebDriver documentation].
 
 [[spring-mvc-test-server-htmlunit-webdriver-advanced-builder]]
 ====== Advanced MockMvcHtmlUnitDriverBuilder
@@ -4904,7 +4904,7 @@ we were at the wrong page.
 
 Next we create a `content` closure that specifies all the areas of interest within the page.
 We can use a
-http://www.gebish.org/manual/current/intro.html#the_jquery_ish_navigator_api[jQuery-ish Navigator API]
+http://www.gebish.org/manual/current/#the-jquery-ish-navigator-api[jQuery-ish Navigator API]
 to select the content we are interested in.
 
 Finally, we can verify that a new message was created successfully.
