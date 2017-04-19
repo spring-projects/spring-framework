@@ -39,6 +39,198 @@ import static org.junit.Assert.*;
 public class PathPatternMatcherTests {
 
 	@Test
+	public void basicMatching() {
+		checkMatches(null, null);
+		checkMatches("", "");
+		checkMatches("", null);
+		checkNoMatch("/abc", null);
+		checkMatches(null, "");
+		checkNoMatch(null, "/abc");
+		checkMatches("/", "/");
+		checkNoMatch("/", "/a");
+		checkMatches("f", "f");
+		checkMatches("/foo", "/foo");
+		checkMatches("/foo/", "/foo/");
+		checkMatches("/foo/bar", "/foo/bar");
+		checkMatches("foo/bar", "foo/bar");
+		checkMatches("/foo/bar/", "/foo/bar/");
+		checkMatches("foo/bar/", "foo/bar/");
+		checkMatches("/foo/bar/woo", "/foo/bar/woo");
+		checkNoMatch("foo", "foobar");
+		checkMatches("/foo/bar", "/foo/bar");
+		checkNoMatch("/foo/bar", "/foo/baz");
+		// TODO Need more tests for escaped separators in path patterns and paths?
+		checkMatches("/foo\\/bar", "/foo\\/bar"); // chain string is Separator(/) Literal(foo\) Separator(/) Literal(bar)
+	}
+
+	@Test
+	public void optionalTrailingSeparators() {
+		// LiteralPathElement
+		PathPattern pp = parse("/resource");
+		assertTrue(pp.matches("/resource"));
+		assertTrue(pp.matches("/resource/"));
+		assertFalse(pp.matches("/resource//"));
+		pp = parse("/resource/");
+		assertFalse(pp.matches("/resource"));
+		assertTrue(pp.matches("/resource/"));
+		assertFalse(pp.matches("/resource//"));
+
+		// SingleCharWildcardPathElement
+		pp = parse("/res?urce");
+		assertTrue(pp.matches("/resource"));
+		assertTrue(pp.matches("/resource/"));
+		assertFalse(pp.matches("/resource//"));
+		pp = parse("/res?urce/");
+		assertFalse(pp.matches("/resource"));
+		assertTrue(pp.matches("/resource/"));
+		assertFalse(pp.matches("/resource//"));
+
+		// CaptureVariablePathElement
+		pp = parse("/{var}");
+		assertTrue(pp.matches("/resource"));
+		assertEquals("resource",pp.matchAndExtract("/resource").get("var"));
+		assertTrue(pp.matches("/resource/"));
+		assertEquals("resource",pp.matchAndExtract("/resource/").get("var"));
+		assertFalse(pp.matches("/resource//"));
+		pp = parse("/{var}/");
+		assertFalse(pp.matches("/resource"));
+		assertTrue(pp.matches("/resource/"));
+		assertEquals("resource",pp.matchAndExtract("/resource/").get("var"));
+		assertFalse(pp.matches("/resource//"));
+		
+		// CaptureTheRestPathElement
+		pp = parse("/{*var}");
+		assertTrue(pp.matches("/resource"));
+		assertEquals("/resource",pp.matchAndExtract("/resource").get("var"));
+		assertTrue(pp.matches("/resource/"));
+		assertEquals("/resource/",pp.matchAndExtract("/resource/").get("var"));
+		assertTrue(pp.matches("/resource//"));
+		assertEquals("/resource//",pp.matchAndExtract("/resource//").get("var"));
+		assertTrue(pp.matches("//resource//"));
+		assertEquals("//resource//",pp.matchAndExtract("//resource//").get("var"));
+		
+		// WildcardTheRestPathElement
+		pp = parse("/**");
+		assertTrue(pp.matches("/resource"));
+		assertTrue(pp.matches("/resource/"));
+		assertTrue(pp.matches("/resource//"));
+		assertTrue(pp.matches("//resource//"));
+		
+		// WildcardPathElement
+		pp = parse("/*");
+		assertTrue(pp.matches("/resource"));
+		assertTrue(pp.matches("/resource/"));
+		assertFalse(pp.matches("/resource//"));
+		pp = parse("/*/");
+		assertFalse(pp.matches("/resource"));
+		assertTrue(pp.matches("/resource/"));
+		assertFalse(pp.matches("/resource//"));
+
+		// RegexPathElement
+		pp = parse("/{var1}_{var2}");
+		assertTrue(pp.matches("/res1_res2"));
+		assertEquals("res1",pp.matchAndExtract("/res1_res2").get("var1"));
+		assertEquals("res2",pp.matchAndExtract("/res1_res2").get("var2"));
+		assertTrue(pp.matches("/res1_res2/"));
+		assertEquals("res1",pp.matchAndExtract("/res1_res2/").get("var1"));
+		assertEquals("res2",pp.matchAndExtract("/res1_res2/").get("var2"));
+		assertFalse(pp.matches("/res1_res2//"));
+		pp = parse("/{var1}_{var2}/");
+		assertFalse(pp.matches("/res1_res2"));
+		assertTrue(pp.matches("/res1_res2/"));
+		assertEquals("res1",pp.matchAndExtract("/res1_res2/").get("var1"));
+		assertEquals("res2",pp.matchAndExtract("/res1_res2/").get("var2"));
+		assertFalse(pp.matches("/res1_res2//"));
+		pp = parse("/{var1}*");
+		assertTrue(pp.matches("/a"));
+		assertTrue(pp.matches("/a/"));
+		assertFalse(pp.matches("/")); // no characters for var1
+		assertFalse(pp.matches("//")); // no characters for var1
+
+		// Now with trailing matching turned OFF
+		PathPatternParser parser = new PathPatternParser();
+		parser.setMatchOptionalTrailingSlash(false);
+		// LiteralPathElement
+		pp = parser.parse("/resource");
+		assertTrue(pp.matches("/resource"));
+		assertFalse(pp.matches("/resource/"));
+		assertFalse(pp.matches("/resource//"));
+		pp = parser.parse("/resource/");
+		assertFalse(pp.matches("/resource"));
+		assertTrue(pp.matches("/resource/"));
+		assertFalse(pp.matches("/resource//"));
+
+		// SingleCharWildcardPathElement
+		pp = parser.parse("/res?urce");
+		assertTrue(pp.matches("/resource"));
+		assertFalse(pp.matches("/resource/"));
+		assertFalse(pp.matches("/resource//"));
+		pp = parser.parse("/res?urce/");
+		assertFalse(pp.matches("/resource"));
+		assertTrue(pp.matches("/resource/"));
+		assertFalse(pp.matches("/resource//"));
+
+		// CaptureVariablePathElement
+		pp = parser.parse("/{var}");
+		assertTrue(pp.matches("/resource"));
+		assertEquals("resource",pp.matchAndExtract("/resource").get("var"));
+		assertFalse(pp.matches("/resource/"));
+		assertFalse(pp.matches("/resource//"));
+		pp = parser.parse("/{var}/");
+		assertFalse(pp.matches("/resource"));
+		assertTrue(pp.matches("/resource/"));
+		assertEquals("resource",pp.matchAndExtract("/resource/").get("var"));
+		assertFalse(pp.matches("/resource//"));
+				
+		// CaptureTheRestPathElement
+		pp = parser.parse("/{*var}");
+		assertTrue(pp.matches("/resource"));
+		assertEquals("/resource",pp.matchAndExtract("/resource").get("var"));
+		assertTrue(pp.matches("/resource/"));
+		assertEquals("/resource/",pp.matchAndExtract("/resource/").get("var"));
+		assertTrue(pp.matches("/resource//"));
+		assertEquals("/resource//",pp.matchAndExtract("/resource//").get("var"));
+		assertTrue(pp.matches("//resource//"));
+		assertEquals("//resource//",pp.matchAndExtract("//resource//").get("var"));
+				
+		// WildcardTheRestPathElement
+		pp = parser.parse("/**");
+		assertTrue(pp.matches("/resource"));
+		assertTrue(pp.matches("/resource/"));
+		assertTrue(pp.matches("/resource//"));
+		assertTrue(pp.matches("//resource//"));
+				
+		// WildcardPathElement
+		pp = parser.parse("/*");
+		assertTrue(pp.matches("/resource"));
+		assertFalse(pp.matches("/resource/"));
+		assertFalse(pp.matches("/resource//"));
+		pp = parser.parse("/*/");
+		assertFalse(pp.matches("/resource"));
+		assertTrue(pp.matches("/resource/"));
+		assertFalse(pp.matches("/resource//"));
+
+		// RegexPathElement
+		pp = parser.parse("/{var1}_{var2}");
+		assertTrue(pp.matches("/res1_res2"));
+		assertEquals("res1",pp.matchAndExtract("/res1_res2").get("var1"));
+		assertEquals("res2",pp.matchAndExtract("/res1_res2").get("var2"));
+		assertFalse(pp.matches("/res1_res2/"));
+		assertFalse(pp.matches("/res1_res2//"));
+		pp = parser.parse("/{var1}_{var2}/");
+		assertFalse(pp.matches("/res1_res2"));
+		assertTrue(pp.matches("/res1_res2/"));
+		assertEquals("res1",pp.matchAndExtract("/res1_res2/").get("var1"));
+		assertEquals("res2",pp.matchAndExtract("/res1_res2/").get("var2"));
+		assertFalse(pp.matches("/res1_res2//"));
+		pp = parser.parse("/{var1}*");
+		assertTrue(pp.matches("/a"));
+		assertFalse(pp.matches("/a/"));
+		assertFalse(pp.matches("/")); // no characters for var1
+		assertFalse(pp.matches("//")); // no characters for var1
+	}
+
+	@Test
 	public void pathRemainderBasicCases_spr15336() {
 		// Cover all PathElement kinds
 		assertEquals("/bar", parse("/foo").getPathRemaining("/foo/bar").getPathRemaining());
@@ -93,31 +285,6 @@ public class PathPatternMatcherTests {
 	}
 
 	@Test
-	public void basicMatching() {
-		checkMatches(null, null);
-		checkMatches("", "");
-		checkMatches("", null);
-		checkNoMatch("/abc", null);
-		checkMatches(null, "");
-		checkNoMatch(null, "/abc");
-		checkMatches("/", "/");
-		checkNoMatch("/", "/a");
-		checkMatches("f", "f");
-		checkMatches("/foo", "/foo");
-		checkMatches("/foo/", "/foo/");
-		checkMatches("/foo/bar", "/foo/bar");
-		checkMatches("foo/bar", "foo/bar");
-		checkMatches("/foo/bar/", "/foo/bar/");
-		checkMatches("foo/bar/", "foo/bar/");
-		checkMatches("/foo/bar/woo", "/foo/bar/woo");
-		checkNoMatch("foo", "foobar");
-		checkMatches("/foo/bar", "/foo/bar");
-		checkNoMatch("/foo/bar", "/foo/baz");
-		// TODO Need more tests for escaped separators in path patterns and paths?
-		checkMatches("/foo\\/bar", "/foo\\/bar"); // chain string is Separator(/) Literal(foo\) Separator(/) Literal(bar)
-	}
-
-	@Test
 	public void questionMarks() {
 		checkNoMatch("a", "ab");
 		checkMatches("/f?o/bar", "/foo/bar");
@@ -144,38 +311,62 @@ public class PathPatternMatcherTests {
 		checkCapture("/customer/{*something}", "/customer/aa/bb/cc", "something",
 				"/aa/bb/cc");
 		checkCapture("/customer/{*something}", "/customer/", "something", "/");
-		checkCapture("/customer/////{*something}", "/customer/", "something", "/");
-		checkCapture("/customer/{*something}", "/customer//////99", "something", "/99");
-		checkCapture("/customer///{*something}", "/customer//////99", "something", "/99");
+		checkCapture("/customer/////{*something}", "/customer/////", "something", "/");
+		checkCapture("/customer/////{*something}", "/customer//////", "something", "//");
+		checkCapture("/customer//////{*something}", "/customer//////99", "something", "/99");
+		checkCapture("/customer//////{*something}", "/customer//////99", "something", "/99");
 		checkCapture("/customer/{*something}", "/customer", "something", "");
 		checkCapture("/{*something}", "", "something", "");
+		checkCapture("/customer/{*something}", "/customer//////99", "something", "//////99");
 	}
 
 	@Test
-	public void multipleSelectorsInPattern() {
-		checkMatches("///abc", "/abc");
-		checkMatches("//", "/");
-		checkMatches("abc", "abc");
-		checkMatches("///abc//d/e", "/abc/d/e");
-		checkMatches("///abc//{def}//////xyz", "/abc/foo/xyz");
+	public void multipleSeparatorsInPattern() {
+		PathPattern pp = parse("a//b//c");
+		assertEquals("Literal(a) Separator(/) Separator(/) Literal(b) Separator(/) Separator(/) Literal(c)",pp.toChainString());
+		assertTrue(pp.matches("a//b//c"));
+		assertEquals("Literal(a) Separator(/) WildcardTheRest(/**)",parse("a//**").toChainString());
+		checkMatches("///abc", "///abc");
+		checkNoMatch("///abc", "/abc");
+		checkNoMatch("//", "/");
+		checkMatches("//", "//");
+		checkNoMatch("///abc//d/e", "/abc/d/e");
+		checkMatches("///abc//d/e", "///abc//d/e");
+		checkNoMatch("///abc//{def}//////xyz", "/abc/foo/xyz");
+		checkMatches("///abc//{def}//////xyz", "///abc//p//////xyz");
 	}
 
 	@Test
 	public void multipleSelectorsInPath() {
-		checkMatches("/abc", "////abc");
-		checkMatches("/", "//");
-		checkMatches("/abc//def///ghi", "/abc/def/ghi");
+		checkNoMatch("/abc", "////abc");
+		checkNoMatch("/", "//");
+		checkNoMatch("/abc/def/ghi", "/abc//def///ghi");
+		checkNoMatch("/abc", "////abc");
+		checkMatches("////abc", "////abc");
+		checkNoMatch("/", "//");
+		checkNoMatch("/abc//def///ghi", "/abc/def/ghi");
+		checkMatches("/abc//def///ghi", "/abc//def///ghi");
 	}
 
 	@Test
-	public void multipleSelectorsInPatternAndPath() {
-		checkMatches("///one///two///three", "//one/////two///////three");
-		checkMatches("//one//two//three", "/one/////two/three");
-		checkCapture("///{foo}///bar", "/one/bar", "foo", "one");
+	public void multipleSeparatorsInPatternAndPath() {
+		checkNoMatch("///one///two///three", "//one/////two///////three");
+		checkMatches("//one/////two///////three", "//one/////two///////three");
+		checkNoMatch("//one//two//three", "/one/////two/three");
+		checkMatches("/one/////two/three", "/one/////two/three");
+		checkCapture("///{foo}///bar", "///one///bar", "foo", "one");
 	}
-
+	
 	@Test
 	public void wildcards() {
+		checkMatches("/*/bar", "/foo/bar");
+		checkNoMatch("/*/bar", "/foo/baz");
+		checkNoMatch("/*/bar", "//bar");
+		checkMatches("/f*/bar", "/foo/bar");
+		checkMatches("/*/bar", "/foo/bar");
+		checkMatches("a/*","a/");
+		
+		checkMatches("/*","/");
 		checkMatches("/*/bar", "/foo/bar");
 		checkNoMatch("/*/bar", "/foo/baz");
 		checkMatches("/f*/bar", "/foo/bar");
@@ -183,18 +374,17 @@ public class PathPatternMatcherTests {
 		checkMatches("/a*b*c*d/bar", "/abcd/bar");
 		checkMatches("*a*", "testa");
 		checkMatches("a/*", "a/");
+		checkNoMatch("a/*", "a//"); // trailing slash, so is allowed
+		checkMatches("a/*", "a/a/"); // trailing slash, so is allowed
+		PathPatternParser ppp = new PathPatternParser();
+		ppp.setMatchOptionalTrailingSlash(false);
+		assertFalse(ppp.parse("a/*").matches("a//"));
 		checkMatches("a/*", "a/a");
-		checkNoMatch("a/*", "a/a/");
-
+		checkMatches("a/*", "a/a/"); // trailing slash is optional
 		checkMatches("/resource/**", "/resource");
 		checkNoMatch("/resource/**", "/resourceX");
 		checkNoMatch("/resource/**", "/resourceX/foobar");
 		checkMatches("/resource/**", "/resource/foobar");
-	}
-
-	@Test
-	public void trailingSeparators() {
-		checkNoMatch("aaa/", "aaa");
 	}
 
 	@Test
@@ -246,7 +436,8 @@ public class PathPatternMatcherTests {
 		checkMatches("test*aaa", "testblaaaa");
 		checkNoMatch("test*", "tst");
 		checkNoMatch("test*", "tsttest");
-		checkNoMatch("test*", "test/");
+		checkMatches("test*", "test/"); // trailing slash is optional
+		checkMatches("test*", "test"); // trailing slash is optional
 		checkNoMatch("test*", "test/t");
 		checkNoMatch("test/*", "test");
 		checkNoMatch("*test*", "tsttst");
@@ -265,8 +456,6 @@ public class PathPatternMatcherTests {
 
 		checkMatches("/**", "");
 		checkMatches("/books/**", "/books");
-		checkMatches("/books////**", "/books");
-		checkMatches("/books////**", "/books////");
 		checkMatches("/**", "/testing/testing");
 		checkMatches("/*/**", "/testing/testing");
 		checkMatches("/bla*bla/test", "/blaXXXbla/test");
@@ -314,6 +503,12 @@ public class PathPatternMatcherTests {
 	
 	@Test
 	public void matchStart() {
+		checkStartNoMatch("test/*/","test//");
+		checkStartMatches("test/*","test/abc");
+		checkStartMatches("test/*/def","test/abc/def");
+		checkStartNoMatch("test/*/def","test//");
+		checkStartNoMatch("test/*/def","test//def");
+		
 		checkStartMatches("test/{a}_{b}/foo", "test/a_b");
 		checkStartMatches("test/?/abc", "test/a");
 		checkStartMatches("test/{*foobar}", "test/");
@@ -357,7 +552,8 @@ public class PathPatternMatcherTests {
 		checkStartMatches("*.*", "test.test.test");
 		checkStartMatches("test*aaa", "testblaaaa");
 		checkStartNoMatch("test*", "tst");
-		checkStartNoMatch("test*", "test/");
+		checkStartMatches("test*", "test/"); // trailing slash is optional
+		checkStartMatches("test*", "test");
 		checkStartNoMatch("test*", "tsttest");
 		checkStartNoMatch("test*", "test/t");
 		checkStartMatches("test/*", "test");
@@ -398,7 +594,7 @@ public class PathPatternMatcherTests {
 				"/XXXblaXXXX/testing/bla/testing/testing.jpg");
 
 		checkStartMatches("/abc/{foo}", "/abc/def");
-		checkStartNoMatch("/abc/{foo}", "/abc/def/");
+		checkStartMatches("/abc/{foo}", "/abc/def/"); // trailing slash is optional
 		checkStartMatches("/abc/{foo}/", "/abc/def/");
 		checkStartNoMatch("/abc/{foo}/", "/abc/def/ghi");
 		checkStartMatches("/abc/{foo}/", "/abc/def");
@@ -556,8 +752,8 @@ public class PathPatternMatcherTests {
 
 	@Test
 	public void extractPathWithinPattern_spr15259() { 
+		checkExtractPathWithinPattern("/**","//","/");
 		checkExtractPathWithinPattern("/**","/","");
-		checkExtractPathWithinPattern("/**","//","");
 		checkExtractPathWithinPattern("/**","","");
 		checkExtractPathWithinPattern("/**","/foobar","foobar");
 	}
@@ -579,10 +775,8 @@ public class PathPatternMatcherTests {
 		checkExtractPathWithinPattern("/a/b/c*d*/*.html", "/a/b/cod/foo.html", "cod/foo.html");
 		checkExtractPathWithinPattern("a/{foo}/b/{bar}", "a/c/b/d", "c/b/d");
 		checkExtractPathWithinPattern("a/{foo}_{bar}/d/e", "a/b_c/d/e", "b_c/d/e");
-		checkExtractPathWithinPattern("aaa//*///ccc///ddd", "aaa/bbb/ccc/ddd", "bbb/ccc/ddd");
-		checkExtractPathWithinPattern("aaa/*/ccc/ddd", "aaa//bbb//ccc/ddd", "bbb/ccc/ddd");
+		checkExtractPathWithinPattern("aaa//*///ccc///ddd", "aaa//bbb///ccc///ddd", "bbb/ccc/ddd");
 		checkExtractPathWithinPattern("aaa//*///ccc///ddd", "aaa//bbb//ccc/ddd", "bbb/ccc/ddd");
-		checkExtractPathWithinPattern("aaa//*///ccc///ddd", "aaa/////bbb//ccc/ddd", "bbb/ccc/ddd");
 		checkExtractPathWithinPattern("aaa/c*/ddd/", "aaa/ccc///ddd///", "ccc/ddd");
 		checkExtractPathWithinPattern("", "", "");
 		checkExtractPathWithinPattern("/", "", "");
@@ -604,13 +798,18 @@ public class PathPatternMatcherTests {
 		
 		pp = new PathPatternParser().parse("/{foo}/{bar}");
 		assertTrue(pp.matches("/abc/def"));
+		assertFalse(pp.matches("/def"));
+		assertFalse(pp.matches("/"));
 		assertFalse(pp.matches("//def"));
 		assertFalse(pp.matches("//"));
+
 		
 		pp = parse("/{foo}/boo");
 		assertTrue(pp.matches("/abc/boo"));
 		assertTrue(pp.matches("/a/boo"));
+		assertFalse(pp.matches("/boo"));
 		assertFalse(pp.matches("//boo"));
+
 		
 		pp = parse("/{foo}*");
 		assertTrue(pp.matches("/abc"));
@@ -630,11 +829,14 @@ public class PathPatternMatcherTests {
 		checkCapture("/{foo:[a-z][a-z]}{bar:[a-z]}", "/abc", "foo", "ab", "bar", "c");
 		
 		// Only patterns not capturing variables cannot match against just /
-		pp = new PathPatternParser().parse("/****");
+		PathPatternParser ppp = new PathPatternParser();
+		ppp.setMatchOptionalTrailingSlash(true);
+		pp = ppp.parse("/****");
 		assertTrue(pp.matches("/abcdef"));
 		assertTrue(pp.matches("/"));
+		assertTrue(pp.matches("/"));
 		assertTrue(pp.matches("//"));
-		
+
 		// Confirming AntPathMatcher behaviour:
 		assertFalse(new AntPathMatcher().match("/{foo}", "/"));
 		assertTrue(new AntPathMatcher().match("/{foo}", "/a"));
@@ -682,6 +884,7 @@ public class PathPatternMatcherTests {
 		checkCapture("/{bla}.*", "/testing.html", "bla", "testing");
 		Map<String, String> extracted = checkCapture("/abc", "/abc");
 		assertEquals(0, extracted.size());
+		checkCapture("/{bla}/foo","/a/foo");
 	}
 
 	@Test
@@ -990,6 +1193,7 @@ public class PathPatternMatcherTests {
 
 	private PathPattern parse(String path) {
 		PathPatternParser pp = new PathPatternParser();
+		pp.setMatchOptionalTrailingSlash(true);
 		return pp.parse(path);
 	}
 
@@ -998,18 +1202,21 @@ public class PathPatternMatcherTests {
 	private void checkMatches(String uriTemplate, String path) {
 		PathPatternParser parser = (separator == PathPatternParser.DEFAULT_SEPARATOR
 				? new PathPatternParser() : new PathPatternParser(separator));
+		parser.setMatchOptionalTrailingSlash(true);
 		PathPattern p = parser.parse(uriTemplate);
 		assertTrue(p.matches(path));
 	}
 
 	private void checkStartNoMatch(String uriTemplate, String path) {
 		PathPatternParser p = new PathPatternParser();
+		p.setMatchOptionalTrailingSlash(true);
 		PathPattern pattern = p.parse(uriTemplate);
 		assertFalse(pattern.matchStart(path));
 	}
 
 	private void checkStartMatches(String uriTemplate, String path) {
 		PathPatternParser p = new PathPatternParser();
+		p.setMatchOptionalTrailingSlash(true);
 		PathPattern pattern = p.parse(uriTemplate);
 		assertTrue(pattern.matchStart(path));
 	}

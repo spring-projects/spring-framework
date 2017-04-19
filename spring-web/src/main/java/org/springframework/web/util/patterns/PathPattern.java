@@ -76,6 +76,9 @@ public class PathPattern implements Comparable<PathPattern> {
 	/** Will this match candidates in a case sensitive way? (case sensitivity  at parse time) */
 	private boolean caseSensitive;
 
+	/** If this pattern has no trailing slash, allow candidates to include one and still match successfully */
+	boolean allowOptionalTrailingSlash;
+
 	/** How many variables are captured in this pattern */
 	private int capturedVariableCount;
 
@@ -105,11 +108,12 @@ public class PathPattern implements Comparable<PathPattern> {
 	/** Does the pattern end with {*...} */
 	private boolean isCatchAll = false;
 
-	public PathPattern(String patternText, PathElement head, char separator, boolean caseSensitive) {
+	public PathPattern(String patternText, PathElement head, char separator, boolean caseSensitive, boolean allowOptionalTrailingSlash) {
 		this.head = head;
 		this.patternString = patternText;
 		this.separator = separator;
 		this.caseSensitive = caseSensitive;
+		this.allowOptionalTrailingSlash = allowOptionalTrailingSlash;
 		// Compute fields for fast comparison
 		PathElement s = head;
 		while (s != null) {
@@ -251,11 +255,15 @@ public class PathPattern implements Comparable<PathPattern> {
 		// assert this.matches(path)
 		PathElement s = head;
 		int separatorCount = 0;
+		boolean matchTheRest = false;
 		// Find first path element that is pattern based
 		while (s != null) {
 			if (s instanceof SeparatorPathElement || s instanceof CaptureTheRestPathElement
 					|| s instanceof WildcardTheRestPathElement) {
 				separatorCount++;
+				if (s instanceof WildcardTheRestPathElement || s instanceof CaptureTheRestPathElement) {
+					matchTheRest = true;
+				}
 			}
 			if (s.getWildcardCount() != 0 || s.getCaptureCount() != 0) {
 				break;
@@ -271,17 +279,15 @@ public class PathPattern implements Comparable<PathPattern> {
 		int pos = 0;
 		while (separatorCount > 0 && pos < len) {
 			if (path.charAt(pos++) == separator) {
-				// Skip any adjacent separators
-				while (pos < len && path.charAt(pos) == separator) {
-					pos++;
-				}
 				separatorCount--;
 			}
 		}
 		int end = len;
 		// Trim trailing separators
-		while (end > 0 && path.charAt(end - 1) == separator) {
-			end--;
+		if (!matchTheRest) {
+			while (end > 0 && path.charAt(end - 1) == separator) {
+				end--;
+			}
 		}
 		// Check if multiple separators embedded in the resulting path, if so trim them out.
 		// Example: aaa////bbb//ccc/d -> aaa/bbb/ccc/d
@@ -425,7 +431,7 @@ public class PathPattern implements Comparable<PathPattern> {
 
 		boolean extractingVariables;
 		
-		boolean determineRemaining = false;
+		boolean determineRemainingPath = false;
 		
 		// if determineRemaining is true, this is set to the position in
 		// the candidate where the pattern finished matching - i.e. it
@@ -438,11 +444,12 @@ public class PathPattern implements Comparable<PathPattern> {
 			this.extractingVariables = extractVariables;
 		}
 
-		/**
-		 * 
-		 */
 		public void setMatchAllowExtraPath() {
-			determineRemaining = true;
+			determineRemainingPath = true;
+		}
+		
+		public boolean isAllowOptionalTrailingSlash() {
+			return allowOptionalTrailingSlash;
 		}
 
 		public void setMatchStartMatching(boolean b) {
