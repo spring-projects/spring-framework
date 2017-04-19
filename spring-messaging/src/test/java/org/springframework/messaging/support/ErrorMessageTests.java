@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
- *
  * @author Gary Russell
  * @since 5.0
  */
@@ -32,10 +31,12 @@ public class ErrorMessageTests {
 	public void testToString() {
 		ErrorMessage em = new ErrorMessage(new RuntimeException("foo"));
 		String emString = em.toString();
-		assertThat(emString, not(containsString("originalMessage")));
+		assertThat(emString, not(containsString("original")));
+
 		em = new ErrorMessage(new RuntimeException("foo"), new GenericMessage<>("bar"));
 		emString = em.toString();
-		assertThat(emString, containsString("}, originalMessage="));
+		assertThat(emString, containsString("original"));
+		assertThat(emString, containsString(em.getOriginalMessage().toString()));
 	}
 
 }

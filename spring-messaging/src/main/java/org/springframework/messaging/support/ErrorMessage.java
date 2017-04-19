@@ -23,10 +23,12 @@ import org.springframework.messaging.MessageHeaders;
 
 /**
  * A {@link GenericMessage} with a {@link Throwable} payload.
- * The payload is typically a {@link org.springframework.messaging.MessagingException}
+ *
+ * <p>The payload is typically a {@link org.springframework.messaging.MessagingException}
  * with the message at the point of failure in its {@code failedMessage} property.
  * An optional {@code originalMessage} may be provided, which represents the message
  * that existed at the point in the stack where the error message is created.
+ *
  * <p>Consider some code that starts with a message, invokes some process that performs
  * transformation on that message and then fails for some reason, throwing the exception.
  * The exception is caught and an error message produced that contains both the original
@@ -43,6 +45,7 @@ public class ErrorMessage extends GenericMessage<Throwable> {
 	private static final long serialVersionUID = -5470210965279837728L;
 
 	private final Message<?> originalMessage;
+
 
 	/**
 	 * Create a new message with the given payload.
@@ -79,8 +82,8 @@ public class ErrorMessage extends GenericMessage<Throwable> {
 	/**
 	 * Create a new message with the given payload and original message.
 	 * @param payload the message payload (never {@code null})
-	 * @param originalMessage the original message (if present) at the point in the stack
-	 *        where the ErrorMessage was created
+	 * @param originalMessage the original message (if present) at the point
+	 * in the stack where the ErrorMessage was created
 	 * @since 5.0
 	 */
 	public ErrorMessage(Throwable payload, Message<?> originalMessage) {
@@ -93,8 +96,8 @@ public class ErrorMessage extends GenericMessage<Throwable> {
 	 * The content of the given header map is copied.
 	 * @param payload the message payload (never {@code null})
 	 * @param headers message headers to use for initialization
-	 * @param originalMessage the original message (if present) at the point in the stack
-	 *        where the ErrorMessage was created
+	 * @param originalMessage the original message (if present) at the point
+	 * in the stack where the ErrorMessage was created
 	 * @since 5.0
 	 */
 	public ErrorMessage(Throwable payload, Map<String, Object> headers, Message<?> originalMessage) {
@@ -108,8 +111,8 @@ public class ErrorMessage extends GenericMessage<Throwable> {
 	 * is used directly in the new message, i.e. it is not copied.
 	 * @param payload the message payload (never {@code null})
 	 * @param headers message headers
-	 * @param originalMessage the original message (if present) at the point in the stack
-	 *        where the ErrorMessage was created
+	 * @param originalMessage the original message (if present) at the point
+	 * in the stack where the ErrorMessage was created
 	 * @since 5.0
 	 */
 	public ErrorMessage(Throwable payload, MessageHeaders headers, Message<?> originalMessage) {
@@ -117,13 +120,14 @@ public class ErrorMessage extends GenericMessage<Throwable> {
 		this.originalMessage = originalMessage;
 	}
 
+
 	/**
-	 * The original message (if present) at the point in the stack where the
-	 * ErrorMessage was created.
-	 * @return the originalMessage
+	 * Return the original message (if available) at the point in the stack
+	 * where the ErrorMessage was created.
+	 * @since 5.0
 	 */
 	public Message<?> getOriginalMessage() {
-		return originalMessage;
+		return this.originalMessage;
 	}
 
 	@Override
@@ -131,14 +135,10 @@ public class ErrorMessage extends GenericMessage<Throwable> {
 		if (this.originalMessage == null) {
 			return super.toString();
 		}
-		else {
-			StringBuilder sb = new StringBuilder(super.toString());
-			if (sb.length() > 0) {
-				sb.setLength(sb.length() - 1);
-			}
-			sb.append(", originalMessage=").append(this.originalMessage.toString()).append("]");
-			return sb.toString();
-		}
+
+		StringBuilder sb = new StringBuilder(super.toString());
+		sb.append(" for original ").append(this.originalMessage);
+		return sb.toString();
 	}
 
 }
