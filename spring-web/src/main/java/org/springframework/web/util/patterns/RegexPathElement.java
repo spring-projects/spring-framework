@@ -124,7 +124,7 @@ class RegexPathElement extends PathElement {
 		boolean matches = m.matches();
 		if (matches) {
 			if (next == null) {
-				if (matchingContext.determineRemaining && 
+				if (matchingContext.determineRemainingPath && 
 					((this.variableNames.size() == 0) ? true : p > candidateIndex)) {
 					matchingContext.remainingPathIndex = p;
 					matches = true;
@@ -134,6 +134,11 @@ class RegexPathElement extends PathElement {
 					// If pattern is capturing variables there must be some actual data to bind to them
 					matches = (p == matchingContext.candidateLength && 
 							   ((this.variableNames.size() == 0) ? true : p > candidateIndex));
+					if (!matches && matchingContext.isAllowOptionalTrailingSlash()) {
+						matches = ((this.variableNames.size() == 0) ? true : p > candidateIndex) &&
+							      (p + 1) == matchingContext.candidateLength && 
+							      matchingContext.candidate[p] == separator;
+					}
 				}
 			}
 			else {

@@ -41,7 +41,7 @@ public class PathPatternParserTests {
 		checkStructure("foo");
 		checkStructure("foo/");
 		checkStructure("/foo/");
-		checkStructure("//");
+		checkStructure("");
 	}
 
 	@Test
@@ -49,7 +49,7 @@ public class PathPatternParserTests {
 		p = checkStructure("?");
 		assertPathElements(p, SingleCharWildcardedPathElement.class);
 		checkStructure("/?/");
-		checkStructure("//?abc?/");
+		checkStructure("/?abc?/");
 	}
 
 	@Test
@@ -175,7 +175,7 @@ public class PathPatternParserTests {
 		p = checkStructure("{foo}");
 		assertEquals(CaptureVariablePathElement.class.getName(), p.getHeadSection().getClass().getName());
 		checkStructure("/{foo}");
-		checkStructure("//{f}/");
+		checkStructure("/{f}/");
 		checkStructure("/{foo}/{bar}/{wibble}");
 	}
 
@@ -208,13 +208,13 @@ public class PathPatternParserTests {
 		checkError("{", 1, PatternMessage.MISSING_CLOSE_CAPTURE);
 		checkError("{abc", 4, PatternMessage.MISSING_CLOSE_CAPTURE);
 		checkError("{/}", 1, PatternMessage.MISSING_CLOSE_CAPTURE);
-		checkError("//{", 3, PatternMessage.MISSING_CLOSE_CAPTURE);
+		checkError("/{", 2, PatternMessage.MISSING_CLOSE_CAPTURE);
 		checkError("}", 0, PatternMessage.MISSING_OPEN_CAPTURE);
 		checkError("/}", 1, PatternMessage.MISSING_OPEN_CAPTURE);
 		checkError("def}", 3, PatternMessage.MISSING_OPEN_CAPTURE);
-		checkError("//{/}", 3, PatternMessage.MISSING_CLOSE_CAPTURE);
-		checkError("//{{/}", 3, PatternMessage.ILLEGAL_NESTED_CAPTURE);
-		checkError("//{abc{/}", 6, PatternMessage.ILLEGAL_NESTED_CAPTURE);
+		checkError("/{/}", 2, PatternMessage.MISSING_CLOSE_CAPTURE);
+		checkError("/{{/}", 2, PatternMessage.ILLEGAL_NESTED_CAPTURE);
+		checkError("/{abc{/}", 5, PatternMessage.ILLEGAL_NESTED_CAPTURE);
 		checkError("/{0abc}/abc", 2, PatternMessage.ILLEGAL_CHARACTER_AT_START_OF_CAPTURE_DESCRIPTOR);
 		checkError("/{a?bc}/abc", 3, PatternMessage.ILLEGAL_CHARACTER_IN_CAPTURE_DESCRIPTOR);
 		checkError("/{abc}_{abc}", 1, PatternMessage.ILLEGAL_DOUBLE_CAPTURE);
@@ -294,15 +294,19 @@ public class PathPatternParserTests {
 	@Test
 	public void multipleSeparatorPatterns() {
 		p = checkStructure("///aaa");
-		assertEquals(4, p.getNormalizedLength());
-		assertPathElements(p, SeparatorPathElement.class, LiteralPathElement.class);
+		assertEquals(6, p.getNormalizedLength());
+		assertPathElements(p, SeparatorPathElement.class, SeparatorPathElement.class,
+				SeparatorPathElement.class, LiteralPathElement.class);
 		p = checkStructure("///aaa////aaa/b");
-		assertEquals(10, p.getNormalizedLength());
-		assertPathElements(p, SeparatorPathElement.class, LiteralPathElement.class,
-				SeparatorPathElement.class, LiteralPathElement.class, SeparatorPathElement.class, LiteralPathElement.class);
+		assertEquals(15, p.getNormalizedLength());
+		assertPathElements(p, SeparatorPathElement.class, SeparatorPathElement.class, 
+				SeparatorPathElement.class, LiteralPathElement.class, SeparatorPathElement.class,
+				SeparatorPathElement.class, SeparatorPathElement.class, SeparatorPathElement.class,
+				LiteralPathElement.class, SeparatorPathElement.class, LiteralPathElement.class);
 		p = checkStructure("/////**");
-		assertEquals(1, p.getNormalizedLength());
-		assertPathElements(p, WildcardTheRestPathElement.class);
+		assertEquals(5, p.getNormalizedLength());
+		assertPathElements(p, SeparatorPathElement.class, SeparatorPathElement.class,
+				SeparatorPathElement.class, SeparatorPathElement.class, WildcardTheRestPathElement.class);
 	}
 
 	@Test

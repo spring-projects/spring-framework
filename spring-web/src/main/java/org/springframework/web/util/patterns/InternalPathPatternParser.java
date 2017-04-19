@@ -35,6 +35,11 @@ public class InternalPathPatternParser {
 	// Is the parser producing case sensitive PathPattern matchers
 	boolean caseSensitive = true;
 
+	// If true the PathPatterns produced by the parser will allow patterns
+	// that don't have a trailing slash to match paths that may or may not
+	// have a trailing slash
+	private boolean matchOptionalTrailingSlash = true;
+	
 	// The input data for parsing
 	private char[] pathPatternData;
 
@@ -79,11 +84,14 @@ public class InternalPathPatternParser {
 	 * Create a PatternParser that will use the specified separator instead of
 	 * the default.
 	 *
-	 * @param separator the path separator to look for when parsing.
+	 * @param separator the path separator to look for when parsing
+	 * @param caseSensitive true if PathPatterns should be sensitive to case
+	 * @param matchOptionalTrailingSlash true if patterns without a trailing slash can match paths that do have a trailing slash
 	 */
-	public InternalPathPatternParser(char separator, boolean caseSensitive) {
+	public InternalPathPatternParser(char separator, boolean caseSensitive, boolean matchOptionalTrailingSlash) {
 		this.separator = separator;
 		this.caseSensitive = caseSensitive;
+		this.matchOptionalTrailingSlash = matchOptionalTrailingSlash;
 	}
 
 	/**
@@ -99,10 +107,6 @@ public class InternalPathPatternParser {
 		if (pathPattern == null) {
 			pathPattern = "";
 		}
-//		int starstar = pathPattern.indexOf("**");
-//		if (starstar!=-1 && starstar!=pathPattern.length()-2) {
-//			throw new IllegalStateException("Not allowed ** unless at end of pattern: "+pathPattern);
-//		}
 		pathPatternData = pathPattern.toCharArray();
 		pathPatternLength = pathPatternData.length;
 		headPE = null;
@@ -116,10 +120,6 @@ public class InternalPathPatternParser {
 			if (ch == separator) {
 				if (pathElementStart != -1) {
 					pushPathElement(createPathElement());
-				}
-				// Skip over multiple separators
-				while ((pos + 1) < pathPatternLength && pathPatternData[pos + 1] == separator) {
-					pos++;
 				}
 				if (peekDoubleWildcard()) {
 					pushPathElement(new WildcardTheRestPathElement(pos, separator));
@@ -195,7 +195,7 @@ public class InternalPathPatternParser {
 		if (pathElementStart != -1) {
 			pushPathElement(createPathElement());
 		}
-		return new PathPattern(pathPattern, headPE, separator, caseSensitive);
+		return new PathPattern(pathPattern, headPE, separator, caseSensitive, matchOptionalTrailingSlash);
 	}
 
 	/**

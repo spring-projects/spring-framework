@@ -49,13 +49,8 @@ class CaptureTheRestPathElement extends PathElement {
 				matchingContext.candidate[candidateIndex] != separator) {
 			return false;
 		}
-		while ((candidateIndex + 1) < matchingContext.candidateLength &&
-				matchingContext.candidate[candidateIndex + 1] == separator) {
-			candidateIndex++;
-		}
-		if (matchingContext.determineRemaining) {
+		if (matchingContext.determineRemainingPath) {
 			matchingContext.remainingPathIndex = matchingContext.candidateLength;
-			return true;
 		}
 		if (matchingContext.extractingVariables) {
 			matchingContext.set(variableName, new String(matchingContext.candidate, candidateIndex,

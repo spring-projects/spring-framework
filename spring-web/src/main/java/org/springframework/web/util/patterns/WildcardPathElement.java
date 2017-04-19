@@ -20,7 +20,8 @@ import org.springframework.web.util.patterns.PathPattern.MatchingContext;
 
 /**
  * A wildcard path element. In the pattern '/foo/&ast;/goo' the * is
- * represented by a WildcardPathElement.
+ * represented by a WildcardPathElement. Within a path it matches at least 
+ * one character but at the end of a path it can match zero characters.
  *
  * @author Andy Clement
  * @since 5.0
@@ -32,25 +33,37 @@ class WildcardPathElement extends PathElement {
 	}
 
 	/**
-	 * Matching on a WildcardPathElement is quite straight forward. Just scan the 
-	 * candidate from the candidateIndex for the next separator or the end of the
+	 * Matching on a WildcardPathElement is quite straight forward. Scan the 
+	 * candidate from the candidateIndex onwards for the next separator or the end of the
 	 * candidate.
 	 */
 	@Override
 	public boolean matches(int candidateIndex, MatchingContext matchingContext) {
 		int nextPos = matchingContext.scanAhead(candidateIndex);
 		if (next == null) {
-			if (matchingContext.determineRemaining) {
+			if (matchingContext.determineRemainingPath) {
 				matchingContext.remainingPathIndex = nextPos;
 				return true;
 			}
 			else {
-				return (nextPos == matchingContext.candidateLength);
+				if (nextPos == matchingContext.candidateLength) {
+					return true;
+				}
+				else {
+					return matchingContext.isAllowOptionalTrailingSlash() && // if optional slash is on...
+						   nextPos > candidateIndex && // and there is at least one character to match the *...
+						   (nextPos + 1) == matchingContext.candidateLength &&  // and the nextPos is the end of the candidate...
+						   matchingContext.candidate[nextPos] == separator; // and the final character is a separator
+				}
 			}
 		}
-		else {
+		else { 
 			if (matchingContext.isMatchStartMatching && nextPos == matchingContext.candidateLength) {
 				return true; // no more data but matches up to this point
+			}
+			// Within a path (e.g. /aa/*/bb) there must be at least one character to match the wildcard
+			if (nextPos == candidateIndex) {
+				return false;
 			}
 			return next.matches(nextPos, matchingContext);
 		}
