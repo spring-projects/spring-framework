@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.function.server;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -71,7 +70,6 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 	}
 
 	@Test
-	@Ignore("SPR-15419")
 	public void variables() throws Exception {
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/1/2/3", String.class);

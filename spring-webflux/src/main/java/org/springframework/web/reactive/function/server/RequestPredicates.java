@@ -42,7 +42,6 @@ import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.patterns.PathPattern;
 import org.springframework.web.util.patterns.PathPatternParser;
-import org.springframework.web.util.patterns.PathRemainingMatchInfo;
 
 /**
  * Implementations of {@link RequestPredicate} that implement various useful
@@ -344,7 +343,7 @@ public abstract class RequestPredicates {
 			boolean match = this.pattern.matches(path);
 			traceMatch("Pattern", this.pattern.getPatternString(), path, match);
 			if (match) {
-				mergeTemplateVariables(request);
+				mergeTemplateVariables(request, this.pattern.matchAndExtract(request.path()));
 				return true;
 			}
 			else {
@@ -354,25 +353,24 @@ public abstract class RequestPredicates {
 
 		@Override
 		public Optional<ServerRequest> nest(ServerRequest request) {
-			PathRemainingMatchInfo info = this.pattern.getPathRemaining(request.path());
-			String remainingPath = (info == null ? null : info.getPathRemaining());
-			return Optional.ofNullable(remainingPath)
-					.map(path -> !path.startsWith("/") ? "/" + path : path)
-					.map(path -> {
-						// TODO: re-enable when SPR-15419 has been fixed.
-						// mergeTemplateVariables(request);
+			return Optional.ofNullable(this.pattern.getPathRemaining(request.path()))
+					.map(info -> {
+						mergeTemplateVariables(request, info.getMatchingVariables());
+						String path = info.getPathRemaining();
+						if (!path.startsWith("/")) {
+							path = "/" + path;
+						}
 						return new SubPathServerRequestWrapper(request, path);
 					});
 		}
 
-		private void mergeTemplateVariables(ServerRequest request) {
-			Map<String, String> newVariables = this.pattern.matchAndExtract(request.path());
-			if (!newVariables.isEmpty()) {
+		private void mergeTemplateVariables(ServerRequest request, Map<String, String> variables) {
+			if (!variables.isEmpty()) {
 				Map<String, String> oldVariables = request.pathVariables();
-				Map<String, String> variables = new LinkedHashMap<>(oldVariables);
-				variables.putAll(newVariables);
+				Map<String, String> mergedVariables = new LinkedHashMap<>(oldVariables);
+				mergedVariables.putAll(variables);
 				request.attributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-						Collections.unmodifiableMap(variables));
+						Collections.unmodifiableMap(mergedVariables));
 			}
 		}
 
