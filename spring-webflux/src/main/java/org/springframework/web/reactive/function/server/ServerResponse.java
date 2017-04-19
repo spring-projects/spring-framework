@@ -341,17 +341,27 @@ public interface ServerResponse {
 		 * @param elementClass the class of elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
 		 * @param <P> the type of the {@code Publisher}
-		 * @return the built request
+		 * @return the built response
 		 */
 		<T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher, Class<T> elementClass);
 
 		/**
+		 * Set the body of the response to the given {@code Object} and return it.
+		 * This convenience method combines {@link #body(BodyInserter)} and
+		 * {@link BodyInserters#fromObject(Object)}.
+		 * @param body the body of the response
+		 * @return the built response
+		 * @throws IllegalArgumentException if {@code body} is a {@link Publisher}, for which
+		 * {@link #body(Publisher, Class)} should be used.
+		 */
+		Mono<ServerResponse> body(Object body);
+
+		/**
 		 * Set the body of the response to the given {@code BodyInserter} and return it.
 		 * @param inserter the {@code BodyInserter} that writes to the response
-		 * @param <T> the type contained in the body
 		 * @return the built response
 		 */
-		<T> Mono<ServerResponse> body(BodyInserter<T, ? super ServerHttpResponse> inserter);
+		Mono<ServerResponse> body(BodyInserter<?, ? super ServerHttpResponse> inserter);
 
 		/**
 		 * Render the template with the given {@code name} using the given {@code modelAttributes}.

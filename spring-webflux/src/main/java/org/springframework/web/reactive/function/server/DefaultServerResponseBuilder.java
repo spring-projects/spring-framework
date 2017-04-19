@@ -189,7 +189,21 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 	@Override
-	public <T> Mono<ServerResponse> body(BodyInserter<T, ? super ServerHttpResponse> inserter) {
+	public Mono<ServerResponse> body(Object body) {
+		Assert.notNull(body, "'body' must not be null");
+		Assert.isTrue(!(body instanceof Publisher), "Please specify the element class by using " +
+				"body(Publisher, Class)");
+
+		return new DefaultEntityResponseBuilder<>(body,
+				BodyInserters.fromObject(body))
+				.headers(this.headers)
+				.status(this.statusCode)
+				.build()
+				.map(entityResponse -> entityResponse);
+	}
+
+	@Override
+	public Mono<ServerResponse> body(BodyInserter<?, ? super ServerHttpResponse> inserter) {
 		Assert.notNull(inserter, "'inserter' must not be null");
 		return Mono.just(new BodyInserterServerResponse<>(this.statusCode, this.headers, inserter, this.hints));
 	}

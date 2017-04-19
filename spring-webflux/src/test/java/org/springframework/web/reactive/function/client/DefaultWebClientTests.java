@@ -116,6 +116,14 @@ public class DefaultWebClientTests {
 		verifyNoMoreInteractions(this.exchangeFunction);
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void bodyObjectPublisher() throws Exception {
+		Mono<Void> mono = Mono.empty();
+		WebClient client = builder().build();
+
+		client.post().uri("http://example.com").body(mono);
+	}
+
 
 	private WebClient.Builder builder() {
 		return WebClient.builder().baseUrl("/base").exchangeFunction(this.exchangeFunction);

@@ -445,10 +445,9 @@ public interface WebClient {
 		/**
 		 * Set the body of the request to the given {@code BodyInserter}.
 		 * @param inserter the {@code BodyInserter} that writes to the request
-		 * @param <T> the type contained in the body
 		 * @return this builder
 		 */
-		<T> RequestHeadersSpec<?> body(BodyInserter<T, ? super ClientHttpRequest> inserter);
+		RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter);
 
 		/**
 		 * Set the body of the request to the given {@code Publisher}.
@@ -458,10 +457,10 @@ public interface WebClient {
 		 * @param publisher the {@code Publisher} to write to the request
 		 * @param elementClass the class of elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
-		 * @param <S> the type of the {@code Publisher}
+		 * @param <P> the type of the {@code Publisher}
 		 * @return this builder
 		 */
-		<T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, Class<T> elementClass);
+		<T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher, Class<T> elementClass);
 
 		/**
 		 * Set the body of the request to the given {@code Object}.
@@ -469,10 +468,9 @@ public interface WebClient {
 		 * {@linkplain org.springframework.web.reactive.function.BodyInserters#fromObject
 		 * Object body inserter}.
 		 * @param body the {@code Object} to write to the request
-		 * @param <T> the type contained in the body
 		 * @return this builder
 		 */
-		<T> RequestHeadersSpec<?> body(T body);
+		RequestHeadersSpec<?> body(Object body);
 
 	}
 

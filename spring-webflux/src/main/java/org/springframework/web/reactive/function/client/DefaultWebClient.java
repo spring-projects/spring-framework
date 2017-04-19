@@ -35,6 +35,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -258,19 +259,22 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public <T> RequestHeadersSpec<?> body(BodyInserter<T, ? super ClientHttpRequest> inserter) {
+		public RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter) {
 			this.inserter = inserter;
 			return this;
 		}
 
 		@Override
-		public <T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, Class<T> elementClass) {
+		public <T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher, Class<T> elementClass) {
 			this.inserter = BodyInserters.fromPublisher(publisher, elementClass);
 			return this;
 		}
 
 		@Override
-		public <T> RequestHeadersSpec<?> body(T body) {
+		public RequestHeadersSpec<?> body(Object body) {
+			Assert.isTrue(!(body instanceof Publisher), "Please specify the element class by " +
+					"using body(Publisher, Class)");
+
 			this.inserter = BodyInserters.fromObject(body);
 			return this;
 		}
