@@ -15,10 +15,10 @@
  */
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import reactor.core.publisher.Mono;
@@ -114,13 +114,12 @@ class ModelInitializer {
 				.orElse(Mono.empty());
 	}
 
-	private String getAttributeName(MethodParameter parameter) {
-		Method method = parameter.getMethod();
-		ModelAttribute annot = AnnotatedElementUtils.findMergedAnnotation(method, ModelAttribute.class);
-		if (annot != null && StringUtils.hasText(annot.value())) {
-			return annot.value();
-		}
-		return Conventions.getVariableNameForParameter(parameter);
+	private String getAttributeName(MethodParameter param) {
+		return Optional
+				.ofNullable(AnnotatedElementUtils.findMergedAnnotation(param.getMethod(), ModelAttribute.class))
+				.filter(ann -> StringUtils.hasText(ann.value()))
+				.map(ModelAttribute::value)
+				.orElse(Conventions.getVariableNameForParameter(param));
 	}
 
 }

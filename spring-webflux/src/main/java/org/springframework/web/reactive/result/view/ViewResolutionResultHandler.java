@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import reactor.core.publisher.Flux;
@@ -276,11 +277,10 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 	}
 
 	private String getNameForReturnValue(MethodParameter returnType) {
-		ModelAttribute annotation = returnType.getMethodAnnotation(ModelAttribute.class);
-		if (annotation != null && StringUtils.hasText(annotation.value())) {
-			return annotation.value();
-		}
-		return Conventions.getVariableNameForParameter(returnType);
+		return Optional.ofNullable(returnType.getMethodAnnotation(ModelAttribute.class))
+				.filter(ann -> StringUtils.hasText(ann.value()))
+				.map(ModelAttribute::value)
+				.orElse(Conventions.getVariableNameForParameter(returnType));
 	}
 
 	private void updateBindingContext(BindingContext context, ServerWebExchange exchange) {

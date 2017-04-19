@@ -21,6 +21,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
@@ -148,11 +149,10 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 	}
 
 	private String getAttributeName(MethodParameter parameter) {
-		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
-		if (ann != null && StringUtils.hasText(ann.value())) {
-			return ann.value();
-		}
-		return Conventions.getVariableNameForParameter(parameter);
+		return Optional.ofNullable(parameter.getParameterAnnotation(ModelAttribute.class))
+				.filter(ann -> StringUtils.hasText(ann.value()))
+				.map(ModelAttribute::value)
+				.orElse(Conventions.getVariableNameForParameter(parameter));
 	}
 
 	private Mono<?> prepareAttributeMono(String attributeName, ResolvableType attributeType,
@@ -216,7 +216,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		}
 
 		// A single data class constructor -> resolve constructor arguments from request parameters.
-		return exchange.getRequestParams().flatMap(requestParams -> {
+		return exchange.getRequestParams().map(requestParams -> {
 			ConstructorProperties cp = ctor.getAnnotation(ConstructorProperties.class);
 			String[] paramNames = (cp != null ? cp.value() : parameterNameDiscoverer.getParameterNames(ctor));
 			Assert.state(paramNames != null, () -> "Cannot resolve parameter names for constructor " + ctor);
@@ -234,7 +234,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 				}
 				args[i] = binder.convertIfNecessary(paramValue, paramTypes[i], new MethodParameter(ctor, i));
 			}
-			return Mono.fromSupplier(() -> BeanUtils.instantiateClass(ctor, args));
+			return BeanUtils.instantiateClass(ctor, args);
 		});
 	}
 
