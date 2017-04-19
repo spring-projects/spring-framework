@@ -28,6 +28,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ReactiveAdapter;
@@ -37,7 +38,6 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -235,7 +235,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 						viewsMono = Mono.just(Collections.singletonList((View) returnValue));
 					}
 					else {
-						String name = getNameForReturnValue(clazz, parameter);
+						String name = getNameForReturnValue(parameter);
 						model.addAttribute(name, returnValue);
 						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
 					}
@@ -275,13 +275,12 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 				});
 	}
 
-	private String getNameForReturnValue(Class<?> returnValueType, MethodParameter returnType) {
+	private String getNameForReturnValue(MethodParameter returnType) {
 		ModelAttribute annotation = returnType.getMethodAnnotation(ModelAttribute.class);
 		if (annotation != null && StringUtils.hasText(annotation.value())) {
 			return annotation.value();
 		}
-		// TODO: Conventions does not deal with async wrappers
-		return ClassUtils.getShortNameAsProperty(returnValueType);
+		return Conventions.getVariableNameForParameter(returnType);
 	}
 
 	private void updateBindingContext(BindingContext context, ServerWebExchange exchange) {

@@ -18,18 +18,17 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.reactive.BindingContext;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -82,7 +81,6 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 
 		int index = parameter.getParameterIndex() - 1;
 		MethodParameter attributeParam = new MethodParameter(parameter.getMethod(), index);
-		Class<?> attributeType = attributeParam.getParameterType();
 
 		ResolvableType type = ResolvableType.forMethodParameter(attributeParam);
 		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(type.resolve());
@@ -95,8 +93,7 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 		if (annot != null && StringUtils.hasText(annot.value())) {
 			return annot.value();
 		}
-		// TODO: Conventions does not deal with async wrappers
-		return ClassUtils.getShortNameAsProperty(attributeType);
+		return Conventions.getVariableNameForParameter(attributeParam);
 	}
 
 }

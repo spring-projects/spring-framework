@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.Conventions;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -33,6 +34,7 @@ import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -110,8 +112,8 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 				() -> getClass().getSimpleName() + " doesn't support multi-value reactive type wrapper: " +
 						parameter.getGenericParameterType());
 
-		String name = getAttributeName(valueType, parameter);
-		Mono<?> valueMono = getAttributeMono(name, valueType, context, exchange);
+		String name = getAttributeName(parameter);
+		Mono<?> valueMono = prepareAttributeMono(name, valueType, context, exchange);
 
 		Map<String, Object> model = context.getModel().asMap();
 		MonoProcessor<BindingResult> bindingResultMono = MonoProcessor.create();
@@ -145,19 +147,23 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		});
 	}
 
-	private String getAttributeName(ResolvableType valueType, MethodParameter parameter) {
+	private String getAttributeName(MethodParameter parameter) {
 		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
 		if (ann != null && StringUtils.hasText(ann.value())) {
 			return ann.value();
 		}
-		// TODO: Conventions does not deal with async wrappers
-		return ClassUtils.getShortNameAsProperty(valueType.getRawClass());
+		return Conventions.getVariableNameForParameter(parameter);
 	}
 
-	private Mono<?> getAttributeMono(
-			String attributeName, ResolvableType attributeType, BindingContext context, ServerWebExchange exchange) {
+	private Mono<?> prepareAttributeMono(String attributeName, ResolvableType attributeType,
+			BindingContext context, ServerWebExchange exchange) {
 
 		Object attribute = context.getModel().asMap().get(attributeName);
+
+		if (attribute == null) {
+			attribute = findAndRemoveReactiveAttribute(context.getModel(), attributeName);
+		}
+
 		if (attribute == null) {
 			return createAttribute(attributeName, attributeType.getRawClass(), context, exchange);
 		}
@@ -170,6 +176,28 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		else {
 			return Mono.justOrEmpty(attribute);
 		}
+	}
+
+	private Object findAndRemoveReactiveAttribute(Model model, String attributeName) {
+		return model.asMap().entrySet().stream()
+				.filter(entry -> {
+					if (!entry.getKey().startsWith(attributeName)) {
+						return false;
+					}
+					ReactiveAdapter adapter = getAdapterRegistry().getAdapter(null, entry.getValue());
+					if (adapter == null) {
+						return false;
+					}
+					String name = attributeName + ClassUtils.getShortName(adapter.getReactiveType());
+					return entry.getKey().equals(name);
+				})
+				.findFirst()
+				.map(entry -> {
+					// Remove since we will be re-inserting the resolved attribute value
+					model.asMap().remove(entry.getKey());
+					return entry.getValue();
+				})
+				.orElse(null);
 	}
 
 	private Mono<?> createAttribute(

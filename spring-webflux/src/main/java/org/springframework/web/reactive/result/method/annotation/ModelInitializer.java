@@ -23,12 +23,12 @@ import java.util.stream.Collectors;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.reactive.BindingContext;
@@ -107,21 +107,20 @@ class ModelInitializer {
 						attributeType = type.resolve();
 					}
 
-					String name = getAttributeName(attributeType, handlerResult.getReturnTypeSource());
+					String name = getAttributeName(handlerResult.getReturnTypeSource());
 					bindingContext.getModel().asMap().putIfAbsent(name, value);
 					return Mono.<Void>empty();
 				})
 				.orElse(Mono.empty());
 	}
 
-	private String getAttributeName(Class<?> valueType, MethodParameter parameter) {
+	private String getAttributeName(MethodParameter parameter) {
 		Method method = parameter.getMethod();
 		ModelAttribute annot = AnnotatedElementUtils.findMergedAnnotation(method, ModelAttribute.class);
 		if (annot != null && StringUtils.hasText(annot.value())) {
 			return annot.value();
 		}
-		// TODO: Conventions does not deal with async wrappers
-		return ClassUtils.getShortNameAsProperty(valueType);
+		return Conventions.getVariableNameForParameter(parameter);
 	}
 
 }

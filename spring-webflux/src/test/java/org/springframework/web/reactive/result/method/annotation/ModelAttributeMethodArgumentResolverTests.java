@@ -42,7 +42,11 @@ import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link ModelAttributeMethodArgumentResolver}.
@@ -105,7 +109,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 
 	@Test
 	public void createAndBind() throws Exception {
-		testBindFoo(this.testMethod.annotPresent(ModelAttribute.class).arg(Foo.class), value -> {
+		testBindFoo("foo", this.testMethod.annotPresent(ModelAttribute.class).arg(Foo.class), value -> {
 			assertEquals(Foo.class, value.getClass());
 			return (Foo) value;
 		});
@@ -116,7 +120,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 		MethodParameter parameter = this.testMethod
 				.annotNotPresent(ModelAttribute.class).arg(Mono.class, Foo.class);
 
-		testBindFoo(parameter, mono -> {
+		testBindFoo("fooMono", parameter, mono -> {
 			assertTrue(mono.getClass().getName(), mono instanceof Mono);
 			Object value = ((Mono<?>) mono).block(Duration.ofSeconds(5));
 			assertEquals(Foo.class, value.getClass());
@@ -129,7 +133,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 		MethodParameter parameter = this.testMethod
 				.annotPresent(ModelAttribute.class).arg(Single.class, Foo.class);
 
-		testBindFoo(parameter, single -> {
+		testBindFoo("fooSingle", parameter, single -> {
 			assertTrue(single.getClass().getName(), single instanceof Single);
 			Object value = ((Single<?>) single).toBlocking().value();
 			assertEquals(Foo.class, value.getClass());
@@ -144,7 +148,7 @@ public class ModelAttributeMethodArgumentResolverTests {
 		this.bindContext.getModel().addAttribute(foo);
 
 		MethodParameter parameter = this.testMethod.annotNotPresent(ModelAttribute.class).arg(Foo.class);
-		testBindFoo(parameter, value -> {
+		testBindFoo("foo", parameter, value -> {
 			assertEquals(Foo.class, value.getClass());
 			return (Foo) value;
 		});
@@ -156,10 +160,10 @@ public class ModelAttributeMethodArgumentResolverTests {
 	public void bindExistingMono() throws Exception {
 		Foo foo = new Foo();
 		foo.setName("Jim");
-		this.bindContext.getModel().addAttribute("foo", Mono.just(foo));
+		this.bindContext.getModel().addAttribute("fooMono", Mono.just(foo));
 
 		MethodParameter parameter = this.testMethod.annotNotPresent(ModelAttribute.class).arg(Foo.class);
-		testBindFoo(parameter, value -> {
+		testBindFoo("foo", parameter, value -> {
 			assertEquals(Foo.class, value.getClass());
 			return (Foo) value;
 		});
@@ -171,10 +175,10 @@ public class ModelAttributeMethodArgumentResolverTests {
 	public void bindExistingSingle() throws Exception {
 		Foo foo = new Foo();
 		foo.setName("Jim");
-		this.bindContext.getModel().addAttribute("foo", Single.just(foo));
+		this.bindContext.getModel().addAttribute("fooSingle", Single.just(foo));
 
 		MethodParameter parameter = this.testMethod.annotNotPresent(ModelAttribute.class).arg(Foo.class);
-		testBindFoo(parameter, value -> {
+		testBindFoo("foo", parameter, value -> {
 			assertEquals(Foo.class, value.getClass());
 			return (Foo) value;
 		});
@@ -186,12 +190,13 @@ public class ModelAttributeMethodArgumentResolverTests {
 	public void bindExistingMonoToMono() throws Exception {
 		Foo foo = new Foo();
 		foo.setName("Jim");
-		this.bindContext.getModel().addAttribute("foo", Mono.just(foo));
+		String modelKey = "fooMono";
+		this.bindContext.getModel().addAttribute(modelKey, Mono.just(foo));
 
 		MethodParameter parameter = this.testMethod
 				.annotNotPresent(ModelAttribute.class).arg(Mono.class, Foo.class);
 
-		testBindFoo(parameter, mono -> {
+		testBindFoo(modelKey, parameter, mono -> {
 			assertTrue(mono.getClass().getName(), mono instanceof Mono);
 			Object value = ((Mono<?>) mono).block(Duration.ofSeconds(5));
 			assertEquals(Foo.class, value.getClass());
@@ -199,7 +204,9 @@ public class ModelAttributeMethodArgumentResolverTests {
 		});
 	}
 
-	private void testBindFoo(MethodParameter param, Function<Object, Foo> valueExtractor) throws Exception {
+	private void testBindFoo(String modelKey, MethodParameter param, Function<Object, Foo> valueExtractor)
+			throws Exception {
+
 		Object value = createResolver()
 				.resolveArgument(param, this.bindContext, postForm("name=Robert&age=25"))
 				.block(Duration.ZERO);
@@ -208,12 +215,11 @@ public class ModelAttributeMethodArgumentResolverTests {
 		assertEquals("Robert", foo.getName());
 		assertEquals(25, foo.getAge());
 
-		String key = "foo";
-		String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + key;
+		String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + modelKey;
 
 		Map<String, Object> map = bindContext.getModel().asMap();
 		assertEquals(map.toString(), 2, map.size());
-		assertSame(foo, map.get(key));
+		assertSame(foo, map.get(modelKey));
 		assertNotNull(map.get(bindingResultKey));
 		assertTrue(map.get(bindingResultKey) instanceof BindingResult);
 	}
