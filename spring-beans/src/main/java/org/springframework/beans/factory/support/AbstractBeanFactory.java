@@ -128,7 +128,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/** 转换服务，取代属性编辑器 */
 	private ConversionService conversionService;
 
-	/** Custom PropertyEditorRegistrars to apply to the beans of this factory */
+	/** 属性编辑登记员集合 */
 	private final Set<PropertyEditorRegistrar> propertyEditorRegistrars =
 			new LinkedHashSet<PropertyEditorRegistrar>(4);
 
