@@ -29,6 +29,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.Before;
 import org.junit.Test;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import rx.Completable;
@@ -131,6 +132,10 @@ public class ResponseEntityResultHandlerTests {
 		assertFalse(this.resultHandler.supports(handlerResult(value, returnType)));
 
 		returnType = on(TestController.class).resolveReturnType(Completable.class);
+		assertFalse(this.resultHandler.supports(handlerResult(value, returnType)));
+
+		// SPR-15464
+		returnType = on(TestController.class).resolveReturnType(Flux.class);
 		assertFalse(this.resultHandler.supports(handlerResult(value, returnType)));
 	}
 
@@ -381,6 +386,7 @@ public class ResponseEntityResultHandlerTests {
 
 		Mono<ResponseEntity<?>> monoResponseEntityWildcard() { return null; }
 
+		Flux<?> fluxWildcard() { return null; }
 	}
 
 }

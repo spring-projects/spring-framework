@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,8 @@ public class ByteArrayEncoder extends AbstractEncoder<byte[]> {
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
-		Class<?> clazz = elementType.getRawClass();
-		return (super.canEncode(elementType, mimeType) && byte[].class.isAssignableFrom(clazz));
+		Class<?> clazz = elementType.resolve(Object.class);
+		return super.canEncode(elementType, mimeType) && byte[].class.isAssignableFrom(clazz);
 	}
 
 	@Override

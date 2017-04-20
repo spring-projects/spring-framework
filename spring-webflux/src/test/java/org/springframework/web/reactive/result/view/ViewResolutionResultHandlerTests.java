@@ -97,6 +97,9 @@ public class ViewResolutionResultHandlerTests {
 
 		testSupports(on(Handler.class).annotPresent(ModelAttribute.class).resolveReturnType(Long.class));
 		testDoesNotSupport(on(Handler.class).annotNotPresent(ModelAttribute.class).resolveReturnType(Long.class));
+
+		// SPR-15464
+		testSupports(on(Handler.class).resolveReturnType(Mono.class));
 	}
 
 	private void testSupports(MethodParameter returnType) {
@@ -427,6 +430,7 @@ public class ViewResolutionResultHandlerTests {
 		Long longValue() { return null; }
 		@ModelAttribute("myLong") Long longModelAttribute() { return null; }
 
+		Mono<?> monoWildcard() { return null; }
 	}
 
 }

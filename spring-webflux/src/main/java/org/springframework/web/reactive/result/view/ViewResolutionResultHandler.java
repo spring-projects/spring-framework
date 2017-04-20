@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,7 +156,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 			if (adapter.isNoValue()) {
 				return true;
 			}
-			type = result.getReturnType().getGeneric(0).getRawClass();
+			type = result.getReturnType().getGeneric(0).resolve(Object.class);
 		}
 		return (CharSequence.class.isAssignableFrom(type) || Rendering.class.isAssignableFrom(type) ||
 				Model.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type) ||

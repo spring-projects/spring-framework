@@ -68,6 +68,9 @@ public class ResourceRegionEncoderTests extends AbstractDataBufferAllocatingTest
 		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Resource.class), allMimeType));
 		assertTrue(this.encoder.canEncode(resourceRegion, MimeTypeUtils.APPLICATION_OCTET_STREAM));
 		assertTrue(this.encoder.canEncode(resourceRegion, allMimeType));
+
+		// SPR-15464
+		assertFalse(this.encoder.canEncode(ResolvableType.NONE, null));
 	}
 
 	@Test

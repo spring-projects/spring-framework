@@ -52,8 +52,8 @@ public class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
-		Class<?> clazz = elementType.getRawClass();
-		return (super.canEncode(elementType, mimeType) && CharSequence.class.isAssignableFrom(clazz));
+		Class<?> clazz = elementType.resolve(Object.class);
+		return super.canEncode(elementType, mimeType) && CharSequence.class.isAssignableFrom(clazz);
 	}
 
 	@Override

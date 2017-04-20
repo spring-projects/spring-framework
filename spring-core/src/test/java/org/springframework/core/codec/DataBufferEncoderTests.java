@@ -47,6 +47,9 @@ public class DataBufferEncoderTests extends AbstractDataBufferAllocatingTestCase
 				MimeTypeUtils.TEXT_PLAIN));
 		assertTrue(this.encoder.canEncode(ResolvableType.forClass(DataBuffer.class),
 				MimeTypeUtils.APPLICATION_JSON));
+
+		// SPR-15464
+		assertFalse(this.encoder.canEncode(ResolvableType.NONE, null));
 	}
 
 	@Test

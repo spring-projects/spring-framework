@@ -42,8 +42,8 @@ public class DataBufferEncoder extends AbstractEncoder<DataBuffer> {
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
-		Class<?> clazz = elementType.getRawClass();
-		return (super.canEncode(elementType, mimeType) && DataBuffer.class.isAssignableFrom(clazz));
+		Class<?> clazz = elementType.resolve(Object.class);
+		return super.canEncode(elementType, mimeType) && DataBuffer.class.isAssignableFrom(clazz);
 	}
 
 	@Override

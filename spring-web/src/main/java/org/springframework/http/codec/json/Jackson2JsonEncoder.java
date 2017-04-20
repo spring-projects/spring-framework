@@ -104,10 +104,10 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpMes
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
-		Class<?> clazz = elementType.getRawClass();
-		// Skip String: StringDecoder + "*/*" comes after
-		return (!String.class.isAssignableFrom(elementType.resolve(Object.class)) &&
-				this.objectMapper.canSerialize(clazz) && supportsMimeType(mimeType));
+		Class<?> clazz = elementType.resolve(Object.class);
+		return Object.class.equals(clazz) ||
+				!String.class.isAssignableFrom(elementType.resolve(clazz)) &&
+				this.objectMapper.canSerialize(clazz) && supportsMimeType(mimeType);
 	}
 
 	@Override
