@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -436,7 +436,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 	/**
-	 * Initialize components of this {@link UriComponentsBuilder} from the
+	 * Initialize components of this {@code UriComponentsBuilder} from the
 	 * components of the given {@link UriComponents}.
 	 * @param uriComponents the UriComponents instance
 	 * @return this UriComponentsBuilder
@@ -453,6 +453,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param scheme the URI scheme
 	 * @return this UriComponentsBuilder
 	 */
+	@Override
 	public UriComponentsBuilder scheme(String scheme) {
 		this.scheme = scheme;
 		return this;
@@ -478,6 +479,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param userInfo the URI user info
 	 * @return this UriComponentsBuilder
 	 */
+	@Override
 	public UriComponentsBuilder userInfo(String userInfo) {
 		this.userInfo = userInfo;
 		resetSchemeSpecificPart();
@@ -490,6 +492,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param host the URI host
 	 * @return this UriComponentsBuilder
 	 */
+	@Override
 	public UriComponentsBuilder host(String host) {
 		this.host = host;
 		resetSchemeSpecificPart();
@@ -501,6 +504,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param port the URI port
 	 * @return this UriComponentsBuilder
 	 */
+	@Override
 	public UriComponentsBuilder port(int port) {
 		Assert.isTrue(port >= -1, "Port must be >= -1");
 		this.port = String.valueOf(port);
@@ -515,6 +519,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param port the URI port
 	 * @return this UriComponentsBuilder
 	 */
+	@Override
 	public UriComponentsBuilder port(String port) {
 		this.port = port;
 		resetSchemeSpecificPart();
@@ -527,6 +532,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param path the URI path
 	 * @return this UriComponentsBuilder
 	 */
+	@Override
 	public UriComponentsBuilder path(String path) {
 		this.pathBuilder.addPath(path);
 		resetSchemeSpecificPart();
@@ -538,6 +544,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param path the URI path; a {@code null} value results in an empty path.
 	 * @return this UriComponentsBuilder
 	 */
+	@Override
 	public UriComponentsBuilder replacePath(String path) {
 		this.pathBuilder = new CompositePathComponentBuilder(path);
 		resetSchemeSpecificPart();
@@ -551,6 +558,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param pathSegments the URI path segments
 	 * @return this UriComponentsBuilder
 	 */
+	@Override
 	public UriComponentsBuilder pathSegment(String... pathSegments) throws IllegalArgumentException {
 		this.pathBuilder.addPathSegments(pathSegments);
 		resetSchemeSpecificPart();
@@ -573,6 +581,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param query the query string
 	 * @return this UriComponentsBuilder
 	 */
+	@Override
 	public UriComponentsBuilder query(String query) {
 		if (query != null) {
 			Matcher matcher = QUERY_PARAM_PATTERN.matcher(query);
@@ -595,6 +604,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param query the query string; a {@code null} value removes all query parameters.
 	 * @return this UriComponentsBuilder
 	 */
+	@Override
 	public UriComponentsBuilder replaceQuery(String query) {
 		this.queryParams.clear();
 		query(query);
@@ -611,6 +621,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param values the query parameter values
 	 * @return this UriComponentsBuilder
 	 */
+	@Override
 	public UriComponentsBuilder queryParam(String name, Object... values) {
 		Assert.notNull(name, "Name must not be null");
 		if (!ObjectUtils.isEmpty(values)) {
@@ -632,6 +643,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return this UriComponentsBuilder
 	 * @since 4.0
 	 */
+	@Override
 	public UriComponentsBuilder queryParams(MultiValueMap<String, String> params) {
 		if (params != null) {
 			this.queryParams.putAll(params);
@@ -646,6 +658,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param values the query parameter values
 	 * @return this UriComponentsBuilder
 	 */
+	@Override
 	public UriComponentsBuilder replaceQueryParam(String name, Object... values) {
 		Assert.notNull(name, "Name must not be null");
 		this.queryParams.remove(name);
@@ -662,6 +675,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return this UriComponentsBuilder
 	 * @since 4.2
 	 */
+	@Override
 	public UriComponentsBuilder replaceQueryParams(MultiValueMap<String, String> params) {
 		this.queryParams.clear();
 		if (params != null) {
@@ -676,6 +690,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param fragment the URI fragment
 	 * @return this UriComponentsBuilder
 	 */
+	@Override
 	public UriComponentsBuilder fragment(String fragment) {
 		if (fragment != null) {
 			Assert.hasLength(fragment, "Fragment must not be empty");
@@ -759,7 +774,6 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	/**
 	 * Public declaration of Object's {@code clone()} method.
 	 * Delegates to {@link #cloneBuilder()}.
-	 * @see Object#clone()
 	 */
 	@Override
 	public Object clone() {
