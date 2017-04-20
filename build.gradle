@@ -43,7 +43,7 @@ configure(allprojects) { project ->
 	ext.cacheApiVersion        = "1.0.0"
 	ext.caffeineVersion        = "2.4.0"
 	ext.eclipselinkVersion     = "2.6.4"
-	ext.ehcacheVersion         = "2.10.3"
+	ext.ehcacheVersion         = "2.10.4"
 	ext.ehcachejcacheVersion   = "1.0.1"
 	ext.ehcache3Version        = "3.3.1"
 	ext.ejbApiVersion          = "3.2"
@@ -64,7 +64,7 @@ configure(allprojects) { project ->
 	ext.jaxbVersion            = "2.2.11"
 	ext.jaxwsVersion           = "2.2.11"
 	ext.jcaVersion             = "1.7"
-	ext.jettyVersion           = "9.4.3.v20170317"
+	ext.jettyVersion           = "9.4.4.v20170414"
 	ext.jmsVersion             = "2.0.1"
 	ext.jodaVersion            = "2.9.9"
 	ext.jpaVersion             = "2.1.1"
@@ -77,12 +77,12 @@ configure(allprojects) { project ->
 	ext.junitPlatformVersion   = '1.0.0-M4'
 	ext.log4jVersion           = '2.8.2'
 	ext.nettyVersion           = "4.1.9.Final"
-	ext.okhttp3Version         = "3.6.0"
-	ext.poiVersion             = "3.15"
+	ext.okhttp3Version         = "3.7.0"
+	ext.poiVersion             = "3.16"
 	ext.protobufVersion        = "3.2.0"
 	ext.quartzVersion          = "2.2.3"
 	ext.reactorVersion         = "Bismuth-BUILD-SNAPSHOT"
-	ext.romeVersion            = "1.7.1"
+	ext.romeVersion            = "1.7.2"
 	ext.rxjavaVersion          = '1.2.9'
 	ext.rxjavaAdapterVersion   = '1.2.1'
 	ext.rxjava2Version         = '2.0.8'
@@ -92,7 +92,7 @@ configure(allprojects) { project ->
 	ext.snakeyamlVersion       = "1.18"
 	ext.testngVersion          = "6.11"
 	ext.tiles3Version          = "3.0.7"
-	ext.tomcatVersion          = "8.5.13"
+	ext.tomcatVersion          = "8.5.14"
 	ext.tyrusVersion           = "1.13.1"
 	ext.undertowVersion        = "1.4.12.Final"
 	ext.websocketVersion       = "1.1"
