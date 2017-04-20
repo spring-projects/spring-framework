@@ -18,7 +18,6 @@ package org.springframework.web.servlet.config.annotation;
 
 import java.util.List;
 import java.util.Locale;
-
 import javax.servlet.http.HttpServletRequest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -363,7 +362,7 @@ public class WebMvcConfigurationSupportTests {
 
 	@EnableWebMvc
 	@Configuration
-	static class CustomViewResolverOrderConfig extends WebMvcConfigurerAdapter {
+	static class CustomViewResolverOrderConfig implements WebMvcConfigurer {
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
@@ -374,7 +373,7 @@ public class WebMvcConfigurationSupportTests {
 
 	@EnableWebMvc
 	@Configuration
-	static class CustomArgumentResolverConfig extends WebMvcConfigurerAdapter {
+	static class CustomArgumentResolverConfig implements WebMvcConfigurer {
 
 		@Override
 		public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {

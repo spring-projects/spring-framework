@@ -4522,7 +4522,7 @@ a `CacheControl` instance, which supports more specific directives:
 ----
 	@Configuration
 	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
+	public class WebConfig implements WebMvcConfigurer {
 
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -4935,7 +4935,7 @@ It also automatically registers the following well-known modules if they are det
 [[mvc-config-customize]]
 === Customizing the Provided Configuration
 To customize the default configuration in Java you simply implement the
-`WebMvcConfigurer` interface or more likely extend the class `WebMvcConfigurerAdapter`
+`WebMvcConfigurer` interface or more likely extend the class `WebMvcConfigurer`
 and override the methods you need:
 
 [source,java,indent=0]
@@ -4943,7 +4943,7 @@ and override the methods you need:
 ----
 	@Configuration
 	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
+	public class WebConfig implements WebMvcConfigurer {
 
 		// Override configuration methods...
 
@@ -4970,7 +4970,7 @@ register custom formatters and converters, override the `addFormatters` method:
 ----
 	@Configuration
 	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
+	public class WebConfig implements WebMvcConfigurer {
 
 		@Override
 		public void addFormatters(FormatterRegistry registry) {
@@ -5064,7 +5064,7 @@ Alternatively you can configure your own global `Validator` instance:
 ----
 	@Configuration
 	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
+	public class WebConfig implements WebMvcConfigurer {
 
 		@Override
 		public Validator getValidator(); {
@@ -5129,7 +5129,7 @@ An example of registering interceptors in Java:
 ----
 	@Configuration
 	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
+	public class WebConfig implements WebMvcConfigurer {
 
 		@Override
 		public void addInterceptors(InterceptorRegistry registry) {
@@ -5183,7 +5183,7 @@ Below is an example of customizing content negotiation options through the MVC J
 ----
 	@Configuration
 	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
+	public class WebConfig implements WebMvcConfigurer {
 
 		@Override
 		public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
@@ -5242,7 +5242,7 @@ An example of forwarding a request for `"/"` to a view called `"home"` in Java:
 ----
 	@Configuration
 	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
+	public class WebConfig implements WebMvcConfigurer {
 
 		@Override
 		public void addViewControllers(ViewControllerRegistry registry) {
@@ -5274,7 +5274,7 @@ JSON rendering:
 ----
 	@Configuration
 	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
+	public class WebConfig implements WebMvcConfigurer {
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
@@ -5331,7 +5331,7 @@ In Java config simply add the respective "Configurer" bean:
 ----
 	@Configuration
 	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
+	public class WebConfig implements WebMvcConfigurer {
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
@@ -5370,7 +5370,7 @@ to serve resource requests with a URL pattern of `/resources/{asterisk}{asterisk
 ----
 	@Configuration
 	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
+	public class WebConfig implements WebMvcConfigurer {
 
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -5396,7 +5396,7 @@ browser cache and a reduction in HTTP requests made by the browser:
 ----
 	@Configuration
 	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
+	public class WebConfig implements WebMvcConfigurer {
 
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -5430,7 +5430,7 @@ serving of resources from both the web application root and from a known path of
 ----
 	@EnableWebMvc
 	@Configuration
-	public class WebConfig extends WebMvcConfigurerAdapter {
+	public class WebConfig implements WebMvcConfigurer {
 
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -5477,7 +5477,7 @@ Java config example;
 ----
 	@Configuration
 	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
+	public class WebConfig implements WebMvcConfigurer {
 
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -5544,7 +5544,7 @@ To enable the feature using the default setup use:
 ----
 	@Configuration
 	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
+	public class WebConfig implements WebMvcConfigurer {
 
 		@Override
 		public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
@@ -5576,7 +5576,7 @@ then the default Servlet's name must be explicitly provided as in the following 
 ----
 	@Configuration
 	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
+	public class WebConfig implements WebMvcConfigurer {
 
 		@Override
 		public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
@@ -5609,7 +5609,7 @@ Below is an example in Java config:
 ----
 	@Configuration
 	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
+	public class WebConfig implements WebMvcConfigurer {
 
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {
@@ -5658,9 +5658,9 @@ And the same in XML, use the `<mvc:path-matching>` element:
 === Message Converters
 
 Customization of `HttpMessageConverter` can be achieved in Java config by overriding
-{api-spring-framework}/web/servlet/config/annotation/WebMvcConfigurerAdapter.html#configureMessageConverters-java.util.List-[`configureMessageConverters()`]
+{api-spring-framework}/web/servlet/config/annotation/WebMvcConfigurer.html#configureMessageConverters-java.util.List-[`configureMessageConverters()`]
 if you want to replace the default converters created by Spring MVC, or by overriding
-{api-spring-framework}/web/servlet/config/annotation/WebMvcConfigurerAdapter.html#extendMessageConverters-java.util.List-[`extendMessageConverters()`]
+{api-spring-framework}/web/servlet/config/annotation/WebMvcConfigurer.html#extendMessageConverters-java.util.List-[`extendMessageConverters()`]
 if you just want to customize them or add additional converters to the default ones.
 
 Below is an example that adds Jackson JSON and XML converters with a customized
@@ -5671,7 +5671,7 @@ Below is an example that adds Jackson JSON and XML converters with a customized
 ----
 	@Configuration
 	@EnableWebMvc
-	public class WebConfiguration extends WebMvcConfigurerAdapter {
+	public class WebConfiguration implements WebMvcConfigurer {
 
 		@Override
 		public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -5779,7 +5779,7 @@ or a single `@EnableWebMvc` annotated class, since they both register the same u
 beans.
 
 Modifying beans in this way does not prevent you from using any of the higher-level
-constructs shown earlier in this section. `WebMvcConfigurerAdapter` subclasses and
+constructs shown earlier in this section. `WebMvcConfigurer` subclasses and
 `WebMvcConfigurer` implementations are still being used.
 ====
 

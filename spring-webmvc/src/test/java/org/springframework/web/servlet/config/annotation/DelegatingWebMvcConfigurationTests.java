@@ -46,8 +46,13 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.util.UrlPathHelper;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * A test fixture for {@link DelegatingWebMvcConfiguration} tests.
@@ -118,7 +123,7 @@ public class DelegatingWebMvcConfigurationTests {
 		final HttpMessageConverter customConverter = mock(HttpMessageConverter.class);
 		final StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
 		List<WebMvcConfigurer> configurers = new ArrayList<>();
-		configurers.add(new WebMvcConfigurerAdapter() {
+		configurers.add(new WebMvcConfigurer() {
 			@Override
 			public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 				converters.add(stringConverter);
@@ -176,7 +181,7 @@ public class DelegatingWebMvcConfigurationTests {
 	@Test
 	public void configureExceptionResolvers() throws Exception {
 		List<WebMvcConfigurer> configurers = new ArrayList<>();
-		configurers.add(new WebMvcConfigurerAdapter() {
+		configurers.add(new WebMvcConfigurer() {
 			@Override
 			public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 				exceptionResolvers.add(new DefaultHandlerExceptionResolver());
@@ -195,7 +200,7 @@ public class DelegatingWebMvcConfigurationTests {
 		final UrlPathHelper pathHelper = mock(UrlPathHelper.class);
 
 		List<WebMvcConfigurer> configurers = new ArrayList<>();
-		configurers.add(new WebMvcConfigurerAdapter() {
+		configurers.add(new WebMvcConfigurer() {
 			@Override
 			public void configurePathMatch(PathMatchConfigurer configurer) {
 				configurer.setUseRegisteredSuffixPatternMatch(true)

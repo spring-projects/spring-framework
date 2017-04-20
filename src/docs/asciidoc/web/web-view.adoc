@@ -47,7 +47,7 @@ Configuring the Groovy Markup Template Engine is quite easy:
 ----
 	@Configuration
 	@EnableWebMvc
-	public class WebConfig extends WebMvcConfigurerAdapter {
+	public class WebConfig implements WebMvcConfigurer {
 
         @Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
@@ -1385,7 +1385,7 @@ provided with Java 8+, you should declare the following configuration:
 ----
 	@Configuration
 	@EnableWebMvc
-	public class MustacheConfig extends WebMvcConfigurerAdapter {
+	public class MustacheConfig implements WebMvcConfigurer {
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
@@ -1472,7 +1472,7 @@ browser facilities not available in the server-side script engine.
 ----
 	@Configuration
 	@EnableWebMvc
-	public class MustacheConfig extends WebMvcConfigurerAdapter {
+	public class MustacheConfig implements WebMvcConfigurer {
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
@@ -1746,7 +1746,7 @@ regular MVC annotation configuration.
 @EnableWebMvc
 @ComponentScan
 @Configuration
-public class WebConfig extends WebMvcConfigurerAdapter {
+public class WebConfig implements WebMvcConfigurer {
 
 	@Bean
 	public XsltViewResolver xsltViewResolver() {
