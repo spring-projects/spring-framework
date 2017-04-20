@@ -22,8 +22,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Before;
 import org.junit.Test;
+import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.Flux;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -95,6 +98,13 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 		assertTrue(this.handler.supportsReturnType(
 				on(TestController.class).resolveReturnType(ResponseEntity.class, ResponseBodyEmitter.class)));
+
+		assertTrue(this.handler.supportsReturnType(
+				on(TestController.class).resolveReturnType(Flux.class, String.class)));
+
+		assertTrue(this.handler.supportsReturnType(
+				on(TestController.class).resolveReturnType(forClassWithGenerics(ResponseEntity.class,
+								forClassWithGenerics(Flux.class, String.class)))));
 	}
 
 	@Test
@@ -103,8 +113,8 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		assertFalse(this.handler.supportsReturnType(
 				on(TestController.class).resolveReturnType(ResponseEntity.class, String.class)));
 
-		assertFalse(this.handler.supportsReturnType(on(TestController.class)
-				.resolveReturnType(forClassWithGenerics(ResponseEntity.class,
+		assertFalse(this.handler.supportsReturnType(
+				on(TestController.class).resolveReturnType(forClassWithGenerics(ResponseEntity.class,
 						forClassWithGenerics(AtomicReference.class, String.class)))));
 
 		assertFalse(this.handler.supportsReturnType(
@@ -196,6 +206,27 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	}
 
 	@Test
+	public void responseBodyFlux() throws Exception {
+
+		this.request.addHeader("Accept", "text/event-stream");
+
+		MethodParameter type = on(TestController.class).resolveReturnType(Flux.class, String.class);
+		EmitterProcessor<String> processor = EmitterProcessor.create();
+		this.handler.handleReturnValue(processor, type, this.mavContainer, this.webRequest);
+
+		assertTrue(this.request.isAsyncStarted());
+		assertEquals(200, this.response.getStatus());
+		assertEquals("text/event-stream;charset=UTF-8", this.response.getContentType());
+
+		processor.onNext("foo");
+		processor.onNext("bar");
+		processor.onNext("baz");
+		processor.onComplete();
+
+		assertEquals("data:foo\n\ndata:bar\n\ndata:baz\n\n", this.response.getContentAsString());
+	}
+
+	@Test
 	public void responseEntitySse() throws Exception {
 		MethodParameter type = on(TestController.class).resolveReturnType(ResponseEntity.class, SseEmitter.class);
 		ResponseEntity<SseEmitter> entity = ResponseEntity.ok().header("foo", "bar").body(new SseEmitter());
@@ -218,6 +249,27 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		assertEquals(Collections.singletonList("bar"), this.response.getHeaders("foo"));
 	}
 
+	@Test
+	public void responseEntityFlux() throws Exception {
+
+		EmitterProcessor<String> processor = EmitterProcessor.create();
+		ResponseEntity<Flux<String>> entity = ResponseEntity.ok().body(processor);
+		ResolvableType bodyType = forClassWithGenerics(Flux.class, String.class);
+		MethodParameter type = on(TestController.class).resolveReturnType(ResponseEntity.class, bodyType);
+		this.handler.handleReturnValue(entity, type, this.mavContainer, this.webRequest);
+
+		assertTrue(this.request.isAsyncStarted());
+		assertEquals(200, this.response.getStatus());
+		assertEquals("text/plain", this.response.getContentType());
+
+		processor.onNext("foo");
+		processor.onNext("bar");
+		processor.onNext("baz");
+		processor.onComplete();
+
+		assertEquals("foobarbaz", this.response.getContentAsString());
+	}
+
 
 	@SuppressWarnings("unused")
 	private static class TestController {
@@ -235,6 +287,10 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		private ResponseEntity<AtomicReference<String>> h6() { return null; }
 
 		private ResponseEntity h7() { return null; }
+
+		private Flux<String> h8() { return null; }
+
+		private ResponseEntity<Flux<String>> h9() { return null; }
 
 	}
 

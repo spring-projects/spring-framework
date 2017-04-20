@@ -126,6 +126,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 			response.setStatus(responseEntity.getStatusCodeValue());
 			outputMessage.getHeaders().putAll(responseEntity.getHeaders());
 			returnValue = responseEntity.getBody();
+			returnType = returnType.nested();
 			if (returnValue == null) {
 				mavContainer.setRequestHandled(true);
 				outputMessage.flush();
