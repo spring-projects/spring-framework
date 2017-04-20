@@ -110,7 +110,7 @@ import org.springframework.util.StringValueResolver;
  */
 public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport implements ConfigurableBeanFactory {
 
-	/** Parent bean factory, for bean inheritance support */
+	/** 父工厂的引用, 支持Bean的继承 */
 	private BeanFactory parentBeanFactory;
 
 	/** ClassLoader to resolve bean class names with, if necessary */
