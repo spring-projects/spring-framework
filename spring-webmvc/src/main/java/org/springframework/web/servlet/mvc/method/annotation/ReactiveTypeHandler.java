@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -119,7 +120,6 @@ class ReactiveTypeHandler {
 		
 		Collection<MediaType> mediaTypes = getMediaTypes(request);
 		Optional<MediaType> mediaType = mediaTypes.stream().filter(MimeType::isConcrete).findFirst();
-		boolean jsonArrayOfStrings = isJsonArrayOfStrings(elementType, mediaType);
 
 		if (adapter.isMultiValue()) {
 			if (mediaTypes.stream().anyMatch(MediaType.TEXT_EVENT_STREAM::includes) ||
@@ -133,7 +133,7 @@ class ReactiveTypeHandler {
 				new JsonEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
 			}
-			if (CharSequence.class.isAssignableFrom(elementType) && !jsonArrayOfStrings) {
+			if (CharSequence.class.isAssignableFrom(elementType) && !isJsonStringArray(elementType, mediaType)) {
 				ResponseBodyEmitter emitter = getEmitter(mediaType.orElse(MediaType.TEXT_PLAIN));
 				new TextEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
@@ -142,7 +142,7 @@ class ReactiveTypeHandler {
 
 		// Not streaming...
 		DeferredResult<Object> result = new DeferredResult<>();
-		new DeferredResultSubscriber(result, jsonArrayOfStrings).connect(adapter, returnValue);
+		new DeferredResultSubscriber(result, adapter).connect(adapter, returnValue);
 		WebAsyncUtils.getAsyncManager(request).startDeferredResultProcessing(result, mav);
 
 		return null;
@@ -160,7 +160,7 @@ class ReactiveTypeHandler {
 	}
 
 	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-	private boolean isJsonArrayOfStrings(Class<?> elementType, Optional<MediaType> mediaType) {
+	private boolean isJsonStringArray(Class<?> elementType, Optional<MediaType> mediaType) {
 		return CharSequence.class.isAssignableFrom(elementType) && mediaType.filter(type ->
 				MediaType.APPLICATION_JSON.includes(type) || JSON_TYPE.includes(type)).isPresent();
 	}
@@ -387,14 +387,14 @@ class ReactiveTypeHandler {
 
 		private final DeferredResult<Object> result;
 
-		private final boolean jsonArrayOfStrings;
+		private final boolean multiValueSource;
 
 		private final CollectedValuesList values = new CollectedValuesList();
 
 
-		DeferredResultSubscriber(DeferredResult<Object> result, boolean jsonArrayOfStrings) {
+		DeferredResultSubscriber(DeferredResult<Object> result, ReactiveAdapter adapter) {
 			this.result = result;
-			this.jsonArrayOfStrings = jsonArrayOfStrings;
+			this.multiValueSource = adapter.isMultiValue();
 		}
 
 
@@ -421,14 +421,14 @@ class ReactiveTypeHandler {
 
 		@Override
 		public void onComplete() {
-			if (this.values.size() > 1) {
+			if (this.values.size() > 1 || this.multiValueSource) {
 				this.result.setResult(this.values);
 			}
 			else if (this.values.size() == 1) {
 				this.result.setResult(this.values.get(0));
 			}
 			else {
-				this.result.setResult(this.jsonArrayOfStrings ? this.values : null);
+				this.result.setResult(null);
 			}
 		}
 	}

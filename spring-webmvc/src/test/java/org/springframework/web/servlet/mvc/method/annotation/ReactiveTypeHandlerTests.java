@@ -16,7 +16,6 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
@@ -53,6 +52,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.web.method.ResolvableMethod.on;
 
@@ -127,15 +127,8 @@ public class ReactiveTypeHandlerTests {
 
 	@Test
 	public void deferredResultSubscriberWithNoValues() throws Exception {
-
-		// Empty -> null
 		MonoProcessor<String> monoEmpty = MonoProcessor.create();
 		testDeferredResultSubscriber(monoEmpty, Mono.class, monoEmpty::onComplete, null);
-
-		// Empty -> List[0] when JSON is preferred
-		this.servletRequest.addHeader("Accept", "application/json");
-		MonoProcessor<String> monoEmpty2 = MonoProcessor.create();
-		testDeferredResultSubscriber(monoEmpty2, Mono.class, monoEmpty2::onComplete, new ArrayList<>());
 	}
 
 	@Test
@@ -177,23 +170,31 @@ public class ReactiveTypeHandlerTests {
 	public void jsonArrayOfStrings() throws Exception {
 
 		// Empty -> null
-		testJsonPreferred("text/plain", null);
-		testJsonPreferred("text/plain, application/json", null);
-		testJsonPreferred("text/markdown", null);
-		testJsonPreferred("foo/bar", null);
+		testJsonNotPreferred("text/plain");
+		testJsonNotPreferred("text/plain, application/json");
+		testJsonNotPreferred("text/markdown");
+		testJsonNotPreferred("foo/bar");
 
 		// Empty -> List[0] when JSON is preferred
-		testJsonPreferred("application/json", Collections.emptyList());
-		testJsonPreferred("application/foo+json", Collections.emptyList());
-		testJsonPreferred("application/json, text/plain", Collections.emptyList());
-		testJsonPreferred("*/*, application/json, text/plain", Collections.emptyList());
+		testJsonPreferred("application/json");
+		testJsonPreferred("application/foo+json");
+		testJsonPreferred("application/json, text/plain");
+		testJsonPreferred("*/*, application/json, text/plain");
 	}
 
-	private void testJsonPreferred(String acceptHeaderValue, Object expected) throws Exception {
+	private void testJsonNotPreferred(String acceptHeaderValue) throws Exception {
 		resetRequest();
 		this.servletRequest.addHeader("Accept", acceptHeaderValue);
-		MonoProcessor<String> mono = MonoProcessor.create();
-		testDeferredResultSubscriber(mono, Mono.class, mono::onComplete, expected);
+		EmitterProcessor<String> processor = EmitterProcessor.create();
+		ResponseBodyEmitter emitter = handleValue(processor, Flux.class);
+		assertNotNull(emitter);
+	}
+
+	private void testJsonPreferred(String acceptHeaderValue) throws Exception {
+		resetRequest();
+		this.servletRequest.addHeader("Accept", acceptHeaderValue);
+		EmitterProcessor<String> processor = EmitterProcessor.create();
+		testDeferredResultSubscriber(processor, Flux.class, processor::onComplete, Collections.emptyList());
 	}
 
 	@Test
@@ -212,8 +213,8 @@ public class ReactiveTypeHandlerTests {
 		testSseResponse(false);
 
 		// Requested media types are sorted
-		testJsonPreferred("text/plain;q=0.8, application/json;q=1.0", Collections.emptyList());
-		testJsonPreferred("text/plain, application/json", null);
+		testJsonPreferred("text/plain;q=0.8, application/json;q=1.0");
+		testJsonNotPreferred("text/plain, application/json");
 	}
 
 	private void testSseResponse(boolean expectSseEimtter) throws Exception {
