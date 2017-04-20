@@ -113,7 +113,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/** 父工厂的引用, 支持Bean的继承 */
 	private BeanFactory parentBeanFactory;
 
-	/** ClassLoader to resolve bean class names with, if necessary */
+	/** 类加载器,来解决bean类名称 */
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/** ClassLoader to temporarily resolve bean class names with, if necessary */
