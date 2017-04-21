@@ -165,7 +165,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	 * 回滚事务
 	 * @param status 事务状态
 	 * @param ex 错误异常
-	 * @throws TransactionException in case of a rollback error
+	 * @throws TransactionException 回滚失败
 	 */
 	private void rollbackOnException(TransactionStatus status, Throwable ex) throws TransactionException {
 		logger.debug("Initiating transaction rollback on application exception", ex);
