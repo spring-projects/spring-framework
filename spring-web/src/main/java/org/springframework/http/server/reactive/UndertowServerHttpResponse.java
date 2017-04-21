@@ -138,9 +138,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 		if (this.responseChannel == null) {
 			this.responseChannel = this.exchange.getResponseChannel();
 		}
-		ResponseBodyProcessor bodyProcessor = new ResponseBodyProcessor( this.responseChannel);
-		bodyProcessor.registerListener();
-		return bodyProcessor;
+		return new ResponseBodyProcessor(this.responseChannel);
 	}
 
 
@@ -153,16 +151,18 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 		public ResponseBodyProcessor(StreamSinkChannel channel) {
 			Assert.notNull(channel, "StreamSinkChannel must not be null");
 			this.channel = channel;
-		}
-
-		public void registerListener() {
 			this.channel.getWriteSetter().set(c -> onWritePossible());
-			this.channel.resumeWrites();
+			this.channel.suspendWrites();
 		}
 
 		@Override
 		protected boolean isWritePossible() {
-			return false;
+			if (this.channel.isWriteResumed()) {
+				return true;
+			} else {
+				this.channel.resumeWrites();
+				return false;
+			}
 		}
 
 		@Override
@@ -213,6 +213,17 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 		@Override
 		protected boolean isDataEmpty(DataBuffer dataBuffer) {
 			return (dataBuffer.readableByteCount() == 0);
+		}
+
+		@Override
+		protected void suspendWriting() {
+			this.channel.suspendWrites();
+		}
+
+		@Override
+		protected void writingComplete() {
+			this.channel.getWriteSetter().set(null);
+			this.channel.resumeWrites();
 		}
 	}
 

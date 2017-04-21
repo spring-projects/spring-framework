@@ -150,6 +150,18 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 */
 	protected abstract boolean write(T data) throws IOException;
 
+	/**
+	 * Suspend writing. Defaults to no-op.
+	 */
+	protected void suspendWriting() {
+	}
+
+	/**
+	 * Invoked when writing is complete. Defaults to no-op.
+	 */
+	protected void writingComplete() {
+	}
+
 
 	private boolean changeState(State oldState, State newState) {
 		return this.state.compareAndSet(oldState, newState);
@@ -223,6 +235,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				if (processor.changeState(this, COMPLETED)) {
+					processor.writingComplete();
 					processor.resultPublisher.publishComplete();
 				}
 			}
@@ -248,10 +261,12 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 							processor.releaseData();
 							if (!processor.subscriberCompleted) {
 								processor.changeState(WRITING, REQUESTED);
+								processor.suspendWriting();
 								processor.subscription.request(1);
 							}
 							else {
 								processor.changeState(WRITING, COMPLETED);
+								processor.writingComplete();
 								processor.resultPublisher.publishComplete();
 							}
 						}
@@ -311,6 +326,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 		public <T> void onError(AbstractListenerWriteProcessor<T> processor, Throwable ex) {
 			if (processor.changeState(this, COMPLETED)) {
+				processor.writingComplete();
 				processor.resultPublisher.publishError(ex);
 			}
 		}

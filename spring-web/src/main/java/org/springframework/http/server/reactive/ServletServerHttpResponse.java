@@ -306,6 +306,11 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 				return false;
 			}
 		}
+
+		@Override
+		protected void writingComplete() {
+			bodyProcessor = null;
+		}
 	}
 
 }
