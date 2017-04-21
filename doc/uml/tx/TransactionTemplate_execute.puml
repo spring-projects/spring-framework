@@ -1,0 +1,7 @@
+@startuml
+TransactionTemplate --> PlatformTransactionManager: getTransaction
+PlatformTransactionManager --> TransactionTemplate:TransactionStatus
+TransactionTemplate --> TransactionCallback: doInTransaction
+TransactionCallback --> TransactionTemplate: T
+TransactionTemplate --> PlatformTransactionManager: commit
+@enduml

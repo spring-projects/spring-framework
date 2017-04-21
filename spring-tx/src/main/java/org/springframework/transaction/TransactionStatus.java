@@ -19,7 +19,7 @@ package org.springframework.transaction;
 import java.io.Flushable;
 
 /**
- * Representation of the status of a transaction.
+ * 事务运行时状态.
  *
  * <p>Transactional code can use this to retrieve status information,
  * and to programmatically request a rollback (instead of throwing
@@ -39,6 +39,7 @@ import java.io.Flushable;
 public interface TransactionStatus extends SavepointManager, Flushable {
 
 	/**
+	 * 是否是新事务
 	 * Return whether the present transaction is new (else participating
 	 * in an existing transaction, or potentially not running in an
 	 * actual transaction in the first place).
@@ -46,6 +47,7 @@ public interface TransactionStatus extends SavepointManager, Flushable {
 	boolean isNewTransaction();
 
 	/**
+	 * 是否有保存点
 	 * Return whether this transaction internally carries a savepoint,
 	 * that is, has been created as nested transaction based on a savepoint.
 	 * <p>This method is mainly here for diagnostic purposes, alongside
@@ -59,6 +61,7 @@ public interface TransactionStatus extends SavepointManager, Flushable {
 	boolean hasSavepoint();
 
 	/**
+	 *
 	 * Set the transaction rollback-only. This instructs the transaction manager
 	 * that the only possible outcome of the transaction may be a rollback, as
 	 * alternative to throwing an exception which would in turn trigger a rollback.
@@ -85,6 +88,7 @@ public interface TransactionStatus extends SavepointManager, Flushable {
 	void flush();
 
 	/**
+	 * 返回事务是否完成
 	 * Return whether this transaction is completed, that is,
 	 * whether it has already been committed or rolled back.
 	 * @see PlatformTransactionManager#commit

@@ -176,7 +176,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	/**
-	 * Create a new AbstractBeanFactory with the given parent.
+	 * 指定父Bean工厂的构造方法
 	 * @param parentBeanFactory parent bean factory, or {@code null} if none
 	 * @see #getBean
 	 */
@@ -218,6 +218,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	/**
+	 *
 	 * Return an instance, which may be shared or independent, of the specified bean.
 	 * @param name the name of the bean to retrieve
 	 * @param requiredType the required type of the bean to retrieve
@@ -770,6 +771,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return this.typeConverter;
 	}
 
+	/**
+	 * 得到类型转换器
+	 * @return
+	 */
 	@Override
 	public TypeConverter getTypeConverter() {
 		TypeConverter customConverter = getCustomTypeConverter();
@@ -777,7 +782,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return customConverter;
 		}
 		else {
-			// Build default TypeConverter, registering custom editors.
+			// 构建一个新的类型转换器, 注册类型转换器.
 			SimpleTypeConverter typeConverter = new SimpleTypeConverter();
 			typeConverter.setConversionService(getConversionService());
 			registerCustomEditors(typeConverter);

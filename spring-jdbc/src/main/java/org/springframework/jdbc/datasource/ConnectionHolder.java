@@ -24,6 +24,7 @@ import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
 
 /**
+ * 连接器持有者，包装一个jdbc连接器，线程绑定一个实例，具有DataSource特性
  * Connection holder, wrapping a JDBC Connection.
  * {@link DataSourceTransactionManager} binds instances of this class
  * to the thread, for a specific DataSource.

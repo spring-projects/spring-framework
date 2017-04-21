@@ -16,6 +16,11 @@
 
 package org.springframework.transaction.support;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.Constants;
@@ -29,15 +34,13 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSuspensionNotSupportedException;
 import org.springframework.transaction.UnexpectedRollbackException;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-import java.util.List;
-
 /**
  * 通用的事务处理流程框架，提供创建事务的模版，这个模板会被具体的事务处理器所使用，
  * 抽象事务管理器根据事务属性配置和当前线程绑定信息对事务是否需要创建以及如何创建进行一些通用的处理，
  * 然后把事务创建的底层细节交给具体的事务处理器实现。抽象事务管理器创建事务的模板方法如下：
+ *
+ * 这是典型的接口->抽象类->具体实现类三层结构，以提高代码复用性。
+ * 其中抽象类是负责实现一些共有逻辑，而具体子类则是各自实现差异化功能：
  * Abstract base class that implements Spring's standard transaction workflow,
  * serving as basis for concrete platform transaction managers like
  * {@link org.springframework.transaction.jta.JtaTransactionManager}.
@@ -84,6 +87,7 @@ import java.util.List;
 public abstract class AbstractPlatformTransactionManager implements PlatformTransactionManager, Serializable {
 
 	/**
+	 * 总是激活事务同步
 	 * Always activate transaction synchronization, even for "empty" transactions
 	 * that result from PROPAGATION_SUPPORTS with no existing backend transaction.
 	 * @see org.springframework.transaction.TransactionDefinition#PROPAGATION_SUPPORTS
@@ -118,8 +122,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 	private int defaultTimeout = TransactionDefinition.TIMEOUT_DEFAULT;
 
+	// 嵌套事务
 	private boolean nestedTransactionAllowed = false;
 
+	// 校验已经存在事务
 	private boolean validateExistingTransaction = false;
 
 	private boolean globalRollbackOnParticipationFailure = true;
@@ -327,7 +333,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	//---------------------------------------------------------------------
 
 	/**
-     * 具体的实现由具体的事务处理器提供
+     * 根据事务定义获取事务状态
      * This implementation handles propagation behavior. Delegates to
 	 * {@code doGetTransaction}, {@code isExistingTransaction}
 	 * and {@code doBegin}.
@@ -355,13 +361,12 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
             return handleExistingTransaction(definition, transaction, debugEnabled);
 		}
 
-		// Check definition settings for new transaction.
         // //检查事务属性中timeout超时属性设置是否合理
         if (definition.getTimeout() < TransactionDefinition.TIMEOUT_DEFAULT) {
 			throw new InvalidTimeoutException("Invalid transaction timeout", definition.getTimeout());
 		}
 
-		// No existing transaction found -> check propagation behavior to find out how to proceed.
+		// 没有找到现有的事务 -> check propagation behavior to find out how to proceed.
         // 对事务属性中配置的事务传播特性处理
         // 如果事务传播特性配置的是mandatory，当前没有事务存在，抛出异常
         if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY) {

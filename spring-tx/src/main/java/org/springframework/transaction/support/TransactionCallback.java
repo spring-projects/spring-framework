@@ -35,7 +35,7 @@ import org.springframework.transaction.TransactionStatus;
 public interface TransactionCallback<T> {
 
 	/**
-	 * Gets called by {@link TransactionTemplate#execute} within a transactional context.
+	 * Gets called by {@link TransactionTemplate#execute} within a transactionawithin a transactional context.
 	 * Does not need to care about transactions itself, although it can retrieve
 	 * and influence the status of the current transaction via the given status
 	 * object, e.g. setting rollback-only.

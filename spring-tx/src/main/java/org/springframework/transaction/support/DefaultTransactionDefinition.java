@@ -22,6 +22,7 @@ import org.springframework.core.Constants;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
+ * 默认的事务管理器配置
  * Default implementation of the {@link TransactionDefinition} interface,
  * offering bean-style configuration and sensible default values
  * (PROPAGATION_REQUIRED, ISOLATION_DEFAULT, TIMEOUT_DEFAULT, readOnly=false).

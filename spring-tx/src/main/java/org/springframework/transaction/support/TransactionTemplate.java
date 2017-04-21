@@ -115,12 +115,19 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 
 	@Override
 	public void afterPropertiesSet() {
+		// 校验事务管理器
 		if (this.transactionManager == null) {
 			throw new IllegalArgumentException("Property 'transactionManager' is required");
 		}
 	}
 
-
+	/**
+	 * 执行器
+	 * @param action the callback object that specifies the transactional action
+	 * @param <T>
+	 * @return
+	 * @throws TransactionException
+	 */
 	@Override
 	public <T> T execute(TransactionCallback<T> action) throws TransactionException {
 		if (this.transactionManager instanceof CallbackPreferringPlatformTransactionManager) {
@@ -130,32 +137,34 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 			TransactionStatus status = this.transactionManager.getTransaction(this);
 			T result;
 			try {
+				// 调用应用系统的执行逻辑
 				result = action.doInTransaction(status);
 			}
 			catch (RuntimeException ex) {
-				// Transactional code threw application exception -> rollback
+				// 应用程序执行代码时抛出运行时异常 -> 回滚
 				rollbackOnException(status, ex);
 				throw ex;
 			}
 			catch (Error err) {
-				// Transactional code threw error -> rollback
+				// 应用程序执行代码抛出运行时错误 -> 回滚
 				rollbackOnException(status, err);
 				throw err;
 			}
 			catch (Exception ex) {
-				// Transactional code threw unexpected exception -> rollback
+				// 应用程序执行代码抛出未知异常 -> 回滚
 				rollbackOnException(status, ex);
 				throw new UndeclaredThrowableException(ex, "TransactionCallback threw undeclared checked exception");
 			}
+			// 提交事务
 			this.transactionManager.commit(status);
 			return result;
 		}
 	}
 
 	/**
-	 * Perform a rollback, handling rollback exceptions properly.
-	 * @param status object representing the transaction
-	 * @param ex the thrown application exception or error
+	 * 回滚事务
+	 * @param status 事务状态
+	 * @param ex 错误异常
 	 * @throws TransactionException in case of a rollback error
 	 */
 	private void rollbackOnException(TransactionStatus status, Throwable ex) throws TransactionException {

@@ -64,27 +64,28 @@ public @interface Transactional {
 	String value() default "";
 
 	/**
-	 * The transaction propagation type.
+	 * 事务传播特性
 	 * Defaults to {@link Propagation#REQUIRED}.
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getPropagationBehavior()
 	 */
 	Propagation propagation() default Propagation.REQUIRED;
 
 	/**
-	 * The transaction isolation level.
+	 * 事务隔离级别.
 	 * Defaults to {@link Isolation#DEFAULT}.
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getIsolationLevel()
 	 */
 	Isolation isolation() default Isolation.DEFAULT;
 
 	/**
-	 * The timeout for this transaction.
+	 * 超时时间.
 	 * Defaults to the default timeout of the underlying transaction system.
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getTimeout()
 	 */
 	int timeout() default TransactionDefinition.TIMEOUT_DEFAULT;
 
 	/**
+	 * 事务是否只读
 	 * {@code true} if the transaction is read-only.
 	 * Defaults to {@code false}.
 	 * <p>This just serves as a hint for the actual transaction subsystem;
@@ -96,6 +97,7 @@ public @interface Transactional {
 	boolean readOnly() default false;
 
 	/**
+	 * 定义exception 当事务遇到这些异常，事务回滚
 	 * Defines zero (0) or more exception {@link Class classes}, which must be a
 	 * subclass of {@link Throwable}, indicating which exception types must cause
 	 * a transaction rollback.
