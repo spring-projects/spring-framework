@@ -4,7 +4,6 @@
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :toc: left
 :toclevels: 2
-ifdef::backend-pdf[:source-highlighter: rouge]
 
 This part of the reference documentation covers all of those technologies that are
 absolutely integral to the Spring Framework.

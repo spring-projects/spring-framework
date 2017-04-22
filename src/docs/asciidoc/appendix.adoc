@@ -5,7 +5,6 @@
 :wiki-spring-framework: https://github.com/spring-projects/spring-framework/wiki
 :toc: left
 :toclevels: 2
-ifdef::backend-pdf[:source-highlighter: rouge]
 
 [[spring-whats-new]]
 == What's New in the Spring Framework
