@@ -334,7 +334,7 @@ public interface ServerResponse {
 		BodyBuilder hint(String key, Object value);
 
 		/**
-		 * Set the body of the response to the given {@code Publisher} and return it.
+		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
 		 * This convenience method combines {@link #body(BodyInserter)} and
 		 * {@link BodyInserters#fromPublisher(Publisher, Class)}.
 		 * @param publisher the {@code Publisher} to write to the response
@@ -346,7 +346,7 @@ public interface ServerResponse {
 		<T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher, Class<T> elementClass);
 
 		/**
-		 * Set the body of the response to the given {@code Object} and return it.
+		 * Set the body of the response to the given synchronous {@code Object} and return it.
 		 * This convenience method combines {@link #body(BodyInserter)} and
 		 * {@link BodyInserters#fromObject(Object)}.
 		 * @param body the body of the response
@@ -354,7 +354,7 @@ public interface ServerResponse {
 		 * @throws IllegalArgumentException if {@code body} is a {@link Publisher}, for which
 		 * {@link #body(Publisher, Class)} should be used.
 		 */
-		Mono<ServerResponse> body(Object body);
+		Mono<ServerResponse> syncBody(Object body);
 
 		/**
 		 * Set the body of the response to the given {@code BodyInserter} and return it.

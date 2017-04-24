@@ -121,7 +121,7 @@ public class DefaultWebClientTests {
 		Mono<Void> mono = Mono.empty();
 		WebClient client = builder().build();
 
-		client.post().uri("http://example.com").body(mono);
+		client.post().uri("http://example.com").syncBody(mono);
 	}
 
 

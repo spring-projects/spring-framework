@@ -81,11 +81,11 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 	private static class NestedHandler {
 
 		public Mono<ServerResponse> bar(ServerRequest request) {
-			return ServerResponse.ok().body("bar");
+			return ServerResponse.ok().syncBody("bar");
 		}
 
 		public Mono<ServerResponse> baz(ServerRequest request) {
-			return ServerResponse.ok().body("baz");
+			return ServerResponse.ok().syncBody("baz");
 		}
 
 		public Mono<ServerResponse> variables(ServerRequest request) {

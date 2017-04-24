@@ -19,7 +19,6 @@ import java.net.URI;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -64,7 +63,7 @@ public class JsonContentTests {
 	public void postJsonContent() throws Exception {
 		this.client.post().uri("/persons")
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
-				.body("{\"name\":\"John\"}")
+				.syncBody("{\"name\":\"John\"}")
 				.exchange()
 				.expectStatus().isCreated()
 				.expectBody().isEmpty();

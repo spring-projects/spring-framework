@@ -123,7 +123,7 @@ public class ResponseEntityTests {
 	@Test
 	public void postEntity() throws Exception {
 		this.client.post().uri("/persons")
-				.body(new Person("John"))
+				.syncBody(new Person("John"))
 				.exchange()
 				.expectStatus().isCreated()
 				.expectHeader().valueEquals("location", "/persons/John")

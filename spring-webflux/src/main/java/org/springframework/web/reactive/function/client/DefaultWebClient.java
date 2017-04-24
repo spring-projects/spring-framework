@@ -271,7 +271,7 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public RequestHeadersSpec<?> body(Object body) {
+		public RequestHeadersSpec<?> syncBody(Object body) {
 			Assert.isTrue(!(body instanceof Publisher), "Please specify the element class by " +
 					"using body(Publisher, Class)");
 

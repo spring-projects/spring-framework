@@ -274,7 +274,7 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public <T> RequestHeadersSpec<?> body(BodyInserter<T, ? super ClientHttpRequest> inserter) {
+		public RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter) {
 			this.bodySpec.body(inserter);
 			return this;
 		}
@@ -286,8 +286,8 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public <T> RequestHeadersSpec<?> body(T body) {
-			this.bodySpec.body(body);
+		public RequestHeadersSpec<?> syncBody(Object body) {
+			this.bodySpec.syncBody(body);
 			return this;
 		}
 

@@ -450,7 +450,7 @@ public interface WebClient {
 		RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter);
 
 		/**
-		 * Set the body of the request to the given {@code Publisher}.
+		 * Set the body of the request to the given asynchronous {@code Publisher}.
 		 * <p>This method is a convenient shortcut for {@link #body(BodyInserter)} with a
 		 * {@linkplain org.springframework.web.reactive.function.BodyInserters#fromPublisher}
 		 * Publisher body inserter}.
@@ -463,14 +463,14 @@ public interface WebClient {
 		<T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher, Class<T> elementClass);
 
 		/**
-		 * Set the body of the request to the given {@code Object}.
+		 * Set the body of the request to the given synchronous {@code Object}.
 		 * <p>This method is a convenient shortcut for {@link #body(BodyInserter)} with a
 		 * {@linkplain org.springframework.web.reactive.function.BodyInserters#fromObject
 		 * Object body inserter}.
 		 * @param body the {@code Object} to write to the request
 		 * @return this builder
 		 */
-		RequestHeadersSpec<?> body(Object body);
+		RequestHeadersSpec<?> syncBody(Object body);
 
 	}
 

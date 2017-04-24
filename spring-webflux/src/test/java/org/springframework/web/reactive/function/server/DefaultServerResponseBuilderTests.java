@@ -298,7 +298,7 @@ public class DefaultServerResponseBuilderTests {
 	public void bodyObjectPublisher() throws Exception {
 		Mono<Void> mono = Mono.empty();
 
-		ServerResponse.ok().body(mono);
+		ServerResponse.ok().syncBody(mono);
 	}
 
 

@@ -458,14 +458,13 @@ public interface WebTestClient {
 		/**
 		 * Set the body of the request to the given {@code BodyInserter}.
 		 * @param inserter the inserter
-		 * @param <T> the body type or the element type (for a stream)
 		 * @return spec for decoding the response
 		 * @see org.springframework.web.reactive.function.BodyInserters
 		 */
-		<T> RequestHeadersSpec<?> body(BodyInserter<T, ? super ClientHttpRequest> inserter);
+		RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter);
 
 		/**
-		 * Set the body of the request to the given {@code Publisher}.
+		 * Set the body of the request to the given asynchronous {@code Publisher}.
 		 * @param publisher the request body data
 		 * @param elementClass the class of elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
@@ -475,13 +474,12 @@ public interface WebTestClient {
 		<T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, Class<T> elementClass);
 
 		/**
-		 * Set the body of the request to the given {@code Object} and
+		 * Set the body of the request to the given synchronous {@code Object} and
 		 * perform the request.
 		 * @param body the {@code Object} to write to the request
-		 * @param <T> the type contained in the body
 		 * @return a {@code Mono} with the response
 		 */
-		<T> RequestHeadersSpec<?> body(T body);
+		RequestHeadersSpec<?> syncBody(Object body);
 
 	}
 
