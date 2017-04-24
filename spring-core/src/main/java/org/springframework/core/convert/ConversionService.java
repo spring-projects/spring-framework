@@ -17,6 +17,7 @@
 package org.springframework.core.convert;
 
 /**
+ * 类型转换的服务接口,。通过实现这个接口我们可以实现自己的Converter调用逻辑
  * A service interface for type conversion. This is the entry point into the convert system.
  * Call {@link #convert(Object, Class)} to perform a thread-safe type conversion using this system.
  *
@@ -27,6 +28,7 @@ package org.springframework.core.convert;
 public interface ConversionService {
 
 	/**
+	 * 判断当前的ConversionService是否能够对原类型和目标类型进行转换
 	 * Return {@code true} if objects of {@code sourceType} can be converted to the {@code targetType}.
 	 * <p>If this method returns {@code true}, it means {@link #convert(Object, Class)} is capable
 	 * of converting an instance of {@code sourceType} to {@code targetType}.
@@ -43,6 +45,7 @@ public interface ConversionService {
 	boolean canConvert(Class<?> sourceType, Class<?> targetType);
 
 	/**
+	 * 是对于一种类型的封装，里面包含该种类型的值、实际类型等等信息
 	 * Return {@code true} if objects of {@code sourceType} can be converted to the {@code targetType}.
 	 * The TypeDescriptors provide additional context about the source and target locations
 	 * where conversion would occur, often object fields or property locations.

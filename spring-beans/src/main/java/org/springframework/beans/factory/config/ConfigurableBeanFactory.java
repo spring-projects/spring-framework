@@ -65,6 +65,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 
 
 	/**
+	 * 设置这个bean工厂的父母
 	 * Set the parent of this bean factory.
 	 * <p>Note that the parent cannot be changed: It should only be set outside
 	 * a constructor if it isn't available at the time of factory instantiation.
@@ -76,6 +77,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void setParentBeanFactory(BeanFactory parentBeanFactory) throws IllegalStateException;
 
 	/**
+	 * 设置使用的类加载器加载bean类
 	 * Set the class loader to use for loading bean classes.
 	 * Default is the thread context class loader.
 	 * <p>Note that this class loader will only apply to bean definitions
@@ -148,7 +150,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void setConversionService(ConversionService conversionService);
 
 	/**
-	 * Return the associated ConversionService, if any.
+	 * 返回相关的转换服务.
 	 * @since 3.0
 	 */
 	ConversionService getConversionService();

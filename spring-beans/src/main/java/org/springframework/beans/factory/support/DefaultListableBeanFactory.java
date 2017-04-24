@@ -153,10 +153,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/** Resolver to use for checking if a bean definition is an autowire candidate */
 	private AutowireCandidateResolver autowireCandidateResolver = new SimpleAutowireCandidateResolver();
 
-	/** Map from dependency type to corresponding autowired value */
+	/** 存储修正过的依赖映射关系 */
 	private final Map<Class<?>, Object> resolvableDependencies = new HashMap<Class<?>, Object>(16);
 
-	/** Map of bean definition objects, keyed by bean name */
+	/** 存储Bean名称–>Bean定义映射关系 */
 	private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<String, BeanDefinition>(64);
 
 	/** Map of singleton and non-singleton bean names, keyed by dependency type */
@@ -165,7 +165,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/** Map of singleton-only bean names, keyed by dependency type */
 	private final Map<Class<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<Class<?>, String[]>(64);
 
-	/** List of bean definition names, in registration order */
+	/** 存储Bean定义名称列表, in registration order */
 	private final List<String> beanDefinitionNames = new ArrayList<String>(64);
 
 	/** List of names of manually registered singletons, in registration order */

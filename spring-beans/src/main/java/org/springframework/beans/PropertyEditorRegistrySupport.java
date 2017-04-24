@@ -100,18 +100,23 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 	private ConversionService conversionService;
 
+	// 是否开启默认的编辑器
 	private boolean defaultEditorsActive = false;
+
 
 	private boolean configValueEditorsActive = false;
 
+	// 默认的数据编辑器
 	private Map<Class<?>, PropertyEditor> defaultEditors;
 
 	private Map<Class<?>, PropertyEditor> overriddenDefaultEditors;
 
 	private Map<Class<?>, PropertyEditor> customEditors;
 
+	// 自定义路径属性编辑器集合
 	private Map<String, CustomEditorHolder> customEditorsForPath;
 
+	// 自定义属性编辑器缓存集合
 	private Map<Class<?>, PropertyEditor> customEditorCache;
 
 

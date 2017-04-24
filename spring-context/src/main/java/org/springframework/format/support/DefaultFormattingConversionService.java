@@ -28,7 +28,7 @@ import org.springframework.util.StringValueResolver;
 /**
  * A specialization of {@link FormattingConversionService} configured by default with
  * converters and formatters appropriate for most applications.
- *
+ * <p>
  * <p>Designed for direct instantiation but also exposes the static {@link #addDefaultFormatters}
  * utility method for ad hoc use against any {@code FormatterRegistry} instance, just
  * as {@code DefaultConversionService} exposes its own
@@ -40,70 +40,72 @@ import org.springframework.util.StringValueResolver;
  */
 public class DefaultFormattingConversionService extends FormattingConversionService {
 
-	private static final boolean jsr310Present = ClassUtils.isPresent(
-			"java.time.LocalDate", DefaultFormattingConversionService.class.getClassLoader());
+    private static final boolean jsr310Present = ClassUtils.isPresent(
+            "java.time.LocalDate", DefaultFormattingConversionService.class.getClassLoader());
 
-	private static final boolean jodaTimePresent = ClassUtils.isPresent(
-			"org.joda.time.LocalDate", DefaultFormattingConversionService.class.getClassLoader());
-
-
-	/**
-	 * Create a new {@code DefaultFormattingConversionService} with the set of
-	 * {@linkplain DefaultConversionService#addDefaultConverters default converters} and
-	 * {@linkplain #addDefaultFormatters default formatters}.
-	 */
-	public DefaultFormattingConversionService() {
-		this(null, true);
-	}
-
-	/**
-	 * Create a new {@code DefaultFormattingConversionService} with the set of
-	 * {@linkplain DefaultConversionService#addDefaultConverters default converters} and,
-	 * based on the value of {@code registerDefaultFormatters}, the set of
-	 * {@linkplain #addDefaultFormatters default formatters}.
-	 * @param registerDefaultFormatters whether to register default formatters
-	 */
-	public DefaultFormattingConversionService(boolean registerDefaultFormatters) {
-		this(null, registerDefaultFormatters);
-	}
-
-	/**
-	 * Create a new {@code DefaultFormattingConversionService} with the set of
-	 * {@linkplain DefaultConversionService#addDefaultConverters default converters} and,
-	 * based on the value of {@code registerDefaultFormatters}, the set of
-	 * {@linkplain #addDefaultFormatters default formatters}
-	 * @param embeddedValueResolver delegated to {@link #setEmbeddedValueResolver(StringValueResolver)}
-	 * prior to calling {@link #addDefaultFormatters}.
-	 * @param registerDefaultFormatters whether to register default formatters
-	 */
-	public DefaultFormattingConversionService(StringValueResolver embeddedValueResolver, boolean registerDefaultFormatters) {
-		setEmbeddedValueResolver(embeddedValueResolver);
-		DefaultConversionService.addDefaultConverters(this);
-		if (registerDefaultFormatters) {
-			addDefaultFormatters(this);
-		}
-	}
+    private static final boolean jodaTimePresent = ClassUtils.isPresent(
+            "org.joda.time.LocalDate", DefaultFormattingConversionService.class.getClassLoader());
 
 
-	/**
-	 * Add formatters appropriate for most environments, including number formatters and a Joda-Time
-	 * date formatter if Joda-Time is present on the classpath.
-	 * @param formatterRegistry the service to register default formatters against
-	 */
-	public static void addDefaultFormatters(FormatterRegistry formatterRegistry) {
-		formatterRegistry.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());
-		if (jsr310Present) {
-			// just handling JSR-310 specific date and time types
-			new DateTimeFormatterRegistrar().registerFormatters(formatterRegistry);
-		}
-		if (jodaTimePresent) {
-			// handles Joda-specific types as well as Date, Calendar, Long
-			new JodaTimeFormatterRegistrar().registerFormatters(formatterRegistry);
-		}
-		else {
-			// regular DateFormat-based Date, Calendar, Long converters
-			new DateFormatterRegistrar().registerFormatters(formatterRegistry);
-		}
-	}
+    /**
+     * Create a new {@code DefaultFormattingConversionService} with the set of
+     * {@linkplain DefaultConversionService#addDefaultConverters default converters} and
+     * {@linkplain #addDefaultFormatters default formatters}.
+     */
+    public DefaultFormattingConversionService() {
+        this(null, true);
+    }
+
+    /**
+     * Create a new {@code DefaultFormattingConversionService} with the set of
+     * {@linkplain DefaultConversionService#addDefaultConverters default converters} and,
+     * based on the value of {@code registerDefaultFormatters}, the set of
+     * {@linkplain #addDefaultFormatters default formatters}.
+     *
+     * @param registerDefaultFormatters whether to register default formatters
+     */
+    public DefaultFormattingConversionService(boolean registerDefaultFormatters) {
+        this(null, registerDefaultFormatters);
+    }
+
+    /**
+     * Create a new {@code DefaultFormattingConversionService} with the set of
+     * {@linkplain DefaultConversionService#addDefaultConverters default converters} and,
+     * based on the value of {@code registerDefaultFormatters}, the set of
+     * {@linkplain #addDefaultFormatters default formatters}
+     *
+     * @param embeddedValueResolver     delegated to {@link #setEmbeddedValueResolver(StringValueResolver)}
+     *                                  prior to calling {@link #addDefaultFormatters}.
+     * @param registerDefaultFormatters whether to register default formatters
+     */
+    public DefaultFormattingConversionService(StringValueResolver embeddedValueResolver, boolean registerDefaultFormatters) {
+        setEmbeddedValueResolver(embeddedValueResolver);
+        DefaultConversionService.addDefaultConverters(this);
+        if (registerDefaultFormatters) {
+            addDefaultFormatters(this);
+        }
+    }
+
+
+    /**
+     * Add formatters appropriate for most environments, including number formatters and a Joda-Time
+     * date formatter if Joda-Time is present on the classpath.
+     *
+     * @param formatterRegistry the service to register default formatters against
+     */
+    public static void addDefaultFormatters(FormatterRegistry formatterRegistry) {
+        formatterRegistry.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());
+        if (jsr310Present) {
+            // just handling JSR-310 specific date and time types
+            new DateTimeFormatterRegistrar().registerFormatters(formatterRegistry);
+        }
+        if (jodaTimePresent) {
+            // handles Joda-specific types as well as Date, Calendar, Long
+            new JodaTimeFormatterRegistrar().registerFormatters(formatterRegistry);
+        } else {
+            // regular DateFormat-based Date, Calendar, Long converters
+            new DateFormatterRegistrar().registerFormatters(formatterRegistry);
+        }
+    }
 
 }

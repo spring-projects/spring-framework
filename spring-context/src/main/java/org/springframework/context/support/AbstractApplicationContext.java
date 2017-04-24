@@ -76,6 +76,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * Spring 最重要类之一，抽象类实现了ApplicationContext接口
  * Abstract implementation of the {@link org.springframework.context.ApplicationContext}
  * interface. Doesn't mandate the type of storage used for configuration; simply
  * implements common context functionality. Uses the Template Method design pattern,
@@ -193,7 +194,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** Helper class used in event publishing */
 	private ApplicationEventMulticaster applicationEventMulticaster;
 
-	/** Statically specified listeners */
+	/** 监听器 */
 	private Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<ApplicationListener<?>>();
 
 	/** Environment used by this context; initialized by {@link #createEnvironment()} */
@@ -444,6 +445,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	@Override
 	public void refresh() throws BeansException, IllegalStateException {
+		// refresh()方法和close()方法都使用了startUpShutdownMonitor对象锁加锁，这就保证了在调用refresh()方法的时候无法调用close()方法，反之亦然，避免了冲突
+		//另外一个好处不在这个方法中体现，但是提一下，使用对象锁可以减小了同步的范围，只对不能并发的代码块进行加锁，提高了整体代码运行的效率
 		synchronized (this.startupShutdownMonitor) {
 			// Prepare this context for refreshing.
 			prepareRefresh();
@@ -503,7 +506,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * active flag as well as performing any initialization of property sources.
 	 */
 	protected void prepareRefresh() {
+		//设置一下刷新Spring上下文的开始时间
 		this.startupDate = System.currentTimeMillis();
+		//将active标识位设置为true
 		this.active.set(true);
 
 		if (logger.isInfoEnabled()) {
@@ -528,6 +533,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * 获取刷新Spring上下文的Bean工厂
 	 * Tell the subclass to refresh the internal bean factory.
 	 * @return the fresh BeanFactory instance
 	 * @see #refreshBeanFactory()
@@ -730,11 +736,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * 完成初始化这个上下文bean的工厂，初始化所有剩下单例的beta
 	 * Finish the initialization of this context's bean factory,
 	 * initializing all remaining singleton beans.
 	 */
 	protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
-		// Initialize conversion service for this context.
+		// 这个上下文初始化转换服务.
 		if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME) &&
 				beanFactory.isTypeMatch(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class)) {
 			beanFactory.setConversionService(
@@ -747,10 +754,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			getBean(weaverAwareName);
 		}
 
-		// Stop using the temporary ClassLoader for type matching.
+		// 停止使用临时类装入器类型匹配.
 		beanFactory.setTempClassLoader(null);
 
-		// Allow for caching all bean definition metadata, not expecting further changes.
+		// 允许缓存所有bean定义元数据, not expecting further changes.
 		beanFactory.freezeConfiguration();
 
 		// Instantiate all remaining (non-lazy-init) singletons.
@@ -1187,6 +1194,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	/**
+	 * AbstractRefreshableApplicationContext和GenericApplicationContext这两个子类实现了这个方法
 	 * Subclasses must implement this method to perform the actual configuration load.
 	 * The method is invoked by {@link #refresh()} before any other initialization work.
 	 * <p>A subclass will either create a new bean factory and hold a reference to it,
