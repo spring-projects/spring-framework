@@ -279,7 +279,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			defaultStrategies = PropertiesLoaderUtils.loadProperties(resource);
 		}
 		catch (IOException ex) {
-			throw new IllegalStateException("Could not load 'DispatcherServlet.properties': " + ex.getMessage());
+			throw new IllegalStateException("Could not load '" + DEFAULT_STRATEGIES_PATH + "': " + ex.getMessage());
 		}
 	}
 
