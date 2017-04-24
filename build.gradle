@@ -273,6 +273,7 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 	}
 
 	task sourcesJar(type: Jar, dependsOn: classes) {
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 		classifier = 'sources'
 		from sourceSets.main.allSource
 		// Don't include or exclude anything explicitly by default. See SPR-12085.
