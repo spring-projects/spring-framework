@@ -264,7 +264,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private static final String DEFAULT_STRATEGIES_PATH = "DispatcherServlet.properties";
 
-
+	/**
+	 * Common prefix that DispatcherServlet's default strategy attributes start with.
+	 */
+        private static final String DEFAULT_STRATEGIES_PREFIX = "org.springframework.web.servlet";
+	
 	/** Additional logger to use when no mapped handler is found for a request. */
 	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
 
@@ -279,7 +283,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			defaultStrategies = PropertiesLoaderUtils.loadProperties(resource);
 		}
 		catch (IOException ex) {
-			throw new IllegalStateException("Could not load 'DispatcherServlet.properties': " + ex.getMessage());
+			throw new IllegalStateException("Could not load '" + DEFAULT_STRATEGIES_PATH + "': " + ex.getMessage());
 		}
 	}
 
@@ -874,7 +878,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			Enumeration<?> attrNames = request.getAttributeNames();
 			while (attrNames.hasMoreElements()) {
 				String attrName = (String) attrNames.nextElement();
-				if (this.cleanupAfterInclude || attrName.startsWith("org.springframework.web.servlet")) {
+				if (this.cleanupAfterInclude || attrName.startsWith(DEFAULT_STRATEGIES_PREFIX)) {
 					attributesSnapshot.put(attrName, request.getAttribute(attrName));
 				}
 			}
