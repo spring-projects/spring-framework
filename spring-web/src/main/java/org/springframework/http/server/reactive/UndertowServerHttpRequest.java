@@ -146,6 +146,7 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 				this.pooledByteBuffer = this.byteBufferPool.allocate();
 			}
 			ByteBuffer byteBuffer = this.pooledByteBuffer.getBuffer();
+			byteBuffer.clear();
 			int read = this.channel.read(byteBuffer);
 			if (logger.isTraceEnabled()) {
 				logger.trace("read:" + read);
