@@ -104,11 +104,12 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	public void service(ServletRequest request, ServletResponse response) throws IOException {
 		// Start async before Read/WriteListener registration
 		AsyncContext asyncContext = request.startAsync();
+		asyncContext.setTimeout(-1);
 
 		ServerHttpRequest httpRequest = createRequest(((HttpServletRequest) request), asyncContext);
 		ServerHttpResponse httpResponse = createResponse(((HttpServletResponse) response), asyncContext);
 
-		asyncContext.addListener(TIMEOUT_HANDLER);
+		asyncContext.addListener(ERROR_LISTENER);
 
 		HandlerResultSubscriber subscriber = new HandlerResultSubscriber(asyncContext);
 		this.httpHandler.handle(httpRequest, httpResponse).subscribe(subscriber);
@@ -129,7 +130,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	}
 
 	/**
-	 * We cannot combine TIMEOUT_HANDLER and HandlerResultSubscriber due to:
+	 * We cannot combine ERROR_LISTENER and HandlerResultSubscriber due to:
 	 * https://issues.jboss.org/browse/WFLY-8515
 	 */
 	private static void runIfAsyncNotComplete(AsyncContext asyncContext, Runnable task) {
@@ -167,7 +168,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	}
 
 
-	private final static AsyncListener TIMEOUT_HANDLER = new AsyncListener() {
+	private final static AsyncListener ERROR_LISTENER = new AsyncListener() {
 
 		@Override
 		public void onTimeout(AsyncEvent event) throws IOException {
