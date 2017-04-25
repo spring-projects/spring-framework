@@ -18,7 +18,6 @@ package org.springframework.test.web.reactive.server.samples.bind;
 
 import org.junit.Before;
 import org.junit.Test;
-import reactor.core.publisher.Mono;
 
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -42,7 +41,7 @@ public class RouterFunctionTests {
 	public void setUp() throws Exception {
 
 		RouterFunction<?> route = route(GET("/test"), request ->
-				ServerResponse.ok().body(Mono.just("It works!"), String.class));
+				ServerResponse.ok().syncBody("It works!"));
 
 		this.testClient = WebTestClient.bindToRouterFunction(route).build();
 	}

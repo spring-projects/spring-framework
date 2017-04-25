@@ -19,7 +19,6 @@ package org.springframework.test.web.reactive.server.samples.bind;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import reactor.core.publisher.Mono;
 
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
@@ -48,7 +47,7 @@ public class HttpServerTests {
 
 		HttpHandler httpHandler = RouterFunctions.toHttpHandler(
 				route(GET("/test"), request ->
-						ServerResponse.ok().body(Mono.just("It works!"), String.class)));
+						ServerResponse.ok().syncBody("It works!")));
 
 		this.server = new ReactorHttpServer();
 		this.server.setHandler(httpHandler);
