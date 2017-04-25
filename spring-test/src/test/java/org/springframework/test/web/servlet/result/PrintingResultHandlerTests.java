@@ -120,7 +120,7 @@ public class PrintingResultHandlerTests {
 		assertEquals(2, cookieValues.size());
 		assertEquals("cookie=cookieValue", cookieValues.get(0));
 		assertTrue("Actual: " + cookieValues.get(1), cookieValues.get(1).startsWith(
-				"enigma=42;Path=/crumbs;Domain=.example.com;Max-Age=1234;Expires="));
+				"enigma=42; Path=/crumbs; Domain=.example.com; Max-Age=1234; Expires="));
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("header", "headerValue");
