@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -85,7 +86,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  */
 public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneMockMvcBuilder> {
 
-	private final Object[] controllers;
+	private final List<Object> controllers;
 
 	private List<Object> controllerAdvice;
 
@@ -121,6 +122,8 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private Map<String, String> placeholderValues = new HashMap<>();
 
+	private Supplier<RequestMappingHandlerMapping> handlerMappingFactory = RequestMappingHandlerMapping::new;
+
 
 	/**
 	 * Protected constructor. Not intended for direct instantiation.
@@ -128,7 +131,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	 */
 	protected StandaloneMockMvcBuilder(Object... controllers) {
 		Assert.isTrue(!ObjectUtils.isEmpty(controllers), "At least one controller is required");
-		this.controllers = controllers;
+		this.controllers = Arrays.asList(controllers);
 	}
 
 	/**
@@ -324,6 +327,17 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		return this;
 	}
 
+	/**
+	 * Configure factory to create a custom {@link RequestMappingHandlerMapping}.
+	 * @param factory the factory
+	 * @since 5.0
+	 */
+	public StandaloneMockMvcBuilder setCustomHandlerMapping(Supplier<RequestMappingHandlerMapping> factory) {
+		Assert.notNull(factory, "RequestMappingHandlerMapping supplier is required.");
+		this.handlerMappingFactory = factory;
+		return this;
+	}
+
 
 	@Override
 	protected WebApplicationContext initWebAppContext() {
@@ -338,13 +352,13 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		StandaloneConfiguration config = new StandaloneConfiguration();
 		config.setApplicationContext(wac);
 
+		wac.addBeans(this.controllers);
 		wac.addBeans(this.controllerAdvice);
 
-		StaticRequestMappingHandlerMapping hm = config.getHandlerMapping();
+		RequestMappingHandlerMapping hm = config.getHandlerMapping();
 		hm.setServletContext(wac.getServletContext());
 		hm.setApplicationContext(wac);
 		hm.afterPropertiesSet();
-		hm.registerHandlers(this.controllers);
 		wac.addBean("requestMappingHandlerMapping", hm);
 
 		RequestMappingHandlerAdapter handlerAdapter = config.requestMappingHandlerAdapter();
@@ -379,8 +393,8 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	/** Using the MVC Java configuration as the starting point for the "standalone" setup */
 	private class StandaloneConfiguration extends WebMvcConfigurationSupport {
 
-		public StaticRequestMappingHandlerMapping getHandlerMapping() {
-			StaticRequestMappingHandlerMapping handlerMapping = new StaticRequestMappingHandlerMapping();
+		public RequestMappingHandlerMapping getHandlerMapping() {
+			RequestMappingHandlerMapping handlerMapping = handlerMappingFactory.get();
 			handlerMapping.setEmbeddedValueResolver(new StaticStringValueResolver(placeholderValues));
 			handlerMapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
 			handlerMapping.setUseTrailingSlashMatch(useTrailingSlashPatternMatch);
@@ -469,20 +483,6 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 			}
 		}
 	}
-
-
-	/**
-	 * A {@code RequestMappingHandlerMapping} that allows registration of controllers.
-	 */
-	private static class StaticRequestMappingHandlerMapping extends RequestMappingHandlerMapping {
-
-		public void registerHandlers(Object...handlers) {
-			for (Object handler : handlers) {
-				detectHandlerMethods(handler);
-			}
-		}
-	}
-
 
 	/**
 	 * A static resolver placeholder for values embedded in request mappings.
