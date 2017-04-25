@@ -97,6 +97,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Fisher
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Oleg Zhurakousky
  * @since 2.0
  * @see AliasFor
  * @see AnnotationAttributes
@@ -484,7 +485,6 @@ public abstract class AnnotationUtils {
 	 * @return the first matching annotation, or {@code null} if not found
 	 * @since 4.2
 	 */
-	@SuppressWarnings("unchecked")
 	private static <A extends Annotation> A findAnnotation(
 			AnnotatedElement annotatedElement, Class<A> annotationType, Set<Annotation> visited) {
 		try {
@@ -673,7 +673,6 @@ public abstract class AnnotationUtils {
 	 * @param visited the set of annotations that have already been visited
 	 * @return the first matching annotation, or {@code null} if not found
 	 */
-	@SuppressWarnings("unchecked")
 	private static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType, Set<Annotation> visited) {
 		try {
 			A annotation = clazz.getDeclaredAnnotation(annotationType);
@@ -1294,8 +1293,11 @@ public abstract class AnnotationUtils {
 	 * Retrieve the <em>value</em> of a named attribute, given an annotation instance.
 	 * @param annotation the annotation instance from which to retrieve the value
 	 * @param attributeName the name of the attribute value to retrieve
-	 * @return the attribute value, or {@code null} if not found
+	 * @return the attribute value, or {@code null} if not found unless the the attribute value 
+	 * can not be retrieved due to {@link AnnotationConfigurationException}, in which case it
+	 * will be re-thrown
 	 * @see #getValue(Annotation)
+	 * @see #rethrowAnnotationConfigurationException(Throwable)
 	 */
 	public static Object getValue(Annotation annotation, String attributeName) {
 		if (annotation == null || !StringUtils.hasText(attributeName)) {
@@ -1305,6 +1307,10 @@ public abstract class AnnotationUtils {
 			Method method = annotation.annotationType().getDeclaredMethod(attributeName);
 			ReflectionUtils.makeAccessible(method);
 			return method.invoke(annotation);
+		}
+		catch (InvocationTargetException ex) {
+			rethrowAnnotationConfigurationException(ex.getTargetException());
+			throw new IllegalStateException("Could not obtain annotation attribute value of " + attributeName, ex);
 		}
 		catch (Exception ex) {
 			return null;

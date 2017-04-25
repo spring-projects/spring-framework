@@ -54,6 +54,7 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * @author Sam Brannen
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Oleg Zhurakousky
  */
 public class AnnotationUtilsTests {
 
@@ -1238,6 +1239,14 @@ public class AnnotationUtilsTests {
 		assertNotNull(contextConfig);
 		assertEquals("value: ", "", contextConfig.value());
 		assertEquals("location: ", "", contextConfig.location());
+	}
+	
+	@ContextConfig(value="foo", location="bar")
+	@Test(expected=AnnotationConfigurationException.class)
+	public void synthesizeAnnotationWithAttributeAliasesDifferentValues() throws Exception {
+		Method m = AnnotationUtilsTests.class.getDeclaredMethod("synthesizeAnnotationWithAttributeAliasesDifferentValues");
+		Annotation a = synthesizeAnnotation(m.getDeclaredAnnotation(ContextConfig.class));
+		getValue(a);
 	}
 
 	@Test
