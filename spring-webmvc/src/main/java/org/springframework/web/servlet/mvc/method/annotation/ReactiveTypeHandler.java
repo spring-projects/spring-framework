@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -31,6 +32,7 @@ import org.reactivestreams.Subscription;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.MediaType;
@@ -116,14 +118,15 @@ class ReactiveTypeHandler {
 		ReactiveAdapter adapter = this.reactiveRegistry.getAdapter(returnValue.getClass());
 		Assert.state(adapter != null, "Unexpected return value: " + returnValue);
 
-		Class<?> elementType = returnType.nested().getNestedParameterType();
-		
+		ResolvableType elementType = ResolvableType.forMethodParameter(returnType).getGeneric(0);
+		Class<?> elementClass = elementType.resolve(Object.class);
+
 		Collection<MediaType> mediaTypes = getMediaTypes(request);
 		Optional<MediaType> mediaType = mediaTypes.stream().filter(MimeType::isConcrete).findFirst();
 
 		if (adapter.isMultiValue()) {
 			if (mediaTypes.stream().anyMatch(MediaType.TEXT_EVENT_STREAM::includes) ||
-					ServerSentEvent.class.isAssignableFrom(elementType)) {
+					ServerSentEvent.class.isAssignableFrom(elementClass)) {
 				SseEmitter emitter = new SseEmitter();
 				new SseEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
@@ -133,7 +136,7 @@ class ReactiveTypeHandler {
 				new JsonEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
 			}
-			if (CharSequence.class.isAssignableFrom(elementType) && !isJsonStringArray(elementType, mediaType)) {
+			if (CharSequence.class.isAssignableFrom(elementClass) && !isJsonStringArray(elementClass, mediaType)) {
 				ResponseBodyEmitter emitter = getEmitter(mediaType.orElse(MediaType.TEXT_PLAIN));
 				new TextEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
@@ -142,7 +145,7 @@ class ReactiveTypeHandler {
 
 		// Not streaming...
 		DeferredResult<Object> result = new DeferredResult<>();
-		new DeferredResultSubscriber(result, adapter).connect(adapter, returnValue);
+		new DeferredResultSubscriber(result, adapter, elementType).connect(adapter, returnValue);
 		WebAsyncUtils.getAsyncManager(request).startDeferredResultProcessing(result, mav);
 
 		return null;
@@ -389,12 +392,15 @@ class ReactiveTypeHandler {
 
 		private final boolean multiValueSource;
 
-		private final CollectedValuesList values = new CollectedValuesList();
+		private final CollectedValuesList values;
 
 
-		DeferredResultSubscriber(DeferredResult<Object> result, ReactiveAdapter adapter) {
+		DeferredResultSubscriber(DeferredResult<Object> result, ReactiveAdapter adapter,
+				ResolvableType elementType) {
+
 			this.result = result;
 			this.multiValueSource = adapter.isMultiValue();
+			this.values = new CollectedValuesList(elementType);
 		}
 
 
@@ -435,6 +441,16 @@ class ReactiveTypeHandler {
 
 	@SuppressWarnings("serial")
 	static class CollectedValuesList extends ArrayList<Object> {
+
+		private final ResolvableType elementType;
+
+		CollectedValuesList(ResolvableType elementType) {
+			this.elementType = elementType;
+		}
+
+		public ResolvableType getReturnType() {
+			return ResolvableType.forClassWithGenerics(List.class, this.elementType);
+		}
 	}
 
 }

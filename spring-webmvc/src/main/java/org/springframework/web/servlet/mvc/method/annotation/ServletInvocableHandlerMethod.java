@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.springframework.core.MethodParameter;
@@ -28,6 +27,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
@@ -249,10 +249,9 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		public ConcurrentResultMethodParameter(Object returnValue) {
 			super(-1);
 			this.returnValue = returnValue;
-			ResolvableType candidateReturnType =
-					ResolvableType.forType(super.getGenericParameterType()).getGeneric(0);
 			this.returnType = (returnValue instanceof ReactiveTypeHandler.CollectedValuesList ?
-					ResolvableType.forClassWithGenerics(List.class, candidateReturnType) : candidateReturnType);
+					((ReactiveTypeHandler.CollectedValuesList) returnValue).getReturnType() :
+					ResolvableType.forType(super.getGenericParameterType()).getGeneric(0));
 		}
 
 		public ConcurrentResultMethodParameter(ConcurrentResultMethodParameter original) {
@@ -275,6 +274,17 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		@Override
 		public Type getGenericParameterType() {
 			return this.returnType.getType();
+		}
+
+		@Override
+		public <T extends Annotation> boolean hasMethodAnnotation(Class<T> annotationType) {
+
+			// Ensure @ResponseBody-style handling for values collected from a reactive type
+			// even if actual return type is ResponseEntity<Flux<T>>
+
+			return ResponseBody.class.equals(annotationType) &&
+					this.returnValue instanceof ReactiveTypeHandler.CollectedValuesList ||
+					super.hasMethodAnnotation(annotationType);
 		}
 
 		@Override

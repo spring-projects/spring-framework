@@ -28,6 +28,7 @@ import org.junit.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -278,8 +279,8 @@ public class ServletInvocableHandlerMethodTests {
 	@Test
 	public void wrapConcurrentResult_CollectedValuesList() throws Exception {
 		List<HttpMessageConverter<?>> converters = Collections.singletonList(new MappingJackson2HttpMessageConverter());
-		this.request.addHeader("Accept", "application/json");
-		ReactiveTypeHandler.CollectedValuesList result = new ReactiveTypeHandler.CollectedValuesList();
+		ResolvableType elementType = ResolvableType.forClass(List.class);
+		ReactiveTypeHandler.CollectedValuesList result = new ReactiveTypeHandler.CollectedValuesList(elementType);
 		result.add(Arrays.asList("foo1", "bar1"));
 		result.add(Arrays.asList("foo2", "bar2"));
 
@@ -291,6 +292,24 @@ public class ServletInvocableHandlerMethodTests {
 
 		assertEquals(200, this.response.getStatus());
 		assertEquals("[[\"foo1\",\"bar1\"],[\"foo2\",\"bar2\"]]", this.response.getContentAsString());
+	}
+
+	@Test // SPR-15478
+	public void wrapConcurrentResult_CollectedValuesListWithResponseEntity() throws Exception {
+		List<HttpMessageConverter<?>> converters = Collections.singletonList(new MappingJackson2HttpMessageConverter());
+		ResolvableType elementType = ResolvableType.forClass(Bar.class);
+		ReactiveTypeHandler.CollectedValuesList result = new ReactiveTypeHandler.CollectedValuesList(elementType);
+		result.add(new Bar("foo"));
+		result.add(new Bar("bar"));
+
+		ContentNegotiationManager manager = new ContentNegotiationManager();
+		this.returnValueHandlers.addHandler(new RequestResponseBodyMethodProcessor(converters, manager));
+		ServletInvocableHandlerMethod hm = getHandlerMethod(new ResponseEntityHandler(), "handleFlux");
+		hm = hm.wrapConcurrentResult(result);
+		hm.invokeAndHandle(this.webRequest, this.mavContainer);
+
+		assertEquals(200, this.response.getStatus());
+		assertEquals("[{\"value\":\"foo\"},{\"value\":\"bar\"}]", this.response.getContentAsString());
 	}
 
 	@Test  // SPR-12287 (16/Oct/14 comments)
@@ -360,17 +379,14 @@ public class ServletInvocableHandlerMethodTests {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	private static class ResponseStatusHandler {
 
-		public void handle() {
-		}
+		public void handle() { }
 	}
 
 
 	private static class MethodLevelResponseBodyHandler {
 
 		@ResponseBody
-		public DeferredResult<String> handle() {
-			return new DeferredResult<>();
-		}
+		public DeferredResult<String> handle() { return null; }
 
 		// Unusual but legal return type
 		// Properly test generic type handling of Flux values collected to a List
@@ -384,18 +400,14 @@ public class ServletInvocableHandlerMethodTests {
 	@ResponseBody
 	private static class TypeLevelResponseBodyHandler {
 
-		public DeferredResult<String> handle() {
-			return new DeferredResult<>();
-		}
+		public DeferredResult<String> handle() { return null; }
 	}
 
 
 	private static class DeferredResultSubclassHandler {
 
 		@ResponseBody
-		public CustomDeferredResult handle() {
-			return new CustomDeferredResult();
-		}
+		public CustomDeferredResult handle() { return null; }
 	}
 
 
@@ -406,13 +418,11 @@ public class ServletInvocableHandlerMethodTests {
 	@SuppressWarnings("unused")
 	private static class ResponseEntityHandler {
 
-		public DeferredResult<ResponseEntity<String>> handleDeferred() {
-			return new DeferredResult<>();
-		}
+		public DeferredResult<ResponseEntity<String>> handleDeferred() { return null; }
 
-		public ResponseEntity<Void> handleRawType() {
-			return ResponseEntity.ok().build();
-		}
+		public ResponseEntity<Void> handleRawType() { return null; }
+
+		public ResponseEntity<Flux<Bar>> handleFlux() { return null; }
 	}
 
 
@@ -438,6 +448,19 @@ public class ServletInvocableHandlerMethodTests {
 
 		public StreamingResponseBody handleStreamBody() { return null; }
 
+	}
+
+	private static class Bar {
+
+		private final String value;
+
+		public Bar(String value) {
+			this.value = value;
+		}
+
+		public String getValue() {
+			return this.value;
+		}
 	}
 
 }
