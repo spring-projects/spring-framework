@@ -62,6 +62,8 @@ public class CronSequenceGenerator {
 	private final BitSet months = new BitSet(12);
 
 	private final BitSet daysOfMonth = new BitSet(31);
+	
+	private boolean lastDayOfMonth;
 
 	private final BitSet daysOfWeek = new BitSet(7);
 
@@ -104,6 +106,13 @@ public class CronSequenceGenerator {
 		return this.expression;
 	}
 
+	/**
+	 * 
+	 * @return true if the dayOfMonth in the cron expression is "L" : code for the last day of month.
+	 */
+	public boolean isLastDayOfMonth() {
+		return lastDayOfMonth;
+	}
 
 	/**
 	 * Get the next {@link Date} in the sequence matching the Cron pattern and
@@ -133,6 +142,11 @@ public class CronSequenceGenerator {
 		Calendar calendar = new GregorianCalendar();
 		calendar.setTimeZone(this.timeZone);
 		calendar.setTime(date);
+		
+		if (this.lastDayOfMonth){
+			this.daysOfMonth.clear(28, 31);
+			this.daysOfMonth.set(calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+		}
 
 		// First, just reset the milliseconds and try to calculate from there...
 		calendar.set(Calendar.MILLISECOND, 0);
@@ -304,7 +318,12 @@ public class CronSequenceGenerator {
 		if (field.contains("?")) {
 			field = "*";
 		}
-		setNumberHits(bits, field, 0, max);
+		if ("L".equals(field)) {
+			this.lastDayOfMonth=true;
+		}
+		else {
+			setNumberHits(bits, field, 0, max);
+		}
 	}
 
 	private void setMonths(BitSet bits, String value) {
