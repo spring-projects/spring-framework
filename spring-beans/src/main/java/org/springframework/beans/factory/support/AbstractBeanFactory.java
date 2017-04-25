@@ -1177,11 +1177,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 		}
 		if (!this.customEditors.isEmpty()) {
-			for (Map.Entry<Class<?>, Class<? extends PropertyEditor>> entry : this.customEditors.entrySet()) {
+			this.customEditors.entrySet().forEach(entry -> {
 				Class<?> requiredType = entry.getKey();
 				Class<? extends PropertyEditor> editorClass = entry.getValue();
 				registry.registerCustomEditor(requiredType, BeanUtils.instantiateClass(editorClass));
-			}
+			});
 		}
 	}
 

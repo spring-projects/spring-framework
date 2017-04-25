@@ -114,7 +114,7 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 			logger.warn("Neither 'urlMap' nor 'mappings' set on SimpleUrlHandlerMapping");
 		}
 		else {
-			for (Map.Entry<String, Object> entry : urlMap.entrySet()) {
+			urlMap.entrySet().forEach(entry -> {
 				String url = entry.getKey();
 				Object handler = entry.getValue();
 				// Prepend with slash if not already present.
@@ -126,7 +126,7 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 					handler = ((String) handler).trim();
 				}
 				registerHandler(url, handler);
-			}
+			});
 		}
 	}
 
