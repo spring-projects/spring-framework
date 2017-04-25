@@ -131,14 +131,14 @@ class ReactiveTypeHandler {
 				new SseEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
 			}
+			if (CharSequence.class.isAssignableFrom(elementClass)) {
+				ResponseBodyEmitter emitter = getEmitter(mediaType.orElse(MediaType.TEXT_PLAIN));
+				new TextEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
+				return emitter;
+			}
 			if (mediaTypes.stream().anyMatch(MediaType.APPLICATION_STREAM_JSON::includes)) {
 				ResponseBodyEmitter emitter = getEmitter(MediaType.APPLICATION_STREAM_JSON);
 				new JsonEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
-				return emitter;
-			}
-			if (CharSequence.class.isAssignableFrom(elementClass) && !isJsonStringArray(elementClass, mediaType)) {
-				ResponseBodyEmitter emitter = getEmitter(mediaType.orElse(MediaType.TEXT_PLAIN));
-				new TextEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
 			}
 		}
@@ -160,12 +160,6 @@ class ReactiveTypeHandler {
 
 		return CollectionUtils.isEmpty(mediaTypes) ?
 				this.contentNegotiationManager.resolveMediaTypes(request) : mediaTypes;
-	}
-
-	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-	private boolean isJsonStringArray(Class<?> elementType, Optional<MediaType> mediaType) {
-		return CharSequence.class.isAssignableFrom(elementType) && mediaType.filter(type ->
-				MediaType.APPLICATION_JSON.includes(type) || JSON_TYPE.includes(type)).isPresent();
 	}
 
 	private ResponseBodyEmitter getEmitter(MediaType mediaType) {
