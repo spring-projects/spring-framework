@@ -30,6 +30,7 @@ import static org.junit.Assert.*;
  * @author Arjen Poutsma
  * @author Marcel Overdijk
  * @author Kazuki Shimizu
+ * @author Theodoros Ntakouris
  */
 public class ResponseEntityTests {
 
@@ -73,6 +74,15 @@ public class ResponseEntityTests {
 	}
 
 	@Test
+	public void createdNoBody() throws URISyntaxException {
+		ResponseEntity<Void> responseEntity = ResponseEntity.created().build();
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+		assertNull(responseEntity.getBody());
+	}
+
+	@Test
 	public void createdLocation() throws URISyntaxException {
 		URI location = new URI("location");
 		ResponseEntity<Void> responseEntity = ResponseEntity.created(location).build();
@@ -96,6 +106,16 @@ public class ResponseEntityTests {
 		assertNull(responseEntity.getBody());
 	}
 
+	@Test
+	public void accepted() throws URISyntaxException {
+		Integer entity = 42;
+		ResponseEntity<Integer> responseEntity = ResponseEntity.accepted(entity);
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
+		assertEquals(entity, responseEntity.getBody());
+	}
+
 	@Test // SPR-14939
 	public void acceptedNoBodyWithAlternativeBodyType() throws URISyntaxException {
 		ResponseEntity<String> responseEntity = ResponseEntity.accepted().build();
@@ -106,7 +126,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void noContent() throws URISyntaxException {
+	public void noContentNoBody() throws URISyntaxException {
 		ResponseEntity<Void> responseEntity = ResponseEntity.noContent().build();
 
 		assertNotNull(responseEntity);
@@ -115,7 +135,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void badRequest() throws URISyntaxException {
+	public void badRequestNoBody() throws URISyntaxException {
 		ResponseEntity<Void> responseEntity = ResponseEntity.badRequest().build();
 
 		assertNotNull(responseEntity);
@@ -124,7 +144,17 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void notFound() throws URISyntaxException {
+	public void badRequest() throws URISyntaxException {
+		Integer entity = 42;
+		ResponseEntity<Integer> responseEntity = ResponseEntity.badRequest(entity);
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+		assertEquals(entity, responseEntity.getBody());
+	}
+
+	@Test
+	public void notFoundNoBody() throws URISyntaxException {
 		ResponseEntity<Void> responseEntity = ResponseEntity.notFound().build();
 
 		assertNotNull(responseEntity);
@@ -134,11 +164,107 @@ public class ResponseEntityTests {
 
 	@Test
 	public void unprocessableEntity() throws URISyntaxException {
-		ResponseEntity<String> responseEntity = ResponseEntity.unprocessableEntity().body("error");
+		String entity = "error";
+		ResponseEntity<String> responseEntity = ResponseEntity.unprocessableEntity(entity);
 
 		assertNotNull(responseEntity);
 		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, responseEntity.getStatusCode());
-		assertEquals("error", responseEntity.getBody());
+		assertEquals(entity, responseEntity.getBody());
+	}
+
+	@Test
+	public void serverErrorNoBody() throws URISyntaxException{
+		ResponseEntity<Void> responseEntity = ResponseEntity.serverError().build();
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+		assertNull(responseEntity.getBody());
+	}
+
+	@Test
+	public void serverError() throws URISyntaxException{
+		Integer entity = 42;
+		ResponseEntity<Integer> responseEntity = ResponseEntity.serverError(entity);
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+		assertEquals(entity, responseEntity.getBody());
+	}
+
+	@Test
+	public void unauthorizedNoBody() throws URISyntaxException{
+		ResponseEntity<Void> responseEntity = ResponseEntity.unauthorized().build();
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
+		assertNull(responseEntity.getBody());
+	}
+
+	@Test
+	public void unauthorized() throws URISyntaxException{
+		Integer entity = 42;
+		ResponseEntity<Integer> responseEntity = ResponseEntity.unauthorized(entity);
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
+		assertEquals(entity, responseEntity.getBody());
+	}
+
+	@Test
+	public void notImplementedNoBody() throws URISyntaxException{
+		ResponseEntity<Void> responseEntity = ResponseEntity.notImplemented().build();
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.NOT_IMPLEMENTED, responseEntity.getStatusCode());
+		assertNull(responseEntity.getBody());
+	}
+
+	@Test
+	public void notImplemented() throws URISyntaxException{
+		Integer entity = 42;
+		ResponseEntity<Integer> responseEntity = ResponseEntity.notImplemented(entity);
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.NOT_IMPLEMENTED, responseEntity.getStatusCode());
+		assertEquals(entity, responseEntity.getBody());
+	}
+
+	@Test
+	public void forbiddenNoBody() throws URISyntaxException{
+		ResponseEntity<Void> responseEntity = ResponseEntity.forbidden().build();
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
+		assertNull(responseEntity.getBody());
+	}
+
+	@Test
+	public void forbidden() throws URISyntaxException{
+		Integer entity = 42;
+		ResponseEntity<Integer> responseEntity = ResponseEntity.forbidden(entity);
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
+		assertEquals(entity, responseEntity.getBody());
+	}
+
+	@Test
+	public void serviceUnavailableNoBody() throws URISyntaxException{
+		ResponseEntity<Void> responseEntity = ResponseEntity.serviceUnavailable().build();
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.SERVICE_UNAVAILABLE, responseEntity.getStatusCode());
+		assertNull(responseEntity.getBody());
+	}
+
+	@Test
+	public void serviceUnavailable() throws URISyntaxException{
+		Integer entity = 42;
+		ResponseEntity<Integer> responseEntity = ResponseEntity.serviceUnavailable(entity);
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.SERVICE_UNAVAILABLE, responseEntity.getStatusCode());
+		assertEquals(entity, responseEntity.getBody());
 	}
 
 	@Test
