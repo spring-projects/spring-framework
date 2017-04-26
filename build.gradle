@@ -97,7 +97,6 @@ configure(allprojects) { project ->
 	ext.websocketVersion       = "1.1"
 	ext.woodstoxVersion        = "5.0.3"
 	ext.xmlunitVersion         = "2.3.0"
-	ext.xnioVersion            = "3.4.5.Final"
 	ext.xstreamVersion         = "1.4.9"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
@@ -716,7 +715,6 @@ project("spring-web") {
 		optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
 		optional("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		optional("io.undertow:undertow-core:${undertowVersion}")
-		optional("org.jboss.xnio:xnio-api:${xnioVersion}")
 		optional("io.netty:netty-buffer:${nettyVersion}")  // temporarily for JsonObjectDecoder
 	  	optional("com.fasterxml.woodstox:woodstox-core:${woodstoxVersion}") {  // woodstox before aalto
 			exclude group: "stax", module: "stax-api"
@@ -771,7 +769,6 @@ project("spring-web") {
 		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
-		testRuntime("org.jboss.xnio:xnio-nio:${xnioVersion}")
 		testRuntime("org.jboss.logging:jboss-logging:3.3.1.Final")
 	}
 
@@ -823,7 +820,6 @@ project("spring-webflux") {
 		testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
 		testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 		testCompile("io.undertow:undertow-core:${undertowVersion}")
-		testCompile("org.jboss.xnio:xnio-api:${xnioVersion}")
 		testCompile("io.reactivex:rxnetty-http:${rxnettyVersion}") {
 			exclude group: 'io.reactivex', module: 'rxjava'
 		}
@@ -835,7 +831,6 @@ project("spring-webflux") {
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
 		testRuntime("javax.activation:activation:${activationApiVersion}")
-		testRuntime("org.jboss.xnio:xnio-nio:${xnioVersion}")
 		testRuntime("org.jboss.logging:jboss-logging:3.3.1.Final")
 		testRuntime("org.webjars:underscorejs:1.8.3")
 		testRuntime("org.jruby:jruby:9.1.8.0")
@@ -998,14 +993,12 @@ project("spring-websocket") {
 		optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
 			exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
 		}
-		optional("org.jboss.xnio:xnio-api:${xnioVersion}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
 		testCompile("io.projectreactor:reactor-core")
 		testCompile("io.projectreactor.ipc:reactor-netty")
 		testCompile("io.netty:netty-all:${nettyVersion}")
-		testRuntime("org.jboss.xnio:xnio-nio:${xnioVersion}")
 		testRuntime("org.jboss.logging:jboss-logging:3.3.1.Final")
 	}
 
