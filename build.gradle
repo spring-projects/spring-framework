@@ -1,8 +1,7 @@
 buildscript {
-	ext.kotlinVersion = '1.1.2-eap-77'
+	ext.kotlinVersion = '1.1.2'
 	repositories {
 		maven { url "https://repo.spring.io/plugins-release" }
-		maven { url "https://dl.bintray.com/kotlin/kotlin-eap-1.1" }
 	}
 	dependencies {
 		classpath("io.spring.gradle:dependency-management-plugin:1.0.0.RELEASE")
@@ -179,7 +178,6 @@ configure(allprojects) { project ->
 		maven { url "https://repo.spring.io/libs-release" }
 		maven { url "https://repo.spring.io/libs-snapshot" }
 		maven { url "https://repo.spring.io/milestone" }
-		maven { url "https://dl.bintray.com/kotlin/kotlin-eap-1.1" }
 	}
 
 	dependencies {
