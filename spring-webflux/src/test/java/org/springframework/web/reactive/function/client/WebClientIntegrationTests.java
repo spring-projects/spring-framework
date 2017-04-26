@@ -38,8 +38,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.Pojo;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests using a {@link ExchangeFunction} through {@link WebClient}.
@@ -169,7 +168,7 @@ public class WebClientIntegrationTests {
 				.uri("/json")
 				.accept(MediaType.APPLICATION_JSON)
 				.retrieve()
-				.bodyToEntity(String.class);
+				.toEntity(String.class);
 
 		StepVerifier.create(result)
 				.consumeNextWith(entity -> {
@@ -196,7 +195,7 @@ public class WebClientIntegrationTests {
 				.uri("/json")
 				.accept(MediaType.APPLICATION_JSON)
 				.retrieve()
-				.bodyToEntityList(Pojo.class);
+				.toEntityList(Pojo.class);
 
 		StepVerifier.create(result)
 				.consumeNextWith(entity -> {

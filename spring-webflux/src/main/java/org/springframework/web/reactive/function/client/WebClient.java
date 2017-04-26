@@ -504,7 +504,7 @@ public interface WebClient {
 		 * @param <T> response body type
 		 * @return {@code Mono} with the result
 		 */
-		<T> Mono<ResponseEntity<T>> bodyToEntity(Class<T> bodyType);
+		<T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyType);
 
 		/**
 		 * A variant of {@link #bodyToFlux(Class)} collected via
@@ -514,7 +514,7 @@ public interface WebClient {
 		 * @param <T> the type of elements in the list
 		 * @return {@code Mono} with the result
 		 */
-		<T> Mono<ResponseEntity<List<T>>> bodyToEntityList(Class<T> elementType);
+		<T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementType);
 
 	}
 

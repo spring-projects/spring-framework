@@ -67,33 +67,33 @@ fun <T : Any> WebClient.ResponseSpec.bodyToFlux(type: KClass<T>): Flux<T> = body
 inline fun <reified T : Any> WebClient.ResponseSpec.bodyToFlux(): Flux<T> = bodyToFlux(T::class.java)
 
 /**
- * Extension for [WebClient.ResponseSpec.bodyToEntity] providing a [KClass] based variant.
+ * Extension for [WebClient.ResponseSpec.toEntity] providing a [KClass] based variant.
  *
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun <T : Any> WebClient.ResponseSpec.bodyToEntity(type: KClass<T>): Mono<ResponseEntity<T>> = bodyToEntity(type.java)
+fun <T : Any> WebClient.ResponseSpec.toEntity(type: KClass<T>): Mono<ResponseEntity<T>> = toEntity(type.java)
 
 /**
- * Extension for [WebClient.ResponseSpec.bodyToEntity] providing a `bodyToEntity<Foo>()` variant.
+ * Extension for [WebClient.ResponseSpec.toEntity] providing a `bodyToEntity<Foo>()` variant.
  *
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Any> WebClient.ResponseSpec.bodyToEntity(): Mono<ResponseEntity<T>> = bodyToEntity(T::class.java)
+inline fun <reified T : Any> WebClient.ResponseSpec.toEntity(): Mono<ResponseEntity<T>> = toEntity(T::class.java)
 
 /**
- * Extension for [WebClient.ResponseSpec.bodyToEntityList] providing a [KClass] based variant.
+ * Extension for [WebClient.ResponseSpec.toEntityList] providing a [KClass] based variant.
  *
  * @author Sebastien Deleuze
  * @since 5.0
  */
-fun <T : Any> WebClient.ResponseSpec.bodyToEntityList(type: KClass<T>): Mono<ResponseEntity<List<T>>> = bodyToEntityList(type.java)
+fun <T : Any> WebClient.ResponseSpec.toEntityList(type: KClass<T>): Mono<ResponseEntity<List<T>>> = toEntityList(type.java)
 
 /**
- * Extension for [WebClient.ResponseSpec.bodyToEntityList] providing a `bodyToEntityList<Foo>()` variant.
+ * Extension for [WebClient.ResponseSpec.toEntityList] providing a `bodyToEntityList<Foo>()` variant.
  *
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Any> WebClient.ResponseSpec.bodyToEntityList(): Mono<ResponseEntity<List<T>>> = bodyToEntityList(T::class.java)
+inline fun <reified T : Any> WebClient.ResponseSpec.toEntityList(): Mono<ResponseEntity<List<T>>> = toEntityList(T::class.java)
