@@ -41,7 +41,6 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
 
-
 	private final Charset defaultCharset;
 
 	private final List<Charset> availableCharsets;

@@ -725,6 +725,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return (this.configurationFrozen || super.isBeanEligibleForMetadataCaching(beanName));
 	}
 
+	/**
+	 * 由于此方法实例化的是所有非懒加载的单例Bean，因此要实例化Bean，必须满足11行的三个定义：
+	 * （1）不是抽象的
+	* （2）必须是单例的
+	* （3）必须是非懒加载的
+	 * @throws BeansException
+	 */
 	@Override
 	public void preInstantiateSingletons() throws BeansException {
 		if (this.logger.isDebugEnabled()) {
