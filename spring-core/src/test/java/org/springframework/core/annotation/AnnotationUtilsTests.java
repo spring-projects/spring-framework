@@ -1240,10 +1240,13 @@ public class AnnotationUtilsTests {
 		assertEquals("value: ", "", contextConfig.value());
 		assertEquals("location: ", "", contextConfig.location());
 	}
-	
-	@Test(expected = AnnotationConfigurationException.class)
-	public void synthesizeAnnotationWithAttributeAliasesDifferentValues() throws Exception {
-		getValue(synthesizeAnnotation(ContextConfigMismatch.class.getAnnotation(ContextConfig.class)));
+
+	@Test
+	public void synthesizeAnnotationWithAttributeAliasesWithDifferentValues() throws Exception {
+		ContextConfig contextConfig = synthesizeAnnotation(ContextConfigMismatch.class.getAnnotation(ContextConfig.class));
+
+		exception.expect(AnnotationConfigurationException.class);
+		getValue(contextConfig);
 	}
 
 	@Test

@@ -1282,7 +1282,9 @@ public abstract class AnnotationUtils {
 	 * Retrieve the <em>value</em> of the {@code value} attribute of a
 	 * single-element Annotation, given an annotation instance.
 	 * @param annotation the annotation instance from which to retrieve the value
-	 * @return the attribute value, or {@code null} if not found
+	 * @return the attribute value, or {@code null} if not found unless the attribute
+	 * value cannot be retrieved due to an {@link AnnotationConfigurationException}, in
+	 * which case such an exception will be rethrown
 	 * @see #getValue(Annotation, String)
 	 */
 	public static Object getValue(Annotation annotation) {
@@ -1293,9 +1295,9 @@ public abstract class AnnotationUtils {
 	 * Retrieve the <em>value</em> of a named attribute, given an annotation instance.
 	 * @param annotation the annotation instance from which to retrieve the value
 	 * @param attributeName the name of the attribute value to retrieve
-	 * @return the attribute value, or {@code null} if not found unless the the attribute value 
-	 * can not be retrieved due to {@link AnnotationConfigurationException}, in which case it
-	 * will be re-thrown
+	 * @return the attribute value, or {@code null} if not found unless the attribute
+	 * value cannot be retrieved due to an {@link AnnotationConfigurationException}, in
+	 * which case such an exception will be rethrown
 	 * @see #getValue(Annotation)
 	 * @see #rethrowAnnotationConfigurationException(Throwable)
 	 */
@@ -1311,7 +1313,7 @@ public abstract class AnnotationUtils {
 		catch (InvocationTargetException ex) {
 			rethrowAnnotationConfigurationException(ex.getTargetException());
 			throw new IllegalStateException(
-					"Could not obtain value for annotation attribute '" + attributeName + "' on " + annotation, ex);
+					"Could not obtain value for annotation attribute '" + attributeName + "' in " + annotation, ex);
 		}
 		catch (Throwable ex) {
 			return null;
