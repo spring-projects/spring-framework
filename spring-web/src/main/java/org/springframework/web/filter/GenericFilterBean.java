@@ -37,6 +37,7 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
@@ -91,7 +92,7 @@ public abstract class GenericFilterBean implements
 
 	private String beanName;
 
-	private Environment environment = new StandardServletEnvironment();
+	private Environment environment;
 
 	private ServletContext servletContext;
 
@@ -184,7 +185,7 @@ public abstract class GenericFilterBean implements
 			PropertyValues pvs = new FilterConfigPropertyValues(filterConfig, this.requiredProperties);
 			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 			ResourceLoader resourceLoader = new ServletContextResourceLoader(filterConfig.getServletContext());
-			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, this.environment));
+			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, getEnvironment()));
 			initBeanWrapper(bw);
 			bw.setPropertyValues(pvs, true);
 		}
@@ -283,6 +284,24 @@ public abstract class GenericFilterBean implements
 	public void destroy() {
 	}
 
+    /**
+     * <p>If {@code null}, a new environment will be initialized via
+     * {@link #createEnvironment()}.
+     */
+    public Environment getEnvironment() {
+        if (this.environment == null) {
+            this.environment = this.createEnvironment();
+        }
+        return this.environment;
+    }
+
+    /**
+     * Create and return a new {@link StandardServletEnvironment}. Subclasses may override
+     * in order to configure the environment or specialize the environment type returned.
+     */
+    protected ConfigurableEnvironment createEnvironment() {
+        return new StandardServletEnvironment();
+    }
 
 	/**
 	 * PropertyValues implementation created from FilterConfig init parameters.
