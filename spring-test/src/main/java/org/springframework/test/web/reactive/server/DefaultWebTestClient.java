@@ -57,7 +57,6 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
 import static org.springframework.web.reactive.function.BodyExtractors.toFlux;
 import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
-
 /**
  * Default implementation of {@link WebTestClient}.
  *
@@ -476,7 +475,6 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public EntityExchangeResult<List<E>> returnResult() {
 			return getResult();
 		}

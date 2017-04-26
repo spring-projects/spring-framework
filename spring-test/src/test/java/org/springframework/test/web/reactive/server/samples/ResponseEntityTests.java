@@ -44,7 +44,6 @@ import static org.junit.Assert.assertThat;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 
-
 /**
  * Annotated controllers accepting and returning typed Objects.
  *
@@ -133,7 +132,6 @@ public class ResponseEntityTests {
 
 	@RestController
 	@RequestMapping("/persons")
-	@SuppressWarnings("unused")
 	static class PersonController {
 
 		@GetMapping("/{name}")

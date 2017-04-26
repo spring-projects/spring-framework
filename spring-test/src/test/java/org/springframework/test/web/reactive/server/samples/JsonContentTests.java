@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server.samples;
 
 import java.net.URI;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Samples of tests with serialized JSON content.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class JsonContentTests {
 
@@ -71,7 +73,6 @@ public class JsonContentTests {
 
 
 	@RestController
-	@SuppressWarnings("unused")
 	static class PersonController {
 
 		@GetMapping("/persons")
