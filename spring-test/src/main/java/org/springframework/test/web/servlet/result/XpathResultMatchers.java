@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 
 /**
  * Factory for assertions on the response content using XPath expressions.
+ *
  * <p>An instance of this class is typically accessed via
  * {@link MockMvcResultMatchers#xpath}.
  *
@@ -54,6 +55,7 @@ public class XpathResultMatchers {
 
 		this.xpathHelper = new XpathExpectationsHelper(expression, namespaces, args);
 	}
+
 
 	/**
 	 * Evaluate the XPath and assert the {@link Node} content found with the

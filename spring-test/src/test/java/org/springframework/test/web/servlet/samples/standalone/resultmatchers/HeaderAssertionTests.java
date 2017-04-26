@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,22 +33,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.WebRequest;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.springframework.http.HttpHeaders.IF_MODIFIED_SINCE;
-import static org.springframework.http.HttpHeaders.LAST_MODIFIED;
-import static org.springframework.http.HttpHeaders.VARY;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
-
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.http.HttpHeaders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 /**
  * Examples of expectations on response header values.
@@ -146,24 +136,20 @@ public class HeaderAssertionTests {
 
 			fail(ERROR_MESSAGE);
 		}
-		catch (AssertionError e) {
-			if (ERROR_MESSAGE.equals(e.getMessage())) {
-				throw e;
+		catch (AssertionError err) {
+			if (ERROR_MESSAGE.equals(err.getMessage())) {
+				throw err;
 			}
-			assertEquals("Response does not contain header " + "X-Custom-Header", e.getMessage());
+			assertEquals("Response does not contain header 'X-Custom-Header'", err.getMessage());
 		}
 	}
 
-	// SPR-10771
-
-	@Test
+	@Test  // SPR-10771
 	public void doesNotExist() throws Exception {
 		this.mockMvc.perform(get("/persons/1")).andExpect(header().doesNotExist("X-Custom-Header"));
 	}
 
-	// SPR-10771
-
-	@Test(expected = AssertionError.class)
+	@Test(expected = AssertionError.class)  // SPR-10771
 	public void doesNotExistFail() throws Exception {
 		this.mockMvc.perform(get("/persons/1")).andExpect(header().doesNotExist(LAST_MODIFIED));
 	}
@@ -189,6 +175,7 @@ public class HeaderAssertionTests {
 		this.mockMvc.perform(get("/persons/1")).andExpect(header().longValue("X-Rate-Limiting", 1));
 	}
 
+
 	private void assertIncorrectResponseHeader(ResultMatcher matcher, String unexpected) throws Exception {
 		try {
 			this.mockMvc.perform(get("/persons/1")
@@ -197,15 +184,15 @@ public class HeaderAssertionTests {
 
 			fail(ERROR_MESSAGE);
 		}
-		catch (AssertionError e) {
-			if (ERROR_MESSAGE.equals(e.getMessage())) {
-				throw e;
+		catch (AssertionError err) {
+			if (ERROR_MESSAGE.equals(err.getMessage())) {
+				throw err;
 			}
 			// SPR-10659: ensure header name is in the message
 			// Unfortunately, we can't control formatting from JUnit or Hamcrest.
-			assertMessageContains(e, "Response header " + LAST_MODIFIED);
-			assertMessageContains(e, unexpected);
-			assertMessageContains(e, now);
+			assertMessageContains(err, "Response header '" + LAST_MODIFIED + "'");
+			assertMessageContains(err, unexpected);
+			assertMessageContains(err, now);
 		}
 	}
 
@@ -219,7 +206,6 @@ public class HeaderAssertionTests {
 	private static class PersonController {
 
 		private long timestamp;
-
 
 		public void setStubTimestamp(long timestamp) {
 			this.timestamp = timestamp;
@@ -239,4 +225,5 @@ public class HeaderAssertionTests {
 			return this.timestamp;
 		}
 	}
+
 }

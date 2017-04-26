@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
 /**
  * Factory for assertions on the response content using
  * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expressions.
+ *
  * <p>An instance of this class is typically accessed via
  * {@link MockMvcResultMatchers#jsonPath(String, Matcher)} or
  * {@link MockMvcResultMatchers#jsonPath(String, Object...)}.
@@ -258,9 +259,8 @@ public class JsonPathResultMatchers {
 				MatcherAssert.assertThat(reason, content, StringStartsWith.startsWith(this.prefix));
 				return content.substring(this.prefix.length());
 			}
-			catch (StringIndexOutOfBoundsException oobe) {
-				throw new AssertionError(
-						"JSON prefix \"" + this.prefix + "\" not found, exception: " + oobe.getMessage());
+			catch (StringIndexOutOfBoundsException ex) {
+				throw new AssertionError("JSON prefix \"" + this.prefix + "\" not found", ex);
 			}
 		}
 		else {

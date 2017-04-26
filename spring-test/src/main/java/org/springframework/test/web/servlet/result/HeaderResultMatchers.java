@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,12 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.hamcrest.MatcherAssert.*;
+import static org.springframework.test.util.AssertionErrors.*;
 
 /**
  * Factory for response header assertions.
+ *
  * <p>An instance of this class is available via
  * {@link MockMvcResultMatchers#header}.
  *
@@ -44,7 +44,6 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
  * @since 3.2
  */
 public class HeaderResultMatchers {
-
 
 	/**
 	 * Protected constructor.
@@ -62,7 +61,7 @@ public class HeaderResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) {
-				assertThat("Response header " + name, result.getResponse().getHeader(name), matcher);
+				assertThat("Response header '" + name + "'", result.getResponse().getHeader(name), matcher);
 			}
 		};
 	}
@@ -77,7 +76,7 @@ public class HeaderResultMatchers {
 			@Override
 			public void match(MvcResult result) {
 				List<String> values = result.getResponse().getHeaders(name);
-				assertThat("Response header " + name, values, matcher);
+				assertThat("Response header '" + name + "'", values, matcher);
 			}
 		};
 	}
@@ -89,7 +88,7 @@ public class HeaderResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) {
-				assertEquals("Response header " + name, value, result.getResponse().getHeader(name));
+				assertEquals("Response header '" + name + "'", value, result.getResponse().getHeader(name));
 			}
 		};
 	}
@@ -103,7 +102,7 @@ public class HeaderResultMatchers {
 			@Override
 			public void match(MvcResult result) {
 				List<Object> actual = result.getResponse().getHeaderValues(name);
-				assertEquals("Response header " + name, Arrays.asList(values), actual);
+				assertEquals("Response header '" + name + "'", Arrays.asList(values), actual);
 			}
 		};
 	}
@@ -116,7 +115,7 @@ public class HeaderResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) {
-				assertTrue("Response should not contain header " + name,
+				assertTrue("Response should not contain header '" + name + "'",
 						!result.getResponse().containsHeader(name));
 			}
 		};
@@ -133,8 +132,8 @@ public class HeaderResultMatchers {
 			@Override
 			public void match(MvcResult result) {
 				MockHttpServletResponse response = result.getResponse();
-				assertTrue("Response does not contain header " + name, response.containsHeader(name));
-				assertEquals("Response header " + name, value, Long.parseLong(response.getHeader(name)));
+				assertTrue("Response does not contain header '" + name + "'", response.containsHeader(name));
+				assertEquals("Response header '" + name + "'", value, Long.parseLong(response.getHeader(name)));
 			}
 		};
 	}
@@ -156,8 +155,8 @@ public class HeaderResultMatchers {
 				format.setTimeZone(TimeZone.getTimeZone("GMT"));
 				String formatted = format.format(new Date(value));
 				MockHttpServletResponse response = result.getResponse();
-				assertTrue("Response does not contain header " + name, response.containsHeader(name));
-				assertEquals("Response header " + name, formatted, response.getHeader(name));
+				assertTrue("Response does not contain header '" + name + "'", response.containsHeader(name));
+				assertEquals("Response header '" + name + "'", formatted, response.getHeader(name));
 			}
 		};
 	}
