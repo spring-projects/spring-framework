@@ -25,7 +25,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -215,7 +214,7 @@ public class EnableAsyncTests {
 		ctx.close();
 	}
 
-	@Test @Ignore  // TODO
+	@Test
 	public void spr14949FindsOnInterfaceWithCglibProxy() throws InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Spr14949ConfigB.class);
 

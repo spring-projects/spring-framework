@@ -47,10 +47,8 @@ import org.springframework.util.ClassUtils;
  *
  * @author Juergen Hoeller
  * @since 3.0
- * @see org.springframework.dao.annotation.PersistenceExceptionTranslationAdvisor
- * @see org.springframework.stereotype.Repository
- * @see org.springframework.dao.DataAccessException
- * @see org.springframework.dao.support.PersistenceExceptionTranslator
+ * @see Async
+ * @see AnnotationAsyncExecutionInterceptor
  */
 @SuppressWarnings("serial")
 public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements BeanFactoryAware {
@@ -157,7 +155,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 		ComposablePointcut result = null;
 		for (Class<? extends Annotation> asyncAnnotationType : asyncAnnotationTypes) {
 			Pointcut cpc = new AnnotationMatchingPointcut(asyncAnnotationType, true);
-			Pointcut mpc = AnnotationMatchingPointcut.forMethodAnnotation(asyncAnnotationType);
+			Pointcut mpc = new AnnotationMatchingPointcut(null, asyncAnnotationType, true);
 			if (result == null) {
 				result = new ComposablePointcut(cpc);
 			}
