@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,8 @@ public interface ResponseBodyAdvice<T> {
 	 * and the selected {@code HttpMessageConverter} type.
 	 * @param returnType the return type
 	 * @param converterType the selected converter type
-	 * @return {@code true} if {@link #beforeBodyWrite} should be invoked, {@code false} otherwise
+	 * @return {@code true} if {@link #beforeBodyWrite} should be invoked;
+	 * {@code false} otherwise
 	 */
 	boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType);
 
@@ -55,7 +56,7 @@ public interface ResponseBodyAdvice<T> {
 	 * @param selectedConverterType the converter type selected to write to the response
 	 * @param request the current request
 	 * @param response the current response
-	 * @return the body that was passed in or a modified, possibly new instance
+	 * @return the body that was passed in or a modified (possibly new) instance
 	 */
 	T beforeBodyWrite(T body, MethodParameter returnType, MediaType selectedContentType,
 			Class<? extends HttpMessageConverter<?>> selectedConverterType,

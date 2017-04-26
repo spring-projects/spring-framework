@@ -37,7 +37,6 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 @WebServlet(asyncSupported = true)
 public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
-
 	public JettyHttpHandlerAdapter(HttpHandler httpHandler) {
 		super(httpHandler);
 	}

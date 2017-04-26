@@ -35,15 +35,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests with server-side {@link WebSocketHandler}s.
+ *
  * @author Rossen Stoyanchev
  */
 public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
-
 
 	@Override
 	protected Class<?> getWebConfigClass() {
@@ -136,6 +135,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 
 	}
 
+
 	private static class EchoWebSocketHandler implements WebSocketHandler {
 
 		@Override
@@ -144,6 +144,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 			return session.send(session.receive().doOnNext(WebSocketMessage::retain));
 		}
 	}
+
 
 	private static class SubProtocolWebSocketHandler implements WebSocketHandler {
 
@@ -160,6 +161,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		}
 	}
 
+
 	private static class CustomHeaderHandler implements WebSocketHandler {
 
 		@Override
@@ -170,6 +172,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 			return doSend(session, Mono.just(message));
 		}
 	}
+
 
 	// TODO: workaround for suspected RxNetty WebSocket client issue
 	// https://github.com/ReactiveX/RxNetty/issues/560

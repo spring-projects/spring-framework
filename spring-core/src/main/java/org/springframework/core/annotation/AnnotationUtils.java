@@ -1310,9 +1310,10 @@ public abstract class AnnotationUtils {
 		}
 		catch (InvocationTargetException ex) {
 			rethrowAnnotationConfigurationException(ex.getTargetException());
-			throw new IllegalStateException("Could not obtain annotation attribute value of " + attributeName, ex);
+			throw new IllegalStateException(
+					"Could not obtain value for annotation attribute '" + attributeName + "' on " + annotation, ex);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			return null;
 		}
 	}
@@ -1368,7 +1369,7 @@ public abstract class AnnotationUtils {
 		try {
 			return annotationType.getDeclaredMethod(attributeName).getDefaultValue();
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			return null;
 		}
 	}

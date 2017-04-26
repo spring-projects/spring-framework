@@ -30,7 +30,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 
 /**
- * {@link ServletHttpHandlerAdapter} extension that uses Jetty APIs for reading
+ * {@link ServletHttpHandlerAdapter} extension that uses Tomcat APIs for reading
  * from the request and writing to the response with {@link ByteBuffer}.
  *
  * @author Violeta Georgieva
@@ -38,7 +38,6 @@ import org.springframework.core.io.buffer.DataBufferFactory;
  */
 @WebServlet(asyncSupported = true)
 public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
-
 
 	public TomcatHttpHandlerAdapter(HttpHandler httpHandler) {
 		super(httpHandler);
