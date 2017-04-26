@@ -477,42 +477,46 @@ public interface WebClient {
 	interface ResponseSpec {
 
 		/**
-		 * Extract the response body to an Object of type {@code <T>} by
-		 * invoking {@link ClientResponse#bodyToMono(Class)}.
+		 * Extract the body to a {@code Mono}. If the response has status code 4xx or 5xx, the
+		 * {@code Mono} will contain a {@link WebClientException}.
 		 *
 		 * @param bodyType the expected response body type
 		 * @param <T> response body type
-		 * @return {@code Mono} with the result
+		 * @return a mono containing the body, or a {@link WebClientException} if the status code is
+		 * 4xx or 5xx
 		 */
 		<T> Mono<T> bodyToMono(Class<T> bodyType);
 
 		/**
-		 * Extract the response body to a stream of Objects of type {@code <T>}
-		 * by invoking {@link ClientResponse#bodyToFlux(Class)}.
+		 * Extract the body to a {@code Flux}. If the response has status code 4xx or 5xx, the
+		 * {@code Flux} will contain a {@link WebClientException}.
 		 *
 		 * @param elementType the type of element in the response
 		 * @param <T> the type of elements in the response
-		 * @return the body of the response
+		 * @return a flux containing the body, or a {@link WebClientException} if the status code is
+		 * 4xx or 5xx
 		 */
 		<T> Flux<T> bodyToFlux(Class<T> elementType);
 
 		/**
-		 * A variant of {@link #bodyToMono(Class)} that also provides access to
-		 * the response status and headers.
+		 * Returns the response as a delayed {@code ResponseEntity}. Unlike
+		 * {@link #bodyToMono(Class)} and {@link #bodyToFlux(Class)}, this method does not check
+		 * for a 4xx or 5xx status code before extracting the body.
 		 *
 		 * @param bodyType the expected response body type
 		 * @param <T> response body type
-		 * @return {@code Mono} with the result
+		 * @return {@code Mono} with the {@code ResponseEntity}
 		 */
 		<T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyType);
 
 		/**
-		 * A variant of {@link #bodyToFlux(Class)} collected via
-		 * {@link Flux#collectList()} and wrapped in {@code ResponseEntity}.
+		 * Returns the response as a delayed list of {@code ResponseEntity}s. Unlike
+		 * {@link #bodyToMono(Class)} and {@link #bodyToFlux(Class)}, this method does not check
+		 * for a 4xx or 5xx status code before extracting the body.
 		 *
 		 * @param elementType the expected response body list element type
 		 * @param <T> the type of elements in the list
-		 * @return {@code Mono} with the result
+		 * @return {@code Mono} with the list of {@code ResponseEntity}s
 		 */
 		<T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementType);
 

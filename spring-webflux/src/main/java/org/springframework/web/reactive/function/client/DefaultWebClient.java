@@ -32,13 +32,17 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyExtractor;
+import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -350,13 +354,34 @@ class DefaultWebClient implements WebClient {
 
 		@Override
 		public <T> Mono<T> bodyToMono(Class<T> bodyType) {
-			return this.responseMono.flatMap(clientResponse -> clientResponse.bodyToMono(bodyType));
+			return this.responseMono.flatMap(
+					response -> bodyToPublisher(response, BodyExtractors.toMono(bodyType),
+							Mono::error));
 		}
 
 		@Override
 		public <T> Flux<T> bodyToFlux(Class<T> elementType) {
-			return this.responseMono.flatMapMany(clientResponse -> clientResponse.bodyToFlux(elementType));
+			return this.responseMono.flatMapMany(
+					response -> bodyToPublisher(response, BodyExtractors.toFlux(elementType),
+							Flux::error));
 		}
+
+		private <T extends Publisher<?>> T bodyToPublisher(ClientResponse response,
+				BodyExtractor<T, ? super ClientHttpResponse> extractor,
+				Function<WebClientException, T> errorFunction) {
+
+			HttpStatus status = response.statusCode();
+			if (status.is4xxClientError() || status.is5xxServerError()) {
+				WebClientException ex = new WebClientException(
+						"ClientResponse has erroneous status code: " + status.value() +
+								" " + status.getReasonPhrase());
+				return errorFunction.apply(ex);
+			}
+			else {
+				return response.body(extractor);
+			}
+		}
+
 
 		@Override
 		public <T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyType) {

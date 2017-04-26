@@ -334,7 +334,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void notFound() throws Exception {
+	public void exchangeNotFound() throws Exception {
 		this.server.enqueue(new MockResponse().setResponseCode(404)
 				.setHeader("Content-Type", "text/plain").setBody("Not Found"));
 
@@ -342,6 +342,47 @@ public class WebClientIntegrationTests {
 
 		StepVerifier.create(result)
 				.consumeNextWith(response -> assertEquals(HttpStatus.NOT_FOUND, response.statusCode()))
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("*/*", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+		Assert.assertEquals("/greeting?name=Spring", recordedRequest.getPath());
+	}
+
+	@Test
+	public void retrieveBodyToMonoNotFound() throws Exception {
+		this.server.enqueue(new MockResponse().setResponseCode(404)
+				.setHeader("Content-Type", "text/plain").setBody("Not Found"));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/greeting?name=Spring")
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectError(WebClientException.class)
+				.verify(Duration.ofSeconds(3));
+
+		RecordedRequest recordedRequest = server.takeRequest();
+		Assert.assertEquals(1, server.getRequestCount());
+		Assert.assertEquals("*/*", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+		Assert.assertEquals("/greeting?name=Spring", recordedRequest.getPath());
+	}
+
+	@Test
+	public void retrieveToEntityNotFound() throws Exception {
+		this.server.enqueue(new MockResponse().setResponseCode(404)
+				.setHeader("Content-Type", "text/plain").setBody("Not Found"));
+
+		Mono<ResponseEntity<String>> result = this.webClient.get()
+				.uri("/greeting?name=Spring")
+				.retrieve()
+				.toEntity(String.class);
+
+		StepVerifier.create(result)
+				.consumeNextWith(response -> assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode()))
 				.expectComplete()
 				.verify(Duration.ofSeconds(3));
 

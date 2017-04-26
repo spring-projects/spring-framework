@@ -59,9 +59,7 @@ public interface ClientResponse {
 	MultiValueMap<String, ResponseCookie> cookies();
 
 	/**
-	 * Extract the body with the given {@code BodyExtractor}. Unlike {@link #bodyToMono(Class)} and
-	 * {@link #bodyToFlux(Class)}; this method does not check for a 4xx or 5xx  status code before
-	 * extracting the body.
+	 * Extract the body with the given {@code BodyExtractor}.
 	 * @param extractor the {@code BodyExtractor} that reads from the response
 	 * @param <T> the type of the body returned
 	 * @return the extracted body
@@ -69,22 +67,18 @@ public interface ClientResponse {
 	<T> T body(BodyExtractor<T, ? super ClientHttpResponse> extractor);
 
 	/**
-	 * Extract the body to a {@code Mono}. If the response has status code 4xx or 5xx, the
-	 * {@code Mono} will contain a {@link WebClientException}.
+	 * Extract the body to a {@code Mono}.
 	 * @param elementClass the class of element in the {@code Mono}
 	 * @param <T> the element type
-	 * @return a mono containing the body, or a {@link WebClientException} if the status code is
-	 * 4xx or 5xx
+	 * @return a mono containing the body of the given type {@code T}
 	 */
 	<T> Mono<T> bodyToMono(Class<? extends T> elementClass);
 
 	/**
-	 * Extract the body to a {@code Flux}. If the response has status code 4xx or 5xx, the
-	 * {@code Flux} will contain a {@link WebClientException}.
+	 * Extract the body to a {@code Flux}.
 	 * @param elementClass the class of element in the {@code Flux}
 	 * @param <T> the element type
-	 * @return a flux containing the body, or a {@link WebClientException} if the status code is
-	 * 4xx or 5xx
+	 * @return a flux containing the body of the given type {@code T}
 	 */
 	<T> Flux<T> bodyToFlux(Class<? extends T> elementClass);
 
