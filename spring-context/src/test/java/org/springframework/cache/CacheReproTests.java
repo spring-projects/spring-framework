@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -180,7 +179,7 @@ public class CacheReproTests {
 		assertSame(tb, cache.get("tb1").get());
 	}
 
-	@Test @Ignore  // TODO
+	@Test
 	public void spr15271FindsOnInterfaceWithCglibProxy() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr15271ConfigB.class);
 		Spr15271Interface bean = context.getBean(Spr15271Interface.class);
