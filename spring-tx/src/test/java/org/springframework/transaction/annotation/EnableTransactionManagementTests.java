@@ -19,7 +19,6 @@ package org.springframework.transaction.annotation;
 import java.util.Collection;
 import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.aop.support.AopUtils;
@@ -166,7 +165,7 @@ public class EnableTransactionManagementTests {
 		ctx.close();
 	}
 
-	@Test @Ignore  // TODO
+	@Test
 	public void spr14322FindsOnInterfaceWithCglibProxy() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Spr14322ConfigB.class);
 		TransactionalTestInterface bean = ctx.getBean(TransactionalTestInterface.class);
