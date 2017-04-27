@@ -33,15 +33,19 @@ import org.springframework.http.HttpMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
+import static org.springframework.http.codec.multipart.MultipartHttpMessageReader.*;
+
 /**
  * Implementations of {@link BodyExtractor} that read various bodies, such a reactive streams.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public abstract class BodyExtractors {
@@ -136,6 +140,23 @@ public abstract class BodyExtractors {
 	}
 
 	/**
+	 * Return a {@code BodyExtractor} that reads form data into a {@link MultiValueMap}.
+	 * @return a {@code BodyExtractor} that reads multipart data
+	 */
+	// Note that the returned BodyExtractor is parameterized to ServerHttpRequest, not
+	// ReactiveHttpInputMessage like other methods, since reading form data only typically happens on
+	// the server-side
+	public static BodyExtractor<Mono<MultiValueMap<String, Part>>, ServerHttpRequest> toMultipartData() {
+		return (serverRequest, context) -> {
+			HttpMessageReader<MultiValueMap<String, Part>> messageReader =
+					multipartMessageReader(context);
+			return context.serverResponse()
+					.map(serverResponse -> messageReader.readMono(MULTIPART_VALUE_TYPE, MULTIPART_VALUE_TYPE, serverRequest, serverResponse, context.hints()))
+					.orElseGet(() -> messageReader.readMono(MULTIPART_VALUE_TYPE, serverRequest, context.hints()));
+		};
+	}
+
+	/**
 	 * Return a {@code BodyExtractor} that returns the body of the message as a {@link Flux} of
 	 * {@link DataBuffer}s.
 	 * <p><strong>Note</strong> that the returned buffers should be released after usage by calling
@@ -178,6 +199,17 @@ public abstract class BodyExtractors {
 				.orElseThrow(() -> new IllegalStateException(
 						"Could not find HttpMessageReader that supports " +
 								MediaType.APPLICATION_FORM_URLENCODED_VALUE));
+	}
+
+	private static HttpMessageReader<MultiValueMap<String, Part>> multipartMessageReader(BodyExtractor.Context context) {
+		return context.messageReaders().get()
+				.filter(messageReader -> messageReader
+						.canRead(MULTIPART_VALUE_TYPE, MediaType.MULTIPART_FORM_DATA))
+				.findFirst()
+				.map(BodyExtractors::<MultiValueMap<String, Part>>cast)
+				.orElseThrow(() -> new IllegalStateException(
+						"Could not find HttpMessageReader that supports " +
+								MediaType.MULTIPART_FORM_DATA));
 	}
 
 	private static MediaType contentType(HttpMessage message) {

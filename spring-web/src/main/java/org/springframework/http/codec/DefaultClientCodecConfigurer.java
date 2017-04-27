@@ -21,6 +21,7 @@ import java.util.List;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
 
 /**
  * Default implementation of {@link ClientCodecConfigurer}.
@@ -57,6 +58,7 @@ class DefaultClientCodecConfigurer extends DefaultCodecConfigurer implements Cli
 		protected void addTypedWritersTo(List<HttpMessageWriter<?>> result) {
 			super.addTypedWritersTo(result);
 			addWriterTo(result, FormHttpMessageWriter::new);
+			addWriterTo(result, MultipartHttpMessageWriter::new);
 		}
 
 		@Override
