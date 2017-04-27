@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -318,12 +318,11 @@ public class AntPathMatcher implements PathMatcher {
 
 	private boolean isPotentialMatch(String path, String[] pattDirs) {
 		if (!this.trimTokens) {
-			char[] pathChars = path.toCharArray();
 			int pos = 0;
 			for (String pattDir : pattDirs) {
 				int skipped = skipSeparator(path, pos, this.pathSeparator);
 				pos += skipped;
-				skipped = skipSegment(pathChars, pos, pattDir);
+				skipped = skipSegment(path, pos, pattDir);
 				if (skipped < pattDir.length()) {
 					if (skipped > 0) {
 						return true;
@@ -336,16 +335,18 @@ public class AntPathMatcher implements PathMatcher {
 		return true;
 	}
 
-	private int skipSegment(char[] chars, int pos, String prefix) {
+	private int skipSegment(String path, int pos, String prefix) {
 		int skipped = 0;
-		for (char c : prefix.toCharArray()) {
+		for (int i = 0; i < prefix.length(); i++) {
+			char c = prefix.charAt(i);
 			if (isWildcardChar(c)) {
 				return skipped;
 			}
-			else if (pos + skipped >= chars.length) {
+			int currPos = pos + skipped;
+			if (currPos >= path.length()) {
 				return 0;
 			}
-			else if (chars[pos + skipped] == c) {
+			if (c == path.charAt(currPos)) {
 				skipped++;
 			}
 		}
