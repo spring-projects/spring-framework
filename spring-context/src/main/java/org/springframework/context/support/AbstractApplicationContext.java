@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -281,8 +281,22 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>If {@code null}, a new environment will be initialized via
+	 * Set the {@code Environment} for this application context.
+	 * <p>Default value is determined by {@link #createEnvironment()}. Replacing the
+	 * default with this method is one option but configuration through {@link
+	 * #getEnvironment()} should also be considered. In either case, such modifications
+	 * should be performed <em>before</em> {@link #refresh()}.
+	 * @see org.springframework.context.support.AbstractApplicationContext#createEnvironment
+	 */
+	@Override
+	public void setEnvironment(ConfigurableEnvironment environment) {
+		this.environment = environment;
+	}
+
+	/**
+	 * Return the {@code Environment} for this application context in configurable
+	 * form, allowing for further customization.
+	 * <p>If none specified, a default environment will be initialized via
 	 * {@link #createEnvironment()}.
 	 */
 	@Override
@@ -294,16 +308,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>Default value is determined by {@link #createEnvironment()}. Replacing the
-	 * default with this method is one option but configuration through {@link
-	 * #getEnvironment()} should also be considered. In either case, such modifications
-	 * should be performed <em>before</em> {@link #refresh()}.
-	 * @see org.springframework.context.support.AbstractApplicationContext#createEnvironment
+	 * Create and return a new {@link StandardEnvironment}.
+	 * <p>Subclasses may override this method in order to supply
+	 * a custom {@link ConfigurableEnvironment} implementation.
 	 */
-	@Override
-	public void setEnvironment(ConfigurableEnvironment environment) {
-		this.environment = environment;
+	protected ConfigurableEnvironment createEnvironment() {
+		return new StandardEnvironment();
 	}
 
 	/**
@@ -444,7 +454,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	/**
-	 * {@inheritDoc}
+	 * Set the parent of this application context.
 	 * <p>The parent {@linkplain ApplicationContext#getEnvironment() environment} is
 	 * {@linkplain ConfigurableEnvironment#merge(ConfigurableEnvironment) merged} with
 	 * this (child) application context environment if the parent is non-{@code null} and
@@ -493,15 +503,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	public Collection<ApplicationListener<?>> getApplicationListeners() {
 		return this.applicationListeners;
-	}
-
-	/**
-	 * Create and return a new {@link StandardEnvironment}.
-	 * <p>Subclasses may override this method in order to supply
-	 * a custom {@link ConfigurableEnvironment} implementation.
-	 */
-	protected ConfigurableEnvironment createEnvironment() {
-		return new StandardEnvironment();
 	}
 
 	@Override
@@ -935,13 +936,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * DisposableBean callback for destruction of this instance.
-	 * Only called when the ApplicationContext itself is running
-	 * as a bean in another BeanFactory or ApplicationContext,
-	 * which is rather unusual.
-	 * <p>The {@code close} method is the native way to
-	 * shut down an ApplicationContext.
+	 * <p>The {@link #close()} method is the native way to shut down
+	 * an ApplicationContext, which this method simply delegates to.
 	 * @see #close()
-	 * @see org.springframework.beans.factory.access.SingletonBeanFactoryLocator
 	 */
 	@Override
 	public void destroy() {
