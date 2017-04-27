@@ -747,6 +747,7 @@ project("spring-web") {
 		optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		optional("javax.xml.ws:jaxws-api:${jaxwsVersion}")
 		optional("javax.mail:javax.mail-api:${javamailVersion}")
+		optional("org.synchronoss.cloud:nio-multipart-parser:1.0.2")
 		optional("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}")
 		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
 		testCompile("io.projectreactor.addons:reactor-test")
