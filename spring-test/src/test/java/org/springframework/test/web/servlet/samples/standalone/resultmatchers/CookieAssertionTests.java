@@ -46,7 +46,7 @@ public class CookieAssertionTests {
 	public void setup() {
 		CookieLocaleResolver localeResolver = new CookieLocaleResolver();
 		localeResolver.setCookieDomain("domain");
-
+		localeResolver.setCookieHttpOnly(true);
 		this.mockMvc = standaloneSetup(new SimpleController())
 				.addInterceptors(new LocaleChangeInterceptor())
 				.setLocaleResolver(localeResolver)
@@ -62,7 +62,7 @@ public class CookieAssertionTests {
 
 	@Test
 	public void testNotExists() throws Exception {
-		this.mockMvc.perform(get("/")).andExpect(cookie().doesNotExist("unknowCookie"));
+		this.mockMvc.perform(get("/")).andExpect(cookie().doesNotExist("unknownCookie"));
 	}
 
 	@Test
@@ -101,6 +101,10 @@ public class CookieAssertionTests {
 		this.mockMvc.perform(get("/")).andExpect(cookie().secure(COOKIE_NAME, false));
 	}
 
+	@Test
+	public void testHttpOnly() throws Exception {
+		this.mockMvc.perform(get("/")).andExpect(cookie().httpOnly(COOKIE_NAME, true));
+	}
 
 	@Controller
 	private static class SimpleController {
