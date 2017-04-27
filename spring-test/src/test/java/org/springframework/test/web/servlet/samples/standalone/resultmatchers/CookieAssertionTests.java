@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
  * Examples of expectations on response cookies values.
  *
  * @author Rossen Stoyanchev
+ * @author Nikola Yovchev
  */
 public class CookieAssertionTests {
 
@@ -47,6 +48,7 @@ public class CookieAssertionTests {
 		CookieLocaleResolver localeResolver = new CookieLocaleResolver();
 		localeResolver.setCookieDomain("domain");
 		localeResolver.setCookieHttpOnly(true);
+
 		this.mockMvc = standaloneSetup(new SimpleController())
 				.addInterceptors(new LocaleChangeInterceptor())
 				.setLocaleResolver(localeResolver)
@@ -54,6 +56,7 @@ public class CookieAssertionTests {
 				.alwaysExpect(status().isOk())
 				.build();
 	}
+
 
 	@Test
 	public void testExists() throws Exception {
@@ -106,6 +109,7 @@ public class CookieAssertionTests {
 		this.mockMvc.perform(get("/")).andExpect(cookie().httpOnly(COOKIE_NAME, true));
 	}
 
+
 	@Controller
 	private static class SimpleController {
 
@@ -114,4 +118,5 @@ public class CookieAssertionTests {
 			return "home";
 		}
 	}
+
 }

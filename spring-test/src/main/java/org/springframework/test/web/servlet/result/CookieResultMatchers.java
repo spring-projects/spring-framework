@@ -199,12 +199,13 @@ public class CookieResultMatchers {
 	}
 
 	/**
-	 * Assert whether the cookie must be httpOnly.
+	 * Assert whether the cookie must be HTTP only.
+	 * @since 4.3.9
 	 */
 	public ResultMatcher httpOnly(final String name, final boolean httpOnly) {
 		return result -> {
 			Cookie cookie = result.getResponse().getCookie(name);
-			assertEquals("Response cookie httpOnly", httpOnly, cookie.isHttpOnly());
+			assertEquals("Response cookie '" + name + "' httpOnly", httpOnly, cookie.isHttpOnly());
 		};
 	}
 
