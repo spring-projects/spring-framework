@@ -47,6 +47,13 @@ public class TransactionAwareCacheDecoratorTests {
 	}
 
 	@Test
+	public void getTargetCache() {
+		Cache target = new ConcurrentMapCache("testCache");
+		TransactionAwareCacheDecorator cache = new TransactionAwareCacheDecorator(target);
+		assertSame(target, cache.getTargetCache());
+	}
+
+	@Test
 	public void regularOperationsOnTarget() {
 		Cache target = new ConcurrentMapCache("testCache");
 		Cache cache = new TransactionAwareCacheDecorator(target);
