@@ -161,8 +161,8 @@ public abstract class AnnotationUtils {
 		}
 		catch (Throwable ex) {
 			handleIntrospectionFailure(annotatedElement, ex);
+			return null;
 		}
-		return null;
 	}
 
 	/**
@@ -192,8 +192,8 @@ public abstract class AnnotationUtils {
 		}
 		catch (Throwable ex) {
 			handleIntrospectionFailure(annotatedElement, ex);
+			return null;
 		}
-		return null;
 	}
 
 	/**
@@ -232,8 +232,8 @@ public abstract class AnnotationUtils {
 		}
 		catch (Throwable ex) {
 			handleIntrospectionFailure(annotatedElement, ex);
+			return null;
 		}
-		return null;
 	}
 
 	/**
@@ -254,8 +254,8 @@ public abstract class AnnotationUtils {
 		}
 		catch (Throwable ex) {
 			handleIntrospectionFailure(method, ex);
+			return null;
 		}
-		return null;
 	}
 
 	/**
@@ -443,8 +443,8 @@ public abstract class AnnotationUtils {
 		}
 		catch (Throwable ex) {
 			handleIntrospectionFailure(annotatedElement, ex);
+			return Collections.emptySet();
 		}
-		return Collections.emptySet();
 	}
 
 	/**
@@ -1316,6 +1316,7 @@ public abstract class AnnotationUtils {
 					"Could not obtain value for annotation attribute '" + attributeName + "' in " + annotation, ex);
 		}
 		catch (Throwable ex) {
+			handleIntrospectionFailure(annotation.getClass(), ex);
 			return null;
 		}
 	}
@@ -1372,6 +1373,7 @@ public abstract class AnnotationUtils {
 			return annotationType.getDeclaredMethod(attributeName).getDefaultValue();
 		}
 		catch (Throwable ex) {
+			handleIntrospectionFailure(annotationType, ex);
 			return null;
 		}
 	}
@@ -1830,9 +1832,9 @@ public abstract class AnnotationUtils {
 			logger = loggerToUse;
 		}
 		if (element instanceof Class && Annotation.class.isAssignableFrom((Class<?>) element)) {
-			// Meta-annotation lookup on an annotation type
+			// Meta-annotation or (default) value lookup on an annotation type
 			if (loggerToUse.isDebugEnabled()) {
-				loggerToUse.debug("Failed to introspect meta-annotations on [" + element + "]: " + ex);
+				loggerToUse.debug("Failed to meta-introspect annotation [" + element + "]: " + ex);
 			}
 		}
 		else {
