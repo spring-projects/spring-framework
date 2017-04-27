@@ -53,6 +53,12 @@ public class TransactionAwareCacheDecorator implements Cache {
 		this.targetCache = targetCache;
 	}
 
+	/**
+	 * Return the target Cache that this Cache should delegate to.
+	 */
+	public Cache getTargetCache() {
+		return this.targetCache;
+	}
 
 	@Override
 	public String getName() {
