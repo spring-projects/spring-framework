@@ -21,6 +21,8 @@ import java.util.List;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.multipart.SynchronossMultipartHttpMessageReader;
+import org.springframework.util.ClassUtils;
 
 /**
  * Default implementation of {@link ServerCodecConfigurer}.
@@ -29,6 +31,11 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder;
  * @since 5.0
  */
 class DefaultServerCodecConfigurer extends DefaultCodecConfigurer implements ServerCodecConfigurer {
+
+	static final boolean synchronossMultipartPresent =
+			ClassUtils.isPresent("org.synchronoss.cloud.nio.multipart.NioMultipartParser",
+					org.springframework.http.codec.DefaultCodecConfigurer.class.getClassLoader());
+
 
 	public DefaultServerCodecConfigurer() {
 		super(new DefaultServerDefaultCodecsConfigurer());
@@ -57,6 +64,9 @@ class DefaultServerCodecConfigurer extends DefaultCodecConfigurer implements Ser
 		public void addTypedReadersTo(List<HttpMessageReader<?>> result) {
 			super.addTypedReadersTo(result);
 			addReaderTo(result, FormHttpMessageReader::new);
+			if (synchronossMultipartPresent) {
+				addReaderTo(result, SynchronossMultipartHttpMessageReader::new);
+			}
 		}
 
 		@Override

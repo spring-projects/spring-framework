@@ -103,7 +103,7 @@ public class DelegatingWebFluxConfigurationTests {
 		verify(webFluxConfigurer).configureArgumentResolvers(any());
 
 		assertSame(formatterRegistry.getValue(), initializerConversionService);
-		assertEquals(9, codecsConfigurer.getValue().getReaders().size());
+		assertEquals(10, codecsConfigurer.getValue().getReaders().size());
 	}
 
 	@Test

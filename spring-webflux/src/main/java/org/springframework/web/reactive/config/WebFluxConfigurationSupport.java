@@ -81,8 +81,6 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	private PathMatchConfigurer pathMatchConfigurer;
 
-	private ServerCodecConfigurer messageCodecsConfigurer;
-
 	private ApplicationContext applicationContext;
 
 
@@ -242,7 +240,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	@Bean
 	public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
 		RequestMappingHandlerAdapter adapter = createRequestMappingHandlerAdapter();
-		adapter.setMessageCodecConfigurer(getMessageCodecsConfigurer());
+		adapter.setMessageCodecConfigurer(serverCodecConfigurer());
 		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
 		adapter.setReactiveAdapterRegistry(webFluxAdapterRegistry());
 
@@ -267,16 +265,15 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	/**
-	 * Main method to access the configurer for HTTP message readers and writers.
+	 * Return the configurer for HTTP message readers and writers.
 	 * <p>Use {@link #configureHttpMessageCodecs(ServerCodecConfigurer)} to
 	 * configure the readers and writers.
 	 */
-	protected final ServerCodecConfigurer getMessageCodecsConfigurer() {
-		if (this.messageCodecsConfigurer == null) {
-			this.messageCodecsConfigurer = ServerCodecConfigurer.create();
-			configureHttpMessageCodecs(this.getMessageCodecsConfigurer());
-		}
-		return this.messageCodecsConfigurer;
+	@Bean
+	public ServerCodecConfigurer serverCodecConfigurer() {
+		ServerCodecConfigurer serverCodecConfigurer = ServerCodecConfigurer.create();
+		configureHttpMessageCodecs(serverCodecConfigurer);
+		return serverCodecConfigurer;
 	}
 
 	/**
@@ -372,13 +369,13 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	@Bean
 	public ResponseEntityResultHandler responseEntityResultHandler() {
-		return new ResponseEntityResultHandler(getMessageCodecsConfigurer().getWriters(),
+		return new ResponseEntityResultHandler(serverCodecConfigurer().getWriters(),
 				webFluxContentTypeResolver(), webFluxAdapterRegistry());
 	}
 
 	@Bean
 	public ResponseBodyResultHandler responseBodyResultHandler() {
-		return new ResponseBodyResultHandler(getMessageCodecsConfigurer().getWriters(),
+		return new ResponseBodyResultHandler(serverCodecConfigurer().getWriters(),
 				webFluxContentTypeResolver(), webFluxAdapterRegistry());
 	}
 

@@ -40,6 +40,7 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.MimeTypeUtils;
@@ -76,13 +77,14 @@ public class ClientCodecConfigurerTests {
 	@Test
 	public void defaultWriters() throws Exception {
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
-		assertEquals(9, writers.size());
+		assertEquals(10, writers.size());
 		assertEquals(ByteArrayEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(ByteBufferEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(DataBufferEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(ResourceHttpMessageWriter.class, writers.get(index.getAndIncrement()).getClass());
 		assertStringEncoder(getNextEncoder(writers), true);
 		assertEquals(FormHttpMessageWriter.class, writers.get(this.index.getAndIncrement()).getClass());
+		assertEquals(MultipartHttpMessageWriter.class, writers.get(this.index.getAndIncrement()).getClass());
 		assertEquals(Jaxb2XmlEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(Jackson2JsonEncoder.class, getNextEncoder(writers).getClass());
 		assertStringEncoder(getNextEncoder(writers), false);

@@ -15,6 +15,7 @@
  */
 package org.springframework.mock.http.server.reactive;
 
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.web.server.ServerWebExchangeDecorator;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
@@ -35,7 +36,8 @@ public class MockServerWebExchange extends ServerWebExchangeDecorator {
 
 	public MockServerWebExchange(MockServerHttpRequest request) {
 		super(new DefaultServerWebExchange(
-				request, new MockServerHttpResponse(), new DefaultWebSessionManager()));
+				request, new MockServerHttpResponse(), new DefaultWebSessionManager(),
+				ServerCodecConfigurer.create()));
 	}
 
 

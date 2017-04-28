@@ -133,6 +133,7 @@ class ControllerMethodResolver {
 
 		// Annotation-based...
 		registrar.add(new RequestParamMethodArgumentResolver(beanFactory, reactiveRegistry, false));
+		registrar.add(new RequestPartMethodArgumentResolver(beanFactory, reactiveRegistry, false));
 		registrar.add(new RequestParamMapMethodArgumentResolver(reactiveRegistry));
 		registrar.add(new PathVariableMethodArgumentResolver(beanFactory, reactiveRegistry));
 		registrar.add(new PathVariableMapMethodArgumentResolver(reactiveRegistry));

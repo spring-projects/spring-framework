@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -38,6 +39,7 @@ import org.springframework.web.server.session.WebSessionManager;
  * then invokes the target {@code WebHandler}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHandler {
@@ -45,6 +47,8 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	private static final Log logger = LogFactory.getLog(HttpWebHandlerAdapter.class);
 
 	private WebSessionManager sessionManager = new DefaultWebSessionManager();
+
+	private ServerCodecConfigurer codecConfigurer;
 
 
 	public HttpWebHandlerAdapter(WebHandler delegate) {
@@ -71,6 +75,24 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 		return this.sessionManager;
 	}
 
+	/**
+	 * Configure a custom {@link ServerCodecConfigurer}. The provided instance is set on
+	 * each created {@link DefaultServerWebExchange}.
+	 * <p>By default this is set to {@link ServerCodecConfigurer#create()}.
+	 * @param codecConfigurer the codec configurer to use
+	 */
+	public void setCodecConfigurer(ServerCodecConfigurer codecConfigurer) {
+		Assert.notNull(codecConfigurer, "ServerCodecConfigurer must not be null");
+		this.codecConfigurer = codecConfigurer;
+	}
+
+	/**
+	 * Return the configured {@link ServerCodecConfigurer}.
+	 */
+	public ServerCodecConfigurer getCodecConfigurer() {
+		return this.codecConfigurer != null ? this.codecConfigurer : ServerCodecConfigurer.create();
+	}
+
 
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
@@ -87,7 +109,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	}
 
 	protected ServerWebExchange createExchange(ServerHttpRequest request, ServerHttpResponse response) {
-		return new DefaultServerWebExchange(request, response, this.sessionManager);
+		return new DefaultServerWebExchange(request, response, this.sessionManager, getCodecConfigurer());
 	}
 
 }

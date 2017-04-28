@@ -31,6 +31,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
@@ -81,7 +82,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 		WebSessionManager sessionManager = new MockWebSessionManager(this.session);
 
 		ServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
+		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager, ServerCodecConfigurer.create());
 
 		this.handleMethod = ReflectionUtils.findMethod(getClass(), "handleWithSessionAttribute", (Class<?>[]) null);
 	}
