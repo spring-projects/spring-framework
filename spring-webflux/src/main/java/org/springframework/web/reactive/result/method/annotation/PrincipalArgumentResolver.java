@@ -21,8 +21,8 @@ import java.security.Principal;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.util.Assert;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.server.ServerWebExchange;
@@ -36,6 +36,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class PrincipalArgumentResolver extends HandlerMethodArgumentResolverSupport {
 
+
 	public PrincipalArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
 		super(adapterRegistry);
 	}
@@ -43,15 +44,16 @@ public class PrincipalArgumentResolver extends HandlerMethodArgumentResolverSupp
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return checkParameterTypeNoReactiveWrapper(parameter, Principal.class::isAssignableFrom);
+		return checkParameterType(parameter, Principal.class::isAssignableFrom);
 	}
 
 	@Override
 	public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext context,
 			ServerWebExchange exchange) {
 
-		Assert.isAssignable(Principal.class, parameter.getParameterType());
-		return exchange.getPrincipal().cast(Object.class);
+		Mono<Principal> principal = exchange.getPrincipal();
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(parameter.getParameterType());
+		return adapter != null ? Mono.just(adapter.fromPublisher(principal)) : Mono.from(principal);
 	}
 
 }
