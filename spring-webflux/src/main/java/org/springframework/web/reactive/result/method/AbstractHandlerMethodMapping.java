@@ -262,6 +262,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		try {
 			// Ensure form data is parsed for "params" conditions...
 			return exchange.getRequestParams()
+					.then(exchange.getMultipartData())
 					.then(Mono.defer(() -> {
 						HandlerMethod handlerMethod = null;
 						try {
