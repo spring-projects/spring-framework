@@ -169,8 +169,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 		if (map.isEmpty()) {
 			return;
 		}
-		map.entrySet().forEach(entry -> put(entry.getKey(), entry.getValue()));
-		
+		map.forEach(this::put);
 	}
 
 	@Override

@@ -100,14 +100,13 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 
 	@Override
 	public void setAll(Map<K, V> values) {
-		values.entrySet().forEach(entry -> set(entry.getKey(), entry.getValue()));	
+		values.forEach(this::set);
 	}
 
 	@Override
 	public Map<K, V> toSingleValueMap() {
 		LinkedHashMap<K, V> singleValueMap = new LinkedHashMap<>(this.targetMap.size());
-		this.targetMap.entrySet().forEach(entry ->
-			singleValueMap.put(entry.getKey(), entry.getValue().get(0)));
+		this.targetMap.forEach((key, value) -> singleValueMap.put(key, value.get(0)));
 		
 		return singleValueMap;
 	}

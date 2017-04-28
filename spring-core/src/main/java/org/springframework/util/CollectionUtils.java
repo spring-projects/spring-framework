@@ -354,9 +354,9 @@ public abstract class CollectionUtils {
 	public static <K, V> MultiValueMap<K, V> unmodifiableMultiValueMap(MultiValueMap<? extends K, ? extends V> map) {
 		Assert.notNull(map, "'map' must not be null");
 		Map<K, List<V>> result = new LinkedHashMap<>(map.size());
-		map.entrySet().forEach(entry -> {
-			List<? extends V> values = Collections.unmodifiableList(entry.getValue());
-			result.put(entry.getKey(), (List<V>) values);
+		map.forEach((key, value) -> {
+			List<? extends V> values = Collections.unmodifiableList(value);
+			result.put(key, (List<V>) values);
 		});
 		Map<K, List<V>> unmodifiableMap = Collections.unmodifiableMap(result);
 		return toMultiValueMap(unmodifiableMap);
@@ -431,13 +431,13 @@ public abstract class CollectionUtils {
 
 		@Override
 		public void setAll(Map<K, V> values) {
-			values.entrySet().forEach(entry -> set(entry.getKey(), entry.getValue()));
+			values.forEach(this::set);
 		}
 
 		@Override
 		public Map<K, V> toSingleValueMap() {
 			LinkedHashMap<K, V> singleValueMap = new LinkedHashMap<>(this.map.size());
-			map.entrySet().forEach(entry -> singleValueMap.put(entry.getKey(), entry.getValue().get(0)));
+			this.map.forEach((key, value) -> singleValueMap.put(key, value.get(0)));
 			return singleValueMap;
 		}
 

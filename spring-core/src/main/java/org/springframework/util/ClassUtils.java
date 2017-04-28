@@ -106,10 +106,10 @@ public abstract class ClassUtils {
 		primitiveWrapperTypeMap.put(Integer.class, int.class);
 		primitiveWrapperTypeMap.put(Long.class, long.class);
 		primitiveWrapperTypeMap.put(Short.class, short.class);
-		
-		primitiveWrapperTypeMap.entrySet().forEach(entry -> {
-			primitiveTypeToWrapperMap.put(entry.getValue(), entry.getKey());
-			registerCommonClasses(entry.getKey());
+
+		primitiveWrapperTypeMap.forEach((key, value) -> {
+			primitiveTypeToWrapperMap.put(value, key);
+			registerCommonClasses(key);
 		});
 
 		Set<Class<?>> primitiveTypes = new HashSet<>(32);
