@@ -35,6 +35,7 @@ import org.springframework.web.reactive.config.DelegatingWebFluxConfiguration;
 import org.springframework.web.reactive.config.PathMatchConfigurer;
 import org.springframework.web.reactive.config.ViewResolverRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
+import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
@@ -74,6 +75,12 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 	@Override
 	public DefaultControllerSpec corsMappings(Consumer<CorsRegistry> consumer) {
 		this.configurer.corsRegistryConsumer = consumer;
+		return this;
+	}
+
+	@Override
+	public DefaultControllerSpec argumentResolvers(Consumer<ArgumentResolverConfigurer> consumer) {
+		this.configurer.argumentResolverConsumer = consumer;
 		return this;
 	}
 
@@ -136,6 +143,8 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 
 		private Consumer<CorsRegistry> corsRegistryConsumer;
 
+		private Consumer<ArgumentResolverConfigurer> argumentResolverConsumer;
+
 		private Consumer<PathMatchConfigurer> pathMatchConsumer;
 
 		private Consumer<ServerCodecConfigurer> messageCodecsConsumer;
@@ -165,6 +174,13 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 		public void configurePathMatching(PathMatchConfigurer configurer) {
 			if (this.pathMatchConsumer != null) {
 				this.pathMatchConsumer.accept(configurer);
+			}
+		}
+
+		@Override
+		public void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
+			if (this.argumentResolverConsumer != null) {
+				this.argumentResolverConsumer.accept(configurer);
 			}
 		}
 

@@ -16,13 +16,24 @@
 
 package org.springframework.test.web.reactive.server;
 
+import java.util.function.Consumer;
+
 import org.junit.Test;
 
+import org.springframework.format.FormatterRegistry;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.reactive.config.CorsRegistry;
+import org.springframework.web.reactive.config.PathMatchConfigurer;
+import org.springframework.web.reactive.config.ViewResolverRegistry;
+import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for {@link DefaultControllerSpec}.
@@ -52,6 +63,36 @@ public class DefaultControllerSpecTests {
 				.expectBody(String.class).isEqualTo("Handled exception");
 	}
 
+	@Test
+	public void configurerConsumers() throws Exception {
+
+		TestConsumer<ArgumentResolverConfigurer> argumentResolverConsumer = new TestConsumer<>();
+		TestConsumer<RequestedContentTypeResolverBuilder> contenTypeResolverConsumer = new TestConsumer<>();
+		TestConsumer<CorsRegistry> corsRegistryConsumer = new TestConsumer<>();
+		TestConsumer<FormatterRegistry> formatterConsumer = new TestConsumer<>();
+		TestConsumer<ServerCodecConfigurer> codecsConsumer = new TestConsumer<>();
+		TestConsumer<PathMatchConfigurer> pathMatchingConsumer = new TestConsumer<>();
+		TestConsumer<ViewResolverRegistry> viewResolverConsumer = new TestConsumer<>();
+
+		new DefaultControllerSpec(new MyController())
+				.argumentResolvers(argumentResolverConsumer)
+				.contentTypeResolver(contenTypeResolverConsumer)
+				.corsMappings(corsRegistryConsumer)
+				.formatters(formatterConsumer)
+				.httpMessageCodecs(codecsConsumer)
+				.pathMatching(pathMatchingConsumer)
+				.viewResolvers(viewResolverConsumer)
+				.build();
+
+		assertNotNull(argumentResolverConsumer.getValue());
+		assertNotNull(contenTypeResolverConsumer.getValue());
+		assertNotNull(corsRegistryConsumer.getValue());
+		assertNotNull(formatterConsumer.getValue());
+		assertNotNull(codecsConsumer.getValue());
+		assertNotNull(pathMatchingConsumer.getValue());
+		assertNotNull(viewResolverConsumer.getValue());
+
+	}
 
 	@RestController
 	private static class MyController {
@@ -74,6 +115,21 @@ public class DefaultControllerSpecTests {
 		@ExceptionHandler
 		public ResponseEntity<String> handle(IllegalStateException ex) {
 			return ResponseEntity.status(400).body("Handled exception");
+		}
+	}
+
+	private static class TestConsumer<T> implements Consumer<T> {
+
+		private T value;
+
+
+		public T getValue() {
+			return this.value;
+		}
+
+		@Override
+		public void accept(T t) {
+			this.value = t;
 		}
 	}
 

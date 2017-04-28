@@ -48,6 +48,7 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.util.UriBuilder;
@@ -243,7 +244,13 @@ public interface WebTestClient {
 		ControllerSpec pathMatching(Consumer<PathMatchConfigurer> consumer);
 
 		/**
-		 * Modify or extend the list of built-in message readers and writers.
+		 * Configure resolvers for custom controller method arguments.
+		 * @see WebFluxConfigurer#configureHttpMessageCodecs
+		 */
+		ControllerSpec argumentResolvers(Consumer<ArgumentResolverConfigurer> configurer);
+
+		/**
+		 * Configure custom HTTP message readers and writers or override built-in ones.
 		 * @see WebFluxConfigurer#configureHttpMessageCodecs
 		 */
 		ControllerSpec httpMessageCodecs(Consumer<ServerCodecConfigurer> configurer);
