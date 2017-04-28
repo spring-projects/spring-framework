@@ -36,6 +36,7 @@ import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
@@ -48,6 +49,7 @@ import org.springframework.web.server.WebSession;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.springframework.http.MediaType.*;
+import static org.springframework.http.codec.multipart.MultipartHttpMessageReader.*;
 
 /**
  * Default implementation of {@link ServerWebExchange}.
@@ -66,6 +68,10 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 			Mono.just(CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<String, String>(0)))
 					.cache();
 
+	private static final Mono<MultiValueMap<String, Part>> EMPTY_MULTIPART_DATA =
+			Mono.just(CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<String, Part>(0)))
+					.cache();
+
 
 	private final ServerHttpRequest request;
 
@@ -76,6 +82,8 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	private final Mono<WebSession> sessionMono;
 
 	private final Mono<MultiValueMap<String, String>> formDataMono;
+
+	private final Mono<MultiValueMap<String, Part>> multipartDataMono;
 
 	private final Mono<MultiValueMap<String, String>> requestParamsMono;
 
@@ -97,6 +105,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		this.response = response;
 		this.sessionMono = sessionManager.getSession(this).cache();
 		this.formDataMono = initFormData(request, codecConfigurer);
+		this.multipartDataMono = initMultipartData(request, codecConfigurer);
 		this.requestParamsMono = initRequestParams(request, this.formDataMono);
 
 	}
@@ -124,6 +133,31 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 			// Ignore
 		}
 		return EMPTY_FORM_DATA;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Mono<MultiValueMap<String, Part>> initMultipartData(
+			ServerHttpRequest request, ServerCodecConfigurer codecConfigurer) {
+
+		MediaType contentType;
+		try {
+			contentType = request.getHeaders().getContentType();
+			if (MULTIPART_FORM_DATA.isCompatibleWith(contentType)) {
+				return ((HttpMessageReader<MultiValueMap<String, Part>>)codecConfigurer
+						.getReaders()
+						.stream()
+						.filter(messageReader -> messageReader.canRead(MULTIPART_VALUE_TYPE, MULTIPART_FORM_DATA))
+						.findFirst()
+						.orElseThrow(() -> new IllegalStateException("Could not find HttpMessageReader that supports " + MULTIPART_FORM_DATA)))
+						.readMono(FORM_DATA_VALUE_TYPE, request, Collections.emptyMap())
+						.switchIfEmpty(EMPTY_MULTIPART_DATA)
+						.cache();
+			}
+		}
+		catch (InvalidMediaTypeException ex) {
+			// Ignore
+		}
+		return EMPTY_MULTIPART_DATA;
 	}
 
 	private static Mono<MultiValueMap<String, String>> initRequestParams(
@@ -182,6 +216,11 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	@Override
 	public Mono<MultiValueMap<String, String>> getFormData() {
 		return this.formDataMono;
+	}
+
+	@Override
+	public Mono<MultiValueMap<String, Part>> getMultipartData() {
+		return this.multipartDataMono;
 	}
 
 	@Override

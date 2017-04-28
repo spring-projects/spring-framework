@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.MultiValueMap;
@@ -81,6 +82,12 @@ public interface ServerWebExchange {
 	 * {@code "application/x-www-form-urlencoded"} or an empty map.
 	 */
 	Mono<MultiValueMap<String, String>> getFormData();
+
+	/**
+	 * Return the form parts from the body of the request or an empty {@code Mono}
+	 * if the Content-Type is not "multipart/form-data".
+	 */
+	Mono<MultiValueMap<String, Part>> getMultipartData();
 
 	/**
 	 * Return a combined map that represents both

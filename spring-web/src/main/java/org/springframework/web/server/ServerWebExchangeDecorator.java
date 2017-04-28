@@ -22,6 +22,7 @@ import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
@@ -91,6 +92,11 @@ public class ServerWebExchangeDecorator implements ServerWebExchange {
 	@Override
 	public Mono<MultiValueMap<String, String>> getFormData() {
 		return getDelegate().getFormData();
+	}
+
+	@Override
+	public Mono<MultiValueMap<String, Part>> getMultipartData() {
+		return getDelegate().getMultipartData();
 	}
 
 	@Override
