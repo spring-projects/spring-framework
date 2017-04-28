@@ -125,13 +125,13 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 					new HandlerStrategies() {
 						@Override
 						public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-							return () -> getMessageCodecsConfigurer().getReaders().stream()
+							return () -> serverCodecConfigurer().getReaders().stream()
 									.map(reader -> (HttpMessageReader<?>) reader);
 						}
 
 						@Override
 						public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
-							return () -> getMessageCodecsConfigurer().getWriters().stream()
+							return () -> serverCodecConfigurer().getWriters().stream()
 									.map(writer -> (HttpMessageWriter<?>) writer);
 						}
 

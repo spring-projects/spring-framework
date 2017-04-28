@@ -22,6 +22,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -51,6 +52,7 @@ import org.springframework.web.server.session.WebSessionManager;
  * {@link #applicationContext(ApplicationContext)}, or a mix of both.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 5.0
  * @see HttpWebHandlerAdapter
  */
@@ -62,6 +64,9 @@ public class WebHttpHandlerBuilder {
 	/** Well-known name for the WebSessionManager in the bean factory. */
 	public static final String WEB_SESSION_MANAGER_BEAN_NAME = "webSessionManager";
 
+	/** Well-known name for the ServerCodecConfigurer in the bean factory. */
+	public static final String SERVER_CODEC_CONFIGURER_BEAN_NAME = "serverCodecConfigurer";
+
 
 	private final WebHandler webHandler;
 
@@ -70,6 +75,8 @@ public class WebHttpHandlerBuilder {
 	private final List<WebExceptionHandler> exceptionHandlers = new ArrayList<>();
 
 	private WebSessionManager sessionManager;
+
+	private ServerCodecConfigurer codecConfigurer;
 
 
 	/**
@@ -102,6 +109,8 @@ public class WebHttpHandlerBuilder {
 	 *	ordered.
 	 *	<li>{@link WebSessionManager} [0..1] -- looked up by the name
 	 *	{@link #WEB_SESSION_MANAGER_BEAN_NAME}.
+	 *  <li>{@link ServerCodecConfigurer} [0..1] -- looked up by the name
+	 *	{@link #SERVER_CODEC_CONFIGURER_BEAN_NAME}.
 	 * </ul>
 	 * @param context the application context to use for the lookup
 	 * @return the prepared builder
@@ -121,6 +130,14 @@ public class WebHttpHandlerBuilder {
 		try {
 			builder.sessionManager(
 					context.getBean(WEB_SESSION_MANAGER_BEAN_NAME, WebSessionManager.class));
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// Fall back on default
+		}
+
+		try {
+			builder.codecConfigurer(
+					context.getBean(SERVER_CODEC_CONFIGURER_BEAN_NAME, ServerCodecConfigurer.class));
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// Fall back on default
@@ -184,6 +201,16 @@ public class WebHttpHandlerBuilder {
 		return this;
 	}
 
+	/**
+	 * Configure the {@link ServerCodecConfigurer} to set on the
+	 * {@link ServerWebExchange WebServerExchange}.
+	 * @param codecConfigurer the codec configurer
+	 */
+	public WebHttpHandlerBuilder codecConfigurer(ServerCodecConfigurer codecConfigurer) {
+		this.codecConfigurer = codecConfigurer;
+		return this;
+	}
+
 
 	/**
 	 * Build the {@link HttpHandler}.
@@ -198,6 +225,9 @@ public class WebHttpHandlerBuilder {
 		HttpWebHandlerAdapter adapted = new HttpWebHandlerAdapter(decorated);
 		if (this.sessionManager != null) {
 			adapted.setSessionManager(this.sessionManager);
+		}
+		if (this.codecConfigurer != null) {
+			adapted.setCodecConfigurer(this.codecConfigurer);
 		}
 
 		return adapted;

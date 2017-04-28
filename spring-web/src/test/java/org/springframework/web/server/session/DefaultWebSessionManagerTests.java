@@ -26,6 +26,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
@@ -59,7 +60,7 @@ public class DefaultWebSessionManagerTests {
 
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(request, response, this.manager);
+		this.exchange = new DefaultServerWebExchange(request, response, this.manager, ServerCodecConfigurer.create());
 	}
 
 

@@ -34,7 +34,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.FormHttpMessageReader;
+import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
@@ -46,6 +47,8 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.session.WebSessionManager;
 
+import static org.springframework.http.MediaType.*;
+
 /**
  * Default implementation of {@link ServerWebExchange}.
  *
@@ -55,8 +58,6 @@ import org.springframework.web.server.session.WebSessionManager;
 public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private static final List<HttpMethod> SAFE_METHODS = Arrays.asList(HttpMethod.GET, HttpMethod.HEAD);
-
-	private static final FormHttpMessageReader FORM_READER = new FormHttpMessageReader();
 
 	private static final ResolvableType FORM_DATA_VALUE_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
@@ -85,26 +86,35 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	 * Alternate constructor with a WebSessionManager parameter.
 	 */
 	public DefaultServerWebExchange(ServerHttpRequest request, ServerHttpResponse response,
-			WebSessionManager sessionManager) {
+			WebSessionManager sessionManager, ServerCodecConfigurer codecConfigurer) {
 
 		Assert.notNull(request, "'request' is required");
 		Assert.notNull(response, "'response' is required");
-		Assert.notNull(response, "'sessionManager' is required");
-		Assert.notNull(response, "'formReader' is required");
+		Assert.notNull(sessionManager, "'sessionManager' is required");
+		Assert.notNull(codecConfigurer, "'codecConfigurer' is required");
 
 		this.request = request;
 		this.response = response;
 		this.sessionMono = sessionManager.getSession(this).cache();
-		this.formDataMono = initFormData(request);
+		this.formDataMono = initFormData(request, codecConfigurer);
 		this.requestParamsMono = initRequestParams(request, this.formDataMono);
+
 	}
 
-	private static Mono<MultiValueMap<String, String>> initFormData(ServerHttpRequest request) {
+	@SuppressWarnings("unchecked")
+	private static Mono<MultiValueMap<String, String>> initFormData(
+			ServerHttpRequest request, ServerCodecConfigurer codecConfigurer) {
+
 		MediaType contentType;
 		try {
 			contentType = request.getHeaders().getContentType();
-			if (MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType)) {
-				return FORM_READER
+			if (APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType)) {
+				return ((HttpMessageReader<MultiValueMap<String, String>>)codecConfigurer
+						.getReaders()
+						.stream()
+						.filter(messageReader -> messageReader.canRead(FORM_DATA_VALUE_TYPE, APPLICATION_FORM_URLENCODED))
+						.findFirst()
+						.orElseThrow(() -> new IllegalStateException("Could not find HttpMessageReader that supports " + APPLICATION_FORM_URLENCODED)))
 						.readMono(FORM_DATA_VALUE_TYPE, request, Collections.emptyMap())
 						.switchIfEmpty(EMPTY_FORM_DATA)
 						.cache();
