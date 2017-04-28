@@ -717,7 +717,14 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			String forwardedToUse = StringUtils.tokenizeToStringArray(forwardedHeader, ",")[0];
 			Matcher matcher = FORWARDED_HOST_PATTERN.matcher(forwardedToUse);
 			if (matcher.find()) {
-				host(matcher.group(1).trim());
+				String host = matcher.group(1).trim();
+				if (host.matches(".*:\\d+$")) {
+					host(host.substring(0, host.lastIndexOf(':')));
+					port(host.substring(host.lastIndexOf(':') + 1));
+				} else {
+					host(host);
+					port(null);
+				}
 			}
 			matcher = FORWARDED_PROTO_PATTERN.matcher(forwardedToUse);
 			if (matcher.find()) {
