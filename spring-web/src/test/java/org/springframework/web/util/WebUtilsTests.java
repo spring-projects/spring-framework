@@ -56,6 +56,48 @@ public class WebUtilsTests {
 	}
 
 	@Test
+	public void convertSquareBracketToDot() {
+		String[] strArr = new String[] {"123", "abc"};
+
+		Map<String, Object> params = new HashMap<>();
+		params.put("k1", "simpleKey");
+		params.put("33", "numberKey");
+		params.put("level1dot.level2", "dot");
+		params.put("level1[level2]", "squareBracket");
+		params.put("34[22]", "NumberKeyWithSquareBracket1");
+		params.put("35[3b][22]", "NumberKeyWithSquareBracket2");
+		params.put("level1-dot[level-2]", "dash");
+		params.put("level1arr[]", strArr);
+		params.put("level1[level2_arr][]", strArr);
+		params.put("level1arr[0]['level2']", "level2-SingleQuote");
+		params.put("level1arr[0][level2arr][]", strArr);
+		params.put("level1arr[0][level2][\"level3\"]", "level3-DoubleQuote");
+		params.put("level1arr[0][\"level2\"]['level3arr'][0][level4]", "level4-of-nestedArray");
+		params.put("level1arr[0][level2][\"level3arr\"][0][level4arr][]", strArr);
+		params.put("`~!@#$%^&*()-_=+\\|[{'\";:}][<,>/?]", "special");
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setParameters(params);
+		Map<String, Object> paramMap = WebUtils.getParametersStartingWith(request, "");
+
+		assertEquals("simpleKey", paramMap.get("k1"));
+		assertEquals("numberKey", paramMap.get("33"));
+		assertEquals("dot", paramMap.get("level1dot.level2"));
+		assertEquals("squareBracket", paramMap.get("level1.level2"));
+		assertEquals("NumberKeyWithSquareBracket1", paramMap.get("34[22]"));
+		assertEquals("NumberKeyWithSquareBracket2", paramMap.get("35.3b[22]"));
+		assertEquals("dash", paramMap.get("level1-dot.level-2"));
+		assertEquals(strArr, paramMap.get("level1arr"));
+		assertEquals(strArr, paramMap.get("level1.level2_arr"));
+		assertEquals("level2-SingleQuote", paramMap.get("level1arr[0].level2"));
+		assertEquals(strArr, paramMap.get("level1arr[0].level2arr"));
+		assertEquals("level3-DoubleQuote", paramMap.get("level1arr[0].level2.level3"));
+		assertEquals("level4-of-nestedArray", paramMap.get("level1arr[0].level2.level3arr[0].level4"));
+		assertEquals(strArr, paramMap.get("level1arr[0].level2.level3arr[0].level4arr"));
+		assertEquals("special", paramMap.get("`~!@#$%^&*()-_=+\\|.{'\";:}.<,>/?"));
+	}
+
+	@Test
 	public void parseMatrixVariablesString() {
 		MultiValueMap<String, String> variables;
 
