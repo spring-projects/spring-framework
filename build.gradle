@@ -75,7 +75,8 @@ configure(allprojects) { project ->
 	ext.junitJupiterVersion    = '5.0.0-M4'
 	ext.junitPlatformVersion   = '1.0.0-M4'
 	ext.log4jVersion           = '2.8.2'
-	ext.nettyVersion           = "4.1.9.Final"
+	ext.nettyVersion           = "4.1.10.Final"
+	ext.niomultipartVersion    = "1.0.2"
 	ext.okhttp3Version         = "3.7.0"
 	ext.poiVersion             = "3.16"
 	ext.protobufVersion        = "3.2.0"
@@ -89,7 +90,6 @@ configure(allprojects) { project ->
 	ext.servletVersion         = "3.1.0"
 	ext.slf4jVersion           = "1.7.25"
 	ext.snakeyamlVersion       = "1.18"
-	ext.nioMultipartVersion    = "1.0.2"
 	ext.testngVersion          = "6.11"
 	ext.tiles3Version          = "3.0.7"
 	ext.tomcatVersion          = "8.5.14"
@@ -583,7 +583,6 @@ project("spring-messaging") {
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 		testCompile("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}")
-		testRuntime("javax.activation:activation:${activationApiVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
 	}
@@ -628,7 +627,6 @@ project("spring-jms") {
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 		optional("javax.resource:javax.resource-api:${jcaVersion}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
-		testRuntime("javax.activation:activation:${activationApiVersion}")
 	}
 }
 
@@ -704,10 +702,10 @@ project("spring-web") {
 		optional("javax.el:javax.el-api:${elApiVersion}")
 		optional("javax.faces:javax.faces-api:${jsfVersion}")
 		optional("javax.validation:validation-api:${beanvalVersion}")
-		optional("javax.activation:activation:${activationApiVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("com.caucho:hessian:4.0.38")
 		optional("commons-fileupload:commons-fileupload:${fileuploadVersion}")
+		optional("org.synchronoss.cloud:nio-multipart-parser:${niomultipartVersion}")
 		optional("org.reactivestreams:reactive-streams")
 		optional("io.projectreactor:reactor-core")
 		optional("io.projectreactor.ipc:reactor-netty")
@@ -748,9 +746,7 @@ project("spring-web") {
 		optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		optional("javax.xml.ws:jaxws-api:${jaxwsVersion}")
 		optional("javax.mail:javax.mail-api:${javamailVersion}")
-		optional("org.synchronoss.cloud:nio-multipart-parser:${nioMultipartVersion}")
 		optional("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}")
-		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
 		testCompile("io.projectreactor.addons:reactor-test")
 		testCompile("org.apache.taglibs:taglibs-standard-jstlel:1.2.1") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
@@ -771,7 +767,6 @@ project("spring-web") {
 		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
-		testRuntime("org.jboss.logging:jboss-logging:3.3.1.Final")
 	}
 
 	if (JavaVersion.current().java9Compatible) {
@@ -828,22 +823,17 @@ project("spring-webflux") {
 		testCompile("com.fasterxml:aalto-xml:1.0.0")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
-		testRuntime("javax.el:javax.el-api:${elApiVersion}")
-		testRuntime("org.glassfish:javax.el:3.0.1-b08")
-		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
-		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
-		testRuntime("javax.activation:activation:${activationApiVersion}")
-		testRuntime("org.jboss.logging:jboss-logging:3.3.1.Final")
-		testRuntime("org.webjars:underscorejs:1.8.3")
-		testRuntime("org.jruby:jruby:9.1.8.0")
-		testRuntime("org.python:jython-standalone:2.5.3")
-		testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
 		testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
 		testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
-		testRuntime("org.synchronoss.cloud:nio-multipart-parser:${nioMultipartVersion}")
+		testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
+		testRuntime("org.jruby:jruby:9.1.8.0")
+		testRuntime("org.python:jython-standalone:2.5.3")
+		testRuntime("org.webjars:underscorejs:1.8.3")
+		testRuntime("org.glassfish:javax.el:3.0.1-b08")
 		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
+		testRuntime("org.synchronoss.cloud:nio-multipart-parser:${niomultipartVersion}")
 	}
 
 	if (JavaVersion.current().java9Compatible) {
@@ -951,16 +941,15 @@ project("spring-webmvc") {
 		testCompile("io.reactivex:rxjava:${rxjavaVersion}")
 		testCompile("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
 		testCompile("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
-		testRuntime("org.jruby:jruby:9.1.8.0")
-		testRuntime("org.python:jython-standalone:2.5.3")
-		testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
 		testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
 		testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
+		testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
+		testRuntime("org.jruby:jruby:9.1.8.0")
+		testRuntime("org.python:jython-standalone:2.5.3")
 		testRuntime("org.webjars:underscorejs:1.8.3")
 		testRuntime("org.glassfish:javax.el:3.0.1-b08")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
-		testRuntime("javax.activation:activation:${activationApiVersion}")
 	}
 }
 
@@ -1005,7 +994,6 @@ project("spring-websocket") {
 		testCompile("io.projectreactor:reactor-core")
 		testCompile("io.projectreactor.ipc:reactor-netty")
 		testCompile("io.netty:netty-all:${nettyVersion}")
-		testRuntime("org.jboss.logging:jboss-logging:3.3.1.Final")
 	}
 
 	if (JavaVersion.current().java9Compatible) {
@@ -1084,9 +1072,9 @@ project("spring-test") {
 		testCompile("javax.cache:cache-api:${cacheApiVersion}")
 		testCompile('de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1')
 		testCompile('io.projectreactor.ipc:reactor-netty')
+		// Pull in the latest JUnit 5 Launcher API and the Vintage engine as well
+		// so that we can run JUnit 4 tests in IntelliJ IDEA.
 		testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
-		// Pull in the latest Launcher API and the Vintage engine so
-		// that we can run JUnit 4 tests in IntelliJ IDEA.
 		testRuntime("org.junit.platform:junit-platform-launcher:${junitPlatformVersion}")
 		testRuntime("org.junit.vintage:junit-vintage-engine:${junitVintageVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-jul:${log4jVersion}")  // Java Util Logging for JUnit 5
