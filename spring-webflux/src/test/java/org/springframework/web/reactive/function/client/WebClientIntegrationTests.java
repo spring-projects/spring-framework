@@ -393,7 +393,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void buildFilter() throws Exception {
+	public void filter() throws Exception {
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
 		WebClient filteredClient = this.webClient.filter(
@@ -404,8 +404,8 @@ public class WebClientIntegrationTests {
 
 		Mono<String> result = filteredClient.get()
 				.uri("/greeting?name=Spring")
-				.exchange()
-				.flatMap(response -> response.bodyToMono(String.class));
+				.retrieve()
+				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
 				.expectNext("Hello Spring!")
@@ -418,28 +418,56 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void filter() throws Exception {
-		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
+	public void errorHandlingFilter() throws Exception {
 
-		WebClient filteredClient = this.webClient.filter(
-				(request, next) -> {
-					ClientRequest filteredRequest = ClientRequest.from(request).header("foo", "bar").build();
-					return next.exchange(filteredRequest);
-				});
+		ExchangeFilterFunction filter = ExchangeFilterFunction.ofResponseProcessor(
+						clientResponse -> {
+							List<String> headerValues = clientResponse.headers().header("Foo");
+							return headerValues.isEmpty() ? Mono.error(
+									new MyException("Response does not contain Foo header")) :
+									Mono.just(clientResponse);
+						}
+				);
+
+		WebClient filteredClient = this.webClient.filter(filter);
+
+		// header not present
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
 		Mono<String> result = filteredClient.get()
 				.uri("/greeting?name=Spring")
-				.exchange()
-				.flatMap(response -> response.bodyToMono(String.class));
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectError(MyException.class)
+				.verify(Duration.ofSeconds(3));
+
+		// header present
+
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain")
+				.setHeader("Foo", "Bar")
+				.setBody("Hello Spring!"));
+
+		result = filteredClient.get()
+				.uri("/greeting?name=Spring")
+				.retrieve()
+				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
 				.expectNext("Hello Spring!")
 				.expectComplete()
 				.verify(Duration.ofSeconds(3));
 
-		RecordedRequest recordedRequest = server.takeRequest();
-		Assert.assertEquals(1, server.getRequestCount());
-		Assert.assertEquals("bar", recordedRequest.getHeader("foo"));
+		Assert.assertEquals(2, server.getRequestCount());
+	}
+
+	@SuppressWarnings("serial")
+	private static class MyException extends RuntimeException {
+
+		public MyException(String message) {
+			super(message);
+		}
 	}
 
 }
