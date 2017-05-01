@@ -57,7 +57,7 @@ public interface HttpMessageConverter<T> {
 	List<MediaType> getSupportedMediaTypes();
 
 	/**
-	 * Read an object of the given type form the given input message, and returns it.
+	 * Read an object of the given type from the given input message, and returns it.
 	 * @param clazz the type of object to return. This type must have previously been passed to the
 	 * {@link #canRead canRead} method of this interface, which must have returned {@code true}.
 	 * @param inputMessage the HTTP input message to read from
