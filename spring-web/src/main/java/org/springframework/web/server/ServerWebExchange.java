@@ -79,13 +79,15 @@ public interface ServerWebExchange {
 
 	/**
 	 * Return the form data from the body of the request if the Content-Type is
-	 * {@code "application/x-www-form-urlencoded"} or an empty map.
+	 * {@code "application/x-www-form-urlencoded"} or an empty map otherwise.
+	 * This method may be called multiple times.
 	 */
 	Mono<MultiValueMap<String, String>> getFormData();
 
 	/**
-	 * Return the form parts from the body of the request or an empty {@code Mono}
-	 * if the Content-Type is not "multipart/form-data".
+	 * Return the parts of a multipart request if the Content-Type is
+	 * {@code "multipart/form-data"} or an empty map otherwise.
+	 * This method may be called multiple times.
 	 */
 	Mono<MultiValueMap<String, Part>> getMultipartData();
 

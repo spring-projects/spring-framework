@@ -26,6 +26,8 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -52,74 +54,102 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 
 /**
- * Implementation of {@link HttpMessageReader} to read multipart HTML
- * forms with {@code "multipart/form-data"} media type in accordance
- * with <a href="https://tools.ietf.org/html/rfc7578">RFC 7578</a> based
+ * {@code HttpMessageReader} for {@code "multipart/form-data"} requests based
  * on the Synchronoss NIO Multipart library.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 5.0
  * @see <a href="https://github.com/synchronoss/nio-multipart">Synchronoss NIO Multipart</a>
  */
-public class SynchronossMultipartHttpMessageReader implements MultipartHttpMessageReader {
+public class SynchronossMultipartHttpMessageReader implements HttpMessageReader<MultiValueMap<String, Part>> {
+
+	private static final ResolvableType MULTIPART_VALUE_TYPE = ResolvableType.forClassWithGenerics(
+			MultiValueMap.class, String.class, Part.class);
+
 
 	@Override
-	public Mono<MultiValueMap<String, Part>> readMono(ResolvableType elementType, ReactiveHttpInputMessage inputMessage, Map<String, Object> hints) {
+	public List<MediaType> getReadableMediaTypes() {
+		return Collections.singletonList(MediaType.MULTIPART_FORM_DATA);
+	}
 
-		return Flux.create(new NioMultipartConsumer(inputMessage))
-				.collectMultimap(part -> part.getName())
-				.map(partsMap -> new LinkedMultiValueMap<>(partsMap
-						.entrySet()
-						.stream()
-						.collect(Collectors.toMap(
-							entry -> entry.getKey(),
-							entry -> new ArrayList<>(entry.getValue()))
-						)));
+	@Override
+	public boolean canRead(ResolvableType elementType, MediaType mediaType) {
+		return MULTIPART_VALUE_TYPE.isAssignableFrom(elementType) &&
+				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType));
 	}
 
 
-	private static class NioMultipartConsumer implements Consumer<FluxSink<Part>> {
+	@Override
+	public Flux<MultiValueMap<String, Part>> read(ResolvableType elementType,
+			ReactiveHttpInputMessage message, Map<String, Object> hints) {
+
+		return Flux.from(readMono(elementType, message, hints));
+	}
+
+
+	@Override
+	public Mono<MultiValueMap<String, Part>> readMono(ResolvableType elementType,
+			ReactiveHttpInputMessage inputMessage, Map<String, Object> hints) {
+
+		return Flux.create(new SynchronossPartGenerator(inputMessage))
+				.collectMultimap(Part::getName).map(this::toMultiValueMap);
+	}
+
+	private LinkedMultiValueMap<String, Part> toMultiValueMap(Map<String, Collection<Part>> map) {
+		return new LinkedMultiValueMap<>(map.entrySet().stream()
+				.collect(Collectors.toMap(Map.Entry::getKey, e -> toList(e.getValue()))));
+	}
+
+	private List<Part> toList(Collection<Part> collection) {
+		return collection instanceof List ? (List<Part>) collection : new ArrayList<>(collection);
+	}
+
+
+	/**
+	 * Consume and feed input to the Synchronoss parser, then adapt parser
+	 * output events to {@code Flux<Sink<Part>>}.
+	 */
+	private static class SynchronossPartGenerator implements Consumer<FluxSink<Part>> {
 
 		private final ReactiveHttpInputMessage inputMessage;
 
 
-		public NioMultipartConsumer(ReactiveHttpInputMessage inputMessage) {
+		SynchronossPartGenerator(ReactiveHttpInputMessage inputMessage) {
 			this.inputMessage = inputMessage;
 		}
 
 
 		@Override
 		public void accept(FluxSink<Part> emitter) {
-			HttpHeaders headers = inputMessage.getHeaders();
-			MultipartContext context = new MultipartContext(
-					headers.getContentType().toString(),
-					Math.toIntExact(headers.getContentLength()),
-					headers.getFirst(HttpHeaders.ACCEPT_CHARSET));
-			NioMultipartParserListener listener = new ReactiveNioMultipartParserListener(emitter);
+
+			MultipartContext context = createMultipartContext();
+			NioMultipartParserListener listener = new FluxSinkAdapterListener(emitter);
 			NioMultipartParser parser = Multipart.multipart(context).forNIO(listener);
 
-			inputMessage.getBody().subscribe(buffer -> {
+			this.inputMessage.getBody().subscribe(buffer -> {
 				byte[] resultBytes = new byte[buffer.readableByteCount()];
 				buffer.read(resultBytes);
 				try {
 					parser.write(resultBytes);
 				}
 				catch (IOException ex) {
-					listener.onError("Exception thrown while closing the parser", ex);
+					listener.onError("Exception thrown providing input to the parser", ex);
 				}
-
-			}, (e) -> {
+			}, (ex) -> {
 				try {
-					listener.onError("Exception thrown while reading the request body", e);
+					listener.onError("Request body input error", ex);
 					parser.close();
 				}
-				catch (IOException ex) {
-					listener.onError("Exception thrown while closing the parser", ex);
+				catch (IOException ex2) {
+					listener.onError("Exception thrown while closing the parser", ex2);
 				}
 			}, () -> {
 				try {
@@ -132,85 +162,100 @@ public class SynchronossMultipartHttpMessageReader implements MultipartHttpMessa
 
 		}
 
-		private static class ReactiveNioMultipartParserListener implements NioMultipartParserListener {
+		private MultipartContext createMultipartContext() {
+			HttpHeaders headers = this.inputMessage.getHeaders();
+			String contentType = headers.getContentType().toString();
+			int contentLength = Math.toIntExact(headers.getContentLength());
+			String charset = headers.getFirst(HttpHeaders.ACCEPT_CHARSET);
+			return new MultipartContext(contentType, contentLength, charset);
+		}
 
-			private FluxSink<Part> emitter;
 
-			private final AtomicInteger errorCount = new AtomicInteger(0);
+	}
+	/**
+	 * Listen for parser output and adapt to {@code Flux<Sink<Part>>}.
+	 */
+	private static class FluxSinkAdapterListener implements NioMultipartParserListener {
+
+		private final FluxSink<Part> sink;
+
+		private final AtomicInteger terminated = new AtomicInteger(0);
 
 
-			public ReactiveNioMultipartParserListener(FluxSink<Part> emitter) {
-				this.emitter = emitter;
+		FluxSinkAdapterListener(FluxSink<Part> sink) {
+			this.sink = sink;
+		}
+
+
+		@Override
+		public void onPartFinished(StreamStorage storage, Map<String, List<String>> headers) {
+			HttpHeaders httpHeaders = new HttpHeaders();
+			httpHeaders.putAll(headers);
+			this.sink.next(new SynchronossPart(httpHeaders, storage));
+		}
+
+		@Override
+		public void onFormFieldPartFinished(String name, String value, Map<String, List<String>> headers) {
+			HttpHeaders httpHeaders = new HttpHeaders();
+			httpHeaders.putAll(headers);
+			this.sink.next(new SynchronossPart(httpHeaders, value));
+		}
+
+		@Override
+		public void onError(String message, Throwable cause) {
+			if (this.terminated.getAndIncrement() == 0) {
+				this.sink.error(new RuntimeException(message, cause));
 			}
+		}
 
-
-			@Override
-			public void onPartFinished(StreamStorage streamStorage, Map<String, List<String>> headersFromPart) {
-				HttpHeaders headers = new HttpHeaders();
-				headers.putAll(headersFromPart);
-				emitter.next(new NioPart(headers, streamStorage));
+		@Override
+		public void onAllPartsFinished() {
+			if (this.terminated.getAndIncrement() == 0) {
+				this.sink.complete();
 			}
+		}
 
-			@Override
-			public void onFormFieldPartFinished(String fieldName, String fieldValue, Map<String, List<String>> headersFromPart) {
-				HttpHeaders headers = new HttpHeaders();
-				headers.putAll(headersFromPart);
-				emitter.next(new NioPart(headers, fieldValue));
-			}
+		@Override
+		public void onNestedPartStarted(Map<String, List<String>> headersFromParentPart) {
+		}
 
-			@Override
-			public void onAllPartsFinished() {
-				emitter.complete();
-			}
-
-			@Override
-			public void onNestedPartStarted(Map<String, List<String>> headersFromParentPart) {
-			}
-
-			@Override
-			public void onNestedPartFinished() {
-			}
-
-			@Override
-			public void onError(String message, Throwable cause) {
-				if (errorCount.getAndIncrement() == 1) {
-					emitter.error(new RuntimeException(message, cause));
-				}
-			}
-
+		@Override
+		public void onNestedPartFinished() {
 		}
 	}
 
-	/**
-	 * {@link Part} implementation based on the NIO Multipart library.
-	 */
-	private static class NioPart implements Part {
+
+	private static class SynchronossPart implements Part {
 
 		private final HttpHeaders headers;
 
-		private final StreamStorage streamStorage;
+		private final StreamStorage storage;
 
 		private final String content;
 
 		private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 
-		public NioPart(HttpHeaders headers, StreamStorage streamStorage) {
+		SynchronossPart(HttpHeaders headers, StreamStorage storage) {
+			Assert.notNull(headers, "HttpHeaders is required");
+			Assert.notNull(storage, "'storage' is required");
 			this.headers = headers;
-			this.streamStorage = streamStorage;
+			this.storage = storage;
 			this.content = null;
 		}
 
-		public NioPart(HttpHeaders headers, String content) {
+		SynchronossPart(HttpHeaders headers, String content) {
+			Assert.notNull(headers, "HttpHeaders is required");
+			Assert.notNull(content, "'content' is required");
 			this.headers = headers;
-			this.streamStorage = null;
+			this.storage = null;
 			this.content = content;
 		}
 
 
 		@Override
 		public String getName() {
-			return MultipartUtils.getFieldName(headers);
+			return MultipartUtils.getFieldName(this.headers);
 		}
 
 		@Override
@@ -224,42 +269,24 @@ public class SynchronossMultipartHttpMessageReader implements MultipartHttpMessa
 		}
 
 		@Override
-		public Mono<Void> transferTo(File dest) {
-			if (!getFilename().isPresent()) {
-				return Mono.error(new IllegalStateException("The part does not contain a file."));
-			}
-			try {
-				InputStream inputStream = this.streamStorage.getInputStream();
-				// Get a FileChannel when possible in order to use zero copy mechanism
-				ReadableByteChannel inChannel = Channels.newChannel(inputStream);
-				FileChannel outChannel = new FileOutputStream(dest).getChannel();
-				// NIO Multipart has previously limited the size of the content
-				long count = (inChannel instanceof FileChannel ? ((FileChannel)inChannel).size() : Long.MAX_VALUE);
-				long result = outChannel.transferFrom(inChannel, 0, count);
-				if (result < count) {
-					return Mono.error(new IOException(
-							"Could only write " + result + " out of " + count + " bytes"));
-				}
-			}
-			catch (IOException ex) {
-				return Mono.error(ex);
-			}
-			return Mono.empty();
-		}
-
-		@Override
 		public Mono<String> getContentAsString() {
 			if (this.content != null) {
 				return Mono.just(this.content);
 			}
-			MediaType contentType = this.headers.getContentType();
-			Charset charset = (contentType.getCharset() == null ? StandardCharsets.UTF_8 : contentType.getCharset());
 			try {
-				return Mono.just(StreamUtils.copyToString(this.streamStorage.getInputStream(), charset));
+				InputStream inputStream = this.storage.getInputStream();
+				Charset charset = getCharset();
+				return Mono.just(StreamUtils.copyToString(inputStream, charset));
 			}
 			catch (IOException e) {
-				return Mono.error(new IllegalStateException("Error while reading part content as a string", e));
+				return Mono.error(new IllegalStateException(
+						"Error while reading part content as a string", e));
 			}
+		}
+
+		private Charset getCharset() {
+			return Optional.ofNullable(this.headers.getContentType())
+					.map(MimeType::getCharset).orElse(StandardCharsets.UTF_8);
 		}
 
 		@Override
@@ -269,9 +296,29 @@ public class SynchronossMultipartHttpMessageReader implements MultipartHttpMessa
 				buffer.write(this.content.getBytes());
 				return Flux.just(buffer);
 			}
-			InputStream inputStream = this.streamStorage.getInputStream();
+			InputStream inputStream = this.storage.getInputStream();
 			return DataBufferUtils.read(inputStream, this.bufferFactory, 4096);
 		}
 
+		@Override
+		public Mono<Void> transferTo(File dest) {
+			if (this.storage == null || !getFilename().isPresent()) {
+				return Mono.error(new IllegalStateException("The part does not represent a file."));
+			}
+			try {
+				ReadableByteChannel ch = Channels.newChannel(this.storage.getInputStream());
+				long expected = (ch instanceof FileChannel ? ((FileChannel) ch).size() : Long.MAX_VALUE);
+				long actual = new FileOutputStream(dest).getChannel().transferFrom(ch, 0, expected);
+				if (actual < expected) {
+					return Mono.error(new IOException(
+							"Could only write " + actual + " out of " + expected + " bytes"));
+				}
+			}
+			catch (IOException ex) {
+				return Mono.error(ex);
+			}
+			return Mono.empty();
+		}
 	}
+
 }

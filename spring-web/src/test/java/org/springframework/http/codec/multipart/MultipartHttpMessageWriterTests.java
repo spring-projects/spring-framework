@@ -25,6 +25,8 @@ import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import reactor.core.publisher.Mono;
 
@@ -57,27 +59,27 @@ public class MultipartHttpMessageWriterTests {
 
 	@Test
 	public void canWrite() {
-		assertTrue(this.writer.canWrite(ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
+
+		assertTrue(this.writer.canWrite(forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
 				MediaType.MULTIPART_FORM_DATA));
-		assertTrue(this.writer.canWrite(ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
+		assertTrue(this.writer.canWrite(forClassWithGenerics(MultiValueMap.class, String.class, String.class),
 				MediaType.MULTIPART_FORM_DATA));
-		assertFalse(this.writer.canWrite(ResolvableType.forClassWithGenerics(MultiValueMap.class, Object.class, Object.class),
+
+		assertFalse(this.writer.canWrite(forClassWithGenerics(Map.class, String.class, Object.class),
 				MediaType.MULTIPART_FORM_DATA));
-		assertFalse(this.writer.canWrite(ResolvableType.forClassWithGenerics(Map.class, String.class, Object.class),
-				MediaType.MULTIPART_FORM_DATA));
-		assertFalse(this.writer.canWrite(ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
+		assertFalse(this.writer.canWrite(forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
 				MediaType.APPLICATION_FORM_URLENCODED));
 	}
 
 	@Test
 	public void writeMultipart() throws Exception {
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-		parts.add("name 1", "value 1");
-		parts.add("name 2", "value 2+1");
-		parts.add("name 2", "value 2+2");
+		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+		map.add("name 1", "value 1");
+		map.add("name 2", "value 2+1");
+		map.add("name 2", "value 2+2");
 
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
-		parts.add("logo", logo);
+		map.add("logo", logo);
 
 		// SPR-12108
 		Resource utf8 = new ClassPathResource("/org/springframework/http/converter/logo.jpg") {
@@ -86,28 +88,28 @@ public class MultipartHttpMessageWriterTests {
 				return "Hall\u00F6le.jpg";
 			}
 		};
-		parts.add("utf8", utf8);
+		map.add("utf8", utf8);
 
-		Foo foo = new Foo("bar");
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-		HttpEntity<Foo> entity = new HttpEntity<>(foo, entityHeaders);
-		parts.add("json", entity);
+		HttpEntity<Foo> entity = new HttpEntity<>(new Foo("bar"), entityHeaders);
+		map.add("json", entity);
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		this.writer.write(Mono.just(parts), null, MediaType.MULTIPART_FORM_DATA, response, Collections.emptyMap()).block();
+		Map<String, Object> hints = Collections.emptyMap();
+		this.writer.write(Mono.just(map), null, MediaType.MULTIPART_FORM_DATA, response, hints).block();
 
 		final MediaType contentType = response.getHeaders().getContentType();
 		assertNotNull("No boundary found", contentType.getParameter("boundary"));
 
-		// see if NIO Multipart can read what we wrote
-		MultipartHttpMessageReader multipartReader = new SynchronossMultipartHttpMessageReader();
+		// see if Synchronoss NIO Multipart can read what we wrote
+		SynchronossMultipartHttpMessageReader reader = new SynchronossMultipartHttpMessageReader();
 		MockServerHttpRequest request = MockServerHttpRequest.post("/foo")
 				.header(CONTENT_TYPE, contentType.toString())
 				.body(response.getBody());
 
-		MultiValueMap<String, Part> requestParts = multipartReader.
-				readMono(MultipartHttpMessageReader.MULTIPART_VALUE_TYPE, request, Collections.emptyMap()).block();
+		ResolvableType elementType = forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
+		MultiValueMap<String, Part> requestParts = reader.readMono(elementType, request, hints).block();
 		assertEquals(5, requestParts.size());
 
 

@@ -26,45 +26,56 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 
 /**
- * A representation of a part received in a multipart request. Could contain a file, the
- * string or json value of a parameter.
+ * Representation for a part in a "multipart/form-data" request.
+ *
+ * <p>The origin of a multipart request may a browser form in which case each
+ * part represents a text-based form field or a file upload. Multipart requests
+ * may also be used outside of browsers to transfer data with any content type
+ * such as JSON, PDF, etc.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 5.0
+ * @see <a href="https://tools.ietf.org/html/rfc7578">RFC 7578 (multipart/form-data)</a>
+ * @see <a href="https://tools.ietf.org/html/rfc2183">RFC 2183 (Content-Disposition)</a>
+ * @see <a href="https://www.w3.org/TR/html5/forms.html#multipart-form-data">HTML5 (multipart forms)</a>
  */
 public interface Part {
 
 	/**
-	 * @return the headers of this part
-	 */
-	HttpHeaders getHeaders();
-
-	/**
-	 * @return the name of the parameter in the multipart form
+	 * Return the name of the part in the multipart form.
+	 * @return the name of the part, never {@code null} or empty
 	 */
 	String getName();
 
 	/**
-	 * @return optionally the filename if the part contains a file
+	 * Return the headers associated with the part.
+	 */
+	HttpHeaders getHeaders();
+
+	/**
+	 *
+	 * Return the name of the file selected by the user in a browser form.
+	 * @return the filename if defined and available
 	 */
 	Optional<String> getFilename();
 
 	/**
-	 * @return the content of the part as a String using the charset specified in the
-	 * {@code Content-Type} header if any, or else using {@code UTF-8} by default.
+	 * Return the part content converted to a String with the charset from the
+	 * {@code Content-Type} header or {@code UTF-8} by default.
 	 */
 	Mono<String> getContentAsString();
 
 	/**
-	 * @return the content of the part as a stream of bytes
+	 * Return the part raw content as a stream of DataBuffer's.
 	 */
 	Flux<DataBuffer> getContent();
 
 	/**
-	 * Transfer the file contained in this part to the specified destination.
-	 * @param dest the destination file
-	 * @return a {@link Mono} that indicates completion of the file transfer or an error,
-	 * for example an {@link IllegalStateException} if the part does not contain a file
+	 * Transfer the file in this part to the given file destination.
+	 * @param dest the target file
+	 * @return completion {@code Mono} with the result of the file transfer,
+	 * possibly {@link IllegalStateException} if the part isn't a file
 	 */
 	Mono<Void> transferTo(File dest);
 
