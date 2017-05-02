@@ -77,13 +77,13 @@ class DefaultWebTestClient implements WebTestClient {
 
 
 	DefaultWebTestClient(WebClient.Builder webClientBuilder, ClientHttpConnector connector,
-			ExchangeMutatingWebFilter exchangeMutatingWebFilter, Duration timeout) {
+			ExchangeMutatingWebFilter filter, Duration timeout) {
 
 		Assert.notNull(webClientBuilder, "WebClient.Builder is required");
 
 		this.wiretapConnector = new WiretapConnector(connector);
 		this.webClient = webClientBuilder.clientConnector(this.wiretapConnector).build();
-		this.exchangeMutatingWebFilter = exchangeMutatingWebFilter;
+		this.exchangeMutatingWebFilter = (filter != null ? filter : new ExchangeMutatingWebFilter());
 		this.timeout = (timeout != null ? timeout : Duration.ofSeconds(5));
 	}
 

@@ -35,6 +35,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -140,7 +141,7 @@ public interface WebTestClient {
 	// Static, factory methods
 
 	/**
-	 * Integration testing without a server, targeting specific annotated,
+	 * Integration testing without a server targeting specific annotated,
 	 * WebFlux controllers. The default configuration is the same as for
 	 * {@link org.springframework.web.reactive.config.EnableWebFlux @EnableWebFlux}
 	 * but can also be further customized through the returned spec.
@@ -152,7 +153,7 @@ public interface WebTestClient {
 	}
 
 	/**
-	 * Integration testing without a server, with WebFlux infrastructure detected
+	 * Integration testing without a server with WebFlux infrastructure detected
 	 * from an {@link ApplicationContext} such as {@code @EnableWebFlux}
 	 * Java config and annotated controller Spring beans.
 	 * @param applicationContext the context
@@ -164,12 +165,21 @@ public interface WebTestClient {
 	}
 
 	/**
-	 * Integration testing without a server, targeting WebFlux functional endpoints.
+	 * Integration testing without a server targeting WebFlux functional endpoints.
 	 * @param routerFunction the RouterFunction to test
 	 * @return the {@link WebTestClient} builder
 	 */
 	static MockServerSpec<?> bindToRouterFunction(RouterFunction<?> routerFunction) {
 		return new RouterFunctionSpec(routerFunction);
+	}
+
+	/**
+	 * Integration testing without a server targeting the given HttpHandler.
+	 * @param httpHandler the handler to test
+	 * @return the {@link WebTestClient} builder
+	 */
+	static Builder bindToHttpHandler(HttpHandler httpHandler) {
+		return new DefaultWebTestClientBuilder(httpHandler, null);
 	}
 
 	/**
