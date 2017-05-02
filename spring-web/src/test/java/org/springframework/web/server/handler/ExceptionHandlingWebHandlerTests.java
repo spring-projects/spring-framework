@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,61 +20,67 @@ import java.util.Arrays;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
+ * Unit tests for {@link ExceptionHandlingWebHandler}.
  * @author Rossen Stoyanchev
- * @since 5.0
  */
-public class ExceptionHandlingHttpHandlerTests {
+public class ExceptionHandlingWebHandlerTests {
 
-	private final MockServerWebExchange exchange = MockServerHttpRequest.get("http://localhost:8080").toExchange();
+	private final ServerWebExchange exchange = MockServerHttpRequest.get("http://localhost:8080").toExchange();
 
 	private final WebHandler targetHandler = new StubWebHandler(new IllegalStateException("boo"));
 
 
 	@Test
 	public void handleErrorSignal() throws Exception {
-		WebExceptionHandler exceptionHandler = new BadRequestExceptionHandler();
-		createWebHandler(exceptionHandler).handle(this.exchange).block();
-
+		createWebHandler(new BadRequestExceptionHandler()).handle(this.exchange).block();
 		assertEquals(HttpStatus.BAD_REQUEST, this.exchange.getResponse().getStatusCode());
 	}
 
 	@Test
 	public void handleErrorSignalWithMultipleHttpErrorHandlers() throws Exception {
-		WebExceptionHandler[] exceptionHandlers = new WebExceptionHandler[] {
+		createWebHandler(
 				new UnresolvedExceptionHandler(),
 				new UnresolvedExceptionHandler(),
 				new BadRequestExceptionHandler(),
-				new UnresolvedExceptionHandler()
-		};
-		createWebHandler(exceptionHandlers).handle(this.exchange).block();
+				new UnresolvedExceptionHandler()).handle(this.exchange).block();
 
 		assertEquals(HttpStatus.BAD_REQUEST, this.exchange.getResponse().getStatusCode());
 	}
 
 	@Test
 	public void unresolvedException() throws Exception {
-		WebExceptionHandler exceptionHandler = new UnresolvedExceptionHandler();
-		createWebHandler(exceptionHandler).handle(this.exchange).block();
+		Mono<Void> mono = createWebHandler(new UnresolvedExceptionHandler()).handle(this.exchange);
+		StepVerifier.create(mono).expectErrorMessage("boo").verify();
+		assertNull(this.exchange.getResponse().getStatusCode());
+	}
+
+	@Test
+	public void unresolvedExceptionWithWebHttpHandlerAdapter() throws Exception {
+
+		// HttpWebHandlerAdapter handles unresolved errors
+
+		new HttpWebHandlerAdapter(createWebHandler(new UnresolvedExceptionHandler()))
+				.handle(this.exchange.getRequest(), this.exchange.getResponse()).block();
 
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.exchange.getResponse().getStatusCode());
 	}
 
 	@Test
 	public void thrownExceptionBecomesErrorSignal() throws Exception {
-		WebExceptionHandler exceptionHandler = new BadRequestExceptionHandler();
-		createWebHandler(exceptionHandler).handle(this.exchange).block();
-
+		createWebHandler(new BadRequestExceptionHandler()).handle(this.exchange).block();
 		assertEquals(HttpStatus.BAD_REQUEST, this.exchange.getResponse().getStatusCode());
 	}
 
