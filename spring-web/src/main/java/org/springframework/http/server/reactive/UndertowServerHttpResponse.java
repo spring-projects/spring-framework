@@ -229,6 +229,12 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 			this.channel.getWriteSetter().set(null);
 			this.channel.resumeWrites();
 		}
+
+		@Override
+		protected void writingFailed(Throwable t) {
+			cancel();
+			onError(t);
+		}
 	}
 
 
@@ -247,6 +253,12 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 				}
 				UndertowServerHttpResponse.this.responseChannel.flush();
 			}
+		}
+
+		@Override
+		protected void flushingFailed(Throwable t) {
+			cancel();
+			onError(t);
 		}
 	}
 
