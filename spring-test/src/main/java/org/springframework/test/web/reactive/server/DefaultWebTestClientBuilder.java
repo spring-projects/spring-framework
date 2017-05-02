@@ -37,7 +37,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 	private final ClientHttpConnector connector;
 
-	private final ExchangeMutatorWebFilter exchangeMutatorFilter;
+	private final ExchangeMutatingWebFilter exchangeMutatingWebFilter;
 
 	private Duration responseTimeout;
 
@@ -48,12 +48,12 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 	DefaultWebTestClientBuilder(ClientHttpConnector connector) {
 		this.connector = connector;
-		this.exchangeMutatorFilter = null;
+		this.exchangeMutatingWebFilter = null;
 	}
 
-	DefaultWebTestClientBuilder(HttpHandler httpHandler, ExchangeMutatorWebFilter exchangeMutatorFilter) {
+	DefaultWebTestClientBuilder(HttpHandler httpHandler, ExchangeMutatingWebFilter exchangeMutatingWebFilter) {
 		this.connector = new HttpHandlerConnector(httpHandler);
-		this.exchangeMutatorFilter = exchangeMutatorFilter;
+		this.exchangeMutatingWebFilter = exchangeMutatingWebFilter;
 	}
 
 
@@ -96,7 +96,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	@Override
 	public WebTestClient build() {
 		return new DefaultWebTestClient(this.webClientBuilder, this.connector,
-				this.exchangeMutatorFilter, this.responseTimeout);
+				this.exchangeMutatingWebFilter, this.responseTimeout);
 	}
 
 }

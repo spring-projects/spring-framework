@@ -375,22 +375,23 @@ public interface WebClient {
 		 * Exchange the request for a {@code ClientResponse} with full access
 		 * to the response status and headers before extracting the body.
 		 *
-		 * <p>Use {@link Mono#then(Function)} or {@link Mono#flatMap(Function)}
-		 * to compose further on the response:
+		 * <p>Use {@link Mono#flatMap(Function)} or
+		 * {@link Mono#flatMapMany(Function)} to compose further on the response:
 		 *
 		 * <pre>
 		 *	Mono&lt;Pojo&gt; mono = client.get().uri("/")
 		 *		.accept(MediaType.APPLICATION_JSON)
 		 *		.exchange()
-		 *		.then(response -> response.bodyToMono(Pojo.class));
+		 *		.flatMap(response -> response.bodyToMono(Pojo.class));
 		 *
 		 *	Flux&lt;Pojo&gt; flux = client.get().uri("/")
 		 *		.accept(MediaType.APPLICATION_STREAM_JSON)
 		 *		.exchange()
-		 *		.then(response -> response.bodyToFlux(Pojo.class));
+		 *		.flatMapMany(response -> response.bodyToFlux(Pojo.class));
 		 * </pre>
 		 *
 		 * @return a {@code Mono} with the response
+		 * @see #retrieve()
 		 */
 		Mono<ClientResponse> exchange();
 

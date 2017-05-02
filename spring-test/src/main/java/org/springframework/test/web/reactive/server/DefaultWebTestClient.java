@@ -69,7 +69,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 	private final WiretapConnector wiretapConnector;
 
-	private final ExchangeMutatorWebFilter exchangeMutatorWebFilter;
+	private final ExchangeMutatingWebFilter exchangeMutatingWebFilter;
 
 	private final Duration timeout;
 
@@ -77,20 +77,20 @@ class DefaultWebTestClient implements WebTestClient {
 
 
 	DefaultWebTestClient(WebClient.Builder webClientBuilder, ClientHttpConnector connector,
-			ExchangeMutatorWebFilter webFilter, Duration timeout) {
+			ExchangeMutatingWebFilter exchangeMutatingWebFilter, Duration timeout) {
 
 		Assert.notNull(webClientBuilder, "WebClient.Builder is required");
 
 		this.wiretapConnector = new WiretapConnector(connector);
 		this.webClient = webClientBuilder.clientConnector(this.wiretapConnector).build();
-		this.exchangeMutatorWebFilter = webFilter;
+		this.exchangeMutatingWebFilter = exchangeMutatingWebFilter;
 		this.timeout = (timeout != null ? timeout : Duration.ofSeconds(5));
 	}
 
 	private DefaultWebTestClient(DefaultWebTestClient webTestClient, ExchangeFilterFunction filter) {
 		this.webClient = webTestClient.webClient.filter(filter);
 		this.wiretapConnector = webTestClient.wiretapConnector;
-		this.exchangeMutatorWebFilter = webTestClient.exchangeMutatorWebFilter;
+		this.exchangeMutatingWebFilter = webTestClient.exchangeMutatingWebFilter;
 		this.timeout = webTestClient.timeout;
 	}
 
@@ -150,13 +150,13 @@ class DefaultWebTestClient implements WebTestClient {
 	@Override
 	public WebTestClient exchangeMutator(UnaryOperator<ServerWebExchange> mutator) {
 
-		Assert.notNull(this.exchangeMutatorWebFilter,
+		Assert.notNull(this.exchangeMutatingWebFilter,
 				"This option is applicable only for tests without an actual running server");
 
 		return filter((request, next) -> {
 			String requestId = request.headers().getFirst(WiretapConnector.REQUEST_ID_HEADER_NAME);
 			Assert.notNull(requestId, "No request-id header");
-			this.exchangeMutatorWebFilter.register(requestId, mutator);
+			this.exchangeMutatingWebFilter.registerPerRequestMutator(requestId, mutator);
 			return next.exchange(request);
 		});
 	}

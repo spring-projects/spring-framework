@@ -29,15 +29,18 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 
 /**
- * WebFilter that applies global and request-specific transformation on
+ * WebFilter for applying global and per-request transformations to a
  * {@link ServerWebExchange}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-class ExchangeMutatorWebFilter implements WebFilter {
+class ExchangeMutatingWebFilter implements WebFilter {
 
-	private volatile Function<ServerWebExchange, ServerWebExchange> globalMutator;
+	private static final Function<ServerWebExchange, ServerWebExchange> NO_OP_MUTATOR = e -> e;
+
+
+	private volatile Function<ServerWebExchange, ServerWebExchange> globalMutator = NO_OP_MUTATOR;
 
 	private final Map<String, Function<ServerWebExchange, ServerWebExchange>> perRequestMutators =
 			new ConcurrentHashMap<>(4);
@@ -47,9 +50,9 @@ class ExchangeMutatorWebFilter implements WebFilter {
 	 * Register a global transformation function to apply to all requests.
 	 * @param mutator the transformation function
 	 */
-	public void register(UnaryOperator<ServerWebExchange> mutator) {
+	public void registerGlobalMutator(UnaryOperator<ServerWebExchange> mutator) {
 		Assert.notNull(mutator, "'mutator' is required");
-		this.globalMutator = this.globalMutator != null ? this.globalMutator.andThen(mutator) : mutator;
+		this.globalMutator = this.globalMutator.andThen(mutator);
 	}
 
 	/**
@@ -57,7 +60,7 @@ class ExchangeMutatorWebFilter implements WebFilter {
 	 * @param requestId the "request-id" header value identifying the request
 	 * @param mutator the transformation function
 	 */
-	public void register(String requestId, UnaryOperator<ServerWebExchange> mutator) {
+	public void registerPerRequestMutator(String requestId, UnaryOperator<ServerWebExchange> mutator) {
 		this.perRequestMutators.compute(requestId,
 				(s, value) -> value != null ? value.andThen(mutator) : mutator);
 	}
@@ -65,18 +68,15 @@ class ExchangeMutatorWebFilter implements WebFilter {
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-
-		if (this.globalMutator != null) {
-			exchange = this.globalMutator.apply(exchange);
-		}
-
-		String requestId = WiretapConnector.getRequestId(exchange.getRequest().getHeaders());
-		Function<ServerWebExchange, ServerWebExchange> mutator = this.perRequestMutators.remove(requestId);
-		if (mutator != null) {
-			exchange = mutator.apply(exchange);
-		}
-
+		exchange = this.globalMutator.apply(exchange);
+		exchange = getMutatorFor(exchange).apply(exchange);
 		return chain.filter(exchange);
+	}
+
+	private Function<ServerWebExchange, ServerWebExchange> getMutatorFor(ServerWebExchange exchange) {
+		String id = WiretapConnector.getRequestId(exchange.getRequest().getHeaders());
+		Function<ServerWebExchange, ServerWebExchange> mutator = this.perRequestMutators.remove(id);
+		return mutator != null ? mutator : NO_OP_MUTATOR;
 	}
 
 }
