@@ -59,8 +59,7 @@ abstract class SerializableTypeWrapper {
 	private static final Class<?>[] SUPPORTED_SERIALIZABLE_TYPES = {
 			GenericArrayType.class, ParameterizedType.class, TypeVariable.class, WildcardType.class};
 
-	private static final ConcurrentReferenceHashMap<Type, Type> cache =
-			new ConcurrentReferenceHashMap<>(256);
+	static final ConcurrentReferenceHashMap<Type, Type> cache = new ConcurrentReferenceHashMap<>(256);
 
 
 	/**
@@ -84,12 +83,7 @@ abstract class SerializableTypeWrapper {
 	 */
 	@SuppressWarnings("serial")
 	public static Type forGenericSuperclass(final Class<?> type) {
-		return forTypeProvider(new DefaultTypeProvider() {
-			@Override
-			public Type getType() {
-				return type.getGenericSuperclass();
-			}
-		});
+		return forTypeProvider(type::getGenericSuperclass);
 	}
 
 	/**
@@ -100,12 +94,7 @@ abstract class SerializableTypeWrapper {
 		Type[] result = new Type[type.getGenericInterfaces().length];
 		for (int i = 0; i < result.length; i++) {
 			final int index = i;
-			result[i] = forTypeProvider(new DefaultTypeProvider() {
-				@Override
-				public Type getType() {
-					return type.getGenericInterfaces()[index];
-				}
-			});
+			result[i] = forTypeProvider(() -> type.getGenericInterfaces()[index]);
 		}
 		return result;
 	}
@@ -118,12 +107,7 @@ abstract class SerializableTypeWrapper {
 		Type[] result = new Type[type.getTypeParameters().length];
 		for (int i = 0; i < result.length; i++) {
 			final int index = i;
-			result[i] = forTypeProvider(new DefaultTypeProvider() {
-				@Override
-				public Type getType() {
-					return type.getTypeParameters()[index];
-				}
-			});
+			result[i] = forTypeProvider(() -> type.getTypeParameters()[index]);
 		}
 		return result;
 	}
@@ -183,6 +167,7 @@ abstract class SerializableTypeWrapper {
 	/**
 	 * A {@link Serializable} interface providing access to a {@link Type}.
 	 */
+	@SuppressWarnings("serial")
 	interface TypeProvider extends Serializable {
 
 		/**
@@ -191,20 +176,10 @@ abstract class SerializableTypeWrapper {
 		Type getType();
 
 		/**
-		 * Return the source of the type or {@code null}.
+		 * Return the source of the type, or {@code null} if not known.
+		 * <p>The default implementations returns {@code null}.
 		 */
-		Object getSource();
-	}
-
-
-	/**
-	 * Default implementation of {@link TypeProvider} with a {@code null} source.
-	 */
-	@SuppressWarnings("serial")
-	private static abstract class DefaultTypeProvider implements TypeProvider {
-
-		@Override
-		public Object getSource() {
+		default Object getSource() {
 			return null;
 		}
 	}
