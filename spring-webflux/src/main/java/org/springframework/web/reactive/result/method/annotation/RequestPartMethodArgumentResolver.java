@@ -17,19 +17,13 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.codec.multipart.Part;
-import org.springframework.util.Assert;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.server.ServerWebExchange;
@@ -39,48 +33,25 @@ import org.springframework.web.server.ServerWebInputException;
  * Resolver for method arguments annotated with @{@link RequestPart}.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 5.0
- * @see RequestParamMapMethodArgumentResolver
  */
-public class RequestPartMethodArgumentResolver extends AbstractNamedValueSyncArgumentResolver {
-
-	private final boolean useDefaultResolution;
-
+public class RequestPartMethodArgumentResolver extends AbstractNamedValueArgumentResolver {
 
 	/**
 	 * Class constructor with a default resolution mode flag.
-	 * @param factory a bean factory used for resolving  ${...} placeholder
-	 * and #{...} SpEL expressions in default values, or {@code null} if default
-	 * values are not expected to contain expressions
 	 * @param registry for checking reactive type wrappers
-	 * @param useDefaultResolution in default resolution mode a method argument
-	 * that is a simple type, as defined in {@link BeanUtils#isSimpleProperty},
-	 * is treated as a request parameter even if it isn't annotated, the
-	 * request parameter name is derived from the method parameter name.
 	 */
-	public RequestPartMethodArgumentResolver(
-			ConfigurableBeanFactory factory, ReactiveAdapterRegistry registry, boolean useDefaultResolution) {
-
-		super(factory, registry);
-		this.useDefaultResolution = useDefaultResolution;
+	public RequestPartMethodArgumentResolver(ReactiveAdapterRegistry registry) {
+		super(null, registry);
 	}
 
 
 	@Override
-	public boolean supportsParameter(MethodParameter param) {
-		if (checkAnnotatedParamNoReactiveWrapper(param, RequestPart.class, this::singleParam)) {
-			return true;
-		}
-		else if (this.useDefaultResolution) {
-			return checkParameterTypeNoReactiveWrapper(param, BeanUtils::isSimpleProperty) ||
-					BeanUtils.isSimpleProperty(param.nestedIfOptional().getNestedParameterType());
-		}
-		return false;
+	public boolean supportsParameter(MethodParameter parameter) {
+		return parameter.hasParameterAnnotation(RequestPart.class);
 	}
 
-	private boolean singleParam(RequestPart requestParam, Class<?> type) {
-		return !Map.class.isAssignableFrom(type) || StringUtils.hasText(requestParam.name());
-	}
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
@@ -89,28 +60,21 @@ public class RequestPartMethodArgumentResolver extends AbstractNamedValueSyncArg
 	}
 
 	@Override
-	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter,
-			ServerWebExchange exchange) {
-
-		List<?> paramValues = getMultipartData(exchange).get(name);
-		Object result = null;
-		if (paramValues != null) {
-			result = (paramValues.size() == 1 ? paramValues.get(0) : paramValues);
-		}
-		return Optional.ofNullable(result);
-	}
-
-	private MultiValueMap<String, Part> getMultipartData(ServerWebExchange exchange) {
-		MultiValueMap<String, Part> params = exchange.getMultipartData().subscribe().peek();
-		Assert.notNull(params, "Expected multipart data (if any) to be parsed.");
-		return params;
+	protected Mono<Object> resolveName(String name, MethodParameter param, ServerWebExchange exchange) {
+		return exchange.getMultipartData().flatMap(allParts -> {
+			List<Part> parts = allParts.get(name);
+			if (CollectionUtils.isEmpty(parts)) {
+				return Mono.empty();
+			}
+			return Mono.just(parts.size() == 1 ? parts.get(0) : parts);
+		});
 	}
 
 	@Override
-	protected void handleMissingValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
-		String type = parameter.getNestedParameterType().getSimpleName();
+	protected void handleMissingValue(String name, MethodParameter param, ServerWebExchange exchange) {
+		String type = param.getNestedParameterType().getSimpleName();
 		String reason = "Required " + type + " parameter '" + name + "' is not present";
-		throw new ServerWebInputException(reason, parameter);
+		throw new ServerWebInputException(reason, param);
 	}
 
 

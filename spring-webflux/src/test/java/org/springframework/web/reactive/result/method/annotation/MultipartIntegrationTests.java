@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -37,7 +35,6 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.DispatcherHandler;
@@ -51,9 +48,8 @@ import static org.junit.Assert.assertEquals;
 
 public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
-	private AnnotationConfigApplicationContext wac;
-
 	private WebClient webClient;
+
 
 	@Override
 	@Before
@@ -65,26 +61,10 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 
 	@Override
 	protected HttpHandler createHttpHandler() {
-		this.wac = new AnnotationConfigApplicationContext();
-		this.wac.register(TestConfiguration.class);
-		this.wac.refresh();
-
-		return WebHttpHandlerBuilder.webHandler(new DispatcherHandler(this.wac)).build();
-	}
-
-	@Test
-	public void map() {
-		test("/map");
-	}
-
-	@Test
-	public void multiValueMap() {
-		test("/multivaluemap");
-	}
-
-	@Test
-	public void partParam() {
-		test("/partparam");
+		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
+		wac.register(TestConfiguration.class);
+		wac.refresh();
+		return WebHttpHandlerBuilder.webHandler(new DispatcherHandler(wac)).build();
 	}
 
 	@Test
@@ -121,26 +101,6 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 	@RestController
 	@SuppressWarnings("unused")
 	static class MultipartController {
-
-		@PostMapping("/map")
-		void map(@RequestParam Map<String, Part> parts) {
-			assertEquals(2, parts.size());
-			assertEquals("foo.txt", parts.get("fooPart").getFilename().get());
-			assertEquals("bar", parts.get("barPart").getContentAsString().block());
-		}
-
-		@PostMapping("/multivaluemap")
-		void multiValueMap(@RequestParam MultiValueMap<String, Part> parts) {
-			Map<String, Part> map = parts.toSingleValueMap();
-			assertEquals(2, map.size());
-			assertEquals("foo.txt", map.get("fooPart").getFilename().get());
-			assertEquals("bar", map.get("barPart").getContentAsString().block());
-		}
-
-		@PostMapping("/partparam")
-		void partParam(@RequestParam Part fooPart) {
-			assertEquals("foo.txt", fooPart.getFilename().get());
-		}
 
 		@PostMapping("/part")
 		void part(@RequestPart Part fooPart) {

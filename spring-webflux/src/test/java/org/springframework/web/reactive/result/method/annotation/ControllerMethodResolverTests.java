@@ -91,8 +91,8 @@ public class ControllerMethodResolverTests {
 
 		AtomicInteger index = new AtomicInteger(-1);
 		assertEquals(RequestParamMethodArgumentResolver.class, next(resolvers, index).getClass());
-		assertEquals(RequestPartMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(RequestParamMapMethodArgumentResolver.class, next(resolvers, index).getClass());
+		assertEquals(RequestPartMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(PathVariableMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(PathVariableMapMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(RequestBodyArgumentResolver.class, next(resolvers, index).getClass());
@@ -130,8 +130,8 @@ public class ControllerMethodResolverTests {
 
 		AtomicInteger index = new AtomicInteger(-1);
 		assertEquals(RequestParamMethodArgumentResolver.class, next(resolvers, index).getClass());
-		assertEquals(RequestPartMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(RequestParamMapMethodArgumentResolver.class, next(resolvers, index).getClass());
+		assertEquals(RequestPartMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(PathVariableMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(PathVariableMapMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(ModelAttributeMethodArgumentResolver.class, next(resolvers, index).getClass());
@@ -167,7 +167,6 @@ public class ControllerMethodResolverTests {
 
 		AtomicInteger index = new AtomicInteger(-1);
 		assertEquals(RequestParamMethodArgumentResolver.class, next(resolvers, index).getClass());
-		assertEquals(RequestPartMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(RequestParamMapMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(PathVariableMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(PathVariableMapMethodArgumentResolver.class, next(resolvers, index).getClass());
@@ -198,8 +197,8 @@ public class ControllerMethodResolverTests {
 
 		AtomicInteger index = new AtomicInteger(-1);
 		assertEquals(RequestParamMethodArgumentResolver.class, next(resolvers, index).getClass());
-		assertEquals(RequestPartMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(RequestParamMapMethodArgumentResolver.class, next(resolvers, index).getClass());
+		assertEquals(RequestPartMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(PathVariableMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(PathVariableMapMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(RequestHeaderMethodArgumentResolver.class, next(resolvers, index).getClass());

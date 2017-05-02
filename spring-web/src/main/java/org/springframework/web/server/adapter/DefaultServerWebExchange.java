@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,8 +88,6 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private final Mono<MultiValueMap<String, Part>> multipartDataMono;
 
-	private final Mono<MultiValueMap<String, String>> requestParamsMono;
-
 	private volatile boolean notModified;
 
 
@@ -109,8 +107,6 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		this.sessionMono = sessionManager.getSession(this).cache();
 		this.formDataMono = initFormData(request, codecConfigurer);
 		this.multipartDataMono = initMultipartData(request, codecConfigurer);
-		this.requestParamsMono = initRequestParams(request, this.formDataMono);
-
 	}
 
 	@SuppressWarnings("unchecked")
@@ -165,20 +161,6 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		return EMPTY_MULTIPART_DATA;
 	}
 
-	private static Mono<MultiValueMap<String, String>> initRequestParams(
-			ServerHttpRequest request, Mono<MultiValueMap<String, String>> formDataMono) {
-
-		return formDataMono
-				.map(formData -> {
-					MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
-					result.putAll(request.getQueryParams());
-					result.putAll(formData);
-					return CollectionUtils.unmodifiableMultiValueMap(result);
-				})
-				.defaultIfEmpty(request.getQueryParams())
-				.cache();
-	}
-
 
 	@Override
 	public ServerHttpRequest getRequest() {
@@ -226,11 +208,6 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	@Override
 	public Mono<MultiValueMap<String, Part>> getMultipartData() {
 		return this.multipartDataMono;
-	}
-
-	@Override
-	public Mono<MultiValueMap<String, String>> getRequestParams() {
-		return this.requestParamsMono;
 	}
 
 	@Override

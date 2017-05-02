@@ -28,7 +28,6 @@ import reactor.test.StepVerifier;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -137,18 +136,6 @@ public class RequestParamMethodArgumentResolverTests {
 	public void resolveWithQueryString() throws Exception {
 		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
 		assertEquals("foo", resolve(param, MockServerHttpRequest.get("/path?name=foo").toExchange()));
-	}
-
-	@Test
-	public void resolveWithFormData() throws Exception {
-
-		ServerWebExchange exchange = MockServerHttpRequest.post("/path")
-				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-				.body("name=foo")
-				.toExchange();
-
-		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
-		assertEquals("foo", resolve(param, exchange));
 	}
 
 	@Test

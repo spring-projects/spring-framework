@@ -258,32 +258,26 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			logger.debug("Looking up handler method for path " + lookupPath);
 		}
 		this.mappingRegistry.acquireReadLock();
-
 		try {
-			// Ensure form data is parsed for "params" conditions...
-			return exchange.getRequestParams()
-					.then(exchange.getMultipartData())
-					.then(Mono.defer(() -> {
-						HandlerMethod handlerMethod = null;
-						try {
-							handlerMethod = lookupHandlerMethod(lookupPath, exchange);
-						}
-						catch (Exception ex) {
-							return Mono.error(ex);
-						}
-						if (logger.isDebugEnabled()) {
-							if (handlerMethod != null) {
-								logger.debug("Returning handler method [" + handlerMethod + "]");
-							}
-							else {
-								logger.debug("Did not find handler method for [" + lookupPath + "]");
-							}
-						}
-						if (handlerMethod != null) {
-							handlerMethod = handlerMethod.createWithResolvedBean();
-						}
-						return Mono.justOrEmpty(handlerMethod);
-					}));
+			HandlerMethod handlerMethod;
+			try {
+				handlerMethod = lookupHandlerMethod(lookupPath, exchange);
+			}
+			catch (Exception ex) {
+				return Mono.error(ex);
+			}
+			if (logger.isDebugEnabled()) {
+				if (handlerMethod != null) {
+					logger.debug("Returning handler method [" + handlerMethod + "]");
+				}
+				else {
+					logger.debug("Did not find handler method for [" + lookupPath + "]");
+				}
+			}
+			if (handlerMethod != null) {
+				handlerMethod = handlerMethod.createWithResolvedBean();
+			}
+			return Mono.justOrEmpty(handlerMethod);
 		}
 		finally {
 			this.mappingRegistry.releaseReadLock();

@@ -21,9 +21,6 @@ import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.ResolvableType;
-import org.springframework.http.codec.multipart.Part;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -51,6 +48,7 @@ import org.springframework.web.server.ServerWebExchange;
 public class RequestParamMapMethodArgumentResolver extends HandlerMethodArgumentResolverSupport
 		implements SyncHandlerMethodArgumentResolver {
 
+
 	public RequestParamMapMethodArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
 		super(adapterRegistry);
 	}
@@ -70,18 +68,10 @@ public class RequestParamMapMethodArgumentResolver extends HandlerMethodArgument
 	public Optional<Object> resolveArgumentValue(MethodParameter methodParameter,
 			BindingContext context, ServerWebExchange exchange) {
 
-		ResolvableType paramType = ResolvableType.forType(methodParameter.getGenericParameterType());
-		boolean isMultiValueMap = MultiValueMap.class.isAssignableFrom(paramType.getRawClass());
-
-
-		if (paramType.getGeneric(1).getRawClass() == Part.class) {
-			MultiValueMap<String, Part> requestParts = exchange.getMultipartData().subscribe().peek();
-			Assert.notNull(requestParts, "Expected multipart data (if any) to be parsed.");
-			return Optional.of(isMultiValueMap ? requestParts : requestParts.toSingleValueMap());
-		}
-		MultiValueMap<String, String> requestParams = exchange.getRequestParams().subscribe().peek();
-		Assert.notNull(requestParams, "Expected form data (if any) to be parsed.");
-		return Optional.of(isMultiValueMap ? requestParams : requestParams.toSingleValueMap());
+		boolean isMultiValueMap = MultiValueMap.class.isAssignableFrom(methodParameter.getParameterType());
+		MultiValueMap<String, String> queryParams = exchange.getRequest().getQueryParams();
+		Object value = isMultiValueMap ? queryParams : queryParams.toSingleValueMap();
+		return Optional.of(value);
 	}
 
 }

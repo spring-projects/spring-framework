@@ -25,9 +25,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.http.codec.multipart.Part;
-import org.springframework.util.Assert;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ValueConstants;
@@ -35,7 +32,8 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
 /**
- * Resolver for method arguments annotated with @{@link RequestParam}.
+ * Resolver for method arguments annotated with @{@link RequestParam} from URI
+ * query string parameters.
  *
  * <p>This resolver can also be created in default resolution mode in which
  * simple types (int, long, etc.) not annotated with @{@link RequestParam} are
@@ -103,24 +101,12 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueSyncAr
 	protected Optional<Object> resolveNamedValue(String name, MethodParameter parameter,
 			ServerWebExchange exchange) {
 
-		List<?> paramValues = parameter.getParameter().getType() == Part.class ? getMultipartData(exchange).get(name) : getRequestParams(exchange).get(name);
+		List<String> paramValues = exchange.getRequest().getQueryParams().get(name);
 		Object result = null;
 		if (paramValues != null) {
 			result = (paramValues.size() == 1 ? paramValues.get(0) : paramValues);
 		}
 		return Optional.ofNullable(result);
-	}
-
-	private MultiValueMap<String, String> getRequestParams(ServerWebExchange exchange) {
-		MultiValueMap<String, String> params = exchange.getRequestParams().subscribe().peek();
-		Assert.notNull(params, "Expected form data (if any) to be parsed.");
-		return params;
-	}
-
-	private MultiValueMap<String, Part> getMultipartData(ServerWebExchange exchange) {
-		MultiValueMap<String, Part> params = exchange.getMultipartData().subscribe().peek();
-		Assert.notNull(params, "Expected multipart data (if any) to be parsed.");
-		return params;
 	}
 
 	@Override

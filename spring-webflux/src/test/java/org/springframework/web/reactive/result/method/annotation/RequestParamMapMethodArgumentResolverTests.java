@@ -36,8 +36,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.post;
 import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
 
 /**
@@ -46,7 +44,8 @@ import static org.springframework.web.method.MvcAnnotationPredicates.requestPara
  */
 public class RequestParamMapMethodArgumentResolverTests {
 
-	private RequestParamMapMethodArgumentResolver resolver = new RequestParamMapMethodArgumentResolver(new ReactiveAdapterRegistry());
+	private final RequestParamMapMethodArgumentResolver resolver =
+			new RequestParamMapMethodArgumentResolver(new ReactiveAdapterRegistry());
 
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
@@ -81,15 +80,6 @@ public class RequestParamMapMethodArgumentResolverTests {
 	public void resolveMapArgumentWithQueryString() throws Exception {
 		MethodParameter param = this.testMethod.annot(requestParam().name("")).arg(Map.class);
 		Object result= resolve(param, MockServerHttpRequest.get("/path?foo=bar").toExchange());
-		assertTrue(result instanceof Map);
-		assertEquals(Collections.singletonMap("foo", "bar"), result);
-	}
-
-	@Test
-	public void resolveMapArgumentWithFormData() throws Exception {
-		MethodParameter param = this.testMethod.annot(requestParam().name("")).arg(Map.class);
-		ServerWebExchange exchange = post("/").contentType(APPLICATION_FORM_URLENCODED).body("foo=bar").toExchange();
-		Object result= resolve(param, exchange);
 		assertTrue(result instanceof Map);
 		assertEquals(Collections.singletonMap("foo", "bar"), result);
 	}

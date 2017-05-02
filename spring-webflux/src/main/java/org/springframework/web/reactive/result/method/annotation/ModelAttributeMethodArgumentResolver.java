@@ -216,7 +216,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		}
 
 		// A single data class constructor -> resolve constructor arguments from request parameters.
-		return exchange.getRequestParams().map(requestParams -> {
+		return WebExchangeDataBinder.extractValuesToBind(exchange).map(bindValues -> {
 			ConstructorProperties cp = ctor.getAnnotation(ConstructorProperties.class);
 			String[] paramNames = (cp != null ? cp.value() : parameterNameDiscoverer.getParameterNames(ctor));
 			Assert.state(paramNames != null, () -> "Cannot resolve parameter names for constructor " + ctor);
@@ -226,13 +226,9 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 			Object[] args = new Object[paramTypes.length];
 			WebDataBinder binder = context.createDataBinder(exchange, null, attributeName);
 			for (int i = 0; i < paramNames.length; i++) {
-				List<String> paramValues = requestParams.get(paramNames[i]);
-				Object paramValue = null;
-				if (paramValues != null) {
-					paramValue = (paramValues.size() == 1 ? paramValues.get(0) :
-							paramValues.toArray(new String[paramValues.size()]));
-				}
-				args[i] = binder.convertIfNecessary(paramValue, paramTypes[i], new MethodParameter(ctor, i));
+				Object value = bindValues.get(paramNames[i]);
+				value = (value != null && value instanceof List ? ((List<?>) value).toArray() : value);
+				args[i] = binder.convertIfNecessary(value, paramTypes[i], new MethodParameter(ctor, i));
 			}
 			return BeanUtils.instantiateClass(ctor, args);
 		});

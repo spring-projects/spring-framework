@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,23 +80,22 @@ public interface ServerWebExchange {
 	/**
 	 * Return the form data from the body of the request if the Content-Type is
 	 * {@code "application/x-www-form-urlencoded"} or an empty map otherwise.
-	 * This method may be called multiple times.
+	 *
+	 * <p><strong>Note:</strong> calling this method causes the request body to
+	 * be read and parsed in full and the resulting {@code MultiValueMap} is
+	 * cached so that this method is safe to call more than once.
 	 */
 	Mono<MultiValueMap<String, String>> getFormData();
 
 	/**
 	 * Return the parts of a multipart request if the Content-Type is
 	 * {@code "multipart/form-data"} or an empty map otherwise.
-	 * This method may be called multiple times.
+	 *
+	 * <p><strong>Note:</strong> calling this method causes the request body to
+	 * be read and parsed in full and the resulting {@code MultiValueMap} is
+	 * cached so that this method is safe to call more than once.
 	 */
 	Mono<MultiValueMap<String, Part>> getMultipartData();
-
-	/**
-	 * Return a combined map that represents both
-	 * {@link ServerHttpRequest#getQueryParams()} and {@link #getFormData()}
-	 * or an empty map.
-	 */
-	Mono<MultiValueMap<String, String>> getRequestParams();
 
 	/**
 	 * Returns {@code true} if the one of the {@code checkNotModified} methods
