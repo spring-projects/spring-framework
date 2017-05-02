@@ -59,8 +59,7 @@ abstract class SerializableTypeWrapper {
 	private static final Class<?>[] SUPPORTED_SERIALIZABLE_TYPES = {
 			GenericArrayType.class, ParameterizedType.class, TypeVariable.class, WildcardType.class};
 
-	private static final ConcurrentReferenceHashMap<Type, Type> cache =
-			new ConcurrentReferenceHashMap<Type, Type>(256);
+	static final ConcurrentReferenceHashMap<Type, Type> cache = new ConcurrentReferenceHashMap<Type, Type>(256);
 
 
 	/**
@@ -84,7 +83,7 @@ abstract class SerializableTypeWrapper {
 	 */
 	@SuppressWarnings("serial")
 	public static Type forGenericSuperclass(final Class<?> type) {
-		return forTypeProvider(new DefaultTypeProvider() {
+		return forTypeProvider(new SimpleTypeProvider() {
 			@Override
 			public Type getType() {
 				return type.getGenericSuperclass();
@@ -100,7 +99,7 @@ abstract class SerializableTypeWrapper {
 		Type[] result = new Type[type.getGenericInterfaces().length];
 		for (int i = 0; i < result.length; i++) {
 			final int index = i;
-			result[i] = forTypeProvider(new DefaultTypeProvider() {
+			result[i] = forTypeProvider(new SimpleTypeProvider() {
 				@Override
 				public Type getType() {
 					return type.getGenericInterfaces()[index];
@@ -118,7 +117,7 @@ abstract class SerializableTypeWrapper {
 		Type[] result = new Type[type.getTypeParameters().length];
 		for (int i = 0; i < result.length; i++) {
 			final int index = i;
-			result[i] = forTypeProvider(new DefaultTypeProvider() {
+			result[i] = forTypeProvider(new SimpleTypeProvider() {
 				@Override
 				public Type getType() {
 					return type.getTypeParameters()[index];
@@ -198,10 +197,10 @@ abstract class SerializableTypeWrapper {
 
 
 	/**
-	 * Default implementation of {@link TypeProvider} with a {@code null} source.
+	 * Base implementation of {@link TypeProvider} with a {@code null} source.
 	 */
 	@SuppressWarnings("serial")
-	private static abstract class DefaultTypeProvider implements TypeProvider {
+	private static abstract class SimpleTypeProvider implements TypeProvider {
 
 		@Override
 		public Object getSource() {
