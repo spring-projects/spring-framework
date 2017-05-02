@@ -39,23 +39,17 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static java.util.Collections.emptyMap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
-import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
-
+import static java.util.Collections.*;
+import static org.junit.Assert.*;
+import static org.springframework.http.HttpHeaders.*;
+import static org.springframework.http.MediaType.*;
 
 /**
  * @author Sebastien Deleuze
  */
 public class SynchronossMultipartHttpMessageReaderTests {
 
-	private final HttpMessageReader<MultiValueMap<String, Part>> reader =
-			new SynchronossMultipartHttpMessageReader();
+	private final HttpMessageReader<MultiValueMap<String, Part>> reader = new SynchronossMultipartHttpMessageReader();
 
 
 	@Test
@@ -84,7 +78,7 @@ public class SynchronossMultipartHttpMessageReaderTests {
 	@Test
 	public void resolveParts() throws IOException {
 		ServerHttpRequest request = generateMultipartRequest();
-		ResolvableType elementType = forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
+		ResolvableType elementType = ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
 		MultiValueMap<String, Part> parts = this.reader.readMono(elementType, request, emptyMap()).block();
 		assertEquals(2, parts.size());
 
@@ -98,7 +92,7 @@ public class SynchronossMultipartHttpMessageReaderTests {
 		assertEquals(12, buffer.readableByteCount());
 		byte[] byteContent = new byte[12];
 		buffer.read(byteContent);
-		assertEquals("Lorem\nIpsum\n", new String(byteContent));
+		assertEquals("Lorem Ipsum.", new String(byteContent));
 
 		assertTrue(parts.containsKey("barPart"));
 		part = parts.getFirst("barPart");
@@ -111,9 +105,10 @@ public class SynchronossMultipartHttpMessageReaderTests {
 	@Test
 	public void bodyError() {
 		ServerHttpRequest request = generateErrorMultipartRequest();
-		ResolvableType elementType = forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
+		ResolvableType elementType = ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
 		StepVerifier.create(this.reader.readMono(elementType, request, emptyMap())).verifyError();
 	}
+
 
 	private ServerHttpRequest generateMultipartRequest() throws IOException {
 		HttpHeaders fooHeaders = new HttpHeaders();

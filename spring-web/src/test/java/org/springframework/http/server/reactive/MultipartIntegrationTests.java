@@ -19,7 +19,6 @@ package org.springframework.http.server.reactive;
 import java.net.URI;
 import java.util.Optional;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
@@ -31,20 +30,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.http.codec.multipart.Part;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
 
+import static org.junit.Assert.*;
+
+/**
+ * @author Sebastien Deleuze
+ */
 public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Override
 	protected HttpHandler createHttpHandler() {
-		HttpWebHandlerAdapter handler = new HttpWebHandlerAdapter(new CheckRequestHandler());
-		return handler;
+		return new HttpWebHandlerAdapter(new CheckRequestHandler());
 	}
 
 	@Test
@@ -70,11 +73,11 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 		return parts;
 	}
 
+
 	public static class CheckRequestHandler implements WebHandler {
 
 		@Override
 		public Mono<Void> handle(ServerWebExchange exchange) {
-
 			if (exchange.getRequest().getURI().getPath().equals("/form-parts")) {
 				return assertGetFormParts(exchange);
 			}
@@ -106,7 +109,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 			assertEquals(12, buffer.readableByteCount());
 			byte[] byteContent = new byte[12];
 			buffer.read(byteContent);
-			assertEquals("Lorem\nIpsum\n", new String(byteContent));
+			assertEquals("Lorem Ipsum.", new String(byteContent));
 		}
 
 		private void assertBarPart(Part part) {
