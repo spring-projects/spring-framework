@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,10 +143,11 @@ public final class Property {
 			return StringUtils.uncapitalize(this.readMethod.getName().substring(index));
 		}
 		else {
-			int index = this.writeMethod.getName().indexOf("set") + 3;
+			int index = this.writeMethod.getName().indexOf("set");
 			if (index == -1) {
 				throw new IllegalArgumentException("Not a setter method");
 			}
+			index += 3;
 			return StringUtils.uncapitalize(this.writeMethod.getName().substring(index));
 		}
 	}
