@@ -791,7 +791,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromHttpRequestForwardedHeaderWithHostPort() throws Exception {
+	public void fromHttpRequestForwardedHeaderWithHostPortAndWithoutServerPort() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "proto=https; host=84.198.58.199:9090");
 		request.setScheme("http");
@@ -828,7 +828,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromHttpRequestForwardedHeaderWithoutHostPortOnHttps() throws Exception {
+	public void fromHttpRequestForwardedHeaderWithoutHostPortAndWithServerPort() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "proto=https; host=84.198.58.199");
 		request.setScheme("http");
