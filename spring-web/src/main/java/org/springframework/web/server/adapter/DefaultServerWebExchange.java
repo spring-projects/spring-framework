@@ -48,8 +48,8 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.springframework.http.MediaType.*;
-import static org.springframework.http.codec.multipart.MultipartHttpMessageReader.*;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 /**
  * Default implementation of {@link ServerWebExchange}.
@@ -63,6 +63,9 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private static final ResolvableType FORM_DATA_VALUE_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
+
+	private static final ResolvableType MULTIPART_VALUE_TYPE = ResolvableType.forClassWithGenerics(
+			MultiValueMap.class, String.class, Part.class);
 
 	private static final Mono<MultiValueMap<String, String>> EMPTY_FORM_DATA =
 			Mono.just(CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<String, String>(0)))
@@ -121,9 +124,10 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 				return ((HttpMessageReader<MultiValueMap<String, String>>)codecConfigurer
 						.getReaders()
 						.stream()
-						.filter(messageReader -> messageReader.canRead(FORM_DATA_VALUE_TYPE, APPLICATION_FORM_URLENCODED))
+						.filter(reader -> reader.canRead(FORM_DATA_VALUE_TYPE, APPLICATION_FORM_URLENCODED))
 						.findFirst()
-						.orElseThrow(() -> new IllegalStateException("Could not find HttpMessageReader that supports " + APPLICATION_FORM_URLENCODED)))
+						.orElseThrow(() -> new IllegalStateException(
+								"Could not find HttpMessageReader that supports " + APPLICATION_FORM_URLENCODED)))
 						.readMono(FORM_DATA_VALUE_TYPE, request, Collections.emptyMap())
 						.switchIfEmpty(EMPTY_FORM_DATA)
 						.cache();
@@ -143,12 +147,13 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		try {
 			contentType = request.getHeaders().getContentType();
 			if (MULTIPART_FORM_DATA.isCompatibleWith(contentType)) {
-				return ((HttpMessageReader<MultiValueMap<String, Part>>)codecConfigurer
+				return ((HttpMessageReader<MultiValueMap<String, Part>>) codecConfigurer
 						.getReaders()
 						.stream()
-						.filter(messageReader -> messageReader.canRead(MULTIPART_VALUE_TYPE, MULTIPART_FORM_DATA))
+						.filter(reader -> reader.canRead(MULTIPART_VALUE_TYPE, MULTIPART_FORM_DATA))
 						.findFirst()
-						.orElseThrow(() -> new IllegalStateException("Could not find HttpMessageReader that supports " + MULTIPART_FORM_DATA)))
+						.orElseThrow(() -> new IllegalStateException(
+								"Could not find HttpMessageReader that supports " + MULTIPART_FORM_DATA)))
 						.readMono(FORM_DATA_VALUE_TYPE, request, Collections.emptyMap())
 						.switchIfEmpty(EMPTY_MULTIPART_DATA)
 						.cache();

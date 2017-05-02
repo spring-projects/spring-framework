@@ -32,7 +32,6 @@ import javax.mail.internet.MimeUtility;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuples;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CharSequenceEncoder;
@@ -53,16 +52,14 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Implementation of {@link HttpMessageWriter} to write multipart HTML
- * forms with {@code "multipart/form-data"} media type.
+ * {@code HttpMessageWriter} for {@code "multipart/form-data"} requests.
  *
- * <p>When writing multipart data, this writer uses other
- * {@link HttpMessageWriter HttpMessageWriters} to write the respective
- * MIME parts. By default, basic writers are registered (for {@code Strings}
- * and {@code Resources}). These can be overridden through the provided
- * constructors.
+ * <p>This writer delegates to other message writers to write the respective
+ * parts. By default basic writers are registered for {@code String}, and
+ * {@code Resources}. These can be overridden through the provided constructors.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueMap<String, ?>> {
@@ -70,7 +67,7 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
-	private List<HttpMessageWriter<?>> partWriters;
+	private final List<HttpMessageWriter<?>> partWriters;
 
 	private Charset filenameCharset = DEFAULT_CHARSET;
 
@@ -93,9 +90,9 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 		this(partWriters, new DefaultDataBufferFactory());
 	}
 
-	public MultipartHttpMessageWriter(List<HttpMessageWriter<?>> partWriters, DataBufferFactory bufferFactory) {
+	public MultipartHttpMessageWriter(List<HttpMessageWriter<?>> partWriters, DataBufferFactory factory) {
 		this.partWriters = partWriters;
-		this.bufferFactory = bufferFactory;
+		this.bufferFactory = factory;
 	}
 
 	/**
@@ -116,9 +113,14 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 
 	@Override
+	public List<MediaType> getWritableMediaTypes() {
+		return Collections.singletonList(MediaType.MULTIPART_FORM_DATA);
+	}
+
+	@Override
 	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
-		return (mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType)) &&
-				(MultiValueMap.class.isAssignableFrom(elementType.getRawClass()) && String.class.isAssignableFrom(elementType.resolveGeneric(0)));
+		return MultiValueMap.class.isAssignableFrom(elementType.getRawClass()) &&
+				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType));
 	}
 
 	@Override
@@ -126,45 +128,61 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 			ResolvableType elementType, MediaType mediaType, ReactiveHttpOutputMessage outputMessage,
 			Map<String, Object> hints) {
 
-		final byte[] boundary = generateMultipartBoundary();
-		Map<String, String> parameters = Collections.singletonMap("boundary", new String(boundary, StandardCharsets.US_ASCII));
+		byte[] boundary = generateMultipartBoundary();
 
-		MediaType contentType = new MediaType(MediaType.MULTIPART_FORM_DATA, parameters);
 		HttpHeaders headers = outputMessage.getHeaders();
-		headers.setContentType(contentType);
+		headers.setContentType(new MediaType(MediaType.MULTIPART_FORM_DATA,
+				Collections.singletonMap("boundary", new String(boundary, StandardCharsets.US_ASCII))));
 
-		return Flux
-				.from(inputStream)
-				.single()
-				.flatMap(form -> {
-					Flux<DataBuffer> body = Flux.fromIterable(form.entrySet())
-						.concatMap(entry -> Flux.fromIterable(entry.getValue()).map(value -> Tuples.of(entry.getKey(), value)))
-						.concatMap(part -> generatePart(part.getT1(), getHttpEntity(part.getT2()), boundary))
-						.concatWith(Mono.just(generateLastLine(boundary)));
-					return outputMessage.writeWith(body);
-				});
+		return Mono.from(inputStream).flatMap(multiValueMap ->
+				outputMessage.writeWith(generateParts(multiValueMap, boundary)));
+	}
+
+	/**
+	 * Generate a multipart boundary.
+	 * <p>By default delegates to {@link MimeTypeUtils#generateMultipartBoundary()}.
+	 */
+	protected byte[] generateMultipartBoundary() {
+		return MimeTypeUtils.generateMultipartBoundary();
+	}
+
+	private Flux<DataBuffer> generateParts(MultiValueMap<String, ?> map, byte[] boundary) {
+		return Flux.fromIterable(map.entrySet())
+				.concatMap(entry -> Flux
+						.fromIterable(entry.getValue())
+						.concatMap(value -> generatePart(entry.getKey(), value, boundary)))
+				.concatWith(Mono.just(generateLastLine(boundary)));
 	}
 
 	@SuppressWarnings("unchecked")
-	private Flux<DataBuffer> generatePart(String name, HttpEntity<?> partEntity, byte[] boundary) {
-		Object partBody = partEntity.getBody();
-		ResolvableType partType = ResolvableType.forClass(partBody.getClass());
-		MultipartHttpOutputMessage outputMessage = new MultipartHttpOutputMessage(this.bufferFactory);
-		HttpHeaders partHeaders = outputMessage.getHeaders();
-		outputMessage.getHeaders().putAll(partHeaders);
-		MediaType partContentType = partHeaders.getContentType();
-		partHeaders.setContentDispositionFormData(name, getFilename(partBody));
+	private <T> Flux<DataBuffer> generatePart(String name, T value, byte[] boundary) {
 
-		Optional<HttpMessageWriter<?>> writer = this.partWriters
-				.stream()
-				.filter(e -> e.canWrite(partType, partContentType))
+		MultipartHttpOutputMessage outputMessage = new MultipartHttpOutputMessage(this.bufferFactory);
+
+		T body;
+		if (value instanceof HttpEntity) {
+			outputMessage.getHeaders().putAll(((HttpEntity<T>) value).getHeaders());
+			body = ((HttpEntity<T>) value).getBody();
+		}
+		else {
+			body = value;
+		}
+
+		ResolvableType bodyType = ResolvableType.forClass(body.getClass());
+		outputMessage.getHeaders().setContentDispositionFormData(name, getFilename(body));
+
+		MediaType contentType = outputMessage.getHeaders().getContentType();
+
+		Optional<HttpMessageWriter<?>> writer = this.partWriters.stream()
+				.filter(partWriter -> partWriter.canWrite(bodyType, contentType))
 				.findFirst();
 
 		if(!writer.isPresent()) {
-			return Flux.error(new CodecException("No suitable writer found!"));
+			return Flux.error(new CodecException("No suitable writer found for part: " + name));
 		}
-		Mono<Void> partWritten = ((HttpMessageWriter<Object>)writer.get())
-				.write(Mono.just(partBody), partType, partContentType, outputMessage, Collections.emptyMap());
+
+		Mono<Void> partWritten = ((HttpMessageWriter<T>) writer.get())
+				.write(Mono.just(body), bodyType, contentType, outputMessage, Collections.emptyMap());
 
 		// partWritten.subscribe() is required in order to make sure MultipartHttpOutputMessage#getBody()
 		// returns a non-null value (occurs with ResourceHttpMessageWriter that invokes
@@ -180,36 +198,12 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 	}
 
 	/**
-	 * Generate a multipart boundary.
-	 * <p>This implementation delegates to
-	 * {@link MimeTypeUtils#generateMultipartBoundary()}.
-	 */
-	protected byte[] generateMultipartBoundary() {
-		return MimeTypeUtils.generateMultipartBoundary();
-	}
-
-	/**
-	 * Return an {@link HttpEntity} for the given part Object.
-	 * @param part the part to return an {@link HttpEntity} for
-	 * @return the part Object itself it is an {@link HttpEntity},
-	 * or a newly built {@link HttpEntity} wrapper for that part
-	 */
-	protected HttpEntity<?> getHttpEntity(Object part) {
-		if (part instanceof HttpEntity) {
-			return (HttpEntity<?>) part;
-		}
-		else {
-			return new HttpEntity<>(part);
-		}
-	}
-
-	/**
-	 * Return the filename of the given multipart part. This value will be used for the
-	 * {@code Content-Disposition} header.
-	 * <p>The default implementation returns {@link Resource#getFilename()} if the part is a
-	 * {@code Resource}, and {@code null} in other cases. Can be overridden in subclasses.
-	 * @param part the part to determine the file name for
-	 * @return the filename, or {@code null} if not known
+	 * Return the filename of the given multipart part. This value will be used
+	 * for the {@code Content-Disposition} header.
+	 * <p>The default implementation returns {@link Resource#getFilename()} if
+	 * the part is a {@code Resource}, and {@code null} in other cases.
+	 * @param part the part for which return a file name
+	 * @return the filename or {@code null}
 	 */
 	protected String getFilename(Object part) {
 		if (part instanceof Resource) {
@@ -222,7 +216,6 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 			return null;
 		}
 	}
-
 
 	private DataBuffer generateBoundaryLine(byte[] boundary) {
 		DataBuffer buffer = this.bufferFactory.allocateBuffer(boundary.length + 4);
@@ -251,11 +244,6 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 		buffer.write((byte)'\r');
 		buffer.write((byte)'\n');
 		return buffer;
-	}
-
-	@Override
-	public List<MediaType> getWritableMediaTypes() {
-		return Collections.singletonList(MediaType.MULTIPART_FORM_DATA);
 	}
 
 
@@ -304,11 +292,6 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 			return this.body.then();
 		}
 
-		@Override
-		public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-			return Mono.error(new UnsupportedOperationException());
-		}
-
 		private DataBuffer generateHeaders() {
 			DataBuffer buffer = this.bufferFactory.allocateBuffer();
 			for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
@@ -329,13 +312,21 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 		}
 
 		@Override
-		public Mono<Void> setComplete() {
-			return (this.body != null ? this.body.then() : Mono.error(new IllegalStateException("Body has not been written yet")));
+		public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
+			return Mono.error(new UnsupportedOperationException());
 		}
 
 		public Flux<DataBuffer> getBody() {
-			return (this.body != null ? this.body : Flux.error(new IllegalStateException("Body has not been written yet")));
+			return (this.body != null ? this.body :
+					Flux.error(new IllegalStateException("Body has not been written yet")));
 		}
+
+		@Override
+		public Mono<Void> setComplete() {
+			return (this.body != null ? this.body.then() :
+					Mono.error(new IllegalStateException("Body has not been written yet")));
+		}
+
 	}
 
 	/**

@@ -39,8 +39,6 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
-import static org.springframework.http.codec.multipart.MultipartHttpMessageReader.*;
-
 /**
  * Implementations of {@link BodyExtractor} that read various bodies, such a reactive streams.
  *
@@ -52,6 +50,9 @@ public abstract class BodyExtractors {
 
 	private static final ResolvableType FORM_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
+
+	private static final ResolvableType MULTIPART_TYPE = ResolvableType.forClassWithGenerics(
+			MultiValueMap.class, String.class, Part.class);
 
 
 	/**
@@ -151,8 +152,8 @@ public abstract class BodyExtractors {
 			HttpMessageReader<MultiValueMap<String, Part>> messageReader =
 					multipartMessageReader(context);
 			return context.serverResponse()
-					.map(serverResponse -> messageReader.readMono(MULTIPART_VALUE_TYPE, MULTIPART_VALUE_TYPE, serverRequest, serverResponse, context.hints()))
-					.orElseGet(() -> messageReader.readMono(MULTIPART_VALUE_TYPE, serverRequest, context.hints()));
+					.map(serverResponse -> messageReader.readMono(MULTIPART_TYPE, MULTIPART_TYPE, serverRequest, serverResponse, context.hints()))
+					.orElseGet(() -> messageReader.readMono(MULTIPART_TYPE, serverRequest, context.hints()));
 		};
 	}
 
@@ -204,7 +205,7 @@ public abstract class BodyExtractors {
 	private static HttpMessageReader<MultiValueMap<String, Part>> multipartMessageReader(BodyExtractor.Context context) {
 		return context.messageReaders().get()
 				.filter(messageReader -> messageReader
-						.canRead(MULTIPART_VALUE_TYPE, MediaType.MULTIPART_FORM_DATA))
+						.canRead(MULTIPART_TYPE, MediaType.MULTIPART_FORM_DATA))
 				.findFirst()
 				.map(BodyExtractors::<MultiValueMap<String, Part>>cast)
 				.orElseThrow(() -> new IllegalStateException(
