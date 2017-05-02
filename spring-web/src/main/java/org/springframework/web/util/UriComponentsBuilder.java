@@ -94,6 +94,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private static final Pattern FORWARDED_PROTO_PATTERN = Pattern.compile("proto=\"?([^;,\"]+)\"?");
 
+	private static final String HOST_ENDS_WITH_PORT_PATTERN = ".*:\\d+$";
+
 
 	private String scheme;
 
@@ -718,7 +720,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			Matcher matcher = FORWARDED_HOST_PATTERN.matcher(forwardedToUse);
 			if (matcher.find()) {
 				String host = matcher.group(1).trim();
-				if (host.matches(".*:\\d+$")) {
+				if (host.matches(HOST_ENDS_WITH_PORT_PATTERN)) {
 					host(host.substring(0, host.lastIndexOf(':')));
 					port(host.substring(host.lastIndexOf(':') + 1));
 				} else {

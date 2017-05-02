@@ -832,6 +832,7 @@ public class UriComponentsBuilderTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "proto=https; host=84.198.58.199");
 		request.setScheme("http");
+		request.setServerPort(8080);
 		request.setServerName("example.com");
 		request.setRequestURI("/rest/mobile/users/1");
 
