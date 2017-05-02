@@ -21,13 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
@@ -45,29 +39,34 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Sebastien Deleuze
  */
 public class MultipartHttpMessageWriterTests {
 
-	private final MultipartHttpMessageWriter writer = new MultipartHttpMessageWriter(
-			Arrays.asList(
-				new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()),
-				new ResourceHttpMessageWriter(),
-				new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder())
+	private final MultipartHttpMessageWriter writer = new MultipartHttpMessageWriter(Arrays.asList(
+			new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()),
+			new ResourceHttpMessageWriter(),
+			new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder())
 	));
+
 
 	@Test
 	public void canWrite() {
+		assertTrue(this.writer.canWrite(
+				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
+				MediaType.MULTIPART_FORM_DATA));
+		assertTrue(this.writer.canWrite(
+				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
+				MediaType.MULTIPART_FORM_DATA));
 
-		assertTrue(this.writer.canWrite(forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
+		assertFalse(this.writer.canWrite(
+				ResolvableType.forClassWithGenerics(Map.class, String.class, Object.class),
 				MediaType.MULTIPART_FORM_DATA));
-		assertTrue(this.writer.canWrite(forClassWithGenerics(MultiValueMap.class, String.class, String.class),
-				MediaType.MULTIPART_FORM_DATA));
-
-		assertFalse(this.writer.canWrite(forClassWithGenerics(Map.class, String.class, Object.class),
-				MediaType.MULTIPART_FORM_DATA));
-		assertFalse(this.writer.canWrite(forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
+		assertFalse(this.writer.canWrite(
+				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
 				MediaType.APPLICATION_FORM_URLENCODED));
 	}
 
@@ -105,13 +104,12 @@ public class MultipartHttpMessageWriterTests {
 		// see if Synchronoss NIO Multipart can read what we wrote
 		SynchronossMultipartHttpMessageReader reader = new SynchronossMultipartHttpMessageReader();
 		MockServerHttpRequest request = MockServerHttpRequest.post("/foo")
-				.header(CONTENT_TYPE, contentType.toString())
+				.header(HttpHeaders.CONTENT_TYPE, contentType.toString())
 				.body(response.getBody());
 
-		ResolvableType elementType = forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
+		ResolvableType elementType = ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
 		MultiValueMap<String, Part> requestParts = reader.readMono(elementType, request, hints).block();
 		assertEquals(5, requestParts.size());
-
 
 		Part part = requestParts.getFirst("name 1");
 		assertEquals("name 1", part.getName());
@@ -146,6 +144,7 @@ public class MultipartHttpMessageWriterTests {
 		assertEquals(MediaType.APPLICATION_JSON_UTF8, part.getHeaders().getContentType());
 		assertEquals("{\"bar\":\"bar\"}", part.getContentAsString().block());
 	}
+
 
 	private class Foo {
 

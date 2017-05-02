@@ -75,10 +75,10 @@ import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 /**
  * Unit tests for {@link WebFluxConfigurationSupport}.
+ *
  * @author Rossen Stoyanchev
  */
 public class WebFluxConfigurationSupportTests {
-
 
 	@Test
 	public void requestMappingHandlerMapping() throws Exception {

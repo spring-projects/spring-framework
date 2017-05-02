@@ -115,35 +115,14 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		this.httpHandler.handle(httpRequest, httpResponse).subscribe(subscriber);
 	}
 
-	protected ServerHttpRequest createRequest(HttpServletRequest request,
-			AsyncContext context) throws IOException {
-
+	protected ServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context) throws IOException {
 		return new ServletServerHttpRequest(
 				request, context, getDataBufferFactory(), getBufferSize());
 	}
 
-	protected ServerHttpResponse createResponse(HttpServletResponse response,
-			AsyncContext context) throws IOException {
-
+	protected ServerHttpResponse createResponse(HttpServletResponse response, AsyncContext context) throws IOException {
 		return new ServletServerHttpResponse(
 				response, context, getDataBufferFactory(), getBufferSize());
-	}
-
-	/**
-	 * We cannot combine ERROR_LISTENER and HandlerResultSubscriber due to:
-	 * https://issues.jboss.org/browse/WFLY-8515
-	 */
-	private static void runIfAsyncNotComplete(AsyncContext asyncContext, Runnable task) {
-		try {
-			if (asyncContext.getRequest().isAsyncStarted()) {
-				task.run();
-			}
-		}
-		catch (IllegalStateException ex) {
-			// Ignore:
-			// AsyncContext recycled and should not be used
-			// e.g. TIMEOUT_LISTENER (above) may have completed the AsyncContext
-		}
 	}
 
 
@@ -165,6 +144,23 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 	@Override
 	public void destroy() {
+	}
+
+
+	/**
+	 * We cannot combine ERROR_LISTENER and HandlerResultSubscriber due to:
+	 * https://issues.jboss.org/browse/WFLY-8515
+	 */
+	private static void runIfAsyncNotComplete(AsyncContext asyncContext, Runnable task) {
+		try {
+			if (asyncContext.getRequest().isAsyncStarted()) {
+				task.run();
+			}
+		}
+		catch (IllegalStateException ex) {
+			// Ignore: AsyncContext recycled and should not be used
+			// e.g. TIMEOUT_LISTENER (above) may have completed the AsyncContext
+		}
 	}
 
 
@@ -193,15 +189,14 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		}
 	};
 
+
 	private class HandlerResultSubscriber implements Subscriber<Void> {
 
 		private final AsyncContext asyncContext;
 
-
 		HandlerResultSubscriber(AsyncContext asyncContext) {
 			this.asyncContext = asyncContext;
 		}
-
 
 		@Override
 		public void onSubscribe(Subscription subscription) {
