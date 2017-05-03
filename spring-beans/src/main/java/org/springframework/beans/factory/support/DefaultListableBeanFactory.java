@@ -1090,7 +1090,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
 			if (matchingBeans.isEmpty()) {
-				if (descriptor.isRequired()) {
+				if (isRequired(descriptor)) {
 					raiseNoMatchingBeanFound(type, descriptor.getResolvableType(), descriptor);
 				}
 				return null;
@@ -1102,7 +1102,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (matchingBeans.size() > 1) {
 				autowiredBeanName = determineAutowireCandidate(matchingBeans, descriptor);
 				if (autowiredBeanName == null) {
-					if (descriptor.isRequired() || !indicatesMultipleBeans(type)) {
+					if (isRequired(descriptor) || !indicatesMultipleBeans(type)) {
 						return descriptor.resolveNotUnique(type, matchingBeans);
 					}
 					else {
@@ -1205,6 +1205,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		else {
 			return null;
 		}
+	}
+
+	private boolean isRequired(DependencyDescriptor descriptor) {
+		return this.autowireCandidateResolver.isRequired(descriptor);
 	}
 
 	private boolean indicatesMultipleBeans(Class<?> type) {
