@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,6 +109,17 @@ public class InjectionPoint {
 		else {
 			return this.methodParameter.getParameterAnnotations();
 		}
+	}
+
+	/**
+	 * Retrieve a field/parameter annotation of the given type, if any.
+	 * @param annotationType the annotation type to retrieve
+	 * @return the annotation instance, or {@code null} if none found
+	 * @since 4.3.9
+	 */
+	public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+		return (this.field != null ? this.field.getAnnotation(annotationType) :
+				this.methodParameter.getParameterAnnotation(annotationType));
 	}
 
 	/**

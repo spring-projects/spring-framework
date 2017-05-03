@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,8 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @since 4.0
  */
-public class GenericTypeAwareAutowireCandidateResolver implements AutowireCandidateResolver, BeanFactoryAware {
+public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCandidateResolver
+		implements BeanFactoryAware {
 
 	private BeanFactory beanFactory;
 
@@ -57,8 +58,8 @@ public class GenericTypeAwareAutowireCandidateResolver implements AutowireCandid
 
 	@Override
 	public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
-		if (!bdHolder.getBeanDefinition().isAutowireCandidate()) {
-			// if explicitly false, do not proceed with any other checks
+		if (!super.isAutowireCandidate(bdHolder, descriptor)) {
+			// If explicitly false, do not proceed with any other checks...
 			return false;
 		}
 		return (descriptor == null || checkGenericTypeMatch(bdHolder, descriptor));
@@ -163,25 +164,6 @@ public class GenericTypeAwareAutowireCandidateResolver implements AutowireCandid
 				return returnType;
 			}
 		}
-		return null;
-	}
-
-
-	/**
-	 * This implementation always returns {@code null}, leaving suggested value support up
-	 * to subclasses.
-	 */
-	@Override
-	public Object getSuggestedValue(DependencyDescriptor descriptor) {
-		return null;
-	}
-
-	/**
-	 * This implementation always returns {@code null}, leaving lazy resolution support up
-	 * to subclasses.
-	 */
-	@Override
-	public Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, String beanName) {
 		return null;
 	}
 

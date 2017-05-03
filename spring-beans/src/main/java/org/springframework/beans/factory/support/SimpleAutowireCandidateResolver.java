@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 
@@ -27,18 +26,25 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5
- * @see BeanDefinition#isAutowireCandidate()
  */
 public class SimpleAutowireCandidateResolver implements AutowireCandidateResolver {
 
-	/**
-	 * Determine if the provided bean definition is an autowire candidate.
-	 * <p>To be considered a candidate the bean's <em>autowire-candidate</em>
-	 * attribute must not have been set to 'false'.
-	 */
 	@Override
 	public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		return bdHolder.getBeanDefinition().isAutowireCandidate();
+	}
+
+	/**
+	 * Determine whether the given descriptor is effectively required.
+	 * <p>The default implementation checks {@link DependencyDescriptor#isRequired()}.
+	 * @param descriptor the descriptor for the target method parameter or field
+	 * @return whether the descriptor is marked as required or possibly indicating
+	 * non-required status some other way (e.g. through a parameter annotation)
+	 * @since 4.3.9
+	 * @see DependencyDescriptor#isRequired()
+	 */
+	public boolean isRequired(DependencyDescriptor descriptor) {
+		return descriptor.isRequired();
 	}
 
 	@Override
