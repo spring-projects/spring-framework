@@ -125,8 +125,10 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation returns {@link Channels#newChannel(InputStream)} with the result of
-	 * {@link #getInputStream()}.
+	 * This implementation returns {@link Channels#newChannel(InputStream)}
+	 * with the result of {@link #getInputStream()}.
+	 * <p>This is the same as in {@link Resource}'s corresponding default method
+	 * but mirrored here for efficient JVM-level dispatching in a class hierarchy.
 	 */
 	@Override
 	public ReadableByteChannel readableChannel() throws IOException {
@@ -138,7 +140,6 @@ public abstract class AbstractResource implements Resource {
 	 * content length. Subclasses will almost always be able to provide
 	 * a more optimal version of this, e.g. checking a File length.
 	 * @see #getInputStream()
-	 * @throws IllegalStateException if {@link #getInputStream()} returns null.
 	 */
 	@Override
 	public long contentLength() throws IOException {
