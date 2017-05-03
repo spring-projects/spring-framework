@@ -73,10 +73,10 @@ public interface Part {
 
 	/**
 	 * Transfer the file in this part to the given file destination.
-	 * @param dest the target file
+	 * @param destination the target file
 	 * @return completion {@code Mono} with the result of the file transfer,
 	 * possibly {@link IllegalStateException} if the part isn't a file
 	 */
-	Mono<Void> transferTo(File dest);
+	Mono<Void> transferTo(File destination);
 
 }
