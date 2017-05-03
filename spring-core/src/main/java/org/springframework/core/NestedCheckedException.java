@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,13 +80,7 @@ public abstract class NestedCheckedException extends Exception {
 	 * @return the innermost exception, or {@code null} if none
 	 */
 	public Throwable getRootCause() {
-		Throwable rootCause = null;
-		Throwable cause = getCause();
-		while (cause != null && cause != rootCause) {
-			rootCause = cause;
-			cause = cause.getCause();
-		}
-		return rootCause;
+		return NestedExceptionUtils.getRootCause(this);
 	}
 
 	/**

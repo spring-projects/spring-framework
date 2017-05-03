@@ -24,7 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.NestedCheckedException;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.HttpHandler;
@@ -33,7 +33,6 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
 import org.springframework.web.server.handler.WebHandlerDecorator;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
@@ -60,8 +59,17 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	 * or a full stack trace only at TRACE level.
 	 */
 	private static final String DISCONNECTED_CLIENT_LOG_CATEGORY =
-			ExceptionHandlingWebHandler.class.getName() + ".DisconnectedClient";
+			"org.springframework.web.server.DisconnectedClient";
 
+	/**
+	 * Tomcat: ClientAbortException or EOFException
+	 * Jetty: EofException
+	 * WildFly, GlassFish: java.io.IOException "Broken pipe" (already covered)
+	 * <p>TODO:
+	 * This definition is currently duplicated between HttpWebHandlerAdapter
+	 * and AbstractSockJsSession. It is a candidate for a common utility class.
+	 * @see #indicatesDisconnectedClient(Throwable)
+	 */
 	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS =
 			new HashSet<>(Arrays.asList("ClientAbortException", "EOFException", "EofException"));
 
@@ -115,7 +123,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	 * Return the configured {@link ServerCodecConfigurer}.
 	 */
 	public ServerCodecConfigurer getCodecConfigurer() {
-		return this.codecConfigurer != null ? this.codecConfigurer : ServerCodecConfigurer.create();
+		return (this.codecConfigurer != null ? this.codecConfigurer : ServerCodecConfigurer.create());
 	}
 
 
@@ -125,7 +133,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 		return getDelegate().handle(exchange)
 				.onErrorResume(ex -> {
 					response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-					logException(ex);
+					logHandleFailure(ex);
 					return Mono.empty();
 				})
 				.then(Mono.defer(response::setComplete));
@@ -135,25 +143,25 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 		return new DefaultServerWebExchange(request, response, this.sessionManager, getCodecConfigurer());
 	}
 
-	@SuppressWarnings("serial")
-	private void logException(Throwable ex) {
-		NestedCheckedException nestedEx = new NestedCheckedException("", ex) {};
-		if ("Broken pipe".equalsIgnoreCase(nestedEx.getMostSpecificCause().getMessage()) ||
-				DISCONNECTED_CLIENT_EXCEPTIONS.contains(ex.getClass().getSimpleName())) {
-
+	private void logHandleFailure(Throwable ex) {
+		if (indicatesDisconnectedClient(ex)) {
 			if (disconnectedClientLogger.isTraceEnabled()) {
 				disconnectedClientLogger.trace("Looks like the client has gone away", ex);
 			}
 			else if (disconnectedClientLogger.isDebugEnabled()) {
-				disconnectedClientLogger.debug(
-						"The client has gone away: " + nestedEx.getMessage() +
-								" (For a full stack trace, set the log category" +
-								"'" + DISCONNECTED_CLIENT_LOG_CATEGORY + "' to TRACE)");
+				disconnectedClientLogger.debug("Looks like the client has gone away: " + ex +
+						" (For a full stack trace, set the log category '" + DISCONNECTED_CLIENT_LOG_CATEGORY +
+						"' to TRACE level.)");
 			}
 		}
 		else {
-			logger.error("Could not complete request", ex);
+			logger.error("Failed to handle request", ex);
 		}
+	}
+
+	private boolean indicatesDisconnectedClient(Throwable ex)  {
+		return ("Broken pipe".equalsIgnoreCase(NestedExceptionUtils.getMostSpecificCause(ex).getMessage()) ||
+				DISCONNECTED_CLIENT_EXCEPTIONS.contains(ex.getClass().getSimpleName()));
 	}
 
 }
