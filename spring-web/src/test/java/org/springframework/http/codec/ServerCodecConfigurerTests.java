@@ -41,7 +41,8 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.http.codec.multipart.SynchronossMultipartHttpMessageReader;
+import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
+import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.MimeTypeUtils;
@@ -63,14 +64,15 @@ public class ServerCodecConfigurerTests {
 	@Test
 	public void defaultReaders() throws Exception {
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
-		assertEquals(10, readers.size());
+		assertEquals(11, readers.size());
 		assertEquals(ByteArrayDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ByteBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(DataBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ResourceDecoder.class, getNextDecoder(readers).getClass());
 		assertStringDecoder(getNextDecoder(readers), true);
 		assertEquals(FormHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
-		assertEquals(SynchronossMultipartHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
+		assertEquals(SynchronossPartHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
+		assertEquals(MultipartHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
 		assertEquals(Jaxb2XmlDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(Jackson2JsonDecoder.class, getNextDecoder(readers).getClass());
 		assertStringDecoder(getNextDecoder(readers), false);

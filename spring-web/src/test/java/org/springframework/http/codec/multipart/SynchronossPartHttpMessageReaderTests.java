@@ -32,53 +32,57 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpOutputMessage;
-import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static java.util.Collections.*;
-import static org.junit.Assert.*;
-import static org.springframework.http.HttpHeaders.*;
-import static org.springframework.http.MediaType.*;
+import static java.util.Collections.emptyMap;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 /**
  * @author Sebastien Deleuze
  */
-public class SynchronossMultipartHttpMessageReaderTests {
+public class SynchronossPartHttpMessageReaderTests {
 
-	private final HttpMessageReader<MultiValueMap<String, Part>> reader = new SynchronossMultipartHttpMessageReader();
+	private final MultipartHttpMessageReader reader =
+			new MultipartHttpMessageReader(new SynchronossPartHttpMessageReader());
 
 
 	@Test
 	public void canRead() {
 		assertTrue(this.reader.canRead(
-				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Part.class),
+				forClassWithGenerics(MultiValueMap.class, String.class, Part.class),
 				MediaType.MULTIPART_FORM_DATA));
 
 		assertFalse(this.reader.canRead(
-				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
+				forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
 				MediaType.MULTIPART_FORM_DATA));
 
 		assertFalse(this.reader.canRead(
-				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
+				forClassWithGenerics(MultiValueMap.class, String.class, String.class),
 				MediaType.MULTIPART_FORM_DATA));
 
 		assertFalse(this.reader.canRead(
-				ResolvableType.forClassWithGenerics(Map.class, String.class, String.class),
+				forClassWithGenerics(Map.class, String.class, String.class),
 				MediaType.MULTIPART_FORM_DATA));
 
 		assertFalse(this.reader.canRead(
-				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Part.class),
+				forClassWithGenerics(MultiValueMap.class, String.class, Part.class),
 				MediaType.APPLICATION_FORM_URLENCODED));
 	}
 
 	@Test
 	public void resolveParts() throws IOException {
 		ServerHttpRequest request = generateMultipartRequest();
-		ResolvableType elementType = ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
+		ResolvableType elementType = forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
 		MultiValueMap<String, Part> parts = this.reader.readMono(elementType, request, emptyMap()).block();
 		assertEquals(2, parts.size());
 
@@ -105,7 +109,7 @@ public class SynchronossMultipartHttpMessageReaderTests {
 	@Test
 	public void bodyError() {
 		ServerHttpRequest request = generateErrorMultipartRequest();
-		ResolvableType elementType = ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
+		ResolvableType elementType = forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
 		StepVerifier.create(this.reader.readMono(elementType, request, emptyMap())).verifyError();
 	}
 

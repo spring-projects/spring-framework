@@ -102,7 +102,9 @@ public class MultipartHttpMessageWriterTests {
 		assertNotNull("No boundary found", contentType.getParameter("boundary"));
 
 		// see if Synchronoss NIO Multipart can read what we wrote
-		SynchronossMultipartHttpMessageReader reader = new SynchronossMultipartHttpMessageReader();
+		SynchronossPartHttpMessageReader synchronossReader = new SynchronossPartHttpMessageReader();
+		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(synchronossReader);
+
 		MockServerHttpRequest request = MockServerHttpRequest.post("/foo")
 				.header(HttpHeaders.CONTENT_TYPE, contentType.toString())
 				.body(response.getBody());

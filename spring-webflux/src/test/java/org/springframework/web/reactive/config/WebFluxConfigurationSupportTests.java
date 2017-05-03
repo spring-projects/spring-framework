@@ -127,7 +127,7 @@ public class WebFluxConfigurationSupportTests {
 		assertNotNull(adapter);
 
 		List<HttpMessageReader<?>> readers = adapter.getMessageCodecConfigurer().getReaders();
-		assertEquals(10, readers.size());
+		assertEquals(11, readers.size());
 
 		assertHasMessageReader(readers, forClass(byte[].class), APPLICATION_OCTET_STREAM);
 		assertHasMessageReader(readers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);

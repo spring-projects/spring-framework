@@ -25,15 +25,12 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.synchronoss.cloud.nio.multipart.Multipart;
 import org.synchronoss.cloud.nio.multipart.MultipartContext;
@@ -55,25 +52,24 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.util.Assert;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 
 /**
- * {@code HttpMessageReader} for {@code "multipart/form-data"} requests based
- * on the Synchronoss NIO Multipart library.
+ * {@code HttpMessageReader} for parsing {@code "multipart/form-data"} requests
+ * to a stream of {@link Part}'s using the Synchronoss NIO Multipart library.
+ *
+ * <p>This reader can be provided to {@link MultipartHttpMessageReader} in order
+ * to aggregate all parts into a Map.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
  * @since 5.0
  * @see <a href="https://github.com/synchronoss/nio-multipart">Synchronoss NIO Multipart</a>
+ * @see MultipartHttpMessageReader
  */
-public class SynchronossMultipartHttpMessageReader implements HttpMessageReader<MultiValueMap<String, Part>> {
-
-	private static final ResolvableType MULTIPART_VALUE_TYPE = ResolvableType.forClassWithGenerics(
-			MultiValueMap.class, String.class, Part.class);
+public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part> {
 
 
 	@Override
@@ -83,34 +79,25 @@ public class SynchronossMultipartHttpMessageReader implements HttpMessageReader<
 
 	@Override
 	public boolean canRead(ResolvableType elementType, MediaType mediaType) {
-		return MULTIPART_VALUE_TYPE.isAssignableFrom(elementType) &&
+		return Part.class.equals(elementType.resolve(Object.class)) &&
 				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType));
 	}
 
 
 	@Override
-	public Flux<MultiValueMap<String, Part>> read(ResolvableType elementType,
-			ReactiveHttpInputMessage message, Map<String, Object> hints) {
+	public Flux<Part> read(ResolvableType elementType, ReactiveHttpInputMessage message,
+			Map<String, Object> hints) {
 
-		return Flux.from(readMono(elementType, message, hints));
+		return Flux.create(new SynchronossPartGenerator(message));
 	}
 
 
 	@Override
-	public Mono<MultiValueMap<String, Part>> readMono(ResolvableType elementType,
-			ReactiveHttpInputMessage inputMessage, Map<String, Object> hints) {
+	public Mono<Part> readMono(ResolvableType elementType, ReactiveHttpInputMessage message,
+			Map<String, Object> hints) {
 
-		return Flux.create(new SynchronossPartGenerator(inputMessage))
-				.collectMultimap(Part::getName).map(this::toMultiValueMap);
-	}
-
-	private LinkedMultiValueMap<String, Part> toMultiValueMap(Map<String, Collection<Part>> map) {
-		return new LinkedMultiValueMap<>(map.entrySet().stream()
-				.collect(Collectors.toMap(Map.Entry::getKey, e -> toList(e.getValue()))));
-	}
-
-	private List<Part> toList(Collection<Part> collection) {
-		return collection instanceof List ? (List<Part>) collection : new ArrayList<>(collection);
+		return Mono.error(new UnsupportedOperationException(
+				"This reader does not support reading a single element."));
 	}
 
 

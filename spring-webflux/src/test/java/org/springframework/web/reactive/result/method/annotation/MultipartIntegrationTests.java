@@ -16,8 +16,12 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.junit.Before;
 import org.junit.Test;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -35,6 +39,7 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.DispatcherHandler;
@@ -68,14 +73,10 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 	}
 
 	@Test
-	public void part() {
-		test("/part");
-	}
-
-	private void test(String uri) {
+	public void requestPart() {
 		Mono<ClientResponse> result = webClient
 				.post()
-				.uri(uri)
+				.uri("/requestPart")
 				.contentType(MediaType.MULTIPART_FORM_DATA)
 				.body(BodyInserters.fromMultipartData(generateBody()))
 				.exchange();
@@ -85,6 +86,37 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 				.consumeNextWith(response -> assertEquals(HttpStatus.OK, response.statusCode()))
 				.verifyComplete();
 	}
+
+	@Test
+	public void requestBodyMap() {
+		Mono<String> result = webClient
+				.post()
+				.uri("/requestBodyMap")
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.body(BodyInserters.fromMultipartData(generateBody()))
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.consumeNextWith(body -> assertEquals("Map[barPart,fooPart]", body))
+				.verifyComplete();
+	}
+
+	@Test
+	public void requestBodyFlux() {
+		Mono<String> result = webClient
+				.post()
+				.uri("/requestBodyFlux")
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.body(BodyInserters.fromMultipartData(generateBody()))
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.consumeNextWith(body -> assertEquals("Flux[barPart,fooPart]", body))
+				.verifyComplete();
+	}
+
 
 	private MultiValueMap<String, Object> generateBody() {
 		HttpHeaders fooHeaders = new HttpHeaders();
@@ -102,11 +134,22 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 	@SuppressWarnings("unused")
 	static class MultipartController {
 
-		@PostMapping("/part")
+		@PostMapping("/requestPart")
 		void part(@RequestPart Part fooPart) {
 			assertEquals("foo.txt", fooPart.getFilename().get());
 		}
 
+		@PostMapping("/requestBodyMap")
+		Mono<String> part(@RequestBody Mono<MultiValueMap<String, Part>> parts) {
+			return parts.map(map -> map.toSingleValueMap().entrySet().stream()
+					.map(Map.Entry::getKey).sorted().collect(Collectors.joining(",", "Map[", "]")));
+		}
+
+		@PostMapping("/requestBodyFlux")
+		Mono<String> part(@RequestBody Flux<Part> parts) {
+			return parts.map(Part::getName).collectList()
+					.map(names -> names.stream().sorted().collect(Collectors.joining(",", "Flux[", "]")));
+		}
 	}
 
 	@Configuration

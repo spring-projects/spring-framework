@@ -21,7 +21,8 @@ import java.util.List;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.http.codec.multipart.SynchronossMultipartHttpMessageReader;
+import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
+import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -65,7 +66,9 @@ class DefaultServerCodecConfigurer extends DefaultCodecConfigurer implements Ser
 			super.addTypedReadersTo(result);
 			addReaderTo(result, FormHttpMessageReader::new);
 			if (synchronossMultipartPresent) {
-				addReaderTo(result, SynchronossMultipartHttpMessageReader::new);
+				SynchronossPartHttpMessageReader partReader = new SynchronossPartHttpMessageReader();
+				addReaderTo(result, () -> partReader);
+				addReaderTo(result, () -> new MultipartHttpMessageReader(partReader));
 			}
 		}
 
