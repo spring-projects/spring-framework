@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,6 @@ public abstract class AbstractResource implements Resource {
 	 * content length. Subclasses will almost always be able to provide
 	 * a more optimal version of this, e.g. checking a File length.
 	 * @see #getInputStream()
-	 * @throws IllegalStateException if {@link #getInputStream()} returns null.
 	 */
 	@Override
 	public long contentLength() throws IOException {
@@ -162,8 +161,9 @@ public abstract class AbstractResource implements Resource {
 	 * Determine the File to use for timestamp checking.
 	 * <p>The default implementation delegates to {@link #getFile()}.
 	 * @return the File to use for timestamp checking (never {@code null})
-	 * @throws IOException if the resource cannot be resolved as absolute
-	 * file path, i.e. if the resource is not available in a file system
+	 * @throws FileNotFoundException if the resource cannot be resolved as
+	 * an absolute file path, i.e. is not available in a file system
+	 * @throws IOException in case of general resolution/reading failures
 	 */
 	protected File getFileForLastModifiedCheck() throws IOException {
 		return getFile();

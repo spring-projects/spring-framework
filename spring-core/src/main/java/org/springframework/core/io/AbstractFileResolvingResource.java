@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.io;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -89,11 +90,11 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 		try {
 			URL url = getURL();
 			if (ResourceUtils.isFileURL(url)) {
-				// Proceed with file system resolution...
+				// Proceed with file system resolution
 				return getFile().exists();
 			}
 			else {
-				// Try a URL connection content-length header...
+				// Try a URL connection content-length header
 				URLConnection con = url.openConnection();
 				customizeConnection(con);
 				HttpURLConnection httpCon =
@@ -133,7 +134,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 		try {
 			URL url = getURL();
 			if (ResourceUtils.isFileURL(url)) {
-				// Proceed with file system resolution...
+				// Proceed with file system resolution
 				File file = getFile();
 				return (file.canRead() && !file.isDirectory());
 			}
@@ -150,11 +151,11 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	public long contentLength() throws IOException {
 		URL url = getURL();
 		if (ResourceUtils.isFileURL(url)) {
-			// Proceed with file system resolution...
+			// Proceed with file system resolution
 			return getFile().length();
 		}
 		else {
-			// Try a URL connection content-length header...
+			// Try a URL connection content-length header
 			URLConnection con = url.openConnection();
 			customizeConnection(con);
 			return con.getContentLength();
@@ -165,15 +166,18 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	public long lastModified() throws IOException {
 		URL url = getURL();
 		if (ResourceUtils.isFileURL(url) || ResourceUtils.isJarURL(url)) {
-			// Proceed with file system resolution...
-			return super.lastModified();
+			// Proceed with file system resolution
+			try {
+				return super.lastModified();
+			}
+			catch (FileNotFoundException ex) {
+				// Defensively fall back to URL connection check instead
+			}
 		}
-		else {
-			// Try a URL connection last-modified header...
-			URLConnection con = url.openConnection();
-			customizeConnection(con);
-			return con.getLastModified();
-		}
+		// Try a URL connection last-modified header
+		URLConnection con = url.openConnection();
+		customizeConnection(con);
+		return con.getLastModified();
 	}
 
 

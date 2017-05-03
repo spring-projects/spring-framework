@@ -583,10 +583,13 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			// We'll also handle paths with and without leading "file:" prefix.
 			String urlFile = rootDirURL.getFile();
 			try {
-				int separatorIndex = urlFile.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
+				int separatorIndex = urlFile.indexOf(ResourceUtils.WAR_URL_SEPARATOR);
+				if (separatorIndex == -1) {
+					separatorIndex = urlFile.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
+				}
 				if (separatorIndex != -1) {
 					jarFileUrl = urlFile.substring(0, separatorIndex);
-					rootEntryPath = urlFile.substring(separatorIndex + ResourceUtils.JAR_URL_SEPARATOR.length());
+					rootEntryPath = urlFile.substring(separatorIndex + 2);  // both separators are 2 chars
 					jarFile = getJarFile(jarFileUrl);
 				}
 				else {
