@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -176,6 +177,15 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	@Override
 	public ReadableByteChannel readableChannel() throws IOException {
 		return new FileInputStream(this.file).getChannel();
+	}
+
+	/**
+	 * This implementation opens a FileChannel for the underlying file.
+	 * @see java.nio.channels.FileChannel
+	 */
+	@Override
+	public WritableByteChannel writableChannel() throws IOException {
+		return new FileOutputStream(this.file).getChannel();
 	}
 
 	/**
