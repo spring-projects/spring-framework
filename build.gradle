@@ -301,6 +301,15 @@ project("spring-build-src") {
 	configurations.archives.artifacts.clear()
 }
 
+project("spring-jcl") {
+	description = "Spring Commons Logging Bridge"
+
+	dependencies {
+		optional("org.apache.logging.log4j:log4j-api:${log4jVersion}")
+		optional("org.slf4j:slf4j-api:${slf4jVersion}")
+	}
+}
+
 project("spring-core") {
 	description = "Spring Core"
 
@@ -366,8 +375,7 @@ project("spring-core") {
 
 		compile(files(cglibRepackJar))
 		compile(files(objenesisRepackJar))
-		optional("org.apache.logging.log4j:log4j-api:${log4jVersion}")
-		optional("org.slf4j:slf4j-api:${slf4jVersion}")
+		compile(project(":spring-jcl"))
 		optional("net.sf.jopt-simple:jopt-simple:5.0.3")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")

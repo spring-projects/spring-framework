@@ -395,8 +395,8 @@ Although Spring provides integration and support for a huge range of enterprise 
 other external tools, it intentionally keeps its mandatory dependencies to an absolute
 minimum: you shouldn't have to locate and download (even automatically) a large number
 of jar libraries in order to use Spring for simple use cases. For basic dependency
-injection there is only one mandatory external dependency, and that is for logging (see
-below for a more detailed description of logging options).
+injection there is only one mandatory external dependency, and that is for logging
+(see below for a more detailed description of logging options).
 
 Next we outline the basic steps needed to configure an application that depends on
 Spring, first with Maven and then with Gradle and finally using Ivy. In all cases, if
@@ -597,11 +597,12 @@ http://repo.spring.io/snapshot/org/springframework/spring[snapshots].
 ==== Logging
 Spring's logging setup has been revised for Spring 5: It is still based on the Apache
 Commons Logging API, also known as Jakarta Commons Logging (JCL). However, `spring-core`
-includes an embedded variant of Commons Logging now, with a Spring-specific `LogFactory`
-which automatically bridges to https://logging.apache.org/log4j/2.x/[Log4j 2],
-http://www.slf4j.org[SLF4J], or the JDK's own `java.util.logging` (JUL). This
-implementation acts like the JCL-over-SLF4J bridge but with a range of dynamically
-detected providers, analogous to JBoss Logging's common targets (as used by Hibernate).
+refers to a custom Commons Logging bridge in the `spring-jcl` module now, with a
+Spring-specific `LogFactory` implementation which automatically bridges to
+https://logging.apache.org/log4j/2.x/[Log4j 2], http://www.slf4j.org[SLF4J], or the
+JDK's own `java.util.logging` (JUL). This implementation acts like the JCL-over-SLF4J
+bridge but with a range of dynamically detected providers, analogous to JBoss Logging's
+common targets (as supported by e.g. Hibernate and Undertow).
 
 As a benefit, there is no need for external bridges like JCL-over-SLF4J anymore,
 and correspondingly no need for a manual exclude of the standard Commons Logging jar
@@ -630,6 +631,10 @@ up since Spring's bridge does not support custom `commons-logging.properties' se
 For any other log provider, please set up a corresponding SLF4J or JUL bridge (which
 you are very likely going to need for other libraries such as Hibernate anyway).
 Note that Log4j 1.x has reached its end-of-life; please migrate to Log4j 2.x.
+
+If you run into any remaining issues with Spring's Commons Logging implementation,
+consider excluding `spring-jcl` and switching to the standard `commons-logging`
+artifact (supporting `commons-logging.properties' setup) or to `jcl-over-slf4j`.
 ====
 
 [[overview-logging-log4j]]
