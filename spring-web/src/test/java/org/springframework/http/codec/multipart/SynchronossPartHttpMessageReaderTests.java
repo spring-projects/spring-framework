@@ -18,7 +18,6 @@ package org.springframework.http.codec.multipart;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -88,10 +87,9 @@ public class SynchronossPartHttpMessageReaderTests {
 
 		assertTrue(parts.containsKey("fooPart"));
 		Part part = parts.getFirst("fooPart");
+		assertTrue(part instanceof FilePart);
 		assertEquals("fooPart", part.getName());
-		Optional<String> filename = part.getFilename();
-		assertTrue(filename.isPresent());
-		assertEquals("foo.txt", filename.get());
+		assertEquals("foo.txt", ((FilePart) part).getFilename());
 		DataBuffer buffer = part.getContent().reduce(DataBuffer::write).block();
 		assertEquals(12, buffer.readableByteCount());
 		byte[] byteContent = new byte[12];
@@ -100,10 +98,9 @@ public class SynchronossPartHttpMessageReaderTests {
 
 		assertTrue(parts.containsKey("barPart"));
 		part = parts.getFirst("barPart");
+		assertTrue(part instanceof FormFieldPart);
 		assertEquals("barPart", part.getName());
-		filename = part.getFilename();
-		assertFalse(filename.isPresent());
-		assertEquals("bar", part.getContentAsString().block());
+		assertEquals("bar", ((FormFieldPart) part).getValue());
 	}
 
 	@Test

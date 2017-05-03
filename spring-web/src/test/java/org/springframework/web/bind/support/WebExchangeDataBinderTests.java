@@ -17,15 +17,22 @@
 package org.springframework.web.bind.support;
 
 import java.beans.PropertyEditorSupport;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.time.Duration;
-import java.util.Iterator;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.FormHttpMessageWriter;
+import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
+import org.springframework.mock.http.client.reactive.test.MockClientHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
@@ -34,9 +41,12 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 
 import static junit.framework.TestCase.assertFalse;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
 
 /**
  * Unit tests for {@link WebExchangeDataBinder}.
@@ -177,39 +187,60 @@ public class WebExchangeDataBinderTests {
 		assertEquals("test", this.testBean.getSpouse().getName());
 	}
 
+	@Test
+	public void testMultipart() throws Exception {
 
-	private String generateForm(MultiValueMap<String, String> form) {
-		StringBuilder builder = new StringBuilder();
-		try {
-			for (Iterator<String> names = form.keySet().iterator(); names.hasNext();) {
-				String name = names.next();
-				for (Iterator<String> values = form.get(name).iterator(); values.hasNext();) {
-					String value = values.next();
-					builder.append(URLEncoder.encode(name, "UTF-8"));
-					if (value != null) {
-						builder.append('=');
-						builder.append(URLEncoder.encode(value, "UTF-8"));
-						if (values.hasNext()) {
-							builder.append('&');
-						}
-					}
-				}
-				if (names.hasNext()) {
-					builder.append('&');
-				}
-			}
-		}
-		catch (UnsupportedEncodingException ex) {
-			throw new IllegalStateException(ex);
-		}
-		return builder.toString();
+		MultipartBean bean = new MultipartBean();
+		WebExchangeDataBinder binder = new WebExchangeDataBinder(bean);
+
+		MultiValueMap<String, Object> data = new LinkedMultiValueMap<>();
+		data.add("name", "bar");
+		data.add("someList", "123");
+		data.add("someList", "abc");
+		data.add("someArray", "dec");
+		data.add("someArray", "456");
+		data.add("part", new ClassPathResource("org/springframework/http/codec/multipart/foo.txt"));
+		data.add("somePartList", new ClassPathResource("org/springframework/http/codec/multipart/foo.txt"));
+		data.add("somePartList", new ClassPathResource("org/springframework/http/server/reactive/spring.png"));
+		binder.bind(exchangeMultipart(data)).block(Duration.ofMillis(5000));
+
+		assertEquals("bar", bean.getName());
+		assertEquals(Arrays.asList("123", "abc"), bean.getSomeList());
+		assertArrayEquals(new String[] {"dec", "456"}, bean.getSomeArray());
+		assertEquals("foo.txt", bean.getPart().getFilename());
+		assertEquals(2, bean.getSomePartList().size());
+		assertEquals("foo.txt", bean.getSomePartList().get(0).getFilename());
+		assertEquals("spring.png", bean.getSomePartList().get(1).getFilename());
 	}
 
+
+
 	private ServerWebExchange exchange(MultiValueMap<String, String> formData) {
+
+		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST, "/");
+
+		new FormHttpMessageWriter().write(Mono.just(formData),
+				forClassWithGenerics(MultiValueMap.class, String.class, String.class),
+				MediaType.APPLICATION_FORM_URLENCODED, request, Collections.emptyMap()).block();
+
 		return MockServerHttpRequest
 				.post("/")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-				.body(generateForm(formData))
+				.body(request.getBody())
+				.toExchange();
+	}
+
+	private ServerWebExchange exchangeMultipart(MultiValueMap<String, ?> multipartData) {
+
+		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST, "/");
+
+		new MultipartHttpMessageWriter().write(Mono.just(multipartData), forClass(MultiValueMap.class),
+				MediaType.MULTIPART_FORM_DATA, request, Collections.emptyMap()).block();
+
+		return MockServerHttpRequest
+				.post("/")
+				.contentType(request.getHeaders().getContentType())
+				.body(request.getBody())
 				.toExchange();
 	}
 
@@ -219,6 +250,60 @@ public class WebExchangeDataBinderTests {
 		@Override
 		public void setAsText(String text) {
 			setValue(new TestBean());
+		}
+	}
+
+	private static class MultipartBean {
+
+		private String name;
+
+		private List<?> someList;
+
+		private String[] someArray;
+
+		private FilePart part;
+
+		private List<FilePart> somePartList;
+
+
+		public String getName() {
+			return this.name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public List<?> getSomeList() {
+			return this.someList;
+		}
+
+		public void setSomeList(List<?> someList) {
+			this.someList = someList;
+		}
+
+		public String[] getSomeArray() {
+			return this.someArray;
+		}
+
+		public void setSomeArray(String[] someArray) {
+			this.someArray = someArray;
+		}
+
+		public FilePart getPart() {
+			return this.part;
+		}
+
+		public void setPart(FilePart part) {
+			this.part = part;
+		}
+
+		public List<FilePart> getSomePartList() {
+			return this.somePartList;
+		}
+
+		public void setSomePartList(List<FilePart> somePartList) {
+			this.somePartList = somePartList;
 		}
 	}
 

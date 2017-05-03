@@ -39,7 +39,10 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze
@@ -114,37 +117,39 @@ public class MultipartHttpMessageWriterTests {
 		assertEquals(5, requestParts.size());
 
 		Part part = requestParts.getFirst("name 1");
+		assertTrue(part instanceof FormFieldPart);
 		assertEquals("name 1", part.getName());
-		assertEquals("value 1", part.getContentAsString().block());
-		assertFalse(part.getFilename().isPresent());
+		assertEquals("value 1", ((FormFieldPart) part).getValue());
 
-		List<Part> part2 = requestParts.get("name 2");
-		assertEquals(2, part2.size());
-		part = part2.get(0);
+		List<Part> parts2 = requestParts.get("name 2");
+		assertEquals(2, parts2.size());
+		part = parts2.get(0);
+		assertTrue(part instanceof FormFieldPart);
 		assertEquals("name 2", part.getName());
-		assertEquals("value 2+1", part.getContentAsString().block());
-		part = part2.get(1);
+		assertEquals("value 2+1", ((FormFieldPart) part).getValue());
+		part = parts2.get(1);
+		assertTrue(part instanceof FormFieldPart);
 		assertEquals("name 2", part.getName());
-		assertEquals("value 2+2", part.getContentAsString().block());
+		assertEquals("value 2+2", ((FormFieldPart) part).getValue());
 
 		part = requestParts.getFirst("logo");
+		assertTrue(part instanceof FilePart);
 		assertEquals("logo", part.getName());
-		assertTrue(part.getFilename().isPresent());
-		assertEquals("logo.jpg", part.getFilename().get());
+		assertEquals("logo.jpg", ((FilePart) part).getFilename());
 		assertEquals(MediaType.IMAGE_JPEG, part.getHeaders().getContentType());
 		assertEquals(logo.getFile().length(), part.getHeaders().getContentLength());
 
 		part = requestParts.getFirst("utf8");
+		assertTrue(part instanceof FilePart);
 		assertEquals("utf8", part.getName());
-		assertTrue(part.getFilename().isPresent());
-		assertEquals("Hall\u00F6le.jpg", part.getFilename().get());
+		assertEquals("Hall\u00F6le.jpg", ((FilePart) part).getFilename());
 		assertEquals(MediaType.IMAGE_JPEG, part.getHeaders().getContentType());
 		assertEquals(utf8.getFile().length(), part.getHeaders().getContentLength());
 
 		part = requestParts.getFirst("json");
 		assertEquals("json", part.getName());
 		assertEquals(MediaType.APPLICATION_JSON_UTF8, part.getHeaders().getContentType());
-		assertEquals("{\"bar\":\"bar\"}", part.getContentAsString().block());
+		assertEquals("{\"bar\":\"bar\"}", ((FormFieldPart) part).getValue());
 	}
 
 

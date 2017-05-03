@@ -237,7 +237,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 	private boolean hasErrorsArgument(MethodParameter parameter) {
 		int i = parameter.getParameterIndex();
 		Class<?>[] paramTypes = parameter.getMethod().getParameterTypes();
-		return (paramTypes.length > i && Errors.class.isAssignableFrom(paramTypes[i + 1]));
+		return (paramTypes.length > i + 1 && Errors.class.isAssignableFrom(paramTypes[i + 1]));
 	}
 
 	private void validateIfApplicable(WebExchangeDataBinder binder, MethodParameter parameter) {

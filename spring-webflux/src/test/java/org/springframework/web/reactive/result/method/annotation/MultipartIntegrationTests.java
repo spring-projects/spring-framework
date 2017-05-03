@@ -33,11 +33,13 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -117,6 +119,21 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 				.verifyComplete();
 	}
 
+	@Test
+	public void modelAttribute() {
+		Mono<String> result = webClient
+				.post()
+				.uri("/modelAttribute")
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.body(BodyInserters.fromMultipartData(generateBody()))
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.consumeNextWith(body -> assertEquals("TestBean[barPart=bar,fooPart=foo.txt]", body))
+				.verifyComplete();
+	}
+
 
 	private MultiValueMap<String, Object> generateBody() {
 		HttpHeaders fooHeaders = new HttpHeaders();
@@ -135,22 +152,57 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 	static class MultipartController {
 
 		@PostMapping("/requestPart")
-		void part(@RequestPart Part fooPart) {
-			assertEquals("foo.txt", fooPart.getFilename().get());
+		void requestPart(@RequestPart Part fooPart) {
+			assertEquals("foo.txt", ((FilePart) fooPart).getFilename());
 		}
 
 		@PostMapping("/requestBodyMap")
-		Mono<String> part(@RequestBody Mono<MultiValueMap<String, Part>> parts) {
+		Mono<String> requestBodyMap(@RequestBody Mono<MultiValueMap<String, Part>> parts) {
 			return parts.map(map -> map.toSingleValueMap().entrySet().stream()
 					.map(Map.Entry::getKey).sorted().collect(Collectors.joining(",", "Map[", "]")));
 		}
 
 		@PostMapping("/requestBodyFlux")
-		Mono<String> part(@RequestBody Flux<Part> parts) {
+		Mono<String> requestBodyFlux(@RequestBody Flux<Part> parts) {
 			return parts.map(Part::getName).collectList()
 					.map(names -> names.stream().sorted().collect(Collectors.joining(",", "Flux[", "]")));
 		}
+
+		@PostMapping("/modelAttribute")
+		String modelAttribute(@ModelAttribute TestBean testBean) {
+			return testBean.toString();
+		}
 	}
+
+	static class TestBean {
+
+		private String barPart;
+
+		private FilePart fooPart;
+
+
+		public String getBarPart() {
+			return this.barPart;
+		}
+
+		public void setBarPart(String barPart) {
+			this.barPart = barPart;
+		}
+
+		public FilePart getFooPart() {
+			return this.fooPart;
+		}
+
+		public void setFooPart(FilePart fooPart) {
+			this.fooPart = fooPart;
+		}
+
+		@Override
+		public String toString() {
+			return "TestBean[barPart=" + getBarPart() + ",fooPart=" + getFooPart().getFilename() + "]";
+		}
+	}
+
 
 	@Configuration
 	@EnableWebFlux

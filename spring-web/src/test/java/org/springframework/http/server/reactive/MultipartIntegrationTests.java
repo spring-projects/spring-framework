@@ -30,6 +30,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -99,12 +101,11 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 
 		private void assertFooPart(Part part) {
 			assertEquals("fooPart", part.getName());
-			Optional<String> filename = part.getFilename();
-			assertTrue(filename.isPresent());
-			assertEquals("foo.txt", filename.get());
+			assertTrue(part instanceof FilePart);
+			assertEquals("foo.txt", ((FilePart) part).getFilename());
 			DataBuffer buffer = part
 					.getContent()
-					.reduce((s1, s2) -> s1.write(s2))
+					.reduce(DataBuffer::write)
 					.block();
 			assertEquals(12, buffer.readableByteCount());
 			byte[] byteContent = new byte[12];
@@ -114,9 +115,8 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 
 		private void assertBarPart(Part part) {
 			assertEquals("barPart", part.getName());
-			Optional<String> filename = part.getFilename();
-			assertFalse(filename.isPresent());
-			assertEquals("bar", part.getContentAsString().block());
+			assertTrue(part instanceof FormFieldPart);
+			assertEquals("bar", ((FormFieldPart) part).getValue());
 		}
 	}
 

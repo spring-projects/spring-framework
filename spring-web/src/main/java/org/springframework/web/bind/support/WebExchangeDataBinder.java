@@ -19,10 +19,12 @@ package org.springframework.web.bind.support;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
@@ -105,6 +107,9 @@ public class WebExchangeDataBinder extends WebDataBinder {
 
 	private static void addBindValue(Map<String, Object> params, String key, List<?> values) {
 		if (!CollectionUtils.isEmpty(values)) {
+			values = values.stream()
+					.map(value -> value instanceof FormFieldPart ? ((FormFieldPart) value).getValue() : value)
+					.collect(Collectors.toList());
 			params.put(key, values.size() == 1 ? values.get(0) : values);
 		}
 	}

@@ -27,6 +27,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -38,7 +40,6 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.junit.Assert.assertEquals;
-
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -57,9 +58,7 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 
 		StepVerifier
 				.create(result)
-				.consumeNextWith(response -> {
-					assertEquals(HttpStatus.OK, response.statusCode());
-				})
+				.consumeNextWith(response -> assertEquals(HttpStatus.OK, response.statusCode()))
 				.verifyComplete();
 	}
 
@@ -90,8 +89,8 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 						Map<String, Part> parts = map.toSingleValueMap();
 						try {
 							assertEquals(2, parts.size());
-							assertEquals("foo.txt", parts.get("fooPart").getFilename().get());
-							assertEquals("bar", parts.get("barPart").getContentAsString().block());
+							assertEquals("foo.txt", ((FilePart) parts.get("fooPart")).getFilename());
+							assertEquals("bar", ((FormFieldPart) parts.get("barPart")).getValue());
 						}
 						catch(Exception e) {
 							return Mono.error(e);
