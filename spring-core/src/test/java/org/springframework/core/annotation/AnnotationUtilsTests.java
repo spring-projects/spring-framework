@@ -54,6 +54,7 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * @author Sam Brannen
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Oleg Zhurakousky
  */
 public class AnnotationUtilsTests {
 
@@ -90,7 +91,7 @@ public class AnnotationUtilsTests {
 		assertNotNull(findAnnotation(m, Order.class));
 	}
 
-	/** @since 4.2 */
+	// @since 4.2
 	@Test
 	public void findMethodAnnotationWithAnnotationOnMethodInInterface() throws Exception {
 		Method m = Leaf.class.getMethod("fromInterfaceImplementedByRoot");
@@ -102,7 +103,7 @@ public class AnnotationUtilsTests {
 		assertNotNull(findAnnotation(m, Order.class));
 	}
 
-	/** @since 4.2 */
+	// @since 4.2
 	@Test
 	public void findMethodAnnotationWithMetaAnnotationOnLeaf() throws Exception {
 		Method m = Leaf.class.getMethod("metaAnnotatedOnLeaf");
@@ -111,7 +112,7 @@ public class AnnotationUtilsTests {
 		assertNotNull(findAnnotation(m, Order.class));
 	}
 
-	/** @since 4.2 */
+	// @since 4.2
 	@Test
 	public void findMethodAnnotationWithMetaMetaAnnotationOnLeaf() throws Exception {
 		Method m = Leaf.class.getMethod("metaMetaAnnotatedOnLeaf");
@@ -128,7 +129,7 @@ public class AnnotationUtilsTests {
 		assertNotNull(findAnnotation(m, Order.class));
 	}
 
-	/** @since 4.2 */
+	// @since 4.2
 	@Test
 	public void findMethodAnnotationWithMetaAnnotationOnRoot() throws Exception {
 		Method m = Leaf.class.getMethod("metaAnnotatedOnRoot");
@@ -258,42 +259,42 @@ public class AnnotationUtilsTests {
 		assertNull("Should not find @Component on MetaCycleAnnotatedClass", component);
 	}
 
-	/** @since 4.2 */
+	// @since 4.2
 	@Test
 	public void findClassAnnotationOnInheritedAnnotationInterface() {
 		Transactional tx = findAnnotation(InheritedAnnotationInterface.class, Transactional.class);
 		assertNotNull("Should find @Transactional on InheritedAnnotationInterface", tx);
 	}
 
-	/** @since 4.2 */
+	// @since 4.2
 	@Test
 	public void findClassAnnotationOnSubInheritedAnnotationInterface() {
 		Transactional tx = findAnnotation(SubInheritedAnnotationInterface.class, Transactional.class);
 		assertNotNull("Should find @Transactional on SubInheritedAnnotationInterface", tx);
 	}
 
-	/** @since 4.2 */
+	// @since 4.2
 	@Test
 	public void findClassAnnotationOnSubSubInheritedAnnotationInterface() {
 		Transactional tx = findAnnotation(SubSubInheritedAnnotationInterface.class, Transactional.class);
 		assertNotNull("Should find @Transactional on SubSubInheritedAnnotationInterface", tx);
 	}
 
-	/** @since 4.2 */
+	// @since 4.2
 	@Test
 	public void findClassAnnotationOnNonInheritedAnnotationInterface() {
 		Order order = findAnnotation(NonInheritedAnnotationInterface.class, Order.class);
 		assertNotNull("Should find @Order on NonInheritedAnnotationInterface", order);
 	}
 
-	/** @since 4.2 */
+	// @since 4.2
 	@Test
 	public void findClassAnnotationOnSubNonInheritedAnnotationInterface() {
 		Order order = findAnnotation(SubNonInheritedAnnotationInterface.class, Order.class);
 		assertNotNull("Should find @Order on SubNonInheritedAnnotationInterface", order);
 	}
 
-	/** @since 4.2 */
+	// @since 4.2
 	@Test
 	public void findClassAnnotationOnSubSubNonInheritedAnnotationInterface() {
 		Order order = findAnnotation(SubSubNonInheritedAnnotationInterface.class, Order.class);
@@ -1240,6 +1241,11 @@ public class AnnotationUtilsTests {
 		assertEquals("location: ", "", contextConfig.location());
 	}
 
+	@Test(expected = AnnotationConfigurationException.class)
+	public void synthesizeAnnotationWithAttributeAliasesDifferentValues() throws Exception {
+		getValue(synthesizeAnnotation(ContextConfigMismatch.class.getAnnotation(ContextConfig.class)));
+	}
+
 	@Test
 	public void synthesizeAnnotationFromMapWithMinimalAttributesWithAttributeAliases() throws Exception {
 		Map<String, Object> map = Collections.singletonMap("location", "test.xml");
@@ -1357,11 +1363,6 @@ public class AnnotationUtilsTests {
 		assertNotNull(synthesizedWebMapping2);
 
 		assertThat(webMappingWithAliases.toString(), is(not(synthesizedWebMapping1.toString())));
-
-		// The unsynthesized annotation for handleMappedWithSamePathAndValueAttributes()
-		// should produce the same toString() results as synthesized annotations for
-		// handleMappedWithPathAttribute()
-		assertToStringForWebMappingWithPathAndValue(webMappingWithPathAndValue);
 		assertToStringForWebMappingWithPathAndValue(synthesizedWebMapping1);
 		assertToStringForWebMappingWithPathAndValue(synthesizedWebMapping2);
 	}
@@ -1819,13 +1820,13 @@ public class AnnotationUtilsTests {
 	interface InterfaceWithRepeated {
 
 		@MyRepeatable("A")
-		@MyRepeatableContainer({ @MyRepeatable("B"), @MyRepeatable("C") })
+		@MyRepeatableContainer({@MyRepeatable("B"), @MyRepeatable("C")})
 		@MyRepeatableMeta1
 		void foo();
 	}
 
 	@MyRepeatable("A")
-	@MyRepeatableContainer({ @MyRepeatable("B"), @MyRepeatable("C") })
+	@MyRepeatableContainer({@MyRepeatable("B"), @MyRepeatable("C")})
 	@MyRepeatableMeta1
 	static class MyRepeatableClass {
 	}
@@ -1834,7 +1835,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@MyRepeatable("X")
-	@MyRepeatableContainer({ @MyRepeatable("Y"), @MyRepeatable("Z") })
+	@MyRepeatableContainer({@MyRepeatable("Y"), @MyRepeatable("Z")})
 	@MyRepeatableMeta2
 	static class SubMyRepeatableWithAdditionalLocalDeclarationsClass extends MyRepeatableClass {
 	}
@@ -1964,7 +1965,7 @@ public class AnnotationUtilsTests {
 		BrokenContextConfig[] value();
 	}
 
-	@Hierarchy({ @ContextConfig("A"), @ContextConfig(location = "B") })
+	@Hierarchy({@ContextConfig("A"), @ContextConfig(location = "B")})
 	static class ConfigHierarchyTestCase {
 	}
 
@@ -2316,7 +2317,7 @@ public class AnnotationUtilsTests {
 		Filter[] excludeFilters() default {};
 	}
 
-	@ComponentScan(excludeFilters = { @Filter(pattern = "*Foo"), @Filter(pattern = "*Bar") })
+	@ComponentScan(excludeFilters = {@Filter(pattern = "*Foo"), @Filter(pattern = "*Bar")})
 	static class ComponentScanClass {
 	}
 
@@ -2342,6 +2343,10 @@ public class AnnotationUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface AnnotationWithoutDefaults {
 		String text();
+	}
+
+	@ContextConfig(value = "foo", location = "bar")
+	interface ContextConfigMismatch {
 	}
 
 }

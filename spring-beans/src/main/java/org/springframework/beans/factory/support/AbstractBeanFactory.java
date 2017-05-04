@@ -1295,8 +1295,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					mbd.setScope(containingBd.getScope());
 				}
 
-				// Only cache the merged bean definition if we're already about to create an
-				// instance of the bean, or at least have already created an instance before.
+				// Cache the merged bean definition for the time being
+				// (it might still get re-merged later on in order to pick up metadata changes)
 				if (containingBd == null && isCacheBeanMetadata()) {
 					this.mergedBeanDefinitions.put(beanName, mbd);
 				}

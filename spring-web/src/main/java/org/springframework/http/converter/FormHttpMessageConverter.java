@@ -179,12 +179,11 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * names. Encoding is based on the encoded-word syntax defined in RFC 2047
 	 * and relies on {@code MimeUtility} from "javax.mail".
 	 * <p>If not set file names will be encoded as US-ASCII.
-	 * @param multipartCharset the charset to use
 	 * @since 4.1.1
 	 * @see <a href="http://en.wikipedia.org/wiki/MIME#Encoded-Word">Encoded-Word</a>
 	 */
-	public void setMultipartCharset(Charset multipartCharset) {
-		this.multipartCharset = multipartCharset;
+	public void setMultipartCharset(Charset charset) {
+		this.multipartCharset = charset;
 	}
 
 
