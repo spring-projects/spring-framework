@@ -25,6 +25,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -148,10 +149,17 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	/**
 	 * Set the default character set to use for reading and writing form data when
 	 * the request or response Content-Type header does not explicitly specify it.
-	 * <p>By default this is set to "UTF-8". As of 4.3, it will also be used as
-	 * the default charset for the conversion of text bodies in a multipart request.
-	 * In contrast to this, {@link #setMultipartCharset} only affects the encoding of
-	 * <i>file names</i> in a multipart request according to the encoded-word syntax.
+	 *
+	 * <p>As of 4.3, this is also used as the default charset for the conversion
+	 * of text bodies in a multipart request.
+	 *
+	 * <p>As of 5.0 this is also used for part headers including
+	 * "Content-Disposition" (and its filename parameter) unless (the mutually
+	 * exclusive) {@link #setMultipartCharset} is also set, in which case part
+	 * headers are encoded as ASCII and <i>filename</i> is encoded with the
+	 * "encoded-word" syntax from RFC 2047.
+	 *
+	 * <p>By default this is set to "UTF-8".
 	 */
 	public void setCharset(Charset charset) {
 		if (charset != this.charset) {
@@ -177,9 +185,13 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	/**
 	 * Set the character set to use when writing multipart data to encode file
-	 * names. Encoding is based on the encoded-word syntax defined in RFC 2047
+	 * names. Encoding is based on the "encoded-word" syntax defined in RFC 2047
 	 * and relies on {@code MimeUtility} from "javax.mail".
-	 * <p>If not set file names will be encoded as US-ASCII.
+	 *
+	 * <p>As of 5.0 by default part headers, including Content-Disposition (and
+	 * its filename parameter) will be encoded based on the setting of
+	 * {@link #setCharset(Charset)} or {@code UTF-8} by default.
+	 *
 	 * @since 4.1.1
 	 * @see <a href="http://en.wikipedia.org/wiki/MIME#Encoded-Word">Encoded-Word</a>
 	 */
@@ -322,7 +334,11 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	private void writeMultipart(final MultiValueMap<String, Object> parts, HttpOutputMessage outputMessage) throws IOException {
 		final byte[] boundary = generateMultipartBoundary();
-		Map<String, String> parameters = Collections.singletonMap("boundary", new String(boundary, "US-ASCII"));
+		Map<String, String> parameters = new HashMap<>(2);
+		parameters.put("boundary", new String(boundary, "US-ASCII"));
+		if (!isFilenameCharsetSet()) {
+			parameters.put("charset", this.charset.name());
+		}
 
 		MediaType contentType = new MediaType(MediaType.MULTIPART_FORM_DATA, parameters);
 		HttpHeaders headers = outputMessage.getHeaders();
@@ -342,6 +358,15 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			writeParts(outputMessage.getBody(), parts, boundary);
 			writeEnd(outputMessage.getBody(), boundary);
 		}
+	}
+
+	/**
+	 * When {@link #setMultipartCharset(Charset)} is configured (i.e. RFC 2047,
+	 * "encoded-word" syntax) we need to use ASCII for part headers or otherwise
+	 * we encode directly using the configured {@link #setCharset(Charset)}.
+	 */
+	private boolean isFilenameCharsetSet() {
+		return this.multipartCharset != null;
 	}
 
 	private void writeParts(OutputStream os, MultiValueMap<String, Object> parts, byte[] boundary) throws IOException {
@@ -365,7 +390,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		MediaType partContentType = partHeaders.getContentType();
 		for (HttpMessageConverter<?> messageConverter : this.partConverters) {
 			if (messageConverter.canWrite(partType, partContentType)) {
-				HttpOutputMessage multipartMessage = new MultipartHttpOutputMessage(os);
+				Charset charset = isFilenameCharsetSet() ? StandardCharsets.US_ASCII : this.charset;
+				HttpOutputMessage multipartMessage = new MultipartHttpOutputMessage(os, charset);
 				multipartMessage.getHeaders().setContentDispositionFormData(name, getFilename(partBody));
 				if (!partHeaders.isEmpty()) {
 					multipartMessage.getHeaders().putAll(partHeaders);
@@ -377,7 +403,6 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		throw new HttpMessageNotWritableException("Could not write request: no suitable HttpMessageConverter " +
 				"found for request type [" + partType.getName() + "]");
 	}
-
 
 	/**
 	 * Generate a multipart boundary.
@@ -451,12 +476,15 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 		private final OutputStream outputStream;
 
+		private final Charset charset;
+
 		private final HttpHeaders headers = new HttpHeaders();
 
 		private boolean headersWritten = false;
 
-		public MultipartHttpOutputMessage(OutputStream outputStream) {
+		public MultipartHttpOutputMessage(OutputStream outputStream, Charset charset) {
 			this.outputStream = outputStream;
+			this.charset = charset;
 		}
 
 		@Override
@@ -473,9 +501,9 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		private void writeHeaders() throws IOException {
 			if (!this.headersWritten) {
 				for (Map.Entry<String, List<String>> entry : this.headers.entrySet()) {
-					byte[] headerName = getAsciiBytes(entry.getKey());
+					byte[] headerName = getBytes(entry.getKey());
 					for (String headerValueString : entry.getValue()) {
-						byte[] headerValue = getAsciiBytes(headerValueString);
+						byte[] headerValue = getBytes(headerValueString);
 						this.outputStream.write(headerName);
 						this.outputStream.write(':');
 						this.outputStream.write(' ');
@@ -488,8 +516,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			}
 		}
 
-		private byte[] getAsciiBytes(String name) {
-			return name.getBytes(StandardCharsets.US_ASCII);
+		private byte[] getBytes(String name) {
+			return name.getBytes(this.charset);
 		}
 	}
 
