@@ -63,7 +63,7 @@ configure(allprojects) { project ->
 	ext.jaxbVersion            = "2.2.11"
 	ext.jaxwsVersion           = "2.2.11"
 	ext.jcaVersion             = "1.7"
-	ext.jettyVersion           = "9.4.4.v20170414"
+	ext.jettyVersion           = "9.4.5.v20170502"
 	ext.jmsVersion             = "2.0.1"
 	ext.jodaVersion            = "2.9.9"
 	ext.jpaVersion             = "2.1.1"
@@ -79,8 +79,8 @@ configure(allprojects) { project ->
 	ext.niomultipartVersion    = "1.0.2"
 	ext.okhttp3Version         = "3.7.0"
 	ext.poiVersion             = "3.16"
-	ext.protobufVersion        = "3.2.0"
-	ext.quartzVersion          = "2.2.3"
+	ext.protobufVersion        = "3.3.0"
+	ext.quartzVersion          = "2.3.0"
 	ext.reactorVersion         = "Bismuth-M1"
 	ext.romeVersion            = "1.7.2"
 	ext.rxjavaVersion          = '1.2.10'
@@ -94,7 +94,7 @@ configure(allprojects) { project ->
 	ext.tiles3Version          = "3.0.7"
 	ext.tomcatVersion          = "8.5.14"
 	ext.tyrusVersion           = "1.13.1"
-	ext.undertowVersion        = "1.4.13.Final"
+	ext.undertowVersion        = "1.4.14.Final"
 	ext.websocketVersion       = "1.1"
 	ext.woodstoxVersion        = "5.0.3"
 	ext.xmlunitVersion         = "2.3.0"
@@ -177,7 +177,6 @@ configure(allprojects) { project ->
 	repositories {
 		maven { url "https://repo.spring.io/libs-release" }
 		maven { url "https://repo.spring.io/milestone" }
-		maven { url "https://repo.spring.io/libs-snapshot" }
 	}
 
 	dependencies {
@@ -1006,7 +1005,9 @@ project("spring-websocket") {
 	}
 
 	if (JavaVersion.current().java9Compatible) {
-		// Reactor2TcpClient's use of Netty requires access to sun.nio.ch.SelectorImpl
+		// JAXB requires java.util.logging
+		test.jvmArgs(["--add-modules", "java.logging"])
+		// ReactorNettyTcpClient's use of Netty requires access to sun.nio.ch.SelectorImpl
 		test.jvmArgs(["--add-exports", "java.base/sun.nio.ch=ALL-UNNAMED"])
 	}
 }
