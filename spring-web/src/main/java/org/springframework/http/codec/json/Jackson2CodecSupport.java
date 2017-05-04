@@ -35,6 +35,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Base class providing support methods for Jackson 2.9 encoding and decoding.
@@ -62,19 +63,21 @@ public abstract class Jackson2CodecSupport {
 
 	protected final ObjectMapper objectMapper;
 
+	private final List<MimeType> mimeTypes;
+
 
 	/**
 	 * Constructor with a Jackson {@link ObjectMapper} to use.
 	 */
-	protected Jackson2CodecSupport(ObjectMapper objectMapper) {
+	protected Jackson2CodecSupport(ObjectMapper objectMapper, MimeType... mimeTypes) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 		this.objectMapper = objectMapper;
+		this.mimeTypes = !ObjectUtils.isEmpty(mimeTypes) ? Arrays.asList(mimeTypes) : JSON_MIME_TYPES;
 	}
 
 
 	protected boolean supportsMimeType(MimeType mimeType) {
-		return (mimeType == null ||
-				JSON_MIME_TYPES.stream().anyMatch(m -> m.isCompatibleWith(mimeType)));
+		return (mimeType == null || this.mimeTypes.stream().anyMatch(m -> m.isCompatibleWith(mimeType)));
 	}
 
 	protected JavaType getJavaType(Type type, Class<?> contextClass) {

@@ -61,8 +61,8 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 		super(Jackson2ObjectMapperBuilder.json().build());
 	}
 
-	public Jackson2JsonDecoder(ObjectMapper mapper) {
-		super(mapper);
+	public Jackson2JsonDecoder(ObjectMapper mapper, MimeType... mimeTypes) {
+		super(mapper, mimeTypes);
 	}
 
 

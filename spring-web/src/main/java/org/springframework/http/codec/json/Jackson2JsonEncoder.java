@@ -71,8 +71,8 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpMes
 		this(Jackson2ObjectMapperBuilder.json().build());
 	}
 
-	public Jackson2JsonEncoder(ObjectMapper mapper) {
-		super(mapper);
+	public Jackson2JsonEncoder(ObjectMapper mapper, MimeType... mimeTypes) {
+		super(mapper, mimeTypes);
 		this.streamingMediaTypes.add(MediaType.APPLICATION_STREAM_JSON);
 		this.ssePrettyPrinter = initSsePrettyPrinter();
 	}
