@@ -81,7 +81,7 @@ configure(allprojects) { project ->
 	ext.poiVersion             = "3.16"
 	ext.protobufVersion        = "3.2.0"
 	ext.quartzVersion          = "2.2.3"
-	ext.reactorVersion         = "Bismuth-BUILD-SNAPSHOT"
+	ext.reactorVersion         = "Bismuth-M1"
 	ext.romeVersion            = "1.7.2"
 	ext.rxjavaVersion          = '1.2.10'
 	ext.rxjavaAdapterVersion   = '1.2.1'
@@ -176,8 +176,8 @@ configure(allprojects) { project ->
 
 	repositories {
 		maven { url "https://repo.spring.io/libs-release" }
-		maven { url "https://repo.spring.io/libs-snapshot" }
 		maven { url "https://repo.spring.io/milestone" }
+		maven { url "https://repo.spring.io/libs-snapshot" }
 	}
 
 	dependencies {
