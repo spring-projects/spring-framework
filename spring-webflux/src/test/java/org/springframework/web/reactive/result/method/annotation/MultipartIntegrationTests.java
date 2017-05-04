@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -34,6 +35,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
@@ -152,8 +154,9 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 	static class MultipartController {
 
 		@PostMapping("/requestPart")
-		void requestPart(@RequestPart Part fooPart) {
-			assertEquals("foo.txt", ((FilePart) fooPart).getFilename());
+		void requestPart(@RequestPart FormFieldPart barPart, @RequestPart Mono<FilePart> fooPart) {
+			assertEquals("bar", barPart.getValue());
+			assertEquals("foo.txt", fooPart.block(Duration.ZERO).getFilename());
 		}
 
 		@PostMapping("/requestBodyMap")

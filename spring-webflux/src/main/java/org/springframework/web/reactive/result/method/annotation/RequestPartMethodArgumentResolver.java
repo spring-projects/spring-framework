@@ -21,6 +21,7 @@ import java.util.List;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.util.CollectionUtils;
@@ -61,13 +62,16 @@ public class RequestPartMethodArgumentResolver extends AbstractNamedValueArgumen
 
 	@Override
 	protected Mono<Object> resolveName(String name, MethodParameter param, ServerWebExchange exchange) {
-		return exchange.getMultipartData().flatMap(allParts -> {
-			List<Part> parts = allParts.get(name);
-			if (CollectionUtils.isEmpty(parts)) {
-				return Mono.empty();
-			}
-			return Mono.just(parts.size() == 1 ? parts.get(0) : parts);
-		});
+
+		Mono<Object> partsMono = exchange.getMultipartData()
+				.filter(map -> !CollectionUtils.isEmpty(map.get(name)))
+				.map(map -> {
+					List<Part> parts = map.get(name);
+					return parts.size() == 1 ? parts.get(0) : parts;
+				});
+
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(param.getParameterType());
+		return (adapter != null ? Mono.just(adapter.fromPublisher(partsMono)) : partsMono);
 	}
 
 	@Override

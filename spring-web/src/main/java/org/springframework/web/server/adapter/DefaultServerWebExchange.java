@@ -48,9 +48,6 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
-
 /**
  * Default implementation of {@link ServerWebExchange}.
  *
@@ -61,10 +58,10 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private static final List<HttpMethod> SAFE_METHODS = Arrays.asList(HttpMethod.GET, HttpMethod.HEAD);
 
-	private static final ResolvableType FORM_DATA_VALUE_TYPE =
+	private static final ResolvableType FORM_DATA_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
-	private static final ResolvableType MULTIPART_VALUE_TYPE = ResolvableType.forClassWithGenerics(
+	private static final ResolvableType MULTIPART_DATA_TYPE = ResolvableType.forClassWithGenerics(
 			MultiValueMap.class, String.class, Part.class);
 
 	private static final Mono<MultiValueMap<String, String>> EMPTY_FORM_DATA =
@@ -110,21 +107,17 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Mono<MultiValueMap<String, String>> initFormData(
-			ServerHttpRequest request, ServerCodecConfigurer codecConfigurer) {
+	private static Mono<MultiValueMap<String, String>> initFormData(ServerHttpRequest request,
+			ServerCodecConfigurer configurer) {
 
-		MediaType contentType;
 		try {
-			contentType = request.getHeaders().getContentType();
-			if (APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType)) {
-				return ((HttpMessageReader<MultiValueMap<String, String>>)codecConfigurer
-						.getReaders()
-						.stream()
-						.filter(reader -> reader.canRead(FORM_DATA_VALUE_TYPE, APPLICATION_FORM_URLENCODED))
+			MediaType contentType = request.getHeaders().getContentType();
+			if (MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType)) {
+				return ((HttpMessageReader<MultiValueMap<String, String>>) configurer.getReaders().stream()
+						.filter(reader -> reader.canRead(FORM_DATA_TYPE, MediaType.APPLICATION_FORM_URLENCODED))
 						.findFirst()
-						.orElseThrow(() -> new IllegalStateException(
-								"Could not find HttpMessageReader that supports " + APPLICATION_FORM_URLENCODED)))
-						.readMono(FORM_DATA_VALUE_TYPE, request, Collections.emptyMap())
+						.orElseThrow(() -> new IllegalStateException("No form data HttpMessageReader.")))
+						.readMono(FORM_DATA_TYPE, request, Collections.emptyMap())
 						.switchIfEmpty(EMPTY_FORM_DATA)
 						.cache();
 			}
@@ -136,21 +129,17 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Mono<MultiValueMap<String, Part>> initMultipartData(
-			ServerHttpRequest request, ServerCodecConfigurer codecConfigurer) {
+	private static Mono<MultiValueMap<String, Part>> initMultipartData(ServerHttpRequest request,
+			ServerCodecConfigurer configurer) {
 
-		MediaType contentType;
 		try {
-			contentType = request.getHeaders().getContentType();
-			if (MULTIPART_FORM_DATA.isCompatibleWith(contentType)) {
-				return ((HttpMessageReader<MultiValueMap<String, Part>>) codecConfigurer
-						.getReaders()
-						.stream()
-						.filter(reader -> reader.canRead(MULTIPART_VALUE_TYPE, MULTIPART_FORM_DATA))
+			MediaType contentType = request.getHeaders().getContentType();
+			if (MediaType.MULTIPART_FORM_DATA.isCompatibleWith(contentType)) {
+				return ((HttpMessageReader<MultiValueMap<String, Part>>) configurer.getReaders().stream()
+						.filter(reader -> reader.canRead(MULTIPART_DATA_TYPE, MediaType.MULTIPART_FORM_DATA))
 						.findFirst()
-						.orElseThrow(() -> new IllegalStateException(
-								"Could not find HttpMessageReader that supports " + MULTIPART_FORM_DATA)))
-						.readMono(FORM_DATA_VALUE_TYPE, request, Collections.emptyMap())
+						.orElseThrow(() -> new IllegalStateException("No multipart HttpMessageReader.")))
+						.readMono(MULTIPART_DATA_TYPE, request, Collections.emptyMap())
 						.switchIfEmpty(EMPTY_MULTIPART_DATA)
 						.cache();
 			}
