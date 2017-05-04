@@ -66,11 +66,11 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
+	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+
 	private final List<HttpMessageWriter<?>> partWriters;
 
 	private Charset charset = DEFAULT_CHARSET;
-
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 
 	public MultipartHttpMessageWriter() {
@@ -84,13 +84,14 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 		this.partWriters = partWriters;
 	}
 
+
 	/**
 	 * Set the character set to use for part headers such as
 	 * "Content-Disposition" (and its filename parameter).
 	 * <p>By default this is set to "UTF-8".
 	 */
 	public void setCharset(Charset charset) {
-		Assert.notNull(charset, "'charset' must not be null");
+		Assert.notNull(charset, "Charset must not be null");
 		this.charset = charset;
 	}
 
@@ -126,11 +127,9 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 		outputMessage.getHeaders().setContentType(new MediaType(MediaType.MULTIPART_FORM_DATA, params));
 
 		return Mono.from(inputStream).flatMap(map -> {
-
 			Flux<DataBuffer> body = Flux.fromIterable(map.entrySet())
 					.concatMap(entry -> encodePartValues(boundary, entry.getKey(), entry.getValue()))
 					.concatWith(Mono.just(generateLastLine(boundary)));
-
 			return outputMessage.writeWith(body);
 		});
 	}
@@ -150,9 +149,7 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 	@SuppressWarnings("unchecked")
 	private <T> Flux<DataBuffer> encodePart(byte[] boundary, String name, T value) {
-
-		MultipartHttpOutputMessage outputMessage =
-				new MultipartHttpOutputMessage(this.bufferFactory, getCharset());
+		MultipartHttpOutputMessage outputMessage = new MultipartHttpOutputMessage(this.bufferFactory, getCharset());
 
 		T body;
 		if (value instanceof HttpEntity) {
@@ -173,7 +170,7 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 				.filter(partWriter -> partWriter.canWrite(bodyType, contentType))
 				.findFirst();
 
-		if(!writer.isPresent()) {
+		if (!writer.isPresent()) {
 			return Flux.error(new CodecException("No suitable writer found for part: " + name));
 		}
 
@@ -182,16 +179,13 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 		// partWritten.subscribe() is required in order to make sure MultipartHttpOutputMessage#getBody()
 		// returns a non-null value (occurs with ResourceHttpMessageWriter that invokes
-		// ReactiveHttpOutputMessage.writeWith() only when at least one element has been
-		// requested).
+		// ReactiveHttpOutputMessage.writeWith() only when at least one element has been requested).
 		partWritten.subscribe();
 
 		return Flux.concat(
-				Mono.just(generateBoundaryLine(boundary)),
-				outputMessage.getBody(),
-				Mono.just(generateNewLine())
-		);
+				Mono.just(generateBoundaryLine(boundary)), outputMessage.getBody(), Mono.just(generateNewLine()));
 	}
+
 
 	private DataBuffer generateBoundaryLine(byte[] boundary) {
 		DataBuffer buffer = this.bufferFactory.allocateBuffer(boundary.length + 4);
@@ -231,16 +225,14 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 		private final HttpHeaders headers = new HttpHeaders();
 
-		private final AtomicBoolean commited = new AtomicBoolean();
+		private final AtomicBoolean committed = new AtomicBoolean();
 
 		private Flux<DataBuffer> body;
-
 
 		public MultipartHttpOutputMessage(DataBufferFactory bufferFactory, Charset charset) {
 			this.bufferFactory = bufferFactory;
 			this.charset = charset;
 		}
-
 
 		@Override
 		public HttpHeaders getHeaders() {
@@ -254,12 +246,12 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 		@Override
 		public void beforeCommit(Supplier<? extends Mono<Void>> action) {
-			this.commited.set(true);
+			this.committed.set(true);
 		}
 
 		@Override
 		public boolean isCommitted() {
-			return this.commited.get();
+			return this.committed.get();
 		}
 
 		@Override
@@ -305,7 +297,6 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 			return (this.body != null ? this.body.then() :
 					Mono.error(new IllegalStateException("Body has not been written yet")));
 		}
-
 	}
 
 }

@@ -93,7 +93,6 @@ public class HandlerResultMatchers {
 	 * mockMvc.perform(get("/"))
 	 *     .andExpect(handler().methodCall(on(SimpleController.class).handle()));
 	 * </pre>
-	 *
 	 * @param obj either the value returned from a "mock" controller invocation
 	 * or the "mock" controller itself after an invocation
 	 */

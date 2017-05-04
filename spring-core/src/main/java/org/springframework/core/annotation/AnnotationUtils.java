@@ -1283,8 +1283,8 @@ public abstract class AnnotationUtils {
 	 * single-element Annotation, given an annotation instance.
 	 * @param annotation the annotation instance from which to retrieve the value
 	 * @return the attribute value, or {@code null} if not found unless the attribute
-	 * value cannot be retrieved due to an {@link AnnotationConfigurationException}, in
-	 * which case such an exception will be rethrown
+	 * value cannot be retrieved due to an {@link AnnotationConfigurationException},
+	 * in which case such an exception will be rethrown
 	 * @see #getValue(Annotation, String)
 	 */
 	public static Object getValue(Annotation annotation) {
@@ -1296,8 +1296,8 @@ public abstract class AnnotationUtils {
 	 * @param annotation the annotation instance from which to retrieve the value
 	 * @param attributeName the name of the attribute value to retrieve
 	 * @return the attribute value, or {@code null} if not found unless the attribute
-	 * value cannot be retrieved due to an {@link AnnotationConfigurationException}, in
-	 * which case such an exception will be rethrown
+	 * value cannot be retrieved due to an {@link AnnotationConfigurationException},
+	 * in which case such an exception will be rethrown
 	 * @see #getValue(Annotation)
 	 * @see #rethrowAnnotationConfigurationException(Throwable)
 	 */

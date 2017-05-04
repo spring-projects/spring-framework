@@ -1208,7 +1208,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	private boolean isRequired(DependencyDescriptor descriptor) {
-		return this.autowireCandidateResolver.isRequired(descriptor);
+		return getAutowireCandidateResolver().isRequired(descriptor);
 	}
 
 	private boolean indicatesMultipleBeans(Class<?> type) {
