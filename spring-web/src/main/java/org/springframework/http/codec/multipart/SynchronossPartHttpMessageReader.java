@@ -121,7 +121,12 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 		@Override
 		public void accept(FluxSink<Part> emitter) {
 
-			MultipartContext context = createMultipartContext();
+			HttpHeaders headers = this.inputMessage.getHeaders();
+			MediaType mediaType = headers.getContentType();
+			int length = Math.toIntExact(headers.getContentLength());
+			Charset charset = Optional.ofNullable(mediaType.getCharset()).orElse(StandardCharsets.UTF_8);
+			MultipartContext context = new MultipartContext(mediaType.toString(), length, charset.name());
+
 			NioMultipartParserListener listener = new FluxSinkAdapterListener(emitter, this.bufferFactory);
 			NioMultipartParser parser = Multipart.multipart(context).forNIO(listener);
 
@@ -152,16 +157,6 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 			});
 
 		}
-
-		private MultipartContext createMultipartContext() {
-			HttpHeaders headers = this.inputMessage.getHeaders();
-			String contentType = headers.getContentType().toString();
-			int contentLength = Math.toIntExact(headers.getContentLength());
-			String charset = headers.getFirst(HttpHeaders.ACCEPT_CHARSET);
-			return new MultipartContext(contentType, contentLength, charset);
-		}
-
-
 	}
 	/**
 	 * Listen for parser output and adapt to {@code Flux<Sink<Part>>}.
