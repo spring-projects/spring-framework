@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
-
+import java.util.stream.Collectors;
 import javax.mail.internet.MimeUtility;
 
 import org.reactivestreams.Publisher;
@@ -71,28 +71,18 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 	private Charset filenameCharset = DEFAULT_CHARSET;
 
-	private final DataBufferFactory bufferFactory;
+	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 
 	public MultipartHttpMessageWriter() {
-		this(new DefaultDataBufferFactory());
-	}
-
-	public MultipartHttpMessageWriter(DataBufferFactory bufferFactory) {
 		this.partWriters = Arrays.asList(
 				new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()),
 				new ResourceHttpMessageWriter()
 		);
-		this.bufferFactory = bufferFactory;
 	}
 
 	public MultipartHttpMessageWriter(List<HttpMessageWriter<?>> partWriters) {
-		this(partWriters, new DefaultDataBufferFactory());
-	}
-
-	public MultipartHttpMessageWriter(List<HttpMessageWriter<?>> partWriters, DataBufferFactory factory) {
 		this.partWriters = partWriters;
-		this.bufferFactory = factory;
 	}
 
 	/**
@@ -130,12 +120,17 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 		byte[] boundary = generateMultipartBoundary();
 
-		HttpHeaders headers = outputMessage.getHeaders();
-		headers.setContentType(new MediaType(MediaType.MULTIPART_FORM_DATA,
+		outputMessage.getHeaders().setContentType(new MediaType("multipart", "form-data",
 				Collections.singletonMap("boundary", new String(boundary, StandardCharsets.US_ASCII))));
 
-		return Mono.from(inputStream).flatMap(multiValueMap ->
-				outputMessage.writeWith(generateParts(multiValueMap, boundary)));
+		return Mono.from(inputStream).flatMap(map -> {
+
+			Flux<DataBuffer> body = Flux.fromIterable(map.entrySet())
+					.concatMap(entry -> encodePartValues(boundary, entry.getKey(), entry.getValue()))
+					.concatWith(Mono.just(generateLastLine(boundary)));
+
+			return outputMessage.writeWith(body);
+		});
 	}
 
 	/**
@@ -146,16 +141,13 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 		return MimeTypeUtils.generateMultipartBoundary();
 	}
 
-	private Flux<DataBuffer> generateParts(MultiValueMap<String, ?> map, byte[] boundary) {
-		return Flux.fromIterable(map.entrySet())
-				.concatMap(entry -> Flux
-						.fromIterable(entry.getValue())
-						.concatMap(value -> generatePart(entry.getKey(), value, boundary)))
-				.concatWith(Mono.just(generateLastLine(boundary)));
+	private Flux<DataBuffer> encodePartValues(byte[] boundary, String name, List<?> values) {
+		return Flux.concat(values.stream().map(v ->
+				encodePart(boundary, name, v)).collect(Collectors.toList()));
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> Flux<DataBuffer> generatePart(String name, T value, byte[] boundary) {
+	private <T> Flux<DataBuffer> encodePart(byte[] boundary, String name, T value) {
 
 		MultipartHttpOutputMessage outputMessage = new MultipartHttpOutputMessage(this.bufferFactory);
 
