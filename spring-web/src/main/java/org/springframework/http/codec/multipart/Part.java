@@ -43,16 +43,18 @@ public interface Part {
 	 * Return the name of the part in the multipart form.
 	 * @return the name of the part, never {@code null} or empty
 	 */
-	String getName();
+	String name();
 
 	/**
 	 * Return the headers associated with the part.
 	 */
-	HttpHeaders getHeaders();
+	HttpHeaders headers();
 
 	/**
-	 * Return the part raw content as a stream of DataBuffer's.
+	 * Return the content for this part.
+	 * <p>Note that for a {@link FormFieldPart} the content may be accessed
+	 * more easily via {@link FormFieldPart#value()}.
 	 */
-	Flux<DataBuffer> getContent();
+	Flux<DataBuffer> content();
 
 }

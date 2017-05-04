@@ -85,7 +85,7 @@ public class MultipartHttpMessageReader implements HttpMessageReader<MultiValueM
 			ReactiveHttpInputMessage inputMessage, Map<String, Object> hints) {
 
 		return this.partReader.read(elementType, inputMessage, hints)
-				.collectMultimap(Part::getName).map(this::toMultiValueMap);
+				.collectMultimap(Part::name).map(this::toMultiValueMap);
 	}
 
 	private LinkedMultiValueMap<String, Part> toMultiValueMap(Map<String, Collection<Part>> map) {

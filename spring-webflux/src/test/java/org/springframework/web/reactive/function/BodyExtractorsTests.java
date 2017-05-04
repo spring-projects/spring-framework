@@ -36,8 +36,6 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.StringDecoder;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -56,7 +54,6 @@ import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
@@ -297,24 +294,24 @@ public class BodyExtractorsTests {
 
 		StepVerifier.create(result)
 				.consumeNextWith(part -> {
-					assertEquals("text", part.getName());
+					assertEquals("text", part.name());
 					assertTrue(part instanceof FormFieldPart);
 					FormFieldPart formFieldPart = (FormFieldPart) part;
-					assertEquals("text default", formFieldPart.getValue());
+					assertEquals("text default", formFieldPart.value());
 				})
 				.consumeNextWith(part -> {
-					assertEquals("file1", part.getName());
+					assertEquals("file1", part.name());
 					assertTrue(part instanceof FilePart);
 					FilePart filePart = (FilePart) part;
-					assertEquals("a.txt", filePart.getFilename());
-					assertEquals(MediaType.TEXT_PLAIN, filePart.getHeaders().getContentType());
+					assertEquals("a.txt", filePart.filename());
+					assertEquals(MediaType.TEXT_PLAIN, filePart.headers().getContentType());
 				})
 				.consumeNextWith(part -> {
-					assertEquals("file2", part.getName());
+					assertEquals("file2", part.name());
 					assertTrue(part instanceof FilePart);
 					FilePart filePart = (FilePart) part;
-					assertEquals("a.html", filePart.getFilename());
-					assertEquals(MediaType.TEXT_HTML, filePart.getHeaders().getContentType());
+					assertEquals("a.html", filePart.filename());
+					assertEquals(MediaType.TEXT_HTML, filePart.headers().getContentType());
 				})
 				.expectComplete()
 				.verify();

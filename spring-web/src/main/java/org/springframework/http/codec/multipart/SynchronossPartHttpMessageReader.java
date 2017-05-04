@@ -185,10 +185,14 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 		public void onPartFinished(StreamStorage storage, Map<String, List<String>> headers) {
 			HttpHeaders httpHeaders = new HttpHeaders();
 			httpHeaders.putAll(headers);
-			Part part = MultipartUtils.getFileName(httpHeaders) != null ?
-					new SynchronossFilePart(httpHeaders, storage, this.bufferFactory) :
+			this.sink.next(createPart(httpHeaders, storage));
+		}
+
+		private Part createPart(HttpHeaders httpHeaders, StreamStorage storage) {
+			String fileName = MultipartUtils.getFileName(httpHeaders);
+			return fileName != null ?
+					new SynchronossFilePart(httpHeaders, storage, fileName, this.bufferFactory) :
 					new DefaultSynchronossPart(httpHeaders, storage, this.bufferFactory);
-			this.sink.next(part);
 		}
 
 		@Override
@@ -238,12 +242,12 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 
 
 		@Override
-		public String getName() {
+		public String name() {
 			return MultipartUtils.getFieldName(this.headers);
 		}
 
 		@Override
-		public HttpHeaders getHeaders() {
+		public HttpHeaders headers() {
 			return this.headers;
 		}
 
@@ -265,7 +269,7 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 
 
 		@Override
-		public Flux<DataBuffer> getContent() {
+		public Flux<DataBuffer> content() {
 			InputStream inputStream = this.storage.getInputStream();
 			return DataBufferUtils.read(inputStream, getBufferFactory(), 4096);
 		}
@@ -278,14 +282,14 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 	private static class SynchronossFilePart extends DefaultSynchronossPart implements FilePart {
 
 
-		public SynchronossFilePart(HttpHeaders headers, StreamStorage storage, DataBufferFactory factory) {
+		public SynchronossFilePart(HttpHeaders headers, StreamStorage storage, String fileName, DataBufferFactory factory) {
 			super(headers, storage, factory);
 		}
 
 
 		@Override
-		public String getFilename() {
-			return MultipartUtils.getFileName(getHeaders());
+		public String filename() {
+			return MultipartUtils.getFileName(headers());
 		}
 
 		@Override
@@ -341,12 +345,12 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 
 
 		@Override
-		public String getValue() {
+		public String value() {
 			return this.content;
 		}
 
 		@Override
-		public Flux<DataBuffer> getContent() {
+		public Flux<DataBuffer> content() {
 			byte[] bytes = this.content.getBytes(getCharset());
 			DataBuffer buffer = getBufferFactory().allocateBuffer(bytes.length);
 			buffer.write(bytes);
@@ -354,7 +358,7 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 		}
 
 		private Charset getCharset() {
-			return Optional.ofNullable(MultipartUtils.getCharEncoding(getHeaders()))
+			return Optional.ofNullable(MultipartUtils.getCharEncoding(headers()))
 					.map(Charset::forName).orElse(StandardCharsets.UTF_8);
 		}
 	}

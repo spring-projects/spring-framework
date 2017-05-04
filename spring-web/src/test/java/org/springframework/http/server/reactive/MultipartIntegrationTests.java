@@ -17,7 +17,6 @@
 package org.springframework.http.server.reactive;
 
 import java.net.URI;
-import java.util.Optional;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -100,11 +99,11 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 		}
 
 		private void assertFooPart(Part part) {
-			assertEquals("fooPart", part.getName());
+			assertEquals("fooPart", part.name());
 			assertTrue(part instanceof FilePart);
-			assertEquals("foo.txt", ((FilePart) part).getFilename());
+			assertEquals("foo.txt", ((FilePart) part).filename());
 			DataBuffer buffer = part
-					.getContent()
+					.content()
 					.reduce(DataBuffer::write)
 					.block();
 			assertEquals(12, buffer.readableByteCount());
@@ -114,9 +113,9 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 		}
 
 		private void assertBarPart(Part part) {
-			assertEquals("barPart", part.getName());
+			assertEquals("barPart", part.name());
 			assertTrue(part instanceof FormFieldPart);
-			assertEquals("bar", ((FormFieldPart) part).getValue());
+			assertEquals("bar", ((FormFieldPart) part).value());
 		}
 	}
 

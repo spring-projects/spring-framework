@@ -27,6 +27,6 @@ public interface FormFieldPart extends Part {
 	/**
 	 * Return the form field value.
 	 */
-	String getValue();
+	String value();
 
 }

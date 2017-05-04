@@ -29,10 +29,9 @@ import reactor.core.publisher.Mono;
 public interface FilePart extends Part {
 
 	/**
-	 * Return the name of the file selected by the user in a browser form.
+	 * Return the original filename in the client's filesystem.
 	 */
-	String getFilename();
-
+	String filename();
 
 	/**
 	 * Transfer the file in this part to the given file destination.

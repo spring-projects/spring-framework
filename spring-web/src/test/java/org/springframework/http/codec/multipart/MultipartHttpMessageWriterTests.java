@@ -118,38 +118,38 @@ public class MultipartHttpMessageWriterTests {
 
 		Part part = requestParts.getFirst("name 1");
 		assertTrue(part instanceof FormFieldPart);
-		assertEquals("name 1", part.getName());
-		assertEquals("value 1", ((FormFieldPart) part).getValue());
+		assertEquals("name 1", part.name());
+		assertEquals("value 1", ((FormFieldPart) part).value());
 
 		List<Part> parts2 = requestParts.get("name 2");
 		assertEquals(2, parts2.size());
 		part = parts2.get(0);
 		assertTrue(part instanceof FormFieldPart);
-		assertEquals("name 2", part.getName());
-		assertEquals("value 2+1", ((FormFieldPart) part).getValue());
+		assertEquals("name 2", part.name());
+		assertEquals("value 2+1", ((FormFieldPart) part).value());
 		part = parts2.get(1);
 		assertTrue(part instanceof FormFieldPart);
-		assertEquals("name 2", part.getName());
-		assertEquals("value 2+2", ((FormFieldPart) part).getValue());
+		assertEquals("name 2", part.name());
+		assertEquals("value 2+2", ((FormFieldPart) part).value());
 
 		part = requestParts.getFirst("logo");
 		assertTrue(part instanceof FilePart);
-		assertEquals("logo", part.getName());
-		assertEquals("logo.jpg", ((FilePart) part).getFilename());
-		assertEquals(MediaType.IMAGE_JPEG, part.getHeaders().getContentType());
-		assertEquals(logo.getFile().length(), part.getHeaders().getContentLength());
+		assertEquals("logo", part.name());
+		assertEquals("logo.jpg", ((FilePart) part).filename());
+		assertEquals(MediaType.IMAGE_JPEG, part.headers().getContentType());
+		assertEquals(logo.getFile().length(), part.headers().getContentLength());
 
 		part = requestParts.getFirst("utf8");
 		assertTrue(part instanceof FilePart);
-		assertEquals("utf8", part.getName());
-		assertEquals("Hall\u00F6le.jpg", ((FilePart) part).getFilename());
-		assertEquals(MediaType.IMAGE_JPEG, part.getHeaders().getContentType());
-		assertEquals(utf8.getFile().length(), part.getHeaders().getContentLength());
+		assertEquals("utf8", part.name());
+		assertEquals("Hall\u00F6le.jpg", ((FilePart) part).filename());
+		assertEquals(MediaType.IMAGE_JPEG, part.headers().getContentType());
+		assertEquals(utf8.getFile().length(), part.headers().getContentLength());
 
 		part = requestParts.getFirst("json");
-		assertEquals("json", part.getName());
-		assertEquals(MediaType.APPLICATION_JSON_UTF8, part.getHeaders().getContentType());
-		assertEquals("{\"bar\":\"bar\"}", ((FormFieldPart) part).getValue());
+		assertEquals("json", part.name());
+		assertEquals(MediaType.APPLICATION_JSON_UTF8, part.headers().getContentType());
+		assertEquals("{\"bar\":\"bar\"}", ((FormFieldPart) part).value());
 	}
 
 

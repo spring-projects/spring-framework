@@ -155,8 +155,8 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 
 		@PostMapping("/requestPart")
 		void requestPart(@RequestPart FormFieldPart barPart, @RequestPart Mono<FilePart> fooPart) {
-			assertEquals("bar", barPart.getValue());
-			assertEquals("foo.txt", fooPart.block(Duration.ZERO).getFilename());
+			assertEquals("bar", barPart.value());
+			assertEquals("foo.txt", fooPart.block(Duration.ZERO).filename());
 		}
 
 		@PostMapping("/requestBodyMap")
@@ -167,7 +167,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 
 		@PostMapping("/requestBodyFlux")
 		Mono<String> requestBodyFlux(@RequestBody Flux<Part> parts) {
-			return parts.map(Part::getName).collectList()
+			return parts.map(Part::name).collectList()
 					.map(names -> names.stream().sorted().collect(Collectors.joining(",", "Flux[", "]")));
 		}
 
@@ -202,7 +202,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 
 		@Override
 		public String toString() {
-			return "TestBean[barPart=" + getBarPart() + ",fooPart=" + getFooPart().getFilename() + "]";
+			return "TestBean[barPart=" + getBarPart() + ",fooPart=" + getFooPart().filename() + "]";
 		}
 	}
 

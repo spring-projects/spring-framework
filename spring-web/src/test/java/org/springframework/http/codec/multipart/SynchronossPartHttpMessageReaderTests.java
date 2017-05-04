@@ -88,9 +88,9 @@ public class SynchronossPartHttpMessageReaderTests {
 		assertTrue(parts.containsKey("fooPart"));
 		Part part = parts.getFirst("fooPart");
 		assertTrue(part instanceof FilePart);
-		assertEquals("fooPart", part.getName());
-		assertEquals("foo.txt", ((FilePart) part).getFilename());
-		DataBuffer buffer = part.getContent().reduce(DataBuffer::write).block();
+		assertEquals("fooPart", part.name());
+		assertEquals("foo.txt", ((FilePart) part).filename());
+		DataBuffer buffer = part.content().reduce(DataBuffer::write).block();
 		assertEquals(12, buffer.readableByteCount());
 		byte[] byteContent = new byte[12];
 		buffer.read(byteContent);
@@ -99,8 +99,8 @@ public class SynchronossPartHttpMessageReaderTests {
 		assertTrue(parts.containsKey("barPart"));
 		part = parts.getFirst("barPart");
 		assertTrue(part instanceof FormFieldPart);
-		assertEquals("barPart", part.getName());
-		assertEquals("bar", ((FormFieldPart) part).getValue());
+		assertEquals("barPart", part.name());
+		assertEquals("bar", ((FormFieldPart) part).value());
 	}
 
 	@Test

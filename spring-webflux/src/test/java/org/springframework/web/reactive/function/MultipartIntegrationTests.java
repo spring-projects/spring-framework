@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.function;
 
-import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -106,8 +105,8 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 						Map<String, Part> parts = map.toSingleValueMap();
 						try {
 							assertEquals(2, parts.size());
-							assertEquals("foo.txt", ((FilePart) parts.get("fooPart")).getFilename());
-							assertEquals("bar", ((FormFieldPart) parts.get("barPart")).getValue());
+							assertEquals("foo.txt", ((FilePart) parts.get("fooPart")).filename());
+							assertEquals("bar", ((FormFieldPart) parts.get("barPart")).value());
 						}
 						catch(Exception e) {
 							return Mono.error(e);
@@ -121,8 +120,8 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 					.flatMap(parts -> {
 						try {
 							assertEquals(2, parts.size());
-							assertEquals("foo.txt", ((FilePart) parts.get(0)).getFilename());
-							assertEquals("bar", ((FormFieldPart) parts.get(1)).getValue());
+							assertEquals("foo.txt", ((FilePart) parts.get(0)).filename());
+							assertEquals("bar", ((FormFieldPart) parts.get(1)).value());
 						}
 						catch(Exception e) {
 							return Mono.error(e);
