@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.web.bind.support;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -25,11 +23,10 @@ import java.util.TreeMap;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.http.codec.multipart.Part;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -40,6 +37,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  */
 public class WebExchangeDataBinder extends WebDataBinder {
+
 
 	/**
 	 * Create a new instance, with default object name.
@@ -63,76 +61,52 @@ public class WebExchangeDataBinder extends WebDataBinder {
 
 
 	/**
-	 * Bind the URL query parameters or form data of the body of the given request
-	 * to this binder's target. The request body is parsed if the content-type
-	 * is "application/x-www-form-urlencoded".
+	 * Bind query params, form data, and or multipart form data to the binder target.
 	 * @param exchange the current exchange.
-	 * @return a {@code Mono<Void>} to indicate the result
+	 * @return a {@code Mono<Void>} when binding is complete
 	 */
 	public Mono<Void> bind(ServerWebExchange exchange) {
-		ServerHttpRequest request = exchange.getRequest();
-		Mono<MultiValueMap<String, String>> queryParams = Mono.just(request.getQueryParams());
-		Mono<MultiValueMap<String, String>> formParams =
-				exchange.getFormData().defaultIfEmpty(new LinkedMultiValueMap<>());
+		return getValuesToBind(exchange)
+				.doOnNext(values -> doBind(new MutablePropertyValues(values)))
+				.then();
+	}
 
-		return Mono.zip(this::mergeParams, queryParams, formParams)
-				.map(this::getParamsToBind)
-				.doOnNext(values -> values.putAll(getMultipartFiles(exchange)))
-				.doOnNext(values -> values.putAll(getExtraValuesToBind(exchange)))
-				.then(values -> {
-					doBind(new MutablePropertyValues(values));
-					return Mono.empty();
+	/**
+	 * Protected method to obtain the values for data binding. By default this
+	 * method delegates to {@link #extractValuesToBind(ServerWebExchange)}.
+	 */
+	protected Mono<Map<String, Object>> getValuesToBind(ServerWebExchange exchange) {
+		return extractValuesToBind(exchange);
+	}
+
+	/**
+	 * Combine query params and form data for multipart form data from the body
+	 * of the request into a {@code Map<String, Object>} of values to use for
+	 * data binding purposes.
+	 *
+	 * @param exchange the current exchange
+	 * @return a {@code Mono} with the values to bind
+	 */
+	public static Mono<Map<String, Object>> extractValuesToBind(ServerWebExchange exchange) {
+
+		MultiValueMap<String, String> queryParams = exchange.getRequest().getQueryParams();
+		Mono<MultiValueMap<String, String>> formData = exchange.getFormData();
+		Mono<MultiValueMap<String, Part>> multipartData = exchange.getMultipartData();
+
+		return Mono.when(Mono.just(queryParams), formData, multipartData)
+				.map(tuple -> {
+					Map<String, Object> result = new TreeMap<>();
+					tuple.getT1().forEach((key, values) -> addBindValue(result, key, values));
+					tuple.getT2().forEach((key, values) -> addBindValue(result, key, values));
+					tuple.getT3().forEach((key, values) -> addBindValue(result, key, values));
+					return result;
 				});
 	}
 
-	@SuppressWarnings("unchecked")
-	private MultiValueMap<String, String> mergeParams(Object[] paramMaps) {
-		MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
-		Arrays.stream(paramMaps).forEach(map -> result.putAll((MultiValueMap<String, String>) map));
-		return result;
-	}
-
-	private Map<String, Object> getParamsToBind(MultiValueMap<String, String> params) {
-		Map<String, Object> valuesToBind = new TreeMap<>();
-		for (Map.Entry<String, List<String>> entry : params.entrySet()) {
-			String name = entry.getKey();
-			List<String> values = entry.getValue();
-			if (values == null || values.isEmpty()) {
-				// Do nothing, no values found at all.
-			}
-			else {
-				if (values.size() > 1) {
-					valuesToBind.put(name, values);
-				}
-				else {
-					valuesToBind.put(name, values.get(0));
-				}
-			}
+	private static void addBindValue(Map<String, Object> params, String key, List<?> values) {
+		if (!CollectionUtils.isEmpty(values)) {
+			params.put(key, values.size() == 1 ? values.get(0) : values);
 		}
-		return valuesToBind;
-	}
-
-	/**
-	 * Bind all multipart files contained in the given request, if any (in case
-	 * of a multipart request).
-	 * <p>Multipart files will only be added to the property values if they
-	 * are not empty or if we're configured to bind empty multipart files too.
-	 * @param exchange the current exchange
-	 * @return Map of field name String to MultipartFile object
-	 */
-	protected Map<String, List<MultipartFile>> getMultipartFiles(ServerWebExchange exchange) {
-		// TODO
-		return Collections.emptyMap();
-	}
-
-	/**
-	 * Extension point that subclasses can use to add extra bind values for a
-	 * request. Invoked before {@link #doBind(MutablePropertyValues)}.
-	 * The default implementation is empty.
-	 * @param exchange the current exchange
-	 */
-	protected Map<String, ?> getExtraValuesToBind(ServerWebExchange exchange) {
-		return Collections.emptyMap();
 	}
 
 }

@@ -212,9 +212,6 @@ class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 					}
 				}
 
-				if (this.input.readableBytes() == 0) {
-					this.index = 0;
-				}
 				return Flux.fromIterable(chunks);
 			}
 

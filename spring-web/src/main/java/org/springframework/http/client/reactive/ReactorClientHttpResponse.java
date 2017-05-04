@@ -19,7 +19,7 @@ package org.springframework.http.client.reactive;
 import java.util.Collection;
 
 import reactor.core.publisher.Flux;
-import reactor.ipc.netty.http.HttpInbound;
+import reactor.ipc.netty.http.client.HttpClientResponse;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
@@ -34,19 +34,19 @@ import org.springframework.util.MultiValueMap;
  * {@link ClientHttpResponse} implementation for the Reactor-Netty HTTP client.
  *
  * @author Brian Clozel
- * @see reactor.ipc.netty.http.HttpClient
+ * @see reactor.ipc.netty.http.client.HttpClient
  * @since 5.0
  */
 public class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	private final NettyDataBufferFactory dataBufferFactory;
 
-	private final HttpInbound response;
+	private final HttpClientResponse response;
 
 
-	public ReactorClientHttpResponse(HttpInbound response) {
+	public ReactorClientHttpResponse(HttpClientResponse response) {
 		this.response = response;
-		this.dataBufferFactory = new NettyDataBufferFactory(response.delegate().alloc());
+		this.dataBufferFactory = new NettyDataBufferFactory(response.channel().alloc());
 	}
 
 
@@ -62,7 +62,9 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public HttpHeaders getHeaders() {
 		HttpHeaders headers = new HttpHeaders();
-		this.response.responseHeaders().entries().stream().forEach(e -> headers.add(e.getKey(), e.getValue()));
+		this.response.responseHeaders()
+		             .entries()
+		             .forEach(e -> headers.add(e.getKey(), e.getValue()));
 		return headers;
 	}
 

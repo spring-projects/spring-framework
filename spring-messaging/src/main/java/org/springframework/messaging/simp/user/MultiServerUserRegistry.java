@@ -136,6 +136,16 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 	}
 
 	@Override
+	public int getUserCount() {
+		int userCount = 0;
+		for (UserRegistrySnapshot registry : this.remoteRegistries.values()) {
+			userCount += registry.getUserMap().size();
+		}
+		userCount += this.localRegistry.getUserCount();
+		return userCount;
+	}
+
+	@Override
 	public Set<SimpSubscription> findSubscriptions(SimpSubscriptionMatcher matcher) {
 		Set<SimpSubscription> result = new HashSet<>();
 		for (UserRegistrySnapshot registry : this.remoteRegistries.values()) {

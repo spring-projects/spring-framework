@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -309,7 +309,21 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 
 
 	/**
-	 * Determine whether the given dependency carries a value annotation.
+	 * Determine whether the given dependency declares an autowired annotation,
+	 * checking its required flag.
+	 * @see Autowired#required()
+	 */
+	@Override
+	public boolean isRequired(DependencyDescriptor descriptor) {
+		if (!super.isRequired(descriptor)) {
+			return false;
+		}
+		Autowired autowired = descriptor.getAnnotation(Autowired.class);
+		return (autowired == null || autowired.required());
+	}
+
+	/**
+	 * Determine whether the given dependency declares a value annotation.
 	 * @see Value
 	 */
 	@Override

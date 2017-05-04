@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Creates new ModelAndView given a view name and a model.
+	 * Create a new ModelAndView given a view name and a model.
 	 * @param viewName name of the View to render, to be resolved
 	 * by the DispatcherServlet's ViewResolver
 	 * @param model Map of model names (Strings) to model objects
@@ -104,7 +104,7 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Creates new ModelAndView given a View object and a model.
+	 * Create a new ModelAndView given a View object and a model.
 	 * <emphasis>Note: the supplied model data is copied into the internal
 	 * storage of this class. You should not consider to modify the supplied
 	 * Map after supplying it to this class</emphasis>
@@ -121,14 +121,27 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Creates new ModelAndView given a view name, model, and status.
+	 * Create a new ModelAndView given a view name and HTTP status.
+	 * @param viewName name of the View to render, to be resolved
+	 * by the DispatcherServlet's ViewResolver
+	 * @param status an HTTP status code to use for the response
+	 * (to be set just prior to View rendering)
+	 * @since 4.3.8
+	 */
+	public ModelAndView(String viewName, HttpStatus status) {
+		this.view = viewName;
+		this.status = status;
+	}
+
+	/**
+	 * Create a new ModelAndView given a view name, model, and HTTP status.
 	 * @param viewName name of the View to render, to be resolved
 	 * by the DispatcherServlet's ViewResolver
 	 * @param model Map of model names (Strings) to model objects
 	 * (Objects). Model entries may not be {@code null}, but the
 	 * model Map may be {@code null} if there is no model data.
-	 * @param status an alternative status code to use for the response;
-	 * The response status is set just prior to View rendering.
+	 * @param status an HTTP status code to use for the response
+	 * (to be set just prior to View rendering)
 	 * @since 4.3
 	 */
 	public ModelAndView(String viewName, Map<String, ?> model, HttpStatus status) {

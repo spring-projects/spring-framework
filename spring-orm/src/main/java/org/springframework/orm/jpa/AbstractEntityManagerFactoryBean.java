@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,7 +135,6 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @see javax.persistence.Persistence
 	 */
 	public void setPersistenceProviderClass(Class<? extends PersistenceProvider> persistenceProviderClass) {
-		Assert.isAssignable(PersistenceProvider.class, persistenceProviderClass);
 		this.persistenceProvider = BeanUtils.instantiateClass(persistenceProviderClass);
 	}
 
@@ -217,7 +216,6 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @see JpaVendorAdapter#getEntityManagerFactoryInterface()
 	 */
 	public void setEntityManagerFactoryInterface(Class<? extends EntityManagerFactory> emfInterface) {
-		Assert.isAssignable(EntityManagerFactory.class, emfInterface);
 		this.entityManagerFactoryInterface = emfInterface;
 	}
 
@@ -231,7 +229,6 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @see EntityManagerFactoryInfo#getEntityManagerInterface()
 	 */
 	public void setEntityManagerInterface(Class<? extends EntityManager> emInterface) {
-		Assert.isAssignable(EntityManager.class, emInterface);
 		this.entityManagerInterface = emInterface;
 	}
 

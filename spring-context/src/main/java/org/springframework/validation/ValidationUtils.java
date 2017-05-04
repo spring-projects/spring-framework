@@ -126,7 +126,7 @@ public abstract class ValidationUtils {
 	}
 
 	/**
-	 * Reject the given field with the given error codea nd error arguments
+	 * Reject the given field with the given error code and error arguments
 	 * if the value is empty.
 	 * <p>An 'empty' value in this context means either {@code null} or
 	 * the empty string "".

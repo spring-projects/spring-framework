@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
-
 import org.mockito.MockitoAnnotations;
 
 import org.springframework.http.MediaType;
-import org.springframework.util.Assert;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link ResponseBodyEmitter}.
@@ -166,7 +164,7 @@ public class ResponseBodyEmitterTests {
 		verify(this.handler).onTimeout(captor.capture());
 		verify(this.handler).onCompletion(any());
 
-		Assert.notNull(captor.getValue());
+		assertNotNull(captor.getValue());
 		captor.getValue().run();
 		verify(runnable).run();
 	}
@@ -182,7 +180,7 @@ public class ResponseBodyEmitterTests {
 		Runnable runnable = mock(Runnable.class);
 		this.emitter.onTimeout(runnable);
 
-		Assert.notNull(captor.getValue());
+		assertNotNull(captor.getValue());
 		captor.getValue().run();
 		verify(runnable).run();
 	}
@@ -197,7 +195,7 @@ public class ResponseBodyEmitterTests {
 		verify(this.handler).onTimeout(any());
 		verify(this.handler).onCompletion(captor.capture());
 
-		Assert.notNull(captor.getValue());
+		assertNotNull(captor.getValue());
 		captor.getValue().run();
 		verify(runnable).run();
 	}
@@ -213,7 +211,7 @@ public class ResponseBodyEmitterTests {
 		Runnable runnable = mock(Runnable.class);
 		this.emitter.onCompletion(runnable);
 
-		Assert.notNull(captor.getValue());
+		assertNotNull(captor.getValue());
 		captor.getValue().run();
 		verify(runnable).run();
 	}

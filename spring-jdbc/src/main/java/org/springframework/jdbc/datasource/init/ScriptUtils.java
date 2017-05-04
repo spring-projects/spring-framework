@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,19 +168,18 @@ public abstract class ScriptUtils {
 			String blockCommentStartDelimiter, String blockCommentEndDelimiter, List<String> statements)
 			throws ScriptException {
 
-		Assert.hasText(script, "script must not be null or empty");
-		Assert.notNull(separator, "separator must not be null");
-		Assert.hasText(commentPrefix, "commentPrefix must not be null or empty");
-		Assert.hasText(blockCommentStartDelimiter, "blockCommentStartDelimiter must not be null or empty");
-		Assert.hasText(blockCommentEndDelimiter, "blockCommentEndDelimiter must not be null or empty");
+		Assert.hasText(script, "'script' must not be null or empty");
+		Assert.notNull(separator, "'separator' must not be null");
+		Assert.hasText(commentPrefix, "'commentPrefix' must not be null or empty");
+		Assert.hasText(blockCommentStartDelimiter, "'blockCommentStartDelimiter' must not be null or empty");
+		Assert.hasText(blockCommentEndDelimiter, "'blockCommentEndDelimiter' must not be null or empty");
 
 		StringBuilder sb = new StringBuilder();
 		boolean inSingleQuote = false;
 		boolean inDoubleQuote = false;
 		boolean inEscape = false;
-		char[] content = script.toCharArray();
 		for (int i = 0; i < script.length(); i++) {
-			char c = content[i];
+			char c = script.charAt(i);
 			if (inEscape) {
 				inEscape = false;
 				sb.append(c);
@@ -200,7 +199,7 @@ public abstract class ScriptUtils {
 			}
 			if (!inSingleQuote && !inDoubleQuote) {
 				if (script.startsWith(separator, i)) {
-					// we've reached the end of the current statement
+					// We've reached the end of the current statement
 					if (sb.length() > 0) {
 						statements.add(sb.toString());
 						sb = new StringBuilder();
@@ -209,32 +208,31 @@ public abstract class ScriptUtils {
 					continue;
 				}
 				else if (script.startsWith(commentPrefix, i)) {
-					// skip over any content from the start of the comment to the EOL
+					// Skip over any content from the start of the comment to the EOL
 					int indexOfNextNewline = script.indexOf("\n", i);
 					if (indexOfNextNewline > i) {
 						i = indexOfNextNewline;
 						continue;
 					}
 					else {
-						// if there's no EOL, we must be at the end
-						// of the script, so stop here.
+						// If there's no EOL, we must be at the end of the script, so stop here.
 						break;
 					}
 				}
 				else if (script.startsWith(blockCommentStartDelimiter, i)) {
-					// skip over any block comments
+					// Skip over any block comments
 					int indexOfCommentEnd = script.indexOf(blockCommentEndDelimiter, i);
 					if (indexOfCommentEnd > i) {
 						i = indexOfCommentEnd + blockCommentEndDelimiter.length() - 1;
 						continue;
 					}
 					else {
-						throw new ScriptParseException(String.format("Missing block comment end delimiter [%s].",
-							blockCommentEndDelimiter), resource);
+						throw new ScriptParseException(
+								"Missing block comment end delimiter: " + blockCommentEndDelimiter, resource);
 					}
 				}
 				else if (c == ' ' || c == '\n' || c == '\t') {
-					// avoid multiple adjacent whitespace characters
+					// Avoid multiple adjacent whitespace characters
 					if (sb.length() > 0 && sb.charAt(sb.length() - 1) != ' ') {
 						c = ' ';
 					}
@@ -342,9 +340,8 @@ public abstract class ScriptUtils {
 	 */
 	public static boolean containsSqlScriptDelimiters(String script, String delim) {
 		boolean inLiteral = false;
-		char[] content = script.toCharArray();
 		for (int i = 0; i < script.length(); i++) {
-			if (content[i] == '\'') {
+			if (script.charAt(i) == '\'') {
 				inLiteral = !inLiteral;
 			}
 			if (!inLiteral && script.startsWith(delim, i)) {

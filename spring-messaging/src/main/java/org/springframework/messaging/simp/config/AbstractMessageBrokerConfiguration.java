@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -317,14 +317,14 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 			return new NoOpMessageHandler();
 		}
 		SimpUserRegistry userRegistry = userRegistry();
-		Assert.isInstanceOf(MultiServerUserRegistry.class, userRegistry);
+		Assert.isInstanceOf(MultiServerUserRegistry.class, userRegistry, "MultiServerUserRegistry required");
 		return new UserRegistryMessageHandler((MultiServerUserRegistry) userRegistry,
 				brokerMessagingTemplate(), getBrokerRegistry().getUserRegistryBroadcast(),
 				messageBrokerTaskScheduler());
 	}
 
 	// Expose alias for 4.1 compatibility
-	@Bean(name={"messageBrokerTaskScheduler", "messageBrokerSockJsTaskScheduler"})
+	@Bean(name = {"messageBrokerTaskScheduler", "messageBrokerSockJsTaskScheduler"})
 	public ThreadPoolTaskScheduler messageBrokerTaskScheduler() {
 		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 		scheduler.setThreadNamePrefix("MessageBroker-");

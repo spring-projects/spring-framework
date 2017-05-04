@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.Cookie;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.StreamUtils;
 
 import static org.junit.Assert.*;
@@ -61,6 +61,16 @@ public class MockHttpServletRequestTests {
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 
+
+	@Test
+	public void protocolAndScheme() {
+		assertEquals(MockHttpServletRequest.DEFAULT_PROTOCOL, request.getProtocol());
+		assertEquals(MockHttpServletRequest.DEFAULT_SCHEME, request.getScheme());
+		request.setProtocol("HTTP/2.0");
+		request.setScheme("https");
+		assertEquals("HTTP/2.0", request.getProtocol());
+		assertEquals("https", request.getScheme());
+	}
 
 	@Test
 	public void setContentAndGetInputStream() throws IOException {
@@ -242,12 +252,14 @@ public class MockHttpServletRequestTests {
 		request.setCookies(cookie1, cookie2);
 
 		Cookie[] cookies = request.getCookies();
+		List<String> cookieHeaders = Collections.list(request.getHeaders("Cookie"));
 
 		assertEquals(2, cookies.length);
 		assertEquals("foo", cookies[0].getName());
 		assertEquals("bar", cookies[0].getValue());
 		assertEquals("baz", cookies[1].getName());
 		assertEquals("qux", cookies[1].getValue());
+		assertEquals(Arrays.asList("foo=bar", "baz=qux"), cookieHeaders);
 	}
 
 	@Test
@@ -286,6 +298,16 @@ public class MockHttpServletRequestTests {
 		List<Locale> preferredLocales = Arrays.asList(Locale.ITALY, Locale.CHINA);
 		request.setPreferredLocales(preferredLocales);
 		assertEqualEnumerations(Collections.enumeration(preferredLocales), request.getLocales());
+		assertEquals("it-it, zh-cn", request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
+	}
+
+	@Test
+	public void preferredLocalesFromAcceptLanguageHeader() {
+		String headerValue = "fr-ch, fr;q=0.9, en-*;q=0.8, de;q=0.7, *;q=0.5";
+		request.addHeader("Accept-Language", headerValue);
+		List<Locale> actual = Collections.list(request.getLocales());
+		assertEquals(Arrays.asList(Locale.forLanguageTag("fr-ch"), Locale.forLanguageTag("fr"),
+				Locale.forLanguageTag("en"), Locale.forLanguageTag("de")), actual);
 	}
 
 	@Test

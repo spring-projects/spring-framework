@@ -67,10 +67,10 @@ public abstract class AssertionErrors {
 	}
 
 	/**
-	 * Assert two objects are equal raise an {@link AssertionError} if not.
+	 * Assert two objects are equal and raise an {@link AssertionError} if not.
 	 * <p>For example:
 	 * <pre class="code">
-	 * assertEquals("Response header [" + name + "]", actual, expected);
+	 * assertEquals("Response header [" + name + "]", expected, actual);
 	 * </pre>
 	 * @param message describes the value being checked
 	 * @param expected the expected value
@@ -79,6 +79,23 @@ public abstract class AssertionErrors {
 	public static void assertEquals(String message, Object expected, Object actual) {
 		if (!ObjectUtils.nullSafeEquals(expected, actual)) {
 			fail(message, ObjectUtils.nullSafeToString(expected), ObjectUtils.nullSafeToString(actual));
+		}
+	}
+
+	/**
+	 * Assert two objects are not equal and raise an {@link AssertionError} otherwise.
+	 * <p>For example:
+	 * <pre class="code">
+	 * assertNotEquals("Response header [" + name + "]", expected, actual);
+	 * </pre>
+	 * @param message describes the value being checked
+	 * @param expected the expected value
+	 * @param actual the actual value
+	 */
+	public static void assertNotEquals(String message, Object expected, Object actual) {
+		if (ObjectUtils.nullSafeEquals(expected, actual)) {
+			throw new AssertionError(message + " was not expected to be:" +
+					"<" + ObjectUtils.nullSafeToString(actual) + ">");
 		}
 	}
 

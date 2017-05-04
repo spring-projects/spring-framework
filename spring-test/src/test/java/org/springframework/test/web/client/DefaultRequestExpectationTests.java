@@ -24,14 +24,13 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.mock.http.client.MockAsyncClientHttpRequest;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.test.web.client.ExpectedCount.once;
-import static org.springframework.test.web.client.ExpectedCount.times;
+import static org.springframework.test.web.client.ExpectedCount.twice;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -53,7 +52,7 @@ public class DefaultRequestExpectationTests {
 	}
 
 	@Test
-	public void matchWithFailedExpection() throws Exception {
+	public void matchWithFailedExpectation() throws Exception {
 		RequestExpectation expectation = new DefaultRequestExpectation(once(), requestTo("/foo"));
 		expectation.andExpect(method(POST));
 
@@ -63,7 +62,7 @@ public class DefaultRequestExpectationTests {
 
 	@Test
 	public void hasRemainingCount() throws Exception {
-		RequestExpectation expectation = new DefaultRequestExpectation(times(2), requestTo("/foo"));
+		RequestExpectation expectation = new DefaultRequestExpectation(twice(), requestTo("/foo"));
 		expectation.andRespond(withSuccess());
 
 		expectation.createResponse(createRequest(GET, "/foo"));
@@ -75,7 +74,7 @@ public class DefaultRequestExpectationTests {
 
 	@Test
 	public void isSatisfied() throws Exception {
-		RequestExpectation expectation = new DefaultRequestExpectation(times(2), requestTo("/foo"));
+		RequestExpectation expectation = new DefaultRequestExpectation(twice(), requestTo("/foo"));
 		expectation.andRespond(withSuccess());
 
 		expectation.createResponse(createRequest(GET, "/foo"));
@@ -87,9 +86,10 @@ public class DefaultRequestExpectationTests {
 
 
 
+	@SuppressWarnings("deprecation")
 	private ClientHttpRequest createRequest(HttpMethod method, String url) {
 		try {
-			return new MockAsyncClientHttpRequest(method,  new URI(url));
+			return new org.springframework.mock.http.client.MockAsyncClientHttpRequest(method,  new URI(url));
 		}
 		catch (URISyntaxException ex) {
 			throw new IllegalStateException(ex);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.jms.JmsException;
 import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.connection.JmsResourceHolder;
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.JmsDestinationAccessor;
@@ -362,6 +363,23 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 */
 	public boolean isExplicitQosEnabled() {
 		return this.explicitQosEnabled;
+	}
+
+	/**
+	 * Set the {@link QosSettings} to use when sending a message.
+	 * @param settings the deliveryMode, priority, and timeToLive settings to use
+	 * @see #setExplicitQosEnabled(boolean)
+	 * @see #setDeliveryMode(int)
+	 * @see #setPriority(int)
+	 * @see #setTimeToLive(long)
+	 * @since 5.0
+	 */
+	public void setQosSettings(QosSettings settings) {
+		Assert.notNull(settings, "Settings must not be null");
+		setExplicitQosEnabled(true);
+		setDeliveryMode(settings.getDeliveryMode());
+		setPriority(settings.getPriority());
+		setTimeToLive(settings.getTimeToLive());
 	}
 
 	/**

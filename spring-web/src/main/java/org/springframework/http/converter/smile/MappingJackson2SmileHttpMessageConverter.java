@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,16 +58,17 @@ public class MappingJackson2SmileHttpMessageConverter extends AbstractJackson2Ht
 	 */
 	public MappingJackson2SmileHttpMessageConverter(ObjectMapper objectMapper) {
 		super(objectMapper, new MediaType("application", "x-jackson-smile"));
-		Assert.isAssignable(SmileFactory.class, objectMapper.getFactory().getClass());
+		Assert.isInstanceOf(SmileFactory.class, objectMapper.getFactory(), "SmileFactory required");
 	}
+
 
 	/**
 	 * {@inheritDoc}
-	 * The {@code objectMapper} parameter must be configured with a {@code SmileFactory} instance.
+	 * The {@code ObjectMapper} must be configured with a {@code SmileFactory} instance.
 	 */
 	@Override
 	public void setObjectMapper(ObjectMapper objectMapper) {
-		Assert.isAssignable(SmileFactory.class, objectMapper.getFactory().getClass());
+		Assert.isInstanceOf(SmileFactory.class, objectMapper.getFactory(), "SmileFactory required");
 		super.setObjectMapper(objectMapper);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -54,6 +56,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -69,7 +72,7 @@ import org.springframework.util.StringUtils;
  * is {@link Locale#ENGLISH}. This value can be changed via {@link #addPreferredLocale}
  * or {@link #setPreferredLocales}.
  *
- * <p>As of Spring Framework 5.0, this set of mocks is designed on a Servlet 3.1 baseline.
+ * <p>As of Spring Framework 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -86,10 +89,42 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private static final String HTTPS = "https";
 
+	private static final String CHARSET_PREFIX = "charset=";
+
+	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
+
+	private static final ServletInputStream EMPTY_SERVLET_INPUT_STREAM =
+			new DelegatingServletInputStream(StreamUtils.emptyInput());
+
+	private static final BufferedReader EMPTY_BUFFERED_READER =
+			new BufferedReader(new StringReader(""));
+
 	/**
-	 * The default protocol: 'http'.
+	 * Date formats as specified in the HTTP RFC
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
 	 */
-	public static final String DEFAULT_PROTOCOL = HTTP;
+	private static final String[] DATE_FORMATS = new String[] {
+			"EEE, dd MMM yyyy HH:mm:ss zzz",
+			"EEE, dd-MMM-yy HH:mm:ss zzz",
+			"EEE MMM dd HH:mm:ss yyyy"
+	};
+
+
+	// ---------------------------------------------------------------------
+	// Public constants
+	// ---------------------------------------------------------------------
+
+	/**
+	 * The default protocol: 'HTTP/1.1'.
+	 * @since 4.3.7
+	 */
+	public static final String DEFAULT_PROTOCOL = "HTTP/1.1";
+
+	/**
+	 * The default scheme: 'http'.
+	 * @since 4.3.7
+	 */
+	public static final String DEFAULT_SCHEME = HTTP;
 
 	/**
 	 * The default server address: '127.0.0.1'.
@@ -116,27 +151,12 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 */
 	public static final String DEFAULT_REMOTE_HOST = "localhost";
 
-	private static final String CONTENT_TYPE_HEADER = "Content-Type";
 
-	private static final String HOST_HEADER = "Host";
+	// ---------------------------------------------------------------------
+	// Lifecycle properties
+	// ---------------------------------------------------------------------
 
-	private static final String CHARSET_PREFIX = "charset=";
-
-	private static final ServletInputStream EMPTY_SERVLET_INPUT_STREAM =
-			new DelegatingServletInputStream(StreamUtils.emptyInput());
-
-	/**
-	 * Date formats as specified in the HTTP RFC
-	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
-	 */
-	private static final String[] DATE_FORMATS = new String[] {
-			"EEE, dd MMM yyyy HH:mm:ss zzz",
-			"EEE, dd-MMM-yy HH:mm:ss zzz",
-			"EEE MMM dd HH:mm:ss yyyy"
-	};
-
-	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
-
+	private final ServletContext servletContext;
 
 	private boolean active = true;
 
@@ -157,7 +177,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private String protocol = DEFAULT_PROTOCOL;
 
-	private String scheme = DEFAULT_PROTOCOL;
+	private String scheme = DEFAULT_SCHEME;
 
 	private String serverName = DEFAULT_SERVER_NAME;
 
@@ -171,8 +191,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private final List<Locale> locales = new LinkedList<>();
 
 	private boolean secure = false;
-
-	private final ServletContext servletContext;
 
 	private int remotePort = DEFAULT_SERVER_PORT;
 
@@ -367,7 +385,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 					StringUtils.hasLength(this.characterEncoding)) {
 				sb.append(";").append(CHARSET_PREFIX).append(this.characterEncoding);
 			}
-			doAddHeaderValue(CONTENT_TYPE_HEADER, sb.toString(), true);
+			doAddHeaderValue(HttpHeaders.CONTENT_TYPE, sb.toString(), true);
 		}
 	}
 
@@ -422,6 +440,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return (this.content != null ? this.content.length : -1);
 	}
 
+	@Override
 	public long getContentLengthLong() {
 		return getContentLength();
 	}
@@ -475,28 +494,25 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * <p>If there are already one or more values registered for the given
 	 * parameter name, they will be replaced.
 	 */
-	public void setParameter(String name, String[] values) {
+	public void setParameter(String name, String... values) {
 		Assert.notNull(name, "Parameter name must not be null");
 		this.parameters.put(name, values);
 	}
 
 	/**
-	 * Sets all provided parameters <strong>replacing</strong> any existing
+	 * Set all provided parameters <strong>replacing</strong> any existing
 	 * values for the provided parameter names. To add without replacing
 	 * existing values, use {@link #addParameters(java.util.Map)}.
 	 */
-	@SuppressWarnings("rawtypes")
-	public void setParameters(Map params) {
+	public void setParameters(Map<String, ?> params) {
 		Assert.notNull(params, "Parameter map must not be null");
-		for (Object key : params.keySet()) {
-			Assert.isInstanceOf(String.class, key,
-					"Parameter map key must be of type [" + String.class.getName() + "]");
+		for (String key : params.keySet()) {
 			Object value = params.get(key);
 			if (value instanceof String) {
-				this.setParameter((String) key, (String) value);
+				setParameter(key, (String) value);
 			}
 			else if (value instanceof String[]) {
-				this.setParameter((String) key, (String[]) value);
+				setParameter(key, (String[]) value);
 			}
 			else {
 				throw new IllegalArgumentException(
@@ -519,7 +535,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * <p>If there are already one or more values registered for the given
 	 * parameter name, the given values will be added to the end of the list.
 	 */
-	public void addParameter(String name, String[] values) {
+	public void addParameter(String name, String... values) {
 		Assert.notNull(name, "Parameter name must not be null");
 		String[] oldArr = this.parameters.get(name);
 		if (oldArr != null) {
@@ -538,18 +554,15 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * existing values. To replace existing values, use
 	 * {@link #setParameters(java.util.Map)}.
 	 */
-	@SuppressWarnings("rawtypes")
-	public void addParameters(Map params) {
+	public void addParameters(Map<String, ?> params) {
 		Assert.notNull(params, "Parameter map must not be null");
-		for (Object key : params.keySet()) {
-			Assert.isInstanceOf(String.class, key,
-					"Parameter map key must be of type [" + String.class.getName() + "]");
+		for (String key : params.keySet()) {
 			Object value = params.get(key);
 			if (value instanceof String) {
-				this.addParameter((String) key, (String) value);
+				addParameter(key, (String) value);
 			}
 			else if (value instanceof String[]) {
-				this.addParameter((String) key, (String[]) value);
+				addParameter(key, (String[]) value);
 			}
 			else {
 				throw new IllegalArgumentException("Parameter map value must be single value " +
@@ -618,7 +631,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public String getServerName() {
-		String host = getHeader(HOST_HEADER);
+		String host = getHeader(HttpHeaders.HOST);
 		if (host != null) {
 			host = host.trim();
 			if (host.startsWith("[")) {
@@ -640,7 +653,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public int getServerPort() {
-		String host = getHeader(HOST_HEADER);
+		String host = getHeader(HttpHeaders.HOST);
 		if (host != null) {
 			host = host.trim();
 			int idx;
@@ -664,11 +677,12 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		if (this.content != null) {
 			InputStream sourceStream = new ByteArrayInputStream(this.content);
 			Reader sourceReader = (this.characterEncoding != null) ?
-					new InputStreamReader(sourceStream, this.characterEncoding) : new InputStreamReader(sourceStream);
+					new InputStreamReader(sourceStream, this.characterEncoding) :
+					new InputStreamReader(sourceStream);
 			return new BufferedReader(sourceReader);
 		}
 		else {
-			return null;
+			return EMPTY_BUFFERED_READER;
 		}
 	}
 
@@ -723,6 +737,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public void addPreferredLocale(Locale locale) {
 		Assert.notNull(locale, "Locale must not be null");
 		this.locales.add(0, locale);
+		updateAcceptLanguageHeader();
 	}
 
 	/**
@@ -735,6 +750,13 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		Assert.notEmpty(locales, "Locale list must not be empty");
 		this.locales.clear();
 		this.locales.addAll(locales);
+		updateAcceptLanguageHeader();
+	}
+
+	private void updateAcceptLanguageHeader() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAcceptLanguageAsLocales(this.locales);
+		doAddHeaderValue(HttpHeaders.ACCEPT_LANGUAGE, headers.getFirst(HttpHeaders.ACCEPT_LANGUAGE), true);
 	}
 
 	/**
@@ -906,6 +928,12 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public void setCookies(Cookie... cookies) {
 		this.cookies = cookies;
+		this.headers.remove(HttpHeaders.COOKIE);
+		if (cookies != null) {
+			Arrays.stream(cookies)
+					.map(c -> c.getName() + '=' + (c.getValue() == null ? "" : c.getValue()))
+					.forEach(value -> doAddHeaderValue(HttpHeaders.COOKIE, value, false));
+		}
 	}
 
 	@Override
@@ -929,14 +957,23 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * @see #getDateHeader
 	 */
 	public void addHeader(String name, Object value) {
-		if (CONTENT_TYPE_HEADER.equalsIgnoreCase(name)) {
-			setContentType((String) value);
-			return;
+		if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name) &&
+				!this.headers.containsKey(HttpHeaders.CONTENT_TYPE)) {
+
+			setContentType(value.toString());
 		}
-		doAddHeaderValue(name, value, false);
+		else if (HttpHeaders.ACCEPT_LANGUAGE.equalsIgnoreCase(name) &&
+				!this.headers.containsKey(HttpHeaders.ACCEPT_LANGUAGE)) {
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.add(HttpHeaders.ACCEPT_LANGUAGE, value.toString());
+			setPreferredLocales(headers.getAcceptLanguageAsLocales());
+		}
+		else {
+			doAddHeaderValue(name, value, false);
+		}
 	}
 
-	@SuppressWarnings("rawtypes")
 	private void doAddHeaderValue(String name, Object value, boolean replace) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		Assert.notNull(value, "Header value must not be null");
@@ -945,7 +982,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			this.headers.put(name, header);
 		}
 		if (value instanceof Collection) {
-			header.addValues((Collection) value);
+			header.addValues((Collection<?>) value);
 		}
 		else if (value.getClass().isArray()) {
 			header.addValueArray(value);
@@ -1128,16 +1165,13 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	public StringBuffer getRequestURL() {
 		StringBuffer url = new StringBuffer(this.scheme).append("://").append(this.serverName);
-
-		if (this.serverPort > 0
-				&& ((HTTP.equalsIgnoreCase(this.scheme) && this.serverPort != 80) || (HTTPS.equalsIgnoreCase(this.scheme) && this.serverPort != 443))) {
+		if (this.serverPort > 0 && ((HTTP.equalsIgnoreCase(this.scheme) && this.serverPort != 80) ||
+				(HTTPS.equalsIgnoreCase(this.scheme) && this.serverPort != 443))) {
 			url.append(':').append(this.serverPort);
 		}
-
 		if (StringUtils.hasText(getRequestURI())) {
 			url.append(getRequestURI());
 		}
-
 		return url;
 	}
 

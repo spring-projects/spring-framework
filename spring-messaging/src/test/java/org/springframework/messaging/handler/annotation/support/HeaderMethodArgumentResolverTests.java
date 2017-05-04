@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.messaging.handler.annotation.support;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +43,7 @@ import static org.junit.Assert.*;
  * Test fixture for {@link HeaderMethodArgumentResolver} tests.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public class HeaderMethodArgumentResolverTests {
@@ -53,6 +55,7 @@ public class HeaderMethodArgumentResolverTests {
 	private MethodParameter paramSystemPropertyDefaultValue;
 	private MethodParameter paramSystemPropertyName;
 	private MethodParameter paramNotAnnotated;
+	private MethodParameter paramOptional;
 	private MethodParameter paramNativeHeader;
 
 
@@ -69,7 +72,8 @@ public class HeaderMethodArgumentResolverTests {
 		this.paramSystemPropertyDefaultValue = new SynthesizingMethodParameter(method, 2);
 		this.paramSystemPropertyName = new SynthesizingMethodParameter(method, 3);
 		this.paramNotAnnotated = new SynthesizingMethodParameter(method, 4);
-		this.paramNativeHeader = new SynthesizingMethodParameter(method, 5);
+		this.paramOptional = new SynthesizingMethodParameter(method, 5);
+		this.paramNativeHeader = new SynthesizingMethodParameter(method, 6);
 
 		this.paramRequired.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		GenericTypeResolver.resolveParameterType(this.paramRequired, HeaderMethodArgumentResolver.class);
@@ -147,6 +151,32 @@ public class HeaderMethodArgumentResolverTests {
 		}
 	}
 
+	@Test
+	public void resolveOptionalHeaderWithValue() throws Exception {
+		GenericApplicationContext cxt = new GenericApplicationContext();
+		cxt.refresh();
+
+		HeaderMethodArgumentResolver resolver =
+				new HeaderMethodArgumentResolver(new DefaultConversionService(), cxt.getBeanFactory());
+
+		Message<String> message = MessageBuilder.withPayload("foo").setHeader("foo", "bar").build();
+		Object result = resolver.resolveArgument(paramOptional, message);
+		assertEquals(Optional.of("bar"), result);
+	}
+
+	@Test
+	public void resolveOptionalHeaderAsEmpty() throws Exception {
+		GenericApplicationContext cxt = new GenericApplicationContext();
+		cxt.refresh();
+
+		HeaderMethodArgumentResolver resolver =
+				new HeaderMethodArgumentResolver(new DefaultConversionService(), cxt.getBeanFactory());
+
+		Message<String> message = MessageBuilder.withPayload("foo").build();
+		Object result = resolver.resolveArgument(paramOptional, message);
+		assertEquals(Optional.empty(), result);
+	}
+
 
 	public void handleMessage(
 			@Header String param1,
@@ -154,6 +184,7 @@ public class HeaderMethodArgumentResolverTests {
 			@Header(name = "name", defaultValue = "#{systemProperties.systemProperty}") String param3,
 			@Header(name = "#{systemProperties.systemProperty}") String param4,
 			String param5,
+			@Header("foo") Optional<String> param6,
 			@Header("nativeHeaders.param1") String nativeHeaderParam1) {
 	}
 

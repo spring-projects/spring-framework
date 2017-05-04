@@ -33,6 +33,7 @@ abstract class ConversionUtils {
 
 	public static Object invokeConverter(GenericConverter converter, Object source, TypeDescriptor sourceType,
 			TypeDescriptor targetType) {
+
 		try {
 			return converter.convert(source, sourceType, targetType);
 		}
@@ -44,7 +45,9 @@ abstract class ConversionUtils {
 		}
 	}
 
-	public static boolean canConvertElements(TypeDescriptor sourceElementType, TypeDescriptor targetElementType, ConversionService conversionService) {
+	public static boolean canConvertElements(TypeDescriptor sourceElementType, TypeDescriptor targetElementType,
+			ConversionService conversionService) {
+
 		if (targetElementType == null) {
 			// yes
 			return true;
@@ -58,11 +61,11 @@ abstract class ConversionUtils {
 			return true;
 		}
 		else if (sourceElementType.getType().isAssignableFrom(targetElementType.getType())) {
-			// maybe;
+			// maybe
 			return true;
 		}
 		else {
-			// no;
+			// no
 			return false;
 		}
 	}

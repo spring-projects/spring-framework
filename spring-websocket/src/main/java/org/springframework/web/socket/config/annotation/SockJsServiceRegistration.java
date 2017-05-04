@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,17 +30,18 @@ import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 
+
 /**
- * A helper class for configuring SockJS fallback options, typically used indirectly, in
- * conjunction with {@link org.springframework.web.socket.config.annotation.EnableWebSocket @EnableWebSocket} and
- * {@link WebSocketConfigurer}.
+ * A helper class for configuring SockJS fallback options for use with an
+ * {@link org.springframework.web.socket.config.annotation.EnableWebSocket} and
+ * {@link WebSocketConfigurer} setup.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class SockJsServiceRegistration {
 
-	private TaskScheduler taskScheduler;
+	private TaskScheduler scheduler;
 
 	private String clientLibraryUrl;
 
@@ -69,13 +70,29 @@ public class SockJsServiceRegistration {
 	private SockJsMessageCodec messageCodec;
 
 
+	public SockJsServiceRegistration() {
+	}
+
+	/**
+	 * Deprecated constructor with a TaskScheduler.
+	 *
+	 * @deprecated as of 5.0 a TaskScheduler is not provided upfront, not until
+	 * it is obvious that it is needed; call {@link #getTaskScheduler()} to check
+	 * and then {@link #setTaskScheduler(TaskScheduler)} to set it before a call
+	 * to {@link #createSockJsService()}
+	 */
+	@Deprecated
 	public SockJsServiceRegistration(TaskScheduler defaultTaskScheduler) {
-		this.taskScheduler = defaultTaskScheduler;
+		this.scheduler = defaultTaskScheduler;
 	}
 
 
-	public SockJsServiceRegistration setTaskScheduler(TaskScheduler taskScheduler) {
-		this.taskScheduler = taskScheduler;
+	/**
+	 * A scheduler instance to use for scheduling SockJS heart-beats.
+	 */
+	public SockJsServiceRegistration setTaskScheduler(TaskScheduler scheduler) {
+		Assert.notNull(scheduler, "TaskScheduler is required.");
+		this.scheduler = scheduler;
 		return this;
 	}
 
@@ -276,15 +293,21 @@ public class SockJsServiceRegistration {
 		return service;
 	}
 
+	/**
+	 * Return the TaskScheduler, if configured.
+	 */
+	protected TaskScheduler getTaskScheduler() {
+		return this.scheduler;
+	}
+
 	private TransportHandlingSockJsService createSockJsService() {
-		if (!this.transportHandlers.isEmpty()) {
-			Assert.state(this.transportHandlerOverrides.isEmpty(),
-					"Specify either TransportHandlers or TransportHandler overrides, not both");
-			return new TransportHandlingSockJsService(this.taskScheduler, this.transportHandlers);
-		}
-		else {
-			return new DefaultSockJsService(this.taskScheduler, this.transportHandlerOverrides);
-		}
+
+		Assert.state(this.transportHandlers.isEmpty() || this.transportHandlerOverrides.isEmpty(),
+				"Specify either TransportHandlers or TransportHandler overrides, not both");
+
+		return !this.transportHandlers.isEmpty() ?
+				new TransportHandlingSockJsService(this.scheduler, this.transportHandlers) :
+				new DefaultSockJsService(this.scheduler, this.transportHandlerOverrides);
 	}
 
 }

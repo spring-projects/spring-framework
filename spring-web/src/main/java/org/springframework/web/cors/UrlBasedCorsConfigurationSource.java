@@ -19,6 +19,7 @@ package org.springframework.web.cors;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.AntPathMatcher;

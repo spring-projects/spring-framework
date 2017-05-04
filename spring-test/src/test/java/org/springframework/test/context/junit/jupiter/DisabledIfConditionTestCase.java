@@ -69,7 +69,7 @@ class DisabledIfConditionTestCase {
 	@Test
 	void invalidExpressionEvaluationType() {
 		String methodName = "nonBooleanOrStringExpression";
-		IllegalStateException exception = expectThrows(IllegalStateException.class,
+		IllegalStateException exception = assertThrows(IllegalStateException.class,
 			() -> condition.evaluate(buildExtensionContext(methodName)));
 
 		Method method = ReflectionUtils.findMethod(getClass(), methodName);
@@ -81,7 +81,7 @@ class DisabledIfConditionTestCase {
 	@Test
 	void unsupportedStringEvaluationValue() {
 		String methodName = "stringExpressionThatIsNeitherTrueNorFalse";
-		IllegalStateException exception = expectThrows(IllegalStateException.class,
+		IllegalStateException exception = assertThrows(IllegalStateException.class,
 			() -> condition.evaluate(buildExtensionContext(methodName)));
 
 		Method method = ReflectionUtils.findMethod(getClass(), methodName);
@@ -123,7 +123,7 @@ class DisabledIfConditionTestCase {
 	}
 
 	private void assertExpressionIsBlank(String methodName) {
-		IllegalStateException exception = expectThrows(IllegalStateException.class,
+		IllegalStateException exception = assertThrows(IllegalStateException.class,
 			() -> condition.evaluate(buildExtensionContext(methodName)));
 
 		assertThat(exception.getMessage(), containsString("must not be blank"));

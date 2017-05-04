@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 
 package org.springframework.web.jsf.el;
 
+import java.beans.FeatureDescriptor;
+import java.util.Iterator;
 import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.ELResolver;
+import javax.el.PropertyNotWritableException;
 import javax.faces.context.FacesContext;
 
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.access.el.SpringBeanELResolver;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.jsf.FacesContextUtils;
 
@@ -64,18 +67,72 @@ import org.springframework.web.jsf.FacesContextUtils;
  * @see WebApplicationContextFacesELResolver
  * @see org.springframework.web.jsf.FacesContextUtils#getRequiredWebApplicationContext
  */
-public class SpringBeanFacesELResolver extends SpringBeanELResolver {
+public class SpringBeanFacesELResolver extends ELResolver {
 
-	/**
-	 * This implementation delegates to {@link #getWebApplicationContext}.
-	 * Can be overridden to provide an arbitrary BeanFactory reference to resolve
-	 * against; usually, this will be a full Spring ApplicationContext.
-	 * @param elContext the current JSF ELContext
-	 * @return the Spring BeanFactory (never {@code null})
-	 */
 	@Override
-	protected BeanFactory getBeanFactory(ELContext elContext) {
-		return getWebApplicationContext(elContext);
+	public Object getValue(ELContext elContext, Object base, Object property) throws ELException {
+		if (base == null) {
+			String beanName = property.toString();
+			WebApplicationContext wac = getWebApplicationContext(elContext);
+			if (wac.containsBean(beanName)) {
+				elContext.setPropertyResolved(true);
+				return wac.getBean(beanName);
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public Class<?> getType(ELContext elContext, Object base, Object property) throws ELException {
+		if (base == null) {
+			String beanName = property.toString();
+			WebApplicationContext wac = getWebApplicationContext(elContext);
+			if (wac.containsBean(beanName)) {
+				elContext.setPropertyResolved(true);
+				return wac.getType(beanName);
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public void setValue(ELContext elContext, Object base, Object property, Object value) throws ELException {
+		if (base == null) {
+			String beanName = property.toString();
+			WebApplicationContext wac = getWebApplicationContext(elContext);
+			if (wac.containsBean(beanName)) {
+				if (value == wac.getBean(beanName)) {
+					// Setting the bean reference to the same value is alright - can simply be ignored...
+					elContext.setPropertyResolved(true);
+				}
+				else {
+					throw new PropertyNotWritableException(
+							"Variable '" + beanName + "' refers to a Spring bean which by definition is not writable");
+				}
+			}
+		}
+	}
+
+	@Override
+	public boolean isReadOnly(ELContext elContext, Object base, Object property) throws ELException {
+		if (base == null) {
+			String beanName = property.toString();
+			WebApplicationContext wac = getWebApplicationContext(elContext);
+			if (wac.containsBean(beanName)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext elContext, Object base) {
+		return null;
+	}
+
+	@Override
+	public Class<?> getCommonPropertyType(ELContext elContext, Object base) {
+		return Object.class;
 	}
 
 	/**

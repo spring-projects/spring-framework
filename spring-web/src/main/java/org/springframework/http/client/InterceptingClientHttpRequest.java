@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -86,7 +87,9 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 			}
 			else {
 				ClientHttpRequest delegate = requestFactory.createRequest(request.getURI(), request.getMethod());
-				delegate.getHeaders().putAll(request.getHeaders());
+				for (Map.Entry<String, List<String>> entry : request.getHeaders().entrySet()) {
+					delegate.getHeaders().addAll(entry.getKey(), entry.getValue());
+				}
 				if (body.length > 0) {
 					StreamUtils.copy(body, delegate.getBody());
 				}

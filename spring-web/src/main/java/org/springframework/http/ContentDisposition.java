@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.nio.charset.StandardCharsets;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import static java.nio.charset.StandardCharsets.*;
+
 /**
  * Represent the content disposition type and parameters as defined in RFC 2183.
  *
@@ -42,10 +44,9 @@ public class ContentDisposition {
 
 	private final Long size;
 
+
 	/**
-	 * Create a {@code ContentDisposition} instance with the specified disposition type
-	 * and {@litteral name}, {@litteral filename} (encoded with the specified {@link Charset}
-	 * if any) and {@litteral size} parameter values.
+	 * Private constructor. See static factory methods in this class.
 	 */
 	private ContentDisposition(String type, String name, String filename, Charset charset, Long size) {
 		this.type = type;
@@ -55,22 +56,6 @@ public class ContentDisposition {
 		this.size = size;
 	}
 
-	/**
-	 * Return a builder for a {@code ContentDisposition}.
-	 * @param type the disposition type like for example {@literal inline}, {@literal attachment},
-	 * or {@literal form-data}
-	 * @return a content disposition builder
-	 */
-	public static Builder builder(String type) {
-		return new BuilderImpl(type);
-	}
-
-	/**
-	 * @return an empty content disposition
-	 */
-	public static ContentDisposition empty() {
-		return new ContentDisposition(null, null, null, null, null);
-	}
 
 	/**
 	 * Return the disposition type, like for example {@literal inline}, {@literal attachment},
@@ -109,6 +94,24 @@ public class ContentDisposition {
 		return this.size;
 	}
 
+
+	/**
+	 * Return a builder for a {@code ContentDisposition}.
+	 * @param type the disposition type like for example {@literal inline},
+	 * {@literal attachment}, or {@literal form-data}
+	 * @return the builder
+	 */
+	public static Builder builder(String type) {
+		return new BuilderImpl(type);
+	}
+
+	/**
+	 * Return an empty content disposition.
+	 */
+	public static ContentDisposition empty() {
+		return new ContentDisposition(null, null, null, null, null);
+	}
+
 	/**
 	 * Parse a {@literal Content-Disposition} header value as defined in RFC 2183.
 	 * @param contentDisposition the {@literal Content-Disposition} header value
@@ -117,27 +120,27 @@ public class ContentDisposition {
 	 */
 	public static ContentDisposition parse(String contentDisposition) {
 		String[] parts = StringUtils.tokenizeToStringArray(contentDisposition, ";");
-		Assert.isTrue(parts.length >= 1);
+		Assert.isTrue(parts.length >= 1, "Content-Disposition header must not be empty");
 		String type = parts[0];
 		String name = null;
 		String filename = null;
 		Charset charset = null;
 		Long size = null;
 		for (int i = 1; i < parts.length; i++) {
-			String parameter = parts[i];
-			int eqIndex = parameter.indexOf('=');
+			String part = parts[i];
+			int eqIndex = part.indexOf('=');
 			if (eqIndex != -1) {
-				String attribute = parameter.substring(0, eqIndex);
-				String value = (parameter.startsWith("\"", eqIndex + 1) && parameter.endsWith("\"") ?
-						parameter.substring(eqIndex + 2, parameter.length() - 1) :
-						parameter.substring(eqIndex + 1, parameter.length()));
+				String attribute = part.substring(0, eqIndex);
+				String value = (part.startsWith("\"", eqIndex + 1) && part.endsWith("\"") ?
+						part.substring(eqIndex + 2, part.length() - 1) :
+						part.substring(eqIndex + 1, part.length()));
 				if (attribute.equals("name") ) {
 					name = value;
 				}
 				else if (attribute.equals("filename*") ) {
 					filename = decodeHeaderFieldParam(value);
 					charset = Charset.forName(value.substring(0, value.indexOf("'")));
-					Assert.isTrue(StandardCharsets.UTF_8.equals(charset) || StandardCharsets.ISO_8859_1.equals(charset),
+					Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
 							"Charset should be UTF-8 or ISO-8859-1");
 				}
 				else if (attribute.equals("filename") && (filename == null)) {
@@ -152,42 +155,6 @@ public class ContentDisposition {
 			}
 		}
 		return new ContentDisposition(type, name, filename, charset, size);
-	}
-
-	/**
-	 * Encode the given header field param as describe in RFC 5987.
-	 * @param input the header field param
-	 * @param charset the charset of the header field param string,
-	 * only the US-ASCII, UTF-8 and ISO-8859-1 charsets are supported
-	 * @return the encoded header field param
-	 * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
-	 */
-	private static String encodeHeaderFieldParam(String input, Charset charset) {
-		Assert.notNull(input, "Input String should not be null");
-		Assert.notNull(charset, "Charset should not be null");
-		if (StandardCharsets.US_ASCII.equals(charset)) {
-			return input;
-		}
-		Assert.isTrue(StandardCharsets.UTF_8.equals(charset) || StandardCharsets.ISO_8859_1.equals(charset),
-				"Charset should be UTF-8 or ISO-8859-1");
-		byte[] source = input.getBytes(charset);
-		int len = source.length;
-		StringBuilder sb = new StringBuilder(len << 1);
-		sb.append(charset.name());
-		sb.append("''");
-		for (byte b : source) {
-			if (isRFC5987AttrChar(b)) {
-				sb.append((char) b);
-			}
-			else {
-				sb.append('%');
-				char hex1 = Character.toUpperCase(Character.forDigit((b >> 4) & 0xF, 16));
-				char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
-				sb.append(hex1);
-				sb.append(hex2);
-			}
-		}
-		return sb.toString();
 	}
 
 	/**
@@ -206,7 +173,7 @@ public class ContentDisposition {
 			return input;
 		}
 		Charset charset = Charset.forName(input.substring(0, firstQuoteIndex));
-		Assert.isTrue(StandardCharsets.UTF_8.equals(charset) || StandardCharsets.ISO_8859_1.equals(charset),
+		Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
 				"Charset should be UTF-8 or ISO-8859-1");
 		byte[] value = input.substring(secondQuoteIndex + 1, input.length()).getBytes(charset);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -297,6 +264,42 @@ public class ContentDisposition {
 		return builder.toString();
 	}
 
+	/**
+	 * Encode the given header field param as describe in RFC 5987.
+	 * @param input the header field param
+	 * @param charset the charset of the header field param string,
+	 * only the US-ASCII, UTF-8 and ISO-8859-1 charsets are supported
+	 * @return the encoded header field param
+	 * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
+	 */
+	private static String encodeHeaderFieldParam(String input, Charset charset) {
+		Assert.notNull(input, "Input String should not be null");
+		Assert.notNull(charset, "Charset should not be null");
+		if (StandardCharsets.US_ASCII.equals(charset)) {
+			return input;
+		}
+		Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
+				"Charset should be UTF-8 or ISO-8859-1");
+		byte[] source = input.getBytes(charset);
+		int len = source.length;
+		StringBuilder sb = new StringBuilder(len << 1);
+		sb.append(charset.name());
+		sb.append("''");
+		for (byte b : source) {
+			if (isRFC5987AttrChar(b)) {
+				sb.append((char) b);
+			}
+			else {
+				sb.append('%');
+				char hex1 = Character.toUpperCase(Character.forDigit((b >> 4) & 0xF, 16));
+				char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
+				sb.append(hex1);
+				sb.append(hex2);
+			}
+		}
+		return sb.toString();
+	}
+
 
 	/**
 	 * A mutable builder for {@code ContentDisposition}.
@@ -377,7 +380,6 @@ public class ContentDisposition {
 		public ContentDisposition build() {
 			return new ContentDisposition(this.type, this.name, this.filename, this.charset, this.size);
 		}
-
 	}
 
 }

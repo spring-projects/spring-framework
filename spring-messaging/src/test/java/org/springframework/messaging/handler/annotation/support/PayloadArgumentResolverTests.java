@@ -53,8 +53,6 @@ public class PayloadArgumentResolverTests {
 
 	private PayloadArgumentResolver resolver;
 
-	private Method payloadMethod;
-
 	private MethodParameter paramAnnotated;
 
 	private MethodParameter paramAnnotatedNotRequired;
@@ -76,20 +74,35 @@ public class PayloadArgumentResolverTests {
 
 	@Before
 	public void setup() throws Exception {
-		this.resolver = new PayloadArgumentResolver(new StringMessageConverter(), testValidator());
-		this.payloadMethod = PayloadArgumentResolverTests.class.getDeclaredMethod("handleMessage",
-				String.class, String.class, Locale.class, String.class, String.class, String.class, String.class);
 
-		this.paramAnnotated = new SynthesizingMethodParameter(this.payloadMethod, 0);
-		this.paramAnnotatedNotRequired = new SynthesizingMethodParameter(this.payloadMethod, 1);
+		this.resolver = new PayloadArgumentResolver(new StringMessageConverter(), testValidator());
+
+		Method payloadMethod = PayloadArgumentResolverTests.class.getDeclaredMethod(
+				"handleMessage", String.class, String.class, Locale.class,
+				String.class, String.class, String.class, String.class);
+
+		this.paramAnnotated = new SynthesizingMethodParameter(payloadMethod, 0);
+		this.paramAnnotatedNotRequired = new SynthesizingMethodParameter(payloadMethod, 1);
 		this.paramAnnotatedRequired = new SynthesizingMethodParameter(payloadMethod, 2);
 		this.paramWithSpelExpression = new SynthesizingMethodParameter(payloadMethod, 3);
-		this.paramValidated = new SynthesizingMethodParameter(this.payloadMethod, 4);
+		this.paramValidated = new SynthesizingMethodParameter(payloadMethod, 4);
 		this.paramValidated.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-		this.paramValidatedNotAnnotated = new SynthesizingMethodParameter(this.payloadMethod, 5);
-		this.paramNotAnnotated = new SynthesizingMethodParameter(this.payloadMethod, 6);
+		this.paramValidatedNotAnnotated = new SynthesizingMethodParameter(payloadMethod, 5);
+		this.paramNotAnnotated = new SynthesizingMethodParameter(payloadMethod, 6);
 	}
 
+	@Test
+	public void supportsParameter() throws Exception {
+
+		assertTrue(this.resolver.supportsParameter(this.paramAnnotated));
+		assertTrue(this.resolver.supportsParameter(this.paramNotAnnotated));
+
+		PayloadArgumentResolver strictResolver = new PayloadArgumentResolver(
+				new StringMessageConverter(), testValidator(), false);
+
+		assertTrue(strictResolver.supportsParameter(this.paramAnnotated));
+		assertFalse(strictResolver.supportsParameter(this.paramNotAnnotated));
+	}
 
 	@Test
 	public void resolveRequired() throws Exception {

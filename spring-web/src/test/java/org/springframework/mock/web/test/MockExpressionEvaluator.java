@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ import javax.servlet.jsp.PageContext;
 
 import org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager;
 
+import org.springframework.util.Assert;
+
 /**
  * Mock implementation of the JSP 2.0 {@link javax.servlet.jsp.el.ExpressionEvaluator}
  * interface, delegating to the Apache JSTL ExpressionEvaluatorManager.
- *
- * <p>Used for testing the web framework; only necessary for testing applications
- * when testing custom JSP tags.
+ * Only necessary for testing applications when testing custom JSP tags.
  *
  * <p>Note that the Apache JSTL implementation (jstl.jar, standard.jar) has to be
  * available on the class path to use this expression evaluator.
@@ -68,9 +68,7 @@ public class MockExpressionEvaluator extends javax.servlet.jsp.el.ExpressionEval
 	public Object evaluate(String expression, Class expectedType, javax.servlet.jsp.el.VariableResolver variableResolver,
 			javax.servlet.jsp.el.FunctionMapper functionMapper) throws javax.servlet.jsp.el.ELException {
 
-		if (variableResolver != null) {
-			throw new IllegalArgumentException("Custom VariableResolver not supported");
-		}
+		Assert.isNull(variableResolver, "Custom VariableResolver not supported");
 		return doEvaluate(expression, expectedType, functionMapper);
 	}
 
@@ -78,9 +76,7 @@ public class MockExpressionEvaluator extends javax.servlet.jsp.el.ExpressionEval
 	protected Object doEvaluate(String expression, Class expectedType, javax.servlet.jsp.el.FunctionMapper functionMapper)
 			throws javax.servlet.jsp.el.ELException {
 
-		if (functionMapper != null) {
-			throw new IllegalArgumentException("Custom FunctionMapper not supported");
-		}
+		Assert.isNull(functionMapper, "Custom FunctionMapper not supported");
 		try {
 			return ExpressionEvaluatorManager.evaluate("JSP EL expression", expression, expectedType, this.pageContext);
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,10 +77,8 @@ class ComponentScanAnnotationParser {
 		Assert.state(this.environment != null, "Environment must not be null");
 		Assert.state(this.resourceLoader != null, "ResourceLoader must not be null");
 
-		ClassPathBeanDefinitionScanner scanner =
-				new ClassPathBeanDefinitionScanner(this.registry, componentScan.getBoolean("useDefaultFilters"));
-		scanner.setEnvironment(this.environment);
-		scanner.setResourceLoader(this.resourceLoader);
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this.registry,
+				componentScan.getBoolean("useDefaultFilters"), this.environment, this.resourceLoader);
 
 		Class<? extends BeanNameGenerator> generatorClass = componentScan.getClass("nameGenerator");
 		boolean useInheritedGenerator = (BeanNameGenerator.class == generatorClass);
@@ -145,7 +143,7 @@ class ComponentScanAnnotationParser {
 			switch (filterType) {
 				case ANNOTATION:
 					Assert.isAssignable(Annotation.class, filterClass,
-							"An error occurred while processing a @ComponentScan ANNOTATION type filter: ");
+							"@ComponentScan ANNOTATION type filter requires an annotation type");
 					@SuppressWarnings("unchecked")
 					Class<Annotation> annotationType = (Class<Annotation>) filterClass;
 					typeFilters.add(new AnnotationTypeFilter(annotationType));
@@ -155,7 +153,7 @@ class ComponentScanAnnotationParser {
 					break;
 				case CUSTOM:
 					Assert.isAssignable(TypeFilter.class, filterClass,
-							"An error occurred while processing a @ComponentScan CUSTOM type filter: ");
+							"@ComponentScan CUSTOM type filter requires a TypeFilter implementation");
 					TypeFilter filter = BeanUtils.instantiateClass(filterClass, TypeFilter.class);
 					ParserStrategyUtils.invokeAwareMethods(
 							filter, this.environment, this.resourceLoader, this.registry);

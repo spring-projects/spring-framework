@@ -21,7 +21,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.WebAsyncTask;
 import org.springframework.web.context.request.async.WebAsyncUtils;
-import org.springframework.web.method.support.AsyncHandlerMethodReturnValueHandler;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
@@ -30,7 +30,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class AsyncTaskMethodReturnValueHandler implements AsyncHandlerMethodReturnValueHandler {
+public class AsyncTaskMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
 	private final BeanFactory beanFactory;
 
@@ -43,11 +43,6 @@ public class AsyncTaskMethodReturnValueHandler implements AsyncHandlerMethodRetu
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		return WebAsyncTask.class.isAssignableFrom(returnType.getParameterType());
-	}
-
-	@Override
-	public boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType) {
-		return (returnValue != null && returnValue instanceof WebAsyncTask);
 	}
 
 	@Override

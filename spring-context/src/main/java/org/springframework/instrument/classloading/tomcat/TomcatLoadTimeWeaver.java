@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public class TomcatLoadTimeWeaver implements LoadTimeWeaver {
 			}
 			this.copyMethod = copyMethod;
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new IllegalStateException(
 					"Could not initialize TomcatLoadTimeWeaver because Tomcat API classes are not available", ex);
 		}
@@ -91,7 +91,7 @@ public class TomcatLoadTimeWeaver implements LoadTimeWeaver {
 		catch (InvocationTargetException ex) {
 			throw new IllegalStateException("Tomcat addTransformer method threw exception", ex.getCause());
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new IllegalStateException("Could not invoke Tomcat addTransformer method", ex);
 		}
 	}
@@ -109,7 +109,7 @@ public class TomcatLoadTimeWeaver implements LoadTimeWeaver {
 		catch (InvocationTargetException ex) {
 			throw new IllegalStateException("Tomcat copy method threw exception", ex.getCause());
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new IllegalStateException("Could not invoke Tomcat copy method", ex);
 		}
 	}

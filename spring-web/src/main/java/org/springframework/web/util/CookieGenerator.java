@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class CookieGenerator {
 
 	private String cookiePath = DEFAULT_COOKIE_PATH;
 
-	private Integer cookieMaxAge = null;
+	private Integer cookieMaxAge;
 
 	private boolean cookieSecure = false;
 
@@ -111,7 +111,9 @@ public class CookieGenerator {
 
 	/**
 	 * Use the given maximum age (in seconds) for cookies created by this generator.
-	 * Useful special value: -1 ... not persistent, deleted when client shuts down
+	 * Useful special value: -1 ... not persistent, deleted when client shuts down.
+	 * <p>Default is no specific maximum age at all, using the Servlet container's
+	 * default.
 	 * @see javax.servlet.http.Cookie#setMaxAge
 	 */
 	public void setCookieMaxAge(Integer cookieMaxAge) {
@@ -128,7 +130,8 @@ public class CookieGenerator {
 	/**
 	 * Set whether the cookie should only be sent using a secure protocol,
 	 * such as HTTPS (SSL). This is an indication to the receiving browser,
-	 * not processed by the HTTP server itself. Default is "false".
+	 * not processed by the HTTP server itself.
+	 * <p>Default is "false".
 	 * @see javax.servlet.http.Cookie#setSecure
 	 */
 	public void setCookieSecure(boolean cookieSecure) {
@@ -145,6 +148,7 @@ public class CookieGenerator {
 
 	/**
 	 * Set whether the cookie is supposed to be marked with the "HttpOnly" attribute.
+	 * <p>Default is "false".
 	 * @see javax.servlet.http.Cookie#setHttpOnly
 	 */
 	public void setCookieHttpOnly(boolean cookieHttpOnly) {

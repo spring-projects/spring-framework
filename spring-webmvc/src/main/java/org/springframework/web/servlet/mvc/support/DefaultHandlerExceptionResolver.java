@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -354,7 +355,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 		if (logger.isWarnEnabled()) {
 			logger.warn("Failed to read HTTP message: " + ex);
 		}
-		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		response.sendError(ex.getErrorStatus().orElse(HttpStatus.BAD_REQUEST).value());
 		return new ModelAndView();
 	}
 

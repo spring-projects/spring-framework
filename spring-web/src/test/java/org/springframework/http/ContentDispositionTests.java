@@ -36,7 +36,8 @@ public class ContentDispositionTests {
 	public void parse() {
 		ContentDisposition disposition = ContentDisposition
 				.parse("form-data; name=\"foo\"; filename=\"foo.txt\"; size=123");
-		assertEquals(ContentDisposition.builder("form-data").name("foo").filename("foo.txt").size(123L).build(), disposition);
+		assertEquals(ContentDisposition.builder("form-data")
+				.name("foo").filename("foo.txt").size(123L).build(), disposition);
 	}
 
 	@Test
@@ -86,7 +87,8 @@ public class ContentDispositionTests {
 	public void headerValueWithEncodedFilename() {
 		ContentDisposition disposition = ContentDisposition.builder("form-data")
 				.name("name").filename("中文.txt", StandardCharsets.UTF_8).build();
-		assertEquals("form-data; name=\"name\"; filename*=UTF-8''%E4%B8%AD%E6%96%87.txt", disposition.toString());
+		assertEquals("form-data; name=\"name\"; filename*=UTF-8''%E4%B8%AD%E6%96%87.txt",
+				disposition.toString());
 	}
 
 	@Test  // SPR-14547

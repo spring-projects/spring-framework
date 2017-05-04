@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,26 +29,24 @@ import org.springframework.web.context.WebApplicationContext;
  */
 public interface WebSocketTestServer {
 
-	int getPort();
-
 	void setup();
 
 	void deployConfig(WebApplicationContext cxt, Filter... filters);
-
-	/**
-	 * Get the {@link ServletContext} created by the underlying server.
-	 *
-	 * <p>The {@code ServletContext} is only guaranteed to be available
-	 * after {@link #deployConfig} has been invoked.
-	 *
-	 * @since 4.2
-	 */
-	ServletContext getServletContext();
 
 	void undeployConfig();
 
 	void start() throws Exception;
 
 	void stop() throws Exception;
+
+	int getPort();
+
+	/**
+	 * Get the {@link ServletContext} created by the underlying server.
+	 * <p>The {@code ServletContext} is only guaranteed to be available
+	 * after {@link #deployConfig} has been invoked.
+	 * @since 4.2
+	 */
+	ServletContext getServletContext();
 
 }

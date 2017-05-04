@@ -99,7 +99,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 		else {
 			Mono<DataBuffer> singleBuffer = flux.reduce(DataBuffer::write);
 			return singleBuffer.
-					flatMap(dataBuffer -> {
+					flatMapMany(dataBuffer -> {
 						try {
 							InputStream is = dataBuffer.asInputStream();
 							XMLEventReader eventReader = inputFactory.createXMLEventReader(is);

@@ -40,6 +40,7 @@ import org.springframework.beans.factory.FactoryBean;
  * Manipulated input streams could lead to unwanted code execution on the server
  * during the deserialization step. As a consequence, do not expose HTTP invoker
  * endpoints to untrusted clients but rather just between your own services.</b>
+ * In general, we strongly recommend any other message format (e.g. JSON) instead.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -51,8 +52,7 @@ import org.springframework.beans.factory.FactoryBean;
  * @see org.springframework.remoting.rmi.RmiProxyFactoryBean
  * @see org.springframework.remoting.caucho.HessianProxyFactoryBean
  */
-public class HttpInvokerProxyFactoryBean extends HttpInvokerClientInterceptor
-		implements FactoryBean<Object> {
+public class HttpInvokerProxyFactoryBean extends HttpInvokerClientInterceptor implements FactoryBean<Object> {
 
 	private Object serviceProxy;
 

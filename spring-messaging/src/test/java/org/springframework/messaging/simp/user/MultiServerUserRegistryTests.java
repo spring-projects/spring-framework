@@ -61,9 +61,10 @@ public class MultiServerUserRegistryTests {
 		SimpUser user = Mockito.mock(SimpUser.class);
 		Set<SimpUser> users = Collections.singleton(user);
 		when(this.localRegistry.getUsers()).thenReturn(users);
+		when(this.localRegistry.getUserCount()).thenReturn(1);
 		when(this.localRegistry.getUser("joe")).thenReturn(user);
 
-		assertEquals(1, this.registry.getUsers().size());
+		assertEquals(1, this.registry.getUserCount());
 		assertSame(user, this.registry.getUser("joe"));
 	}
 
@@ -84,7 +85,7 @@ public class MultiServerUserRegistryTests {
 		this.registry.addRemoteRegistryDto(message, this.converter, 20000);
 
 
-		assertEquals(1, this.registry.getUsers().size());
+		assertEquals(1, this.registry.getUserCount());
 		SimpUser user = this.registry.getUser("joe");
 		assertNotNull(user);
 		assertTrue(user.hasSessions());
@@ -125,7 +126,7 @@ public class MultiServerUserRegistryTests {
 		this.registry.addRemoteRegistryDto(message, this.converter, 20000);
 
 
-		assertEquals(3, this.registry.getUsers().size());
+		assertEquals(3, this.registry.getUserCount());
 		Set<SimpSubscription> matches = this.registry.findSubscriptions(s -> s.getDestination().equals("/match"));
 		assertEquals(2, matches.size());
 		Iterator<SimpSubscription> iterator = matches.iterator();
@@ -157,7 +158,7 @@ public class MultiServerUserRegistryTests {
 		this.registry.addRemoteRegistryDto(message, this.converter, 20000);
 
 
-		assertEquals(1, this.registry.getUsers().size());
+		assertEquals(1, this.registry.getUserCount());
 		SimpUser user = this.registry.getUsers().iterator().next();
 		assertTrue(user.hasSessions());
 		assertEquals(2, user.getSessions().size());
@@ -187,9 +188,9 @@ public class MultiServerUserRegistryTests {
 		this.registry.addRemoteRegistryDto(message, this.converter, -1);
 
 
-		assertEquals(1, this.registry.getUsers().size());
+		assertEquals(1, this.registry.getUserCount());
 		this.registry.purgeExpiredRegistries();
-		assertEquals(0, this.registry.getUsers().size());
+		assertEquals(0, this.registry.getUserCount());
 	}
 
 }

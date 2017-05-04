@@ -211,14 +211,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			for (BeanPostProcessor processor : processors) {
 				if (processor instanceof DestructionAwareBeanPostProcessor) {
 					DestructionAwareBeanPostProcessor dabpp = (DestructionAwareBeanPostProcessor) processor;
-					try {
-						if (dabpp.requiresDestruction(bean)) {
-							filteredPostProcessors.add(dabpp);
-						}
-					}
-					catch (AbstractMethodError err) {
-						// A pre-4.3 third-party DestructionAwareBeanPostProcessor...
-						// As of 5.0, we can let requiresDestruction be a Java 8 default method which returns true.
+					if (dabpp.requiresDestruction(bean)) {
 						filteredPostProcessors.add(dabpp);
 					}
 				}

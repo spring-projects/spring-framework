@@ -26,7 +26,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.http.HttpMethod;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
@@ -45,20 +45,22 @@ import static org.junit.Assert.assertSame;
  */
 public class DefaultWebSessionManagerTests {
 
-	private final DefaultWebSessionManager manager = new DefaultWebSessionManager();
+	private DefaultWebSessionManager manager;
 
-	private final TestWebSessionIdResolver idResolver = new TestWebSessionIdResolver();
+	private TestWebSessionIdResolver idResolver;
 
-	private DefaultServerWebExchange exchange;
+	private ServerWebExchange exchange;
 
 
 	@Before
 	public void setUp() throws Exception {
+		this.manager = new DefaultWebSessionManager();
+		this.idResolver = new TestWebSessionIdResolver();
 		this.manager.setSessionIdResolver(this.idResolver);
 
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/path");
+		MockServerHttpRequest request = MockServerHttpRequest.get("/path").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(request, response, this.manager);
+		this.exchange = new DefaultServerWebExchange(request, response, this.manager, ServerCodecConfigurer.create());
 	}
 
 

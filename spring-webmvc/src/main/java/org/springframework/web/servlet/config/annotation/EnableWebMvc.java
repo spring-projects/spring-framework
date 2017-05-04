@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,14 +38,13 @@ import org.springframework.context.annotation.Import;
  * </pre>
  *
  * <p>To customize the imported configuration, implement the interface
- * {@link WebMvcConfigurer} or more likely extend the empty method base class
- * {@link WebMvcConfigurerAdapter} and override individual methods, e.g.:
+ * {@link WebMvcConfigurer} and override individual methods, e.g.:
  *
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableWebMvc
  * &#064;ComponentScan(basePackageClasses = MyConfiguration.class)
- * public class MyConfiguration extends WebMvcConfigurerAdapter {
+ * public class MyConfiguration implements WebMvcConfigurer {
  *
  * 	   &#064;Override
  * 	   public void addFormatters(FormatterRegistry formatterRegistry) {
@@ -93,7 +92,6 @@ import org.springframework.context.annotation.Import;
  * @author Rossen Stoyanchev
  * @since 3.1
  * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurer
- * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport
  * @see org.springframework.web.servlet.config.annotation.DelegatingWebMvcConfiguration
  */

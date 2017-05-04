@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +29,14 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
+import org.hamcrest.Matchers;
+import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
@@ -40,25 +48,45 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.Netty4ClientHttpRequestFactory;
+import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Brian Clozel
  */
-public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
+@RunWith(Parameterized.class)
+public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase {
 
-	private final RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+	private RestTemplate template;
+
+	@Parameter
+	public ClientHttpRequestFactory clientHttpRequestFactory;
+
+	@SuppressWarnings("deprecation")
+	@Parameters
+	public static Iterable<? extends ClientHttpRequestFactory> data() {
+		return Arrays.asList(
+				new SimpleClientHttpRequestFactory(),
+				new HttpComponentsClientHttpRequestFactory(),
+				new Netty4ClientHttpRequestFactory(),
+				new OkHttp3ClientHttpRequestFactory()
+		);
+	}
+
+
+	@Before
+	public void setupClient() {
+		 this.template = new RestTemplate(this.clientHttpRequestFactory);
+	}
 
 
 	@Test
@@ -131,6 +159,9 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 
 	@Test
 	public void patchForObject() throws URISyntaxException {
+		// JDK client does not support the PATCH method
+		Assume.assumeThat(this.clientHttpRequestFactory,
+				Matchers.not(Matchers.instanceOf(SimpleClientHttpRequestFactory.class)));
 		String s = template.patchForObject(baseUrl + "/{method}", helloWorld, String.class, "patch");
 		assertEquals("Invalid content", helloWorld, s);
 	}
@@ -273,10 +304,15 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 		assertTrue(content.contains("\"type\":\"bar\""));
 	}
 
+	@Test  // SPR-15015
+	public void postWithoutBody() throws Exception {
+		assertNull(template.postForObject(baseUrl + "/jsonpost", null, String.class));
+	}
 
-	public interface MyJacksonView1 {};
 
-	public interface MyJacksonView2 {};
+	public interface MyJacksonView1 {}
+
+	public interface MyJacksonView2 {}
 
 
 	public static class MySampleBean {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Set;
 import javax.servlet.ServletException;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.util.StringUtils;
 
 /**
  * Exception thrown when a request handler does not support a
@@ -51,28 +52,28 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 	/**
 	 * Create a new HttpRequestMethodNotSupportedException.
 	 * @param method the unsupported HTTP request method
-	 * @param supportedMethods the actually supported HTTP methods
-	 */
-	public HttpRequestMethodNotSupportedException(String method, String[] supportedMethods) {
-		this(method, supportedMethods, "Request method '" + method + "' not supported");
-	}
-
-	/**
-	 * Create a new HttpRequestMethodNotSupportedException.
-	 * @param method the unsupported HTTP request method
-	 * @param supportedMethods the actually supported HTTP methods
-	 */
-	public HttpRequestMethodNotSupportedException(String method, Collection<String> supportedMethods) {
-		this(method, supportedMethods.toArray(new String[supportedMethods.size()]));
-	}
-
-	/**
-	 * Create a new HttpRequestMethodNotSupportedException.
-	 * @param method the unsupported HTTP request method
 	 * @param msg the detail message
 	 */
 	public HttpRequestMethodNotSupportedException(String method, String msg) {
 		this(method, null, msg);
+	}
+
+	/**
+	 * Create a new HttpRequestMethodNotSupportedException.
+	 * @param method the unsupported HTTP request method
+	 * @param supportedMethods the actually supported HTTP methods (may be {@code null})
+	 */
+	public HttpRequestMethodNotSupportedException(String method, Collection<String> supportedMethods) {
+		this(method, StringUtils.toStringArray(supportedMethods));
+	}
+
+	/**
+	 * Create a new HttpRequestMethodNotSupportedException.
+	 * @param method the unsupported HTTP request method
+	 * @param supportedMethods the actually supported HTTP methods (may be {@code null})
+	 */
+	public HttpRequestMethodNotSupportedException(String method, String[] supportedMethods) {
+		this(method, supportedMethods, "Request method '" + method + "' not supported");
 	}
 
 	/**
@@ -96,16 +97,21 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 	}
 
 	/**
-	 * Return the actually supported HTTP methods, if known.
+	 * Return the actually supported HTTP methods, or {@code null} if not known.
 	 */
 	public String[] getSupportedMethods() {
 		return this.supportedMethods;
 	}
 
 	/**
-	 * Return the actually supported HTTP methods, if known, as {@link HttpMethod} instances.
+	 * Return the actually supported HTTP methods as {@link HttpMethod} instances,
+	 * or {@code null} if not known.
+	 * @since 3.2
 	 */
 	public Set<HttpMethod> getSupportedHttpMethods() {
+		if (this.supportedMethods == null) {
+			return null;
+		}
 		List<HttpMethod> supportedMethods = new LinkedList<>();
 		for (String value : this.supportedMethods) {
 			HttpMethod resolved = HttpMethod.resolve(value);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -383,16 +383,6 @@ public abstract class SharedEntityManagerCreator {
 					this.em = null;
 				}
 			}
-		}
-
-		@Override
-		protected void finalize() throws Throwable {
-			// Trigger explicit EntityManager.close() call on garbage collection,
-			// in particular for open/close statistics to be in sync. This is
-			// only relevant if the Query object has not been executed, e.g.
-			// when just used for the early validation of query definitions.
-			EntityManagerFactoryUtils.closeEntityManager(this.em);
-			super.finalize();
 		}
 	}
 

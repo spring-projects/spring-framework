@@ -56,6 +56,8 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 
 	private final Validator validator;
 
+	private final boolean useDefaultResolution;
+
 
 	/**
 	 * Create a new {@code PayloadArgumentResolver} with the given
@@ -74,15 +76,31 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 	 * @param validator the Validator to use (optional)
 	 */
 	public PayloadArgumentResolver(MessageConverter messageConverter, Validator validator) {
+		this(messageConverter, validator, true);
+	}
+
+	/**
+	 * Create a new {@code PayloadArgumentResolver} with the given
+	 * {@link MessageConverter} and {@link Validator}.
+	 * @param messageConverter the MessageConverter to use (required)
+	 * @param validator the Validator to use (optional)
+	 * @param useDefaultResolution if "true" (the default) this resolver supports
+	 * all parameters; if "false" then only arguments with the {@code @Payload}
+	 * annotation are supported.
+	 */
+	public PayloadArgumentResolver(MessageConverter messageConverter, Validator validator,
+			boolean useDefaultResolution) {
+
 		Assert.notNull(messageConverter, "MessageConverter must not be null");
 		this.converter = messageConverter;
 		this.validator = validator;
+		this.useDefaultResolution = useDefaultResolution;
 	}
 
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return true;
+		return (parameter.hasParameterAnnotation(Payload.class) || this.useDefaultResolution);
 	}
 
 	@Override

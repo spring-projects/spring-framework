@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -197,8 +197,8 @@ public class JdbcTemplateQueryTests {
 	public void testQueryForObjectWithBigDecimal() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
-		given(this.resultSet.getBigDecimal(1)).willReturn(new BigDecimal(22.5));
-		assertEquals(new BigDecimal(22.5), this.template.queryForObject(sql, BigDecimal.class));
+		given(this.resultSet.getBigDecimal(1)).willReturn(new BigDecimal("22.5"));
+		assertEquals(new BigDecimal("22.5"), this.template.queryForObject(sql, BigDecimal.class));
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 	}

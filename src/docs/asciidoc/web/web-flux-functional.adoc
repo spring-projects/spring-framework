@@ -1,0 +1,244 @@
+==== Functional Programming Model
+
+NOTE: This section is to be merged into `web-flux.adoc`.
+
+===== HandlerFunctions
+
+Incoming HTTP requests are handled by a **`HandlerFunction`**, which is essentially a function that
+takes a `ServerRequest` and returns a `Mono<ServerResponse>`. The annotation counterpart to a
+handler function would be a method with `@RequestMapping`.
+
+`ServerRequest` and `ServerResponse` are immutable interfaces that offer JDK-8 friendly access
+to the underlying HTTP messages. Both are fully reactive by
+building on top of Reactor: the request expose the body as `Flux` or `Mono`; the response accepts
+any http://www.reactive-streams.org[Reactive Streams] `Publisher` as body.
+
+`ServerRequest` gives access to various HTTP request elements:
+the method, URI, query parameters, and -- through the separate `ServerRequest.Headers` interface
+-- the headers. Access to the body is provided through the `body` methods. For instance, this is
+how to extract the request body into a `Mono<String>`:
+
+ Mono<String> string = request.bodyToMono(String.class);
+
+And here is how to extract the body into a `Flux`, where `Person` is a class that can be
+deserialised from the contents of the body (i.e. `Person` is supported by Jackson if the body
+contains JSON, or JAXB if XML).
+
+ Flux<Person> people = request.bodyToFlux(Person.class);
+
+The two methods above (`bodyToMono` and `bodyToFlux`) are, in fact, convenience methods that use the
+generic `ServerRequest.body(BodyExtractor)` method. `BodyExtractor` is
+a functional strategy interface that allows you to write your own extraction logic, but common
+`BodyExtractor` instances can be found in the `BodyExtractors` utility class. So, the above
+examples can be replaced with:
+
+ Mono<String> string = request.body(BodyExtractors.toMono(String.class);
+ Flux<Person> people = request.body(BodyExtractors.toFlux(Person.class);
+
+Similarly, `ServerResponse` provides access to the HTTP response. Since it is immutable, you create
+a `ServerResponse` with a builder. The builder allows you to set the response status, add response
+headers, and provide a body. For instance, this is how to create a response with a 200 OK status,
+a JSON content-type, and a body:
+
+ Mono<Person> person = ...
+ ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person);
+
+And here is how to build a response with a 201 Created status, Location header, and empty body:
+
+ URI location = ...
+ ServerResponse.created(location).build();
+
+
+Putting these together allows us to create a `HandlerFunction`. For instance, here is an example
+of a simple "Hello World" handler lambda, that returns a response with a 200 status and a body
+based on a String:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+HandlerFunction<ServerResponse> helloWorld =
+  request -> ServerResponse.ok().body(fromObject("Hello World"));
+----
+
+Writing handler functions as lambda's, as we do above, is convenient, but perhaps lacks in
+readability and becomes less maintainable when dealing with multiple functions. Therefore, it is
+recommended to group related handler functions into a handler or controller class. For example,
+here is a class that exposes a reactive `Person` repository:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.web.reactive.function.BodyInserters.fromObject;
+
+public class PersonHandler {
+
+	private final PersonRepository repository;
+
+	public PersonHandler(PersonRepository repository) {
+		this.repository = repository;
+	}
+
+	public Mono<ServerResponse> listPeople(ServerRequest request) { // <1>
+		Flux<Person> people = repository.allPeople();
+		return ServerResponse.ok().contentType(APPLICATION_JSON).body(people, Person.class);
+	}
+
+	public Mono<ServerResponse> createPerson(ServerRequest request) { // <2>
+		Mono<Person> person = request.bodyToMono(Person.class);
+		return ServerResponse.ok().build(repository.savePerson(person));
+	}
+
+	public Mono<ServerResponse> getPerson(ServerRequest request) { // <3>
+		int personId = Integer.valueOf(request.pathVariable("id"));
+		Mono<ServerResponse> notFound = ServerResponse.notFound().build();
+		Mono<Person> personMono = this.repository.getPerson(personId);
+		return personMono
+				.flatMap(person -> ServerResponse.ok().contentType(APPLICATION_JSON).body(fromObject(person)))
+				.switchIfEmpty(notFound);
+	}
+}
+----
+<1> `listPeople` is a handler function that returns all `Person` objects found in the repository as
+JSON.
+<2> `createPerson` is a handler function that stores a new `Person` contained in the request body.
+Note that `PersonRepository.savePerson(Person)` returns `Mono<Void>`: an empty Mono that emits
+a completion signal when the person has been read from the request and stored. So we use the
+`build(Publisher<Void>)` method to send a response when that completion signal is received, i.e.
+when the `Person` has been saved.
+<3> `getPerson` is a handler function that returns a single person, identified via the path
+variable `id`. We retrieve that `Person` via the repository, and create a JSON response if it is
+found. If it is not found, we use `otherwiseIfEmpty(Mono<T>)` to return a 404 Not Found response.
+
+===== RouterFunctions
+
+Incoming requests are routed to handler functions with a **`RouterFunction`**, which is a function
+that takes a `ServerRequest`, and returns a `Mono<HandlerFunction>`. If a request matches a
+particular route, a handler function is returned; otherwise it returns an empty `Mono`. The
+`RouterFunction` has a similar purpose as the `@RequestMapping` annotation in `@Controller` classes.
+
+Typically, you do not write router functions yourself, but rather use
+`RouterFunctions.route(RequestPredicate, HandlerFunction)` to
+create one using a request predicate and handler function. If the predicate applies, the request is
+routed to the given handler function; otherwise no routing is performed, resulting in a
+404 Not Found response.
+Though you can write your own `RequestPredicate`, you do not have to: the `RequestPredicates`
+utility class offers commonly used predicates, such matching based on path, HTTP method,
+content-type, etc.
+Using `route`, we can route to our "Hello World" handler function:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+RouterFunction<ServerResponse> helloWorldRoute =
+	RouterFunctions.route(RequestPredicates.path("/hello-world"),
+	request -> Response.ok().body(fromObject("Hello World")));
+----
+
+Two router functions can be composed into a new router function that routes to either handler
+function: if the predicate of the first route does not match, the second is evaluated.
+Composed router functions are evaluated in order, so it makes sense to put specific functions
+before generic ones.
+You can compose two router functions by calling `RouterFunction.and(RouterFunction)`, or by calling
+`RouterFunction.andRoute(RequestPredicate, HandlerFunction)`, which is a convenient combination
+of `RouterFunction.and()` with `RouterFunctions.route()`.
+
+Given the `PersonHandler` we showed above, we can now define a router function that routes to the
+respective handler functions.
+We use https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html[method-references]
+to refer to the handler functions:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
+
+PersonRepository repository = ...
+PersonHandler handler = new PersonHandler(repository);
+
+RouterFunction<ServerResponse> personRoute =
+	route(GET("/person/{id}").and(accept(APPLICATION_JSON)), handler::getPerson)
+		.andRoute(GET("/person").and(accept(APPLICATION_JSON)), handler::listPeople)
+		.andRoute(POST("/person").and(contentType(APPLICATION_JSON)), handler::createPerson);
+----
+
+Besides router functions, you can also compose request predicates, by calling
+`RequestPredicate.and(RequestPredicate)` or `RequestPredicate.or(RequestPredicate)`.
+These work as expected: for `and` the resulting predicate matches if *both* given predicates match;
+`or` matches if *either* predicate does.
+Most of the predicates found in `RequestPredicates` are compositions.
+For instance, `RequestPredicates.GET(String)` is a composition of
+`RequestPredicates.method(HttpMethod)` and `RequestPredicates.path(String)`.
+
+====== Running a Server
+
+Now there is just one piece of the puzzle missing: running a router function in an HTTP server.
+You can convert a router function into a `HttpHandler` by using
+`RouterFunctions.toHttpHandler(RouterFunction)`.
+The `HttpHandler` allows you to run on a wide variety of reactive runtimes: Reactor Netty,
+Servlet 3.1+, and Undertow.
+Here is how we run a router function in Reactor Netty, for instance:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+RouterFunction<ServerResponse> route = ...
+HttpHandler httpHandler = RouterFunctions.toHttpHandler(route);
+ReactorHttpHandlerAdapter adapter = new ReactorHttpHandlerAdapter(httpHandler);
+HttpServer server = HttpServer.create(HOST, PORT);
+server.newHandler(adapter).block();
+----
+
+For Tomcat it looks like this:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+RouterFunction<ServerResponse> route = ...
+HttpHandler httpHandler = RouterFunctions.toHttpHandler(route);
+HttpServlet servlet = new ServletHttpHandlerAdapter(httpHandler);
+Tomcat server = new Tomcat();
+Context rootContext = server.addContext("", System.getProperty("java.io.tmpdir"));
+Tomcat.addServlet(rootContext, "servlet", servlet);
+rootContext.addServletMapping("/", "servlet");
+tomcatServer.start();
+----
+
+
+
+TODO: DispatcherHandler
+
+===== HandlerFilterFunction
+
+Routes mapped by a router function can be filtered by calling
+`RouterFunction.filter(HandlerFilterFunction)`, where `HandlerFilterFunction` is essentially a
+function that takes a `ServerRequest` and `HandlerFunction`, and returns a `ServerResponse`.
+The handler function parameter represents the next element in the chain: this is typically the
+`HandlerFunction` that is routed to, but can also be another `FilterFunction` if multiple filters
+are applied.
+With annotations, similar functionality can be achieved using `@ControllerAdvice` and/or a `ServletFilter`.
+Let's add a simple security filter to our route, assuming that we have a `SecurityManager` that
+can determine whether a particular path is allowed:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+
+SecurityManager securityManager = ...
+RouterFunction<ServerResponse> route = ...
+
+RouterFunction<ServerResponse> filteredRoute =
+	route.filter(request, next) -> {
+		if (securityManager.allowAccessTo(request.path())) {
+			return next.handle(request);
+		}
+		else {
+			return ServerResponse.status(UNAUTHORIZED).build();
+		}
+  });
+----
+
+You can see in this example that invoking the `next.handle(ServerRequest)` is optional: we only
+allow the handler function to be executed when access is allowed.

@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -181,7 +182,9 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	@Override
-	protected void handleMissingValue(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
+	protected void handleMissingValue(String name, MethodParameter parameter, NativeWebRequest request)
+			throws Exception {
+
 		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
 		if (MultipartResolutionDelegate.isMultipartArgument(parameter)) {
 			if (!MultipartResolutionDelegate.isMultipartRequest(servletRequest)) {
@@ -192,7 +195,8 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			}
 		}
 		else {
-			throw new MissingServletRequestParameterException(name, parameter.getNestedParameterType().getSimpleName());
+			throw new MissingServletRequestParameterException(name,
+					parameter.getNestedParameterType().getSimpleName());
 		}
 	}
 
@@ -201,8 +205,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService conversionService) {
 
 		Class<?> paramType = parameter.getNestedParameterType();
-		if (Map.class.isAssignableFrom(paramType) || MultipartFile.class == paramType ||
-				"javax.servlet.http.Part".equals(paramType.getName())) {
+		if (Map.class.isAssignableFrom(paramType) || MultipartFile.class == paramType || Part.class == paramType) {
 			return;
 		}
 

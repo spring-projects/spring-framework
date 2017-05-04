@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 
@@ -159,7 +160,7 @@ public class StompHeaderAccessorTests {
 	@Test
 	public void toNativeHeadersContentType() {
 		SimpMessageHeaderAccessor simpHeaderAccessor = SimpMessageHeaderAccessor.create();
-		simpHeaderAccessor.setContentType(MimeTypeUtils.APPLICATION_ATOM_XML);
+		simpHeaderAccessor.setContentType(MimeType.valueOf("application/atom+xml"));
 		Message<byte[]> message = MessageBuilder.createMessage(new byte[0], simpHeaderAccessor.getMessageHeaders());
 
 		StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(message);

@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletException;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,7 +41,6 @@ import org.springframework.http.converter.ResourceRegionHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ResourceUtils;
@@ -91,10 +89,6 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  */
 public class ResourceHttpRequestHandler extends WebContentGenerator
 		implements HttpRequestHandler, InitializingBean, CorsConfigurationSource {
-
-	// Servlet 3.1 setContentLengthLong(long) available?
-	private static final boolean contentLengthLongAvailable =
-			ClassUtils.hasMethod(ServletResponse.class, "setContentLengthLong", long.class);
 
 	private static final Log logger = LogFactory.getLog(ResourceHttpRequestHandler.class);
 
@@ -532,12 +526,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	protected void setHeaders(HttpServletResponse response, Resource resource, MediaType mediaType) throws IOException {
 		long length = resource.contentLength();
 		if (length > Integer.MAX_VALUE) {
-			if (contentLengthLongAvailable) {
-				response.setContentLengthLong(length);
-			}
-			else {
-				response.setHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(length));
-			}
+			response.setContentLengthLong(length);
 		}
 		else {
 			response.setContentLength((int) length);

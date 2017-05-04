@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 
 package org.springframework.http.codec.json;
 
-import java.util.Collections;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.annotation.JsonView;
+import static java.util.Collections.*;
 import org.junit.Test;
+import static org.springframework.http.MediaType.*;
+import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
+import static org.springframework.http.codec.json.Jackson2JsonEncoder.*;
+import static org.springframework.http.codec.json.JacksonViewBean.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -30,7 +33,6 @@ import reactor.test.StepVerifier;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
 import org.springframework.http.codec.ServerSentEvent;
 
@@ -48,11 +50,20 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 	@Test
 	public void canEncode() {
 		ResolvableType pojoType = ResolvableType.forClass(Pojo.class);
-		assertTrue(this.encoder.canEncode(pojoType, MediaType.APPLICATION_JSON));
+		assertTrue(this.encoder.canEncode(pojoType, APPLICATION_JSON));
 		assertTrue(this.encoder.canEncode(pojoType, null));
-		assertFalse(this.encoder.canEncode(pojoType, MediaType.APPLICATION_XML));
+
+		// SPR-15464
+		assertTrue(this.encoder.canEncode(ResolvableType.NONE, null));
+	}
+
+	@Test
+	public void canNotEncode() {
+		assertFalse(this.encoder.canEncode(ResolvableType.forClass(String.class), null));
+		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Pojo.class), APPLICATION_XML));
+
 		ResolvableType sseType = ResolvableType.forClass(ServerSentEvent.class);
-		assertFalse(this.encoder.canEncode(sseType, MediaType.APPLICATION_JSON));
+		assertFalse(this.encoder.canEncode(sseType, APPLICATION_JSON));
 	}
 
 	@Test
@@ -63,51 +74,71 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 				new Pojo("foofoofoo", "barbarbar")
 		);
 		ResolvableType type = ResolvableType.forClass(Pojo.class);
-		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null, Collections.emptyMap());
+		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null, emptyMap());
 
 		StepVerifier.create(output)
-				.consumeNextWith(stringConsumer("["))
-				.consumeNextWith(stringConsumer("{\"foo\":\"foo\",\"bar\":\"bar\"}"))
-				.consumeNextWith(stringConsumer(","))
-				.consumeNextWith(stringConsumer("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"))
-				.consumeNextWith(stringConsumer(","))
-				.consumeNextWith(stringConsumer("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"))
-				.consumeNextWith(stringConsumer("]"))
-				.expectComplete()
-				.verify();
+				.consumeNextWith(stringConsumer("[{\"foo\":\"foo\",\"bar\":\"bar\"},{\"foo\":\"foofoo\",\"bar\":\"barbar\"},{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}]"))
+				.verifyComplete();
 	}
 
 	@Test
 	public void encodeWithType() throws Exception {
 		Flux<ParentClass> source = Flux.just(new Foo(), new Bar());
 		ResolvableType type = ResolvableType.forClass(ParentClass.class);
-		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null, Collections.emptyMap());
+		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null, emptyMap());
 
 		StepVerifier.create(output)
-				.consumeNextWith(stringConsumer("["))
-				.consumeNextWith(stringConsumer("{\"type\":\"foo\"}"))
-				.consumeNextWith(stringConsumer(","))
-				.consumeNextWith(stringConsumer("{\"type\":\"bar\"}"))
-				.consumeNextWith(stringConsumer("]"))
-				.expectComplete()
-				.verify();
+				.consumeNextWith(stringConsumer("[{\"type\":\"foo\"},{\"type\":\"bar\"}]"))
+				.verifyComplete();
 	}
 
 	@Test
-	public void jsonView() throws Exception {
+	public void encodeAsStream() throws Exception {
+		Flux<Pojo> source = Flux.just(
+				new Pojo("foo", "bar"),
+				new Pojo("foofoo", "barbar"),
+				new Pojo("foofoofoo", "barbarbar")
+		);
+		ResolvableType type = ResolvableType.forClass(Pojo.class);
+		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, APPLICATION_STREAM_JSON, emptyMap());
+
+		StepVerifier.create(output)
+				.consumeNextWith(stringConsumer("{\"foo\":\"foo\",\"bar\":\"bar\"}\n"))
+				.consumeNextWith(stringConsumer("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n"))
+				.consumeNextWith(stringConsumer("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n"))
+				.verifyComplete();
+	}
+
+	@Test
+	public void fieldLevelJsonView() throws Exception {
 		JacksonViewBean bean = new JacksonViewBean();
 		bean.setWithView1("with");
 		bean.setWithView2("with");
 		bean.setWithoutView("without");
 
 		ResolvableType type = ResolvableType.forClass(JacksonViewBean.class);
-		Map<String, Object> hints = Collections.singletonMap(Jackson2JsonEncoder.JSON_VIEW_HINT, MyJacksonView1.class);
+		Map<String, Object> hints = singletonMap(JSON_VIEW_HINT, MyJacksonView1.class);
 		Flux<DataBuffer> output = this.encoder.encode(Mono.just(bean), this.bufferFactory, type, null, hints);
 
 		StepVerifier.create(output)
 				.consumeNextWith(stringConsumer("{\"withView1\":\"with\"}"))
-				.expectComplete()
-				.verify();
+				.verifyComplete();
+	}
+
+	@Test
+	public void classLevelJsonView() throws Exception {
+		JacksonViewBean bean = new JacksonViewBean();
+		bean.setWithView1("with");
+		bean.setWithView2("with");
+		bean.setWithoutView("without");
+
+		ResolvableType type = ResolvableType.forClass(JacksonViewBean.class);
+		Map<String, Object> hints = singletonMap(JSON_VIEW_HINT, MyJacksonView3.class);
+		Flux<DataBuffer> output = this.encoder.encode(Mono.just(bean), this.bufferFactory, type, null, hints);
+
+		StepVerifier.create(output)
+				.consumeNextWith(stringConsumer("{\"withoutView\":\"without\"}"))
+				.verifyComplete();
 	}
 
 
@@ -121,48 +152,6 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 
 	@JsonTypeName("bar")
 	private static class Bar extends ParentClass {
-	}
-
-
-	private interface MyJacksonView1 {}
-
-	private interface MyJacksonView2 {}
-
-
-	@SuppressWarnings("unused")
-	private static class JacksonViewBean {
-
-		@JsonView(MyJacksonView1.class)
-		private String withView1;
-
-		@JsonView(MyJacksonView2.class)
-		private String withView2;
-
-		private String withoutView;
-
-		public String getWithView1() {
-			return withView1;
-		}
-
-		public void setWithView1(String withView1) {
-			this.withView1 = withView1;
-		}
-
-		public String getWithView2() {
-			return withView2;
-		}
-
-		public void setWithView2(String withView2) {
-			this.withView2 = withView2;
-		}
-
-		public String getWithoutView() {
-			return withoutView;
-		}
-
-		public void setWithoutView(String withoutView) {
-			this.withoutView = withoutView;
-		}
 	}
 
 }

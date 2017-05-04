@@ -19,7 +19,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.Conventions;
@@ -55,6 +54,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class RequestResponseBodyMethodProcessor extends AbstractMessageConverterMethodProcessor {
@@ -124,7 +124,8 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
-		Object arg = readWithMessageConverters(webRequest, parameter, parameter.getGenericParameterType());
+		parameter = parameter.nestedIfOptional();
+		Object arg = readWithMessageConverters(webRequest, parameter, parameter.getNestedGenericParameterType());
 		String name = Conventions.getVariableNameForParameter(parameter);
 
 		WebDataBinder binder = binderFactory.createBinder(webRequest, arg, name);
@@ -136,28 +137,28 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		}
 		mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + name, binder.getBindingResult());
 
-		return arg;
+		return adaptArgumentIfNecessary(arg, parameter);
 	}
 
 	@Override
-	protected <T> Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter methodParam,
+	protected <T> Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter parameter,
 			Type paramType) throws IOException, HttpMediaTypeNotSupportedException, HttpMessageNotReadableException {
 
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 		ServletServerHttpRequest inputMessage = new ServletServerHttpRequest(servletRequest);
 
-		Object arg = readWithMessageConverters(inputMessage, methodParam, paramType);
+		Object arg = readWithMessageConverters(inputMessage, parameter, paramType);
 		if (arg == null) {
-			if (checkRequired(methodParam)) {
+			if (checkRequired(parameter)) {
 				throw new HttpMessageNotReadableException("Required request body is missing: " +
-						methodParam.getMethod().toGenericString());
+						parameter.getMethod().toGenericString());
 			}
 		}
 		return arg;
 	}
 
-	protected boolean checkRequired(MethodParameter methodParam) {
-		return methodParam.getParameterAnnotation(RequestBody.class).required();
+	protected boolean checkRequired(MethodParameter parameter) {
+		return (parameter.getParameterAnnotation(RequestBody.class).required() && !parameter.isOptional());
 	}
 
 	@Override

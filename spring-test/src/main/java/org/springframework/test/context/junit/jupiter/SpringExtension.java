@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,10 +61,10 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		ParameterResolver {
 
 	/**
-	 * {@link Namespace} in which {@code TestContextManagers} are stored, keyed
-	 * by test class.
+	 * {@link Namespace} in which {@code TestContextManagers} are stored,
+	 * keyed by test class.
 	 */
-	private static final Namespace namespace = Namespace.create(SpringExtension.class);
+	private static final Namespace NAMESPACE = Namespace.create(SpringExtension.class);
 
 
 	/**
@@ -84,7 +84,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 			getTestContextManager(context).afterTestClass();
 		}
 		finally {
-			context.getStore(namespace).remove(context.getTestClass().get());
+			context.getStore(NAMESPACE).remove(context.getTestClass().get());
 		}
 	}
 
@@ -139,17 +139,15 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	}
 
 	/**
-	 * Determine if the value for the {@link Parameter} in the supplied
-	 * {@link ParameterContext} should be autowired from the test's
-	 * {@link ApplicationContext}.
+	 * Determine if the value for the {@link Parameter} in the supplied {@link ParameterContext}
+	 * should be autowired from the test's {@link ApplicationContext}.
 	 * <p>Returns {@code true} if the parameter is declared in a {@link Constructor}
-	 * that is annotated with {@link Autowired @Autowired} and otherwise delegates
-	 * to {@link ParameterAutowireUtils#isAutowirable}.
-	 * <p><strong>WARNING</strong>: if the parameter is declared in a {@code Constructor}
+	 * that is annotated with {@link Autowired @Autowired} and otherwise delegates to
+	 * {@link ParameterAutowireUtils#isAutowirable}.
+	 * <p><strong>WARNING</strong>: If the parameter is declared in a {@code Constructor}
 	 * that is annotated with {@code @Autowired}, Spring will assume the responsibility
-	 * for resolving all parameters in the constructor. Consequently, no other
-	 * registered {@link ParameterResolver} will be able to resolve parameters.
-	 *
+	 * for resolving all parameters in the constructor. Consequently, no other registered
+	 * {@link ParameterResolver} will be able to resolve parameters.
 	 * @see #resolve
 	 * @see ParameterAutowireUtils#isAutowirable
 	 */
@@ -157,14 +155,14 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	public boolean supports(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		Parameter parameter = parameterContext.getParameter();
 		Executable executable = parameter.getDeclaringExecutable();
-		return (executable instanceof Constructor && AnnotatedElementUtils.hasAnnotation(executable, Autowired.class))
-				|| ParameterAutowireUtils.isAutowirable(parameter);
+		return (executable instanceof Constructor &&
+				AnnotatedElementUtils.hasAnnotation(executable, Autowired.class)) ||
+				ParameterAutowireUtils.isAutowirable(parameter);
 	}
 
 	/**
-	 * Resolve a value for the {@link Parameter} in the supplied
-	 * {@link ParameterContext} by retrieving the corresponding dependency
-	 * from the test's {@link ApplicationContext}.
+	 * Resolve a value for the {@link Parameter} in the supplied {@link ParameterContext} by
+	 * retrieving the corresponding dependency from the test's {@link ApplicationContext}.
 	 * <p>Delegates to {@link ParameterAutowireUtils#resolveDependency}.
 	 * @see #supports
 	 * @see ParameterAutowireUtils#resolveDependency
@@ -177,28 +175,26 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		return ParameterAutowireUtils.resolveDependency(parameter, testClass, applicationContext);
 	}
 
+
 	/**
-	 * Get the {@link ApplicationContext} associated with the supplied
-	 * {@code ExtensionContext}.
-	 * @param context the current {@code ExtensionContext}; never {@code null}
+	 * Get the {@link ApplicationContext} associated with the supplied {@code ExtensionContext}.
+	 * @param context the current {@code ExtensionContext} (never {@code null})
 	 * @return the application context
-	 * @throws IllegalStateException if an error occurs while retrieving the
-	 * application context
+	 * @throws IllegalStateException if an error occurs while retrieving the application context
 	 * @see org.springframework.test.context.TestContext#getApplicationContext()
 	 */
-	static ApplicationContext getApplicationContext(ExtensionContext context) {
+	public static ApplicationContext getApplicationContext(ExtensionContext context) {
 		return getTestContextManager(context).getTestContext().getApplicationContext();
 	}
 
 	/**
-	 * Get the {@link TestContextManager} associated with the supplied
-	 * {@code ExtensionContext}.
-	 * @return the {@code TestContextManager}; never {@code null}
+	 * Get the {@link TestContextManager} associated with the supplied {@code ExtensionContext}.
+	 * @return the {@code TestContextManager} (never {@code null})
 	 */
 	private static TestContextManager getTestContextManager(ExtensionContext context) {
 		Assert.notNull(context, "ExtensionContext must not be null");
 		Class<?> testClass = context.getTestClass().get();
-		Store store = context.getStore(namespace);
+		Store store = context.getStore(NAMESPACE);
 		return store.getOrComputeIfAbsent(testClass, TestContextManager::new, TestContextManager.class);
 	}
 

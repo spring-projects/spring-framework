@@ -23,6 +23,8 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MultiValueMap;
@@ -60,9 +62,7 @@ public class FormHttpMessageReaderTests {
 	@Test
 	public void readFormAsMono() {
 		String body = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
-		MockServerHttpRequest request = new MockServerHttpRequest();
-		request.setBody(body);
-		request.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		MockServerHttpRequest request = request(body);
 		MultiValueMap<String, String> result = this.reader.readMono(null, request, null).block();
 
 		assertEquals("Invalid result", 3, result.size());
@@ -77,9 +77,7 @@ public class FormHttpMessageReaderTests {
 	@Test
 	public void readFormAsFlux() {
 		String body = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
-		MockServerHttpRequest request = new MockServerHttpRequest();
-		request.setBody(body);
-		request.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		MockServerHttpRequest request = request(body);
 		MultiValueMap<String, String> result = this.reader.read(null, request, null).single().block();
 
 		assertEquals("Invalid result", 3, result.size());
@@ -89,6 +87,13 @@ public class FormHttpMessageReaderTests {
 		assertEquals("Invalid result", "value 2+1", values.get(0));
 		assertEquals("Invalid result", "value 2+2", values.get(1));
 		assertNull("Invalid result", result.getFirst("name 3"));
+	}
+
+	private MockServerHttpRequest request(String body) {
+		return MockServerHttpRequest
+					.method(HttpMethod.GET, "/")
+					.header(HttpHeaders.CONTENT_TYPE,  MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+					.body(body);
 	}
 
 }

@@ -50,9 +50,9 @@ public class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTest
 
 	@Test
 	public void zeroCopy() throws Exception {
+
 		// Zero-copy only does not support servlet
-		assumeTrue(server instanceof ReactorHttpServer ||
-				server instanceof UndertowHttpServer);
+		assumeTrue(server instanceof ReactorHttpServer || server instanceof UndertowHttpServer);
 
 		RestTemplate restTemplate = new RestTemplate();
 

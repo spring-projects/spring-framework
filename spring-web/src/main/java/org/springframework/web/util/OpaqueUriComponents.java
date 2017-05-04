@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.util;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -90,7 +89,7 @@ final class OpaqueUriComponents extends UriComponents {
 	}
 
 	@Override
-	public UriComponents encode(Charset charset) throws UnsupportedEncodingException {
+	public UriComponents encode(Charset charset) {
 		return this;
 	}
 
@@ -138,9 +137,15 @@ final class OpaqueUriComponents extends UriComponents {
 
 	@Override
 	protected void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
-		builder.scheme(getScheme());
-		builder.schemeSpecificPart(getSchemeSpecificPart());
-		builder.fragment(getFragment());
+		if (getScheme() != null) {
+			builder.scheme(getScheme());
+		}
+		if (getSchemeSpecificPart() != null) {
+			builder.schemeSpecificPart(getSchemeSpecificPart());
+		}
+		if (getFragment() != null) {
+			builder.fragment(getFragment());
+		}
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +55,8 @@ public class MessageBrokerRegistry {
 
 
 	public MessageBrokerRegistry(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel) {
-		Assert.notNull(clientInboundChannel);
-		Assert.notNull(clientOutboundChannel);
+		Assert.notNull(clientInboundChannel, "Inbound channel must not be null");
+		Assert.notNull(clientOutboundChannel, "Outbound channel must not be null");
 		this.clientInboundChannel = clientInboundChannel;
 		this.clientOutboundChannel = clientOutboundChannel;
 	}

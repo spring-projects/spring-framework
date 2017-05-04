@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,12 +48,17 @@ import org.springframework.util.Assert;
  * <p>Allows to use a pre-configured {@link EventLoopGroup} instance: useful for
  * sharing across multiple clients.
  *
+ * <p>Note that this implementation consistently closes the HTTP connection on each
+ * request.
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Mark Paluch
  * @since 4.1.2
+ * @deprecated as of Spring 5.0, in favor of {@link org.springframework.http.client.reactive.ReactorClientHttpConnector}
  */
+@Deprecated
 public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 		AsyncClientHttpRequestFactory, InitializingBean, DisposableBean {
 
@@ -77,8 +82,6 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	private int readTimeout = -1;
 
 	private volatile Bootstrap bootstrap;
-
-	private volatile Bootstrap sslBootstrap;
 
 
 	/**
@@ -177,20 +180,17 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	private Bootstrap getBootstrap(URI uri) {
 		boolean isSecure = (uri.getPort() == 443 || "https".equalsIgnoreCase(uri.getScheme()));
 		if (isSecure) {
-			if (this.sslBootstrap == null) {
-				this.sslBootstrap = buildBootstrap(true);
-			}
-			return this.sslBootstrap;
+			return buildBootstrap(uri, true);
 		}
 		else {
 			if (this.bootstrap == null) {
-				this.bootstrap = buildBootstrap(false);
+				this.bootstrap = buildBootstrap(uri, false);
 			}
 			return this.bootstrap;
 		}
 	}
 
-	private Bootstrap buildBootstrap(boolean isSecure) {
+	private Bootstrap buildBootstrap(URI uri, boolean isSecure) {
 		Bootstrap bootstrap = new Bootstrap();
 		bootstrap.group(this.eventLoopGroup).channel(NioSocketChannel.class)
 				.handler(new ChannelInitializer<SocketChannel>() {
@@ -200,7 +200,7 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 						ChannelPipeline pipeline = channel.pipeline();
 						if (isSecure) {
 							Assert.notNull(sslContext, "sslContext should not be null");
-							pipeline.addLast(sslContext.newHandler(channel.alloc()));
+							pipeline.addLast(sslContext.newHandler(channel.alloc(), uri.getHost(), uri.getPort()));
 						}
 						pipeline.addLast(new HttpClientCodec());
 						pipeline.addLast(new HttpObjectAggregator(maxResponseSize));

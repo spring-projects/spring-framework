@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel;
 
 import org.springframework.expression.ParseException;
@@ -23,6 +24,7 @@ import org.springframework.expression.ParseException;
  * message. See {@link SpelMessage} for the list of all possible messages that can occur.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @since 3.0
  */
 @SuppressWarnings("serial")
@@ -34,45 +36,33 @@ public class SpelParseException extends ParseException {
 
 
 	public SpelParseException(String expressionString, int position, SpelMessage message, Object... inserts) {
-		super(expressionString, position, message.formatMessage(position,inserts));
-		this.position = position;
+		super(expressionString, position, message.formatMessage(inserts));
 		this.message = message;
 		this.inserts = inserts;
 	}
 
 	public SpelParseException(int position, SpelMessage message, Object... inserts) {
-		super(position, message.formatMessage(position,inserts));
-		this.position = position;
+		super(position, message.formatMessage(inserts));
 		this.message = message;
 		this.inserts = inserts;
 	}
 
 	public SpelParseException(int position, Throwable cause, SpelMessage message, Object... inserts) {
-		super(position, message.formatMessage(position,inserts), cause);
-		this.position = position;
+		super(position, message.formatMessage(inserts), cause);
 		this.message = message;
 		this.inserts = inserts;
 	}
 
 
 	/**
-	 * @return a formatted message with inserts applied
-	 */
-	@Override
-	public String getMessage() {
-		return (this.message != null ? this.message.formatMessage(this.position, this.inserts)
-				: super.getMessage());
-	}
-
-	/**
-	 * @return the message code
+	 * Return the message code.
 	 */
 	public SpelMessage getMessageCode() {
 		return this.message;
 	}
 
 	/**
-	 * @return the message inserts
+	 * Return the message inserts.
 	 */
 	public Object[] getInserts() {
 		return this.inserts;

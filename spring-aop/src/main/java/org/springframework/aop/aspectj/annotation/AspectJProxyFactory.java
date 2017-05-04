@@ -16,9 +16,9 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.aspectj.lang.reflect.PerClauseKind;
 
@@ -50,7 +50,7 @@ import org.springframework.util.ClassUtils;
 public class AspectJProxyFactory extends ProxyCreatorSupport {
 
 	/** Cache for singleton aspect instances */
-	private static final Map<Class<?>, Object> aspectCache = new HashMap<>();
+	private static final Map<Class<?>, Object> aspectCache = new ConcurrentHashMap<>();
 
 	private final AspectJAdvisorFactory aspectFactory = new ReflectiveAspectJAdvisorFactory();
 
@@ -144,7 +144,7 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	private MetadataAwareAspectInstanceFactory createAspectInstanceFactory(
 			AspectMetadata am, Class<?> aspectClass, String aspectName) {
 
-		MetadataAwareAspectInstanceFactory instanceFactory = null;
+		MetadataAwareAspectInstanceFactory instanceFactory;
 		if (am.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
 			// Create a shared aspect instance.
 			Object instance = getSingletonAspectInstance(aspectClass);
@@ -162,15 +162,20 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 * is created if one cannot be found in the instance cache.
 	 */
 	private Object getSingletonAspectInstance(Class<?> aspectClass) {
-		synchronized (aspectCache) {
-			Object instance = aspectCache.get(aspectClass);
-			if (instance != null) {
-				return instance;
+		// Quick check without a lock...
+		Object instance = aspectCache.get(aspectClass);
+		if (instance == null) {
+			synchronized (aspectCache) {
+				// To be safe, check within full lock now...
+				instance = aspectCache.get(aspectClass);
+				if (instance != null) {
+					return instance;
+				}
+				instance = new SimpleAspectInstanceFactory(aspectClass).getAspectInstance();
+				aspectCache.put(aspectClass, instance);
 			}
-			instance = new SimpleAspectInstanceFactory(aspectClass).getAspectInstance();
-			aspectCache.put(aspectClass, instance);
-			return instance;
 		}
+		return instance;
 	}
 
 

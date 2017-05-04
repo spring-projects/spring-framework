@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,7 +159,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	}
 
 	/**
-	 * Sets the maximum length of the payload body to be included in the log message.
+	 * Set the maximum length of the payload body to be included in the log message.
 	 * Default is 50 characters.
 	 * @since 3.0
 	 */
@@ -233,7 +233,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		HttpServletRequest requestToUse = request;
 
 		if (isIncludePayload() && isFirstRequest && !(request instanceof ContentCachingRequestWrapper)) {
-			requestToUse = new ContentCachingRequestWrapper(request);
+			requestToUse = new ContentCachingRequestWrapper(request, getMaxPayloadLength());
 		}
 
 		boolean shouldLog = shouldLog(requestToUse);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import javax.jms.Session;
 import javax.jms.Topic;
 
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -167,6 +168,8 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	private String subscriptionName;
 
 	private Boolean replyPubSubDomain;
+
+	private QosSettings replyQosSettings;
 
 	private boolean pubSubNoLocal = false;
 
@@ -488,6 +491,22 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		else {
 			return isPubSubDomain();
 		}
+	}
+
+	/**
+	 * Configure the {@link QosSettings} to use when sending a reply. Can be set to
+	 * {@code null} to indicate that the broker's defaults should be used.
+	 * @param replyQosSettings the QoS settings to use when sending a reply or {@code null}
+	 * to use the default vas.
+	 * @since 5.0
+	 */
+	public void setReplyQosSettings(QosSettings replyQosSettings) {
+		this.replyQosSettings = replyQosSettings;
+	}
+
+	@Override
+	public QosSettings getReplyQosSettings() {
+		return this.replyQosSettings;
 	}
 
 	/**

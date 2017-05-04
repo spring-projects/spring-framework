@@ -224,7 +224,7 @@ public class SpringMethodRule implements MethodRule {
 	 * that is annotated with {@code @ClassRule}.
 	 */
 	private static SpringClassRule validateSpringClassRuleConfiguration(Class<?> testClass) {
-		Field ruleField = findSpringClassRuleField(testClass).orElseThrow(() -> 
+		Field ruleField = findSpringClassRuleField(testClass).orElseThrow(() ->
 				new IllegalStateException(String.format(
 					"Failed to find 'public static final SpringClassRule' field in test class [%s]. " +
 					"Consult the javadoc for SpringClassRule for details.", testClass.getName())));

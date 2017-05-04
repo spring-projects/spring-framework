@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,11 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  */
 public class CandidateComponentsIndexLoader {
 
-
-	private static final Log logger = LogFactory.getLog(CandidateComponentsIndexLoader.class);
+	/**
+	 * The location to look for components.
+	 * <p>Can be present in multiple JAR files.
+	 */
+	public static final String COMPONENTS_RESOURCE_LOCATION = "META-INF/spring.components";
 
 	/**
 	 * System property that instructs Spring to ignore the index, i.e.
@@ -54,18 +57,13 @@ public class CandidateComponentsIndexLoader {
 	 */
 	public static final String IGNORE_INDEX = "spring.index.ignore";
 
-	private static final boolean shouldIgnoreIndex =
-			SpringProperties.getFlag(IGNORE_INDEX);
 
+	private static final boolean shouldIgnoreIndex = SpringProperties.getFlag(IGNORE_INDEX);
 
-	/**
-	 * The location to look for components.
-	 * <p>Can be present in multiple JAR files.
-	 */
-	public static final String COMPONENTS_RESOURCE_LOCATION = "META-INF/spring.components";
+	private static final Log logger = LogFactory.getLog(CandidateComponentsIndexLoader.class);
 
-	private static final ConcurrentMap<ClassLoader, CandidateComponentsIndex> cache
-			= new ConcurrentReferenceHashMap<>();
+	private static final ConcurrentMap<ClassLoader, CandidateComponentsIndex> cache =
+			new ConcurrentReferenceHashMap<>();
 
 
 	/**
@@ -89,6 +87,7 @@ public class CandidateComponentsIndexLoader {
 		if (shouldIgnoreIndex) {
 			return null;
 		}
+
 		try {
 			Enumeration<URL> urls = classLoader.getResources(COMPONENTS_RESOURCE_LOCATION);
 			if (!urls.hasMoreElements()) {
@@ -100,15 +99,15 @@ public class CandidateComponentsIndexLoader {
 				Properties properties = PropertiesLoaderUtils.loadProperties(new UrlResource(url));
 				result.add(properties);
 			}
-			if (logger.isTraceEnabled()) {
-				logger.trace("Loaded " + result.size() + "] index(es)");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loaded " + result.size() + "] index(es)");
 			}
 			int totalCount = result.stream().mapToInt(Properties::size).sum();
 			return (totalCount > 0 ? new CandidateComponentsIndex(result) : null);
 		}
 		catch (IOException ex) {
-			throw new IllegalArgumentException("Unable to load indexes from location ["
-					+ COMPONENTS_RESOURCE_LOCATION + "]", ex);
+			throw new IllegalStateException("Unable to load indexes from location [" +
+					COMPONENTS_RESOURCE_LOCATION + "]", ex);
 		}
 	}
 

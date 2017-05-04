@@ -26,6 +26,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Currency;
 import java.util.HashMap;
@@ -88,19 +89,6 @@ import org.springframework.util.ClassUtils;
  * @see java.beans.PropertyEditorSupport#setValue
  */
 public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
-
-	private static Class<?> zoneIdClass;
-
-	static {
-		try {
-			zoneIdClass = ClassUtils.forName("java.time.ZoneId", PropertyEditorRegistrySupport.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			// Java 8 ZoneId class not available
-			zoneIdClass = null;
-		}
-	}
-
 
 	private ConversionService conversionService;
 
@@ -222,9 +210,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(URI.class, new URIEditor());
 		this.defaultEditors.put(URL.class, new URLEditor());
 		this.defaultEditors.put(UUID.class, new UUIDEditor());
-		if (zoneIdClass != null) {
-			this.defaultEditors.put(zoneIdClass, new ZoneIdEditor());
-		}
+		this.defaultEditors.put(ZoneId.class, new ZoneIdEditor());
 
 		// Default instances of collection editors.
 		// Can be overridden by registering custom instances of those as custom editors.

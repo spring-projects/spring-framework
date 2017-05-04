@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,7 +128,7 @@ public enum HttpStatus {
 	/**
 	 * {@code 302 Moved Temporarily}.
 	 * @see <a href="http://tools.ietf.org/html/rfc1945#section-9.3">HTTP/1.0, section 9.3</a>
-	 * @deprecated In favor of {@link #FOUND} which will be returned from {@code HttpStatus.valueOf(302)}
+	 * @deprecated in favor of {@link #FOUND} which will be returned from {@code HttpStatus.valueOf(302)}
 	 */
 	@Deprecated
 	MOVED_TEMPORARILY(302, "Moved Temporarily"),
@@ -236,7 +236,7 @@ public enum HttpStatus {
 	/**
 	 * {@code 413 Request Entity Too Large}.
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-10.4.14">HTTP/1.1, section 10.4.14</a>
-	 * @deprecated In favor of {@link #PAYLOAD_TOO_LARGE} which will be returned from {@code HttpStatus.valueOf(413)}
+	 * @deprecated in favor of {@link #PAYLOAD_TOO_LARGE} which will be returned from {@code HttpStatus.valueOf(413)}
 	 */
 	@Deprecated
 	REQUEST_ENTITY_TOO_LARGE(413, "Request Entity Too Large"),
@@ -249,7 +249,7 @@ public enum HttpStatus {
 	/**
 	 * {@code 414 Request-URI Too Long}.
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-10.4.15">HTTP/1.1, section 10.4.15</a>
-	 * @deprecated In favor of {@link #URI_TOO_LONG} which will be returned from {@code HttpStatus.valueOf(414)}
+	 * @deprecated in favor of {@link #URI_TOO_LONG} which will be returned from {@code HttpStatus.valueOf(414)}
 	 */
 	@Deprecated
 	REQUEST_URI_TOO_LONG(414, "Request-URI Too Long"),

@@ -39,8 +39,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jmx.AbstractMBeanServerTests;
@@ -68,7 +70,6 @@ import static org.junit.Assert.*;
  * @author Sam Brannen
  * @author Stephane Nicoll
  */
-@SuppressWarnings("deprecation")
 public class MBeanExporterTests extends AbstractMBeanServerTests {
 
 	@Rule
@@ -234,7 +235,6 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		assertListener(listener1);
 		assertListener(listener2);
 	}
-
 
 	@Test
 	public void testExportJdkProxy() throws Exception {
@@ -541,10 +541,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		start(exporter);
 	}
 
-	/**
-	 * SPR-2158
-	 */
-	@Test
+	@Test  // SPR-2158
 	public void testMBeanIsNotUnregisteredSpuriouslyIfSomeExternalProcessHasUnregisteredMBean() throws Exception {
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setBeans(getBeanMap());
@@ -561,10 +558,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 				listener.getUnregistered().size());
 	}
 
-	/**
-	 * SPR-3302
-	 */
-	@Test
+	@Test  // SPR-3302
 	public void testBeanNameCanBeUsedInNotificationListenersMap() throws Exception {
 		String beanName = "charlesDexterWard";
 		BeanDefinitionBuilder testBean = BeanDefinitionBuilder.rootBeanDefinition(JmxTestBean.class);
@@ -608,10 +602,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		start(exporter);
 	}
 
-	/*
-	 * SPR-3625
-	 */
-	@Test
+	@Test  // SPR-3625
 	public void testMBeanIsUnregisteredForRuntimeExceptionDuringInitialization() throws Exception {
 		BeanDefinitionBuilder builder1 = BeanDefinitionBuilder.rootBeanDefinition(Person.class);
 		BeanDefinitionBuilder builder2 = BeanDefinitionBuilder
@@ -666,6 +657,37 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		assertIsNotRegistered("Bean should have been excluded",
 				ObjectNameManager.getInstance(secondBeanName));
 	}
+
+	@Test
+	public void testRegisterFactoryBean() throws MalformedObjectNameException {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition("spring:type=FactoryBean", new RootBeanDefinition(ProperSomethingFactoryBean.class));
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(getServer());
+		exporter.setBeanFactory(factory);
+		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ALL);
+
+		start(exporter);
+		assertIsRegistered("Non-null FactoryBean object registered",
+				ObjectNameManager.getInstance("spring:type=FactoryBean"));
+	}
+
+	@Test
+	public void testIgnoreNullObjectFromFactoryBean() throws MalformedObjectNameException {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition("spring:type=FactoryBean", new RootBeanDefinition(NullSomethingFactoryBean.class));
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(getServer());
+		exporter.setBeanFactory(factory);
+		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ALL);
+
+		start(exporter);
+		assertIsNotRegistered("Null FactoryBean object not registered",
+				ObjectNameManager.getInstance("spring:type=FactoryBean"));
+	}
+
 
 	private ConfigurableApplicationContext load(String context) {
 		return new ClassPathXmlApplicationContext(context, getClass());
@@ -796,6 +818,43 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		@Override
 		public boolean includeBean(Class<?> beanClass, String beanName) {
 			return this.namedBeans.contains(beanName);
+		}
+	}
+
+
+	public interface SomethingMBean {}
+
+	public static class Something implements SomethingMBean {}
+
+
+	public static class ProperSomethingFactoryBean implements FactoryBean<Something> {
+
+		@Override public Something getObject() {
+			return new Something();
+		}
+
+		@Override public Class<?> getObjectType() {
+			return Something.class;
+		}
+
+		@Override public boolean isSingleton() {
+			return true;
+		}
+	}
+
+
+	public static class NullSomethingFactoryBean implements FactoryBean<Something> {
+
+		@Override public Something getObject() {
+			return null;
+		}
+
+		@Override public Class<?> getObjectType() {
+			return Something.class;
+		}
+
+		@Override public boolean isSingleton() {
+			return true;
 		}
 	}
 

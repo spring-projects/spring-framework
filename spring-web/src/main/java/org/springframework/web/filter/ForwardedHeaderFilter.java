@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,26 +28,31 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.http.HttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Filter that wraps the request in order to override its
+ * Filter that wraps the request and response in order to override its
  * {@link HttpServletRequest#getServerName() getServerName()},
  * {@link HttpServletRequest#getServerPort() getServerPort()},
- * {@link HttpServletRequest#getScheme() getScheme()}, and
- * {@link HttpServletRequest#isSecure() isSecure()} methods with values derived
- * from "Forwarded" or "X-Forwarded-*" headers. In effect the wrapped request
- * reflects the client-originated protocol and address.
+ * {@link HttpServletRequest#getScheme() getScheme()},
+ * {@link HttpServletRequest#isSecure() isSecure()},
+ * {@link HttpServletResponse#sendRedirect(String) sendRedirect(String)},
+ * methods with values derived from "Forwarded" or "X-Forwarded-*"
+ * headers. In effect the wrapped request and response reflects the
+ * client-originated protocol and address.
  *
  * @author Rossen Stoyanchev
  * @author Eddú Meléndez
+ * @author Rob Winch
  * @since 4.3
  */
 public class ForwardedHeaderFilter extends OncePerRequestFilter {
@@ -64,7 +69,14 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	}
 
 
-	private final UrlPathHelper pathHelper = new UrlPathHelper();
+	private final UrlPathHelper pathHelper;
+
+
+	public ForwardedHeaderFilter() {
+		this.pathHelper = new UrlPathHelper();
+		this.pathHelper.setUrlDecode(false);
+		this.pathHelper.setRemoveSemicolonContent(false);
+	}
 
 
 	@Override
@@ -93,7 +105,9 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 			FilterChain filterChain) throws ServletException, IOException {
 
-		filterChain.doFilter(new ForwardedHeaderRequestWrapper(request, this.pathHelper), response);
+		ForwardedHeaderRequestWrapper wrappedRequest = new ForwardedHeaderRequestWrapper(request, this.pathHelper);
+		ForwardedHeaderResponseWrapper wrappedResponse = new ForwardedHeaderResponseWrapper(response, wrappedRequest);
+		filterChain.doFilter(wrappedRequest, wrappedResponse);
 	}
 
 
@@ -111,7 +125,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		private final String requestUri;
 
-		private final StringBuffer requestUrl;
+		private final String requestUrl;
 
 		private final Map<String, List<String>> headers;
 
@@ -130,8 +144,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			String prefix = getForwardedPrefix(request);
 			this.contextPath = (prefix != null ? prefix : request.getContextPath());
 			this.requestUri = this.contextPath + pathHelper.getPathWithinApplication(request);
-			this.requestUrl = new StringBuffer(this.scheme + "://" + this.host +
-					(port == -1 ? "" : ":" + port) + this.requestUri);
+			this.requestUrl = this.scheme + "://" + this.host + (port == -1 ? "" : ":" + port) + this.requestUri;
 			this.headers = initHeaders(request);
 		}
 
@@ -199,7 +212,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		@Override
 		public StringBuffer getRequestURL() {
-			return this.requestUrl;
+			return new StringBuffer(this.requestUrl);
 		}
 
 		// Override header accessors to not expose forwarded headers
@@ -219,6 +232,48 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		@Override
 		public Enumeration<String> getHeaderNames() {
 			return Collections.enumeration(this.headers.keySet());
+		}
+	}
+
+
+	private static class ForwardedHeaderResponseWrapper extends HttpServletResponseWrapper {
+
+		private static final String FOLDER_SEPARATOR = "/";
+
+		private final HttpServletRequest request;
+
+		public ForwardedHeaderResponseWrapper(HttpServletResponse response, HttpServletRequest request) {
+			super(response);
+			this.request = request;
+		}
+
+		@Override
+		public void sendRedirect(String location) throws IOException {
+			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
+
+			// Absolute location
+			if (builder.build().getScheme() != null) {
+				super.sendRedirect(location);
+				return;
+			}
+
+			// Network-path reference
+			if (location.startsWith("//")) {
+				String scheme = this.request.getScheme();
+				super.sendRedirect(builder.scheme(scheme).toUriString());
+				return;
+			}
+
+			// Relative to Servlet container root or to current request
+			String path = (location.startsWith(FOLDER_SEPARATOR) ? location :
+					StringUtils.applyRelativePath(this.request.getRequestURI(), location));
+
+			String result = UriComponentsBuilder
+					.fromHttpRequest(new ServletServerHttpRequest(this.request))
+					.replacePath(path)
+					.build().normalize().toUriString();
+
+			super.sendRedirect(result);
 		}
 	}
 

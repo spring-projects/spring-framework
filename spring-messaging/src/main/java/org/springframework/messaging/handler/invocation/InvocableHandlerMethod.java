@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
@@ -127,7 +126,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		for (int i = 0; i < parameters.length; i++) {
 			MethodParameter parameter = parameters[i];
 			parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
-			GenericTypeResolver.resolveParameterType(parameter, getBean().getClass());
 			args[i] = resolveProvidedArgument(parameter, providedArgs);
 			if (args[i] != null) {
 				continue;
@@ -139,36 +137,22 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				}
 				catch (Exception ex) {
 					if (logger.isDebugEnabled()) {
-						logger.debug(getArgumentResolutionErrorMessage("Error resolving argument", i), ex);
+						logger.debug(getArgumentResolutionErrorMessage("Failed to resolve", i), ex);
 					}
 					throw ex;
 				}
 			}
 			if (args[i] == null) {
-				String msg = getArgumentResolutionErrorMessage("No suitable resolver for argument", i);
-				throw new IllegalStateException(msg);
+				throw new MethodArgumentResolutionException(message, parameter,
+						getArgumentResolutionErrorMessage("No suitable resolver for", i));
 			}
 		}
 		return args;
 	}
 
-	private String getArgumentResolutionErrorMessage(String message, int index) {
-		MethodParameter param = getMethodParameters()[index];
-		message += " [" + index + "] [type=" + param.getParameterType().getName() + "]";
-		return getDetailedErrorMessage(message);
-	}
-
-	/**
-	 * Adds HandlerMethod details such as the controller type and method
-	 * signature to the given error message.
-	 * @param message error message to append the HandlerMethod details to
-	 */
-	protected String getDetailedErrorMessage(String message) {
-		StringBuilder sb = new StringBuilder(message).append("\n");
-		sb.append("HandlerMethod details: \n");
-		sb.append("Controller [").append(getBeanType().getName()).append("]\n");
-		sb.append("Method [").append(getBridgedMethod().toGenericString()).append("]\n");
-		return sb.toString();
+	private String getArgumentResolutionErrorMessage(String text, int index) {
+		Class<?> paramType = getMethodParameters()[index].getParameterType();
+		return text + " argument " + index + " of type '" + paramType.getName() + "'";
 	}
 
 	/**
@@ -197,8 +181,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		}
 		catch (IllegalArgumentException ex) {
 			assertTargetBean(getBridgedMethod(), getBean(), args);
-			String message = (ex.getMessage() != null ? ex.getMessage() : "Illegal argument");
-			throw new IllegalStateException(getInvocationErrorMessage(message, args), ex);
+			String text = (ex.getMessage() != null ? ex.getMessage() : "Illegal argument");
+			throw new IllegalStateException(getInvocationErrorMessage(text, args), ex);
 		}
 		catch (InvocationTargetException ex) {
 			// Unwrap for HandlerExceptionResolvers ...
@@ -213,33 +197,33 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				throw (Exception) targetException;
 			}
 			else {
-				String msg = getInvocationErrorMessage("Failed to invoke controller method", args);
-				throw new IllegalStateException(msg, targetException);
+				String text = getInvocationErrorMessage("Failed to invoke handler method", args);
+				throw new IllegalStateException(text, targetException);
 			}
 		}
 	}
 
 	/**
 	 * Assert that the target bean class is an instance of the class where the given
-	 * method is declared. In some cases the actual controller instance at request-
+	 * method is declared. In some cases the actual endpoint instance at request-
 	 * processing time may be a JDK dynamic proxy (lazy initialization, prototype
-	 * beans, and others). {@code @Controller}'s that require proxying should prefer
+	 * beans, and others). Endpoint classes that require proxying should prefer
 	 * class-based proxy mechanisms.
 	 */
 	private void assertTargetBean(Method method, Object targetBean, Object[] args) {
 		Class<?> methodDeclaringClass = method.getDeclaringClass();
 		Class<?> targetBeanClass = targetBean.getClass();
 		if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
-			String msg = "The mapped controller method class '" + methodDeclaringClass.getName() +
-					"' is not an instance of the actual controller bean class '" +
-					targetBeanClass.getName() + "'. If the controller requires proxying " +
+			String text = "The mapped handler method class '" + methodDeclaringClass.getName() +
+					"' is not an instance of the actual endpoint bean class '" +
+					targetBeanClass.getName() + "'. If the endpoint requires proxying " +
 					"(e.g. due to @Transactional), please use class-based proxying.";
-			throw new IllegalStateException(getInvocationErrorMessage(msg, args));
+			throw new IllegalStateException(getInvocationErrorMessage(text, args));
 		}
 	}
 
-	private String getInvocationErrorMessage(String message, Object[] resolvedArgs) {
-		StringBuilder sb = new StringBuilder(getDetailedErrorMessage(message));
+	private String getInvocationErrorMessage(String text, Object[] resolvedArgs) {
+		StringBuilder sb = new StringBuilder(getDetailedErrorMessage(text));
 		sb.append("Resolved arguments: \n");
 		for (int i = 0; i < resolvedArgs.length; i++) {
 			sb.append("[").append(i).append("] ");
@@ -253,6 +237,19 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		}
 		return sb.toString();
 	}
+
+	/**
+	 * Adds HandlerMethod details such as the bean type and method signature to the message.
+	 * @param text error message to append the HandlerMethod details to
+	 */
+	protected String getDetailedErrorMessage(String text) {
+		StringBuilder sb = new StringBuilder(text).append("\n");
+		sb.append("HandlerMethod details: \n");
+		sb.append("Endpoint [").append(getBeanType().getName()).append("]\n");
+		sb.append("Method [").append(getBridgedMethod().toGenericString()).append("]\n");
+		return sb.toString();
+	}
+
 
 	MethodParameter getAsyncReturnValueType(Object returnValue) {
 		return new AsyncResultMethodParameter(returnValue);
@@ -268,7 +265,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		public AsyncResultMethodParameter(Object returnValue) {
 			super(-1);
 			this.returnValue = returnValue;
-			this.returnType = ResolvableType.forType(super.getGenericParameterType()).getGeneric(0);
+			this.returnType = ResolvableType.forType(super.getGenericParameterType()).getGeneric();
 		}
 
 		protected AsyncResultMethodParameter(AsyncResultMethodParameter original) {
@@ -283,7 +280,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				return this.returnValue.getClass();
 			}
 			if (!ResolvableType.NONE.equals(this.returnType)) {
-				return this.returnType.getRawClass();
+				return this.returnType.resolve();
 			}
 			return super.getParameterType();
 		}

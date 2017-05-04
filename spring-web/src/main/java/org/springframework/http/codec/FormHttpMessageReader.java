@@ -83,19 +83,19 @@ public class FormHttpMessageReader implements HttpMessageReader<MultiValueMap<St
 
 	@Override
 	public Flux<MultiValueMap<String, String>> read(ResolvableType elementType,
-			ReactiveHttpInputMessage inputMessage, Map<String, Object> hints) {
+			ReactiveHttpInputMessage message, Map<String, Object> hints) {
 
-		return Flux.from(readMono(elementType, inputMessage, hints));
+		return Flux.from(readMono(elementType, message, hints));
 	}
 
 	@Override
 	public Mono<MultiValueMap<String, String>> readMono(ResolvableType elementType,
-			ReactiveHttpInputMessage inputMessage, Map<String, Object> hints) {
+			ReactiveHttpInputMessage message, Map<String, Object> hints) {
 
-		MediaType contentType = inputMessage.getHeaders().getContentType();
+		MediaType contentType = message.getHeaders().getContentType();
 		Charset charset = getMediaTypeCharset(contentType);
 
-		return inputMessage.getBody()
+		return message.getBody()
 				.reduce(DataBuffer::write)
 				.map(buffer -> {
 					CharBuffer charBuffer = charset.decode(buffer.asByteBuffer());

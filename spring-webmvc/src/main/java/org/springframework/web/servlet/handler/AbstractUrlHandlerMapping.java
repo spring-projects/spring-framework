@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,6 +170,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			validateHandler(handler, request);
 			return buildPathExposingHandler(handler, urlPath, urlPath, null);
 		}
+
 		// Pattern match?
 		List<String> matchingPatterns = new ArrayList<>();
 		for (String registeredPattern : this.handlerMap.keySet()) {
@@ -182,20 +183,26 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 				}
 			}
 		}
-		String bestPatternMatch = null;
+
+		String bestMatch = null;
 		Comparator<String> patternComparator = getPathMatcher().getPatternComparator(urlPath);
 		if (!matchingPatterns.isEmpty()) {
 			Collections.sort(matchingPatterns, patternComparator);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Matching patterns for request [" + urlPath + "] are " + matchingPatterns);
 			}
-			bestPatternMatch = matchingPatterns.get(0);
+			bestMatch = matchingPatterns.get(0);
 		}
-		if (bestPatternMatch != null) {
-			handler = this.handlerMap.get(bestPatternMatch);
+		if (bestMatch != null) {
+			handler = this.handlerMap.get(bestMatch);
 			if (handler == null) {
-				Assert.isTrue(bestPatternMatch.endsWith("/"));
-				handler = this.handlerMap.get(bestPatternMatch.substring(0, bestPatternMatch.length() - 1));
+				if (bestMatch.endsWith("/")) {
+					handler = this.handlerMap.get(bestMatch.substring(0, bestMatch.length() - 1));
+				}
+				if (handler == null) {
+					throw new IllegalStateException(
+							"Could not find handler for best pattern match [" + bestMatch + "]");
+				}
 			}
 			// Bean name or resolved handler?
 			if (handler instanceof String) {
@@ -203,13 +210,13 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 				handler = getApplicationContext().getBean(handlerName);
 			}
 			validateHandler(handler, request);
-			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestPatternMatch, urlPath);
+			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestMatch, urlPath);
 
 			// There might be multiple 'best patterns', let's make sure we have the correct URI template variables
 			// for all of them
 			Map<String, String> uriTemplateVariables = new LinkedHashMap<>();
 			for (String matchingPattern : matchingPatterns) {
-				if (patternComparator.compare(bestPatternMatch, matchingPattern) == 0) {
+				if (patternComparator.compare(bestMatch, matchingPattern) == 0) {
 					Map<String, String> vars = getPathMatcher().extractUriTemplateVariables(matchingPattern, urlPath);
 					Map<String, String> decodedVars = getUrlPathHelper().decodePathVariables(request, vars);
 					uriTemplateVariables.putAll(decodedVars);
@@ -218,8 +225,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			if (logger.isDebugEnabled()) {
 				logger.debug("URI Template variables for request [" + urlPath + "] are " + uriTemplateVariables);
 			}
-			return buildPathExposingHandler(handler, bestPatternMatch, pathWithinMapping, uriTemplateVariables);
+			return buildPathExposingHandler(handler, bestMatch, pathWithinMapping, uriTemplateVariables);
 		}
+
 		// No handler found...
 		return null;
 	}

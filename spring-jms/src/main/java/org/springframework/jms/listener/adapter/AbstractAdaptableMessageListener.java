@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.jms.listener.SessionAwareMessageListener;
 import org.springframework.jms.support.JmsHeaderMapper;
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.SimpleJmsHeaderMapper;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.MessageConverter;
@@ -66,6 +67,7 @@ public abstract class AbstractAdaptableMessageListener
 
 	private final MessagingMessageConverterAdapter messagingMessageConverter = new MessagingMessageConverterAdapter();
 
+	private QosSettings responseQosSettings;
 
 	/**
 	 * Set the default destination to send response messages to. This will be applied
@@ -167,6 +169,24 @@ public abstract class AbstractAdaptableMessageListener
 		return this.messagingMessageConverter;
 	}
 
+	/**
+	 * Set the {@link QosSettings} to use when sending a response. Can be set to
+	 * {@code null} to indicate that the broker's defaults should be used.
+	 * @param responseQosSettings the QoS settings to use when sending a response or
+	 * {@code null} to use the default values.
+	 * @since 5.0
+	 */
+	public void setResponseQosSettings(QosSettings responseQosSettings) {
+		this.responseQosSettings = responseQosSettings;
+	}
+
+	/**
+	 * Return the {@link QosSettings} to use when sending a response or {@code null} if
+	 * the defaults should be used.
+	 */
+	protected QosSettings getResponseQosSettings() {
+		return this.responseQosSettings;
+	}
 
 	/**
 	 * Standard JMS {@link MessageListener} entry point.
@@ -399,7 +419,14 @@ public abstract class AbstractAdaptableMessageListener
 		MessageProducer producer = session.createProducer(destination);
 		try {
 			postProcessProducer(producer, response);
-			producer.send(response);
+			QosSettings settings = getResponseQosSettings();
+			if (settings != null) {
+				producer.send(response, settings.getDeliveryMode(), settings.getPriority(),
+						settings.getTimeToLive());
+			}
+			else {
+				producer.send(response);
+			}
 		}
 		finally {
 			JmsUtils.closeMessageProducer(producer);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.multipart.support;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -37,6 +38,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -106,13 +108,17 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			}
 			setMultipartFiles(files);
 		}
-		catch (Exception ex) {
-			throw new MultipartException("Could not parse multipart servlet request", ex);
+		catch (Throwable ex) {
+			handleParseFailure(ex);
 		}
 	}
 
-	private String extractFilename(String contentDisposition) {
-		return extractFilename(contentDisposition, FILENAME_KEY);
+	protected void handleParseFailure(Throwable ex) {
+		String msg = ex.getMessage();
+		if (msg != null && msg.contains("size") && msg.contains("exceed")) {
+			throw new MaxUploadSizeExceededException(-1, ex);
+		}
+		throw new MultipartException("Failed to parse multipart servlet request", ex);
 	}
 
 	private String extractFilename(String contentDisposition, String key) {
@@ -137,6 +143,10 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			}
 		}
 		return filename;
+	}
+
+	private String extractFilename(String contentDisposition) {
+		return extractFilename(contentDisposition, FILENAME_KEY);
 	}
 
 	private String extractFilenameWithCharset(String contentDisposition) {
@@ -219,7 +229,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			Part part = getPart(paramOrFileName);
 			return (part != null ? part.getContentType() : null);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new MultipartException("Could not access multipart servlet request", ex);
 		}
 	}
@@ -239,7 +249,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 				return null;
 			}
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new MultipartException("Could not access multipart servlet request", ex);
 		}
 	}
@@ -298,6 +308,15 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		@Override
 		public void transferTo(File dest) throws IOException, IllegalStateException {
 			this.part.write(dest.getPath());
+			if (dest.isAbsolute() && !dest.exists()) {
+				// Servlet 3.0 Part.write is not guaranteed to support absolute file paths:
+				// may translate the given path to a relative location within a temp dir
+				// (e.g. on Jetty whereas Tomcat and Undertow detect absolute paths).
+				// At least we offloaded the file from memory storage; it'll get deleted
+				// from the temp dir eventually in any case. And for our user's purposes,
+				// we can manually copy it to the requested location as a fallback.
+				FileCopyUtils.copy(this.part.getInputStream(), new FileOutputStream(dest));
+			}
 		}
 	}
 

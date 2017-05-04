@@ -22,6 +22,7 @@ import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
@@ -32,8 +33,8 @@ import org.springframework.util.MultiValueMap;
  * {@link ServerWebExchange}. Pre-implements all methods by delegating to the
  * wrapped instance.
  *
- * <p>Note that if the purpose for wrapping is simply to override specific
- * properties, e.g. {@link #getPrincipal()}, consider using
+ * <p><strong>Note:</strong> if the purpose for using a decorator is to override
+ * properties like {@link #getPrincipal()}, consider using
  * {@link ServerWebExchange#mutate()} instead.
  *
  * @author Rossen Stoyanchev
@@ -91,6 +92,11 @@ public class ServerWebExchangeDecorator implements ServerWebExchange {
 	@Override
 	public Mono<MultiValueMap<String, String>> getFormData() {
 		return getDelegate().getFormData();
+	}
+
+	@Override
+	public Mono<MultiValueMap<String, Part>> getMultipartData() {
+		return getDelegate().getMultipartData();
 	}
 
 	@Override

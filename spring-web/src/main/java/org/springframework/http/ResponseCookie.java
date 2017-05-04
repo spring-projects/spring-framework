@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http;
 
 import java.time.Duration;
@@ -50,7 +51,7 @@ public final class ResponseCookie extends HttpCookie {
 			String path, boolean secure, boolean httpOnly) {
 
 		super(name, value);
-		Assert.notNull(maxAge);
+		Assert.notNull(maxAge, "Max age must not be null");
 		this.maxAge = maxAge;
 		this.domain = Optional.ofNullable(domain);
 		this.path = Optional.ofNullable(path);
@@ -61,7 +62,6 @@ public final class ResponseCookie extends HttpCookie {
 
 	/**
 	 * Return the cookie "Max-Age" attribute in seconds.
-	 *
 	 * <p>A positive value indicates when the cookie expires relative to the
 	 * current time. A value of 0 means the cookie should expire immediately.
 	 * A negative value means no "Max-Age" attribute in which case the cookie
@@ -100,13 +100,6 @@ public final class ResponseCookie extends HttpCookie {
 		return this.httpOnly;
 	}
 
-	@Override
-	public int hashCode() {
-		int result = super.hashCode();
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.domain);
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.path);
-		return result;
-	}
 
 	@Override
 	public boolean equals(Object other) {
@@ -120,6 +113,14 @@ public final class ResponseCookie extends HttpCookie {
 		return (getName().equalsIgnoreCase(otherCookie.getName()) &&
 				ObjectUtils.nullSafeEquals(this.path, otherCookie.getPath()) &&
 				ObjectUtils.nullSafeEquals(this.domain, otherCookie.getDomain()));
+	}
+
+	@Override
+	public int hashCode() {
+		int result = super.hashCode();
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.domain);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.path);
+		return result;
 	}
 
 
@@ -143,7 +144,6 @@ public final class ResponseCookie extends HttpCookie {
 			private boolean secure;
 
 			private boolean httpOnly;
-
 
 			@Override
 			public ResponseCookieBuilder maxAge(Duration maxAge) {
@@ -188,6 +188,7 @@ public final class ResponseCookie extends HttpCookie {
 			}
 		};
 	}
+
 
 	/**
 	 * A builder for a server-defined HttpCookie with attributes.

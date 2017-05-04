@@ -36,8 +36,6 @@ import org.springframework.util.Assert;
  */
 public class StandardTypeConverter implements TypeConverter {
 
-	private static volatile ConversionService defaultConversionService;
-
 	private final ConversionService conversionService;
 
 
@@ -45,10 +43,7 @@ public class StandardTypeConverter implements TypeConverter {
 	 * Create a StandardTypeConverter for the default ConversionService.
 	 */
 	public StandardTypeConverter() {
-		if (defaultConversionService == null) {
-			defaultConversionService = new DefaultConversionService();
-		}
-		this.conversionService = defaultConversionService;
+		this.conversionService = DefaultConversionService.getSharedInstance();
 	}
 
 	/**

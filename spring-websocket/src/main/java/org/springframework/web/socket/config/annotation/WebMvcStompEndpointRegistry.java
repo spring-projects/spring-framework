@@ -142,7 +142,6 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 		this.stompHandler.setApplicationEventPublisher(applicationContext);
 	}
 
-
 	/**
 	 * Return a handler mapping with the mapped ViewControllers; or {@code null}
 	 * in case of no registrations.

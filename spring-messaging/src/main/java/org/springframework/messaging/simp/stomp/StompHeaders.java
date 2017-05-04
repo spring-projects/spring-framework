@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -397,12 +397,14 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 */
 	@Override
 	public void add(String headerName, String headerValue) {
-		List<String> headerValues = headers.get(headerName);
-		if (headerValues == null) {
-			headerValues = new LinkedList<>();
-			this.headers.put(headerName, headerValues);
-		}
+		List<String> headerValues = headers.computeIfAbsent(headerName, k -> new LinkedList<>());
 		headerValues.add(headerValue);
+	}
+
+	@Override
+	public void addAll(String headerName, List<String> headerValues) {
+		List<String> currentValues = headers.computeIfAbsent(headerName, k -> new LinkedList<>());
+		currentValues.addAll(headerValues);
 	}
 
 	/**

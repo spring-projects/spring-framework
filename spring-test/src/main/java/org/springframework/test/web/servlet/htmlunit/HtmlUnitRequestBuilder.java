@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.test.web.servlet.htmlunit;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -27,14 +29,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import com.gargoylesoftware.htmlunit.CookieManager;
+import com.gargoylesoftware.htmlunit.FormEncodingType;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
@@ -58,7 +59,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * Internal class used to transform a {@link WebRequest} into a
  * {@link MockHttpServletRequest} using Spring MVC Test's {@link RequestBuilder}.
  *
- * <p>By default the first path segment of the URL is used as the contextPath.
+ * <p>By default the first path segment of the URL is used as the context path.
  * To override this default see {@link #setContextPath(String)}.
  *
  * @author Rob Winch
@@ -67,8 +68,6 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @see MockMvcWebConnection
  */
 final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
-
-	private static final Pattern LOCALE_PATTERN = Pattern.compile("^\\s*(\\w{2})(?:-(\\w{2}))?(?:;q=(\\d+\\.\\d+))?$");
 
 	private final Map<String, MockHttpSession> sessions;
 
@@ -97,23 +96,23 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		Assert.notNull(sessions, "Sessions Map must not be null");
 		Assert.notNull(webClient, "WebClient must not be null");
 		Assert.notNull(webRequest, "WebRequest must not be null");
-
 		this.sessions = sessions;
 		this.webClient = webClient;
 		this.webRequest = webRequest;
 	}
 
+
 	public MockHttpServletRequest buildRequest(ServletContext servletContext) {
-		String charset = getCharset();
+		Charset charset = getCharset();
 		String httpMethod = this.webRequest.getHttpMethod().name();
 		UriComponents uriComponents = uriComponents();
 
 		MockHttpServletRequest request = new HtmlUnitMockHttpServletRequest(
 				servletContext, httpMethod, uriComponents.getPath());
 		parent(request, this.parentBuilder);
-		request.setServerName(uriComponents.getHost()); // needs to be first for additional headers
+		request.setServerName(uriComponents.getHost());  // needs to be first for additional headers
 		authType(request);
-		request.setCharacterEncoding(charset);
+		request.setCharacterEncoding(charset.name());
 		content(request, charset);
 		contextPath(request, uriComponents);
 		contentType(request);
@@ -129,6 +128,11 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		request.setPathInfo(null);
 
 		return postProcess(request);
+	}
+
+	private Charset getCharset() {
+		Charset charset = this.webRequest.getCharset();
+		return (charset != null ? charset : StandardCharsets.ISO_8859_1);
 	}
 
 	private MockHttpServletRequest postProcess(MockHttpServletRequest request) {
@@ -219,21 +223,22 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		}
 	}
 
-	private void content(MockHttpServletRequest request, String charset) {
+	private void content(MockHttpServletRequest request, Charset charset) {
 		String requestBody = this.webRequest.getRequestBody();
 		if (requestBody == null) {
 			return;
 		}
-		try {
-			request.setContent(requestBody.getBytes(charset));
-		}
-		catch (UnsupportedEncodingException ex) {
-			throw new IllegalStateException(ex);
-		}
+		request.setContent(requestBody.getBytes(charset));
 	}
 
 	private void contentType(MockHttpServletRequest request) {
 		String contentType = header("Content-Type");
+		if (contentType == null) {
+			FormEncodingType encodingType = this.webRequest.getEncodingType();
+			if (encodingType != null) {
+				contentType = encodingType.getName();
+			}
+		}
 		request.setContentType(contentType != null ? contentType : MediaType.ALL_VALUE);
 	}
 
@@ -249,7 +254,8 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		}
 		else {
 			Assert.isTrue(uriComponents.getPath().startsWith(this.contextPath),
-					() -> uriComponents.getPath() + " should start with contextPath " + this.contextPath);
+					() -> "\"" + uriComponents.getPath() +
+							"\" should start with context path \"" + this.contextPath + "\"");
 			request.setContextPath(this.contextPath);
 		}
 	}
@@ -263,7 +269,8 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			while (tokens.hasMoreTokens()) {
 				String cookieName = tokens.nextToken().trim();
 				Assert.isTrue(tokens.hasMoreTokens(),
-						() -> "Expected value for cookie name '" + cookieName + "'. Full cookie was " + cookieHeaderValue);
+						() -> "Expected value for cookie name '" + cookieName +
+								"': full cookie header was [" + cookieHeaderValue + "]");
 				String cookieValue = tokens.nextToken().trim();
 				processCookie(request, cookies, new Cookie(cookieName, cookieValue));
 			}
@@ -292,14 +299,6 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			request.setRequestedSessionId(cookie.getValue());
 			request.setSession(httpSession(request, cookie.getValue()));
 		}
-	}
-
-	private String getCharset() {
-		String charset = this.webRequest.getCharset();
-		if (charset == null) {
-			return "ISO-8859-1";
-		}
-		return charset;
 	}
 
 	private String header(String headerName) {
@@ -349,12 +348,6 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		if (locale == null) {
 			request.addPreferredLocale(Locale.getDefault());
 		}
-		else {
-			String[] tokens = StringUtils.tokenizeToStringArray(locale, ",");
-			for (int i = tokens.length - 1; i >= 0; i--) {
-				request.addPreferredLocale(parseLocale(tokens[i]));
-			}
-		}
 	}
 
 	private void params(MockHttpServletRequest request, UriComponents uriComponents) {
@@ -378,21 +371,6 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		catch (UnsupportedEncodingException ex) {
 			throw new IllegalStateException(ex);
 		}
-	}
-
-	private Locale parseLocale(String locale) {
-		Matcher matcher = LOCALE_PATTERN.matcher(locale);
-		Assert.isTrue(matcher.matches(), () -> "Invalid locale " + locale);
-		String language = matcher.group(1);
-		String country = matcher.group(2);
-		if (country == null) {
-			country = "";
-		}
-		String qualifier = matcher.group(3);
-		if (qualifier == null) {
-			qualifier = "";
-		}
-		return new Locale(language, country, qualifier);
 	}
 
 	private void servletPath(MockHttpServletRequest request, String requestPath) {

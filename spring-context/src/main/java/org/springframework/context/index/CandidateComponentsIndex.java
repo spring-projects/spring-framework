@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.springframework.util.MultiValueMap;
 
 /**
  * Provide access to the candidates that are defined in {@code META-INF/spring.components}.
- * <p>
- * An arbitrary number of stereotypes can be registered (and queried) on the index: a
+ *
+ * <p>An arbitrary number of stereotypes can be registered (and queried) on the index: a
  * typical example is the fully qualified name of an annotation that flags the class for
  * a certain use case. The following call returns all the {@code @Component}
  * <b>candidate</b> types for the {@code com.example} package (and its sub-packages):
@@ -38,7 +38,7 @@ import org.springframework.util.MultiValueMap;
  *         "com.example", "org.springframework.stereotype.Component");
  * </pre>
  *
- * The {@code type} is usually the fully qualified name of a class, though this is
+ * <p>The {@code type} is usually the fully qualified name of a class, though this is
  * not a rule. Similarly, the {@code stereotype} is usually the fully qualified name of
  * a target type but it can be any marker really.
  *
@@ -49,9 +49,11 @@ public class CandidateComponentsIndex {
 
 	private final MultiValueMap<String, String> index;
 
+
 	CandidateComponentsIndex(List<Properties> content) {
 		this.index = parseIndex(content);
 	}
+
 
 	/**
 	 * Return the candidate types that are associated with the specified stereotype.

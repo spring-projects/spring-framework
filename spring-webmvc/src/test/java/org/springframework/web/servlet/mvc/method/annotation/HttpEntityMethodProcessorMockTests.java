@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,9 +110,9 @@ public class HttpEntityMethodProcessorMockTests {
 	private ServletWebRequest webRequest;
 
 
-	@SuppressWarnings("unchecked")
 	@Before
-	public void setUp() throws Exception {
+	@SuppressWarnings("unchecked")
+	public void setup() throws Exception {
 		dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
 		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
@@ -259,8 +259,8 @@ public class HttpEntityMethodProcessorMockTests {
 		verify(stringHttpMessageConverter).write(eq(body), eq(MediaType.TEXT_HTML), isA(HttpOutputMessage.class));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings("unchecked")
 	public void shouldHandleReturnValueWithResponseBodyAdvice() throws Exception {
 		servletRequest.addHeader("Accept", "text/*");
 		servletRequest.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, Collections.singleton(MediaType.TEXT_HTML));
@@ -310,7 +310,7 @@ public class HttpEntityMethodProcessorMockTests {
 		processor.handleReturnValue(returnValue, returnTypeResponseEntityProduces, mavContainer, webRequest);
 	}
 
-	@Test // SPR-9142
+	@Test  // SPR-9142
 	public void shouldFailHandlingWhenAcceptHeaderIllegal() throws Exception {
 		ResponseEntity<String> returnValue = new ResponseEntity<>("Body", HttpStatus.ACCEPTED);
 		servletRequest.addHeader("Accept", "01");
@@ -371,7 +371,7 @@ public class HttpEntityMethodProcessorMockTests {
 		assertConditionalResponse(HttpStatus.NOT_MODIFIED, null, etagValue, -1);
 	}
 
-	@Test // SPR-14559
+	@Test  // SPR-14559
 	public void shouldHandleInvalidIfNoneMatchWithHttp200() throws Exception {
 		String etagValue = "\"deadb33f8badf00d\"";
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, "unquoted");
@@ -429,7 +429,7 @@ public class HttpEntityMethodProcessorMockTests {
 		assertConditionalResponse(HttpStatus.OK, null, changedEtagValue, oneMinuteAgo);
 	}
 
-	@Test // SPR-13496
+	@Test  // SPR-13496
 	public void shouldHandleConditionalRequestIfNoneMatchWildcard() throws Exception {
 		String wildcardValue = "*";
 		String etagValue = "\"some-etag\"";
@@ -443,7 +443,7 @@ public class HttpEntityMethodProcessorMockTests {
 		assertConditionalResponse(HttpStatus.OK, "body", etagValue, -1);
 	}
 
-	@Test // SPR-13626
+	@Test  // SPR-13626
 	public void shouldHandleGetIfNoneMatchWildcard() throws Exception {
 		String wildcardValue = "*";
 		String etagValue = "\"some-etag\"";
@@ -456,7 +456,7 @@ public class HttpEntityMethodProcessorMockTests {
 		assertConditionalResponse(HttpStatus.OK, "body", etagValue, -1);
 	}
 
-	@Test // SPR-13626
+	@Test  // SPR-13626
 	public void shouldHandleIfNoneMatchIfMatch() throws Exception {
 		String etagValue = "\"some-etag\"";
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etagValue);
@@ -469,7 +469,7 @@ public class HttpEntityMethodProcessorMockTests {
 		assertConditionalResponse(HttpStatus.NOT_MODIFIED, null, etagValue, -1);
 	}
 
-	@Test // SPR-13626
+	@Test  // SPR-13626
 	public void shouldHandleIfNoneMatchIfUnmodifiedSince() throws Exception {
 		String etagValue = "\"some-etag\"";
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etagValue);
@@ -498,7 +498,7 @@ public class HttpEntityMethodProcessorMockTests {
 		assertEquals(200, servletResponse.getStatus());
 	}
 
-	@Test //SPR-14767
+	@Test  //SPR-14767
 	public void shouldHandleValidatorHeadersInPutResponses() throws Exception {
 		servletRequest.setMethod("PUT");
 		String etagValue = "\"some-etag\"";
@@ -509,6 +509,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 		assertConditionalResponse(HttpStatus.OK, "body", etagValue, -1);
 	}
+
 
 	private void initStringMessageConversion(MediaType accepted) {
 		given(stringHttpMessageConverter.canWrite(String.class, null)).willReturn(true);
@@ -540,6 +541,7 @@ public class HttpEntityMethodProcessorMockTests {
 			assertEquals(dateFormat.format(lastModified), servletResponse.getHeader(HttpHeaders.LAST_MODIFIED));
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	public ResponseEntity<String> handle1(HttpEntity<String> httpEntity, ResponseEntity<String> entity,

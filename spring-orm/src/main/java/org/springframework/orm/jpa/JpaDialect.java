@@ -145,7 +145,6 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @see org.springframework.jdbc.datasource.ConnectionHandle#getConnection
 	 * @see org.springframework.jdbc.datasource.SimpleConnectionHandle
 	 * @see JpaTransactionManager#setDataSource
-	 * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor
 	 */
 	ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly)
 			throws PersistenceException, SQLException;

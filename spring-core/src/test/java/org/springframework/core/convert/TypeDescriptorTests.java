@@ -598,15 +598,16 @@ public class TypeDescriptorTests {
 		TypeDescriptor t12 = new TypeDescriptor(getClass().getField("mapField"));
 		assertEquals(t11, t12);
 
-		TypeDescriptor t13 = new TypeDescriptor(new MethodParameter(getClass().getMethod("testAnnotatedMethod", String.class), 0));
-		TypeDescriptor t14 = new TypeDescriptor(new MethodParameter(getClass().getMethod("testAnnotatedMethod", String.class), 0));
+		MethodParameter testAnnotatedMethod = new MethodParameter(getClass().getMethod("testAnnotatedMethod", String.class), 0);
+		TypeDescriptor t13 = new TypeDescriptor(testAnnotatedMethod);
+		TypeDescriptor t14 = new TypeDescriptor(testAnnotatedMethod);
 		assertEquals(t13, t14);
 
-		TypeDescriptor t15 = new TypeDescriptor(new MethodParameter(getClass().getMethod("testAnnotatedMethod", String.class), 0));
+		TypeDescriptor t15 = new TypeDescriptor(testAnnotatedMethod);
 		TypeDescriptor t16 = new TypeDescriptor(new MethodParameter(getClass().getMethod("testAnnotatedMethodDifferentAnnotationValue", String.class), 0));
 		assertNotEquals(t15, t16);
 
-		TypeDescriptor t17 = new TypeDescriptor(new MethodParameter(getClass().getMethod("testAnnotatedMethod", String.class), 0));
+		TypeDescriptor t17 = new TypeDescriptor(testAnnotatedMethod);
 		TypeDescriptor t18 = new TypeDescriptor(new MethodParameter(getClass().getMethod("test5", String.class), 0));
 		assertNotEquals(t17, t18);
 	}

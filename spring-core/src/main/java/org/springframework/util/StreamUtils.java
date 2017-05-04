@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,11 +51,15 @@ public abstract class StreamUtils {
 	/**
 	 * Copy the contents of the given InputStream into a new byte array.
 	 * Leaves the stream open when done.
-	 * @param in the stream to copy from
-	 * @return the new byte array that has been copied to
+	 * @param in the stream to copy from (may be {@code null} or empty)
+	 * @return the new byte array that has been copied to (possibly empty)
 	 * @throws IOException in case of I/O errors
 	 */
 	public static byte[] copyToByteArray(InputStream in) throws IOException {
+		if (in == null) {
+			return new byte[0];
+		}
+
 		ByteArrayOutputStream out = new ByteArrayOutputStream(BUFFER_SIZE);
 		copy(in, out);
 		return out.toByteArray();
@@ -64,12 +68,15 @@ public abstract class StreamUtils {
 	/**
 	 * Copy the contents of the given InputStream into a String.
 	 * Leaves the stream open when done.
-	 * @param in the InputStream to copy from
-	 * @return the String that has been copied to
+	 * @param in the InputStream to copy from (may be {@code null} or empty)
+	 * @return the String that has been copied to (possibly empty)
 	 * @throws IOException in case of I/O errors
 	 */
 	public static String copyToString(InputStream in, Charset charset) throws IOException {
-		Assert.notNull(in, "No InputStream specified");
+		if (in == null) {
+			return "";
+		}
+
 		StringBuilder out = new StringBuilder();
 		InputStreamReader reader = new InputStreamReader(in, charset);
 		char[] buffer = new char[BUFFER_SIZE];
@@ -90,6 +97,7 @@ public abstract class StreamUtils {
 	public static void copy(byte[] in, OutputStream out) throws IOException {
 		Assert.notNull(in, "No input byte array specified");
 		Assert.notNull(out, "No OutputStream specified");
+
 		out.write(in);
 	}
 
@@ -105,6 +113,7 @@ public abstract class StreamUtils {
 		Assert.notNull(in, "No input String specified");
 		Assert.notNull(charset, "No charset specified");
 		Assert.notNull(out, "No OutputStream specified");
+
 		Writer writer = new OutputStreamWriter(out, charset);
 		writer.write(in);
 		writer.flush();
@@ -121,6 +130,7 @@ public abstract class StreamUtils {
 	public static int copy(InputStream in, OutputStream out) throws IOException {
 		Assert.notNull(in, "No InputStream specified");
 		Assert.notNull(out, "No OutputStream specified");
+
 		int byteCount = 0;
 		byte[] buffer = new byte[BUFFER_SIZE];
 		int bytesRead = -1;
@@ -146,10 +156,14 @@ public abstract class StreamUtils {
 	 * @since 4.3
 	 */
 	public static long copyRange(InputStream in, OutputStream out, long start, long end) throws IOException {
+		Assert.notNull(in, "No InputStream specified");
+		Assert.notNull(out, "No OutputStream specified");
+
 		long skipped = in.skip(start);
 		if (skipped < start) {
-			throw new IOException("Skipped only " + skipped + " bytes out of " + start + " required.");
+			throw new IOException("Skipped only " + skipped + " bytes out of " + start + " required");
 		}
+
 		long bytesToCopy = end - start + 1;
 		byte buffer[] = new byte[StreamUtils.BUFFER_SIZE];
 		while (bytesToCopy > 0) {
@@ -166,7 +180,7 @@ public abstract class StreamUtils {
 				bytesToCopy = 0;
 			}
 		}
-		return end - start + 1 - bytesToCopy;
+		return (end - start + 1 - bytesToCopy);
 	}
 
 	/**
@@ -248,4 +262,5 @@ public abstract class StreamUtils {
 		public void close() throws IOException {
 		}
 	}
+
 }

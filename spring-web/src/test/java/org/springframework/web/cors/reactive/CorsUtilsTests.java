@@ -16,57 +16,53 @@
 
 package org.springframework.web.cors.reactive;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.web.cors.reactive.CorsUtils;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.options;
 
 /**
  * Test case for reactive {@link CorsUtils}.
- *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  */
 public class CorsUtilsTests {
 
 	@Test
 	public void isCorsRequest() {
-		MockServerHttpRequest request = new MockServerHttpRequest();
-		request.addHeader(HttpHeaders.ORIGIN, "http://domain.com");
+		MockServerHttpRequest request = get("/").header(HttpHeaders.ORIGIN, "http://domain.com").build();
 		assertTrue(CorsUtils.isCorsRequest(request));
 	}
 
 	@Test
 	public void isNotCorsRequest() {
-		MockServerHttpRequest request = new MockServerHttpRequest();
+		MockServerHttpRequest request = get("/").build();
 		assertFalse(CorsUtils.isCorsRequest(request));
 	}
 
 	@Test
 	public void isPreFlightRequest() {
-		MockServerHttpRequest request = new MockServerHttpRequest();
-		request.setHttpMethod(HttpMethod.OPTIONS);
-		request.addHeader(HttpHeaders.ORIGIN, "http://domain.com");
-		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		MockServerHttpRequest request = options("/")
+				.header(HttpHeaders.ORIGIN, "http://domain.com")
+				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET")
+				.build();
 		assertTrue(CorsUtils.isPreFlightRequest(request));
 	}
 
 	@Test
 	public void isNotPreFlightRequest() {
-		MockServerHttpRequest request = new MockServerHttpRequest();
+		MockServerHttpRequest request = get("/").build();
 		assertFalse(CorsUtils.isPreFlightRequest(request));
 
-		request = new MockServerHttpRequest();
-		request.setHttpMethod(HttpMethod.OPTIONS);
-		request.addHeader(HttpHeaders.ORIGIN, "http://domain.com");
+		request = options("/").header(HttpHeaders.ORIGIN, "http://domain.com").build();
 		assertFalse(CorsUtils.isPreFlightRequest(request));
 
-		request = new MockServerHttpRequest();
-		request.setHttpMethod(HttpMethod.OPTIONS);
-		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		request = options("/").header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET").build();
 		assertFalse(CorsUtils.isPreFlightRequest(request));
 	}
 

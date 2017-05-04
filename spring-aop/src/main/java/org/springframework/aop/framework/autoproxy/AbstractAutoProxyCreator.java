@@ -55,26 +55,25 @@ import org.springframework.util.StringUtils;
  * before invoking the bean itself.
  *
  * <p>This class distinguishes between "common" interceptors: shared for all proxies it
- * creates, and "specific" interceptors: unique per bean instance. There need not
- * be any common interceptors. If there are, they are set using the interceptorNames
- * property. As with ProxyFactoryBean, interceptors names in the current factory
- * are used rather than bean references to allow correct handling of prototype
- * advisors and interceptors: for example, to support stateful mixins.
- * Any advice type is supported for "interceptorNames" entries.
+ * creates, and "specific" interceptors: unique per bean instance. There need not be any
+ * common interceptors. If there are, they are set using the interceptorNames property.
+ * As with {@link org.springframework.aop.framework.ProxyFactoryBean}, interceptors names
+ * in the current factory are used rather than bean references to allow correct handling
+ * of prototype advisors and interceptors: for example, to support stateful mixins.
+ * Any advice type is supported for {@link #setInterceptorNames "interceptorNames"} entries.
  *
  * <p>Such auto-proxying is particularly useful if there's a large number of beans that
  * need to be wrapped with similar proxies, i.e. delegating to the same interceptors.
  * Instead of x repetitive proxy definitions for x target beans, you can register
  * one single such post processor with the bean factory to achieve the same effect.
  *
- * <p>Subclasses can apply any strategy to decide if a bean is to be proxied,
- * e.g. by type, by name, by definition details, etc. They can also return
- * additional interceptors that should just be applied to the specific bean
- * instance. The default concrete implementation is BeanNameAutoProxyCreator,
- * identifying the beans to be proxied via a list of bean names.
+ * <p>Subclasses can apply any strategy to decide if a bean is to be proxied, e.g. by type,
+ * by name, by definition details, etc. They can also return additional interceptors that
+ * should just be applied to the specific bean instance. A simple concrete implementation is
+ * {@link BeanNameAutoProxyCreator}, identifying the beans to be proxied via given names.
  *
  * <p>Any number of {@link TargetSourceCreator} implementations can be used to create
- * a custom target source - for example, to pool prototype objects. Auto-proxying will
+ * a custom target source: for example, to pool prototype objects. Auto-proxying will
  * occur even if there is no advice, as long as a TargetSourceCreator specifies a custom
  * {@link org.springframework.aop.TargetSource}. If there are no TargetSourceCreators set,
  * or if none matches, a {@link org.springframework.aop.target.SingletonTargetSource}
@@ -128,11 +127,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	private BeanFactory beanFactory;
 
-	private final Set<String> targetSourcedBeans =
-			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
+	private final Set<String> targetSourcedBeans = Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
-	private final Set<Object> earlyProxyReferences =
-			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
+	private final Set<Object> earlyProxyReferences = Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
 	private final Map<Object, Class<?>> proxyTypes = new ConcurrentHashMap<>(16);
 
@@ -156,8 +153,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	/**
-	 * Specify the AdvisorAdapterRegistry to use.
-	 * Default is the global AdvisorAdapterRegistry.
+	 * Specify the {@link AdvisorAdapterRegistry} to use.
+	 * <p>Default is the global {@link AdvisorAdapterRegistry}.
 	 * @see org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry
 	 */
 	public void setAdvisorAdapterRegistry(AdvisorAdapterRegistry advisorAdapterRegistry) {
@@ -165,18 +162,18 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	/**
-	 * Set custom TargetSourceCreators to be applied in this order.
-	 * If the list is empty, or they all return null, a SingletonTargetSource
+	 * Set custom {@code TargetSourceCreators} to be applied in this order.
+	 * If the list is empty, or they all return null, a {@link SingletonTargetSource}
 	 * will be created for each bean.
 	 * <p>Note that TargetSourceCreators will kick in even for target beans
-	 * where no advices or advisors have been found. If a TargetSourceCreator
-	 * returns a TargetSource for a specific bean, that bean will be proxied
+	 * where no advices or advisors have been found. If a {@code TargetSourceCreator}
+	 * returns a {@link TargetSource} for a specific bean, that bean will be proxied
 	 * in any case.
-	 * <p>TargetSourceCreators can only be invoked if this post processor is used
-	 * in a BeanFactory, and its BeanFactoryAware callback is used.
-	 * @param targetSourceCreators list of TargetSourceCreator.
-	 * Ordering is significant: The TargetSource returned from the first matching
-	 * TargetSourceCreator (that is, the first that returns non-null) will be used.
+	 * <p>{@code TargetSourceCreators} can only be invoked if this post processor is used
+	 * in a {@link BeanFactory} and its {@link BeanFactoryAware} callback is triggered.
+	 * @param targetSourceCreators the list of {@code TargetSourceCreators}.
+	 * Ordering is significant: The {@code TargetSource} returned from the first matching
+	 * {@code TargetSourceCreator} (that is, the first that returns non-null) will be used.
 	 */
 	public void setCustomTargetSourceCreators(TargetSourceCreator... targetSourceCreators) {
 		this.customTargetSourceCreators = targetSourceCreators;
@@ -207,8 +204,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	/**
-	 * Return the owning BeanFactory.
-	 * May be {@code null}, as this object doesn't need to belong to a bean factory.
+	 * Return the owning {@link BeanFactory}.
+	 * May be {@code null}, as this post-processor doesn't need to belong to a bean factory.
 	 */
 	protected BeanFactory getBeanFactory() {
 		return this.beanFactory;

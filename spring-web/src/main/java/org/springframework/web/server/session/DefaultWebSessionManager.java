@@ -104,8 +104,8 @@ public class DefaultWebSessionManager implements WebSessionManager {
 				Flux.fromIterable(getSessionIdResolver().resolveSessionIds(exchange))
 						.concatMap(this.sessionStore::retrieveSession)
 						.next()
-						.then(session -> validateSession(exchange, session))
-						.otherwiseIfEmpty(createSession(exchange))
+						.flatMap(session -> validateSession(exchange, session))
+						.switchIfEmpty(createSession(exchange))
 						.map(session -> extendSession(exchange, session)));
 	}
 

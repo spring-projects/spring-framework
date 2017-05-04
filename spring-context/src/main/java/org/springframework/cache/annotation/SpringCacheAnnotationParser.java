@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.cache.interceptor.CachePutOperation;
 import org.springframework.cache.interceptor.CacheableOperation;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -60,30 +59,48 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	}
 
 	protected Collection<CacheOperation> parseCacheAnnotations(DefaultCacheConfig cachingConfig, AnnotatedElement ae) {
+		Collection<CacheOperation> ops = parseCacheAnnotations(cachingConfig, ae, false);
+		if (ops != null && ops.size() > 1 && ae.getAnnotations().length > 0) {
+			// More than one operation found -> local declarations override interface-declared ones...
+			Collection<CacheOperation> localOps = parseCacheAnnotations(cachingConfig, ae, true);
+			if (localOps != null) {
+				return localOps;
+			}
+		}
+		return ops;
+	}
+
+	private Collection<CacheOperation> parseCacheAnnotations(
+			DefaultCacheConfig cachingConfig, AnnotatedElement ae, boolean localOnly) {
+
 		Collection<CacheOperation> ops = null;
 
-		Collection<Cacheable> cacheables = AnnotatedElementUtils.getAllMergedAnnotations(ae, Cacheable.class);
+		Collection<Cacheable> cacheables = (localOnly ? AnnotatedElementUtils.getAllMergedAnnotations(ae, Cacheable.class) :
+				AnnotatedElementUtils.findAllMergedAnnotations(ae, Cacheable.class));
 		if (!cacheables.isEmpty()) {
 			ops = lazyInit(ops);
 			for (Cacheable cacheable : cacheables) {
 				ops.add(parseCacheableAnnotation(ae, cachingConfig, cacheable));
 			}
 		}
-		Collection<CacheEvict> evicts = AnnotatedElementUtils.getAllMergedAnnotations(ae, CacheEvict.class);
+		Collection<CacheEvict> evicts = (localOnly ? AnnotatedElementUtils.getAllMergedAnnotations(ae, CacheEvict.class) :
+				AnnotatedElementUtils.findAllMergedAnnotations(ae, CacheEvict.class));
 		if (!evicts.isEmpty()) {
 			ops = lazyInit(ops);
 			for (CacheEvict evict : evicts) {
 				ops.add(parseEvictAnnotation(ae, cachingConfig, evict));
 			}
 		}
-		Collection<CachePut> puts = AnnotatedElementUtils.getAllMergedAnnotations(ae, CachePut.class);
+		Collection<CachePut> puts = (localOnly ? AnnotatedElementUtils.getAllMergedAnnotations(ae, CachePut.class) :
+				AnnotatedElementUtils.findAllMergedAnnotations(ae, CachePut.class));
 		if (!puts.isEmpty()) {
 			ops = lazyInit(ops);
 			for (CachePut put : puts) {
 				ops.add(parsePutAnnotation(ae, cachingConfig, put));
 			}
 		}
-		Collection<Caching> cachings = AnnotatedElementUtils.getAllMergedAnnotations(ae, Caching.class);
+		Collection<Caching> cachings = (localOnly ? AnnotatedElementUtils.getAllMergedAnnotations(ae, Caching.class) :
+				AnnotatedElementUtils.findAllMergedAnnotations(ae, Caching.class));
 		if (!cachings.isEmpty()) {
 			ops = lazyInit(ops);
 			for (Caching caching : cachings) {
@@ -194,7 +211,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	 * @return the default config (never {@code null})
 	 */
 	DefaultCacheConfig getDefaultCacheConfig(Class<?> target) {
-		CacheConfig annotation = AnnotationUtils.getAnnotation(target, CacheConfig.class);
+		CacheConfig annotation = AnnotatedElementUtils.findMergedAnnotation(target, CacheConfig.class);
 		if (annotation != null) {
 			return new DefaultCacheConfig(annotation.cacheNames(), annotation.keyGenerator(),
 					annotation.cacheManager(), annotation.cacheResolver());

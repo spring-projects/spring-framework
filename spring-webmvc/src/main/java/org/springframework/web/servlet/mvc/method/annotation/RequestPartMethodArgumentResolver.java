@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.MethodParameter;
@@ -156,22 +154,12 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 				throw new MissingServletRequestPartException(name);
 			}
 		}
-		if (parameter.isOptional()) {
-			if (arg == null || (arg instanceof Collection && ((Collection) arg).isEmpty()) ||
-					(arg instanceof Object[] && ((Object[]) arg).length == 0)) {
-				arg = Optional.empty();
-			}
-			else {
-				arg = Optional.of(arg);
-			}
-		}
-
-		return arg;
+		return adaptArgumentIfNecessary(arg, parameter);
 	}
 
 	private String getPartName(MethodParameter methodParam, RequestPart requestPart) {
 		String partName = (requestPart != null ? requestPart.name() : "");
-		if (partName.length() == 0) {
+		if (partName.isEmpty()) {
 			partName = methodParam.getParameterName();
 			if (partName == null) {
 				throw new IllegalArgumentException("Request part name for argument type [" +

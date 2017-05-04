@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -354,10 +354,10 @@ public abstract class CollectionUtils {
 	public static <K, V> MultiValueMap<K, V> unmodifiableMultiValueMap(MultiValueMap<? extends K, ? extends V> map) {
 		Assert.notNull(map, "'map' must not be null");
 		Map<K, List<V>> result = new LinkedHashMap<>(map.size());
-		for (Map.Entry<? extends K, ? extends List<? extends V>> entry : map.entrySet()) {
-			List<? extends V> values = Collections.unmodifiableList(entry.getValue());
-			result.put(entry.getKey(), (List<V>) values);
-		}
+		map.forEach((key, value) -> {
+			List<? extends V> values = Collections.unmodifiableList(value);
+			result.put(key, (List<V>) values);
+		});
 		Map<K, List<V>> unmodifiableMap = Collections.unmodifiableMap(result);
 		return toMultiValueMap(unmodifiableMap);
 	}
@@ -406,12 +406,14 @@ public abstract class CollectionUtils {
 
 		@Override
 		public void add(K key, V value) {
-			List<V> values = this.map.get(key);
-			if (values == null) {
-				values = new LinkedList<>();
-				this.map.put(key, values);
-			}
+			List<V> values = this.map.computeIfAbsent(key, k -> new LinkedList<>());
 			values.add(value);
+		}
+
+		@Override
+		public void addAll(K key, List<V> values) {
+			List<V> currentValues = this.map.computeIfAbsent(key, k -> new LinkedList<>());
+			currentValues.addAll(values);
 		}
 
 		@Override
@@ -429,17 +431,13 @@ public abstract class CollectionUtils {
 
 		@Override
 		public void setAll(Map<K, V> values) {
-			for (Entry<K, V> entry : values.entrySet()) {
-				set(entry.getKey(), entry.getValue());
-			}
+			values.forEach(this::set);
 		}
 
 		@Override
 		public Map<K, V> toSingleValueMap() {
 			LinkedHashMap<K, V> singleValueMap = new LinkedHashMap<>(this.map.size());
-			for (Entry<K, List<V>> entry : map.entrySet()) {
-				singleValueMap.put(entry.getKey(), entry.getValue().get(0));
-			}
+			this.map.forEach((key, value) -> singleValueMap.put(key, value.get(0)));
 			return singleValueMap;
 		}
 

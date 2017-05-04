@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -248,11 +248,11 @@ public class WebDataBinder extends DataBinder {
 	 * Determine an empty value for the specified field.
 	 * <p>Default implementation returns:
 	 * <ul>
-	 *     <li>{@code Boolean.FALSE} for boolean fields
-	 *     <li>an empty array for array types
-	 *     <li>Collection implementations for Collection types
-	 *     <li>Map implementations for Map types
-	 *     <li>else, {@code null} is used as default
+	 * <li>{@code Boolean.FALSE} for boolean fields
+	 * <li>an empty array for array types
+	 * <li>Collection implementations for Collection types
+	 * <li>Map implementations for Map types
+	 * <li>else, {@code null} is used as default
 	 * </ul>
 	 * @param field the name of the field
 	 * @param fieldType the type of the field

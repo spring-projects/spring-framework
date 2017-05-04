@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core.io.buffer;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -34,7 +35,7 @@ import static org.junit.Assert.assertFalse;
 public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
-	public void readChannel() throws Exception {
+	public void readReadableByteChannel() throws Exception {
 		URI uri = DataBufferUtilsTests.class.getResource("DataBufferUtilsTests.txt").toURI();
 		FileChannel channel = FileChannel.open(Paths.get(uri), StandardOpenOption.READ);
 		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.bufferFactory, 3);
@@ -48,6 +49,37 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.verify();
 
 		assertFalse(channel.isOpen());
+	}
+
+	@Test
+	public void readAsynchronousFileChannel() throws Exception {
+		URI uri = DataBufferUtilsTests.class.getResource("DataBufferUtilsTests.txt").toURI();
+		AsynchronousFileChannel
+				channel = AsynchronousFileChannel.open(Paths.get(uri), StandardOpenOption.READ);
+		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.bufferFactory, 3);
+
+		StepVerifier.create(flux)
+				.consumeNextWith(stringConsumer("foo"))
+				.consumeNextWith(stringConsumer("bar"))
+				.consumeNextWith(stringConsumer("baz"))
+				.consumeNextWith(stringConsumer("qux"))
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void readAsynchronousFileChannelPosition() throws Exception {
+		URI uri = DataBufferUtilsTests.class.getResource("DataBufferUtilsTests.txt").toURI();
+		AsynchronousFileChannel
+				channel = AsynchronousFileChannel.open(Paths.get(uri), StandardOpenOption.READ);
+		Flux<DataBuffer> flux = DataBufferUtils.read(channel, 3, this.bufferFactory, 3);
+
+		StepVerifier.create(flux)
+				.consumeNextWith(stringConsumer("bar"))
+				.consumeNextWith(stringConsumer("baz"))
+				.consumeNextWith(stringConsumer("qux"))
+				.expectComplete()
+				.verify();
 	}
 
 	@Test

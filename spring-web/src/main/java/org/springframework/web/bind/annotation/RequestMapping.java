@@ -34,7 +34,7 @@ import org.springframework.core.annotation.AliasFor;
  * types, in arbitrary order (except for validation results, which need to
  * follow right after the corresponding command object, if desired):
  * <ul>
- * <li>Request and/or response objects (typically from the Servlet API).
+ * <li>Request and/or response objects from the Servlet API.
  * You may choose any specific request/response type, e.g.
  * {@link javax.servlet.ServletRequest} / {@link javax.servlet.http.HttpServletRequest}.
  * <li>Session object: typically {@link javax.servlet.http.HttpSession}.
@@ -60,7 +60,7 @@ import org.springframework.core.annotation.AliasFor;
  * the response's content. This will be the raw OutputStream/Writer as
  * exposed by the Servlet API.
  * <li>{@link org.springframework.http.HttpMethod} for the HTTP request method</li>
- * <li>{@link PathVariable @PathVariable} annotated parameters (Servlet-only)
+ * <li>{@link PathVariable @PathVariable} annotated parameters
  * for access to URI template values (i.e. /hotels/{hotel}). Variable values will be
  * converted to the declared method argument type. By default, the URI template
  * will match against the regular expression {@code [^\.]*} (i.e. any character
@@ -69,7 +69,7 @@ import org.springframework.core.annotation.AliasFor;
  * Additionally, {@code @PathVariable} can be used on a
  * {@link java.util.Map Map&lt;String, String&gt;} to gain access to all
  * URI template variables.
- * <li>{@link MatrixVariable @MatrixVariable} annotated parameters (Servlet-only)
+ * <li>{@link MatrixVariable @MatrixVariable} annotated parameters
  * for access to name-value pairs located in URI path segments. Matrix variables
  * must be represented with a URI template variable. For example /hotels/{hotel}
  * where the incoming URL may be "/hotels/42;q=1".
@@ -89,7 +89,7 @@ import org.springframework.core.annotation.AliasFor;
  * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, String&gt;}, or
  * {@link org.springframework.http.HttpHeaders HttpHeaders} method parameter to
  * gain access to all request headers.
- * <li>{@link RequestBody @RequestBody} annotated parameters (Servlet-only)
+ * <li>{@link RequestBody @RequestBody} annotated parameters
  * for access to the Servlet request HTTP contents. The request stream will be
  * converted to the declared method argument type using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
@@ -98,9 +98,7 @@ import org.springframework.core.annotation.AliasFor;
  * {@link org.springframework.validation.Errors} argument.
  * Instead a {@link org.springframework.web.bind.MethodArgumentNotValidException}
  * exception is raised.
- * <li>{@link RequestPart @RequestPart} annotated parameters
- * (Servlet-only, {@literal @MVC 3.1-only})
- * for access to the content
+ * <li>{@link RequestPart @RequestPart} annotated parameters for access to the content
  * of a part of "multipart/form-data" request. The request part stream will be
  * converted to the declared method argument type using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
@@ -116,15 +114,15 @@ import org.springframework.core.annotation.AliasFor;
  * <li>{@link RequestAttribute @RequestAttribute} annotated parameters for access
  * to request attributes.
  * <li>{@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} parameters
- * (Servlet-only) for access to the Servlet request HTTP headers and contents.
+ * for access to the Servlet request HTTP headers and contents.
  * The request stream will be converted to the entity body using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
  * converters}.
  * <li>{@link java.util.Map} / {@link org.springframework.ui.Model} /
  * {@link org.springframework.ui.ModelMap} for enriching the implicit model
  * that will be exposed to the web view.
- * <li>{@link org.springframework.web.servlet.mvc.support.RedirectAttributes}
- * (Servlet-only, {@literal @MVC 3.1-only}) to specify the exact set of attributes
+ * <li>{@link org.springframework.web.servlet.mvc.support.RedirectAttributes},
+ * to specify the exact set of attributes
  * to use in case of a redirect and also to add flash attributes (attributes
  * stored temporarily on the server-side to make them available to the request
  * after the redirect). {@code RedirectAttributes} is used instead of the
@@ -147,7 +145,6 @@ import org.springframework.core.annotation.AliasFor;
  * attributes that have been indicated by the {@link SessionAttributes @SessionAttributes}
  * annotation at the handler type level).
  * <li>{@link org.springframework.web.util.UriComponentsBuilder}
- * (Servlet-only, {@literal @MVC 3.1-only})
  * for preparing a URL relative to the current request's host, port, scheme,
  * context path, and the literal part of the servlet mapping.
  * </ul>
@@ -160,64 +157,64 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <p>The following return types are supported for handler methods:
  * <ul>
- * <li>A {@code ModelAndView} object (from Servlet MVC),
- * with the model implicitly enriched with command objects and the results
- * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
- * <li>A {@link org.springframework.ui.Model Model} object, with the view name implicitly
+ * <li>{@link org.springframework.web.servlet.ModelAndView} object (Spring MVC only),
+ * providing a view, model attributes, and optionally a response status.
+ * <li>{@link org.springframework.web.reactive.result.view.Rendering} object (Spring WebFlux only),
+ * providing a view, model attributes, and optionally a response status.
+ * <li>{@link org.springframework.ui.Model Model} object, with the view name implicitly
  * determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}
  * and the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
- * <li>A {@link java.util.Map} object for exposing a model,
+ * <li>{@link java.util.Map} object for exposing a model,
  * with the view name implicitly determined through a
  * {@link org.springframework.web.servlet.RequestToViewNameTranslator}
  * and the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
- * <li>A {@link org.springframework.web.servlet.View} object, with the
+ * <li>{@link org.springframework.web.servlet.View} object, with the
  * model implicitly determined through command objects and
  * {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
  * The handler method may also programmatically enrich the model by
  * declaring a {@link org.springframework.ui.Model} argument (see above).
- * <li>A {@link String} value which is interpreted as view name,
+ * <li>{@link String} value which is interpreted as view name,
  * with the model implicitly determined through command objects and
  * {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
  * The handler method may also programmatically enrich the model by
  * declaring a {@link org.springframework.ui.ModelMap} argument
  * (see above).
- * <li>{@link ResponseBody @ResponseBody} annotated methods (Servlet-only)
+ * <li>{@link ResponseBody @ResponseBody} annotated methods
  * for access to the Servlet response HTTP contents. The return value will
  * be converted to the response stream using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
  * converters}.
- * <li>An {@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} or
+ * <li>{@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} or
  * {@link org.springframework.http.ResponseEntity ResponseEntity&lt;?&gt;} object
- * (Servlet-only) to access to the Servlet response HTTP headers and contents.
+ * to access to the Servlet response HTTP headers and contents.
  * The entity body will be converted to the response stream using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
  * converters}.
- * <li>An {@link org.springframework.http.HttpHeaders HttpHeaders} object to
+ * <li>{@link org.springframework.http.HttpHeaders HttpHeaders} object to
  * return a response with no body.</li>
- * <li>A {@link Callable} which is used by Spring MVC to obtain the return
- * value asynchronously in a separate thread transparently managed by Spring MVC
- * on behalf of the application.
- * <li>A {@link org.springframework.web.context.request.async.DeferredResult}
- * which the application uses to produce a return value in a separate
- * thread of its own choosing, as an alternative to returning a Callable.
- * <li>A {@link org.springframework.util.concurrent.ListenableFuture}
- * which the application uses to produce a return value in a separate
- * thread of its own choosing, as an alternative to returning a Callable.
- * <li>A {@link java.util.concurrent.CompletionStage} (implemented by
- * {@link java.util.concurrent.CompletableFuture} for example)
- * which the application uses to produce a return value in a separate
- * thread of its own choosing, as an alternative to returning a Callable.
- * <li>A {@link org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter}
- * can be used to write multiple objects to the response asynchronously;
- * also supported as the body within {@code ResponseEntity}.</li>
- * <li>An {@link org.springframework.web.servlet.mvc.method.annotation.SseEmitter}
- * can be used to write Server-Sent Events to the response asynchronously;
- * also supported as the body within {@code ResponseEntity}.</li>
- * <li>A {@link org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody}
- * can be used to write to the response asynchronously;
- * also supported as the body within {@code ResponseEntity}.</li>
+ * <li>{@link Callable} -- async computation in a Spring MVC managed thread.</li>
+ * <li>{@link org.springframework.web.context.request.async.DeferredResult DeferredResult} --
+ * async result produced later from an application managed, or any thread.
+ * <li>{@link org.springframework.util.concurrent.ListenableFuture ListenableFuture}
+ * alternative, equivalent to {@code DeferredResult}.</li>
+ * <li>{@link java.util.concurrent.CompletionStage CompletionStage} and
+ * {@link java.util.concurrent.CompletableFuture CompletableFuture} --
+ * alternative, equivalent to {@code DeferredResult}.</li>
+ * <li>{@link org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter} --
+ * {@code @ResponseBody}-style, asynchronous writing of a stream of Objects to the
+ * response body.</li>
+ * <li>{@link org.springframework.web.servlet.mvc.method.annotation.SseEmitter} --
+ * variant of {@code ResponseBodyEmitter} for a Server-Sent Events formatted stream.</li>
+ * <li>{@link org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody} --
+ * async writing directly to the response body {@link java.io.OutputStream}.</li>
+ * <li>Reactive types (e.g. Reactor {@code Flux}/{@code Mono}, RxJava 1 &amp; 2
+ * {@code Observable}/{@code Single}, or others via
+ * {@link org.springframework.core.ReactiveAdapterRegistry ReactiveAdapterRegistry}) --
+ * alternatives, equivalent to {@code DeferredResult} or {@code ResponseBodyEmitter}
+ * and {@code SseEmitter} depending also on the requested media types (e.g.
+ * "text/event-stream", "application/json+stream").</li>
  * <li>{@code void} if the method handles the response itself (by
  * writing the response content directly, declaring an argument of type
  * {@link javax.servlet.ServletResponse} / {@link javax.servlet.http.HttpServletResponse}

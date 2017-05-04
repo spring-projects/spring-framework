@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.socket.sockjs.transport.session;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -31,7 +30,7 @@ import java.util.concurrent.ScheduledFuture;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.NestedCheckedException;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -71,23 +70,23 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 			"org.springframework.web.socket.sockjs.DisconnectedClient";
 
 	/**
+	 * Tomcat: ClientAbortException or EOFException
+	 * Jetty: EofException
+	 * WildFly, GlassFish: java.io.IOException "Broken pipe" (already covered)
+	 * <p>TODO:
+	 * This definition is currently duplicated between HttpWebHandlerAdapter
+	 * and AbstractSockJsSession. It is a candidate for a common utility class.
+	 * @see #indicatesDisconnectedClient(Throwable)
+	 */
+	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS =
+			new HashSet<>(Arrays.asList("ClientAbortException", "EOFException", "EofException"));
+
+
+	/**
 	 * Separate logger to use on network IO failure after a client has gone away.
 	 * @see #DISCONNECTED_CLIENT_LOG_CATEGORY
 	 */
 	protected static final Log disconnectedClientLogger = LogFactory.getLog(DISCONNECTED_CLIENT_LOG_CATEGORY);
-
-
-	private static final Set<String> disconnectedClientExceptions;
-
-	static {
-		Set<String> set = new HashSet<>(2);
-		set.add("ClientAbortException"); // Tomcat
-		set.add("EOFException"); // Tomcat
-		set.add("EofException"); // Jetty
-		// java.io.IOException "Broken pipe" on WildFly, Glassfish (already covered)
-		disconnectedClientExceptions = Collections.unmodifiableSet(set);
-	}
-
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -162,7 +161,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	public final void sendMessage(WebSocketMessage<?> message) throws IOException {
 		Assert.state(!isClosed(), "Cannot send a message when session is closed");
-		Assert.isInstanceOf(TextMessage.class, message, "SockJS supports text messages only: " + message);
+		Assert.isInstanceOf(TextMessage.class, message, "SockJS supports text messages only");
 		sendMessageInternal(((TextMessage) message).getPayload());
 	}
 
@@ -208,7 +207,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 						writeFrameInternal(SockJsFrame.closeFrame(status.getCode(), status.getReason()));
 					}
 					catch (Throwable ex) {
-						logger.debug("Failure while send SockJS close frame", ex);
+						logger.debug("Failure while sending SockJS close frame", ex);
 					}
 				}
 				updateLastActiveTime();
@@ -340,28 +339,28 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		}
 	}
 
-	private void logWriteFrameFailure(Throwable failure) {
-		@SuppressWarnings("serial")
-		NestedCheckedException nestedException = new NestedCheckedException("", failure) {};
+	protected abstract void writeFrameInternal(SockJsFrame frame) throws IOException;
 
-		if ("Broken pipe".equalsIgnoreCase(nestedException.getMostSpecificCause().getMessage()) ||
-				disconnectedClientExceptions.contains(failure.getClass().getSimpleName())) {
-
+	private void logWriteFrameFailure(Throwable ex) {
+		if (indicatesDisconnectedClient(ex)) {
 			if (disconnectedClientLogger.isTraceEnabled()) {
-				disconnectedClientLogger.trace("Looks like the client has gone away", failure);
+				disconnectedClientLogger.trace("Looks like the client has gone away", ex);
 			}
 			else if (disconnectedClientLogger.isDebugEnabled()) {
-				disconnectedClientLogger.debug("Looks like the client has gone away: " +
-						nestedException.getMessage() + " (For full stack trace, set the '" +
-						DISCONNECTED_CLIENT_LOG_CATEGORY + "' log category to TRACE level)");
+				disconnectedClientLogger.debug("Looks like the client has gone away: " + ex +
+						" (For a full stack trace, set the log category '" + DISCONNECTED_CLIENT_LOG_CATEGORY +
+						"' to TRACE level.)");
 			}
 		}
 		else {
-			logger.debug("Terminating connection after failure to send message to client", failure);
+			logger.debug("Terminating connection after failure to send message to client", ex);
 		}
 	}
 
-	protected abstract void writeFrameInternal(SockJsFrame frame) throws IOException;
+	private boolean indicatesDisconnectedClient(Throwable ex)  {
+		return ("Broken pipe".equalsIgnoreCase(NestedExceptionUtils.getMostSpecificCause(ex).getMessage()) ||
+				DISCONNECTED_CLIENT_EXCEPTIONS.contains(ex.getClass().getSimpleName()));
+	}
 
 
 	// Delegation methods
@@ -396,7 +395,12 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		if (!isClosed()) {
 			try {
 				updateLastActiveTime();
-				cancelHeartbeat();
+				// Avoid cancelHeartbeat() and responseLock within server "close" callback
+				ScheduledFuture<?> future = this.heartbeatFuture;
+				if (future != null) {
+					this.heartbeatFuture = null;
+					future.cancel(false);
+				}
 			}
 			finally {
 				this.state = State.CLOSED;
@@ -416,7 +420,8 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 			delegateError(error);
 		}
 		catch (Throwable delegateException) {
-			// ignore
+			// Ignore
+			logger.debug("Exception from error handling delegate", delegateException);
 		}
 		try {
 			close(closeStatus);
@@ -446,9 +451,12 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		@Override
 		public void run() {
 			synchronized (responseLock) {
-				if (!this.expired) {
+				if (!this.expired && !isClosed()) {
 					try {
 						sendHeartbeat();
+					}
+					catch (Throwable ex) {
+						// Ignore: already handled in writeFrame...
 					}
 					finally {
 						this.expired = true;

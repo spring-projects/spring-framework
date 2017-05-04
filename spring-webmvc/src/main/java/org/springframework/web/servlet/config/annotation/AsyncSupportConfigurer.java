@@ -56,6 +56,11 @@ public class AsyncSupportConfigurer {
 	 * highly recommended to change that default in production since the simple
 	 * executor does not re-use threads.
 	 *
+	 * <p>As of 5.0 this executor is also used when a controller returns a reactive
+	 * type that does streaming (e.g. "text/event-stream" or
+	 * "application/stream+json") for the blocking writes to the
+	 * {@link javax.servlet.ServletOutputStream}.
+	 *
 	 * @param taskExecutor the task executor instance to use by default
 	 */
 	public AsyncSupportConfigurer setTaskExecutor(AsyncTaskExecutor taskExecutor) {

@@ -33,7 +33,9 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @since 4.3
+ * @deprecated as of 5.0 in favor of {@link DefaultUriBuilderFactory}
  */
+@Deprecated
 public abstract class AbstractUriTemplateHandler implements UriTemplateHandler {
 
 	private String baseUrl;

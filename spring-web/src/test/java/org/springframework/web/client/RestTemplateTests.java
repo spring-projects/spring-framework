@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,19 +42,10 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.web.util.DefaultUriTemplateHandler;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.mock;
-import static org.mockito.BDDMockito.verify;
-import static org.mockito.BDDMockito.willThrow;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Arjen Poutsma
@@ -76,17 +67,19 @@ public class RestTemplateTests {
 	@SuppressWarnings("rawtypes")
 	private HttpMessageConverter converter;
 
+
 	@Before
-	public void setUp() {
+	public void setup() {
 		requestFactory = mock(ClientHttpRequestFactory.class);
 		request = mock(ClientHttpRequest.class);
 		response = mock(ClientHttpResponse.class);
 		errorHandler = mock(ResponseErrorHandler.class);
 		converter = mock(HttpMessageConverter.class);
-		template = new RestTemplate(Collections.<HttpMessageConverter<?>>singletonList(converter));
+		template = new RestTemplate(Collections.singletonList(converter));
 		template.setRequestFactory(requestFactory);
 		template.setErrorHandler(errorHandler);
 	}
+
 
 	@Test
 	public void varArgsTemplateVariables() throws Exception {
@@ -149,6 +142,21 @@ public class RestTemplateTests {
 		vars.put("first", null);
 		vars.put("last", "foo");
 		template.execute("http://example.com/{first}-{last}", HttpMethod.GET, null, null, vars);
+
+		verify(response).close();
+	}
+
+	@Test  // SPR-15201
+	public void uriTemplateWithTrailingSlash() throws Exception {
+		String url = "http://example.com/spring/";
+		given(requestFactory.createRequest(new URI(url), HttpMethod.GET)).willReturn(request);
+		given(request.execute()).willReturn(response);
+		given(errorHandler.hasError(response)).willReturn(false);
+		HttpStatus status = HttpStatus.OK;
+		given(response.getStatusCode()).willReturn(status);
+		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+
+		template.execute(url, HttpMethod.GET, null, null);
 
 		verify(response).close();
 	}
@@ -272,9 +280,7 @@ public class RestTemplateTests {
 
 	@Test
 	public void getForObjectWithCustomUriTemplateHandler() throws Exception {
-
-		DefaultUriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
-		uriTemplateHandler.setParsePath(true);
+		DefaultUriBuilderFactory uriTemplateHandler = new DefaultUriBuilderFactory();
 		template.setUriTemplateHandler(uriTemplateHandler);
 
 		URI expectedUri = new URI("http://example.com/hotels/1/pic/pics%2Flogo.png/size/150x150");
@@ -298,7 +304,6 @@ public class RestTemplateTests {
 
 		verify(response).close();
 	}
-
 
 	@Test
 	public void headForHeaders() throws Exception {
@@ -802,4 +807,5 @@ public class RestTemplateTests {
 
 		verify(response).close();
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,31 @@
 package org.springframework.http.codec;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.reactivestreams.Publisher;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.util.Assert;
 
 /**
- * Implementation of the {@link HttpMessageWriter} interface that delegates
- * to an {@link Encoder}.
+ * {@code HttpMessageWriter} that wraps and delegates to a {@link Encoder}.
+ *
+ * <p>Also a {@code HttpMessageWriter} that pre-resolves encoding hints
+ * from the extra information available on the server side such as the request
+ * or controller method annotations.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
@@ -45,80 +52,127 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 	private final Encoder<T> encoder;
 
-	private final List<MediaType> writableMediaTypes;
+	private final List<MediaType> mediaTypes;
+
+	private final MediaType defaultMediaType;
 
 
 	/**
-	 * Create a {@code CodecHttpMessageConverter} with the given {@link Encoder}.
-	 * @param encoder the encoder to use
+	 * Create an instance wrapping the given {@link Encoder}.
 	 */
 	public EncoderHttpMessageWriter(Encoder<T> encoder) {
+		Assert.notNull(encoder, "Encoder is required");
 		this.encoder = encoder;
-		this.writableMediaTypes = (encoder != null ?
-				MediaType.asMediaTypes(encoder.getEncodableMimeTypes()) : Collections.emptyList());
+		this.mediaTypes = MediaType.asMediaTypes(encoder.getEncodableMimeTypes());
+		this.defaultMediaType = initDefaultMediaType(this.mediaTypes);
+	}
+
+	private static MediaType initDefaultMediaType(List<MediaType> mediaTypes) {
+		return mediaTypes.stream().filter(MediaType::isConcrete).findFirst().orElse(null);
+	}
+
+
+	/**
+	 * Return the {@code Encoder} of this writer.
+	 */
+	public Encoder<T> getEncoder() {
+		return this.encoder;
+	}
+
+	@Override
+	public List<MediaType> getWritableMediaTypes() {
+		return this.mediaTypes;
 	}
 
 
 	@Override
 	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
-		return this.encoder != null && this.encoder.canEncode(elementType, mediaType);
+		return this.encoder.canEncode(elementType, mediaType);
 	}
-
-	@Override
-	public List<MediaType> getWritableMediaTypes() {
-		return this.writableMediaTypes;
-	}
-
 
 	@Override
 	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType elementType,
-			MediaType mediaType, ReactiveHttpOutputMessage outputMessage,
+			MediaType mediaType, ReactiveHttpOutputMessage message,
 			Map<String, Object> hints) {
 
-		if (this.encoder == null) {
-			return Mono.error(new IllegalStateException("No decoder set"));
-		}
+		MediaType contentType = updateContentType(message, mediaType);
 
-		HttpHeaders headers = outputMessage.getHeaders();
-		if (headers.getContentType() == null) {
-			MediaType contentTypeToUse = mediaType;
-			if (mediaType == null || mediaType.isWildcardType() || mediaType.isWildcardSubtype()) {
-				contentTypeToUse = getDefaultContentType(elementType);
-			}
-			else if (MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
-				MediaType contentType = getDefaultContentType(elementType);
-				contentTypeToUse = (contentType != null ? contentType : contentTypeToUse);
-			}
-			if (contentTypeToUse != null) {
-				if (contentTypeToUse.getCharset() == null) {
-					MediaType contentType = getDefaultContentType(elementType);
-					if (contentType != null && contentType.getCharset() != null) {
-						contentTypeToUse = new MediaType(contentTypeToUse, contentType.getCharset());
-					}
-				}
-				headers.setContentType(contentTypeToUse);
-			}
-		}
+		Flux<DataBuffer> body = this.encoder
+				.encode(inputStream, message.bufferFactory(), elementType, contentType, hints)
+				.onErrorMap(this::mapError);
 
-		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
-		Flux<DataBuffer> body = this.encoder.encode(inputStream, bufferFactory, elementType, mediaType, hints);
-		return outputMessage.writeWith(body);
+		return isStreamingMediaType(contentType) ?
+				message.writeAndFlushWith(body.map(Flux::just)) :
+				message.writeWith(body);
+	}
+
+	private MediaType updateContentType(ReactiveHttpOutputMessage message, MediaType mediaType) {
+		MediaType result = message.getHeaders().getContentType();
+		if (result != null) {
+			return result;
+		}
+		MediaType fallback = this.defaultMediaType;
+		result = useFallback(mediaType, fallback) ? fallback : mediaType;
+		if (result != null) {
+			result = addDefaultCharset(result, fallback);
+			message.getHeaders().setContentType(result);
+		}
+		return result;
+	}
+
+	private static boolean useFallback(MediaType main, MediaType fallback) {
+		return main == null || !main.isConcrete() ||
+				main.equals(MediaType.APPLICATION_OCTET_STREAM) && fallback != null;
+	}
+
+	private static MediaType addDefaultCharset(MediaType main, MediaType defaultType) {
+		if (main.getCharset() == null && defaultType != null && defaultType.getCharset() != null) {
+			return new MediaType(main, defaultType.getCharset());
+		}
+		return main;
+	}
+
+	private boolean isStreamingMediaType(MediaType contentType) {
+		return this.encoder instanceof HttpMessageEncoder &&
+				((HttpMessageEncoder<?>) this.encoder).getStreamingMediaTypes().stream()
+						.anyMatch(contentType::isCompatibleWith);
+	}
+
+	private Throwable mapError(Throwable ex) {
+		if (ex instanceof ResponseStatusException) {
+			return ex;
+		}
+		return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to encode HTTP message", ex);
+	}
+
+
+	// Server side only...
+
+	@Override
+	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType actualType,
+			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request,
+			ServerHttpResponse response, Map<String, Object> hints) {
+
+		Map<String, Object> allHints = new HashMap<>();
+		allHints.putAll(getWriteHints(actualType, elementType, mediaType, request, response));
+		allHints.putAll(hints);
+
+		return write(inputStream, elementType, mediaType, response, allHints);
 	}
 
 	/**
-	 * Return the default content type for the given {@code ResolvableType}.
-	 * Used when {@link #write} is called without a concrete content type.
-	 *
-	 * <p>By default returns the first of {@link Encoder#getEncodableMimeTypes()
-	 * encodableMimeTypes} that is concrete({@link MediaType#isConcrete()}), if any.
-	 *
-	 * @param elementType the type of element for encoding
-	 * @return the content type, or {@code null}
+	 * Get additional hints for encoding for example based on the server request
+	 * or annotations from controller method parameters. By default, delegate to
+	 * the encoder if it is an instance of {@link HttpMessageEncoder}.
 	 */
-	protected MediaType getDefaultContentType(ResolvableType elementType) {
-		return writableMediaTypes.stream()
-				.filter(MediaType::isConcrete)
-				.findFirst().orElse(null);
+	protected Map<String, Object> getWriteHints(ResolvableType streamType, ResolvableType elementType,
+			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
+
+		if (this.encoder instanceof HttpMessageEncoder) {
+			HttpMessageEncoder<?> httpEncoder = (HttpMessageEncoder<?>) this.encoder;
+			return httpEncoder.getEncodeHints(streamType, elementType, mediaType, request, response);
+		}
+		return Collections.emptyMap();
 	}
 
 }

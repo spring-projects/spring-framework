@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,17 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.util.Assert;
 
 /**
- * Configures Date formatting for use with Spring.
+ * Configures basic date formatting for use with Spring, primarily for
+ * {@link org.springframework.format.annotation.DateTimeFormat} declarations.
+ * Applies to fields of type {@link Date}, {@link Calendar} and {@code long}.
  *
  * <p>Designed for direct instantiation but also exposes the static
- * {@link #addDateConverters(ConverterRegistry)} utility method for ad hoc use
- * against any {@code ConverterRegistry} instance.
+ * {@link #addDateConverters(ConverterRegistry)} utility method for
+ * ad-hoc use against any {@code ConverterRegistry} instance.
  *
  * @author Phillip Webb
  * @since 3.2
+ * @see org.springframework.format.datetime.standard.DateTimeFormatterRegistrar
  * @see org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar
  * @see FormatterRegistrar#registerFormatters
  */
@@ -43,9 +46,9 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 
 
 	/**
-	 * Set the date formatter to register. If not specified no formatter is registered.
-	 * This method can be used if global formatter configuration is required.
-	 * @param dateFormatter the date formatter
+	 * Set a global date formatter to register.
+	 * <p>If not specified, no general formatter for non-annotated
+	 * {@link Date} and {@link Calendar} fields will be registered.
 	 */
 	public void setFormatter(DateFormatter dateFormatter) {
 		Assert.notNull(dateFormatter, "DateFormatter must not be null");

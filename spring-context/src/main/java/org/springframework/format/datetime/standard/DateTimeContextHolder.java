@@ -26,11 +26,12 @@ import org.springframework.core.NamedThreadLocal;
  *
  * @author Juergen Hoeller
  * @since 4.0
+ * @see org.springframework.context.i18n.LocaleContextHolder
  */
 public final class DateTimeContextHolder {
 
 	private static final ThreadLocal<DateTimeContext> dateTimeContextHolder =
-			new NamedThreadLocal<>("DateTime Context");
+			new NamedThreadLocal<>("DateTimeContext");
 
 
 	/**

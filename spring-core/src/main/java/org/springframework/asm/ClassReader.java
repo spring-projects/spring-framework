@@ -105,6 +105,21 @@ public class ClassReader {
     public static final int EXPAND_FRAMES = 8;
 
     /**
+     * Flag to expand the ASM pseudo instructions into an equivalent sequence of
+     * standard bytecode instructions. When resolving a forward jump it may
+     * happen that the signed 2 bytes offset reserved for it is not sufficient
+     * to store the bytecode offset. In this case the jump instruction is
+     * replaced with a temporary ASM pseudo instruction using an unsigned 2
+     * bytes offset (see Label#resolve). This internal flag is used to re-read
+     * classes containing such instructions, in order to replace them with
+     * standard instructions. In addition, when this flag is used, GOTO_W and
+     * JSR_W are <i>not</i> converted into GOTO and JSR, to make sure that
+     * infinite loops where a GOTO_W is replaced with a GOTO in ClassReader and
+     * converted back to a GOTO_W in ClassWriter cannot occur.
+     */
+    static final int EXPAND_ASM_INSNS = 256;
+
+    /**
      * The class to be parsed. <i>The content of this array must not be
      * modified. This field is intended for {@link Attribute} sub classes, and
      * is normally not needed by class generators or adapters.</i>
@@ -1062,6 +1077,10 @@ public class ClassReader {
                 readLabel(offset + readShort(u + 1), labels);
                 u += 3;
                 break;
+            case ClassWriter.ASM_LABEL_INSN:
+                readLabel(offset + readUnsignedShort(u + 1), labels);
+                u += 3;
+                break;
             case ClassWriter.LABELW_INSN:
                 readLabel(offset + readInt(u + 1), labels);
                 u += 5;
@@ -1286,8 +1305,23 @@ public class ClassReader {
                 }
             }
         }
+        if ((context.flags & EXPAND_ASM_INSNS) != 0) {
+            // Expanding the ASM pseudo instructions can introduce F_INSERT
+            // frames, even if the method does not currently have any frame.
+            // Also these inserted frames must be computed by simulating the
+            // effect of the bytecode instructions one by one, starting from the
+            // first one and the last existing frame (or the implicit first
+            // one). Finally, due to the way MethodWriter computes this (with
+            // the compute = INSERTED_FRAMES option), MethodWriter needs to know
+            // maxLocals before the first instruction is visited. For all these
+            // reasons we always visit the implicit first frame in this case
+            // (passing only maxLocals - the rest can be and is computed in
+            // MethodWriter).
+            mv.visitFrame(Opcodes.F_NEW, maxLocals, null, 0, null);
+        }
 
         // visits the instructions
+        int opcodeDelta = (context.flags & EXPAND_ASM_INSNS) == 0 ? -33 : 0;
         u = codeStart;
         while (u < codeEnd) {
             int offset = u - codeStart;
@@ -1352,9 +1386,42 @@ public class ClassReader {
                 u += 3;
                 break;
             case ClassWriter.LABELW_INSN:
-                mv.visitJumpInsn(opcode - 33, labels[offset + readInt(u + 1)]);
+                mv.visitJumpInsn(opcode + opcodeDelta, labels[offset
+                        + readInt(u + 1)]);
                 u += 5;
                 break;
+            case ClassWriter.ASM_LABEL_INSN: {
+                // changes temporary opcodes 202 to 217 (inclusive), 218
+                // and 219 to IFEQ ... JSR (inclusive), IFNULL and
+                // IFNONNULL
+                opcode = opcode < 218 ? opcode - 49 : opcode - 20;
+                Label target = labels[offset + readUnsignedShort(u + 1)];
+                // replaces GOTO with GOTO_W, JSR with JSR_W and IFxxx
+                // <l> with IFNOTxxx <l'> GOTO_W <l>, where IFNOTxxx is
+                // the "opposite" opcode of IFxxx (i.e., IFNE for IFEQ)
+                // and where <l'> designates the instruction just after
+                // the GOTO_W.
+                if (opcode == Opcodes.GOTO || opcode == Opcodes.JSR) {
+                    mv.visitJumpInsn(opcode + 33, target);
+                } else {
+                    opcode = opcode <= 166 ? ((opcode + 1) ^ 1) - 1
+                            : opcode ^ 1;
+                    Label endif = new Label();
+                    mv.visitJumpInsn(opcode, endif);
+                    mv.visitJumpInsn(200, target); // GOTO_W
+                    mv.visitLabel(endif);
+                    // since we introduced an unconditional jump instruction we
+                    // also need to insert a stack map frame here, unless there
+                    // is already one. The actual frame content will be computed
+                    // in MethodWriter.
+                    if (FRAMES && stackMap != 0
+                            && (frame == null || frame.offset != offset + 3)) {
+                        mv.visitFrame(ClassWriter.F_INSERT, 0, null, 0, null);
+                    }
+                }
+                u += 3;
+                break;
+            }
             case ClassWriter.WIDE_INSN:
                 opcode = b[u + 1] & 0xFF;
                 if (opcode == Opcodes.IINC) {
@@ -1848,7 +1915,9 @@ public class ClassReader {
             v += 2;
             break;
         case 'Z': // pointer to CONSTANT_Boolean
-            av.visit(name, readInt(items[readUnsignedShort(v)]) == 0 ? Boolean.FALSE : Boolean.TRUE);
+            av.visit(name,
+                    readInt(items[readUnsignedShort(v)]) == 0 ? Boolean.FALSE
+                            : Boolean.TRUE);
             v += 2;
             break;
         case 'S': // pointer to CONSTANT_Short

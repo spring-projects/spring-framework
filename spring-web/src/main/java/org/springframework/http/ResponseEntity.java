@@ -381,7 +381,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		 * @return the response entity
 		 * @see BodyBuilder#body(Object)
 		 */
-		ResponseEntity<Void> build();
+		<T> ResponseEntity<T> build();
 	}
 
 
@@ -505,7 +505,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
-		public ResponseEntity<Void> build() {
+		public <T> ResponseEntity<T> build() {
 			return body(null);
 		}
 

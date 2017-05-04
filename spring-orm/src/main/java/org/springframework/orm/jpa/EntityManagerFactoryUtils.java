@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -426,7 +426,8 @@ public abstract class EntityManagerFactoryUtils {
 
 	/**
 	 * Callback for resource cleanup at the end of a non-JPA transaction
-	 * (e.g. when participating in a JtaTransactionManager transaction).
+	 * (e.g. when participating in a JtaTransactionManager transaction),
+	 * fully synchronized with the ongoing transaction.
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
 	private static class TransactionalEntityManagerSynchronization
@@ -441,6 +442,7 @@ public abstract class EntityManagerFactoryUtils {
 
 		public TransactionalEntityManagerSynchronization(
 				EntityManagerHolder emHolder, EntityManagerFactory emf, Object txData, boolean newEm) {
+
 			super(emHolder, emf);
 			this.transactionData = txData;
 			this.jpaDialect = (emf instanceof EntityManagerFactoryInfo ?
@@ -488,7 +490,9 @@ public abstract class EntityManagerFactoryUtils {
 		}
 
 		@Override
-		protected void cleanupResource(EntityManagerHolder resourceHolder, EntityManagerFactory resourceKey, boolean committed) {
+		protected void cleanupResource(
+				EntityManagerHolder resourceHolder, EntityManagerFactory resourceKey, boolean committed) {
+
 			if (!committed) {
 				// Clear all pending inserts/updates/deletes in the EntityManager.
 				// Necessary for pre-bound EntityManagers, to avoid inconsistent state.

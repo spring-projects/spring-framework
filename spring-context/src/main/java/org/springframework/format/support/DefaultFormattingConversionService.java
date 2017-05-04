@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.format.datetime.DateFormatterRegistrar;
 import org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
+import org.springframework.format.number.NumberFormatAnnotationFormatterFactory;
 import org.springframework.format.number.money.CurrencyUnitFormatter;
 import org.springframework.format.number.money.Jsr354NumberFormatAnnotationFormatterFactory;
 import org.springframework.format.number.money.MonetaryAmountFormatter;
-import org.springframework.format.number.NumberFormatAnnotationFormatterFactory;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringValueResolver;
 
@@ -48,9 +48,6 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 
 	private static final boolean jsr354Present = ClassUtils.isPresent(
 			"javax.money.MonetaryAmount", DefaultFormattingConversionService.class.getClassLoader());
-
-	private static final boolean jsr310Present = ClassUtils.isPresent(
-			"java.time.LocalDate", DefaultFormattingConversionService.class.getClassLoader());
 
 	private static final boolean jodaTimePresent = ClassUtils.isPresent(
 			"org.joda.time.LocalDate", DefaultFormattingConversionService.class.getClassLoader());
@@ -112,10 +109,10 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 		}
 
 		// Default handling of date-time values
-		if (jsr310Present) {
-			// just handling JSR-310 specific date and time types
-			new DateTimeFormatterRegistrar().registerFormatters(formatterRegistry);
-		}
+
+		// just handling JSR-310 specific date and time types
+		new DateTimeFormatterRegistrar().registerFormatters(formatterRegistry);
+
 		if (jodaTimePresent) {
 			// handles Joda-specific types as well as Date, Calendar, Long
 			new JodaTimeFormatterRegistrar().registerFormatters(formatterRegistry);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 	public void testFormatHelperForClassName() {
 		assertEquals("java.lang.String",FormatHelper.formatClassNameForMessage(String.class));
 		assertEquals("java.lang.String[]",FormatHelper.formatClassNameForMessage(new String[1].getClass()));
+		assertEquals("java.lang.String[][]",FormatHelper.formatClassNameForMessage(new String[1][1].getClass()));
 		assertEquals("int[]",FormatHelper.formatClassNameForMessage(new int[1].getClass()));
 		assertEquals("int[][]",FormatHelper.formatClassNameForMessage(new int[1][2].getClass()));
 		assertEquals("null",FormatHelper.formatClassNameForMessage(null));

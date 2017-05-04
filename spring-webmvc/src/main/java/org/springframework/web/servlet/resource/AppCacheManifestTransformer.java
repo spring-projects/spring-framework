@@ -55,7 +55,7 @@ import org.springframework.util.StringUtils;
  * <p>In order to serve manifest files with the proper {@code "text/manifest"} content type,
  * it is required to configure it with
  * {@code contentNegotiationConfigurer.mediaType("appcache", MediaType.valueOf("text/manifest")}
- * in a {@code WebMvcConfigurerAdapter}.
+ * in a {@code WebMvcConfigurer}.
  *
  * @author Brian Clozel
  * @since 4.1

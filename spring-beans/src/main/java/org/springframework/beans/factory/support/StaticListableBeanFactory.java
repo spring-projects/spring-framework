@@ -248,7 +248,13 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 
 	@Override
 	public String[] getBeanNamesForType(ResolvableType type) {
-		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type.getRawClass()));
+		boolean isFactoryType = false;
+		if (type != null) {
+			Class<?> resolved = type.resolve();
+			if (resolved != null && FactoryBean.class.isAssignableFrom(resolved)) {
+				isFactoryType = true;
+			}
+		}
 		List<String> matches = new ArrayList<>();
 		for (Map.Entry<String, Object> entry : this.beans.entrySet()) {
 			String name = entry.getKey();

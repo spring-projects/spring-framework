@@ -55,6 +55,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionResolver;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
  * An {@link AbstractHandlerMethodExceptionResolver} that resolves exceptions
@@ -303,6 +305,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		// Type-based argument resolution
 		resolvers.add(new ServletRequestMethodArgumentResolver());
 		resolvers.add(new ServletResponseMethodArgumentResolver());
+		resolvers.add(new RedirectAttributesMethodArgumentResolver());
 		resolvers.add(new ModelMethodProcessor());
 
 		// Custom arguments
@@ -381,9 +384,12 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			}
 		}
 		catch (Throwable invocationEx) {
-			if (logger.isWarnEnabled()) {
+			// Any other than the original exception is unintended here,
+			// probably an accident (e.g. failed assertion or the like).
+			if (invocationEx != exception && logger.isWarnEnabled()) {
 				logger.warn("Failed to invoke @ExceptionHandler method: " + exceptionHandlerMethod, invocationEx);
 			}
+			// Continue with default processing of the original exception...
 			return null;
 		}
 
@@ -397,6 +403,11 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			mav.setViewName(mavContainer.getViewName());
 			if (!mavContainer.isViewReference()) {
 				mav.setView((View) mavContainer.getView());
+			}
+			if (model instanceof RedirectAttributes) {
+				Map<String, ?> flashAttributes = ((RedirectAttributes) model).getFlashAttributes();
+				request = webRequest.getNativeRequest(HttpServletRequest.class);
+				RequestContextUtils.getOutputFlashMap(request).putAll(flashAttributes);
 			}
 			return mav;
 		}
