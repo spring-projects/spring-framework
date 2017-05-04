@@ -260,7 +260,7 @@ public class JsonPathResultMatchers {
 				return content.substring(this.prefix.length());
 			}
 			catch (StringIndexOutOfBoundsException ex) {
-				throw new AssertionError("JSON prefix \"" + this.prefix + "\" not found", ex);
+				throw new AssertionError("JSON prefix \"" + this.prefix + "\" not found: " + ex);
 			}
 		}
 		else {
