@@ -161,8 +161,8 @@ public abstract class AnnotationUtils {
 		}
 		catch (Throwable ex) {
 			handleIntrospectionFailure(annotatedElement, ex);
+			return null;
 		}
-		return null;
 	}
 
 	/**
@@ -192,8 +192,8 @@ public abstract class AnnotationUtils {
 		}
 		catch (Throwable ex) {
 			handleIntrospectionFailure(annotatedElement, ex);
+			return null;
 		}
-		return null;
 	}
 
 	/**
@@ -232,8 +232,8 @@ public abstract class AnnotationUtils {
 		}
 		catch (Throwable ex) {
 			handleIntrospectionFailure(annotatedElement, ex);
+			return null;
 		}
-		return null;
 	}
 
 	/**
@@ -254,8 +254,8 @@ public abstract class AnnotationUtils {
 		}
 		catch (Throwable ex) {
 			handleIntrospectionFailure(method, ex);
+			return null;
 		}
-		return null;
 	}
 
 	/**
@@ -473,8 +473,8 @@ public abstract class AnnotationUtils {
 		}
 		catch (Throwable ex) {
 			handleIntrospectionFailure(annotatedElement, ex);
+			return Collections.emptySet();
 		}
-		return Collections.emptySet();
 	}
 
 	/**
@@ -1320,7 +1320,9 @@ public abstract class AnnotationUtils {
 	 * Retrieve the <em>value</em> of the {@code value} attribute of a
 	 * single-element Annotation, given an annotation instance.
 	 * @param annotation the annotation instance from which to retrieve the value
-	 * @return the attribute value, or {@code null} if not found
+	 * @return the attribute value, or {@code null} if not found unless the attribute
+	 * value cannot be retrieved due to an {@link AnnotationConfigurationException},
+	 * in which case such an exception will be rethrown
 	 * @see #getValue(Annotation, String)
 	 */
 	public static Object getValue(Annotation annotation) {
@@ -1331,8 +1333,11 @@ public abstract class AnnotationUtils {
 	 * Retrieve the <em>value</em> of a named attribute, given an annotation instance.
 	 * @param annotation the annotation instance from which to retrieve the value
 	 * @param attributeName the name of the attribute value to retrieve
-	 * @return the attribute value, or {@code null} if not found
+	 * @return the attribute value, or {@code null} if not found unless the attribute
+	 * value cannot be retrieved due to an {@link AnnotationConfigurationException},
+	 * in which case such an exception will be rethrown
 	 * @see #getValue(Annotation)
+	 * @see #rethrowAnnotationConfigurationException(Throwable)
 	 */
 	public static Object getValue(Annotation annotation, String attributeName) {
 		if (annotation == null || !StringUtils.hasText(attributeName)) {
@@ -1343,7 +1348,13 @@ public abstract class AnnotationUtils {
 			ReflectionUtils.makeAccessible(method);
 			return method.invoke(annotation);
 		}
-		catch (Exception ex) {
+		catch (InvocationTargetException ex) {
+			rethrowAnnotationConfigurationException(ex.getTargetException());
+			throw new IllegalStateException(
+					"Could not obtain value for annotation attribute '" + attributeName + "' in " + annotation, ex);
+		}
+		catch (Throwable ex) {
+			handleIntrospectionFailure(annotation.getClass(), ex);
 			return null;
 		}
 	}
@@ -1399,7 +1410,8 @@ public abstract class AnnotationUtils {
 		try {
 			return annotationType.getDeclaredMethod(attributeName).getDefaultValue();
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
+			handleIntrospectionFailure(annotationType, ex);
 			return null;
 		}
 	}
@@ -1868,9 +1880,9 @@ public abstract class AnnotationUtils {
 			logger = loggerToUse;
 		}
 		if (element instanceof Class && Annotation.class.isAssignableFrom((Class<?>) element)) {
-			// Meta-annotation lookup on an annotation type
+			// Meta-annotation or (default) value lookup on an annotation type
 			if (loggerToUse.isDebugEnabled()) {
-				loggerToUse.debug("Failed to introspect meta-annotations on [" + element + "]: " + ex);
+				loggerToUse.debug("Failed to meta-introspect annotation [" + element + "]: " + ex);
 			}
 		}
 		else {
@@ -1966,7 +1978,7 @@ public abstract class AnnotationUtils {
 						else if (ObjectUtils.nullSafeEquals(this.containerAnnotationType, currentAnnotationType)) {
 							this.result.addAll(getValue(element, ann));
 						}
-						else if (!isInJavaLangAnnotationPackage(ann)) {
+						else if (!isInJavaLangAnnotationPackage(currentAnnotationType)) {
 							process(currentAnnotationType);
 						}
 					}
