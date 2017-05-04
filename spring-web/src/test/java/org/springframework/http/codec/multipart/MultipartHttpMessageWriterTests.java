@@ -101,7 +101,7 @@ public class MultipartHttpMessageWriterTests {
 		Map<String, Object> hints = Collections.emptyMap();
 		this.writer.write(Mono.just(map), null, MediaType.MULTIPART_FORM_DATA, response, hints).block();
 
-		final MediaType contentType = response.getHeaders().getContentType();
+		MediaType contentType = response.getHeaders().getContentType();
 		assertNotNull("No boundary found", contentType.getParameter("boundary"));
 
 		// see if Synchronoss NIO Multipart can read what we wrote
@@ -109,7 +109,7 @@ public class MultipartHttpMessageWriterTests {
 		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(synchronossReader);
 
 		MockServerHttpRequest request = MockServerHttpRequest.post("/foo")
-				.header(HttpHeaders.CONTENT_TYPE, contentType.toString())
+				.contentType(MediaType.parseMediaType(contentType.toString()))
 				.body(response.getBody());
 
 		ResolvableType elementType = ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Part.class);

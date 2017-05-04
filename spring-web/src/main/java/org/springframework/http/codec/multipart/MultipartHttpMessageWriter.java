@@ -16,18 +16,17 @@
 
 package org.springframework.http.codec.multipart;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.mail.internet.MimeUtility;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -69,7 +68,7 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 	private final List<HttpMessageWriter<?>> partWriters;
 
-	private Charset filenameCharset = DEFAULT_CHARSET;
+	private Charset charset = DEFAULT_CHARSET;
 
 	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
@@ -86,19 +85,20 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 	}
 
 	/**
-	 * Set the character set to use for writing file names in the multipart request.
+	 * Set the character set to use for part headers such as
+	 * "Content-Disposition" (and its filename parameter).
 	 * <p>By default this is set to "UTF-8".
 	 */
-	public void setFilenameCharset(Charset charset) {
+	public void setCharset(Charset charset) {
 		Assert.notNull(charset, "'charset' must not be null");
-		this.filenameCharset = charset;
+		this.charset = charset;
 	}
 
 	/**
-	 * Return the configured filename charset.
+	 * Return the configured charset for part headers.
 	 */
-	public Charset getFilenameCharset() {
-		return this.filenameCharset;
+	public Charset getCharset() {
+		return this.charset;
 	}
 
 
@@ -120,8 +120,10 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 		byte[] boundary = generateMultipartBoundary();
 
-		outputMessage.getHeaders().setContentType(new MediaType("multipart", "form-data",
-				Collections.singletonMap("boundary", new String(boundary, StandardCharsets.US_ASCII))));
+		Map<String, String> params = new HashMap<>(2);
+		params.put("boundary", new String(boundary, StandardCharsets.US_ASCII));
+		params.put("charset", getCharset().name());
+		outputMessage.getHeaders().setContentType(new MediaType(MediaType.MULTIPART_FORM_DATA, params));
 
 		return Mono.from(inputStream).flatMap(map -> {
 
@@ -149,7 +151,8 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 	@SuppressWarnings("unchecked")
 	private <T> Flux<DataBuffer> encodePart(byte[] boundary, String name, T value) {
 
-		MultipartHttpOutputMessage outputMessage = new MultipartHttpOutputMessage(this.bufferFactory);
+		MultipartHttpOutputMessage outputMessage =
+				new MultipartHttpOutputMessage(this.bufferFactory, getCharset());
 
 		T body;
 		if (value instanceof HttpEntity) {
@@ -160,9 +163,10 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 			body = value;
 		}
 
-		ResolvableType bodyType = ResolvableType.forClass(body.getClass());
-		outputMessage.getHeaders().setContentDispositionFormData(name, getFilename(body));
+		String filename = (body instanceof Resource ? ((Resource) body).getFilename() : null);
+		outputMessage.getHeaders().setContentDispositionFormData(name, filename);
 
+		ResolvableType bodyType = ResolvableType.forClass(body.getClass());
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 
 		Optional<HttpMessageWriter<?>> writer = this.partWriters.stream()
@@ -187,26 +191,6 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 				outputMessage.getBody(),
 				Mono.just(generateNewLine())
 		);
-	}
-
-	/**
-	 * Return the filename of the given multipart part. This value will be used
-	 * for the {@code Content-Disposition} header.
-	 * <p>The default implementation returns {@link Resource#getFilename()} if
-	 * the part is a {@code Resource}, and {@code null} in other cases.
-	 * @param part the part for which return a file name
-	 * @return the filename or {@code null}
-	 */
-	protected String getFilename(Object part) {
-		if (part instanceof Resource) {
-			Resource resource = (Resource) part;
-			String filename = resource.getFilename();
-			filename = MimeDelegate.encode(filename, this.filenameCharset.name());
-			return filename;
-		}
-		else {
-			return null;
-		}
 	}
 
 	private DataBuffer generateBoundaryLine(byte[] boundary) {
@@ -243,6 +227,8 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 
 		private final DataBufferFactory bufferFactory;
 
+		private final Charset charset;
+
 		private final HttpHeaders headers = new HttpHeaders();
 
 		private final AtomicBoolean commited = new AtomicBoolean();
@@ -250,8 +236,9 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 		private Flux<DataBuffer> body;
 
 
-		public MultipartHttpOutputMessage(DataBufferFactory bufferFactory) {
+		public MultipartHttpOutputMessage(DataBufferFactory bufferFactory, Charset charset) {
 			this.bufferFactory = bufferFactory;
+			this.charset = charset;
 		}
 
 
@@ -287,9 +274,9 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 		private DataBuffer generateHeaders() {
 			DataBuffer buffer = this.bufferFactory.allocateBuffer();
 			for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-				byte[] headerName = entry.getKey().getBytes(StandardCharsets.US_ASCII);
+				byte[] headerName = entry.getKey().getBytes(this.charset);
 				for (String headerValueString : entry.getValue()) {
-					byte[] headerValue = headerValueString.getBytes(StandardCharsets.US_ASCII);
+					byte[] headerValue = headerValueString.getBytes(this.charset);
 					buffer.write(headerName);
 					buffer.write((byte)':');
 					buffer.write((byte)' ');
@@ -319,21 +306,6 @@ public class MultipartHttpMessageWriter implements HttpMessageWriter<MultiValueM
 					Mono.error(new IllegalStateException("Body has not been written yet")));
 		}
 
-	}
-
-	/**
-	 * Inner class to avoid a hard dependency on the JavaMail API.
-	 */
-	private static class MimeDelegate {
-
-		public static String encode(String value, String charset) {
-			try {
-				return MimeUtility.encodeText(value, charset, null);
-			}
-			catch (UnsupportedEncodingException ex) {
-				throw new IllegalStateException(ex);
-			}
-		}
 	}
 
 }

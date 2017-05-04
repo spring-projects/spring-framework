@@ -838,7 +838,6 @@ project("spring-webflux") {
 		testRuntime("org.python:jython-standalone:2.5.3")
 		testRuntime("org.webjars:underscorejs:1.8.3")
 		testRuntime("org.glassfish:javax.el:3.0.1-b08")
-		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
 		testRuntime("org.synchronoss.cloud:nio-multipart-parser:${niomultipartVersion}")

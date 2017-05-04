@@ -282,7 +282,9 @@ public class SynchronossPartHttpMessageReader implements HttpMessageReader<Part>
 	private static class SynchronossFilePart extends DefaultSynchronossPart implements FilePart {
 
 
-		public SynchronossFilePart(HttpHeaders headers, StreamStorage storage, String fileName, DataBufferFactory factory) {
+		public SynchronossFilePart(HttpHeaders headers, StreamStorage storage,
+				String fileName, DataBufferFactory factory) {
+
 			super(headers, storage, factory);
 		}
 
