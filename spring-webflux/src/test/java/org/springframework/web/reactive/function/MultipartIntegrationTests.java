@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function;
 
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -48,10 +49,25 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 	private final WebClient webClient = WebClient.create();
 
 	@Test
-	public void multipart() {
+	public void multipartData() {
 		Mono<ClientResponse> result = webClient
 				.post()
-				.uri("http://localhost:" + this.port + "/")
+				.uri("http://localhost:" + this.port + "/multipartData")
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.body(BodyInserters.fromMultipartData(generateBody()))
+				.exchange();
+
+		StepVerifier
+				.create(result)
+				.consumeNextWith(response -> assertEquals(HttpStatus.OK, response.statusCode()))
+				.verifyComplete();
+	}
+
+	@Test
+	public void parts() {
+		Mono<ClientResponse> result = webClient
+				.post()
+				.uri("http://localhost:" + this.port + "/parts")
 				.contentType(MediaType.MULTIPART_FORM_DATA)
 				.body(BodyInserters.fromMultipartData(generateBody()))
 				.exchange();
@@ -77,12 +93,13 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 	@Override
 	protected RouterFunction<ServerResponse> routerFunction() {
 		MultipartHandler multipartHandler = new MultipartHandler();
-		return route(POST("/"), multipartHandler::handle);
+		return route(POST("/multipartData"), multipartHandler::multipartData)
+				.andRoute(POST("/parts"), multipartHandler::parts);
 	}
 
 	private static class MultipartHandler {
 
-		public Mono<ServerResponse> handle(ServerRequest request) {
+		public Mono<ServerResponse> multipartData(ServerRequest request) {
 			return request
 					.body(BodyExtractors.toMultipartData())
 					.flatMap(map -> {
@@ -91,6 +108,21 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 							assertEquals(2, parts.size());
 							assertEquals("foo.txt", ((FilePart) parts.get("fooPart")).getFilename());
 							assertEquals("bar", ((FormFieldPart) parts.get("barPart")).getValue());
+						}
+						catch(Exception e) {
+							return Mono.error(e);
+						}
+						return ServerResponse.ok().build();
+					});
+		}
+
+		public Mono<ServerResponse> parts(ServerRequest request) {
+			return request.body(BodyExtractors.toParts()).collectList()
+					.flatMap(parts -> {
+						try {
+							assertEquals(2, parts.size());
+							assertEquals("foo.txt", ((FilePart) parts.get(0)).getFilename());
+							assertEquals("bar", ((FormFieldPart) parts.get(1)).getValue());
 						}
 						catch(Exception e) {
 							return Mono.error(e);

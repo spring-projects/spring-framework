@@ -48,11 +48,13 @@ import org.springframework.util.MultiValueMap;
  */
 public abstract class BodyExtractors {
 
-	private static final ResolvableType FORM_TYPE =
+	private static final ResolvableType FORM_MAP_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
-	private static final ResolvableType MULTIPART_TYPE = ResolvableType.forClassWithGenerics(
+	private static final ResolvableType MULTIPART_MAP_TYPE = ResolvableType.forClassWithGenerics(
 			MultiValueMap.class, String.class, Part.class);
+
+	private static final ResolvableType PART_TYPE = ResolvableType.forClass(Part.class);
 
 
 	/**
@@ -133,15 +135,16 @@ public abstract class BodyExtractors {
 	public static BodyExtractor<Mono<MultiValueMap<String, String>>, ServerHttpRequest> toFormData() {
 		return (serverRequest, context) -> {
 			HttpMessageReader<MultiValueMap<String, String>> messageReader =
-					formMessageReader(context);
+					messageReader(FORM_MAP_TYPE, MediaType.APPLICATION_FORM_URLENCODED, context);
 			return context.serverResponse()
-					.map(serverResponse -> messageReader.readMono(FORM_TYPE, FORM_TYPE, serverRequest, serverResponse, context.hints()))
-					.orElseGet(() -> messageReader.readMono(FORM_TYPE, serverRequest, context.hints()));
+					.map(serverResponse -> messageReader.readMono(FORM_MAP_TYPE, FORM_MAP_TYPE, serverRequest, serverResponse, context.hints()))
+					.orElseGet(() -> messageReader.readMono(FORM_MAP_TYPE, serverRequest, context.hints()));
 		};
 	}
 
 	/**
-	 * Return a {@code BodyExtractor} that reads form data into a {@link MultiValueMap}.
+	 * Return a {@code BodyExtractor} that reads multipart (i.e. file upload) form data into a
+	 * {@link MultiValueMap}.
 	 * @return a {@code BodyExtractor} that reads multipart data
 	 */
 	// Note that the returned BodyExtractor is parameterized to ServerHttpRequest, not
@@ -150,10 +153,29 @@ public abstract class BodyExtractors {
 	public static BodyExtractor<Mono<MultiValueMap<String, Part>>, ServerHttpRequest> toMultipartData() {
 		return (serverRequest, context) -> {
 			HttpMessageReader<MultiValueMap<String, Part>> messageReader =
-					multipartMessageReader(context);
+					messageReader(MULTIPART_MAP_TYPE, MediaType.MULTIPART_FORM_DATA, context);
 			return context.serverResponse()
-					.map(serverResponse -> messageReader.readMono(MULTIPART_TYPE, MULTIPART_TYPE, serverRequest, serverResponse, context.hints()))
-					.orElseGet(() -> messageReader.readMono(MULTIPART_TYPE, serverRequest, context.hints()));
+					.map(serverResponse -> messageReader.readMono(MULTIPART_MAP_TYPE,
+							MULTIPART_MAP_TYPE, serverRequest, serverResponse, context.hints()))
+					.orElseGet(() -> messageReader.readMono(MULTIPART_MAP_TYPE, serverRequest, context.hints()));
+		};
+	}
+
+	/**
+	 * Return a {@code BodyExtractor} that reads multipart (i.e. file upload) form data into a
+	 * {@link MultiValueMap}.
+	 * @return a {@code BodyExtractor} that reads multipart data
+	 */
+	// Note that the returned BodyExtractor is parameterized to ServerHttpRequest, not
+	// ReactiveHttpInputMessage like other methods, since reading form data only typically happens on
+	// the server-side
+	public static BodyExtractor<Flux<Part>, ServerHttpRequest> toParts() {
+		return (serverRequest, context) -> {
+			HttpMessageReader<Part> messageReader =
+					messageReader(PART_TYPE, MediaType.MULTIPART_FORM_DATA, context);
+			return context.serverResponse()
+					.map(serverResponse -> messageReader.read(PART_TYPE, PART_TYPE, serverRequest, serverResponse, context.hints()))
+					.orElseGet(() -> messageReader.read(PART_TYPE, serverRequest, context.hints()));
 		};
 	}
 
@@ -191,26 +213,15 @@ public abstract class BodyExtractors {
 				});
 	}
 
-	private static HttpMessageReader<MultiValueMap<String, String>> formMessageReader(BodyExtractor.Context context) {
+	private static <T> HttpMessageReader<T> messageReader(ResolvableType elementType,
+			MediaType mediaType, BodyExtractor.Context context) {
 		return context.messageReaders().get()
-				.filter(messageReader -> messageReader
-						.canRead(FORM_TYPE, MediaType.APPLICATION_FORM_URLENCODED))
+				.filter(messageReader -> messageReader.canRead(elementType, mediaType))
 				.findFirst()
-				.map(BodyExtractors::<MultiValueMap<String, String>>cast)
+				.map(BodyExtractors::<T>cast)
 				.orElseThrow(() -> new IllegalStateException(
-						"Could not find HttpMessageReader that supports " +
-								MediaType.APPLICATION_FORM_URLENCODED_VALUE));
-	}
-
-	private static HttpMessageReader<MultiValueMap<String, Part>> multipartMessageReader(BodyExtractor.Context context) {
-		return context.messageReaders().get()
-				.filter(messageReader -> messageReader
-						.canRead(MULTIPART_TYPE, MediaType.MULTIPART_FORM_DATA))
-				.findFirst()
-				.map(BodyExtractors::<MultiValueMap<String, Part>>cast)
-				.orElseThrow(() -> new IllegalStateException(
-						"Could not find HttpMessageReader that supports " +
-								MediaType.MULTIPART_FORM_DATA));
+						"Could not find HttpMessageReader that supports \"" + mediaType +
+								"\" and \"" + elementType + "\""));
 	}
 
 	private static MediaType contentType(HttpMessage message) {

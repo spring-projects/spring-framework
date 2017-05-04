@@ -36,6 +36,8 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.StringDecoder;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -45,10 +47,16 @@ import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.FormHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.http.codec.multipart.FormFieldPart;
+import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
+import org.springframework.http.codec.multipart.Part;
+import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
@@ -72,6 +80,11 @@ public class BodyExtractorsTests {
 		messageReaders.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes(true)));
 		messageReaders.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
 		messageReaders.add(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
+		messageReaders.add(new FormHttpMessageReader());
+		SynchronossPartHttpMessageReader partReader = new SynchronossPartHttpMessageReader();
+		messageReaders.add(partReader);
+		messageReaders.add(new MultipartHttpMessageReader(partReader));
+
 		messageReaders.add(new FormHttpMessageReader());
 
 		this.context = new BodyExtractor.Context() {
@@ -244,6 +257,64 @@ public class BodyExtractorsTests {
 					assertEquals("Invalid result", "value 2+1", values.get(0));
 					assertEquals("Invalid result", "value 2+2", values.get(1));
 					assertNull("Invalid result", form.getFirst("name 3"));
+				})
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void toParts() throws Exception {
+		BodyExtractor<Flux<Part>, ServerHttpRequest> extractor = BodyExtractors.toParts();
+
+		String bodyContents = "-----------------------------9051914041544843365972754266\r\n" +
+				"Content-Disposition: form-data; name=\"text\"\r\n" +
+				"\r\n" +
+				"text default\r\n" +
+				"-----------------------------9051914041544843365972754266\r\n" +
+				"Content-Disposition: form-data; name=\"file1\"; filename=\"a.txt\"\r\n" +
+				"Content-Type: text/plain\r\n" +
+				"\r\n" +
+				"Content of a.txt.\r\n" +
+				"\r\n" +
+				"-----------------------------9051914041544843365972754266\r\n" +
+				"Content-Disposition: form-data; name=\"file2\"; filename=\"a.html\"\r\n" +
+				"Content-Type: text/html\r\n" +
+				"\r\n" +
+				"<!DOCTYPE html><title>Content of a.html.</title>\r\n" +
+				"\r\n" +
+				"-----------------------------9051914041544843365972754266--\r\n";
+
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer =
+				factory.wrap(ByteBuffer.wrap(bodyContents.getBytes(StandardCharsets.UTF_8)));
+		Flux<DataBuffer> body = Flux.just(dataBuffer);
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.header("Content-Type", "multipart/form-data; boundary=---------------------------9051914041544843365972754266")
+				.body(body);
+
+		Flux<Part> result = extractor.extract(request, this.context);
+
+		StepVerifier.create(result)
+				.consumeNextWith(part -> {
+					assertEquals("text", part.getName());
+					assertTrue(part instanceof FormFieldPart);
+					FormFieldPart formFieldPart = (FormFieldPart) part;
+					assertEquals("text default", formFieldPart.getValue());
+				})
+				.consumeNextWith(part -> {
+					assertEquals("file1", part.getName());
+					assertTrue(part instanceof FilePart);
+					FilePart filePart = (FilePart) part;
+					assertEquals("a.txt", filePart.getFilename());
+					assertEquals(MediaType.TEXT_PLAIN, filePart.getHeaders().getContentType());
+				})
+				.consumeNextWith(part -> {
+					assertEquals("file2", part.getName());
+					assertTrue(part instanceof FilePart);
+					FilePart filePart = (FilePart) part;
+					assertEquals("a.html", filePart.getFilename());
+					assertEquals(MediaType.TEXT_HTML, filePart.getHeaders().getContentType());
 				})
 				.expectComplete()
 				.verify();
