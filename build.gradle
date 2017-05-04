@@ -220,6 +220,7 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 	dependencyManagement {
 		imports {
 			mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
+			mavenBom "io.netty:netty-bom:${nettyVersion}"
 		}
 		resolutionStrategy {
 			cacheChangingModulesFor 0, 'seconds'
@@ -385,7 +386,7 @@ project("spring-core") {
 		optional("io.reactivex:rxjava:${rxjavaVersion}")
 		optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
 		optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
-		optional("io.netty:netty-buffer:${nettyVersion}")
+		optional("io.netty:netty-buffer")
 		testCompile("io.projectreactor.addons:reactor-test")
 		testCompile("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
@@ -566,7 +567,7 @@ project("spring-messaging") {
 		optional(project(":spring-oxm"))
 		optional("io.projectreactor:reactor-core")
 		optional("io.projectreactor.ipc:reactor-netty")
-		optional("io.netty:netty-all:${nettyVersion}")
+		optional("io.netty:netty-all")
 		optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
@@ -587,7 +588,7 @@ project("spring-messaging") {
 		}
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
-		testCompile("io.netty:netty-all:${nettyVersion}")
+		testCompile("io.netty:netty-all")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 		testCompile("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}")
@@ -722,7 +723,7 @@ project("spring-web") {
 		optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
 		optional("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		optional("io.undertow:undertow-core:${undertowVersion}")
-		optional("io.netty:netty-buffer:${nettyVersion}")  // temporarily for JsonObjectDecoder
+		optional("io.netty:netty-buffer")  // temporarily for JsonObjectDecoder
 	  	optional("com.fasterxml.woodstox:woodstox-core:${woodstoxVersion}") {  // woodstox before aalto
 			exclude group: "stax", module: "stax-api"
 		}
@@ -733,7 +734,7 @@ project("spring-web") {
 		optional("org.apache.httpcomponents:httpasyncclient:${httpasyncVersion}") {
 			exclude group: "commons-logging", module: "commons-logging"
 		}
-		optional("io.netty:netty-all:${nettyVersion}")
+		optional("io.netty:netty-all")
 		optional("com.squareup.okhttp3:okhttp:${okhttp3Version}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
@@ -1001,7 +1002,7 @@ project("spring-websocket") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
 		testCompile("io.projectreactor:reactor-core")
 		testCompile("io.projectreactor.ipc:reactor-netty")
-		testCompile("io.netty:netty-all:${nettyVersion}")
+		testCompile("io.netty:netty-all")
 	}
 
 	if (JavaVersion.current().java9Compatible) {
