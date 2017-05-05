@@ -13,24 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.core.codec;
 
 /**
- * Codec exception suitable for internal errors, like those not related to invalid data. It can be used to make sure
- * such error will produce a 5xx status code and not a 4xx one when reading HTTP messages for example.
+ * Indicates an issue with encoding the input Object stream with a focus on
+ * indicating the Objects cannot be encoded. As opposed to a more general
+ * {@link CodecException} such as a configuration issue that an {@link Encoder}
+ * may also choose to raise.
  *
- * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 5.0
+ * @see Encoder
  */
 @SuppressWarnings("serial")
-public class InternalCodecException extends CodecException {
+public class EncodingException extends CodecException {
 
-	public InternalCodecException(String msg) {
+	/**
+	 * Create a new EncodingException.
+	 * @param msg the detail message
+	 */
+	public EncodingException(String msg) {
 		super(msg);
 	}
 
-	public InternalCodecException(String msg, Throwable cause) {
+	/**
+	 * Create a new EncodingException.
+	 * @param msg the detail message
+	 * @param cause root cause for the exception, if any
+	 */
+	public EncodingException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
 

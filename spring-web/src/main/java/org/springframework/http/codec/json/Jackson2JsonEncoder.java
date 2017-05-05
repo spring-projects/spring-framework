@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
@@ -39,6 +40,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
+import org.springframework.core.codec.EncodingException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.MediaType;
@@ -164,8 +166,11 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpMes
 		try {
 			writer.writeValue(outputStream, value);
 		}
+		catch (JsonProcessingException ex) {
+			throw new EncodingException("JSON encoding error: " + ex.getMessage(), ex);
+		}
 		catch (IOException ex) {
-			throw new CodecException("Error while writing the data", ex);
+			throw new CodecException("I/O error while writing: " + ex.getMessage(), ex);
 		}
 
 		return buffer;

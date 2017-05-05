@@ -22,14 +22,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.reactivestreams.Publisher;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -97,10 +96,9 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 			Map<String, Object> hints) {
 
 		MediaType contentType = updateContentType(message, mediaType);
+		DataBufferFactory factory = message.bufferFactory();
 
-		Flux<DataBuffer> body = this.encoder
-				.encode(inputStream, message.bufferFactory(), elementType, contentType, hints)
-				.onErrorMap(this::mapError);
+		Flux<DataBuffer> body = this.encoder.encode(inputStream, factory, elementType, contentType, hints);
 
 		return isStreamingMediaType(contentType) ?
 				message.writeAndFlushWith(body.map(Flux::just)) :
@@ -137,13 +135,6 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		return this.encoder instanceof HttpMessageEncoder &&
 				((HttpMessageEncoder<?>) this.encoder).getStreamingMediaTypes().stream()
 						.anyMatch(contentType::isCompatibleWith);
-	}
-
-	private Throwable mapError(Throwable ex) {
-		if (ex instanceof ResponseStatusException) {
-			return ex;
-		}
-		return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to encode HTTP message", ex);
 	}
 
 

@@ -17,19 +17,22 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.core.*;
-import org.springframework.core.codec.InternalCodecException;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.Conventions;
+import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapter;
+import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -117,9 +120,9 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 				Map<String, Object> readHints = Collections.emptyMap();
 				if (adapter != null && adapter.isMultiValue()) {
 					Flux<?> flux = reader.read(bodyType, elementType, request, response, readHints);
-					flux = flux.onErrorResume(ex -> Flux.error(getReadError(bodyParameter, ex)));
+					flux = flux.onErrorResume(ex -> Flux.error(handleReadError(bodyParameter, ex)));
 					if (isBodyRequired || !adapter.supportsEmpty()) {
-						flux = flux.switchIfEmpty(Flux.error(getRequiredBodyError(bodyParameter)));
+						flux = flux.switchIfEmpty(Flux.error(handleMissingBody(bodyParameter)));
 					}
 					Object[] hints = extractValidationHints(bodyParameter);
 					if (hints != null) {
@@ -130,9 +133,9 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 				}
 				else {
 					Mono<?> mono = reader.readMono(bodyType, elementType, request, response, readHints);
-					mono = mono.onErrorResume(ex -> Mono.error(getReadError(bodyParameter, ex)));
+					mono = mono.onErrorResume(ex -> Mono.error(handleReadError(bodyParameter, ex)));
 					if (isBodyRequired || (adapter != null && !adapter.supportsEmpty())) {
-						mono = mono.switchIfEmpty(Mono.error(getRequiredBodyError(bodyParameter)));
+						mono = mono.switchIfEmpty(Mono.error(handleMissingBody(bodyParameter)));
 					}
 					Object[] hints = extractValidationHints(bodyParameter);
 					if (hints != null) {
@@ -152,17 +155,14 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		return Mono.error(new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes));
 	}
 
-	private ResponseStatusException getReadError(MethodParameter parameter, Throwable ex) {
-		Throwable cause = ex instanceof ResponseStatusException ? ex.getCause() : ex;
-
-		return cause instanceof InternalCodecException ?
-				new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to read HTTP message", cause) :
-				new ServerWebInputException("Failed to read HTTP message", parameter, cause);
+	private Throwable handleReadError(MethodParameter parameter, Throwable ex) {
+		return ex instanceof DecodingException ?
+				new ServerWebInputException("Failed to read HTTP message", parameter, ex) : ex;
 	}
 
-	private ServerWebInputException getRequiredBodyError(MethodParameter parameter) {
-		return new ServerWebInputException("Required request body is missing: " +
-				parameter.getMethod().toGenericString());
+	private ServerWebInputException handleMissingBody(MethodParameter parameter) {
+		Method method = parameter.getMethod();
+		return new ServerWebInputException("Request body is missing: " + method.toGenericString());
 	}
 
 	/**

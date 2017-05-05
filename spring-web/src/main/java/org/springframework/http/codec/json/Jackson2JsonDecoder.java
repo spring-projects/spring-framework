@@ -21,6 +21,7 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -32,10 +33,10 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.codec.HttpMessageDecoder;
-import org.springframework.core.codec.InternalCodecException;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -116,10 +117,13 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 						return value;
 					}
 					catch (InvalidDefinitionException ex) {
-						throw new InternalCodecException("Error while reading the data", ex);
+						throw new CodecException("Type definition error: " + ex.getMessage(), ex);
+					}
+					catch (JsonProcessingException ex) {
+						throw new DecodingException("JSON parse error: " + ex.getMessage(), ex);
 					}
 					catch (IOException ex) {
-						throw new CodecException("Error while reading the data", ex);
+						throw new CodecException("I/O error while reading: " + ex.getMessage(), ex);
 					}
 				});
 	}

@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.UnmarshalException;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -28,6 +29,8 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractSingleValueEncoder;
+import org.springframework.core.codec.CodecException;
+import org.springframework.core.codec.EncodingException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.ClassUtils;
@@ -73,13 +76,16 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 			OutputStream outputStream = buffer.asOutputStream();
 			Class<?> clazz = ClassUtils.getUserClass(value);
 			Marshaller marshaller = jaxbContexts.createMarshaller(clazz);
-			marshaller
-					.setProperty(Marshaller.JAXB_ENCODING, StandardCharsets.UTF_8.name());
+			marshaller.setProperty(Marshaller.JAXB_ENCODING, StandardCharsets.UTF_8.name());
 			marshaller.marshal(value, outputStream);
 			return Flux.just(buffer);
 		}
+		catch (UnmarshalException ex) {
+			return Flux.error(new EncodingException(
+					"Could not unmarshal to [" + value.getClass() + "]: " + ex.getMessage(), ex));
+		}
 		catch (JAXBException ex) {
-			return Flux.error(ex);
+			return Flux.error(new CodecException("Could not instantiate JAXBContext: " + ex.getMessage(), ex));
 		}
 	}
 

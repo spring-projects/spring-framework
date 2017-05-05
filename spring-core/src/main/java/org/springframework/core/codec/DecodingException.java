@@ -13,36 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.core.codec;
 
-import org.springframework.core.NestedRuntimeException;
-
 /**
- * General error that indicates a problem while encoding and decoding to and
- * from an Object stream.
+ * Indicates an issue with decoding the input stream with the focus on indicating
+ * a content issue such as a parse failure. As opposed to a more general I/O
+ * errors, illegal state, or a {@link CodecException} such as a configuration
+ * issue that a {@link Decoder} may choose to raise.
  *
- * @author Sebastien Deleuze
+ * <p>For example in a web application, a server side {@code DecodingException}
+ * would translate to a response with a 400 (bad input) status while
+ * {@code CodecException} would translate to 500 (server error) status.
+ *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see Decoder
  */
 @SuppressWarnings("serial")
-public class CodecException extends NestedRuntimeException {
+public class DecodingException extends CodecException {
 
 	/**
-	 * Create a new CodecException.
+	 * Create a new DecodingException.
 	 * @param msg the detail message
 	 */
-	public CodecException(String msg) {
+	public DecodingException(String msg) {
 		super(msg);
 	}
 
 	/**
-	 * Create a new CodecException.
+	 * Create a new DecodingException.
 	 * @param msg the detail message
 	 * @param cause root cause for the exception, if any
 	 */
-	public CodecException(String msg, Throwable cause) {
+	public DecodingException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
 
