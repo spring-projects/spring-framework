@@ -83,7 +83,7 @@ configure(allprojects) { project ->
 	ext.quartzVersion          = "2.3.0"
 	ext.reactorVersion         = "Bismuth-M1"
 	ext.romeVersion            = "1.7.2"
-	ext.rxjavaVersion          = '1.2.10'
+	ext.rxjavaVersion          = '1.3.0'
 	ext.rxjavaAdapterVersion   = '1.2.1'
 	ext.rxjava2Version         = '2.1.0'
 	ext.rxnettyVersion         = '0.5.2'
