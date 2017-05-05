@@ -17,9 +17,9 @@ package org.springframework.core.codec;
 
 /**
  * Indicates an issue with encoding the input Object stream with a focus on
- * indicating the Objects cannot be encoded. As opposed to a more general
- * {@link CodecException} such as a configuration issue that an {@link Encoder}
- * may also choose to raise.
+ * not being able to encode Objects. As opposed to a more general I/O errors
+ * or a {@link CodecException} such as a configuration issue that an
+ * {@link Encoder} may also choose to raise.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
