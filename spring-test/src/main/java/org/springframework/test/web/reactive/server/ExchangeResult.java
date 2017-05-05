@@ -128,7 +128,7 @@ public class ExchangeResult {
 	 * Return response cookies received from the server.
 	 */
 	public MultiValueMap<String, ResponseCookie> getResponseCookies() {
-		return this.getResponseCookies();
+		return this.response.getCookies();
 	}
 
 	/**
