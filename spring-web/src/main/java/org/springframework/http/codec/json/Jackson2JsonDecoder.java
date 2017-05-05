@@ -117,13 +117,13 @@ public class Jackson2JsonDecoder extends Jackson2CodecSupport implements HttpMes
 						return value;
 					}
 					catch (InvalidDefinitionException ex) {
-						throw new CodecException("Type definition error: " + ex.getMessage(), ex);
+						throw new CodecException("Type definition error: " + ex.getType(), ex);
 					}
 					catch (JsonProcessingException ex) {
-						throw new DecodingException("JSON parse error: " + ex.getMessage(), ex);
+						throw new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex);
 					}
 					catch (IOException ex) {
-						throw new CodecException("I/O error while reading: " + ex.getMessage(), ex);
+						throw new DecodingException("I/O error while parsing input stream", ex);
 					}
 				});
 	}

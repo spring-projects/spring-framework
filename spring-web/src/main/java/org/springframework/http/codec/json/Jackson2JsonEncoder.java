@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -50,7 +51,6 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
-
 
 /**
  * Encode from an {@code Object} stream to a byte stream of JSON objects,
@@ -107,7 +107,7 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpMes
 	@Override
 	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
 		Class<?> clazz = elementType.resolve(Object.class);
-		return Object.class.equals(clazz) ||
+		return (Object.class == clazz) ||
 				!String.class.isAssignableFrom(elementType.resolve(clazz)) &&
 				this.objectMapper.canSerialize(clazz) && supportsMimeType(mimeType);
 	}
@@ -166,11 +166,14 @@ public class Jackson2JsonEncoder extends Jackson2CodecSupport implements HttpMes
 		try {
 			writer.writeValue(outputStream, value);
 		}
+		catch (InvalidDefinitionException ex) {
+			throw new CodecException("Type definition error: " + ex.getType(), ex);
+		}
 		catch (JsonProcessingException ex) {
-			throw new EncodingException("JSON encoding error: " + ex.getMessage(), ex);
+			throw new EncodingException("JSON encoding error: " + ex.getOriginalMessage(), ex);
 		}
 		catch (IOException ex) {
-			throw new CodecException("I/O error while writing: " + ex.getMessage(), ex);
+			throw new IllegalStateException("Unexpected I/O error while writing to data buffer", ex);
 		}
 
 		return buffer;

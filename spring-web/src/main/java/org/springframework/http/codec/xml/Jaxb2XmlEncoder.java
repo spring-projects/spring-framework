@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License.H
  */
 
 package org.springframework.http.codec.xml;
@@ -20,8 +20,8 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.MarshalException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.UnmarshalException;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -75,17 +75,16 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 			DataBuffer buffer = dataBufferFactory.allocateBuffer(1024);
 			OutputStream outputStream = buffer.asOutputStream();
 			Class<?> clazz = ClassUtils.getUserClass(value);
-			Marshaller marshaller = jaxbContexts.createMarshaller(clazz);
+			Marshaller marshaller = this.jaxbContexts.createMarshaller(clazz);
 			marshaller.setProperty(Marshaller.JAXB_ENCODING, StandardCharsets.UTF_8.name());
 			marshaller.marshal(value, outputStream);
 			return Flux.just(buffer);
 		}
-		catch (UnmarshalException ex) {
-			return Flux.error(new EncodingException(
-					"Could not unmarshal to [" + value.getClass() + "]: " + ex.getMessage(), ex));
+		catch (MarshalException ex) {
+			return Flux.error(new EncodingException("Could not marshal " + value.getClass() + " to XML", ex));
 		}
 		catch (JAXBException ex) {
-			return Flux.error(new CodecException("Could not instantiate JAXBContext: " + ex.getMessage(), ex));
+			return Flux.error(new CodecException("Invalid JAXB configuration", ex));
 		}
 	}
 

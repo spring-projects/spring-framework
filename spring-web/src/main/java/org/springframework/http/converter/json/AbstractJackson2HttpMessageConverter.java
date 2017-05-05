@@ -218,7 +218,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		return readJavaType(javaType, inputMessage);
 	}
 
-	private Object readJavaType(JavaType javaType, HttpInputMessage inputMessage) {
+	private Object readJavaType(JavaType javaType, HttpInputMessage inputMessage) throws IOException {
 		try {
 			if (inputMessage instanceof MappingJacksonInputMessage) {
 				Class<?> deserializationView = ((MappingJacksonInputMessage) inputMessage).getDeserializationView();
@@ -230,13 +230,10 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
 		}
 		catch (InvalidDefinitionException ex) {
-			throw new HttpMessageConversionException("Type definition error: " + ex.getMessage(), ex);
+			throw new HttpMessageConversionException("Type definition error: " + ex.getType(), ex);
 		}
 		catch (JsonProcessingException ex) {
-			throw new HttpMessageNotReadableException("JSON parse error: " + ex.getMessage(), ex);
-		}
-		catch (IOException ex) {
-			throw new HttpMessageNotReadableException("I/O error while reading: " + ex.getMessage(), ex);
+			throw new HttpMessageNotReadableException("JSON parse error: " + ex.getOriginalMessage(), ex);
 		}
 	}
 
@@ -287,8 +284,11 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			generator.flush();
 
 		}
+		catch (InvalidDefinitionException ex) {
+			throw new HttpMessageConversionException("Type definition error: " + ex.getType(), ex);
+		}
 		catch (JsonProcessingException ex) {
-			throw new HttpMessageNotWritableException("Could not write JSON document: " + ex.getMessage(), ex);
+			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getOriginalMessage(), ex);
 		}
 	}
 
