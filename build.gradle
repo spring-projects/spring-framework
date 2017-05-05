@@ -1,5 +1,5 @@
 buildscript {
-	ext.kotlinVersion = '1.1.2'
+	ext.kotlinVersion = '1.1.2-3'
 	repositories {
 		maven { url "https://repo.spring.io/plugins-release" }
 	}
@@ -108,18 +108,15 @@ configure(allprojects) { project ->
 	apply from: "${gradleScriptDir}/ide.gradle"
 	apply from: "${gradleScriptDir}/sniffer.gradle"
 
-	// Kotlin compiler does not support JDK 9 yet, see https://youtrack.jetbrains.com/issue/KT-14988
-	if (!JavaVersion.current().java9Compatible) {
-		apply plugin: "kotlin"
-		compileKotlin {
-			kotlinOptions.jvmTarget = "1.8"
-			kotlinOptions.freeCompilerArgs = ["-Xskip-runtime-version-check"]
+	apply plugin: "kotlin"
+	compileKotlin {
+		kotlinOptions.jvmTarget = "1.8"
+		kotlinOptions.freeCompilerArgs = ["-Xskip-runtime-version-check"]
 
-		}
-		compileTestKotlin {
-			kotlinOptions.jvmTarget = "1.8"
-			kotlinOptions.freeCompilerArgs = ["-Xskip-runtime-version-check"]
-		}
+	}
+	compileTestKotlin {
+		kotlinOptions.jvmTarget = "1.8"
+		kotlinOptions.freeCompilerArgs = ["-Xskip-runtime-version-check"]
 	}
 
 	configurations.all {
@@ -594,11 +591,6 @@ project("spring-messaging") {
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
 	}
-
-	if (JavaVersion.current().java9Compatible) {
-		// Reactor2TcpClient's use of Netty requires access to sun.nio.ch.SelectorImpl
-		test.jvmArgs(["--add-exports", "java.base/sun.nio.ch=ALL-UNNAMED"])
-	}
 }
 
 project("spring-tx") {
@@ -776,11 +768,6 @@ project("spring-web") {
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
 	}
-
-	if (JavaVersion.current().java9Compatible) {
-		// Netty4ClientHttpRequestFactory requires access to sun.nio.ch.SelectorImpl
-		test.jvmArgs(["--add-exports", "java.base/sun.nio.ch=ALL-UNNAMED"])
-	}
 }
 
 project("spring-webflux") {
@@ -841,11 +828,6 @@ project("spring-webflux") {
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
 		testRuntime("org.synchronoss.cloud:nio-multipart-parser:${niomultipartVersion}")
-	}
-
-	if (JavaVersion.current().java9Compatible) {
-		// ReactorClientHttpConnector requires access to sun.nio.ch.SelectorImpl
-		test.jvmArgs(["--add-exports", "java.base/sun.nio.ch=ALL-UNNAMED"])
 	}
 }
 
@@ -1001,13 +983,6 @@ project("spring-websocket") {
 		testCompile("io.projectreactor:reactor-core")
 		testCompile("io.projectreactor.ipc:reactor-netty")
 		testCompile("io.netty:netty-all")
-	}
-
-	if (JavaVersion.current().java9Compatible) {
-		// JAXB requires java.util.logging
-		test.jvmArgs(["--add-modules", "java.logging"])
-		// ReactorNettyTcpClient's use of Netty requires access to sun.nio.ch.SelectorImpl
-		test.jvmArgs(["--add-exports", "java.base/sun.nio.ch=ALL-UNNAMED"])
 	}
 }
 
