@@ -41,9 +41,9 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractGenericHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -230,11 +230,13 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
 		}
 		catch (InvalidDefinitionException ex) {
-			throw new HttpMessageNotReadableException(
-					"Could not map JSON to target object of " + javaType, ex, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new HttpMessageConversionException("Type definition error: " + ex.getMessage(), ex);
+		}
+		catch (JsonProcessingException ex) {
+			throw new HttpMessageNotReadableException("JSON parse error: " + ex.getMessage(), ex);
 		}
 		catch (IOException ex) {
-			throw new HttpMessageNotReadableException("Could not read JSON document: " + ex.getMessage(), ex);
+			throw new HttpMessageNotReadableException("I/O error while reading: " + ex.getMessage(), ex);
 		}
 	}
 

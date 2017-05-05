@@ -34,14 +34,21 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import org.junit.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
+import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Jackson 2.x converter tests.
@@ -388,9 +395,8 @@ public class MappingJackson2HttpMessageConverterTests {
 		try {
 			converter.read(BeanWithNoDefaultConstructor.class, inputMessage);
 		}
-		catch (HttpMessageNotReadableException ex) {
-			assertTrue(ex.getErrorStatus().isPresent());
-			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getErrorStatus().get());
+		catch (HttpMessageConversionException ex) {
+			assertTrue(ex.getMessage(), ex.getMessage().startsWith("Type definition error:"));
 			return;
 		}
 		fail();
