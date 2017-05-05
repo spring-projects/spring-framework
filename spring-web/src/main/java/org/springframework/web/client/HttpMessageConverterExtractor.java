@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,9 +109,9 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 				}
 			}
 		}
-		catch(IOException | HttpMessageNotReadableException exc) {
-			throw new RestClientException("Error while extracting response for type ["
-					+ this.responseType + "] and content type [" + contentType + "]", exc);
+		catch (IOException | HttpMessageNotReadableException ex) {
+			throw new RestClientException("Error while extracting response for type [" +
+					this.responseType + "] and content type [" + contentType + "]", ex);
 		}
 
 		throw new RestClientException("Could not extract response: no suitable HttpMessageConverter found " +

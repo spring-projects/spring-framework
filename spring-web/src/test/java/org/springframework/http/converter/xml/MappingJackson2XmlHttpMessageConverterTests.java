@@ -102,7 +102,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 				outputMessage.getHeaders().getContentType());
 	}
 
-	@Test(expected = HttpMessageNotReadableException.class)
+	@Test(expected = IOException.class)
 	public void readInvalidXml() throws IOException {
 		String body = "FooBar";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
@@ -154,7 +154,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
 
-		this.thrown.expect(HttpMessageNotReadableException.class);
+		this.thrown.expect(IOException.class);
 		this.converter.read(MyBean.class, inputMessage);
 	}
 
@@ -181,7 +181,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
 
-		this.thrown.expect(HttpMessageNotReadableException.class);
+		this.thrown.expect(IOException.class);
 		this.converter.read(MyBean.class, inputMessage);
 	}
 

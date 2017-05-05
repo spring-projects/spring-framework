@@ -69,7 +69,6 @@ public interface HttpMessageWriter<T> {
 	Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType elementType,
 			MediaType mediaType, ReactiveHttpOutputMessage message, Map<String, Object> hints);
 
-
 	/**
 	 * Server-side only alternative to
 	 * {@link #write(Publisher, ResolvableType, MediaType, ReactiveHttpOutputMessage, Map)}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result;
 
 import java.util.ArrayList;
@@ -54,15 +55,11 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 	private int order = LOWEST_PRECEDENCE;
 
 
-	protected HandlerResultHandlerSupport(RequestedContentTypeResolver contentTypeResolver) {
-		this(contentTypeResolver, new ReactiveAdapterRegistry());
-	}
-
 	protected HandlerResultHandlerSupport(RequestedContentTypeResolver contentTypeResolver,
 			ReactiveAdapterRegistry adapterRegistry) {
 
-		Assert.notNull(contentTypeResolver, "'contentTypeResolver' is required.");
-		Assert.notNull(adapterRegistry, "'adapterRegistry' is required.");
+		Assert.notNull(contentTypeResolver, "RequestedContentTypeResolver is required");
+		Assert.notNull(adapterRegistry, "ReactiveAdapterRegistry is required");
 		this.contentTypeResolver = contentTypeResolver;
 		this.adapterRegistry = adapterRegistry;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,32 +51,27 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 	/**
 	 * Constructor with {@link HttpMessageWriter}s and a
 	 * {@code RequestedContentTypeResolver}.
-	 *
 	 * @param messageWriters for serializing Objects to the response body stream
 	 * @param contentTypeResolver for resolving the requested content type
 	 */
 	protected AbstractMessageWriterResultHandler(List<HttpMessageWriter<?>> messageWriters,
 			RequestedContentTypeResolver contentTypeResolver) {
 
-		super(contentTypeResolver);
-		Assert.notEmpty(messageWriters, "At least one message writer is required.");
-		this.messageWriters = messageWriters;
+		this(messageWriters, contentTypeResolver, new ReactiveAdapterRegistry());
 	}
 
 	/**
 	 * Constructor with an additional {@link ReactiveAdapterRegistry}.
-	 *
 	 * @param messageWriters for serializing Objects to the response body stream
 	 * @param contentTypeResolver for resolving the requested content type
 	 * @param adapterRegistry for adapting other reactive types (e.g. rx.Observable,
 	 * rx.Single, etc.) to Flux or Mono
 	 */
 	protected AbstractMessageWriterResultHandler(List<HttpMessageWriter<?>> messageWriters,
-			RequestedContentTypeResolver contentTypeResolver,
-			ReactiveAdapterRegistry adapterRegistry) {
+			RequestedContentTypeResolver contentTypeResolver, ReactiveAdapterRegistry adapterRegistry) {
 
 		super(contentTypeResolver, adapterRegistry);
-		Assert.notEmpty(messageWriters, "At least one message writer is required.");
+		Assert.notEmpty(messageWriters, "At least one message writer is required");
 		this.messageWriters = messageWriters;
 	}
 
@@ -124,8 +119,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 		}
 		else {
 			if (getProducibleMediaTypes(elementType).isEmpty()) {
-				return Mono.error(new IllegalStateException(
-						"No converter for return value type: " + elementType));
+				return Mono.error(new IllegalStateException("No converter for return value type: " + elementType));
 			}
 		}
 

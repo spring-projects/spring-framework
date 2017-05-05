@@ -35,7 +35,6 @@ public interface HttpMessageDecoder<T> extends Decoder<T> {
 	/**
 	 * Get decoding hints based on the server request or annotations on the
 	 * target controller method parameter.
-	 *
 	 * @param actualType the actual target type to decode to, possibly a reactive
 	 * wrapper and sourced from {@link org.springframework.core.MethodParameter},
 	 * i.e. providing access to method parameter annotations.

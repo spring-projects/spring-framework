@@ -81,17 +81,13 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 	}
 
 	@Override
-	public Flux<T> read(ResolvableType elementType, ReactiveHttpInputMessage message,
-			Map<String, Object> hints) {
-
+	public Flux<T> read(ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
 		MediaType contentType = getContentType(message);
 		return this.decoder.decode(message.getBody(), elementType, contentType, hints);
 	}
 
 	@Override
-	public Mono<T> readMono(ResolvableType elementType, ReactiveHttpInputMessage message,
-			Map<String, Object> hints) {
-
+	public Mono<T> readMono(ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
 		MediaType contentType = getContentType(message);
 		return this.decoder.decodeToMono(message.getBody(), elementType, contentType, hints);
 	}

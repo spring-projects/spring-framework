@@ -26,7 +26,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 
-
 /**
  * Extension of {@code Encoder} exposing extra methods relevant in the context
  * of HTTP request or response body encoding.
@@ -45,7 +44,6 @@ public interface HttpMessageEncoder<T> extends Encoder<T> {
 	/**
 	 * Get decoding hints based on the server request or annotations on the
 	 * target controller method parameter.
-	 *
 	 * @param actualType the actual source type to encode, possibly a reactive
 	 * wrapper and sourced from {@link org.springframework.core.MethodParameter},
 	 * i.e. providing access to method annotations.

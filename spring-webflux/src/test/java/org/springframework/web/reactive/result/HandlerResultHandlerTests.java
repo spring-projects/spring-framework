@@ -20,9 +20,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerWebExchange;
@@ -31,28 +31,17 @@ import org.springframework.web.reactive.accept.FixedContentTypeResolver;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.http.MediaType.ALL;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
-import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
-import static org.springframework.http.MediaType.IMAGE_GIF;
-import static org.springframework.http.MediaType.IMAGE_JPEG;
-import static org.springframework.http.MediaType.IMAGE_PNG;
-import static org.springframework.http.MediaType.TEXT_PLAIN;
+import static org.junit.Assert.*;
+import static org.springframework.http.MediaType.*;
 
 /**
  * Unit tests for {@link HandlerResultHandlerSupport}.
+ *
  * @author Rossen Stoyanchev
  */
 public class HandlerResultHandlerTests {
 
-	private TestResultHandler resultHandler;
-
-
-	@Before
-	public void setup() throws Exception {
-		this.resultHandler = new TestResultHandler();
-	}
+	private final TestResultHandler resultHandler = new TestResultHandler();
 
 
 	@Test
@@ -116,7 +105,7 @@ public class HandlerResultHandlerTests {
 		}
 
 		public TestResultHandler(RequestedContentTypeResolver contentTypeResolver) {
-			super(contentTypeResolver);
+			super(contentTypeResolver, new ReactiveAdapterRegistry());
 		}
 	}
 

@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -84,8 +83,8 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 			ReactiveAdapterRegistry adapterRegistry) {
 
 		super(adapterRegistry);
-		Assert.notEmpty(messageReaders, "At least one HttpMessageReader is required.");
-		Assert.notNull(adapterRegistry, "'adapterRegistry' is required");
+		Assert.notEmpty(messageReaders, "At least one HttpMessageReader is required");
+		Assert.notNull(adapterRegistry, "ReactiveAdapterRegistry is required");
 		this.messageReaders = messageReaders;
 		this.supportedMediaTypes = messageReaders.stream()
 				.flatMap(converter -> converter.getReadableMediaTypes().stream())
@@ -156,13 +155,12 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	}
 
 	private Throwable handleReadError(MethodParameter parameter, Throwable ex) {
-		return ex instanceof DecodingException ?
-				new ServerWebInputException("Failed to read HTTP message", parameter, ex) : ex;
+		return (ex instanceof DecodingException ?
+				new ServerWebInputException("Failed to read HTTP message", parameter, ex) : ex);
 	}
 
-	private ServerWebInputException handleMissingBody(MethodParameter parameter) {
-		Method method = parameter.getMethod();
-		return new ServerWebInputException("Request body is missing: " + method.toGenericString());
+	private ServerWebInputException handleMissingBody(MethodParameter param) {
+		return new ServerWebInputException("Request body is missing: " + param.getMethod().toGenericString());
 	}
 
 	/**

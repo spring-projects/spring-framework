@@ -28,7 +28,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -92,17 +91,15 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 	@Override
 	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType elementType,
-			MediaType mediaType, ReactiveHttpOutputMessage message,
-			Map<String, Object> hints) {
+			MediaType mediaType, ReactiveHttpOutputMessage message, Map<String, Object> hints) {
 
 		MediaType contentType = updateContentType(message, mediaType);
-		DataBufferFactory factory = message.bufferFactory();
 
-		Flux<DataBuffer> body = this.encoder.encode(inputStream, factory, elementType, contentType, hints);
+		Flux<DataBuffer> body = this.encoder.encode(
+				inputStream, message.bufferFactory(), elementType, contentType, hints);
 
-		return isStreamingMediaType(contentType) ?
-				message.writeAndFlushWith(body.map(Flux::just)) :
-				message.writeWith(body);
+		return (isStreamingMediaType(contentType) ?
+				message.writeAndFlushWith(body.map(Flux::just)) : message.writeWith(body));
 	}
 
 	private MediaType updateContentType(ReactiveHttpOutputMessage message, MediaType mediaType) {
@@ -120,8 +117,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	}
 
 	private static boolean useFallback(MediaType main, MediaType fallback) {
-		return main == null || !main.isConcrete() ||
-				main.equals(MediaType.APPLICATION_OCTET_STREAM) && fallback != null;
+		return (main == null || !main.isConcrete() ||
+				main.equals(MediaType.APPLICATION_OCTET_STREAM) && fallback != null);
 	}
 
 	private static MediaType addDefaultCharset(MediaType main, MediaType defaultType) {

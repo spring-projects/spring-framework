@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,20 +35,22 @@ public class ServerResponseResultHandler implements HandlerResultHandler {
 
 	private final HandlerStrategies strategies;
 
+
 	/**
-	 * Create a {@code ResponseResultHandler} with default strategies.
+	 * Create a {@code ServerResponseResultHandler} with default strategies.
 	 */
 	public ServerResponseResultHandler() {
 		this(HandlerStrategies.builder().build());
 	}
 
 	/**
-	 * Create a {@code ResponseResultHandler} with the given strategies.
+	 * Create a {@code ServerResponseResultHandler} with the given strategies.
 	 */
 	public ServerResponseResultHandler(HandlerStrategies strategies) {
-		Assert.notNull(strategies, "'strategies' must not be null");
+		Assert.notNull(strategies, "HandlerStrategies must not be null");
 		this.strategies = strategies;
 	}
+
 
 	@Override
 	public boolean supports(HandlerResult result) {
@@ -59,8 +61,8 @@ public class ServerResponseResultHandler implements HandlerResultHandler {
 
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
-		ServerResponse response = (ServerResponse) result.getReturnValue().orElseThrow(
-				IllegalStateException::new);
+		ServerResponse response = (ServerResponse) result.getReturnValue().orElseThrow(IllegalStateException::new);
 		return response.writeTo(exchange, this.strategies);
 	}
+
 }
