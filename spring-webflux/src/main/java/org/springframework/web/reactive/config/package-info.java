@@ -1,4 +1,4 @@
 /**
- * Defines Spring Web Reactive configuration.
+ * Spring WebFlux configuration infrastructure.
  */
 package org.springframework.web.reactive.config;

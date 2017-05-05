@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.config;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.core.convert.converter.Converter;
@@ -28,11 +27,10 @@ import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
-import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 
 /**
- * Defines callback methods to customize the configuration for Web Reactive
+ * Defines callback methods to customize the configuration for WebFlux
  * applications enabled via {@code @EnableWebFlux}.
  *
  * <p>{@code @EnableWebFlux}-annotated configuration classes may implement

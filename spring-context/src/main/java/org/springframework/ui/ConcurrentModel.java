@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ui;
 
 import java.util.Collection;
@@ -23,12 +24,13 @@ import org.springframework.core.Conventions;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of {@link Model} based on a {@link ConcurrentHashMap} for use
- * in concurrent scenarios. Exposed to handler methods by Spring Web Reactive
- * typically via a declaration of the {@link Model} interface. There is typically
- * no need to create it within user code. If necessary a controller method can
- * return a regular {@code java.util.Map}, or more likely a
- * {@code java.util.ConcurrentMap}.
+ * Implementation of the {@link Model} interface based on a {@link ConcurrentHashMap}
+ * for use in concurrent scenarios.
+ *
+ * <p>Exposed to handler methods by Spring WebFlux, typically via a declaration of the
+ * {@link Model} interface. There is typically no need to create it within user code.
+ * If necessary a handler method can return a regular {@code java.util.Map},
+ * likely a {@code java.util.ConcurrentMap}, for a pre-determined model.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

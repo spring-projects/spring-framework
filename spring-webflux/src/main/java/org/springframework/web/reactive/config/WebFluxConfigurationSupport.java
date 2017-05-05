@@ -61,7 +61,7 @@ import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
 
 /**
- * The main class for Spring Web Reactive configuration.
+ * The main class for Spring WebFlux configuration.
  *
  * <p>Import directly or extend and override protected methods to customize.
  *
@@ -73,8 +73,8 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	static final boolean jackson2Present =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
 					WebFluxConfigurationSupport.class.getClassLoader()) &&
-					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-							WebFluxConfigurationSupport.class.getClassLoader());
+			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
+					WebFluxConfigurationSupport.class.getClassLoader());
 
 
 	private Map<String, CorsConfiguration> corsConfigurations;
@@ -407,6 +407,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 			return Mono.empty();
 		}
 	}
+
 
 	private static final class NoOpValidator implements Validator {
 
