@@ -48,7 +48,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.reactive.result.method.RequestMappingInfo.BuilderConfiguration;
+import org.springframework.web.reactive.result.method.RequestMappingInfo.*;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -56,16 +56,13 @@ import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.support.HttpRequestPathHelper;
 
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
-import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
-import static org.springframework.web.method.MvcAnnotationPredicates.getMapping;
-import static org.springframework.web.method.MvcAnnotationPredicates.requestMapping;
-import static org.springframework.web.method.ResolvableMethod.on;
-import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.*;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static org.springframework.web.method.MvcAnnotationPredicates.*;
+import static org.springframework.web.method.ResolvableMethod.*;
+import static org.springframework.web.reactive.result.method.RequestMappingInfo.*;
 
 /**
  * Unit tests for {@link RequestMappingInfoHandlerMapping}.
@@ -165,8 +162,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
 		assertError(mono, UnsupportedMediaTypeStatusException.class,
-				ex -> assertEquals("Request failure [status: 415, " +
-						"reason: \"Invalid mime type \"bogus\": does not contain '/'\"]",
+				ex -> assertEquals("Response status 415 with reason \"Invalid mime type \"bogus\": does not contain '/'\"",
 						ex.getMessage()));
 	}
 

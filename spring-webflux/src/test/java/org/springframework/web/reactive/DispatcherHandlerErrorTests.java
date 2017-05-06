@@ -51,10 +51,8 @@ import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.junit.Assert.*;
+import static org.springframework.http.MediaType.*;
 
 /**
  * Test the effect of exceptions at different stages of request processing by
@@ -87,8 +85,7 @@ public class DispatcherHandlerErrorTests {
 		StepVerifier.create(publisher)
 				.consumeErrorWith(error -> {
 					assertThat(error, instanceOf(ResponseStatusException.class));
-					assertThat(error.getMessage(),
-							is("Request failure [status: 404, reason: \"No matching handler\"]"));
+					assertThat(error.getMessage(), is("Response status 404 with reason \"No matching handler\""));
 				})
 				.verify();
 	}

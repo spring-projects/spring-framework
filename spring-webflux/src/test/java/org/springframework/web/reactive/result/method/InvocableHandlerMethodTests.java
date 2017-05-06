@@ -32,15 +32,11 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.web.method.ResolvableMethod.on;
+import static org.mockito.Mockito.*;
+import static org.springframework.web.method.ResolvableMethod.*;
 
 /**
  * Unit tests for {@link InvocableHandlerMethod}.
@@ -109,7 +105,7 @@ public class InvocableHandlerMethodTests {
 			fail("Expected UnsupportedMediaTypeStatusException");
 		}
 		catch (UnsupportedMediaTypeStatusException ex) {
-			assertThat(ex.getMessage(), is("Request failure [status: 415, reason: \"boo\"]"));
+			assertThat(ex.getMessage(), is("Response status 415 with reason \"boo\""));
 		}
 	}
 
