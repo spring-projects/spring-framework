@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.json.MappingJacksonValue;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -103,7 +102,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 				outputMessage.getHeaders().getContentType());
 	}
 
-	@Test(expected = HttpMessageNotReadableException.class)
+	@Test(expected = IOException.class)
 	public void readInvalidXml() throws IOException {
 		String body = "FooBar";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
@@ -155,7 +154,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
 
-		this.thrown.expect(HttpMessageNotReadableException.class);
+		this.thrown.expect(IOException.class);
 		this.converter.read(MyBean.class, inputMessage);
 	}
 
@@ -182,7 +181,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
 
-		this.thrown.expect(HttpMessageNotReadableException.class);
+		this.thrown.expect(IOException.class);
 		this.converter.read(MyBean.class, inputMessage);
 	}
 
