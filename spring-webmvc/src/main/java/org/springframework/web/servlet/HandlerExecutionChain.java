@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -80,7 +79,7 @@ public class HandlerExecutionChain {
 
 	/**
 	 * Return the handler object to execute.
-	 * @return the handler object
+	 * @return the handler object (may be {@code null})
 	 */
 	public Object getHandler() {
 		return this.handler;
@@ -92,7 +91,7 @@ public class HandlerExecutionChain {
 
 	public void addInterceptors(HandlerInterceptor... interceptors) {
 		if (!ObjectUtils.isEmpty(interceptors)) {
-			initInterceptorList().addAll(Arrays.asList(interceptors));
+			CollectionUtils.mergeArrayIntoCollection(interceptors, initInterceptorList());
 		}
 	}
 
@@ -101,7 +100,7 @@ public class HandlerExecutionChain {
 			this.interceptorList = new ArrayList<HandlerInterceptor>();
 			if (this.interceptors != null) {
 				// An interceptor array specified through the constructor
-				this.interceptorList.addAll(Arrays.asList(this.interceptors));
+				CollectionUtils.mergeArrayIntoCollection(this.interceptors, this.interceptorList);
 			}
 		}
 		this.interceptors = null;
@@ -202,14 +201,16 @@ public class HandlerExecutionChain {
 	 */
 	@Override
 	public String toString() {
-		if (this.handler == null) {
+		Object handler = getHandler();
+		if (handler == null) {
 			return "HandlerExecutionChain with no handler";
 		}
 		StringBuilder sb = new StringBuilder();
-		sb.append("HandlerExecutionChain with handler [").append(this.handler).append("]");
-		if (!CollectionUtils.isEmpty(this.interceptorList)) {
-			sb.append(" and ").append(this.interceptorList.size()).append(" interceptor");
-			if (this.interceptorList.size() > 1) {
+		sb.append("HandlerExecutionChain with handler [").append(handler).append("]");
+		HandlerInterceptor[] interceptors = getInterceptors();
+		if (!ObjectUtils.isEmpty(interceptors)) {
+			sb.append(" and ").append(interceptors.length).append(" interceptor");
+			if (interceptors.length > 1) {
 				sb.append("s");
 			}
 		}
