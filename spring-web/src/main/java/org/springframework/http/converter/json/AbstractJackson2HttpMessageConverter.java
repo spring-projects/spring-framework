@@ -219,7 +219,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		return readJavaType(javaType, inputMessage);
 	}
 
-	private Object readJavaType(JavaType javaType, HttpInputMessage inputMessage) {
+	private Object readJavaType(JavaType javaType, HttpInputMessage inputMessage) throws IOException {
 		try {
 			if (inputMessage instanceof MappingJacksonInputMessage) {
 				Class<?> deserializationView = ((MappingJacksonInputMessage) inputMessage).getDeserializationView();
@@ -230,8 +230,8 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			}
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
 		}
-		catch (IOException ex) {
-			throw new HttpMessageNotReadableException("Could not read JSON document: " + ex.getMessage(), ex);
+		catch (JsonProcessingException ex) {
+			throw new HttpMessageNotReadableException("JSON parse error: " + ex.getOriginalMessage(), ex);
 		}
 	}
 
@@ -283,7 +283,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 		}
 		catch (JsonProcessingException ex) {
-			throw new HttpMessageNotWritableException("Could not write JSON document: " + ex.getMessage(), ex);
+			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getOriginalMessage(), ex);
 		}
 	}
 

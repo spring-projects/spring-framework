@@ -161,7 +161,7 @@ public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverte
 			return this.gson.fromJson(json, token.getType());
 		}
 		catch (JsonParseException ex) {
-			throw new HttpMessageNotReadableException("Could not read JSON document: " + ex.getMessage(), ex);
+			throw new HttpMessageNotReadableException("JSON parse error: " + ex.getMessage(), ex);
 		}
 	}
 
@@ -191,7 +191,7 @@ public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverte
 			writer.close();
 		}
 		catch (JsonIOException ex) {
-			throw new HttpMessageNotWritableException("Could not write JSON document: " + ex.getMessage(), ex);
+			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
 		}
 	}
 

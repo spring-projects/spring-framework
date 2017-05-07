@@ -226,7 +226,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 			}
 		}
 		catch (IOException ex) {
-			throw new HttpMessageNotReadableException("Could not read document: " + ex.getMessage(), ex);
+			throw new HttpMessageNotReadableException("I/O error while reading input message", ex);
 		}
 
 		if (body == NO_VALUE) {

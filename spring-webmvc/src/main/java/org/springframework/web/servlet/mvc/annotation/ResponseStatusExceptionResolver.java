@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  * @since 3.0
- * @see AnnotatedElementUtils#findMergedAnnotation
+ * @see ResponseStatus
  */
 public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionResolver implements MessageSourceAware {
 
@@ -99,14 +99,14 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 
 		int statusCode = responseStatus.code().value();
 		String reason = responseStatus.reason();
-		if (this.messageSource != null) {
-			reason = this.messageSource.getMessage(reason, null, reason, LocaleContextHolder.getLocale());
-		}
 		if (!StringUtils.hasLength(reason)) {
 			response.sendError(statusCode);
 		}
 		else {
-			response.sendError(statusCode, reason);
+			String resolvedReason = (this.messageSource != null ?
+					this.messageSource.getMessage(reason, null, reason, LocaleContextHolder.getLocale()) :
+					reason);
+			response.sendError(statusCode, resolvedReason);
 		}
 		return new ModelAndView();
 	}
