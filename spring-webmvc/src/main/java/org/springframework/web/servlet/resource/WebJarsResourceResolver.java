@@ -105,7 +105,7 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 			if (endOffset != -1) {
 				String webjar = path.substring(startOffset, endOffset);
 				String partialPath = path.substring(endOffset);
-				String webJarPath = webJarAssetLocator.getFullPath(webjar, partialPath);
+				String webJarPath = webJarAssetLocator.getFullPathExact(webjar, partialPath);
 				return webJarPath.substring(WEBJARS_LOCATION_LENGTH);
 			}
 		}
