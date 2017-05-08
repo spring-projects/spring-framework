@@ -87,8 +87,10 @@ public class RouterFunctionTests {
 	@Test
 	public void filter() throws Exception {
 		Mono<String> stringMono = Mono.just("42");
-		HandlerFunction<EntityResponse<Mono<String>>> handlerFunction = request -> EntityResponse.fromPublisher(stringMono, String.class).build();
-		RouterFunction<EntityResponse<Mono<String>>> routerFunction = request -> Mono.just(handlerFunction);
+		HandlerFunction<EntityResponse<Mono<String>>> handlerFunction =
+				request -> EntityResponse.fromPublisher(stringMono, String.class).build();
+		RouterFunction<EntityResponse<Mono<String>>> routerFunction =
+				request -> Mono.just(handlerFunction);
 
 		HandlerFilterFunction<EntityResponse<Mono<String>>, EntityResponse<Mono<Integer>>> filterFunction =
 				(request, next) -> next.handle(request).flatMap(

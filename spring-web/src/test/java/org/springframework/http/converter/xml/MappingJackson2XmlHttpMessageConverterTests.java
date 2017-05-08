@@ -17,7 +17,6 @@
 package org.springframework.http.converter.xml;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -27,11 +26,9 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
-import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -128,7 +125,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 
 		MappingJacksonValue jacksonValue = new MappingJacksonValue(bean);
 		jacksonValue.setSerializationView(MyJacksonView1.class);
-		this.writeInternal(jacksonValue, outputMessage);
+		this.converter.write(jacksonValue, null, outputMessage);
 
 		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
 		assertThat(result, containsString("<withView1>with</withView1>"));
@@ -182,14 +179,6 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 
 		this.thrown.expect(IOException.class);
 		this.converter.read(MyBean.class, inputMessage);
-	}
-
-
-	private void writeInternal(Object object, HttpOutputMessage outputMessage) throws Exception {
-		Method method = AbstractHttpMessageConverter.class.getDeclaredMethod(
-				"writeInternal", Object.class, HttpOutputMessage.class);
-		method.setAccessible(true);
-		method.invoke(this.converter, object, outputMessage);
 	}
 
 
