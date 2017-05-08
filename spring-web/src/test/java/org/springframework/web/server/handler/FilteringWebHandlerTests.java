@@ -104,7 +104,7 @@ public class FilteringWebHandlerTests {
 
 		new FilteringWebHandler(targetHandler, Collections.singletonList(filter))
 				.handle(MockServerHttpRequest.get("/").toExchange())
-				.block(Duration.ZERO);
+				.block(Duration.ofSeconds(5));
 
 		assertTrue(filter.invoked());
 		assertTrue(targetHandler.invoked());
@@ -170,7 +170,7 @@ public class FilteringWebHandlerTests {
 		}
 
 		private Mono<String> doAsyncWork() {
-			return Mono.just("123");
+			return Mono.delay(Duration.ofMillis(100L)).map(l -> "123");
 		}
 	}
 
