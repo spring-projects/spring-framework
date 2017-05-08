@@ -16,6 +16,7 @@
 package org.springframework.web.server.adapter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -148,6 +149,17 @@ public class WebHttpHandlerBuilder {
 
 
 	/**
+	 * Add the given filter(s).
+	 * @param filters the filter(s) to add
+	 */
+	public WebHttpHandlerBuilder filter(WebFilter... filters) {
+		if (!ObjectUtils.isEmpty(filters)) {
+			this.filters.addAll(Arrays.asList(filters));
+		}
+		return this;
+	}
+
+	/**
 	 * Add the given filters.
 	 * @param filters the filters to add
 	 */
@@ -165,6 +177,17 @@ public class WebHttpHandlerBuilder {
 	public WebHttpHandlerBuilder prependFilter(WebFilter filter) {
 		Assert.notNull(filter, "WebFilter is required");
 		this.filters.add(0, filter);
+		return this;
+	}
+
+	/**
+	 * Add the given exception handler(s).
+	 * @param handlers the exception handler(s)
+	 */
+	public WebHttpHandlerBuilder exceptionHandler(WebExceptionHandler... handlers) {
+		if (!ObjectUtils.isEmpty(handlers)) {
+			this.exceptionHandlers.addAll(Arrays.asList(handlers));
+		}
 		return this;
 	}
 
