@@ -84,7 +84,7 @@ public class HttpHandlerConnectorTests {
 		TestHttpHandler handler = new TestHttpHandler(response -> {
 			response.setStatusCode(HttpStatus.OK);
 			response.getHeaders().put("custom-header", Arrays.asList("h0", "h1"));
-			response.getCookies().add(cookie.getName(), cookie);
+			response.addCookie(cookie);
 			return response.writeWith(Mono.just(toDataBuffer("Custom body")));
 		});
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,13 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	 * Return a mutable map with the cookies to send to the server.
 	 */
 	MultiValueMap<String, ResponseCookie> getCookies();
+
+	/**
+	 * Add the given {@code ResponseCookie}.
+	 * @param cookie the cookie to add
+	 * @throws IllegalStateException if the response has already been committed
+	 */
+	void addCookie(ResponseCookie cookie);
 
 	/**
 	 * A mechanism for URL rewriting that applications and libraries such as
