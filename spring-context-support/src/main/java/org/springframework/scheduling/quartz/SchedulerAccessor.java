@@ -18,22 +18,27 @@ package org.springframework.scheduling.quartz;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.Calendar;
 import org.quartz.JobDetail;
+import org.quartz.JobKey;
 import org.quartz.JobListener;
 import org.quartz.ListenerManager;
-import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerListener;
 import org.quartz.Trigger;
+import org.quartz.TriggerKey;
 import org.quartz.TriggerListener;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.spi.ClassLoadHelper;
 import org.quartz.xml.XMLSchedulingDataProcessor;
 
@@ -63,6 +68,8 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 
 	private boolean overwriteExistingJobs = false;
 
+	private boolean removeUnusedTriggers;
+
 	private String[] jobSchedulingDataLocations;
 
 	private List<JobDetail> jobDetails;
@@ -83,10 +90,21 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 
 
 	/**
+	 * Set whether any triggers that were previously defined for this
+	 * SchedulerFactoryBean should be removed if they are not also
+	 * specified now. Default is "false", to not delete any trigger
+	 * even if it is not currently defined on this bean.
+	 */
+	public void setRemoveUnusedTriggers(boolean removeUnusedTriggers) {
+		this.removeUnusedTriggers = removeUnusedTriggers;
+	}
+
+	/**
 	 * Set whether any jobs defined on this SchedulerFactoryBean should overwrite
 	 * existing job definitions. Default is "false", to not overwrite already
 	 * registered jobs that have been read in from a persistent job store.
 	 */
+
 	public void setOverwriteExistingJobs(boolean overwriteExistingJobs) {
 		this.overwriteExistingJobs = overwriteExistingJobs;
 	}
@@ -210,17 +228,6 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 				}
 			}
 
-			// Register JobDetails.
-			if (this.jobDetails != null) {
-				for (JobDetail jobDetail : this.jobDetails) {
-					addJobToScheduler(jobDetail);
-				}
-			}
-			else {
-				// Create empty list for easier checks when registering triggers.
-				this.jobDetails = new LinkedList<>();
-			}
-
 			// Register Calendars.
 			if (this.calendars != null) {
 				for (String calendarName : this.calendars.keySet()) {
@@ -229,12 +236,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 				}
 			}
 
-			// Register Triggers.
-			if (this.triggers != null) {
-				for (Trigger trigger : this.triggers) {
-					addTriggerToScheduler(trigger);
-				}
-			}
+			rescheduleJobsAndTriggers();
 		}
 
 		catch (Throwable ex) {
@@ -261,6 +263,74 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	private void rescheduleJobsAndTriggers() throws SchedulerException {
+		Map<JobDetail, Set<Trigger>> mergedDetails = mergeJobsAndTriggers();
+		getScheduler().scheduleJobs((Map)mergedDetails, overwriteExistingJobs);
+
+		maybeRemoveUnusedTriggers(mergedDetails);
+	}
+
+	private void maybeRemoveUnusedTriggers(Map<JobDetail, Set<Trigger>> mergedDetails) throws SchedulerException {
+		if (this.removeUnusedTriggers) {
+			Scheduler scheduler = getScheduler();
+			List<Trigger> allTriggers = new LinkedList<>();
+
+			// collect all the triggers that are currently linked to the scheduler
+			Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.anyGroup());
+			for (JobKey jobKey : jobKeys) {
+				allTriggers.addAll(scheduler.getTriggersOfJob(jobKey));
+			}
+
+			// remove all the triggers that are still registered to the scheduler
+			for (Set<Trigger> triggers : mergedDetails.values()) {
+				allTriggers.removeAll(triggers);
+			}
+
+			List<TriggerKey> unusedTriggerKeys = getTriggerKeys(allTriggers);
+			scheduler.unscheduleJobs(unusedTriggerKeys);
+		}
+	}
+
+	private List<TriggerKey> getTriggerKeys(List<Trigger> triggers) {
+		List<TriggerKey> keys = new ArrayList<>();
+		for (Trigger trigger : triggers) {
+			keys.add(trigger.getKey());
+		}
+		return keys;
+	}
+
+	private Map<JobDetail, Set<Trigger>> mergeJobsAndTriggers() {
+		Map<JobDetail, Set<Trigger>> triggersByJobDetails = new HashMap<>();
+
+		if (this.jobDetails != null) {
+			for (JobDetail jobDetail : this.jobDetails) {
+				getTriggersForJob(jobDetail, triggersByJobDetails);
+			}
+		}
+
+		if (this.triggers != null) {
+			for (Trigger trigger : this.triggers) {
+				JobDetail jobDetail = extractJobDetail(trigger);
+				getTriggersForJob(jobDetail, triggersByJobDetails).add(trigger);
+			}
+		}
+		return triggersByJobDetails;
+	}
+
+	private Set<Trigger> getTriggersForJob(JobDetail jobDetail, Map<JobDetail, Set<Trigger>> triggersByJobDetails) {
+		Set<Trigger> triggers = triggersByJobDetails.get(jobDetail);
+		if (triggers == null) {
+			triggers = new LinkedHashSet<>();
+			triggersByJobDetails.put(jobDetail, triggers);
+		}
+		return triggers;
+	}
+
+	private JobDetail extractJobDetail(Trigger trigger) {
+		return (JobDetail) trigger.getJobDataMap().remove("jobDetail");
+	}
+
 	/**
 	 * Add the given job to the Scheduler, if it doesn't already exist.
 	 * Overwrites the job in any case if "overwriteExistingJobs" is set.
@@ -277,52 +347,6 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 		else {
 			return false;
 		}
-	}
-
-	/**
-	 * Add the given trigger to the Scheduler, if it doesn't already exist.
-	 * Overwrites the trigger in any case if "overwriteExistingJobs" is set.
-	 * @param trigger the trigger to add
-	 * @return {@code true} if the trigger was actually added,
-	 * {@code false} if it already existed before
-	 * @see #setOverwriteExistingJobs
-	 */
-	private boolean addTriggerToScheduler(Trigger trigger) throws SchedulerException {
-		boolean triggerExists = (getScheduler().getTrigger(trigger.getKey()) != null);
-		if (triggerExists && !this.overwriteExistingJobs) {
-			return false;
-		}
-
-		// Check if the Trigger is aware of an associated JobDetail.
-		JobDetail jobDetail = (JobDetail) trigger.getJobDataMap().remove("jobDetail");
-		if (triggerExists) {
-			if (jobDetail != null && !this.jobDetails.contains(jobDetail) && addJobToScheduler(jobDetail)) {
-				this.jobDetails.add(jobDetail);
-			}
-			getScheduler().rescheduleJob(trigger.getKey(), trigger);
-		}
-		else {
-			try {
-				if (jobDetail != null && !this.jobDetails.contains(jobDetail) &&
-						(this.overwriteExistingJobs || getScheduler().getJobDetail(jobDetail.getKey()) == null)) {
-					getScheduler().scheduleJob(jobDetail, trigger);
-					this.jobDetails.add(jobDetail);
-				}
-				else {
-					getScheduler().scheduleJob(trigger);
-				}
-			}
-			catch (ObjectAlreadyExistsException ex) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Unexpectedly found existing trigger, assumably due to cluster race condition: " +
-							ex.getMessage() + " - can safely be ignored");
-				}
-				if (this.overwriteExistingJobs) {
-					getScheduler().rescheduleJob(trigger.getKey(), trigger);
-				}
-			}
-		}
-		return true;
 	}
 
 	/**
